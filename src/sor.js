@@ -1,6 +1,5 @@
 import {getSpotPrice, getSlippageLinearizedSpotPriceAfterSwap, getLinearizedOutputAmountSwap, getOutputAmountSwap} from './helpers'
 
-let bdata = require("../data.json");
 let swapType = 'swapExactIn'
 let inputAmount = 1
 let maxBalancers = 20
@@ -11,7 +10,7 @@ let outTokenEthPrice = 100
 let costPerTrade = gasPrice * gasPerTrade // eg. 210k gas @ 10 Gwei
 let costOutputToken = costPerTrade * outTokenEthPrice
 
-const linearizedSolution = (balancers, swapType, targetInputAmount, maxBalancers, costOutputToken) => {
+export const linearizedSolution = (balancers, swapType, targetInputAmount, maxBalancers, costOutputToken) => {
 
   balancers.forEach(b=> {
     b.spotPrice = getSpotPrice(b)
@@ -62,7 +61,7 @@ const linearizedSolution = (balancers, swapType, targetInputAmount, maxBalancers
         inputAmountsEpAfter = epAfter.inputAmounts.slice(0, b)
 
         inputAmounts = getExactInputAmounts(inputAmountsEpBefore, inputAmountsEpAfter, targetInputAmount)
-        
+
         highestEpNotEnough = false
         break;
       }
@@ -203,13 +202,13 @@ const getExactInputAmounts = (inputAmountsEpBefore, inputAmountsEpAfter, targetT
 }
 
 const getExactInputAmountsHighestEpNotEnough = (balancers, b, epBefore, targetInputAmount) => {
-  balancerIds = epBefore[b].bestBalancers
-  inputAmountsEpBefore = epBefore[b].inputAmounts
+  let balancerIds = epBefore.bestBalancers.slice(0, b)
+  let inputAmountsEpBefore = epBefore.inputAmounts.slice(0, b)
   let totalInputBefore = inputAmountsEpBefore.reduce((a, b)=> a + b)
   let deltaTotalInput = targetInputAmount - totalInputBefore
   let inverseSls = []
   balancerIds.forEach((b, i)=> {
-    balancer = balancers.find(obj => {return obj.id === b})
+    let balancer = balancers.find(obj => {return obj.id === b})
     inverseSls.push(1/balancer.slippage)
   })
 
@@ -217,7 +216,7 @@ const getExactInputAmountsHighestEpNotEnough = (balancers, b, epBefore, targetIn
   let deltaEP = deltaTotalInput / sumInverseSls
 
   let deltaTimesTarget = []
-  invereSls.forEach((a, i)=> {
+  inverseSls.forEach((a, i)=> {
     let mult = a * deltaEP
     deltaTimesTarget.push(mult)
   })
@@ -258,12 +257,15 @@ const verifyAndPrintSolution = (solution, balancers) => {
     console.log(actualTotalOutput)
 }
 
-let tokenIn = '0x5b1869d9a4c187f2eaa108f3062412ecf0526b24';
-let tokenOut = '0xcfeb869f69431e42cdb54a4f4f105c19c080a601';
+// let solution = linearizedSolution(bdata, swapType, inputAmount, maxBalancers, costOutputToken)
+// verifyAndPrintSolution(solution, bdata)
+
+// let tokenIn = '0x5b1869d9a4c187f2eaa108f3062412ecf0526b24';
+// let tokenOut = '0xcfeb869f69431e42cdb54a4f4f105c19c080a601';
 
 
-let solution = linearizedSolution(bdata, swapType, inputAmount, maxBalancers, costOutputToken)
-verifyAndPrintSolution(solution, bdata)
+// let solution = linearizedSolution(bdata, swapType, inputAmount, maxBalancers, costOutputToken)
+// verifyAndPrintSolution(solution, bdata)
 
 // getPoolsWithTokens(tokenIn, tokenOut).then(data => {
 //   let poolData = []
@@ -288,7 +290,4 @@ verifyAndPrintSolution(solution, bdata)
 //   let solution = linearizedSolution(poolData, swapType, inputAmount, maxBalancers, costOutputToken)
 //   verifyAndPrintSolution(solution, poolData)
 // });
-
-export getPoolsWithTokens
-
 

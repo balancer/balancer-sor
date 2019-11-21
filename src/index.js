@@ -1,7 +1,8 @@
-import sor from './sor';
+import { linearizedSolution } from './sor';
 import { getPoolsWithTokens } from './subgraph';
 
-
+let sor = {}
+sor.linearizedSolution = linearizedSolution
 sor.getPoolsWithTokens = getPoolsWithTokens
 
-module.exports = sor;
+export default sor;
