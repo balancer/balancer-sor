@@ -2,6 +2,8 @@
   "name": "balancer-sor",
   "version": "0.1.0",
   "license": "GPL-3.0-only",
+  "main": "src/index.js",
+  "module": "src/index.js",
   "scripts": {
     "start": "babel-node src/index.js"
   },
