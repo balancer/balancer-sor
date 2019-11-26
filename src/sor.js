@@ -1,7 +1,7 @@
 import {getSpotPrice, getSlippageLinearizedSpotPriceAfterSwap, getLinearizedOutputAmountSwap, getOutputAmountSwap} from './helpers'
 import {Decimal} from "decimal.js"
 
-Decimal.set({ precision: 18, rounding: 4 }) 
+Decimal.set({ precision: 18, rounding: Decimal.ROUND_HALF_CEIL }) 
 
 let swapType = 'swapExactIn'
 let maxBalancers = 20
