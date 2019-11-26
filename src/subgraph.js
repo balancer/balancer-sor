@@ -4,6 +4,8 @@ import { ethers } from 'ethers';
 const SUBGRAPH_URL = process.env.SUBGRAPH_URL || 'http://localhost:8000/subgraphs/name/balancer-labs/balancer-subgraph';
 
 export async function getPoolsWithTokens(tokenIn, tokenOut) {
+    // GraphQL is case-sensitive
+    // Always use checksum addresses
     tokenIn = ethers.utils.getAddress(tokenIn);
     tokenOut = ethers.utils.getAddress(tokenOut);
 

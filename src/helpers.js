@@ -1,47 +1,51 @@
+import {Decimal} from "decimal.js"
+
 export const getSpotPrice = (balancer) => {
-  let inRatio = balancer.Bi / balancer.wi
-  let outRatio = balancer.Bo / balancer.wo
-  return (( inRatio / outRatio ) / ( 1 - balancer.fee ))
+  let inRatio = balancer.balanceIn.div(balancer.weightIn)
+  let outRatio = balancer.balanceOut.div(balancer.weightOut)
+  return (inRatio.div(outRatio)).div(Decimal(1).minus(balancer.swapFee))
 }
 
 export const getOutputAmountSwap = (balancer, swapType, amount) => {
-  let wi = balancer.wi
-  let wo = balancer.wo
-  let Bi = balancer.Bi
-  let Bo = balancer.Bo
-  let fee = balancer.fee
+  let weightIn = balancer.weightIn
+  let weightOut = balancer.weightOut
+  let balanceIn = balancer.balanceIn
+  let balanceOut = balancer.balanceOut
+  let swapFee = balancer.swapFee
   if (swapType == 'swapExactIn') {
-    let Ai = amount
-    return (1-(Bi/(Bi+Ai*(1-fee)))**(wi/wo))*Bo
+    let amountIn = Decimal(amount)
+    // TODO - break into multiple statements with comments
+    return (Decimal(1).minus((balanceIn.div((balanceIn.plus(amountIn.times((Decimal(1).minus(swapFee)))))))).pow(weightIn.div(weightOut))).times(balanceOut)
+    // return (1-(Bi/(Bi+Ai*(1-fee)))**(wi/wo))*Bo
   } else {
-    let Ao = amount
-    return ((Bo/(Bo-Ao))**(wo/wi)-1)*Bi/(1-fee)
+    let amountOut = Decimal(amount)
+    return (((balanceOut.div(balanceOut.minus(amountOut))).pow(weightOut.div(weightIn))).minus(Decimal(1))).times(balanceIn.div(Decimal(1).minus(swapFee)))
   }
 }
 
 export const getSlippageLinearizedSpotPriceAfterSwap = (balancer, swapType) => {
-  let wI = balancer.wi
-  let wO = balancer.wo
-  let bI = balancer.Bi
-  let bO = balancer.Bo
-  let sF = balancer.fee
+  let weightIn = balancer.weightIn
+  let weightOut = balancer.weightOut
+  let balanceIn = balancer.balanceIn
+  let balanceOut = balancer.balanceOut
+  let swapFee = balancer.swapFee
   if (swapType === 'swapExactIn') {
-    return ((1 - sF) * (wI / wO) + 1) / bI
+    return ((Decimal(1).minus(swapFee)).times(weightIn.div(weightOut)).plus(Decimal(1))).div(balanceIn)
   } else {
-    return (wO / ((1 - sF) * wI) + 1) / bO
+    return (weightOut.div(((Decimal(1).minus(swapFee)).times(weightIn))).plus(Decimal(1))).div(balanceOut)
   }
 }
 
 export const getSlippageLinearizedEffectivePriceSwap = (balancer, swapType) => {
-  let wi = balancer.wi
-  let wo = balancer.wo
-  let Bi = balancer.Bi
-  let Bo = balancer.Bo
-  let fee = balancer.fee
+  let weightIn = balancer.weightIn
+  let weightOut = balancer.weightOut
+  let balanceIn = balancer.balanceIn
+  let balanceOut = balancer.balanceOut
+  let swapFee = balancer.swapFee
   if (swapType == 'swapExactIn') {
-    return (1-fee)*(wi/wo+1)/(2*Bi)
+    return (Decimal(1).minus(swapFee)).times((weightIn.div(weightOut)).plus(Decimal(1))).div((Decimal(2).times(balanceIn)))
   } else {
-    return (wo/wi+1)/(2*Bo)
+    return ((weightOut.div(weightIn)).plus(Decimal(1))).div((Decimal(2).times(balanceOut)))
   }
 }
 
@@ -50,10 +54,10 @@ export const getLinearizedOutputAmountSwap = (balancer, swapType, amount) => {
   let slippageLinearizedEp = getSlippageLinearizedEffectivePriceSwap(balancer, swapType)
   
   if (swapType == 'swapExactIn') {
-    let Ai = amount
-    return Ai / (spotPrice*(1+slippageLinearizedEp*Ai))
+    let amountIn = Decimal(amount)
+    return amountIn.div(spotPrice.times(Decimal(1).plus(slippageLinearizedEp.times(amountIn))))
   } else {
-    let Ao = amount
-    return Ao * (spotPrice*(1+slippageLinearizedEp*Ao))
+    let amountOut = amount
+    return amountOut.times(spotPrice.times(Decimal(1).plus(slippageLinearizedEp.times(amountOut))))
   }
 }

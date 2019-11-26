@@ -1,26 +1,35 @@
 import {getSpotPrice, getSlippageLinearizedSpotPriceAfterSwap, getLinearizedOutputAmountSwap, getOutputAmountSwap} from './helpers'
+import {Decimal} from "decimal.js"
+
+Decimal.set({ precision: 18, rounding: 4 }) 
 
 let swapType = 'swapExactIn'
-let inputAmount = 1
 let maxBalancers = 20
-let gasPrice = 0.00000001 // 1 Gwei
-let gasPerTrade = 210000 // eg. 210k gas
-let outTokenEthPrice = 100
+let gasPrice = Decimal(0.00000001) // 1 Gwei
+let gasPerTrade = Decimal(210000) // eg. 210k gas
+let outTokenEthPrice = Decimal(100)
 
-let costPerTrade = gasPrice * gasPerTrade // eg. 210k gas @ 10 Gwei
-let costOutputToken = costPerTrade * outTokenEthPrice
+let costPerTrade = gasPrice.times(gasPerTrade) // eg. 210k gas @ 10 Gwei
+let costOutputToken = costPerTrade.times(outTokenEthPrice)
 
 export const linearizedSolution = (balancers, swapType, targetInputAmount, maxBalancers, costOutputToken) => {
 
+  targetInputAmount = Decimal(targetInputAmount)
+  console.log(targetInputAmount)
   balancers.forEach(b=> {
+    b.balanceIn = Decimal(b.balanceIn)
+    b.balanceOut = Decimal(b.balanceOut)
+    b.weightIn = Decimal(b.weightIn)
+    b.weightOut = Decimal(b.weightOut)
+    b.swapFee = Decimal(b.swapFee)
     b.spotPrice = getSpotPrice(b)
     b.slippage = getSlippageLinearizedSpotPriceAfterSwap(b, swapType)
   })
   let sortedBalancers = balancers.sort((a, b) => {
-    return a.spotPrice - b.spotPrice
+    return a.spotPrice.minus(b.spotPrice)
   })
 
-  let epsOfInterest = getEpsOfInterest(sortedBalancers).sort((a, b)=> { return a.ep - b.ep})
+  let epsOfInterest = getEpsOfInterest(sortedBalancers).sort((a, b)=> { return a.ep.minus(b.ep)})
 
   epsOfInterest = calculateBestBalancersForEpsOfInterest(epsOfInterest)
 
@@ -53,9 +62,9 @@ export const linearizedSolution = (balancers, swapType, targetInputAmount, maxBa
 
       
       let inputAmountsAfter = epAfter.inputAmounts
-      let totalInputAmountAfter = inputAmountsAfter.slice(0, b).reduce((a, b)=> a + b)
+      let totalInputAmountAfter = inputAmountsAfter.slice(0, b).reduce((a, b)=> a.plus(b))
 
-      if (totalInputAmountAfter > targetInputAmount) {
+      if (totalInputAmountAfter.greaterThan(targetInputAmount)) {
         balancerIds = epBefore.bestBalancers.slice(0, b)
         inputAmountsEpBefore = epBefore.inputAmounts.slice(0, b)
         inputAmountsEpAfter = epAfter.inputAmounts.slice(0, b)
@@ -80,11 +89,11 @@ export const linearizedSolution = (balancers, swapType, targetInputAmount, maxBa
 
     let improvementCondition = false
     if (swapType == 'swapExactIn') {
-      totalOutput -= balancerIds.length * costOutputToken
-      improvementCondition = (totalOutput > bestTotalOutput) || (bestTotalOutput == 0)
+      totalOutput = totalOutput.minus(Decimal(balancerIds.length).times(costOutputToken))
+      improvementCondition = (totalOutput.greaterThan(bestTotalOutput)) || (bestTotalOutput == 0)
     } else {
-      totalOutput += balancerIds.length * costOutputToken
-      improvementCondition = (totalOutput < bestTotalOutput) || (bestTotalOutput == 0)
+      totalOutput = totalOutput.plus(Decimal(balancerIds.length).times(costOutputToken))
+      improvementCondition = (totalOutput.lessThan(bestTotalOutput)) || (bestTotalOutput == 0)
     }
 
     if (improvementCondition == true) {
@@ -118,9 +127,9 @@ const getEpsOfInterest = (sortedBalancers) => {
     for (let k = 0; k < i; k++) {
       let prevBal = sortedBalancers[k]
 
-      if (b.slippage < prevBal.slippage) {
+      if (b.slippage.lessThan(prevBal.slippage)) {
         epi = {}
-        epi.ep = prevBal.spotPrice + (b.spotPrice - prevBal.spotPrice) * (prevBal.slippage / (prevBal.slippage - b.slippage))
+        epi.ep = prevBal.spotPrice.plus((b.spotPrice.minus(prevBal.spotPrice)).times(prevBal.slippage.div(prevBal.slippage.minus(b.slippage))))
         epi.swap = [prevBal.id, b.id]
         epsOfInterest.push(epi)
       }
@@ -162,17 +171,17 @@ const getInputAmountsForEp = (balancers, bids, ep) => {
   let inputAmounts = []
   bids.forEach((bid, i)=> {
     let balancer = balancers.find(obj => {return obj.id === bid})
-    inputAmounts.push((ep - balancer.spotPrice) / balancer.slippage)
+    inputAmounts.push((ep.minus(balancer.spotPrice)).div(balancer.slippage))
   })
   return inputAmounts
 }
 
 const getLinearizedTotalOutput = (balancers, swapType, balancerIds, inputAmounts) => {
   let balancer
-  let totalOutput = 0
+  let totalOutput = Decimal(0)
   balancerIds.forEach((b, i)=> {
     balancer = balancers.find(obj => {return obj.id === b})
-    totalOutput += getLinearizedOutputAmountSwap(balancer, swapType, inputAmounts[i])
+    totalOutput = totalOutput.plus(getLinearizedOutputAmountSwap(balancer, swapType, inputAmounts[i]))
   })
   return totalOutput
 }
@@ -180,22 +189,26 @@ const getLinearizedTotalOutput = (balancers, swapType, balancerIds, inputAmounts
 const getExactInputAmounts = (inputAmountsEpBefore, inputAmountsEpAfter, targetTotalInput) => {
   let deltaInputAmounts = []
   inputAmountsEpAfter.forEach((a, i)=> {
-    let diff = a - inputAmountsEpBefore[i]
+    let diff = a.minus(inputAmountsEpBefore[i])
     deltaInputAmounts.push(diff)
   })
-  let totalInputBefore = inputAmountsEpBefore.reduce((a, b)=> a + b)
-  let totalInputAfter = inputAmountsEpAfter.reduce((a, b)=> a + b)
-  let deltaTotalInput = totalInputAfter - totalInputBefore
+  let totalInputBefore = inputAmountsEpBefore.reduce((a, b)=> a.plus(b))
+  let totalInputAfter = inputAmountsEpAfter.reduce((a, b)=> a.plus(b))
+  let deltaTotalInput = totalInputAfter.minus(totalInputBefore)
 
   let deltaTimesTarget = []
   deltaInputAmounts.forEach((a, i)=> {
-    let mult = a * ((targetTotalInput-totalInputBefore) / deltaTotalInput)
+    let mult = a.times((targetTotalInput.minus(totalInputBefore)).div(deltaTotalInput))
     deltaTimesTarget.push(mult)
   })
 
   let inputAmounts = []
   inputAmountsEpBefore.forEach((a, i)=> {
-    let add = a + deltaTimesTarget[i]
+    console.log(a)
+    console.log(deltaTimesTarget[i])
+    let add = a.plus(deltaTimesTarget[i])
+    console.log(add)
+    console.log('')
     inputAmounts.push(add)
   })
   return inputAmounts
@@ -204,26 +217,26 @@ const getExactInputAmounts = (inputAmountsEpBefore, inputAmountsEpAfter, targetT
 const getExactInputAmountsHighestEpNotEnough = (balancers, b, epBefore, targetInputAmount) => {
   let balancerIds = epBefore.bestBalancers.slice(0, b)
   let inputAmountsEpBefore = epBefore.inputAmounts.slice(0, b)
-  let totalInputBefore = inputAmountsEpBefore.reduce((a, b)=> a + b)
-  let deltaTotalInput = targetInputAmount - totalInputBefore
+  let totalInputBefore = inputAmountsEpBefore.reduce((a, b)=> a.plus(b))
+  let deltaTotalInput = targetInputAmount.minus(totalInputBefore)
   let inverseSls = []
   balancerIds.forEach((b, i)=> {
     let balancer = balancers.find(obj => {return obj.id === b})
-    inverseSls.push(1/balancer.slippage)
+    inverseSls.push(Decimal(1).div(balancer.slippage))
   })
 
-  let sumInverseSls = inverseSls.reduce((a, b)=> a + b)
-  let deltaEP = deltaTotalInput / sumInverseSls
+  let sumInverseSls = inverseSls.reduce((a, b)=> a.plus(b))
+  let deltaEP = deltaTotalInput.div(sumInverseSls)
 
   let deltaTimesTarget = []
   inverseSls.forEach((a, i)=> {
-    let mult = a * deltaEP
+    let mult = a.times(deltaEP)
     deltaTimesTarget.push(mult)
   })
 
   let inputAmounts = []
   inputAmountsEpBefore.forEach((a, i)=> {
-    let add = a + deltaTimesTarget[i]
+    let add = a.plus(deltaTimesTarget[i])
     inputAmounts.push(add)
   })
   return inputAmounts
@@ -235,59 +248,31 @@ const verifyAndPrintSolution = (solution, balancers) => {
   let selectedBalancers = solution.selectedBalancers
   let totalOutput = solution.totalOutput
 
-  let actualTotalOutput = 0
+  let actualTotalOutput = Decimal(0)
 
   selectedBalancers.forEach((b, i)=> {
     let balancer = balancers.find(obj => {return obj.id === b})
-    actualTotalOutput += getOutputAmountSwap(balancer, swapType, inputAmounts[i])
+    actualTotalOutput = actualTotalOutput.plus(getOutputAmountSwap(balancer, swapType, inputAmounts[i]))
     if (swapType == 'swapExactIn') {
-      actualTotalOutput -= costOutputToken
+      actualTotalOutput = actualTotalOutput.minus(costOutputToken)
     } else {
-      actualTotalOutput += costOutputToken
+      actualTotalOutput = actualTotalOutput.plus(costOutputToken)
     }
   })
 
     console.log('Best solution found for ' + swapType + ' (input amount =' + inputAmount +') with '+ inputAmounts.length  + ' Balancers')
     console.log(selectedBalancers)
     console.log('Input amounts: ')
-    console.log(inputAmounts)
+    console.log(inputAmounts.toString())
     console.log('Estimated total_output: ')
     console.log(totalOutput)
     console.log('Actual total_output: ')
     console.log(actualTotalOutput)
 }
 
+// let inputAmount = 1
+// let bdata = require('../data.json')
 // let solution = linearizedSolution(bdata, swapType, inputAmount, maxBalancers, costOutputToken)
 // verifyAndPrintSolution(solution, bdata)
 
-// let tokenIn = '0x5b1869d9a4c187f2eaa108f3062412ecf0526b24';
-// let tokenOut = '0xcfeb869f69431e42cdb54a4f4f105c19c080a601';
-
-
-// let solution = linearizedSolution(bdata, swapType, inputAmount, maxBalancers, costOutputToken)
-// verifyAndPrintSolution(solution, bdata)
-
-// getPoolsWithTokens(tokenIn, tokenOut).then(data => {
-//   let poolData = []
-//   let tokenInBalance = 0
-//   let tokenInWeight = 0
-//   let tokenOutBalance = 0
-//   let tokenOutWeight = 0
-
-//   data.pools.forEach(p=> {
-//     let tI = p.tokens.find(t => t.address === tokenIn)
-//     let tO = p.tokens.find(t => t.address === tokenOut)
-//     let obj = {}
-//     obj.id = p.id
-//     obj.Bi = Number(tI.balance)
-//     obj.Bo = Number(tO.balance)
-//     obj.wi = tI.denormWeight / p.totalWeight
-//     obj.wo = tO.denormWeight / p.totalWeight
-//     obj.fee = Number(p.swapFee)
-//     poolData.push(obj)
-//   })
-//   // console.log(poolData)
-//   let solution = linearizedSolution(poolData, swapType, inputAmount, maxBalancers, costOutputToken)
-//   verifyAndPrintSolution(solution, poolData)
-// });
 
