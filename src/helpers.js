@@ -57,7 +57,7 @@ export const getLinearizedOutputAmountSwap = (balancer, swapType, amount) => {
     let amountIn = Decimal(amount)
     return amountIn.div(spotPrice.times(Decimal(1).plus(slippageLinearizedEp.times(amountIn))))
   } else {
-    let amountOut = amount
+    let amountOut = Decimal(amount)
     return amountOut.times(spotPrice.times(Decimal(1).plus(slippageLinearizedEp.times(amountOut))))
   }
 }

@@ -15,7 +15,6 @@ let costOutputToken = costPerTrade.times(outTokenEthPrice)
 export const linearizedSolution = (balancers, swapType, targetInputAmount, maxBalancers, costOutputToken) => {
 
   targetInputAmount = Decimal(targetInputAmount)
-  console.log(targetInputAmount)
   balancers.forEach(b=> {
     b.balanceIn = Decimal(b.balanceIn)
     b.balanceOut = Decimal(b.balanceOut)
@@ -204,11 +203,7 @@ const getExactInputAmounts = (inputAmountsEpBefore, inputAmountsEpAfter, targetT
 
   let inputAmounts = []
   inputAmountsEpBefore.forEach((a, i)=> {
-    console.log(a)
-    console.log(deltaTimesTarget[i])
     let add = a.plus(deltaTimesTarget[i])
-    console.log(add)
-    console.log('')
     inputAmounts.push(add)
   })
   return inputAmounts
