@@ -1,7 +1,7 @@
 import fetch from 'isomorphic-fetch';
 import { ethers } from 'ethers';
 
-const SUBGRAPH_URL = process.env.SUBGRAPH_URL || 'http://localhost:8000/subgraphs/name/balancer-labs/balancer-subgraph';
+const SUBGRAPH_URL = process.env.REACT_APP_SUBGRAPH_URL || 'https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-kovan';
 
 export async function getPoolsWithTokens(tokenIn, tokenOut) {
     // GraphQL is case-sensitive
