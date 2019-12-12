@@ -187,6 +187,8 @@ const getLinearizedTotalOutput = (balancers, swapType, balancerIds, inputAmounts
 
 const getExactInputAmounts = (inputAmountsEpBefore, inputAmountsEpAfter, targetTotalInput) => {
   let deltaInputAmounts = []
+
+  if (inputAmountsEpAfter[inputAmountsEpAfter.length-1] == 0)  inputAmountsEpAfter.pop()
   inputAmountsEpAfter.forEach((a, i)=> {
     let diff = a.minus(inputAmountsEpBefore[i])
     deltaInputAmounts.push(diff)

@@ -11,7 +11,7 @@ export async function getPoolsWithTokens(tokenIn, tokenOut) {
 
     const query = `
       query ($tokens: [Bytes!]) {
-          pools (where: {tokensList_contains: $tokens}) {
+          pools (where: {tokensList_contains: $tokens, publicSwap: true}) {
             id
             publicSwap
             swapFee
