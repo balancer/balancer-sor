@@ -230,7 +230,7 @@ const getExactInputAmountsHighestEpNotEnough = (balancers, b, epBefore, targetIn
 
   let deltaTimesTarget = []
   inverseSls.forEach((a, i)=> {
-    let mult = a.times(deltaEP)
+    let mult = a.times(deltaEP).decimalPlaces(18)
     deltaTimesTarget.push(mult)
   })
 
@@ -270,9 +270,9 @@ const verifyAndPrintSolution = (solution, balancers) => {
     console.log(actualTotalOutput)
 }
 
-let inputAmount = 1
-let bdata = require('../data.json')
-let solution = linearizedSolution(bdata, swapType, inputAmount, maxBalancers, costOutputToken)
-verifyAndPrintSolution(solution, bdata)
+// let inputAmount = 1
+// let bdata = require('../data2.json')
+// let solution = linearizedSolution(bdata, swapType, inputAmount, maxBalancers, costOutputToken)
+// verifyAndPrintSolution(solution, bdata)
 
 
