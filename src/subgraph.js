@@ -47,3 +47,37 @@ export async function getPoolsWithTokens(tokenIn, tokenOut) {
   return data;
 
 }
+
+export async function getTokenPairs(token) {
+    // GraphQL is case-sensitive
+    // Always use checksum addresses
+    token = ethers.utils.getAddress(token);
+
+    const query = `
+      query ($token: [Bytes!]) {
+          pools (where: {tokensList_contains: $token, publicSwap: true}) {
+            tokensList
+          }
+        }
+    `;
+
+    const variables = {
+      token: [token]
+    }
+
+    const response = await fetch(SUBGRAPH_URL, {
+      method: 'POST',
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        query,
+        variables
+      })
+    });
+
+  const { data } = await response.json();
+  return data;
+
+}
