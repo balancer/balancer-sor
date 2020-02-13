@@ -1,5 +1,5 @@
 import { BigNumber } from './utils/bignumber';
-import { Pool } from 'types';
+import { Pool } from './types';
 
 export function getSpotPrice(balancer: Pool): BigNumber {
     let inRatio = balancer.balanceIn.div(balancer.weightIn);

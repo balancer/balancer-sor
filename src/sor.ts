@@ -4,7 +4,7 @@ import {
     getLinearizedOutputAmountSwap,
 } from './helpers';
 import { BigNumber } from './utils/bignumber';
-import { Pool, SwapAmount, EffectivePrice, Solution } from 'types';
+import { Pool, SwapAmount, EffectivePrice, Solution } from './types';
 
 export const linearizedSolution = (
     balancers: Pool[],
