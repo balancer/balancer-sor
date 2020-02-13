@@ -17,11 +17,11 @@ export interface SwapAmount {
 }
 
 export interface EffectivePrice {
-    price: BigNumber;
-    id: string;
-    swap: string[];
-    amounts: BigNumber[];
-    bestPools: string[];
+    price?: BigNumber;
+    id?: string;
+    swap?: string[];
+    amounts?: BigNumber[];
+    bestPools?: string[];
 }
 
 export interface Solution {

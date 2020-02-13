@@ -14,6 +14,11 @@ export const linearizedSolution = (
     costOutputToken: BigNumber
 ): Solution => {
     balancers.forEach(b => {
+        b.balanceIn = new BigNumber(b.balanceIn);
+        b.balanceOut = new BigNumber(b.balanceOut);
+        b.weightIn = new BigNumber(b.weightIn);
+        b.weightOut = new BigNumber(b.weightOut);
+        b.swapFee = new BigNumber(b.swapFee);
         b.spotPrice = getSpotPrice(b);
         b.slippage = getSlippageLinearizedSpotPriceAfterSwap(b, swapType);
     });
@@ -53,15 +58,15 @@ export const linearizedSolution = (
                 continue;
             }
 
-            let inputAmountsAfter = epAfter.inputAmounts;
+            let inputAmountsAfter = epAfter.amounts;
             let totalInputAmountAfter = inputAmountsAfter
                 .slice(0, b)
                 .reduce((a, b) => a.plus(b));
 
             if (totalInputAmountAfter.isGreaterThan(targetInputAmount)) {
-                balancerIds = epBefore.bestBalancers.slice(0, b);
-                inputAmountsEpBefore = epBefore.inputAmounts.slice(0, b);
-                inputAmountsEpAfter = epAfter.inputAmounts.slice(0, b);
+                balancerIds = epBefore.bestPools.slice(0, b);
+                inputAmountsEpBefore = epBefore.amounts.slice(0, b);
+                inputAmountsEpAfter = epAfter.amounts.slice(0, b);
 
                 inputAmounts = getExactInputAmounts(
                     inputAmountsEpBefore,
@@ -119,7 +124,10 @@ export const linearizedSolution = (
         }
     }
 
-    let solution: Solution;
+    let solution: Solution = {
+        swaps: [],
+        totalOutput: new BigNumber(0),
+    };
 
     bestInputAmounts.forEach((amount, i) => {
         let swap: SwapAmount = {
@@ -135,9 +143,9 @@ export const linearizedSolution = (
 };
 
 function getEpsOfInterest(sortedBalancers: Pool[]): EffectivePrice[] {
-    let epsOfInterest: EffectivePrice[];
+    let epsOfInterest: EffectivePrice[] = [];
     sortedBalancers.forEach((b, i) => {
-        let epi: EffectivePrice;
+        let epi: EffectivePrice = {};
         epi.price = b.spotPrice;
         epi.id = b.id;
         epsOfInterest.push(epi);
@@ -146,7 +154,7 @@ function getEpsOfInterest(sortedBalancers: Pool[]): EffectivePrice[] {
             let prevBal = sortedBalancers[k];
 
             if (b.slippage.isLessThan(prevBal.slippage)) {
-                let epi: EffectivePrice;
+                let epi: EffectivePrice = {};
                 epi.price = prevBal.spotPrice.plus(
                     b.spotPrice
                         .minus(prevBal.spotPrice)
@@ -203,7 +211,7 @@ function getInputAmountsForEp(
     bids: string[],
     ep: BigNumber
 ): BigNumber[] {
-    let inputAmounts: BigNumber[];
+    let inputAmounts: BigNumber[] = [];
     bids.forEach((bid, i) => {
         let balancer = balancers.find(obj => {
             return obj.id === bid;
@@ -237,7 +245,7 @@ function getExactInputAmounts(
     inputAmountsEpAfter: BigNumber[],
     targetTotalInput: BigNumber
 ): BigNumber[] {
-    let deltaInputAmounts: BigNumber[];
+    let deltaInputAmounts: BigNumber[] = [];
 
     if (
         inputAmountsEpAfter[inputAmountsEpAfter.length - 1].isEqualTo(
@@ -253,14 +261,14 @@ function getExactInputAmounts(
     let totalInputAfter = inputAmountsEpAfter.reduce((a, b) => a.plus(b));
     let deltaTotalInput = totalInputAfter.minus(totalInputBefore);
 
-    let deltaTimesTarget: BigNumber[];
+    let deltaTimesTarget: BigNumber[] = [];
     deltaInputAmounts.forEach((a, i) => {
         let mult = a.times(targetTotalInput.minus(totalInputBefore));
         mult = mult.div(deltaTotalInput);
         deltaTimesTarget.push(mult);
     });
 
-    let inputAmounts: BigNumber[];
+    let inputAmounts: BigNumber[] = [];
     inputAmountsEpBefore.forEach((a, i) => {
         let add = a.plus(deltaTimesTarget[i]);
         inputAmounts.push(add);
