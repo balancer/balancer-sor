@@ -1,102 +1,99 @@
-import BigNumber from 'bignumber.js';
+import { BigNumber } from './utils/bignumber';
+import { Pool } from 'types';
 
-BigNumber.config({ DECIMAL_PLACES: 18 });
-
-export const getSpotPrice = balancer => {
+export function getSpotPrice(balancer: Pool): BigNumber {
     let inRatio = balancer.balanceIn.div(balancer.weightIn);
     let outRatio = balancer.balanceOut.div(balancer.weightOut);
     let spotPrice = inRatio
         .div(outRatio)
-        .div(BigNumber(1).minus(balancer.swapFee));
+        .div(new BigNumber(1).minus(balancer.swapFee));
     return spotPrice;
-};
+}
 
-export const getSlippageLinearizedSpotPriceAfterSwap = (balancer, swapType) => {
+export function getSlippageLinearizedSpotPriceAfterSwap(
+    balancer: Pool,
+    swapType: string
+): BigNumber {
     let weightIn = balancer.weightIn;
     let weightOut = balancer.weightOut;
     let balanceIn = balancer.balanceIn;
     let balanceOut = balancer.balanceOut;
     let swapFee = balancer.swapFee;
     if (swapType === 'swapExactIn') {
-        return BigNumber(1)
+        return new BigNumber(1)
             .minus(swapFee)
             .times(weightIn.div(weightOut))
             .decimalPlaces(18)
-            .plus(BigNumber(1))
+            .plus(new BigNumber(1))
             .div(balanceIn);
     } else {
         return weightOut
             .div(
-                BigNumber(1)
+                new BigNumber(1)
                     .minus(swapFee)
                     .times(weightIn)
                     .decimalPlaces(18)
             )
-            .plus(BigNumber(1))
+            .plus(new BigNumber(1))
             .div(balanceOut);
     }
-};
+}
 
-export const getSlippageLinearizedEffectivePriceSwap = (balancer, swapType) => {
+export function getSlippageLinearizedEffectivePriceSwap(
+    balancer: Pool,
+    swapType: string
+): BigNumber {
     let weightIn = balancer.weightIn;
     let weightOut = balancer.weightOut;
     let balanceIn = balancer.balanceIn;
     let balanceOut = balancer.balanceOut;
     let swapFee = balancer.swapFee;
     if (swapType == 'swapExactIn') {
-        return BigNumber(1)
+        return new BigNumber(1)
             .minus(swapFee)
-            .times(weightIn.div(weightOut).plus(BigNumber(1)))
+            .times(weightIn.div(weightOut).plus(new BigNumber(1)))
             .decimalPlaces(18)
-            .div(
-                BigNumber(2)
-                    .times(balanceIn)
-                    .decimalPlaces(18)
-            );
+            .div(new BigNumber(2).times(balanceIn).decimalPlaces(18));
     } else {
         return weightOut
             .div(weightIn)
-            .plus(BigNumber(1))
-            .div(
-                BigNumber(2)
-                    .times(balanceOut)
-                    .decimalPlaces(18)
-            );
+            .plus(new BigNumber(1))
+            .div(new BigNumber(2).times(balanceOut).decimalPlaces(18));
     }
-};
+}
 
-export const getLinearizedOutputAmountSwap = (balancer, swapType, amount) => {
-    let spotPrice = getSpotPrice(balancer); // TODO
+export function getLinearizedOutputAmountSwap(
+    balancer: Pool,
+    swapType: string,
+    amount: BigNumber
+): BigNumber {
+    let spotPrice: BigNumber = balancer.spotPrice;
     let slippageLinearizedEp = getSlippageLinearizedEffectivePriceSwap(
         balancer,
         swapType
     );
 
     if (swapType == 'swapExactIn') {
-        let amountIn = BigNumber(amount);
-        return amountIn.div(
+        return amount.div(
             spotPrice
                 .times(
-                    BigNumber(1).plus(
-                        slippageLinearizedEp.times(amountIn).decimalPlaces(18)
+                    new BigNumber(1).plus(
+                        slippageLinearizedEp.times(amount).decimalPlaces(18)
                     )
                 )
                 .decimalPlaces(18)
         );
     } else {
-        let amountOut = BigNumber(amount);
-        return amountOut
+        return amount
             .times(
                 spotPrice
                     .times(
-                        BigNumber(1).plus(
-                            slippageLinearizedEp
-                                .times(amountOut)
-                                .decimalPlaces(18)
+                        new BigNumber(1).plus(
+                            slippageLinearizedEp.times(amount).decimalPlaces(18)
                         )
                     )
                     .decimalPlaces(18)
             )
             .decimalPlaces(18);
     }
-};
+}

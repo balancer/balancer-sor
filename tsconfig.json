@@ -1,0 +1,15 @@
+{
+    "compilerOptions": {
+        "module": "commonjs",
+        "target": "es5",
+        "lib": ["es2017", "es2018.promise"],
+        "outDir": "./dist/",
+        "noImplicitAny": false,
+        "baseUrl": "src",
+        "esModuleInterop": true,
+        "resolveJsonModule": true,
+        "allowJs": true,
+        "experimentalDecorators": true,
+        "strictNullChecks": false
+    }
+}
