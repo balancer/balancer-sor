@@ -13,6 +13,8 @@ export const linearizedSolution = (
     maxBalancers: number,
     costOutputToken: BigNumber
 ): SwapAmount[] => {
+    targetInputAmount = new BigNumber(targetInputAmount);
+
     balancers.forEach(b => {
         b.balanceIn = new BigNumber(b.balanceIn);
         b.balanceOut = new BigNumber(b.balanceOut);
@@ -82,7 +84,7 @@ export const linearizedSolution = (
         }
 
         if (highestEpNotEnough) {
-            balancerIds = epBefore.bestBalancers.slice(0, b);
+            balancerIds = epBefore.bestPools.slice(0, b);
             inputAmounts = getExactInputAmountsHighestEpNotEnough(
                 balancers,
                 b,
