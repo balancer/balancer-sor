@@ -7,8 +7,8 @@ export interface Pool {
     weightIn: BigNumber;
     weightOut: BigNumber;
     swapFee: BigNumber;
-    spotPrice: BigNumber;
-    slippage: BigNumber;
+    spotPrice?: BigNumber;
+    slippage?: BigNumber;
 }
 
 export interface SwapAmount {
