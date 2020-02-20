@@ -107,14 +107,14 @@ export const linearizedSolution = (
             );
             improvementCondition =
                 totalOutput.isGreaterThan(bestTotalOutput) ||
-                bestTotalOutput === new BigNumber(0);
+                bestTotalOutput.isEqualTo(new BigNumber(0));
         } else {
             totalOutput = totalOutput.plus(
                 new BigNumber(balancerIds.length).times(costOutputToken)
             );
             improvementCondition =
                 totalOutput.isLessThan(bestTotalOutput) ||
-                bestTotalOutput === new BigNumber(0);
+                bestTotalOutput.isEqualTo(new BigNumber(0));
         }
 
         if (improvementCondition === true) {
