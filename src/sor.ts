@@ -4,7 +4,7 @@ import {
     getLinearizedOutputAmountSwap,
 } from './helpers';
 import { BigNumber } from './utils/bignumber';
-import { Pool, SwapAmount, EffectivePrice, Solution } from './types';
+import { Pool, SwapAmount, EffectivePrice } from './types';
 
 export const linearizedSolution = (
     balancers: Pool[],
@@ -12,7 +12,7 @@ export const linearizedSolution = (
     targetInputAmount: BigNumber,
     maxBalancers: number,
     costOutputToken: BigNumber
-): Solution => {
+): SwapAmount[] => {
     balancers.forEach(b => {
         b.balanceIn = new BigNumber(b.balanceIn);
         b.balanceOut = new BigNumber(b.balanceOut);
@@ -124,22 +124,17 @@ export const linearizedSolution = (
         }
     }
 
-    let solution: Solution = {
-        swaps: [],
-        totalOutput: new BigNumber(0),
-    };
+    let swaps: SwapAmount[] = [];
 
     bestInputAmounts.forEach((amount, i) => {
         let swap: SwapAmount = {
             pool: bestBalancerIds[i],
             amount: amount,
         };
-        solution.swaps.push(swap);
+        swaps.push(swap);
     });
 
-    solution.totalOutput = bestTotalOutput;
-
-    return solution;
+    return swaps;
 };
 
 function getEpsOfInterest(sortedBalancers: Pool[]): EffectivePrice[] {

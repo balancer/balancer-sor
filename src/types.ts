@@ -23,8 +23,3 @@ export interface EffectivePrice {
     amounts?: BigNumber[];
     bestPools?: string[];
 }
-
-export interface Solution {
-    swaps: SwapAmount[];
-    totalOutput: BigNumber;
-}
