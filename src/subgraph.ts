@@ -1,7 +1,9 @@
 import fetch from 'isomorphic-fetch';
 import { ethers } from 'ethers';
 
-const SUBGRAPH_URL = process.env.REACT_APP_SUBGRAPH_URL || 'https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-kovan';
+const SUBGRAPH_URL =
+    process.env.REACT_APP_SUBGRAPH_URL ||
+    'https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-kovan';
 
 export async function getPoolsWithTokens(tokenIn, tokenOut) {
     // GraphQL is case-sensitive
@@ -21,6 +23,8 @@ export async function getPoolsWithTokens(tokenIn, tokenOut) {
               id
               address
               balance
+              decimals
+              symbol
               denormWeight
             }
           }
@@ -28,24 +32,23 @@ export async function getPoolsWithTokens(tokenIn, tokenOut) {
     `;
 
     const variables = {
-      tokens: [tokenIn, tokenOut]
-    }
+        tokens: [tokenIn, tokenOut],
+    };
 
     const response = await fetch(SUBGRAPH_URL, {
-      method: 'POST',
-      headers: {
-        Accept: 'application/json',
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        query,
-        variables
-      })
+        method: 'POST',
+        headers: {
+            Accept: 'application/json',
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            query,
+            variables,
+        }),
     });
 
-  const { data } = await response.json();
-  return data;
-
+    const { data } = await response.json();
+    return data;
 }
 
 export async function getTokenPairs(token) {
@@ -62,22 +65,21 @@ export async function getTokenPairs(token) {
     `;
 
     const variables = {
-      token: [token]
-    }
+        token: [token],
+    };
 
     const response = await fetch(SUBGRAPH_URL, {
-      method: 'POST',
-      headers: {
-        Accept: 'application/json',
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        query,
-        variables
-      })
+        method: 'POST',
+        headers: {
+            Accept: 'application/json',
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            query,
+            variables,
+        }),
     });
 
-  const { data } = await response.json();
-  return data;
-
+    const { data } = await response.json();
+    return data;
 }
