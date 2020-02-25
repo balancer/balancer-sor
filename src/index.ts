@@ -1,2 +1,2 @@
-export { smartOrderRouter } from './sor';
+export { linearizedSolution } from './sor';
 export { getPoolsWithTokens, getTokenPairs } from './subgraph';

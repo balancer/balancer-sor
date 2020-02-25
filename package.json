@@ -13,9 +13,6 @@
             "pre-commit": "pretty-quick --staged"
         }
     },
-    "publishConfig": {
-        "access": "public"
-    },
     "devDependencies": {
         "husky": "^4.2.1",
         "prettier": "^1.19.1",

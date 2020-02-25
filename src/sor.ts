@@ -1,22 +1,26 @@
 import {
     getSpotPrice,
     getSlippageLinearizedSpotPriceAfterSwap,
-    getOutputAmountSwap,
-    bmul,
-    bdiv,
-    BONE,
+    getLinearizedOutputAmountSwap,
 } from './helpers';
 import { BigNumber } from './utils/bignumber';
 import { Pool, SwapAmount, EffectivePrice } from './types';
 
-export const smartOrderRouter = (
+export const linearizedSolution = (
     balancers: Pool[],
     swapType: string,
     targetInputAmount: BigNumber,
     maxBalancers: number,
     costOutputToken: BigNumber
 ): SwapAmount[] => {
+    targetInputAmount = new BigNumber(targetInputAmount);
+
     balancers.forEach(b => {
+        b.balanceIn = new BigNumber(b.balanceIn);
+        b.balanceOut = new BigNumber(b.balanceOut);
+        b.weightIn = new BigNumber(b.weightIn);
+        b.weightOut = new BigNumber(b.weightOut);
+        b.swapFee = new BigNumber(b.swapFee);
         b.spotPrice = getSpotPrice(b);
         b.slippage = getSlippageLinearizedSpotPriceAfterSwap(b, swapType);
     });
@@ -89,7 +93,7 @@ export const smartOrderRouter = (
             );
         }
 
-        totalOutput = getTotalOutput(
+        totalOutput = getLinearizedTotalOutput(
             balancers,
             swapType,
             balancerIds,
@@ -99,20 +103,14 @@ export const smartOrderRouter = (
         let improvementCondition: boolean = false;
         if (swapType === 'swapExactIn') {
             totalOutput = totalOutput.minus(
-                bmul(
-                    new BigNumber(balancerIds.length).times(BONE),
-                    costOutputToken
-                )
+                new BigNumber(balancerIds.length).times(costOutputToken)
             );
             improvementCondition =
                 totalOutput.isGreaterThan(bestTotalOutput) ||
                 bestTotalOutput.isEqualTo(new BigNumber(0));
         } else {
             totalOutput = totalOutput.plus(
-                bmul(
-                    new BigNumber(balancerIds.length).times(BONE),
-                    costOutputToken
-                )
+                new BigNumber(balancerIds.length).times(costOutputToken)
             );
             improvementCondition =
                 totalOutput.isLessThan(bestTotalOutput) ||
@@ -155,13 +153,14 @@ function getEpsOfInterest(sortedBalancers: Pool[]): EffectivePrice[] {
             if (b.slippage.isLessThan(prevBal.slippage)) {
                 let epi: EffectivePrice = {};
                 epi.price = prevBal.spotPrice.plus(
-                    bmul(
-                        b.spotPrice.minus(prevBal.spotPrice),
-                        bdiv(
-                            prevBal.slippage,
-                            prevBal.slippage.minus(b.slippage)
+                    b.spotPrice
+                        .minus(prevBal.spotPrice)
+                        .times(
+                            prevBal.slippage.div(
+                                prevBal.slippage.minus(b.slippage)
+                            )
                         )
-                    )
+                        .decimalPlaces(18)
                 );
                 epi.swap = [prevBal.id, b.id];
                 epsOfInterest.push(epi);
@@ -214,14 +213,12 @@ function getInputAmountsForEp(
         let balancer = balancers.find(obj => {
             return obj.id === bid;
         });
-        inputAmounts.push(
-            bdiv(ep.minus(balancer.spotPrice), balancer.slippage)
-        );
+        inputAmounts.push(ep.minus(balancer.spotPrice).div(balancer.slippage));
     });
     return inputAmounts;
 }
 
-function getTotalOutput(
+function getLinearizedTotalOutput(
     balancers: Pool[],
     swapType: string,
     balancerIds: string[],
@@ -234,7 +231,7 @@ function getTotalOutput(
             return obj.id === b;
         });
         totalOutput = totalOutput.plus(
-            getOutputAmountSwap(balancer, swapType, inputAmounts[i])
+            getLinearizedOutputAmountSwap(balancer, swapType, inputAmounts[i])
         );
     });
     return totalOutput;
@@ -263,8 +260,8 @@ function getExactInputAmounts(
 
     let deltaTimesTarget: BigNumber[] = [];
     deltaInputAmounts.forEach((a, i) => {
-        let mult = bmul(a, targetTotalInput.minus(totalInputBefore));
-        mult = bdiv(mult, deltaTotalInput);
+        let mult = a.times(targetTotalInput.minus(totalInputBefore));
+        mult = mult.div(deltaTotalInput);
         deltaTimesTarget.push(mult);
     });
 
@@ -291,15 +288,15 @@ function getExactInputAmountsHighestEpNotEnough(
         let balancer = balancers.find(obj => {
             return obj.id === b;
         });
-        inverseSls.push(bdiv(BONE, balancer.slippage));
+        inverseSls.push(new BigNumber(1).div(balancer.slippage));
     });
 
     let sumInverseSls = inverseSls.reduce((a, b) => a.plus(b));
-    let deltaEP = bdiv(deltaTotalInput, sumInverseSls);
+    let deltaEP = deltaTotalInput.div(sumInverseSls);
 
     let deltaTimesTarget = [];
     inverseSls.forEach((a, i) => {
-        let mult = bmul(a, deltaEP);
+        let mult = a.times(deltaEP).decimalPlaces(18);
         deltaTimesTarget.push(mult);
     });
 
