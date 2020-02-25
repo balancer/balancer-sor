@@ -9,7 +9,7 @@ import {
 import { BigNumber } from './utils/bignumber';
 import { Pool, SwapAmount, EffectivePrice } from './types';
 
-export const linearizedSolution = (
+export const smartOrderRouter = (
     balancers: Pool[],
     swapType: string,
     targetInputAmount: BigNumber,
