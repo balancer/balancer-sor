@@ -2,6 +2,9 @@ import {
     getSpotPrice,
     getSlippageLinearizedSpotPriceAfterSwap,
     getLinearizedOutputAmountSwap,
+    bmul,
+    bdiv,
+    BONE,
 } from './helpers';
 import { BigNumber } from './utils/bignumber';
 import { Pool, SwapAmount, EffectivePrice } from './types';
@@ -13,14 +16,7 @@ export const linearizedSolution = (
     maxBalancers: number,
     costOutputToken: BigNumber
 ): SwapAmount[] => {
-    targetInputAmount = new BigNumber(targetInputAmount);
-
     balancers.forEach(b => {
-        b.balanceIn = new BigNumber(b.balanceIn);
-        b.balanceOut = new BigNumber(b.balanceOut);
-        b.weightIn = new BigNumber(b.weightIn);
-        b.weightOut = new BigNumber(b.weightOut);
-        b.swapFee = new BigNumber(b.swapFee);
         b.spotPrice = getSpotPrice(b);
         b.slippage = getSlippageLinearizedSpotPriceAfterSwap(b, swapType);
     });
@@ -103,14 +99,20 @@ export const linearizedSolution = (
         let improvementCondition: boolean = false;
         if (swapType === 'swapExactIn') {
             totalOutput = totalOutput.minus(
-                new BigNumber(balancerIds.length).times(costOutputToken)
+                bmul(
+                    new BigNumber(balancerIds.length).times(BONE),
+                    costOutputToken
+                )
             );
             improvementCondition =
                 totalOutput.isGreaterThan(bestTotalOutput) ||
                 bestTotalOutput.isEqualTo(new BigNumber(0));
         } else {
             totalOutput = totalOutput.plus(
-                new BigNumber(balancerIds.length).times(costOutputToken)
+                bmul(
+                    new BigNumber(balancerIds.length).times(BONE),
+                    costOutputToken
+                )
             );
             improvementCondition =
                 totalOutput.isLessThan(bestTotalOutput) ||
@@ -153,14 +155,13 @@ function getEpsOfInterest(sortedBalancers: Pool[]): EffectivePrice[] {
             if (b.slippage.isLessThan(prevBal.slippage)) {
                 let epi: EffectivePrice = {};
                 epi.price = prevBal.spotPrice.plus(
-                    b.spotPrice
-                        .minus(prevBal.spotPrice)
-                        .times(
-                            prevBal.slippage.div(
-                                prevBal.slippage.minus(b.slippage)
-                            )
+                    bmul(
+                        b.spotPrice.minus(prevBal.spotPrice),
+                        bdiv(
+                            prevBal.slippage,
+                            prevBal.slippage.minus(b.slippage)
                         )
-                        .decimalPlaces(18)
+                    )
                 );
                 epi.swap = [prevBal.id, b.id];
                 epsOfInterest.push(epi);
@@ -213,7 +214,9 @@ function getInputAmountsForEp(
         let balancer = balancers.find(obj => {
             return obj.id === bid;
         });
-        inputAmounts.push(ep.minus(balancer.spotPrice).div(balancer.slippage));
+        inputAmounts.push(
+            bdiv(ep.minus(balancer.spotPrice), balancer.slippage)
+        );
     });
     return inputAmounts;
 }
@@ -260,8 +263,8 @@ function getExactInputAmounts(
 
     let deltaTimesTarget: BigNumber[] = [];
     deltaInputAmounts.forEach((a, i) => {
-        let mult = a.times(targetTotalInput.minus(totalInputBefore));
-        mult = mult.div(deltaTotalInput);
+        let mult = bmul(a, targetTotalInput.minus(totalInputBefore));
+        mult = bdiv(mult, deltaTotalInput);
         deltaTimesTarget.push(mult);
     });
 
@@ -288,15 +291,15 @@ function getExactInputAmountsHighestEpNotEnough(
         let balancer = balancers.find(obj => {
             return obj.id === b;
         });
-        inverseSls.push(new BigNumber(1).div(balancer.slippage));
+        inverseSls.push(bdiv(BONE, balancer.slippage));
     });
 
     let sumInverseSls = inverseSls.reduce((a, b) => a.plus(b));
-    let deltaEP = deltaTotalInput.div(sumInverseSls);
+    let deltaEP = bdiv(deltaTotalInput, sumInverseSls);
 
     let deltaTimesTarget = [];
     inverseSls.forEach((a, i) => {
-        let mult = a.times(deltaEP).decimalPlaces(18);
+        let mult = bmul(a, deltaEP);
         deltaTimesTarget.push(mult);
     });
 
