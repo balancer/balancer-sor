@@ -21,7 +21,7 @@ export function bdiv(a: BigNumber, b: BigNumber): BigNumber {
 export function getSpotPrice(balancer: Pool): BigNumber {
     let inRatio = bdiv(balancer.balanceIn, balancer.weightIn);
     let outRatio = bdiv(balancer.balanceOut, balancer.weightOut);
-    let spotPrice = bdiv(inRatio, bdiv(outRatio, BONE.minus(balancer.swapFee)));
+    let spotPrice = bdiv(bdiv(inRatio, outRatio), BONE.minus(balancer.swapFee));
     return spotPrice;
 }
 
@@ -31,12 +31,14 @@ export function getSlippageLinearizedSpotPriceAfterSwap(
 ): BigNumber {
     let { weightIn, weightOut, balanceIn, balanceOut, swapFee } = balancer;
     if (swapType === 'swapExactIn') {
-        return bmul(BONE.minus(swapFee), bdiv(weightIn, weightOut)).plus(
-            bdiv(BONE, balanceIn)
+        return bdiv(
+            bmul(BONE.minus(swapFee), bdiv(weightIn, weightOut)).plus(BONE),
+            balanceIn
         );
     } else {
-        return bdiv(weightOut, bmul(BONE.minus(swapFee), weightIn)).plus(
-            bdiv(BONE, balanceOut)
+        return bdiv(
+            bdiv(weightOut, bmul(BONE.minus(swapFee), weightIn)).plus(BONE),
+            balanceOut
         );
     }
 }
