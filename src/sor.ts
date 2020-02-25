@@ -1,7 +1,7 @@
 import {
     getSpotPrice,
     getSlippageLinearizedSpotPriceAfterSwap,
-    getLinearizedOutputAmountSwap,
+    getOutputAmountSwap,
     bmul,
     bdiv,
     BONE,
@@ -89,7 +89,7 @@ export const linearizedSolution = (
             );
         }
 
-        totalOutput = getLinearizedTotalOutput(
+        totalOutput = getTotalOutput(
             balancers,
             swapType,
             balancerIds,
@@ -221,7 +221,7 @@ function getInputAmountsForEp(
     return inputAmounts;
 }
 
-function getLinearizedTotalOutput(
+function getTotalOutput(
     balancers: Pool[],
     swapType: string,
     balancerIds: string[],
@@ -234,7 +234,7 @@ function getLinearizedTotalOutput(
             return obj.id === b;
         });
         totalOutput = totalOutput.plus(
-            getLinearizedOutputAmountSwap(balancer, swapType, inputAmounts[i])
+            getOutputAmountSwap(balancer, swapType, inputAmounts[i])
         );
     });
     return totalOutput;
