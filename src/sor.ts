@@ -215,7 +215,10 @@ function getInputAmountsForEp(
             return obj.id === bid;
         });
         inputAmounts.push(
-            bdiv(ep.minus(balancer.spotPrice), bmul(balancer.slippage,balancer.spotPrice))
+            bdiv(
+                ep.minus(balancer.spotPrice),
+                bmul(balancer.slippage, balancer.spotPrice)
+            )
         );
     });
     return inputAmounts;
@@ -291,14 +294,16 @@ function getExactInputAmountsHighestEpNotEnough(
         let balancer = balancers.find(obj => {
             return obj.id === b;
         });
-        inverseSl_SPs.push(bdiv(BONE, bmul(balancer.slippage,balancer.spotPrice)));
+        inverseSl_SPs.push(
+            bdiv(BONE, bmul(balancer.slippage, balancer.spotPrice))
+        );
     });
 
-    let sumInverseSls = inverseSls.reduce((a, b) => a.plus(b));
+    let sumInverseSls = inverseSl_SPs.reduce((a, b) => a.plus(b));
     let deltaEP = bdiv(deltaTotalInput, sumInverseSls);
 
     let deltaTimesTarget = [];
-    inverseSls.forEach((a, i) => {
+    inverseSl_SPs.forEach((a, i) => {
         let mult = bmul(a, deltaEP);
         deltaTimesTarget.push(mult);
     });
