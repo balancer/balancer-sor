@@ -215,7 +215,7 @@ function getInputAmountsForEp(
             return obj.id === bid;
         });
         inputAmounts.push(
-            bdiv(ep.minus(balancer.spotPrice), balancer.slippage)
+            bdiv(ep.minus(balancer.spotPrice), bmul(balancer.slippage,balancer.spotPrice))
         );
     });
     return inputAmounts;
@@ -286,12 +286,12 @@ function getExactInputAmountsHighestEpNotEnough(
     let inputAmountsEpBefore = epBefore.amounts.slice(0, b);
     let totalInputBefore = inputAmountsEpBefore.reduce((a, b) => a.plus(b));
     let deltaTotalInput = targetInputAmount.minus(totalInputBefore);
-    let inverseSls = [];
+    let inverseSl_SPs = [];
     balancerIds.forEach((b, i) => {
         let balancer = balancers.find(obj => {
             return obj.id === b;
         });
-        inverseSls.push(bdiv(BONE, balancer.slippage));
+        inverseSl_SPs.push(bdiv(BONE, bmul(balancer.slippage,balancer.spotPrice)));
     });
 
     let sumInverseSls = inverseSls.reduce((a, b) => a.plus(b));
