@@ -5,6 +5,15 @@ import { smartOrderRouter } from '../src/sor';
 import { BigNumber } from '../src/utils/bignumber';
 import { getSpotPrice, BONE } from '../src/helpers';
 
+const errorDelta = 10 ** -8;
+
+function calcRelativeDiff(expected: BigNumber, actual: BigNumber): BigNumber {
+    return expected
+        .minus(actual)
+        .div(expected)
+        .abs();
+}
+
 // These example pools are taken from python-SOR SOR_method_comparison.py
 let balancers: Pool[] = [
     {
@@ -30,17 +39,23 @@ describe('Two Pool Tests', () => {
         var sp1 = getSpotPrice(balancers[0]);
         var sp2 = getSpotPrice(balancers[1]);
 
-        assert.equal(
-            sp1.toString(),
-            '7968240028251420',
+        // Taken form python-SOR, SOR_method_comparison.py
+        var sp1Expected = new BigNumber(7968240028251420);
+        var sp2Expected = new BigNumber(18990231371439040);
+
+        var relDif = calcRelativeDiff(sp1Expected, sp1);
+        assert.isAtMost(
+            relDif.toNumber(),
+            errorDelta,
             'Spot Price Balancer 1 Incorrect'
         );
-        assert.equal(
-            sp2.toString(),
-            '18990231371439037',
+
+        relDif = calcRelativeDiff(sp2Expected, sp2);
+        assert.isAtMost(
+            relDif.toNumber(),
+            errorDelta,
             'Spot Price Balancer 2 Incorrect'
         );
-        // !! 18990231371439040 IS THE RESULT FROM PYTHON SOR_method_comparison.py
     });
 
     it('should test two pool SOR swap amounts', () => {
@@ -55,18 +70,19 @@ describe('Two Pool Tests', () => {
 
         // console.log(swaps[0].amount.div(BONE).toString())
         // console.log(swaps[1].amount.div(BONE).toString())
-        assert.equal(swaps.length, 2, 'Should be two swaps.');
-        assert.equal(
-            swaps[0].amount.toString(),
-            '635206783664651357',
-            'First swap incorrect.'
+        assert.equal(swaps.length, 2, 'Should be two swaps for this example.');
+
+        // Taken form python-SOR, SOR_method_comparison.py
+        var expectedSwap1 = new BigNumber(635206783664651400);
+        var relDif = calcRelativeDiff(expectedSwap1, swaps[0].amount);
+        assert.isAtMost(relDif.toNumber(), errorDelta, 'First swap incorrect.');
+
+        var expectedSwap2 = new BigNumber(64793216335348570);
+        relDif = calcRelativeDiff(expectedSwap2, swaps[1].amount);
+        assert.isAtMost(
+            relDif.toNumber(),
+            errorDelta,
+            'Second swap incorrect.'
         );
-        // !! 635206783664651400 IS THE RESULT FROM PYTHON SOR_method_comparison.py
-        assert.equal(
-            swaps[1].amount.toString(),
-            '64793216335348642',
-            'First swap incorrect.'
-        );
-        // !! 64793216335348570 IS THE RESULT FROM PYTHON SOR_method_comparison.py
     });
 });
