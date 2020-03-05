@@ -1,6 +1,6 @@
 import { expect, assert } from 'chai';
 import 'mocha';
-import { Pool, SwapAmount, EffectivePrice } from '../src/types';
+import { Pool } from '../src/types';
 import { smartOrderRouter } from '../src/sor';
 import { BigNumber } from '../src/utils/bignumber';
 import { getSpotPrice, BONE } from '../src/helpers';
@@ -20,16 +20,16 @@ let balancers: Pool[] = [
         id: '0x165021F95EFB42643E9c3d8677c3430795a29806',
         balanceIn: new BigNumber(1.341648768830377422).times(BONE),
         balanceOut: new BigNumber(84.610322835523687996).times(BONE),
-        weightIn: new BigNumber(0.6666666666666666).times(BONE),
-        weightOut: new BigNumber(0.3333333333333333).times(BONE),
+        weightIn: new BigNumber(0.6666666666666666),
+        weightOut: new BigNumber(0.3333333333333333),
         swapFee: new BigNumber(0.005).times(BONE),
     },
     {
         id: '0x31670617b85451E5E3813E50442Eed3ce3B68d19',
         balanceIn: new BigNumber(14.305796722007608821).times(BONE),
         balanceOut: new BigNumber(376.662367824920653194).times(BONE),
-        weightIn: new BigNumber(0.6666666666666666).times(BONE),
-        weightOut: new BigNumber(0.3333333333333333).times(BONE),
+        weightIn: new BigNumber(0.6666666666666666),
+        weightOut: new BigNumber(0.3333333333333333),
         swapFee: new BigNumber(0.000001).times(BONE),
     },
 ];
