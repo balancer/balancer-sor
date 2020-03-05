@@ -6,7 +6,9 @@
     "types": "dist/index.d.ts",
     "scripts": {
         "build": "tsc",
-        "prepublish": "tsc"
+        "prepublish": "tsc",
+        "test": "nyc mocha -r ts-node/register test/*.spec.ts",
+        "coverage": "nyc report --reporter=text-lcov | coveralls"
     },
     "husky": {
         "hooks": {
@@ -17,13 +19,21 @@
         "access": "public"
     },
     "devDependencies": {
+        "@types/chai": "^4.2.10",
+        "@types/mocha": "^7.0.2",
+        "chai": "^4.2.0",
+        "coveralls": "^3.0.9",
         "husky": "^4.2.1",
+        "mocha": "^7.1.0",
+        "nyc": "^15.0.0",
         "prettier": "^1.19.1",
-        "pretty-quick": "^2.0.1"
+        "pretty-quick": "^2.0.1",
+        "ts-node": "^8.6.2"
     },
     "dependencies": {
         "bignumber.js": "^9.0.0",
         "ethers": "^4.0.39",
-        "isomorphic-fetch": "^2.2.1"
+        "isomorphic-fetch": "^2.2.1",
+        "typescript": "^3.8.3"
     }
 }
