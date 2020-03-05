@@ -1,6 +1,6 @@
 version: 2
 jobs:
-    checkout_and_test:
+    build:
         docker:
             - image: circleci/node:11
         working_directory: ~/balancer
