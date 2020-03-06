@@ -86,7 +86,7 @@ describe('Two Pool Tests', () => {
         );
     });
 
-    it('should test spew two pool SOR swap amounts', () => {
+    it('should test two pool SOR swap amounts highestEpNotEnough False branch.', () => {
         var amountIn = new BigNumber(400).times(BONE);
         var swaps = smartOrderRouter(
             balancers,
@@ -110,7 +110,7 @@ describe('Two Pool Tests', () => {
             'Second pool.'
         );
 
-        // Taken form python-SOR, SOR_method_comparison.py with input changed to 700
+        // Taken form python-SOR, SOR_method_comparison.py with input changed to 400
         var expectedSwap1 = new BigNumber(326222020689680300000);
         var relDif = calcRelativeDiff(expectedSwap1, swaps[0].amount);
         assert.isAtMost(relDif.toNumber(), errorDelta, 'First swap incorrect.');
