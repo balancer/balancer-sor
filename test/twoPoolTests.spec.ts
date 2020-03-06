@@ -68,8 +68,8 @@ describe('Two Pool Tests', () => {
             new BigNumber(0)
         );
 
-        // console.log(swaps[0].amount.div(BONE).toString())
-        // console.log(swaps[1].amount.div(BONE).toString())
+        //console.log(swaps[0].amount.div(BONE).toString())
+        //console.log(swaps[1].amount.div(BONE).toString())
         assert.equal(swaps.length, 2, 'Should be two swaps for this example.');
 
         // Taken form python-SOR, SOR_method_comparison.py
@@ -86,8 +86,8 @@ describe('Two Pool Tests', () => {
         );
     });
 
-    it('should test two pool SOR swap amounts highestEpNotEnough False branch.', () => {
-        var amountIn = new BigNumber(400).times(BONE);
+    it('should test two pool SOR swap amounts smalles pool reached limit.', () => {
+        var amountIn = new BigNumber(7.8).times(BONE);
         var swaps = smartOrderRouter(
             balancers,
             'swapExactIn',
@@ -96,8 +96,8 @@ describe('Two Pool Tests', () => {
             new BigNumber(0)
         );
 
-        // console.log(swaps[0].amount.div(BONE).toString())
-        // console.log(swaps[1].amount.div(BONE).toString())
+        //console.log(swaps[0].amount.div(BONE).toString())
+        //console.log(swaps[1].amount.div(BONE).toString())
         assert.equal(swaps.length, 2, 'Should be two swaps for this example.');
         assert.equal(
             swaps[0].pool,
@@ -111,17 +111,31 @@ describe('Two Pool Tests', () => {
         );
 
         // Taken form python-SOR, SOR_method_comparison.py with input changed to 400
-        var expectedSwap1 = new BigNumber(326222020689680300000);
+        var expectedSwap1 = new BigNumber(7.12917562).times(BONE);
         var relDif = calcRelativeDiff(expectedSwap1, swaps[0].amount);
         assert.isAtMost(relDif.toNumber(), errorDelta, 'First swap incorrect.');
 
-        var expectedSwap2 = new BigNumber(73777979310319780000);
+        var expectedSwap2 = new BigNumber(0.67082438).times(BONE);
         relDif = calcRelativeDiff(expectedSwap2, swaps[1].amount);
         assert.isAtMost(
             relDif.toNumber(),
             errorDelta,
             'Second swap incorrect.'
         );
+    });
+
+    it('should test two pool SOR swap not possible (over limit).', () => {
+        var amountIn = new BigNumber(8).times(BONE);
+        var swaps = smartOrderRouter(
+            balancers,
+            'swapExactIn',
+            amountIn,
+            10,
+            new BigNumber(0)
+        );
+
+        //console.log(swaps)
+        assert.equal(swaps.length, 0, 'Swap should not be possible.');
     });
 
     // Check case mentioned in Discord

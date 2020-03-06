@@ -9,6 +9,7 @@ export interface Pool {
     swapFee: BigNumber;
     spotPrice?: BigNumber;
     slippage?: BigNumber;
+    limitAmount?: BigNumber;
 }
 
 export interface SwapAmount {
@@ -19,6 +20,7 @@ export interface SwapAmount {
 export interface EffectivePrice {
     price?: BigNumber;
     id?: string;
+    maxAmount?: string;
     swap?: string[];
     amounts?: BigNumber[];
     bestPools?: string[];
