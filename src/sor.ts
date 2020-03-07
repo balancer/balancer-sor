@@ -158,8 +158,10 @@ function getEpsOfInterest(sortedBalancers: Pool[]): EffectivePrice[] {
                     bmul(
                         b.spotPrice.minus(prevBal.spotPrice),
                         bdiv(
-                            bmul(prevBal.slippage,prevBal.spotPrice),
-                            bmul(prevBal.slippage,prevBal.spotPrice).minus(bmul(b.slippage,b.spotPrice))
+                            bmul(prevBal.slippage, prevBal.spotPrice),
+                            bmul(prevBal.slippage, prevBal.spotPrice).minus(
+                                bmul(b.slippage, b.spotPrice)
+                            )
                         )
                     )
                 );
