@@ -128,14 +128,22 @@ export const smartOrderRouter = (
     }
 
     let swaps: SwapAmount[] = [];
+    let totalSwapAmount: BigNumber = new BigNumber(0);
+    let dust: BigNumber = new BigNumber(0);
 
     bestInputAmounts.forEach((amount, i) => {
         let swap: SwapAmount = {
             pool: bestBalancerIds[i],
             amount: amount,
         };
+        totalSwapAmount = totalSwapAmount.plus(amount);
         swaps.push(swap);
     });
+
+    if (swaps.length > 0) {
+        dust = targetInputAmount.minus(totalSwapAmount);
+        swaps[0].amount = swaps[0].amount.plus(dust);
+    }
 
     return swaps;
 };
