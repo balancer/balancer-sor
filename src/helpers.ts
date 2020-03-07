@@ -3,6 +3,8 @@ import { Pool } from './types';
 
 export const BONE = new BigNumber(10).pow(18);
 export const TWOBONE = BONE.times(new BigNumber(2));
+export const MAX_IN_RATIO = BONE.times(new BigNumber(0.5));
+export const MAX_OUT_RATIO = BONE.times(new BigNumber(1 / 3));
 
 export function bmul(a: BigNumber, b: BigNumber): BigNumber {
     let c0 = a.times(b);
@@ -16,6 +18,17 @@ export function bdiv(a: BigNumber, b: BigNumber): BigNumber {
     let c1 = c0.plus(BONE.div(TWOBONE));
     let c2 = c1.idiv(b);
     return c2;
+}
+
+export function getLimitAmountSwap(
+    balancer: Pool,
+    swapType: string
+): BigNumber {
+    if (swapType === 'swapExactIn') {
+        return bmul(balancer.balanceIn, MAX_IN_RATIO);
+    } else {
+        return bmul(balancer.balanceOut, MAX_OUT_RATIO);
+    }
 }
 
 export function getSpotPrice(balancer: Pool): BigNumber {
