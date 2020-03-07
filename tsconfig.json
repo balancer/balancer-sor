@@ -12,5 +12,5 @@
         "experimentalDecorators": true,
         "strictNullChecks": false
     },
-    "exclude": ["test"]
+    "include": ["src"]
 }
