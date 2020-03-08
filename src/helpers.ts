@@ -3,9 +3,8 @@ import { Pool } from './types';
 
 export const BONE = new BigNumber(10).pow(18);
 export const TWOBONE = BONE.times(new BigNumber(2));
-export const MAX_IN_RATIO = BONE.times(new BigNumber(0.5));
-export const MAX_OUT_RATIO = BONE.times(new BigNumber(1 / 3));
-
+export const MAX_IN_RATIO = BONE.times(new BigNumber(0.499999999999999)); // Leave some room for bignumber rounding errors
+export const MAX_OUT_RATIO = BONE.times(new BigNumber(0.333333333333333)); // Leave some room for bignumber rounding errors
 export function bmul(a: BigNumber, b: BigNumber): BigNumber {
     let c0 = a.times(b);
     let c1 = c0.plus(BONE.div(TWOBONE));

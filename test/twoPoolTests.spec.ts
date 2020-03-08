@@ -125,7 +125,7 @@ describe('Two Pool Tests', () => {
     });
 
     it('should test exact limit for both pools.', () => {
-        var amountIn = new BigNumber(7.823722745418992).times(BONE);
+        var amountIn = new BigNumber(7.823722745418976).times(BONE);
         var swaps = smartOrderRouter(
             balancers,
             'swapExactIn',
@@ -134,8 +134,8 @@ describe('Two Pool Tests', () => {
             new BigNumber(0)
         );
 
-        console.log(swaps[0].amount.div(BONE).toString());
-        console.log(swaps[1].amount.div(BONE).toString());
+        //console.log(swaps[0].amount.div(BONE).toString());
+        //console.log(swaps[1].amount.div(BONE).toString());
         assert.equal(swaps.length, 2, 'Should be two swaps for this example.');
         assert.equal(
             swaps[0].pool,
@@ -149,11 +149,11 @@ describe('Two Pool Tests', () => {
         );
 
         // Taken form python-SOR, SOR_method_comparison.py with input changed to 400
-        var expectedSwap1 = new BigNumber(7.152898361003804).times(BONE);
+        var expectedSwap1 = new BigNumber(7.15289836100379).times(BONE);
         var relDif = calcRelativeDiff(expectedSwap1, swaps[0].amount);
         assert.isAtMost(relDif.toNumber(), errorDelta, 'First swap incorrect.');
 
-        var expectedSwap2 = new BigNumber(0.6708243844151887).times(BONE);
+        var expectedSwap2 = new BigNumber(0.6708243844151873).times(BONE);
         relDif = calcRelativeDiff(expectedSwap2, swaps[1].amount);
         assert.isAtMost(
             relDif.toNumber(),
