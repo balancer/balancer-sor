@@ -86,7 +86,7 @@ describe('Two Pool Tests', () => {
         );
     });
 
-    it('should test two pool SOR swap amounts smalles pool reached limit.', () => {
+    it('should test two pool SOR swap amounts smallest pool reached limit.', () => {
         var amountIn = new BigNumber(7.8).times(BONE);
         var swaps = smartOrderRouter(
             balancers,
@@ -116,6 +116,44 @@ describe('Two Pool Tests', () => {
         assert.isAtMost(relDif.toNumber(), errorDelta, 'First swap incorrect.');
 
         var expectedSwap2 = new BigNumber(0.67082438).times(BONE);
+        relDif = calcRelativeDiff(expectedSwap2, swaps[1].amount);
+        assert.isAtMost(
+            relDif.toNumber(),
+            errorDelta,
+            'Second swap incorrect.'
+        );
+    });
+
+    it('should test exact limit for both pools.', () => {
+        var amountIn = new BigNumber(7.823722745418976).times(BONE);
+        var swaps = smartOrderRouter(
+            balancers,
+            'swapExactIn',
+            amountIn,
+            10,
+            new BigNumber(0)
+        );
+
+        //console.log(swaps[0].amount.div(BONE).toString());
+        //console.log(swaps[1].amount.div(BONE).toString());
+        assert.equal(swaps.length, 2, 'Should be two swaps for this example.');
+        assert.equal(
+            swaps[0].pool,
+            '0x31670617b85451E5E3813E50442Eed3ce3B68d19',
+            'First pool.'
+        );
+        assert.equal(
+            swaps[1].pool,
+            '0x165021F95EFB42643E9c3d8677c3430795a29806',
+            'Second pool.'
+        );
+
+        // Taken form python-SOR, SOR_method_comparison.py with input changed to 400
+        var expectedSwap1 = new BigNumber(7.15289836100379).times(BONE);
+        var relDif = calcRelativeDiff(expectedSwap1, swaps[0].amount);
+        assert.isAtMost(relDif.toNumber(), errorDelta, 'First swap incorrect.');
+
+        var expectedSwap2 = new BigNumber(0.6708243844151873).times(BONE);
         relDif = calcRelativeDiff(expectedSwap2, swaps[1].amount);
         assert.isAtMost(
             relDif.toNumber(),
