@@ -6,7 +6,7 @@ import { BigNumber } from './utils/bignumber';
 
 const SUBGRAPH_URL =
     process.env.REACT_APP_SUBGRAPH_URL ||
-    'https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-kovan';
+    'https://api.thegraph.com/subgraphs/name/balancer-labs/balancer';
 
 export async function getPoolsWithTokens(tokenIn, tokenOut) {
     // GraphQL is case-sensitive
