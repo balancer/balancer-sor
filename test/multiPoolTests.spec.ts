@@ -3,7 +3,8 @@ import 'mocha';
 import { Pool } from '../src/types';
 import { smartOrderRouter } from '../src/sor';
 import { BigNumber } from '../src/utils/bignumber';
-import { getSpotPrice, BONE } from '../src/helpers';
+import { BONE } from '../src/bmath';
+import { getSpotPrice } from '../src/helpers';
 import balancersJson from './multi-pools.json';
 
 const errorDelta = 10 ** -8;
