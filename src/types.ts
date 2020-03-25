@@ -25,3 +25,10 @@ export interface EffectivePrice {
     amounts?: BigNumber[];
     bestPools?: string[];
 }
+
+export type Swap = {
+    pool: string;
+    tokenInParam: string;
+    tokenOutParam: string;
+    maxPrice: string;
+};
