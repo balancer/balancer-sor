@@ -1,5 +1,8 @@
 import fetch from 'isomorphic-fetch';
 import { ethers } from 'ethers';
+import * as bmath from './bmath';
+import { Pool } from './types';
+import { BigNumber } from './utils/bignumber';
 
 const SUBGRAPH_URL =
     process.env.REACT_APP_SUBGRAPH_URL ||
@@ -50,6 +53,49 @@ export async function getPoolsWithTokens(tokenIn, tokenOut) {
     const { data } = await response.json();
     return data;
 }
+
+export const parsePoolData = (
+    pools,
+    tokenIn: string,
+    tokenOut: string
+): Pool[] => {
+    if (pools.length === 0)
+        throw Error('There are no pools with selected tokens');
+
+    let poolData: Pool[] = [];
+    pools.forEach(p => {
+        let tI = p.tokens.find(
+            t =>
+                ethers.utils.getAddress(t.address) ===
+                ethers.utils.getAddress(tokenIn)
+        );
+        let tO = p.tokens.find(
+            t =>
+                ethers.utils.getAddress(t.address) ===
+                ethers.utils.getAddress(tokenOut)
+        );
+        let obj = {
+            id: p.id,
+            decimalsIn: tI.decimals,
+            decimalsOut: tO.decimals,
+            balanceIn: bmath.scale(bmath.bnum(tI.balance), tI.decimals),
+            balanceOut: bmath.scale(bmath.bnum(tO.balance), tO.decimals),
+            weightIn: bmath.scale(
+                bmath.bnum(tI.denormWeight).div(bmath.bnum(p.totalWeight)),
+                18
+            ),
+            weightOut: bmath.scale(
+                bmath.bnum(tO.denormWeight).div(bmath.bnum(p.totalWeight)),
+                18
+            ),
+            swapFee: bmath.scale(bmath.bnum(p.swapFee), 18),
+        };
+
+        poolData.push(obj);
+    });
+
+    return poolData;
+};
 
 export async function getTokenPairs(token) {
     // GraphQL is case-sensitive

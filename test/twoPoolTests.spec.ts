@@ -3,7 +3,8 @@ import 'mocha';
 import { Pool } from '../src/types';
 import { smartOrderRouter } from '../src/sor';
 import { BigNumber } from '../src/utils/bignumber';
-import { getSpotPrice, BONE } from '../src/helpers';
+import { getSpotPrice } from '../src/helpers';
+import { BONE } from '../src/bmath';
 
 const errorDelta = 10 ** -8;
 
