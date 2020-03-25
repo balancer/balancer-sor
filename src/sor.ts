@@ -3,12 +3,17 @@ import {
     getSlippageLinearizedSpotPriceAfterSwap,
     getLimitAmountSwap,
     getLinearizedOutputAmountSwap,
+} from './helpers';
+import {
     bmul,
     bdiv,
+    bnum,
     BONE,
-} from './helpers';
+    calcOutGivenIn,
+    calcInGivenOut,
+} from './bmath';
 import { BigNumber } from './utils/bignumber';
-import { Pool, SwapAmount, EffectivePrice } from './types';
+import { Pool, Swap, SwapAmount, EffectivePrice } from './types';
 
 export const smartOrderRouter = (
     balancers: Pool[],
@@ -239,6 +244,104 @@ function getEpsOfInterest(
 
     return epsOfInterest;
 }
+
+export const calcTotalOutput = (swaps: Swap[], poolData: Pool[]): BigNumber => {
+    try {
+        let totalAmountOut = bnum(0);
+        swaps.forEach(swap => {
+            const swapAmount = swap.tokenInParam;
+
+            const pool = poolData.find(p => p.id === swap.pool);
+            if (!pool) {
+                throw new Error(
+                    '[Invariant] No pool found for selected balancer index'
+                );
+            }
+
+            const preview = calcOutGivenIn(
+                pool.balanceIn,
+                pool.weightIn,
+                pool.balanceOut,
+                pool.weightOut,
+                bnum(swapAmount),
+                pool.swapFee
+            );
+
+            totalAmountOut = totalAmountOut.plus(preview);
+        });
+        return totalAmountOut;
+    } catch (e) {
+        throw new Error(e);
+    }
+};
+
+export const calcTotalInput = (swaps: Swap[], poolData: Pool[]): BigNumber => {
+    try {
+        let totalAmountIn = bnum(0);
+        swaps.forEach(swap => {
+            const swapAmount = swap.tokenOutParam;
+            const pool = poolData.find(p => p.id === swap.pool);
+            if (!pool) {
+                throw new Error(
+                    '[Invariant] No pool found for selected balancer index'
+                );
+            }
+
+            const preview = calcInGivenOut(
+                pool.balanceIn,
+                pool.weightIn,
+                pool.balanceOut,
+                pool.weightOut,
+                bnum(swapAmount),
+                pool.swapFee
+            );
+
+            totalAmountIn = totalAmountIn.plus(preview);
+        });
+
+        return totalAmountIn;
+    } catch (e) {
+        throw new Error(e);
+    }
+};
+
+export const formatSwapsExactAmountIn = (
+    sorSwaps: SwapAmount[],
+    maxPrice: BigNumber,
+    minAmountOut: BigNumber
+): Swap[] => {
+    const swaps: Swap[] = [];
+    for (let i = 0; i < sorSwaps.length; i++) {
+        let swapAmount = sorSwaps[i].amount;
+        let swap: Swap = {
+            pool: sorSwaps[i].pool,
+            tokenInParam: swapAmount.toString(),
+            tokenOutParam: minAmountOut.toString(),
+            maxPrice: maxPrice.toString(),
+        };
+        swaps.push(swap);
+    }
+    return swaps;
+};
+
+export const formatSwapsExactAmountOut = (
+    sorSwaps: SwapAmount[],
+    maxPrice: BigNumber,
+    maxAmountIn: BigNumber
+): Swap[] => {
+    const swaps: Swap[] = [];
+    for (let i = 0; i < sorSwaps.length; i++) {
+        let swapAmount = sorSwaps[i].amount;
+        let swap: Swap = {
+            pool: sorSwaps[i].pool,
+            tokenInParam: maxAmountIn.toString(),
+            tokenOutParam: swapAmount.toString(),
+            maxPrice: maxPrice.toString(),
+        };
+        swaps.push(swap);
+    }
+    return swaps;
+};
 
 function calculateBestBalancersForEpsOfInterest(
     epsOfInterest: EffectivePrice[]
