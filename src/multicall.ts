@@ -1,4 +1,5 @@
 import { ethers } from 'ethers';
+import { Web3Provider } from 'ethers/providers';
 import { Pool } from './types';
 import * as bmath from './bmath';
 
@@ -7,7 +8,7 @@ export async function parsePoolDataOnChain(
     tokenIn: string,
     tokenOut: string,
     multiAddress: string,
-    providerUrl: string
+    provider: Web3Provider
 ): Promise<Pool[]> {
     if (pools.length === 0)
         throw Error('There are no pools with selected tokens');
@@ -15,7 +16,6 @@ export async function parsePoolDataOnChain(
     const multiAbi = require('./abi/multicall.json');
     const bpoolAbi = require('./abi/bpool.json');
 
-    const provider = new ethers.providers.JsonRpcProvider(providerUrl);
     const multi = new ethers.Contract(multiAddress, multiAbi, provider);
 
     const iface = new ethers.utils.Interface(bpoolAbi);
