@@ -12,5 +12,5 @@
         "experimentalDecorators": true,
         "strictNullChecks": false
     },
-    "include": ["src"]
+    "include": ["src", "src/abi/*.json"]
 }
