@@ -1,6 +1,6 @@
 {
     "name": "@balancer-labs/sor",
-    "version": "0.2.6-1",
+    "version": "0.2.6",
     "license": "GPL-3.0-only",
     "main": "dist/index.js",
     "types": "dist/index.d.ts",
