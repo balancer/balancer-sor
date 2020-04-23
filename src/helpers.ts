@@ -7,6 +7,7 @@ import {
     MAX_OUT_RATIO,
     bmul,
     bdiv,
+    bnum,
 } from './bmath';
 
 export function getLimitAmountSwap(
@@ -23,8 +24,11 @@ export function getLimitAmountSwap(
 export function getSpotPrice(balancer: Pool): BigNumber {
     let inRatio = bdiv(balancer.balanceIn, balancer.weightIn);
     let outRatio = bdiv(balancer.balanceOut, balancer.weightOut);
-    let spotPrice = bdiv(bdiv(inRatio, outRatio), BONE.minus(balancer.swapFee));
-    return spotPrice;
+    if (outRatio.isEqualTo(bnum(0))) {
+        return bnum(0);
+    } else {
+        return bdiv(bdiv(inRatio, outRatio), BONE.minus(balancer.swapFee));
+    }
 }
 
 export function getSlippageLinearizedSpotPriceAfterSwap(
@@ -33,15 +37,23 @@ export function getSlippageLinearizedSpotPriceAfterSwap(
 ): BigNumber {
     let { weightIn, weightOut, balanceIn, balanceOut, swapFee } = balancer;
     if (swapType === 'swapExactIn') {
-        return bdiv(
-            bmul(BONE.minus(swapFee), bdiv(weightIn, weightOut)).plus(BONE),
-            balanceIn
-        );
+        if (balanceIn.isEqualTo(bnum(0))) {
+            return bnum(0);
+        } else {
+            return bdiv(
+                bmul(BONE.minus(swapFee), bdiv(weightIn, weightOut)).plus(BONE),
+                balanceIn
+            );
+        }
     } else {
-        return bdiv(
-            bdiv(weightOut, bmul(BONE.minus(swapFee), weightIn)).plus(BONE),
-            balanceOut
-        );
+        if (balanceOut.isEqualTo(bnum(0))) {
+            return bnum(0);
+        } else {
+            return bdiv(
+                bdiv(weightOut, bmul(BONE.minus(swapFee), weightIn)).plus(BONE),
+                balanceOut
+            );
+        }
     }
 }
 
@@ -51,15 +63,26 @@ export function getSlippageLinearizedEffectivePriceSwap(
 ): BigNumber {
     let { weightIn, weightOut, balanceIn, balanceOut, swapFee } = balancer;
     if (swapType == 'swapExactIn') {
-        return bmul(
-            BONE.minus(swapFee),
-            bdiv(bdiv(weightIn, weightOut).plus(BONE), bmul(TWOBONE, balanceIn))
-        );
+        if (balanceIn.isEqualTo(bnum(0))) {
+            return bnum(0);
+        } else {
+            return bmul(
+                BONE.minus(swapFee),
+                bdiv(
+                    bdiv(weightIn, weightOut).plus(BONE),
+                    bmul(TWOBONE, balanceIn)
+                )
+            );
+        }
     } else {
-        return bdiv(
-            bdiv(weightOut, weightIn).plus(BONE),
-            bmul(TWOBONE, balanceOut)
-        );
+        if (balanceOut.isEqualTo(bnum(0))) {
+            return bnum(0);
+        } else {
+            return bdiv(
+                bdiv(weightOut, weightIn).plus(BONE),
+                bmul(TWOBONE, balanceOut)
+            );
+        }
     }
 }
 
