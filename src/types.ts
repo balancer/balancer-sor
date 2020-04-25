@@ -17,7 +17,7 @@ export interface SwapAmount {
     amount: BigNumber;
 }
 
-export interface EffectivePrice {
+export interface Price {
     price?: BigNumber;
     id?: string;
     maxAmount?: string;
