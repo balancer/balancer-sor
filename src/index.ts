@@ -10,7 +10,8 @@ export {
     getPoolsWithTokens,
     getPoolsWithSingleToken,
     getTokenPairs,
-    parsePoolData,
+    parsePoolData, // TODO remove when paths fully implemented
+    parsePathData,
 } from './subgraph';
 export { parsePoolDataOnChain } from './multicall';
 import * as bmath from './bmath';

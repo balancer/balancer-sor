@@ -3,6 +3,10 @@ import {
     getSlippageLinearizedSpotPriceAfterSwap,
     getLimitAmountSwap,
     getLinearizedOutputAmountSwap,
+    getSpotPricePath,
+    getSlippageLinearizedSpotPriceAfterSwapPath,
+    getLimitAmountSwapPath,
+    getLinearizedOutputAmountSwapPath,
     getNormalizedLiquidity,
 } from './helpers';
 import {
@@ -14,71 +18,80 @@ import {
     calcInGivenOut,
 } from './bmath';
 import { BigNumber } from './utils/bignumber';
-import { Pool, Swap, SwapAmount, Price } from './types';
+import { Pool, Path, Swap, SwapAmount, Price } from './types';
 
 export const smartOrderRouter = (
-    pools: Pool[],
+    paths: Path[],
     swapType: string,
     targetInputAmount: BigNumber,
-    maxPools: number,
+    maxPaths: number,
     costOutputToken: BigNumber
 ): SwapAmount[] => {
-    pools.forEach(b => {
-        b.spotPrice = getSpotPrice(b);
-        b.slippage = getSlippageLinearizedSpotPriceAfterSwap(b, swapType);
-        b.limitAmount = getLimitAmountSwap(b, swapType);
+    paths.forEach(b => {
+        b.spotPrice = getSpotPricePath(b);
+        b.slippage = getSlippageLinearizedSpotPriceAfterSwapPath(b, swapType);
+        b.limitAmount = getLimitAmountSwapPath(b, swapType);
     });
-    let sortedPools = pools.sort((a, b) => {
+
+    let sortedPaths = paths.sort((a, b) => {
         return a.spotPrice.minus(b.spotPrice).toNumber();
     });
 
-    let pricesOfInterest = getPricesOfInterest(sortedPools, swapType).sort(
+    // console.log(sortedPaths);
+
+    let pricesOfInterest = getPricesOfInterest(sortedPaths, swapType).sort(
         (a, b) => {
             return a.price.minus(b.price).toNumber();
         }
     );
 
-    pricesOfInterest = calculateBestPoolsForPricesOfInterest(pricesOfInterest);
+    pricesOfInterest = calculateBestPathsForPricesOfInterest(pricesOfInterest);
 
     pricesOfInterest.forEach(e => {
-        let bids = e.bestPools;
+        let bids = e.bestPaths;
         let poi = e.price;
-        e.amounts = getInputAmountsForPriceOfInterest(sortedPools, bids, poi);
+        e.amounts = getInputAmountsForPriceOfInterest(sortedPaths, bids, poi);
     });
+
+    console.log(pricesOfInterest);
 
     let bestTotalOutput: BigNumber = new BigNumber(0);
     let highestPoiNotEnough: boolean = true;
-    let poolIds, totalOutput;
-    let bestInputAmounts, bestPoolIds, inputAmounts;
+    let pathIds, totalOutput;
+    let bestInputAmounts, bestPathIds, inputAmounts;
 
-    let bmin = Math.min(maxPools, pools.length + 1);
+    let bmin = Math.min(maxPaths, paths.length + 1);
     for (let b = 1; b <= bmin; b++) {
         totalOutput = 0;
 
-        let e, epAfter, epBefore, inputAmountsEpBefore, inputAmountsEpAfter;
+        let price,
+            priceAfter,
+            priceBefore,
+            inputAmountsPriceBefore,
+            inputAmountsPriceAfter;
         for (let i = 0; i < pricesOfInterest.length; i++) {
-            e = pricesOfInterest[i];
+            price = pricesOfInterest[i];
 
-            epAfter = e;
+            priceAfter = price;
 
             if (i === 0) {
-                epBefore = epAfter;
+                priceBefore = priceAfter;
                 continue;
             }
 
-            let inputAmountsAfter = epAfter.amounts;
+            let inputAmountsAfter = priceAfter.amounts;
             let totalInputAmountAfter = inputAmountsAfter
                 .slice(0, b)
                 .reduce((a, b) => a.plus(b));
 
             if (totalInputAmountAfter.isGreaterThan(targetInputAmount)) {
-                poolIds = epBefore.bestPools.slice(0, b);
-                inputAmountsEpBefore = epBefore.amounts.slice(0, b);
-                inputAmountsEpAfter = epAfter.amounts.slice(0, b);
+                pathIds = priceBefore.bestPaths.slice(0, b);
+                inputAmountsPriceBefore = priceBefore.amounts.slice(0, b);
+                inputAmountsPriceAfter = priceAfter.amounts.slice(0, b);
 
                 inputAmounts = getExactInputAmounts(
-                    inputAmountsEpBefore,
-                    inputAmountsEpAfter,
+                    inputAmountsPriceBefore,
+                    inputAmountsPriceAfter,
                     targetInputAmount
                 );
 
@@ -86,32 +99,32 @@ export const smartOrderRouter = (
                 break;
             }
 
-            epBefore = epAfter;
+            priceBefore = priceAfter;
         }
 
         if (highestPoiNotEnough) {
-            poolIds = [];
+            pathIds = [];
             inputAmounts = [];
         }
 
         totalOutput = getLinearizedTotalOutput(
-            pools,
+            paths,
             swapType,
-            poolIds,
+            pathIds,
             inputAmounts
         );
 
         let improvementCondition: boolean = false;
         if (swapType === 'swapExactIn') {
             totalOutput = totalOutput.minus(
-                bmul(new BigNumber(poolIds.length).times(BONE), costOutputToken)
+                bmul(new BigNumber(pathIds.length).times(BONE), costOutputToken)
             );
             improvementCondition =
                 totalOutput.isGreaterThan(bestTotalOutput) ||
                 bestTotalOutput.isEqualTo(new BigNumber(0));
         } else {
             totalOutput = totalOutput.plus(
-                bmul(new BigNumber(poolIds.length).times(BONE), costOutputToken)
+                bmul(new BigNumber(pathIds.length).times(BONE), costOutputToken)
             );
             improvementCondition =
                 totalOutput.isLessThan(bestTotalOutput) ||
@@ -120,7 +133,7 @@ export const smartOrderRouter = (
 
         if (improvementCondition === true) {
             bestInputAmounts = inputAmounts;
-            bestPoolIds = poolIds;
+            bestPathIds = pathIds;
             bestTotalOutput = totalOutput;
         } else {
             break;
@@ -133,7 +146,7 @@ export const smartOrderRouter = (
 
     bestInputAmounts.forEach((amount, i) => {
         let swap: SwapAmount = {
-            pool: bestPoolIds[i],
+            pool: bestPathIds[i],
             amount: amount,
         };
         totalSwapAmount = totalSwapAmount.plus(amount);
@@ -148,9 +161,9 @@ export const smartOrderRouter = (
     return swaps;
 };
 
-function getPricesOfInterest(sortedPools: Pool[], swapType: string): Price[] {
+function getPricesOfInterest(sortedPaths: Path[], swapType: string): Price[] {
     let pricesOfInterest: Price[] = [];
-    sortedPools.forEach((b, i) => {
+    sortedPaths.forEach((b, i) => {
         // New pool
         let pi: Price = {};
         pi.price = b.spotPrice;
@@ -166,74 +179,74 @@ function getPricesOfInterest(sortedPools: Pool[], swapType: string): Price[] {
         pricesOfInterest.push(pi);
 
         for (let k = 0; k < i; k++) {
-            let prevPool = sortedPools[k];
+            let prevPath = sortedPaths[k];
 
             if (
                 bmul(b.slippage, b.spotPrice).isLessThan(
-                    bmul(prevPool.slippage, prevPool.spotPrice)
+                    bmul(prevPath.slippage, prevPath.spotPrice)
                 )
             ) {
                 let amountCross = bdiv(
-                    b.spotPrice.minus(prevPool.spotPrice),
-                    bmul(prevPool.slippage, prevPool.spotPrice).minus(
+                    b.spotPrice.minus(prevPath.spotPrice),
+                    bmul(prevPath.slippage, prevPath.spotPrice).minus(
                         bmul(b.slippage, b.spotPrice)
                     )
                 );
 
                 if (
                     amountCross.isLessThan(b.limitAmount) &&
-                    amountCross.isLessThan(prevPool.limitAmount)
+                    amountCross.isLessThan(prevPath.limitAmount)
                 ) {
                     let epi1: Price = {};
-                    epi1.price = prevPool.spotPrice.plus(
+                    epi1.price = prevPath.spotPrice.plus(
                         bmul(
                             amountCross,
-                            bmul(prevPool.slippage, prevPool.spotPrice)
+                            bmul(prevPath.slippage, prevPath.spotPrice)
                         )
                     );
-                    epi1.swap = [prevPool.id, b.id];
+                    epi1.swap = [prevPath.id, b.id];
                     pricesOfInterest.push(epi1);
                 }
 
                 if (
-                    prevPool.limitAmount.isLessThan(b.limitAmount) &&
-                    prevPool.limitAmount.isLessThan(amountCross)
+                    prevPath.limitAmount.isLessThan(b.limitAmount) &&
+                    prevPath.limitAmount.isLessThan(amountCross)
                 ) {
                     let epi2: Price = {};
                     epi2.price = b.spotPrice.plus(
                         bmul(
-                            prevPool.limitAmount,
+                            prevPath.limitAmount,
                             bmul(b.slippage, b.spotPrice)
                         )
                     );
-                    epi2.swap = [prevPool.id, b.id];
+                    epi2.swap = [prevPath.id, b.id];
                     pricesOfInterest.push(epi2);
                 }
 
                 if (
-                    b.limitAmount.isLessThan(prevPool.limitAmount) &&
+                    b.limitAmount.isLessThan(prevPath.limitAmount) &&
                     amountCross.isLessThan(b.limitAmount)
                 ) {
                     let epi3: Price = {};
-                    epi3.price = prevPool.spotPrice.plus(
+                    epi3.price = prevPath.spotPrice.plus(
                         bmul(
                             b.limitAmount,
-                            bmul(prevPool.slippage, prevPool.spotPrice)
+                            bmul(prevPath.slippage, prevPath.spotPrice)
                         )
                     );
-                    epi3.swap = [b.id, prevPool.id];
+                    epi3.swap = [b.id, prevPath.id];
                     pricesOfInterest.push(epi3);
                 }
             } else {
-                if (prevPool.limitAmount.isLessThan(b.limitAmount)) {
+                if (prevPath.limitAmount.isLessThan(b.limitAmount)) {
                     let epi4: Price = {};
                     epi4.price = b.spotPrice.plus(
                         bmul(
-                            prevPool.limitAmount,
+                            prevPath.limitAmount,
                             bmul(b.slippage, b.spotPrice)
                         )
                     );
-                    epi4.swap = [prevPool.id, b.id];
+                    epi4.swap = [prevPath.id, b.id];
                     pricesOfInterest.push(epi4);
                 }
             }
@@ -243,26 +256,27 @@ function getPricesOfInterest(sortedPools: Pool[], swapType: string): Price[] {
     return pricesOfInterest;
 }
 
-export const calcTotalOutput = (swaps: Swap[], poolData: Pool[]): BigNumber => {
+export const calcTotalOutput = (swaps: Swap[], pathData: Path[]): BigNumber => {
     try {
         let totalAmountOut = bnum(0);
         swaps.forEach(swap => {
             const swapAmount = swap.tokenInParam;
 
-            const pool = poolData.find(p => p.id === swap.pool);
-            if (!pool) {
+            const path = pathData.find(p => p.id === swap.pool);
+            if (!path) {
                 throw new Error(
                     '[Invariant] No pool found for selected pool index'
                 );
             }
 
+            // TODO correct for multihop
             const preview = calcOutGivenIn(
-                pool.balanceIn,
-                pool.weightIn,
-                pool.balanceOut,
-                pool.weightOut,
+                path.pools[0].balanceIn,
+                path.pools[0].weightIn,
+                path.pools[0].balanceOut,
+                path.pools[0].weightOut,
                 bnum(swapAmount),
-                pool.swapFee
+                path.pools[0].swapFee
             );
 
             totalAmountOut = totalAmountOut.plus(preview);
@@ -273,25 +287,25 @@ export const calcTotalOutput = (swaps: Swap[], poolData: Pool[]): BigNumber => {
     }
 };
 
-export const calcTotalInput = (swaps: Swap[], poolData: Pool[]): BigNumber => {
+export const calcTotalInput = (swaps: Swap[], pathData: Path[]): BigNumber => {
     try {
         let totalAmountIn = bnum(0);
         swaps.forEach(swap => {
             const swapAmount = swap.tokenOutParam;
-            const pool = poolData.find(p => p.id === swap.pool);
-            if (!pool) {
+            const path = pathData.find(p => p.id === swap.pool);
+            if (!path) {
                 throw new Error(
                     '[Invariant] No pool found for selected pool index'
                 );
             }
 
             const preview = calcInGivenOut(
-                pool.balanceIn,
-                pool.weightIn,
-                pool.balanceOut,
-                pool.weightOut,
+                path.pools[0].balanceIn,
+                path.pools[0].weightIn,
+                path.pools[0].balanceOut,
+                path.pools[0].weightOut,
                 bnum(swapAmount),
-                pool.swapFee
+                path.pools[0].swapFee
             );
 
             totalAmountIn = totalAmountIn.plus(preview);
@@ -341,25 +355,25 @@ export const formatSwapsExactAmountOut = (
     return swaps;
 };
 
-function calculateBestPoolsForPricesOfInterest(
+function calculateBestPathsForPricesOfInterest(
     pricesOfInterest: Price[]
 ): Price[] {
-    let bestPools = [];
+    let bestPaths = [];
     pricesOfInterest.forEach((e, i) => {
         if (e.id != null) {
-            bestPools.push(e.id);
+            bestPaths.push(e.id);
         } else if (e.swap) {
-            let index1 = bestPools.indexOf(e.swap[0]);
-            let index2 = bestPools.indexOf(e.swap[1]);
+            let index1 = bestPaths.indexOf(e.swap[0]);
+            let index2 = bestPaths.indexOf(e.swap[1]);
 
             if (index1 != -1) {
                 if (index2 != -1) {
-                    let bestBal1 = bestPools[index1];
-                    let bestBal2 = bestPools[index2];
-                    bestPools[index1] = bestBal2;
-                    bestPools[index2] = bestBal1;
+                    let bestPath1 = bestPaths[index1];
+                    let bestPath2 = bestPaths[index2];
+                    bestPaths[index1] = bestPath2;
+                    bestPaths[index2] = bestPath1;
                 } else {
-                    bestPools[index1] = e.swap[2];
+                    bestPaths[index1] = e.swap[2];
                 }
             }
         } else if (e.maxAmount) {
@@ -370,27 +384,27 @@ function calculateBestPoolsForPricesOfInterest(
                 'ERROR: poolID or swap not found in pricesOfInterest'
             );
         }
-        pricesOfInterest[i].bestPools = bestPools.slice();
+        pricesOfInterest[i].bestPaths = bestPaths.slice();
     });
     return pricesOfInterest;
 }
 
 function getInputAmountsForPriceOfInterest(
-    pools: Pool[],
+    paths: Path[],
     bids: string[],
     poi: BigNumber
 ): BigNumber[] {
     let inputAmounts: BigNumber[] = [];
     bids.forEach((bid, i) => {
-        let pool = pools.find(obj => {
+        let path = paths.find(obj => {
             return obj.id === bid;
         });
         let inputAmount = bdiv(
-            poi.minus(pool.spotPrice),
-            bmul(pool.slippage, pool.spotPrice)
+            poi.minus(path.spotPrice),
+            bmul(path.slippage, path.spotPrice)
         );
-        if (pool.limitAmount.isLessThan(inputAmount)) {
-            inputAmount = pool.limitAmount;
+        if (path.limitAmount.isLessThan(inputAmount)) {
+            inputAmount = path.limitAmount;
         }
         inputAmounts.push(inputAmount);
     });
@@ -398,43 +412,43 @@ function getInputAmountsForPriceOfInterest(
 }
 
 function getLinearizedTotalOutput(
-    pools: Pool[],
+    paths: Path[],
     swapType: string,
-    poolIds: string[],
+    pathIds: string[],
     inputAmounts: BigNumber[]
 ): BigNumber {
-    let pool;
+    let path;
     let totalOutput = new BigNumber(0);
-    poolIds.forEach((b, i) => {
-        pool = pools.find(obj => {
+    pathIds.forEach((b, i) => {
+        path = paths.find(obj => {
             return obj.id === b;
         });
         totalOutput = totalOutput.plus(
-            getLinearizedOutputAmountSwap(pool, swapType, inputAmounts[i])
+            getLinearizedOutputAmountSwapPath(path, swapType, inputAmounts[i])
         );
     });
     return totalOutput;
 }
 
 function getExactInputAmounts(
-    inputAmountsEpBefore: BigNumber[],
-    inputAmountsEpAfter: BigNumber[],
+    inputAmountsPriceBefore: BigNumber[],
+    inputAmountsPriceAfter: BigNumber[],
     targetTotalInput: BigNumber
 ): BigNumber[] {
     let deltaInputAmounts: BigNumber[] = [];
 
     if (
-        inputAmountsEpAfter[inputAmountsEpAfter.length - 1].isEqualTo(
+        inputAmountsPriceAfter[inputAmountsPriceAfter.length - 1].isEqualTo(
             new BigNumber(0)
         )
     )
-        inputAmountsEpAfter.pop();
-    inputAmountsEpAfter.forEach((a, i) => {
-        let diff = a.minus(inputAmountsEpBefore[i]);
+        inputAmountsPriceAfter.pop();
+    inputAmountsPriceAfter.forEach((a, i) => {
+        let diff = a.minus(inputAmountsPriceBefore[i]);
         deltaInputAmounts.push(diff);
     });
-    let totalInputBefore = inputAmountsEpBefore.reduce((a, b) => a.plus(b));
-    let totalInputAfter = inputAmountsEpAfter.reduce((a, b) => a.plus(b));
+    let totalInputBefore = inputAmountsPriceBefore.reduce((a, b) => a.plus(b));
+    let totalInputAfter = inputAmountsPriceAfter.reduce((a, b) => a.plus(b));
     let deltaTotalInput = totalInputAfter.minus(totalInputBefore);
 
     let deltaTimesTarget: BigNumber[] = [];
@@ -445,7 +459,7 @@ function getExactInputAmounts(
     });
 
     let inputAmounts: BigNumber[] = [];
-    inputAmountsEpBefore.forEach((a, i) => {
+    inputAmountsPriceBefore.forEach((a, i) => {
         let add = a.plus(deltaTimesTarget[i]);
         inputAmounts.push(add);
     });

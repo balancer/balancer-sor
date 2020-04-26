@@ -7,6 +7,11 @@ export interface Pool {
     weightIn: BigNumber;
     weightOut: BigNumber;
     swapFee: BigNumber;
+}
+
+export interface Path {
+    id: string;
+    pools: Pool[];
     spotPrice?: BigNumber;
     slippage?: BigNumber;
     limitAmount?: BigNumber;
@@ -23,7 +28,7 @@ export interface Price {
     maxAmount?: string;
     swap?: string[];
     amounts?: BigNumber[];
-    bestPools?: string[];
+    bestPaths?: string[];
 }
 
 export type Swap = {

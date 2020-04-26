@@ -1,7 +1,7 @@
 import fetch from 'isomorphic-fetch';
 import { ethers } from 'ethers';
 import * as bmath from './bmath';
-import { Pool } from './types';
+import { Pool, Path } from './types';
 import { BigNumber } from './utils/bignumber';
 
 const SUBGRAPH_URL =
@@ -98,6 +98,55 @@ export async function getPoolsWithTokens(tokenIn, tokenOut) {
     const { data } = await response.json();
     return data;
 }
+
+export const parsePathData = (
+    pools,
+    tokenIn: string,
+    tokenOut: string
+): Path[] => {
+    if (pools.length === 0)
+        throw Error('There are no pools with selected tokens');
+
+    let pathData: Path[] = [];
+    pools.forEach(p => {
+        let tI = p.tokens.find(
+            t =>
+                ethers.utils.getAddress(t.address) ===
+                ethers.utils.getAddress(tokenIn)
+        );
+        let tO = p.tokens.find(
+            t =>
+                ethers.utils.getAddress(t.address) ===
+                ethers.utils.getAddress(tokenOut)
+        );
+        let pool = {
+            id: p.id,
+            decimalsIn: tI.decimals,
+            decimalsOut: tO.decimals,
+            balanceIn: bmath.scale(bmath.bnum(tI.balance), tI.decimals),
+            balanceOut: bmath.scale(bmath.bnum(tO.balance), tO.decimals),
+            weightIn: bmath.scale(
+                bmath.bnum(tI.denormWeight).div(bmath.bnum(p.totalWeight)),
+                18
+            ),
+            weightOut: bmath.scale(
+                bmath.bnum(tO.denormWeight).div(bmath.bnum(p.totalWeight)),
+                18
+            ),
+            swapFee: bmath.scale(bmath.bnum(p.swapFee), 18),
+        };
+
+        // TODO replace with array of pools when path is a multi-hop
+        let path = {
+            id: pool.id,
+            pools: [pool],
+        };
+
+        pathData.push(path);
+    });
+
+    return pathData;
+};
 
 export const parsePoolData = (
     pools,

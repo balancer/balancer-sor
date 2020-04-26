@@ -146,10 +146,12 @@ const tokenOut = '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2'; // WETH
 
     // console.log(data.pools);
 
-    const poolData = sor.parsePoolData(data.pools, tokenIn, tokenOut);
+    const pathData = sor.parsePathData(data.pools, tokenIn, tokenOut);
+    console.log(pathData);
+    console.log(pathData[0].pools);
 
     const sorSwaps = sor.smartOrderRouter(
-        poolData,
+        pathData,
         'swapExactIn',
         new BigNumber('10000000000000000000'),
         new BigNumber('10'),
@@ -159,7 +161,7 @@ const tokenOut = '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2'; // WETH
     const swaps = sor.formatSwapsExactAmountIn(sorSwaps, MAX_UINT, 0);
     console.log(swaps);
 
-    const expectedOut = sor.calcTotalOutput(swaps, poolData);
+    const expectedOut = sor.calcTotalOutput(swaps, pathData);
     console.log(expectedOut.toString());
 })();
 
