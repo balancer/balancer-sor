@@ -19,11 +19,13 @@ const tokenOut = '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2'; // WETH
         dataTokenIn.pools,
         tokenOut
     );
+    // console.log(poolsTokenInNoTokenOut);
+
     const tokenInHopTokens = getTokensPairedToToken(
         poolsTokenInNoTokenOut,
         tokenIn
     );
-    console.log(tokenInHopTokens);
+    // console.log(tokenInHopTokens);
 
     // Second: we get all tokens that can be used to be traded with tokenOut excluding
     // tokens that are in pools that already contain tokenIn (in which case multi-hop is not necessary)
@@ -36,33 +38,113 @@ const tokenOut = '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2'; // WETH
         poolsTokenOutNoTokenIn,
         tokenOut
     );
-    console.log(tokenOutHopTokens);
+    // console.log(tokenOutHopTokens);
 
     // Third: we find the intersection of the two previous sets so we can trade tokenIn for tokenOut with 1 multi-hop
     // code from https://stackoverflow.com/a/31931146
-    const hopTokens = new Set(
+    var hopTokensSet = new Set(
         [...Array.from(tokenInHopTokens)].filter(i => tokenOutHopTokens.has(i))
     );
+    // Transform set into Array
+    var hopTokens = Array.from(hopTokensSet);
     console.log(hopTokens);
 
-    // // Find the most liquid pool for pair (tokenIn -> hopToken) and pair (hopToken -> tokenOut)
-    // for (var i = 0; i < hopTokens.length; i++) {
+    // Find the most liquid pool for each pair (tokenIn -> hopToken). We store an object in the form:
+    // mostLiquidPoolsFirstHop = {hopToken1: mostLiquidPool, hopToken2: mostLiquidPool, ... , hopTokenN: mostLiquidPool}
+    // Here we could query subgraph for all pools with pair (tokenIn -> hopToken), but to
+    // minimize subgraph calls we loop through poolsTokenInNoTokenOut, and check the liquidity
+    // only for those that have hopToken
+    var mostLiquidPoolsFirstHop = {};
+    for (var i = 0; i < hopTokens.length; i++) {
+        var highestNormalizedLiquidity = 0; // Aux variable to find pool with most liquidity for pair (tokenIn -> hopToken)
+        var highestNormalizedLiquidityIndex = 0; // Aux variable to find pool with most liquidity for pair (tokenIn -> hopToken)
+        for (var k = 0; k < poolsTokenInNoTokenOut.length; k++) {
+            // We now loop to check if this pool has hopToken
+            var found = false;
+            for (
+                var j = 0;
+                j < poolsTokenInNoTokenOut[k].tokensList.length;
+                j++
+            ) {
+                if (
+                    poolsTokenInNoTokenOut[k].tokensList[j].toLowerCase() ==
+                    hopTokens[i]
+                ) {
+                    found = true;
+                    break;
+                }
+            }
+            // If this pool has hopTokens[i] calculate its normalized liquidity
+            if (found) {
+                let normalizedLiquidity = sor.getNormalizedLiquidity(
+                    sor.parsePoolData(
+                        [poolsTokenInNoTokenOut[k]],
+                        tokenIn,
+                        hopTokens[i]
+                    )[0]
+                );
+                if (normalizedLiquidity > highestNormalizedLiquidity) {
+                    highestNormalizedLiquidity = normalizedLiquidity;
+                    highestNormalizedLiquidityIndex = k;
+                }
+            }
+        }
+        mostLiquidPoolsFirstHop[String(hopTokens[i])] =
+            poolsTokenInNoTokenOut[highestNormalizedLiquidityIndex];
+        // console.log(highestNormalizedLiquidity)
+        // console.log(mostLiquidPoolsFirstHop)
+    }
 
-    //     for(var k = 0; k < pools[i].tokensList.length; k++) {
-    //         if (pools[i].tokensList[k].toLowerCase() == token.toLowerCase()) {
-    //             found = true;
-    //             break;
-    //         }
-    //     }
-    //     //Append pool if token not found
-    //     if(!found)
-    //         OutputPools.push(pools[i]);
-    // }
+    //console.log(mostLiquidPoolsFirstHop)
+
+    // Now similarly find the most liquid pool for each pair (hopToken -> tokenOut)
+    var mostLiquidPoolsSecondHop = {};
+    for (var i = 0; i < hopTokens.length; i++) {
+        var highestNormalizedLiquidity = 0; // Aux variable to find pool with most liquidity for pair (tokenIn -> hopToken)
+        var highestNormalizedLiquidityIndex = 0; // Aux variable to find pool with most liquidity for pair (tokenIn -> hopToken)
+        for (var k = 0; k < poolsTokenOutNoTokenIn.length; k++) {
+            // We now loop to check if this pool has hopToken
+            var found = false;
+            for (
+                var j = 0;
+                j < poolsTokenOutNoTokenIn[k].tokensList.length;
+                j++
+            ) {
+                if (
+                    poolsTokenOutNoTokenIn[k].tokensList[j].toLowerCase() ==
+                    hopTokens[i]
+                ) {
+                    found = true;
+                    break;
+                }
+            }
+            // If this pool has hopTokens[i] calculate its normalized liquidity
+            if (found) {
+                let normalizedLiquidity = sor.getNormalizedLiquidity(
+                    sor.parsePoolData(
+                        [poolsTokenOutNoTokenIn[k]],
+                        hopTokens[i],
+                        tokenOut
+                    )[0]
+                );
+                if (normalizedLiquidity > highestNormalizedLiquidity) {
+                    highestNormalizedLiquidity = normalizedLiquidity;
+                    highestNormalizedLiquidityIndex = k;
+                }
+            }
+        }
+        mostLiquidPoolsSecondHop[String(hopTokens[i])] =
+            poolsTokenOutNoTokenIn[highestNormalizedLiquidityIndex];
+        // console.log(highestNormalizedLiquidity)
+        // console.log(mostLiquidPoolsSecondHop)
+    }
+
+    //console.log(mostLiquidPoolsSecondHop)
 
     //// We find all pools with the direct trading pair (tokenIn -> tokenOut)
     const data = await sor.getPoolsWithTokens(tokenIn, tokenOut);
 
-    console.log(data);
+    // console.log(data.pools);
 
     const poolData = sor.parsePoolData(data.pools, tokenIn, tokenOut);
 

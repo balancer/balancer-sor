@@ -5,6 +5,7 @@ export {
     formatSwapsExactAmountIn,
     formatSwapsExactAmountOut,
 } from './sor';
+export { getNormalizedLiquidity } from './helpers';
 export {
     getPoolsWithTokens,
     getPoolsWithSingleToken,

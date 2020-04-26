@@ -3,6 +3,7 @@ import {
     getSlippageLinearizedSpotPriceAfterSwap,
     getLimitAmountSwap,
     getLinearizedOutputAmountSwap,
+    getNormalizedLiquidity,
 } from './helpers';
 import {
     bmul,
@@ -41,12 +42,12 @@ export const smartOrderRouter = (
 
     pricesOfInterest.forEach(e => {
         let bids = e.bestPools;
-        let ep = e.price;
-        e.amounts = getInputAmountsForEp(sortedPools, bids, ep);
+        let poi = e.price;
+        e.amounts = getInputAmountsForPriceOfInterest(sortedPools, bids, poi);
     });
 
     let bestTotalOutput: BigNumber = new BigNumber(0);
-    let highestEpNotEnough: boolean = true;
+    let highestPoiNotEnough: boolean = true;
     let poolIds, totalOutput;
     let bestInputAmounts, bestPoolIds, inputAmounts;
 
@@ -81,14 +82,14 @@ export const smartOrderRouter = (
                     targetInputAmount
                 );
 
-                highestEpNotEnough = false;
+                highestPoiNotEnough = false;
                 break;
             }
 
             epBefore = epAfter;
         }
 
-        if (highestEpNotEnough) {
+        if (highestPoiNotEnough) {
             poolIds = [];
             inputAmounts = [];
         }
@@ -374,10 +375,10 @@ function calculateBestPoolsForPricesOfInterest(
     return pricesOfInterest;
 }
 
-function getInputAmountsForEp(
+function getInputAmountsForPriceOfInterest(
     pools: Pool[],
     bids: string[],
-    ep: BigNumber
+    poi: BigNumber
 ): BigNumber[] {
     let inputAmounts: BigNumber[] = [];
     bids.forEach((bid, i) => {
@@ -385,7 +386,7 @@ function getInputAmountsForEp(
             return obj.id === bid;
         });
         let inputAmount = bdiv(
-            ep.minus(pool.spotPrice),
+            poi.minus(pool.spotPrice),
             bmul(pool.slippage, pool.spotPrice)
         );
         if (pool.limitAmount.isLessThan(inputAmount)) {

@@ -109,3 +109,10 @@ export function getLinearizedOutputAmountSwap(
         );
     }
 }
+// Based on the function of same name of file onchain-sor in file: BRegistry.sol
+// Normalized liquidity is not used in any calculationf, but instead for comparison between pools only
+// so we can find the most liquid pool considering the effect of uneven weigths
+export function getNormalizedLiquidity(balancer: Pool): BigNumber {
+    let { weightIn, weightOut, balanceIn, balanceOut, swapFee } = balancer;
+    return bdiv(bmul(balanceOut, weightIn), weightIn.plus(weightOut));
+}
