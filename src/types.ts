@@ -28,7 +28,7 @@ export interface Price {
     maxAmount?: string;
     swap?: string[];
     amounts?: BigNumber[];
-    bestPaths?: string[];
+    bestPathsIds?: string[];
 }
 
 export type Swap = {

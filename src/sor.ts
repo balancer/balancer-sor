@@ -2,12 +2,12 @@ import {
     getSpotPrice,
     getSlippageLinearizedSpotPriceAfterSwap,
     getLimitAmountSwap,
-    getLinearizedOutputAmountSwap,
     getSpotPricePath,
     getSlippageLinearizedSpotPriceAfterSwapPath,
     getLimitAmountSwapPath,
-    getLinearizedOutputAmountSwapPath,
     getNormalizedLiquidity,
+    getOutputAmountSwap,
+    getOutputAmountSwapPath,
 } from './helpers';
 import {
     bmul,
@@ -20,13 +20,22 @@ import {
 import { BigNumber } from './utils/bignumber';
 import { Pool, Path, Swap, SwapAmount, Price } from './types';
 
-export const smartOrderRouter = (
+// TODO give the option to choose a % of slippage beyond current price?
+const MAX_UINT = new BigNumber(
+    115792089237316195423570985008687907853269984665640564039457584007913129639935
+);
+const minAmountOut = 0;
+const maxAmountIn = MAX_UINT;
+const maxPrice = MAX_UINT;
+
+export const smartOrderRouterMultiHop = (
+    pools: Pool[],
     paths: Path[],
     swapType: string,
     targetInputAmount: BigNumber,
     maxPaths: number,
     costOutputToken: BigNumber
-): SwapAmount[] => {
+): [Swap[], BigNumber] => {
     paths.forEach(b => {
         b.spotPrice = getSpotPricePath(b);
         b.slippage = getSlippageLinearizedSpotPriceAfterSwapPath(b, swapType);
@@ -45,15 +54,21 @@ export const smartOrderRouter = (
         }
     );
 
-    pricesOfInterest = calculateBestPathsForPricesOfInterest(pricesOfInterest);
+    pricesOfInterest = calculateBestPathIdsForPricesOfInterest(
+        pricesOfInterest
+    );
 
-    pricesOfInterest.forEach(e => {
-        let bids = e.bestPaths;
-        let poi = e.price;
-        e.amounts = getInputAmountsForPriceOfInterest(sortedPaths, bids, poi);
+    pricesOfInterest.forEach(poi => {
+        let pathIds = poi.bestPathsIds;
+        let price = poi.price;
+        poi.amounts = getInputAmountsForPriceOfInterest(
+            sortedPaths,
+            pathIds,
+            price
+        );
     });
 
-    console.log(pricesOfInterest);
+    // console.log(pricesOfInterest);
 
     let bestTotalOutput: BigNumber = new BigNumber(0);
     let highestPoiNotEnough: boolean = true;
@@ -85,7 +100,7 @@ export const smartOrderRouter = (
                 .reduce((a, b) => a.plus(b));
 
             if (totalInputAmountAfter.isGreaterThan(targetInputAmount)) {
-                pathIds = priceBefore.bestPaths.slice(0, b);
+                pathIds = priceBefore.bestPathsIds.slice(0, b);
                 inputAmountsPriceBefore = priceBefore.amounts.slice(0, b);
                 inputAmountsPriceAfter = priceAfter.amounts.slice(0, b);
 
@@ -107,12 +122,8 @@ export const smartOrderRouter = (
             inputAmounts = [];
         }
 
-        totalOutput = getLinearizedTotalOutput(
-            paths,
-            swapType,
-            pathIds,
-            inputAmounts
-        );
+        // TODO replace output for return everywhere
+        totalOutput = calcTotalReturn(paths, swapType, pathIds, inputAmounts);
 
         let improvementCondition: boolean = false;
         if (swapType === 'swapExactIn') {
@@ -140,25 +151,92 @@ export const smartOrderRouter = (
         }
     }
 
-    let swaps: SwapAmount[] = [];
+    console.log(bestInputAmounts);
+    console.log(bestPathIds);
+    console.log(bestTotalOutput);
+
+    //// Prepare swap data from paths
+    let swaps: Swap[] = [];
     let totalSwapAmount: BigNumber = new BigNumber(0);
     let dust: BigNumber = new BigNumber(0);
 
-    bestInputAmounts.forEach((amount, i) => {
-        let swap: SwapAmount = {
-            pool: bestPathIds[i],
-            amount: amount,
-        };
-        totalSwapAmount = totalSwapAmount.plus(amount);
-        swaps.push(swap);
+    // TODO: change all inputAmount variable names to swapAmount
+    bestInputAmounts.forEach((swapAmount, i) => {
+        totalSwapAmount = totalSwapAmount.plus(swapAmount);
+
+        // Find path data
+        const path = paths.find(p => p.id === bestPathIds[i]);
+        if (!path) {
+            throw new Error(
+                '[Invariant] No pool found for selected pool index'
+            );
+        }
+
+        if (path.pools.length == 1) {
+            // Direct trade: add swap from only pool
+            let swap: Swap = {
+                pool: path.pools[0].id,
+                tokenInParam:
+                    swapType === 'swapExactIn'
+                        ? swapAmount.toString()
+                        : maxAmountIn.toString(),
+                tokenOutParam:
+                    swapType === 'swapExactIn'
+                        ? minAmountOut.toString()
+                        : swapAmount.toString(),
+                maxPrice: maxPrice.toString(),
+            };
+            swaps.push(swap);
+        } else {
+            // Multi-hop:
+            // Add swap from first pool
+            let swap1hop: Swap = {
+                pool: path.pools[0].id,
+                tokenInParam:
+                    swapType === 'swapExactIn'
+                        ? swapAmount.toString()
+                        : maxAmountIn.toString(),
+                tokenOutParam:
+                    swapType === 'swapExactIn'
+                        ? minAmountOut.toString()
+                        : getOutputAmountSwap(
+                              path.pools[1],
+                              swapType,
+                              swapAmount
+                          ).toString(),
+                maxPrice: maxPrice.toString(),
+            };
+            swaps.push(swap1hop);
+
+            // Add swap from second pool
+            let swap2hop: Swap = {
+                pool: path.pools[1].id,
+                tokenInParam:
+                    swapType === 'swapExactIn'
+                        ? getOutputAmountSwap(
+                              path.pools[0],
+                              swapType,
+                              swapAmount
+                          ).toString()
+                        : maxAmountIn.toString(),
+                tokenOutParam:
+                    swapType === 'swapExactIn'
+                        ? minAmountOut.toString()
+                        : swapAmount.toString(),
+                maxPrice: maxPrice.toString(),
+            };
+            swaps.push(swap2hop);
+        }
     });
 
-    if (swaps.length > 0) {
-        dust = targetInputAmount.minus(totalSwapAmount);
-        swaps[0].amount = swaps[0].amount.plus(dust);
-    }
+    // TODO recheck the logic when swapExactOut -> has to go to second pool when Multi-hop
+    // if (swaps.length > 0) {
+    //     dust = targetInputAmount.minus(totalSwapAmount);
+    //     (swapType === 'swapExactIn')? swaps[0].tokenInParam =
+    //         new BigNumber(swaps[0].tokenInParam).plus(dust).toString() : new BigNumber(swaps[0].tokenOutParam).plus(dust).toString();
+    // }
 
-    return swaps;
+    return [swaps, bestTotalOutput];
 };
 
 function getPricesOfInterest(sortedPaths: Path[], swapType: string): Price[] {
@@ -256,124 +334,124 @@ function getPricesOfInterest(sortedPaths: Path[], swapType: string): Price[] {
     return pricesOfInterest;
 }
 
-export const calcTotalOutput = (swaps: Swap[], pathData: Path[]): BigNumber => {
-    try {
-        let totalAmountOut = bnum(0);
-        swaps.forEach(swap => {
-            const swapAmount = swap.tokenInParam;
+// export const calcTotalOutput = (swaps: Swap[], pathData: Path[]): BigNumber => {
+//     try {
+//         let totalAmountOut = bnum(0);
+//         swaps.forEach(swap => {
+//             const swapAmount = swap.tokenInParam;
 
-            const path = pathData.find(p => p.id === swap.pool);
-            if (!path) {
-                throw new Error(
-                    '[Invariant] No pool found for selected pool index'
-                );
-            }
+//             const path = pathData.find(p => p.id === swap.pool);
+//             if (!path) {
+//                 throw new Error(
+//                     '[Invariant] No pool found for selected pool index'
+//                 );
+//             }
 
-            // TODO correct for multihop
-            const preview = calcOutGivenIn(
-                path.pools[0].balanceIn,
-                path.pools[0].weightIn,
-                path.pools[0].balanceOut,
-                path.pools[0].weightOut,
-                bnum(swapAmount),
-                path.pools[0].swapFee
-            );
+//             // TODO correct for multihop
+//             const preview = calcOutGivenIn(
+//                 path.pools[0].balanceIn,
+//                 path.pools[0].weightIn,
+//                 path.pools[0].balanceOut,
+//                 path.pools[0].weightOut,
+//                 bnum(swapAmount),
+//                 path.pools[0].swapFee
+//             );
 
-            totalAmountOut = totalAmountOut.plus(preview);
-        });
-        return totalAmountOut;
-    } catch (e) {
-        throw new Error(e);
-    }
-};
+//             totalAmountOut = totalAmountOut.plus(preview);
+//         });
+//         return totalAmountOut;
+//     } catch (e) {
+//         throw new Error(e);
+//     }
+// };
 
-export const calcTotalInput = (swaps: Swap[], pathData: Path[]): BigNumber => {
-    try {
-        let totalAmountIn = bnum(0);
-        swaps.forEach(swap => {
-            const swapAmount = swap.tokenOutParam;
-            const path = pathData.find(p => p.id === swap.pool);
-            if (!path) {
-                throw new Error(
-                    '[Invariant] No pool found for selected pool index'
-                );
-            }
+// export const calcTotalInput = (swaps: Swap[], pathData: Path[]): BigNumber => {
+//     try {
+//         let totalAmountIn = bnum(0);
+//         swaps.forEach(swap => {
+//             const swapAmount = swap.tokenOutParam;
+//             const path = pathData.find(p => p.id === swap.pool);
+//             if (!path) {
+//                 throw new Error(
+//                     '[Invariant] No pool found for selected pool index'
+//                 );
+//             }
 
-            const preview = calcInGivenOut(
-                path.pools[0].balanceIn,
-                path.pools[0].weightIn,
-                path.pools[0].balanceOut,
-                path.pools[0].weightOut,
-                bnum(swapAmount),
-                path.pools[0].swapFee
-            );
+//             const preview = calcInGivenOut(
+//                 path.pools[0].balanceIn,
+//                 path.pools[0].weightIn,
+//                 path.pools[0].balanceOut,
+//                 path.pools[0].weightOut,
+//                 bnum(swapAmount),
+//                 path.pools[0].swapFee
+//             );
 
-            totalAmountIn = totalAmountIn.plus(preview);
-        });
+//             totalAmountIn = totalAmountIn.plus(preview);
+//         });
 
-        return totalAmountIn;
-    } catch (e) {
-        throw new Error(e);
-    }
-};
+//         return totalAmountIn;
+//     } catch (e) {
+//         throw new Error(e);
+//     }
+// };
 
-export const formatSwapsExactAmountIn = (
-    sorSwaps: SwapAmount[],
-    maxPrice: BigNumber,
-    minAmountOut: BigNumber
-): Swap[] => {
-    const swaps: Swap[] = [];
-    for (let i = 0; i < sorSwaps.length; i++) {
-        let swapAmount = sorSwaps[i].amount;
-        let swap: Swap = {
-            pool: sorSwaps[i].pool,
-            tokenInParam: swapAmount.toString(),
-            tokenOutParam: minAmountOut.toString(),
-            maxPrice: maxPrice.toString(),
-        };
-        swaps.push(swap);
-    }
-    return swaps;
-};
+// export const formatSwapsExactAmountIn = (
+//     sorSwaps: SwapAmount[],
+//     maxPrice: BigNumber,
+//     minAmountOut: BigNumber
+// ): Swap[] => {
+//     const swaps: Swap[] = [];
+//     for (let i = 0; i < sorSwaps.length; i++) {
+//         let swapAmount = sorSwaps[i].amount;
+//         let swap: Swap = {
+//             pool: sorSwaps[i].pool,
+//             tokenInParam: swapAmount.toString(),
+//             tokenOutParam: minAmountOut.toString(),
+//             maxPrice: maxPrice.toString(),
+//         };
+//         swaps.push(swap);
+//     }
+//     return swaps;
+// };
 
-export const formatSwapsExactAmountOut = (
-    sorSwaps: SwapAmount[],
-    maxPrice: BigNumber,
-    maxAmountIn: BigNumber
-): Swap[] => {
-    const swaps: Swap[] = [];
-    for (let i = 0; i < sorSwaps.length; i++) {
-        let swapAmount = sorSwaps[i].amount;
-        let swap: Swap = {
-            pool: sorSwaps[i].pool,
-            tokenInParam: maxAmountIn.toString(),
-            tokenOutParam: swapAmount.toString(),
-            maxPrice: maxPrice.toString(),
-        };
-        swaps.push(swap);
-    }
-    return swaps;
-};
+// export const formatSwapsExactAmountOut = (
+//     sorSwaps: SwapAmount[],
+//     maxPrice: BigNumber,
+//     maxAmountIn: BigNumber
+// ): Swap[] => {
+//     const swaps: Swap[] = [];
+//     for (let i = 0; i < sorSwaps.length; i++) {
+//         let swapAmount = sorSwaps[i].amount;
+//         let swap: Swap = {
+//             pool: sorSwaps[i].pool,
+//             tokenInParam: maxAmountIn.toString(),
+//             tokenOutParam: swapAmount.toString(),
+//             maxPrice: maxPrice.toString(),
+//         };
+//         swaps.push(swap);
+//     }
+//     return swaps;
+// };
 
-function calculateBestPathsForPricesOfInterest(
+function calculateBestPathIdsForPricesOfInterest(
     pricesOfInterest: Price[]
 ): Price[] {
-    let bestPaths = [];
+    let bestPathsIds = [];
     pricesOfInterest.forEach((e, i) => {
         if (e.id != null) {
-            bestPaths.push(e.id);
+            bestPathsIds.push(e.id);
         } else if (e.swap) {
-            let index1 = bestPaths.indexOf(e.swap[0]);
-            let index2 = bestPaths.indexOf(e.swap[1]);
+            let index1 = bestPathsIds.indexOf(e.swap[0]);
+            let index2 = bestPathsIds.indexOf(e.swap[1]);
 
             if (index1 != -1) {
                 if (index2 != -1) {
-                    let bestPath1 = bestPaths[index1];
-                    let bestPath2 = bestPaths[index2];
-                    bestPaths[index1] = bestPath2;
-                    bestPaths[index2] = bestPath1;
+                    let bestPath1 = bestPathsIds[index1];
+                    let bestPath2 = bestPathsIds[index2];
+                    bestPathsIds[index1] = bestPath2;
+                    bestPathsIds[index2] = bestPath1;
                 } else {
-                    bestPaths[index1] = e.swap[2];
+                    bestPathsIds[index1] = e.swap[2];
                 }
             }
         } else if (e.maxAmount) {
@@ -384,18 +462,18 @@ function calculateBestPathsForPricesOfInterest(
                 'ERROR: poolID or swap not found in pricesOfInterest'
             );
         }
-        pricesOfInterest[i].bestPaths = bestPaths.slice();
+        pricesOfInterest[i].bestPathsIds = bestPathsIds.slice();
     });
     return pricesOfInterest;
 }
 
 function getInputAmountsForPriceOfInterest(
     paths: Path[],
-    bids: string[],
+    pathIds: string[],
     poi: BigNumber
 ): BigNumber[] {
     let inputAmounts: BigNumber[] = [];
-    bids.forEach((bid, i) => {
+    pathIds.forEach((bid, i) => {
         let path = paths.find(obj => {
             return obj.id === bid;
         });
@@ -411,12 +489,12 @@ function getInputAmountsForPriceOfInterest(
     return inputAmounts;
 }
 
-function getLinearizedTotalOutput(
+export const calcTotalReturn = (
     paths: Path[],
     swapType: string,
     pathIds: string[],
     inputAmounts: BigNumber[]
-): BigNumber {
+): BigNumber => {
     let path;
     let totalOutput = new BigNumber(0);
     pathIds.forEach((b, i) => {
@@ -424,11 +502,11 @@ function getLinearizedTotalOutput(
             return obj.id === b;
         });
         totalOutput = totalOutput.plus(
-            getLinearizedOutputAmountSwapPath(path, swapType, inputAmounts[i])
+            getOutputAmountSwapPath(path, swapType, inputAmounts[i])
         );
     });
     return totalOutput;
-}
+};
 
 function getExactInputAmounts(
     inputAmountsPriceBefore: BigNumber[],

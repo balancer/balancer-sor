@@ -99,96 +99,88 @@ export async function getPoolsWithTokens(tokenIn, tokenOut) {
     return data;
 }
 
-export const parsePathData = (
-    pools,
+export const parsePoolAndPathData = (
+    directPools,
     tokenIn: string,
-    tokenOut: string
-): Path[] => {
-    if (pools.length === 0)
-        throw Error('There are no pools with selected tokens');
-
+    tokenOut: string,
+    mostLiquidPoolsFirstHop,
+    mostLiquidPoolsSecondHop,
+    hopTokens
+): [Pool[], Path[]] => {
+    let poolData: Pool[] = [];
     let pathData: Path[] = [];
-    pools.forEach(p => {
-        let tI = p.tokens.find(
-            t =>
-                ethers.utils.getAddress(t.address) ===
-                ethers.utils.getAddress(tokenIn)
-        );
-        let tO = p.tokens.find(
-            t =>
-                ethers.utils.getAddress(t.address) ===
-                ethers.utils.getAddress(tokenOut)
-        );
-        let pool = {
-            id: p.id,
-            decimalsIn: tI.decimals,
-            decimalsOut: tO.decimals,
-            balanceIn: bmath.scale(bmath.bnum(tI.balance), tI.decimals),
-            balanceOut: bmath.scale(bmath.bnum(tO.balance), tO.decimals),
-            weightIn: bmath.scale(
-                bmath.bnum(tI.denormWeight).div(bmath.bnum(p.totalWeight)),
-                18
-            ),
-            weightOut: bmath.scale(
-                bmath.bnum(tO.denormWeight).div(bmath.bnum(p.totalWeight)),
-                18
-            ),
-            swapFee: bmath.scale(bmath.bnum(p.swapFee), 18),
-        };
 
-        // TODO replace with array of pools when path is a multi-hop
+    // First add direct pair paths
+    directPools.forEach(p => {
+        let pool = parsePoolForTokenPair(p, tokenIn, tokenOut);
+        poolData.push(pool);
+
         let path = {
             id: pool.id,
             pools: [pool],
         };
-
         pathData.push(path);
     });
 
-    return pathData;
-};
-
-export const parsePoolData = (
-    pools,
-    tokenIn: string,
-    tokenOut: string
-): Pool[] => {
-    if (pools.length === 0)
-        throw Error('There are no pools with selected tokens');
-
-    let poolData: Pool[] = [];
-    pools.forEach(p => {
-        let tI = p.tokens.find(
-            t =>
-                ethers.utils.getAddress(t.address) ===
-                ethers.utils.getAddress(tokenIn)
+    // Now add multi-hop paths.
+    // mostLiquidPoolsFirstHop always has the same lengh of mostLiquidPoolsSecondHop
+    for (let i = 0; i < mostLiquidPoolsFirstHop.length; i++) {
+        let poolFirstHop = parsePoolForTokenPair(
+            mostLiquidPoolsFirstHop[i],
+            tokenIn,
+            hopTokens[i]
         );
-        let tO = p.tokens.find(
-            t =>
-                ethers.utils.getAddress(t.address) ===
-                ethers.utils.getAddress(tokenOut)
+        let poolSecondHop = parsePoolForTokenPair(
+            mostLiquidPoolsSecondHop[i],
+            hopTokens[i],
+            tokenOut
         );
-        let obj = {
-            id: p.id,
-            decimalsIn: tI.decimals,
-            decimalsOut: tO.decimals,
-            balanceIn: bmath.scale(bmath.bnum(tI.balance), tI.decimals),
-            balanceOut: bmath.scale(bmath.bnum(tO.balance), tO.decimals),
-            weightIn: bmath.scale(
-                bmath.bnum(tI.denormWeight).div(bmath.bnum(p.totalWeight)),
-                18
-            ),
-            weightOut: bmath.scale(
-                bmath.bnum(tO.denormWeight).div(bmath.bnum(p.totalWeight)),
-                18
-            ),
-            swapFee: bmath.scale(bmath.bnum(p.swapFee), 18),
+        poolData.push(poolFirstHop);
+        poolData.push(poolSecondHop);
+
+        let path = {
+            id: poolFirstHop.id + poolSecondHop.id, // Path id is the concatenation of the ids of poolFirstHop and poolSecondHop
+            pools: [poolFirstHop, poolSecondHop],
         };
 
-        poolData.push(obj);
-    });
+        pathData.push(path);
+    }
+    return [poolData, pathData];
+};
 
-    return poolData;
+export const parsePoolForTokenPair = (
+    p,
+    tokenIn: string,
+    tokenOut: string
+): Pool => {
+    let tI = p.tokens.find(
+        t =>
+            ethers.utils.getAddress(t.address) ===
+            ethers.utils.getAddress(tokenIn)
+    );
+    let tO = p.tokens.find(
+        t =>
+            ethers.utils.getAddress(t.address) ===
+            ethers.utils.getAddress(tokenOut)
+    );
+    let pool = {
+        id: p.id,
+        decimalsIn: tI.decimals,
+        decimalsOut: tO.decimals,
+        balanceIn: bmath.scale(bmath.bnum(tI.balance), tI.decimals),
+        balanceOut: bmath.scale(bmath.bnum(tO.balance), tO.decimals),
+        weightIn: bmath.scale(
+            bmath.bnum(tI.denormWeight).div(bmath.bnum(p.totalWeight)),
+            18
+        ),
+        weightOut: bmath.scale(
+            bmath.bnum(tO.denormWeight).div(bmath.bnum(p.totalWeight)),
+            18
+        ),
+        swapFee: bmath.scale(bmath.bnum(p.swapFee), 18),
+    };
+
+    return pool;
 };
 
 export async function getTokenPairs(token) {

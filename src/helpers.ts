@@ -8,16 +8,15 @@ import {
     bmul,
     bdiv,
     bnum,
+    calcOutGivenIn,
+    calcInGivenOut,
 } from './bmath';
 
-export function getLimitAmountSwap(
-    balancer: Pool,
-    swapType: string
-): BigNumber {
+export function getLimitAmountSwap(pool: Pool, swapType: string): BigNumber {
     if (swapType === 'swapExactIn') {
-        return bmul(balancer.balanceIn, MAX_IN_RATIO);
+        return bmul(pool.balanceIn, MAX_IN_RATIO);
     } else {
-        return bmul(balancer.balanceOut, MAX_OUT_RATIO);
+        return bmul(pool.balanceOut, MAX_OUT_RATIO);
     }
 }
 
@@ -64,13 +63,13 @@ export function getSpotPricePath(path: Path): BigNumber {
     }
 }
 
-export function getSpotPrice(balancer: Pool): BigNumber {
-    let inRatio = bdiv(balancer.balanceIn, balancer.weightIn);
-    let outRatio = bdiv(balancer.balanceOut, balancer.weightOut);
+export function getSpotPrice(pool: Pool): BigNumber {
+    let inRatio = bdiv(pool.balanceIn, pool.weightIn);
+    let outRatio = bdiv(pool.balanceOut, pool.weightOut);
     if (outRatio.isEqualTo(bnum(0))) {
         return bnum(0);
     } else {
-        return bdiv(bdiv(inRatio, outRatio), BONE.minus(balancer.swapFee));
+        return bdiv(bdiv(inRatio, outRatio), BONE.minus(pool.swapFee));
     }
 }
 
@@ -91,8 +90,7 @@ export function getSlippageLinearizedSpotPriceAfterSwapPath(
             return bnum(0);
         } else {
             if (swapType === 'swapExactIn') {
-                // We don't need to use bmath operators as this is not going to be used to calculate the amount out, so
-                // it doesn't need to be done exactly as it would in solidity
+                // See formula on https://one.wolframcloud.com/env/fernando.martinel/SOR_multihop_analysis.nb
                 let numerator1 = bmul(
                     bmul(
                         bmul(BONE.minus(p1.swapFee), BONE.minus(p2.swapFee)), // In mathematica both terms are the negative (which compensates)
@@ -123,7 +121,35 @@ export function getSlippageLinearizedSpotPriceAfterSwapPath(
 
                 return bdiv(numerator, denominator);
             } else {
-                return bnum(0); // TODO replace with actual formula
+                let numerator1 = bmul(
+                    bmul(
+                        bmul(BONE.minus(p1.swapFee), BONE.minus(p2.swapFee)), // In mathematica both terms are the negative (which compensates)
+                        p1.balanceOut
+                    ),
+                    bmul(p1.weightIn, p2.weightIn)
+                );
+
+                let numerator2 = bmul(
+                    bmul(
+                        p1.balanceOut.plus(p2.balanceIn),
+                        BONE.minus(p1.swapFee) // In mathematica this is the negative but we add (instead of subtracting) numerator2 to compensate
+                    ),
+                    bmul(p1.weightIn, p2.weightOut)
+                );
+
+                let numerator3 = bmul(
+                    p2.balanceIn,
+                    bmul(p1.weightOut, p2.weightOut)
+                );
+
+                let numerator = numerator1.plus(numerator2).plus(numerator3);
+
+                let denominator = bmul(
+                    bmul(p1.balanceIn, p2.balanceIn),
+                    bmul(p1.weightOut, p2.weightOut)
+                );
+
+                return bdiv(numerator, denominator);
             }
         }
     } else {
@@ -132,10 +158,10 @@ export function getSlippageLinearizedSpotPriceAfterSwapPath(
 }
 
 export function getSlippageLinearizedSpotPriceAfterSwap(
-    balancer: Pool,
+    pool: Pool,
     swapType: string
 ): BigNumber {
-    let { weightIn, weightOut, balanceIn, balanceOut, swapFee } = balancer;
+    let { weightIn, weightOut, balanceIn, balanceOut, swapFee } = pool;
     if (swapType === 'swapExactIn') {
         if (balanceIn.isEqualTo(bnum(0))) {
             return bnum(0);
@@ -157,101 +183,73 @@ export function getSlippageLinearizedSpotPriceAfterSwap(
     }
 }
 
-export function getSlippageLinearizedEffectivePriceSwapPath(
+export function getOutputAmountSwapPath(
     path: Path,
-    swapType: string
+    swapType: string,
+    amount: BigNumber
 ): BigNumber {
     let pools = path.pools;
     if (pools.length == 1)
-        return getSlippageLinearizedEffectivePriceSwap(pools[0], swapType);
+        return getOutputAmountSwap(pools[0], swapType, amount);
     else if (pools.length == 2) {
-        return bnum(0); // TODO replace with actual formula
+        if (swapType === 'swapExactIn') {
+            // The outputAmount is number of tokenOut we receive from the second pool
+            return getOutputAmountSwap(
+                pools[1],
+                swapType,
+                getOutputAmountSwap(pools[0], swapType, amount)
+            );
+        } else {
+            // The outputAmount is number of tokenIn we send to the first pool
+            return getOutputAmountSwap(
+                pools[0],
+                swapType,
+                getOutputAmountSwap(pools[1], swapType, amount)
+            );
+        }
     } else {
         throw new Error('Path with more than 2 pools not supported');
     }
 }
 
-export function getSlippageLinearizedEffectivePriceSwap(
-    balancer: Pool,
-    swapType: string
+export function getOutputAmountSwap(
+    pool: Pool,
+    swapType: string,
+    amount: BigNumber
 ): BigNumber {
-    let { weightIn, weightOut, balanceIn, balanceOut, swapFee } = balancer;
-    if (swapType == 'swapExactIn') {
+    let { weightIn, weightOut, balanceIn, balanceOut, swapFee } = pool;
+    if (swapType === 'swapExactIn') {
         if (balanceIn.isEqualTo(bnum(0))) {
             return bnum(0);
         } else {
-            return bmul(
-                BONE.minus(swapFee),
-                bdiv(
-                    bdiv(weightIn, weightOut).plus(BONE),
-                    bmul(TWOBONE, balanceIn)
-                )
+            return calcOutGivenIn(
+                balanceIn,
+                weightIn,
+                balanceOut,
+                weightOut,
+                amount,
+                swapFee
             );
         }
     } else {
         if (balanceOut.isEqualTo(bnum(0))) {
             return bnum(0);
         } else {
-            return bdiv(
-                bdiv(weightOut, weightIn).plus(BONE),
-                bmul(TWOBONE, balanceOut)
+            return calcInGivenOut(
+                balanceIn,
+                weightIn,
+                balanceOut,
+                weightOut,
+                amount,
+                swapFee
             );
         }
     }
 }
-
-export function getLinearizedOutputAmountSwapPath(
-    path: Path,
-    swapType: string,
-    amount: BigNumber
-): BigNumber {
-    let { spotPrice } = path;
-    let slippageLinearizedEp = getSlippageLinearizedEffectivePriceSwapPath(
-        path,
-        swapType
-    );
-
-    if (swapType == 'swapExactIn') {
-        return bdiv(
-            amount,
-            bmul(spotPrice, BONE.plus(bmul(slippageLinearizedEp, amount)))
-        );
-    } else {
-        return bmul(
-            amount,
-            bmul(spotPrice, BONE.plus(bmul(slippageLinearizedEp, amount)))
-        );
-    }
-}
-
-export function getLinearizedOutputAmountSwap(
-    path: Path,
-    swapType: string,
-    amount: BigNumber
-): BigNumber {
-    let { spotPrice } = path;
-    let slippageLinearizedEp = getSlippageLinearizedEffectivePriceSwapPath(
-        path,
-        swapType
-    );
-
-    if (swapType == 'swapExactIn') {
-        return bdiv(
-            amount,
-            bmul(spotPrice, BONE.plus(bmul(slippageLinearizedEp, amount)))
-        );
-    } else {
-        return bmul(
-            amount,
-            bmul(spotPrice, BONE.plus(bmul(slippageLinearizedEp, amount)))
-        );
-    }
-}
-
 // Based on the function of same name of file onchain-sor in file: BRegistry.sol
 // Normalized liquidity is not used in any calculationf, but instead for comparison between pools only
 // so we can find the most liquid pool considering the effect of uneven weigths
-export function getNormalizedLiquidity(balancer: Pool): BigNumber {
-    let { weightIn, weightOut, balanceIn, balanceOut, swapFee } = balancer;
+export function getNormalizedLiquidity(pool: Pool): BigNumber {
+    let { weightIn, weightOut, balanceIn, balanceOut, swapFee } = pool;
     return bdiv(bmul(balanceOut, weightIn), weightIn.plus(weightOut));
 }

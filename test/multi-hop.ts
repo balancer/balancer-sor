@@ -10,6 +10,11 @@ const MAX_UINT = ethers.constants.MaxUint256;
 const tokenIn = '0x6B175474E89094C44Da98b954EedeAC495271d0F'; // DAI
 const tokenOut = '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2'; // WETH
 
+// const tokenOut = '0x9f8f72aa9304c8b593d555f12ef6589cc3a579a2'; // MKR
+// const tokenIn = '0x0d8775f648430679a709e98d2b0cb6250d2887ef'; // BAT
+
+// const tokenOut = '0x39aa39c021dfbae8fac545936693ac917d5e7563'; // cUSDC
+
 (async function() {
     //// Multi-hop trades: we find the best pools that connect tokenIn and tokenOut through a multi-hop (intermediate) token
     // First: we get all tokens that can be used to be traded with tokenIn excluding
@@ -25,7 +30,6 @@ const tokenOut = '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2'; // WETH
         poolsTokenInNoTokenOut,
         tokenIn
     );
-    // console.log(tokenInHopTokens);
 
     // Second: we get all tokens that can be used to be traded with tokenOut excluding
     // tokens that are in pools that already contain tokenIn (in which case multi-hop is not necessary)
@@ -34,11 +38,12 @@ const tokenOut = '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2'; // WETH
         dataTokenOut.pools,
         tokenIn
     );
+    // console.log(poolsTokenOutNoTokenIn);
+
     const tokenOutHopTokens = getTokensPairedToToken(
         poolsTokenOutNoTokenIn,
         tokenOut
     );
-    // console.log(tokenOutHopTokens);
 
     // Third: we find the intersection of the two previous sets so we can trade tokenIn for tokenOut with 1 multi-hop
     // code from https://stackoverflow.com/a/31931146
@@ -54,7 +59,7 @@ const tokenOut = '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2'; // WETH
     // Here we could query subgraph for all pools with pair (tokenIn -> hopToken), but to
     // minimize subgraph calls we loop through poolsTokenInNoTokenOut, and check the liquidity
     // only for those that have hopToken
-    var mostLiquidPoolsFirstHop = {};
+    var mostLiquidPoolsFirstHop = [];
     for (var i = 0; i < hopTokens.length; i++) {
         var highestNormalizedLiquidity = 0; // Aux variable to find pool with most liquidity for pair (tokenIn -> hopToken)
         var highestNormalizedLiquidityIndex = 0; // Aux variable to find pool with most liquidity for pair (tokenIn -> hopToken)
@@ -77,28 +82,34 @@ const tokenOut = '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2'; // WETH
             // If this pool has hopTokens[i] calculate its normalized liquidity
             if (found) {
                 let normalizedLiquidity = sor.getNormalizedLiquidity(
-                    sor.parsePoolData(
-                        [poolsTokenInNoTokenOut[k]],
+                    sor.parsePoolForTokenPair(
+                        poolsTokenInNoTokenOut[k],
                         tokenIn,
                         hopTokens[i]
-                    )[0]
+                    )
                 );
-                if (normalizedLiquidity > highestNormalizedLiquidity) {
+
+                if (
+                    normalizedLiquidity.isGreaterThan(
+                        highestNormalizedLiquidity
+                    )
+                ) {
                     highestNormalizedLiquidity = normalizedLiquidity;
                     highestNormalizedLiquidityIndex = k;
                 }
             }
         }
-        mostLiquidPoolsFirstHop[String(hopTokens[i])] =
+        mostLiquidPoolsFirstHop[i] =
             poolsTokenInNoTokenOut[highestNormalizedLiquidityIndex];
         // console.log(highestNormalizedLiquidity)
         // console.log(mostLiquidPoolsFirstHop)
     }
 
-    //console.log(mostLiquidPoolsFirstHop)
+    console.log('mostLiquidPoolsFirstHop');
+    console.log(mostLiquidPoolsFirstHop);
 
     // Now similarly find the most liquid pool for each pair (hopToken -> tokenOut)
-    var mostLiquidPoolsSecondHop = {};
+    var mostLiquidPoolsSecondHop = [];
     for (var i = 0; i < hopTokens.length; i++) {
         var highestNormalizedLiquidity = 0; // Aux variable to find pool with most liquidity for pair (tokenIn -> hopToken)
         var highestNormalizedLiquidityIndex = 0; // Aux variable to find pool with most liquidity for pair (tokenIn -> hopToken)
@@ -121,48 +132,63 @@ const tokenOut = '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2'; // WETH
             // If this pool has hopTokens[i] calculate its normalized liquidity
             if (found) {
                 let normalizedLiquidity = sor.getNormalizedLiquidity(
-                    sor.parsePoolData(
-                        [poolsTokenOutNoTokenIn[k]],
+                    sor.parsePoolForTokenPair(
+                        poolsTokenOutNoTokenIn[k],
                         hopTokens[i],
                         tokenOut
-                    )[0]
+                    )
                 );
-                if (normalizedLiquidity > highestNormalizedLiquidity) {
+
+                if (
+                    normalizedLiquidity.isGreaterThan(
+                        highestNormalizedLiquidity
+                    )
+                ) {
                     highestNormalizedLiquidity = normalizedLiquidity;
                     highestNormalizedLiquidityIndex = k;
                 }
             }
         }
-        mostLiquidPoolsSecondHop[String(hopTokens[i])] =
+        mostLiquidPoolsSecondHop[i] =
             poolsTokenOutNoTokenIn[highestNormalizedLiquidityIndex];
         // console.log(highestNormalizedLiquidity)
         // console.log(mostLiquidPoolsSecondHop)
     }
 
-    //console.log(mostLiquidPoolsSecondHop)
+    console.log('mostLiquidPoolsSecondHop');
+    console.log(mostLiquidPoolsSecondHop);
 
     //// We find all pools with the direct trading pair (tokenIn -> tokenOut)
+    // TODO avoid another subgraph call by filtering pools with single tokenIn AND tokenOut
     const data = await sor.getPoolsWithTokens(tokenIn, tokenOut);
 
+    const directPools = data.pools;
+
+    // console.log("datapools");
     // console.log(data.pools);
 
-    const pathData = sor.parsePathData(data.pools, tokenIn, tokenOut);
-    console.log(pathData);
-    console.log(pathData[0].pools);
+    const [poolData, pathData] = sor.parsePoolAndPathData(
+        directPools,
+        tokenIn,
+        tokenOut,
+        mostLiquidPoolsFirstHop,
+        mostLiquidPoolsSecondHop,
+        hopTokens
+    );
+    // console.log(poolData);
+    // console.log(pathData);
 
-    const sorSwaps = sor.smartOrderRouter(
+    const [sorSwaps, totalReturn] = sor.smartOrderRouterMultiHop(
+        poolData,
         pathData,
         'swapExactIn',
+        // 'swapExactOut',
         new BigNumber('10000000000000000000'),
         new BigNumber('10'),
         0
     );
-
-    const swaps = sor.formatSwapsExactAmountIn(sorSwaps, MAX_UINT, 0);
-    console.log(swaps);
-
-    const expectedOut = sor.calcTotalOutput(swaps, pathData);
-    console.log(expectedOut.toString());
+    console.log(sorSwaps);
+    console.log(totalReturn.toString());
 })();
 
 // TO DO: move these functions to the ideal file
