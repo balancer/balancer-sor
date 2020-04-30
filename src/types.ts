@@ -1,6 +1,6 @@
 import { BigNumber } from './utils/bignumber';
 
-export interface Pool {
+export interface PoolPairData {
     id: string;
     balanceIn: BigNumber;
     balanceOut: BigNumber;
@@ -11,15 +11,10 @@ export interface Pool {
 
 export interface Path {
     id: string;
-    pools: Pool[];
+    poolPairDataList: PoolPairData[];
     spotPrice?: BigNumber;
     slippage?: BigNumber;
     limitAmount?: BigNumber;
-}
-
-export interface SwapAmount {
-    pool: string;
-    amount: BigNumber;
 }
 
 export interface Price {

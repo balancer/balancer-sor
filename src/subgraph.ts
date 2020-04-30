@@ -1,7 +1,7 @@
 import fetch from 'isomorphic-fetch';
 import { ethers } from 'ethers';
 import * as bmath from './bmath';
-import { Pool, Path } from './types';
+import { PoolPairData, Path } from './types';
 import { BigNumber } from './utils/bignumber';
 
 const SUBGRAPH_URL =
@@ -99,91 +99,7 @@ export async function getPoolsWithTokens(tokenIn, tokenOut) {
     return data;
 }
 
-export const parsePoolAndPathData = (
-    directPools,
-    tokenIn: string,
-    tokenOut: string,
-    mostLiquidPoolsFirstHop,
-    mostLiquidPoolsSecondHop,
-    hopTokens
-): [Pool[], Path[]] => {
-    let poolData: Pool[] = [];
-    let pathData: Path[] = [];
-
-    // First add direct pair paths
-    directPools.forEach(p => {
-        let pool = parsePoolForTokenPair(p, tokenIn, tokenOut);
-        poolData.push(pool);
-
-        let path = {
-            id: pool.id,
-            pools: [pool],
-        };
-        pathData.push(path);
-    });
-
-    // Now add multi-hop paths.
-    // mostLiquidPoolsFirstHop always has the same lengh of mostLiquidPoolsSecondHop
-    for (let i = 0; i < mostLiquidPoolsFirstHop.length; i++) {
-        let poolFirstHop = parsePoolForTokenPair(
-            mostLiquidPoolsFirstHop[i],
-            tokenIn,
-            hopTokens[i]
-        );
-        let poolSecondHop = parsePoolForTokenPair(
-            mostLiquidPoolsSecondHop[i],
-            hopTokens[i],
-            tokenOut
-        );
-        poolData.push(poolFirstHop);
-        poolData.push(poolSecondHop);
-
-        let path = {
-            id: poolFirstHop.id + poolSecondHop.id, // Path id is the concatenation of the ids of poolFirstHop and poolSecondHop
-            pools: [poolFirstHop, poolSecondHop],
-        };
-
-        pathData.push(path);
-    }
-    return [poolData, pathData];
-};
-
-export const parsePoolForTokenPair = (
-    p,
-    tokenIn: string,
-    tokenOut: string
-): Pool => {
-    let tI = p.tokens.find(
-        t =>
-            ethers.utils.getAddress(t.address) ===
-            ethers.utils.getAddress(tokenIn)
-    );
-    let tO = p.tokens.find(
-        t =>
-            ethers.utils.getAddress(t.address) ===
-            ethers.utils.getAddress(tokenOut)
-    );
-    let pool = {
-        id: p.id,
-        decimalsIn: tI.decimals,
-        decimalsOut: tO.decimals,
-        balanceIn: bmath.scale(bmath.bnum(tI.balance), tI.decimals),
-        balanceOut: bmath.scale(bmath.bnum(tO.balance), tO.decimals),
-        weightIn: bmath.scale(
-            bmath.bnum(tI.denormWeight).div(bmath.bnum(p.totalWeight)),
-            18
-        ),
-        weightOut: bmath.scale(
-            bmath.bnum(tO.denormWeight).div(bmath.bnum(p.totalWeight)),
-            18
-        ),
-        swapFee: bmath.scale(bmath.bnum(p.swapFee), 18),
-    };
-
-    return pool;
-};
-
-export async function getTokenPairs(token) {
+export async function getPoolsWithToken(token) {
     // GraphQL is case-sensitive
     // Always use checksum addresses
     token = ethers.utils.getAddress(token);

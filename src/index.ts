@@ -1,11 +1,13 @@
 export { smartOrderRouterMultiHop, calcTotalReturn } from './sor';
-export { getNormalizedLiquidity } from './helpers';
 export {
+    getMultihopPoolsWithTokens,
+    getTokenPairsMultiHop,
+    parsePoolData,
+} from './helpers';
+export {
+    getPoolsWithToken,
     getPoolsWithTokens,
     getPoolsWithSingleToken,
-    getTokenPairs,
-    parsePoolAndPathData,
-    parsePoolForTokenPair,
 } from './subgraph';
 export { parsePoolDataOnChain } from './multicall';
 import * as bmath from './bmath';

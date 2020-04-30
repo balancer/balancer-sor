@@ -1,6 +1,6 @@
 import { ethers } from 'ethers';
 import { Web3Provider } from 'ethers/providers';
-import { Pool } from './types';
+import { PoolPairData } from './types';
 import * as bmath from './bmath';
 
 export async function parsePoolDataOnChain(
@@ -9,7 +9,7 @@ export async function parsePoolDataOnChain(
     tokenOut: string,
     multiAddress: string,
     provider: Web3Provider
-): Promise<Pool[]> {
+): Promise<PoolPairData[]> {
     if (pools.length === 0)
         throw Error('There are no pools with selected tokens');
 
@@ -24,7 +24,7 @@ export async function parsePoolDataOnChain(
 
     let calls = [];
 
-    let poolData: Pool[] = [];
+    let poolData: PoolPairData[] = [];
     pools.forEach(p => {
         calls.push([p.id, iface.functions.getBalance.encode([tokenIn])]);
         calls.push([p.id, iface.functions.getBalance.encode([tokenOut])]);
@@ -43,7 +43,7 @@ export async function parsePoolDataOnChain(
         const [blockNumber, response] = await multi.aggregate(calls);
         let i = 0;
         let chunkResponse = [];
-        let returnPools: Pool[] = [];
+        let returnPools: PoolPairData[] = [];
         for (let i = 0; i < response.length; i += 5) {
             let chunk = response.slice(i, i + 5);
             chunkResponse.push(chunk);
