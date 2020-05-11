@@ -201,14 +201,13 @@ export const smartOrderRouterMultiHop = (
             // Direct trade: add swap from only pool
             let swap: Swap = {
                 pool: path.poolPairDataList[0].id,
-                tokenInParam:
-                    swapType === 'swapExactIn'
-                        ? swapAmount.toString()
-                        : maxAmountIn.toString(),
-                tokenOutParam:
+                tokenIn: path.poolPairDataList[0].tokenIn,
+                tokenOut: path.poolPairDataList[0].tokenOut,
+                swapAmount: swapAmount.toString(),
+                limitReturnAmount:
                     swapType === 'swapExactIn'
                         ? minAmountOut.toString()
-                        : swapAmount.toString(),
+                        : maxAmountIn.toString(),
                 maxPrice: maxPrice.toString(),
             };
             swaps.push(swap);
@@ -217,18 +216,20 @@ export const smartOrderRouterMultiHop = (
             // Add swap from first pool
             let swap1hop: Swap = {
                 pool: path.poolPairDataList[0].id,
-                tokenInParam:
+                tokenIn: path.poolPairDataList[0].tokenIn,
+                tokenOut: path.poolPairDataList[0].tokenOut,
+                swapAmount:
                     swapType === 'swapExactIn'
                         ? swapAmount.toString()
-                        : maxAmountIn.toString(),
-                tokenOutParam:
-                    swapType === 'swapExactIn'
-                        ? minAmountOut.toString()
                         : getReturnAmountSwap(
                               path.poolPairDataList[1],
                               swapType,
                               swapAmount
                           ).toString(),
+                limitReturnAmount:
+                    swapType === 'swapExactIn'
+                        ? minAmountOut.toString()
+                        : maxAmountIn.toString(),
                 maxPrice: maxPrice.toString(),
             };
             swaps.push(swap1hop);
@@ -236,18 +237,20 @@ export const smartOrderRouterMultiHop = (
             // Add swap from second pool
             let swap2hop: Swap = {
                 pool: path.poolPairDataList[1].id,
-                tokenInParam:
+                tokenIn: path.poolPairDataList[1].tokenIn,
+                tokenOut: path.poolPairDataList[1].tokenOut,
+                swapAmount:
                     swapType === 'swapExactIn'
                         ? getReturnAmountSwap(
                               path.poolPairDataList[0],
                               swapType,
                               swapAmount
                           ).toString()
-                        : maxAmountIn.toString(),
-                tokenOutParam:
+                        : swapAmount.toString(),
+                limitReturnAmount:
                     swapType === 'swapExactIn'
                         ? minAmountOut.toString()
-                        : swapAmount.toString(),
+                        : maxAmountIn.toString(),
                 maxPrice: maxPrice.toString(),
             };
             swaps.push(swap2hop);
@@ -260,19 +263,19 @@ export const smartOrderRouterMultiHop = (
     if (swaps.length > 0) {
         dust = totalSwapAmount.minus(totalSwapAmountWithRoundingErrors);
         if (swapType === 'swapExactIn') {
-            swaps[0].tokenInParam = new BigNumber(swaps[0].tokenInParam)
+            swaps[0].swapAmount = new BigNumber(swaps[0].swapAmount)
                 .plus(dust)
                 .toString(); // Add dust to first swapExactIn
         } else {
             if (lenghtFirstPath == 1)
                 // First path is a direct path (only one pool)
-                swaps[0].tokenOutParam = new BigNumber(swaps[0].tokenOutParam)
+                swaps[0].swapAmount = new BigNumber(swaps[0].swapAmount)
                     .plus(dust)
                     .toString();
             // Add dust to first swapExactOut
             // First path is a multihop path (two pools)
             else
-                swaps[1].tokenOutParam = new BigNumber(swaps[1].tokenOutParam)
+                swaps[1].swapAmount = new BigNumber(swaps[1].swapAmount)
                     .plus(dust)
                     .toString(); // Add dust to second swapExactOut
         }

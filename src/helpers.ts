@@ -451,6 +451,8 @@ export const parsePoolPairData = (
     );
     let poolPairData = {
         id: p.id,
+        tokenIn: tokenIn,
+        tokenOut: tokenOut,
         decimalsIn: tI.decimals,
         decimalsOut: tO.decimals,
         balanceIn: scale(bnum(tI.balance), tI.decimals),

@@ -2,6 +2,8 @@ import { BigNumber } from './utils/bignumber';
 
 export interface PoolPairData {
     id: string;
+    tokenIn: string;
+    tokenOut: string;
     balanceIn: BigNumber;
     balanceOut: BigNumber;
     weightIn: BigNumber;
@@ -28,7 +30,9 @@ export interface Price {
 
 export type Swap = {
     pool: string;
-    tokenInParam: string;
-    tokenOutParam: string;
+    tokenIn: string;
+    tokenOut: string;
+    swapAmount: string;
+    limitReturnAmount: string;
     maxPrice: string;
 };

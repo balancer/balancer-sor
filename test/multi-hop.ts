@@ -7,16 +7,19 @@ const ethers = require('ethers');
 const MAX_UINT = ethers.constants.MaxUint256;
 
 // MAINNET
+// const tokenIn = '0x6B175474E89094C44Da98b954EedeAC495271d0F'; // DAI
+// const tokenOut = '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2'; // WETH
+
 const tokenIn = '0x6B175474E89094C44Da98b954EedeAC495271d0F'; // DAI
-const tokenOut = '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2'; // WETH
+const tokenOut = '0x0327112423f3a68efdf1fcf402f6c5cb9f7c33fd'; // BTC++
 
 // const tokenIn = '0x0d8775f648430679a709e98d2b0cb6250d2887ef'; // BAT
 // const tokenOut = '0x9f8f72aa9304c8b593d555f12ef6589cc3a579a2'; // MKR
-const swapType = 'swapExactIn';
-// const swapType = 'swapExactOut';
-const swapAmount = new BigNumber('10000000000000000000000'); // 10000
-const maxPaths = new BigNumber('10');
-const returnTokenCostPerPool = new BigNumber('1000000000000000'); // It costs 0.0001 returnToken per pool trade
+// const swapType = 'swapExactIn';
+const swapType = 'swapExactOut';
+const swapAmount = new BigNumber('1000000000000000000'); // 1
+const maxPaths = new BigNumber('2');
+const returnTokenCostPerPool = new BigNumber('1000000000000'); // It costs 0.0000001 returnToken per pool trade
 
 // const tokenOut = '0x27054b13b1b798b345b591a4d22e6562d47ea75a'; // AST
 
@@ -68,6 +71,8 @@ const returnTokenCostPerPool = new BigNumber('1000000000000000'); // It costs 0.
         hopTokens
     );
 
+    // console.log(pathData);
+
     const [sorSwaps, totalReturn] = sor.smartOrderRouterMultiHop(
         pathData,
         swapType,
@@ -75,8 +80,8 @@ const returnTokenCostPerPool = new BigNumber('1000000000000000'); // It costs 0.
         maxPaths,
         returnTokenCostPerPool
     );
-    // console.log("SOR swaps WITH multi-hop");
-    // console.log(sorSwaps);
+    console.log('SOR swaps WITH multi-hop');
+    console.log(sorSwaps);
     console.log('Total return WITH multi-hop');
     console.log(totalReturn.toString());
 

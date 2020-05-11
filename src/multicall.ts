@@ -52,6 +52,8 @@ export async function parsePoolDataOnChain(
         chunkResponse.forEach((r, j) => {
             let obj = {
                 id: pools[j].id,
+                tokenIn: tokenIn,
+                tokenOut: tokenOut,
                 balanceIn: bmath.bnum(r[0]),
                 balanceOut: bmath.bnum(r[1]),
                 weightIn: bmath.bnum(r[2]),
