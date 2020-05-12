@@ -32,7 +32,7 @@ export const smartOrderRouterMultiHop = (
     paths: Path[],
     swapType: string,
     totalSwapAmount: BigNumber,
-    maxPaths: number,
+    maxPools: number,
     costReturnToken: BigNumber
 ): [Swap[], BigNumber] => {
     paths.forEach(b => {
@@ -74,7 +74,7 @@ export const smartOrderRouterMultiHop = (
     let pathIds, totalReturn;
     let bestSwapAmounts, bestPathIds, swapAmounts;
 
-    let bmin = Math.min(maxPaths, paths.length + 1);
+    let bmin = paths.length + 1;
     for (let b = 1; b <= bmin; b++) {
         totalReturn = 0;
 
@@ -121,7 +121,6 @@ export const smartOrderRouterMultiHop = (
             swapAmounts = [];
         }
 
-        // TODO replace output for return everywhere
         totalReturn = calcTotalReturn(paths, swapType, pathIds, swapAmounts);
 
         // Calculates the number of pools in all the paths to include the gas costs
@@ -136,26 +135,28 @@ export const smartOrderRouterMultiHop = (
         // console.log(totalNumberOfPools)
 
         let improvementCondition: boolean = false;
-        if (swapType === 'swapExactIn') {
-            totalReturn = totalReturn.minus(
-                bmul(
-                    new BigNumber(totalNumberOfPools).times(BONE),
-                    costReturnToken
-                )
-            );
-            improvementCondition =
-                totalReturn.isGreaterThan(bestTotalReturn) ||
-                bestTotalReturn.isEqualTo(new BigNumber(0));
-        } else {
-            totalReturn = totalReturn.plus(
-                bmul(
-                    new BigNumber(totalNumberOfPools).times(BONE),
-                    costReturnToken
-                )
-            );
-            improvementCondition =
-                totalReturn.isLessThan(bestTotalReturn) ||
-                bestTotalReturn.isEqualTo(new BigNumber(0));
+        if (totalNumberOfPools <= maxPools) {
+            if (swapType === 'swapExactIn') {
+                totalReturn = totalReturn.minus(
+                    bmul(
+                        new BigNumber(totalNumberOfPools).times(BONE),
+                        costReturnToken
+                    )
+                );
+                improvementCondition =
+                    totalReturn.isGreaterThan(bestTotalReturn) ||
+                    bestTotalReturn.isEqualTo(new BigNumber(0));
+            } else {
+                totalReturn = totalReturn.plus(
+                    bmul(
+                        new BigNumber(totalNumberOfPools).times(BONE),
+                        costReturnToken
+                    )
+                );
+                improvementCondition =
+                    totalReturn.isLessThan(bestTotalReturn) ||
+                    bestTotalReturn.isEqualTo(new BigNumber(0));
+            }
         }
 
         if (improvementCondition === true) {

@@ -18,7 +18,7 @@ const tokenOut = '0x0327112423f3a68efdf1fcf402f6c5cb9f7c33fd'; // BTC++
 // const swapType = 'swapExactIn';
 const swapType = 'swapExactOut';
 const swapAmount = new BigNumber('1000000000000000000'); // 1
-const maxPaths = new BigNumber('2');
+const maxPools = new BigNumber('4');
 const returnTokenCostPerPool = new BigNumber('1000000000000'); // It costs 0.0000001 returnToken per pool trade
 
 // const tokenOut = '0x27054b13b1b798b345b591a4d22e6562d47ea75a'; // AST
@@ -45,7 +45,7 @@ const returnTokenCostPerPool = new BigNumber('1000000000000'); // It costs 0.000
         pathDataDirectPoolsOnly,
         swapType,
         swapAmount,
-        maxPaths,
+        maxPools,
         returnTokenCostPerPool
     );
     // console.log("SOR swaps WITHOUT multi-hop");
@@ -77,7 +77,7 @@ const returnTokenCostPerPool = new BigNumber('1000000000000'); // It costs 0.000
         pathData,
         swapType,
         swapAmount,
-        maxPaths,
+        maxPools,
         returnTokenCostPerPool
     );
     console.log('SOR swaps WITH multi-hop');
