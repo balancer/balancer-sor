@@ -34,7 +34,7 @@ export const smartOrderRouterMultiHop = (
     totalSwapAmount: BigNumber,
     maxPools: number,
     costReturnToken: BigNumber
-): [Swap[], BigNumber] => {
+): [Swap[][], BigNumber] => {
     paths.forEach(b => {
         b.spotPrice = getSpotPricePath(b);
         b.slippage = getSlippageLinearizedSpotPriceAfterSwapPath(b, swapType);
@@ -173,7 +173,7 @@ export const smartOrderRouterMultiHop = (
     // console.log(bestTotalReturn);
 
     //// Prepare swap data from paths
-    let swaps: Swap[] = [];
+    let swaps: Swap[][] = [];
     let totalSwapAmountWithRoundingErrors: BigNumber = new BigNumber(0);
     let dust: BigNumber = new BigNumber(0);
     let lenghtFirstPath;
@@ -211,7 +211,7 @@ export const smartOrderRouterMultiHop = (
                         : maxAmountIn.toString(),
                 maxPrice: maxPrice.toString(),
             };
-            swaps.push(swap);
+            swaps.push([swap]);
         } else {
             // Multi-hop:
             // Add swap from first pool
@@ -233,7 +233,6 @@ export const smartOrderRouterMultiHop = (
                         : maxAmountIn.toString(),
                 maxPrice: maxPrice.toString(),
             };
-            swaps.push(swap1hop);
 
             // Add swap from second pool
             let swap2hop: Swap = {
@@ -254,7 +253,7 @@ export const smartOrderRouterMultiHop = (
                         : maxAmountIn.toString(),
                 maxPrice: maxPrice.toString(),
             };
-            swaps.push(swap2hop);
+            swaps.push([swap1hop, swap2hop]);
         }
     });
 
@@ -264,19 +263,19 @@ export const smartOrderRouterMultiHop = (
     if (swaps.length > 0) {
         dust = totalSwapAmount.minus(totalSwapAmountWithRoundingErrors);
         if (swapType === 'swapExactIn') {
-            swaps[0].swapAmount = new BigNumber(swaps[0].swapAmount)
+            swaps[0][0].swapAmount = new BigNumber(swaps[0][0].swapAmount)
                 .plus(dust)
                 .toString(); // Add dust to first swapExactIn
         } else {
             if (lenghtFirstPath == 1)
                 // First path is a direct path (only one pool)
-                swaps[0].swapAmount = new BigNumber(swaps[0].swapAmount)
+                swaps[0][0].swapAmount = new BigNumber(swaps[0][0].swapAmount)
                     .plus(dust)
                     .toString();
             // Add dust to first swapExactOut
             // First path is a multihop path (two pools)
             else
-                swaps[1].swapAmount = new BigNumber(swaps[1].swapAmount)
+                swaps[0][1].swapAmount = new BigNumber(swaps[0][1].swapAmount)
                     .plus(dust)
                     .toString(); // Add dust to second swapExactOut
         }
