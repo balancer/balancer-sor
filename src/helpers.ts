@@ -271,6 +271,9 @@ export async function getMultihopPoolsWithTokens(tokenIn, tokenOut) {
         tokenIn
     );
     // console.log(poolsTokenOutNoTokenIn);
+    // console.log("poolsTokenOutNoTokenIn");
+
+    // console.log(poolsTokenOutNoTokenIn[poolsTokenOutNoTokenIn.length-1].tokens);
 
     const tokenOutHopTokens = getTokensPairedToTokenInPool(
         poolsTokenOutNoTokenIn,
@@ -307,6 +310,10 @@ export async function getMultihopPoolsWithTokens(tokenIn, tokenOut) {
                     poolsTokenInNoTokenOut[k].tokensList[j].toLowerCase() ==
                     hopTokens[i]
                 ) {
+                    // console.log("poolsTokenInNoTokenOut[k].tokensList[j].toLowerCase()");
+                    // console.log(poolsTokenInNoTokenOut[k].tokensList[j].toLowerCase());
+                    // console.log("hopTokens[i]")
+                    // console.log(hopTokens[i])
                     found = true;
                     break;
                 }
@@ -322,7 +329,9 @@ export async function getMultihopPoolsWithTokens(tokenIn, tokenOut) {
                 );
 
                 if (
-                    normalizedLiquidity.isGreaterThan(
+                    normalizedLiquidity.isGreaterThanOrEqualTo(
+                        // Cannot be strictly greater otherwise
+                        // highestNormalizedLiquidityIndex = 0 if hopTokens[i] balance is 0 in this pool.
                         highestNormalizedLiquidity
                     )
                 ) {
@@ -372,7 +381,9 @@ export async function getMultihopPoolsWithTokens(tokenIn, tokenOut) {
                 );
 
                 if (
-                    normalizedLiquidity.isGreaterThan(
+                    normalizedLiquidity.isGreaterThanOrEqualTo(
+                        // Cannot be strictly greater otherwise
+                        // highestNormalizedLiquidityIndex = 0 if hopTokens[i] balance is 0 in this pool.
                         highestNormalizedLiquidity
                     )
                 ) {
@@ -403,11 +414,17 @@ export const parsePoolData = (
     directPools.forEach(p => {
         let poolPairData = parsePoolPairData(p, tokenIn, tokenOut);
 
-        let path = {
-            id: poolPairData.id,
-            poolPairDataList: [poolPairData],
-        };
-        pathDataList.push(path);
+        // Only add path if the balances are both not zero
+        if (
+            !poolPairData.balanceIn.isZero() &&
+            !poolPairData.balanceOut.isZero()
+        ) {
+            let path = {
+                id: poolPairData.id,
+                poolPairDataList: [poolPairData],
+            };
+            pathDataList.push(path);
+        }
     });
 
     // Now add multi-hop paths.
@@ -424,12 +441,19 @@ export const parsePoolData = (
             tokenOut
         );
 
-        let path = {
-            id: poolFirstHop.id + poolSecondHop.id, // Path id is the concatenation of the ids of poolFirstHop and poolSecondHop
-            poolPairDataList: [poolFirstHop, poolSecondHop],
-        };
-
-        pathDataList.push(path);
+        // Only add path if the balances are both not zero for first and second hops
+        if (
+            !poolFirstHop.balanceIn.isZero() &&
+            !poolSecondHop.balanceOut.isZero() &&
+            !poolFirstHop.balanceIn.isZero() &&
+            !poolSecondHop.balanceOut.isZero()
+        ) {
+            let path = {
+                id: poolFirstHop.id + poolSecondHop.id, // Path id is the concatenation of the ids of poolFirstHop and poolSecondHop
+                poolPairDataList: [poolFirstHop, poolSecondHop],
+            };
+            pathDataList.push(path);
+        }
     }
     return pathDataList;
 };
@@ -439,16 +463,29 @@ export const parsePoolPairData = (
     tokenIn: string,
     tokenOut: string
 ): PoolPairData => {
+    // console.log("Pool")
+    // console.log(p)
+    // console.log("tokenIn")
+    // console.log(tokenIn)
+    // console.log("tokenOut")
+    // console.log(tokenOut)
+
     let tI = p.tokens.find(
         t =>
             ethers.utils.getAddress(t.address) ===
             ethers.utils.getAddress(tokenIn)
     );
+    // console.log("tI")
+    // console.log(tI)
     let tO = p.tokens.find(
         t =>
             ethers.utils.getAddress(t.address) ===
             ethers.utils.getAddress(tokenOut)
     );
+
+    // console.log("tO")
+    // console.log(tO)
+
     let poolPairData = {
         id: p.id,
         tokenIn: tokenIn,

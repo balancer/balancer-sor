@@ -45,7 +45,14 @@ export const smartOrderRouterMultiHop = (
         return a.spotPrice.minus(b.spotPrice).toNumber();
     });
 
-    // console.log(sortedPaths);
+    // console.log("sortedPaths");
+    // sortedPaths.forEach((path, i) => {
+    //      console.log(path);
+    //      console.log("path.spotPrice");
+    //      console.log(path.spotPrice.toString());
+    //      console.log("path.slippage");
+    //      console.log(path.slippage.toString());
+    // });
 
     let pricesOfInterest = getPricesOfInterest(sortedPaths, swapType).sort(
         (a, b) => {
@@ -67,6 +74,7 @@ export const smartOrderRouterMultiHop = (
         );
     });
 
+    // console.log("pricesOfInterest");
     // console.log(pricesOfInterest);
 
     let bestTotalReturn: BigNumber = new BigNumber(0);
@@ -108,6 +116,15 @@ export const smartOrderRouterMultiHop = (
                     swapAmountsPriceAfter,
                     totalSwapAmount
                 );
+                // console.log("swapAmountsPriceBefore");
+                // console.log(swapAmountsPriceBefore.toString());
+                // console.log("swapAmountsPriceAfter");
+                // console.log(swapAmountsPriceAfter.toString());
+                // console.log("totalSwapAmount");
+                // console.log(totalSwapAmount.toString());
+
+                // console.log("swapAmounts");
+                // console.log(swapAmounts.toString());
 
                 highestPoiNotEnough = false;
                 break;
@@ -121,6 +138,7 @@ export const smartOrderRouterMultiHop = (
             swapAmounts = [];
         }
 
+        // console.log("calcTotalReturn")
         totalReturn = calcTotalReturn(paths, swapType, pathIds, swapAmounts);
 
         // Calculates the number of pools in all the paths to include the gas costs
@@ -168,9 +186,10 @@ export const smartOrderRouterMultiHop = (
         }
     }
 
-    // console.log(bestSwapAmounts);
+    // console.log("Best solution found")
+    // console.log(bestSwapAmounts.toString());
     // console.log(bestPathIds);
-    // console.log(bestTotalReturn);
+    // console.log(bestTotalReturn.toString());
 
     //// Prepare swap data from paths
     let swaps: Swap[][] = [];
@@ -187,7 +206,8 @@ export const smartOrderRouterMultiHop = (
         const path = paths.find(p => p.id === bestPathIds[i]);
         if (!path) {
             throw new Error(
-                '[Invariant] No pool found for selected pool index'
+                '[Invariant] No pool found for selected pool index' +
+                    bestPathIds[i]
             );
         }
 
@@ -458,7 +478,7 @@ function getExactSwapAmounts(
     swapAmountsPriceAfter: BigNumber[],
     totalSwapAmountWithRoundingErrors: BigNumber
 ): BigNumber[] {
-    let deltaSwapAmounts: BigNumber[] = [];
+    let deltaBeforeAfterAmounts: BigNumber[] = [];
 
     if (
         swapAmountsPriceAfter[swapAmountsPriceAfter.length - 1].isEqualTo(
@@ -466,23 +486,40 @@ function getExactSwapAmounts(
         )
     )
         swapAmountsPriceAfter.pop();
+
     swapAmountsPriceAfter.forEach((a, i) => {
         let diff = a.minus(swapAmountsPriceBefore[i]);
-        deltaSwapAmounts.push(diff);
+        deltaBeforeAfterAmounts.push(diff);
     });
     let totalInputBefore = swapAmountsPriceBefore.reduce((a, b) => a.plus(b));
     let totalInputAfter = swapAmountsPriceAfter.reduce((a, b) => a.plus(b));
     let deltaTotalInput = totalInputAfter.minus(totalInputBefore);
 
+    // console.log("deltaTotalInput")
+    // console.log(deltaTotalInput)
+    // console.log("deltaBeforeAfterAmounts")
+    // console.log(deltaBeforeAfterAmounts)
+
     let deltaTimesTarget: BigNumber[] = [];
-    deltaSwapAmounts.forEach((a, i) => {
-        let mult = bmul(
-            a,
-            totalSwapAmountWithRoundingErrors.minus(totalInputBefore)
+    deltaBeforeAfterAmounts.forEach((a, i) => {
+        let ratio = bdiv(
+            totalSwapAmountWithRoundingErrors.minus(totalInputBefore),
+            deltaTotalInput
         );
-        mult = bdiv(mult, deltaTotalInput);
-        deltaTimesTarget.push(mult);
+
+        // console.log("a")
+        // console.log(a)
+        // console.log("totalSwapAmountWithRoundingErrors.minus(totalInputBefore)")
+        // console.log(totalSwapAmountWithRoundingErrors.minus(totalInputBefore))
+        // console.log("mult")
+        // console.log(mult)
+
+        let deltaAmount = bmul(ratio, a);
+        deltaTimesTarget.push(deltaAmount);
     });
+
+    // console.log("deltaTimesTarget")
+    // console.log(deltaTimesTarget)
 
     let swapAmounts: BigNumber[] = [];
     swapAmountsPriceBefore.forEach((a, i) => {
