@@ -35,6 +35,8 @@ export const smartOrderRouterMultiHop = (
     maxPools: number,
     costReturnToken: BigNumber
 ): [Swap[][], BigNumber] => {
+    console.time('smartOrderRouterMultiHop');
+
     paths.forEach(b => {
         b.spotPrice = getSpotPricePath(b);
         b.slippage = getSlippageLinearizedSpotPriceAfterSwapPath(b, swapType);
@@ -300,6 +302,9 @@ export const smartOrderRouterMultiHop = (
                     .toString(); // Add dust to second swapExactOut
         }
     }
+
+    console.timeEnd('smartOrderRouterMultiHop');
+
     return [swaps, bestTotalReturn];
 };
 
@@ -339,57 +344,54 @@ function getPricesOfInterest(sortedPaths: Path[], swapType: string): Price[] {
                     amountCross.isLessThan(b.limitAmount) &&
                     amountCross.isLessThan(prevPath.limitAmount)
                 ) {
-                    let epi1: Price = {};
-                    epi1.price = prevPath.spotPrice.plus(
-                        bmul(
-                            amountCross,
-                            bmul(prevPath.slippage, prevPath.spotPrice)
-                        )
+                    let epiA: Price = {};
+                    epiA.price = b.spotPrice.plus(
+                        bmul(amountCross, bmul(b.slippage, b.spotPrice))
                     );
-                    epi1.swap = [prevPath.id, b.id];
-                    pricesOfInterest.push(epi1);
+                    epiA.swap = [prevPath.id, b.id];
+                    pricesOfInterest.push(epiA);
                 }
 
                 if (
                     prevPath.limitAmount.isLessThan(b.limitAmount) &&
                     prevPath.limitAmount.isLessThan(amountCross)
                 ) {
-                    let epi2: Price = {};
-                    epi2.price = b.spotPrice.plus(
+                    let epiB: Price = {};
+                    epiB.price = b.spotPrice.plus(
                         bmul(
                             prevPath.limitAmount,
                             bmul(b.slippage, b.spotPrice)
                         )
                     );
-                    epi2.swap = [prevPath.id, b.id];
-                    pricesOfInterest.push(epi2);
+                    epiB.swap = [prevPath.id, b.id];
+                    pricesOfInterest.push(epiB);
                 }
 
                 if (
                     b.limitAmount.isLessThan(prevPath.limitAmount) &&
                     amountCross.isLessThan(b.limitAmount)
                 ) {
-                    let epi3: Price = {};
-                    epi3.price = prevPath.spotPrice.plus(
+                    let epiC: Price = {};
+                    epiC.price = prevPath.spotPrice.plus(
                         bmul(
                             b.limitAmount,
                             bmul(prevPath.slippage, prevPath.spotPrice)
                         )
                     );
-                    epi3.swap = [b.id, prevPath.id];
-                    pricesOfInterest.push(epi3);
+                    epiC.swap = [b.id, prevPath.id];
+                    pricesOfInterest.push(epiC);
                 }
             } else {
                 if (prevPath.limitAmount.isLessThan(b.limitAmount)) {
-                    let epi4: Price = {};
-                    epi4.price = b.spotPrice.plus(
+                    let epiD: Price = {};
+                    epiD.price = b.spotPrice.plus(
                         bmul(
                             prevPath.limitAmount,
                             bmul(b.slippage, b.spotPrice)
                         )
                     );
-                    epi4.swap = [prevPath.id, b.id];
-                    pricesOfInterest.push(epi4);
+                    epiD.swap = [prevPath.id, b.id];
+                    pricesOfInterest.push(epiD);
                 }
             }
         }
@@ -416,7 +418,7 @@ function calculateBestPathIdsForPricesOfInterest(
                     bestPathsIds[index1] = bestPath2;
                     bestPathsIds[index2] = bestPath1;
                 } else {
-                    bestPathsIds[index1] = e.swap[2];
+                    bestPathsIds[index1] = e.swap[1];
                 }
             }
         } else if (e.maxAmount) {
@@ -428,7 +430,9 @@ function calculateBestPathIdsForPricesOfInterest(
             );
         }
         pricesOfInterest[i].bestPathsIds = bestPathsIds.slice();
+        // console.log(bestPathsIds)
     });
+
     return pricesOfInterest;
 }
 
