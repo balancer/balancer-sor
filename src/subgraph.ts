@@ -131,3 +131,37 @@ export async function getPoolsWithToken(token) {
     const { data } = await response.json();
     return data;
 }
+
+export async function getPools() {
+    const query = `
+      {
+          pools (where: {publicSwap: true}) {
+            id
+            swapFee
+            totalWeight
+            tokens {
+              id
+              address
+              balance
+              decimals
+              symbol
+              denormWeight
+            }
+          }
+      }
+    `;
+
+    const response = await fetch(SUBGRAPH_URL, {
+        method: 'POST',
+        headers: {
+            Accept: 'application/json',
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            query,
+        }),
+    });
+
+    const { data } = await response.json();
+    return data;
+}
