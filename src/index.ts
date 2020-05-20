@@ -8,6 +8,7 @@ export {
     getPoolsWithToken,
     getPoolsWithTokens,
     getPoolsWithSingleToken,
+    getPools,
 } from './subgraph';
 export { parsePoolDataOnChain } from './multicall';
 import * as bmath from './bmath';
