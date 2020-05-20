@@ -193,11 +193,8 @@ function getEpsOfInterest(
                     amountCross.isLessThan(prevBal.limitAmount)
                 ) {
                     let epi1: EffectivePrice = {};
-                    epi1.price = prevBal.spotPrice.plus(
-                        bmul(
-                            amountCross,
-                            bmul(prevBal.slippage, prevBal.spotPrice)
-                        )
+                    epi1.price = b.spotPrice.plus(
+                        bmul(amountCross, bmul(b.slippage, b.spotPrice))
                     );
                     epi1.swap = [prevBal.id, b.id];
                     epsOfInterest.push(epi1);
@@ -361,7 +358,7 @@ function calculateBestBalancersForEpsOfInterest(
                     bestBalancers[index1] = bestBal2;
                     bestBalancers[index2] = bestBal1;
                 } else {
-                    bestBalancers[index1] = e.swap[2];
+                    bestBalancers[index1] = e.swap[1];
                 }
             }
         } else if (e.maxAmount) {
