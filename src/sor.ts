@@ -358,7 +358,7 @@ function calculateBestBalancersForEpsOfInterest(
                     bestBalancers[index1] = bestBal2;
                     bestBalancers[index2] = bestBal1;
                 } else {
-                    bestBalancers[index1] = e.swap[2];
+                    bestBalancers[index1] = e.swap[1];
                 }
             }
         } else if (e.maxAmount) {
