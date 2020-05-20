@@ -193,11 +193,8 @@ function getEpsOfInterest(
                     amountCross.isLessThan(prevBal.limitAmount)
                 ) {
                     let epi1: EffectivePrice = {};
-                    epi1.price = prevBal.spotPrice.plus(
-                        bmul(
-                            amountCross,
-                            bmul(prevBal.slippage, prevBal.spotPrice)
-                        )
+                    epi1.price = b.spotPrice.plus(
+                        bmul(amountCross, bmul(b.slippage, b.spotPrice))
                     );
                     epi1.swap = [prevBal.id, b.id];
                     epsOfInterest.push(epi1);
