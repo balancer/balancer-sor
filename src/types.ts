@@ -12,8 +12,8 @@ export interface PoolPairData {
 }
 
 export interface Path {
-    id: string;
-    poolPairDataList: PoolPairData[];
+    id: string; // pool address if direct path, contactenation of pool addresses if multihop
+    swaps: Swap[];
     spotPrice?: BigNumber;
     slippage?: BigNumber;
     limitAmount?: BigNumber;
@@ -32,7 +32,7 @@ export type Swap = {
     pool: string;
     tokenIn: string;
     tokenOut: string;
-    swapAmount: string;
-    limitReturnAmount: string;
-    maxPrice: string;
+    swapAmount?: string;
+    limitReturnAmount?: string;
+    maxPrice?: string;
 };

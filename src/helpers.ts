@@ -27,49 +27,97 @@ export function getLimitAmountSwap(
 }
 
 export function getLimitAmountSwapPath(
+    pools: any[],
     path: Path,
     swapType: string
 ): BigNumber {
-    let poolPairDataList = path.poolPairDataList;
-    if (poolPairDataList.length == 1)
-        return getLimitAmountSwap(poolPairDataList[0], swapType);
-    else if (poolPairDataList.length == 2) {
+    let swaps = path.swaps;
+    if (swaps.length == 1) {
+        let swap1 = swaps[0];
+        let poolSwap1 = pools.find(p => p.id === swap1.pool);
+        let poolPairDataSwap1 = parsePoolPairData(
+            poolSwap1,
+            swap1.tokenIn,
+            swap1.tokenOut
+        );
+        return getLimitAmountSwap(poolPairDataSwap1, swapType);
+    } else if (swaps.length == 2) {
+        let swap1 = swaps[0];
+        let poolSwap1 = pools.find(p => p.id === swap1.pool);
+        let poolPairDataSwap1 = parsePoolPairData(
+            poolSwap1,
+            swap1.tokenIn,
+            swap1.tokenOut
+        );
+
+        let swap2 = swaps[1];
+        let poolSwap2 = pools.find(p => p.id === swap2.pool);
+        let poolPairDataSwap2 = parsePoolPairData(
+            poolSwap2,
+            swap2.tokenIn,
+            swap2.tokenOut
+        );
+
         if (swapType === 'swapExactIn') {
             return BigNumber.min(
                 // The limit is either set by limit_IN of poolPairData 1 or indirectly by limit_IN of poolPairData 2
-                getLimitAmountSwap(poolPairDataList[0], swapType),
+                getLimitAmountSwap(poolPairDataSwap1, swapType),
                 bmul(
-                    getLimitAmountSwap(poolPairDataList[1], swapType),
-                    getSpotPrice(poolPairDataList[0])
+                    getLimitAmountSwap(poolPairDataSwap2, swapType),
+                    getSpotPrice(poolPairDataSwap1)
                 ) // we need to multiply the limit_IN of
                 // poolPairData 2 by the spotPrice of poolPairData 1 to get the equivalent in token IN
             );
         } else {
             return BigNumber.min(
                 // The limit is either set by limit_OUT of poolPairData 2 or indirectly by limit_OUT of poolPairData 1
-                getLimitAmountSwap(poolPairDataList[1], swapType),
+                getLimitAmountSwap(poolPairDataSwap2, swapType),
                 bdiv(
-                    getLimitAmountSwap(poolPairDataList[0], swapType),
-                    getSpotPrice(poolPairDataList[1])
+                    getLimitAmountSwap(poolPairDataSwap1, swapType),
+                    getSpotPrice(poolPairDataSwap2)
                 ) // we need to divide the limit_OUT of
                 // poolPairData 1 by the spotPrice of poolPairData 2 to get the equivalent in token OUT
             );
         }
     } else {
-        throw new Error('Path with more than 2 poolPairDataList not supported');
+        throw new Error('Path with more than 2 swaps not supported');
     }
 }
 
-export function getSpotPricePath(path: Path): BigNumber {
-    let poolPairDataList = path.poolPairDataList;
-    if (poolPairDataList.length == 1) return getSpotPrice(poolPairDataList[0]);
-    else if (poolPairDataList.length == 2) {
+export function getSpotPricePath(pools: any[], path: Path): BigNumber {
+    let swaps = path.swaps;
+    if (swaps.length == 1) {
+        let swap1 = swaps[0];
+        let poolSwap1 = pools.find(p => p.id === swap1.pool);
+        let poolPairDataSwap1 = parsePoolPairData(
+            poolSwap1,
+            swap1.tokenIn,
+            swap1.tokenOut
+        );
+        return getSpotPrice(poolPairDataSwap1);
+    } else if (swaps.length == 2) {
+        let swap1 = swaps[0];
+        let poolSwap1 = pools.find(p => p.id === swap1.pool);
+        let poolPairDataSwap1 = parsePoolPairData(
+            poolSwap1,
+            swap1.tokenIn,
+            swap1.tokenOut
+        );
+
+        let swap2 = swaps[1];
+        let poolSwap2 = pools.find(p => p.id === swap2.pool);
+        let poolPairDataSwap2 = parsePoolPairData(
+            poolSwap2,
+            swap2.tokenIn,
+            swap2.tokenOut
+        );
+
         return bmul(
-            getSpotPrice(poolPairDataList[0]),
-            getSpotPrice(poolPairDataList[1])
+            getSpotPrice(poolPairDataSwap1),
+            getSpotPrice(poolPairDataSwap2)
         );
     } else {
-        throw new Error('Path with more than 2 poolPairDataList not supported');
+        throw new Error('Path with more than 2 swaps not supported');
     }
 }
 
@@ -84,18 +132,32 @@ export function getSpotPrice(poolPairData: PoolPairData): BigNumber {
 }
 
 export function getSlippageLinearizedSpotPriceAfterSwapPath(
+    pools: any[],
     path: Path,
     swapType: string
 ): BigNumber {
-    let poolPairDataList = path.poolPairDataList;
-    if (poolPairDataList.length == 1)
+    let swaps = path.swaps;
+    if (swaps.length == 1) {
+        let swap1 = swaps[0];
+        let poolSwap1 = pools.find(p => p.id === swap1.pool);
+        let poolPairDataSwap1 = parsePoolPairData(
+            poolSwap1,
+            swap1.tokenIn,
+            swap1.tokenOut
+        );
+
         return getSlippageLinearizedSpotPriceAfterSwap(
-            poolPairDataList[0],
+            poolPairDataSwap1,
             swapType
         );
-    else if (poolPairDataList.length == 2) {
-        let p1 = poolPairDataList[0];
-        let p2 = poolPairDataList[1];
+    } else if (swaps.length == 2) {
+        let swap1 = swaps[0];
+        let poolSwap1 = pools.find(p => p.id === swap1.pool);
+        let p1 = parsePoolPairData(poolSwap1, swap1.tokenIn, swap1.tokenOut);
+
+        let swap2 = swaps[1];
+        let poolSwap2 = pools.find(p => p.id === swap2.pool);
+        let p2 = parsePoolPairData(poolSwap2, swap2.tokenIn, swap2.tokenOut);
         if (
             p1.balanceIn.isEqualTo(bnum(0)) ||
             p2.balanceIn.isEqualTo(bnum(0))
@@ -146,7 +208,7 @@ export function getSlippageLinearizedSpotPriceAfterSwapPath(
             }
         }
     } else {
-        throw new Error('Path with more than 2 poolPairDataList not supported');
+        throw new Error('Path with more than 2 swaps not supported');
     }
 }
 
@@ -177,31 +239,55 @@ export function getSlippageLinearizedSpotPriceAfterSwap(
 }
 
 export function getReturnAmountSwapPath(
+    pools: any[],
     path: Path,
     swapType: string,
     amount: BigNumber
 ): BigNumber {
-    let poolPairDataList = path.poolPairDataList;
-    if (poolPairDataList.length == 1)
-        return getReturnAmountSwap(poolPairDataList[0], swapType, amount);
-    else if (poolPairDataList.length == 2) {
+    let swaps = path.swaps;
+    if (swaps.length == 1) {
+        let swap1 = swaps[0];
+        let poolSwap1 = pools.find(p => p.id === swap1.pool);
+        let poolPairDataSwap1 = parsePoolPairData(
+            poolSwap1,
+            swap1.tokenIn,
+            swap1.tokenOut
+        );
+        return getReturnAmountSwap(poolPairDataSwap1, swapType, amount);
+    } else if (swaps.length == 2) {
+        let swap1 = swaps[0];
+        let poolSwap1 = pools.find(p => p.id === swap1.pool);
+        let poolPairDataSwap1 = parsePoolPairData(
+            poolSwap1,
+            swap1.tokenIn,
+            swap1.tokenOut
+        );
+
+        let swap2 = swaps[1];
+        let poolSwap2 = pools.find(p => p.id === swap2.pool);
+        let poolPairDataSwap2 = parsePoolPairData(
+            poolSwap2,
+            swap2.tokenIn,
+            swap2.tokenOut
+        );
+
         if (swapType === 'swapExactIn') {
             // The outputAmount is number of tokenOut we receive from the second poolPairData
             return getReturnAmountSwap(
-                poolPairDataList[1],
+                poolPairDataSwap2,
                 swapType,
-                getReturnAmountSwap(poolPairDataList[0], swapType, amount)
+                getReturnAmountSwap(poolPairDataSwap1, swapType, amount)
             );
         } else {
             // The outputAmount is number of tokenIn we send to the first poolPairData
             return getReturnAmountSwap(
-                poolPairDataList[0],
+                poolPairDataSwap1,
                 swapType,
-                getReturnAmountSwap(poolPairDataList[1], swapType, amount)
+                getReturnAmountSwap(poolPairDataSwap2, swapType, amount)
             );
         }
     } else {
-        throw new Error('Path with more than 2 poolPairDataList not supported');
+        throw new Error('Path with more than 2 swaps not supported');
     }
 }
 
@@ -407,21 +493,35 @@ export const parsePoolData = (
     mostLiquidPoolsFirstHop = [],
     mostLiquidPoolsSecondHop = [],
     hopTokens = []
-): Path[] => {
+): [any[], Path[]] => {
     let pathDataList: Path[] = [];
-
+    let pools = new Set();
     // First add direct pair paths
     directPools.forEach(p => {
-        let poolPairData = parsePoolPairData(p, tokenIn, tokenOut);
-
+        // Add pool to the set with all pools (only adds if it's still not present in set)
+        pools.add(p);
         // Only add path if the balances are both not zero
-        if (
-            !poolPairData.balanceIn.isZero() &&
-            !poolPairData.balanceOut.isZero()
-        ) {
+        let balanceIn = p.tokens.find(token => token.address === tokenIn)
+            .balance;
+        // console.log("p.tokens");
+        // console.log(p.tokens);
+        // console.log("p.tokens.find(token => token.address === tokenIn)");
+        // console.log(p.tokens.find(token => token.address === tokenIn));
+
+        // console.log("balanceIn");
+        // console.log(balanceIn);
+        let balanceOut = p.tokens.find(token => token.address === tokenOut)
+            .balance;
+        if (balanceIn != 0 && balanceOut != 0) {
+            let swap = {
+                pool: p.id,
+                tokenIn: tokenIn,
+                tokenOut: tokenOut,
+            };
+
             let path = {
-                id: poolPairData.id,
-                poolPairDataList: [poolPairData],
+                id: p.id,
+                swaps: [swap],
             };
             pathDataList.push(path);
         }
@@ -430,32 +530,64 @@ export const parsePoolData = (
     // Now add multi-hop paths.
     // mostLiquidPoolsFirstHop always has the same lengh of mostLiquidPoolsSecondHop
     for (let i = 0; i < mostLiquidPoolsFirstHop.length; i++) {
-        let poolFirstHop = parsePoolPairData(
-            mostLiquidPoolsFirstHop[i],
-            tokenIn,
-            hopTokens[i]
-        );
-        let poolSecondHop = parsePoolPairData(
-            mostLiquidPoolsSecondHop[i],
-            hopTokens[i],
-            tokenOut
-        );
+        // Add pool to the set with all pools (only adds if it's still not present in set)
+        pools.add(mostLiquidPoolsFirstHop[i]);
+        // let poolFirstHop = parsePoolPairData(
+        //     mostLiquidPoolsFirstHop[i],
+        //     tokenIn,
+        //     hopTokens[i]
+        // );
+
+        // Add pool to the set with all pools (only adds if it's still not present in set)
+        pools.add(mostLiquidPoolsSecondHop[i]);
+        // let poolSecondHop = parsePoolPairData(
+        //     mostLiquidPoolsSecondHop[i],
+        //     hopTokens[i],
+        //     tokenOut
+        // );
 
         // Only add path if the balances are both not zero for first and second hops
+
+        let poolFirstHopBalanceIn = mostLiquidPoolsFirstHop[i].tokens.find(
+            token => token.address === tokenIn
+        ).balance;
+        let poolFirstHopBalanceOut = mostLiquidPoolsFirstHop[i].tokens.find(
+            token => token.address === hopTokens[i]
+        ).balance;
+        let poolSecondHopBalanceIn = mostLiquidPoolsSecondHop[i].tokens.find(
+            token => token.address === hopTokens[i]
+        ).balance;
+        let poolSecondHopBalanceOut = mostLiquidPoolsSecondHop[i].tokens.find(
+            token => token.address === tokenOut
+        ).balance;
         if (
-            !poolFirstHop.balanceIn.isZero() &&
-            !poolSecondHop.balanceOut.isZero() &&
-            !poolFirstHop.balanceIn.isZero() &&
-            !poolSecondHop.balanceOut.isZero()
+            poolFirstHopBalanceIn != 0 &&
+            poolFirstHopBalanceOut != 0 &&
+            poolSecondHopBalanceIn != 0 &&
+            poolSecondHopBalanceOut != 0
         ) {
+            let swap1 = {
+                pool: mostLiquidPoolsFirstHop[i].id,
+                tokenIn: tokenIn,
+                tokenOut: hopTokens[i],
+            };
+
+            let swap2 = {
+                pool: mostLiquidPoolsSecondHop[i].id,
+                tokenIn: hopTokens[i],
+                tokenOut: tokenOut,
+            };
+
             let path = {
-                id: poolFirstHop.id + poolSecondHop.id, // Path id is the concatenation of the ids of poolFirstHop and poolSecondHop
-                poolPairDataList: [poolFirstHop, poolSecondHop],
+                id:
+                    mostLiquidPoolsFirstHop[i].id +
+                    mostLiquidPoolsSecondHop[i].id, // Path id is the concatenation of the ids of poolFirstHop and poolSecondHop
+                swaps: [swap1, swap2],
             };
             pathDataList.push(path);
         }
     }
-    return pathDataList;
+    return [Array.from(pools), pathDataList];
 };
 
 export const parsePoolPairData = (

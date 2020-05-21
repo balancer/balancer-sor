@@ -39,11 +39,14 @@ const returnTokenCostPerPool = new BigNumber('0');
     // TODO avoid another subgraph call by filtering pools with single tokenIn AND tokenOut
     const data = await sor.getPoolsWithTokens(tokenIn, tokenOut);
 
+    let pools;
+
     const directPools = data.pools;
     // console.log('directPools');
     // console.log(directPools);
 
-    const pathDataDirectPoolsOnly = sor.parsePoolData(
+    let pathDataDirectPoolsOnly;
+    [pools, pathDataDirectPoolsOnly] = sor.parsePoolData(
         directPools,
         tokenIn,
         tokenOut
@@ -52,23 +55,29 @@ const returnTokenCostPerPool = new BigNumber('0');
     // console.log("pathDataDirectPoolsOnly");
     // pathDataDirectPoolsOnly.forEach((pathDataDirectPoolsOnly, i) => {
     //      console.log(pathDataDirectPoolsOnly.id);
-    //      console.log(pathDataDirectPoolsOnly.poolPairDataList);
+    //      console.log(pathDataDirectPoolsOnly.swaps);
     // });
 
-    const [
-        sorSwapsDirectPoolsOnly,
-        totalReturnDirectPoolsOnly,
-    ] = sor.smartOrderRouterMultiHop(
-        pathDataDirectPoolsOnly,
-        swapType,
-        swapAmount,
-        maxPools,
-        returnTokenCostPerPool
-    );
-    // console.log('SOR swaps WITHOUT multi-hop');
-    // console.log(sorSwapsDirectPoolsOnly);
-    console.log('Total return WITHOUT multi-hop');
-    console.log(totalReturnDirectPoolsOnly.toString());
+    // console.log("direct pools");
+    // pools.forEach((pool, i) => {
+    //      console.log(pool);
+    // });
+
+    // const [
+    //     sorSwapsDirectPoolsOnly,
+    //     totalReturnDirectPoolsOnly,
+    // ] = sor.smartOrderRouterMultiHop(
+    //     pools,
+    //     pathDataDirectPoolsOnly,
+    //     swapType,
+    //     swapAmount,
+    //     maxPools,
+    //     returnTokenCostPerPool
+    // );
+    // // console.log('SOR swaps WITHOUT multi-hop');
+    // // console.log(sorSwapsDirectPoolsOnly);
+    // console.log('Total return WITHOUT multi-hop');
+    // console.log(totalReturnDirectPoolsOnly.toString());
 
     let mostLiquidPoolsFirstHop, mostLiquidPoolsSecondHop, hopTokens;
     [
@@ -77,11 +86,12 @@ const returnTokenCostPerPool = new BigNumber('0');
         hopTokens,
     ] = await sor.getMultihopPoolsWithTokens(tokenIn, tokenOut);
 
-    // console.log(hopTokens);
+    console.log('hopTokens');
+    console.log(hopTokens);
     // console.log("mostLiquidPoolsSecondHop");
     // console.log(mostLiquidPoolsSecondHop);
-
-    const pathData = sor.parsePoolData(
+    let pathData;
+    [pools, pathData] = sor.parsePoolData(
         directPools,
         tokenIn,
         tokenOut,
@@ -96,9 +106,16 @@ const returnTokenCostPerPool = new BigNumber('0');
     //      console.log(path.poolPairDataList);
     // });
 
-    // console.log(pathData);
+    // console.log("All pools");
+    // pools.forEach((pool, i) => {
+    //      console.log(pool);
+    // });
+
+    console.log('pathData');
+    console.log(pathData);
 
     const [sorSwaps, totalReturn] = sor.smartOrderRouterMultiHop(
+        pools,
         pathData,
         swapType,
         swapAmount,
@@ -110,11 +127,11 @@ const returnTokenCostPerPool = new BigNumber('0');
     console.log('Total return WITH multi-hop');
     console.log(totalReturn.toString());
 
-    // let [directTokenPairs, allTokenPairs] = await sor.getTokenPairsMultiHop(
-    //     tokenIn
-    // );
-    // console.log('directTokenPairs');
-    // console.log(directTokenPairs);
-    // console.log('allTokenPairs');
-    // console.log(allTokenPairs);
+    // // let [directTokenPairs, allTokenPairs] = await sor.getTokenPairsMultiHop(
+    // //     tokenIn
+    // // );
+    // // console.log('directTokenPairs');
+    // // console.log(directTokenPairs);
+    // // console.log('allTokenPairs');
+    // // console.log(allTokenPairs);
 })();
