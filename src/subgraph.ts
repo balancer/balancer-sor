@@ -50,7 +50,14 @@ export async function getPoolsWithSingleToken(token) {
     });
 
     const { data } = await response.json();
-    return data;
+
+    // Create a dictionary for fast access with pool id
+    const pools = {};
+    data.pools.forEach((p, i) => {
+        pools[p.id] = p;
+    });
+
+    return pools;
 }
 
 export async function getPoolsWithTokens(tokenIn, tokenOut) {
@@ -96,7 +103,14 @@ export async function getPoolsWithTokens(tokenIn, tokenOut) {
     });
 
     const { data } = await response.json();
-    return data;
+
+    // Create a dictionary for fast access with pool id
+    const pools = {};
+    data.pools.forEach((p, i) => {
+        pools[p.id] = p;
+    });
+
+    return pools;
 }
 
 export async function getPoolsWithToken(token) {

@@ -37,11 +37,10 @@ const returnTokenCostPerPool = new BigNumber('0');
 (async function() {
     //// We find all pools with the direct trading pair (tokenIn -> tokenOut)
     // TODO avoid another subgraph call by filtering pools with single tokenIn AND tokenOut
-    const data = await sor.getPoolsWithTokens(tokenIn, tokenOut);
+    const directPools = await sor.getPoolsWithTokens(tokenIn, tokenOut);
 
     let pools;
 
-    const directPools = data.pools;
     // console.log('directPools');
     // console.log(directPools);
 

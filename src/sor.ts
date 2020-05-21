@@ -250,7 +250,7 @@ export const smartOrderRouterMultiHop = (
             // Multi-hop:
 
             let swap1 = path.swaps[0];
-            let poolSwap1 = pools.find(p => p.id === swap1.pool);
+            let poolSwap1 = pools[swap1.pool];
             let poolPairDataSwap1 = parsePoolPairData(
                 poolSwap1,
                 swap1.tokenIn,
@@ -258,7 +258,7 @@ export const smartOrderRouterMultiHop = (
             );
 
             let swap2 = path.swaps[1];
-            let poolSwap2 = pools.find(p => p.id === swap2.pool);
+            let poolSwap2 = pools[swap2.pool];
             let poolPairDataSwap2 = parsePoolPairData(
                 poolSwap2,
                 swap2.tokenIn,

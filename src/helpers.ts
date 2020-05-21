@@ -34,7 +34,7 @@ export function getLimitAmountSwapPath(
     let swaps = path.swaps;
     if (swaps.length == 1) {
         let swap1 = swaps[0];
-        let poolSwap1 = pools.find(p => p.id === swap1.pool);
+        let poolSwap1 = pools[swap1.pool];
         let poolPairDataSwap1 = parsePoolPairData(
             poolSwap1,
             swap1.tokenIn,
@@ -43,7 +43,7 @@ export function getLimitAmountSwapPath(
         return getLimitAmountSwap(poolPairDataSwap1, swapType);
     } else if (swaps.length == 2) {
         let swap1 = swaps[0];
-        let poolSwap1 = pools.find(p => p.id === swap1.pool);
+        let poolSwap1 = pools[swap1.pool];
         let poolPairDataSwap1 = parsePoolPairData(
             poolSwap1,
             swap1.tokenIn,
@@ -51,7 +51,7 @@ export function getLimitAmountSwapPath(
         );
 
         let swap2 = swaps[1];
-        let poolSwap2 = pools.find(p => p.id === swap2.pool);
+        let poolSwap2 = pools[swap2.pool];
         let poolPairDataSwap2 = parsePoolPairData(
             poolSwap2,
             swap2.tokenIn,
@@ -88,7 +88,7 @@ export function getSpotPricePath(pools: any[], path: Path): BigNumber {
     let swaps = path.swaps;
     if (swaps.length == 1) {
         let swap1 = swaps[0];
-        let poolSwap1 = pools.find(p => p.id === swap1.pool);
+        let poolSwap1 = pools[swap1.pool];
         let poolPairDataSwap1 = parsePoolPairData(
             poolSwap1,
             swap1.tokenIn,
@@ -97,7 +97,7 @@ export function getSpotPricePath(pools: any[], path: Path): BigNumber {
         return getSpotPrice(poolPairDataSwap1);
     } else if (swaps.length == 2) {
         let swap1 = swaps[0];
-        let poolSwap1 = pools.find(p => p.id === swap1.pool);
+        let poolSwap1 = pools[swap1.pool];
         let poolPairDataSwap1 = parsePoolPairData(
             poolSwap1,
             swap1.tokenIn,
@@ -105,7 +105,7 @@ export function getSpotPricePath(pools: any[], path: Path): BigNumber {
         );
 
         let swap2 = swaps[1];
-        let poolSwap2 = pools.find(p => p.id === swap2.pool);
+        let poolSwap2 = pools[swap2.pool];
         let poolPairDataSwap2 = parsePoolPairData(
             poolSwap2,
             swap2.tokenIn,
@@ -139,7 +139,7 @@ export function getSlippageLinearizedSpotPriceAfterSwapPath(
     let swaps = path.swaps;
     if (swaps.length == 1) {
         let swap1 = swaps[0];
-        let poolSwap1 = pools.find(p => p.id === swap1.pool);
+        let poolSwap1 = pools[swap1.pool];
         let poolPairDataSwap1 = parsePoolPairData(
             poolSwap1,
             swap1.tokenIn,
@@ -152,11 +152,11 @@ export function getSlippageLinearizedSpotPriceAfterSwapPath(
         );
     } else if (swaps.length == 2) {
         let swap1 = swaps[0];
-        let poolSwap1 = pools.find(p => p.id === swap1.pool);
+        let poolSwap1 = pools[swap1.pool];
         let p1 = parsePoolPairData(poolSwap1, swap1.tokenIn, swap1.tokenOut);
 
         let swap2 = swaps[1];
-        let poolSwap2 = pools.find(p => p.id === swap2.pool);
+        let poolSwap2 = pools[swap2.pool];
         let p2 = parsePoolPairData(poolSwap2, swap2.tokenIn, swap2.tokenOut);
         if (
             p1.balanceIn.isEqualTo(bnum(0)) ||
@@ -247,7 +247,7 @@ export function getReturnAmountSwapPath(
     let swaps = path.swaps;
     if (swaps.length == 1) {
         let swap1 = swaps[0];
-        let poolSwap1 = pools.find(p => p.id === swap1.pool);
+        let poolSwap1 = pools[swap1.pool];
         let poolPairDataSwap1 = parsePoolPairData(
             poolSwap1,
             swap1.tokenIn,
@@ -256,7 +256,7 @@ export function getReturnAmountSwapPath(
         return getReturnAmountSwap(poolPairDataSwap1, swapType, amount);
     } else if (swaps.length == 2) {
         let swap1 = swaps[0];
-        let poolSwap1 = pools.find(p => p.id === swap1.pool);
+        let poolSwap1 = pools[swap1.pool];
         let poolPairDataSwap1 = parsePoolPairData(
             poolSwap1,
             swap1.tokenIn,
@@ -264,7 +264,7 @@ export function getReturnAmountSwapPath(
         );
 
         let swap2 = swaps[1];
-        let poolSwap2 = pools.find(p => p.id === swap2.pool);
+        let poolSwap2 = pools[swap2.pool];
         let poolPairDataSwap2 = parsePoolPairData(
             poolSwap2,
             swap2.tokenIn,
@@ -337,9 +337,9 @@ export async function getMultihopPoolsWithTokens(tokenIn, tokenOut) {
     //// Multi-hop trades: we find the best pools that connect tokenIn and tokenOut through a multi-hop (intermediate) token
     // First: we get all tokens that can be used to be traded with tokenIn excluding
     // tokens that are in pools that already contain tokenOut (in which case multi-hop is not necessary)
-    const dataTokenIn = await getPoolsWithSingleToken(tokenIn);
+    const poolsTokenIn = await getPoolsWithSingleToken(tokenIn);
     const poolsTokenInNoTokenOut = filterPoolsWithoutToken(
-        dataTokenIn.pools,
+        poolsTokenIn,
         tokenOut
     );
     // console.log(poolsTokenInNoTokenOut);
@@ -351,9 +351,9 @@ export async function getMultihopPoolsWithTokens(tokenIn, tokenOut) {
 
     // Second: we get all tokens that can be used to be traded with tokenOut excluding
     // tokens that are in pools that already contain tokenIn (in which case multi-hop is not necessary)
-    const dataTokenOut = await getPoolsWithSingleToken(tokenOut);
+    const poolsTokenOut = await getPoolsWithSingleToken(tokenOut);
     const poolsTokenOutNoTokenIn = filterPoolsWithoutToken(
-        dataTokenOut.pools,
+        poolsTokenOut,
         tokenIn
     );
     // console.log(poolsTokenOutNoTokenIn);
@@ -380,11 +380,11 @@ export async function getMultihopPoolsWithTokens(tokenIn, tokenOut) {
     // Here we could query subgraph for all pools with pair (tokenIn -> hopToken), but to
     // minimize subgraph calls we loop through poolsTokenInNoTokenOut, and check the liquidity
     // only for those that have hopToken
-    var mostLiquidPoolsFirstHop = [];
+    var mostLiquidPoolsFirstHop = {};
     for (var i = 0; i < hopTokens.length; i++) {
         var highestNormalizedLiquidity = bnum(0); // Aux variable to find pool with most liquidity for pair (tokenIn -> hopToken)
-        var highestNormalizedLiquidityIndex = 0; // Aux variable to find pool with most liquidity for pair (tokenIn -> hopToken)
-        for (var k = 0; k < poolsTokenInNoTokenOut.length; k++) {
+        var highestNormalizedLiquidityPoolId; // Aux variable to find pool with most liquidity for pair (tokenIn -> hopToken)
+        for (let k in poolsTokenInNoTokenOut) {
             // We now loop to check if this pool has hopToken
             var found = false;
             for (
@@ -422,12 +422,12 @@ export async function getMultihopPoolsWithTokens(tokenIn, tokenOut) {
                     )
                 ) {
                     highestNormalizedLiquidity = normalizedLiquidity;
-                    highestNormalizedLiquidityIndex = k;
+                    highestNormalizedLiquidityPoolId = k;
                 }
             }
         }
-        mostLiquidPoolsFirstHop[i] =
-            poolsTokenInNoTokenOut[highestNormalizedLiquidityIndex];
+        mostLiquidPoolsFirstHop[highestNormalizedLiquidityPoolId] =
+            poolsTokenInNoTokenOut[highestNormalizedLiquidityPoolId];
         // console.log(highestNormalizedLiquidity)
         // console.log(mostLiquidPoolsFirstHop)
     }
@@ -436,11 +436,11 @@ export async function getMultihopPoolsWithTokens(tokenIn, tokenOut) {
     // console.log(mostLiquidPoolsFirstHop);
 
     // Now similarly find the most liquid pool for each pair (hopToken -> tokenOut)
-    var mostLiquidPoolsSecondHop = [];
+    var mostLiquidPoolsSecondHop = {};
     for (var i = 0; i < hopTokens.length; i++) {
         var highestNormalizedLiquidity = bnum(0); // Aux variable to find pool with most liquidity for pair (tokenIn -> hopToken)
-        var highestNormalizedLiquidityIndex = 0; // Aux variable to find pool with most liquidity for pair (tokenIn -> hopToken)
-        for (var k = 0; k < poolsTokenOutNoTokenIn.length; k++) {
+        var highestNormalizedLiquidityPoolId; // Aux variable to find pool with most liquidity for pair (tokenIn -> hopToken)
+        for (let k in poolsTokenOutNoTokenIn) {
             // We now loop to check if this pool has hopToken
             var found = false;
             for (
@@ -474,12 +474,12 @@ export async function getMultihopPoolsWithTokens(tokenIn, tokenOut) {
                     )
                 ) {
                     highestNormalizedLiquidity = normalizedLiquidity;
-                    highestNormalizedLiquidityIndex = k;
+                    highestNormalizedLiquidityPoolId = k;
                 }
             }
         }
-        mostLiquidPoolsSecondHop[i] =
-            poolsTokenOutNoTokenIn[highestNormalizedLiquidityIndex];
+        mostLiquidPoolsSecondHop[highestNormalizedLiquidityPoolId] =
+            poolsTokenOutNoTokenIn[highestNormalizedLiquidityPoolId];
         // console.log(highestNormalizedLiquidity)
         // console.log(mostLiquidPoolsSecondHop)
     }
@@ -490,16 +490,17 @@ export const parsePoolData = (
     directPools,
     tokenIn: string,
     tokenOut: string,
-    mostLiquidPoolsFirstHop = [],
-    mostLiquidPoolsSecondHop = [],
+    mostLiquidPoolsFirstHop = {},
+    mostLiquidPoolsSecondHop = {},
     hopTokens = []
-): [any[], Path[]] => {
+): [any, Path[]] => {
     let pathDataList: Path[] = [];
-    let pools = new Set();
+    let pools = {};
     // First add direct pair paths
-    directPools.forEach(p => {
-        // Add pool to the set with all pools (only adds if it's still not present in set)
-        pools.add(p);
+    for (let i in directPools) {
+        let p = directPools[i];
+        // Add pool to the set with all pools (only adds if it's still not present in dict)
+        pools[i] = p;
         // Only add path if the balances are both not zero
         let balanceIn = p.tokens.find(token => token.address === tokenIn)
             .balance;
@@ -525,21 +526,32 @@ export const parsePoolData = (
             };
             pathDataList.push(path);
         }
-    });
+    }
 
     // Now add multi-hop paths.
-    // mostLiquidPoolsFirstHop always has the same lengh of mostLiquidPoolsSecondHop
-    for (let i = 0; i < mostLiquidPoolsFirstHop.length; i++) {
-        // Add pool to the set with all pools (only adds if it's still not present in set)
-        pools.add(mostLiquidPoolsFirstHop[i]);
+    // mostLiquidPoolsFirstHop and mostLiquidPoolsSecondHop always has the same
+    // lengh of hopTokens
+
+    // iterate object. See: https://dmitripavlutin.com/how-to-iterate-easily-over-object-properties-in-javascript/
+    let mostLiquidPoolsFirstHopObjectEntries: any = Object.entries(
+        mostLiquidPoolsFirstHop
+    );
+    let mostLiquidPoolsSecondHopObjectEntries: any = Object.entries(
+        mostLiquidPoolsSecondHop
+    );
+    for (let i = 0; i < hopTokens.length; i++) {
+        // Add pool to the set with all pools (only adds if it's still not present in dict)
+        pools[mostLiquidPoolsFirstHopObjectEntries[i][0]] =
+            mostLiquidPoolsFirstHopObjectEntries[i][1];
         // let poolFirstHop = parsePoolPairData(
         //     mostLiquidPoolsFirstHop[i],
         //     tokenIn,
         //     hopTokens[i]
         // );
 
-        // Add pool to the set with all pools (only adds if it's still not present in set)
-        pools.add(mostLiquidPoolsSecondHop[i]);
+        // Add pool to the set with all pools (only adds if it's still not present in dict)
+        pools[mostLiquidPoolsSecondHopObjectEntries[i][0]] =
+            mostLiquidPoolsSecondHopObjectEntries[i][1];
         // let poolSecondHop = parsePoolPairData(
         //     mostLiquidPoolsSecondHop[i],
         //     hopTokens[i],
@@ -548,18 +560,18 @@ export const parsePoolData = (
 
         // Only add path if the balances are both not zero for first and second hops
 
-        let poolFirstHopBalanceIn = mostLiquidPoolsFirstHop[i].tokens.find(
-            token => token.address === tokenIn
-        ).balance;
-        let poolFirstHopBalanceOut = mostLiquidPoolsFirstHop[i].tokens.find(
-            token => token.address === hopTokens[i]
-        ).balance;
-        let poolSecondHopBalanceIn = mostLiquidPoolsSecondHop[i].tokens.find(
-            token => token.address === hopTokens[i]
-        ).balance;
-        let poolSecondHopBalanceOut = mostLiquidPoolsSecondHop[i].tokens.find(
-            token => token.address === tokenOut
-        ).balance;
+        let poolFirstHopBalanceIn = mostLiquidPoolsFirstHopObjectEntries[
+            i
+        ][1].tokens.find(token => token.address === tokenIn).balance;
+        let poolFirstHopBalanceOut = mostLiquidPoolsFirstHopObjectEntries[
+            i
+        ][1].tokens.find(token => token.address === hopTokens[i]).balance;
+        let poolSecondHopBalanceIn = mostLiquidPoolsSecondHopObjectEntries[
+            i
+        ][1].tokens.find(token => token.address === hopTokens[i]).balance;
+        let poolSecondHopBalanceOut = mostLiquidPoolsSecondHopObjectEntries[
+            i
+        ][1].tokens.find(token => token.address === tokenOut).balance;
         if (
             poolFirstHopBalanceIn != 0 &&
             poolFirstHopBalanceOut != 0 &&
@@ -567,27 +579,27 @@ export const parsePoolData = (
             poolSecondHopBalanceOut != 0
         ) {
             let swap1 = {
-                pool: mostLiquidPoolsFirstHop[i].id,
+                pool: mostLiquidPoolsFirstHopObjectEntries[i][0],
                 tokenIn: tokenIn,
                 tokenOut: hopTokens[i],
             };
 
             let swap2 = {
-                pool: mostLiquidPoolsSecondHop[i].id,
+                pool: mostLiquidPoolsSecondHopObjectEntries[i][0],
                 tokenIn: hopTokens[i],
                 tokenOut: tokenOut,
             };
 
             let path = {
                 id:
-                    mostLiquidPoolsFirstHop[i].id +
-                    mostLiquidPoolsSecondHop[i].id, // Path id is the concatenation of the ids of poolFirstHop and poolSecondHop
+                    mostLiquidPoolsFirstHopObjectEntries[i][0] +
+                    mostLiquidPoolsSecondHopObjectEntries[i][0], // Path id is the concatenation of the ids of poolFirstHop and poolSecondHop
                 swaps: [swap1, swap2],
             };
             pathDataList.push(path);
         }
     }
-    return [Array.from(pools), pathDataList];
+    return [pools, pathDataList];
 };
 
 export const parsePoolPairData = (
@@ -636,8 +648,8 @@ export const parsePoolPairData = (
 
 function filterPoolsWithoutToken(pools, token) {
     var found;
-    var OutputPools = [];
-    for (var i = 0; i < pools.length; i++) {
+    var OutputPools = {};
+    for (let i in pools) {
         found = false;
         for (var k = 0; k < pools[i].tokensList.length; k++) {
             if (pools[i].tokensList[k].toLowerCase() == token.toLowerCase()) {
@@ -645,8 +657,8 @@ function filterPoolsWithoutToken(pools, token) {
                 break;
             }
         }
-        //Append pool if token not found
-        if (!found) OutputPools.push(pools[i]);
+        //Add pool if token not found
+        if (!found) OutputPools[i] = pools[i];
     }
     return OutputPools;
 }
@@ -659,7 +671,7 @@ function filterPoolsWithoutToken(pools, token) {
 function getTokensPairedToTokenInPool(pools, token) {
     var found;
     var tokens = new Set();
-    for (var i = 0; i < pools.length; i++) {
+    for (let i in pools) {
         found = false;
         for (var k = 0; k < pools[i].tokensList.length; k++) {
             if (pools[i].tokensList[k].toLowerCase() != token.toLowerCase()) {
@@ -675,10 +687,9 @@ export async function getTokenPairsMultiHop(token) {
     let directTokenPairsSet = new Set();
     let multihopTokenPairsSet = new Set();
     let allTokenPairsSet = new Set();
-    let poolsWithTokenData = await getPoolsWithToken(token);
-    let poolsWithToken = poolsWithTokenData.pools;
+    let poolsWithToken = await getPoolsWithToken(token);
     // console.log(poolsWithToken)
-    for (var i = 0; i < poolsWithToken.length; i++) {
+    for (let i in poolsWithToken) {
         for (var k = 0; k < poolsWithToken[i].tokensList.length; k++) {
             directTokenPairsSet.add(poolsWithToken[i].tokensList[k]);
             allTokenPairsSet.add(poolsWithToken[i].tokensList[k]);
@@ -689,11 +700,10 @@ export async function getTokenPairsMultiHop(token) {
     // console.log(directTokenPairs)
 
     for (var j = 0; j < directTokenPairs.length; j++) {
-        let poolsWithDirectTokenPairData = await getPoolsWithToken(
+        let poolsWithDirectTokenPair = await getPoolsWithToken(
             directTokenPairs[j]
         );
-        let poolsWithDirectTokenPair = poolsWithDirectTokenPairData.pools;
-        for (var i = 0; i < poolsWithDirectTokenPair.length; i++) {
+        for (let i in poolsWithDirectTokenPair) {
             for (
                 var k = 0;
                 k < poolsWithDirectTokenPair[i].tokensList.length;
