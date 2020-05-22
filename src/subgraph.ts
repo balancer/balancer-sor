@@ -172,6 +172,7 @@ export async function getPools() {
               symbol
               denormWeight
             }
+            tokensList
           }
       }
     `;

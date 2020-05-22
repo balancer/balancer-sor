@@ -760,37 +760,140 @@ function getTokensPairedToTokenWithinPools(pools, token) {
     return tokens;
 }
 
-export async function getTokenPairsMultiHop(token) {
-    // Get all tokens that can be accessed through multi-hop (only 2 hops possible for now)
-    let directTokenPairsSet = new Set();
-    let multihopTokenPairsSet = new Set();
-    let allTokenPairsSet = new Set();
-    let poolsWithToken = await getPoolsWithToken(token);
-    // console.log(poolsWithToken)
-    for (let i in poolsWithToken) {
-        for (var k = 0; k < poolsWithToken[i].tokensList.length; k++) {
-            directTokenPairsSet.add(poolsWithToken[i].tokensList[k]);
-            allTokenPairsSet.add(poolsWithToken[i].tokensList[k]);
-        }
+function union(setA, setB) {
+    if (setA.size == 0) {
+        return new Set(setB);
     }
-    // Get all pools that each directTokenPair has and add tokens that are present in them, these are the multihop tokens of token
-    let directTokenPairs = Array.from(directTokenPairsSet);
-    // console.log(directTokenPairs)
 
-    for (var j = 0; j < directTokenPairs.length; j++) {
-        let poolsWithDirectTokenPair = await getPoolsWithToken(
-            directTokenPairs[j]
-        );
-        for (let i in poolsWithDirectTokenPair) {
-            for (
-                var k = 0;
-                k < poolsWithDirectTokenPair[i].tokensList.length;
-                k++
-            ) {
-                allTokenPairsSet.add(poolsWithDirectTokenPair[i].tokensList[k]);
+    let _union = new Set(setA);
+
+    setB.forEach((address, index) => {
+        _union.add(address);
+    });
+
+    return _union;
+}
+
+export async function getTokenPairsMultiHop(token, poolsDict?) {
+    token = ethers.utils.getAddress(token);
+
+    if (poolsDict === undefined) {
+        // TODO???????
+        console.log(`!!!!!!! Make Subgraph Call.`);
+        return;
+    }
+
+    let tokenPools = new Set();
+    let directTokenPairsSet = new Set();
+
+    // If pool contains token add all its tokens to direct list
+    poolsDict.forEach((pool, index) => {
+        for (let i = 0; i < pool.tokensList.length; i++) {
+            const cAddr = ethers.utils.getAddress(pool.tokensList[i]);
+            if (cAddr === token) {
+                tokenPools.add(pool.id);
+                let poolTokens = new Set(pool.tokensList);
+                directTokenPairsSet = union(directTokenPairsSet, poolTokens);
+                break;
             }
         }
+    });
+
+    let allTokenPairsSet = new Set(directTokenPairsSet);
+
+    // foreach directToken find its pools and add all its tokens (unless pool already been checked)
+    directTokenPairsSet.forEach((directToken, index) => {
+        poolsDict.forEach((pool, index) => {
+            if (!tokenPools.has(pool.id)) {
+                directToken = ethers.utils.getAddress(String(directToken));
+                for (let i = 0; i < pool.tokensList.length; i++) {
+                    const cAddr = ethers.utils.getAddress(pool.tokensList[i]);
+
+                    if (cAddr === directToken) {
+                        tokenPools.add(pool.id);
+                        let poolTokens = new Set(pool.tokensList);
+                        allTokenPairsSet = union(allTokenPairsSet, poolTokens);
+                        break;
+                    }
+                }
+            }
+        });
+    });
+
+    let directTokenPairs = Array.from(directTokenPairsSet);
+    let allTokenPairs = Array.from(allTokenPairsSet);
+    return [directTokenPairs, allTokenPairs];
+}
+
+export async function getTokenPairsMultiHopOld(token, poolsDict?) {
+    token = ethers.utils.getAddress(token);
+
+    if (poolsDict === undefined) {
+        // TODO???????
+        console.log(`!!!!!!! Make Subgraph Call.`);
+        return;
     }
+
+    const poolAddresses = Object.keys(poolsDict);
+    console.log(poolAddresses);
+    console.log(poolsDict);
+
+    let tokenPools = new Set();
+    let directTokenPairsSet = new Set();
+
+    poolAddresses.forEach((address, index) => {
+        // If pool contains token add all its tokens to direct list
+        // console.log(`Checking pool: ${address}`);
+        for (let i = 0; i < poolsDict[address].tokensList.length; i++) {
+            const cAddr = ethers.utils.getAddress(
+                poolsDict[address].tokensList[i]
+            );
+            console.log(`Checking token: ${cAddr}`);
+
+            if (cAddr === token) {
+                // console.log(`Match - adding tokens`)
+                tokenPools.add(address);
+                let poolTokens = new Set(poolsDict[address].tokensList);
+                directTokenPairsSet = union(directTokenPairsSet, poolTokens);
+                // break;
+            }
+        }
+    });
+
+    let allTokenPairsSet = new Set(directTokenPairsSet);
+
+    // foreach directToken find pool and add all its tokens (unless pool already been checked)
+    directTokenPairsSet.forEach((directToken, index) => {
+        poolAddresses.forEach((address, index) => {
+            if (tokenPools.has(address)) {
+                console.log(`Pool Already Added ${address}`);
+            } else {
+                directToken = ethers.utils.getAddress(String(directToken));
+                console.log(`Checking Pool ${address} ${directToken}`);
+                // If pool contains token add all its tokens to direct list
+                for (let i = 0; i < poolsDict[address].tokensList.length; i++) {
+                    const cAddr = ethers.utils.getAddress(
+                        poolsDict[address].tokensList[i]
+                    );
+                    console.log(`Checking token: ${cAddr}`);
+
+                    if (cAddr === directToken) {
+                        console.log(allTokenPairsSet);
+                        console.log(
+                            `Match - adding tokens`,
+                            poolsDict[address].tokensList
+                        );
+                        tokenPools.add(address);
+                        let poolTokens = new Set(poolsDict[address].tokensList);
+                        allTokenPairsSet = union(allTokenPairsSet, poolTokens);
+                        // break;
+                    }
+                }
+            }
+        });
+    });
+
+    let directTokenPairs = Array.from(directTokenPairsSet);
     let allTokenPairs = Array.from(allTokenPairsSet);
     return [directTokenPairs, allTokenPairs];
 }
