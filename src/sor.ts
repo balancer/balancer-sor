@@ -274,6 +274,7 @@ export const smartOrderRouterMultiHop = (
                     swapType === 'swapExactIn'
                         ? swapAmount.toString()
                         : getReturnAmountSwap(
+                              pools,
                               poolPairDataSwap2,
                               swapType,
                               swapAmount
@@ -293,6 +294,7 @@ export const smartOrderRouterMultiHop = (
                 swapAmount:
                     swapType === 'swapExactIn'
                         ? getReturnAmountSwap(
+                              pools,
                               poolPairDataSwap1,
                               swapType,
                               swapAmount
@@ -306,6 +308,9 @@ export const smartOrderRouterMultiHop = (
             };
             swaps.push([swap1hop, swap2hop]);
         }
+        // Updates the pools in the path with the swaps so that if
+        // the new paths use these pools they will have the updated balances
+        getReturnAmountSwapPath(pools, path, swapType, swapAmount);
     });
 
     // Since the individual swapAmounts for each path are integers, the sum of all swapAmounts
@@ -496,12 +501,14 @@ export const calcTotalReturn = (
 ): BigNumber => {
     let path;
     let totalReturn = new BigNumber(0);
+    let poolsClone = JSON.parse(JSON.stringify(pools)); // we create a clone to avoid
+    // changing the contents of pools (parameter passed as reference)
     pathIds.forEach((b, i) => {
         path = paths.find(obj => {
             return obj.id === b;
         });
         totalReturn = totalReturn.plus(
-            getReturnAmountSwapPath(pools, path, swapType, swapAmounts[i])
+            getReturnAmountSwapPath(poolsClone, path, swapType, swapAmounts[i])
         );
     });
     return totalReturn;

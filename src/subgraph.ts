@@ -51,10 +51,15 @@ export async function getPoolsWithSingleToken(token) {
 
     const { data } = await response.json();
 
-    // Create a dictionary for fast access with pool id
+    // Create a dictionary for fast access with pool id and filter out pools
+    // that have 0 balance for token
     const pools = {};
     data.pools.forEach((p, i) => {
-        pools[p.id] = p;
+        if (
+            p.tokens.find(t => ethers.utils.getAddress(t.address) === token)
+                .balance != 0
+        )
+            pools[p.id] = p;
     });
 
     return pools;
@@ -107,7 +112,13 @@ export async function getPoolsWithTokens(tokenIn, tokenOut) {
     // Create a dictionary for fast access with pool id
     const pools = {};
     data.pools.forEach((p, i) => {
-        pools[p.id] = p;
+        if (
+            p.tokens.find(t => ethers.utils.getAddress(t.address) === tokenIn)
+                .balance != 0 &&
+            p.tokens.find(t => ethers.utils.getAddress(t.address) === tokenOut)
+                .balance != 0
+        )
+            pools[p.id] = p;
     });
 
     return pools;

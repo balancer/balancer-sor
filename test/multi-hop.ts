@@ -19,13 +19,16 @@ const MAX_UINT = ethers.constants.MaxUint256;
 // KOVAN
 const tokenIn = '0x1528f3fcc26d13f7079325fb78d9442607781c8c'; // DAI
 const tokenOut = '0x2f375e94fc336cdec2dc0ccb5277fe59cbf1cae5'; // USDC
+// const tokenIn = '0xd0a1e359811322d97991e03f863a0c30c2cf029c'; // WETH
+// const tokenOut = '0x37f03a12241e9fd3658ad6777d289c3fb8512bc9'; // ANT
 // const tokenOut = '0x0327112423f3a68efdf1fcf402f6c5cb9f7caaaa'; // Token that does not exist
 // const tokenOut = '0xe0c9275e44ea80ef17579d33c55136b7da269aeb'; // wBTC
 
 // const swapType = 'swapExactIn';
 const swapType = 'swapExactOut';
 // const swapAmount = new BigNumber('10094007593337980162'); // 1 * 10**18
-const swapAmount = new BigNumber('20000000'); // 1 * 10**6
+const swapAmount = new BigNumber('10296143'); // 1 * 10**6
+// const swapAmount = new BigNumber('10000000000000000000'); // 10 * 10**6
 const maxPools = new BigNumber('4');
 const returnTokenCostPerPool = new BigNumber('0');
 // const returnTokenCostPerPool = new BigNumber('1000000000000'); // It costs 0.0000001 returnToken per pool trade
@@ -41,9 +44,6 @@ const returnTokenCostPerPool = new BigNumber('0');
 
     let pools;
 
-    // console.log('directPools');
-    // console.log(directPools);
-
     let pathDataDirectPoolsOnly;
     [pools, pathDataDirectPoolsOnly] = sor.parsePoolData(
         directPools,
@@ -51,11 +51,11 @@ const returnTokenCostPerPool = new BigNumber('0');
         tokenOut
     );
 
-    console.log('pathDataDirectPoolsOnly');
-    pathDataDirectPoolsOnly.forEach((pathDataDirectPoolsOnly, i) => {
-        console.log(pathDataDirectPoolsOnly.id);
-        console.log(pathDataDirectPoolsOnly.swaps);
-    });
+    // console.log('pathDataDirectPoolsOnly');
+    // pathDataDirectPoolsOnly.forEach((pathDataDirectPoolsOnly, i) => {
+    //     console.log(pathDataDirectPoolsOnly.id);
+    //     console.log(pathDataDirectPoolsOnly.swaps);
+    // });
 
     // console.log("direct pools");
     // console.log(directPools);
@@ -64,7 +64,8 @@ const returnTokenCostPerPool = new BigNumber('0');
         sorSwapsDirectPoolsOnly,
         totalReturnDirectPoolsOnly,
     ] = sor.smartOrderRouterMultiHop(
-        pools,
+        // pools,
+        JSON.parse(JSON.stringify(pools)), // Passing clone to avoid change in original pools
         pathDataDirectPoolsOnly,
         swapType,
         swapAmount,
@@ -83,8 +84,10 @@ const returnTokenCostPerPool = new BigNumber('0');
         hopTokens,
     ] = await sor.getMultihopPoolsWithTokens(tokenIn, tokenOut);
 
-    console.log('hopTokens');
-    console.log(hopTokens);
+    // console.log('hopTokens');
+    // console.log(hopTokens);
+    // console.log("mostLiquidPoolsFirstHop");
+    // console.log(mostLiquidPoolsFirstHop);
     // console.log("mostLiquidPoolsSecondHop");
     // console.log(mostLiquidPoolsSecondHop);
     let pathData;
@@ -97,14 +100,15 @@ const returnTokenCostPerPool = new BigNumber('0');
         hopTokens
     );
 
-    console.log('pathData');
-    pathData.forEach((path, i) => {
-        console.log(path.id);
-        console.log(path.swaps);
-    });
+    // console.log('pathData');
+    // pathData.forEach((path, i) => {
+    //     console.log(path.id);
+    //     console.log(path.swaps);
+    // });
 
     const [sorSwaps, totalReturn] = sor.smartOrderRouterMultiHop(
-        pools,
+        // pools,
+        JSON.parse(JSON.stringify(pools)), // Passing clone to avoid change in original pools
         pathData,
         swapType,
         swapAmount,
