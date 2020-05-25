@@ -9,6 +9,67 @@ const { ethers, utils } = require('ethers');
 const MAX_UINT = ethers.constants.MaxUint256;
 
 describe('Multi-Pool Tests', () => {
+    it('should test 10ANT -> ETH, swapExactIn', async () => {
+        let tokenIn = '0x37f03a12241E9FD3658ad6777d289c3fb8512Bc9'; // ANT
+        let tokenOut = '0xd0A1E359811322d97991E03f863a0C30C2cF029C'; // WETH
+        tokenIn = tokenIn.toLowerCase();
+        tokenOut = tokenOut.toLowerCase();
+
+        const swapType = 'swapExactIn';
+        const swapAmount = new BigNumber('10000000000000000000');
+        const maxPools = 4;
+        const returnTokenCostPerPool = new BigNumber('0');
+
+        console.log(
+            `!!!!!!! ${tokenIn} ${tokenOut} ${swapType} ${utils.formatEther(
+                swapAmount.toString()
+            )} ${maxPools} ${utils.formatEther(
+                returnTokenCostPerPool.toString()
+            )}`
+        );
+        //// We find all pools with the direct trading pair (tokenIn -> tokenOut)
+        // TODO avoid another subgraph call by filtering pools with single tokenIn AND tokenOut
+
+        // SUBZGRAPH GETALLPOOLS
+
+        const directPools = await sor.getPoolsWithTokens(tokenIn, tokenOut);
+
+        let mostLiquidPoolsFirstHop, mostLiquidPoolsSecondHop, hopTokens;
+        [
+            mostLiquidPoolsFirstHop,
+            mostLiquidPoolsSecondHop,
+            hopTokens,
+        ] = await sor.getMultihopPoolsWithTokens(tokenIn, tokenOut);
+
+        let pools, pathData;
+        [pools, pathData] = sor.parsePoolData(
+            directPools,
+            tokenIn,
+            tokenOut,
+            mostLiquidPoolsFirstHop,
+            mostLiquidPoolsSecondHop,
+            hopTokens
+        );
+
+        const [sorSwaps, totalReturn] = sor.smartOrderRouterMultiHop(
+            pools,
+            pathData,
+            swapType,
+            swapAmount,
+            maxPools,
+            returnTokenCostPerPool
+        );
+        /*
+        console.log('SOR swaps WITH multi-hop');
+        console.log(sorSwaps);
+        console.log('Total return WITH multi-hop');
+        console.log(totalReturn.toString());
+        */
+
+        assert(sorSwaps.length > 0, `Should have more than 0 swaps.`);
+        console.log(utils.formatEther(totalReturn.toString()));
+    }).timeout(10000);
+
     it('should test DAI -> USDC, swapExactIn', async () => {
         // const tokenIn = '0xef13C0c8abcaf5767160018d268f9697aE4f5375'; // MKR
         // !!!!!!! These have to be in correct format !!!!!!!

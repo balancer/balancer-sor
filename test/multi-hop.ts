@@ -7,6 +7,8 @@ const ethers = require('ethers');
 const MAX_UINT = ethers.constants.MaxUint256;
 
 // MAINNET
+// let tokenIn = '0x6b175474e89094c44da98b954eedeac495271d0f'; // DAI
+// let tokenOut = '0xc011a72400e58ecd99ee497cf89e3775d4bd732f'; // SNX
 // const tokenIn = '0x6B175474E89094C44Da98b954EedeAC495271d0F'; // DAI
 // const tokenOut = '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2'; // WETH
 // const tokenIn = '0x6B175474E89094C44Da98b954EedeAC495271d0F'; // DAI
