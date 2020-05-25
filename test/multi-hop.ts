@@ -19,18 +19,18 @@ const MAX_UINT = ethers.constants.MaxUint256;
 // const tokenOut = '0x9f8f72aa9304c8b593d555f12ef6589cc3a579a2'; // MKR
 
 // KOVAN
-const tokenIn = '0x1528f3fcc26d13f7079325fb78d9442607781c8c'; // DAI
-const tokenOut = '0x2f375e94fc336cdec2dc0ccb5277fe59cbf1cae5'; // USDC
-// const tokenIn = '0xd0a1e359811322d97991e03f863a0c30c2cf029c'; // WETH
-// const tokenOut = '0x37f03a12241e9fd3658ad6777d289c3fb8512bc9'; // ANT
+// const tokenIn = '0x1528f3fcc26d13f7079325fb78d9442607781c8c'; // DAI
+// const tokenOut = '0x2f375e94fc336cdec2dc0ccb5277fe59cbf1cae5'; // USDC
+const tokenIn = '0x37f03a12241e9fd3658ad6777d289c3fb8512bc9'; // ANT
+const tokenOut = '0xd0a1e359811322d97991e03f863a0c30c2cf029c'; // WETH
 // const tokenOut = '0x0327112423f3a68efdf1fcf402f6c5cb9f7caaaa'; // Token that does not exist
 // const tokenOut = '0xe0c9275e44ea80ef17579d33c55136b7da269aeb'; // wBTC
 
-// const swapType = 'swapExactIn';
-const swapType = 'swapExactOut';
+const swapType = 'swapExactIn';
+// const swapType = 'swapExactOut';
 // const swapAmount = new BigNumber('10094007593337980162'); // 1 * 10**18
-const swapAmount = new BigNumber('10296143'); // 1 * 10**6
-// const swapAmount = new BigNumber('10000000000000000000'); // 10 * 10**6
+// const swapAmount = new BigNumber('10296143'); // 1 * 10**6
+const swapAmount = new BigNumber('10' + '000000000000000000'); // 10 + `10**18`
 const maxPools = new BigNumber('4');
 const returnTokenCostPerPool = new BigNumber('0');
 // const returnTokenCostPerPool = new BigNumber('1000000000000'); // It costs 0.0000001 returnToken per pool trade
@@ -120,7 +120,7 @@ const returnTokenCostPerPool = new BigNumber('0');
     console.log('SOR swaps WITH multi-hop');
     console.log(sorSwaps);
     console.log('Total return WITH multi-hop');
-    console.log(totalReturn.toString());
+    console.log(totalReturn.toNumber() / 10 ** 18);
 
     // // let [directTokenPairs, allTokenPairs] = await sor.getTokenPairsMultiHop(
     // //     tokenIn
