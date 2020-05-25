@@ -556,6 +556,7 @@ export async function getMultihopPoolsWithTokens(tokenIn, tokenOut) {
     return [mostLiquidPoolsFirstHop, mostLiquidPoolsSecondHop, hopTokens];
 }
 
+// LEGACY FUNCTION - Keep Input/Output Format
 export const parsePoolData = (
     directPools,
     tokenIn: string,

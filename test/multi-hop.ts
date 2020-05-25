@@ -17,12 +17,14 @@ const MAX_UINT = ethers.constants.MaxUint256;
 // const tokenOut = '0x0327112423f3a68efdf1fcf402f6c5cb9f7c33fd'; // BTC++
 // const tokenIn = '0x0d8775f648430679a709e98d2b0cb6250d2887ef'; // BAT
 // const tokenOut = '0x9f8f72aa9304c8b593d555f12ef6589cc3a579a2'; // MKR
+let tokenIn = '0x9f8F72aA9304c8B593d555F12eF6589cC3A579A2'; // MKR
+let tokenOut = '0x960b236A07cf122663c4303350609A66A7B288C0'; // ANT
 
 // KOVAN
 // const tokenIn = '0x1528f3fcc26d13f7079325fb78d9442607781c8c'; // DAI
 // const tokenOut = '0x2f375e94fc336cdec2dc0ccb5277fe59cbf1cae5'; // USDC
-const tokenIn = '0x37f03a12241e9fd3658ad6777d289c3fb8512bc9'; // ANT
-const tokenOut = '0xd0a1e359811322d97991e03f863a0c30c2cf029c'; // WETH
+// const tokenIn = '0x37f03a12241e9fd3658ad6777d289c3fb8512bc9'; // ANT
+// const tokenOut = '0xd0a1e359811322d97991e03f863a0c30c2cf029c'; // WETH
 // const tokenOut = '0x0327112423f3a68efdf1fcf402f6c5cb9f7caaaa'; // Token that does not exist
 // const tokenOut = '0xe0c9275e44ea80ef17579d33c55136b7da269aeb'; // wBTC
 

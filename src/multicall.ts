@@ -3,6 +3,7 @@ import { Web3Provider } from 'ethers/providers';
 import { PoolPairData } from './types';
 import * as bmath from './bmath';
 
+// LEGACY FUNCTION - Keep Input/Output Format
 export async function parsePoolDataOnChain(
     pools,
     tokenIn: string,

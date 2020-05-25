@@ -1,20 +1,4 @@
-export { smartOrderRouterMultiHop, calcTotalReturn } from './sor';
-export {
-    getMultihopPoolsWithTokens,
-    getTokenPairsMultiHop,
-    parsePoolData,
-} from './helpers';
-export {
-    getPoolsWithToken,
-    getPoolsWithTokens,
-    getPoolsWithSingleToken,
-    getPools,
-    getTokenPairs,
-} from './subgraph';
-export { parsePoolDataOnChain } from './multicall';
-import * as bmath from './bmath';
-export { bmath };
-
+// Legacy Calls
 export {
     smartOrderRouter,
     calcTotalOutput,
@@ -22,3 +6,22 @@ export {
     formatSwapsExactAmountIn,
     formatSwapsExactAmountOut,
 } from './direct/direct-sor';
+//
+
+export { smartOrderRouterMultiHop, calcTotalReturn } from './sor';
+export {
+    getMultihopPoolsWithTokens,
+    getTokenPairsMultiHop,
+    parsePoolData, // Legacy Function
+} from './helpers';
+export {
+    getPoolsWithTokens, // Legacy Function
+    getTokenPairs, // Legacy Function
+    getPoolsWithToken,
+    getPoolsWithSingleToken,
+    getPools,
+    getPoolsWithTokensMultiHop,
+} from './subgraph';
+export { parsePoolDataOnChain } from './multicall'; // Legacy Function
+import * as bmath from './bmath';
+export { bmath };
