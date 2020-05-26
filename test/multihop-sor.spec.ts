@@ -38,15 +38,15 @@ describe('Multihop Tests Mainnet Data', () => {
         assert.equal(allPools.pools.length, 57, 'Should be 57 pools');
     });
 
-    it('filterPoolsWithTokens - WETH/ANT Pools', async () => {
+    it('filterPoolsWithTokensDirect - WETH/ANT Pools', async () => {
         const allPoolsReturned = allPools; // Replicated sor.getPools() call
-        console.time('filterPoolsWithTokens');
-        const directPools = sor.filterPoolsWithTokens(
+        console.time('filterPoolsWithTokensDirect');
+        const directPools = sor.filterPoolsWithTokensDirect(
             allPoolsReturned,
             WETH,
             ANT
         );
-        console.timeEnd('filterPoolsWithTokens');
+        console.timeEnd('filterPoolsWithTokensDirect');
         assert.equal(
             Object.keys(directPools).length,
             0,
@@ -54,21 +54,25 @@ describe('Multihop Tests Mainnet Data', () => {
         );
     });
 
-    it('filterPoolsWithTokens - WETH/DAI Pools', async () => {
+    it('filterPoolsWithTokensDirect - WETH/DAI Pools', async () => {
         const allPoolsReturned = allPools; // Replicated sor.getPools() call
-        console.time('filterPoolsWithTokens');
-        let directPools = sor.filterPoolsWithTokens(
+        console.time('filterPoolsWithTokensDirect');
+        let directPools = sor.filterPoolsWithTokensDirect(
             allPoolsReturned,
             WETH,
             DAI
         );
-        console.timeEnd('filterPoolsWithTokens');
+        console.timeEnd('filterPoolsWithTokensDirect');
         assert.equal(
             Object.keys(directPools).length,
             9,
             'Should have 9 direct pools'
         );
-        directPools = sor.filterPoolsWithTokens(allPoolsReturned, DAI, WETH);
+        directPools = sor.filterPoolsWithTokensDirect(
+            allPoolsReturned,
+            DAI,
+            WETH
+        );
         assert.equal(
             Object.keys(directPools).length,
             9,
@@ -88,7 +92,7 @@ describe('Multihop Tests Mainnet Data', () => {
         ] = await sor.getMultihopPoolsWithTokens(WETH, DAI);
         console.timeEnd('getMultihopPoolsWithTokens');
 
-        const directPools = await sor.filterPoolsWithTokens(
+        const directPools = await sor.filterPoolsWithTokensDirect(
             allPoolsReturned,
             WETH,
             DAI
@@ -128,7 +132,7 @@ describe('Multihop Tests Mainnet Data', () => {
         const amountIn = new BigNumber(1).times(BONE);
         console.time('FullMultiHopExactIn');
         const allPoolsReturned = allPools; // Replicated sor.getPools() call
-        const directPools = await sor.filterPoolsWithTokens(
+        const directPools = await sor.filterPoolsWithTokensDirect(
             allPoolsReturned,
             WETH,
             DAI
@@ -178,7 +182,7 @@ describe('Multihop Tests Mainnet Data', () => {
         console.time('FullMultiHopExactOut');
 
         const allPoolsReturned = allPools; // Replicated sor.getPools() call
-        const directPools = await sor.filterPoolsWithTokens(
+        const directPools = await sor.filterPoolsWithTokensDirect(
             allPoolsReturned,
             WETH,
             DAI
@@ -224,7 +228,7 @@ describe('Multihop Tests Mainnet Data', () => {
         const amountIn = new BigNumber(1).times(BONE);
         console.time('FullMultiHopExactIn');
         const allPoolsReturned = allPools; // Replicated sor.getPools() call
-        const directPools = await sor.filterPoolsWithTokens(
+        const directPools = await sor.filterPoolsWithTokensDirect(
             allPoolsReturned,
             WETH,
             ANT
@@ -278,7 +282,7 @@ describe('Multihop Tests Mainnet Data', () => {
 
         console.time('FullMultiHopExactOut');
         const allPoolsReturned = allPools; // Replicated sor.getPools() call
-        const directPools = await sor.filterPoolsWithTokens(
+        const directPools = await sor.filterPoolsWithTokensDirect(
             allPoolsReturned,
             WETH,
             ANT
@@ -332,7 +336,7 @@ describe('Multihop Tests Mainnet Data', () => {
 
         console.time('FullMultiHopExactIn');
         const allPoolsReturned = allPools; // Replicated sor.getPools() call
-        const directPools = await sor.filterPoolsWithTokens(
+        const directPools = await sor.filterPoolsWithTokensDirect(
             allPoolsReturned,
             USDC,
             MKR
@@ -387,7 +391,7 @@ describe('Multihop Tests Mainnet Data', () => {
 
         console.time('FullMultiHopExactOut');
         const allPoolsReturned = allPools; // Replicated sor.getPools() call
-        const directPools = await sor.filterPoolsWithTokens(
+        const directPools = await sor.filterPoolsWithTokensDirect(
             allPoolsReturned,
             USDC,
             MKR
