@@ -37,8 +37,6 @@ export const smartOrderRouterMultiHop = (
     maxPools: number,
     costReturnToken: BigNumber
 ): [Swap[][], BigNumber] => {
-    console.time('smartOrderRouterMultiHop');
-
     paths.forEach(b => {
         b.spotPrice = getSpotPricePath(pools, b);
         b.slippage = getSlippageLinearizedSpotPriceAfterSwapPath(
@@ -336,9 +334,6 @@ export const smartOrderRouterMultiHop = (
                     .toString(); // Add dust to second swapExactOut
         }
     }
-
-    console.timeEnd('smartOrderRouterMultiHop');
-
     return [swaps, bestTotalReturn];
 };
 

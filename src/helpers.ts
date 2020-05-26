@@ -15,6 +15,10 @@ import {
     scale,
 } from './bmath';
 
+export function toChecksum(address) {
+    return ethers.utils.getAddress(address);
+}
+
 export function getLimitAmountSwap(
     poolPairData: PoolPairData,
     swapType: string
@@ -897,4 +901,28 @@ export async function getTokenPairsMultiHopOld(token, poolsDict?) {
     let directTokenPairs = Array.from(directTokenPairsSet);
     let allTokenPairs = Array.from(allTokenPairsSet);
     return [directTokenPairs, allTokenPairs];
+}
+
+// Filters all pools data to find pools that have both tokens with > 0 balance
+export function filterPoolsWithTokens(
+    allPools: any,
+    tokenIn: string,
+    tokenOut: string
+) {
+    let poolData = {};
+
+    allPools.pools.forEach(p => {
+        let tI: any = p.tokens.find(
+            t => toChecksum(t.address) === toChecksum(tokenIn)
+        );
+        let tO: any = p.tokens.find(
+            t => toChecksum(t.address) === toChecksum(tokenOut)
+        );
+
+        if (tI && tO && tI.balance > 0 && tO.balance > 0) {
+            poolData[p.id] = p;
+        }
+    });
+
+    return poolData;
 }

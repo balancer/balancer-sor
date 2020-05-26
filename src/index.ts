@@ -13,6 +13,7 @@ export {
     getMultihopPoolsWithTokens,
     getTokenPairsMultiHop,
     parsePoolData, // Legacy Function
+    filterPoolsWithTokens,
 } from './helpers';
 export {
     getPoolsWithTokens, // Legacy Function
