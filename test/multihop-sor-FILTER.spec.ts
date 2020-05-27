@@ -63,7 +63,6 @@ describe('Multihop Tests Mainnet Data', () => {
             DAI
         );
         console.timeEnd('filterPoolsWithTokensDirect');
-
         assert.equal(
             Object.keys(directPools).length,
             10,
@@ -90,7 +89,11 @@ describe('Multihop Tests Mainnet Data', () => {
             mostLiquidPoolsFirstHop,
             mostLiquidPoolsSecondHop,
             hopTokens,
-        ] = await sor.getMultihopPoolsWithTokens(WETH, DAI);
+        ] = await sor.filterPoolsWithTokensMultihop(
+            allPoolsReturned,
+            WETH,
+            DAI
+        );
         console.timeEnd('getMultihopPoolsWithTokens');
 
         const directPools = await sor.filterPoolsWithTokensDirect(
@@ -144,7 +147,11 @@ describe('Multihop Tests Mainnet Data', () => {
             mostLiquidPoolsFirstHop,
             mostLiquidPoolsSecondHop,
             hopTokens,
-        ] = await sor.getMultihopPoolsWithTokens(WETH, DAI);
+        ] = await sor.filterPoolsWithTokensMultihop(
+            allPoolsReturned,
+            WETH,
+            DAI
+        );
 
         let pools, pathData;
         [pools, pathData] = sor.parsePoolData(
@@ -158,7 +165,7 @@ describe('Multihop Tests Mainnet Data', () => {
 
         console.time('smartOrderRouterMultiHop');
         const [sorSwaps, totalReturn] = sor.smartOrderRouterMultiHop(
-            pools,
+            JSON.parse(JSON.stringify(pools)),
             pathData,
             'swapExactIn',
             amountIn,
@@ -194,7 +201,11 @@ describe('Multihop Tests Mainnet Data', () => {
             mostLiquidPoolsFirstHop,
             mostLiquidPoolsSecondHop,
             hopTokens,
-        ] = await sor.getMultihopPoolsWithTokens(WETH, DAI);
+        ] = await sor.filterPoolsWithTokensMultihop(
+            allPoolsReturned,
+            WETH,
+            DAI
+        );
 
         let pools, pathData;
         [pools, pathData] = sor.parsePoolData(
@@ -207,7 +218,7 @@ describe('Multihop Tests Mainnet Data', () => {
         );
 
         const [sorSwaps, totalReturn] = sor.smartOrderRouterMultiHop(
-            pools,
+            JSON.parse(JSON.stringify(pools)),
             pathData,
             'swapExactOut',
             amountOut,
@@ -220,7 +231,7 @@ describe('Multihop Tests Mainnet Data', () => {
         // ADD SWAP CHECK
         assert.equal(
             utils.formatEther(totalReturn.toString()),
-            '4.99680629174882464',
+            '4.978956703358553061',
             'Total Out Should Match'
         );
     });
@@ -240,7 +251,11 @@ describe('Multihop Tests Mainnet Data', () => {
             mostLiquidPoolsFirstHop,
             mostLiquidPoolsSecondHop,
             hopTokens,
-        ] = await sor.getMultihopPoolsWithTokens(WETH, ANT);
+        ] = await sor.filterPoolsWithTokensMultihop(
+            allPoolsReturned,
+            WETH,
+            ANT
+        );
 
         let pools, pathData;
         [pools, pathData] = sor.parsePoolData(
@@ -254,7 +269,7 @@ describe('Multihop Tests Mainnet Data', () => {
 
         console.time('smartOrderRouterMultiHop');
         const [sorSwaps, totalReturn] = sor.smartOrderRouterMultiHop(
-            pools,
+            JSON.parse(JSON.stringify(pools)),
             pathData,
             'swapExactIn',
             amountIn,
@@ -294,7 +309,11 @@ describe('Multihop Tests Mainnet Data', () => {
             mostLiquidPoolsFirstHop,
             mostLiquidPoolsSecondHop,
             hopTokens,
-        ] = await sor.getMultihopPoolsWithTokens(WETH, ANT);
+        ] = await sor.filterPoolsWithTokensMultihop(
+            allPoolsReturned,
+            WETH,
+            ANT
+        );
 
         let pools, pathData;
         [pools, pathData] = sor.parsePoolData(
@@ -308,7 +327,7 @@ describe('Multihop Tests Mainnet Data', () => {
 
         console.time('smartOrderRouterMultiHop');
         const [sorSwaps, totalReturn] = sor.smartOrderRouterMultiHop(
-            pools,
+            JSON.parse(JSON.stringify(pools)),
             pathData,
             'swapExactOut',
             amountOut,
@@ -348,7 +367,11 @@ describe('Multihop Tests Mainnet Data', () => {
             mostLiquidPoolsFirstHop,
             mostLiquidPoolsSecondHop,
             hopTokens,
-        ] = await sor.getMultihopPoolsWithTokens(USDC, MKR);
+        ] = await sor.filterPoolsWithTokensMultihop(
+            allPoolsReturned,
+            USDC,
+            MKR
+        );
 
         let pools, pathData;
         [pools, pathData] = sor.parsePoolData(
@@ -362,7 +385,7 @@ describe('Multihop Tests Mainnet Data', () => {
 
         console.time('smartOrderRouterMultiHop');
         const [sorSwaps, totalReturn] = sor.smartOrderRouterMultiHop(
-            pools,
+            JSON.parse(JSON.stringify(pools)),
             pathData,
             'swapExactIn',
             amountIn,
@@ -403,7 +426,11 @@ describe('Multihop Tests Mainnet Data', () => {
             mostLiquidPoolsFirstHop,
             mostLiquidPoolsSecondHop,
             hopTokens,
-        ] = await sor.getMultihopPoolsWithTokens(USDC, MKR);
+        ] = await sor.filterPoolsWithTokensMultihop(
+            allPoolsReturned,
+            USDC,
+            MKR
+        );
 
         let pools, pathData;
         [pools, pathData] = sor.parsePoolData(
@@ -417,7 +444,7 @@ describe('Multihop Tests Mainnet Data', () => {
 
         console.time('smartOrderRouterMultiHop');
         const [sorSwaps, totalReturn] = sor.smartOrderRouterMultiHop(
-            pools,
+            JSON.parse(JSON.stringify(pools)),
             pathData,
             'swapExactOut',
             amountOut,

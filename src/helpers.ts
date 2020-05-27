@@ -927,34 +927,53 @@ export function filterPoolsWithTokensDirect(
     return poolData;
 }
 
-export async function filterPoolsWithTokensMultihop(tokenIn, tokenOut) {
+// Returns two pool lists. One with all pools containing tokenOne and not tokenTwo and one with tokenTwo not tokenOn.
+export function filterPoolsWithoutMutualTokens(
+    allPools: any,
+    tokenOne: string,
+    tokenTwo: string
+) {
+    let tokenOnePools = {};
+    let tokenTwoPools = {};
+
+    allPools.pools.forEach(pool => {
+        let tOne: any = pool.tokens.find(
+            t => toChecksum(t.address) === toChecksum(tokenOne)
+        );
+        let tTwo: any = pool.tokens.find(
+            t => toChecksum(t.address) === toChecksum(tokenTwo)
+        );
+
+        if (tOne && !tTwo) {
+            tokenOnePools[pool.id] = pool;
+        } else if (!tOne && tTwo) {
+            tokenTwoPools[pool.id] = pool;
+        }
+    });
+
+    return [tokenOnePools, tokenTwoPools];
+}
+
+// Replacing getMultihopPoolsWithTokens
+export async function filterPoolsWithTokensMultihop(
+    allPools: any,
+    tokenIn: string,
+    tokenOut: string
+) {
     //// Multi-hop trades: we find the best pools that connect tokenIn and tokenOut through a multi-hop (intermediate) token
     // First: we get all tokens that can be used to be traded with tokenIn excluding
     // tokens that are in pools that already contain tokenOut (in which case multi-hop is not necessary)
-    const poolsTokenIn = await getPoolsWithSingleToken(tokenIn);
-    const poolsTokenInNoTokenOut = filterPoolsWithoutToken(
-        poolsTokenIn,
-        tokenOut
-    );
-    // console.log("poolsTokenInNoTokenOut");
-    // console.log(poolsTokenInNoTokenOut);
+    let poolsTokenInNoTokenOut, poolsTokenOutNoTokenIn;
+    [
+        poolsTokenInNoTokenOut,
+        poolsTokenOutNoTokenIn,
+    ] = filterPoolsWithoutMutualTokens(allPools, tokenIn, tokenOut);
 
+    // TODO: Bring this into above function to improve time?
     const tokenInHopTokens = getTokensPairedToTokenWithinPools(
         poolsTokenInNoTokenOut,
         tokenIn
     );
-
-    // Second: we get all tokens that can be used to be traded with tokenOut excluding
-    // tokens that are in pools that already contain tokenIn (in which case multi-hop is not necessary)
-    const poolsTokenOut = await getPoolsWithSingleToken(tokenOut);
-    const poolsTokenOutNoTokenIn = filterPoolsWithoutToken(
-        poolsTokenOut,
-        tokenIn
-    );
-    // console.log(poolsTokenOutNoTokenIn);
-    // console.log("poolsTokenOutNoTokenIn");
-
-    // console.log(poolsTokenOutNoTokenIn[poolsTokenOutNoTokenIn.length-1].tokens);
 
     const tokenOutHopTokens = getTokensPairedToTokenWithinPools(
         poolsTokenOutNoTokenIn,

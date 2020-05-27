@@ -211,6 +211,7 @@ export async function getPools() {
             id
             swapFee
             totalWeight
+            publicSwap
             tokens {
               id
               address
