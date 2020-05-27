@@ -1,7 +1,7 @@
 import { BigNumber } from '../../src/utils/bignumber';
 import { ethers } from 'ethers';
 import { PoolPairData, Path } from '../../src/types';
-import { getPoolsWithSingleToken, getPoolsWithToken } from '../../src/subgraph';
+import { getPoolsWithSingleToken } from './subgraph';
 import {
     BONE,
     TWOBONE,

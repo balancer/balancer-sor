@@ -18,10 +18,7 @@ export {
 export {
     getPoolsWithTokens, // Legacy Function
     getTokenPairs, // Legacy Function
-    getPoolsWithToken,
-    getPoolsWithSingleToken,
     getPools,
-    getPoolsWithTokensMultiHop,
 } from './subgraph';
 export { parsePoolDataOnChain } from './multicall'; // Legacy Function
 import * as bmath from './bmath';

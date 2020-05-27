@@ -100,7 +100,7 @@ describe('Tests Multihop SOR vs static allPools.json', () => {
     it('Get multihop pools - WETH>DAI', async () => {
         const allPoolsReturned = allPools; // Replicated sor.getPools() call
 
-        console.time('getMultihopPoolsWithTokens');
+        console.time('filterPoolsWithTokensMultihop');
         let mostLiquidPoolsFirstHop, mostLiquidPoolsSecondHop, hopTokens;
         [
             mostLiquidPoolsFirstHop,
@@ -111,7 +111,7 @@ describe('Tests Multihop SOR vs static allPools.json', () => {
             WETH,
             DAI
         );
-        console.timeEnd('getMultihopPoolsWithTokens');
+        console.timeEnd('filterPoolsWithTokensMultihop');
 
         const directPools = await sor.filterPoolsWithTokensDirect(
             allPoolsReturned,
