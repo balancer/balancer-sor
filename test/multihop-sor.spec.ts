@@ -42,10 +42,12 @@ describe('Tests Multihop SOR vs static allPools.json', () => {
     it('getTokenPairsMultiHop - Should return direct & multihop partner tokens', async () => {
         const allPoolsReturned = allPools; // Replicated sor.getAllPublicSwapPools() call
 
+        console.time('getTokenPairsMultiHop');
         let [directTokenPairs, allTokenPairs] = sor.getTokenPairsMultiHop(
             DAI,
             allPoolsReturned.pools
         );
+        console.timeEnd('getTokenPairsMultiHop');
 
         assert.equal(
             directTokenPairs.length,
