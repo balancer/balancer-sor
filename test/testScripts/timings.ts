@@ -16,7 +16,7 @@ describe('Multi-Pool Tests', () => {
 
         console.time('total');
         console.time('getPools');
-        const allPools = await sor.getPools();
+        const allPools = await sor.getAllPublicSwapPools();
         console.timeEnd('getPools');
 
         console.time('getTokenPairsMultiHop');

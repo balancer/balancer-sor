@@ -28,19 +28,19 @@ export function bnum(val: string | number): any {
 describe('Tests Multihop SOR vs static allPools.json', () => {
     it('getPools timer check', async () => {
         console.time('getPools');
-        await sor.getPools();
+        await sor.getAllPublicSwapPools();
         console.timeEnd('getPools');
     });
 
     it('Saved pool check', async () => {
         // Compares saved pools @25/05/20 to current Subgraph pools.
-        //const sg = await sor.getPools();
+        //const sg = await sor.getAllPublicSwapPools();
         //expect(allPools).to.eql(sg)
         assert.equal(allPools.pools.length, 59, 'Should be 59 pools');
     });
 
     it('getTokenPairsMultiHop - Should return direct & multihop partner tokens', async () => {
-        const allPoolsReturned = allPools; // Replicated sor.getPools() call
+        const allPoolsReturned = allPools; // Replicated sor.getAllPublicSwapPools() call
 
         let [directTokenPairs, allTokenPairs] = sor.getTokenPairsMultiHop(
             DAI,
@@ -56,7 +56,7 @@ describe('Tests Multihop SOR vs static allPools.json', () => {
     });
 
     it('filterPoolsWithTokensDirect - WETH/ANT Pools', async () => {
-        const allPoolsReturned = allPools; // Replicated sor.getPools() call
+        const allPoolsReturned = allPools; // Replicated sor.getAllPublicSwapPools() call
         console.time('filterPoolsWithTokensDirect');
         const directPools = sor.filterPoolsWithTokensDirect(
             allPoolsReturned,
@@ -72,7 +72,7 @@ describe('Tests Multihop SOR vs static allPools.json', () => {
     });
 
     it('filterPoolsWithTokensDirect - WETH/DAI Pools', async () => {
-        const allPoolsReturned = allPools; // Replicated sor.getPools() call
+        const allPoolsReturned = allPools; // Replicated sor.getAllPublicSwapPools() call
         console.time('filterPoolsWithTokensDirect');
         let directPools = sor.filterPoolsWithTokensDirect(
             allPoolsReturned,
@@ -98,7 +98,7 @@ describe('Tests Multihop SOR vs static allPools.json', () => {
     });
 
     it('Get multihop pools - WETH>DAI', async () => {
-        const allPoolsReturned = allPools; // Replicated sor.getPools() call
+        const allPoolsReturned = allPools; // Replicated sor.getAllPublicSwapPools() call
 
         console.time('filterPoolsWithTokensMultihop');
         let mostLiquidPoolsFirstHop, mostLiquidPoolsSecondHop, hopTokens;
@@ -152,7 +152,7 @@ describe('Tests Multihop SOR vs static allPools.json', () => {
     it('Full Multihop SOR, WETH>DAI, swapExactIn', async () => {
         const amountIn = new BigNumber(1).times(BONE);
         console.time('FullMultiHopExactIn');
-        const allPoolsReturned = allPools; // Replicated sor.getPools() call
+        const allPoolsReturned = allPools; // Replicated sor.getAllPublicSwapPools() call
         const directPools = await sor.filterPoolsWithTokensDirect(
             allPoolsReturned,
             WETH,
@@ -206,7 +206,7 @@ describe('Tests Multihop SOR vs static allPools.json', () => {
         const amountOut = new BigNumber(1000).times(BONE);
         console.time('FullMultiHopExactOut');
 
-        const allPoolsReturned = allPools; // Replicated sor.getPools() call
+        const allPoolsReturned = allPools; // Replicated sor.getAllPublicSwapPools() call
         const directPools = await sor.filterPoolsWithTokensDirect(
             allPoolsReturned,
             WETH,
@@ -256,7 +256,7 @@ describe('Tests Multihop SOR vs static allPools.json', () => {
     it('Full Multihop SOR, WETH>ANT, swapExactIn', async () => {
         const amountIn = new BigNumber(1).times(BONE);
         console.time('FullMultiHopExactIn');
-        const allPoolsReturned = allPools; // Replicated sor.getPools() call
+        const allPoolsReturned = allPools; // Replicated sor.getAllPublicSwapPools() call
         const directPools = await sor.filterPoolsWithTokensDirect(
             allPoolsReturned,
             WETH,
@@ -314,7 +314,7 @@ describe('Tests Multihop SOR vs static allPools.json', () => {
         const amountOut = new BigNumber(1000).times(BONE);
 
         console.time('FullMultiHopExactOut');
-        const allPoolsReturned = allPools; // Replicated sor.getPools() call
+        const allPoolsReturned = allPools; // Replicated sor.getAllPublicSwapPools() call
         const directPools = await sor.filterPoolsWithTokensDirect(
             allPoolsReturned,
             WETH,
@@ -372,7 +372,7 @@ describe('Tests Multihop SOR vs static allPools.json', () => {
         const amountIn = new BigNumber('1000000'); // 1 USDC
 
         console.time('FullMultiHopExactIn');
-        const allPoolsReturned = allPools; // Replicated sor.getPools() call
+        const allPoolsReturned = allPools; // Replicated sor.getAllPublicSwapPools() call
         const directPools = await sor.filterPoolsWithTokensDirect(
             allPoolsReturned,
             USDC,
@@ -429,7 +429,7 @@ describe('Tests Multihop SOR vs static allPools.json', () => {
         const amountOut = new BigNumber(10).times(BONE);
 
         console.time('FullMultiHopExactOut');
-        const allPoolsReturned = allPools; // Replicated sor.getPools() call
+        const allPoolsReturned = allPools; // Replicated sor.getAllPublicSwapPools() call
         const directPools = await sor.filterPoolsWithTokensDirect(
             allPoolsReturned,
             USDC,

@@ -144,7 +144,7 @@ describe('Test direct SOR (legacy version with direct pools only) using allPools
 
     it('Direct SOR - WETH->DAI, swapExactIn', async () => {
         console.time('findPoolsWithTokens');
-        const allPoolsReturned = allPools; // Replicates sor.getPools() call
+        const allPoolsReturned = allPools; // Replicates sor.getAllPublicSwapPools() call
         const pools = findPoolsWithTokens(allPoolsReturned, WETH, DAI);
         console.timeEnd('findPoolsWithTokens');
 
@@ -175,7 +175,7 @@ describe('Test direct SOR (legacy version with direct pools only) using allPools
 
     it('Direct SOR - WETH->DAI, swapExactOut', async () => {
         var amountOut = new BigNumber(1000).times(BONE);
-        const allPoolsReturned = allPools; // Replicates sor.getPools() call
+        const allPoolsReturned = allPools; // Replicates sor.getAllPublicSwapPools() call
         const pools = findPoolsWithTokens(allPoolsReturned, WETH, DAI);
         // Find best swaps
         var swaps = sor.smartOrderRouter(
@@ -197,7 +197,7 @@ describe('Test direct SOR (legacy version with direct pools only) using allPools
 
     it('Direct SOR - WETH->ANT, no direct swaps', async () => {
         var amountOut = new BigNumber(1000).times(BONE);
-        const allPoolsReturned = allPools; // Replicates sor.getPools() call
+        const allPoolsReturned = allPools; // Replicates sor.getAllPublicSwapPools() call
 
         const pools = findPoolsWithTokens(allPoolsReturned, WETH, ANT);
 
@@ -217,7 +217,7 @@ describe('Test direct SOR (legacy version with direct pools only) using allPools
 
     it('Direct SOR - USDC->MKR, no direct swaps', async () => {
         var amountOut = new BigNumber(1000).times(BONE);
-        const allPoolsReturned = allPools; // Replicates sor.getPools() call
+        const allPoolsReturned = allPools; // Replicates sor.getAllPublicSwapPools() call
 
         const pools = findPoolsWithTokens(allPoolsReturned, USDC, MKR);
 

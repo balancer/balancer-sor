@@ -110,7 +110,7 @@ describe('Test Filter Functions using allPoolsSmall.json & full SOR comparrions'
         console.timeEnd('getMultihopPoolsWithTokens');
 
         console.time('filterPoolsWithTokensMultihop');
-        const allPoolsReturned = await sor.getPools();
+        const allPoolsReturned = await sor.getAllPublicSwapPools();
 
         let mostLiquidPoolsFirstHopFilter,
             mostLiquidPoolsSecondHopFilter,
@@ -144,7 +144,7 @@ describe('Test Filter Functions using allPoolsSmall.json & full SOR comparrions'
         console.timeEnd('getMultihopPoolsWithTokens');
 
         console.time('filterPoolsWithTokensMultihop');
-        const allPoolsReturned = await sor.getPools();
+        const allPoolsReturned = await sor.getAllPublicSwapPools();
 
         let mostLiquidPoolsFirstHopFilter,
             mostLiquidPoolsSecondHopFilter,
@@ -178,7 +178,7 @@ describe('Test Filter Functions using allPoolsSmall.json & full SOR comparrions'
         console.timeEnd('getMultihopPoolsWithTokens');
 
         console.time('filterPoolsWithTokensMultihop');
-        const allPoolsReturned = await sor.getPools();
+        const allPoolsReturned = await sor.getAllPublicSwapPools();
 
         let mostLiquidPoolsFirstHopFilter,
             mostLiquidPoolsSecondHopFilter,

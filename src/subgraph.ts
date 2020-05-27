@@ -90,7 +90,7 @@ export async function getTokenPairs(token) {
 }
 
 // Returns all public pools
-export async function getPools() {
+export async function getAllPublicSwapPools() {
     const query = `
       {
           pools (where: {publicSwap: true}) {

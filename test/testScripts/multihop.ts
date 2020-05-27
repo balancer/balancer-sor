@@ -142,7 +142,7 @@ const calcTotalInput = (swaps: any[], poolData: Pool[]): any => {
 describe('Multihop Tests Mainnet Data', () => {
     it('pool check', async () => {
         // Compares saved pools @25/05/20 to current Subgraph pools.
-        //const sg = await sor.getPools();
+        //const sg = await sor.getAllPublicSwapPools();
         //expect(allPools).to.eql(sg)
         assert.equal(allPools.pools.length, 57, 'Should be 57 pools');
     });
