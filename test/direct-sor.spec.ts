@@ -36,7 +36,7 @@ function toChecksum(address) {
 }
 
 // This is similar to function used in legacy Exchange app to format pool data
-function findPoolsWithTokens(tokenIn, tokenOut): Pool[] {
+function findPoolsWithTokens(allPools, tokenIn, tokenOut): Pool[] {
     let poolData: Pool[] = [];
 
     allPools.pools.forEach(p => {
@@ -125,8 +125,9 @@ const calcTotalInput = (swaps: any[], poolData: Pool[]): any => {
     return totalAmountIn;
 };
 
-describe('Multihop Tests Mainnet Data', () => {
+describe('Test direct SOR (legacy version with direct pools only) using allPools.json', () => {
     it('getPoolsWithTokens timer check', async () => {
+        // Timing data for Subgraph calls.
         console.time('getPoolsWithTokens');
         await sor.getPoolsWithTokens(WETH, DAI);
         console.timeEnd('getPoolsWithTokens');
@@ -138,14 +139,13 @@ describe('Multihop Tests Mainnet Data', () => {
 
     it('Saved pool check', async () => {
         // Compares saved pools @25/05/20 to current Subgraph pools.
-        //const sg = await sor.getPools();
-        //expect(allPools).to.eql(sg)
-        assert.equal(allPools.pools.length, 57, 'Should be 57 pools');
+        assert.equal(allPools.pools.length, 59, 'Should be 59 pools');
     });
 
     it('Direct SOR - WETH->DAI, swapExactIn', async () => {
         console.time('findPoolsWithTokens');
-        const pools = findPoolsWithTokens(WETH, DAI);
+        const allPoolsReturned = allPools; // Replicates sor.getPools() call
+        const pools = findPoolsWithTokens(allPoolsReturned, WETH, DAI);
         console.timeEnd('findPoolsWithTokens');
 
         var amountIn = new BigNumber(1).times(BONE);
@@ -163,20 +163,20 @@ describe('Multihop Tests Mainnet Data', () => {
 
         var totalOutPut = calcTotalOutput(swaps, pools);
 
-        assert.equal(pools.length, 9, 'Should have 9 pools with tokens.');
-        assert.equal(swaps.length, 4, 'Should have 4 swaps.');
+        assert.equal(pools.length, 10, 'Should have 10 pools with tokens.');
+        assert.equal(swaps.length, 3, 'Should have 3 swaps.');
         // ADD SWAP CHECK
         assert.equal(
             utils.formatEther(totalOutPut.toString()),
-            '201.551912488644695653',
+            '202.860557251722913901',
             'Total Out Should Match'
         );
     });
 
     it('Direct SOR - WETH->DAI, swapExactOut', async () => {
         var amountOut = new BigNumber(1000).times(BONE);
-
-        const pools = findPoolsWithTokens(WETH, DAI);
+        const allPoolsReturned = allPools; // Replicates sor.getPools() call
+        const pools = findPoolsWithTokens(allPoolsReturned, WETH, DAI);
         // Find best swaps
         var swaps = sor.smartOrderRouter(
             pools,
@@ -187,18 +187,19 @@ describe('Multihop Tests Mainnet Data', () => {
         );
 
         var totalOutPut = calcTotalInput(swaps, pools);
-        assert.equal(pools.length, 9, 'Should have 9 pools with tokens.');
+        assert.equal(pools.length, 10, 'Should have 10 pools with tokens.');
         assert.equal(swaps.length, 4, 'Should have 4 swaps.');
         assert.equal(
             utils.formatEther(totalOutPut.toString()),
-            '4.981406985571843872'
+            '4.978956703358553061'
         );
     });
 
     it('Direct SOR - WETH->ANT, no direct swaps', async () => {
         var amountOut = new BigNumber(1000).times(BONE);
+        const allPoolsReturned = allPools; // Replicates sor.getPools() call
 
-        const pools = findPoolsWithTokens(WETH, ANT);
+        const pools = findPoolsWithTokens(allPoolsReturned, WETH, ANT);
 
         // Find best swaps
         var swaps = sor.smartOrderRouter(
@@ -216,8 +217,9 @@ describe('Multihop Tests Mainnet Data', () => {
 
     it('Direct SOR - USDC->MKR, no direct swaps', async () => {
         var amountOut = new BigNumber(1000).times(BONE);
+        const allPoolsReturned = allPools; // Replicates sor.getPools() call
 
-        const pools = findPoolsWithTokens(USDC, MKR);
+        const pools = findPoolsWithTokens(allPoolsReturned, USDC, MKR);
 
         // Find best swaps
         var swaps = sor.smartOrderRouter(

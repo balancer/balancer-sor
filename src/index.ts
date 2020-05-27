@@ -10,7 +10,6 @@ export {
 
 export { smartOrderRouterMultiHop, calcTotalReturn } from './sor';
 export {
-    getMultihopPoolsWithTokens,
     getTokenPairsMultiHop,
     parsePoolData, // Legacy Function
     filterPoolsWithTokensDirect,

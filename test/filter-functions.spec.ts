@@ -1,8 +1,10 @@
-// testing multi-hop
+// Tests multihop filter methods
+// & compares full SOR vs slower test method
 import { expect, assert } from 'chai';
 import 'mocha';
 const sor = require('../src');
 const helpers = require('../src/helpers');
+const comparrisonHelper = require('./utils/comparrisonHelpers');
 const BigNumber = require('bignumber.js');
 const { ethers, utils } = require('ethers');
 // Following has:
@@ -30,7 +32,7 @@ export function bnum(val: string | number): any {
     return new BigNumber(val.toString());
 }
 
-describe('Filter Tests Small Mainnet Data', () => {
+describe('Test Filter Functions using allPoolsSmall.json & full SOR comparrions', () => {
     it('Saved pool check', async () => {
         assert.equal(allPools.pools.length, 12, 'Should be 12 pools');
     });
@@ -104,7 +106,7 @@ describe('Filter Tests Small Mainnet Data', () => {
             mostLiquidPoolsFirstHop,
             mostLiquidPoolsSecondHop,
             hopTokens,
-        ] = await sor.getMultihopPoolsWithTokens(DAI, USDC);
+        ] = await comparrisonHelper.getMultihopPoolsWithTokens(DAI, USDC);
         console.timeEnd('getMultihopPoolsWithTokens');
 
         console.time('filterPoolsWithTokensMultihop');
@@ -138,7 +140,7 @@ describe('Filter Tests Small Mainnet Data', () => {
             mostLiquidPoolsFirstHop,
             mostLiquidPoolsSecondHop,
             hopTokens,
-        ] = await sor.getMultihopPoolsWithTokens(USDC, MKR);
+        ] = await comparrisonHelper.getMultihopPoolsWithTokens(USDC, MKR);
         console.timeEnd('getMultihopPoolsWithTokens');
 
         console.time('filterPoolsWithTokensMultihop');
@@ -172,7 +174,7 @@ describe('Filter Tests Small Mainnet Data', () => {
             mostLiquidPoolsFirstHop,
             mostLiquidPoolsSecondHop,
             hopTokens,
-        ] = await sor.getMultihopPoolsWithTokens(WETH, DAI);
+        ] = await comparrisonHelper.getMultihopPoolsWithTokens(WETH, DAI);
         console.timeEnd('getMultihopPoolsWithTokens');
 
         console.time('filterPoolsWithTokensMultihop');
