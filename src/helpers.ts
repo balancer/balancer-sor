@@ -779,8 +779,11 @@ function union(setA, setB) {
     return _union;
 }
 
-export async function getTokenPairsMultiHop(token, poolsDict) {
-    token = ethers.utils.getAddress(token);
+// Returns two arrays
+// First array contains all tokens in direct pools containing tokenIn
+// Second array contains all tokens in multi-hop pools containing tokenIn
+export function getTokenPairsMultiHop(token: string, poolsDict: any) {
+    token = toChecksum(token);
 
     let tokenPools = new Set();
     let directTokenPairsSet = new Set();

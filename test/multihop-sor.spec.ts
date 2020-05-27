@@ -39,6 +39,22 @@ describe('Tests Multihop SOR vs static allPools.json', () => {
         assert.equal(allPools.pools.length, 59, 'Should be 59 pools');
     });
 
+    it('getTokenPairsMultiHop - Should return direct & multihop partner tokens', async () => {
+        const allPoolsReturned = allPools; // Replicated sor.getPools() call
+
+        let [directTokenPairs, allTokenPairs] = sor.getTokenPairsMultiHop(
+            DAI,
+            allPoolsReturned.pools
+        );
+
+        assert.equal(
+            directTokenPairs.length,
+            18,
+            'Should have 18 direct tokens'
+        );
+        assert.equal(allTokenPairs.length, 39, 'Should be 39 multi-hop tokens');
+    });
+
     it('filterPoolsWithTokensDirect - WETH/ANT Pools', async () => {
         const allPoolsReturned = allPools; // Replicated sor.getPools() call
         console.time('filterPoolsWithTokensDirect');
