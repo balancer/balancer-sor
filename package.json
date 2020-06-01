@@ -36,7 +36,7 @@
     },
     "dependencies": {
         "bignumber.js": "^9.0.0",
-        "ethers": "^4.0.39",
+        "ethers": "4.0.39",
         "isomorphic-fetch": "^2.2.1",
         "typescript": "^3.8.3"
     }

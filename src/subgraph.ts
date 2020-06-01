@@ -17,7 +17,7 @@ export async function getPoolsWithTokens(tokenIn, tokenOut) {
 
     const query = `
       query ($tokens: [Bytes!]) {
-          pools (where: {tokensList_contains: $tokens, publicSwap: true}) {
+          pools (first: 1000, where: {tokensList_contains: $tokens, publicSwap: true}) {
             id
             publicSwap
             swapFee
@@ -63,7 +63,7 @@ export async function getTokenPairs(token) {
 
     const query = `
       query ($token: [Bytes!]) {
-          pools (where: {tokensList_contains: $token, publicSwap: true}) {
+          pools (first: 1000, where: {tokensList_contains: $token, publicSwap: true}) {
             tokensList
           }
         }
@@ -93,7 +93,7 @@ export async function getTokenPairs(token) {
 export async function getAllPublicSwapPools() {
     const query = `
       {
-          pools (where: {publicSwap: true}) {
+          pools (first: 1000, where: {publicSwap: true}) {
             id
             swapFee
             totalWeight
