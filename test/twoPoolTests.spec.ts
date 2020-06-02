@@ -1,7 +1,12 @@
 import { expect, assert } from 'chai';
 import 'mocha';
 import { Pool } from '../src/types';
-import { smartOrderRouter } from '../src/sor';
+import {
+    smartOrderRouter,
+    smartOrderRouterEpsOfInterest,
+    processBalancers,
+    processEpsOfInterest,
+} from '../src/sor';
 import { BigNumber } from '../src/utils/bignumber';
 import { getSpotPrice } from '../src/helpers';
 import { BONE } from '../src/bmath';
@@ -175,6 +180,45 @@ describe('Two Pool Tests', () => {
 
         //console.log(swaps)
         assert.equal(swaps.length, 0, 'Swap should not be possible.');
+    });
+
+    it('smartOrderRouter loop should take a while to compute.', () => {
+        console.time('Legacy smartOrderRouter');
+        var amountIn = new BigNumber(7.823722745418976).times(BONE);
+
+        let swaps;
+        for (var i = 0; i < 1000; i++) {
+            swaps = smartOrderRouter(
+                balancers,
+                'swapExactIn',
+                amountIn,
+                10,
+                new BigNumber(0)
+            );
+        }
+        console.log(swaps);
+        console.timeEnd('Legacy smartOrderRouter');
+    });
+
+    it('smartOrderRouterEpsOfInterest loop should be fast to compute.', () => {
+        console.time('smartOrderRouterEpsOfInterest');
+        var amountIn = new BigNumber(7.823722745418976).times(BONE);
+        balancers = processBalancers(balancers, 'swapExactIn');
+        var epsOfInterest = processEpsOfInterest(balancers, 'swapExactIn');
+
+        let swaps;
+        for (var i = 0; i < 1000; i++) {
+            swaps = smartOrderRouterEpsOfInterest(
+                balancers,
+                'swapExactIn',
+                amountIn,
+                10,
+                new BigNumber(0),
+                epsOfInterest
+            );
+        }
+        console.log(swaps);
+        console.timeEnd('smartOrderRouterEpsOfInterest');
     });
 
     // Check case mentioned in Discord
