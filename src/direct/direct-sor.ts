@@ -153,6 +153,122 @@ export const smartOrderRouter = (
     return swaps;
 };
 
+export const smartOrderRouterEpsOfInterest = (
+    balancers: Pool[],
+    swapType: string,
+    targetInputAmount: BigNumber,
+    maxBalancers: number,
+    costOutputToken: BigNumber,
+    epsOfInterest: EffectivePrice[]
+): SwapAmount[] => {
+    let bestTotalOutput: BigNumber = new BigNumber(0);
+    let highestEpNotEnough: boolean = true;
+    let balancerIds, totalOutput;
+    let bestInputAmounts, bestBalancerIds, inputAmounts;
+
+    let bmin = Math.min(maxBalancers, balancers.length + 1);
+    for (let b = 1; b <= bmin; b++) {
+        totalOutput = 0;
+
+        let e, epAfter, epBefore, inputAmountsEpBefore, inputAmountsEpAfter;
+        for (let i = 0; i < epsOfInterest.length; i++) {
+            e = epsOfInterest[i];
+
+            epAfter = e;
+
+            if (i === 0) {
+                epBefore = epAfter;
+                continue;
+            }
+
+            let inputAmountsAfter = epAfter.amounts;
+            let totalInputAmountAfter = inputAmountsAfter
+                .slice(0, b)
+                .reduce((a, b) => a.plus(b));
+
+            if (totalInputAmountAfter.isGreaterThan(targetInputAmount)) {
+                balancerIds = epBefore.bestPools.slice(0, b);
+                inputAmountsEpBefore = epBefore.amounts.slice(0, b);
+                inputAmountsEpAfter = epAfter.amounts.slice(0, b);
+
+                inputAmounts = getExactInputAmounts(
+                    inputAmountsEpBefore,
+                    inputAmountsEpAfter,
+                    targetInputAmount
+                );
+
+                highestEpNotEnough = false;
+                break;
+            }
+
+            epBefore = epAfter;
+        }
+
+        if (highestEpNotEnough) {
+            balancerIds = [];
+            inputAmounts = [];
+        }
+
+        totalOutput = getLinearizedTotalOutput(
+            balancers,
+            swapType,
+            balancerIds,
+            inputAmounts
+        );
+
+        let improvementCondition: boolean = false;
+        if (swapType === 'swapExactIn') {
+            totalOutput = totalOutput.minus(
+                bmul(
+                    new BigNumber(balancerIds.length).times(BONE),
+                    costOutputToken
+                )
+            );
+            improvementCondition =
+                totalOutput.isGreaterThan(bestTotalOutput) ||
+                bestTotalOutput.isEqualTo(new BigNumber(0));
+        } else {
+            totalOutput = totalOutput.plus(
+                bmul(
+                    new BigNumber(balancerIds.length).times(BONE),
+                    costOutputToken
+                )
+            );
+            improvementCondition =
+                totalOutput.isLessThan(bestTotalOutput) ||
+                bestTotalOutput.isEqualTo(new BigNumber(0));
+        }
+
+        if (improvementCondition === true) {
+            bestInputAmounts = inputAmounts;
+            bestBalancerIds = balancerIds;
+            bestTotalOutput = totalOutput;
+        } else {
+            break;
+        }
+    }
+
+    let swaps: SwapAmount[] = [];
+    let totalSwapAmount: BigNumber = new BigNumber(0);
+    let dust: BigNumber = new BigNumber(0);
+
+    bestInputAmounts.forEach((amount, i) => {
+        let swap: SwapAmount = {
+            pool: bestBalancerIds[i],
+            amount: amount,
+        };
+        totalSwapAmount = totalSwapAmount.plus(amount);
+        swaps.push(swap);
+    });
+
+    if (swaps.length > 0) {
+        dust = targetInputAmount.minus(totalSwapAmount);
+        swaps[0].amount = swaps[0].amount.plus(dust);
+    }
+
+    return swaps;
+};
+
 function getEpsOfInterest(
     sortedBalancers: Pool[],
     swapType: string
@@ -193,11 +309,8 @@ function getEpsOfInterest(
                     amountCross.isLessThan(prevBal.limitAmount)
                 ) {
                     let epi1: EffectivePrice = {};
-                    epi1.price = prevBal.spotPrice.plus(
-                        bmul(
-                            amountCross,
-                            bmul(prevBal.slippage, prevBal.spotPrice)
-                        )
+                    epi1.price = b.spotPrice.plus(
+                        bmul(amountCross, bmul(b.slippage, b.spotPrice))
                     );
                     epi1.swap = [prevBal.id, b.id];
                     epsOfInterest.push(epi1);
@@ -361,7 +474,7 @@ function calculateBestBalancersForEpsOfInterest(
                     bestBalancers[index1] = bestBal2;
                     bestBalancers[index2] = bestBal1;
                 } else {
-                    bestBalancers[index1] = e.swap[2];
+                    bestBalancers[index1] = e.swap[1];
                 }
             }
         } else if (e.maxAmount) {
@@ -452,4 +565,36 @@ function getExactInputAmounts(
         inputAmounts.push(add);
     });
     return inputAmounts;
+}
+
+export function processBalancers(balancers: Pool[], swapType: string): Pool[] {
+    balancers.forEach(b => {
+        b.spotPrice = getSpotPrice(b);
+        b.slippage = getSlippageLinearizedSpotPriceAfterSwap(b, swapType);
+        b.limitAmount = getLimitAmountSwap(b, swapType);
+    });
+    let sortedBalancers = balancers.sort((a, b) => {
+        return a.spotPrice.minus(b.spotPrice).toNumber();
+    });
+    return sortedBalancers;
+}
+
+export function processEpsOfInterest(
+    sortedBalancers: Pool[],
+    swapType: string
+): EffectivePrice[] {
+    let epsOfInterest = getEpsOfInterest(sortedBalancers, swapType).sort(
+        (a, b) => {
+            return a.price.minus(b.price).toNumber();
+        }
+    );
+
+    epsOfInterest = calculateBestBalancersForEpsOfInterest(epsOfInterest);
+
+    epsOfInterest.forEach(e => {
+        let bids = e.bestPools;
+        let ep = e.price;
+        e.amounts = getInputAmountsForEp(sortedBalancers, bids, ep);
+    });
+    return epsOfInterest;
 }

@@ -1,10 +1,13 @@
 // Legacy Calls
 export {
     smartOrderRouter,
+    smartOrderRouterEpsOfInterest,
     calcTotalOutput,
     calcTotalInput,
     formatSwapsExactAmountIn,
     formatSwapsExactAmountOut,
+    processBalancers,
+    processEpsOfInterest,
 } from './direct/direct-sor';
 //
 
