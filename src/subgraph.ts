@@ -91,7 +91,12 @@ export const parsePoolData = (
             swapFee: bmath.scale(bmath.bnum(p.swapFee), 18),
         };
 
-        poolData.push(obj);
+        if (
+            obj.balanceIn.gt(bmath.bnum(0)) &&
+            obj.balanceOut.gt(bmath.bnum(0))
+        ) {
+            poolData.push(obj);
+        }
     });
 
     return poolData;

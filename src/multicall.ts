@@ -58,7 +58,12 @@ export async function parsePoolDataOnChain(
                 weightOut: bmath.bnum(r[3]),
                 swapFee: bmath.bnum(r[4]),
             };
-            returnPools.push(obj);
+            if (
+                obj.balanceIn.gt(bmath.bnum(0)) &&
+                obj.balanceOut.gt(bmath.bnum(0))
+            ) {
+                returnPools.push(obj);
+            }
         });
 
         return returnPools;
