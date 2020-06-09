@@ -129,7 +129,7 @@ describe('Test Filter Functions using allPoolsSmall.json & full SOR comparrions'
         expect(mostLiquidPoolsFirstHop).to.eql(mostLiquidPoolsFirstHopFilter);
         expect(mostLiquidPoolsSecondHop).to.eql(mostLiquidPoolsSecondHopFilter);
         expect(hopTokens).to.eql(hopTokensFilter);
-    });
+    }).timeout(4000);
 
     it('Get multihop pools - USDC>MKR (LIVE SUBGRAPH)', async () => {
         // THIS TESTS ON LIVE SUBGRAPH
@@ -163,7 +163,7 @@ describe('Test Filter Functions using allPoolsSmall.json & full SOR comparrions'
         expect(mostLiquidPoolsFirstHop).to.eql(mostLiquidPoolsFirstHopFilter);
         expect(mostLiquidPoolsSecondHop).to.eql(mostLiquidPoolsSecondHopFilter);
         expect(hopTokens).to.eql(hopTokensFilter);
-    });
+    }).timeout(4000);
 
     it('Full Multihop SOR - WETH>DAI (LIVE SUBGRAPH)', async () => {
         // THIS TESTS ON LIVE SUBGRAPH
@@ -257,5 +257,5 @@ describe('Test Filter Functions using allPoolsSmall.json & full SOR comparrions'
             utils.formatEther(totalReturnFilter.toString()),
             'Total Out Should Match'
         );
-    });
+    }).timeout(4000);
 });
