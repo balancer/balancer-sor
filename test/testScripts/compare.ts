@@ -6,7 +6,12 @@ import { BONE, calcOutGivenIn, calcInGivenOut } from '../../src/bmath';
 
 const WETH = '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2'; // WETH
 const DAI = '0x6B175474E89094C44Da98b954EedeAC495271d0F'; // DAI
-var amountIn = new BigNumber(1).times(BONE);
+const LINK = '0x514910771af9ca656af840dff83e8264ecf986ca';
+const IMBTC = '0x3212b29e33587a00fb1c83346f5dbfa69a458923';
+
+const amountIn = new BigNumber(1).times(BONE);
+const tokenIn = IMBTC;
+const tokenOut = LINK;
 
 export function bnum(val: string | number): any {
     return new BigNumber(val.toString());
@@ -90,9 +95,7 @@ async function direct() {
     console.log('Direct Start');
 
     const allPoolsReturned = await sor.getAllPublicSwapPools();
-    const pools = findPoolsWithTokens(allPoolsReturned, WETH, DAI);
-
-    var amountIn = new BigNumber(1).times(BONE);
+    const pools = findPoolsWithTokens(allPoolsReturned, tokenIn, tokenOut);
 
     // Find best swaps
     var swaps = sor.smartOrderRouter(
@@ -112,8 +115,8 @@ async function multi() {
     const allPoolsReturned = await sor.getAllPublicSwapPools();
     const directPools = await sor.filterPoolsWithTokensDirect(
         allPoolsReturned,
-        WETH,
-        DAI
+        tokenIn,
+        tokenOut
     );
 
     let mostLiquidPoolsFirstHop, mostLiquidPoolsSecondHop, hopTokens;
@@ -121,13 +124,17 @@ async function multi() {
         mostLiquidPoolsFirstHop,
         mostLiquidPoolsSecondHop,
         hopTokens,
-    ] = await sor.filterPoolsWithTokensMultihop(allPoolsReturned, WETH, DAI);
+    ] = await sor.filterPoolsWithTokensMultihop(
+        allPoolsReturned,
+        tokenIn,
+        tokenOut
+    );
 
     let pools, pathData;
     [pools, pathData] = sor.parsePoolData(
         directPools,
-        WETH.toLowerCase(),
-        DAI.toLowerCase(),
+        tokenIn.toLowerCase(),
+        tokenOut.toLowerCase(),
         mostLiquidPoolsFirstHop,
         mostLiquidPoolsSecondHop,
         hopTokens
@@ -143,6 +150,8 @@ async function multi() {
     );
 
     console.log(utils.formatEther(totalReturn.toString()));
+    console.log(`MultiHop Swaps: `);
+    console.log(sorSwaps);
 }
 
 async function run() {
