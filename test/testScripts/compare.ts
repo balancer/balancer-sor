@@ -11,7 +11,7 @@ const IMBTC = '0x3212b29e33587a00fb1c83346f5dbfa69a458923';
 
 const amountIn = new BigNumber(1).times(BONE);
 const tokenIn = IMBTC;
-const tokenOut = LINK;
+const tokenOut = DAI;
 
 export function bnum(val: string | number): any {
     return new BigNumber(val.toString());
@@ -130,15 +130,23 @@ async function multi() {
         tokenOut
     );
 
+    console.log(`mostLiquidPoolsFirstHop: ${mostLiquidPoolsFirstHop.length}`);
+    console.log(`mostLiquidPoolsSecondHop: ${mostLiquidPoolsSecondHop.length}`);
+
     let pools, pathData;
     [pools, pathData] = sor.parsePoolData(
         directPools,
+        // tokenIn,
+        // tokenOut,
         tokenIn.toLowerCase(),
         tokenOut.toLowerCase(),
         mostLiquidPoolsFirstHop,
         mostLiquidPoolsSecondHop,
         hopTokens
     );
+
+    console.log(`pools: ${pools.length}`);
+    console.log(`pathData: ${pathData.length}`);
 
     const [sorSwaps, totalReturn] = sor.smartOrderRouterMultiHop(
         JSON.parse(JSON.stringify(pools)),
