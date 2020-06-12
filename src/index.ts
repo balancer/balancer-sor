@@ -23,6 +23,6 @@ export {
     getTokenPairs, // Legacy Function
     getAllPublicSwapPools,
 } from './subgraph';
-export { parsePoolDataOnChain } from './multicall'; // Legacy Function
+export { parsePoolDataOnChain, getAllPoolDataOnChain } from './multicall'; // Legacy Function
 import * as bmath from './bmath';
 export { bmath };
