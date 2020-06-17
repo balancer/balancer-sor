@@ -1,6 +1,6 @@
 // testing multi-hop
 console.log('Started');
-const sor = require('../src');
+const sor = require('../../src');
 const BigNumber = require('bignumber.js');
 const ethers = require('ethers');
 

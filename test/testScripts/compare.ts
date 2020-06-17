@@ -1,17 +1,37 @@
+import fetch from 'isomorphic-fetch';
 const sor = require('../../src');
 const BigNumber = require('bignumber.js');
 const { ethers, utils } = require('ethers');
 import { Pool } from '../../src/direct/types';
 import { BONE, calcOutGivenIn, calcInGivenOut } from '../../src/bmath';
 
-const WETH = '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2'; // WETH
-const DAI = '0x6B175474E89094C44Da98b954EedeAC495271d0F'; // DAI
-const LINK = '0x514910771af9ca656af840dff83e8264ecf986ca';
-const IMBTC = '0x3212b29e33587a00fb1c83346f5dbfa69a458923';
+const SUBGRAPH_URL =
+    'https://api.thegraph.com/subgraphs/name/balancer-labs/balancer';
 
-const amountIn = new BigNumber(1).times(BONE);
-const tokenIn = IMBTC;
-const tokenOut = DAI;
+export async function getPoolTokens() {
+    const query = `
+      {
+        poolTokens {
+          symbol
+          address
+        }
+      }
+    `;
+
+    const response = await fetch(SUBGRAPH_URL, {
+        method: 'POST',
+        headers: {
+            Accept: 'application/json',
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            query,
+        }),
+    });
+
+    const { data } = await response.json();
+    return data;
+}
 
 export function bnum(val: string | number): any {
     return new BigNumber(val.toString());
@@ -91,28 +111,69 @@ function toChecksum(address) {
     return ethers.utils.getAddress(address);
 }
 
-async function direct() {
-    console.log('Direct Start');
-
-    const allPoolsReturned = await sor.getAllPublicSwapPools();
+// This uses legacy SOR to get direct swaps
+// & helper functions from Exchange app to calc total output
+async function directLegacy(
+    allPoolsReturned,
+    tokenIn,
+    tokenOut,
+    trade,
+    amount
+) {
     const pools = findPoolsWithTokens(allPoolsReturned, tokenIn, tokenOut);
 
     // Find best swaps
-    var swaps = sor.smartOrderRouter(
-        pools,
-        'swapExactIn',
-        amountIn,
-        4,
-        new BigNumber(0)
-    );
+    var swaps = sor.smartOrderRouter(pools, trade, amount, 4, new BigNumber(0));
 
     var totalOutPut = calcTotalOutput(swaps, pools);
 
-    console.log(utils.formatEther(totalOutPut.toString()));
+    // console.log(`Legacy Direct Total: ${utils.formatEther(totalOutPut.toString())}`);
+    return [swaps, totalOutPut];
 }
 
-async function multi() {
-    const allPoolsReturned = await sor.getAllPublicSwapPools();
+// Uses new SOR functions but with only Direct Pools
+async function SorDirectOnly(
+    allPoolsReturned,
+    tokenIn,
+    tokenOut,
+    trade,
+    amount
+) {
+    let parsedPools, pathDataDirectPoolsOnly;
+
+    const filteredPools = sor.filterPoolsWithTokensDirect(
+        allPoolsReturned,
+        tokenIn,
+        tokenOut
+    );
+
+    [parsedPools, pathDataDirectPoolsOnly] = sor.parsePoolData(
+        filteredPools,
+        tokenIn.toLowerCase(),
+        tokenOut.toLowerCase()
+    );
+
+    const returnTokenCostPerPool = new BigNumber('0');
+    const maxPools = new BigNumber('4');
+
+    const [
+        sorSwapsDirectPoolsOnly,
+        totalReturnDirectPoolsOnly,
+    ] = sor.smartOrderRouterMultiHop(
+        JSON.parse(JSON.stringify(parsedPools)), // Passing clone to avoid change in original pools
+        pathDataDirectPoolsOnly,
+        trade,
+        amount,
+        maxPools,
+        returnTokenCostPerPool
+    );
+    //console.log('SOR swaps WITHOUT multi-hop');
+    //console.log(sorSwapsDirectPoolsOnly);
+    // console.log(`SOR Direct Total: ${utils.formatEther(totalReturnDirectPoolsOnly.toString())}`);
+    return [sorSwapsDirectPoolsOnly, totalReturnDirectPoolsOnly];
+}
+
+async function SorMultihop(allPoolsReturned, tokenIn, tokenOut, trade, amount) {
     const directPools = await sor.filterPoolsWithTokensDirect(
         allPoolsReturned,
         tokenIn,
@@ -130,14 +191,9 @@ async function multi() {
         tokenOut
     );
 
-    console.log(`mostLiquidPoolsFirstHop: ${mostLiquidPoolsFirstHop.length}`);
-    console.log(`mostLiquidPoolsSecondHop: ${mostLiquidPoolsSecondHop.length}`);
-
     let pools, pathData;
     [pools, pathData] = sor.parsePoolData(
         directPools,
-        // tokenIn,
-        // tokenOut,
         tokenIn.toLowerCase(),
         tokenOut.toLowerCase(),
         mostLiquidPoolsFirstHop,
@@ -145,26 +201,142 @@ async function multi() {
         hopTokens
     );
 
-    console.log(`pools: ${pools.length}`);
-    console.log(`pathData: ${pathData.length}`);
-
     const [sorSwaps, totalReturn] = sor.smartOrderRouterMultiHop(
         JSON.parse(JSON.stringify(pools)),
         pathData,
-        'swapExactIn',
-        amountIn,
+        trade,
+        amount,
         4,
         new BigNumber(0)
     );
 
-    console.log(utils.formatEther(totalReturn.toString()));
-    console.log(`MultiHop Swaps: `);
-    console.log(sorSwaps);
+    // console.log(`SOR Multihop Total: ${utils.formatEther(totalReturn.toString())}`);
+    // console.log(`MultiHop Swaps: `);
+    // console.log(sorSwaps);
+    return [sorSwaps, totalReturn];
 }
 
 async function run() {
-    await direct();
-    await multi();
+    // For manual input reference
+    const WETH = '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2'; // WETH
+    const DAI = '0x6B175474E89094C44Da98b954EedeAC495271d0F'; // DAI
+    const LINK = '0x514910771af9ca656af840dff83e8264ecf986ca';
+    const IMBTC = '0x3212b29e33587a00fb1c83346f5dbfa69a458923';
+
+    const runLoop = 7;
+    const amounts = [
+        new BigNumber(0.1).times(BONE),
+        new BigNumber(1.7).times(BONE),
+        new BigNumber(107.6).times(BONE),
+        new BigNumber(1000.77).times(BONE),
+    ];
+
+    let trade: string = 'swapExactOut';
+    const allPoolsReturned = await sor.getAllPublicSwapPools();
+    const poolTokens = await getPoolTokens();
+
+    let resultTable = [];
+
+    console.log(`Running for ${runLoop} random tokens...`);
+
+    for (let i = 0; i < runLoop; i++) {
+        trade = trade === 'swapExactIn' ? 'swapExactOut' : 'swapExactIn';
+        const tokenOneIndex = Math.floor(
+            Math.random() * poolTokens.poolTokens.length
+        );
+        const tokenTwoIndex = Math.floor(
+            Math.random() * poolTokens.poolTokens.length
+        );
+
+        for (let j = 0; j < amounts.length; j++) {
+            let amount = amounts[j];
+            console.log(
+                `${i}: ${utils.formatEther(amount.toString())} ${
+                    poolTokens.poolTokens[tokenOneIndex].symbol
+                }/${poolTokens.poolTokens[tokenTwoIndex].symbol}`
+            );
+
+            let directSwaps,
+                directTotal = bnum(0);
+
+            if (trade !== 'swapExactOut') {
+                [directSwaps, directTotal] = await directLegacy(
+                    allPoolsReturned,
+                    poolTokens.poolTokens[tokenOneIndex].address,
+                    poolTokens.poolTokens[tokenTwoIndex].address,
+                    trade,
+                    amount
+                );
+            }
+            let [sorDirectSwaps, sorDirectTotal] = await SorDirectOnly(
+                allPoolsReturned,
+                poolTokens.poolTokens[tokenOneIndex].address,
+                poolTokens.poolTokens[tokenTwoIndex].address,
+                trade,
+                amount
+            );
+            let [sorMultiSwaps, sorMultiTotal] = await SorMultihop(
+                allPoolsReturned,
+                poolTokens.poolTokens[tokenOneIndex].address,
+                poolTokens.poolTokens[tokenTwoIndex].address,
+                trade,
+                amount
+            );
+
+            let result = '';
+
+            if (trade !== 'swapExactOut') {
+                if (
+                    !directTotal.eq(sorDirectTotal) &&
+                    sorDirectTotal.lt(directTotal)
+                ) {
+                    console.log(`!!!! Difference in Direct Compare`);
+                    result += `Direct Compare Issue. `;
+                }
+            }
+
+            if (sorMultiTotal.lt(sorDirectTotal) && trade === 'swapExactIn') {
+                console.log(`!!!! swapExactIn Multiswap Total < Direct !!!!`);
+                result += `Multiswap Total < Direct`;
+            } else if (
+                sorMultiTotal.gt(sorDirectTotal) &&
+                trade === 'swapExactOut'
+            ) {
+                if (!sorDirectTotal.isZero()) {
+                    console.log(
+                        `!!!! swapExactOut Multiswap Total In > Direct !!!!`
+                    );
+                    result += `Multiswap Total In > Direct`;
+                }
+            }
+
+            /*
+            if(sorMultiTotal.isZero()){
+              i--;
+            }
+            */
+
+            result = result === '' ? 'OK' : result;
+            const totalMultiSwaps = sorMultiSwaps.reduce(
+                (acc, seq) => acc + seq.length,
+                0
+            );
+
+            let resultObj = {
+                trade: `${trade} ${utils.formatEther(amount.toString())}`,
+                pairs: `${poolTokens.poolTokens[tokenOneIndex].symbol}/${poolTokens.poolTokens[tokenTwoIndex].symbol}`,
+                directTotal: utils.formatEther(directTotal.toString()),
+                sorDirectTotal: utils.formatEther(sorDirectTotal.toString()),
+                sorMultiHopTotal: utils.formatEther(sorMultiTotal.toString()),
+                noSwapsMulti: totalMultiSwaps,
+                result: result,
+            };
+
+            resultTable.push(resultObj);
+        }
+    }
+
+    console.table(resultTable);
 }
 
 run();
