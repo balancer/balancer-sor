@@ -19,6 +19,15 @@ export interface Path {
     limitAmount?: BigNumber;
 }
 
+export interface EffectivePrice {
+    price?: BigNumber;
+    id?: string;
+    maxAmount?: string;
+    swap?: string[];
+    amounts?: BigNumber[];
+    bestPools?: string[];
+}
+
 export interface Price {
     price?: BigNumber;
     id?: string;

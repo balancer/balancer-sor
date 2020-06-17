@@ -1,6 +1,6 @@
 // Test direct SOR (legacy version with direct pools only)
 // Uses allPools.json which has Mainnet pool data from 25/05/20
-import { expect, assert } from 'chai';
+import { assert } from 'chai';
 import 'mocha';
 const sor = require('../src');
 const BigNumber = require('bignumber.js');

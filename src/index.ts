@@ -11,7 +11,14 @@ export {
 } from './direct/direct-sor';
 //
 
-export { smartOrderRouterMultiHop, calcTotalReturn } from './sor';
+export {
+    smartOrderRouterMultiHop,
+    smartOrderRouterMultiHopEpsOfInterest,
+    calcTotalReturn,
+    processPaths,
+    processEpsOfInterestMultiHop,
+} from './sor';
+
 export {
     getTokenPairsMultiHop,
     parsePoolData, // Legacy Function

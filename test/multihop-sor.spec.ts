@@ -470,4 +470,103 @@ describe('Tests Multihop SOR vs static allPools.json', () => {
             'Total Out Should Match'
         );
     });
+
+    it('Full Multihop SOR, USDC>MKR, swapExactIn, EPS of interest version should be quicker', async () => {
+        const amountIn = new BigNumber('1000000'); // 1 USDC
+
+        const allPoolsReturned = allPools; // Replicated sor.getAllPublicSwapPools() call
+        const directPools = await sor.filterPoolsWithTokensDirect(
+            allPoolsReturned,
+            USDC,
+            MKR
+        );
+
+        let mostLiquidPoolsFirstHop, mostLiquidPoolsSecondHop, hopTokens;
+        [
+            mostLiquidPoolsFirstHop,
+            mostLiquidPoolsSecondHop,
+            hopTokens,
+        ] = await sor.filterPoolsWithTokensMultihop(
+            allPoolsReturned,
+            USDC,
+            MKR
+        );
+
+        let pools, pathData;
+        [pools, pathData] = sor.parsePoolData(
+            directPools,
+            USDC.toLowerCase(), // TODO - Why is this required????
+            MKR.toLowerCase(),
+            mostLiquidPoolsFirstHop,
+            mostLiquidPoolsSecondHop,
+            hopTokens
+        );
+
+        let sorSwaps, totalReturn;
+        console.time('smartOrderRouterMultiHopx100');
+        const mhTimeStart = process.hrtime.bigint();
+        for (var i = 0; i < 100; i++) {
+            [sorSwaps, totalReturn] = sor.smartOrderRouterMultiHop(
+                JSON.parse(JSON.stringify(pools)),
+                pathData,
+                'swapExactIn',
+                amountIn,
+                4,
+                new BigNumber(0)
+            );
+        }
+        const mhTimeStop = process.hrtime.bigint();
+        console.timeEnd('smartOrderRouterMultiHopx100');
+
+        assert.equal(
+            Object.keys(directPools).length,
+            0,
+            'Should be no direct pools.'
+        );
+        assert.equal(sorSwaps.length, 2, 'Should have 2 swaps.');
+        assert.equal(
+            utils.formatEther(totalReturn.toString()),
+            '0.002932410291658511',
+            'Total Out Should Match'
+        );
+
+        let paths = sor.processPaths(pathData, pools, 'swapExactIn');
+        let epsOfInterest = sor.processEpsOfInterestMultiHop(
+            paths,
+            'swapExactIn'
+        );
+
+        let sorSwapsEps, totalReturnEps;
+        const mhTimeEpsStart = process.hrtime.bigint();
+        console.time('smartOrderRouterMultiHopEpsx100');
+        for (var i = 0; i < 100; i++) {
+            [
+                sorSwapsEps,
+                totalReturnEps,
+            ] = sor.smartOrderRouterMultiHopEpsOfInterest(
+                JSON.parse(JSON.stringify(pools)),
+                paths,
+                'swapExactIn',
+                amountIn,
+                4,
+                new BigNumber(0),
+                epsOfInterest
+            );
+        }
+        let t = console.timeEnd('smartOrderRouterMultiHopEpsx100');
+        let mhTimeEpsStop = process.hrtime.bigint();
+        console.log(`Old ${mhTimeStop - mhTimeStart} nanoseconds`);
+        console.log(`New ${mhTimeEpsStop - mhTimeEpsStart} nanoseconds`);
+
+        assert.equal(
+            totalReturnEps.toString(),
+            totalReturn.toString(),
+            'Returns should be same.'
+        );
+        expect(sorSwapsEps).to.eql(sorSwaps);
+        assert(
+            mhTimeStop - mhTimeStart > mhTimeEpsStop - mhTimeEpsStart,
+            'New method should be faster'
+        );
+    }).timeout(30000);
 });
