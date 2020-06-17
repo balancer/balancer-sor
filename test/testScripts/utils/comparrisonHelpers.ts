@@ -1,6 +1,6 @@
-import { BigNumber } from '../../src/utils/bignumber';
+import { BigNumber } from '../../../src/utils/bignumber';
 import { ethers } from 'ethers';
-import { PoolPairData, Path } from '../../src/types';
+import { PoolPairData, Path } from '../../../src/types';
 import { getPoolsWithSingleToken } from './subgraph';
 import {
     BONE,
@@ -13,7 +13,7 @@ import {
     calcOutGivenIn,
     calcInGivenOut,
     scale,
-} from '../../src/bmath';
+} from '../../../src/bmath';
 
 export function toChecksum(address) {
     return ethers.utils.getAddress(address);

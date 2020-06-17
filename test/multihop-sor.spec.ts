@@ -4,10 +4,9 @@ import { expect, assert } from 'chai';
 import 'mocha';
 const sor = require('../src');
 const BigNumber = require('bignumber.js');
-const { ethers, utils } = require('ethers');
+const { utils } = require('ethers');
 const allPools = require('./allPools.json');
-import { Pool } from '../src/direct/types';
-import { BONE, calcOutGivenIn, calcInGivenOut } from '../src/bmath';
+import { BONE } from '../src/bmath';
 
 const WETH = '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2'; // WETH
 const DAI = '0x6B175474E89094C44Da98b954EedeAC495271d0F'; // DAI
@@ -21,21 +20,9 @@ BigNumber.config({
     DECIMAL_PLACES: 18,
 });
 
-export function bnum(val: string | number): any {
-    return new BigNumber(val.toString());
-}
-
 describe('Tests Multihop SOR vs static allPools.json', () => {
-    it('getPools timer check', async () => {
-        console.time('getPools');
-        await sor.getAllPublicSwapPools();
-        console.timeEnd('getPools');
-    });
-
     it('Saved pool check', async () => {
-        // Compares saved pools @25/05/20 to current Subgraph pools.
-        //const sg = await sor.getAllPublicSwapPools();
-        //expect(allPools).to.eql(sg)
+        // Uses saved pools @25/05/20.
         assert.equal(allPools.pools.length, 59, 'Should be 59 pools');
     });
 

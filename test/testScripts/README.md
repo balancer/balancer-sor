@@ -2,9 +2,9 @@
 
 These scripts can be used for to run non-deterministic tests.
 
-Run using: `$ ts-node ./test/testScripts/file-name.ts`
-
 ### compare.ts
+
+Run using: `$ ts-node ./test/testScripts/compare.ts`
 
 Will run multiswap SOR and direct SOR (using live Mainnet Subgraph).
 
@@ -39,3 +39,9 @@ Multihop:
 -   sor.filterPoolsWithTokensMultihop(allPoolsReturned, tokenIn, tokenOut);
 -   sor.parsePoolData
 -   [sorSwaps, totalReturn] = sor.smartOrderRouterMultiHop
+
+### filter-functions
+
+Run: `$ npx mocha -r ts-node/register test/testScripts/filter-functions.spec.ts`
+
+Uses live Subgraph data to compare filter methods.
