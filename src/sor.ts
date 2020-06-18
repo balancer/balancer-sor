@@ -20,11 +20,11 @@ import {
 } from './bmath';
 import { BigNumber } from './utils/bignumber';
 import { PoolPairData, Path, Swap, Price, EffectivePrice } from './types';
+import { ethers, utils } from 'ethers';
 
 // TODO give the option to choose a % of slippage beyond current price?
-const MAX_UINT = new BigNumber(
-    115792089237316195423570985008687907853269984665640564039457584007913129639935
-);
+export const MAX_UINT = utils.bigNumberify(ethers.constants.MaxUint256);
+
 const minAmountOut = 0;
 const maxAmountIn = MAX_UINT;
 const maxPrice = MAX_UINT;
