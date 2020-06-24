@@ -128,6 +128,7 @@ const calcTotalInput = (swaps: any[], poolData: Pool[]): any => {
 describe('Test direct SOR (legacy version with direct pools only) using allPools.json', () => {
     it('getPoolsWithTokens timer check', async () => {
         // Timing data for Subgraph calls.
+        /*
         console.time('getPoolsWithTokens');
         await sor.getPoolsWithTokens(WETH, DAI);
         console.timeEnd('getPoolsWithTokens');
@@ -135,6 +136,7 @@ describe('Test direct SOR (legacy version with direct pools only) using allPools
         console.time('getPoolsWithTokensNoPools');
         await sor.getPoolsWithTokens(USDC, MKR);
         console.timeEnd('getPoolsWithTokensNoPools');
+        */
     });
 
     it('Saved pool check', async () => {
