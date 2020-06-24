@@ -45,3 +45,9 @@ Multihop:
 Run: `$ npx mocha -r ts-node/register test/testScripts/filter-functions.spec.ts`
 
 Uses live Subgraph data to compare filter methods.
+
+### multicall.ts
+
+Run: `$ ts-node ./test/testScripts/multicall.ts`
+
+Uses live Subgraph data to compare filter methods.

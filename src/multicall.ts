@@ -108,7 +108,7 @@ export async function getAllPoolDataOnChain(
     }
 
     try {
-        // console.log(`Multicalls: ${calls.length}`)
+        console.log(`Multicalls: ${calls.length}`);
         const [blockNumber, response] = await multi.aggregate(calls);
 
         let i = 0;
