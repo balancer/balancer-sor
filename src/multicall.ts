@@ -1,5 +1,6 @@
-import { ethers } from 'ethers';
-import { Web3Provider } from 'ethers/providers';
+import { Interface } from '@ethersproject/abi';
+import { Contract } from '@ethersproject/contracts';
+import { Web3Provider } from '@ethersproject/providers';
 import { Pool } from './types';
 import * as bmath from './bmath';
 
@@ -16,9 +17,9 @@ export async function parsePoolDataOnChain(
     const multiAbi = require('./abi/multicall.json');
     const bpoolAbi = require('./abi/bpool.json');
 
-    const multi = new ethers.Contract(multiAddress, multiAbi, provider);
+    const multi = new Contract(multiAddress, multiAbi, provider);
 
-    const iface = new ethers.utils.Interface(bpoolAbi);
+    const iface = new Interface(bpoolAbi);
 
     const promises: Promise<any>[] = [];
 
@@ -26,17 +27,17 @@ export async function parsePoolDataOnChain(
 
     let poolData: Pool[] = [];
     pools.forEach(p => {
-        calls.push([p.id, iface.functions.getBalance.encode([tokenIn])]);
-        calls.push([p.id, iface.functions.getBalance.encode([tokenOut])]);
+        calls.push([p.id, iface.encodeFunctionData('getBalance', [tokenIn])]);
+        calls.push([p.id, iface.encodeFunctionData('getBalance', [tokenOut])]);
         calls.push([
             p.id,
-            iface.functions.getNormalizedWeight.encode([tokenIn]),
+            iface.encodeFunctionData('getNormalizedWeight', [tokenIn]),
         ]);
         calls.push([
             p.id,
-            iface.functions.getNormalizedWeight.encode([tokenOut]),
+            iface.encodeFunctionData('getNormalizedWeight', [tokenOut]),
         ]);
-        calls.push([p.id, iface.functions.getSwapFee.encode([])]);
+        calls.push([p.id, iface.encodeFunctionData('getSwapFee', [])]);
     });
 
     try {
