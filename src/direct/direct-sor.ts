@@ -554,8 +554,11 @@ function getExactInputAmounts(
 
     let deltaTimesTarget: BigNumber[] = [];
     deltaInputAmounts.forEach((a, i) => {
-        let mult = bmul(a, targetTotalInput.minus(totalInputBefore));
-        mult = bdiv(mult, deltaTotalInput);
+        let div = bdiv(
+            targetTotalInput.minus(totalInputBefore),
+            deltaTotalInput
+        );
+        let mult = bmul(div, a);
         deltaTimesTarget.push(mult);
     });
 
