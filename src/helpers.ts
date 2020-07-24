@@ -20,6 +20,7 @@ import {
     TokenAmount,
     Pair,
     Price,
+    Fetcher,
     JSBI,
     WETH,
 } from '@uniswap/sdk';
@@ -885,7 +886,7 @@ export async function getUniswapWeiPrice(
     TokenDecimals: number
 ): Promise<BigNumber> {
     const token = new Token(ChainId.MAINNET, TokenAddr, TokenDecimals);
-    const pair = await Pair.fetchData(WETH[ChainId.MAINNET], token);
+    const pair = await Fetcher.fetchPairData(WETH[ChainId.MAINNET], token);
 
     // This is a JSBI format: https://github.com/GoogleChromeLabs/jsbi
     const token_price = new Price(
