@@ -13,10 +13,12 @@ export {
 
 export {
     smartOrderRouterMultiHop,
+    smartOrderRouterMultiHopNEW,
     smartOrderRouterMultiHopEpsOfInterest,
     calcTotalReturn,
     processPaths,
     processEpsOfInterestMultiHop,
+    processEpsOfInterestMultiHopNEW,
 } from './sor';
 
 export {
