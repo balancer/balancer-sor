@@ -1561,6 +1561,11 @@ jsbn@~0.1.0:
   resolved "https://registry.yarnpkg.com/jsbn/-/jsbn-0.1.1.tgz#a5e654c2e5a2deb5f201d96cefbca80c0ef2f513"
   integrity sha1-peZUwuWi3rXyAdls77yoDA7y9RM=
 
+jsclass@^4.0.5:
+  version "4.0.5"
+  resolved "https://registry.yarnpkg.com/jsclass/-/jsclass-4.0.5.tgz#72257b324ea4774c781f0d67d3e243599dda1d0c"
+  integrity sha1-ciV7Mk6kd0x4Hw1n0+JDWZ3aHQw=
+
 jsesc@^2.5.1:
   version "2.5.2"
   resolved "https://registry.yarnpkg.com/jsesc/-/jsesc-2.5.2.tgz#80564d2e483dacf6e8ef209650a67df3f0c283a4"
