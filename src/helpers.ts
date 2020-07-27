@@ -1,4 +1,4 @@
-var Set2 = require('jsclass/src/set').Set;
+var Set = require('jsclass/src/set').Set;
 import { BigNumber } from './utils/bignumber';
 import { ethers } from 'ethers';
 import { PoolPairData, Path } from './types';
@@ -622,18 +622,6 @@ function getTokensPairedToTokenWithinPools(pools, token) {
     return tokens;
 }
 
-// Inputs:
-// - pools: All pools that contain a token
-// - token: Token for which we are looking for pairs
-// Outputs:
-// - tokens: Set (without duplicate elements) of all tokens that pair with token
-function getTokensPairedToTokenWithinPoolsSET(pools, token) {
-    let tokens = new Set2();
-    tokens = pools.flatten();
-    tokens.remove(token); // since we don't want the token itself in the list
-    return tokens;
-}
-
 function union(setA, setB) {
     if (setA.size == 0) {
         return new Set(setB);
@@ -652,10 +640,10 @@ function union(setA, setB) {
 // First array contains all tokens in direct pools containing tokenIn
 // Second array contains all tokens in multi-hop pools containing tokenIn
 export function getTokenPairsMultiHop(token: string, poolsTokensListSet: any) {
-    let poolsWithToken = new Set2();
-    let poolsWithoutToken = new Set2();
+    let poolsWithToken = new Set();
+    let poolsWithoutToken = new Set();
 
-    let directTokenPairsSet = new Set2();
+    let directTokenPairsSet = new Set();
 
     // If pool contains token add all its tokens to direct list
     poolsTokensListSet.forEach((poolTokenList, index) => {
@@ -665,8 +653,8 @@ export function getTokenPairsMultiHop(token: string, poolsTokensListSet: any) {
 
     directTokenPairsSet = poolsWithToken.flatten();
 
-    let multihopTokenPools = new Set2();
-    let multihopTokenPairsSet = new Set2();
+    let multihopTokenPools = new Set();
+    let multihopTokenPairsSet = new Set();
 
     poolsWithoutToken.forEach((pool, index) => {
         if (!pool.intersection(directTokenPairsSet).isEmpty())
@@ -674,7 +662,7 @@ export function getTokenPairsMultiHop(token: string, poolsTokensListSet: any) {
     });
 
     multihopTokenPairsSet = multihopTokenPools.flatten();
-    let allTokenPairsSet = new Set2();
+    let allTokenPairsSet = new Set();
     allTokenPairsSet = directTokenPairsSet.union(multihopTokenPairsSet);
 
     // console.log("allTokenPairsSet")
@@ -693,10 +681,10 @@ export function filterPoolsWithTokensDirect(
     tokenOut: string
 ) {
     let poolsWithTokens = {};
-    let tokens = new Set2([tokenIn, tokenOut]);
+    let tokens = new Set([tokenIn, tokenOut]);
     // If pool contains token add all its tokens to direct list
     allPools.forEach(pool => {
-        if (tokens.isSubset(new Set2(pool.tokensList)))
+        if (tokens.isSubset(new Set(pool.tokensList)))
             poolsWithTokens[pool.id] = pool;
     });
 
@@ -711,11 +699,11 @@ export function filterPoolsWithoutMutualTokens(
 ) {
     let tokenOnePools = {};
     let tokenTwoPools = {};
-    let tokenOnePairedTokens = new Set2();
-    let tokenTwoPairedTokens = new Set2();
+    let tokenOnePairedTokens = new Set();
+    let tokenTwoPairedTokens = new Set();
 
     allPools.forEach(pool => {
-        let poolTokensSET = new Set2(pool.tokensList);
+        let poolTokensSET = new Set(pool.tokensList);
         let containsTokenOne = poolTokensSET.contains(tokenOne);
         let containsTokenTwo = poolTokensSET.contains(tokenTwo);
 
@@ -789,7 +777,7 @@ export async function filterPoolsWithTokensMultihop(
         for (let k in poolsTokenInNoTokenOut) {
             // If this pool has hopTokens[i] calculate its normalized liquidity
             if (
-                new Set2(poolsTokenInNoTokenOut[k].tokensList).contains(
+                new Set(poolsTokenInNoTokenOut[k].tokensList).contains(
                     hopTokens[i]
                 )
             ) {
@@ -830,7 +818,7 @@ export async function filterPoolsWithTokensMultihop(
         for (let k in poolsTokenOutNoTokenIn) {
             // If this pool has hopTokens[i] calculate its normalized liquidity
             if (
-                new Set2(poolsTokenOutNoTokenIn[k].tokensList).contains(
+                new Set(poolsTokenOutNoTokenIn[k].tokensList).contains(
                     hopTokens[i]
                 )
             ) {
@@ -927,7 +915,7 @@ export async function getCostOutputToken(
 }
 
 export function filterAllPools(allPools: any) {
-    let allTokensSet = new Set2();
+    let allTokensSet = new Set();
     let allPoolsNonZeroBalances = [];
 
     let i = 0;
@@ -937,7 +925,7 @@ export function filterAllPools(allPools: any) {
         // Only check first balance since AFAIK either all balances are zero or none are:
         if (pool.tokens.length != 0) {
             if (pool.tokens[0].balance != '0') {
-                var tokensListSet = new Set2(pool.tokensList);
+                var tokensListSet = new Set(pool.tokensList);
                 allTokensSet.add(tokensListSet); // Will add without duplicate
                 allPoolsNonZeroBalances.push(pool);
                 i++;
