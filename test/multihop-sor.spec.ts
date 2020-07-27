@@ -109,18 +109,18 @@ describe('Tests Multihop SOR vs static allPools.json', () => {
     });
 
     it('Get multihop pools - WETH>DAI', async () => {
-        console.time('filterPoolsWithTokensMultihopSET');
+        console.time('filterPoolsWithTokensMultihop');
         let mostLiquidPoolsFirstHop, mostLiquidPoolsSecondHop, hopTokens;
         [
             mostLiquidPoolsFirstHop,
             mostLiquidPoolsSecondHop,
             hopTokens,
-        ] = await sor.filterPoolsWithTokensMultihopSET(
+        ] = await sor.filterPoolsWithTokensMultihop(
             allPoolsNonZeroBalances,
             WETH,
             DAI
         );
-        console.timeEnd('filterPoolsWithTokensMultihopSET');
+        console.timeEnd('filterPoolsWithTokensMultihop');
 
         const directPools = await sor.filterPoolsWithTokensDirect(
             allPoolsNonZeroBalances,
@@ -176,7 +176,7 @@ describe('Tests Multihop SOR vs static allPools.json', () => {
             mostLiquidPoolsFirstHop,
             mostLiquidPoolsSecondHop,
             hopTokens,
-        ] = await sor.filterPoolsWithTokensMultihopSET(
+        ] = await sor.filterPoolsWithTokensMultihop(
             allPoolsNonZeroBalances,
             WETH,
             DAI
@@ -230,7 +230,7 @@ describe('Tests Multihop SOR vs static allPools.json', () => {
             mostLiquidPoolsFirstHop,
             mostLiquidPoolsSecondHop,
             hopTokens,
-        ] = await sor.filterPoolsWithTokensMultihopSET(
+        ] = await sor.filterPoolsWithTokensMultihop(
             allPoolsNonZeroBalances,
             WETH,
             DAI
@@ -280,7 +280,7 @@ describe('Tests Multihop SOR vs static allPools.json', () => {
             mostLiquidPoolsFirstHop,
             mostLiquidPoolsSecondHop,
             hopTokens,
-        ] = await sor.filterPoolsWithTokensMultihopSET(
+        ] = await sor.filterPoolsWithTokensMultihop(
             allPoolsNonZeroBalances,
             WETH,
             ANT
@@ -338,7 +338,7 @@ describe('Tests Multihop SOR vs static allPools.json', () => {
             mostLiquidPoolsFirstHop,
             mostLiquidPoolsSecondHop,
             hopTokens,
-        ] = await sor.filterPoolsWithTokensMultihopSET(
+        ] = await sor.filterPoolsWithTokensMultihop(
             allPoolsNonZeroBalances,
             WETH,
             ANT
@@ -396,7 +396,7 @@ describe('Tests Multihop SOR vs static allPools.json', () => {
             mostLiquidPoolsFirstHop,
             mostLiquidPoolsSecondHop,
             hopTokens,
-        ] = await sor.filterPoolsWithTokensMultihopSET(
+        ] = await sor.filterPoolsWithTokensMultihop(
             allPoolsNonZeroBalances,
             USDC,
             MKR
@@ -453,7 +453,7 @@ describe('Tests Multihop SOR vs static allPools.json', () => {
             mostLiquidPoolsFirstHop,
             mostLiquidPoolsSecondHop,
             hopTokens,
-        ] = await sor.filterPoolsWithTokensMultihopSET(
+        ] = await sor.filterPoolsWithTokensMultihop(
             allPoolsNonZeroBalances,
             USDC,
             MKR
@@ -510,7 +510,7 @@ describe('Tests Multihop SOR vs static allPools.json', () => {
             mostLiquidPoolsFirstHop,
             mostLiquidPoolsSecondHop,
             hopTokens,
-        ] = await sor.filterPoolsWithTokensMultihopSET(
+        ] = await sor.filterPoolsWithTokensMultihop(
             allPoolsNonZeroBalances,
             USDC,
             MKR
@@ -617,7 +617,7 @@ describe('Tests Multihop SOR vs static allPools.json', () => {
             mostLiquidPoolsFirstHop,
             mostLiquidPoolsSecondHop,
             hopTokens,
-        ] = await sor.filterPoolsWithTokensMultihopSET(
+        ] = await sor.filterPoolsWithTokensMultihop(
             allPoolsNonZeroBalances,
             WETH,
             DAI

@@ -788,7 +788,7 @@ export function filterPoolsWithoutMutualTokensSET(
 }
 
 // Replacing getMultihopPoolsWithTokens
-export async function filterPoolsWithTokensMultihop(
+export async function filterPoolsWithTokensMultihopOld(
     allPools: any,
     tokenIn: string,
     tokenOut: string
@@ -934,7 +934,7 @@ export async function filterPoolsWithTokensMultihop(
 }
 
 // Replacing getMultihopPoolsWithTokens
-export async function filterPoolsWithTokensMultihopSET(
+export async function filterPoolsWithTokensMultihop(
     allPools: any, // Just the list of pool tokens
     tokenIn: string,
     tokenOut: string
