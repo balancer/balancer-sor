@@ -686,7 +686,7 @@ export function getTokenPairsMultiHop(token: string, poolsTokensListSet: any) {
 }
 
 // Filters all pools data to find pools that have both tokens with > 0 balance
-export function filterPoolsWithTokensDirect(
+export function filterPoolsWithTokensDirectOld(
     allPools: any,
     tokenIn: string,
     tokenOut: string
@@ -711,7 +711,7 @@ export function filterPoolsWithTokensDirect(
 
 // Filters all pools data to find pools that have both tokens
 // TODO: Check for balance > 0
-export function filterPoolsWithTokensDirectSET(
+export function filterPoolsWithTokensDirect(
     allPools: any, // The complete information of the pools
     tokenIn: string,
     tokenOut: string

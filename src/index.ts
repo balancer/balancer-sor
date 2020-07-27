@@ -25,7 +25,6 @@ export {
     getTokenPairsMultiHop,
     parsePoolData, // Legacy Function
     filterPoolsWithTokensDirect,
-    filterPoolsWithTokensDirectSET,
     filterPoolsWithTokensMultihop,
     filterPoolsWithTokensMultihopSET,
     getCostOutputToken,
