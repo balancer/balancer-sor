@@ -49,6 +49,7 @@ describe('Test Methods Of Getting All Pools Without 0 Balances', () => {
         console.timeEnd('getPools');
         console.log(allPools.pools.length);
 
+        // Just to prove this Subgraph method won't work.
         let filtered = await getPoolsFiltered();
         console.log(filtered.pools.length);
     }).timeout(10000);
@@ -58,15 +59,10 @@ describe('Test Methods Of Getting All Pools Without 0 Balances', () => {
         let allTokensSet = new Set();
         let allPoolsNonZeroBalances = [];
 
-        for (var i = allPools.pools.length - 1; i >= 0; i--) {
-            allTokensSet.add(new Set(allPools.pools[i].tokensList));
+        [allTokensSet, allPoolsNonZeroBalances] = sor.filterAllPools(allPools);
 
-            // Build list of non-zero balance pools
-            // Only check first balance since AFAIK either all balances are zero or none are:
-            if (allPools.pools[i].tokens.length != 0)
-                if (allPools.pools[i].tokens[0].balance != '0')
-                    allPoolsNonZeroBalances.push(allPools.pools[i]);
-        }
         console.timeEnd('filterAllPools');
+
+        console.log(allPoolsNonZeroBalances.length);
     });
 });
