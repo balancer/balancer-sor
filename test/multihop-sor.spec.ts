@@ -494,7 +494,7 @@ describe('Tests Multihop SOR vs static allPools.json', () => {
         );
     });
 
-    it('Full Multihop SOR, USDC>MKR, Improved processEpsOfInterestMultiHopNEW', async () => {
+    it('Full Multihop SOR, USDC>MKR, Improved processEpsOfInterestMultiHop', async () => {
         const amountIn = new BigNumber('1000000'); // 1 USDC
         const maxPools = 4;
 
@@ -527,10 +527,10 @@ describe('Tests Multihop SOR vs static allPools.json', () => {
         );
 
         let sorSwaps, totalReturn;
-        console.time('smartOrderRouterMultiHopNEWx100');
+        console.time('smartOrderRouterMultiHopx100');
         const mhTimeStart = process.hrtime.bigint();
         for (var i = 0; i < 100; i++) {
-            [sorSwaps, totalReturn] = sor.smartOrderRouterMultiHopNEW(
+            [sorSwaps, totalReturn] = sor.smartOrderRouterMultiHop(
                 JSON.parse(JSON.stringify(pools)),
                 pathData,
                 'swapExactIn',
@@ -540,7 +540,7 @@ describe('Tests Multihop SOR vs static allPools.json', () => {
             );
         }
         const mhTimeStop = process.hrtime.bigint();
-        console.timeEnd('smartOrderRouterMultiHopNEWx100');
+        console.timeEnd('smartOrderRouterMultiHopx100');
 
         assert.equal(
             Object.keys(directPools).length,
@@ -559,7 +559,7 @@ describe('Tests Multihop SOR vs static allPools.json', () => {
         console.timeEnd('processPaths');
 
         console.time('processEpsOfInterestMultiHopNEW');
-        let epsOfInterest = sor.processEpsOfInterestMultiHopNEW(
+        let epsOfInterest = sor.processEpsOfInterestMultiHop(
             paths,
             'swapExactIn',
             maxPools
@@ -637,7 +637,7 @@ describe('Tests Multihop SOR vs static allPools.json', () => {
         console.time('smartOrderRouterMultiHopNEWx100');
         const mhTimeStart = process.hrtime.bigint();
         for (var i = 0; i < 100; i++) {
-            [sorSwaps, totalReturn] = sor.smartOrderRouterMultiHopNEW(
+            [sorSwaps, totalReturn] = sor.smartOrderRouterMultiHop(
                 JSON.parse(JSON.stringify(pools)),
                 pathData,
                 'swapExactIn',
@@ -666,7 +666,7 @@ describe('Tests Multihop SOR vs static allPools.json', () => {
         console.timeEnd('processPaths');
 
         console.time('processEpsOfInterestMultiHopNEW');
-        let epsOfInterest = sor.processEpsOfInterestMultiHopNEW(
+        let epsOfInterest = sor.processEpsOfInterestMultiHop(
             paths,
             'swapExactIn',
             maxPools

@@ -13,30 +13,38 @@ const { utils } = require('ethers');
 const allPools = require('./allPoolsSmall.json');
 import { BONE } from '../src/bmath';
 
-const WETH = '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2'; // WETH
-const DAI = '0x6B175474E89094C44Da98b954EedeAC495271d0F'; // DAI
-const ANT = '0x960b236A07cf122663c4303350609A66A7B288C0';
-const USDC = '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48';
-const MKR = '0x9f8F72aA9304c8B593d555F12eF6589cC3A579A2';
+const DAI = '0x6B175474E89094C44Da98b954EedeAC495271d0F'.toLowerCase(); // DAI
+const USDC = '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48'.toLowerCase();
+
+let allTokensSet, allPoolsNonZeroBalances;
 
 describe('Test Filter Functions using allPoolsSmall.json & full SOR comparrions', () => {
     it('Saved pool check', async () => {
         assert.equal(allPools.pools.length, 12, 'Should be 12 pools');
+
+        [allTokensSet, allPoolsNonZeroBalances] = sor.filterAllPools(allPools);
+        assert.equal(
+            allPoolsNonZeroBalances.length,
+            8,
+            'Should be 8 pools with non-zero balance'
+        );
     });
 
     it('Should filter without mutual pools', async () => {
-        let daiPools, usdcPools;
-        [daiPools, usdcPools] = helpers.filterPoolsWithoutMutualTokens(
-            allPools,
-            DAI,
-            USDC
-        );
+        let daiPools, usdcPools, daiPairedTokens, usdcPairedTokens;
+        [
+            daiPools,
+            daiPairedTokens,
+            usdcPools,
+            usdcPairedTokens,
+        ] = helpers.filterPoolsWithoutMutualTokens(allPools.pools, DAI, USDC);
 
         assert.equal(
             Object.keys(daiPools).length,
             3,
             'Should have 3 DAI only pools'
         );
+
         assert.equal(
             Object.keys(usdcPools).length,
             2,
@@ -53,7 +61,11 @@ describe('Test Filter Functions using allPoolsSmall.json & full SOR comparrions'
             mostLiquidPoolsFirstHopFilter,
             mostLiquidPoolsSecondHopFilter,
             hopTokensFilter,
-        ] = await sor.filterPoolsWithTokensMultihop(allPools, DAI, USDC);
+        ] = await sor.filterPoolsWithTokensMultihop(
+            allPoolsNonZeroBalances,
+            DAI,
+            USDC
+        );
         console.timeEnd('filterPoolsWithTokensMultihop');
 
         assert.equal(
