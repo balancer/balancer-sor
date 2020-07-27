@@ -7,6 +7,7 @@ const BigNumber = require('bignumber.js');
 const { utils } = require('ethers');
 const allPools = require('./allPools.json');
 import { BONE } from '../src/bmath';
+var Set = require('jsclass/src/set').Set;
 
 // const WETH = '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2'; // WETH
 const WETH = '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2'; // WETH lower case
@@ -29,71 +30,41 @@ BigNumber.config({
     DECIMAL_PLACES: 18,
 });
 
-// Added by Fernando
-var Set2 = require('jsclass/src/set').Set;
-var allPoolsSET = new Set2();
-var allPoolsNonZeroBalances = [];
+let allTokensSet = new Set();
+let allPoolsNonZeroBalances = [];
 
 describe('Tests Multihop SOR vs static allPools.json', () => {
     it('Saved pool check', async () => {
         // Uses saved pools @25/05/20.
         assert.equal(allPools.pools.length, 59, 'Should be 59 pools');
 
-        for (var i = allPools.pools.length - 1; i >= 0; i--) {
-            var poolSet = new Set2(allPools.pools[i].tokensList);
+        [allTokensSet, allPoolsNonZeroBalances] = sor.filterAllPools(allPools);
 
-            // console.log(allPools.pools[i].tokensList)
-            // console.log(poolSet)
-            allPoolsSET.add(poolSet);
-
-            // Build list of non-zero balance pools
-            // Only check first balance since AFAIK either all balances are zero or none are:
-
-            // if(allPools.pools[i]["tokens"][0]["balance"] != "0")
-            // console.log("allPools.pools[i].tokens[0].balance")
-            // console.log(allPools.pools[i].tokens[0].balance)
-            if (allPools.pools[i].tokens.length != 0)
-                if (allPools.pools[i].tokens[0].balance != '0')
-                    allPoolsNonZeroBalances.push(allPools.pools[i]);
-        }
-        // console.log(allPoolsSET)
+        assert.equal(allTokensSet.length, 37, 'Should be 37 tokens'); // filter excludes duplicates
+        assert.equal(
+            allPoolsNonZeroBalances.length,
+            45,
+            'Should be 45 pools with non-zero balance'
+        );
     });
 
     it('getTokenPairsMultiHop - Should return direct & multihop partner tokens', async () => {
-        const allPoolsReturned = allPools; // Replicated sor.getAllPublicSwapPools() call
-
         console.time('getTokenPairsMultiHop');
-        let [directTokenPairs, allTokenPairs] = sor.getTokenPairsMultiHop(
+        let [directTokenPairsSET, allTokenPairsSET] = sor.getTokenPairsMultiHop(
             DAI,
-            allPoolsReturned.pools
+            allTokensSet
         );
         console.timeEnd('getTokenPairsMultiHop');
 
         assert.equal(
-            directTokenPairs.length,
-            18,
-            'Should have 18 direct tokens'
-        );
-        assert.equal(allTokenPairs.length, 39, 'Should be 39 multi-hop tokens');
-    });
-
-    it('SET - getTokenPairsMultiHopSET - Should return direct & multihop partner tokens', async () => {
-        console.time('getTokenPairsMultiHopSET');
-        let [
-            directTokenPairsSET,
-            allTokenPairsSET,
-        ] = sor.getTokenPairsMultiHopSET(DAI, allPoolsSET);
-        console.timeEnd('getTokenPairsMultiHopSET');
-
-        assert.equal(
             directTokenPairsSET.length,
-            18,
-            'Should have 18 direct tokens'
+            16,
+            'Should have 16 direct tokens'
         );
         assert.equal(
             allTokenPairsSET.length,
-            39,
-            'Should be 39 multi-hop tokens'
+            33,
+            'Should be 33 multi-hop tokens'
         );
     });
 

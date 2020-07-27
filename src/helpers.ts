@@ -651,64 +651,16 @@ function union(setA, setB) {
 // Returns two arrays
 // First array contains all tokens in direct pools containing tokenIn
 // Second array contains all tokens in multi-hop pools containing tokenIn
-export function getTokenPairsMultiHop(token: string, poolsDict: any) {
-    token = toChecksum(token);
-
-    let tokenPools = new Set();
-    let directTokenPairsSet = new Set();
-
-    // If pool contains token add all its tokens to direct list
-    poolsDict.forEach((pool, index) => {
-        for (let i = 0; i < pool.tokensList.length; i++) {
-            const cAddr = ethers.utils.getAddress(pool.tokensList[i]);
-            if (cAddr === token) {
-                tokenPools.add(pool.id);
-                let poolTokens = new Set(pool.tokensList);
-                directTokenPairsSet = union(directTokenPairsSet, poolTokens);
-                break;
-            }
-        }
-    });
-
-    let allTokenPairsSet = new Set(directTokenPairsSet);
-
-    // foreach directToken find its pools and add all its tokens (unless pool already been checked)
-    directTokenPairsSet.forEach((directToken, index) => {
-        poolsDict.forEach((pool, index) => {
-            if (!tokenPools.has(pool.id)) {
-                directToken = ethers.utils.getAddress(String(directToken));
-                for (let i = 0; i < pool.tokensList.length; i++) {
-                    const cAddr = ethers.utils.getAddress(pool.tokensList[i]);
-
-                    if (cAddr === directToken) {
-                        tokenPools.add(pool.id);
-                        let poolTokens = new Set(pool.tokensList);
-                        allTokenPairsSet = union(allTokenPairsSet, poolTokens);
-                        break;
-                    }
-                }
-            }
-        });
-    });
-
-    let directTokenPairs = Array.from(directTokenPairsSet);
-    let allTokenPairs = Array.from(allTokenPairsSet);
-    return [directTokenPairs, allTokenPairs];
-}
-
-// Returns two arrays
-// First array contains all tokens in direct pools containing tokenIn
-// Second array contains all tokens in multi-hop pools containing tokenIn
-export function getTokenPairsMultiHopSET(token: string, poolsSet: any) {
+export function getTokenPairsMultiHop(token: string, poolsTokensListSet: any) {
     let poolsWithToken = new Set2();
     let poolsWithoutToken = new Set2();
 
     let directTokenPairsSet = new Set2();
 
     // If pool contains token add all its tokens to direct list
-    poolsSet.forEach((pool, index) => {
-        if (pool.contains(token)) poolsWithToken.add(pool);
-        else poolsWithoutToken.add(pool);
+    poolsTokensListSet.forEach((poolTokenList, index) => {
+        if (poolTokenList.contains(token)) poolsWithToken.add(poolTokenList);
+        else poolsWithoutToken.add(poolTokenList);
     });
 
     directTokenPairsSet = poolsWithToken.flatten();
@@ -1169,4 +1121,26 @@ export async function getCostOutputToken(
         GasPriceWei
     );
     return costOutputToken;
+}
+
+export function filterAllPools(allPools: any) {
+    let allTokensSet = new Set2();
+    let allPoolsNonZeroBalances = [];
+
+    let i = 0;
+
+    allPools.pools.forEach(pool => {
+        // Build list of non-zero balance pools
+        // Only check first balance since AFAIK either all balances are zero or none are:
+        if (pool.tokens.length != 0) {
+            if (pool.tokens[0].balance != '0') {
+                var tokensListSet = new Set2(pool.tokensList);
+                allTokensSet.add(tokensListSet); // Will add without duplicate
+                allPoolsNonZeroBalances.push(pool);
+                i++;
+            }
+        }
+    });
+
+    return [allTokensSet, allPoolsNonZeroBalances];
 }
