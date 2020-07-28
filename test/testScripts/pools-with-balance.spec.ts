@@ -1,7 +1,7 @@
 // Compares timings for different methods of getting all pools without any 0 balances
 import { expect, assert } from 'chai';
 const sor = require('../../src');
-const Set = require('jsclass/src/set').Set;
+import { Set } from 'jsclass/src/set';
 import fetch from 'isomorphic-fetch';
 
 const SUBGRAPH_URL =

@@ -1,4 +1,4 @@
-var Set = require('jsclass/src/set').Set;
+import { Set } from 'jsclass/src/set';
 import { BigNumber } from './utils/bignumber';
 import { ethers } from 'ethers';
 import { PoolPairData, Path } from './types';

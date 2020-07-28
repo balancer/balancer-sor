@@ -7,7 +7,7 @@ const BigNumber = require('bignumber.js');
 const { utils } = require('ethers');
 const allPools = require('./allPools.json');
 import { BONE } from '../src/bmath';
-var Set = require('jsclass/src/set').Set;
+import { Set } from 'jsclass/src/set';
 
 // const WETH = '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2'; // WETH
 const WETH = '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2'; // WETH lower case
