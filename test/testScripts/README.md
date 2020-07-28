@@ -51,3 +51,9 @@ Uses live Subgraph data to compare filter methods.
 Run: `$ ts-node ./test/testScripts/multicall.ts`
 
 Uses live Subgraph data to compare filter methods.
+
+### multihop-eps-debug.spec.ts
+
+Run: `$ npx mocha -r ts-node/register test/testScripts/trade-debug.spec.ts`
+
+Tests full multihop-eps trade using live subgraph. Useful for quickly checking trade outputs.
