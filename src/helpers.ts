@@ -14,17 +14,6 @@ import {
     calcInGivenOut,
     scale,
 } from './bmath';
-import { Web3Provider, JsonRpcProvider } from 'ethers/providers';
-import {
-    ChainId,
-    Token,
-    TokenAmount,
-    Pair,
-    Price,
-    Fetcher,
-    JSBI,
-    WETH,
-} from '@uniswap/sdk';
 
 export function toChecksum(address) {
     return ethers.utils.getAddress(address);
@@ -848,70 +837,6 @@ export async function filterPoolsWithTokensMultihop(
         // console.log(mostLiquidPoolsSecondHop)
     }
     return [mostLiquidPoolsFirstHop, mostLiquidPoolsSecondHop, hopTokens];
-}
-
-// Returns wei price in BigNumber format
-export async function getUniswapWeiPrice(
-    TokenAddr: string,
-    TokenDecimals: number
-): Promise<BigNumber> {
-    const token = new Token(ChainId.MAINNET, TokenAddr, TokenDecimals);
-    const pair = await Fetcher.fetchPairData(WETH[ChainId.MAINNET], token);
-
-    // This is a JSBI format: https://github.com/GoogleChromeLabs/jsbi
-    const token_price = new Price(
-        token,
-        WETH[ChainId.MAINNET],
-        pair.reserve1.raw,
-        pair.reserve0.raw
-    );
-    // console.log(token_price.toSignificant(10))
-
-    const numerator = new BigNumber(token_price.raw.numerator.toString());
-    const denominator = new BigNumber(token_price.raw.denominator.toString());
-    const priceEth = numerator.div(denominator);
-    const priceWei = priceEth.times(BONE);
-    // console.log(`Price: ${priceEth.toString()}`)
-    return priceWei;
-}
-
-export function calculateTotalSwapCost(
-    TokenPrice: BigNumber,
-    SwapCost: BigNumber,
-    GasPriceWei: BigNumber
-): BigNumber {
-    return GasPriceWei.times(SwapCost)
-        .times(TokenPrice)
-        .div(BONE);
-}
-
-export async function getCostOutputToken(
-    TokenAddr: string,
-    TokenDecimals: number,
-    GasPriceWei: BigNumber,
-    SwapGasCost: BigNumber,
-    Provider: JsonRpcProvider | Web3Provider
-): Promise<BigNumber> {
-    let network = await Provider.getNetwork();
-
-    // If not mainnet return 0 as UniSwap price unlikely to be correct?
-    // Provider can be used to fetch token data (i.e. Decimals) via UniSwap SDK when Ethers V5 is used
-    if (network.chainId !== 1) return new BigNumber(0);
-
-    let tokenPrice = new BigNumber(0);
-    try {
-        tokenPrice = await getUniswapWeiPrice(TokenAddr, TokenDecimals);
-    } catch (err) {
-        // If no pool for provided address (or addr incorrect) then default to 0
-        console.log('Error Getting Token Price. Defaulting to 0.');
-    }
-
-    let costOutputToken = calculateTotalSwapCost(
-        tokenPrice,
-        SwapGasCost,
-        GasPriceWei
-    );
-    return costOutputToken;
 }
 
 export function filterAllPools(allPools: any) {

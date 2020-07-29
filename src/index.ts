@@ -24,7 +24,6 @@ export {
     parsePoolData, // Legacy Function
     filterPoolsWithTokensDirect,
     filterPoolsWithTokensMultihop,
-    getCostOutputToken,
     filterAllPools,
 } from './helpers';
 export {
@@ -35,3 +34,4 @@ export {
 export { parsePoolDataOnChain, getAllPoolDataOnChain } from './multicall'; // Legacy Function
 import * as bmath from './bmath';
 export { bmath };
+export { getCostOutputToken } from './costToken';

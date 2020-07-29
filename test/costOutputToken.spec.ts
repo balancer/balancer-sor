@@ -1,16 +1,32 @@
 // Tests costOutputToken
 require('dotenv').config();
-import { expect, assert } from 'chai';
-import 'mocha';
+import { expect } from 'chai';
 import { JsonRpcProvider } from 'ethers/providers';
 import { BigNumber } from '../src/utils/bignumber';
 import { BONE } from '../src/bmath';
-import { calculateTotalSwapCost } from '../src/helpers';
+import { calculateTotalSwapCost, getAddress } from '../src/costToken';
 const sor = require('../src');
 
 const DAI = '0x6B175474E89094C44Da98b954EedeAC495271d0F';
+const WETH = '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2';
 
 describe('Test costOutputToken (Uses UniSwap V2 SDK)', () => {
+    it('Should get token pair', async () => {
+        // See Factory https://uniswap.org/docs/v2/smart-contracts/factory/#getpair
+        const CONFIRMED_ADDR = '0xA478c2975Ab1Ea89e8196811F51A7B7Ade33eB11';
+
+        let addr = getAddress(WETH, DAI);
+        expect(addr).to.eql(CONFIRMED_ADDR);
+        addr = getAddress(DAI, WETH);
+        expect(addr).to.eql(CONFIRMED_ADDR);
+        addr = getAddress(DAI, WETH.toLowerCase());
+        expect(addr).to.eql(CONFIRMED_ADDR);
+        addr = getAddress(DAI.toLowerCase(), WETH);
+        expect(addr).to.eql(CONFIRMED_ADDR);
+        addr = getAddress(DAI.toLowerCase(), WETH.toLowerCase());
+        expect(addr).to.eql(CONFIRMED_ADDR);
+    });
+
     it('Should return correct total swap cost', async () => {
         let gasPriceWei = new BigNumber(30000000000); // 30GWEI
         let swapGasCost = new BigNumber(100000);
