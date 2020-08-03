@@ -1,8 +1,7 @@
 import fetch from 'isomorphic-fetch';
-import { ethers } from 'ethers';
+import { getAddress } from '@ethersproject/address';
 import * as bmath from './bmath';
 import { Pool } from './types';
-import { BigNumber } from './utils/bignumber';
 
 const SUBGRAPH_URL =
     process.env.REACT_APP_SUBGRAPH_URL ||
@@ -11,8 +10,8 @@ const SUBGRAPH_URL =
 export async function getPoolsWithTokens(tokenIn, tokenOut) {
     // GraphQL is case-sensitive
     // Always use checksum addresses
-    tokenIn = ethers.utils.getAddress(tokenIn);
-    tokenOut = ethers.utils.getAddress(tokenOut);
+    tokenIn = getAddress(tokenIn);
+    tokenOut = getAddress(tokenOut);
 
     const query = `
       query ($tokens: [Bytes!]) {
@@ -65,14 +64,10 @@ export const parsePoolData = (
     let poolData: Pool[] = [];
     pools.forEach(p => {
         let tI = p.tokens.find(
-            t =>
-                ethers.utils.getAddress(t.address) ===
-                ethers.utils.getAddress(tokenIn)
+            t => getAddress(t.address) === getAddress(tokenIn)
         );
         let tO = p.tokens.find(
-            t =>
-                ethers.utils.getAddress(t.address) ===
-                ethers.utils.getAddress(tokenOut)
+            t => getAddress(t.address) === getAddress(tokenOut)
         );
         let obj = {
             id: p.id,
@@ -105,7 +100,7 @@ export const parsePoolData = (
 export async function getTokenPairs(token) {
     // GraphQL is case-sensitive
     // Always use checksum addresses
-    token = ethers.utils.getAddress(token);
+    token = getAddress(token);
 
     const query = `
       query ($token: [Bytes!]) {
