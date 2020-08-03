@@ -1,6 +1,6 @@
 {
     "name": "@balancer-labs/sor",
-    "version": "0.2.5",
+    "version": "0.3.2",
     "license": "GPL-3.0-only",
     "main": "dist/index.js",
     "types": "dist/index.d.ts",
@@ -25,6 +25,7 @@
     "devDependencies": {
         "@types/chai": "^4.2.10",
         "@types/mocha": "^7.0.2",
+        "@types/node": "^14.0.20",
         "chai": "^4.2.0",
         "coveralls": "^3.0.9",
         "husky": "^4.2.1",
