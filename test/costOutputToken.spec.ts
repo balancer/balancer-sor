@@ -131,4 +131,23 @@ describe('Test costOutputToken (Uses UniSwap V2 SDK)', () => {
         let costEth = cost.div(BONE);
         console.log(`CostOutputToken MKR: ${costEth.toString()}`);
     }).timeout(5000);
+
+    it('Example of full call with WETH & 30GWEI Gas Price', async () => {
+        let provider = new JsonRpcProvider(
+            `https://mainnet.infura.io/v3/${process.env.INFURA}`
+        );
+        let gasPriceWei = new BigNumber(30000000000);
+        let swapGasCost = new BigNumber(100000);
+
+        let cost = await sor.getCostOutputToken(
+            WETH,
+            18,
+            gasPriceWei,
+            swapGasCost,
+            provider
+        );
+        let costEth = cost.div(BONE);
+        console.log(`CostOutputToken WETH: ${costEth.toString()}`);
+        expect(cost).to.eql(gasPriceWei.times(swapGasCost));
+    }).timeout(5000);
 });

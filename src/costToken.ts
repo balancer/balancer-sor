@@ -49,6 +49,9 @@ export async function getTokenWeiPrice(
     provider: Web3Provider
 ): Promise<BigNumber> {
     const WETH = '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2';
+    if (TokenAddr.toLowerCase() === WETH.toLowerCase())
+        return new BigNumber(BONE);
+
     let addr = getAddress(WETH, TokenAddr);
     let [reserve0, reserve1] = await getOnChainReserves(addr, provider);
 
@@ -86,6 +89,7 @@ export async function getCostOutputToken(
     try {
         tokenPrice = await getTokenWeiPrice(TokenAddr, Provider);
     } catch (err) {
+        // console.log(err)
         // If no pool for provided address (or addr incorrect) then default to 0
         console.log('Error Getting Token Price. Defaulting to 0.');
     }
