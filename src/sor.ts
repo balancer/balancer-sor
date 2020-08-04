@@ -75,8 +75,9 @@ export const smartOrderRouterMultiHop = (
     // console.log(pricesOfInterest);
 
     let bestTotalReturn: BigNumber = new BigNumber(0);
+    let bestTotalReturnConsideringFees: BigNumber = new BigNumber(0);
     let highestPoiNotEnough: boolean = true;
-    let pathIds, totalReturn;
+    let pathIds, totalReturn, totalReturnConsideringFees;
     let bestSwapAmounts, bestPathIds, swapAmounts;
 
     let bmin = paths.length + 1;
@@ -158,25 +159,29 @@ export const smartOrderRouterMultiHop = (
         let improvementCondition: boolean = false;
         if (totalNumberOfPools <= maxPools) {
             if (swapType === 'swapExactIn') {
-                totalReturn = totalReturn.minus(
+                totalReturnConsideringFees = totalReturn.minus(
                     bmul(
                         new BigNumber(totalNumberOfPools).times(BONE),
                         costReturnToken
                     )
                 );
                 improvementCondition =
-                    totalReturn.isGreaterThan(bestTotalReturn) ||
-                    bestTotalReturn.isEqualTo(new BigNumber(0));
+                    totalReturnConsideringFees.isGreaterThan(
+                        bestTotalReturnConsideringFees
+                    ) ||
+                    bestTotalReturnConsideringFees.isEqualTo(new BigNumber(0));
             } else {
-                totalReturn = totalReturn.plus(
+                totalReturnConsideringFees = totalReturn.plus(
                     bmul(
                         new BigNumber(totalNumberOfPools).times(BONE),
                         costReturnToken
                     )
                 );
                 improvementCondition =
-                    totalReturn.isLessThan(bestTotalReturn) ||
-                    bestTotalReturn.isEqualTo(new BigNumber(0));
+                    totalReturnConsideringFees.isLessThan(
+                        bestTotalReturnConsideringFees
+                    ) ||
+                    bestTotalReturnConsideringFees.isEqualTo(new BigNumber(0));
             }
         }
 
@@ -184,6 +189,7 @@ export const smartOrderRouterMultiHop = (
             bestSwapAmounts = swapAmounts;
             bestPathIds = pathIds;
             bestTotalReturn = totalReturn;
+            bestTotalReturnConsideringFees = totalReturnConsideringFees;
         } else {
             break;
         }
@@ -390,8 +396,9 @@ export const smartOrderRouterMultiHopEpsOfInterest = (
     pricesOfInterest: EffectivePrice[]
 ): [Swap[][], BigNumber] => {
     let bestTotalReturn: BigNumber = new BigNumber(0);
+    let bestTotalReturnConsideringFees: BigNumber = new BigNumber(0);
     let highestPoiNotEnough: boolean = true;
-    let pathIds, totalReturn;
+    let pathIds, totalReturn, totalReturnConsideringFees;
     let bestSwapAmounts, bestPathIds, swapAmounts;
 
     let bmin = paths.length + 1;
@@ -473,25 +480,29 @@ export const smartOrderRouterMultiHopEpsOfInterest = (
         let improvementCondition: boolean = false;
         if (totalNumberOfPools <= maxPools) {
             if (swapType === 'swapExactIn') {
-                totalReturn = totalReturn.minus(
+                totalReturnConsideringFees = totalReturn.minus(
                     bmul(
                         new BigNumber(totalNumberOfPools).times(BONE),
                         costReturnToken
                     )
                 );
                 improvementCondition =
-                    totalReturn.isGreaterThan(bestTotalReturn) ||
-                    bestTotalReturn.isEqualTo(new BigNumber(0));
+                    totalReturnConsideringFees.isGreaterThan(
+                        bestTotalReturnConsideringFees
+                    ) ||
+                    bestTotalReturnConsideringFees.isEqualTo(new BigNumber(0));
             } else {
-                totalReturn = totalReturn.plus(
+                totalReturnConsideringFees = totalReturn.plus(
                     bmul(
                         new BigNumber(totalNumberOfPools).times(BONE),
                         costReturnToken
                     )
                 );
                 improvementCondition =
-                    totalReturn.isLessThan(bestTotalReturn) ||
-                    bestTotalReturn.isEqualTo(new BigNumber(0));
+                    totalReturnConsideringFees.isLessThan(
+                        bestTotalReturnConsideringFees
+                    ) ||
+                    bestTotalReturnConsideringFees.isEqualTo(new BigNumber(0));
             }
         }
 
@@ -499,6 +510,7 @@ export const smartOrderRouterMultiHopEpsOfInterest = (
             bestSwapAmounts = swapAmounts;
             bestPathIds = pathIds;
             bestTotalReturn = totalReturn;
+            bestTotalReturnConsideringFees = totalReturnConsideringFees;
         } else {
             break;
         }
