@@ -1,6 +1,6 @@
 {
     "name": "@balancer-labs/sor",
-    "version": "0.3.3",
+    "version": "0.3.4",
     "license": "GPL-3.0-only",
     "main": "dist/index.js",
     "types": "dist/index.d.ts",
@@ -23,10 +23,6 @@
         "dist"
     ],
     "devDependencies": {
-        "@ethersproject/abi": "^5.0.1",
-        "@ethersproject/address": "^5.0.1",
-        "@ethersproject/contracts": "^5.0.1",
-        "@ethersproject/providers": "^5.0.4",
         "@types/chai": "^4.2.10",
         "@types/mocha": "^7.0.2",
         "@types/node": "^14.0.20",
@@ -41,13 +37,11 @@
         "typescript": "^3.8.3"
     },
     "dependencies": {
-        "bignumber.js": "^9.0.0",
-        "isomorphic-fetch": "^2.2.1"
-    },
-    "peerDependencies": {
         "@ethersproject/abi": "^5.0.1",
         "@ethersproject/address": "^5.0.1",
         "@ethersproject/contracts": "^5.0.1",
-        "@ethersproject/providers": "^5.0.4"
+        "@ethersproject/providers": "^5.0.4",
+        "bignumber.js": "^9.0.0",
+        "isomorphic-fetch": "^2.2.1"
     }
 }
