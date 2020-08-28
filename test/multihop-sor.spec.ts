@@ -7,7 +7,6 @@ const BigNumber = require('bignumber.js');
 const { utils } = require('ethers');
 const allPools = require('./allPools.json');
 import { BONE } from '../src/bmath';
-import { Set } from 'jsclass/src/set';
 
 // const WETH = '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2'; // WETH
 const WETH = '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2'; // WETH lower case
@@ -30,7 +29,7 @@ BigNumber.config({
     DECIMAL_PLACES: 18,
 });
 
-let allTokensSet = new Set();
+let allTokens = [];
 let allPoolsNonZeroBalances = [];
 
 describe('Tests Multihop SOR vs static allPools.json', () => {
@@ -38,9 +37,9 @@ describe('Tests Multihop SOR vs static allPools.json', () => {
         // Uses saved pools @25/05/20.
         assert.equal(allPools.pools.length, 59, 'Should be 59 pools');
 
-        [allTokensSet, allPoolsNonZeroBalances] = sor.filterAllPools(allPools);
+        [allTokens, allPoolsNonZeroBalances] = sor.filterAllPools(allPools);
 
-        assert.equal(allTokensSet.length, 37, 'Should be 37 tokens'); // filter excludes duplicates
+        assert.equal(allTokens.length, 37, 'Should be 37 tokens'); // filter excludes duplicates
         assert.equal(
             allPoolsNonZeroBalances.length,
             45,
@@ -52,7 +51,7 @@ describe('Tests Multihop SOR vs static allPools.json', () => {
         console.time('getTokenPairsMultiHop');
         let [directTokenPairsSET, allTokenPairsSET] = sor.getTokenPairsMultiHop(
             DAI,
-            allTokensSet
+            allTokens
         );
         console.timeEnd('getTokenPairsMultiHop');
 

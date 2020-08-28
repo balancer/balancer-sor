@@ -1,5 +1,3 @@
-import { pack, keccak256 } from '@ethersproject/solidity';
-import { getCreate2Address } from '@ethersproject/address';
 import { ethers, utils } from 'ethers';
 import { Web3Provider, JsonRpcProvider } from 'ethers/providers';
 import { BigNumber } from './utils/bignumber';
@@ -15,14 +13,14 @@ export function getAddress(tokenA: string, tokenB: string): string {
             ? [tokenA, tokenB]
             : [tokenB, tokenA];
 
-    let address = getCreate2Address(
-        FACTORY_ADDRESS,
-        keccak256(
+    let address = utils.getCreate2Address({
+        from: FACTORY_ADDRESS,
+        salt: utils.solidityKeccak256(
             ['bytes'],
-            [pack(['address', 'address'], [tokens[0], tokens[1]])]
+            [utils.solidityPack(['address', 'address'], [tokens[0], tokens[1]])]
         ),
-        INIT_CODE_HASH
-    );
+        initCodeHash: INIT_CODE_HASH,
+    });
 
     return address;
 }

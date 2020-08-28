@@ -25,6 +25,7 @@
     "devDependencies": {
         "@types/chai": "^4.2.10",
         "@types/mocha": "^7.0.2",
+        "@types/node": "^14.6.1",
         "chai": "^4.2.0",
         "coveralls": "^3.0.9",
         "dotenv": "^8.2.0",
@@ -33,15 +34,12 @@
         "nyc": "^15.0.0",
         "prettier": "^1.19.1",
         "pretty-quick": "^2.0.1",
-        "ts-node": "^8.6.2"
+        "ts-node": "^8.6.2",
+        "typescript": "^3.8.3"
     },
     "dependencies": {
-        "@ethersproject/address": "^5.0.2",
-        "@ethersproject/solidity": "^5.0.2",
         "bignumber.js": "^9.0.0",
-        "ethers": "4.0.39",
-        "isomorphic-fetch": "^2.2.1",
-        "jsclass": "^4.0.5",
-        "typescript": "^3.8.3"
+        "ethers": "4.0.48",
+        "isomorphic-fetch": "^2.2.1"
     }
 }
