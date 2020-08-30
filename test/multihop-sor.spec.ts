@@ -29,7 +29,7 @@ BigNumber.config({
     DECIMAL_PLACES: 18,
 });
 
-let allTokens = [];
+let allTokensSet = new Set();
 let allPoolsNonZeroBalances = [];
 
 describe('Tests Multihop SOR vs static allPools.json', () => {
@@ -37,9 +37,9 @@ describe('Tests Multihop SOR vs static allPools.json', () => {
         // Uses saved pools @25/05/20.
         assert.equal(allPools.pools.length, 59, 'Should be 59 pools');
 
-        [allTokens, allPoolsNonZeroBalances] = sor.filterAllPools(allPools);
+        [allTokensSet, allPoolsNonZeroBalances] = sor.filterAllPools(allPools);
 
-        assert.equal(allTokens.length, 37, 'Should be 37 tokens'); // filter excludes duplicates
+        assert.equal(allTokensSet.size, 37, 'Should be 37 tokens'); // filter excludes duplicates
         assert.equal(
             allPoolsNonZeroBalances.length,
             45,
@@ -51,7 +51,7 @@ describe('Tests Multihop SOR vs static allPools.json', () => {
         console.time('getTokenPairsMultiHop');
         let [directTokenPairsSET, allTokenPairsSET] = sor.getTokenPairsMultiHop(
             DAI,
-            allTokens
+            allTokensSet
         );
         console.timeEnd('getTokenPairsMultiHop');
 
@@ -60,6 +60,7 @@ describe('Tests Multihop SOR vs static allPools.json', () => {
             16,
             'Should have 16 direct tokens'
         );
+
         assert.equal(
             allTokenPairsSET.length,
             33,
