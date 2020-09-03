@@ -72,7 +72,6 @@ export function calculateTotalSwapCost(
 
 export async function getCostOutputToken(
     TokenAddr: string,
-    TokenDecimals: number,
     GasPriceWei: BigNumber,
     SwapGasCost: BigNumber,
     Provider: Web3Provider

@@ -38,7 +38,6 @@ describe('Test multihop-eps trade using live subgraph', () => {
         const swapCost = new BigNumber('100000');
         const costOutputToken = await sor.getCostOutputToken(
             DAI,
-            18,
             gasPrice,
             swapCost,
             provider
@@ -128,7 +127,6 @@ describe('Test multihop-eps trade using live subgraph', () => {
 
         let costOutputToken = await sor.getCostOutputToken(
             USDC,
-            6,
             gasPrice,
             swapCost,
             provider
@@ -219,7 +217,6 @@ describe('Test multihop-eps trade using live subgraph', () => {
         const swapCost = new BigNumber('100000');
         const costOutputToken = await sor.getCostOutputToken(
             WETH,
-            18,
             gasPrice,
             swapCost,
             provider
@@ -304,7 +301,6 @@ describe('Test multihop-eps trade using live subgraph', () => {
         const swapCost = new BigNumber('100000');
         const costOutputToken = await sor.getCostOutputToken(
             USDC,
-            6,
             gasPrice,
             swapCost,
             provider
