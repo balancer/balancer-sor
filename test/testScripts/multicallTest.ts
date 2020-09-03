@@ -20,7 +20,8 @@ async function run() {
 
     let allPools = await sor.getAllPublicSwapPools();
     let i = 0;
-    while (i < 5) {
+    let numberOfLoops = 1;
+    while (i < numberOfLoops) {
         console.log(allPools.pools.length);
         try {
             let allPoolsOnChain = await sor.getAllPoolDataOnChain(
@@ -28,6 +29,20 @@ async function run() {
                 multicall,
                 provider
             );
+
+            console.log(allPoolsOnChain.pools[0]);
+            console.log(
+                `Swap fee: ${allPoolsOnChain.pools[0].swapFee.toString()}`
+            );
+            console.log(
+                `Total Weight: ${allPoolsOnChain.pools[0].totalWeight.toString()}`
+            );
+
+            allPoolsOnChain.pools[0].tokens.forEach(token => {
+                console.log(token.address);
+                console.log(token.balance.toString());
+                console.log(token.denormWeight.toString());
+            });
         } catch (error) {
             break;
         }

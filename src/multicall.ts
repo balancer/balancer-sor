@@ -108,42 +108,31 @@ export async function getAllPoolDataOnChain(
     }
 
     try {
-        console.log(`Multicalls: ${calls.length}`);
+        // console.log(`Multicalls: ${calls.length}`);
         const [blockNumber, response] = await multi.aggregate(calls);
 
         let i = 0;
         let chunkResponse = [];
         let returnPools: PoolPairData[] = [];
-
-        // let noCalls = pools.pools.reduce((acc, pool) => acc + (pool.tokensList.length), 0);
-        // console.log(`noCalls ${noCalls}`)
-
         let j = 0;
-        // Required otherwise we overwrite original argument
-        let poolsCopy = JSON.parse(JSON.stringify(pools.pools));
-        let onChainPools = { pools: [] };
 
-        for (let i = 0; i < poolsCopy.length; i++) {
-            let p = poolsCopy[i];
-            p.swapFee = utils.formatEther(bmath.bnum(response[j]).toString());
+        for (let i = 0; i < pools.pools.length; i++) {
+            pools.pools[i].swapFee = bmath.bnum(response[j]);
             j++;
-            p.tokens.forEach(token => {
-                let balance = bmath.scale(
-                    bmath.bnum(response[j]),
-                    -token.decimals
-                );
-                token.balance = balance.toString();
+            pools.pools[i].tokens.forEach(token => {
+                token.balance = bmath.bnum(response[j]);
                 j++;
-                token.denormWeight = utils.formatEther(
-                    bmath.bnum(response[j]).toString()
-                );
+                token.denormWeight = bmath.bnum(response[j]);
                 j++;
             });
 
-            onChainPools.pools.push(p);
+            pools.pools[i].totalWeight = bmath.scale(
+                bmath.bnum(pools.pools[i].totalWeight),
+                18
+            );
         }
 
-        return onChainPools;
+        return pools;
     } catch (e) {
         console.error('Failure querying onchain balances', { error: e });
         return;

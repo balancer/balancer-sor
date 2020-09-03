@@ -48,7 +48,7 @@ Uses live Subgraph data to compare filter methods.
 
 ### multicall.ts
 
-Run: `$ ts-node ./test/testScripts/multicall.ts`
+Run: `$ ts-node ./test/testScripts/multicallTest.ts`
 
 Uses live Subgraph data to compare filter methods.
 
