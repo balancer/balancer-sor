@@ -123,9 +123,15 @@ async function directLegacy(
     const pools = findPoolsWithTokens(allPoolsReturned, tokenIn, tokenOut);
 
     // Find best swaps
-    var swaps = sor.smartOrderRouter(pools, trade, amount, 4, new BigNumber(0));
+    const swaps = sor.smartOrderRouter(
+        pools,
+        trade,
+        amount,
+        4,
+        new BigNumber(0)
+    );
 
-    var totalOutPut = calcTotalOutput(swaps, pools);
+    const totalOutPut = calcTotalOutput(swaps, pools);
 
     // console.log(`Legacy Direct Total: ${utils.formatEther(totalOutPut.toString())}`);
     return [swaps, totalOutPut];

@@ -42,14 +42,14 @@ let balancers: Pool[] = [
 
 describe('Two Pool Tests', () => {
     it('should test spot price', () => {
-        var sp1 = getSpotPrice(balancers[0]);
-        var sp2 = getSpotPrice(balancers[1]);
+        const sp1 = getSpotPrice(balancers[0]);
+        const sp2 = getSpotPrice(balancers[1]);
 
         // Taken form python-SOR, SOR_method_comparison.py
-        var sp1Expected = new BigNumber(7968240028251420);
-        var sp2Expected = new BigNumber(18990231371439040);
+        const sp1Expected = new BigNumber(7968240028251420);
+        const sp2Expected = new BigNumber(18990231371439040);
 
-        var relDif = calcRelativeDiff(sp1Expected, sp1);
+        let relDif = calcRelativeDiff(sp1Expected, sp1);
         assert.isAtMost(
             relDif.toNumber(),
             errorDelta,
@@ -65,8 +65,8 @@ describe('Two Pool Tests', () => {
     });
 
     it('should test two pool SOR swap amounts', () => {
-        var amountIn = new BigNumber(0.7).times(BONE);
-        var swaps = smartOrderRouter(
+        const amountIn = new BigNumber(0.7).times(BONE);
+        const swaps = smartOrderRouter(
             balancers,
             'swapExactIn',
             amountIn,
@@ -79,11 +79,11 @@ describe('Two Pool Tests', () => {
         assert.equal(swaps.length, 2, 'Should be two swaps for this example.');
 
         // Taken form python-SOR, SOR_method_comparison.py
-        var expectedSwap1 = new BigNumber(635206783664651400);
-        var relDif = calcRelativeDiff(expectedSwap1, swaps[0].amount);
+        const expectedSwap1 = new BigNumber(635206783664651400);
+        let relDif = calcRelativeDiff(expectedSwap1, swaps[0].amount);
         assert.isAtMost(relDif.toNumber(), errorDelta, 'First swap incorrect.');
 
-        var expectedSwap2 = new BigNumber(64793216335348570);
+        const expectedSwap2 = new BigNumber(64793216335348570);
         relDif = calcRelativeDiff(expectedSwap2, swaps[1].amount);
         assert.isAtMost(
             relDif.toNumber(),
@@ -93,8 +93,8 @@ describe('Two Pool Tests', () => {
     });
 
     it('should test two pool SOR swap amounts smallest pool reached limit.', () => {
-        var amountIn = new BigNumber(7.8).times(BONE);
-        var swaps = smartOrderRouter(
+        const amountIn = new BigNumber(7.8).times(BONE);
+        const swaps = smartOrderRouter(
             balancers,
             'swapExactIn',
             amountIn,
@@ -117,11 +117,11 @@ describe('Two Pool Tests', () => {
         );
 
         // Taken form python-SOR, SOR_method_comparison.py with input changed to 400
-        var expectedSwap1 = new BigNumber(7.12917562).times(BONE);
-        var relDif = calcRelativeDiff(expectedSwap1, swaps[0].amount);
+        const expectedSwap1 = new BigNumber(7.12917562).times(BONE);
+        let relDif = calcRelativeDiff(expectedSwap1, swaps[0].amount);
         assert.isAtMost(relDif.toNumber(), errorDelta, 'First swap incorrect.');
 
-        var expectedSwap2 = new BigNumber(0.67082438).times(BONE);
+        const expectedSwap2 = new BigNumber(0.67082438).times(BONE);
         relDif = calcRelativeDiff(expectedSwap2, swaps[1].amount);
         assert.isAtMost(
             relDif.toNumber(),
@@ -131,8 +131,8 @@ describe('Two Pool Tests', () => {
     });
 
     it('should test exact limit for both pools.', () => {
-        var amountIn = new BigNumber(7.823722745418976).times(BONE);
-        var swaps = smartOrderRouter(
+        const amountIn = new BigNumber(7.823722745418976).times(BONE);
+        const swaps = smartOrderRouter(
             balancers,
             'swapExactIn',
             amountIn,
@@ -155,11 +155,11 @@ describe('Two Pool Tests', () => {
         );
 
         // Taken form python-SOR, SOR_method_comparison.py with input changed to 400
-        var expectedSwap1 = new BigNumber(7.15289836100379).times(BONE);
-        var relDif = calcRelativeDiff(expectedSwap1, swaps[0].amount);
+        const expectedSwap1 = new BigNumber(7.15289836100379).times(BONE);
+        let relDif = calcRelativeDiff(expectedSwap1, swaps[0].amount);
         assert.isAtMost(relDif.toNumber(), errorDelta, 'First swap incorrect.');
 
-        var expectedSwap2 = new BigNumber(0.6708243844151873).times(BONE);
+        const expectedSwap2 = new BigNumber(0.6708243844151873).times(BONE);
         relDif = calcRelativeDiff(expectedSwap2, swaps[1].amount);
         assert.isAtMost(
             relDif.toNumber(),
@@ -169,8 +169,8 @@ describe('Two Pool Tests', () => {
     });
 
     it('should test two pool SOR swap not possible (over limit).', () => {
-        var amountIn = new BigNumber(8).times(BONE);
-        var swaps = smartOrderRouter(
+        const amountIn = new BigNumber(8).times(BONE);
+        const swaps = smartOrderRouter(
             balancers,
             'swapExactIn',
             amountIn,
@@ -184,10 +184,10 @@ describe('Two Pool Tests', () => {
 
     it('smartOrderRouter loop should take a while to compute.', () => {
         console.time('Legacy smartOrderRouter');
-        var amountIn = new BigNumber(7.823722745418976).times(BONE);
+        const amountIn = new BigNumber(7.823722745418976).times(BONE);
 
         let swaps;
-        for (var i = 0; i < 1000; i++) {
+        for (let i = 0; i < 1000; i++) {
             swaps = smartOrderRouter(
                 balancers,
                 'swapExactIn',
@@ -202,12 +202,12 @@ describe('Two Pool Tests', () => {
 
     it('smartOrderRouterEpsOfInterest loop should be fast to compute.', () => {
         console.time('smartOrderRouterEpsOfInterest');
-        var amountIn = new BigNumber(7.823722745418976).times(BONE);
+        const amountIn = new BigNumber(7.823722745418976).times(BONE);
         balancers = processBalancers(balancers, 'swapExactIn');
-        var epsOfInterest = processEpsOfInterest(balancers, 'swapExactIn');
+        const epsOfInterest = processEpsOfInterest(balancers, 'swapExactIn');
 
         let swaps;
-        for (var i = 0; i < 1000; i++) {
+        for (let i = 0; i < 1000; i++) {
             swaps = smartOrderRouterEpsOfInterest(
                 balancers,
                 'swapExactIn',

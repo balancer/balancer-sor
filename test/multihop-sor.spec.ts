@@ -529,7 +529,7 @@ describe('Tests Multihop SOR vs static allPools.json', () => {
         let sorSwaps, totalReturn;
         console.time('smartOrderRouterMultiHopx100');
         const mhTimeStart = process.hrtime.bigint();
-        for (var i = 0; i < 100; i++) {
+        for (let i = 0; i < 100; i++) {
             [sorSwaps, totalReturn] = sor.smartOrderRouterMultiHop(
                 JSON.parse(JSON.stringify(pools)),
                 pathData,
@@ -569,7 +569,7 @@ describe('Tests Multihop SOR vs static allPools.json', () => {
         let sorSwapsEps, totalReturnEps;
         const mhTimeEpsStart = process.hrtime.bigint();
         console.time('smartOrderRouterMultiHopEpsNEWx100');
-        for (var i = 0; i < 100; i++) {
+        for (let i = 0; i < 100; i++) {
             [
                 sorSwapsEps,
                 totalReturnEps,
@@ -636,7 +636,7 @@ describe('Tests Multihop SOR vs static allPools.json', () => {
         let sorSwaps, totalReturn;
         console.time('smartOrderRouterMultiHopNEWx100');
         const mhTimeStart = process.hrtime.bigint();
-        for (var i = 0; i < 100; i++) {
+        for (let i = 0; i < 100; i++) {
             [sorSwaps, totalReturn] = sor.smartOrderRouterMultiHop(
                 JSON.parse(JSON.stringify(pools)),
                 pathData,
@@ -676,7 +676,7 @@ describe('Tests Multihop SOR vs static allPools.json', () => {
         let sorSwapsEps, totalReturnEps;
         const mhTimeEpsStart = process.hrtime.bigint();
         console.time('smartOrderRouterMultiHopEpsNEWx100');
-        for (var i = 0; i < 100; i++) {
+        for (let i = 0; i < 100; i++) {
             [
                 sorSwapsEps,
                 totalReturnEps,

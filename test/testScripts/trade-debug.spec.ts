@@ -89,7 +89,7 @@ describe('Test multihop-eps trade using live subgraph', () => {
         const mhTimeEpsStart = process.hrtime.bigint();
 
         console.time('smartOrderRouterMultiHopEpsx100');
-        // for (var i = 0; i < 100; i++) {
+        // for (let i = 0; i < 100; i++) {
         [
             sorSwapsEps,
             totalReturnEps,
@@ -181,7 +181,7 @@ describe('Test multihop-eps trade using live subgraph', () => {
         const mhTimeEpsStart = process.hrtime.bigint();
 
         console.time('smartOrderRouterMultiHopEpsx100');
-        // for (var i = 0; i < 100; i++) {
+        // for (let i = 0; i < 100; i++) {
         [
             sorSwapsEps,
             totalReturnEps,
@@ -267,7 +267,7 @@ describe('Test multihop-eps trade using live subgraph', () => {
         const mhTimeEpsStart = process.hrtime.bigint();
 
         console.time('smartOrderRouterMultiHopEpsx100');
-        // for (var i = 0; i < 100; i++) {
+        // for (let i = 0; i < 100; i++) {
         [
             sorSwapsEps,
             totalReturnEps,
@@ -352,7 +352,7 @@ describe('Test multihop-eps trade using live subgraph', () => {
         const mhTimeEpsStart = process.hrtime.bigint();
 
         console.time('smartOrderRouterMultiHopEpsx100');
-        // for (var i = 0; i < 100; i++) {
+        // for (let i = 0; i < 100; i++) {
         [
             sorSwapsEps,
             totalReturnEps,

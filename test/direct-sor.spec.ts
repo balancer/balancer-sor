@@ -150,11 +150,11 @@ describe('Test direct SOR (legacy version with direct pools only) using allPools
         const pools = findPoolsWithTokens(allPoolsReturned, WETH, DAI);
         console.timeEnd('findPoolsWithTokens');
 
-        var amountIn = new BigNumber(1).times(BONE);
+        const amountIn = new BigNumber(1).times(BONE);
 
         console.time('smartOrderRouter');
         // Find best swaps
-        var swaps = sor.smartOrderRouter(
+        const swaps = sor.smartOrderRouter(
             pools,
             'swapExactIn',
             amountIn,
@@ -163,7 +163,7 @@ describe('Test direct SOR (legacy version with direct pools only) using allPools
         );
         console.timeEnd('smartOrderRouter');
 
-        var totalOutPut = calcTotalOutput(swaps, pools);
+        const totalOutPut = calcTotalOutput(swaps, pools);
 
         assert.equal(pools.length, 10, 'Should have 10 pools with tokens.');
         assert.equal(swaps.length, 3, 'Should have 3 swaps.');
@@ -176,11 +176,11 @@ describe('Test direct SOR (legacy version with direct pools only) using allPools
     });
 
     it('Direct SOR - WETH->DAI, swapExactOut', async () => {
-        var amountOut = new BigNumber(1000).times(BONE);
+        const amountOut = new BigNumber(1000).times(BONE);
         const allPoolsReturned = allPools; // Replicates sor.getAllPublicSwapPools() call
         const pools = findPoolsWithTokens(allPoolsReturned, WETH, DAI);
         // Find best swaps
-        var swaps = sor.smartOrderRouter(
+        const swaps = sor.smartOrderRouter(
             pools,
             'swapExactOut',
             amountOut,
@@ -188,7 +188,7 @@ describe('Test direct SOR (legacy version with direct pools only) using allPools
             new BigNumber(0)
         );
 
-        var totalOutPut = calcTotalInput(swaps, pools);
+        const totalOutPut = calcTotalInput(swaps, pools);
         assert.equal(pools.length, 10, 'Should have 10 pools with tokens.');
         assert.equal(swaps.length, 4, 'Should have 4 swaps.');
         assert.equal(
@@ -198,13 +198,13 @@ describe('Test direct SOR (legacy version with direct pools only) using allPools
     });
 
     it('Direct SOR - WETH->ANT, no direct swaps', async () => {
-        var amountOut = new BigNumber(1000).times(BONE);
+        const amountOut = new BigNumber(1000).times(BONE);
         const allPoolsReturned = allPools; // Replicates sor.getAllPublicSwapPools() call
 
         const pools = findPoolsWithTokens(allPoolsReturned, WETH, ANT);
 
         // Find best swaps
-        var swaps = sor.smartOrderRouter(
+        const swaps = sor.smartOrderRouter(
             pools,
             'swapExactIn',
             amountOut,
@@ -212,19 +212,19 @@ describe('Test direct SOR (legacy version with direct pools only) using allPools
             new BigNumber(0)
         );
 
-        var totalOutPut = calcTotalInput(swaps, pools);
+        const totalOutPut = calcTotalInput(swaps, pools);
         assert.equal(pools.length, 0, 'Should have 0 pools with tokens.');
         assert.equal(swaps.length, 0, 'Should have 0 swaps.');
     });
 
     it('Direct SOR - USDC->MKR, no direct swaps', async () => {
-        var amountOut = new BigNumber(1000).times(BONE);
+        const amountOut = new BigNumber(1000).times(BONE);
         const allPoolsReturned = allPools; // Replicates sor.getAllPublicSwapPools() call
 
         const pools = findPoolsWithTokens(allPoolsReturned, USDC, MKR);
 
         // Find best swaps
-        var swaps = sor.smartOrderRouter(
+        const swaps = sor.smartOrderRouter(
             pools,
             'swapExactIn',
             amountOut,
@@ -232,7 +232,7 @@ describe('Test direct SOR (legacy version with direct pools only) using allPools
             new BigNumber(0)
         );
 
-        var totalOutPut = calcTotalInput(swaps, pools);
+        const totalOutPut = calcTotalInput(swaps, pools);
         assert.equal(pools.length, 0, 'Should have 0 pools with tokens.');
         assert.equal(swaps.length, 0, 'Should have 0 swaps.');
     });

@@ -560,11 +560,11 @@ export const parsePoolPairData = (
 };
 
 function filterPoolsWithoutToken(pools, token) {
-    var found;
-    var OutputPools = {};
+    let found;
+    let OutputPools = {};
     for (let i in pools) {
         found = false;
-        for (var k = 0; k < pools[i].tokensList.length; k++) {
+        for (let k = 0; k < pools[i].tokensList.length; k++) {
             if (pools[i].tokensList[k].toLowerCase() == token.toLowerCase()) {
                 found = true;
                 break;
@@ -582,11 +582,11 @@ function filterPoolsWithoutToken(pools, token) {
 // Outputs:
 // - tokens: Set (without duplicate elements) of all tokens that pair with token
 function getTokensPairedToTokenWithinPools(pools, token) {
-    var found;
-    var tokens = new Set();
+    let found;
+    let tokens = new Set();
     for (let i in pools) {
         found = false;
-        for (var k = 0; k < pools[i].tokensList.length; k++) {
+        for (let k = 0; k < pools[i].tokensList.length; k++) {
             if (
                 ethers.utils.getAddress(pools[i].tokensList[k]) !=
                     ethers.utils.getAddress(token) &&
@@ -728,12 +728,12 @@ export async function filterPoolsWithTokensMultihop(
     ] = filterPoolsWithoutMutualTokens(allPools, tokenIn, tokenOut);
 
     // Third: we find the intersection of the two previous sets so we can trade tokenIn for tokenOut with 1 multi-hop
-    var hopTokensSet = [...tokenInHopTokens].filter(x =>
+    const hopTokensSet = [...tokenInHopTokens].filter(x =>
         tokenOutHopTokens.has(x)
     );
 
     // Transform set into Array
-    var hopTokens = [...hopTokensSet];
+    const hopTokens = [...hopTokensSet];
     // console.log(hopTokens);
 
     // Find the most liquid pool for each pair (tokenIn -> hopToken). We store an object in the form:
@@ -741,10 +741,10 @@ export async function filterPoolsWithTokensMultihop(
     // Here we could query subgraph for all pools with pair (tokenIn -> hopToken), but to
     // minimize subgraph calls we loop through poolsTokenInNoTokenOut, and check the liquidity
     // only for those that have hopToken
-    var mostLiquidPoolsFirstHop = [];
-    for (var i = 0; i < hopTokens.length; i++) {
-        var highestNormalizedLiquidity = bnum(0); // Aux variable to find pool with most liquidity for pair (tokenIn -> hopToken)
-        var highestNormalizedLiquidityPoolId; // Aux variable to find pool with most liquidity for pair (tokenIn -> hopToken)
+    let mostLiquidPoolsFirstHop = [];
+    for (let i = 0; i < hopTokens.length; i++) {
+        let highestNormalizedLiquidity = bnum(0); // Aux variable to find pool with most liquidity for pair (tokenIn -> hopToken)
+        let highestNormalizedLiquidityPoolId; // Aux variable to find pool with most liquidity for pair (tokenIn -> hopToken)
         for (let k in poolsTokenInNoTokenOut) {
             // If this pool has hopTokens[i] calculate its normalized liquidity
             if (
@@ -780,10 +780,10 @@ export async function filterPoolsWithTokensMultihop(
     // console.log(mostLiquidPoolsFirstHop);
 
     // Now similarly find the most liquid pool for each pair (hopToken -> tokenOut)
-    var mostLiquidPoolsSecondHop = [];
-    for (var i = 0; i < hopTokens.length; i++) {
-        var highestNormalizedLiquidity = bnum(0); // Aux variable to find pool with most liquidity for pair (tokenIn -> hopToken)
-        var highestNormalizedLiquidityPoolId; // Aux variable to find pool with most liquidity for pair (tokenIn -> hopToken)
+    let mostLiquidPoolsSecondHop = [];
+    for (let i = 0; i < hopTokens.length; i++) {
+        let highestNormalizedLiquidity = bnum(0); // Aux variable to find pool with most liquidity for pair (tokenIn -> hopToken)
+        let highestNormalizedLiquidityPoolId; // Aux variable to find pool with most liquidity for pair (tokenIn -> hopToken)
         for (let k in poolsTokenOutNoTokenIn) {
             // If this pool has hopTokens[i] calculate its normalized liquidity
             if (
