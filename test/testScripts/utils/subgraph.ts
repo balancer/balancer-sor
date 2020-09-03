@@ -64,3 +64,32 @@ export async function getPoolsWithSingleToken(token) {
 
     return pools;
 }
+
+// This was removed from main library as Subgraph active filter is now implemented. Kept here for use in tests.
+export function filterAllPools(allPools: any) {
+    let allTokens = [];
+    let allTokensSet = new Set();
+    let allPoolsNonZeroBalances = [];
+
+    let i = 0;
+
+    for (let pool of allPools.pools) {
+        // Build list of non-zero balance pools
+        // Only check first balance since AFAIK either all balances are zero or none are:
+        if (pool.tokens.length != 0) {
+            if (pool.tokens[0].balance != '0') {
+                allTokens.push(pool.tokensList.sort()); // Will add without duplicate
+                allPoolsNonZeroBalances.push(pool);
+                i++;
+            }
+        }
+    }
+
+    allTokensSet = new Set(
+        Array.from(new Set(allTokens.map(a => JSON.stringify(a))), json =>
+            JSON.parse(json)
+        )
+    );
+
+    return [allTokensSet, allPoolsNonZeroBalances];
+}

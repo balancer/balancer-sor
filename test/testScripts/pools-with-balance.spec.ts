@@ -45,7 +45,7 @@ describe('Test Methods Of Getting All Pools Without 0 Balances', () => {
 
     it('getPools timer check', async () => {
         console.time('getPools');
-        allPools = await sor.getAllPublicSwapPools();
+        allPools = await sor.getAllPublicSwapPools(); // Only returns pools with balance
         console.timeEnd('getPools');
         console.log(allPools.pools.length);
 
@@ -53,16 +53,4 @@ describe('Test Methods Of Getting All Pools Without 0 Balances', () => {
         let filtered = await getPoolsFiltered();
         console.log(filtered.pools.length);
     }).timeout(10000);
-
-    it('filters all pools with 0 balance (using jsclass)', () => {
-        console.time('filterAllPools');
-        let allTokensSet = new Set();
-        let allPoolsNonZeroBalances = [];
-
-        [allTokensSet, allPoolsNonZeroBalances] = sor.filterAllPools(allPools);
-
-        console.timeEnd('filterAllPools');
-
-        console.log(allPoolsNonZeroBalances.length);
-    });
 });

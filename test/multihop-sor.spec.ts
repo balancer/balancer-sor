@@ -2,6 +2,7 @@
 // Includes timing data.
 import { expect, assert } from 'chai';
 import 'mocha';
+import { filterAllPools } from './testScripts/utils/subgraph';
 const sor = require('../src');
 const BigNumber = require('bignumber.js');
 const { utils } = require('ethers');
@@ -29,15 +30,14 @@ BigNumber.config({
     DECIMAL_PLACES: 18,
 });
 
-let allTokensSet = new Set();
-let allPoolsNonZeroBalances = [];
+let allTokensSet, allPoolsNonZeroBalances;
 
 describe('Tests Multihop SOR vs static allPools.json', () => {
     it('Saved pool check', async () => {
         // Uses saved pools @25/05/20.
         assert.equal(allPools.pools.length, 59, 'Should be 59 pools');
 
-        [allTokensSet, allPoolsNonZeroBalances] = sor.filterAllPools(allPools);
+        [allTokensSet, allPoolsNonZeroBalances] = filterAllPools(allPools);
 
         assert.equal(allTokensSet.size, 37, 'Should be 37 tokens'); // filter excludes duplicates
         assert.equal(

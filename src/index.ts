@@ -24,7 +24,6 @@ export {
     parsePoolData, // Legacy Function
     filterPoolsWithTokensDirect,
     filterPoolsWithTokensMultihop,
-    filterAllPools,
 } from './helpers';
 export {
     getPoolsWithTokens, // Legacy Function

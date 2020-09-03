@@ -2,6 +2,7 @@
 // which was replaced as too slow - uses allPoolsSmall.json for pool data.
 import { assert } from 'chai';
 import 'mocha';
+import { filterAllPools } from './testScripts/utils/subgraph';
 const sor = require('../src');
 const helpers = require('../src/helpers');
 const { utils } = require('ethers');
@@ -22,7 +23,7 @@ describe('Test Filter Functions using allPoolsSmall.json & full SOR comparrions'
     it('Saved pool check', async () => {
         assert.equal(allPools.pools.length, 12, 'Should be 12 pools');
 
-        [allTokensSet, allPoolsNonZeroBalances] = sor.filterAllPools(allPools);
+        [allTokensSet, allPoolsNonZeroBalances] = filterAllPools(allPools);
         assert.equal(
             allPoolsNonZeroBalances.length,
             8,

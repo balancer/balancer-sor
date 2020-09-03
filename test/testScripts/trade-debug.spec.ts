@@ -48,15 +48,10 @@ describe('Test multihop-eps trade using live subgraph', () => {
         //const costScaled = bmath.scale(costOutputToken, 6);
         //console.log(costScaled.toString());
 
-        const allPoolsReturned = await sor.getAllPublicSwapPools();
-
-        let allTokensSet, allPoolsNonZeroBalances;
-        [allTokensSet, allPoolsNonZeroBalances] = sor.filterAllPools(
-            allPoolsReturned
-        );
+        const allPoolsNonZeroBalances = await sor.getAllPublicSwapPools(); // Only returns pools with balance
 
         const directPools = await sor.filterPoolsWithTokensDirect(
-            allPoolsNonZeroBalances,
+            allPoolsNonZeroBalances.pools,
             tokenIn,
             tokenOut
         );
@@ -67,7 +62,7 @@ describe('Test multihop-eps trade using live subgraph', () => {
             mostLiquidPoolsSecondHop,
             hopTokens,
         ] = await sor.filterPoolsWithTokensMultihop(
-            allPoolsNonZeroBalances,
+            allPoolsNonZeroBalances.pools,
             tokenIn,
             tokenOut
         );
@@ -145,15 +140,10 @@ describe('Test multihop-eps trade using live subgraph', () => {
         console.log(costOutputToken.toString());
         */
 
-        const allPoolsReturned = await sor.getAllPublicSwapPools();
-
-        let allTokensSet, allPoolsNonZeroBalances;
-        [allTokensSet, allPoolsNonZeroBalances] = sor.filterAllPools(
-            allPoolsReturned
-        );
+        const allPoolsNonZeroBalances = await sor.getAllPublicSwapPools(); // Only returns pools with balance
 
         const directPools = await sor.filterPoolsWithTokensDirect(
-            allPoolsNonZeroBalances,
+            allPoolsNonZeroBalances.pools,
             tokenIn,
             tokenOut
         );
@@ -164,7 +154,7 @@ describe('Test multihop-eps trade using live subgraph', () => {
             mostLiquidPoolsSecondHop,
             hopTokens,
         ] = await sor.filterPoolsWithTokensMultihop(
-            allPoolsNonZeroBalances,
+            allPoolsNonZeroBalances.pools,
             tokenIn,
             tokenOut
         );
@@ -236,15 +226,10 @@ describe('Test multihop-eps trade using live subgraph', () => {
         );
         console.log(`costOutputToken: ${costOutputToken.toString()}`);
 
-        const allPoolsReturned = await sor.getAllPublicSwapPools();
-
-        let allTokensSet, allPoolsNonZeroBalances;
-        [allTokensSet, allPoolsNonZeroBalances] = sor.filterAllPools(
-            allPoolsReturned
-        );
+        const allPoolsNonZeroBalances = await sor.getAllPublicSwapPools(); // Only returns pools with balance
 
         const directPools = await sor.filterPoolsWithTokensDirect(
-            allPoolsNonZeroBalances,
+            allPoolsNonZeroBalances.pools,
             tokenIn,
             tokenOut
         );
@@ -255,7 +240,7 @@ describe('Test multihop-eps trade using live subgraph', () => {
             mostLiquidPoolsSecondHop,
             hopTokens,
         ] = await sor.filterPoolsWithTokensMultihop(
-            allPoolsNonZeroBalances,
+            allPoolsNonZeroBalances.pools,
             tokenIn,
             tokenOut
         );
@@ -326,15 +311,10 @@ describe('Test multihop-eps trade using live subgraph', () => {
         );
         console.log(`costOutputToken: ${costOutputToken.toString()}`);
 
-        const allPoolsReturned = await sor.getAllPublicSwapPools();
-
-        let allTokensSet, allPoolsNonZeroBalances;
-        [allTokensSet, allPoolsNonZeroBalances] = sor.filterAllPools(
-            allPoolsReturned
-        );
+        const allPoolsNonZeroBalances = await sor.getAllPublicSwapPools(); // Only returns pools with balance
 
         const directPools = await sor.filterPoolsWithTokensDirect(
-            allPoolsNonZeroBalances,
+            allPoolsNonZeroBalances.pools,
             tokenIn,
             tokenOut
         );
@@ -345,7 +325,7 @@ describe('Test multihop-eps trade using live subgraph', () => {
             mostLiquidPoolsSecondHop,
             hopTokens,
         ] = await sor.filterPoolsWithTokensMultihop(
-            allPoolsNonZeroBalances,
+            allPoolsNonZeroBalances.pools,
             tokenIn,
             tokenOut
         );
