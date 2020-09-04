@@ -40,20 +40,26 @@ Multihop:
 -   sor.parsePoolData
 -   [sorSwaps, totalReturn] = sor.smartOrderRouterMultiHop
 
-### filter-functions
+### filter-functions.spec.ts
 
 Run: `$ npx mocha -r ts-node/register test/testScripts/filter-functions.spec.ts`
 
 Uses live Subgraph data to compare filter methods.
 
-### multicall.ts
+### multicallTest.ts
 
 Run: `$ ts-node ./test/testScripts/multicallTest.ts`
 
 Uses live Subgraph data to compare filter methods.
 
-### multihop-eps-debug.spec.ts
+### trade-debug.spec.ts
 
 Run: `$ npx mocha -r ts-node/register test/testScripts/trade-debug.spec.ts`
 
 Tests full multihop-eps trade using live subgraph. Useful for quickly checking trade outputs.
+
+### example-swapExactIn.ts
+
+Run: `$ ts-node ./test/testScripts/example-swapExactIn.ts`
+
+Example showing full swapExactIn, USDC->DAI
