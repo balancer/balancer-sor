@@ -162,16 +162,25 @@ async function SorDirectOnly(
     const returnTokenCostPerPool = new BigNumber('0');
     const maxPools = new BigNumber('4');
 
+    let paths = sor.processPaths(pathDataDirectPoolsOnly, parsedPools, trade);
+
+    let epsOfInterest = sor.processEpsOfInterestMultiHop(
+        pathDataDirectPoolsOnly,
+        trade,
+        maxPools
+    );
+
     const [
         sorSwapsDirectPoolsOnly,
         totalReturnDirectPoolsOnly,
-    ] = sor.smartOrderRouterMultiHop(
-        JSON.parse(JSON.stringify(parsedPools)), // Passing clone to avoid change in original pools
+    ] = sor.smartOrderRouterMultiHopEpsOfInterest(
+        JSON.parse(JSON.stringify(parsedPools)),
         pathDataDirectPoolsOnly,
         trade,
         amount,
         maxPools,
-        returnTokenCostPerPool
+        new BigNumber(0),
+        epsOfInterest
     );
     //console.log('SOR swaps WITHOUT multi-hop');
     //console.log(sorSwapsDirectPoolsOnly);
@@ -207,13 +216,23 @@ async function SorMultihop(allPoolsReturned, tokenIn, tokenOut, trade, amount) {
         hopTokens
     );
 
-    const [sorSwaps, totalReturn] = sor.smartOrderRouterMultiHop(
-        JSON.parse(JSON.stringify(pools)),
-        pathData,
-        trade,
-        amount,
-        4,
-        new BigNumber(0)
+    let paths = sor.processPaths(pathData, allPoolsReturned, swapType);
+
+    let epsOfInterest = sor.processEpsOfInterestMultiHop(
+        paths,
+        swapType,
+        noPools
+    );
+
+    let swaps, totalReturnWei;
+    [swaps, totalReturnWei] = sor.smartOrderRouterMultiHopEpsOfInterest(
+        JSON.parse(JSON.stringify(allPoolsReturned)),
+        paths,
+        swapType,
+        amountOut,
+        noPools,
+        new BigNumber(0),
+        epsOfInterest
     );
 
     // console.log(`SOR Multihop Total: ${utils.formatEther(totalReturn.toString())}`);

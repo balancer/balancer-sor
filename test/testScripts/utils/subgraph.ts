@@ -65,6 +65,15 @@ export async function getPoolsWithSingleToken(token) {
     return pools;
 }
 
+function parsePoolToBnum(pool) {
+    pool.swapFee = bmath.bnum(pool.swapFee);
+    pool.totalWeight = bmath.bnum(pool.totalWeight);
+    pool.tokens.forEach(token => {
+        token.balance = bmath.scale(bmath.bnum(token.balance), token.decimals);
+        token.denormWeight = bmath.scale(bmath.bnum(token.denormWeight), 18);
+    });
+}
+
 // This was removed from main library as Subgraph active filter is now implemented. Kept here for use in tests.
 export function filterAllPools(allPools: any) {
     let allTokens = [];
@@ -79,6 +88,7 @@ export function filterAllPools(allPools: any) {
         if (pool.tokens.length != 0) {
             if (pool.tokens[0].balance != '0') {
                 allTokens.push(pool.tokensList.sort()); // Will add without duplicate
+                // parsePoolToBnum(pool);                  // Change to bnum format
                 allPoolsNonZeroBalances.push(pool);
                 i++;
             }

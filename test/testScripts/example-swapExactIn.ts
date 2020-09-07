@@ -28,7 +28,15 @@ async function swapExactIn() {
     );
 
     // Uses the Subgraph to retrieve all public Balancer pools that have a positive token balance.
-    const allPoolsNonZeroBalances = await sor.getAllPublicSwapPools();
+    const allPoolsNonZeroBalancesSG = await sor.getAllPublicSwapPools();
+
+    const allPoolsNonZeroBalances = await sor.getAllPoolDataOnChain(
+        allPoolsNonZeroBalancesSG,
+        '0xeefba1e63905ef1d7acba5a8513c70307c1ce441',
+        provider
+    );
+
+    // console.log(allPoolsNonZeroBalances)
 
     // Retrieves all pools that contain both DAI & USDC, i.e. pools that can be used for direct swaps
     const directPools = await sor.filterPoolsWithTokensDirect(
@@ -36,6 +44,9 @@ async function swapExactIn() {
         tokenIn.toLowerCase(), // The Subgraph returns tokens in lower case format so we must match this
         tokenOut.toLowerCase()
     );
+
+    console.log(`DIRECT`);
+    console.log(directPools);
 
     // Retrieves pools in order of liquidity for intermediate pools along with tokens that are contained in these.
     let mostLiquidPoolsFirstHop, mostLiquidPoolsSecondHop, hopTokens;
@@ -68,6 +79,10 @@ async function swapExactIn() {
         swapType,
         noPools
     );
+
+    epsOfInterest.forEach(eps => {
+        console.log(eps);
+    });
 
     // Returns  total amount of DAI swapped and list of swaps to make
     let swaps, totalReturnWei;

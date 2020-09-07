@@ -12,7 +12,6 @@ export {
 //
 
 export {
-    smartOrderRouterMultiHop,
     smartOrderRouterMultiHopEpsOfInterest,
     calcTotalReturn,
     processPaths,

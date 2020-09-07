@@ -40,12 +40,6 @@ Multihop:
 -   sor.parsePoolData
 -   [sorSwaps, totalReturn] = sor.smartOrderRouterMultiHop
 
-### filter-functions.spec.ts
-
-Run: `$ npx mocha -r ts-node/register test/testScripts/filter-functions.spec.ts`
-
-Uses live Subgraph data to compare filter methods.
-
 ### multicallTest.ts
 
 Run: `$ ts-node ./test/testScripts/multicallTest.ts`
