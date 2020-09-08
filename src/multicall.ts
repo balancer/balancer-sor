@@ -1,6 +1,6 @@
 import { ethers, utils } from 'ethers';
 import { Web3Provider } from 'ethers/providers';
-import { PoolPairData } from './types';
+import { PoolPairData, Pools, Pool, SubGraphPools, Token } from './types';
 import * as bmath from './bmath';
 
 // LEGACY FUNCTION - Keep Input/Output Format
@@ -72,10 +72,10 @@ export async function parsePoolDataOnChain(
 }
 
 export async function getAllPoolDataOnChain(
-    pools,
+    pools: SubGraphPools,
     multiAddress: string,
     provider: Web3Provider
-): Promise<any> {
+): Promise<Pools> {
     if (pools.pools.length === 0)
         throw Error('There are no pools with selected tokens');
 
@@ -115,24 +115,39 @@ export async function getAllPoolDataOnChain(
         let chunkResponse = [];
         let returnPools: PoolPairData[] = [];
         let j = 0;
-        let onChainPools = { pools: [] };
+        let onChainPools: Pools = { pools: [] };
 
         for (let i = 0; i < pools.pools.length; i++) {
-            let p = { ...pools.pools[i] };
-            p.swapFee = bmath.bnum(response[j]);
+            let tokens: Token[] = [];
+            let publicSwap = true;
+            if (pools.pools[i].publicSwap === 'false') publicSwap = false;
+
+            let p: Pool = {
+                id: pools.pools[i].id,
+                swapFee: bmath.bnum(response[j]),
+                totalWeight: bmath.scale(
+                    bmath.bnum(pools.pools[i].totalWeight),
+                    18
+                ),
+                publicSwap: publicSwap,
+                tokens: tokens,
+                tokensList: pools.pools[i].tokensList,
+            };
             j++;
-            p.tokens.forEach(token => {
-                token.balance = bmath.bnum(response[j]);
+            pools.pools[i].tokens.forEach(token => {
+                let bal = bmath.bnum(response[j]);
                 j++;
-                token.denormWeight = bmath.bnum(response[j]);
+                let dW = bmath.bnum(response[j]);
                 j++;
+                p.tokens.push({
+                    id: token.id,
+                    address: token.address,
+                    balance: bal,
+                    decimals: Number(token.decimals),
+                    symbol: token.symbol,
+                    denormWeight: dW,
+                });
             });
-
-            p.totalWeight = bmath.scale(
-                bmath.bnum(pools.pools[i].totalWeight),
-                18
-            );
-
             onChainPools.pools.push(p);
         }
 
