@@ -183,7 +183,7 @@ describe('Two Pool Tests', () => {
     });
 
     it('smartOrderRouter loop should take a while to compute.', () => {
-        console.time('Legacy smartOrderRouter');
+        // console.time('Legacy smartOrderRouter');
         const amountIn = new BigNumber(7.823722745418976).times(BONE);
 
         let swaps;
@@ -196,12 +196,12 @@ describe('Two Pool Tests', () => {
                 new BigNumber(0)
             );
         }
-        console.log(swaps);
-        console.timeEnd('Legacy smartOrderRouter');
+        // console.log(swaps);
+        // console.timeEnd('Legacy smartOrderRouter');
     });
 
     it('smartOrderRouterEpsOfInterest loop should be fast to compute.', () => {
-        console.time('smartOrderRouterEpsOfInterest');
+        // console.time('smartOrderRouterEpsOfInterest');
         const amountIn = new BigNumber(7.823722745418976).times(BONE);
         balancers = processBalancers(balancers, 'swapExactIn');
         const epsOfInterest = processEpsOfInterest(balancers, 'swapExactIn');
@@ -217,8 +217,8 @@ describe('Two Pool Tests', () => {
                 epsOfInterest
             );
         }
-        console.log(swaps);
-        console.timeEnd('smartOrderRouterEpsOfInterest');
+        // console.log(swaps);
+        // console.timeEnd('smartOrderRouterEpsOfInterest');
     });
 
     // Check case mentioned in Discord

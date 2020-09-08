@@ -23,6 +23,7 @@ export {
     parsePoolData, // Legacy Function
     filterPoolsWithTokensDirect,
     filterPoolsWithTokensMultihop,
+    formatSubgraphPools,
 } from './helpers';
 export {
     getPoolsWithTokens, // Legacy Function

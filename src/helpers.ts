@@ -143,6 +143,7 @@ export function getSlippageLinearizedSpotPriceAfterSwapPath(
     if (swaps.length == 1) {
         let swap1 = swaps[0];
         let poolSwap1 = pools[swap1.pool];
+
         let poolPairDataSwap1 = parsePoolPairData(
             poolSwap1,
             swap1.tokenIn,
@@ -325,6 +326,9 @@ export function getReturnAmountSwap(
         tokenOut,
     } = poolPairData;
     let returnAmount;
+    balanceIn = bnum(balanceIn);
+    balanceOut = bnum(balanceOut);
+
     if (swapType === 'swapExactIn') {
         if (balanceIn.isEqualTo(bnum(0))) {
             return bnum(0);
@@ -393,7 +397,7 @@ export function updateTokenBalanceForPool(
 
     // Scale down back as balances are stored scaled down by the decimals
     let T = pool.tokens.find(t => t.address === token);
-    T.balance = scale(balance, -T.decimals).toString(); // scale down, hence negative sign
+    T.balance = balance;
     return pool;
 }
 
@@ -533,6 +537,7 @@ export const parsePoolPairData = (
             ethers.utils.getAddress(tokenIn)
     );
     // console.log("tI")
+    // console.log(tI.balance.toString());
     // console.log(tI)
     let tO = p.tokens.find(
         t =>
@@ -541,6 +546,7 @@ export const parsePoolPairData = (
     );
 
     // console.log("tO")
+    // console.log(tO.balance.toString());
     // console.log(tO)
 
     let poolPairData = {
@@ -549,11 +555,11 @@ export const parsePoolPairData = (
         tokenOut: tokenOut,
         decimalsIn: tI.decimals,
         decimalsOut: tO.decimals,
-        balanceIn: scale(bnum(tI.balance), tI.decimals),
-        balanceOut: scale(bnum(tO.balance), tO.decimals),
+        balanceIn: bnum(tI.balance),
+        balanceOut: bnum(tO.balance),
         weightIn: scale(bnum(tI.denormWeight).div(bnum(p.totalWeight)), 18),
         weightOut: scale(bnum(tO.denormWeight).div(bnum(p.totalWeight)), 18),
-        swapFee: scale(bnum(p.swapFee), 18),
+        swapFee: bnum(p.swapFee),
     };
 
     return poolPairData;
@@ -816,3 +822,14 @@ export async function filterPoolsWithTokensMultihop(
     }
     return [mostLiquidPoolsFirstHop, mostLiquidPoolsSecondHop, hopTokens];
 }
+
+export const formatSubgraphPools = pools => {
+    for (let pool of pools.pools) {
+        pool.swapFee = scale(bnum(pool.swapFee), 18);
+        pool.totalWeight = scale(bnum(pool.totalWeight), 18);
+        pool.tokens.forEach(token => {
+            token.balance = scale(bnum(token.balance), token.decimals);
+            token.denormWeight = scale(bnum(token.denormWeight), 18);
+        });
+    }
+};

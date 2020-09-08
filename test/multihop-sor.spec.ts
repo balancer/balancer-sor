@@ -2,12 +2,15 @@
 // Includes timing data.
 import { expect, assert } from 'chai';
 import 'mocha';
-import { filterAllPools } from './testScripts/utils/subgraph';
+import {
+    formatAndFilterPools,
+    filterPools,
+} from './testScripts/utils/subgraph';
 const sor = require('../src');
 const BigNumber = require('bignumber.js');
 const { utils } = require('ethers');
 const allPools = require('./allPools.json');
-import { BONE } from '../src/bmath';
+import { BONE, scale } from '../src/bmath';
 
 // const WETH = '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2'; // WETH
 const WETH = '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2'; // WETH lower case
@@ -38,11 +41,13 @@ describe('Tests Multihop SOR vs static allPools.json', () => {
         assert.equal(allPools.pools.length, 59, 'Should be 59 pools');
 
         // Converts Subgraph string format to Wei/Bnum format
-        [allTokensSet, allPoolsNonZeroBalances] = filterAllPools(allPools);
+        [allTokensSet, allPoolsNonZeroBalances] = formatAndFilterPools(
+            allPools
+        );
 
         assert.equal(allTokensSet.size, 37, 'Should be 37 tokens'); // filter excludes duplicates
         assert.equal(
-            allPoolsNonZeroBalances.length,
+            allPoolsNonZeroBalances.pools.length,
             45,
             'Should be 45 pools with non-zero balance'
         );
@@ -72,7 +77,7 @@ describe('Tests Multihop SOR vs static allPools.json', () => {
     it('filterPoolsWithTokensDirect - WETH/ANT Pools', async () => {
         console.time('filterPoolsWithTokensDirect');
         const directPools = sor.filterPoolsWithTokensDirect(
-            allPoolsNonZeroBalances,
+            allPoolsNonZeroBalances.pools,
             WETH,
             ANT
         );
@@ -87,7 +92,7 @@ describe('Tests Multihop SOR vs static allPools.json', () => {
     it('filterPoolsWithTokensDirect - WETH/DAI Pools', async () => {
         console.time('filterPoolsWithTokensDirect');
         let directPools = sor.filterPoolsWithTokensDirect(
-            allPoolsNonZeroBalances,
+            allPoolsNonZeroBalances.pools,
             WETH,
             DAI
         );
@@ -98,7 +103,7 @@ describe('Tests Multihop SOR vs static allPools.json', () => {
             'Should have 10 direct pools'
         );
         directPools = sor.filterPoolsWithTokensDirect(
-            allPoolsNonZeroBalances,
+            allPoolsNonZeroBalances.pools,
             DAI,
             WETH
         );
@@ -117,14 +122,14 @@ describe('Tests Multihop SOR vs static allPools.json', () => {
             mostLiquidPoolsSecondHop,
             hopTokens,
         ] = await sor.filterPoolsWithTokensMultihop(
-            allPoolsNonZeroBalances,
+            allPoolsNonZeroBalances.pools,
             WETH,
             DAI
         );
         console.timeEnd('filterPoolsWithTokensMultihop');
 
         const directPools = await sor.filterPoolsWithTokensDirect(
-            allPoolsNonZeroBalances,
+            allPoolsNonZeroBalances.pools,
             WETH,
             DAI
         );
@@ -168,7 +173,7 @@ describe('Tests Multihop SOR vs static allPools.json', () => {
         const noPools = 4;
 
         const directPools = await sor.filterPoolsWithTokensDirect(
-            allPoolsNonZeroBalances,
+            allPoolsNonZeroBalances.pools,
             WETH,
             DAI
         );
@@ -179,7 +184,7 @@ describe('Tests Multihop SOR vs static allPools.json', () => {
             mostLiquidPoolsSecondHop,
             hopTokens,
         ] = await sor.filterPoolsWithTokensMultihop(
-            allPoolsNonZeroBalances,
+            allPoolsNonZeroBalances.pools,
             WETH,
             DAI
         );
@@ -194,16 +199,14 @@ describe('Tests Multihop SOR vs static allPools.json', () => {
             hopTokens
         );
 
-        // PROCESS paths
-        // Finds sorted price & slippage information for paths
         let paths = sor.processPaths(pathData, pools, swapType);
-        // processEpsOfInterestMultiHop
+
         let epsOfInterest = sor.processEpsOfInterestMultiHop(
             paths,
             swapType,
             noPools
         );
-        // smartOrderRouterMultiHopEps
+
         let swaps, totalReturnWei;
         [swaps, totalReturnWei] = sor.smartOrderRouterMultiHopEpsOfInterest(
             JSON.parse(JSON.stringify(pools)),
@@ -230,7 +233,7 @@ describe('Tests Multihop SOR vs static allPools.json', () => {
         const noPools = 4;
 
         const directPools = await sor.filterPoolsWithTokensDirect(
-            allPoolsNonZeroBalances,
+            allPoolsNonZeroBalances.pools,
             WETH,
             DAI
         );
@@ -241,7 +244,7 @@ describe('Tests Multihop SOR vs static allPools.json', () => {
             mostLiquidPoolsSecondHop,
             hopTokens,
         ] = await sor.filterPoolsWithTokensMultihop(
-            allPoolsNonZeroBalances,
+            allPoolsNonZeroBalances.pools,
             WETH,
             DAI
         );
@@ -290,7 +293,7 @@ describe('Tests Multihop SOR vs static allPools.json', () => {
         const noPools = 4;
 
         const directPools = await sor.filterPoolsWithTokensDirect(
-            allPoolsNonZeroBalances,
+            allPoolsNonZeroBalances.pools,
             WETH,
             ANT
         );
@@ -301,7 +304,7 @@ describe('Tests Multihop SOR vs static allPools.json', () => {
             mostLiquidPoolsSecondHop,
             hopTokens,
         ] = await sor.filterPoolsWithTokensMultihop(
-            allPoolsNonZeroBalances,
+            allPoolsNonZeroBalances.pools,
             WETH,
             ANT
         );
@@ -355,7 +358,7 @@ describe('Tests Multihop SOR vs static allPools.json', () => {
 
         const allPoolsReturned = allPools; // Replicated sor.getAllPublicSwapPools() call
         const directPools = await sor.filterPoolsWithTokensDirect(
-            allPoolsNonZeroBalances,
+            allPoolsNonZeroBalances.pools,
             WETH,
             ANT
         );
@@ -366,7 +369,7 @@ describe('Tests Multihop SOR vs static allPools.json', () => {
             mostLiquidPoolsSecondHop,
             hopTokens,
         ] = await sor.filterPoolsWithTokensMultihop(
-            allPoolsNonZeroBalances,
+            allPoolsNonZeroBalances.pools,
             WETH,
             ANT
         );
@@ -420,7 +423,7 @@ describe('Tests Multihop SOR vs static allPools.json', () => {
 
         const allPoolsReturned = allPools; // Replicated sor.getAllPublicSwapPools() call
         const directPools = await sor.filterPoolsWithTokensDirect(
-            allPoolsNonZeroBalances,
+            allPoolsNonZeroBalances.pools,
             USDC,
             MKR
         );
@@ -431,7 +434,7 @@ describe('Tests Multihop SOR vs static allPools.json', () => {
             mostLiquidPoolsSecondHop,
             hopTokens,
         ] = await sor.filterPoolsWithTokensMultihop(
-            allPoolsNonZeroBalances,
+            allPoolsNonZeroBalances.pools,
             USDC,
             MKR
         );
@@ -485,7 +488,7 @@ describe('Tests Multihop SOR vs static allPools.json', () => {
 
         const allPoolsReturned = allPools; // Replicated sor.getAllPublicSwapPools() call
         const directPools = await sor.filterPoolsWithTokensDirect(
-            allPoolsNonZeroBalances,
+            allPoolsNonZeroBalances.pools,
             USDC,
             MKR
         );
@@ -496,7 +499,7 @@ describe('Tests Multihop SOR vs static allPools.json', () => {
             mostLiquidPoolsSecondHop,
             hopTokens,
         ] = await sor.filterPoolsWithTokensMultihop(
-            allPoolsNonZeroBalances,
+            allPoolsNonZeroBalances.pools,
             USDC,
             MKR
         );
@@ -521,7 +524,8 @@ describe('Tests Multihop SOR vs static allPools.json', () => {
 
         let swaps, totalReturnWei;
         [swaps, totalReturnWei] = sor.smartOrderRouterMultiHopEpsOfInterest(
-            JSON.parse(JSON.stringify(pools)),
+            // JSON.parse(JSON.stringify(pools)),
+            pools,
             paths,
             swapType,
             amountOut,

@@ -3,6 +3,7 @@ import { ethers } from 'ethers';
 import * as bmath from '../../../src/bmath';
 import { PoolPairData, Path } from '../../../src/types';
 import { BigNumber } from '../../../src/utils/bignumber';
+import * as sor from '../../../src';
 
 const SUBGRAPH_URL =
     process.env.REACT_APP_SUBGRAPH_URL ||
@@ -65,17 +66,36 @@ export async function getPoolsWithSingleToken(token) {
     return pools;
 }
 
-function parsePoolToBnum(pool) {
-    pool.swapFee = bmath.bnum(pool.swapFee);
-    pool.totalWeight = bmath.bnum(pool.totalWeight);
-    pool.tokens.forEach(token => {
-        token.balance = bmath.scale(bmath.bnum(token.balance), token.decimals);
-        token.denormWeight = bmath.scale(bmath.bnum(token.denormWeight), 18);
-    });
+// Filters for only pools with balance and converts to wei/bnum format.
+export function formatAndFilterPools(allPools: any) {
+    let allTokens = [];
+    let allTokensSet = new Set();
+    let allPoolsNonZeroBalances = { pools: [] };
+
+    for (let pool of allPools.pools) {
+        // Build list of non-zero balance pools
+        // Only check first balance since AFAIK either all balances are zero or none are:
+        if (pool.tokens.length != 0) {
+            if (pool.tokens[0].balance != '0') {
+                allTokens.push(pool.tokensList.sort()); // Will add without duplicate
+                allPoolsNonZeroBalances.pools.push(pool);
+            }
+        }
+    }
+
+    allTokensSet = new Set(
+        Array.from(new Set(allTokens.map(a => JSON.stringify(a))), json =>
+            JSON.parse(json)
+        )
+    );
+
+    // Formats Subgraph to wei/bnum format
+    sor.formatSubgraphPools(allPoolsNonZeroBalances);
+
+    return [allTokensSet, allPoolsNonZeroBalances];
 }
 
-// This was removed from main library as Subgraph active filter is now implemented. Kept here for use in tests.
-export function filterAllPools(allPools: any) {
+export function filterPools(allPools: any) {
     let allTokens = [];
     let allTokensSet = new Set();
     let allPoolsNonZeroBalances = [];
@@ -88,7 +108,6 @@ export function filterAllPools(allPools: any) {
         if (pool.tokens.length != 0) {
             if (pool.tokens[0].balance != '0') {
                 allTokens.push(pool.tokensList.sort()); // Will add without duplicate
-                // parsePoolToBnum(pool);                  // Change to bnum format
                 allPoolsNonZeroBalances.push(pool);
                 i++;
             }

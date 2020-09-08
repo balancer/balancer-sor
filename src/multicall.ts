@@ -115,24 +115,28 @@ export async function getAllPoolDataOnChain(
         let chunkResponse = [];
         let returnPools: PoolPairData[] = [];
         let j = 0;
+        let onChainPools = { pools: [] };
 
         for (let i = 0; i < pools.pools.length; i++) {
-            pools.pools[i].swapFee = bmath.bnum(response[j]);
+            let p = { ...pools.pools[i] };
+            p.swapFee = bmath.bnum(response[j]);
             j++;
-            pools.pools[i].tokens.forEach(token => {
+            p.tokens.forEach(token => {
                 token.balance = bmath.bnum(response[j]);
                 j++;
                 token.denormWeight = bmath.bnum(response[j]);
                 j++;
             });
 
-            pools.pools[i].totalWeight = bmath.scale(
+            p.totalWeight = bmath.scale(
                 bmath.bnum(pools.pools[i].totalWeight),
                 18
             );
+
+            onChainPools.pools.push(p);
         }
 
-        return pools;
+        return onChainPools;
     } catch (e) {
         console.error('Failure querying onchain balances', { error: e });
         return;

@@ -28,25 +28,26 @@ async function swapExactIn() {
     );
 
     // Uses the Subgraph to retrieve all public Balancer pools that have a positive token balance.
-    const allPoolsNonZeroBalancesSG = await sor.getAllPublicSwapPools();
+    console.log(`Retrieving SubGraph Pools...`);
+    let allPoolsNonZeroBalances = await sor.getAllPublicSwapPools();
 
-    const allPoolsNonZeroBalances = await sor.getAllPoolDataOnChain(
-        allPoolsNonZeroBalancesSG,
+    console.log(`Retrieving Onchain Balances...`);
+    allPoolsNonZeroBalances = await sor.getAllPoolDataOnChain(
+        allPoolsNonZeroBalances,
         '0xeefba1e63905ef1d7acba5a8513c70307c1ce441',
         provider
     );
+    // Alternatively Subgraph data can be used directly
+    // sor.formatSubgraphPools(allPoolsNonZeroBalances);
 
     // console.log(allPoolsNonZeroBalances)
-
+    console.log(`Processing Data...`);
     // Retrieves all pools that contain both DAI & USDC, i.e. pools that can be used for direct swaps
     const directPools = await sor.filterPoolsWithTokensDirect(
         allPoolsNonZeroBalances.pools,
         tokenIn.toLowerCase(), // The Subgraph returns tokens in lower case format so we must match this
         tokenOut.toLowerCase()
     );
-
-    console.log(`DIRECT`);
-    console.log(directPools);
 
     // Retrieves pools in order of liquidity for intermediate pools along with tokens that are contained in these.
     let mostLiquidPoolsFirstHop, mostLiquidPoolsSecondHop, hopTokens;
@@ -80,10 +81,6 @@ async function swapExactIn() {
         noPools
     );
 
-    epsOfInterest.forEach(eps => {
-        console.log(eps);
-    });
-
     // Returns  total amount of DAI swapped and list of swaps to make
     let swaps, totalReturnWei;
     [swaps, totalReturnWei] = sor.smartOrderRouterMultiHopEpsOfInterest(
@@ -98,6 +95,7 @@ async function swapExactIn() {
 
     const totalReturnEth = totalReturnWei.div(BONE); // Just converts from wei units
     console.log(`Total DAI Return: ${totalReturnEth.toString()}`);
+    console.log(`Swaps: `);
     console.log(swaps);
 }
 
