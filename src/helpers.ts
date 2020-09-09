@@ -6,6 +6,7 @@ import {
     Pool,
     PoolDictionary,
     Swap,
+    DisabledOptions,
     DisabledToken,
 } from './types';
 import {
@@ -20,6 +21,7 @@ import {
     calcInGivenOut,
     scale,
 } from './bmath';
+const disabledTokensDefault = require('./disabled-tokens.json');
 
 export function toChecksum(address) {
     return ethers.utils.getAddress(address);
@@ -649,11 +651,15 @@ export function filterPoolsWithTokensDirect(
     allPools: Pool[], // The complete information of the pools
     tokenIn: string,
     tokenOut: string,
-    disabledTokens: DisabledToken[] = []
+    disabledOptions: DisabledOptions = { isOverRide: false, disabledTokens: [] }
 ): PoolDictionary {
-    // let poolsWithTokens: { [poolId: string]: Pool} = {};
     let poolsWithTokens: PoolDictionary = {};
     // If pool contains token add all its tokens to direct list
+
+    let disabledTokens = disabledTokensDefault.tokens;
+    if (disabledOptions.isOverRide)
+        disabledTokens = disabledOptions.disabledTokens;
+
     allPools.forEach(pool => {
         let tokenListSet = new Set(pool.tokensList);
         disabledTokens.forEach(token => tokenListSet.delete(token.address));
@@ -716,7 +722,7 @@ export async function filterPoolsWithTokensMultihop(
     allPools: Pool[], // Just the list of pool tokens
     tokenIn: string,
     tokenOut: string,
-    disabledTokens: DisabledToken[] = []
+    disabledOptions: DisabledOptions = { isOverRide: false, disabledTokens: [] }
 ): Promise<[Pool[], Pool[], string[]]> {
     //// Multi-hop trades: we find the best pools that connect tokenIn and tokenOut through a multi-hop (intermediate) token
     // First: we get all tokens that can be used to be traded with tokenIn excluding
@@ -725,6 +731,10 @@ export async function filterPoolsWithTokensMultihop(
     let tokenInHopTokens: Set<string>;
     let poolsTokenOutNoTokenIn: PoolDictionary;
     let tokenOutHopTokens: Set<string>;
+
+    let disabledTokens = disabledTokensDefault.tokens;
+    if (disabledOptions.isOverRide)
+        disabledTokens = disabledOptions.disabledTokens;
 
     // STOPPED HERE: poolsTokenInNoTokenOut NEEDS
     [

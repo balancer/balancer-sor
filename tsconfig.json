@@ -12,5 +12,5 @@
         "experimentalDecorators": true,
         "strictNullChecks": false
     },
-    "include": ["src", "src/abi/*.json"]
+    "include": ["src", "src/abi/*.json", "src/disabled-tokens.json"]
 }

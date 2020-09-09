@@ -35,13 +35,13 @@ BigNumber.config({
     DECIMAL_PLACES: 18,
 });
 
-let allTokensSet, allPoolsNonZeroBalances;
+let allPoolsNonZeroBalances;
 
 describe('Tests Multihop SOR vs static allPools.json', () => {
     it('Saved pool check - without disabled filter', async () => {
         // Uses saved pools @25/05/20.
         assert.equal(allPools.pools.length, 64, 'Should be 64 pools');
-
+        let allTokensSet;
         // Converts Subgraph string format to Wei/Bnum format
         [allTokensSet, allPoolsNonZeroBalances] = formatAndFilterPools(
             JSON.parse(JSON.stringify(allPools))
@@ -58,7 +58,7 @@ describe('Tests Multihop SOR vs static allPools.json', () => {
     it('Saved pool check - with disabled filter', async () => {
         // Uses saved pools @25/05/20.
         assert.equal(allPools.pools.length, 64, 'Should be 64 pools');
-
+        let allTokensSet;
         // Converts Subgraph string format to Wei/Bnum format
         [allTokensSet, allPoolsNonZeroBalances] = formatAndFilterPools(
             JSON.parse(JSON.stringify(allPools)),
@@ -75,6 +75,13 @@ describe('Tests Multihop SOR vs static allPools.json', () => {
 
     it('getTokenPairsMultiHop - Should return direct & multihop partner tokens', async () => {
         // console.time('getTokenPairsMultiHop');
+        let allTokensSet;
+        // Converts Subgraph string format to Wei/Bnum format
+        [allTokensSet, allPoolsNonZeroBalances] = formatAndFilterPools(
+            JSON.parse(JSON.stringify(allPools)),
+            disabledTokens.tokens
+        );
+
         let [directTokenPairsSET, allTokenPairsSET] = sor.getTokenPairsMultiHop(
             DAI,
             allTokensSet
@@ -94,12 +101,12 @@ describe('Tests Multihop SOR vs static allPools.json', () => {
         );
     });
 
-    it('filterPoolsWithTokensDirect - DAI/ANT Pools', async () => {
+    it('filterPoolsWithTokensDirect - DAI/ANT Pools with local disabled list', async () => {
         const directPools = sor.filterPoolsWithTokensDirect(
             allPoolsNonZeroBalances.pools,
             DAI,
             ANT,
-            disabledTokens.tokens
+            { isOverRide: true, disabledTokens: disabledTokens.tokens }
         );
 
         assert.equal(
@@ -113,13 +120,14 @@ describe('Tests Multihop SOR vs static allPools.json', () => {
         const directPools = sor.filterPoolsWithTokensDirect(
             allPoolsNonZeroBalances.pools,
             DAI,
-            OCEAN
+            OCEAN,
+            { isOverRide: true, disabledTokens: [] }
         );
 
         assert.equal(
             Object.keys(directPools).length,
             1,
-            'Should have 1 direct pools without no disabled'
+            'Should have 1 direct pools with no disabled'
         );
     });
 
@@ -128,7 +136,7 @@ describe('Tests Multihop SOR vs static allPools.json', () => {
             allPoolsNonZeroBalances.pools,
             DAI,
             OCEAN,
-            disabledTokens.tokens
+            { isOverRide: true, disabledTokens: disabledTokens.tokens }
         );
 
         assert.equal(
@@ -144,7 +152,7 @@ describe('Tests Multihop SOR vs static allPools.json', () => {
             allPoolsNonZeroBalances.pools,
             WETH,
             ANT,
-            disabledTokens.tokens
+            { isOverRide: true, disabledTokens: disabledTokens.tokens }
         );
         console.timeEnd('filterPoolsWithTokensDirect');
         assert.equal(
@@ -160,7 +168,7 @@ describe('Tests Multihop SOR vs static allPools.json', () => {
             allPoolsNonZeroBalances.pools,
             WETH,
             DAI,
-            disabledTokens.tokens
+            { isOverRide: true, disabledTokens: disabledTokens.tokens }
         );
         console.timeEnd('filterPoolsWithTokensDirect');
         assert.equal(
@@ -172,7 +180,7 @@ describe('Tests Multihop SOR vs static allPools.json', () => {
             allPoolsNonZeroBalances.pools,
             DAI,
             WETH,
-            disabledTokens.tokens
+            { isOverRide: true, disabledTokens: disabledTokens.tokens }
         );
         assert.equal(
             Object.keys(directPools).length,
@@ -192,7 +200,7 @@ describe('Tests Multihop SOR vs static allPools.json', () => {
             allPoolsNonZeroBalances.pools,
             WETH,
             DAI,
-            disabledTokens.tokens
+            { isOverRide: true, disabledTokens: disabledTokens.tokens }
         );
         console.timeEnd('filterPoolsWithTokensMultihop');
 
@@ -200,7 +208,7 @@ describe('Tests Multihop SOR vs static allPools.json', () => {
             allPoolsNonZeroBalances.pools,
             WETH,
             DAI,
-            disabledTokens.tokens
+            { isOverRide: true, disabledTokens: disabledTokens.tokens }
         );
 
         console.time('parsePoolData');
@@ -245,7 +253,7 @@ describe('Tests Multihop SOR vs static allPools.json', () => {
             allPoolsNonZeroBalances.pools,
             WETH,
             DAI,
-            disabledTokens.tokens
+            { isOverRide: true, disabledTokens: disabledTokens.tokens }
         );
 
         let mostLiquidPoolsFirstHop, mostLiquidPoolsSecondHop, hopTokens;
@@ -257,7 +265,7 @@ describe('Tests Multihop SOR vs static allPools.json', () => {
             allPoolsNonZeroBalances.pools,
             WETH,
             DAI,
-            disabledTokens.tokens
+            { isOverRide: true, disabledTokens: disabledTokens.tokens }
         );
 
         let pools, pathData;
@@ -307,7 +315,7 @@ describe('Tests Multihop SOR vs static allPools.json', () => {
             allPoolsNonZeroBalances.pools,
             WETH,
             DAI,
-            disabledTokens.tokens
+            { isOverRide: true, disabledTokens: disabledTokens.tokens }
         );
 
         let mostLiquidPoolsFirstHop, mostLiquidPoolsSecondHop, hopTokens;
@@ -319,7 +327,7 @@ describe('Tests Multihop SOR vs static allPools.json', () => {
             allPoolsNonZeroBalances.pools,
             WETH,
             DAI,
-            disabledTokens.tokens
+            { isOverRide: true, disabledTokens: disabledTokens.tokens }
         );
 
         let pools, pathData;
@@ -368,7 +376,8 @@ describe('Tests Multihop SOR vs static allPools.json', () => {
         const directPools = await sor.filterPoolsWithTokensDirect(
             allPoolsNonZeroBalances.pools,
             DAI,
-            ANT
+            ANT,
+            { isOverRide: true, disabledTokens: [] }
         );
 
         let mostLiquidPoolsFirstHop, mostLiquidPoolsSecondHop, hopTokens;
@@ -379,7 +388,8 @@ describe('Tests Multihop SOR vs static allPools.json', () => {
         ] = await sor.filterPoolsWithTokensMultihop(
             allPoolsNonZeroBalances.pools,
             DAI,
-            ANT
+            ANT,
+            { isOverRide: true, disabledTokens: [] }
         );
 
         let pools, pathData;
@@ -440,7 +450,7 @@ describe('Tests Multihop SOR vs static allPools.json', () => {
             allPoolsNonZeroBalances.pools,
             DAI,
             ANT,
-            disabledTokens.tokens
+            { isOverRide: true, disabledTokens: disabledTokens.tokens }
         );
 
         let mostLiquidPoolsFirstHop, mostLiquidPoolsSecondHop, hopTokens;
@@ -452,7 +462,7 @@ describe('Tests Multihop SOR vs static allPools.json', () => {
             allPoolsNonZeroBalances.pools,
             DAI,
             ANT,
-            disabledTokens.tokens
+            { isOverRide: true, disabledTokens: disabledTokens.tokens }
         );
 
         let pools, pathData;
@@ -506,7 +516,7 @@ describe('Tests Multihop SOR vs static allPools.json', () => {
             allPoolsNonZeroBalances.pools,
             WETH,
             ANT,
-            disabledTokens.tokens
+            { isOverRide: true, disabledTokens: disabledTokens.tokens }
         );
 
         let mostLiquidPoolsFirstHop, mostLiquidPoolsSecondHop, hopTokens;
@@ -518,7 +528,7 @@ describe('Tests Multihop SOR vs static allPools.json', () => {
             allPoolsNonZeroBalances.pools,
             WETH,
             ANT,
-            disabledTokens.tokens
+            { isOverRide: true, disabledTokens: disabledTokens.tokens }
         );
 
         let pools, pathData;
@@ -573,7 +583,7 @@ describe('Tests Multihop SOR vs static allPools.json', () => {
             allPoolsNonZeroBalances.pools,
             WETH,
             ANT,
-            disabledTokens.tokens
+            { isOverRide: true, disabledTokens: disabledTokens.tokens }
         );
 
         let mostLiquidPoolsFirstHop, mostLiquidPoolsSecondHop, hopTokens;
@@ -585,7 +595,7 @@ describe('Tests Multihop SOR vs static allPools.json', () => {
             allPoolsNonZeroBalances.pools,
             WETH,
             ANT,
-            disabledTokens.tokens
+            { isOverRide: true, disabledTokens: disabledTokens.tokens }
         );
 
         let pools, pathData;
@@ -640,7 +650,7 @@ describe('Tests Multihop SOR vs static allPools.json', () => {
             allPoolsNonZeroBalances.pools,
             USDC,
             MKR,
-            disabledTokens.tokens
+            { isOverRide: true, disabledTokens: disabledTokens.tokens }
         );
 
         let mostLiquidPoolsFirstHop, mostLiquidPoolsSecondHop, hopTokens;
@@ -652,7 +662,7 @@ describe('Tests Multihop SOR vs static allPools.json', () => {
             allPoolsNonZeroBalances.pools,
             USDC,
             MKR,
-            disabledTokens.tokens
+            { isOverRide: true, disabledTokens: disabledTokens.tokens }
         );
 
         let pools, pathData;
@@ -707,7 +717,7 @@ describe('Tests Multihop SOR vs static allPools.json', () => {
             allPoolsNonZeroBalances.pools,
             USDC,
             MKR,
-            disabledTokens.tokens
+            { isOverRide: true, disabledTokens: disabledTokens.tokens }
         );
 
         let mostLiquidPoolsFirstHop, mostLiquidPoolsSecondHop, hopTokens;
@@ -719,7 +729,7 @@ describe('Tests Multihop SOR vs static allPools.json', () => {
             allPoolsNonZeroBalances.pools,
             USDC,
             MKR,
-            disabledTokens.tokens
+            { isOverRide: true, disabledTokens: disabledTokens.tokens }
         );
 
         let pools, pathData;
@@ -776,7 +786,7 @@ describe('Tests Multihop SOR vs static allPools.json', () => {
             allPoolsNonZeroBalances.pools,
             tokenIn,
             tokenOut,
-            disabledTokens.tokens
+            { isOverRide: true, disabledTokens: disabledTokens.tokens }
         );
 
         let mostLiquidPoolsFirstHop, mostLiquidPoolsSecondHop, hopTokens;
@@ -788,7 +798,7 @@ describe('Tests Multihop SOR vs static allPools.json', () => {
             allPoolsNonZeroBalances.pools,
             tokenIn,
             tokenOut,
-            disabledTokens.tokens
+            { isOverRide: true, disabledTokens: disabledTokens.tokens }
         );
 
         let pools, pathData;

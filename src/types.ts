@@ -94,6 +94,10 @@ export interface PoolDictionary {
     [poolId: string]: Pool;
 }
 
+export interface DisabledOptions {
+    isOverRide: boolean;
+    disabledTokens: DisabledToken[];
+}
 export interface DisabledToken {
     address: string;
     symbol: string;
