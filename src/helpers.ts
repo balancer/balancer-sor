@@ -1,6 +1,13 @@
 import { BigNumber } from './utils/bignumber';
 import { ethers } from 'ethers';
-import { PoolPairData, Path, Pool, PoolDictionary, Swap } from './types';
+import {
+    PoolPairData,
+    Path,
+    Pool,
+    PoolDictionary,
+    Swap,
+    DisabledToken,
+} from './types';
 import {
     BONE,
     TWOBONE,
@@ -641,13 +648,16 @@ export function getTokenPairsMultiHop(token: string, poolsTokensListSet: any) {
 export function filterPoolsWithTokensDirect(
     allPools: Pool[], // The complete information of the pools
     tokenIn: string,
-    tokenOut: string
+    tokenOut: string,
+    disabledTokens: DisabledToken[] = []
 ): PoolDictionary {
     // let poolsWithTokens: { [poolId: string]: Pool} = {};
     let poolsWithTokens: PoolDictionary = {};
     // If pool contains token add all its tokens to direct list
     allPools.forEach(pool => {
         let tokenListSet = new Set(pool.tokensList);
+        disabledTokens.forEach(token => tokenListSet.delete(token.address));
+
         if (tokenListSet.has(tokenIn) && tokenListSet.has(tokenOut)) {
             poolsWithTokens[pool.id] = pool;
         }
@@ -660,7 +670,8 @@ export function filterPoolsWithTokensDirect(
 export function filterPoolsWithoutMutualTokens(
     allPools: Pool[],
     tokenOne: string,
-    tokenTwo: string
+    tokenTwo: string,
+    disabledTokens: DisabledToken[] = []
 ): [PoolDictionary, Set<string>, PoolDictionary, Set<string>] {
     let tokenOnePools: PoolDictionary = {};
     let tokenTwoPools: PoolDictionary = {};
@@ -669,6 +680,11 @@ export function filterPoolsWithoutMutualTokens(
 
     allPools.forEach(pool => {
         let poolTokensSET = new Set(pool.tokensList);
+        disabledTokens.forEach(token => poolTokensSET.delete(token.address));
+        if (poolTokensSET.size < 2) {
+            return;
+        }
+
         let containsTokenOne = poolTokensSET.has(tokenOne);
         let containsTokenTwo = poolTokensSET.has(tokenTwo);
 
@@ -699,7 +715,8 @@ export function filterPoolsWithoutMutualTokens(
 export async function filterPoolsWithTokensMultihop(
     allPools: Pool[], // Just the list of pool tokens
     tokenIn: string,
-    tokenOut: string
+    tokenOut: string,
+    disabledTokens: DisabledToken[] = []
 ): Promise<[Pool[], Pool[], string[]]> {
     //// Multi-hop trades: we find the best pools that connect tokenIn and tokenOut through a multi-hop (intermediate) token
     // First: we get all tokens that can be used to be traded with tokenIn excluding
@@ -715,7 +732,12 @@ export async function filterPoolsWithTokensMultihop(
         tokenInHopTokens,
         poolsTokenOutNoTokenIn,
         tokenOutHopTokens,
-    ] = filterPoolsWithoutMutualTokens(allPools, tokenIn, tokenOut);
+    ] = filterPoolsWithoutMutualTokens(
+        allPools,
+        tokenIn,
+        tokenOut,
+        disabledTokens
+    );
 
     // Third: we find the intersection of the two previous sets so we can trade tokenIn for tokenOut with 1 multi-hop
     const hopTokensSet = [...tokenInHopTokens].filter(x =>

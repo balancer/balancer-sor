@@ -93,3 +93,8 @@ export interface SubGraphToken {
 export interface PoolDictionary {
     [poolId: string]: Pool;
 }
+
+export interface DisabledToken {
+    address: string;
+    symbol: string;
+}

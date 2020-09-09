@@ -1,7 +1,12 @@
 import fetch from 'isomorphic-fetch';
 import { ethers } from 'ethers';
 import * as bmath from '../../../src/bmath';
-import { PoolPairData, Path } from '../../../src/types';
+import {
+    PoolPairData,
+    Path,
+    SubGraphPools,
+    DisabledToken,
+} from '../../../src/types';
 import { BigNumber } from '../../../src/utils/bignumber';
 import * as sor from '../../../src';
 
@@ -67,7 +72,10 @@ export async function getPoolsWithSingleToken(token) {
 }
 
 // Filters for only pools with balance and converts to wei/bnum format.
-export function formatAndFilterPools(allPools: any) {
+export function formatAndFilterPools(
+    allPools: SubGraphPools,
+    disabledTokens: DisabledToken[] = []
+) {
     let allTokens = [];
     let allTokensSet = new Set();
     let allPoolsNonZeroBalances = { pools: [] };
@@ -77,7 +85,23 @@ export function formatAndFilterPools(allPools: any) {
         // Only check first balance since AFAIK either all balances are zero or none are:
         if (pool.tokens.length != 0) {
             if (pool.tokens[0].balance != '0') {
-                allTokens.push(pool.tokensList.sort()); // Will add without duplicate
+                let tokens = [];
+                pool.tokensList.forEach(token => {
+                    if (
+                        !disabledTokens.find(
+                            t =>
+                                ethers.utils.getAddress(t.address) ===
+                                ethers.utils.getAddress(token)
+                        )
+                    ) {
+                        tokens.push(token);
+                    }
+                });
+
+                if (tokens.length > 1) {
+                    allTokens.push(tokens.sort()); // Will add without duplicate
+                }
+
                 allPoolsNonZeroBalances.pools.push(pool);
             }
         }

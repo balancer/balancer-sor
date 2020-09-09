@@ -140,8 +140,8 @@ describe('Test direct SOR (legacy version with direct pools only) using allPools
     });
 
     it('Saved pool check', async () => {
-        // Compares saved pools @25/05/20 to current Subgraph pools.
-        assert.equal(allPools.pools.length, 59, 'Should be 59 pools');
+        // Compares saved pools @09/09/20 to current Subgraph pools.
+        assert.equal(allPools.pools.length, 64, 'Should be 64 pools');
     });
 
     it('Direct SOR - WETH->DAI, swapExactIn', async () => {
