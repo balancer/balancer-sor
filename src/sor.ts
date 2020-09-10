@@ -137,15 +137,6 @@ export const smartOrderRouterMultiHopEpsOfInterest = (
                     swapAmountsPriceAfter,
                     totalSwapAmount
                 );
-                // console.log("swapAmountsPriceBefore");
-                // console.log(swapAmountsPriceBefore.toString());
-                // console.log("swapAmountsPriceAfter");
-                // console.log(swapAmountsPriceAfter.toString());
-                // console.log("totalSwapAmount");
-                // console.log(totalSwapAmount.toString());
-
-                // console.log("swapAmounts");
-                // console.log(swapAmounts.toString());
 
                 highestPoiNotEnough = false;
                 break;
@@ -175,9 +166,6 @@ export const smartOrderRouterMultiHopEpsOfInterest = (
             const path = paths.find(p => p.id === pathId);
             totalNumberOfPools += path.swaps.length;
         });
-
-        // console.log("Number of pools in all paths: ")
-        // console.log(totalNumberOfPools)
 
         let improvementCondition: boolean = false;
         if (totalNumberOfPools <= maxPools) {
@@ -218,11 +206,6 @@ export const smartOrderRouterMultiHopEpsOfInterest = (
         }
     }
 
-    // console.log("Best solution found")
-    // console.log(bestSwapAmounts.toString());
-    // console.log(bestPathIds);
-    // console.log(bestTotalReturn.toString());
-
     //// Prepare swap data from paths
     let swaps: Swap[][] = [];
     let totalSwapAmountWithRoundingErrors: BigNumber = new BigNumber(0);
@@ -242,9 +225,6 @@ export const smartOrderRouterMultiHopEpsOfInterest = (
                     bestPathIds[i]
             );
         }
-
-        // // TODO: remove. To debug only!
-        // printSpotPricePathBeforeAndAfterSwap(path, swapType, swapAmount);
 
         if (i == 0)
             // Store lenght of first path to add dust to correct rounding error at the end
@@ -555,11 +535,6 @@ function getExactSwapAmounts(
     let totalInputAfter = swapAmountsPriceAfter.reduce((a, b) => a.plus(b));
     let deltaTotalInput = totalInputAfter.minus(totalInputBefore);
 
-    // console.log("deltaTotalInput")
-    // console.log(deltaTotalInput)
-    // console.log("deltaBeforeAfterAmounts")
-    // console.log(deltaBeforeAfterAmounts)
-
     let deltaTimesTarget: BigNumber[] = [];
     deltaBeforeAfterAmounts.forEach((a, i) => {
         let ratio = bdiv(
@@ -567,19 +542,9 @@ function getExactSwapAmounts(
             deltaTotalInput
         );
 
-        // console.log("a")
-        // console.log(a)
-        // console.log("totalSwapAmountWithRoundingErrors.minus(totalInputBefore)")
-        // console.log(totalSwapAmountWithRoundingErrors.minus(totalInputBefore))
-        // console.log("mult")
-        // console.log(mult)
-
         let deltaAmount = bmul(ratio, a);
         deltaTimesTarget.push(deltaAmount);
     });
-
-    // console.log("deltaTimesTarget")
-    // console.log(deltaTimesTarget)
 
     let swapAmounts: BigNumber[] = [];
     swapAmountsPriceBefore.forEach((a, i) => {
@@ -588,107 +553,3 @@ function getExactSwapAmounts(
     });
     return swapAmounts;
 }
-
-// //// TODO Remove: to debug only!
-// function printSpotPricePathBeforeAndAfterSwap(
-//     path: Path,
-//     swapType: string,
-//     swapAmount: BigNumber
-// ) {
-//     console.log(path.id);
-//     console.log('spotPrice BEFORE trade');
-//     console.log(getSpotPricePath(path).toString());
-
-//     let pathAfterTrade: Path;
-//     pathAfterTrade = path;
-//     if (path.poolPairDataList.length == 1) {
-//         if (swapType === 'swapExactIn') {
-//             path.poolPairDataList[0].balanceIn = path.poolPairDataList[0].balanceIn.plus(
-//                 swapAmount
-//             );
-//             path.poolPairDataList[0].balanceOut = path.poolPairDataList[0].balanceOut.minus(
-//                 getReturnAmountSwap(
-//                     path.poolPairDataList[0],
-//                     swapType,
-//                     swapAmount
-//                 )
-//             );
-//         } else {
-//             path.poolPairDataList[0].balanceIn = path.poolPairDataList[0].balanceIn.plus(
-//                 getReturnAmountSwap(
-//                     path.poolPairDataList[0],
-//                     swapType,
-//                     swapAmount
-//                 )
-//             );
-//             path.poolPairDataList[0].balanceOut = path.poolPairDataList[0].balanceOut.minus(
-//                 swapAmount
-//             );
-//         }
-//     } else {
-//         if (swapType === 'swapExactIn') {
-//             path.poolPairDataList[0].balanceIn = path.poolPairDataList[0].balanceIn.plus(
-//                 swapAmount
-//             );
-//             path.poolPairDataList[0].balanceOut = path.poolPairDataList[0].balanceOut.minus(
-//                 getReturnAmountSwap(
-//                     path.poolPairDataList[0],
-//                     swapType,
-//                     swapAmount
-//                 )
-//             );
-
-//             path.poolPairDataList[1].balanceIn = path.poolPairDataList[1].balanceIn.plus(
-//                 getReturnAmountSwap(
-//                     path.poolPairDataList[0],
-//                     swapType,
-//                     swapAmount
-//                 )
-//             );
-//             path.poolPairDataList[1].balanceOut = path.poolPairDataList[1].balanceOut.minus(
-//                 getReturnAmountSwap(
-//                     path.poolPairDataList[1],
-//                     swapType,
-//                     getReturnAmountSwap(
-//                         path.poolPairDataList[0],
-//                         swapType,
-//                         swapAmount
-//                     )
-//                 )
-//             );
-//         } else {
-//             path.poolPairDataList[0].balanceIn = path.poolPairDataList[0].balanceIn.plus(
-//                 getReturnAmountSwap(
-//                     path.poolPairDataList[0],
-//                     swapType,
-//                     getReturnAmountSwap(
-//                         path.poolPairDataList[1],
-//                         swapType,
-//                         swapAmount
-//                     )
-//                 )
-//             );
-//             path.poolPairDataList[0].balanceOut = path.poolPairDataList[0].balanceOut.minus(
-//                 getReturnAmountSwap(
-//                     path.poolPairDataList[1],
-//                     swapType,
-//                     swapAmount
-//                 )
-//             );
-
-//             path.poolPairDataList[1].balanceIn = path.poolPairDataList[1].balanceIn.plus(
-//                 getReturnAmountSwap(
-//                     path.poolPairDataList[1],
-//                     swapType,
-//                     swapAmount
-//                 )
-//             );
-//             path.poolPairDataList[1].balanceOut = path.poolPairDataList[1].balanceOut.minus(
-//                 swapAmount
-//             );
-//         }
-//     }
-
-//     console.log('spotPrice AFTER  trade');
-//     console.log(getSpotPricePath(path).toString());
-// }
