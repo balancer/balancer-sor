@@ -210,12 +210,38 @@ export function getSlippageLinearizedSpotPriceAfterSwapPath(
 
             let numerator = numerator1.plus(numerator2).plus(numerator3);
 
+            console.log(`!!!!!!! NUMERATOR ${numerator.toString()}`);
+
             // The denominator is different for 'swapExactIn' and 'swapExactOut'
             if (swapType === 'swapExactIn') {
                 let denominator = bmul(
                     bmul(p1.balanceIn, p2.balanceIn),
                     bmul(p1.weightOut, p2.weightOut)
                 );
+                console.log(`!!!!!!! denominator in ${denominator.toString()}`);
+                console.log(
+                    `!!!!!!! balances ${p1.balanceIn.toString()} ${p2.balanceIn.toString()}`
+                );
+                console.log(
+                    `!!!!!!! balances ${bmul(
+                        p1.balanceIn,
+                        p2.balanceIn
+                    ).toString()}`
+                );
+                // console.log(`!!!!!!! balances ${bmul(bnum(1000), bnum(2000)).toString()}`);
+                console.log(
+                    `!!!!!!! weights ${p1.weightOut.toString()} ${p2.weightOut.toString()}`
+                );
+                console.log(
+                    `!!!!!!! weights ${bmul(
+                        p1.weightOut,
+                        p2.weightOut
+                    ).toString()}`
+                );
+                // !!!!!!! balances 816367 51702390  (WBTC, 8decimals x USDC, 6decimals)
+                // Equivalent of 0.0081... x 51.702... => 0.42208125
+                // !!!!!!! balances 0 so returns infinite slippage
+
                 return bdiv(numerator, denominator);
             } else {
                 let denominator = bmul(
@@ -225,6 +251,20 @@ export function getSlippageLinearizedSpotPriceAfterSwapPath(
                         bmul(p1.weightIn, p2.weightIn)
                     )
                 );
+
+                console.log(
+                    `!!!!!!! denominator out ${denominator.toString()}`
+                );
+                console.log(
+                    `!!!!!!! balances ${p1.balanceOut.toString()} ${p2.balanceOut.toString()}`
+                );
+                console.log(
+                    `!!!!!!! balances ${bmul(
+                        p1.balanceOut,
+                        p2.balanceOut
+                    ).toString()}`
+                );
+
                 return bdiv(numerator, denominator);
             }
         }

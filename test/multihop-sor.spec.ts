@@ -1,6 +1,6 @@
 // Tests Multihop SOR vs static allPools.json file.
 // Includes timing data.
-import { expect, assert } from 'chai';
+import { assert } from 'chai';
 import 'mocha';
 import {
     formatAndFilterPools,
