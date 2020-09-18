@@ -51,7 +51,9 @@ describe('Test multihop-eps trade using live subgraph', () => {
         //console.log(costScaled.toString());
 
         allPoolsNonZeroBalances = await sor.getAllPublicSwapPools(); // Only returns pools with balance
-        console.log(`Retrieving Onchain Balances...`);
+        console.log(
+            `Retrieving Onchain Balances...${allPoolsNonZeroBalances.pools.length}`
+        );
         allPoolsNonZeroBalances = await sor.getAllPoolDataOnChain(
             allPoolsNonZeroBalances,
             '0xeefba1e63905ef1d7acba5a8513c70307c1ce441',

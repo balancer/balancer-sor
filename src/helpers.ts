@@ -210,40 +210,25 @@ export function getSlippageLinearizedSpotPriceAfterSwapPath(
 
             let numerator = numerator1.plus(numerator2).plus(numerator3);
 
-            console.log(`!!!!!!! NUMERATOR ${numerator.toString()}`);
-
             // The denominator is different for 'swapExactIn' and 'swapExactOut'
             if (swapType === 'swapExactIn') {
-                let denominator = bmul(
-                    bmul(p1.balanceIn, p2.balanceIn),
-                    bmul(p1.weightOut, p2.weightOut)
-                );
-                console.log(`!!!!!!! denominator in ${denominator.toString()}`);
-                console.log(
-                    `!!!!!!! balances ${p1.balanceIn.toString()} ${p2.balanceIn.toString()}`
-                );
-                console.log(
-                    `!!!!!!! balances ${bmul(
-                        p1.balanceIn,
-                        p2.balanceIn
-                    ).toString()}`
-                );
-                // console.log(`!!!!!!! balances ${bmul(bnum(1000), bnum(2000)).toString()}`);
-                console.log(
-                    `!!!!!!! weights ${p1.weightOut.toString()} ${p2.weightOut.toString()}`
-                );
-                console.log(
-                    `!!!!!!! weights ${bmul(
-                        p1.weightOut,
-                        p2.weightOut
-                    ).toString()}`
-                );
-                // !!!!!!! balances 816367 51702390  (WBTC, 8decimals x USDC, 6decimals)
-                // Equivalent of 0.0081... x 51.702... => 0.42208125
-                // !!!!!!! balances 0 so returns infinite slippage
+                let denominator1 = bmul(p1.balanceIn, p1.weightOut);
+                let denominator2 = bmul(p2.balanceIn, p2.weightOut);
 
-                return bdiv(numerator, denominator);
+                return bdiv(bdiv(numerator, denominator1), denominator2);
             } else {
+                let denominator1 = bmul(
+                    BONE.minus(p1.swapFee),
+                    bmul(p1.balanceOut, p1.weightIn)
+                );
+                let denominator2 = bmul(
+                    BONE.minus(p2.swapFee),
+                    bmul(p2.balanceOut, p2.weightIn)
+                );
+
+                return bdiv(bdiv(numerator, denominator1), denominator2);
+
+                /*
                 let denominator = bmul(
                     bmul(BONE.minus(p1.swapFee), BONE.minus(p2.swapFee)),
                     bmul(
@@ -252,20 +237,8 @@ export function getSlippageLinearizedSpotPriceAfterSwapPath(
                     )
                 );
 
-                console.log(
-                    `!!!!!!! denominator out ${denominator.toString()}`
-                );
-                console.log(
-                    `!!!!!!! balances ${p1.balanceOut.toString()} ${p2.balanceOut.toString()}`
-                );
-                console.log(
-                    `!!!!!!! balances ${bmul(
-                        p1.balanceOut,
-                        p2.balanceOut
-                    ).toString()}`
-                );
-
                 return bdiv(numerator, denominator);
+                */
             }
         }
     } else {

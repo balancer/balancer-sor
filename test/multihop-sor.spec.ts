@@ -13,19 +13,10 @@ const allPools = require('./allPools.json');
 import { BONE, scale } from '../src/bmath';
 const disabledTokens = require('./disabled-tokens.json');
 
-// const WETH = '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2'; // WETH
 const WETH = '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2'; // WETH lower case
-
-// const DAI = '0x6B175474E89094C44Da98b954EedeAC495271d0F'; // DAI
 const DAI = '0x6b175474e89094c44da98b954eedeac495271d0f'; // DAI lower case
-
-// const ANT = '0x960b236A07cf122663c4303350609A66A7B288C0'; // ANT
 const ANT = '0x960b236a07cf122663c4303350609a66a7b288c0'; // ANT lower case
-
-// const USDC = '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48'; // USDC
 const USDC = '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48'; // USDC lower case
-
-// const MKR = '0x9f8F72aA9304c8B593d555F12eF6589cC3A579A2'; // MKR
 const MKR = '0x9f8f72aa9304c8b593d555f12ef6589cc3a579a2'; // MKR lower case
 const OCEAN = '0x985dd3d42de1e256d09e1c10f112bccb8015ad41';
 
@@ -74,7 +65,6 @@ describe('Tests Multihop SOR vs static allPools.json', () => {
     });
 
     it('getTokenPairsMultiHop - Should return direct & multihop partner tokens', async () => {
-        // console.time('getTokenPairsMultiHop');
         let allTokensSet;
         // Converts Subgraph string format to Wei/Bnum format
         [allTokensSet, allPoolsNonZeroBalances] = formatAndFilterPools(
@@ -86,7 +76,6 @@ describe('Tests Multihop SOR vs static allPools.json', () => {
             DAI,
             allTokensSet
         );
-        // console.timeEnd('getTokenPairsMultiHop');
 
         assert.equal(
             directTokenPairsSET.length,
@@ -190,7 +179,6 @@ describe('Tests Multihop SOR vs static allPools.json', () => {
     });
 
     it('Get multihop pools - WETH>DAI', async () => {
-        console.time('filterPoolsWithTokensMultihop');
         let mostLiquidPoolsFirstHop, mostLiquidPoolsSecondHop, hopTokens;
         [
             mostLiquidPoolsFirstHop,
@@ -202,7 +190,6 @@ describe('Tests Multihop SOR vs static allPools.json', () => {
             DAI,
             { isOverRide: true, disabledTokens: disabledTokens.tokens }
         );
-        console.timeEnd('filterPoolsWithTokensMultihop');
 
         const directPools = await sor.filterPoolsWithTokensDirect(
             allPoolsNonZeroBalances.pools,
@@ -211,7 +198,6 @@ describe('Tests Multihop SOR vs static allPools.json', () => {
             { isOverRide: true, disabledTokens: disabledTokens.tokens }
         );
 
-        console.time('parsePoolData');
         let pools, pathData;
         [pools, pathData] = sor.parsePoolData(
             directPools,
@@ -221,10 +207,6 @@ describe('Tests Multihop SOR vs static allPools.json', () => {
             mostLiquidPoolsSecondHop,
             hopTokens
         );
-        console.timeEnd('parsePoolData');
-
-        // console.log("poolsSET")
-        // console.log(pools)
 
         assert.equal(
             mostLiquidPoolsFirstHop.length,
@@ -298,6 +280,16 @@ describe('Tests Multihop SOR vs static allPools.json', () => {
         );
 
         assert.equal(swaps.length, 3, 'Should have 3 swaps.');
+        assert.equal(
+            swaps[0][0].pool,
+            '0x1b09173a0ffbad1cb7670b1a640013c0facfb71f',
+            'First swap pool should match'
+        );
+        assert.equal(
+            swaps[2][0].swapAmount,
+            '234006959988124',
+            'Swap Amount Should Match'
+        );
 
         assert.equal(
             utils.formatEther(totalReturnWei.toString()),
@@ -699,7 +691,17 @@ describe('Tests Multihop SOR vs static allPools.json', () => {
             0,
             'Should be no direct pools.'
         );
+
         assert.equal(swaps.length, 2, 'Should have 2 swaps.');
+        assert.equal(
+            utils.formatEther(totalReturnWei.toString()),
+            '0.002932410291658511',
+            'Total Out Should Match'
+        );
+        assert.equal(swaps[0][0].swapAmount, '798830');
+        assert.equal(swaps[0][1].swapAmount, '207514052940821332');
+        assert.equal(swaps[1][0].swapAmount, '201170');
+        assert.equal(swaps[1][1].swapAmount, '990925483230944');
         assert.equal(
             utils.formatEther(totalReturnWei.toString()),
             '0.002932410291658511',
@@ -767,6 +769,18 @@ describe('Tests Multihop SOR vs static allPools.json', () => {
             'Should be no direct pools.'
         );
         assert.equal(swaps.length, 2, 'Should have 2 swaps.');
+        assert.equal(swaps[0][0].swapAmount, '12780750179338124102');
+        assert.equal(swaps[0][1].swapAmount, '7539149984464375031');
+        assert.equal(swaps[1][0].swapAmount, '855409191664291961834');
+        assert.equal(swaps[1][1].swapAmount, '2460850015535624969');
+        assert.equal(
+            swaps[0][0].limitReturnAmount,
+            '115792089237316195423570985008687907853269984665640564039457584007913129639935'
+        );
+        assert.equal(
+            swaps[1][1].maxPrice,
+            '115792089237316195423570985008687907853269984665640564039457584007913129639935'
+        );
         assert.equal(
             utils.formatEther(totalReturnWei.toString()),
             '0.000000003559698325',

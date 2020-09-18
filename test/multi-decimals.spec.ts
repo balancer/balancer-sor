@@ -8,10 +8,10 @@ import {
 } from './testScripts/utils/subgraph';
 const sor = require('../src');
 const BigNumber = require('bignumber.js');
-const { utils } = require('ethers');
 const allPools = require('./allPoolsDecimals.json');
-import { BONE, scale } from '../src/bmath';
 const disabledTokens = require('./disabled-tokens.json');
+import { bnum } from '../src/bmath';
+import { getAmountOut, getAmountIn } from './utils';
 
 const WBTC = '0xe0C9275E44Ea80eF17579d33c55136b7DA269aEb'.toLowerCase();
 const MKR = '0xef13C0c8abcaf5767160018d268f9697aE4f5375'.toLowerCase();
@@ -23,7 +23,6 @@ BigNumber.config({
 });
 
 let allPoolsNonZeroBalances;
-let inPools, inPath, outPools, outPaths;
 
 describe('Tests Multihop SOR vs static allPools.json', () => {
     it('Saved pool check - without disabled filter', async () => {
@@ -34,8 +33,6 @@ describe('Tests Multihop SOR vs static allPools.json', () => {
             JSON.parse(JSON.stringify(allPools))
         );
 
-        // console.log(allPoolsNonZeroBalances.pools[0].tokens[0].balance.toString());
-
         assert.equal(
             allPoolsNonZeroBalances.pools.length,
             2,
@@ -44,7 +41,7 @@ describe('Tests Multihop SOR vs static allPools.json', () => {
     });
 
     it('Full Multihop SOR, WBTC>MKR, swapExactIn', async () => {
-        const amountIn = new BigNumber(100000);
+        const amountIn = new BigNumber(100000); // 0.00100000 WBTC
         const swapType = 'swapExactIn';
         const noPools = 4;
         const tokenIn = WBTC;
@@ -79,22 +76,13 @@ describe('Tests Multihop SOR vs static allPools.json', () => {
             hopTokens
         );
 
-        inPools = pools;
-        inPath = JSON.parse(JSON.stringify(pathData));
-
         let paths = sor.processPaths(pathData, pools, swapType);
-
-        console.log(paths[0].spotPrice.toString());
-        console.log(paths[0].slippage.toString());
-        console.log(paths[0].limitAmount.toString());
 
         let epsOfInterest = sor.processEpsOfInterestMultiHop(
             paths,
             swapType,
             noPools
         );
-
-        // console.log(epsOfInterest);
 
         let swaps, totalReturnWei;
         [swaps, totalReturnWei] = sor.smartOrderRouterMultiHopEpsOfInterest(
@@ -107,12 +95,32 @@ describe('Tests Multihop SOR vs static allPools.json', () => {
             epsOfInterest
         );
 
-        console.log(`Total Return: ${totalReturnWei.toString()}`);
-        console.log(swaps);
+        assert.equal(swaps.length, 1, 'Should have 1 swap.');
+        assert.equal(swaps[0][0].tokenIn, tokenIn);
+        assert.equal(swaps[0][0].swapAmount, amountIn);
+        assert.equal(swaps[0][1].tokenIn, swaps[0][0].tokenOut);
+        assert.equal(swaps[0][1].tokenOut, tokenOut);
+        let amtOut = getAmountOut(
+            allPoolsNonZeroBalances,
+            swaps[0][0].pool,
+            swaps[0][0].tokenIn,
+            swaps[0][0].tokenOut,
+            amountIn
+        );
+        assert.equal(swaps[0][1].swapAmount, amtOut);
+        amtOut = getAmountOut(
+            allPoolsNonZeroBalances,
+            swaps[0][1].pool,
+            swaps[0][1].tokenIn,
+            swaps[0][1].tokenOut,
+            bnum(swaps[0][1].swapAmount)
+        );
+        assert.equal(totalReturnWei.toString(), amtOut.toString());
+        console.log(totalReturnWei.toString());
     });
 
     it('Full Multihop SOR, WBTC>MKR, swapExactOut', async () => {
-        const amountOut = new BigNumber(100000000000000000);
+        const amountOut = new BigNumber(10000000000000000);
         const swapType = 'swapExactOut';
         const noPools = 4;
         const tokenIn = WBTC;
@@ -147,21 +155,13 @@ describe('Tests Multihop SOR vs static allPools.json', () => {
             hopTokens
         );
 
-        expect(inPath).to.eql(pathData);
-
         let paths = sor.processPaths(pathData, pools, swapType);
-
-        console.log(paths[0].spotPrice.toString());
-        console.log(paths[0].slippage.toString());
-        console.log(paths[0].limitAmount.toString());
 
         let epsOfInterest = sor.processEpsOfInterestMultiHop(
             paths,
             swapType,
             noPools
         );
-
-        console.log(epsOfInterest);
 
         let swaps, totalReturnWei;
         [swaps, totalReturnWei] = sor.smartOrderRouterMultiHopEpsOfInterest(
@@ -174,9 +174,30 @@ describe('Tests Multihop SOR vs static allPools.json', () => {
             epsOfInterest
         );
 
-        console.log(`Total Return: ${totalReturnWei}`);
-        console.log(swaps);
-
-        expect(inPools).to.eql(pools);
+        assert.equal(swaps.length, 1, 'Should have 1 swap.');
+        assert.equal(swaps[0][0].tokenIn, tokenIn);
+        let amtIn = getAmountIn(
+            allPoolsNonZeroBalances,
+            swaps[0][1].pool,
+            swaps[0][1].tokenIn,
+            swaps[0][1].tokenOut,
+            amountOut
+        );
+        assert.equal(swaps[0][0].swapAmount, amtIn.toString());
+        assert.equal(swaps[0][1].tokenIn, swaps[0][0].tokenOut);
+        assert.equal(swaps[0][1].tokenOut, tokenOut);
+        assert.equal(swaps[0][1].swapAmount, amountOut);
+        amtIn = amtIn.plus(
+            getAmountIn(
+                allPoolsNonZeroBalances,
+                swaps[0][0].pool,
+                swaps[0][0].tokenIn,
+                swaps[0][0].tokenOut,
+                bnum(swaps[0][1].swapAmount)
+            )
+        );
+        console.log(swaps[0][0].swapAmount);
+        console.log(totalReturnWei.toString());
+        expect(totalReturnWei.toString()).to.eql(swaps[0][0].swapAmount);
     });
 });
