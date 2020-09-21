@@ -1,17 +1,20 @@
 // Tests Multihop SOR vs static allPools.json file.
 // Includes timing data.
+import * as sor from '../src';
 import { assert } from 'chai';
-import 'mocha';
+import { Swap } from '../src/types';
+import { BigNumber } from '../src/utils/bignumber';
 import {
     formatAndFilterPools,
     filterPools,
-} from './testScripts/utils/subgraph';
-const sor = require('../src');
-const BigNumber = require('bignumber.js');
+    checkSwapsExactIn,
+    checkSwapsExactOut,
+} from './utils';
 const { utils } = require('ethers');
 const allPools = require('./allPools.json');
-import { BONE, scale } from '../src/bmath';
+import { BONE, bnum } from '../src/bmath';
 const disabledTokens = require('./disabled-tokens.json');
+import { getAmountOut, getAmountIn, fullSwap } from './utils';
 
 const WETH = '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2'; // WETH lower case
 const DAI = '0x6b175474e89094c44da98b954eedeac495271d0f'; // DAI lower case
@@ -19,12 +22,6 @@ const ANT = '0x960b236a07cf122663c4303350609a66a7b288c0'; // ANT lower case
 const USDC = '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48'; // USDC lower case
 const MKR = '0x9f8f72aa9304c8b593d555f12ef6589cc3a579a2'; // MKR lower case
 const OCEAN = '0x985dd3d42de1e256d09e1c10f112bccb8015ad41';
-
-BigNumber.config({
-    EXPONENTIAL_AT: [-100, 100],
-    ROUNDING_MODE: BigNumber.ROUND_HALF_EVEN,
-    DECIMAL_PLACES: 18,
-});
 
 let allPoolsNonZeroBalances;
 
@@ -136,14 +133,12 @@ describe('Tests Multihop SOR vs static allPools.json', () => {
     });
 
     it('filterPoolsWithTokensDirect - WETH/ANT Pools', async () => {
-        console.time('filterPoolsWithTokensDirect');
         const directPools = sor.filterPoolsWithTokensDirect(
             allPoolsNonZeroBalances.pools,
             WETH,
             ANT,
             { isOverRide: true, disabledTokens: disabledTokens.tokens }
         );
-        console.timeEnd('filterPoolsWithTokensDirect');
         assert.equal(
             Object.keys(directPools).length,
             0,
@@ -152,14 +147,12 @@ describe('Tests Multihop SOR vs static allPools.json', () => {
     });
 
     it('filterPoolsWithTokensDirect - WETH/DAI Pools', async () => {
-        console.time('filterPoolsWithTokensDirect');
         let directPools = sor.filterPoolsWithTokensDirect(
             allPoolsNonZeroBalances.pools,
             WETH,
             DAI,
             { isOverRide: true, disabledTokens: disabledTokens.tokens }
         );
-        console.timeEnd('filterPoolsWithTokensDirect');
         assert.equal(
             Object.keys(directPools).length,
             10,
@@ -230,71 +223,28 @@ describe('Tests Multihop SOR vs static allPools.json', () => {
         const amountIn = new BigNumber(1).times(BONE);
         const swapType = 'swapExactIn';
         const noPools = 4;
+        const tokenIn = WETH;
+        const tokenOut = DAI;
 
-        const directPools = await sor.filterPoolsWithTokensDirect(
-            allPoolsNonZeroBalances.pools,
-            WETH,
-            DAI,
-            { isOverRide: true, disabledTokens: disabledTokens.tokens }
-        );
-
-        let mostLiquidPoolsFirstHop, mostLiquidPoolsSecondHop, hopTokens;
-        [
-            mostLiquidPoolsFirstHop,
-            mostLiquidPoolsSecondHop,
-            hopTokens,
-        ] = await sor.filterPoolsWithTokensMultihop(
-            allPoolsNonZeroBalances.pools,
-            WETH,
-            DAI,
-            { isOverRide: true, disabledTokens: disabledTokens.tokens }
-        );
-
-        let pools, pathData;
-        [pools, pathData] = sor.parsePoolData(
-            directPools,
-            WETH.toLowerCase(), // TODO - Why is this required????
-            DAI.toLowerCase(),
-            mostLiquidPoolsFirstHop,
-            mostLiquidPoolsSecondHop,
-            hopTokens
-        );
-
-        let paths = sor.processPaths(pathData, pools, swapType);
-
-        let epsOfInterest = sor.processEpsOfInterestMultiHop(
-            paths,
+        let swaps: Swap[][], totalAmtOut: BigNumber;
+        [swaps, totalAmtOut] = fullSwap(
+            allPoolsNonZeroBalances,
+            tokenIn,
+            tokenOut,
             swapType,
-            noPools
-        );
-
-        let swaps, totalReturnWei;
-        [swaps, totalReturnWei] = sor.smartOrderRouterMultiHopEpsOfInterest(
-            JSON.parse(JSON.stringify(pools)),
-            paths,
-            swapType,
-            amountIn,
             noPools,
-            new BigNumber(0),
-            epsOfInterest
+            amountIn,
+            disabledTokens
         );
 
         assert.equal(swaps.length, 3, 'Should have 3 swaps.');
-        assert.equal(
-            swaps[0][0].pool,
-            '0x1b09173a0ffbad1cb7670b1a640013c0facfb71f',
-            'First swap pool should match'
-        );
-        assert.equal(
-            swaps[2][0].swapAmount,
-            '234006959988124',
-            'Swap Amount Should Match'
-        );
-
-        assert.equal(
-            utils.formatEther(totalReturnWei.toString()),
-            '202.860557251722913901',
-            'Total Out Should Match'
+        checkSwapsExactIn(
+            swaps,
+            tokenIn,
+            tokenOut,
+            amountIn,
+            totalAmtOut,
+            allPoolsNonZeroBalances
         );
     });
 
@@ -302,61 +252,28 @@ describe('Tests Multihop SOR vs static allPools.json', () => {
         const amountOut = new BigNumber(1000).times(BONE);
         const swapType = 'swapExactOut';
         const noPools = 4;
+        const tokenIn = WETH;
+        const tokenOut = DAI;
 
-        const directPools = await sor.filterPoolsWithTokensDirect(
-            allPoolsNonZeroBalances.pools,
-            WETH,
-            DAI,
-            { isOverRide: true, disabledTokens: disabledTokens.tokens }
-        );
-
-        let mostLiquidPoolsFirstHop, mostLiquidPoolsSecondHop, hopTokens;
-        [
-            mostLiquidPoolsFirstHop,
-            mostLiquidPoolsSecondHop,
-            hopTokens,
-        ] = await sor.filterPoolsWithTokensMultihop(
-            allPoolsNonZeroBalances.pools,
-            WETH,
-            DAI,
-            { isOverRide: true, disabledTokens: disabledTokens.tokens }
-        );
-
-        let pools, pathData;
-        [pools, pathData] = sor.parsePoolData(
-            directPools,
-            WETH.toLowerCase(), // TODO - Why is this required????
-            DAI.toLowerCase(),
-            mostLiquidPoolsFirstHop,
-            mostLiquidPoolsSecondHop,
-            hopTokens
-        );
-
-        let paths = sor.processPaths(pathData, pools, swapType);
-
-        let epsOfInterest = sor.processEpsOfInterestMultiHop(
-            paths,
+        let swaps: Swap[][], totalAmtIn: BigNumber;
+        [swaps, totalAmtIn] = fullSwap(
+            allPoolsNonZeroBalances,
+            tokenIn,
+            tokenOut,
             swapType,
-            noPools
-        );
-
-        let swaps, totalReturnWei;
-        [swaps, totalReturnWei] = sor.smartOrderRouterMultiHopEpsOfInterest(
-            JSON.parse(JSON.stringify(pools)),
-            paths,
-            swapType,
-            amountOut,
             noPools,
-            new BigNumber(0),
-            epsOfInterest
+            amountOut,
+            disabledTokens
         );
 
         assert.equal(swaps.length, 4, 'Should have 4 swaps.');
-        // ADD SWAP CHECK
-        assert.equal(
-            utils.formatEther(totalReturnWei.toString()),
-            '4.978956703358553061',
-            'Total Out Should Match'
+        checkSwapsExactOut(
+            swaps,
+            tokenIn,
+            tokenOut,
+            amountOut,
+            totalAmtIn,
+            allPoolsNonZeroBalances
         );
     });
 
@@ -364,136 +281,53 @@ describe('Tests Multihop SOR vs static allPools.json', () => {
         const amountIn = new BigNumber(1).times(BONE);
         const swapType = 'swapExactIn';
         const noPools = 4;
+        const tokenIn = DAI;
+        const tokenOut = ANT;
 
-        const directPools = await sor.filterPoolsWithTokensDirect(
-            allPoolsNonZeroBalances.pools,
-            DAI,
-            ANT,
-            { isOverRide: true, disabledTokens: [] }
-        );
-
-        let mostLiquidPoolsFirstHop, mostLiquidPoolsSecondHop, hopTokens;
-        [
-            mostLiquidPoolsFirstHop,
-            mostLiquidPoolsSecondHop,
-            hopTokens,
-        ] = await sor.filterPoolsWithTokensMultihop(
-            allPoolsNonZeroBalances.pools,
-            DAI,
-            ANT,
-            { isOverRide: true, disabledTokens: [] }
-        );
-
-        let pools, pathData;
-        [pools, pathData] = sor.parsePoolData(
-            directPools,
-            DAI.toLowerCase(), // TODO - Why is this required????
-            ANT.toLowerCase(),
-            mostLiquidPoolsFirstHop,
-            mostLiquidPoolsSecondHop,
-            hopTokens
-        );
-
-        let paths = sor.processPaths(pathData, pools, swapType);
-
-        let epsOfInterest = sor.processEpsOfInterestMultiHop(
-            paths,
+        let disabledTokens = { tokens: [] };
+        let swaps: Swap[][], totalAmtOut: BigNumber;
+        [swaps, totalAmtOut] = fullSwap(
+            allPoolsNonZeroBalances,
+            tokenIn,
+            tokenOut,
             swapType,
-            noPools
-        );
-
-        let swaps, totalReturnWei;
-        [swaps, totalReturnWei] = sor.smartOrderRouterMultiHopEpsOfInterest(
-            JSON.parse(JSON.stringify(pools)),
-            paths,
-            swapType,
-            amountIn,
             noPools,
-            new BigNumber(0),
-            epsOfInterest
+            amountIn,
+            disabledTokens
         );
 
-        assert.equal(
-            Object.keys(directPools).length,
-            0,
-            'Should be no direct pools.'
-        );
         assert.equal(swaps.length, 1, 'Should have 1 swaps.');
-        assert.equal(
-            swaps[0][0].pool,
-            '0xf218fe414c6b1c6b42e79b7690f1509a634baad6'
+        checkSwapsExactIn(
+            swaps,
+            tokenIn,
+            tokenOut,
+            amountIn,
+            totalAmtOut,
+            allPoolsNonZeroBalances
         );
-        assert.equal(swaps[0][0].tokenIn, DAI);
-        assert.equal(swaps[0][0].tokenOut, OCEAN);
-        assert.equal(
-            swaps[0][1].pool,
-            '0xf218fe414c6b1c6b42e79b7690f1509a634baad7'
-        );
-        assert.equal(swaps[0][1].tokenIn, OCEAN);
-        assert.equal(swaps[0][1].tokenOut, ANT);
     });
 
     it('Full Multihop SOR, DAI>ANT, swapExactIn - Disabled Tokens, should not have swap', async () => {
         const amountIn = new BigNumber(1).times(BONE);
         const swapType = 'swapExactIn';
         const noPools = 4;
+        const tokenIn = DAI;
+        const tokenOut = ANT;
 
-        const directPools = await sor.filterPoolsWithTokensDirect(
-            allPoolsNonZeroBalances.pools,
-            DAI,
-            ANT,
-            { isOverRide: true, disabledTokens: disabledTokens.tokens }
-        );
-
-        let mostLiquidPoolsFirstHop, mostLiquidPoolsSecondHop, hopTokens;
-        [
-            mostLiquidPoolsFirstHop,
-            mostLiquidPoolsSecondHop,
-            hopTokens,
-        ] = await sor.filterPoolsWithTokensMultihop(
-            allPoolsNonZeroBalances.pools,
-            DAI,
-            ANT,
-            { isOverRide: true, disabledTokens: disabledTokens.tokens }
-        );
-
-        let pools, pathData;
-        [pools, pathData] = sor.parsePoolData(
-            directPools,
-            DAI.toLowerCase(), // TODO - Why is this required????
-            ANT.toLowerCase(),
-            mostLiquidPoolsFirstHop,
-            mostLiquidPoolsSecondHop,
-            hopTokens
-        );
-
-        let paths = sor.processPaths(pathData, pools, swapType);
-
-        let epsOfInterest = sor.processEpsOfInterestMultiHop(
-            paths,
+        let swaps: Swap[][], totalAmtOut: BigNumber;
+        [swaps, totalAmtOut] = fullSwap(
+            allPoolsNonZeroBalances,
+            tokenIn,
+            tokenOut,
             swapType,
-            noPools
-        );
-
-        let swaps, totalReturnWei;
-        [swaps, totalReturnWei] = sor.smartOrderRouterMultiHopEpsOfInterest(
-            JSON.parse(JSON.stringify(pools)),
-            paths,
-            swapType,
-            amountIn,
             noPools,
-            new BigNumber(0),
-            epsOfInterest
+            amountIn,
+            disabledTokens
         );
 
-        assert.equal(
-            Object.keys(directPools).length,
-            0,
-            'Should be no direct pools.'
-        );
         assert.equal(swaps.length, 0, 'Should have 0 swaps.');
         assert.equal(
-            utils.formatEther(totalReturnWei.toString()),
+            utils.formatEther(totalAmtOut.toString()),
             '0.0',
             'Total Out Should Match'
         );
@@ -503,63 +337,23 @@ describe('Tests Multihop SOR vs static allPools.json', () => {
         const amountIn = new BigNumber(1).times(BONE);
         const swapType = 'swapExactIn';
         const noPools = 4;
+        const tokenIn = WETH;
+        const tokenOut = ANT;
 
-        const directPools = await sor.filterPoolsWithTokensDirect(
-            allPoolsNonZeroBalances.pools,
-            WETH,
-            ANT,
-            { isOverRide: true, disabledTokens: disabledTokens.tokens }
-        );
-
-        let mostLiquidPoolsFirstHop, mostLiquidPoolsSecondHop, hopTokens;
-        [
-            mostLiquidPoolsFirstHop,
-            mostLiquidPoolsSecondHop,
-            hopTokens,
-        ] = await sor.filterPoolsWithTokensMultihop(
-            allPoolsNonZeroBalances.pools,
-            WETH,
-            ANT,
-            { isOverRide: true, disabledTokens: disabledTokens.tokens }
-        );
-
-        let pools, pathData;
-        [pools, pathData] = sor.parsePoolData(
-            directPools,
-            WETH.toLowerCase(), // TODO - Why is this required????
-            ANT.toLowerCase(),
-            mostLiquidPoolsFirstHop,
-            mostLiquidPoolsSecondHop,
-            hopTokens
-        );
-
-        let paths = sor.processPaths(pathData, pools, swapType);
-
-        let epsOfInterest = sor.processEpsOfInterestMultiHop(
-            paths,
+        let swaps: Swap[][], totalAmtOut: BigNumber;
+        [swaps, totalAmtOut] = fullSwap(
+            allPoolsNonZeroBalances,
+            tokenIn,
+            tokenOut,
             swapType,
-            noPools
-        );
-
-        let swaps, totalReturnWei;
-        [swaps, totalReturnWei] = sor.smartOrderRouterMultiHopEpsOfInterest(
-            JSON.parse(JSON.stringify(pools)),
-            paths,
-            swapType,
-            amountIn,
             noPools,
-            new BigNumber(0),
-            epsOfInterest
+            amountIn,
+            disabledTokens
         );
 
-        assert.equal(
-            Object.keys(directPools).length,
-            0,
-            'Should be no direct pools.'
-        );
         assert.equal(swaps.length, 0, 'Should have 0 swaps.');
         assert.equal(
-            utils.formatEther(totalReturnWei.toString()),
+            utils.formatEther(totalAmtOut.toString()),
             '0.0',
             'Total Out Should Match'
         );
@@ -569,64 +363,23 @@ describe('Tests Multihop SOR vs static allPools.json', () => {
         const amountOut = new BigNumber(1000).times(BONE);
         const swapType = 'swapExactOut';
         const noPools = 4;
+        const tokenIn = WETH;
+        const tokenOut = ANT;
 
-        const allPoolsReturned = allPools; // Replicated sor.getAllPublicSwapPools() call
-        const directPools = await sor.filterPoolsWithTokensDirect(
-            allPoolsNonZeroBalances.pools,
-            WETH,
-            ANT,
-            { isOverRide: true, disabledTokens: disabledTokens.tokens }
-        );
-
-        let mostLiquidPoolsFirstHop, mostLiquidPoolsSecondHop, hopTokens;
-        [
-            mostLiquidPoolsFirstHop,
-            mostLiquidPoolsSecondHop,
-            hopTokens,
-        ] = await sor.filterPoolsWithTokensMultihop(
-            allPoolsNonZeroBalances.pools,
-            WETH,
-            ANT,
-            { isOverRide: true, disabledTokens: disabledTokens.tokens }
-        );
-
-        let pools, pathData;
-        [pools, pathData] = sor.parsePoolData(
-            directPools,
-            WETH.toLowerCase(), // TODO - Why is this required????
-            ANT.toLowerCase(),
-            mostLiquidPoolsFirstHop,
-            mostLiquidPoolsSecondHop,
-            hopTokens
-        );
-
-        let paths = sor.processPaths(pathData, pools, swapType);
-
-        let epsOfInterest = sor.processEpsOfInterestMultiHop(
-            paths,
+        let swaps: Swap[][], totalAmtIn: BigNumber;
+        [swaps, totalAmtIn] = fullSwap(
+            allPoolsNonZeroBalances,
+            tokenIn,
+            tokenOut,
             swapType,
-            noPools
-        );
-
-        let swaps, totalReturnWei;
-        [swaps, totalReturnWei] = sor.smartOrderRouterMultiHopEpsOfInterest(
-            JSON.parse(JSON.stringify(pools)),
-            paths,
-            swapType,
-            amountOut,
             noPools,
-            new BigNumber(0),
-            epsOfInterest
+            amountOut,
+            disabledTokens
         );
 
-        assert.equal(
-            Object.keys(directPools).length,
-            0,
-            'Should be no direct pools.'
-        );
         assert.equal(swaps.length, 0, 'Should have 0 swaps.');
         assert.equal(
-            utils.formatEther(totalReturnWei.toString()),
+            utils.formatEther(totalAmtIn.toString()),
             '0.0',
             'Total Out Should Match'
         );
@@ -636,76 +389,28 @@ describe('Tests Multihop SOR vs static allPools.json', () => {
         const amountIn = new BigNumber('1000000'); // 1 USDC
         const swapType = 'swapExactIn';
         const noPools = 4;
+        const tokenIn = USDC;
+        const tokenOut = MKR;
 
-        const allPoolsReturned = allPools; // Replicated sor.getAllPublicSwapPools() call
-        const directPools = await sor.filterPoolsWithTokensDirect(
-            allPoolsNonZeroBalances.pools,
-            USDC,
-            MKR,
-            { isOverRide: true, disabledTokens: disabledTokens.tokens }
-        );
-
-        let mostLiquidPoolsFirstHop, mostLiquidPoolsSecondHop, hopTokens;
-        [
-            mostLiquidPoolsFirstHop,
-            mostLiquidPoolsSecondHop,
-            hopTokens,
-        ] = await sor.filterPoolsWithTokensMultihop(
-            allPoolsNonZeroBalances.pools,
-            USDC,
-            MKR,
-            { isOverRide: true, disabledTokens: disabledTokens.tokens }
-        );
-
-        let pools, pathData;
-        [pools, pathData] = sor.parsePoolData(
-            directPools,
-            USDC.toLowerCase(), // TODO - Why is this required????
-            MKR.toLowerCase(),
-            mostLiquidPoolsFirstHop,
-            mostLiquidPoolsSecondHop,
-            hopTokens
-        );
-
-        let paths = sor.processPaths(pathData, pools, swapType);
-
-        let epsOfInterest = sor.processEpsOfInterestMultiHop(
-            paths,
+        let swaps: Swap[][], totalAmtOut: BigNumber;
+        [swaps, totalAmtOut] = fullSwap(
+            allPoolsNonZeroBalances,
+            tokenIn,
+            tokenOut,
             swapType,
-            noPools
-        );
-
-        let swaps, totalReturnWei;
-        [swaps, totalReturnWei] = sor.smartOrderRouterMultiHopEpsOfInterest(
-            JSON.parse(JSON.stringify(pools)),
-            paths,
-            swapType,
-            amountIn,
             noPools,
-            new BigNumber(0),
-            epsOfInterest
-        );
-
-        assert.equal(
-            Object.keys(directPools).length,
-            0,
-            'Should be no direct pools.'
+            amountIn,
+            disabledTokens
         );
 
         assert.equal(swaps.length, 2, 'Should have 2 swaps.');
-        assert.equal(
-            utils.formatEther(totalReturnWei.toString()),
-            '0.002932410291658511',
-            'Total Out Should Match'
-        );
-        assert.equal(swaps[0][0].swapAmount, '798830');
-        assert.equal(swaps[0][1].swapAmount, '207514052940821332');
-        assert.equal(swaps[1][0].swapAmount, '201170');
-        assert.equal(swaps[1][1].swapAmount, '990925483230944');
-        assert.equal(
-            utils.formatEther(totalReturnWei.toString()),
-            '0.002932410291658511',
-            'Total Out Should Match'
+        checkSwapsExactIn(
+            swaps,
+            tokenIn,
+            tokenOut,
+            amountIn,
+            totalAmtOut,
+            allPoolsNonZeroBalances
         );
     });
 
@@ -713,78 +418,28 @@ describe('Tests Multihop SOR vs static allPools.json', () => {
         const amountOut = new BigNumber(10).times(BONE);
         const swapType = 'swapExactOut';
         const noPools = 4;
+        const tokenIn = USDC;
+        const tokenOut = MKR;
 
-        const allPoolsReturned = allPools; // Replicated sor.getAllPublicSwapPools() call
-        const directPools = await sor.filterPoolsWithTokensDirect(
-            allPoolsNonZeroBalances.pools,
-            USDC,
-            MKR,
-            { isOverRide: true, disabledTokens: disabledTokens.tokens }
-        );
-
-        let mostLiquidPoolsFirstHop, mostLiquidPoolsSecondHop, hopTokens;
-        [
-            mostLiquidPoolsFirstHop,
-            mostLiquidPoolsSecondHop,
-            hopTokens,
-        ] = await sor.filterPoolsWithTokensMultihop(
-            allPoolsNonZeroBalances.pools,
-            USDC,
-            MKR,
-            { isOverRide: true, disabledTokens: disabledTokens.tokens }
-        );
-
-        let pools, pathData;
-        [pools, pathData] = sor.parsePoolData(
-            directPools,
-            USDC.toLowerCase(), // TODO - Why is this required????
-            MKR.toLowerCase(),
-            mostLiquidPoolsFirstHop,
-            mostLiquidPoolsSecondHop,
-            hopTokens
-        );
-
-        let paths = sor.processPaths(pathData, pools, swapType);
-
-        let epsOfInterest = sor.processEpsOfInterestMultiHop(
-            paths,
+        let swaps: Swap[][], totalAmtIn: BigNumber;
+        [swaps, totalAmtIn] = fullSwap(
+            allPoolsNonZeroBalances,
+            tokenIn,
+            tokenOut,
             swapType,
-            noPools
-        );
-
-        let swaps, totalReturnWei;
-        [swaps, totalReturnWei] = sor.smartOrderRouterMultiHopEpsOfInterest(
-            JSON.parse(JSON.stringify(pools)),
-            paths,
-            swapType,
-            amountOut,
             noPools,
-            new BigNumber(0),
-            epsOfInterest
+            amountOut,
+            disabledTokens
         );
 
-        assert.equal(
-            Object.keys(directPools).length,
-            0,
-            'Should be no direct pools.'
-        );
         assert.equal(swaps.length, 2, 'Should have 2 swaps.');
-        assert.equal(swaps[0][0].swapAmount, '12780750179338124102');
-        assert.equal(swaps[0][1].swapAmount, '7539149984464375031');
-        assert.equal(swaps[1][0].swapAmount, '855409191664291961834');
-        assert.equal(swaps[1][1].swapAmount, '2460850015535624969');
-        assert.equal(
-            swaps[0][0].limitReturnAmount,
-            '115792089237316195423570985008687907853269984665640564039457584007913129639935'
-        );
-        assert.equal(
-            swaps[1][1].maxPrice,
-            '115792089237316195423570985008687907853269984665640564039457584007913129639935'
-        );
-        assert.equal(
-            utils.formatEther(totalReturnWei.toString()),
-            '0.000000003559698325',
-            'Total Out Should Match'
+        checkSwapsExactOut(
+            swaps,
+            tokenIn,
+            tokenOut,
+            amountOut,
+            totalAmtIn,
+            allPoolsNonZeroBalances
         );
     });
 
@@ -795,78 +450,25 @@ describe('Tests Multihop SOR vs static allPools.json', () => {
         const tokenIn = '0x9f8f72aa9304c8b593d555f12ef6589cc3a579a1';
         const tokenOut = '0x9f8f72aa9304c8b593d555f12ef6589cc3a579a4';
 
-        const allPoolsReturned = allPools;
-        const directPools = await sor.filterPoolsWithTokensDirect(
-            allPoolsNonZeroBalances.pools,
+        let swaps: Swap[][], totalAmtIn: BigNumber;
+        [swaps, totalAmtIn] = fullSwap(
+            allPoolsNonZeroBalances,
             tokenIn,
             tokenOut,
-            { isOverRide: true, disabledTokens: disabledTokens.tokens }
-        );
-
-        let mostLiquidPoolsFirstHop, mostLiquidPoolsSecondHop, hopTokens;
-        [
-            mostLiquidPoolsFirstHop,
-            mostLiquidPoolsSecondHop,
-            hopTokens,
-        ] = await sor.filterPoolsWithTokensMultihop(
-            allPoolsNonZeroBalances.pools,
-            tokenIn,
-            tokenOut,
-            { isOverRide: true, disabledTokens: disabledTokens.tokens }
-        );
-
-        let pools, pathData;
-        [pools, pathData] = sor.parsePoolData(
-            directPools,
-            tokenIn,
-            tokenOut,
-            mostLiquidPoolsFirstHop,
-            mostLiquidPoolsSecondHop,
-            hopTokens
-        );
-
-        let paths = sor.processPaths(pathData, pools, swapType);
-
-        let epsOfInterest = sor.processEpsOfInterestMultiHop(
-            paths,
             swapType,
-            noPools
-        );
-
-        let swaps, totalReturnWei;
-        [swaps, totalReturnWei] = sor.smartOrderRouterMultiHopEpsOfInterest(
-            JSON.parse(JSON.stringify(pools)),
-            paths,
-            swapType,
-            amountOut,
             noPools,
-            new BigNumber(0),
-            epsOfInterest
+            amountOut,
+            disabledTokens
         );
 
-        assert.equal(
-            Object.keys(directPools).length,
-            0,
-            'Should be no direct pools.'
-        );
         assert.equal(swaps.length, 1, 'Should have 1 swaps.');
-        assert.equal(
-            swaps[0][0].pool,
-            '0xf218fe414c6b1c6b42e79b7690f1509a634baad9'
+        checkSwapsExactOut(
+            swaps,
+            tokenIn,
+            tokenOut,
+            amountOut,
+            totalAmtIn,
+            allPoolsNonZeroBalances
         );
-        assert.equal(swaps[0][0].tokenIn, tokenIn);
-        assert.equal(
-            swaps[0][0].tokenOut,
-            '0x9f8f72aa9304c8b593d555f12ef6589cc3a579a3'
-        );
-        assert.equal(
-            swaps[0][1].pool,
-            '0xf218fe414c6b1c6b42e79b7690f1509a634baad0'
-        );
-        assert.equal(
-            swaps[0][1].tokenIn,
-            '0x9f8f72aa9304c8b593d555f12ef6589cc3a579a3'
-        );
-        assert.equal(swaps[0][1].tokenOut, tokenOut);
     });
 });

@@ -731,12 +731,12 @@ export function filterPoolsWithoutMutualTokens(
 }
 
 // Replacing getMultihopPoolsWithTokens
-export async function filterPoolsWithTokensMultihop(
+export function filterPoolsWithTokensMultihop(
     allPools: Pool[], // Just the list of pool tokens
     tokenIn: string,
     tokenOut: string,
     disabledOptions: DisabledOptions = { isOverRide: false, disabledTokens: [] }
-): Promise<[Pool[], Pool[], string[]]> {
+): [Pool[], Pool[], string[]] {
     //// Multi-hop trades: we find the best pools that connect tokenIn and tokenOut through a multi-hop (intermediate) token
     // First: we get all tokens that can be used to be traded with tokenIn excluding
     // tokens that are in pools that already contain tokenOut (in which case multi-hop is not necessary)

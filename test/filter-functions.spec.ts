@@ -1,9 +1,9 @@
 // Tests multihop filter methods by comparing to old SOR getMultihopPoolsWithTokens function
 // which was replaced as too slow - uses allPoolsSmall.json for pool data.
+import * as sor from '../src';
 import { assert } from 'chai';
 import 'mocha';
-import { formatAndFilterPools } from './testScripts/utils/subgraph';
-const sor = require('../src');
+import { formatAndFilterPools } from './utils';
 const helpers = require('../src/helpers');
 const { utils } = require('ethers');
 // Following has:
