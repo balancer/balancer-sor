@@ -227,18 +227,6 @@ export function getSlippageLinearizedSpotPriceAfterSwapPath(
                 );
 
                 return bdiv(bdiv(numerator, denominator1), denominator2);
-
-                /*
-                let denominator = bmul(
-                    bmul(BONE.minus(p1.swapFee), BONE.minus(p2.swapFee)),
-                    bmul(
-                        bmul(p1.balanceOut, p2.balanceOut),
-                        bmul(p1.weightIn, p2.weightIn)
-                    )
-                );
-
-                return bdiv(numerator, denominator);
-                */
             }
         }
     } else {

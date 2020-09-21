@@ -369,7 +369,7 @@ function getPricesOfInterest(sortedPaths: Path[], swapType: string): Price[] {
         // Max amount for this pool
         pi = {};
         pi.price = b.spotPrice.plus(
-            bmul(b.limitAmount, bmul(b.slippage, b.spotPrice))
+            bmul(bmul(b.limitAmount, b.slippage), b.spotPrice)
         );
         pi.maxAmount = b.id;
         pricesOfInterest.push(pi);
@@ -499,10 +499,14 @@ function getSwapAmountsForPriceOfInterest(
         let path = paths.find(obj => {
             return obj.id === bid;
         });
+
         let inputAmount = bdiv(
             poi.minus(path.spotPrice),
             bmul(path.slippage, path.spotPrice)
         );
+
+        if (inputAmount.isNaN()) inputAmount = bnum(0);
+
         if (path.limitAmount.isLessThan(inputAmount)) {
             inputAmount = path.limitAmount;
         }

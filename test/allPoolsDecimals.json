@@ -89,6 +89,33 @@
                 "0xd0a1e359811322d97991e03f863a0c30c2cf029c"
             ],
             "totalWeight": "50"
+        },
+        {
+            "id": "0xd2f574637898526fcddfb3d487cc73c957fa0268",
+            "swapFee": "0.0001",
+            "tokens": [
+                {
+                    "address": "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+                    "balance": "7641049.83122",
+                    "decimals": 6,
+                    "denormWeight": "25",
+                    "id": "0xd2f574637898526fcddfb3d487cc73c957fa0268-0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+                    "symbol": "USDC"
+                },
+                {
+                    "address": "0xb2fdd60ad80ca7ba89b9bab3b5336c2601c020b4",
+                    "balance": "7353019.624566635201844084",
+                    "decimals": 18,
+                    "denormWeight": "25",
+                    "id": "0xd2f574637898526fcddfb3d487cc73c957fa0268-0xb2fdd60ad80ca7ba89b9bab3b5336c2601c020b4",
+                    "symbol": "yUSD-OCT20"
+                }
+            ],
+            "tokensList": [
+                "0xb2fdd60ad80ca7ba89b9bab3b5336c2601c020b4",
+                "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48"
+            ],
+            "totalWeight": "50"
         }
     ]
 }
