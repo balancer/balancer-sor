@@ -32,23 +32,29 @@ async function swapExactIn() {
     let allPoolsNonZeroBalances = await sor.getAllPublicSwapPools();
 
     console.log(`Retrieving Onchain Balances...`);
+    console.time('getAllPoolDataOnChain');
     allPoolsNonZeroBalances = await sor.getAllPoolDataOnChain(
         allPoolsNonZeroBalances,
         '0xeefba1e63905ef1d7acba5a8513c70307c1ce441',
         provider
     );
+    console.timeEnd('getAllPoolDataOnChain');
+
     // Alternatively Subgraph data can be used directly
     // sor.formatSubgraphPools(allPoolsNonZeroBalances);
 
     // console.log(allPoolsNonZeroBalances)
     console.log(`Processing Data...`);
     // Retrieves all pools that contain both DAI & USDC, i.e. pools that can be used for direct swaps
+    console.time('filterPoolsWithTokensDirect');
     const directPools = await sor.filterPoolsWithTokensDirect(
         allPoolsNonZeroBalances.pools,
         tokenIn.toLowerCase(), // The Subgraph returns tokens in lower case format so we must match this
         tokenOut.toLowerCase()
     );
+    console.timeEnd('filterPoolsWithTokensDirect');
 
+    console.time('filterPoolsWithTokensMultihop');
     // Retrieves pools in order of liquidity for intermediate pools along with tokens that are contained in these.
     let mostLiquidPoolsFirstHop, mostLiquidPoolsSecondHop, hopTokens;
     [
@@ -60,7 +66,9 @@ async function swapExactIn() {
         tokenIn.toLowerCase(),
         tokenOut.toLowerCase()
     );
+    console.timeEnd('filterPoolsWithTokensMultihop');
 
+    console.time('parsePoolData');
     // Finds the possible paths to make the swap
     let pools, pathData;
     [pools, pathData] = sor.parsePoolData(
@@ -71,16 +79,22 @@ async function swapExactIn() {
         mostLiquidPoolsSecondHop,
         hopTokens
     );
+    console.timeEnd('parsePoolData');
 
+    console.time('processPaths');
     // Finds sorted price & slippage information for paths
     let paths = sor.processPaths(pathData, pools, swapType);
+    console.timeEnd('processPaths');
 
+    console.time('processEpsOfInterestMultiHop');
     let epsOfInterest = sor.processEpsOfInterestMultiHop(
         paths,
         swapType,
         noPools
     );
+    console.timeEnd('processEpsOfInterestMultiHop');
 
+    console.time('smartOrderRouterMultiHopEpsOfInterest');
     // Returns  total amount of DAI swapped and list of swaps to make
     let swaps, totalReturnWei;
     [swaps, totalReturnWei] = sor.smartOrderRouterMultiHopEpsOfInterest(
@@ -92,6 +106,7 @@ async function swapExactIn() {
         costOutputToken,
         epsOfInterest
     );
+    console.timeEnd('smartOrderRouterMultiHopEpsOfInterest');
 
     const totalReturnEth = totalReturnWei.div(BONE); // Just converts from wei units
     console.log(`Total DAI Return: ${totalReturnEth.toString()}`);

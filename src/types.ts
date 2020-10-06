@@ -17,6 +17,7 @@ export interface Path {
     spotPrice?: BigNumber;
     slippage?: BigNumber;
     limitAmount?: BigNumber;
+    slippagePriceFactor?: BigNumber;
 }
 
 export interface EffectivePrice {
