@@ -89,20 +89,38 @@ export async function getAllPoolDataOnChain(
 
     let calls = [];
 
+    let encodedSwapFee = bPool.functions.getSwapFee.encode([]);
+    let encodedBalance = utils.hexDataSlice(
+        utils.keccak256(utils.toUtf8Bytes('getBalance(address)')),
+        0,
+        4
+    );
+    let encodedWeight = utils.hexDataSlice(
+        utils.keccak256(utils.toUtf8Bytes('getDenormalizedWeight(address)')),
+        0,
+        4
+    );
+
     for (let i = 0; i < pools.pools.length; i++) {
+        // for (let i = 0; i < 1; i++) {
         let p = pools.pools[i];
 
-        calls.push([p.id, bPool.functions.getSwapFee.encode([])]);
+        calls.push([p.id, encodedSwapFee]);
 
         // Checks all tokens for pool
         p.tokens.forEach(token => {
+            let paddedAddr = utils
+                .hexZeroPad(token.address, 32)
+                .replace(`0x`, '');
+
             calls.push([
                 p.id,
-                bPool.functions.getBalance.encode([token.address]),
+                encodedBalance.concat(paddedAddr.replace(`0x`, '')),
             ]);
+
             calls.push([
                 p.id,
-                bPool.functions.getDenormalizedWeight.encode([token.address]),
+                encodedWeight.concat(paddedAddr.replace(`0x`, '')),
             ]);
         });
     }
@@ -150,7 +168,6 @@ export async function getAllPoolDataOnChain(
             });
             onChainPools.pools.push(p);
         }
-
         return onChainPools;
     } catch (e) {
         console.error('Failure querying onchain balances', { error: e });
