@@ -51,21 +51,27 @@ describe('Test multihop-eps trade using live subgraph', () => {
             provider
         );
 
-        const directPools = await sor.filterPoolsWithTokensDirect(
-            allPoolsNonZeroBalances.pools,
-            tokenIn,
-            tokenOut
-        );
+        let poolsTokenIn, poolsTokenOut, directPools, hopTokens;
+        [
+            directPools,
+            hopTokens,
+            poolsTokenIn,
+            poolsTokenOut,
+        ] = sor.filterPools(allPoolsNonZeroBalances.pools, tokenIn, tokenOut, {
+            isOverRide: true,
+            disabledTokens: disabledTokens.tokens,
+        });
 
-        let mostLiquidPoolsFirstHop, mostLiquidPoolsSecondHop, hopTokens;
+        let mostLiquidPoolsFirstHop, mostLiquidPoolsSecondHop;
         [
             mostLiquidPoolsFirstHop,
             mostLiquidPoolsSecondHop,
-            hopTokens,
-        ] = await sor.filterPoolsWithTokensMultihop(
-            allPoolsNonZeroBalances.pools,
+        ] = sor.sortPoolsMostLiquid(
             tokenIn,
-            tokenOut
+            tokenOut,
+            hopTokens,
+            poolsTokenIn,
+            poolsTokenOut
         );
 
         let pools, pathData;

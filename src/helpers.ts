@@ -778,3 +778,251 @@ export const formatSubgraphPools = pools => {
         });
     }
 };
+
+export function filterPools(
+    allPools: Pool[], // The complete information of the pools
+    tokenIn: string,
+    tokenOut: string,
+    disabledOptions: DisabledOptions = { isOverRide: false, disabledTokens: [] }
+): [PoolDictionary, string[], PoolDictionary, PoolDictionary] {
+    // If pool contains token add all its tokens to direct list
+    // Multi-hop trades: we find the best pools that connect tokenIn and tokenOut through a multi-hop (intermediate) token
+    // First: we get all tokens that can be used to be traded with tokenIn excluding
+    // tokens that are in pools that already contain tokenOut (in which case multi-hop is not necessary)
+    let poolsDirect: PoolDictionary = {};
+    let poolsTokenOne: PoolDictionary = {};
+    let poolsTokenTwo: PoolDictionary = {};
+    let tokenInPairedTokens: Set<string> = new Set();
+    let tokenOutPairedTokens: Set<string> = new Set();
+
+    let disabledTokens = disabledTokensDefault.tokens;
+    if (disabledOptions.isOverRide)
+        disabledTokens = disabledOptions.disabledTokens;
+
+    allPools.forEach(pool => {
+        let tokenListSet = new Set(pool.tokensList);
+        disabledTokens.forEach(token => tokenListSet.delete(token.address));
+
+        if (tokenListSet.has(tokenIn) && tokenListSet.has(tokenOut)) {
+            poolsDirect[pool.id] = pool;
+            return;
+        }
+
+        let containsTokenIn = tokenListSet.has(tokenIn);
+        let containsTokenOut = tokenListSet.has(tokenOut);
+
+        if (containsTokenIn && !containsTokenOut) {
+            tokenInPairedTokens = new Set([
+                ...tokenInPairedTokens,
+                ...tokenListSet,
+            ]);
+            poolsTokenOne[pool.id] = pool;
+        } else if (!containsTokenIn && containsTokenOut) {
+            tokenOutPairedTokens = new Set([
+                ...tokenOutPairedTokens,
+                ...tokenListSet,
+            ]);
+            poolsTokenTwo[pool.id] = pool;
+        }
+    });
+
+    // We find the intersection of the two previous sets so we can trade tokenIn for tokenOut with 1 multi-hop
+    const hopTokensSet = [...tokenInPairedTokens].filter(x =>
+        tokenOutPairedTokens.has(x)
+    );
+
+    // Transform set into Array
+    const hopTokens: string[] = [...hopTokensSet];
+
+    return [poolsDirect, hopTokens, poolsTokenOne, poolsTokenTwo];
+}
+
+export function sortPoolsMostLiquidOld(
+    tokenIn: string,
+    tokenOut: string,
+    hopTokens: string[],
+    poolsTokenInNoTokenOut: PoolDictionary,
+    poolsTokenOutNoTokenIn: PoolDictionary,
+    disabledOptions: DisabledOptions = { isOverRide: false, disabledTokens: [] }
+): [Pool[], Pool[]] {
+    console.log('TET');
+
+    // Find the most liquid pool for each pair (tokenIn -> hopToken). We store an object in the form:
+    // mostLiquidPoolsFirstHop = {hopToken1: mostLiquidPool, hopToken2: mostLiquidPool, ... , hopTokenN: mostLiquidPool}
+    // Here we could query subgraph for all pools with pair (tokenIn -> hopToken), but to
+    // minimize subgraph calls we loop through poolsTokenInNoTokenOut, and check the liquidity
+    // only for those that have hopToken
+    let mostLiquidPoolsFirstHop: Pool[] = [];
+    for (let i = 0; i < hopTokens.length; i++) {
+        let highestNormalizedLiquidity = bnum(0); // Aux variable to find pool with most liquidity for pair (tokenIn -> hopToken)
+        let highestNormalizedLiquidityPoolId; // Aux variable to find pool with most liquidity for pair (tokenIn -> hopToken)
+        for (let k in poolsTokenInNoTokenOut) {
+            // If this pool has hopTokens[i] calculate its normalized liquidity
+            if (
+                new Set(poolsTokenInNoTokenOut[k].tokensList).has(hopTokens[i])
+            ) {
+                let normalizedLiquidity = getNormalizedLiquidity(
+                    parsePoolPairData(
+                        poolsTokenInNoTokenOut[k],
+                        tokenIn,
+                        hopTokens[i].toString()
+                    )
+                );
+
+                if (
+                    normalizedLiquidity.isGreaterThanOrEqualTo(
+                        // Cannot be strictly greater otherwise
+                        // highestNormalizedLiquidityPoolId = 0 if hopTokens[i] balance is 0 in this pool.
+                        highestNormalizedLiquidity
+                    )
+                ) {
+                    highestNormalizedLiquidity = normalizedLiquidity;
+                    highestNormalizedLiquidityPoolId = k;
+                }
+            }
+        }
+        mostLiquidPoolsFirstHop[i] =
+            poolsTokenInNoTokenOut[highestNormalizedLiquidityPoolId];
+        // console.log(highestNormalizedLiquidity)
+        // console.log(mostLiquidPoolsFirstHop)
+    }
+
+    // console.log('mostLiquidPoolsFirstHop');
+    // console.log(mostLiquidPoolsFirstHop);
+
+    // Now similarly find the most liquid pool for each pair (hopToken -> tokenOut)
+    let mostLiquidPoolsSecondHop: Pool[] = [];
+    for (let i = 0; i < hopTokens.length; i++) {
+        let highestNormalizedLiquidity = bnum(0); // Aux variable to find pool with most liquidity for pair (tokenIn -> hopToken)
+        let highestNormalizedLiquidityPoolId; // Aux variable to find pool with most liquidity for pair (tokenIn -> hopToken)
+        for (let k in poolsTokenOutNoTokenIn) {
+            // If this pool has hopTokens[i] calculate its normalized liquidity
+            if (
+                new Set(poolsTokenOutNoTokenIn[k].tokensList).has(hopTokens[i])
+            ) {
+                let normalizedLiquidity = getNormalizedLiquidity(
+                    parsePoolPairData(
+                        poolsTokenOutNoTokenIn[k],
+                        hopTokens[i].toString(),
+                        tokenOut
+                    )
+                );
+
+                if (
+                    normalizedLiquidity.isGreaterThanOrEqualTo(
+                        // Cannot be strictly greater otherwise
+                        // highestNormalizedLiquidityPoolId = 0 if hopTokens[i] balance is 0 in this pool.
+                        highestNormalizedLiquidity
+                    )
+                ) {
+                    highestNormalizedLiquidity = normalizedLiquidity;
+                    highestNormalizedLiquidityPoolId = k;
+                }
+            }
+        }
+        mostLiquidPoolsSecondHop[i] =
+            poolsTokenOutNoTokenIn[highestNormalizedLiquidityPoolId];
+        // console.log(highestNormalizedLiquidity)
+        // console.log(mostLiquidPoolsSecondHop)
+    }
+    return [mostLiquidPoolsFirstHop, mostLiquidPoolsSecondHop];
+}
+
+export function sortPoolsMostLiquid(
+    tokenIn: string,
+    tokenOut: string,
+    hopTokens: string[],
+    poolsTokenInNoTokenOut: PoolDictionary,
+    poolsTokenOutNoTokenIn: PoolDictionary
+): [Pool[], Pool[]] {
+    // Find the most liquid pool for each pair (tokenIn -> hopToken). We store an object in the form:
+    // mostLiquidPoolsFirstHop = {hopToken1: mostLiquidPool, hopToken2: mostLiquidPool, ... , hopTokenN: mostLiquidPool}
+    // Here we could query subgraph for all pools with pair (tokenIn -> hopToken), but to
+    // minimize subgraph calls we loop through poolsTokenInNoTokenOut, and check the liquidity
+    // only for those that have hopToken
+    let mostLiquidPoolsFirstHop: Pool[] = [];
+    let mostLiquidPoolsSecondHop: Pool[] = [];
+    let poolPair = {}; // Store pair liquidity incase it is reused
+
+    for (let i = 0; i < hopTokens.length; i++) {
+        let highestNormalizedLiquidityFirst = bnum(0); // Aux variable to find pool with most liquidity for pair (tokenIn -> hopToken)
+        let highestNormalizedLiquidityFirstPoolId; // Aux variable to find pool with most liquidity for pair (tokenIn -> hopToken)
+        for (let k in poolsTokenInNoTokenOut) {
+            // If this pool has hopTokens[i] calculate its normalized liquidity
+            if (
+                new Set(poolsTokenInNoTokenOut[k].tokensList).has(hopTokens[i])
+            ) {
+                let normalizedLiquidity;
+                let id = `${poolsTokenInNoTokenOut[k]}${tokenIn}${hopTokens[
+                    i
+                ].toString()}`;
+                if (!poolPair[id]) {
+                    normalizedLiquidity = getNormalizedLiquidity(
+                        parsePoolPairData(
+                            poolsTokenInNoTokenOut[k],
+                            tokenIn,
+                            hopTokens[i].toString()
+                        )
+                    );
+                    poolPair[id] = normalizedLiquidity;
+                } else {
+                    normalizedLiquidity = poolPair[id];
+                }
+
+                if (
+                    normalizedLiquidity.isGreaterThanOrEqualTo(
+                        // Cannot be strictly greater otherwise
+                        // highestNormalizedLiquidityPoolId = 0 if hopTokens[i] balance is 0 in this pool.
+                        highestNormalizedLiquidityFirst
+                    )
+                ) {
+                    highestNormalizedLiquidityFirst = normalizedLiquidity;
+                    highestNormalizedLiquidityFirstPoolId = k;
+                }
+            }
+        }
+        mostLiquidPoolsFirstHop[i] =
+            poolsTokenInNoTokenOut[highestNormalizedLiquidityFirstPoolId];
+
+        let highestNormalizedLiquidity = bnum(0); // Aux variable to find pool with most liquidity for pair (tokenIn -> hopToken)
+        let highestNormalizedLiquidityPoolId; // Aux variable to find pool with most liquidity for pair (tokenIn -> hopToken)
+        for (let k in poolsTokenOutNoTokenIn) {
+            // If this pool has hopTokens[i] calculate its normalized liquidity
+            if (
+                new Set(poolsTokenOutNoTokenIn[k].tokensList).has(hopTokens[i])
+            ) {
+                let normalizedLiquidity;
+                let id = `${poolsTokenInNoTokenOut[k]}${hopTokens[
+                    i
+                ].toString()}${tokenOut}`;
+                if (!poolPair[id]) {
+                    normalizedLiquidity = getNormalizedLiquidity(
+                        parsePoolPairData(
+                            poolsTokenOutNoTokenIn[k],
+                            hopTokens[i].toString(),
+                            tokenOut
+                        )
+                    );
+                    poolPair[id] = normalizedLiquidity;
+                } else {
+                    normalizedLiquidity = poolPair[id];
+                }
+
+                if (
+                    normalizedLiquidity.isGreaterThanOrEqualTo(
+                        // Cannot be strictly greater otherwise
+                        // highestNormalizedLiquidityPoolId = 0 if hopTokens[i] balance is 0 in this pool.
+                        highestNormalizedLiquidity
+                    )
+                ) {
+                    highestNormalizedLiquidity = normalizedLiquidity;
+                    highestNormalizedLiquidityPoolId = k;
+                }
+            }
+        }
+        mostLiquidPoolsSecondHop[i] =
+            poolsTokenOutNoTokenIn[highestNormalizedLiquidityPoolId];
+    }
+
+    return [mostLiquidPoolsFirstHop, mostLiquidPoolsSecondHop];
+}

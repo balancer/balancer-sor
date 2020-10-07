@@ -35,8 +35,8 @@ Multihop:
 
 -   Multihop SOR with all pools.
 -   sor.getAllPublicSwapPools();
--   sor.filterPoolsWithTokensDirect(allPoolsReturned, tokenIn, tokenOut);
--   sor.filterPoolsWithTokensMultihop(allPoolsReturned, tokenIn, tokenOut);
+-   sor.filterPools(allPoolsReturned, tokenIn, tokenOut, { isOverRide: true, disabledTokens: disabledTokens.tokens });
+-   sor.sortPoolsMostLiquid(tokenIn, tokenOut, hopTokens, poolsTokenIn, poolsTokenOut);
 -   sor.parsePoolData
 -   [sorSwaps, totalReturn] = sor.smartOrderRouterMultiHop
 

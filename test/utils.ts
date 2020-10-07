@@ -252,23 +252,27 @@ export function fullSwap(
     amount,
     disabledTokens
 ): [Swap[][], BigNumber] {
-    const directPools = sor.filterPoolsWithTokensDirect(
-        allPoolsNonZeroBalances.pools,
-        tokenIn,
-        tokenOut,
-        { isOverRide: true, disabledTokens: disabledTokens.tokens }
-    );
+    let poolsTokenIn, poolsTokenOut, directPools, hopTokens;
+    [
+        directPools,
+        hopTokens,
+        poolsTokenIn,
+        poolsTokenOut,
+    ] = sor.filterPools(allPoolsNonZeroBalances.pools, tokenIn, tokenOut, {
+        isOverRide: true,
+        disabledTokens: disabledTokens.tokens,
+    });
 
-    let mostLiquidPoolsFirstHop, mostLiquidPoolsSecondHop, hopTokens;
+    let mostLiquidPoolsFirstHop, mostLiquidPoolsSecondHop;
     [
         mostLiquidPoolsFirstHop,
         mostLiquidPoolsSecondHop,
-        hopTokens,
-    ] = sor.filterPoolsWithTokensMultihop(
-        allPoolsNonZeroBalances.pools,
+    ] = sor.sortPoolsMostLiquid(
         tokenIn,
         tokenOut,
-        { isOverRide: true, disabledTokens: disabledTokens.tokens }
+        hopTokens,
+        poolsTokenIn,
+        poolsTokenOut
     );
 
     let pools, pathData;

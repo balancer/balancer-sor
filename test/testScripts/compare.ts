@@ -189,21 +189,23 @@ async function SorDirectOnly(
 }
 
 async function SorMultihop(allPoolsReturned, tokenIn, tokenOut, trade, amount) {
-    const directPools = await sor.filterPoolsWithTokensDirect(
-        allPoolsReturned,
+    let poolsTokenIn, poolsTokenOut, directPools, hopTokens;
+    [directPools, hopTokens, poolsTokenIn, poolsTokenOut] = sor.filterPools(
+        allPoolsNonZeroBalances.pools,
         tokenIn,
         tokenOut
     );
 
-    let mostLiquidPoolsFirstHop, mostLiquidPoolsSecondHop, hopTokens;
+    let mostLiquidPoolsFirstHop, mostLiquidPoolsSecondHop;
     [
         mostLiquidPoolsFirstHop,
         mostLiquidPoolsSecondHop,
-        hopTokens,
-    ] = await sor.filterPoolsWithTokensMultihop(
-        allPoolsReturned,
+    ] = sor.sortPoolsMostLiquid(
         tokenIn,
-        tokenOut
+        tokenOut,
+        hopTokens,
+        poolsTokenIn,
+        poolsTokenOut
     );
 
     let pools, pathData;

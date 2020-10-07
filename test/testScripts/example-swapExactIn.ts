@@ -46,27 +46,30 @@ async function swapExactIn() {
     // console.log(allPoolsNonZeroBalances)
     console.log(`Processing Data...`);
     // Retrieves all pools that contain both DAI & USDC, i.e. pools that can be used for direct swaps
-    console.time('filterPoolsWithTokensDirect');
-    const directPools = await sor.filterPoolsWithTokensDirect(
+    // Retrieves intermediate pools along with tokens that are contained in these.
+    console.time('filterPools');
+    let directPools, hopTokens, poolsTokenIn, poolsTokenOut;
+    [directPools, hopTokens, poolsTokenIn, poolsTokenOut] = sor.filterPools(
         allPoolsNonZeroBalances.pools,
         tokenIn.toLowerCase(), // The Subgraph returns tokens in lower case format so we must match this
         tokenOut.toLowerCase()
     );
-    console.timeEnd('filterPoolsWithTokensDirect');
+    console.timeEnd('filterPools');
 
-    console.time('filterPoolsWithTokensMultihop');
-    // Retrieves pools in order of liquidity for intermediate pools along with tokens that are contained in these.
-    let mostLiquidPoolsFirstHop, mostLiquidPoolsSecondHop, hopTokens;
+    // Sort intermediate pools by order of liquidity
+    let mostLiquidPoolsFirstHop, mostLiquidPoolsSecondHop;
+    console.time('sortPoolsMostLiquid');
     [
         mostLiquidPoolsFirstHop,
         mostLiquidPoolsSecondHop,
+    ] = sor.sortPoolsMostLiquid(
+        tokenIn,
+        tokenOut,
         hopTokens,
-    ] = await sor.filterPoolsWithTokensMultihop(
-        allPoolsNonZeroBalances.pools,
-        tokenIn.toLowerCase(),
-        tokenOut.toLowerCase()
+        poolsTokenIn,
+        poolsTokenOut
     );
-    console.timeEnd('filterPoolsWithTokensMultihop');
+    console.timeEnd('sortPoolsMostLiquid');
 
     console.time('parsePoolData');
     // Finds the possible paths to make the swap

@@ -60,21 +60,23 @@ describe('Test multihop-eps trade using live subgraph', () => {
             provider
         );
 
-        const directPools = await sor.filterPoolsWithTokensDirect(
+        let poolsTokenIn, poolsTokenOut, directPools, hopTokens;
+        [directPools, hopTokens, poolsTokenIn, poolsTokenOut] = sor.filterPools(
             allPoolsNonZeroBalances.pools,
             tokenIn,
             tokenOut
         );
 
-        let mostLiquidPoolsFirstHop, mostLiquidPoolsSecondHop, hopTokens;
+        let mostLiquidPoolsFirstHop, mostLiquidPoolsSecondHop;
         [
             mostLiquidPoolsFirstHop,
             mostLiquidPoolsSecondHop,
-            hopTokens,
-        ] = await sor.filterPoolsWithTokensMultihop(
-            allPoolsNonZeroBalances.pools,
+        ] = sor.sortPoolsMostLiquid(
             tokenIn,
-            tokenOut
+            tokenOut,
+            hopTokens,
+            poolsTokenIn,
+            poolsTokenOut
         );
 
         let pools, pathData;
@@ -152,21 +154,23 @@ describe('Test multihop-eps trade using live subgraph', () => {
 
         // const allPoolsNonZeroBalances = await sor.getAllPublicSwapPools(); // Only returns pools with balance
 
-        const directPools = await sor.filterPoolsWithTokensDirect(
+        let poolsTokenIn, poolsTokenOut, directPools, hopTokens;
+        [directPools, hopTokens, poolsTokenIn, poolsTokenOut] = sor.filterPools(
             allPoolsNonZeroBalances.pools,
             tokenIn,
             tokenOut
         );
 
-        let mostLiquidPoolsFirstHop, mostLiquidPoolsSecondHop, hopTokens;
+        let mostLiquidPoolsFirstHop, mostLiquidPoolsSecondHop;
         [
             mostLiquidPoolsFirstHop,
             mostLiquidPoolsSecondHop,
-            hopTokens,
-        ] = await sor.filterPoolsWithTokensMultihop(
-            allPoolsNonZeroBalances.pools,
+        ] = sor.sortPoolsMostLiquid(
             tokenIn,
-            tokenOut
+            tokenOut,
+            hopTokens,
+            poolsTokenIn,
+            poolsTokenOut
         );
 
         let pools, pathData;
@@ -238,21 +242,23 @@ describe('Test multihop-eps trade using live subgraph', () => {
 
         // const allPoolsNonZeroBalances = await sor.getAllPublicSwapPools(); // Only returns pools with balance
 
-        const directPools = await sor.filterPoolsWithTokensDirect(
+        let poolsTokenIn, poolsTokenOut, directPools, hopTokens;
+        [directPools, hopTokens, poolsTokenIn, poolsTokenOut] = sor.filterPools(
             allPoolsNonZeroBalances.pools,
             tokenIn,
             tokenOut
         );
 
-        let mostLiquidPoolsFirstHop, mostLiquidPoolsSecondHop, hopTokens;
+        let mostLiquidPoolsFirstHop, mostLiquidPoolsSecondHop;
         [
             mostLiquidPoolsFirstHop,
             mostLiquidPoolsSecondHop,
-            hopTokens,
-        ] = await sor.filterPoolsWithTokensMultihop(
-            allPoolsNonZeroBalances.pools,
+        ] = sor.sortPoolsMostLiquid(
             tokenIn,
-            tokenOut
+            tokenOut,
+            hopTokens,
+            poolsTokenIn,
+            poolsTokenOut
         );
 
         let pools, pathData;
@@ -323,21 +329,23 @@ describe('Test multihop-eps trade using live subgraph', () => {
 
         // const allPoolsNonZeroBalances = await sor.getAllPublicSwapPools(); // Only returns pools with balance
 
-        const directPools = await sor.filterPoolsWithTokensDirect(
+        let poolsTokenIn, poolsTokenOut, directPools, hopTokens;
+        [directPools, hopTokens, poolsTokenIn, poolsTokenOut] = sor.filterPools(
             allPoolsNonZeroBalances.pools,
             tokenIn,
             tokenOut
         );
 
-        let mostLiquidPoolsFirstHop, mostLiquidPoolsSecondHop, hopTokens;
+        let mostLiquidPoolsFirstHop, mostLiquidPoolsSecondHop;
         [
             mostLiquidPoolsFirstHop,
             mostLiquidPoolsSecondHop,
-            hopTokens,
-        ] = await sor.filterPoolsWithTokensMultihop(
-            allPoolsNonZeroBalances.pools,
+        ] = sor.sortPoolsMostLiquid(
             tokenIn,
-            tokenOut
+            tokenOut,
+            hopTokens,
+            poolsTokenIn,
+            poolsTokenOut
         );
 
         let pools, pathData;
@@ -407,21 +415,23 @@ describe('Test multihop-eps trade using live subgraph', () => {
 
         // const allPoolsNonZeroBalances = await sor.getAllPublicSwapPools(); // Only returns pools with balance
 
-        const directPools = await sor.filterPoolsWithTokensDirect(
+        let poolsTokenIn, poolsTokenOut, directPools, hopTokens;
+        [directPools, hopTokens, poolsTokenIn, poolsTokenOut] = sor.filterPools(
             allPoolsNonZeroBalances.pools,
             tokenIn,
             tokenOut
         );
 
-        let mostLiquidPoolsFirstHop, mostLiquidPoolsSecondHop, hopTokens;
+        let mostLiquidPoolsFirstHop, mostLiquidPoolsSecondHop;
         [
             mostLiquidPoolsFirstHop,
             mostLiquidPoolsSecondHop,
-            hopTokens,
-        ] = await sor.filterPoolsWithTokensMultihop(
-            allPoolsNonZeroBalances.pools,
+        ] = sor.sortPoolsMostLiquid(
             tokenIn,
-            tokenOut
+            tokenOut,
+            hopTokens,
+            poolsTokenIn,
+            poolsTokenOut
         );
 
         let pools, pathData;
@@ -481,21 +491,23 @@ describe('Test multihop-eps trade using live subgraph', () => {
 
         // const allPoolsNonZeroBalances = await sor.getAllPublicSwapPools(); // Only returns pools with balance
 
-        const directPools = await sor.filterPoolsWithTokensDirect(
+        let poolsTokenIn, poolsTokenOut, directPools, hopTokens;
+        [directPools, hopTokens, poolsTokenIn, poolsTokenOut] = sor.filterPools(
             allPoolsNonZeroBalances.pools,
             tokenIn,
             tokenOut
         );
 
-        let mostLiquidPoolsFirstHop, mostLiquidPoolsSecondHop, hopTokens;
+        let mostLiquidPoolsFirstHop, mostLiquidPoolsSecondHop;
         [
             mostLiquidPoolsFirstHop,
             mostLiquidPoolsSecondHop,
-            hopTokens,
-        ] = await sor.filterPoolsWithTokensMultihop(
-            allPoolsNonZeroBalances.pools,
+        ] = sor.sortPoolsMostLiquid(
             tokenIn,
-            tokenOut
+            tokenOut,
+            hopTokens,
+            poolsTokenIn,
+            poolsTokenOut
         );
 
         let pools, pathData;
@@ -555,21 +567,23 @@ describe('Test multihop-eps trade using live subgraph', () => {
 
         // const allPoolsNonZeroBalances = await sor.getAllPublicSwapPools(); // Only returns pools with balance
 
-        const directPools = await sor.filterPoolsWithTokensDirect(
+        let poolsTokenIn, poolsTokenOut, directPools, hopTokens;
+        [directPools, hopTokens, poolsTokenIn, poolsTokenOut] = sor.filterPools(
             allPoolsNonZeroBalances.pools,
             tokenIn,
             tokenOut
         );
 
-        let mostLiquidPoolsFirstHop, mostLiquidPoolsSecondHop, hopTokens;
+        let mostLiquidPoolsFirstHop, mostLiquidPoolsSecondHop;
         [
             mostLiquidPoolsFirstHop,
             mostLiquidPoolsSecondHop,
-            hopTokens,
-        ] = await sor.filterPoolsWithTokensMultihop(
-            allPoolsNonZeroBalances.pools,
+        ] = sor.sortPoolsMostLiquid(
             tokenIn,
-            tokenOut
+            tokenOut,
+            hopTokens,
+            poolsTokenIn,
+            poolsTokenOut
         );
 
         let pools, pathData;
@@ -629,21 +643,23 @@ describe('Test multihop-eps trade using live subgraph', () => {
 
         // const allPoolsNonZeroBalances = await sor.getAllPublicSwapPools(); // Only returns pools with balance
 
-        const directPools = await sor.filterPoolsWithTokensDirect(
+        let poolsTokenIn, poolsTokenOut, directPools, hopTokens;
+        [directPools, hopTokens, poolsTokenIn, poolsTokenOut] = sor.filterPools(
             allPoolsNonZeroBalances.pools,
             tokenIn,
             tokenOut
         );
 
-        let mostLiquidPoolsFirstHop, mostLiquidPoolsSecondHop, hopTokens;
+        let mostLiquidPoolsFirstHop, mostLiquidPoolsSecondHop;
         [
             mostLiquidPoolsFirstHop,
             mostLiquidPoolsSecondHop,
-            hopTokens,
-        ] = await sor.filterPoolsWithTokensMultihop(
-            allPoolsNonZeroBalances.pools,
+        ] = sor.sortPoolsMostLiquid(
             tokenIn,
-            tokenOut
+            tokenOut,
+            hopTokens,
+            poolsTokenIn,
+            poolsTokenOut
         );
 
         let pools, pathData;
@@ -702,22 +718,23 @@ describe('Test multihop-eps trade using live subgraph', () => {
         );
 
         // const allPoolsNonZeroBalances = await sor.getAllPublicSwapPools(); // Only returns pools with balance
-
-        const directPools = await sor.filterPoolsWithTokensDirect(
+        let poolsTokenIn, poolsTokenOut, directPools, hopTokens;
+        [directPools, hopTokens, poolsTokenIn, poolsTokenOut] = sor.filterPools(
             allPoolsNonZeroBalances.pools,
             tokenIn,
             tokenOut
         );
 
-        let mostLiquidPoolsFirstHop, mostLiquidPoolsSecondHop, hopTokens;
+        let mostLiquidPoolsFirstHop, mostLiquidPoolsSecondHop;
         [
             mostLiquidPoolsFirstHop,
             mostLiquidPoolsSecondHop,
-            hopTokens,
-        ] = await sor.filterPoolsWithTokensMultihop(
-            allPoolsNonZeroBalances.pools,
+        ] = sor.sortPoolsMostLiquid(
             tokenIn,
-            tokenOut
+            tokenOut,
+            hopTokens,
+            poolsTokenIn,
+            poolsTokenOut
         );
 
         let pools, pathData;

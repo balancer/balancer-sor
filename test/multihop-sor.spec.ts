@@ -172,23 +172,27 @@ describe('Tests Multihop SOR vs static allPools.json', () => {
     });
 
     it('Get multihop pools - WETH>DAI', async () => {
-        let mostLiquidPoolsFirstHop, mostLiquidPoolsSecondHop, hopTokens;
+        let poolsTokenIn, poolsTokenOut, directPools, hopTokens;
+        [
+            directPools,
+            hopTokens,
+            poolsTokenIn,
+            poolsTokenOut,
+        ] = sor.filterPools(allPoolsNonZeroBalances.pools, WETH, DAI, {
+            isOverRide: true,
+            disabledTokens: disabledTokens.tokens,
+        });
+
+        let mostLiquidPoolsFirstHop, mostLiquidPoolsSecondHop;
         [
             mostLiquidPoolsFirstHop,
             mostLiquidPoolsSecondHop,
+        ] = sor.sortPoolsMostLiquid(
+            WETH,
+            DAI,
             hopTokens,
-        ] = await sor.filterPoolsWithTokensMultihop(
-            allPoolsNonZeroBalances.pools,
-            WETH,
-            DAI,
-            { isOverRide: true, disabledTokens: disabledTokens.tokens }
-        );
-
-        const directPools = await sor.filterPoolsWithTokensDirect(
-            allPoolsNonZeroBalances.pools,
-            WETH,
-            DAI,
-            { isOverRide: true, disabledTokens: disabledTokens.tokens }
+            poolsTokenIn,
+            poolsTokenOut
         );
 
         let pools, pathData;

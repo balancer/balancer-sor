@@ -24,6 +24,8 @@ export {
     filterPoolsWithTokensDirect,
     filterPoolsWithTokensMultihop,
     formatSubgraphPools,
+    filterPools,
+    sortPoolsMostLiquid,
 } from './helpers';
 export {
     getPoolsWithTokens, // Legacy Function

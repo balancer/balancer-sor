@@ -56,20 +56,25 @@ describe('Test Filter Functions using allPoolsSmall.json & full SOR comparrions'
     });
 
     it('Get multihop pools - DAI>USDC', async () => {
-        console.time('filterPoolsWithTokensMultihop');
-        let mostLiquidPoolsFirstHopFilter,
-            mostLiquidPoolsSecondHopFilter,
-            hopTokensFilter;
+        let poolsTokenIn, poolsTokenOut, directPools, hopTokensFilter;
+        [
+            directPools,
+            hopTokensFilter,
+            poolsTokenIn,
+            poolsTokenOut,
+        ] = sor.filterPools(allPoolsNonZeroBalances.pools, DAI, USDC);
+
+        let mostLiquidPoolsFirstHopFilter, mostLiquidPoolsSecondHopFilter;
         [
             mostLiquidPoolsFirstHopFilter,
             mostLiquidPoolsSecondHopFilter,
-            hopTokensFilter,
-        ] = await sor.filterPoolsWithTokensMultihop(
-            allPoolsNonZeroBalances.pools,
+        ] = sor.sortPoolsMostLiquid(
             DAI,
-            USDC
+            USDC,
+            hopTokensFilter,
+            poolsTokenIn,
+            poolsTokenOut
         );
-        console.timeEnd('filterPoolsWithTokensMultihop');
 
         assert.equal(
             mostLiquidPoolsFirstHopFilter.length,
