@@ -26,6 +26,7 @@ import {
     Price,
     EffectivePrice,
     PoolDictionary,
+    Pool,
 } from './types';
 import { ethers, utils } from 'ethers';
 
@@ -36,20 +37,74 @@ const minAmountOut = 0;
 const maxAmountIn = MAX_UINT;
 const maxPrice = MAX_UINT;
 
-// TODO: build sortedPaths inside forEach loop to avoid having to do an expensive sort() operation
 export function processPaths(
     paths: Path[],
     pools: PoolDictionary,
     swapType: string
 ): Path[] {
+    let poolPairData = {};
     paths.forEach(path => {
-        path.spotPrice = getSpotPricePath(pools, path);
+        let swaps: Swap[] = path.swaps;
+        // Get and store PoolPairData for swaps in path as these are used across all following get functions
+        if (swaps.length == 1) {
+            let swap1: Swap = swaps[0];
+
+            let id = `${swap1.pool}${swap1.tokenIn}${swap1.tokenOut}`;
+
+            if (poolPairData[id] === undefined) {
+                let poolSwap1: Pool = pools[swap1.pool];
+                let poolPairDataSwap1: PoolPairData = parsePoolPairData(
+                    poolSwap1,
+                    swap1.tokenIn,
+                    swap1.tokenOut
+                );
+
+                let sp = getSpotPrice(poolPairDataSwap1);
+                poolPairData[id] = { poolPairData: poolPairDataSwap1, sp: sp };
+            }
+        } else if (swaps.length == 2) {
+            let swap1: Swap = swaps[0];
+            let id = `${swap1.pool}${swap1.tokenIn}${swap1.tokenOut}`;
+            if (poolPairData[id] === undefined) {
+                let poolSwap1: Pool = pools[swap1.pool];
+                let poolPairDataSwap1: PoolPairData = parsePoolPairData(
+                    poolSwap1,
+                    swap1.tokenIn,
+                    swap1.tokenOut
+                );
+
+                let sp = getSpotPrice(poolPairDataSwap1);
+                poolPairData[id] = { poolPairData: poolPairDataSwap1, sp: sp };
+            }
+
+            let swap2: Swap = swaps[1];
+            id = `${swap2.pool}${swap2.tokenIn}${swap2.tokenOut}`;
+            if (poolPairData[id] === undefined) {
+                let poolSwap2: Pool = pools[swap2.pool];
+                let poolPairDataSwap2: PoolPairData = parsePoolPairData(
+                    poolSwap2,
+                    swap2.tokenIn,
+                    swap2.tokenOut
+                );
+
+                let sp = getSpotPrice(poolPairDataSwap2);
+                poolPairData[id] = { poolPairData: poolPairDataSwap2, sp: sp };
+            }
+        }
+
+        path.spotPrice = getSpotPricePath(pools, path, poolPairData);
         path.slippage = getSlippageLinearizedSpotPriceAfterSwapPath(
             pools,
             path,
-            swapType
+            swapType,
+            poolPairData
         );
-        path.limitAmount = getLimitAmountSwapPath(pools, path, swapType);
+        path.limitAmount = getLimitAmountSwapPath(
+            pools,
+            path,
+            swapType,
+            poolPairData
+        );
     });
 
     let sortedPaths = paths.sort((a, b) => {
