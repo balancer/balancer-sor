@@ -464,40 +464,6 @@ export const parsePoolData = (
         pools[mostLiquidPoolsFirstHop[i].id] = mostLiquidPoolsFirstHop[i];
         pools[mostLiquidPoolsSecondHop[i].id] = mostLiquidPoolsSecondHop[i];
 
-        // // Only add path if the balances are both not zero for first and second hops
-        // console.log("poolFirstHop")
-        // console.log(poolFirstHop)
-        // console.log("poolSecondHop")
-        // console.log(poolSecondHop)
-        // console.log("tokenIn")
-        // console.log(tokenIn)
-        // console.log("hopTokens[i]")
-        // console.log(hopTokens[i])
-        // console.log("tokenOut")
-        // console.log(tokenOut)
-
-        // TODO remove since this is already being checked in the previous filters
-        let poolFirstHopBalanceIn = mostLiquidPoolsFirstHop[i].tokens.find(
-            t =>
-                ethers.utils.getAddress(t.address) ===
-                ethers.utils.getAddress(tokenIn)
-        ).balance;
-        let poolFirstHopBalanceOut = mostLiquidPoolsFirstHop[i].tokens.find(
-            t =>
-                ethers.utils.getAddress(t.address) ===
-                ethers.utils.getAddress(hopTokens[i])
-        ).balance;
-        let poolSecondHopBalanceIn = mostLiquidPoolsSecondHop[i].tokens.find(
-            t =>
-                ethers.utils.getAddress(t.address) ===
-                ethers.utils.getAddress(hopTokens[i])
-        ).balance;
-        let poolSecondHopBalanceOut = mostLiquidPoolsSecondHop[i].tokens.find(
-            t =>
-                ethers.utils.getAddress(t.address) ===
-                ethers.utils.getAddress(tokenOut)
-        ).balance;
-
         let swap1: Swap = {
             pool: mostLiquidPoolsFirstHop[i].id,
             tokenIn: tokenIn,
