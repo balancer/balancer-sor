@@ -31,7 +31,7 @@ There are two types of swap available:
 or  
 **swapExactOut** - i.e. You want to receive exactly 1 BAL and SOR will calculate X amount of ETH you must input.
 
-The SOR will return totalReturn/totalInput as well as a list swaps to achieve the total. The swaps can be executed directly on-chain or with something like the [ExchangeProxy](ADD LINK).
+The SOR will return totalReturn/totalInput as well as a list swaps to achieve the total. Swaps can be through direct pools, i.e. A > POOL1 > B, or via a multihop pool, i.e. A > POOL1 > C > POOL2 > B. The swaps can be executed directly on-chain or with something like the [ExchangeProxy](https://github.com/balancer-labs/balancer-registry/blob/master/contracts/ExchangeProxy.sol).
 
 Example Output:
 
