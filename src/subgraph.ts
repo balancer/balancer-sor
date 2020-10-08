@@ -1,12 +1,14 @@
 import fetch from 'isomorphic-fetch';
 import { getAddress } from '@ethersproject/address';
 import * as bmath from './bmath';
-import { Pool } from './types';
+import { PoolPairData, Path } from './types';
+import { BigNumber } from './utils/bignumber';
 
 const SUBGRAPH_URL =
     process.env.REACT_APP_SUBGRAPH_URL ||
     'https://api.thegraph.com/subgraphs/name/balancer-labs/balancer';
 
+// LEGACY FUNCTION - Keep Input/Output Format
 export async function getPoolsWithTokens(tokenIn, tokenOut) {
     // GraphQL is case-sensitive
     // Always use checksum addresses
@@ -15,7 +17,7 @@ export async function getPoolsWithTokens(tokenIn, tokenOut) {
 
     const query = `
       query ($tokens: [Bytes!]) {
-          pools (first: 1000, where: {tokensList_contains: $tokens, publicSwap: true}) {
+          pools (first: 1000, where: {tokensList_contains: $tokens, publicSwap: true, active: true}) {
             id
             publicSwap
             swapFee
@@ -53,50 +55,7 @@ export async function getPoolsWithTokens(tokenIn, tokenOut) {
     return data;
 }
 
-export const parsePoolData = (
-    pools,
-    tokenIn: string,
-    tokenOut: string
-): Pool[] => {
-    if (pools.length === 0)
-        throw Error('There are no pools with selected tokens');
-
-    let poolData: Pool[] = [];
-    pools.forEach(p => {
-        let tI = p.tokens.find(
-            t => getAddress(t.address) === getAddress(tokenIn)
-        );
-        let tO = p.tokens.find(
-            t => getAddress(t.address) === getAddress(tokenOut)
-        );
-        let obj = {
-            id: p.id,
-            decimalsIn: tI.decimals,
-            decimalsOut: tO.decimals,
-            balanceIn: bmath.scale(bmath.bnum(tI.balance), tI.decimals),
-            balanceOut: bmath.scale(bmath.bnum(tO.balance), tO.decimals),
-            weightIn: bmath.scale(
-                bmath.bnum(tI.denormWeight).div(bmath.bnum(p.totalWeight)),
-                18
-            ),
-            weightOut: bmath.scale(
-                bmath.bnum(tO.denormWeight).div(bmath.bnum(p.totalWeight)),
-                18
-            ),
-            swapFee: bmath.scale(bmath.bnum(p.swapFee), 18),
-        };
-
-        if (
-            obj.balanceIn.gt(bmath.bnum(0)) &&
-            obj.balanceOut.gt(bmath.bnum(0))
-        ) {
-            poolData.push(obj);
-        }
-    });
-
-    return poolData;
-};
-
+// LEGACY FUNCTION - Keep Input/Output Format
 export async function getTokenPairs(token) {
     // GraphQL is case-sensitive
     // Always use checksum addresses
@@ -104,7 +63,7 @@ export async function getTokenPairs(token) {
 
     const query = `
       query ($token: [Bytes!]) {
-          pools (first: 1000, where: {tokensList_contains: $token, publicSwap: true}) {
+          pools (first: 1000, where: {tokensList_contains: $token, publicSwap: true, active: true}) {
             tokensList
           }
         }
@@ -123,6 +82,43 @@ export async function getTokenPairs(token) {
         body: JSON.stringify({
             query,
             variables,
+        }),
+    });
+
+    const { data } = await response.json();
+    return data;
+}
+
+// Returns all public pools
+export async function getAllPublicSwapPools() {
+    const query = `
+      {
+          pools (first: 1000, where: {publicSwap: true, active: true}) {
+            id
+            swapFee
+            totalWeight
+            publicSwap
+            tokens {
+              id
+              address
+              balance
+              decimals
+              symbol
+              denormWeight
+            }
+            tokensList
+          }
+      }
+    `;
+
+    const response = await fetch(SUBGRAPH_URL, {
+        method: 'POST',
+        headers: {
+            Accept: 'application/json',
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            query,
         }),
     });
 

@@ -1,10 +1,10 @@
 import { expect, assert } from 'chai';
 import 'mocha';
-import { Pool } from '../src/types';
-import { smartOrderRouter } from '../src/sor';
+import { Pool } from '../src/direct/types';
+import { smartOrderRouter } from '../src';
 import { BigNumber } from '../src/utils/bignumber';
 import { BONE } from '../src/bmath';
-import { getSpotPrice } from '../src/helpers';
+import { getSpotPrice } from '../src/direct/helpers';
 import balancersJson from './multi-pools.json';
 
 const errorDelta = 10 ** -8;
@@ -37,9 +37,9 @@ function loadMultiPools(): Pool[] {
 
 describe('Multi-Pool Tests', () => {
     it('should test multi pool SOR', () => {
-        var balancers = loadMultiPools();
-        var amountIn = new BigNumber(0.7).times(BONE);
-        var swaps = smartOrderRouter(
+        const balancers = loadMultiPools();
+        const amountIn = new BigNumber(0.7).times(BONE);
+        const swaps = smartOrderRouter(
             balancers,
             'swapExactIn',
             amountIn,
@@ -54,11 +54,11 @@ describe('Multi-Pool Tests', () => {
         assert.equal(swaps[3].pool, '5', 'Fourth pool.');
 
         // Taken form python-SOR, SOR_method_comparison.py
-        var expectedSwap1 = new BigNumber(0.4047892856401362).times(BONE);
-        var relDif = calcRelativeDiff(expectedSwap1, swaps[0].amount);
+        let expectedSwap1 = new BigNumber(0.4047892856401362).times(BONE);
+        let relDif = calcRelativeDiff(expectedSwap1, swaps[0].amount);
         assert.isAtMost(relDif.toNumber(), errorDelta, 'First swap incorrect.');
 
-        var expectedSwap1 = new BigNumber(0.18627809162495904).times(BONE);
+        expectedSwap1 = new BigNumber(0.18627809162495904).times(BONE);
         relDif = calcRelativeDiff(expectedSwap1, swaps[1].amount);
         assert.isAtMost(
             relDif.toNumber(),
@@ -66,11 +66,11 @@ describe('Multi-Pool Tests', () => {
             'Second swap incorrect.'
         );
 
-        var expectedSwap1 = new BigNumber(0.09598365577328219).times(BONE);
+        expectedSwap1 = new BigNumber(0.09598365577328219).times(BONE);
         relDif = calcRelativeDiff(expectedSwap1, swaps[2].amount);
         assert.isAtMost(relDif.toNumber(), errorDelta, 'Third swap incorrect.');
 
-        var expectedSwap1 = new BigNumber(0.012948966961622496).times(BONE);
+        expectedSwap1 = new BigNumber(0.012948966961622496).times(BONE);
         relDif = calcRelativeDiff(expectedSwap1, swaps[3].amount);
         assert.isAtMost(
             relDif.toNumber(),
