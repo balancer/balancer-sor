@@ -1,7 +1,6 @@
-// Example showing full swapExactIn - run using: $ ts-node ./test/testScripts/example-swapExactIn.ts
+// Example showing full swapExactIn with Subgraph data & onchain check - run using: $ ts-node ./test/testScripts/example-swapExactInWithCheck.ts
 require('dotenv').config();
 const sor = require('../../src');
-// const BigNumber = require('bignumber.js');
 import { BigNumber } from '../../src/utils/bignumber';
 import { BONE, bnum, calcOutGivenIn, calcInGivenOut } from '../../src/bmath';
 import { JsonRpcProvider } from '@ethersproject/providers';
@@ -33,8 +32,6 @@ async function swapExactIn() {
     // Uses the Subgraph to retrieve all public Balancer pools that have a positive token balance.
     console.log(`Retrieving SubGraph Pools...`);
     let subGraphPools = await sor.getAllPublicSwapPools();
-
-    console.time(`total`);
 
     // Format pools into wei format. Use copy of original Subgraph pools as its used later for on-chain check.
     let allPoolsNonZeroBalances = JSON.parse(JSON.stringify(subGraphPools));
@@ -126,8 +123,6 @@ async function swapExactIn() {
     console.log(`Total DAI Return (Onchain): ${totalReturnEth.toString()}`);
     console.log(`Swaps (Onchain): `);
     console.log(swaps);
-
-    console.timeEnd(`total`);
 }
 
 swapExactIn();
