@@ -2,7 +2,14 @@ import * as sor from '../src';
 import { BigNumber } from '../src/utils/bignumber';
 import { PoolPairData, Swap, SubGraphPools, DisabledToken } from '../src/types';
 import { parsePoolPairData } from '../src/helpers';
-import { calcOutGivenIn, calcInGivenOut, bnum } from '../src/bmath';
+import {
+    calcOutGivenIn,
+    calcInGivenOut,
+    bnum,
+    scale,
+    bmul,
+    BONE,
+} from '../src/bmath';
 import { expect, assert } from 'chai';
 import { ethers } from 'ethers';
 
@@ -52,7 +59,7 @@ export function getAmountIn(
     return amtOut;
 }
 
-export function checkSwapsExactIn(
+export function testSwapsExactIn(
     swaps: Swap[][],
     tokenIn: string,
     tokenOut: string,
@@ -109,7 +116,7 @@ export function checkSwapsExactIn(
     assert.equal(totalOut.toString(), totalAmtOut.toString());
 }
 
-export function checkSwapsExactOut(
+export function testSwapsExactOut(
     swaps: Swap[][],
     tokenIn: string,
     tokenOut: string,
@@ -305,4 +312,24 @@ export function fullSwap(
     );
 
     return [swaps, total];
+}
+
+export function alterPools(allPools: any) {
+    for (let pool of allPools.pools) {
+        if (pool.tokens.length != 0) {
+            pool.tokens.forEach(token => {
+                // let change = Math.random() * (1.4 - 0.6) + 0.6;
+                let change = Math.random() * (1.1 - 0.9) + 0.9;
+                // change = 1.0001;
+                let changeBn = scale(bnum(change), 18);
+                // let change = bnum(1100000000000000000) // 1.1
+                let balanceBn = scale(bnum(token.balance), token.decimals);
+                let newBalanceBn = bmul(balanceBn, changeBn);
+                newBalanceBn = scale(newBalanceBn, -token.decimals);
+                token.balance = newBalanceBn.toString();
+            });
+        }
+    }
+
+    return allPools;
 }

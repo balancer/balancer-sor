@@ -8,6 +8,7 @@ import {
     Swap,
     DisabledOptions,
     DisabledToken,
+    SubGraphPools,
 } from './types';
 import {
     BONE,
@@ -910,4 +911,187 @@ export function sortPoolsMostLiquid(
     }
 
     return [mostLiquidPoolsFirstHop, mostLiquidPoolsSecondHop];
+}
+
+export function checkSwapsExactIn(
+    swaps: Swap[][],
+    tokenIn: string,
+    tokenOut: string,
+    amountIn: BigNumber,
+    totalAmtOut: BigNumber,
+    allPoolsNonZeroBalances
+): [Swap[][], BigNumber] {
+    let totalOut = bnum(0);
+
+    for (let i = 0; i < swaps.length; i++) {
+        if (swaps[i].length === 1) {
+            let amtOutFirstSequence = calcOutGivenInForPool(
+                allPoolsNonZeroBalances,
+                swaps[i][0].pool,
+                swaps[i][0].tokenIn,
+                swaps[i][0].tokenOut,
+                bnum(swaps[i][0].swapAmount)
+            );
+            totalOut = totalOut.plus(amtOutFirstSequence);
+        } else {
+            let amtOutFirstSequence = calcOutGivenInForPool(
+                allPoolsNonZeroBalances,
+                swaps[i][0].pool,
+                swaps[i][0].tokenIn,
+                swaps[i][0].tokenOut,
+                bnum(swaps[i][0].swapAmount)
+            );
+
+            if (!amtOutFirstSequence.eq(bnum(swaps[i][1].swapAmount))) {
+                swaps[i][1].swapAmount = amtOutFirstSequence.toString();
+            }
+
+            let amtOutSecondSequence = calcOutGivenInForPool(
+                allPoolsNonZeroBalances,
+                swaps[i][1].pool,
+                swaps[i][1].tokenIn,
+                swaps[i][1].tokenOut,
+                bnum(swaps[i][1].swapAmount)
+            );
+            totalOut = totalOut.plus(amtOutSecondSequence);
+        }
+    }
+
+    if (!totalOut.eq(totalAmtOut)) {
+        return [swaps, totalOut];
+    }
+
+    return [swaps, totalAmtOut];
+}
+
+function calcOutGivenInForPool(
+    Pools,
+    PoolAddr: string,
+    TokenIn: string,
+    TokenOut: string,
+    AmtIn
+) {
+    const swapPool = Pools.pools.find(p => p.id === PoolAddr);
+
+    let pool: PoolPairData = parsePoolPairData(swapPool, TokenIn, TokenOut);
+
+    const amtOut = calcOutGivenIn(
+        pool.balanceIn,
+        pool.weightIn,
+        pool.balanceOut,
+        pool.weightOut,
+        AmtIn,
+        pool.swapFee
+    );
+
+    return amtOut;
+}
+
+export function checkSwapsExactOut(
+    swaps: Swap[][],
+    tokenIn: string,
+    tokenOut: string,
+    amountOut: BigNumber,
+    totalAmtIn: BigNumber,
+    allPoolsNonZeroBalances
+): [Swap[][], BigNumber] {
+    let totalOut = bnum(0);
+    let totalIn = bnum(0);
+
+    for (let i = 0; i < swaps.length; i++) {
+        if (swaps[i].length === 1) {
+            totalOut = totalOut.plus(swaps[i][0].swapAmount);
+            let amtInFirstSequence = calcInGivenOutForPool(
+                allPoolsNonZeroBalances,
+                swaps[i][0].pool,
+                swaps[i][0].tokenIn,
+                swaps[i][0].tokenOut,
+                bnum(swaps[i][0].swapAmount)
+            );
+            totalIn = totalIn.plus(amtInFirstSequence);
+        } else {
+            let amtInSecondSequence = calcInGivenOutForPool(
+                allPoolsNonZeroBalances,
+                swaps[i][1].pool,
+                swaps[i][1].tokenIn,
+                swaps[i][1].tokenOut,
+                swaps[i][1].swapAmount
+            );
+
+            // Amount out of first swap which is input to second swap
+            if (!amtInSecondSequence.eq(bnum(swaps[i][0].swapAmount))) {
+                swaps[i][0].swapAmount = amtInSecondSequence.toString();
+            }
+
+            totalOut = totalOut.plus(swaps[i][1].swapAmount);
+
+            let amtInFirstSequence = calcInGivenOutForPool(
+                allPoolsNonZeroBalances,
+                swaps[i][0].pool,
+                swaps[i][0].tokenIn,
+                swaps[i][0].tokenOut,
+                bnum(swaps[i][0].swapAmount)
+            ); // Swap amount is amount out
+
+            totalIn = totalIn.plus(amtInFirstSequence);
+        }
+    }
+
+    if (!totalOut.eq(amountOut)) {
+        console.log(
+            `Error With Amount Out During Correction - Defaulting To No Swaps`
+        );
+        swaps = [];
+        return [swaps, bnum(0)];
+    }
+
+    if (!totalIn.eq(totalAmtIn)) {
+        return [swaps, totalIn];
+    }
+
+    return [swaps, totalAmtIn];
+}
+
+export function calcInGivenOutForPool(
+    Pools,
+    PoolAddr: string,
+    TokenIn: string,
+    TokenOut: string,
+    AmtIn
+) {
+    const swapPool = Pools.pools.find(p => p.id === PoolAddr);
+
+    let pool: PoolPairData = parsePoolPairData(swapPool, TokenIn, TokenOut);
+
+    const amtOut = calcInGivenOut(
+        pool.balanceIn,
+        pool.weightIn,
+        pool.balanceOut,
+        pool.weightOut,
+        AmtIn,
+        pool.swapFee
+    );
+
+    return amtOut;
+}
+
+export function getPoolsFromSwaps(
+    Swaps: Swap[][],
+    subGraphPools: SubGraphPools
+): SubGraphPools {
+    let pools: SubGraphPools = { pools: [] };
+
+    Swaps.forEach(swapSeq => {
+        if (swapSeq.length === 1) {
+            let pool = subGraphPools.pools.find(p => p.id === swapSeq[0].pool);
+            pools.pools.push(pool);
+        } else {
+            let pool = subGraphPools.pools.find(p => p.id === swapSeq[0].pool);
+            pools.pools.push(pool);
+            pool = subGraphPools.pools.find(p => p.id === swapSeq[1].pool);
+            pools.pools.push(pool);
+        }
+    });
+
+    return pools;
 }

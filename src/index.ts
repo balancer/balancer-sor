@@ -26,6 +26,9 @@ export {
     formatSubgraphPools,
     filterPools,
     sortPoolsMostLiquid,
+    checkSwapsExactIn,
+    checkSwapsExactOut,
+    getPoolsFromSwaps,
 } from './helpers';
 export {
     getPoolsWithTokens, // Legacy Function
