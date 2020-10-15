@@ -39,3 +39,4 @@ export { parsePoolDataOnChain, getAllPoolDataOnChain } from './multicall'; // Le
 import * as bmath from './bmath';
 export { bmath };
 export { getCostOutputToken } from './costToken';
+export { SOR } from './wrapper';
