@@ -15,12 +15,14 @@ export class SOR {
     gasPrice: BigNumber;
     // avg Balancer swap cost. Can be updated manually if required.
     swapCost: BigNumber = new BigNumber('100000');
+    tokenCost;
 
     constructor(Provider: JsonRpcProvider, GasPrice: BigNumber) {
         this.isSubgraphFetched = false;
         this.isOnChainFetched = false;
         this.provider = Provider;
         this.gasPrice = GasPrice;
+        this.tokenCost = {};
     }
 
     async fetchSubgraphPools() {
@@ -54,6 +56,24 @@ export class SOR {
         this.isOnChainFetched = true;
     }
 
+    async setCostOutputToken(TokenOut: string, Cost: BigNumber = null) {
+        TokenOut = TokenOut.toLowerCase();
+
+        if (Cost === null) {
+            // This calculates the cost to make a swap which is used as an input to SOR to allow it to make gas efficient recommendations
+            const costOutputToken = await sor.getCostOutputToken(
+                TokenOut,
+                this.gasPrice,
+                this.swapCost,
+                this.provider
+            );
+
+            this.tokenCost[TokenOut] = costOutputToken;
+        } else {
+            this.tokenCost[TokenOut] = Cost;
+        }
+    }
+
     async getSwaps(
         TokenIn: string,
         TokenOut: string,
@@ -76,13 +96,10 @@ export class SOR {
         TokenIn = TokenIn.toLowerCase();
         TokenOut = TokenOut.toLowerCase();
 
-        // This calculates the cost to make a swap which is used as an input to SOR to allow it to make gas efficient recommendations
-        const costOutputToken = await sor.getCostOutputToken(
-            TokenOut,
-            this.gasPrice,
-            this.swapCost,
-            this.provider
-        );
+        let costOutputToken = this.tokenCost[TokenOut];
+        if (costOutputToken === undefined) {
+            costOutputToken = new BigNumber(0);
+        }
 
         // Retrieves all pools that contain both tokenIn & tokenOut, i.e. pools that can be used for direct swaps
         // Retrieves intermediate pools along with tokens that are contained in these.

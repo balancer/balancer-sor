@@ -31,6 +31,11 @@ async function simpleSwap() {
     let amountIn = new BigNumber('1000000'); // 1 USDC, Always pay attention to Token Decimals. i.e. In this case USDC has 6 decimals.
     const maxNoPools = 4; // This determines the max no of pools the SOR will use to swap.
 
+    // This calculates the cost to make a swap which is used as an input to SOR to allow it to make gas efficient recommendations.
+    // Can be set once and will be used for further swap calculations.
+    // Defaults to 0 if not called or can be set manually using: await SOR.setCostOutputToken(tokenOut, manualPriceBn)
+    await SOR.setCostOutputToken(tokenOut);
+
     // If getSwaps is called after fetchSubgraphPools() but before fetchOnChainPools() then Subgraph balances are used.
     // These can potentially be innacurate. By default getSwaps will do a final check of swaps using on-chain info.
     let [swaps, amountOut] = await SOR.getSwaps(
