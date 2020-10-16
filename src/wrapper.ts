@@ -158,7 +158,7 @@ export class SOR {
         );
 
         // Perform onChain check of swaps if using Subgraph balances
-        if (!this.isOnChainFetched && CheckOnChain) {
+        if (!this.isOnChainFetched && CheckOnChain && swaps.length > 0) {
             // Gets pools used in swaps
             let poolsToCheck: SubGraphPools = sor.getPoolsFromSwaps(
                 swaps,
