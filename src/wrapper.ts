@@ -43,7 +43,7 @@ export class SOR {
         this.isSubgraphFetched = true;
     }
 
-    async fetchOnChainPools() {
+    async fetchOnChainPools(MulticallAddr: string = '') {
         this.isOnChainFetched = false;
 
         if (!this.isSubgraphFetched) {
@@ -55,9 +55,12 @@ export class SOR {
 
         this.onChainPools = await sor.getAllPoolDataOnChain(
             this.subgraphPools,
-            this.multicallAddress,
+            MulticallAddr === '' ? this.multicallAddress : MulticallAddr,
             this.provider
         );
+
+        // Error with multicall
+        if (!this.onChainPools) return;
 
         this.isOnChainFetched = true;
     }
