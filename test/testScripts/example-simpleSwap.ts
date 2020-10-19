@@ -17,8 +17,10 @@ async function simpleSwap() {
     // i.e. higher cost means more costly to trade against lots of different pools.
     // Can be changed in future using SOR.gasPrice = newPrice
     const gasPrice = new BigNumber('30000000000');
+    // This determines the max no of pools the SOR will use to swap.
+    const maxNoPools = 4;
 
-    const SOR = new sor.SOR(provider, gasPrice);
+    const SOR = new sor.SOR(provider, gasPrice, maxNoPools);
 
     console.log(`Fetching Subgraph...`);
     // SOR must have a list of available pools. This function fetches from Subgraph.
@@ -29,7 +31,6 @@ async function simpleSwap() {
     const tokenOut = DAI;
     const swapType = 'swapExactIn'; // Two different swap types are used: swapExactIn & swapExactOut
     let amountIn = new BigNumber('1000000'); // 1 USDC, Always pay attention to Token Decimals. i.e. In this case USDC has 6 decimals.
-    const maxNoPools = 4; // This determines the max no of pools the SOR will use to swap.
 
     // This calculates the cost to make a swap which is used as an input to SOR to allow it to make gas efficient recommendations.
     // Can be set once and will be used for further swap calculations.
@@ -42,8 +43,7 @@ async function simpleSwap() {
         tokenIn,
         tokenOut,
         swapType,
-        amountIn,
-        maxNoPools
+        amountIn
     );
     console.log(`Total DAI Return: ${amountOut.toString()}`);
     console.log(`Swaps: `);
@@ -55,7 +55,6 @@ async function simpleSwap() {
         tokenOut,
         'swapExactOut',
         amountOut,
-        maxNoPools,
         false
     );
     console.log(`Total USDC In: ${amountIn.toString()}`);
@@ -72,8 +71,7 @@ async function simpleSwap() {
         tokenIn,
         tokenOut,
         swapType,
-        amountIn,
-        maxNoPools
+        amountIn
     );
     console.log(`Total DAI Return: ${amountOut.toString()}`);
     console.log(`Swaps: `);
@@ -88,8 +86,7 @@ async function simpleSwap() {
         tokenIn,
         tokenOut,
         swapType,
-        amountIn,
-        maxNoPools
+        amountIn
     );
     console.log(`Total DAI Return: ${amountOut.toString()}`);
     console.log(`Swaps: `);
