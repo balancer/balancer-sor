@@ -43,8 +43,7 @@ async function simpleSwap() {
         tokenIn,
         tokenOut,
         swapType,
-        amountIn,
-        maxNoPools
+        amountIn
     );
     console.log(`Total DAI Return: ${amountOut.toString()}`);
     console.log(`Swaps: `);
@@ -56,7 +55,6 @@ async function simpleSwap() {
         tokenOut,
         'swapExactOut',
         amountOut,
-        maxNoPools,
         false
     );
     console.log(`Total USDC In: ${amountIn.toString()}`);
@@ -88,8 +86,7 @@ async function simpleSwap() {
         tokenIn,
         tokenOut,
         swapType,
-        amountIn,
-        maxNoPools
+        amountIn
     );
     console.log(`Total DAI Return: ${amountOut.toString()}`);
     console.log(`Swaps: `);

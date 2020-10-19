@@ -111,8 +111,6 @@ export async function getAllPublicSwapPools(SubgraphUrl: string = '') {
       }
     `;
 
-    console.log(`Using: ${SubgraphUrl === '' ? SUBGRAPH_URL : SubgraphUrl}`);
-
     const response = await fetch(
         SubgraphUrl === '' ? SUBGRAPH_URL : SubgraphUrl,
         {

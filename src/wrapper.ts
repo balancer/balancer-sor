@@ -1,6 +1,6 @@
 import { JsonRpcProvider } from '@ethersproject/providers';
 import { BigNumber } from './utils/bignumber';
-import { SubGraphPools } from './types';
+import { SubGraphPools, Swap } from './types';
 import _ from 'lodash';
 const sor = require('./index');
 
@@ -11,7 +11,8 @@ export class SOR {
     subgraphPoolsFormatted;
     onChainPools;
     provider: JsonRpcProvider;
-    multicallAddress: String = '0xeefba1e63905ef1d7acba5a8513c70307c1ce441';
+    // Default multi address for mainnet
+    multicallAddress: string = '0xeefba1e63905ef1d7acba5a8513c70307c1ce441';
     gasPrice: BigNumber;
     // avg Balancer swap cost. Can be updated manually if required.
     swapCost: BigNumber = new BigNumber('100000');
@@ -83,13 +84,61 @@ export class SOR {
         }
     }
 
+    async onChainCheck(
+        Swaps: Swap[][],
+        Total: BigNumber,
+        SwapType: string,
+        TokenIn: string,
+        TokenOut: string,
+        SwapAmt: BigNumber,
+        MulticallAddr: string
+    ): Promise<[Swap[][], BigNumber]> {
+        // Gets pools used in swaps
+        let poolsToCheck: SubGraphPools = sor.getPoolsFromSwaps(
+            Swaps,
+            this.subgraphPools
+        );
+
+        // Get onchain info for swap pools
+        let onChainPools = await sor.getAllPoolDataOnChain(
+            poolsToCheck,
+            MulticallAddr === '' ? this.multicallAddress : MulticallAddr,
+            this.provider
+        );
+
+        // Checks Subgraph swaps against Onchain pools info.
+        // Will update any invalid swaps for valid.
+        if (SwapType === 'swapExactIn')
+            [Swaps, Total] = sor.checkSwapsExactIn(
+                Swaps,
+                TokenIn,
+                TokenOut,
+                SwapAmt,
+                Total,
+                onChainPools
+            );
+        else
+            [Swaps, Total] = sor.checkSwapsExactOut(
+                Swaps,
+                TokenIn,
+                TokenOut,
+                SwapAmt,
+                Total,
+                onChainPools
+            );
+
+        return [Swaps, Total];
+    }
+
     async getSwaps(
         TokenIn: string,
         TokenOut: string,
         SwapType: string,
         SwapAmt: BigNumber,
-        CheckOnChain: boolean = true
-    ) {
+        CheckOnChain: boolean = true,
+        MulticallAddr: string = ''
+    ): Promise<[Swap[][], BigNumber]> {
+        console.time('getSwaps');
         if (!this.isSubgraphFetched) {
             console.error('ERROR: Must fetch pools before getting a swap.');
             return;
@@ -167,40 +216,18 @@ export class SOR {
 
         // Perform onChain check of swaps if using Subgraph balances
         if (!this.isOnChainFetched && CheckOnChain && swaps.length > 0) {
-            // Gets pools used in swaps
-            let poolsToCheck: SubGraphPools = sor.getPoolsFromSwaps(
+            [swaps, total] = await this.onChainCheck(
                 swaps,
-                this.subgraphPools
+                total,
+                SwapType,
+                TokenIn,
+                TokenOut,
+                SwapAmt,
+                MulticallAddr === '' ? this.multicallAddress : MulticallAddr
             );
-
-            // Get onchain info for swap pools
-            let onChainPools = await sor.getAllPoolDataOnChain(
-                poolsToCheck,
-                this.multicallAddress,
-                this.provider
-            );
-
-            // Checks Subgraph swaps against Onchain pools info.
-            // Will update any invalid swaps for valid.
-            if (SwapType === 'swapExactIn')
-                [swaps, total] = sor.checkSwapsExactIn(
-                    swaps,
-                    TokenIn,
-                    TokenOut,
-                    SwapAmt,
-                    total,
-                    onChainPools
-                );
-            else
-                [swaps, total] = sor.checkSwapsExactOut(
-                    swaps,
-                    TokenIn,
-                    TokenOut,
-                    SwapAmt,
-                    total,
-                    onChainPools
-                );
         }
+
+        console.timeEnd('getSwaps');
 
         return [swaps, total];
     }
