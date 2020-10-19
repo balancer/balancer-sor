@@ -50,6 +50,11 @@ export class SOR {
         this.processedCache = {};
     }
 
+    /*
+    Fetch all public & active pools from Subgraph.
+    Will clear cached onChain pools and processed paths if new pools are different from cached.
+    SubgraphUrl can be passed to override default set in .env.
+    */
     async fetchSubgraphPools(SubgraphUrl: string = '') {
         this.isSubgraphFetched = false;
         let previous = _.cloneDeep(this.subgraphPools);
@@ -63,6 +68,11 @@ export class SOR {
         this.isSubgraphFetched = true;
     }
 
+    /*
+    Uses multicall contact to fetch all onchain balances, weights and fees for cached Subgraph pools.
+    Will clear cached processed paths if new pools are different from cached.
+    MulticallAddr can be passed to override default mainnet multicall address.
+    */
     async fetchOnChainPools(MulticallAddr: string = '') {
         this.isOnChainFetched = false;
 
@@ -92,6 +102,9 @@ export class SOR {
         this.isOnChainFetched = true;
     }
 
+    /*
+    Find and cache cost of token.
+    */
     async setCostOutputToken(TokenOut: string, Cost: BigNumber = null) {
         TokenOut = TokenOut.toLowerCase();
 
@@ -110,6 +123,11 @@ export class SOR {
         }
     }
 
+    /*
+    Checks a swap list against latest onchain pool info.
+    Will update any invalid swaps.
+    Normally used when using Subgraph balances only.
+    */
     async onChainCheck(
         Swaps: Swap[][],
         Total: BigNumber,
@@ -132,7 +150,7 @@ export class SOR {
             this.provider
         );
 
-        // Checks Subgraph swaps against Onchain pools info.
+        // Checks swaps against Onchain pools info.
         // Will update any invalid swaps for valid.
         if (SwapType === 'swapExactIn')
             [Swaps, Total] = sor.checkSwapsExactIn(
@@ -156,6 +174,12 @@ export class SOR {
         return [Swaps, Total];
     }
 
+    /*
+    Main function to retrieve swap information.
+    Will always use onChain pools if available over Subgraph pools.
+    If using Subgraph pools by default swaps are checked using data retrieved from onChain.
+    Can be overridden with CheckOnChain.
+    */
     async getSwaps(
         TokenIn: string,
         TokenOut: string,
@@ -179,11 +203,17 @@ export class SOR {
             costOutputToken = new BigNumber(0);
         }
 
-        let pools, paths, epsOfInterest;
+        let pools: PoolDictionary,
+            paths: Path[],
+            epsOfInterest: EffectivePrice[];
+        // If token pair has been processed before use that info to speed up execution
         let cache = this.processedCache[`${TokenIn}${TokenOut}${SwapType}`];
 
         if (!cache) {
-            // Some function alter pools list directly but we want to keep original so make a copy to work from
+            // If not previously cached we must process all paths/prices.
+
+            // Always use onChain info if available
+            // Some functions alter pools list directly but we want to keep original so make a copy to work from
             let poolsList;
             if (this.isOnChainFetched)
                 poolsList = _.cloneDeep(this.onChainPools);
@@ -248,7 +278,7 @@ export class SOR {
         // swapExactOut - total = total amount of TokenIn required for swap
         let swaps, total;
         [swaps, total] = sor.smartOrderRouterMultiHopEpsOfInterest(
-            _.cloneDeep(pools),
+            _.cloneDeep(pools), // Need to keep original pools for cache
             paths,
             SwapType,
             SwapAmt,
