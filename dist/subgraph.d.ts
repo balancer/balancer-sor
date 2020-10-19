@@ -3,4 +3,6 @@ export declare function getPoolsWithTokens(
     tokenOut: any
 ): Promise<any>;
 export declare function getTokenPairs(token: any): Promise<any>;
-export declare function getAllPublicSwapPools(): Promise<any>;
+export declare function getAllPublicSwapPools(
+    SubgraphUrl?: string
+): Promise<any>;

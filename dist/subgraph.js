@@ -123,7 +123,7 @@ function getTokenPairs(token) {
 }
 exports.getTokenPairs = getTokenPairs;
 // Returns all public pools
-function getAllPublicSwapPools() {
+function getAllPublicSwapPools(SubgraphUrl = '') {
     return __awaiter(this, void 0, void 0, function*() {
         const query = `
       {
@@ -144,16 +144,19 @@ function getAllPublicSwapPools() {
           }
       }
     `;
-        const response = yield isomorphic_fetch_1.default(SUBGRAPH_URL, {
-            method: 'POST',
-            headers: {
-                Accept: 'application/json',
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                query,
-            }),
-        });
+        const response = yield isomorphic_fetch_1.default(
+            SubgraphUrl === '' ? SUBGRAPH_URL : SubgraphUrl,
+            {
+                method: 'POST',
+                headers: {
+                    Accept: 'application/json',
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    query,
+                }),
+            }
+        );
         const { data } = yield response.json();
         return data;
     });
