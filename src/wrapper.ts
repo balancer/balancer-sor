@@ -16,12 +16,18 @@ export class SOR {
     // avg Balancer swap cost. Can be updated manually if required.
     swapCost: BigNumber = new BigNumber('100000');
     tokenCost;
+    maxPools: number;
 
-    constructor(Provider: JsonRpcProvider, GasPrice: BigNumber) {
+    constructor(
+        Provider: JsonRpcProvider,
+        GasPrice: BigNumber,
+        MaxPools: number
+    ) {
         this.isSubgraphFetched = false;
         this.isOnChainFetched = false;
         this.provider = Provider;
         this.gasPrice = GasPrice;
+        this.maxPools = MaxPools;
         this.tokenCost = {};
     }
 
@@ -79,7 +85,6 @@ export class SOR {
         TokenOut: string,
         SwapType: string,
         SwapAmt: BigNumber,
-        NoPools: Number,
         CheckOnChain: boolean = true
     ) {
         if (!this.isSubgraphFetched) {
@@ -140,7 +145,7 @@ export class SOR {
         let epsOfInterest = sor.processEpsOfInterestMultiHop(
             paths,
             SwapType,
-            NoPools
+            this.maxPools
         );
 
         // Returns list of swaps
@@ -152,7 +157,7 @@ export class SOR {
             paths,
             SwapType,
             SwapAmt,
-            NoPools,
+            this.maxPools,
             costOutputToken,
             epsOfInterest
         );
