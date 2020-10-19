@@ -49,6 +49,16 @@ async function simpleSwap() {
     console.log(`Swaps: `);
     console.log(swaps);
 
+    [swaps, amountOut] = await SOR.getSwaps(
+        tokenIn,
+        tokenOut,
+        swapType,
+        amountIn
+    );
+    console.log(`Total DAI Return (Quicker): ${amountOut.toString()}`);
+    console.log(`Swaps: `);
+    console.log(swaps);
+
     // Here the on-chain check is cancelled by setting last parameter to false. Be aware this could lead to invalid swaps if Subgraph out of sync.
     [swaps, amountIn] = await SOR.getSwaps(
         tokenIn,
@@ -67,6 +77,29 @@ async function simpleSwap() {
     await SOR.fetchOnChainPools();
 
     // Now SOR will automatically use the on-chain pool information
+    [swaps, amountOut] = await SOR.getSwaps(
+        tokenIn,
+        tokenOut,
+        swapType,
+        amountIn
+    );
+    console.log(`Total DAI Return: ${amountOut.toString()}`);
+    console.log(`Swaps: `);
+    console.log(swaps);
+
+    console.log('Faster?');
+    [swaps, amountOut] = await SOR.getSwaps(
+        tokenIn,
+        tokenOut,
+        swapType,
+        amountIn
+    );
+    console.log(`Total DAI Return: ${amountOut.toString()}`);
+    console.log(`Swaps: `);
+    console.log(swaps);
+
+    await SOR.fetchOnChainPools();
+    console.log('Faster still?');
     [swaps, amountOut] = await SOR.getSwaps(
         tokenIn,
         tokenOut,
