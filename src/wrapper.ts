@@ -31,10 +31,10 @@ export class SOR {
         this.tokenCost = {};
     }
 
-    async fetchSubgraphPools() {
+    async fetchSubgraphPools(SubgraphUrl: string = '') {
         this.isSubgraphFetched = false;
         let previous = _.cloneDeep(this.subgraphPools);
-        this.subgraphPools = await sor.getAllPublicSwapPools();
+        this.subgraphPools = await sor.getAllPublicSwapPools(SubgraphUrl);
         if (!_.isEqual(this.subgraphPools, previous)) {
             this.isOnChainFetched = false; // New pools so any previous onchain info is out of date.
             this.subgraphPoolsFormatted = _.cloneDeep(this.subgraphPools); // format alters pools so make copy first

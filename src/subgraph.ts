@@ -90,7 +90,7 @@ export async function getTokenPairs(token) {
 }
 
 // Returns all public pools
-export async function getAllPublicSwapPools() {
+export async function getAllPublicSwapPools(SubgraphUrl: string = '') {
     const query = `
       {
           pools (first: 1000, where: {publicSwap: true, active: true}) {
@@ -111,16 +111,21 @@ export async function getAllPublicSwapPools() {
       }
     `;
 
-    const response = await fetch(SUBGRAPH_URL, {
-        method: 'POST',
-        headers: {
-            Accept: 'application/json',
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-            query,
-        }),
-    });
+    console.log(`Using: ${SubgraphUrl === '' ? SUBGRAPH_URL : SubgraphUrl}`);
+
+    const response = await fetch(
+        SubgraphUrl === '' ? SUBGRAPH_URL : SubgraphUrl,
+        {
+            method: 'POST',
+            headers: {
+                Accept: 'application/json',
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                query,
+            }),
+        }
+    );
 
     const { data } = await response.json();
     return data;
