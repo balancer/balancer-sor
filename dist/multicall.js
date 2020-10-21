@@ -217,3 +217,68 @@ function getAllPoolDataOnChain(pools, multiAddress, provider) {
     });
 }
 exports.getAllPoolDataOnChain = getAllPoolDataOnChain;
+function getAllPoolDataOnChainNew(pools, multiAddress, provider) {
+    return __awaiter(this, void 0, void 0, function*() {
+        if (pools.pools.length === 0)
+            throw Error('There are no pools with selected tokens');
+        const customMultiAbi = require('./abi/customMulticall.json');
+        const contract = new contracts_1.Contract(
+            multiAddress,
+            customMultiAbi,
+            provider
+        );
+        let addresses = [];
+        let total = 0;
+        for (let i = 0; i < pools.pools.length; i++) {
+            let pool = pools.pools[i];
+            addresses.push([pool.id]);
+            total += 1;
+            pool.tokens.forEach((token, tokenIndex) => {
+                addresses[i].push(token.address);
+                total += 2;
+            });
+        }
+        try {
+            let results = yield contract.getPoolInfo(addresses, total);
+            let j = 0;
+            let onChainPools = { pools: [] };
+            for (let i = 0; i < pools.pools.length; i++) {
+                let tokens = [];
+                let publicSwap = true;
+                if (pools.pools[i].publicSwap === 'false') publicSwap = false;
+                let p = {
+                    id: pools.pools[i].id,
+                    swapFee: bmath.bnum(results[j]),
+                    totalWeight: bmath.scale(
+                        bmath.bnum(pools.pools[i].totalWeight),
+                        18
+                    ),
+                    publicSwap: publicSwap,
+                    tokens: tokens,
+                    tokensList: pools.pools[i].tokensList,
+                };
+                j++;
+                pools.pools[i].tokens.forEach(token => {
+                    let bal = bmath.bnum(results[j]);
+                    j++;
+                    let dW = bmath.bnum(results[j]);
+                    j++;
+                    p.tokens.push({
+                        id: token.id,
+                        address: token.address,
+                        balance: bal,
+                        decimals: Number(token.decimals),
+                        symbol: token.symbol,
+                        denormWeight: dW,
+                    });
+                });
+                onChainPools.pools.push(p);
+            }
+            return onChainPools;
+        } catch (e) {
+            console.error('Failure querying onchain balances', { error: e });
+            return;
+        }
+    });
+}
+exports.getAllPoolDataOnChainNew = getAllPoolDataOnChainNew;

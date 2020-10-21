@@ -47,6 +47,7 @@ exports.getAllPublicSwapPools = subgraph_1.getAllPublicSwapPools;
 var multicall_1 = require('./multicall'); // Legacy Function
 exports.parsePoolDataOnChain = multicall_1.parsePoolDataOnChain;
 exports.getAllPoolDataOnChain = multicall_1.getAllPoolDataOnChain;
+exports.getAllPoolDataOnChainNew = multicall_1.getAllPoolDataOnChainNew;
 const bmath = __importStar(require('./bmath'));
 exports.bmath = bmath;
 var costToken_1 = require('./costToken');

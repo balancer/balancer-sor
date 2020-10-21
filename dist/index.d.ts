@@ -31,7 +31,11 @@ export {
     getTokenPairs, // Legacy Function
     getAllPublicSwapPools,
 } from './subgraph';
-export { parsePoolDataOnChain, getAllPoolDataOnChain } from './multicall';
+export {
+    parsePoolDataOnChain,
+    getAllPoolDataOnChain,
+    getAllPoolDataOnChainNew,
+} from './multicall';
 import * as bmath from './bmath';
 export { bmath };
 export { getCostOutputToken } from './costToken';

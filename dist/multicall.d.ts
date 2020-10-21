@@ -12,3 +12,8 @@ export declare function getAllPoolDataOnChain(
     multiAddress: string,
     provider: Web3Provider
 ): Promise<Pools>;
+export declare function getAllPoolDataOnChainNew(
+    pools: SubGraphPools,
+    multiAddress: string,
+    provider: Web3Provider
+): Promise<Pools>;
