@@ -28,7 +28,7 @@ export class SOR {
     onChainPools;
     provider: JsonRpcProvider;
     // Default multi address for mainnet
-    multicallAddress: string = '0xeefba1e63905ef1d7acba5a8513c70307c1ce441';
+    multicallAddress: string = '0xF700478148B84E572A447d63b29fD937Fd511147';
     gasPrice: BigNumber;
     // avg Balancer swap cost. Can be updated manually if required.
     swapCost: BigNumber = new BigNumber('100000');
@@ -84,8 +84,7 @@ export class SOR {
         }
 
         let previous = _.cloneDeep(this.onChainPools);
-
-        this.onChainPools = await sor.getAllPoolDataOnChain(
+        this.onChainPools = await sor.getAllPoolDataOnChainNew(
             this.subgraphPools,
             MulticallAddr === '' ? this.multicallAddress : MulticallAddr,
             this.provider
@@ -144,7 +143,7 @@ export class SOR {
         );
 
         // Get onchain info for swap pools
-        let onChainPools = await sor.getAllPoolDataOnChain(
+        let onChainPools = await sor.getAllPoolDataOnChainNew(
             poolsToCheck,
             MulticallAddr === '' ? this.multicallAddress : MulticallAddr,
             this.provider

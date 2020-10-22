@@ -50,14 +50,15 @@ async function simpleSwap() {
     console.log(swaps);
 
     // Here the on-chain check is cancelled by setting last parameter to false. Be aware this could lead to invalid swaps if Subgraph out of sync.
-    [swaps, amountIn] = await SOR.getSwaps(
+    let amtIn;
+    [swaps, amtIn] = await SOR.getSwaps(
         tokenIn,
         tokenOut,
         'swapExactOut',
         amountOut,
         false
     );
-    console.log(`Total USDC In: ${amountIn.toString()}`);
+    console.log(`Total USDC In: ${amtIn.toString()}`);
     console.log(`Swaps: `);
     console.log(swaps);
 
