@@ -34,8 +34,8 @@ async function simpleSwap() {
     await SOR.setCostOutputToken(tokenOut);
 
     console.log(`************** Without Cache`);
-    // If getSwaps is called after fetchSubgraphPools() but before fetchOnChainPools() then Subgraph balances are used.
-    // These can potentially be innacurate. By default getSwaps will do a final check of swaps using on-chain info.
+    // If getSwaps needs onchain balances to ensure accurate swap amts
+    // If getSwaps is called before SOR.fetchSubgraphPools() & SOR.fetchOnChainPools() then it will retrieve this information otherwise it uses the cached pools
     console.time('withOutCache');
     let [swaps, amountOut] = await SOR.getSwaps(
         tokenIn,
@@ -51,17 +51,17 @@ async function simpleSwap() {
 
     console.log(`\n************** With Cache, First Call`);
     console.log(`Fetching Subgraph Pools...`);
-    // SOR must have a list of available pools. This function fetches from Subgraph.
-    // This can be called as often as needed to keep pools list up to date.
+
+    // This function fetches pools from Subgraph. This can be called as often as needed to keep pools list up to date.
     await SOR.fetchSubgraphPools();
 
     console.log(`Fetching onchain pool information...`);
     // This function will retrieve on-chain balances, weights and fees for all pools from fetchSubgraphPools()
-    // This can take >5s to run but results in most accurate and optimal swap information
+    // This can take >5s to run but results in most accurate and optimal swap information.
+    // Result is cached for future processing and can be refreshed by recalling.
     await SOR.fetchOnChainPools();
 
-    // If getSwaps is called after fetchSubgraphPools() but before fetchOnChainPools() then Subgraph balances are used.
-    // These can potentially be innacurate. By default getSwaps will do a final check of swaps using on-chain info.
+    // Cached on-chain pools will now be used for processing
     console.time('firstTime');
     [swaps, amountOut] = await SOR.getSwaps(
         tokenIn,
@@ -77,7 +77,7 @@ async function simpleSwap() {
 
     console.log(`\n************** With Cache, Second Call`);
 
-    // Now SOR will automatically use the on-chain pool information
+    // Some processing has been cached so this call will be much quicker than previous
     console.time('withCache');
     [swaps, amountOut] = await SOR.getSwaps(
         tokenIn,
@@ -93,12 +93,9 @@ async function simpleSwap() {
 
     console.log(`\n************** Updating Pools`);
     console.log('Fetching Subgraph pools...');
-    // Refreshing subgraph pools
-    // - if new pools are different from previous onChain pools previously fetched will be ignored until also refreshed
+    // Refreshing subgraph pools & on-chain information
     await SOR.fetchSubgraphPools();
     console.log(`Fetching onchain pool information...`);
-    // This function will retrieve on-chain balances, weights and fees for all pools from fetchSubgraphPools()
-    // This can take >5s to run but results in most accurate and optimal swap information
     await SOR.fetchOnChainPools();
 
     [swaps, amountOut] = await SOR.getSwaps(
