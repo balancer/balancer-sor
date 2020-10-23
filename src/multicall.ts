@@ -1,5 +1,4 @@
 import { utils } from 'ethers';
-import { Interface } from '@ethersproject/abi';
 import { Contract } from '@ethersproject/contracts';
 import { Web3Provider } from '@ethersproject/providers';
 import { formatEther } from '@ethersproject/units';
@@ -22,7 +21,7 @@ export async function parsePoolDataOnChain(
 
     const multi = new Contract(multiAddress, multiAbi, provider);
 
-    const iface = new Interface(bpoolAbi);
+    const iface = new utils.Interface(bpoolAbi);
 
     const promises: Promise<any>[] = [];
 
@@ -86,7 +85,7 @@ export async function getAllPoolDataOnChain(
     const bpoolAbi = require('./abi/bpool.json');
 
     const multi = new Contract(multiAddress, multiAbi, provider);
-    const bPool = new Interface(bpoolAbi);
+    const bPool = new utils.Interface(bpoolAbi);
 
     const promises: Promise<any>[] = [];
 

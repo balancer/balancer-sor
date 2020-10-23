@@ -47,7 +47,6 @@ var __importStar =
     };
 Object.defineProperty(exports, '__esModule', { value: true });
 const ethers_1 = require('ethers');
-const abi_1 = require('@ethersproject/abi');
 const contracts_1 = require('@ethersproject/contracts');
 const bmath = __importStar(require('./bmath'));
 // LEGACY FUNCTION - Keep Input/Output Format
@@ -68,7 +67,7 @@ function parsePoolDataOnChain(
             multiAbi,
             provider
         );
-        const iface = new abi_1.Interface(bpoolAbi);
+        const iface = new ethers_1.utils.Interface(bpoolAbi);
         const promises = [];
         let calls = [];
         let poolData = [];
@@ -132,7 +131,7 @@ function getAllPoolDataOnChain(pools, multiAddress, provider) {
             multiAbi,
             provider
         );
-        const bPool = new abi_1.Interface(bpoolAbi);
+        const bPool = new ethers_1.utils.Interface(bpoolAbi);
         const promises = [];
         let calls = [];
         let encodedSwapFee = bPool.encodeFunctionData('getSwapFee', []);

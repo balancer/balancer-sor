@@ -37,7 +37,8 @@ var __awaiter =
 Object.defineProperty(exports, '__esModule', { value: true });
 const solidity_1 = require('@ethersproject/solidity');
 const address_1 = require('@ethersproject/address');
-const contracts_1 = require('@ethersproject/contracts');
+// import { Web3Provider } from '@ethersproject/providers';
+const ethers_1 = require('ethers');
 const bignumber_1 = require('./utils/bignumber');
 const bmath_1 = require('./bmath');
 const FACTORY_ADDRESS = '0x5C69bEe701ef814a2B6a3EDD4B1652CB9cc5aA6f';
@@ -62,7 +63,7 @@ exports.getAddress = getAddress;
 function getOnChainReserves(PairAddr, provider) {
     return __awaiter(this, void 0, void 0, function*() {
         const uniswapV2PairAbi = require('./abi/UniswapV2Pair.json');
-        const pairContract = new contracts_1.Contract(
+        const pairContract = new ethers_1.Contract(
             PairAddr,
             uniswapV2PairAbi,
             provider
