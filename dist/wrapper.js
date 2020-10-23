@@ -34,19 +34,13 @@ var __awaiter =
             );
         });
     };
-var __importDefault =
-    (this && this.__importDefault) ||
-    function(mod) {
-        return mod && mod.__esModule ? mod : { default: mod };
-    };
 Object.defineProperty(exports, '__esModule', { value: true });
 const bignumber_1 = require('./utils/bignumber');
-const lodash_1 = __importDefault(require('lodash'));
 const sor = require('./index');
 class SOR {
     constructor(Provider, GasPrice, MaxPools) {
         // Default multi address for mainnet
-        this.multicallAddress = '0xeefba1e63905ef1d7acba5a8513c70307c1ce441';
+        this.multicallAddress = '0xF700478148B84E572A447d63b29fD937Fd511147';
         // avg Balancer swap cost. Can be updated manually if required.
         this.swapCost = new bignumber_1.BigNumber('100000');
         this.isSubgraphFetched = false;
@@ -65,13 +59,12 @@ class SOR {
     fetchSubgraphPools(SubgraphUrl = '') {
         return __awaiter(this, void 0, void 0, function*() {
             this.isSubgraphFetched = false;
-            let previous = lodash_1.default.cloneDeep(this.subgraphPools);
+            let previousStringify = JSON.stringify(this.subgraphPools); // Used for compare
             this.subgraphPools = yield sor.getAllPublicSwapPools(SubgraphUrl);
-            if (!lodash_1.default.isEqual(this.subgraphPools, previous)) {
+            let newStringify = JSON.stringify(this.subgraphPools);
+            if (newStringify !== previousStringify) {
                 this.isOnChainFetched = false; // New pools so any previous onchain info is out of date.
-                this.subgraphPoolsFormatted = lodash_1.default.cloneDeep(
-                    this.subgraphPools
-                ); // format alters pools so make copy first
+                this.subgraphPoolsFormatted = JSON.parse(newStringify); // format alters pools so make copy first
                 sor.formatSubgraphPools(this.subgraphPoolsFormatted);
                 this.processedCache = {}; // Clear processed cache as data changed
             }
@@ -92,8 +85,8 @@ class SOR {
                 );
                 return;
             }
-            let previous = lodash_1.default.cloneDeep(this.onChainPools);
-            this.onChainPools = yield sor.getAllPoolDataOnChain(
+            let previousStringify = JSON.stringify(this.onChainPools); // Used for compare
+            this.onChainPools = yield sor.getAllPoolDataOnChainNew(
                 this.subgraphPools,
                 MulticallAddr === '' ? this.multicallAddress : MulticallAddr,
                 this.provider
@@ -101,7 +94,7 @@ class SOR {
             // Error with multicall
             if (!this.onChainPools) return;
             // If new pools are different from previous then any previous processed data is out of date so clear
-            if (!lodash_1.default.isEqual(previous, this.onChainPools)) {
+            if (previousStringify !== JSON.stringify(this.onChainPools)) {
                 this.processedCache = {};
             }
             this.isOnChainFetched = true;
@@ -145,7 +138,7 @@ class SOR {
             // Gets pools used in swaps
             let poolsToCheck = sor.getPoolsFromSwaps(Swaps, this.subgraphPools);
             // Get onchain info for swap pools
-            let onChainPools = yield sor.getAllPoolDataOnChain(
+            let onChainPools = yield sor.getAllPoolDataOnChainNew(
                 poolsToCheck,
                 MulticallAddr === '' ? this.multicallAddress : MulticallAddr,
                 this.provider
@@ -209,10 +202,10 @@ class SOR {
                 // Some functions alter pools list directly but we want to keep original so make a copy to work from
                 let poolsList;
                 if (this.isOnChainFetched)
-                    poolsList = lodash_1.default.cloneDeep(this.onChainPools);
+                    poolsList = JSON.parse(JSON.stringify(this.onChainPools));
                 else
-                    poolsList = lodash_1.default.cloneDeep(
-                        this.subgraphPoolsFormatted
+                    poolsList = JSON.parse(
+                        JSON.stringify(this.subgraphPoolsFormatted)
                     );
                 // Retrieves all pools that contain both tokenIn & tokenOut, i.e. pools that can be used for direct swaps
                 // Retrieves intermediate pools along with tokens that are contained in these.
@@ -267,7 +260,7 @@ class SOR {
             // swapExactOut - total = total amount of TokenIn required for swap
             let swaps, total;
             [swaps, total] = sor.smartOrderRouterMultiHopEpsOfInterest(
-                lodash_1.default.cloneDeep(pools), // Need to keep original pools for cache
+                JSON.parse(JSON.stringify(pools)), // Need to keep original pools for cache
                 paths,
                 SwapType,
                 SwapAmt,

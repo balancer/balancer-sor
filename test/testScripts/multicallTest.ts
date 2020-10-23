@@ -6,7 +6,6 @@ const { ethers, utils } = require('ethers');
 import { Pool } from '../../src/direct/types';
 import { BONE, calcOutGivenIn, calcInGivenOut } from '../../src/bmath';
 import { JsonRpcProvider } from '@ethersproject/providers';
-import _ from 'lodash'; // Import the entire lodash library
 
 async function run() {
     const multicall = '0xeefBa1e63905eF1D7ACbA5a8513c70307C1cE441';
@@ -47,7 +46,7 @@ async function run() {
             break;
         }
 
-        let newPools = _.cloneDeep(allPools.pools);
+        let newPools = JSON.parse(JSON.stringify(allPools.pools));
 
         newPools = allPools.pools.concat(newPools);
         allPools.pools = newPools;

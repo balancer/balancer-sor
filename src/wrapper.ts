@@ -7,7 +7,6 @@ import {
     Path,
     EffectivePrice,
 } from './types';
-import _ from 'lodash';
 const sor = require('./index');
 
 interface ProcessedData {
@@ -57,11 +56,14 @@ export class SOR {
     */
     async fetchSubgraphPools(SubgraphUrl: string = '') {
         this.isSubgraphFetched = false;
-        let previous = _.cloneDeep(this.subgraphPools);
+
+        let previousStringify = JSON.stringify(this.subgraphPools); // Used for compare
+
         this.subgraphPools = await sor.getAllPublicSwapPools(SubgraphUrl);
-        if (!_.isEqual(this.subgraphPools, previous)) {
+        let newStringify = JSON.stringify(this.subgraphPools);
+        if (newStringify !== previousStringify) {
             this.isOnChainFetched = false; // New pools so any previous onchain info is out of date.
-            this.subgraphPoolsFormatted = _.cloneDeep(this.subgraphPools); // format alters pools so make copy first
+            this.subgraphPoolsFormatted = JSON.parse(newStringify); // format alters pools so make copy first
             sor.formatSubgraphPools(this.subgraphPoolsFormatted);
             this.processedCache = {}; // Clear processed cache as data changed
         }
@@ -82,8 +84,8 @@ export class SOR {
             );
             return;
         }
+        let previousStringify = JSON.stringify(this.onChainPools); // Used for compare
 
-        let previous = _.cloneDeep(this.onChainPools);
         this.onChainPools = await sor.getAllPoolDataOnChainNew(
             this.subgraphPools,
             MulticallAddr === '' ? this.multicallAddress : MulticallAddr,
@@ -94,7 +96,7 @@ export class SOR {
         if (!this.onChainPools) return;
 
         // If new pools are different from previous then any previous processed data is out of date so clear
-        if (!_.isEqual(previous, this.onChainPools)) {
+        if (previousStringify !== JSON.stringify(this.onChainPools)) {
             this.processedCache = {};
         }
 
@@ -215,8 +217,11 @@ export class SOR {
             // Some functions alter pools list directly but we want to keep original so make a copy to work from
             let poolsList;
             if (this.isOnChainFetched)
-                poolsList = _.cloneDeep(this.onChainPools);
-            else poolsList = _.cloneDeep(this.subgraphPoolsFormatted);
+                poolsList = JSON.parse(JSON.stringify(this.onChainPools));
+            else
+                poolsList = JSON.parse(
+                    JSON.stringify(this.subgraphPoolsFormatted)
+                );
 
             // Retrieves all pools that contain both tokenIn & tokenOut, i.e. pools that can be used for direct swaps
             // Retrieves intermediate pools along with tokens that are contained in these.
@@ -277,7 +282,7 @@ export class SOR {
         // swapExactOut - total = total amount of TokenIn required for swap
         let swaps, total;
         [swaps, total] = sor.smartOrderRouterMultiHopEpsOfInterest(
-            _.cloneDeep(pools), // Need to keep original pools for cache
+            JSON.parse(JSON.stringify(pools)), // Need to keep original pools for cache
             paths,
             SwapType,
             SwapAmt,
