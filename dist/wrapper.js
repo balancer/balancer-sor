@@ -38,11 +38,19 @@ Object.defineProperty(exports, '__esModule', { value: true });
 const bignumber_1 = require('./utils/bignumber');
 const sor = require('./index');
 class SOR {
-    constructor(Provider, GasPrice, MaxPools) {
-        // Default multi address for mainnet
-        this.multicallAddress = '0xF700478148B84E572A447d63b29fD937Fd511147';
+    constructor(Provider, GasPrice, MaxPools, ChainId) {
         // avg Balancer swap cost. Can be updated manually if required.
         this.swapCost = new bignumber_1.BigNumber('100000');
+        this.MULTIADDR = {
+            1: '0xF700478148B84E572A447d63b29fD937Fd511147',
+            42: '0x9907109e5Ca97aE76f684407318D1B8ea119c83B',
+        };
+        // 0x71c7f1086aFca7Aa1B0D4d73cfa77979d10D3210 - Balances only
+        this.SUBGRAPH_URL = {
+            1: 'https://api.thegraph.com/subgraphs/name/balancer-labs',
+            42: 'https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-kovan',
+        };
+        this.chainId = ChainId;
         this.isSubgraphFetched = false;
         this.isOnChainFetched = false;
         this.provider = Provider;
@@ -54,13 +62,14 @@ class SOR {
     /*
     Fetch all public & active pools from Subgraph.
     Will clear cached onChain pools and processed paths if new pools are different from cached.
-    SubgraphUrl can be passed to override default set in .env.
     */
-    fetchSubgraphPools(SubgraphUrl = '') {
+    fetchSubgraphPools() {
         return __awaiter(this, void 0, void 0, function*() {
             this.isSubgraphFetched = false;
             let previousStringify = JSON.stringify(this.subgraphPools); // Used for compare
-            this.subgraphPools = yield sor.getAllPublicSwapPools(SubgraphUrl);
+            this.subgraphPools = yield sor.getAllPublicSwapPools(
+                this.SUBGRAPH_URL[this.chainId]
+            );
             let newStringify = JSON.stringify(this.subgraphPools);
             if (newStringify !== previousStringify) {
                 this.isOnChainFetched = false; // New pools so any previous onchain info is out of date.
@@ -76,7 +85,7 @@ class SOR {
     Will clear cached processed paths if new pools are different from cached.
     MulticallAddr can be passed to override default mainnet multicall address.
     */
-    fetchOnChainPools(MulticallAddr = '') {
+    fetchOnChainPools() {
         return __awaiter(this, void 0, void 0, function*() {
             this.isOnChainFetched = false;
             if (!this.isSubgraphFetched) {
@@ -88,7 +97,7 @@ class SOR {
             let previousStringify = JSON.stringify(this.onChainPools); // Used for compare
             this.onChainPools = yield sor.getAllPoolDataOnChain(
                 this.subgraphPools,
-                MulticallAddr === '' ? this.multicallAddress : MulticallAddr,
+                this.MULTIADDR[this.chainId],
                 this.provider
             );
             // Error with multicall
@@ -126,14 +135,7 @@ class SOR {
     If using Subgraph pools by default swaps are checked using data retrieved from onChain.
     Can be overridden with CheckOnChain.
     */
-    getSwaps(
-        TokenIn,
-        TokenOut,
-        SwapType,
-        SwapAmt,
-        SubgraphUrl = '',
-        MulticallAddr = ''
-    ) {
+    getSwaps(TokenIn, TokenOut, SwapType, SwapAmt) {
         return __awaiter(this, void 0, void 0, function*() {
             // The Subgraph returns tokens in lower case format so we must match this
             TokenIn = TokenIn.toLowerCase();
@@ -144,8 +146,8 @@ class SOR {
                     TokenOut,
                     SwapType,
                     SwapAmt,
-                    SubgraphUrl,
-                    MulticallAddr
+                    this.SUBGRAPH_URL[this.chainId],
+                    this.MULTIADDR[this.chainId]
                 );
                 return [swaps, total];
             } else {
@@ -154,8 +156,8 @@ class SOR {
                     TokenOut,
                     SwapType,
                     SwapAmt,
-                    SubgraphUrl,
-                    MulticallAddr
+                    this.SUBGRAPH_URL[this.chainId],
+                    this.MULTIADDR[this.chainId]
                 );
                 return [swaps, total];
             }
@@ -182,7 +184,7 @@ class SOR {
             // Fetch on-chain balances
             let poolsList = yield sor.getAllPoolDataOnChain(
                 subGraphPools,
-                MulticallAddr === '' ? this.multicallAddress : MulticallAddr,
+                this.MULTIADDR[this.chainId],
                 this.provider
             );
             console.timeEnd('OC');

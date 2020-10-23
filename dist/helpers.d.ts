@@ -79,10 +79,3 @@ export declare function sortPoolsMostLiquid(
     poolsTokenInNoTokenOut: PoolDictionary,
     poolsTokenOutNoTokenIn: PoolDictionary
 ): [Pool[], Pool[]];
-export declare function calcInGivenOutForPool(
-    Pools: any,
-    PoolAddr: string,
-    TokenIn: string,
-    TokenOut: string,
-    AmtIn: any
-): BigNumber;

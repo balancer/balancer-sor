@@ -26,20 +26,32 @@ export class SOR {
     subgraphPoolsFormatted;
     onChainPools;
     provider: ethers.providers.JsonRpcProvider;
-    // Default multi address for mainnet
-    multicallAddress: string = '0xF700478148B84E572A447d63b29fD937Fd511147';
     gasPrice: BigNumber;
     // avg Balancer swap cost. Can be updated manually if required.
     swapCost: BigNumber = new BigNumber('100000');
     tokenCost;
     maxPools: number;
     processedCache: ProcessedCache;
+    chainId: number;
+
+    MULTIADDR: { [chainId: number]: string } = {
+        1: '0xF700478148B84E572A447d63b29fD937Fd511147',
+        42: '0x9907109e5Ca97aE76f684407318D1B8ea119c83B',
+    };
+    // 0x71c7f1086aFca7Aa1B0D4d73cfa77979d10D3210 - Balances only
+
+    SUBGRAPH_URL: { [chainId: number]: string } = {
+        1: 'https://api.thegraph.com/subgraphs/name/balancer-labs/balancer',
+        42: 'https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-kovan',
+    };
 
     constructor(
         Provider: ethers.providers.JsonRpcProvider,
         GasPrice: BigNumber,
-        MaxPools: number
+        MaxPools: number,
+        ChainId: number
     ) {
+        this.chainId = ChainId;
         this.isSubgraphFetched = false;
         this.isOnChainFetched = false;
         this.provider = Provider;
@@ -52,14 +64,15 @@ export class SOR {
     /*
     Fetch all public & active pools from Subgraph.
     Will clear cached onChain pools and processed paths if new pools are different from cached.
-    SubgraphUrl can be passed to override default set in .env.
     */
-    async fetchSubgraphPools(SubgraphUrl: string = '') {
+    async fetchSubgraphPools() {
         this.isSubgraphFetched = false;
 
         let previousStringify = JSON.stringify(this.subgraphPools); // Used for compare
 
-        this.subgraphPools = await sor.getAllPublicSwapPools(SubgraphUrl);
+        this.subgraphPools = await sor.getAllPublicSwapPools(
+            this.SUBGRAPH_URL[this.chainId]
+        );
         let newStringify = JSON.stringify(this.subgraphPools);
         if (newStringify !== previousStringify) {
             this.isOnChainFetched = false; // New pools so any previous onchain info is out of date.
@@ -75,7 +88,7 @@ export class SOR {
     Will clear cached processed paths if new pools are different from cached.
     MulticallAddr can be passed to override default mainnet multicall address.
     */
-    async fetchOnChainPools(MulticallAddr: string = '') {
+    async fetchOnChainPools() {
         this.isOnChainFetched = false;
 
         if (!this.isSubgraphFetched) {
@@ -88,7 +101,7 @@ export class SOR {
 
         this.onChainPools = await sor.getAllPoolDataOnChain(
             this.subgraphPools,
-            MulticallAddr === '' ? this.multicallAddress : MulticallAddr,
+            this.MULTIADDR[this.chainId],
             this.provider
         );
 
@@ -134,9 +147,7 @@ export class SOR {
         TokenIn: string,
         TokenOut: string,
         SwapType: string,
-        SwapAmt: BigNumber,
-        SubgraphUrl: string = '',
-        MulticallAddr: string = ''
+        SwapAmt: BigNumber
     ): Promise<[Swap[][], BigNumber]> {
         // The Subgraph returns tokens in lower case format so we must match this
         TokenIn = TokenIn.toLowerCase();
@@ -148,8 +159,8 @@ export class SOR {
                 TokenOut,
                 SwapType,
                 SwapAmt,
-                SubgraphUrl,
-                MulticallAddr
+                this.SUBGRAPH_URL[this.chainId],
+                this.MULTIADDR[this.chainId]
             );
             return [swaps, total];
         } else {
@@ -158,8 +169,8 @@ export class SOR {
                 TokenOut,
                 SwapType,
                 SwapAmt,
-                SubgraphUrl,
-                MulticallAddr
+                this.SUBGRAPH_URL[this.chainId],
+                this.MULTIADDR[this.chainId]
             );
             return [swaps, total];
         }
@@ -187,7 +198,7 @@ export class SOR {
         // Fetch on-chain balances
         let poolsList = await sor.getAllPoolDataOnChain(
             subGraphPools,
-            MulticallAddr === '' ? this.multicallAddress : MulticallAddr,
+            this.MULTIADDR[this.chainId],
             this.provider
         );
         console.timeEnd('OC');

@@ -16,27 +16,32 @@ export declare class SOR {
     subgraphPoolsFormatted: any;
     onChainPools: any;
     provider: ethers.providers.JsonRpcProvider;
-    multicallAddress: string;
     gasPrice: BigNumber;
     swapCost: BigNumber;
     tokenCost: any;
     maxPools: number;
     processedCache: ProcessedCache;
+    chainId: number;
+    MULTIADDR: {
+        [chainId: number]: string;
+    };
+    SUBGRAPH_URL: {
+        [chainId: number]: string;
+    };
     constructor(
         Provider: ethers.providers.JsonRpcProvider,
         GasPrice: BigNumber,
-        MaxPools: number
+        MaxPools: number,
+        ChainId: number
     );
-    fetchSubgraphPools(SubgraphUrl?: string): Promise<void>;
-    fetchOnChainPools(MulticallAddr?: string): Promise<void>;
+    fetchSubgraphPools(): Promise<void>;
+    fetchOnChainPools(): Promise<void>;
     setCostOutputToken(TokenOut: string, Cost?: BigNumber): Promise<void>;
     getSwaps(
         TokenIn: string,
         TokenOut: string,
         SwapType: string,
-        SwapAmt: BigNumber,
-        SubgraphUrl?: string,
-        MulticallAddr?: string
+        SwapAmt: BigNumber
     ): Promise<[Swap[][], BigNumber]>;
     getSwapsWithoutCache(
         TokenIn: string,

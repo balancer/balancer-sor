@@ -56,11 +56,9 @@ export async function getAllPoolDataOnChain(
                 let dW = bmath.bnum(results[j]);
                 j++;
                 p.tokens.push({
-                    id: token.id,
                     address: token.address,
                     balance: bal,
                     decimals: Number(token.decimals),
-                    symbol: token.symbol,
                     denormWeight: dW,
                 });
             });

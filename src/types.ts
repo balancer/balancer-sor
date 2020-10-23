@@ -61,11 +61,9 @@ export interface Pool {
 }
 
 export interface Token {
-    id: string;
     address: string;
     balance: BigNumber;
     decimals: number;
-    symbol: string;
     denormWeight: BigNumber;
 }
 
@@ -83,11 +81,9 @@ export interface SubGraphPool {
 }
 
 export interface SubGraphToken {
-    id: string;
     address: string;
     balance: string;
     decimals: string;
-    symbol: string;
     denormWeight: string;
 }
 

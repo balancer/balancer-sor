@@ -594,30 +594,3 @@ function sortPoolsMostLiquid(
     return [mostLiquidPoolsFirstHop, mostLiquidPoolsSecondHop];
 }
 exports.sortPoolsMostLiquid = sortPoolsMostLiquid;
-function calcOutGivenInForPool(Pools, PoolAddr, TokenIn, TokenOut, AmtIn) {
-    const swapPool = Pools.pools.find(p => p.id === PoolAddr);
-    let pool = exports.parsePoolPairData(swapPool, TokenIn, TokenOut);
-    const amtOut = bmath_1.calcOutGivenIn(
-        pool.balanceIn,
-        pool.weightIn,
-        pool.balanceOut,
-        pool.weightOut,
-        AmtIn,
-        pool.swapFee
-    );
-    return amtOut;
-}
-function calcInGivenOutForPool(Pools, PoolAddr, TokenIn, TokenOut, AmtIn) {
-    const swapPool = Pools.pools.find(p => p.id === PoolAddr);
-    let pool = exports.parsePoolPairData(swapPool, TokenIn, TokenOut);
-    const amtOut = bmath_1.calcInGivenOut(
-        pool.balanceIn,
-        pool.weightIn,
-        pool.balanceOut,
-        pool.weightOut,
-        AmtIn,
-        pool.swapFee
-    );
-    return amtOut;
-}
-exports.calcInGivenOutForPool = calcInGivenOutForPool;

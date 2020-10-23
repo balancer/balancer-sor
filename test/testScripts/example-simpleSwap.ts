@@ -19,8 +19,9 @@ async function simpleSwap() {
     const gasPrice = new BigNumber('30000000000');
     // This determines the max no of pools the SOR will use to swap.
     const maxNoPools = 4;
+    const chainId = 1;
 
-    const SOR = new sor.SOR(provider, gasPrice, maxNoPools);
+    const SOR = new sor.SOR(provider, gasPrice, maxNoPools, chainId);
 
     const tokenIn = USDC;
     const tokenOut = DAI;
