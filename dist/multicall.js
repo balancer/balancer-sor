@@ -75,8 +75,6 @@ function getAllPoolDataOnChain(pools, multiAddress, provider) {
             let onChainPools = { pools: [] };
             for (let i = 0; i < pools.pools.length; i++) {
                 let tokens = [];
-                let publicSwap = true;
-                if (pools.pools[i].publicSwap === 'false') publicSwap = false;
                 let p = {
                     id: pools.pools[i].id,
                     swapFee: bmath.bnum(results[j]),
@@ -84,7 +82,6 @@ function getAllPoolDataOnChain(pools, multiAddress, provider) {
                         bmath.bnum(pools.pools[i].totalWeight),
                         18
                     ),
-                    publicSwap: publicSwap,
                     tokens: tokens,
                     tokensList: pools.pools[i].tokensList,
                 };
@@ -95,11 +92,9 @@ function getAllPoolDataOnChain(pools, multiAddress, provider) {
                     let dW = bmath.bnum(results[j]);
                     j++;
                     p.tokens.push({
-                        id: token.id,
                         address: token.address,
                         balance: bal,
                         decimals: Number(token.decimals),
-                        symbol: token.symbol,
                         denormWeight: dW,
                     });
                 });

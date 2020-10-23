@@ -35,8 +35,6 @@ export async function getAllPoolDataOnChain(
 
         for (let i = 0; i < pools.pools.length; i++) {
             let tokens: Token[] = [];
-            let publicSwap = true;
-            if (pools.pools[i].publicSwap === 'false') publicSwap = false;
 
             let p: Pool = {
                 id: pools.pools[i].id,
@@ -45,7 +43,6 @@ export async function getAllPoolDataOnChain(
                     bmath.bnum(pools.pools[i].totalWeight),
                     18
                 ),
-                publicSwap: publicSwap,
                 tokens: tokens,
                 tokensList: pools.pools[i].tokensList,
             };

@@ -47,7 +47,7 @@ class SOR {
         };
         // 0x71c7f1086aFca7Aa1B0D4d73cfa77979d10D3210 - Balances only
         this.SUBGRAPH_URL = {
-            1: 'https://api.thegraph.com/subgraphs/name/balancer-labs',
+            1: 'https://api.thegraph.com/subgraphs/name/balancer-labs/balancer',
             42: 'https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-kovan',
         };
         this.chainId = ChainId;

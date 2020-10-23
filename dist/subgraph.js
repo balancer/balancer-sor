@@ -54,13 +54,10 @@ function getAllPublicSwapPools(SubgraphUrl = '') {
             id
             swapFee
             totalWeight
-            publicSwap
             tokens {
-              id
               address
               balance
               decimals
-              symbol
               denormWeight
             }
             tokensList
@@ -95,13 +92,10 @@ function getFilteredPools(tokenIn, tokenOut, SubgraphUrl = '') {
             id
             swapFee
             totalWeight
-            publicSwap
             tokens {
-              id
               address
               balance
               decimals
-              symbol
               denormWeight
             }
             tokensList
@@ -111,13 +105,10 @@ function getFilteredPools(tokenIn, tokenOut, SubgraphUrl = '') {
             id
             swapFee
             totalWeight
-            publicSwap
             tokens {
-              id
               address
               balance
               decimals
-              symbol
               denormWeight
             }
             tokensList
@@ -141,7 +132,7 @@ function getFilteredPools(tokenIn, tokenOut, SubgraphUrl = '') {
         // Remove any duplicate pools
         let joined = data.poolIn.concat(data.poolOut);
         var exclusivePools = joined.reduce((accumalator, current) => {
-            if (!accumalator.some(item => item.id === current.id)) {
+            if (!accumalator.some(pool => pool.id === current.id)) {
                 accumalator.push(current);
             }
             return accumalator;

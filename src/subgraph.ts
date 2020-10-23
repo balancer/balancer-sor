@@ -16,7 +16,6 @@ export async function getAllPublicSwapPools(SubgraphUrl: string = '') {
             id
             swapFee
             totalWeight
-            publicSwap
             tokens {
               address
               balance
@@ -60,7 +59,6 @@ export async function getFilteredPools(
             id
             swapFee
             totalWeight
-            publicSwap
             tokens {
               address
               balance
@@ -74,7 +72,6 @@ export async function getFilteredPools(
             id
             swapFee
             totalWeight
-            publicSwap
             tokens {
               address
               balance
