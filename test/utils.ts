@@ -333,3 +333,47 @@ export function alterPools(allPools: any) {
 
     return allPools;
 }
+
+// Returns two arrays
+// First array contains all tokens in direct pools containing tokenIn
+// Second array contains all tokens in multi-hop pools containing tokenIn
+export function getTokenPairsMultiHop(token: string, poolsTokensListSet: any) {
+    let poolsWithToken = [];
+    let poolsWithoutToken = [];
+
+    let directTokenPairsSet = new Set();
+
+    // If pool contains token add all its tokens to direct list
+    poolsTokensListSet.forEach((poolTokenList, index) => {
+        if (poolTokenList.includes(token)) {
+            poolsWithToken.push(poolTokenList);
+        } else {
+            poolsWithoutToken.push(poolTokenList);
+        }
+    });
+
+    directTokenPairsSet = new Set([].concat(...poolsWithToken));
+
+    let multihopTokenPools = [];
+    let multihopTokenPairsSet = new Set();
+
+    poolsWithoutToken.forEach((pool, index) => {
+        let intersection = [...pool].filter(x =>
+            [...directTokenPairsSet].includes(x)
+        );
+        if (intersection.length != 0) {
+            multihopTokenPools.push(pool);
+        }
+    });
+
+    multihopTokenPairsSet = new Set([].concat(...multihopTokenPools));
+    let allTokenPairsSet = new Set();
+    allTokenPairsSet = new Set([
+        ...directTokenPairsSet,
+        ...multihopTokenPairsSet,
+    ]);
+
+    let directTokenPairs = [...directTokenPairsSet];
+    let allTokenPairs = [...allTokenPairsSet];
+    return [directTokenPairs, allTokenPairs];
+}

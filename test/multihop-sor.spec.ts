@@ -14,6 +14,7 @@ import {
 } from './utils';
 import { BONE } from '../src/bmath';
 import { utils } from 'ethers';
+import { getTokenPairsMultiHop } from './utils';
 
 const allPools = require('./allPools.json');
 const disabledTokens = require('./disabled-tokens.json');
@@ -25,7 +26,7 @@ const USDC = '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48'; // USDC lower case
 const MKR = '0x9f8f72aa9304c8b593d555f12ef6589cc3a579a2'; // MKR lower case
 const OCEAN = '0x985dd3d42de1e256d09e1c10f112bccb8015ad41';
 
-let allPoolsCorrect, allPoolsWrong;
+let allPoolsCorrect;
 
 describe('Tests Multihop SOR vs static allPools.json', () => {
     it('Saved pool check - without disabled filter', async () => {
@@ -42,17 +43,6 @@ describe('Tests Multihop SOR vs static allPools.json', () => {
             allPoolsCorrect.pools.length,
             50,
             'Should be 50 pools with non-zero balance'
-        );
-
-        allPoolsWrong = JSON.parse(JSON.stringify(allPools));
-        allPoolsWrong = alterPools(allPoolsWrong); // Creates incorrect token balances
-
-        expect(allPools).to.not.eql(allPoolsWrong);
-        expect(allPoolsCorrect).to.not.eql(allPoolsWrong);
-        let at;
-        [at, allPoolsWrong] = formatAndFilterPools(
-            allPoolsWrong,
-            disabledTokens.tokens
         );
     });
 
@@ -82,7 +72,7 @@ describe('Tests Multihop SOR vs static allPools.json', () => {
             disabledTokens.tokens
         );
 
-        let [directTokenPairsSET, allTokenPairsSET] = sor.getTokenPairsMultiHop(
+        let [directTokenPairsSET, allTokenPairsSET] = getTokenPairsMultiHop(
             DAI,
             allTokensSet
         );
@@ -97,90 +87,6 @@ describe('Tests Multihop SOR vs static allPools.json', () => {
             allTokenPairsSET.length,
             33,
             'Should be 33 multi-hop tokens'
-        );
-    });
-
-    it('filterPoolsWithTokensDirect - DAI/ANT Pools with local disabled list', async () => {
-        const directPools = sor.filterPoolsWithTokensDirect(
-            allPoolsCorrect.pools,
-            DAI,
-            ANT,
-            { isOverRide: true, disabledTokens: disabledTokens.tokens }
-        );
-
-        assert.equal(
-            Object.keys(directPools).length,
-            0,
-            'Should have 0 direct pools'
-        );
-    });
-
-    it('filterPoolsWithTokensDirect - DAI/OCEAN Pools with no disabled list', async () => {
-        const directPools = sor.filterPoolsWithTokensDirect(
-            allPoolsCorrect.pools,
-            DAI,
-            OCEAN,
-            { isOverRide: true, disabledTokens: [] }
-        );
-
-        assert.equal(
-            Object.keys(directPools).length,
-            1,
-            'Should have 1 direct pools with no disabled'
-        );
-    });
-
-    it('filterPoolsWithTokensDirect - DAI/OCEAN Pools with disabled list', async () => {
-        const directPools = sor.filterPoolsWithTokensDirect(
-            allPoolsCorrect.pools,
-            DAI,
-            OCEAN,
-            { isOverRide: true, disabledTokens: disabledTokens.tokens }
-        );
-
-        assert.equal(
-            Object.keys(directPools).length,
-            0,
-            'Should have 0 direct pools'
-        );
-    });
-
-    it('filterPoolsWithTokensDirect - WETH/ANT Pools', async () => {
-        const directPools = sor.filterPoolsWithTokensDirect(
-            allPoolsCorrect.pools,
-            WETH,
-            ANT,
-            { isOverRide: true, disabledTokens: disabledTokens.tokens }
-        );
-        assert.equal(
-            Object.keys(directPools).length,
-            0,
-            'Should have 0 direct pools'
-        );
-    });
-
-    it('filterPoolsWithTokensDirect - WETH/DAI Pools', async () => {
-        let directPools = sor.filterPoolsWithTokensDirect(
-            allPoolsCorrect.pools,
-            WETH,
-            DAI,
-            { isOverRide: true, disabledTokens: disabledTokens.tokens }
-        );
-        assert.equal(
-            Object.keys(directPools).length,
-            10,
-            'Should have 10 direct pools'
-        );
-        directPools = sor.filterPoolsWithTokensDirect(
-            allPoolsCorrect.pools,
-            DAI,
-            WETH,
-            { isOverRide: true, disabledTokens: disabledTokens.tokens }
-        );
-        assert.equal(
-            Object.keys(directPools).length,
-            10,
-            'Should have 10 direct pools'
         );
     });
 
@@ -254,39 +160,7 @@ describe('Tests Multihop SOR vs static allPools.json', () => {
             disabledTokens
         );
 
-        let swapsWrong: Swap[][], totalAmtOutWrong: BigNumber;
-        [swapsWrong, totalAmtOutWrong] = fullSwap(
-            allPoolsWrong, // This would represent pools using balances from incorrect Subgraph
-            tokenIn,
-            tokenOut,
-            swapType,
-            noPools,
-            amountIn,
-            disabledTokens
-        );
-
-        let swapsCorrected: Swap[][], totalAmtOutCorrected: BigNumber;
-        [swapsCorrected, totalAmtOutCorrected] = sor.checkSwapsExactIn(
-            JSON.parse(JSON.stringify(swapsWrong)),
-            tokenIn,
-            tokenOut,
-            amountIn,
-            totalAmtOutWrong,
-            allPoolsCorrect // This would represent pools using correct on-chain balances
-        );
-
         assert.equal(swapsCorrect.length, 3, 'Should have 3 swaps.');
-        let diff = totalAmtOutCorrect.minus(totalAmtOutCorrected);
-        console.log(`Diff Out: ${diff.toString()}`);
-
-        testSwapsExactIn(
-            swapsCorrected,
-            tokenIn,
-            tokenOut,
-            amountIn,
-            totalAmtOutCorrected,
-            allPoolsCorrect
-        );
 
         testSwapsExactIn(
             swapsCorrect,
@@ -325,42 +199,6 @@ describe('Tests Multihop SOR vs static allPools.json', () => {
             totalAmtInCorrect,
             allPoolsCorrect
         );
-
-        let swapsWrong: Swap[][], totalAmtInWrong: BigNumber;
-        [swapsWrong, totalAmtInWrong] = fullSwap(
-            allPoolsWrong, // This would represent pools using balances from incorrect Subgraph
-            tokenIn,
-            tokenOut,
-            swapType,
-            noPools,
-            amountOut,
-            disabledTokens
-        );
-
-        expect(swapsCorrect).to.not.eql(swapsWrong);
-        expect(totalAmtInCorrect).to.not.eql(totalAmtInWrong);
-
-        let swapsCorrected: Swap[][], totalAmtInCorrected: BigNumber;
-        [swapsCorrected, totalAmtInCorrected] = sor.checkSwapsExactOut(
-            JSON.parse(JSON.stringify(swapsWrong)),
-            tokenIn,
-            tokenOut,
-            amountOut,
-            totalAmtInWrong,
-            allPoolsCorrect // This would represent pools using correct on-chain balances
-        );
-
-        testSwapsExactOut(
-            swapsCorrected,
-            tokenIn,
-            tokenOut,
-            amountOut,
-            totalAmtInCorrected,
-            allPoolsCorrect
-        );
-
-        let diff = totalAmtInCorrect.minus(totalAmtInCorrected);
-        console.log(`Diff In: ${diff.toString()}`);
     });
 
     it('Full Multihop SOR, DAI>ANT, swapExactIn - No Disabled Tokens, should have swap', async () => {
@@ -498,39 +336,6 @@ describe('Tests Multihop SOR vs static allPools.json', () => {
             totalAmtOutCorrect,
             allPoolsCorrect
         );
-
-        let swapsWrong: Swap[][], totalAmtOutWrong: BigNumber;
-        [swapsWrong, totalAmtOutWrong] = fullSwap(
-            allPoolsWrong, // This would represent pools using balances from incorrect Subgraph
-            tokenIn,
-            tokenOut,
-            swapType,
-            noPools,
-            amountIn,
-            disabledTokens
-        );
-
-        let swapsCorrected: Swap[][], totalAmtOutCorrected: BigNumber;
-        [swapsCorrected, totalAmtOutCorrected] = sor.checkSwapsExactIn(
-            JSON.parse(JSON.stringify(swapsWrong)),
-            tokenIn,
-            tokenOut,
-            amountIn,
-            totalAmtOutWrong,
-            allPoolsCorrect // This would represent pools using correct on-chain balances
-        );
-
-        testSwapsExactIn(
-            swapsCorrected,
-            tokenIn,
-            tokenOut,
-            amountIn,
-            totalAmtOutCorrected,
-            allPoolsCorrect
-        );
-
-        let diff = totalAmtOutCorrect.minus(totalAmtOutCorrected);
-        console.log(`Diff Out: ${diff.toString()}`);
     });
 
     it('Full Multihop SOR, USDC>MKR, swapExactOut', async () => {
@@ -560,42 +365,6 @@ describe('Tests Multihop SOR vs static allPools.json', () => {
             totalAmtInCorrect,
             allPoolsCorrect
         );
-
-        let swapsWrong: Swap[][], totalAmtInWrong: BigNumber;
-        [swapsWrong, totalAmtInWrong] = fullSwap(
-            allPoolsWrong, // This would represent pools using balances from incorrect Subgraph
-            tokenIn,
-            tokenOut,
-            swapType,
-            noPools,
-            amountOut,
-            disabledTokens
-        );
-
-        expect(swapsCorrect).to.not.eql(swapsWrong);
-        expect(totalAmtInCorrect).to.not.eql(totalAmtInWrong);
-
-        let swapsCorrected: Swap[][], totalAmtInCorrected: BigNumber;
-        [swapsCorrected, totalAmtInCorrected] = sor.checkSwapsExactOut(
-            JSON.parse(JSON.stringify(swapsWrong)),
-            tokenIn,
-            tokenOut,
-            amountOut,
-            totalAmtInWrong,
-            allPoolsCorrect // This would represent pools using correct on-chain balances
-        );
-
-        testSwapsExactOut(
-            swapsCorrected,
-            tokenIn,
-            tokenOut,
-            amountOut,
-            totalAmtInCorrected,
-            allPoolsCorrect
-        );
-
-        let diff = totalAmtInCorrect.minus(totalAmtInCorrected);
-        console.log(`Diff In: ${diff.toString()}`);
     });
 
     it('Full Multihop SOR, Should still complete multihop with disabled token pool', async () => {
@@ -625,41 +394,5 @@ describe('Tests Multihop SOR vs static allPools.json', () => {
             totalAmtInCorrect,
             allPoolsCorrect
         );
-
-        let swapsWrong: Swap[][], totalAmtInWrong: BigNumber;
-        [swapsWrong, totalAmtInWrong] = fullSwap(
-            allPoolsWrong, // This would represent pools using balances from incorrect Subgraph
-            tokenIn,
-            tokenOut,
-            swapType,
-            noPools,
-            amountOut,
-            disabledTokens
-        );
-
-        expect(swapsCorrect).to.not.eql(swapsWrong);
-        expect(totalAmtInCorrect).to.not.eql(totalAmtInWrong);
-
-        let swapsCorrected: Swap[][], totalAmtInCorrected: BigNumber;
-        [swapsCorrected, totalAmtInCorrected] = sor.checkSwapsExactOut(
-            JSON.parse(JSON.stringify(swapsWrong)),
-            tokenIn,
-            tokenOut,
-            amountOut,
-            totalAmtInWrong,
-            allPoolsCorrect // This would represent pools using correct on-chain balances
-        );
-
-        testSwapsExactOut(
-            swapsCorrected,
-            tokenIn,
-            tokenOut,
-            amountOut,
-            totalAmtInCorrected,
-            allPoolsCorrect
-        );
-
-        let diff = totalAmtInCorrect.minus(totalAmtInCorrected);
-        console.log(`Diff In: ${diff.toString()}`);
     });
 });

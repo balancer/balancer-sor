@@ -1,46 +1,17 @@
-// Legacy Calls
-export {
-    smartOrderRouter,
-    smartOrderRouterEpsOfInterest,
-    calcTotalOutput,
-    calcTotalInput,
-    formatSwapsExactAmountIn,
-    formatSwapsExactAmountOut,
-    processBalancers,
-    processEpsOfInterest,
-} from './direct/direct-sor';
-//
-
 export {
     smartOrderRouterMultiHopEpsOfInterest,
-    calcTotalReturn,
     processPaths,
     processEpsOfInterestMultiHop,
 } from './sor';
 
 export {
-    getTokenPairsMultiHop,
-    parsePoolData, // Legacy Function
-    filterPoolsWithTokensDirect,
-    filterPoolsWithTokensMultihop,
+    parsePoolData,
     formatSubgraphPools,
     filterPools,
     sortPoolsMostLiquid,
-    checkSwapsExactIn,
-    checkSwapsExactOut,
-    getPoolsFromSwaps,
 } from './helpers';
-export {
-    getPoolsWithTokens, // Legacy Function
-    getTokenPairs, // Legacy Function
-    getAllPublicSwapPools,
-    getFilteredPools,
-} from './subgraph';
-export {
-    parsePoolDataOnChain,
-    getAllPoolDataOnChain,
-    getAllPoolDataOnChainNew,
-} from './multicall'; // Legacy Function
+export { getAllPublicSwapPools, getFilteredPools } from './subgraph';
+export { getAllPoolDataOnChain } from './multicall'; // Legacy Function
 import * as bmath from './bmath';
 export { bmath };
 export { getCostOutputToken } from './costToken';

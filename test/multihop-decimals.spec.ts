@@ -19,7 +19,7 @@ const MKR = '0xef13C0c8abcaf5767160018d268f9697aE4f5375'.toLowerCase();
 const USDC = '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48';
 const yUSD = '0xb2fdd60ad80ca7ba89b9bab3b5336c2601c020b4';
 
-let allPoolsCorrect, allPoolsWrong;
+let allPoolsCorrect;
 
 describe('Tests Multihop SOR vs static allPoolsDecimals.json', () => {
     it('Saved pool check - without disabled filter', async () => {
@@ -35,13 +35,6 @@ describe('Tests Multihop SOR vs static allPoolsDecimals.json', () => {
             3,
             'Should be 3 pools with non-zero balance'
         );
-
-        allPoolsWrong = JSON.parse(JSON.stringify(allPools));
-        allPoolsWrong = alterPools(allPoolsWrong); // Creates incorrect token balances
-
-        expect(allPools).to.not.eql(allPoolsWrong);
-        expect(allPoolsCorrect).to.not.eql(allPoolsWrong);
-        [allTokensSet, allPoolsWrong] = formatAndFilterPools(allPoolsWrong);
     });
 
     it('Full Multihop SOR, WBTC>MKR, swapExactIn', async () => {
@@ -62,35 +55,7 @@ describe('Tests Multihop SOR vs static allPoolsDecimals.json', () => {
             disabledTokens
         );
 
-        let swapsWrong: Swap[][], totalAmtOutWrong: BigNumber;
-        [swapsWrong, totalAmtOutWrong] = fullSwap(
-            allPoolsWrong, // This would represent pools using balances from incorrect Subgraph
-            tokenIn,
-            tokenOut,
-            swapType,
-            noPools,
-            amountIn,
-            disabledTokens
-        );
-
-        let swapsCorrected: Swap[][], totalAmtOutCorrected: BigNumber;
-        [swapsCorrected, totalAmtOutCorrected] = sor.checkSwapsExactIn(
-            JSON.parse(JSON.stringify(swapsWrong)),
-            tokenIn,
-            tokenOut,
-            amountIn,
-            totalAmtOutWrong,
-            allPoolsCorrect // This would represent pools using correct on-chain balances
-        );
-
         assert.equal(swapsCorrect.length, 1, 'Should have 1 multiswap.');
-        if (swapsWrong.length !== 0) {
-            // If pools balances changed too much then swaps may be 0
-            expect(swapsCorrect).to.not.eql(swapsWrong);
-            expect(totalAmtOutCorrect).to.not.eql(totalAmtOutWrong);
-            expect(swapsCorrect).to.eql(swapsCorrected);
-            expect(totalAmtOutCorrect).to.eql(totalAmtOutCorrected);
-        }
 
         testSwapsExactIn(
             swapsCorrect,
@@ -120,35 +85,7 @@ describe('Tests Multihop SOR vs static allPoolsDecimals.json', () => {
             disabledTokens
         );
 
-        let swapsWrong: Swap[][], totalAmtInWrong: BigNumber;
-        [swapsWrong, totalAmtInWrong] = fullSwap(
-            allPoolsWrong, // This would represent pools using balances from incorrect Subgraph
-            tokenIn,
-            tokenOut,
-            swapType,
-            noPools,
-            amountOut,
-            disabledTokens
-        );
-
-        let swapsCorrected: Swap[][], totalAmtInCorrected: BigNumber;
-        [swapsCorrected, totalAmtInCorrected] = sor.checkSwapsExactOut(
-            JSON.parse(JSON.stringify(swapsWrong)),
-            tokenIn,
-            tokenOut,
-            amountOut,
-            totalAmtInWrong,
-            allPoolsCorrect // This would represent pools using correct on-chain balances
-        );
-
         assert.equal(swapsCorrect.length, 1, 'Should have 1 multiswap.');
-        if (swapsWrong.length !== 0) {
-            // If pools balances changed too much then swaps may be 0
-            expect(swapsCorrect).to.not.eql(swapsWrong);
-            expect(totalAmtInCorrect).to.not.eql(totalAmtInWrong);
-            expect(swapsCorrect).to.eql(swapsCorrected);
-            expect(totalAmtInCorrect).to.eql(totalAmtInCorrected);
-        }
 
         testSwapsExactOut(
             swapsCorrect,
@@ -167,8 +104,6 @@ describe('Tests Multihop SOR vs static allPoolsDecimals.json', () => {
         const tokenIn = USDC;
         const tokenOut = yUSD;
 
-        expect(allPools).to.not.eql(allPoolsWrong);
-
         let swapsCorrect: Swap[][], totalAmtOutCorrect: BigNumber;
         [swapsCorrect, totalAmtOutCorrect] = fullSwap(
             allPoolsCorrect,
@@ -180,35 +115,7 @@ describe('Tests Multihop SOR vs static allPoolsDecimals.json', () => {
             disabledTokens
         );
 
-        let swapsWrong: Swap[][], totalAmtOutWrong: BigNumber;
-        [swapsWrong, totalAmtOutWrong] = fullSwap(
-            allPoolsWrong, // This would represent pools using balances from incorrect Subgraph
-            tokenIn,
-            tokenOut,
-            swapType,
-            noPools,
-            amountIn,
-            disabledTokens
-        );
-
-        let swapsCorrected: Swap[][], totalAmtOutCorrected: BigNumber;
-        [swapsCorrected, totalAmtOutCorrected] = sor.checkSwapsExactIn(
-            JSON.parse(JSON.stringify(swapsWrong)),
-            tokenIn,
-            tokenOut,
-            amountIn,
-            totalAmtOutWrong,
-            allPoolsCorrect // This would represent pools using correct on-chain balances
-        );
-
         assert.equal(swapsCorrect.length, 1, 'Should have 1 multiswap.');
-        if (swapsWrong.length !== 0) {
-            // If pools balances changed too much then swaps may be 0
-            expect(totalAmtOutCorrect).to.not.eql(totalAmtOutWrong);
-            expect(swapsCorrect).to.eql(swapsWrong); // For single direct hop the swaps will be same as only one swap with amountIn
-            expect(swapsCorrect).to.eql(swapsCorrected);
-            expect(totalAmtOutCorrect).to.eql(totalAmtOutCorrected);
-        }
 
         testSwapsExactIn(
             swapsCorrect,
@@ -239,35 +146,7 @@ describe('Tests Multihop SOR vs static allPoolsDecimals.json', () => {
             disabledTokens
         );
 
-        let swapsWrong: Swap[][], totalAmtInWrong: BigNumber;
-        [swapsWrong, totalAmtInWrong] = fullSwap(
-            allPoolsWrong, // This would represent pools using balances from incorrect Subgraph
-            tokenIn,
-            tokenOut,
-            swapType,
-            noPools,
-            amountOut,
-            disabledTokens
-        );
-
-        let swapsCorrected: Swap[][], totalAmtInCorrected: BigNumber;
-        [swapsCorrected, totalAmtInCorrected] = sor.checkSwapsExactOut(
-            JSON.parse(JSON.stringify(swapsWrong)),
-            tokenIn,
-            tokenOut,
-            amountOut,
-            totalAmtInWrong,
-            allPoolsCorrect // This would represent pools using correct on-chain balances
-        );
-
         assert.equal(swapsCorrect.length, 1, 'Should have 1 multiswap.');
-        if (swapsWrong.length !== 0) {
-            // If pools balances changed too much then swaps may be 0
-            expect(totalAmtInCorrect).to.not.eql(totalAmtInWrong);
-            expect(swapsCorrect).to.eql(swapsWrong); // For single direct hop the swaps will be same as only one swap with amountOut
-            expect(swapsCorrect).to.eql(swapsCorrected);
-            expect(totalAmtInCorrect).to.eql(totalAmtInCorrected);
-        }
 
         testSwapsExactOut(
             swapsCorrect,

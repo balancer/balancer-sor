@@ -86,7 +86,7 @@ export class SOR {
         }
         let previousStringify = JSON.stringify(this.onChainPools); // Used for compare
 
-        this.onChainPools = await sor.getAllPoolDataOnChainNew(
+        this.onChainPools = await sor.getAllPoolDataOnChain(
             this.subgraphPools,
             MulticallAddr === '' ? this.multicallAddress : MulticallAddr,
             this.provider
@@ -185,7 +185,7 @@ export class SOR {
         console.time('OC');
 
         // Fetch on-chain balances
-        let poolsList = await sor.getAllPoolDataOnChainNew(
+        let poolsList = await sor.getAllPoolDataOnChain(
             subGraphPools,
             MulticallAddr === '' ? this.multicallAddress : MulticallAddr,
             this.provider

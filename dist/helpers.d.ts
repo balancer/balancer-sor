@@ -4,12 +4,8 @@ import {
     Path,
     Pool,
     PoolDictionary,
-    Swap,
     DisabledOptions,
-    DisabledToken,
-    SubGraphPools,
 } from './types';
-export declare function toChecksum(address: any): string;
 export declare function getLimitAmountSwap(
     poolPairData: PoolPairData,
     swapType: string
@@ -69,28 +65,6 @@ export declare const parsePoolPairData: (
     tokenIn: string,
     tokenOut: string
 ) => PoolPairData;
-export declare function getTokenPairsMultiHop(
-    token: string,
-    poolsTokensListSet: any
-): unknown[][];
-export declare function filterPoolsWithTokensDirect(
-    allPools: Pool[], // The complete information of the pools
-    tokenIn: string,
-    tokenOut: string,
-    disabledOptions?: DisabledOptions
-): PoolDictionary;
-export declare function filterPoolsWithoutMutualTokens(
-    allPools: Pool[],
-    tokenOne: string,
-    tokenTwo: string,
-    disabledTokens?: DisabledToken[]
-): [PoolDictionary, Set<string>, PoolDictionary, Set<string>];
-export declare function filterPoolsWithTokensMultihop(
-    allPools: Pool[], // Just the list of pool tokens
-    tokenIn: string,
-    tokenOut: string,
-    disabledOptions?: DisabledOptions
-): [Pool[], Pool[], string[]];
 export declare const formatSubgraphPools: (pools: any) => void;
 export declare function filterPools(
     allPools: Pool[], // The complete information of the pools
@@ -105,22 +79,6 @@ export declare function sortPoolsMostLiquid(
     poolsTokenInNoTokenOut: PoolDictionary,
     poolsTokenOutNoTokenIn: PoolDictionary
 ): [Pool[], Pool[]];
-export declare function checkSwapsExactIn(
-    swaps: Swap[][],
-    tokenIn: string,
-    tokenOut: string,
-    amountIn: BigNumber,
-    totalAmtOut: BigNumber,
-    allPoolsNonZeroBalances: any
-): [Swap[][], BigNumber];
-export declare function checkSwapsExactOut(
-    swaps: Swap[][],
-    tokenIn: string,
-    tokenOut: string,
-    amountOut: BigNumber,
-    totalAmtIn: BigNumber,
-    allPoolsNonZeroBalances: any
-): [Swap[][], BigNumber];
 export declare function calcInGivenOutForPool(
     Pools: any,
     PoolAddr: string,
@@ -128,7 +86,3 @@ export declare function calcInGivenOutForPool(
     TokenOut: string,
     AmtIn: any
 ): BigNumber;
-export declare function getPoolsFromSwaps(
-    Swaps: Swap[][],
-    subGraphPools: SubGraphPools
-): SubGraphPools;

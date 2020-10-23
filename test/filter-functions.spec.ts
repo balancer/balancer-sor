@@ -33,28 +33,6 @@ describe('Test Filter Functions using allPoolsSmall.json & full SOR comparrions'
         );
     });
 
-    it('Should filter without mutual pools', async () => {
-        let daiPools, usdcPools, daiPairedTokens, usdcPairedTokens;
-        [
-            daiPools,
-            daiPairedTokens,
-            usdcPools,
-            usdcPairedTokens,
-        ] = helpers.filterPoolsWithoutMutualTokens(allPools.pools, DAI, USDC);
-
-        assert.equal(
-            Object.keys(daiPools).length,
-            3,
-            'Should have 3 DAI only pools'
-        );
-
-        assert.equal(
-            Object.keys(usdcPools).length,
-            2,
-            'Should have 2 USDC only pools'
-        );
-    });
-
     it('Get multihop pools - DAI>USDC', async () => {
         let poolsTokenIn, poolsTokenOut, directPools, hopTokensFilter;
         [
