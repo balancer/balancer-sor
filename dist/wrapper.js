@@ -173,22 +173,17 @@ class SOR {
     ) {
         return __awaiter(this, void 0, void 0, function*() {
             // Fetch pools that have either tokenIn or tokenOut or both
-            console.time('SG');
             let subGraphPools = yield sor.getFilteredPools(
                 TokenIn,
                 TokenOut,
                 SubgraphUrl
             );
-            console.timeEnd('SG');
-            console.time('OC');
             // Fetch on-chain balances
             let poolsList = yield sor.getAllPoolDataOnChain(
                 subGraphPools,
                 this.MULTIADDR[this.chainId],
                 this.provider
             );
-            console.timeEnd('OC');
-            console.time('PROCESS');
             // Retrieves all pools that contain both tokenIn & tokenOut, i.e. pools that can be used for direct swaps
             // Retrieves intermediate pools along with tokens that are contained in these.
             let directPools, hopTokens, poolsTokenIn, poolsTokenOut;
@@ -245,7 +240,6 @@ class SOR {
                 costOutputToken,
                 epsOfInterest
             );
-            console.timeEnd('PROCESS');
             return [swaps, total];
         });
     }
