@@ -1,5 +1,5 @@
 import { BigNumber } from './utils/bignumber';
-import { getAddress } from '@ethersproject/address';
+import { utils } from 'ethers';
 import {
     PoolPairData,
     Path,
@@ -25,7 +25,7 @@ import {
 const disabledTokensDefault = require('./disabled-tokens.json');
 
 export function toChecksum(address) {
-    return getAddress(address);
+    return utils.getAddress(address);
 }
 
 export function getLimitAmountSwap(
@@ -453,11 +453,15 @@ export const parsePoolPairData = (
     tokenIn: string,
     tokenOut: string
 ): PoolPairData => {
-    let tI = p.tokens.find(t => getAddress(t.address) === getAddress(tokenIn));
+    let tI = p.tokens.find(
+        t => utils.getAddress(t.address) === utils.getAddress(tokenIn)
+    );
     // console.log("tI")
     // console.log(tI.balance.toString());
     // console.log(tI)
-    let tO = p.tokens.find(t => getAddress(t.address) === getAddress(tokenOut));
+    let tO = p.tokens.find(
+        t => utils.getAddress(t.address) === utils.getAddress(tokenOut)
+    );
 
     // console.log("tO")
     // console.log(tO.balance.toString());
@@ -508,11 +512,12 @@ function getTokensPairedToTokenWithinPools(pools, token) {
         found = false;
         for (let k = 0; k < pools[i].tokensList.length; k++) {
             if (
-                getAddress(pools[i].tokensList[k]) != getAddress(token) &&
+                utils.getAddress(pools[i].tokensList[k]) !=
+                    utils.getAddress(token) &&
                 pools[i].tokens.find(
                     t =>
-                        getAddress(t.address) ===
-                        getAddress(pools[i].tokensList[k])
+                        utils.getAddress(t.address) ===
+                        utils.getAddress(pools[i].tokensList[k])
                 ).balance != 0
             ) {
                 tokens.add(pools[i].tokensList[k]);

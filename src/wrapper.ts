@@ -1,4 +1,4 @@
-import { JsonRpcProvider } from '@ethersproject/providers';
+import { ethers } from 'ethers';
 import { BigNumber } from './utils/bignumber';
 import {
     SubGraphPools,
@@ -25,7 +25,7 @@ export class SOR {
     subgraphPools;
     subgraphPoolsFormatted;
     onChainPools;
-    provider: JsonRpcProvider;
+    provider: ethers.providers.JsonRpcProvider;
     // Default multi address for mainnet
     multicallAddress: string = '0xF700478148B84E572A447d63b29fD937Fd511147';
     gasPrice: BigNumber;
@@ -36,7 +36,7 @@ export class SOR {
     processedCache: ProcessedCache;
 
     constructor(
-        Provider: JsonRpcProvider,
+        Provider: ethers.providers.JsonRpcProvider,
         GasPrice: BigNumber,
         MaxPools: number
     ) {
@@ -135,18 +135,105 @@ export class SOR {
         TokenOut: string,
         SwapType: string,
         SwapAmt: BigNumber,
-        CheckOnChain: boolean = true,
+        SubgraphUrl: string = '',
         MulticallAddr: string = ''
     ): Promise<[Swap[][], BigNumber]> {
-        if (!this.isSubgraphFetched) {
-            console.error('ERROR: Must fetch pools before getting a swap.');
-            // USE SUBGRAPH METHOD
-            return;
-        }
-
         // The Subgraph returns tokens in lower case format so we must match this
         TokenIn = TokenIn.toLowerCase();
         TokenOut = TokenOut.toLowerCase();
+
+        if (!this.isSubgraphFetched || !this.isOnChainFetched) {
+            let [swaps, total] = await this.getSwapsWithoutCache(
+                TokenIn,
+                TokenOut,
+                SwapType,
+                SwapAmt,
+                SubgraphUrl,
+                MulticallAddr
+            );
+            return [swaps, total];
+        } else {
+            let [swaps, total] = await this.getSwapsWithCache(
+                TokenIn,
+                TokenOut,
+                SwapType,
+                SwapAmt,
+                SubgraphUrl,
+                MulticallAddr
+            );
+            return [swaps, total];
+        }
+    }
+
+    async getSwapsWithoutCache(
+        TokenIn: string,
+        TokenOut: string,
+        SwapType: string,
+        SwapAmt: BigNumber,
+        SubgraphUrl: string,
+        MulticallAddr: string
+    ): Promise<[Swap[][], BigNumber]> {
+        // Fetch pools that have either tokenIn or tokenOut or both
+        console.time('SG');
+        let subGraphPools = await sor.getFilteredPools(
+            TokenIn,
+            TokenOut,
+            SubgraphUrl
+        );
+        console.timeEnd('SG');
+
+        console.time('OC');
+
+        // Fetch on-chain balances
+        let poolsList = await sor.getAllPoolDataOnChainNew(
+            subGraphPools,
+            MulticallAddr === '' ? this.multicallAddress : MulticallAddr,
+            this.provider
+        );
+        console.timeEnd('OC');
+
+        console.time('PROCESS');
+        // Retrieves all pools that contain both tokenIn & tokenOut, i.e. pools that can be used for direct swaps
+        // Retrieves intermediate pools along with tokens that are contained in these.
+        let directPools, hopTokens, poolsTokenIn, poolsTokenOut;
+        [directPools, hopTokens, poolsTokenIn, poolsTokenOut] = sor.filterPools(
+            poolsList.pools,
+            TokenIn,
+            TokenOut
+        );
+
+        // Sort intermediate pools by order of liquidity
+        let mostLiquidPoolsFirstHop, mostLiquidPoolsSecondHop;
+        [
+            mostLiquidPoolsFirstHop,
+            mostLiquidPoolsSecondHop,
+        ] = sor.sortPoolsMostLiquid(
+            TokenIn,
+            TokenOut,
+            hopTokens,
+            poolsTokenIn,
+            poolsTokenOut
+        );
+
+        // Finds the possible paths to make the swap
+        let pathData, pools: PoolDictionary;
+        [pools, pathData] = sor.parsePoolData(
+            directPools,
+            TokenIn,
+            TokenOut,
+            mostLiquidPoolsFirstHop,
+            mostLiquidPoolsSecondHop,
+            hopTokens
+        );
+
+        // Finds sorted price & slippage information for paths
+        let paths: Path[] = sor.processPaths(pathData, pools, SwapType);
+
+        let epsOfInterest: EffectivePrice[] = sor.processEpsOfInterestMultiHop(
+            paths,
+            SwapType,
+            this.maxPools
+        );
 
         // Use previously stored value if exists else default to 0
         let costOutputToken = this.tokenCost[TokenOut];
@@ -154,6 +241,32 @@ export class SOR {
             costOutputToken = new BigNumber(0);
         }
 
+        // Returns list of swaps
+        // swapExactIn - total = total amount swap will return of TokenOut
+        // swapExactOut - total = total amount of TokenIn required for swap
+        let swaps, total;
+        [swaps, total] = sor.smartOrderRouterMultiHopEpsOfInterest(
+            pools, // Need to keep original pools for cache
+            paths,
+            SwapType,
+            SwapAmt,
+            this.maxPools,
+            costOutputToken,
+            epsOfInterest
+        );
+        console.timeEnd('PROCESS');
+
+        return [swaps, total];
+    }
+
+    async getSwapsWithCache(
+        TokenIn: string,
+        TokenOut: string,
+        SwapType: string,
+        SwapAmt: BigNumber,
+        SubgraphUrl: string,
+        MulticallAddr: string
+    ): Promise<[Swap[][], BigNumber]> {
         let pools: PoolDictionary,
             paths: Path[],
             epsOfInterest: EffectivePrice[];
@@ -225,6 +338,12 @@ export class SOR {
             pools = cache.pools;
             paths = cache.paths;
             epsOfInterest = cache.epsOfInterest;
+        }
+
+        // Use previously stored value if exists else default to 0
+        let costOutputToken = this.tokenCost[TokenOut];
+        if (costOutputToken === undefined) {
+            costOutputToken = new BigNumber(0);
         }
 
         // Returns list of swaps

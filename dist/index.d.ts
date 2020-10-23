@@ -30,6 +30,7 @@ export {
     getPoolsWithTokens, // Legacy Function
     getTokenPairs, // Legacy Function
     getAllPublicSwapPools,
+    getFilteredPools,
 } from './subgraph';
 export {
     parsePoolDataOnChain,

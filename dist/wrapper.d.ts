@@ -1,4 +1,4 @@
-import { JsonRpcProvider } from '@ethersproject/providers';
+import { ethers } from 'ethers';
 import { BigNumber } from './utils/bignumber';
 import { Swap, PoolDictionary, Path, EffectivePrice } from './types';
 interface ProcessedData {
@@ -15,7 +15,7 @@ export declare class SOR {
     subgraphPools: any;
     subgraphPoolsFormatted: any;
     onChainPools: any;
-    provider: JsonRpcProvider;
+    provider: ethers.providers.JsonRpcProvider;
     multicallAddress: string;
     gasPrice: BigNumber;
     swapCost: BigNumber;
@@ -23,29 +23,36 @@ export declare class SOR {
     maxPools: number;
     processedCache: ProcessedCache;
     constructor(
-        Provider: JsonRpcProvider,
+        Provider: ethers.providers.JsonRpcProvider,
         GasPrice: BigNumber,
         MaxPools: number
     );
     fetchSubgraphPools(SubgraphUrl?: string): Promise<void>;
     fetchOnChainPools(MulticallAddr?: string): Promise<void>;
     setCostOutputToken(TokenOut: string, Cost?: BigNumber): Promise<void>;
-    onChainCheck(
-        Swaps: Swap[][],
-        Total: BigNumber,
-        SwapType: string,
-        TokenIn: string,
-        TokenOut: string,
-        SwapAmt: BigNumber,
-        MulticallAddr: string
-    ): Promise<[Swap[][], BigNumber]>;
     getSwaps(
         TokenIn: string,
         TokenOut: string,
         SwapType: string,
         SwapAmt: BigNumber,
-        CheckOnChain?: boolean,
+        SubgraphUrl?: string,
         MulticallAddr?: string
+    ): Promise<[Swap[][], BigNumber]>;
+    getSwapsWithoutCache(
+        TokenIn: string,
+        TokenOut: string,
+        SwapType: string,
+        SwapAmt: BigNumber,
+        SubgraphUrl: string,
+        MulticallAddr: string
+    ): Promise<[Swap[][], BigNumber]>;
+    getSwapsWithCache(
+        TokenIn: string,
+        TokenOut: string,
+        SwapType: string,
+        SwapAmt: BigNumber,
+        SubgraphUrl: string,
+        MulticallAddr: string
     ): Promise<[Swap[][], BigNumber]>;
 }
 export {};

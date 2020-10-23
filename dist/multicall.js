@@ -47,7 +47,6 @@ var __importStar =
     };
 Object.defineProperty(exports, '__esModule', { value: true });
 const ethers_1 = require('ethers');
-const contracts_1 = require('@ethersproject/contracts');
 const bmath = __importStar(require('./bmath'));
 // LEGACY FUNCTION - Keep Input/Output Format
 function parsePoolDataOnChain(
@@ -62,11 +61,7 @@ function parsePoolDataOnChain(
             throw Error('There are no pools with selected tokens');
         const multiAbi = require('./abi/multicall.json');
         const bpoolAbi = require('./abi/bpool.json');
-        const multi = new contracts_1.Contract(
-            multiAddress,
-            multiAbi,
-            provider
-        );
+        const multi = new ethers_1.Contract(multiAddress, multiAbi, provider);
         const iface = new ethers_1.utils.Interface(bpoolAbi);
         const promises = [];
         let calls = [];
@@ -126,11 +121,7 @@ function getAllPoolDataOnChain(pools, multiAddress, provider) {
             throw Error('There are no pools with selected tokens');
         const multiAbi = require('./abi/multicall.json');
         const bpoolAbi = require('./abi/bpool.json');
-        const multi = new contracts_1.Contract(
-            multiAddress,
-            multiAbi,
-            provider
-        );
+        const multi = new ethers_1.Contract(multiAddress, multiAbi, provider);
         const bPool = new ethers_1.utils.Interface(bpoolAbi);
         const promises = [];
         let calls = [];
@@ -221,7 +212,7 @@ function getAllPoolDataOnChainNew(pools, multiAddress, provider) {
         if (pools.pools.length === 0)
             throw Error('There are no pools with selected tokens');
         const customMultiAbi = require('./abi/customMulticall.json');
-        const contract = new contracts_1.Contract(
+        const contract = new ethers_1.Contract(
             multiAddress,
             customMultiAbi,
             provider

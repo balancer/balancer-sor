@@ -35,9 +35,6 @@ var __awaiter =
         });
     };
 Object.defineProperty(exports, '__esModule', { value: true });
-const solidity_1 = require('@ethersproject/solidity');
-const address_1 = require('@ethersproject/address');
-// import { Web3Provider } from '@ethersproject/providers';
 const ethers_1 = require('ethers');
 const bignumber_1 = require('./utils/bignumber');
 const bmath_1 = require('./bmath');
@@ -49,11 +46,16 @@ function getAddress(tokenA, tokenB) {
         tokenA.toLowerCase() < tokenB.toLowerCase()
             ? [tokenA, tokenB]
             : [tokenB, tokenA];
-    let address = address_1.getCreate2Address(
+    let address = ethers_1.utils.getCreate2Address(
         FACTORY_ADDRESS,
-        solidity_1.keccak256(
+        ethers_1.utils.solidityKeccak256(
             ['bytes'],
-            [solidity_1.pack(['address', 'address'], [tokens[0], tokens[1]])]
+            [
+                ethers_1.utils.solidityPack(
+                    ['address', 'address'],
+                    [tokens[0], tokens[1]]
+                ),
+            ]
         ),
         INIT_CODE_HASH
     );

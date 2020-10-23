@@ -1,7 +1,4 @@
-import { utils } from 'ethers';
-import { Contract } from '@ethersproject/contracts';
-import { Web3Provider } from '@ethersproject/providers';
-import { formatEther } from '@ethersproject/units';
+import { ethers, utils, Contract } from 'ethers';
 import { PoolPairData, Pools, Pool, SubGraphPools, Token } from './types';
 import * as bmath from './bmath';
 
@@ -11,7 +8,7 @@ export async function parsePoolDataOnChain(
     tokenIn: string,
     tokenOut: string,
     multiAddress: string,
-    provider: Web3Provider
+    provider: ethers.providers.Web3Provider
 ): Promise<PoolPairData[]> {
     if (pools.length === 0)
         throw Error('There are no pools with selected tokens');
@@ -76,7 +73,7 @@ export async function parsePoolDataOnChain(
 export async function getAllPoolDataOnChain(
     pools: SubGraphPools,
     multiAddress: string,
-    provider: Web3Provider
+    provider: ethers.providers.Web3Provider
 ): Promise<Pools> {
     if (pools.pools.length === 0)
         throw Error('There are no pools with selected tokens');
@@ -180,7 +177,7 @@ export async function getAllPoolDataOnChain(
 export async function getAllPoolDataOnChainNew(
     pools: SubGraphPools,
     multiAddress: string,
-    provider: Web3Provider
+    provider: ethers.providers.Web3Provider
 ): Promise<Pools> {
     if (pools.pools.length === 0)
         throw Error('There are no pools with selected tokens');

@@ -44,6 +44,7 @@ var subgraph_1 = require('./subgraph');
 exports.getPoolsWithTokens = subgraph_1.getPoolsWithTokens;
 exports.getTokenPairs = subgraph_1.getTokenPairs;
 exports.getAllPublicSwapPools = subgraph_1.getAllPublicSwapPools;
+exports.getFilteredPools = subgraph_1.getFilteredPools;
 var multicall_1 = require('./multicall'); // Legacy Function
 exports.parsePoolDataOnChain = multicall_1.parsePoolDataOnChain;
 exports.getAllPoolDataOnChain = multicall_1.getAllPoolDataOnChain;

@@ -121,52 +121,6 @@ class SOR {
         });
     }
     /*
-    Checks a swap list against latest onchain pool info.
-    Will update any invalid swaps.
-    Normally used when using Subgraph balances only.
-    */
-    onChainCheck(
-        Swaps,
-        Total,
-        SwapType,
-        TokenIn,
-        TokenOut,
-        SwapAmt,
-        MulticallAddr
-    ) {
-        return __awaiter(this, void 0, void 0, function*() {
-            // Gets pools used in swaps
-            let poolsToCheck = sor.getPoolsFromSwaps(Swaps, this.subgraphPools);
-            // Get onchain info for swap pools
-            let onChainPools = yield sor.getAllPoolDataOnChainNew(
-                poolsToCheck,
-                MulticallAddr === '' ? this.multicallAddress : MulticallAddr,
-                this.provider
-            );
-            // Checks swaps against Onchain pools info.
-            // Will update any invalid swaps for valid.
-            if (SwapType === 'swapExactIn')
-                [Swaps, Total] = sor.checkSwapsExactIn(
-                    Swaps,
-                    TokenIn,
-                    TokenOut,
-                    SwapAmt,
-                    Total,
-                    onChainPools
-                );
-            else
-                [Swaps, Total] = sor.checkSwapsExactOut(
-                    Swaps,
-                    TokenIn,
-                    TokenOut,
-                    SwapAmt,
-                    Total,
-                    onChainPools
-                );
-            return [Swaps, Total];
-        });
-    }
-    /*
     Main function to retrieve swap information.
     Will always use onChain pools if available over Subgraph pools.
     If using Subgraph pools by default swaps are checked using data retrieved from onChain.
@@ -177,22 +131,131 @@ class SOR {
         TokenOut,
         SwapType,
         SwapAmt,
-        CheckOnChain = true,
+        SubgraphUrl = '',
         MulticallAddr = ''
     ) {
         return __awaiter(this, void 0, void 0, function*() {
-            if (!this.isSubgraphFetched) {
-                console.error('ERROR: Must fetch pools before getting a swap.');
-                return;
-            }
             // The Subgraph returns tokens in lower case format so we must match this
             TokenIn = TokenIn.toLowerCase();
             TokenOut = TokenOut.toLowerCase();
+            if (!this.isSubgraphFetched || !this.isOnChainFetched) {
+                let [swaps, total] = yield this.getSwapsWithoutCache(
+                    TokenIn,
+                    TokenOut,
+                    SwapType,
+                    SwapAmt,
+                    SubgraphUrl,
+                    MulticallAddr
+                );
+                return [swaps, total];
+            } else {
+                let [swaps, total] = yield this.getSwapsWithCache(
+                    TokenIn,
+                    TokenOut,
+                    SwapType,
+                    SwapAmt,
+                    SubgraphUrl,
+                    MulticallAddr
+                );
+                return [swaps, total];
+            }
+        });
+    }
+    getSwapsWithoutCache(
+        TokenIn,
+        TokenOut,
+        SwapType,
+        SwapAmt,
+        SubgraphUrl,
+        MulticallAddr
+    ) {
+        return __awaiter(this, void 0, void 0, function*() {
+            // Fetch pools that have either tokenIn or tokenOut or both
+            console.time('SG');
+            let subGraphPools = yield sor.getFilteredPools(
+                TokenIn,
+                TokenOut,
+                SubgraphUrl
+            );
+            console.timeEnd('SG');
+            console.time('OC');
+            // Fetch on-chain balances
+            let poolsList = yield sor.getAllPoolDataOnChainNew(
+                subGraphPools,
+                MulticallAddr === '' ? this.multicallAddress : MulticallAddr,
+                this.provider
+            );
+            console.timeEnd('OC');
+            console.time('PROCESS');
+            // Retrieves all pools that contain both tokenIn & tokenOut, i.e. pools that can be used for direct swaps
+            // Retrieves intermediate pools along with tokens that are contained in these.
+            let directPools, hopTokens, poolsTokenIn, poolsTokenOut;
+            [
+                directPools,
+                hopTokens,
+                poolsTokenIn,
+                poolsTokenOut,
+            ] = sor.filterPools(poolsList.pools, TokenIn, TokenOut);
+            // Sort intermediate pools by order of liquidity
+            let mostLiquidPoolsFirstHop, mostLiquidPoolsSecondHop;
+            [
+                mostLiquidPoolsFirstHop,
+                mostLiquidPoolsSecondHop,
+            ] = sor.sortPoolsMostLiquid(
+                TokenIn,
+                TokenOut,
+                hopTokens,
+                poolsTokenIn,
+                poolsTokenOut
+            );
+            // Finds the possible paths to make the swap
+            let pathData, pools;
+            [pools, pathData] = sor.parsePoolData(
+                directPools,
+                TokenIn,
+                TokenOut,
+                mostLiquidPoolsFirstHop,
+                mostLiquidPoolsSecondHop,
+                hopTokens
+            );
+            // Finds sorted price & slippage information for paths
+            let paths = sor.processPaths(pathData, pools, SwapType);
+            let epsOfInterest = sor.processEpsOfInterestMultiHop(
+                paths,
+                SwapType,
+                this.maxPools
+            );
             // Use previously stored value if exists else default to 0
             let costOutputToken = this.tokenCost[TokenOut];
             if (costOutputToken === undefined) {
                 costOutputToken = new bignumber_1.BigNumber(0);
             }
+            // Returns list of swaps
+            // swapExactIn - total = total amount swap will return of TokenOut
+            // swapExactOut - total = total amount of TokenIn required for swap
+            let swaps, total;
+            [swaps, total] = sor.smartOrderRouterMultiHopEpsOfInterest(
+                pools, // Need to keep original pools for cache
+                paths,
+                SwapType,
+                SwapAmt,
+                this.maxPools,
+                costOutputToken,
+                epsOfInterest
+            );
+            console.timeEnd('PROCESS');
+            return [swaps, total];
+        });
+    }
+    getSwapsWithCache(
+        TokenIn,
+        TokenOut,
+        SwapType,
+        SwapAmt,
+        SubgraphUrl,
+        MulticallAddr
+    ) {
+        return __awaiter(this, void 0, void 0, function*() {
             let pools, paths, epsOfInterest;
             // If token pair has been processed before use that info to speed up execution
             let cache = this.processedCache[`${TokenIn}${TokenOut}${SwapType}`];
@@ -255,6 +318,11 @@ class SOR {
                 paths = cache.paths;
                 epsOfInterest = cache.epsOfInterest;
             }
+            // Use previously stored value if exists else default to 0
+            let costOutputToken = this.tokenCost[TokenOut];
+            if (costOutputToken === undefined) {
+                costOutputToken = new bignumber_1.BigNumber(0);
+            }
             // Returns list of swaps
             // swapExactIn - total = total amount swap will return of TokenOut
             // swapExactOut - total = total amount of TokenIn required for swap
@@ -268,18 +336,6 @@ class SOR {
                 costOutputToken,
                 epsOfInterest
             );
-            // Perform onChain check of swaps if using Subgraph balances
-            if (!this.isOnChainFetched && CheckOnChain && swaps.length > 0) {
-                [swaps, total] = yield this.onChainCheck(
-                    swaps,
-                    total,
-                    SwapType,
-                    TokenIn,
-                    TokenOut,
-                    SwapAmt,
-                    MulticallAddr === '' ? this.multicallAddress : MulticallAddr
-                );
-            }
             return [swaps, total];
         });
     }

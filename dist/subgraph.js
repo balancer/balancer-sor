@@ -41,7 +41,7 @@ var __importDefault =
     };
 Object.defineProperty(exports, '__esModule', { value: true });
 const isomorphic_fetch_1 = __importDefault(require('isomorphic-fetch'));
-const address_1 = require('@ethersproject/address');
+const ethers_1 = require('ethers');
 const SUBGRAPH_URL =
     process.env.REACT_APP_SUBGRAPH_URL ||
     'https://api.thegraph.com/subgraphs/name/balancer-labs/balancer';
@@ -50,8 +50,8 @@ function getPoolsWithTokens(tokenIn, tokenOut) {
     return __awaiter(this, void 0, void 0, function*() {
         // GraphQL is case-sensitive
         // Always use checksum addresses
-        tokenIn = address_1.getAddress(tokenIn);
-        tokenOut = address_1.getAddress(tokenOut);
+        tokenIn = ethers_1.utils.getAddress(tokenIn);
+        tokenOut = ethers_1.utils.getAddress(tokenOut);
         const query = `
       query ($tokens: [Bytes!]) {
           pools (first: 1000, where: {tokensList_contains: $tokens, publicSwap: true, active: true}) {
@@ -95,7 +95,7 @@ function getTokenPairs(token) {
     return __awaiter(this, void 0, void 0, function*() {
         // GraphQL is case-sensitive
         // Always use checksum addresses
-        token = address_1.getAddress(token);
+        token = ethers_1.utils.getAddress(token);
         const query = `
       query ($token: [Bytes!]) {
           pools (first: 1000, where: {tokensList_contains: $token, publicSwap: true, active: true}) {
@@ -162,3 +162,68 @@ function getAllPublicSwapPools(SubgraphUrl = '') {
     });
 }
 exports.getAllPublicSwapPools = getAllPublicSwapPools;
+function getFilteredPools(tokenIn, tokenOut, SubgraphUrl = '') {
+    return __awaiter(this, void 0, void 0, function*() {
+        tokenIn = ethers_1.utils.getAddress(tokenIn);
+        tokenOut = ethers_1.utils.getAddress(tokenOut);
+        let query = `
+      {
+          poolIn: pools (first: 1000, where: { tokensList_contains: ["${tokenIn}"], publicSwap: true, active: true}) {
+            id
+            swapFee
+            totalWeight
+            publicSwap
+            tokens {
+              id
+              address
+              balance
+              decimals
+              symbol
+              denormWeight
+            }
+            tokensList
+          },
+
+          poolOut: pools (first: 1000, where: { tokensList_contains: ["${tokenOut}"], publicSwap: true, active: true}) {
+            id
+            swapFee
+            totalWeight
+            publicSwap
+            tokens {
+              id
+              address
+              balance
+              decimals
+              symbol
+              denormWeight
+            }
+            tokensList
+          }
+      }
+    `;
+        const response = yield isomorphic_fetch_1.default(
+            SubgraphUrl === '' ? SUBGRAPH_URL : SubgraphUrl,
+            {
+                method: 'POST',
+                headers: {
+                    Accept: 'application/json',
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    query,
+                }),
+            }
+        );
+        const { data } = yield response.json();
+        // Remove any duplicate pools
+        let joined = data.poolIn.concat(data.poolOut);
+        var exclusivePools = joined.reduce((accumalator, current) => {
+            if (!accumalator.some(item => item.id === current.id)) {
+                accumalator.push(current);
+            }
+            return accumalator;
+        }, []);
+        return { pools: exclusivePools };
+    });
+}
+exports.getFilteredPools = getFilteredPools;
