@@ -125,57 +125,6 @@ export class SOR {
     }
 
     /*
-    Checks a swap list against latest onchain pool info.
-    Will update any invalid swaps.
-    Normally used when using Subgraph balances only.
-    */
-    async onChainCheck(
-        Swaps: Swap[][],
-        Total: BigNumber,
-        SwapType: string,
-        TokenIn: string,
-        TokenOut: string,
-        SwapAmt: BigNumber,
-        MulticallAddr: string
-    ): Promise<[Swap[][], BigNumber]> {
-        // Gets pools used in swaps
-        let poolsToCheck: SubGraphPools = sor.getPoolsFromSwaps(
-            Swaps,
-            this.subgraphPools
-        );
-
-        // Get onchain info for swap pools
-        let onChainPools = await sor.getAllPoolDataOnChainNew(
-            poolsToCheck,
-            MulticallAddr === '' ? this.multicallAddress : MulticallAddr,
-            this.provider
-        );
-
-        // Checks swaps against Onchain pools info.
-        // Will update any invalid swaps for valid.
-        if (SwapType === 'swapExactIn')
-            [Swaps, Total] = sor.checkSwapsExactIn(
-                Swaps,
-                TokenIn,
-                TokenOut,
-                SwapAmt,
-                Total,
-                onChainPools
-            );
-        else
-            [Swaps, Total] = sor.checkSwapsExactOut(
-                Swaps,
-                TokenIn,
-                TokenOut,
-                SwapAmt,
-                Total,
-                onChainPools
-            );
-
-        return [Swaps, Total];
-    }
-
-    /*
     Main function to retrieve swap information.
     Will always use onChain pools if available over Subgraph pools.
     If using Subgraph pools by default swaps are checked using data retrieved from onChain.
@@ -191,6 +140,7 @@ export class SOR {
     ): Promise<[Swap[][], BigNumber]> {
         if (!this.isSubgraphFetched) {
             console.error('ERROR: Must fetch pools before getting a swap.');
+            // USE SUBGRAPH METHOD
             return;
         }
 
@@ -290,19 +240,6 @@ export class SOR {
             costOutputToken,
             epsOfInterest
         );
-
-        // Perform onChain check of swaps if using Subgraph balances
-        if (!this.isOnChainFetched && CheckOnChain && swaps.length > 0) {
-            [swaps, total] = await this.onChainCheck(
-                swaps,
-                total,
-                SwapType,
-                TokenIn,
-                TokenOut,
-                SwapAmt,
-                MulticallAddr === '' ? this.multicallAddress : MulticallAddr
-            );
-        }
 
         return [swaps, total];
     }
