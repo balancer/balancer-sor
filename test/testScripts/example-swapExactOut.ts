@@ -34,7 +34,7 @@ async function swapExactIn() {
     console.log(`Retrieving Onchain Balances...`);
     allPoolsNonZeroBalances = await sor.getAllPoolDataOnChain(
         allPoolsNonZeroBalances,
-        '0xeefba1e63905ef1d7acba5a8513c70307c1ce441', // Address of Multicall contract
+        '0xF700478148B84E572A447d63b29fD937Fd511147', // Address of Multicall contract
         provider
     );
 

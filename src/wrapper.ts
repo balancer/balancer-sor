@@ -185,15 +185,11 @@ export class SOR {
         MulticallAddr: string
     ): Promise<[Swap[][], BigNumber]> {
         // Fetch pools that have either tokenIn or tokenOut or both
-        console.time('SG');
         let subGraphPools = await sor.getFilteredPools(
             TokenIn,
             TokenOut,
             SubgraphUrl
         );
-        console.timeEnd('SG');
-
-        console.time('OC');
 
         // Fetch on-chain balances
         let poolsList = await sor.getAllPoolDataOnChain(
@@ -201,9 +197,7 @@ export class SOR {
             this.MULTIADDR[this.chainId],
             this.provider
         );
-        console.timeEnd('OC');
 
-        console.time('PROCESS');
         // Retrieves all pools that contain both tokenIn & tokenOut, i.e. pools that can be used for direct swaps
         // Retrieves intermediate pools along with tokens that are contained in these.
         let directPools, hopTokens, poolsTokenIn, poolsTokenOut;
@@ -265,7 +259,6 @@ export class SOR {
             costOutputToken,
             epsOfInterest
         );
-        console.timeEnd('PROCESS');
 
         return [swaps, total];
     }
