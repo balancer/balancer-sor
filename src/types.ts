@@ -55,14 +55,17 @@ export interface Pool {
     id: string;
     swapFee: BigNumber;
     totalWeight: BigNumber;
+    publicSwap: Boolean;
     tokens: Token[];
     tokensList: string[];
 }
 
 export interface Token {
+    id: string;
     address: string;
     balance: BigNumber;
     decimals: number;
+    symbol: string;
     denormWeight: BigNumber;
 }
 
@@ -74,14 +77,17 @@ export interface SubGraphPool {
     id: string;
     swapFee: string;
     totalWeight: string;
+    publicSwap: string;
     tokens: SubGraphToken[];
     tokensList: string[];
 }
 
 export interface SubGraphToken {
+    id: string;
     address: string;
     balance: string;
     decimals: string;
+    symbol: string;
     denormWeight: string;
 }
 

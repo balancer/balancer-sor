@@ -30,8 +30,6 @@ export class SOR {
     gasPrice: BigNumber;
     maxPools: number;
     chainId: number;
-    // Default multi address for mainnet
-    multicallAddress: string = '0x514053acec7177e277b947b1ebb5c08ab4c4580e';
     // avg Balancer swap cost. Can be updated manually if required.
     swapCost: BigNumber = new BigNumber('100000');
     tokenCost = {};
@@ -41,10 +39,9 @@ export class SOR {
     processedCache = {};
 
     MULTIADDR: { [chainId: number]: string } = {
-        1: '0xF700478148B84E572A447d63b29fD937Fd511147',
-        42: '0x9907109e5Ca97aE76f684407318D1B8ea119c83B',
+        1: '0x514053acec7177e277b947b1ebb5c08ab4c4580e',
+        42: '0x71c7f1086aFca7Aa1B0D4d73cfa77979d10D3210',
     };
-    // 0x71c7f1086aFca7Aa1B0D4d73cfa77979d10D3210 - Balances only
 
     SUBGRAPH_URL: { [chainId: number]: string } = {
         1: 'https://api.thegraph.com/subgraphs/name/balancer-labs/balancer',
