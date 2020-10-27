@@ -14,6 +14,12 @@ Run: `$ npx mocha -r ts-node/register test/testScripts/trade-debug.spec.ts`
 
 Tests full multihop-eps trades using live subgraph. Useful for quickly checking trade outputs.
 
+### wrapper.spec.ts
+
+Run: `$ npx mocha -r ts-node/register test/testScripts/wrapper.spec.ts`
+
+Some basic tests for Wrapper fetch state, etc. Not in full tests because relies on Subgraph calls which are non-deterministic.
+
 ### example-swapExactIn.ts
 
 Run: `$ ts-node ./test/testScripts/example-swapExactIn.ts`

@@ -98,4 +98,23 @@ describe('Wrapper Tests', () => {
         console.timeEnd(`updateOnChainBalances`);
         expect(result).to.be.true;
     }).timeout(10000);
+
+    it('should be quick with cached', async () => {
+        let startingLength = SOR.subgraphCache.pools.length;
+        console.time('cached');
+        let isFetched = await SOR.fetchPairPools(USDC, DAI, false);
+        console.timeEnd('cached');
+
+        expect(isFetched).to.be.true;
+        expect(SOR.fetchedTokens[MKR.toLowerCase()]).to.be.true;
+        expect(SOR.fetchedTokens[USDC.toLowerCase()]).to.be.true;
+        expect(SOR.fetchedTokens[DAI.toLowerCase()]).to.be.true;
+        expect(SOR.subgraphCache.pools.length).to.eql(startingLength);
+        expect(SOR.subgraphCache.pools.length).to.eql(
+            SOR.onChainCache.pools.length
+        );
+        expect(SOR.hasPairPools(MKR, USDC)).to.be.true; // This is true because we have previously fetched each token separately
+        expect(SOR.hasPairPools(MKR, DAI)).to.be.true;
+        expect(SOR.hasPairPools(USDC, DAI)).to.be.true;
+    }).timeout(10000);
 });

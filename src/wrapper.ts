@@ -36,7 +36,7 @@ export class SOR {
     fetchedTokens: FetchedTokens = {};
     subgraphCache: SubGraphPools = { pools: [] };
     onChainCache: Pools = { pools: [] };
-    processedCache = {};
+    processedDataCache = {};
 
     MULTIADDR: { [chainId: number]: string } = {
         1: '0x514053acec7177e277b947b1ebb5c08ab4c4580e',
@@ -58,6 +58,27 @@ export class SOR {
         this.gasPrice = GasPrice;
         this.maxPools = MaxPools;
         this.chainId = ChainId;
+    }
+
+    /*
+    Find and cache cost of token.
+    */
+    async setCostOutputToken(TokenOut: string, Cost: BigNumber = null) {
+        TokenOut = TokenOut.toLowerCase();
+
+        if (Cost === null) {
+            // This calculates the cost to make a swap which is used as an input to SOR to allow it to make gas efficient recommendations
+            const costOutputToken = await sor.getCostOutputToken(
+                TokenOut,
+                this.gasPrice,
+                this.swapCost,
+                this.provider
+            );
+
+            this.tokenCost[TokenOut] = costOutputToken;
+        } else {
+            this.tokenCost[TokenOut] = Cost;
+        }
     }
 
     /*
@@ -84,12 +105,12 @@ export class SOR {
     async fetchPairPools(
         TokenIn: string,
         TokenOut: string,
-        purgeCache: boolean = true
+        PurgeCache: boolean = true
     ): Promise<boolean> {
         TokenIn = TokenIn.toLowerCase();
         TokenOut = TokenOut.toLowerCase();
 
-        if (purgeCache) {
+        if (PurgeCache) {
             this.purgeCaches();
             return await this.fetchNewPools(TokenIn, TokenOut);
         } else if (
@@ -123,9 +144,17 @@ export class SOR {
     // Updates onChain balances for all pools in existing cache
     async updateOnChainBalances(): Promise<boolean> {
         try {
+            let previousStringify = JSON.stringify(this.onChainCache); // Used for compare
+
             this.onChainCache = await this.fetchOnChainPools(
                 this.subgraphCache
             );
+
+            // If new pools are different from previous then any previous processed data is out of date so clear
+            if (previousStringify !== JSON.stringify(this.onChainCache)) {
+                this.processedDataCache = {};
+            }
+
             return true;
         } catch (err) {
             console.error(`updateOnChainBalances(): ${err.message}`);
@@ -162,22 +191,16 @@ export class SOR {
     // Adds any pools that contain token and don't already exist to cache (Subgraph & Onchain)
     private async updatePools(Token: string): Promise<boolean> {
         try {
-            console.time('SG');
             let poolsWithToken: SubGraphPools = await sor.getPoolsWithToken(
                 Token
             );
-            console.timeEnd('SG');
 
-            console.time('FILTER');
             let newPools: SubGraphPool[] = poolsWithToken.pools.filter(pool => {
                 return !this.subgraphCache.pools.some(
                     existingPool => existingPool.id === pool.id
                 );
             });
-            console.timeEnd('FILTER');
-            console.log(`New Pool Length: ${newPools.length}`);
 
-            console.time('OC');
             if (newPools.length > 0) {
                 let newOnChain = await this.fetchOnChainPools({
                     pools: newPools,
@@ -189,7 +212,6 @@ export class SOR {
                     newOnChain.pools
                 );
             }
-            console.timeEnd('OC');
             this.fetchedTokens[Token] = true;
             return true;
         } catch (err) {
@@ -204,5 +226,139 @@ export class SOR {
         this.fetchedTokens = {};
         this.subgraphCache = { pools: [] };
         this.onChainCache = { pools: [] };
+        this.processedDataCache = {};
+    }
+
+    /*
+    Main function to retrieve swap information.
+    Will fetch & use onChain balances.
+    Can use cached pool info by setting PurgeCache=false but be aware balances may be out of date.
+    */
+    async getSwaps(
+        TokenIn: string,
+        TokenOut: string,
+        SwapType: string,
+        SwapAmt: BigNumber,
+        PurgeCache: boolean = true
+    ): Promise<[Swap[][], BigNumber]> {
+        // The Subgraph returns tokens in lower case format so we must match this
+        TokenIn = TokenIn.toLowerCase();
+        TokenOut = TokenOut.toLowerCase();
+        // Retrieves pool information
+        let isFetched = await this.fetchPairPools(
+            TokenIn,
+            TokenOut,
+            PurgeCache
+        );
+
+        let [swaps, total] = await this.getSwapsWithCache(
+            TokenIn,
+            TokenOut,
+            SwapType,
+            SwapAmt,
+            this.SUBGRAPH_URL[this.chainId],
+            this.MULTIADDR[this.chainId]
+        );
+
+        return [swaps, total];
+    }
+
+    async getSwapsWithCache(
+        TokenIn: string,
+        TokenOut: string,
+        SwapType: string,
+        SwapAmt: BigNumber,
+        SubgraphUrl: string,
+        MulticallAddr: string
+    ): Promise<[Swap[][], BigNumber]> {
+        let pools: PoolDictionary,
+            paths: Path[],
+            epsOfInterest: EffectivePrice[];
+        // If token pair has been processed before use that info to speed up execution
+        let cache = this.processedDataCache[`${TokenIn}${TokenOut}${SwapType}`];
+
+        if (!cache) {
+            // If not previously cached we must process all paths/prices.
+
+            // Always use onChain info
+            // Some functions alter pools list directly but we want to keep original so make a copy to work from
+            let poolsList = JSON.parse(JSON.stringify(this.onChainCache));
+
+            // Retrieves all pools that contain both tokenIn & tokenOut, i.e. pools that can be used for direct swaps
+            // Retrieves intermediate pools along with tokens that are contained in these.
+            let directPools, hopTokens, poolsTokenIn, poolsTokenOut;
+            [
+                directPools,
+                hopTokens,
+                poolsTokenIn,
+                poolsTokenOut,
+            ] = sor.filterPools(poolsList.pools, TokenIn, TokenOut);
+
+            // Sort intermediate pools by order of liquidity
+            let mostLiquidPoolsFirstHop, mostLiquidPoolsSecondHop;
+            [
+                mostLiquidPoolsFirstHop,
+                mostLiquidPoolsSecondHop,
+            ] = sor.sortPoolsMostLiquid(
+                TokenIn,
+                TokenOut,
+                hopTokens,
+                poolsTokenIn,
+                poolsTokenOut
+            );
+
+            // Finds the possible paths to make the swap
+            let pathData;
+            [pools, pathData] = sor.parsePoolData(
+                directPools,
+                TokenIn,
+                TokenOut,
+                mostLiquidPoolsFirstHop,
+                mostLiquidPoolsSecondHop,
+                hopTokens
+            );
+
+            // Finds sorted price & slippage information for paths
+            paths = sor.processPaths(pathData, pools, SwapType);
+
+            epsOfInterest = sor.processEpsOfInterestMultiHop(
+                paths,
+                SwapType,
+                this.maxPools
+            );
+
+            this.processedDataCache[`${TokenIn}${TokenOut}${SwapType}`] = {
+                pools: pools,
+                paths: paths,
+                epsOfInterest: epsOfInterest,
+            };
+        } else {
+            // Using pre-processed data
+            pools = cache.pools;
+            paths = cache.paths;
+            epsOfInterest = cache.epsOfInterest;
+        }
+
+        // Use previously stored value if exists else default to 0
+        let costOutputToken = this.tokenCost[TokenOut];
+        if (costOutputToken === undefined) {
+            costOutputToken = new BigNumber(0);
+        }
+
+        // Returns list of swaps
+        // swapExactIn - total = total amount swap will return of TokenOut
+        // swapExactOut - total = total amount of TokenIn required for swap
+        let swaps, total;
+        [swaps, total] = sor.smartOrderRouterMultiHopEpsOfInterest(
+            JSON.parse(JSON.stringify(pools)), // Need to keep original pools for cache
+            paths,
+            SwapType,
+            SwapAmt,
+            this.maxPools,
+            costOutputToken,
+            epsOfInterest
+        );
+
+        return [swaps, total];
     }
 }

@@ -6,6 +6,7 @@ import { JsonRpcProvider } from '@ethersproject/providers';
 
 const DAI = '0x6B175474E89094C44Da98b954EedeAC495271d0F'; // DAI Address
 const USDC = '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48'; // USDC Address
+const uUSD = '0xD16c79c8A39D44B2F3eB45D2019cd6A42B03E2A9'; // uUSDwETH Synthetic Token
 
 async function simpleSwap() {
     // If running this example make sure you have a .env file saved in root DIR with INFURA=your_key
@@ -33,9 +34,8 @@ async function simpleSwap() {
     // Defaults to 0 if not called or can be set manually using: await SOR.setCostOutputToken(tokenOut, manualPriceBn)
     await SOR.setCostOutputToken(tokenOut);
 
-    console.log(`************** Without Cache`);
-    // If getSwaps needs onchain balances to ensure accurate swap amts
-    // If getSwaps is called before SOR.fetchSubgraphPools() & SOR.fetchOnChainPools() then it will retrieve this information otherwise it uses the cached pools
+    console.log(`************** First Call - Without Cache`);
+    // First call so any pool information for tokens must be retrieved so this call will take longer than cached in future.
     console.time('withOutCache');
     let [swaps, amountOut] = await SOR.getSwaps(
         tokenIn,
@@ -44,79 +44,86 @@ async function simpleSwap() {
         amountIn
     );
     console.timeEnd('withOutCache');
-
     console.log(`Total DAI Return: ${amountOut.toString()}`);
     console.log(`Swaps: `);
     console.log(swaps);
 
-    console.log(`\n************** With Cache, First Call`);
-    console.log(`Fetching Subgraph Pools...`);
+    console.log(`\n************** With Cache`);
+    // Cached pools & paths will now be used for processing making it much faster
+    console.time('callWithCache');
+    [swaps, amountOut] = await SOR.getSwaps(
+        tokenIn,
+        tokenOut,
+        swapType,
+        amountIn,
+        false
+    );
+    console.timeEnd('callWithCache');
+    console.log(`Total DAI Return: ${amountOut.toString()}`);
+    console.log(`Swaps: `);
+    console.log(swaps);
 
-    // This function fetches pools from Subgraph. This can be called as often as needed to keep pools list up to date.
-    await SOR.fetchSubgraphPools();
-
-    console.log(`Fetching onchain pool information...`);
-    // This function will retrieve on-chain balances, weights and fees for all pools from fetchSubgraphPools()
-    // This can take >5s to run but results in most accurate and optimal swap information.
-    // Result is cached for future processing and can be refreshed by recalling.
-    await SOR.fetchOnChainPools();
-
-    // Cached on-chain pools will now be used for processing
-    console.time('firstTime');
+    console.log(`\n************** With Pools Cache Purge`);
+    // By default cache is purged and new pool data is loaded
+    console.time('cachePurge');
     [swaps, amountOut] = await SOR.getSwaps(
         tokenIn,
         tokenOut,
         swapType,
         amountIn
     );
-    console.timeEnd('firstTime');
-
+    console.timeEnd('cachePurge');
     console.log(`Total DAI Return: ${amountOut.toString()}`);
     console.log(`Swaps: `);
     console.log(swaps);
 
-    console.log(`\n************** With Cache, Second Call`);
-
-    // Some processing has been cached so this call will be much quicker than previous
-    console.time('withCache');
-    [swaps, amountOut] = await SOR.getSwaps(
-        tokenIn,
-        tokenOut,
-        swapType,
-        amountIn
-    );
-    console.timeEnd('withCache');
-
-    console.log(`Total DAI Return: ${amountOut.toString()}`);
-    console.log(`Swaps: `);
-    console.log(swaps);
-
-    console.log(`\n************** Updating Pools`);
-    console.log('Fetching Subgraph pools...');
-    // Refreshing subgraph pools & on-chain information
-    await SOR.fetchSubgraphPools();
-    console.log(`Fetching onchain pool information...`);
-    await SOR.fetchOnChainPools();
-
-    [swaps, amountOut] = await SOR.getSwaps(
-        tokenIn,
-        tokenOut,
-        swapType,
-        amountIn
-    );
-    console.log(`Total DAI Return: ${amountOut.toString()}`);
-    console.log(`Swaps: `);
-    console.log(swaps);
-
-    // Here the on-chain check is cancelled by setting last parameter to false. Be aware this could lead to invalid swaps if Subgraph out of sync.
+    console.log(`\n************** With Cache, Different Swap Type`);
+    // Because token info is already cached this should be fast
+    console.time('differentSwap');
     let amtIn;
     [swaps, amtIn] = await SOR.getSwaps(
         tokenIn,
         tokenOut,
         'swapExactOut',
-        amountOut
+        amountOut,
+        false
     );
+    console.timeEnd('differentSwap');
     console.log(`Total USDC In: ${amtIn.toString()}`);
+    console.log(`Swaps: `);
+    console.log(swaps);
+
+    console.log(`\n************** Updating Onchain Pool Balances`);
+    // This updates all cached pool onchain balances
+    console.time('balanceUpdate');
+    await SOR.updateOnChainBalances();
+    console.timeEnd('balanceUpdate');
+
+    console.time('swapAfterBalanceUpdate');
+    [swaps, amtIn] = await SOR.getSwaps(
+        tokenIn,
+        tokenOut,
+        'swapExactOut',
+        amountOut,
+        false
+    );
+    console.timeEnd('swapAfterBalanceUpdate');
+    console.log(`Total USDC In: ${amtIn.toString()}`);
+    console.log(`Swaps: `);
+    console.log(swaps);
+
+    console.log(`\n************** New token, Pool Already Cached`);
+    // This token hasn't been cached but it only exists in a single pool that has already been cached.
+    console.time('newToken');
+    [swaps, amountOut] = await SOR.getSwaps(
+        tokenIn,
+        uUSD,
+        swapType,
+        amountIn,
+        false
+    );
+    console.timeEnd('newToken');
+    console.log(`Total New Token Return: ${amountOut.toString()}`);
     console.log(`Swaps: `);
     console.log(swaps);
 }
