@@ -24,6 +24,7 @@ exports.sortPoolsMostLiquid = helpers_1.sortPoolsMostLiquid;
 var subgraph_1 = require('./subgraph');
 exports.getAllPublicSwapPools = subgraph_1.getAllPublicSwapPools;
 exports.getFilteredPools = subgraph_1.getFilteredPools;
+exports.getPoolsWithToken = subgraph_1.getPoolsWithToken;
 var multicall_1 = require('./multicall'); // Legacy Function
 exports.getAllPoolDataOnChain = multicall_1.getAllPoolDataOnChain;
 const bmath = __importStar(require('./bmath'));

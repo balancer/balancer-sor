@@ -1,5 +1,5 @@
 import { ethers, utils, Contract } from 'ethers';
-import { PoolPairData, Pools, Pool, SubGraphPools, Token } from './types';
+import { Pools, Pool, SubGraphPools, Token } from './types';
 import * as bmath from './bmath';
 
 export async function getAllPoolDataOnChain(

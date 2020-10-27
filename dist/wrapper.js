@@ -41,73 +41,23 @@ class SOR {
     constructor(Provider, GasPrice, MaxPools, ChainId) {
         // avg Balancer swap cost. Can be updated manually if required.
         this.swapCost = new bignumber_1.BigNumber('100000');
+        this.tokenCost = {};
+        this.fetchedTokens = {};
+        this.subgraphCache = { pools: [] };
+        this.onChainCache = { pools: [] };
+        this.processedDataCache = {};
         this.MULTIADDR = {
-            1: '0xF700478148B84E572A447d63b29fD937Fd511147',
-            42: '0x9907109e5Ca97aE76f684407318D1B8ea119c83B',
+            1: '0x514053acec7177e277b947b1ebb5c08ab4c4580e',
+            42: '0x71c7f1086aFca7Aa1B0D4d73cfa77979d10D3210',
         };
-        // 0x71c7f1086aFca7Aa1B0D4d73cfa77979d10D3210 - Balances only
         this.SUBGRAPH_URL = {
             1: 'https://api.thegraph.com/subgraphs/name/balancer-labs/balancer',
             42: 'https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-kovan',
         };
-        this.chainId = ChainId;
-        this.isSubgraphFetched = false;
-        this.isOnChainFetched = false;
         this.provider = Provider;
         this.gasPrice = GasPrice;
         this.maxPools = MaxPools;
-        this.tokenCost = {};
-        this.processedCache = {};
-    }
-    /*
-    Fetch all public & active pools from Subgraph.
-    Will clear cached onChain pools and processed paths if new pools are different from cached.
-    */
-    fetchSubgraphPools() {
-        return __awaiter(this, void 0, void 0, function*() {
-            this.isSubgraphFetched = false;
-            let previousStringify = JSON.stringify(this.subgraphPools); // Used for compare
-            this.subgraphPools = yield sor.getAllPublicSwapPools(
-                this.SUBGRAPH_URL[this.chainId]
-            );
-            let newStringify = JSON.stringify(this.subgraphPools);
-            if (newStringify !== previousStringify) {
-                this.isOnChainFetched = false; // New pools so any previous onchain info is out of date.
-                this.subgraphPoolsFormatted = JSON.parse(newStringify); // format alters pools so make copy first
-                sor.formatSubgraphPools(this.subgraphPoolsFormatted);
-                this.processedCache = {}; // Clear processed cache as data changed
-            }
-            this.isSubgraphFetched = true;
-        });
-    }
-    /*
-    Uses multicall contact to fetch all onchain balances, weights and fees for cached Subgraph pools.
-    Will clear cached processed paths if new pools are different from cached.
-    MulticallAddr can be passed to override default mainnet multicall address.
-    */
-    fetchOnChainPools() {
-        return __awaiter(this, void 0, void 0, function*() {
-            this.isOnChainFetched = false;
-            if (!this.isSubgraphFetched) {
-                console.error(
-                    'ERROR: Must fetch Subgraph pools before getting On-Chain.'
-                );
-                return;
-            }
-            let previousStringify = JSON.stringify(this.onChainPools); // Used for compare
-            this.onChainPools = yield sor.getAllPoolDataOnChain(
-                this.subgraphPools,
-                this.MULTIADDR[this.chainId],
-                this.provider
-            );
-            // Error with multicall
-            if (!this.onChainPools) return;
-            // If new pools are different from previous then any previous processed data is out of date so clear
-            if (previousStringify !== JSON.stringify(this.onChainPools)) {
-                this.processedCache = {};
-            }
-            this.isOnChainFetched = true;
-        });
+        this.chainId = ChainId;
     }
     /*
     Find and cache cost of token.
@@ -130,115 +80,161 @@ class SOR {
         });
     }
     /*
-    Main function to retrieve swap information.
-    Will always use onChain pools if available over Subgraph pools.
-    If using Subgraph pools by default swaps are checked using data retrieved from onChain.
-    Can be overridden with CheckOnChain.
+    Uses multicall contact to fetch all onchain balances for cached Subgraph pools.
     */
-    getSwaps(TokenIn, TokenOut, SwapType, SwapAmt) {
+    fetchOnChainPools(SubgraphPools) {
+        return __awaiter(this, void 0, void 0, function*() {
+            if (SubgraphPools.pools.length === 0) {
+                console.error('ERROR: No Pools To Fetch.');
+                return { pools: [] };
+            }
+            let onChainPools = yield sor.getAllPoolDataOnChain(
+                SubgraphPools,
+                this.MULTIADDR[this.chainId],
+                this.provider
+            );
+            // Error with multicall
+            if (!onChainPools) return { pools: [] };
+            return onChainPools;
+        });
+    }
+    fetchPairPools(TokenIn, TokenOut, PurgeCache = true) {
+        return __awaiter(this, void 0, void 0, function*() {
+            TokenIn = TokenIn.toLowerCase();
+            TokenOut = TokenOut.toLowerCase();
+            if (PurgeCache) {
+                this.purgeCaches();
+                return yield this.fetchNewPools(TokenIn, TokenOut);
+            } else if (
+                this.fetchedTokens[TokenIn] &&
+                this.fetchedTokens[TokenOut]
+            ) {
+                return true;
+            } else if (
+                !this.fetchedTokens[TokenIn] &&
+                !this.fetchedTokens[TokenOut]
+            ) {
+                return yield this.fetchNewPools(TokenIn, TokenOut);
+            } else if (!this.fetchedTokens[TokenIn]) {
+                return yield this.updatePools(TokenIn);
+            } else if (!this.fetchedTokens[TokenOut]) {
+                return yield this.updatePools(TokenOut);
+            }
+            return false;
+        });
+    }
+    hasPairPools(TokenIn, TokenOut) {
+        TokenIn = TokenIn.toLowerCase();
+        TokenOut = TokenOut.toLowerCase();
+        if (this.fetchedTokens[TokenIn] && this.fetchedTokens[TokenOut])
+            return true;
+        else return false;
+    }
+    // Updates onChain balances for all pools in existing cache
+    updateOnChainBalances() {
+        return __awaiter(this, void 0, void 0, function*() {
+            try {
+                let previousStringify = JSON.stringify(this.onChainCache); // Used for compare
+                this.onChainCache = yield this.fetchOnChainPools(
+                    this.subgraphCache
+                );
+                // If new pools are different from previous then any previous processed data is out of date so clear
+                if (previousStringify !== JSON.stringify(this.onChainCache)) {
+                    this.processedDataCache = {};
+                }
+                return true;
+            } catch (err) {
+                console.error(`updateOnChainBalances(): ${err.message}`);
+                return false;
+            }
+        });
+    }
+    // Fetches pools that contain TokenIn, TokenOut or both (Subgraph & Onchain)
+    fetchNewPools(TokenIn, TokenOut) {
+        return __awaiter(this, void 0, void 0, function*() {
+            try {
+                this.subgraphCache = yield sor.getFilteredPools(
+                    TokenIn,
+                    TokenOut,
+                    this.SUBGRAPH_URL[this.chainId]
+                );
+                this.onChainCache = yield this.fetchOnChainPools(
+                    this.subgraphCache
+                );
+                this.fetchedTokens[TokenIn] = true;
+                this.fetchedTokens[TokenOut] = true;
+                return true;
+            } catch (err) {
+                this.fetchedTokens[TokenIn] = false;
+                this.fetchedTokens[TokenOut] = false;
+                console.error(
+                    `Issue Fetching New Pools: ${TokenIn} ${TokenOut}`
+                );
+                console.error(err.message);
+                return false;
+            }
+        });
+    }
+    // Adds any pools that contain token and don't already exist to cache (Subgraph & Onchain)
+    updatePools(Token) {
+        return __awaiter(this, void 0, void 0, function*() {
+            try {
+                let poolsWithToken = yield sor.getPoolsWithToken(Token);
+                let newPools = poolsWithToken.pools.filter(pool => {
+                    return !this.subgraphCache.pools.some(
+                        existingPool => existingPool.id === pool.id
+                    );
+                });
+                if (newPools.length > 0) {
+                    let newOnChain = yield this.fetchOnChainPools({
+                        pools: newPools,
+                    });
+                    this.subgraphCache.pools = this.subgraphCache.pools.concat(
+                        newPools
+                    );
+                    this.onChainCache.pools = this.onChainCache.pools.concat(
+                        newOnChain.pools
+                    );
+                }
+                this.fetchedTokens[Token] = true;
+                return true;
+            } catch (err) {
+                this.fetchedTokens[Token] = false;
+                console.error(`Issue Updating Pools: ${Token}`);
+                console.error(err.message);
+                return false;
+            }
+        });
+    }
+    purgeCaches() {
+        this.fetchedTokens = {};
+        this.subgraphCache = { pools: [] };
+        this.onChainCache = { pools: [] };
+        this.processedDataCache = {};
+    }
+    /*
+    Main function to retrieve swap information.
+    Will fetch & use onChain balances.
+    Can use cached pool info by setting PurgeCache=false but be aware balances may be out of date.
+    */
+    getSwaps(TokenIn, TokenOut, SwapType, SwapAmt, PurgeCache = true) {
         return __awaiter(this, void 0, void 0, function*() {
             // The Subgraph returns tokens in lower case format so we must match this
             TokenIn = TokenIn.toLowerCase();
             TokenOut = TokenOut.toLowerCase();
-            if (!this.isSubgraphFetched || !this.isOnChainFetched) {
-                let [swaps, total] = yield this.getSwapsWithoutCache(
-                    TokenIn,
-                    TokenOut,
-                    SwapType,
-                    SwapAmt,
-                    this.SUBGRAPH_URL[this.chainId],
-                    this.MULTIADDR[this.chainId]
-                );
-                return [swaps, total];
-            } else {
-                let [swaps, total] = yield this.getSwapsWithCache(
-                    TokenIn,
-                    TokenOut,
-                    SwapType,
-                    SwapAmt,
-                    this.SUBGRAPH_URL[this.chainId],
-                    this.MULTIADDR[this.chainId]
-                );
-                return [swaps, total];
-            }
-        });
-    }
-    getSwapsWithoutCache(
-        TokenIn,
-        TokenOut,
-        SwapType,
-        SwapAmt,
-        SubgraphUrl,
-        MulticallAddr
-    ) {
-        return __awaiter(this, void 0, void 0, function*() {
-            // Fetch pools that have either tokenIn or tokenOut or both
-            let subGraphPools = yield sor.getFilteredPools(
+            // Retrieves pool information
+            let isFetched = yield this.fetchPairPools(
                 TokenIn,
                 TokenOut,
-                SubgraphUrl
+                PurgeCache
             );
-            // Fetch on-chain balances
-            let poolsList = yield sor.getAllPoolDataOnChain(
-                subGraphPools,
-                this.MULTIADDR[this.chainId],
-                this.provider
-            );
-            // Retrieves all pools that contain both tokenIn & tokenOut, i.e. pools that can be used for direct swaps
-            // Retrieves intermediate pools along with tokens that are contained in these.
-            let directPools, hopTokens, poolsTokenIn, poolsTokenOut;
-            [
-                directPools,
-                hopTokens,
-                poolsTokenIn,
-                poolsTokenOut,
-            ] = sor.filterPools(poolsList.pools, TokenIn, TokenOut);
-            // Sort intermediate pools by order of liquidity
-            let mostLiquidPoolsFirstHop, mostLiquidPoolsSecondHop;
-            [
-                mostLiquidPoolsFirstHop,
-                mostLiquidPoolsSecondHop,
-            ] = sor.sortPoolsMostLiquid(
+            let [swaps, total] = yield this.getSwapsWithCache(
                 TokenIn,
                 TokenOut,
-                hopTokens,
-                poolsTokenIn,
-                poolsTokenOut
-            );
-            // Finds the possible paths to make the swap
-            let pathData, pools;
-            [pools, pathData] = sor.parsePoolData(
-                directPools,
-                TokenIn,
-                TokenOut,
-                mostLiquidPoolsFirstHop,
-                mostLiquidPoolsSecondHop,
-                hopTokens
-            );
-            // Finds sorted price & slippage information for paths
-            let paths = sor.processPaths(pathData, pools, SwapType);
-            let epsOfInterest = sor.processEpsOfInterestMultiHop(
-                paths,
-                SwapType,
-                this.maxPools
-            );
-            // Use previously stored value if exists else default to 0
-            let costOutputToken = this.tokenCost[TokenOut];
-            if (costOutputToken === undefined) {
-                costOutputToken = new bignumber_1.BigNumber(0);
-            }
-            // Returns list of swaps
-            // swapExactIn - total = total amount swap will return of TokenOut
-            // swapExactOut - total = total amount of TokenIn required for swap
-            let swaps, total;
-            [swaps, total] = sor.smartOrderRouterMultiHopEpsOfInterest(
-                pools, // Need to keep original pools for cache
-                paths,
                 SwapType,
                 SwapAmt,
-                this.maxPools,
-                costOutputToken,
-                epsOfInterest
+                this.SUBGRAPH_URL[this.chainId],
+                this.MULTIADDR[this.chainId]
             );
             return [swaps, total];
         });
@@ -254,18 +250,14 @@ class SOR {
         return __awaiter(this, void 0, void 0, function*() {
             let pools, paths, epsOfInterest;
             // If token pair has been processed before use that info to speed up execution
-            let cache = this.processedCache[`${TokenIn}${TokenOut}${SwapType}`];
+            let cache = this.processedDataCache[
+                `${TokenIn}${TokenOut}${SwapType}`
+            ];
             if (!cache) {
                 // If not previously cached we must process all paths/prices.
-                // Always use onChain info if available
+                // Always use onChain info
                 // Some functions alter pools list directly but we want to keep original so make a copy to work from
-                let poolsList;
-                if (this.isOnChainFetched)
-                    poolsList = JSON.parse(JSON.stringify(this.onChainPools));
-                else
-                    poolsList = JSON.parse(
-                        JSON.stringify(this.subgraphPoolsFormatted)
-                    );
+                let poolsList = JSON.parse(JSON.stringify(this.onChainCache));
                 // Retrieves all pools that contain both tokenIn & tokenOut, i.e. pools that can be used for direct swaps
                 // Retrieves intermediate pools along with tokens that are contained in these.
                 let directPools, hopTokens, poolsTokenIn, poolsTokenOut;
@@ -304,12 +296,13 @@ class SOR {
                     SwapType,
                     this.maxPools
                 );
-                this.processedCache[`${TokenIn}${TokenOut}${SwapType}`] = {
+                this.processedDataCache[`${TokenIn}${TokenOut}${SwapType}`] = {
                     pools: pools,
                     paths: paths,
                     epsOfInterest: epsOfInterest,
                 };
             } else {
+                // Using pre-processed data
                 pools = cache.pools;
                 paths = cache.paths;
                 epsOfInterest = cache.epsOfInterest;

@@ -141,3 +141,46 @@ function getFilteredPools(tokenIn, tokenOut, SubgraphUrl = '') {
     });
 }
 exports.getFilteredPools = getFilteredPools;
+function getPoolsWithToken(Token) {
+    return __awaiter(this, void 0, void 0, function*() {
+        // GraphQL is case-sensitive
+        // Always use checksum addresses
+        Token = ethers_1.utils.getAddress(Token);
+        const query = `
+      query ($tokens: [Bytes!]) {
+          pools (first: 1000, where: {tokensList_contains: $tokens, publicSwap: true, active: true}) {
+            id
+            publicSwap
+            swapFee
+            totalWeight
+            tokensList
+            tokens {
+              id
+              address
+              balance
+              decimals
+              symbol
+              denormWeight
+            }
+          }
+        }
+    `;
+        const variables = {
+            tokens: [Token],
+        };
+        const response = yield isomorphic_fetch_1.default(SUBGRAPH_URL, {
+            method: 'POST',
+            headers: {
+                Accept: 'application/json',
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                query,
+                variables,
+            }),
+        });
+        const { data } = yield response.json();
+        return data;
+    });
+}
+exports.getPoolsWithToken = getPoolsWithToken;

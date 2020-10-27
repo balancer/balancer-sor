@@ -1,23 +1,14 @@
 import {
     getSpotPrice,
-    getSlippageLinearizedSpotPriceAfterSwap,
     getLimitAmountSwap,
     getSpotPricePath,
     getSlippageLinearizedSpotPriceAfterSwapPath,
     getLimitAmountSwapPath,
-    getNormalizedLiquidity,
     getReturnAmountSwap,
     getReturnAmountSwapPath,
     parsePoolPairData,
 } from './helpers';
-import {
-    bmul,
-    bdiv,
-    bnum,
-    BONE,
-    calcOutGivenIn,
-    calcInGivenOut,
-} from './bmath';
+import { bmul, bdiv, bnum, BONE } from './bmath';
 import { BigNumber } from './utils/bignumber';
 import {
     PoolPairData,

@@ -50,8 +50,7 @@ const ethers_1 = require('ethers');
 const bmath = __importStar(require('./bmath'));
 function getAllPoolDataOnChain(pools, multiAddress, provider) {
     return __awaiter(this, void 0, void 0, function*() {
-        if (pools.pools.length === 0)
-            throw Error('There are no pools with selected tokens');
+        if (pools.pools.length === 0) throw Error('There are no pools.');
         const customMultiAbi = require('./abi/customMulticall.json');
         const contract = new ethers_1.Contract(
             multiAddress,
@@ -63,10 +62,10 @@ function getAllPoolDataOnChain(pools, multiAddress, provider) {
         for (let i = 0; i < pools.pools.length; i++) {
             let pool = pools.pools[i];
             addresses.push([pool.id]);
-            total += 1;
+            total++;
             pool.tokens.forEach((token, tokenIndex) => {
                 addresses[i].push(token.address);
-                total += 2;
+                total++;
             });
         }
         try {
@@ -75,27 +74,35 @@ function getAllPoolDataOnChain(pools, multiAddress, provider) {
             let onChainPools = { pools: [] };
             for (let i = 0; i < pools.pools.length; i++) {
                 let tokens = [];
+                let publicSwap = true;
+                if (pools.pools[i].publicSwap === 'false') publicSwap = false;
                 let p = {
                     id: pools.pools[i].id,
-                    swapFee: bmath.bnum(results[j]),
+                    swapFee: bmath.scale(
+                        bmath.bnum(pools.pools[i].swapFee),
+                        18
+                    ),
                     totalWeight: bmath.scale(
                         bmath.bnum(pools.pools[i].totalWeight),
                         18
                     ),
+                    publicSwap: publicSwap,
                     tokens: tokens,
                     tokensList: pools.pools[i].tokensList,
                 };
-                j++;
                 pools.pools[i].tokens.forEach(token => {
                     let bal = bmath.bnum(results[j]);
                     j++;
-                    let dW = bmath.bnum(results[j]);
-                    j++;
                     p.tokens.push({
+                        id: token.id,
                         address: token.address,
                         balance: bal,
                         decimals: Number(token.decimals),
-                        denormWeight: dW,
+                        symbol: token.symbol,
+                        denormWeight: bmath.scale(
+                            bmath.bnum(token.denormWeight),
+                            18
+                        ),
                     });
                 });
                 onChainPools.pools.push(p);

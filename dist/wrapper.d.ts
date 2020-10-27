@@ -1,27 +1,20 @@
-import { ethers } from 'ethers';
+import { JsonRpcProvider } from '@ethersproject/providers';
 import { BigNumber } from './utils/bignumber';
-import { Swap, PoolDictionary, Path, EffectivePrice } from './types';
-interface ProcessedData {
-    pools: PoolDictionary;
-    paths: Path[];
-    epsOfInterest: EffectivePrice[];
-}
-interface ProcessedCache {
-    [PairId: string]: ProcessedData;
+import { SubGraphPools, Swap, Pools } from './types';
+interface FetchedTokens {
+    [Token: string]: boolean;
 }
 export declare class SOR {
-    isSubgraphFetched: boolean;
-    isOnChainFetched: boolean;
-    subgraphPools: any;
-    subgraphPoolsFormatted: any;
-    onChainPools: any;
-    provider: ethers.providers.JsonRpcProvider;
+    provider: JsonRpcProvider;
     gasPrice: BigNumber;
-    swapCost: BigNumber;
-    tokenCost: any;
     maxPools: number;
-    processedCache: ProcessedCache;
     chainId: number;
+    swapCost: BigNumber;
+    tokenCost: {};
+    fetchedTokens: FetchedTokens;
+    subgraphCache: SubGraphPools;
+    onChainCache: Pools;
+    processedDataCache: {};
     MULTIADDR: {
         [chainId: number]: string;
     };
@@ -29,27 +22,29 @@ export declare class SOR {
         [chainId: number]: string;
     };
     constructor(
-        Provider: ethers.providers.JsonRpcProvider,
+        Provider: JsonRpcProvider,
         GasPrice: BigNumber,
         MaxPools: number,
         ChainId: number
     );
-    fetchSubgraphPools(): Promise<void>;
-    fetchOnChainPools(): Promise<void>;
     setCostOutputToken(TokenOut: string, Cost?: BigNumber): Promise<void>;
+    fetchOnChainPools(SubgraphPools: SubGraphPools): Promise<Pools>;
+    fetchPairPools(
+        TokenIn: string,
+        TokenOut: string,
+        PurgeCache?: boolean
+    ): Promise<boolean>;
+    hasPairPools(TokenIn: any, TokenOut: any): boolean;
+    updateOnChainBalances(): Promise<boolean>;
+    private fetchNewPools;
+    private updatePools;
+    purgeCaches(): void;
     getSwaps(
         TokenIn: string,
         TokenOut: string,
         SwapType: string,
-        SwapAmt: BigNumber
-    ): Promise<[Swap[][], BigNumber]>;
-    getSwapsWithoutCache(
-        TokenIn: string,
-        TokenOut: string,
-        SwapType: string,
         SwapAmt: BigNumber,
-        SubgraphUrl: string,
-        MulticallAddr: string
+        PurgeCache?: boolean
     ): Promise<[Swap[][], BigNumber]>;
     getSwapsWithCache(
         TokenIn: string,

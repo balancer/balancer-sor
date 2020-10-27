@@ -1,3 +1,4 @@
+import { SubGraphPools } from './types';
 export declare function getAllPublicSwapPools(
     SubgraphUrl?: string
 ): Promise<any>;
@@ -8,3 +9,6 @@ export declare function getFilteredPools(
 ): Promise<{
     pools: any;
 }>;
+export declare function getPoolsWithToken(
+    Token: string
+): Promise<SubGraphPools>;

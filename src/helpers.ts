@@ -7,12 +7,9 @@ import {
     PoolDictionary,
     Swap,
     DisabledOptions,
-    DisabledToken,
-    SubGraphPools,
 } from './types';
 import {
     BONE,
-    TWOBONE,
     MAX_IN_RATIO,
     MAX_OUT_RATIO,
     bmul,

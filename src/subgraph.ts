@@ -1,8 +1,6 @@
 import fetch from 'isomorphic-fetch';
 import { utils } from 'ethers';
-import * as bmath from './bmath';
-import { PoolPairData, Path, SubGraphPools } from './types';
-import { BigNumber } from './utils/bignumber';
+import { SubGraphPools } from './types';
 
 const SUBGRAPH_URL =
     process.env.REACT_APP_SUBGRAPH_URL ||
