@@ -1,7 +1,7 @@
 import fetch from 'isomorphic-fetch';
 import { utils } from 'ethers';
 import * as bmath from './bmath';
-import { PoolPairData, Path } from './types';
+import { PoolPairData, Path, SubGraphPools } from './types';
 import { BigNumber } from './utils/bignumber';
 
 const SUBGRAPH_URL =
@@ -109,4 +109,49 @@ export async function getFilteredPools(
     }, []);
 
     return { pools: exclusivePools };
+}
+
+export async function getPoolsWithToken(Token: string): Promise<SubGraphPools> {
+    // GraphQL is case-sensitive
+    // Always use checksum addresses
+    Token = utils.getAddress(Token);
+
+    const query = `
+      query ($tokens: [Bytes!]) {
+          pools (first: 1000, where: {tokensList_contains: $tokens, publicSwap: true, active: true}) {
+            id
+            publicSwap
+            swapFee
+            totalWeight
+            tokensList
+            tokens {
+              id
+              address
+              balance
+              decimals
+              symbol
+              denormWeight
+            }
+          }
+        }
+    `;
+
+    const variables = {
+        tokens: [Token],
+    };
+
+    const response = await fetch(SUBGRAPH_URL, {
+        method: 'POST',
+        headers: {
+            Accept: 'application/json',
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            query,
+            variables,
+        }),
+    });
+
+    const { data } = await response.json();
+    return data;
 }
