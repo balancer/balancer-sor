@@ -118,18 +118,15 @@ export async function getPoolsWithToken(Token: string): Promise<SubGraphPools> {
       query ($tokens: [Bytes!]) {
           pools (first: 1000, where: {tokensList_contains: $tokens, publicSwap: true, active: true}) {
             id
-            publicSwap
             swapFee
             totalWeight
-            tokensList
             tokens {
-              id
               address
               balance
               decimals
-              symbol
               denormWeight
             }
+            tokensList
           }
         }
     `;
