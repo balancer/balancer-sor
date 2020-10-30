@@ -19,4 +19,5 @@ export { getAllPoolDataOnChain } from './multicall'; // Legacy Function
 import * as bmath from './bmath';
 export { bmath };
 export { getCostOutputToken } from './costToken';
+export { IPFS } from './ipfs';
 export { SOR } from './wrapper';

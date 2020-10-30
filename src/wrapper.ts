@@ -48,6 +48,11 @@ export class SOR {
         42: 'https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-kovan',
     };
 
+    IPNS: { [chainId: number]: string } = {
+        1: 'balancer-team-bucket.storage.fleek.co/balancer-exchange/pools',
+        42: 'balancer-team-bucket.storage.fleek.co/balancer-exchange-kovan/pools',
+    };
+
     constructor(
         Provider: JsonRpcProvider,
         GasPrice: BigNumber,
