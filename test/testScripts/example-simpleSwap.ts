@@ -4,6 +4,7 @@ const sor = require('../../src');
 import { BigNumber } from 'bignumber.js';
 import { JsonRpcProvider } from '@ethersproject/providers';
 
+const WETH = '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2';
 const DAI = '0x6B175474E89094C44Da98b954EedeAC495271d0F'; // DAI Address
 const USDC = '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48'; // USDC Address
 const uUSD = '0xD16c79c8A39D44B2F3eB45D2019cd6A42B03E2A9'; // uUSDwETH Synthetic Token
@@ -25,22 +26,28 @@ async function simpleSwap() {
     const SOR = new sor.SOR(provider, gasPrice, maxNoPools, chainId);
 
     const tokenIn = USDC;
-    const tokenOut = DAI;
+    const tokenOut = WETH;
     const swapType = 'swapExactIn'; // Two different swap types are used: swapExactIn & swapExactOut
     let amountIn = new BigNumber('1000000'); // 1 USDC, Always pay attention to Token Decimals. i.e. In this case USDC has 6 decimals.
 
+    console.log(
+        `\n************** First Call - Loading Useful Pools For Pair & First Swap`
+    );
+
+    // This can be used to check if all pools have been fetched
+    let isAllPoolsFetched = SOR.isAllFetched;
+
+    console.time(`usefulPairsMethod`);
     // This calculates the cost to make a swap which is used as an input to SOR to allow it to make gas efficient recommendations.
     // Can be set once and will be used for further swap calculations.
     // Defaults to 0 if not called or can be set manually using: await SOR.setCostOutputToken(tokenOut, manualPriceBn)
     await SOR.setCostOutputToken(tokenOut);
 
-    console.log(`************** Fetch Pools - IPFS & Onchain`);
-    // This fetches all pools list from IPFS then onChain balances using Multicall
-    console.time('fetchPools');
-    let result = await SOR.fetchPools();
-    console.timeEnd('fetchPools');
+    // This fetches a subset of pair pools onchain information - Must be called for each swapType
+    console.time('fetchFilteredPairPools');
+    await SOR.fetchFilteredPairPools(tokenIn, tokenOut, swapType);
+    console.timeEnd('fetchFilteredPairPools');
 
-    console.log(`\n************** First Call - Without Paths Cache`);
     // First call so any paths must be processed so this call will take longer than cached in future.
     console.time('withOutPathsCache');
     let [swaps, amountOut] = await SOR.getSwaps(
@@ -50,7 +57,54 @@ async function simpleSwap() {
         amountIn
     );
     console.timeEnd('withOutPathsCache');
-    console.log(`Total DAI Return: ${amountOut.toString()}`);
+    console.timeEnd(`usefulPairsMethod`);
+
+    console.log(`Total WETH Return: ${amountOut.toString()}`);
+    console.log(`Swaps: `);
+    console.log(swaps);
+
+    console.log(`************** Fetch All Pools - IPFS & Onchain`);
+    // This fetches all pools list from IPFS then onChain balances using Multicall
+    let fetch = SOR.fetchPools();
+
+    isAllPoolsFetched = SOR.isAllFetched;
+    console.log(`Are all pools fetched: ${isAllPoolsFetched}`);
+
+    console.log(
+        `\n**************  Loading All Pools In Background - Will use previously fetched useful pools`
+    );
+
+    console.time(`usefulPairsMethodPreviouslyLoaded`);
+    [swaps, amountOut] = await SOR.getSwaps(
+        tokenIn,
+        tokenOut,
+        swapType,
+        new BigNumber('2000000')
+    );
+    console.timeEnd(`usefulPairsMethodPreviouslyLoaded`);
+
+    console.log(`Total WETH Return: ${amountOut.toString()}`);
+    console.log(`Swaps: `);
+    console.log(swaps);
+
+    isAllPoolsFetched = SOR.isAllFetched;
+    console.log(`\n\nAre all pools fetched: ${isAllPoolsFetched}`);
+    console.log(`Waiting for fetch to complete...`);
+    await fetch;
+    isAllPoolsFetched = SOR.isAllFetched;
+    console.log(`Are all pools fetched: ${isAllPoolsFetched}`);
+
+    console.log(`\n************** Using All Pools`);
+    // First call so any paths must be processed so this call will take longer than cached in future.
+    console.time('allPoolsWithOutPathsCache');
+    [swaps, amountOut] = await SOR.getSwaps(
+        tokenIn,
+        tokenOut,
+        swapType,
+        amountIn
+    );
+    console.timeEnd('allPoolsWithOutPathsCache');
+    console.log(`Total WETH Return: ${amountOut.toString()}`);
     console.log(`Swaps: `);
     console.log(swaps);
 
@@ -64,7 +118,7 @@ async function simpleSwap() {
         amountIn
     );
     console.timeEnd('callWithCache');
-    console.log(`Total DAI Return: ${amountOut.toString()}`);
+    console.log(`Total WETH Return: ${amountOut.toString()}`);
     console.log(`Swaps: `);
     console.log(swaps);
 

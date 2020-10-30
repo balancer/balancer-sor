@@ -1,6 +1,7 @@
 import fetch from 'isomorphic-fetch';
 import { utils } from 'ethers';
-import { SubGraphPools } from './types';
+import { SubGraphPools, Pools, Pool, Token } from './types';
+import * as bmath from './bmath';
 
 export class IPFS {
     get(ipfsHash, protocolType = 'ipfs') {
@@ -14,6 +15,47 @@ export class IPFS {
     ): Promise<SubGraphPools> {
         let allPools = await this.get(IpfsHash, ProtocolType);
         return allPools;
+    }
+
+    async getAllPublicSwapPoolsBigNumber(pools): Promise<Pools> {
+        let onChainPools: Pools = { pools: [] };
+
+        for (let i = 0; i < pools.pools.length; i++) {
+            let tokens: Token[] = [];
+            let publicSwap = true;
+            if (pools.pools[i].publicSwap === 'false') publicSwap = false;
+
+            let p: Pool = {
+                id: pools.pools[i].id,
+                swapFee: bmath.scale(bmath.bnum(pools.pools[i].swapFee), 18),
+                totalWeight: bmath.scale(
+                    bmath.bnum(pools.pools[i].totalWeight),
+                    18
+                ),
+                publicSwap: publicSwap,
+                tokens: tokens,
+                tokensList: pools.pools[i].tokensList,
+            };
+
+            pools.pools[i].tokens.forEach(token => {
+                let decimals = Number(token.decimals);
+
+                p.tokens.push({
+                    id: token.id,
+                    address: token.address,
+                    balance: bmath.scale(bmath.bnum(token.balance), decimals),
+                    decimals: decimals,
+                    symbol: token.symbol,
+                    denormWeight: bmath.scale(
+                        bmath.bnum(token.denormWeight),
+                        18
+                    ),
+                });
+            });
+            onChainPools.pools.push(p);
+        }
+
+        return onChainPools;
     }
 
     async getFilteredPools(
