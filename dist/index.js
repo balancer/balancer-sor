@@ -31,5 +31,7 @@ const bmath = __importStar(require('./bmath'));
 exports.bmath = bmath;
 var costToken_1 = require('./costToken');
 exports.getCostOutputToken = costToken_1.getCostOutputToken;
+var ipfs_1 = require('./ipfs');
+exports.IPFS = ipfs_1.IPFS;
 var wrapper_1 = require('./wrapper');
 exports.SOR = wrapper_1.SOR;

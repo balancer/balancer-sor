@@ -1,9 +1,6 @@
 import { JsonRpcProvider } from '@ethersproject/providers';
 import { BigNumber } from './utils/bignumber';
 import { SubGraphPools, Swap, Pools } from './types';
-interface FetchedTokens {
-    [Token: string]: boolean;
-}
 export declare class SOR {
     provider: JsonRpcProvider;
     gasPrice: BigNumber;
@@ -11,14 +8,13 @@ export declare class SOR {
     chainId: number;
     swapCost: BigNumber;
     tokenCost: {};
-    fetchedTokens: FetchedTokens;
-    subgraphCache: SubGraphPools;
     onChainCache: Pools;
     processedDataCache: {};
+    ipfs: any;
     MULTIADDR: {
         [chainId: number]: string;
     };
-    SUBGRAPH_URL: {
+    IPNS: {
         [chainId: number]: string;
     };
     constructor(
@@ -28,31 +24,18 @@ export declare class SOR {
         ChainId: number
     );
     setCostOutputToken(TokenOut: string, Cost?: BigNumber): Promise<void>;
+    fetchPools(): Promise<boolean>;
     fetchOnChainPools(SubgraphPools: SubGraphPools): Promise<Pools>;
-    fetchPairPools(
-        TokenIn: string,
-        TokenOut: string,
-        PurgeCache?: boolean
-    ): Promise<boolean>;
-    hasPairPools(TokenIn: any, TokenOut: any): boolean;
-    updateOnChainBalances(): Promise<boolean>;
-    private fetchNewPools;
-    private updatePools;
-    purgeCaches(): void;
     getSwaps(
         TokenIn: string,
         TokenOut: string,
         SwapType: string,
-        SwapAmt: BigNumber,
-        PurgeCache?: boolean
+        SwapAmt: BigNumber
     ): Promise<[Swap[][], BigNumber]>;
     getSwapsWithCache(
         TokenIn: string,
         TokenOut: string,
         SwapType: string,
-        SwapAmt: BigNumber,
-        SubgraphUrl: string,
-        MulticallAddr: string
+        SwapAmt: BigNumber
     ): Promise<[Swap[][], BigNumber]>;
 }
-export {};

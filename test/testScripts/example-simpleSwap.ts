@@ -34,69 +34,59 @@ async function simpleSwap() {
     // Defaults to 0 if not called or can be set manually using: await SOR.setCostOutputToken(tokenOut, manualPriceBn)
     await SOR.setCostOutputToken(tokenOut);
 
-    console.log(`************** First Call - Without Cache`);
-    // First call so any pool information for tokens must be retrieved so this call will take longer than cached in future.
-    console.time('withOutCache');
+    console.log(`************** Fetch Pools - IPFS & Onchain`);
+    // This fetches all pools list from IPFS then onChain balances using Multicall
+    console.time('fetchPools');
+    let result = await SOR.fetchPools();
+    console.timeEnd('fetchPools');
+
+    console.log(`\n************** First Call - Without Paths Cache`);
+    // First call so any paths must be processed so this call will take longer than cached in future.
+    console.time('withOutPathsCache');
     let [swaps, amountOut] = await SOR.getSwaps(
         tokenIn,
         tokenOut,
         swapType,
         amountIn
     );
-    console.timeEnd('withOutCache');
+    console.timeEnd('withOutPathsCache');
     console.log(`Total DAI Return: ${amountOut.toString()}`);
     console.log(`Swaps: `);
     console.log(swaps);
 
-    console.log(`\n************** With Cache`);
+    console.log(`\n************** Second Call - With Paths Cache`);
     // Cached pools & paths will now be used for processing making it much faster
     console.time('callWithCache');
     [swaps, amountOut] = await SOR.getSwaps(
         tokenIn,
         tokenOut,
         swapType,
-        amountIn,
-        false
+        amountIn
     );
     console.timeEnd('callWithCache');
     console.log(`Total DAI Return: ${amountOut.toString()}`);
     console.log(`Swaps: `);
     console.log(swaps);
 
-    console.log(`\n************** With Pools Cache Purge`);
-    // By default cache is purged and new pool data is loaded
-    console.time('cachePurge');
-    [swaps, amountOut] = await SOR.getSwaps(
-        tokenIn,
-        tokenOut,
-        swapType,
-        amountIn
-    );
-    console.timeEnd('cachePurge');
-    console.log(`Total DAI Return: ${amountOut.toString()}`);
-    console.log(`Swaps: `);
-    console.log(swaps);
-
-    console.log(`\n************** With Cache, Different Swap Type`);
-    // Because token info is already cached this should be fast
+    console.log(`\n************** Different Swap Type - No Paths Cache`);
+    // The paths for this swap needs to be processed
     console.time('differentSwap');
     let amtIn;
     [swaps, amtIn] = await SOR.getSwaps(
         tokenIn,
         tokenOut,
         'swapExactOut',
-        amountOut,
-        false
+        amountOut
     );
     console.timeEnd('differentSwap');
     console.log(`Total USDC In: ${amtIn.toString()}`);
     console.log(`Swaps: `);
     console.log(swaps);
 
-    console.log(`\n************** Updating Onchain Pool Balances`);
-    // This updates all cached pool onchain balances
+    console.log(`\n************** FetchPools again - updates onChain info`);
+    // This updates all pool onchain balances
     console.time('balanceUpdate');
-    await SOR.updateOnChainBalances();
+    await SOR.fetchPools();
     console.timeEnd('balanceUpdate');
 
     console.time('swapAfterBalanceUpdate');
@@ -104,24 +94,17 @@ async function simpleSwap() {
         tokenIn,
         tokenOut,
         'swapExactOut',
-        amountOut,
-        false
+        amountOut
     );
     console.timeEnd('swapAfterBalanceUpdate');
     console.log(`Total USDC In: ${amtIn.toString()}`);
     console.log(`Swaps: `);
     console.log(swaps);
 
-    console.log(`\n************** New token, Pool Already Cached`);
-    // This token hasn't been cached but it only exists in a single pool that has already been cached.
+    console.log(`\n************** New token`);
+    // This token hasn't been cached
     console.time('newToken');
-    [swaps, amountOut] = await SOR.getSwaps(
-        tokenIn,
-        uUSD,
-        swapType,
-        amountIn,
-        false
-    );
+    [swaps, amountOut] = await SOR.getSwaps(tokenIn, uUSD, swapType, amountIn);
     console.timeEnd('newToken');
     console.log(`Total New Token Return: ${amountOut.toString()}`);
     console.log(`Swaps: `);

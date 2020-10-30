@@ -2,7 +2,6 @@ import { JsonRpcProvider } from '@ethersproject/providers';
 import { BigNumber } from './utils/bignumber';
 import {
     SubGraphPools,
-    SubGraphPool,
     Swap,
     PoolDictionary,
     Path,
@@ -21,10 +20,6 @@ interface ProcessedCache {
     [PairId: string]: ProcessedData;
 }
 
-interface FetchedTokens {
-    [Token: string]: boolean;
-}
-
 export class SOR {
     provider: JsonRpcProvider;
     gasPrice: BigNumber;
@@ -33,19 +28,13 @@ export class SOR {
     // avg Balancer swap cost. Can be updated manually if required.
     swapCost: BigNumber = new BigNumber('100000');
     tokenCost = {};
-    fetchedTokens: FetchedTokens = {};
-    subgraphCache: SubGraphPools = { pools: [] };
     onChainCache: Pools = { pools: [] };
     processedDataCache = {};
+    ipfs;
 
     MULTIADDR: { [chainId: number]: string } = {
         1: '0x514053acec7177e277b947b1ebb5c08ab4c4580e',
         42: '0x71c7f1086aFca7Aa1B0D4d73cfa77979d10D3210',
-    };
-
-    SUBGRAPH_URL: { [chainId: number]: string } = {
-        1: 'https://api.thegraph.com/subgraphs/name/balancer-labs/balancer',
-        42: 'https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-kovan',
     };
 
     IPNS: { [chainId: number]: string } = {
@@ -63,6 +52,7 @@ export class SOR {
         this.gasPrice = GasPrice;
         this.maxPools = MaxPools;
         this.chainId = ChainId;
+        this.ipfs = new sor.IPFS();
     }
 
     /*
@@ -86,8 +76,33 @@ export class SOR {
         }
     }
 
+    // Fetch allPools from IPFS then OnChain balances
+    async fetchPools(): Promise<boolean> {
+        try {
+            let allPools = await this.ipfs.getAllPublicSwapPools(
+                `${this.IPNS[this.chainId]}?cb=${Math.random() *
+                    10000000000000000}`,
+                'ipns'
+            );
+
+            let previousStringify = JSON.stringify(this.onChainCache); // Used for compare
+
+            this.onChainCache = await this.fetchOnChainPools(allPools);
+
+            // If new pools are different from previous then any previous processed data is out of date so clear
+            if (previousStringify !== JSON.stringify(this.onChainCache)) {
+                this.processedDataCache = {};
+            }
+
+            return true;
+        } catch (err) {
+            console.error(`fetchPools(): ${err.message}`);
+            return false;
+        }
+    }
+
     /*
-    Uses multicall contact to fetch all onchain balances for cached Subgraph pools.
+    Uses multicall contact to fetch all onchain balances for pools.
     */
     async fetchOnChainPools(SubgraphPools: SubGraphPools): Promise<Pools> {
         if (SubgraphPools.pools.length === 0) {
@@ -107,162 +122,24 @@ export class SOR {
         return onChainPools;
     }
 
-    async fetchPairPools(
-        TokenIn: string,
-        TokenOut: string,
-        PurgeCache: boolean = true
-    ): Promise<boolean> {
-        TokenIn = TokenIn.toLowerCase();
-        TokenOut = TokenOut.toLowerCase();
-
-        if (PurgeCache) {
-            this.purgeCaches();
-            return await this.fetchNewPools(TokenIn, TokenOut);
-        } else if (
-            this.fetchedTokens[TokenIn] &&
-            this.fetchedTokens[TokenOut]
-        ) {
-            return true;
-        } else if (
-            !this.fetchedTokens[TokenIn] &&
-            !this.fetchedTokens[TokenOut]
-        ) {
-            return await this.fetchNewPools(TokenIn, TokenOut);
-        } else if (!this.fetchedTokens[TokenIn]) {
-            return await this.updatePools(TokenIn);
-        } else if (!this.fetchedTokens[TokenOut]) {
-            return await this.updatePools(TokenOut);
-        }
-
-        return false;
-    }
-
-    hasPairPools(TokenIn, TokenOut): boolean {
-        TokenIn = TokenIn.toLowerCase();
-        TokenOut = TokenOut.toLowerCase();
-
-        if (this.fetchedTokens[TokenIn] && this.fetchedTokens[TokenOut])
-            return true;
-        else return false;
-    }
-
-    // Updates onChain balances for all pools in existing cache
-    async updateOnChainBalances(): Promise<boolean> {
-        try {
-            let previousStringify = JSON.stringify(this.onChainCache); // Used for compare
-
-            this.onChainCache = await this.fetchOnChainPools(
-                this.subgraphCache
-            );
-
-            // If new pools are different from previous then any previous processed data is out of date so clear
-            if (previousStringify !== JSON.stringify(this.onChainCache)) {
-                this.processedDataCache = {};
-            }
-
-            return true;
-        } catch (err) {
-            console.error(`updateOnChainBalances(): ${err.message}`);
-            return false;
-        }
-    }
-
-    // Fetches pools that contain TokenIn, TokenOut or both (Subgraph & Onchain)
-    private async fetchNewPools(
-        TokenIn: string,
-        TokenOut: string
-    ): Promise<boolean> {
-        try {
-            this.subgraphCache = await sor.getFilteredPools(
-                TokenIn,
-                TokenOut,
-                this.SUBGRAPH_URL[this.chainId]
-            );
-            this.onChainCache = await this.fetchOnChainPools(
-                this.subgraphCache
-            );
-            this.fetchedTokens[TokenIn] = true;
-            this.fetchedTokens[TokenOut] = true;
-            return true;
-        } catch (err) {
-            this.fetchedTokens[TokenIn] = false;
-            this.fetchedTokens[TokenOut] = false;
-            console.error(`Issue Fetching New Pools: ${TokenIn} ${TokenOut}`);
-            console.error(err.message);
-            return false;
-        }
-    }
-
-    // Adds any pools that contain token and don't already exist to cache (Subgraph & Onchain)
-    private async updatePools(Token: string): Promise<boolean> {
-        try {
-            let poolsWithToken: SubGraphPools = await sor.getPoolsWithToken(
-                Token
-            );
-
-            let newPools: SubGraphPool[] = poolsWithToken.pools.filter(pool => {
-                return !this.subgraphCache.pools.some(
-                    existingPool => existingPool.id === pool.id
-                );
-            });
-
-            if (newPools.length > 0) {
-                let newOnChain = await this.fetchOnChainPools({
-                    pools: newPools,
-                });
-                this.subgraphCache.pools = this.subgraphCache.pools.concat(
-                    newPools
-                );
-                this.onChainCache.pools = this.onChainCache.pools.concat(
-                    newOnChain.pools
-                );
-            }
-            this.fetchedTokens[Token] = true;
-            return true;
-        } catch (err) {
-            this.fetchedTokens[Token] = false;
-            console.error(`Issue Updating Pools: ${Token}`);
-            console.error(err.message);
-            return false;
-        }
-    }
-
-    purgeCaches() {
-        this.fetchedTokens = {};
-        this.subgraphCache = { pools: [] };
-        this.onChainCache = { pools: [] };
-        this.processedDataCache = {};
-    }
-
     /*
     Main function to retrieve swap information.
-    Will fetch & use onChain balances.
-    Can use cached pool info by setting PurgeCache=false but be aware balances may be out of date.
     */
     async getSwaps(
         TokenIn: string,
         TokenOut: string,
         SwapType: string,
-        SwapAmt: BigNumber,
-        PurgeCache: boolean = true
+        SwapAmt: BigNumber
     ): Promise<[Swap[][], BigNumber]> {
         // The Subgraph returns tokens in lower case format so we must match this
         TokenIn = TokenIn.toLowerCase();
         TokenOut = TokenOut.toLowerCase();
-        // Retrieves pool information
-        let isFetched = await this.fetchPairPools(
-            TokenIn,
-            TokenOut,
-            PurgeCache
-        );
 
         let [swaps, total] = await this.getSwapsWithCache(
             TokenIn,
             TokenOut,
             SwapType,
-            SwapAmt,
-            this.SUBGRAPH_URL[this.chainId],
-            this.MULTIADDR[this.chainId]
+            SwapAmt
         );
 
         return [swaps, total];
@@ -272,9 +149,7 @@ export class SOR {
         TokenIn: string,
         TokenOut: string,
         SwapType: string,
-        SwapAmt: BigNumber,
-        SubgraphUrl: string,
-        MulticallAddr: string
+        SwapAmt: BigNumber
     ): Promise<[Swap[][], BigNumber]> {
         let pools: PoolDictionary,
             paths: Path[],

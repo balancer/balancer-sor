@@ -9,14 +9,9 @@ export class IPFS {
     }
 
     async getAllPublicSwapPools(
-        TokenIn: string,
-        TokenOut: string,
         IpfsHash: string,
         ProtocolType: string
     ): Promise<SubGraphPools> {
-        TokenIn = utils.getAddress(TokenIn);
-        TokenOut = utils.getAddress(TokenOut);
-
         let allPools = await this.get(IpfsHash, ProtocolType);
         return allPools;
     }
