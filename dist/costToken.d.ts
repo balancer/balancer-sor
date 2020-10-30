@@ -18,5 +18,6 @@ export declare function getCostOutputToken(
     TokenAddr: string,
     GasPriceWei: BigNumber,
     SwapGasCost: BigNumber,
-    Provider: ethers.providers.Web3Provider
+    Provider: ethers.providers.Web3Provider,
+    ChainId?: number
 ): Promise<BigNumber>;

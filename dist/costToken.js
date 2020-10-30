@@ -99,12 +99,21 @@ function calculateTotalSwapCost(TokenPrice, SwapCost, GasPriceWei) {
         .div(bmath_1.BONE);
 }
 exports.calculateTotalSwapCost = calculateTotalSwapCost;
-function getCostOutputToken(TokenAddr, GasPriceWei, SwapGasCost, Provider) {
+function getCostOutputToken(
+    TokenAddr,
+    GasPriceWei,
+    SwapGasCost,
+    Provider,
+    ChainId = undefined
+) {
     return __awaiter(this, void 0, void 0, function*() {
-        let network = yield Provider.getNetwork();
+        if (!ChainId) {
+            let network = yield Provider.getNetwork();
+            ChainId = network.chainId;
+        }
         // If not mainnet return 0 as UniSwap price unlikely to be correct?
         // Provider can be used to fetch token data (i.e. Decimals) via UniSwap SDK when Ethers V5 is used
-        if (network.chainId !== 1) return new bignumber_1.BigNumber(0);
+        if (ChainId !== 1) return new bignumber_1.BigNumber(0);
         let tokenPrice = new bignumber_1.BigNumber(0);
         try {
             tokenPrice = yield getTokenWeiPrice(TokenAddr, Provider);

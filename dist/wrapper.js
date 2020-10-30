@@ -73,7 +73,8 @@ class SOR {
                     TokenOut,
                     this.gasPrice,
                     this.swapCost,
-                    this.provider
+                    this.provider,
+                    this.chainId
                 );
                 this.tokenCost[TokenOut] = costOutputToken;
             } else {
@@ -255,13 +256,11 @@ class SOR {
         return __awaiter(this, void 0, void 0, function*() {
             TokenIn = TokenIn.toLowerCase();
             TokenOut = TokenOut.toLowerCase();
-            console.time('ipfs');
             let allPoolsNonBig = yield this.ipfs.getAllPublicSwapPools(
                 `${this.IPNS[this.chainId]}?cb=${Math.random() *
                     10000000000000000}`,
                 'ipns'
             );
-            console.timeEnd('ipfs');
             // get all IPFS pools (with balance) & Convert to BigNumber format
             let allPools = yield this.ipfs.getAllPublicSwapPoolsBigNumber(
                 allPoolsNonBig
@@ -349,6 +348,7 @@ class SOR {
                 );
                 allSwaps.push(swaps);
             });
+            // Could do this in loop above ^
             let filteredPools = [];
             // get swap pools
             allSwaps.forEach(swap => {
@@ -368,13 +368,11 @@ class SOR {
                     if (filteredPools.length === 0) break;
                 }
             }
-            console.time('onchain');
             let onChainPools = yield sor.getAllPoolDataOnChain(
                 { pools: poolsOfInterest },
                 this.MULTIADDR[this.chainId],
                 this.provider
             );
-            console.timeEnd('onchain');
             this.poolsForPairsCache[
                 `${TokenIn}${TokenOut}${SwapType}`
             ] = onChainPools;
