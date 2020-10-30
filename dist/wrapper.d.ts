@@ -9,8 +9,10 @@ export declare class SOR {
     swapCost: BigNumber;
     tokenCost: {};
     onChainCache: Pools;
+    poolsForPairsCache: {};
     processedDataCache: {};
     ipfs: any;
+    isAllFetched: boolean;
     MULTIADDR: {
         [chainId: number]: string;
     };
@@ -36,6 +38,13 @@ export declare class SOR {
         TokenIn: string,
         TokenOut: string,
         SwapType: string,
-        SwapAmt: BigNumber
+        SwapAmt: BigNumber,
+        OnChainPools: Pools,
+        UserProcessCache?: boolean
     ): Promise<[Swap[][], BigNumber]>;
+    fetchFilteredPairPools(
+        TokenIn: string,
+        TokenOut: string,
+        SwapType: string
+    ): Promise<void>;
 }

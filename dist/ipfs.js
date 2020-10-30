@@ -39,8 +39,20 @@ var __importDefault =
     function(mod) {
         return mod && mod.__esModule ? mod : { default: mod };
     };
+var __importStar =
+    (this && this.__importStar) ||
+    function(mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null)
+            for (var k in mod)
+                if (Object.hasOwnProperty.call(mod, k)) result[k] = mod[k];
+        result['default'] = mod;
+        return result;
+    };
 Object.defineProperty(exports, '__esModule', { value: true });
 const isomorphic_fetch_1 = __importDefault(require('isomorphic-fetch'));
+const bmath = __importStar(require('./bmath'));
 class IPFS {
     get(ipfsHash, protocolType = 'ipfs') {
         const url = `https://${process.env.IPFS_NODE}/${protocolType}/${ipfsHash}`;
@@ -50,6 +62,44 @@ class IPFS {
         return __awaiter(this, void 0, void 0, function*() {
             let allPools = yield this.get(IpfsHash, ProtocolType);
             return allPools;
+        });
+    }
+    getAllPublicSwapPoolsBigNumber(pools) {
+        return __awaiter(this, void 0, void 0, function*() {
+            let onChainPools = { pools: [] };
+            for (let i = 0; i < pools.pools.length; i++) {
+                let tokens = [];
+                let p = {
+                    id: pools.pools[i].id,
+                    swapFee: bmath.scale(
+                        bmath.bnum(pools.pools[i].swapFee),
+                        18
+                    ),
+                    totalWeight: bmath.scale(
+                        bmath.bnum(pools.pools[i].totalWeight),
+                        18
+                    ),
+                    tokens: tokens,
+                    tokensList: pools.pools[i].tokensList,
+                };
+                pools.pools[i].tokens.forEach(token => {
+                    let decimals = Number(token.decimals);
+                    p.tokens.push({
+                        address: token.address,
+                        balance: bmath.scale(
+                            bmath.bnum(token.balance),
+                            decimals
+                        ),
+                        decimals: decimals,
+                        denormWeight: bmath.scale(
+                            bmath.bnum(token.denormWeight),
+                            18
+                        ),
+                    });
+                });
+                onChainPools.pools.push(p);
+            }
+            return onChainPools;
         });
     }
     getFilteredPools(TokenIn, TokenOut, IpfsHash, ProtocolType) {

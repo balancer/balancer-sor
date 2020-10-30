@@ -22,8 +22,6 @@ export class IPFS {
 
         for (let i = 0; i < pools.pools.length; i++) {
             let tokens: Token[] = [];
-            let publicSwap = true;
-            if (pools.pools[i].publicSwap === 'false') publicSwap = false;
 
             let p: Pool = {
                 id: pools.pools[i].id,
@@ -32,7 +30,6 @@ export class IPFS {
                     bmath.bnum(pools.pools[i].totalWeight),
                     18
                 ),
-                publicSwap: publicSwap,
                 tokens: tokens,
                 tokensList: pools.pools[i].tokensList,
             };
@@ -41,11 +38,9 @@ export class IPFS {
                 let decimals = Number(token.decimals);
 
                 p.tokens.push({
-                    id: token.id,
                     address: token.address,
                     balance: bmath.scale(bmath.bnum(token.balance), decimals),
                     decimals: decimals,
-                    symbol: token.symbol,
                     denormWeight: bmath.scale(
                         bmath.bnum(token.denormWeight),
                         18
