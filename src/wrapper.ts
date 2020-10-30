@@ -70,7 +70,8 @@ export class SOR {
                 TokenOut,
                 this.gasPrice,
                 this.swapCost,
-                this.provider
+                this.provider,
+                this.chainId
             );
 
             this.tokenCost[TokenOut] = costOutputToken;
@@ -382,6 +383,7 @@ export class SOR {
             allSwaps.push(swaps);
         });
 
+        // Could do this in loop above ^
         let filteredPools = [];
         // get swap pools
         allSwaps.forEach(swap => {

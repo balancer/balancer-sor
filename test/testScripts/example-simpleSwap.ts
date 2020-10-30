@@ -41,7 +41,9 @@ async function simpleSwap() {
     // This calculates the cost to make a swap which is used as an input to SOR to allow it to make gas efficient recommendations.
     // Can be set once and will be used for further swap calculations.
     // Defaults to 0 if not called or can be set manually using: await SOR.setCostOutputToken(tokenOut, manualPriceBn)
+    console.time(`setCostOutputToken`);
     await SOR.setCostOutputToken(tokenOut);
+    console.timeEnd(`setCostOutputToken`);
 
     // This fetches a subset of pair pools onchain information - Must be called for each swapType
     console.time('fetchFilteredPairPools');

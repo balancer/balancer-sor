@@ -69,14 +69,16 @@ export async function getCostOutputToken(
     TokenAddr: string,
     GasPriceWei: BigNumber,
     SwapGasCost: BigNumber,
-    Provider: ethers.providers.Web3Provider
+    Provider: ethers.providers.Web3Provider,
+    ChainId: number = undefined
 ): Promise<BigNumber> {
-    let network = await Provider.getNetwork();
-
+    if (!ChainId) {
+        let network = await Provider.getNetwork();
+        ChainId = network.chainId;
+    }
     // If not mainnet return 0 as UniSwap price unlikely to be correct?
     // Provider can be used to fetch token data (i.e. Decimals) via UniSwap SDK when Ethers V5 is used
-    if (network.chainId !== 1) return new BigNumber(0);
-
+    if (ChainId !== 1) return new BigNumber(0);
     let tokenPrice = new BigNumber(0);
     try {
         tokenPrice = await getTokenWeiPrice(TokenAddr, Provider);
@@ -91,5 +93,6 @@ export async function getCostOutputToken(
         SwapGasCost,
         GasPriceWei
     );
+
     return costOutputToken;
 }
