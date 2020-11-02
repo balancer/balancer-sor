@@ -35,9 +35,11 @@ async function simpleSwap() {
     );
 
     // This can be used to check if all pools have been fetched
-    let isAllPoolsFetched = SOR.isAllFetched;
+    SOR.isAllFetched;
+    // Can be used to check if pair/pools been fetched
+    SOR.hasDataForPair(tokenIn, tokenOut);
 
-    console.time(`usefulPairsMethod`);
+    console.time(`totalUsefulPairsMethod`);
     // This calculates the cost to make a swap which is used as an input to SOR to allow it to make gas efficient recommendations.
     // Can be set once and will be used for further swap calculations.
     // Defaults to 0 if not called or can be set manually using: await SOR.setCostOutputToken(tokenOut, manualPriceBn)
@@ -47,7 +49,7 @@ async function simpleSwap() {
 
     // This fetches a subset of pair pools onchain information - Must be called for each swapType
     console.time('fetchFilteredPairPools');
-    await SOR.fetchFilteredPairPools(tokenIn, tokenOut, swapType);
+    await SOR.fetchFilteredPairPools(tokenIn, tokenOut);
     console.timeEnd('fetchFilteredPairPools');
 
     // First call so any paths must be processed so this call will take longer than cached in future.
@@ -59,9 +61,11 @@ async function simpleSwap() {
         amountIn
     );
     console.timeEnd('withOutPathsCache');
-    console.timeEnd(`usefulPairsMethod`);
+    console.timeEnd(`totalUsefulPairsMethod`);
 
-    console.log(`Total WETH Return: ${amountOut.toString()}`);
+    console.log(
+        `USDC>WETH, SwapExactIn, 1USDC, Total WETH Return: ${amountOut.toString()}`
+    );
     console.log(`Swaps: `);
     console.log(swaps);
 
@@ -69,7 +73,7 @@ async function simpleSwap() {
     // This fetches all pools list from IPFS then onChain balances using Multicall
     let fetch = SOR.fetchPools();
 
-    isAllPoolsFetched = SOR.isAllFetched;
+    let isAllPoolsFetched = SOR.isAllFetched;
     console.log(`Are all pools fetched: ${isAllPoolsFetched}`);
 
     console.log(
@@ -85,7 +89,38 @@ async function simpleSwap() {
     );
     console.timeEnd(`usefulPairsMethodPreviouslyLoaded`);
 
-    console.log(`Total WETH Return: ${amountOut.toString()}`);
+    console.log(
+        `USDC>WETH, SwapExactIn, 2USDC, Total WETH Return: ${amountOut.toString()}`
+    );
+    console.log(`Swaps: `);
+    console.log(swaps);
+
+    console.time(`usefulPairsMethodPreviouslyLoaded`);
+    let usdcIn;
+    [swaps, usdcIn] = await SOR.getSwaps(
+        tokenIn,
+        tokenOut,
+        'swapExactOut',
+        amountOut
+    );
+    console.timeEnd(`usefulPairsMethodPreviouslyLoaded`);
+
+    console.log(`USDC>WETH, SwapExactOut, Total USDC In: ${usdcIn.toString()}`);
+    console.log(`Swaps: `);
+    console.log(swaps);
+
+    console.time(`usefulPairsMethodPreviouslyLoaded`);
+    [swaps, amountOut] = await SOR.getSwaps(
+        tokenOut,
+        tokenIn,
+        swapType,
+        new BigNumber(1e18)
+    );
+    console.timeEnd(`usefulPairsMethodPreviouslyLoaded`);
+
+    console.log(
+        `WETH>USDC, SwapExactIn, 1WETH, Total USDC Return: ${amountOut.toString()}`
+    );
     console.log(`Swaps: `);
     console.log(swaps);
 
