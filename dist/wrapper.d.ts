@@ -1,6 +1,13 @@
 import { JsonRpcProvider } from '@ethersproject/providers';
 import { BigNumber } from './utils/bignumber';
-import { SubGraphPools, Swap, Pools } from './types';
+import {
+    SubGraphPools,
+    Swap,
+    PoolDictionary,
+    Path,
+    EffectivePrice,
+    Pools,
+} from './types';
 export declare class SOR {
     provider: JsonRpcProvider;
     gasPrice: BigNumber;
@@ -42,9 +49,16 @@ export declare class SOR {
         OnChainPools: Pools,
         UserProcessCache?: boolean
     ): Promise<[Swap[][], BigNumber]>;
-    fetchFilteredPairPools(
+    fetchFilteredPairPools(TokenIn: string, TokenOut: string): Promise<void>;
+    processPairPools(
         TokenIn: string,
         TokenOut: string,
+        PoolsTokenIn: PoolDictionary,
+        PoolsTokenOut: PoolDictionary,
+        DirectPools: PoolDictionary,
+        HopTokens: string[],
         SwapType: string
-    ): Promise<void>;
+    ): [PoolDictionary, Path[], EffectivePrice[]];
+    private createKey;
+    hasDataForPair(TokenIn: string, TokenOut: string): boolean;
 }

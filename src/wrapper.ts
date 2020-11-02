@@ -194,7 +194,11 @@ export class SOR {
 
             // Retrieves all pools that contain both tokenIn & tokenOut, i.e. pools that can be used for direct swaps
             // Retrieves intermediate pools along with tokens that are contained in these.
-            let directPools, hopTokens, poolsTokenIn, poolsTokenOut;
+            // let directPools, hopTokens, poolsTokenIn, poolsTokenOut;
+            let directPools: PoolDictionary,
+                hopTokens: string[],
+                poolsTokenIn: PoolDictionary,
+                poolsTokenOut: PoolDictionary;
             [
                 directPools,
                 hopTokens,
@@ -202,40 +206,14 @@ export class SOR {
                 poolsTokenOut,
             ] = sor.filterPools(poolsList.pools, TokenIn, TokenOut);
 
-            // let pools: PoolDictionary, paths: Path[], epsExactOut: EffectivePrice[];
-            // [poolsOutIn, pathsExactOut, epsExactOut] = this.processPairPools(TokenOut, TokenIn, poolsTokenOut, poolsTokenIn, directPools, hopTokens, 'swapExactOut');
-
-            // Sort intermediate pools by order of liquidity
-            let mostLiquidPoolsFirstHop, mostLiquidPoolsSecondHop;
-            [
-                mostLiquidPoolsFirstHop,
-                mostLiquidPoolsSecondHop,
-            ] = sor.sortPoolsMostLiquid(
+            [pools, paths, epsOfInterest] = this.processPairPools(
                 TokenIn,
                 TokenOut,
-                hopTokens,
                 poolsTokenIn,
-                poolsTokenOut
-            );
-
-            // Finds the possible paths to make the swap
-            let pathData;
-            [pools, pathData] = sor.parsePoolData(
+                poolsTokenOut,
                 directPools,
-                TokenIn,
-                TokenOut,
-                mostLiquidPoolsFirstHop,
-                mostLiquidPoolsSecondHop,
-                hopTokens
-            );
-
-            // Finds sorted price & slippage information for paths
-            paths = sor.processPaths(pathData, pools, SwapType);
-
-            epsOfInterest = sor.processEpsOfInterestMultiHop(
-                paths,
-                SwapType,
-                this.maxPools
+                hopTokens,
+                SwapType
             );
 
             if (UserProcessCache)
