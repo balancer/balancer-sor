@@ -206,14 +206,22 @@ export class SOR {
                 poolsTokenOut,
             ] = sor.filterPools(poolsList.pools, TokenIn, TokenOut);
 
-            [pools, paths, epsOfInterest] = this.processPairPools(
+            let pathData: Path[];
+            [pools, pathData] = this.processPairPools(
                 TokenIn,
                 TokenOut,
                 poolsTokenIn,
                 poolsTokenOut,
                 directPools,
-                hopTokens,
-                SwapType
+                hopTokens
+            );
+
+            // Finds sorted price & slippage information for paths for SwapType
+            paths = sor.processPaths(pathData, pools, SwapType);
+            epsOfInterest = sor.processEpsOfInterestMultiHop(
+                paths,
+                SwapType,
+                this.maxPools
             );
 
             if (UserProcessCache)
@@ -299,30 +307,38 @@ export class SOR {
             TokenOut
         );
 
-        let poolsInOut: PoolDictionary,
-            pathsExactIn: Path[],
-            epsExactIn: EffectivePrice[];
-        [poolsInOut, pathsExactIn, epsExactIn] = this.processPairPools(
+        // These can be shared for both swap Types
+        let pools: PoolDictionary, pathData: Path[];
+        [pools, pathData] = this.processPairPools(
             TokenIn,
             TokenOut,
             poolsTokenIn,
             poolsTokenOut,
             directPools,
-            hopTokens,
-            'swapExactIn'
+            hopTokens
         );
 
-        let poolsOutIn: PoolDictionary,
-            pathsExactOut: Path[],
-            epsExactOut: EffectivePrice[];
-        [poolsOutIn, pathsExactOut, epsExactOut] = this.processPairPools(
-            TokenOut,
-            TokenIn,
-            poolsTokenOut,
-            poolsTokenIn,
-            directPools,
-            hopTokens,
+        // Finds sorted price & slippage information for paths for SwapType
+        const pathsExactIn: Path[] = sor.processPaths(
+            JSON.parse(JSON.stringify(pathData)),
+            pools,
+            'swapExactIn'
+        );
+        const epsExactIn: EffectivePrice[] = sor.processEpsOfInterestMultiHop(
+            pathsExactIn,
+            'swapExactIn',
+            this.maxPools
+        );
+
+        const pathsExactOut: Path[] = sor.processPaths(
+            pathData,
+            pools,
             'swapExactOut'
+        );
+        const epsExactOut: EffectivePrice[] = sor.processEpsOfInterestMultiHop(
+            pathsExactOut,
+            'swapExactOut',
+            this.maxPools
         );
 
         // Use previously stored value if exists else default to 0
@@ -349,7 +365,7 @@ export class SOR {
 
             let swaps, total;
             [swaps, total] = sor.smartOrderRouterMultiHopEpsOfInterest(
-                JSON.parse(JSON.stringify(poolsInOut)), // Need to keep original pools
+                JSON.parse(JSON.stringify(pools)), // Need to keep original pools
                 pathsExactIn,
                 'swapExactIn',
                 amtIn,
@@ -357,9 +373,10 @@ export class SOR {
                 costOutputToken,
                 epsExactIn
             );
+
             allSwaps.push(swaps);
             [swaps, total] = sor.smartOrderRouterMultiHopEpsOfInterest(
-                JSON.parse(JSON.stringify(poolsOutIn)), // Need to keep original pools
+                JSON.parse(JSON.stringify(pools)), // Need to keep original pools
                 pathsExactOut,
                 'swapExactOut',
                 amtOut,
@@ -411,9 +428,8 @@ export class SOR {
         PoolsTokenIn: PoolDictionary,
         PoolsTokenOut: PoolDictionary,
         DirectPools: PoolDictionary,
-        HopTokens: string[],
-        SwapType: string
-    ): [PoolDictionary, Path[], EffectivePrice[]] {
+        HopTokens: string[]
+    ): [PoolDictionary, Path[]] {
         // Sort intermediate pools by order of liquidity
         let mostLiquidPoolsFirstHop, mostLiquidPoolsSecondHop;
         [
@@ -439,15 +455,7 @@ export class SOR {
             HopTokens
         );
 
-        // Finds sorted price & slippage information for paths for SwapType
-        let paths: Path[] = sor.processPaths(pathData, pools, SwapType);
-        let eps: EffectivePrice[] = sor.processEpsOfInterestMultiHop(
-            paths,
-            SwapType,
-            this.maxPools
-        );
-
-        return [pools, paths, eps];
+        return [pools, pathData];
     }
 
     private createKey(Token1: string, Token2: string): string {
