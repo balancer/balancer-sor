@@ -187,14 +187,21 @@ class SOR {
                     poolsTokenIn,
                     poolsTokenOut,
                 ] = sor.filterPools(poolsList.pools, TokenIn, TokenOut);
-                [pools, paths, epsOfInterest] = this.processPairPools(
+                let pathData;
+                [pools, pathData] = this.processPairPools(
                     TokenIn,
                     TokenOut,
                     poolsTokenIn,
                     poolsTokenOut,
                     directPools,
-                    hopTokens,
-                    SwapType
+                    hopTokens
+                );
+                // Finds sorted price & slippage information for paths for SwapType
+                paths = sor.processPaths(pathData, pools, SwapType);
+                epsOfInterest = sor.processEpsOfInterestMultiHop(
+                    paths,
+                    SwapType,
+                    this.maxPools
                 );
                 if (UserProcessCache)
                     this.processedDataCache[
@@ -276,25 +283,36 @@ class SOR {
                 poolsTokenIn,
                 poolsTokenOut,
             ] = sor.filterPools(allPools.pools, TokenIn, TokenOut);
-            let poolsInOut, pathsExactIn, epsExactIn;
-            [poolsInOut, pathsExactIn, epsExactIn] = this.processPairPools(
+            // These can be shared for both swap Types
+            let pools, pathData;
+            [pools, pathData] = this.processPairPools(
                 TokenIn,
                 TokenOut,
                 poolsTokenIn,
                 poolsTokenOut,
                 directPools,
-                hopTokens,
+                hopTokens
+            );
+            // Finds sorted price & slippage information for paths for SwapType
+            const pathsExactIn = sor.processPaths(
+                JSON.parse(JSON.stringify(pathData)),
+                pools,
                 'swapExactIn'
             );
-            let poolsOutIn, pathsExactOut, epsExactOut;
-            [poolsOutIn, pathsExactOut, epsExactOut] = this.processPairPools(
-                TokenOut,
-                TokenIn,
-                poolsTokenOut,
-                poolsTokenIn,
-                directPools,
-                hopTokens,
+            const epsExactIn = sor.processEpsOfInterestMultiHop(
+                pathsExactIn,
+                'swapExactIn',
+                this.maxPools
+            );
+            const pathsExactOut = sor.processPaths(
+                pathData,
+                pools,
                 'swapExactOut'
+            );
+            const epsExactOut = sor.processEpsOfInterestMultiHop(
+                pathsExactOut,
+                'swapExactOut',
+                this.maxPools
             );
             // Use previously stored value if exists else default to 0
             let costOutputToken = this.tokenCost[TokenOut];
@@ -317,7 +335,7 @@ class SOR {
                     amtOut = bmath_1.scale(amt, decimalsOut);
                 let swaps, total;
                 [swaps, total] = sor.smartOrderRouterMultiHopEpsOfInterest(
-                    JSON.parse(JSON.stringify(poolsInOut)), // Need to keep original pools
+                    JSON.parse(JSON.stringify(pools)), // Need to keep original pools
                     pathsExactIn,
                     'swapExactIn',
                     amtIn,
@@ -327,7 +345,7 @@ class SOR {
                 );
                 allSwaps.push(swaps);
                 [swaps, total] = sor.smartOrderRouterMultiHopEpsOfInterest(
-                    JSON.parse(JSON.stringify(poolsOutIn)), // Need to keep original pools
+                    JSON.parse(JSON.stringify(pools)), // Need to keep original pools
                     pathsExactOut,
                     'swapExactOut',
                     amtOut,
@@ -374,8 +392,7 @@ class SOR {
         PoolsTokenIn,
         PoolsTokenOut,
         DirectPools,
-        HopTokens,
-        SwapType
+        HopTokens
     ) {
         // Sort intermediate pools by order of liquidity
         let mostLiquidPoolsFirstHop, mostLiquidPoolsSecondHop;
@@ -400,14 +417,7 @@ class SOR {
             mostLiquidPoolsSecondHop,
             HopTokens
         );
-        // Finds sorted price & slippage information for paths for SwapType
-        let paths = sor.processPaths(pathData, pools, SwapType);
-        let eps = sor.processEpsOfInterestMultiHop(
-            paths,
-            SwapType,
-            this.maxPools
-        );
-        return [pools, paths, eps];
+        return [pools, pathData];
     }
     createKey(Token1, Token2) {
         return Token1 < Token2 ? `${Token1}${Token2}` : `${Token2}${Token1}`;

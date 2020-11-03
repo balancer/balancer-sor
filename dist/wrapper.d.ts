@@ -1,13 +1,6 @@
 import { JsonRpcProvider } from '@ethersproject/providers';
 import { BigNumber } from './utils/bignumber';
-import {
-    SubGraphPools,
-    Swap,
-    PoolDictionary,
-    Path,
-    EffectivePrice,
-    Pools,
-} from './types';
+import { SubGraphPools, Swap, PoolDictionary, Path, Pools } from './types';
 export declare class SOR {
     provider: JsonRpcProvider;
     gasPrice: BigNumber;
@@ -56,9 +49,8 @@ export declare class SOR {
         PoolsTokenIn: PoolDictionary,
         PoolsTokenOut: PoolDictionary,
         DirectPools: PoolDictionary,
-        HopTokens: string[],
-        SwapType: string
-    ): [PoolDictionary, Path[], EffectivePrice[]];
+        HopTokens: string[]
+    ): [PoolDictionary, Path[]];
     private createKey;
     hasDataForPair(TokenIn: string, TokenOut: string): boolean;
 }
