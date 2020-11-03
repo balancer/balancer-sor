@@ -329,6 +329,9 @@ export function getReturnAmountSwap(
     } else {
         if (balanceOut.isEqualTo(bnum(0))) {
             return bnum(0);
+        } else if (amount.times(3).gte(balanceOut)) {
+            // The maximum amoutOut you can have is 1/3 of the balanceOut to ensure binomial approximation diverges
+            return bnum(0);
         } else {
             returnAmount = calcInGivenOut(
                 balanceIn,
