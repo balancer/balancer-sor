@@ -297,6 +297,9 @@ function getReturnAmountSwap(pools, poolPairData, swapType, amount) {
     } else {
         if (balanceOut.isEqualTo(bmath_1.bnum(0))) {
             return bmath_1.bnum(0);
+        } else if (amount.times(3).gte(balanceOut)) {
+            // The maximum amoutOut you can have is 1/3 of the balanceOut to ensure binomial approximation diverges
+            return bmath_1.bnum(0);
         } else {
             returnAmount = bmath_1.calcInGivenOut(
                 balanceIn,
