@@ -9,11 +9,6 @@ export {
     filterPools,
     sortPoolsMostLiquid,
 } from './helpers';
-export {
-    getAllPublicSwapPools,
-    getFilteredPools,
-    getPoolsWithToken,
-} from './subgraph';
 export { getAllPoolDataOnChain } from './multicall';
 import * as bmath from './bmath';
 export { bmath };

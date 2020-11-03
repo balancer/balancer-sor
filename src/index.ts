@@ -10,12 +10,7 @@ export {
     filterPools,
     sortPoolsMostLiquid,
 } from './helpers';
-export {
-    getAllPublicSwapPools,
-    getFilteredPools,
-    getPoolsWithToken,
-} from './subgraph';
-export { getAllPoolDataOnChain } from './multicall'; // Legacy Function
+export { getAllPoolDataOnChain } from './multicall';
 import * as bmath from './bmath';
 export { bmath };
 export { getCostOutputToken } from './costToken';
