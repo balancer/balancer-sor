@@ -2,7 +2,6 @@
 require('dotenv').config();
 const sor = require('../../src');
 const BigNumber = require('bignumber.js');
-import { BONE } from '../../src/bmath';
 import { JsonRpcProvider } from '@ethersproject/providers';
 
 const provider = new JsonRpcProvider(
@@ -17,6 +16,8 @@ const swapType = 'swapExactIn';
 const noPools = 4; // This determines how many pools the SOR will use to swap.
 const gasPrice = new BigNumber('30000000000'); // You can set gas price to whatever the current price is.
 const swapCost = new BigNumber('100000'); // A pool swap costs approx 100000 gas
+// URL for pools data
+const poolsUrl = `https://cloudflare-ipfs.com/ipns/balancer-team-bucket.storage.fleek.co/balancer-exchange/pools`;
 
 async function swapExactIn() {
     // This calculates the cost to make a swap which is used as an input to SOR to allow it to make gas efficient recommendations
@@ -27,14 +28,17 @@ async function swapExactIn() {
         provider
     );
 
-    // Uses the Subgraph to retrieve all public Balancer pools that have a positive token balance.
-    console.log(`Retrieving SubGraph Pools...`);
-    let allPoolsNonZeroBalances = await sor.getAllPublicSwapPools();
+    // Fetch all pools information
+    const poolsHelper = new sor.POOLS();
+    console.log('Fetching Pools...');
+    let allPoolsNonZeroBalances = await poolsHelper.getAllPublicSwapPools(
+        poolsUrl
+    );
 
     console.log(`Retrieving Onchain Balances...`);
     allPoolsNonZeroBalances = await sor.getAllPoolDataOnChain(
         allPoolsNonZeroBalances,
-        '0xF700478148B84E572A447d63b29fD937Fd511147', // Address of Multicall contract
+        '0x514053acec7177e277b947b1ebb5c08ab4c4580e', // Address of Multicall contract
         provider
     );
 
@@ -93,8 +97,7 @@ async function swapExactIn() {
         epsOfInterest
     );
 
-    const totalReturnEth = totalReturnWei.div(BONE); // Just converts from wei units
-    console.log(`Total DAI Return: ${totalReturnEth.toString()}`);
+    console.log(`Total DAI Return: ${totalReturnWei.toString()}`);
     console.log(`Swaps: `);
     console.log(swaps);
 }

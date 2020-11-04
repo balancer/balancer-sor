@@ -1,4 +1,4 @@
-// Example showing full swapExactIn - run using: $ ts-node ./test/testScripts/example-swapExactIn.ts
+// Example showing full swaps with timings - run using: $ ts-node ./test/testScripts/example-swapExactIn.ts
 require('dotenv').config();
 const sor = require('../../src');
 import { BigNumber } from 'bignumber.js';
@@ -37,7 +37,7 @@ async function simpleSwap() {
     let amountIn = new BigNumber('1000000'); // 1 USDC, Always pay attention to Token Decimals. i.e. In this case USDC has 6 decimals.
 
     console.log(
-        `\n************** First Call - Loading Useful Pools For Pair & First Swap`
+        `\n************** First Call, Without All Pools - Loading Subset of Pools For Pair`
     );
 
     // This can be used to check if all pools have been fetched
@@ -45,7 +45,7 @@ async function simpleSwap() {
     // Can be used to check if pair/pools been fetched
     SOR.hasDataForPair(tokenIn, tokenOut);
 
-    console.time(`totalUsefulPairsMethod`);
+    console.time(`totalCallNoPools`);
     // This calculates the cost to make a swap which is used as an input to SOR to allow it to make gas efficient recommendations.
     // Can be set once and will be used for further swap calculations.
     // Defaults to 0 if not called or can be set manually using: await SOR.setCostOutputToken(tokenOut, manualPriceBn)
@@ -67,7 +67,7 @@ async function simpleSwap() {
         amountIn
     );
     console.timeEnd('withOutPathsCache');
-    console.timeEnd(`totalUsefulPairsMethod`);
+    console.timeEnd(`totalCallNoPools`);
 
     console.log(
         `USDC>WETH, SwapExactIn, 1USDC, Total WETH Return: ${amountOut.toString()}`
@@ -75,25 +75,27 @@ async function simpleSwap() {
     console.log(`Swaps: `);
     console.log(swaps);
 
-    console.log(`************** Fetch All Pools - IPFS & Onchain`);
-    // This fetches all pools list from IPFS then onChain balances using Multicall
+    console.log(
+        `\n************** Fetch All Pools & Onchain Balances (In Background)`
+    );
+    // This fetches all pools list from URL in constructor then onChain balances using Multicall
     let fetch = SOR.fetchPools();
 
     let isAllPoolsFetched = SOR.isAllFetched;
     console.log(`Are all pools fetched: ${isAllPoolsFetched}`);
 
     console.log(
-        `\n**************  Loading All Pools In Background - Will use previously fetched useful pools`
+        `\n**************  Fetch All Pools In Background - Get swap (exactIn) using previously fetched filtered pools`
     );
 
-    console.time(`usefulPairsMethodPreviouslyLoaded`);
+    console.time(`getSwapsWithFilteredPoolsExactIn`);
     [swaps, amountOut] = await SOR.getSwaps(
         tokenIn,
         tokenOut,
         swapType,
         new BigNumber('2000000')
     );
-    console.timeEnd(`usefulPairsMethodPreviouslyLoaded`);
+    console.timeEnd(`getSwapsWithFilteredPoolsExactIn`);
 
     console.log(
         `USDC>WETH, SwapExactIn, 2USDC, Total WETH Return: ${amountOut.toString()}`
@@ -101,7 +103,10 @@ async function simpleSwap() {
     console.log(`Swaps: `);
     console.log(swaps);
 
-    console.time(`usefulPairsMethodPreviouslyLoaded`);
+    console.log(
+        `\n**************  Fetch All Pools In Background - Get swap (exactOut) using previously fetched filtered pools`
+    );
+    console.time(`getSwapsWithFilteredPoolsExactOut`);
     let usdcIn;
     [swaps, usdcIn] = await SOR.getSwaps(
         tokenIn,
@@ -109,20 +114,22 @@ async function simpleSwap() {
         'swapExactOut',
         amountOut
     );
-    console.timeEnd(`usefulPairsMethodPreviouslyLoaded`);
-
+    console.timeEnd(`getSwapsWithFilteredPoolsExactOut`);
     console.log(`USDC>WETH, SwapExactOut, Total USDC In: ${usdcIn.toString()}`);
     console.log(`Swaps: `);
     console.log(swaps);
 
-    console.time(`usefulPairsMethodPreviouslyLoaded`);
+    console.log(
+        `\n**************  Fetch All Pools In Background - Get swap (WETH>USDC) using previously fetched filtered pools`
+    );
+    console.time(`getSwapsWithFilteredPoolsTokensSwapped`);
     [swaps, amountOut] = await SOR.getSwaps(
         tokenOut,
         tokenIn,
         swapType,
         new BigNumber(1e18)
     );
-    console.timeEnd(`usefulPairsMethodPreviouslyLoaded`);
+    console.timeEnd(`getSwapsWithFilteredPoolsTokensSwapped`);
 
     console.log(
         `WETH>USDC, SwapExactIn, 1WETH, Total USDC Return: ${amountOut.toString()}`
@@ -137,7 +144,7 @@ async function simpleSwap() {
     isAllPoolsFetched = SOR.isAllFetched;
     console.log(`Are all pools fetched: ${isAllPoolsFetched}`);
 
-    console.log(`\n************** Using All Pools`);
+    console.log(`\n************** Using All Pools - Without Paths Cache`);
     // First call so any paths must be processed so this call will take longer than cached in future.
     console.time('allPoolsWithOutPathsCache');
     [swaps, amountOut] = await SOR.getSwaps(
@@ -151,16 +158,16 @@ async function simpleSwap() {
     console.log(`Swaps: `);
     console.log(swaps);
 
-    console.log(`\n************** Second Call - With Paths Cache`);
+    console.log(`\n************** Using All Pools - With Paths Cache`);
     // Cached pools & paths will now be used for processing making it much faster
-    console.time('callWithCache');
+    console.time('allPoolsWithPathsCache');
     [swaps, amountOut] = await SOR.getSwaps(
         tokenIn,
         tokenOut,
         swapType,
         amountIn
     );
-    console.timeEnd('callWithCache');
+    console.timeEnd('allPoolsWithPathsCache');
     console.log(`Total WETH Return: ${amountOut.toString()}`);
     console.log(`Swaps: `);
     console.log(swaps);

@@ -36,48 +36,50 @@ The SOR will return totalReturn/totalInput as well as a list swaps to achieve th
 Example Output:
 
 ```js
-// Following is output for 1BAL->ANT swapExactIn
+// Following is output for 1USDC->WETH swapExactIn
 [
     swaps,
-    totalReturnWei,
-] = sor.smartOrderRouterMultiHopEpsOfInterest(....
+    amountOut,
+] = await SOR.getSwaps(....
 
-console.log(totalReturnWei);
-// 4637139997385211870  - This is the total amount of ANT received for 1BAL
-
-console.log(swaps);
+  console.log(
+      `USDC>WETH, SwapExactIn, 1USDC, Total WETH Return: ${amountOut.toString()}`
+  );
+  // USDC>WETH, SwapExactIn, 1USDC, Total WETH Return: 3090385829490120 - This is the total amount of WETH received for 1USDC
+  console.log(`Swaps: `);
+  console.log(swaps);
 
   /*
     This demonstrates a multihop swap going:
-    BAL -> REN via pool 0x89ede...
-    Then REN -> ANT via pool 0x9e04b42...
+    USDC -> BTC++ via pool 0x75286...
+    Then BTC++ -> WETH via pool 0xd4dbf...
   */
   [
     // Multihop swap
     [
       // First sequence in swap
       {
-        pool: '0x89edee8eb84a17396d374f7bbc8dc8ed95a133f9',
-        tokenIn: '0xba100000625a3754423978a60c9317c58a424e3d',
-        tokenOut: '0x408e41876cccdc0f92210600ef50372656052a38',
-        swapAmount: '1000000000000000000',
+        pool: '0x75286e183d923a5f52f52be205e358c5c9101b09',
+        tokenIn: '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48',
+        tokenOut: '0x0327112423f3a68efdf1fcf402f6c5cb9f7c33fd',
+        swapAmount: '1000000',
         limitReturnAmount: '0',
         maxPrice: '115792089237316195423570985008687907853269984665640564039457584007913129639935'
-      },
+       },
       // Second sequence in swap
       {
-        pool: '0x9e04b421149043c04b33865d5ecd8f6c87f174b6',
-        tokenIn: '0x408e41876cccdc0f92210600ef50372656052a38',
-        tokenOut: '0x960b236a07cf122663c4303350609a66a7b288c0',
-        swapAmount: '61607795579834805630',
+        pool: '0xd4dbf96db2fdf8ed40296d8d104b371adf7dee12',
+        tokenIn: '0x0327112423f3a68efdf1fcf402f6c5cb9f7c33fd',
+        tokenOut: '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2',
+        swapAmount: '89403274570637',
         limitReturnAmount: '0',
-        maxPrice: '115792089237316195423570985008687907853269984665640564039457584007913129639935'
+        maxPrice:'115792089237316195423570985008687907853269984665640564039457584007913129639935'
       }
     ]
   ]
 ```
 
-The file: [example-swapExactIn.ts](test/testScripts/example-swapExactIn.ts), shows a full example with comments for a USDC->DAI swapExactIn for 1 USDC input:
+The file: [example-swapExactIn.ts](test/testScripts/example-swapExactIn.ts), shows full examples with comments for various swaps.
 
 To Run:
 
