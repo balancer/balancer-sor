@@ -23,7 +23,13 @@ async function simpleSwap() {
     const maxNoPools = 4;
     const chainId = 1;
 
-    const SOR = new sor.SOR(provider, gasPrice, maxNoPools, chainId);
+    const poolsUrl = `https://ipfs.io/ipns/balancer-team-bucket.storage.fleek.co/balancer-exchange/pools`;
+    // const poolsUrl = `https://cloudflare-ipfs.com/ipns/balancer-team-bucket.storage.fleek.co/balancer-exchange/pools`;
+    // const poolsUrl = `https://ipfs.io/ipns/balancer-team-bucket.storage.fleek.co/balancer-exchange-kovan/pools`;
+    // const poolsUrl = `https://cloudflare-ipfs.com/ipns/balancer-team-bucket.storage.fleek.co/balancer-exchange-kovan/pools`;
+    // const poolsUrl = `https://raw.githubusercontent.com/balancer-labs/balancer-exchange/8615273ca006dba50fd12051535a68ad058f0611/src/allPublicPools.json`;
+
+    const SOR = new sor.SOR(provider, gasPrice, maxNoPools, chainId, poolsUrl);
 
     const tokenIn = USDC;
     const tokenOut = WETH;

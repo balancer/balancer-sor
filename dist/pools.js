@@ -53,18 +53,15 @@ var __importStar =
 Object.defineProperty(exports, '__esModule', { value: true });
 const isomorphic_fetch_1 = __importDefault(require('isomorphic-fetch'));
 const bmath = __importStar(require('./bmath'));
-class IPFS {
-    get(ipfsHash, protocolType = 'ipfs') {
-        const url = `https://${process.env.IPFS_NODE}/${protocolType}/${ipfsHash}`;
-        return isomorphic_fetch_1.default(url).then(res => res.json());
-    }
-    getAllPublicSwapPools(IpfsHash, ProtocolType) {
+class POOLS {
+    getAllPublicSwapPools(URL) {
         return __awaiter(this, void 0, void 0, function*() {
-            let allPools = yield this.get(IpfsHash, ProtocolType);
+            const result = yield isomorphic_fetch_1.default(URL);
+            const allPools = result.json();
             return allPools;
         });
     }
-    getAllPublicSwapPoolsBigNumber(pools) {
+    formatPoolsBigNumber(pools) {
         return __awaiter(this, void 0, void 0, function*() {
             let onChainPools = { pools: [] };
             for (let i = 0; i < pools.pools.length; i++) {
@@ -102,34 +99,5 @@ class IPFS {
             return onChainPools;
         });
     }
-    getFilteredPools(TokenIn, TokenOut, IpfsHash, ProtocolType) {
-        return __awaiter(this, void 0, void 0, function*() {
-            TokenIn = TokenIn.toLowerCase();
-            TokenOut = TokenOut.toLowerCase();
-            let allPools = yield this.get(IpfsHash, ProtocolType);
-            let filteredPools = [];
-            allPools.pools.forEach(pool => {
-                if (pool.tokensList.includes(TokenIn)) {
-                    filteredPools.push(pool);
-                } else if (pool.tokensList.includes(TokenOut)) {
-                    filteredPools.push(pool);
-                }
-            });
-            return { pools: filteredPools };
-        });
-    }
-    getPoolsWithToken(Token, IpfsHash, ProtocolType) {
-        return __awaiter(this, void 0, void 0, function*() {
-            Token = Token.toLowerCase();
-            let allPools = yield this.get(IpfsHash, ProtocolType);
-            let filteredPools = [];
-            allPools.pools.forEach(pool => {
-                if (pool.tokensList.includes(Token)) {
-                    filteredPools.push(pool);
-                }
-            });
-            return { pools: filteredPools };
-        });
-    }
 }
-exports.IPFS = IPFS;
+exports.POOLS = POOLS;

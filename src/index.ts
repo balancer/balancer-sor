@@ -14,5 +14,5 @@ export { getAllPoolDataOnChain } from './multicall';
 import * as bmath from './bmath';
 export { bmath };
 export { getCostOutputToken } from './costToken';
-export { IPFS } from './ipfs';
+export { POOLS } from './pools';
 export { SOR } from './wrapper';

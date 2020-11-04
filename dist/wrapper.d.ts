@@ -1,6 +1,13 @@
 import { JsonRpcProvider } from '@ethersproject/providers';
 import { BigNumber } from './utils/bignumber';
-import { SubGraphPools, Swap, PoolDictionary, Path, Pools } from './types';
+import {
+    SubGraphPools,
+    Swap,
+    PoolDictionary,
+    Path,
+    EffectivePrice,
+    Pools,
+} from './types';
 export declare class SOR {
     provider: JsonRpcProvider;
     gasPrice: BigNumber;
@@ -11,19 +18,18 @@ export declare class SOR {
     onChainCache: Pools;
     poolsForPairsCache: {};
     processedDataCache: {};
-    ipfs: any;
     isAllFetched: boolean;
+    poolsUrl: string;
+    pools: any;
     MULTIADDR: {
-        [chainId: number]: string;
-    };
-    IPNS: {
         [chainId: number]: string;
     };
     constructor(
         Provider: JsonRpcProvider,
         GasPrice: BigNumber,
         MaxPools: number,
-        ChainId: number
+        ChainId: number,
+        PoolsUrl: string
     );
     setCostOutputToken(TokenOut: string, Cost?: BigNumber): Promise<void>;
     fetchPools(): Promise<boolean>;
@@ -34,7 +40,7 @@ export declare class SOR {
         SwapType: string,
         SwapAmt: BigNumber
     ): Promise<[Swap[][], BigNumber]>;
-    getSwapsWithCache(
+    processSwaps(
         TokenIn: string,
         TokenOut: string,
         SwapType: string,
@@ -46,11 +52,13 @@ export declare class SOR {
     processPairPools(
         TokenIn: string,
         TokenOut: string,
-        PoolsTokenIn: PoolDictionary,
-        PoolsTokenOut: PoolDictionary,
-        DirectPools: PoolDictionary,
-        HopTokens: string[]
+        poolsList: any
     ): [PoolDictionary, Path[]];
+    processPathsAndPrices(
+        PathArray: Path[],
+        PoolsDict: PoolDictionary,
+        SwapType: string
+    ): [Path[], EffectivePrice[]];
     private createKey;
     hasDataForPair(TokenIn: string, TokenOut: string): boolean;
 }
