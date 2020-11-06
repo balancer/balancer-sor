@@ -511,6 +511,7 @@ export function filterPools(
     allPools: Pool[], // The complete information of the pools
     tokenIn: string,
     tokenOut: string,
+    maxPools: number,
     disabledOptions: DisabledOptions = { isOverRide: false, disabledTokens: [] }
 ): [PoolDictionary, string[], PoolDictionary, PoolDictionary] {
     // If pool contains token add all its tokens to direct list
@@ -536,21 +537,23 @@ export function filterPools(
             return;
         }
 
-        let containsTokenIn = tokenListSet.has(tokenIn);
-        let containsTokenOut = tokenListSet.has(tokenOut);
+        if (maxPools > 1) {
+            let containsTokenIn = tokenListSet.has(tokenIn);
+            let containsTokenOut = tokenListSet.has(tokenOut);
 
-        if (containsTokenIn && !containsTokenOut) {
-            tokenInPairedTokens = new Set([
-                ...tokenInPairedTokens,
-                ...tokenListSet,
-            ]);
-            poolsTokenOne[pool.id] = pool;
-        } else if (!containsTokenIn && containsTokenOut) {
-            tokenOutPairedTokens = new Set([
-                ...tokenOutPairedTokens,
-                ...tokenListSet,
-            ]);
-            poolsTokenTwo[pool.id] = pool;
+            if (containsTokenIn && !containsTokenOut) {
+                tokenInPairedTokens = new Set([
+                    ...tokenInPairedTokens,
+                    ...tokenListSet,
+                ]);
+                poolsTokenOne[pool.id] = pool;
+            } else if (!containsTokenIn && containsTokenOut) {
+                tokenOutPairedTokens = new Set([
+                    ...tokenOutPairedTokens,
+                    ...tokenListSet,
+                ]);
+                poolsTokenTwo[pool.id] = pool;
+            }
         }
     });
 

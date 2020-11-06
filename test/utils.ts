@@ -264,6 +264,7 @@ export function fullSwap(
         allPoolsNonZeroBalances.pools,
         tokenIn,
         tokenOut,
+        noPools,
         {
             isOverRide: true,
             disabledTokens: disabledTokens.tokens,

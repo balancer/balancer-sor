@@ -40,7 +40,7 @@ describe('Test Filter Functions using allPoolsSmall.json & full SOR comparrions'
             hopTokensFilter,
             poolsTokenIn,
             poolsTokenOut,
-        ] = sor.filterPools(allPoolsNonZeroBalances.pools, DAI, USDC);
+        ] = sor.filterPools(allPoolsNonZeroBalances.pools, DAI, USDC, 4);
 
         let mostLiquidPoolsFirstHopFilter, mostLiquidPoolsSecondHopFilter;
         [

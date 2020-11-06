@@ -147,7 +147,9 @@ export const smartOrderRouterMultiHopEpsOfInterest = (
     let bestTotalReturnConsideringFees: BigNumber = new BigNumber(0);
     let highestPoiNotEnough: boolean = true;
     let pathIds, totalReturn, totalReturnConsideringFees;
-    let bestSwapAmounts, bestPathIds, swapAmounts;
+    let bestSwapAmounts = [],
+        bestPathIds,
+        swapAmounts;
 
     let bmin = paths.length + 1;
     for (let b = 1; b <= bmin; b++) {

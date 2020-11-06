@@ -70,6 +70,7 @@ export declare function filterPools(
     allPools: Pool[], // The complete information of the pools
     tokenIn: string,
     tokenOut: string,
+    maxPools: number,
     disabledOptions?: DisabledOptions
 ): [PoolDictionary, string[], PoolDictionary, PoolDictionary];
 export declare function sortPoolsMostLiquid(

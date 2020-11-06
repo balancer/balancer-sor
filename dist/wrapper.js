@@ -364,7 +364,8 @@ class SOR {
         [directPools, hopTokens, poolsTokenIn, poolsTokenOut] = sor.filterPools(
             poolsList.pools,
             TokenIn,
-            TokenOut
+            TokenOut,
+            this.maxPools
         );
         // Sort intermediate pools by order of liquidity
         let mostLiquidPoolsFirstHop, mostLiquidPoolsSecondHop;

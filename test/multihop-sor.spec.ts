@@ -96,6 +96,7 @@ describe('Tests Multihop SOR vs static allPools.json', () => {
             allPoolsCorrect.pools,
             WETH,
             DAI,
+            4,
             {
                 isOverRide: true,
                 disabledTokens: disabledTokens.tokens,

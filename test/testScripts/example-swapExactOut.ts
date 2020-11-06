@@ -49,7 +49,8 @@ async function swapExactIn() {
     [directPools, hopTokens, poolsTokenIn, poolsTokenOut] = sor.filterPools(
         allPoolsNonZeroBalances.pools,
         tokenIn.toLowerCase(), // The Subgraph returns tokens in lower case format so we must match this
-        tokenOut.toLowerCase()
+        tokenOut.toLowerCase(),
+        noPools
     );
 
     // Sort intermediate pools by order of liquidity

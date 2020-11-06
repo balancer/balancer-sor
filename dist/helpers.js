@@ -475,6 +475,7 @@ function filterPools(
     allPools, // The complete information of the pools
     tokenIn,
     tokenOut,
+    maxPools,
     disabledOptions = { isOverRide: false, disabledTokens: [] }
 ) {
     // If pool contains token add all its tokens to direct list
@@ -496,20 +497,22 @@ function filterPools(
             poolsDirect[pool.id] = pool;
             return;
         }
-        let containsTokenIn = tokenListSet.has(tokenIn);
-        let containsTokenOut = tokenListSet.has(tokenOut);
-        if (containsTokenIn && !containsTokenOut) {
-            tokenInPairedTokens = new Set([
-                ...tokenInPairedTokens,
-                ...tokenListSet,
-            ]);
-            poolsTokenOne[pool.id] = pool;
-        } else if (!containsTokenIn && containsTokenOut) {
-            tokenOutPairedTokens = new Set([
-                ...tokenOutPairedTokens,
-                ...tokenListSet,
-            ]);
-            poolsTokenTwo[pool.id] = pool;
+        if (maxPools > 1) {
+            let containsTokenIn = tokenListSet.has(tokenIn);
+            let containsTokenOut = tokenListSet.has(tokenOut);
+            if (containsTokenIn && !containsTokenOut) {
+                tokenInPairedTokens = new Set([
+                    ...tokenInPairedTokens,
+                    ...tokenListSet,
+                ]);
+                poolsTokenOne[pool.id] = pool;
+            } else if (!containsTokenIn && containsTokenOut) {
+                tokenOutPairedTokens = new Set([
+                    ...tokenOutPairedTokens,
+                    ...tokenListSet,
+                ]);
+                poolsTokenTwo[pool.id] = pool;
+            }
         }
     });
     // We find the intersection of the two previous sets so we can trade tokenIn for tokenOut with 1 multi-hop
