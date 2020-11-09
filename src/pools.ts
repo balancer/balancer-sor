@@ -1,5 +1,4 @@
 import fetch from 'isomorphic-fetch';
-import { utils } from 'ethers';
 import { SubGraphPools, Pools, Pool, Token } from './types';
 import * as bmath from './bmath';
 

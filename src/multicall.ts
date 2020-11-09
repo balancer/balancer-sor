@@ -1,11 +1,12 @@
-import { ethers, utils, Contract } from 'ethers';
+import { Contract } from '@ethersproject/contracts';
+import { BaseProvider } from '@ethersproject/providers';
 import { Pools, Pool, SubGraphPools, Token } from './types';
 import * as bmath from './bmath';
 
 export async function getAllPoolDataOnChain(
     pools: SubGraphPools,
     multiAddress: string,
-    provider: ethers.providers.Web3Provider
+    provider: BaseProvider
 ): Promise<Pools> {
     if (pools.pools.length === 0) throw Error('There are no pools.');
 
@@ -20,7 +21,7 @@ export async function getAllPoolDataOnChain(
 
         addresses.push([pool.id]);
         total++;
-        pool.tokens.forEach((token, tokenIndex) => {
+        pool.tokens.forEach(token => {
             addresses[i].push(token.address);
             total++;
         });

@@ -11,7 +11,7 @@ import {
     BONE,
 } from '../src/bmath';
 import { expect, assert } from 'chai';
-import { ethers } from 'ethers';
+import { getAddress } from '@ethersproject/address';
 
 export function getAmountOut(
     Pools,
@@ -192,9 +192,7 @@ export function formatAndFilterPools(
                 pool.tokensList.forEach(token => {
                     if (
                         !disabledTokens.find(
-                            t =>
-                                ethers.utils.getAddress(t.address) ===
-                                ethers.utils.getAddress(token)
+                            t => getAddress(t.address) === getAddress(token)
                         )
                     ) {
                         tokens.push(token);

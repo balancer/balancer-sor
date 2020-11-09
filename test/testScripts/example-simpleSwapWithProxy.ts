@@ -3,7 +3,9 @@ require('dotenv').config();
 const sor = require('../../src');
 import { BigNumber } from 'bignumber.js';
 import { JsonRpcProvider } from '@ethersproject/providers';
-import { ethers } from 'ethers';
+import { Wallet } from '@ethersproject/wallet';
+import { MaxUint256 } from '@ethersproject/constants';
+import { Contract } from '@ethersproject/contracts';
 
 async function makeSwap() {
     // If running this example make sure you have a .env file saved in root DIR with INFURA=your_key, KEY=pk_of_wallet_to_swap_with
@@ -18,7 +20,7 @@ async function makeSwap() {
     const gasPrice = new BigNumber('25000000000');
     // This determines the max no of pools the SOR will use to swap.
     const maxNoPools = 4;
-    const MAX_UINT = ethers.constants.MaxUint256;
+    const MAX_UINT = MaxUint256;
 
     if (isMainnet) {
         // Will use mainnet addresses - BE CAREFUL SWAP WILL USE REAL FUNDS
@@ -71,13 +73,9 @@ async function makeSwap() {
 
     console.log('Exectuting Swap Using Exchange Proxy...');
 
-    const wallet = new ethers.Wallet(process.env.KEY, provider);
+    const wallet = new Wallet(process.env.KEY, provider);
     const proxyArtifact = require('./abi/ExchangeProxy.json');
-    let proxyContract = new ethers.Contract(
-        proxyAddr,
-        proxyArtifact.abi,
-        provider
-    );
+    let proxyContract = new Contract(proxyAddr, proxyArtifact.abi, provider);
     proxyContract = proxyContract.connect(wallet);
 
     console.log(`Swapping using address: ${wallet.address}...`);
@@ -111,11 +109,7 @@ async function makeSwap() {
     amountOut = new BigNumber(1e18); // This is the exact amount out of tokenOut we want to receive
 
     const tokenArtifact = require('./abi/ERC20.json');
-    let tokenInContract = new ethers.Contract(
-        tokenIn,
-        tokenArtifact.abi,
-        provider
-    );
+    let tokenInContract = new Contract(tokenIn, tokenArtifact.abi, provider);
     tokenInContract = tokenInContract.connect(wallet);
     console.log('Approving proxy...');
     tx = await tokenInContract.approve(proxyAddr, MAX_UINT);

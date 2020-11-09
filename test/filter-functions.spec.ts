@@ -4,15 +4,12 @@ import * as sor from '../src';
 import { assert } from 'chai';
 import 'mocha';
 import { formatAndFilterPools } from './utils';
-const helpers = require('../src/helpers');
-const { utils } = require('ethers');
 // Following has:
 // Both DAI&USDC: 4 pools
 // DAI, No USDC: 3
 // No DAI, USDC: 2
 // Neither: 3
 const allPools = require('./allPoolsSmall.json');
-import { BONE } from '../src/bmath';
 
 const DAI = '0x6B175474E89094C44Da98b954EedeAC495271d0F'.toLowerCase(); // DAI
 const USDC = '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48'.toLowerCase();

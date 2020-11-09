@@ -1,5 +1,5 @@
 import { BigNumber } from './utils/bignumber';
-import { utils } from 'ethers';
+import { getAddress } from '@ethersproject/address';
 import {
     PoolPairData,
     Path,
@@ -19,7 +19,7 @@ import {
     calcInGivenOut,
     scale,
 } from './bmath';
-const disabledTokensDefault = require('./disabled-tokens.json');
+import disabledTokensDefault from './disabled-tokens.json';
 
 export function getLimitAmountSwap(
     poolPairData: PoolPairData,
@@ -449,15 +449,11 @@ export const parsePoolPairData = (
     tokenIn: string,
     tokenOut: string
 ): PoolPairData => {
-    let tI = p.tokens.find(
-        t => utils.getAddress(t.address) === utils.getAddress(tokenIn)
-    );
+    let tI = p.tokens.find(t => getAddress(t.address) === getAddress(tokenIn));
     // console.log("tI")
     // console.log(tI.balance.toString());
     // console.log(tI)
-    let tO = p.tokens.find(
-        t => utils.getAddress(t.address) === utils.getAddress(tokenOut)
-    );
+    let tO = p.tokens.find(t => getAddress(t.address) === getAddress(tokenOut));
 
     // console.log("tO")
     // console.log(tO.balance.toString());

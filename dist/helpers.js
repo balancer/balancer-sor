@@ -1,9 +1,16 @@
 'use strict';
+var __importDefault =
+    (this && this.__importDefault) ||
+    function(mod) {
+        return mod && mod.__esModule ? mod : { default: mod };
+    };
 Object.defineProperty(exports, '__esModule', { value: true });
 const bignumber_1 = require('./utils/bignumber');
-const ethers_1 = require('ethers');
+const address_1 = require('@ethersproject/address');
 const bmath_1 = require('./bmath');
-const disabledTokensDefault = require('./disabled-tokens.json');
+const disabled_tokens_json_1 = __importDefault(
+    require('./disabled-tokens.json')
+);
 function getLimitAmountSwap(poolPairData, swapType) {
     if (swapType === 'swapExactIn') {
         return bmath_1.bmul(poolPairData.balanceIn, bmath_1.MAX_IN_RATIO);
@@ -404,17 +411,13 @@ exports.parsePoolData = (
 };
 exports.parsePoolPairData = (p, tokenIn, tokenOut) => {
     let tI = p.tokens.find(
-        t =>
-            ethers_1.utils.getAddress(t.address) ===
-            ethers_1.utils.getAddress(tokenIn)
+        t => address_1.getAddress(t.address) === address_1.getAddress(tokenIn)
     );
     // console.log("tI")
     // console.log(tI.balance.toString());
     // console.log(tI)
     let tO = p.tokens.find(
-        t =>
-            ethers_1.utils.getAddress(t.address) ===
-            ethers_1.utils.getAddress(tokenOut)
+        t => address_1.getAddress(t.address) === address_1.getAddress(tokenOut)
     );
     // console.log("tO")
     // console.log(tO.balance.toString());
@@ -487,7 +490,7 @@ function filterPools(
     let poolsTokenTwo = {};
     let tokenInPairedTokens = new Set();
     let tokenOutPairedTokens = new Set();
-    let disabledTokens = disabledTokensDefault.tokens;
+    let disabledTokens = disabled_tokens_json_1.default.tokens;
     if (disabledOptions.isOverRide)
         disabledTokens = disabledOptions.disabledTokens;
     allPools.forEach(pool => {

@@ -3,9 +3,9 @@ Object.defineProperty(exports, '__esModule', { value: true });
 const helpers_1 = require('./helpers');
 const bmath_1 = require('./bmath');
 const bignumber_1 = require('./utils/bignumber');
-const ethers_1 = require('ethers');
+const constants_1 = require('@ethersproject/constants');
 // TODO give the option to choose a % of slippage beyond current price?
-exports.MAX_UINT = ethers_1.ethers.constants.MaxUint256;
+exports.MAX_UINT = constants_1.MaxUint256;
 const minAmountOut = 0;
 const maxAmountIn = exports.MAX_UINT;
 const maxPrice = exports.MAX_UINT;

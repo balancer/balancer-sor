@@ -1,4 +1,7 @@
-import { Contract, ethers, utils } from 'ethers';
+import { getCreate2Address } from '@ethersproject/address';
+import { Contract } from '@ethersproject/contracts';
+import { BaseProvider } from '@ethersproject/providers';
+import { keccak256, pack } from '@ethersproject/solidity';
 import { BigNumber } from './utils/bignumber';
 import { BONE } from './bmath';
 
@@ -12,11 +15,11 @@ export function getAddress(tokenA: string, tokenB: string): string {
             ? [tokenA, tokenB]
             : [tokenB, tokenA];
 
-    let address = utils.getCreate2Address(
+    let address = getCreate2Address(
         FACTORY_ADDRESS,
-        utils.solidityKeccak256(
+        keccak256(
             ['bytes'],
-            [utils.solidityPack(['address', 'address'], [tokens[0], tokens[1]])]
+            [pack(['address', 'address'], [tokens[0], tokens[1]])]
         ),
         INIT_CODE_HASH
     );
@@ -26,7 +29,7 @@ export function getAddress(tokenA: string, tokenB: string): string {
 
 export async function getOnChainReserves(
     PairAddr: string,
-    provider: ethers.providers.Web3Provider
+    provider: BaseProvider
 ): Promise<any[]> {
     const uniswapV2PairAbi = require('./abi/UniswapV2Pair.json');
 
@@ -39,7 +42,7 @@ export async function getOnChainReserves(
 
 export async function getTokenWeiPrice(
     TokenAddr: string,
-    provider: ethers.providers.Web3Provider
+    provider: BaseProvider
 ): Promise<BigNumber> {
     const WETH = '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2';
     if (TokenAddr.toLowerCase() === WETH.toLowerCase())
@@ -69,7 +72,7 @@ export async function getCostOutputToken(
     TokenAddr: string,
     GasPriceWei: BigNumber,
     SwapGasCost: BigNumber,
-    Provider: ethers.providers.Web3Provider,
+    Provider: BaseProvider,
     ChainId: number = undefined
 ): Promise<BigNumber> {
     if (!ChainId) {

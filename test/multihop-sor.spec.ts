@@ -13,7 +13,7 @@ import {
     alterPools,
 } from './utils';
 import { BONE } from '../src/bmath';
-import { utils } from 'ethers';
+import { formatEther } from '@ethersproject/units';
 import { getTokenPairsMultiHop } from './utils';
 
 const allPools = require('./allPools.json');
@@ -252,7 +252,7 @@ describe('Tests Multihop SOR vs static allPools.json', () => {
 
         assert.equal(swaps.length, 0, 'Should have 0 swaps.');
         assert.equal(
-            utils.formatEther(totalAmtOut.toString()),
+            formatEther(totalAmtOut.toString()),
             '0.0',
             'Total Out Should Match'
         );
@@ -278,7 +278,7 @@ describe('Tests Multihop SOR vs static allPools.json', () => {
 
         assert.equal(swaps.length, 0, 'Should have 0 swaps.');
         assert.equal(
-            utils.formatEther(totalAmtOut.toString()),
+            formatEther(totalAmtOut.toString()),
             '0.0',
             'Total Out Should Match'
         );
@@ -304,7 +304,7 @@ describe('Tests Multihop SOR vs static allPools.json', () => {
 
         assert.equal(swaps.length, 0, 'Should have 0 swaps.');
         assert.equal(
-            utils.formatEther(totalAmtIn.toString()),
+            formatEther(totalAmtIn.toString()),
             '0.0',
             'Total Out Should Match'
         );

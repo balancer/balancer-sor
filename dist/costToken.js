@@ -35,7 +35,9 @@ var __awaiter =
         });
     };
 Object.defineProperty(exports, '__esModule', { value: true });
-const ethers_1 = require('ethers');
+const address_1 = require('@ethersproject/address');
+const contracts_1 = require('@ethersproject/contracts');
+const solidity_1 = require('@ethersproject/solidity');
 const bignumber_1 = require('./utils/bignumber');
 const bmath_1 = require('./bmath');
 const FACTORY_ADDRESS = '0x5C69bEe701ef814a2B6a3EDD4B1652CB9cc5aA6f';
@@ -46,16 +48,11 @@ function getAddress(tokenA, tokenB) {
         tokenA.toLowerCase() < tokenB.toLowerCase()
             ? [tokenA, tokenB]
             : [tokenB, tokenA];
-    let address = ethers_1.utils.getCreate2Address(
+    let address = address_1.getCreate2Address(
         FACTORY_ADDRESS,
-        ethers_1.utils.solidityKeccak256(
+        solidity_1.keccak256(
             ['bytes'],
-            [
-                ethers_1.utils.solidityPack(
-                    ['address', 'address'],
-                    [tokens[0], tokens[1]]
-                ),
-            ]
+            [solidity_1.pack(['address', 'address'], [tokens[0], tokens[1]])]
         ),
         INIT_CODE_HASH
     );
@@ -65,7 +62,7 @@ exports.getAddress = getAddress;
 function getOnChainReserves(PairAddr, provider) {
     return __awaiter(this, void 0, void 0, function*() {
         const uniswapV2PairAbi = require('./abi/UniswapV2Pair.json');
-        const pairContract = new ethers_1.Contract(
+        const pairContract = new contracts_1.Contract(
             PairAddr,
             uniswapV2PairAbi,
             provider

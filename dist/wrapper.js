@@ -34,10 +34,21 @@ var __awaiter =
             );
         });
     };
+var __importStar =
+    (this && this.__importStar) ||
+    function(mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null)
+            for (var k in mod)
+                if (Object.hasOwnProperty.call(mod, k)) result[k] = mod[k];
+        result['default'] = mod;
+        return result;
+    };
 Object.defineProperty(exports, '__esModule', { value: true });
 const bignumber_1 = require('./utils/bignumber');
 const bmath_1 = require('./bmath');
-const sor = require('./index');
+const sor = __importStar(require('./index'));
 class SOR {
     constructor(Provider, GasPrice, MaxPools, ChainId, PoolsUrl) {
         // avg Balancer swap cost. Can be updated manually if required.

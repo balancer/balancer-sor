@@ -1,4 +1,4 @@
-import { JsonRpcProvider } from '@ethersproject/providers';
+import { BaseProvider } from '@ethersproject/providers';
 import { BigNumber } from './utils/bignumber';
 import {
     SubGraphPool,
@@ -9,11 +9,11 @@ import {
     EffectivePrice,
     Pools,
 } from './types';
-import { bmul, bdiv, bnum, scale } from './bmath';
-const sor = require('./index');
+import { bnum, scale } from './bmath';
+import * as sor from './index';
 
 export class SOR {
-    provider: JsonRpcProvider;
+    provider: BaseProvider;
     gasPrice: BigNumber;
     maxPools: number;
     chainId: number;
@@ -33,7 +33,7 @@ export class SOR {
     };
 
     constructor(
-        Provider: JsonRpcProvider,
+        Provider: BaseProvider,
         GasPrice: BigNumber,
         MaxPools: number,
         ChainId: number,

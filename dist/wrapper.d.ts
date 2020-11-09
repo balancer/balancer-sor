@@ -1,4 +1,4 @@
-import { JsonRpcProvider } from '@ethersproject/providers';
+import { BaseProvider } from '@ethersproject/providers';
 import { BigNumber } from './utils/bignumber';
 import {
     SubGraphPools,
@@ -9,7 +9,7 @@ import {
     Pools,
 } from './types';
 export declare class SOR {
-    provider: JsonRpcProvider;
+    provider: BaseProvider;
     gasPrice: BigNumber;
     maxPools: number;
     chainId: number;
@@ -25,7 +25,7 @@ export declare class SOR {
         [chainId: number]: string;
     };
     constructor(
-        Provider: JsonRpcProvider,
+        Provider: BaseProvider,
         GasPrice: BigNumber,
         MaxPools: number,
         ChainId: number,
