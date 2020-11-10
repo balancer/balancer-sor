@@ -113,26 +113,20 @@ exports.smartOrderRouterMultiHopEpsOfInterest = (
     let bmin = paths.length + 1;
     for (let b = 1; b <= bmin; b++) {
         totalReturn = 0;
-        let price,
-            priceAfter,
-            priceBefore,
-            swapAmountsPriceBefore,
-            swapAmountsPriceAfter;
+        let priceBefore, swapAmountsPriceBefore, swapAmountsPriceAfter;
         for (let i = 0; i < pricesOfInterest.length; i++) {
-            price = pricesOfInterest[i];
-            priceAfter = price;
             if (i === 0) {
-                priceBefore = priceAfter;
+                priceBefore = pricesOfInterest[i];
                 continue;
             }
-            let swapAmountsAfter = priceAfter.amounts;
+            let swapAmountsAfter = pricesOfInterest[i].amounts;
             let totalInputAmountAfter = swapAmountsAfter
                 .slice(0, b)
                 .reduce((a, b) => a.plus(b));
             if (totalInputAmountAfter.isGreaterThan(totalSwapAmount)) {
                 pathIds = priceBefore.bestPathsIds.slice(0, b);
                 swapAmountsPriceBefore = priceBefore.amounts.slice(0, b);
-                swapAmountsPriceAfter = priceAfter.amounts.slice(0, b);
+                swapAmountsPriceAfter = pricesOfInterest[i].amounts.slice(0, b);
                 swapAmounts = getExactSwapAmounts(
                     swapAmountsPriceBefore,
                     swapAmountsPriceAfter,
@@ -141,7 +135,7 @@ exports.smartOrderRouterMultiHopEpsOfInterest = (
                 highestPoiNotEnough = false;
                 break;
             }
-            priceBefore = priceAfter;
+            priceBefore = pricesOfInterest[i];
         }
         if (highestPoiNotEnough) {
             pathIds = [];
@@ -175,10 +169,7 @@ exports.smartOrderRouterMultiHopEpsOfInterest = (
                 improvementCondition =
                     totalReturnConsideringFees.isGreaterThan(
                         bestTotalReturnConsideringFees
-                    ) ||
-                    bestTotalReturnConsideringFees.isEqualTo(
-                        new bignumber_1.BigNumber(0)
-                    );
+                    ) || b === 1; // b === 1 means its the first iteration so bestTotalReturnConsideringFees isn't currently a value
             } else {
                 totalReturnConsideringFees = totalReturn.plus(
                     bmath_1.bmul(
@@ -191,10 +182,7 @@ exports.smartOrderRouterMultiHopEpsOfInterest = (
                 improvementCondition =
                     totalReturnConsideringFees.isLessThan(
                         bestTotalReturnConsideringFees
-                    ) ||
-                    bestTotalReturnConsideringFees.isEqualTo(
-                        new bignumber_1.BigNumber(0)
-                    );
+                    ) || b === 1; // b === 1 means its the first iteration so bestTotalReturnConsideringFees isn't currently a value
             }
         }
         if (improvementCondition === true) {
