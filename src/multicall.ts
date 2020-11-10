@@ -27,44 +27,36 @@ export async function getAllPoolDataOnChain(
         });
     }
 
-    try {
-        let results = await contract.getPoolInfo(addresses, total);
+    let results = await contract.getPoolInfo(addresses, total);
 
-        let j = 0;
-        let onChainPools: Pools = { pools: [] };
+    let j = 0;
+    let onChainPools: Pools = { pools: [] };
 
-        for (let i = 0; i < pools.pools.length; i++) {
-            let tokens: Token[] = [];
+    for (let i = 0; i < pools.pools.length; i++) {
+        let tokens: Token[] = [];
 
-            let p: Pool = {
-                id: pools.pools[i].id,
-                swapFee: bmath.scale(bmath.bnum(pools.pools[i].swapFee), 18),
-                totalWeight: bmath.scale(
-                    bmath.bnum(pools.pools[i].totalWeight),
-                    18
-                ),
-                tokens: tokens,
-                tokensList: pools.pools[i].tokensList,
-            };
+        let p: Pool = {
+            id: pools.pools[i].id,
+            swapFee: bmath.scale(bmath.bnum(pools.pools[i].swapFee), 18),
+            totalWeight: bmath.scale(
+                bmath.bnum(pools.pools[i].totalWeight),
+                18
+            ),
+            tokens: tokens,
+            tokensList: pools.pools[i].tokensList,
+        };
 
-            pools.pools[i].tokens.forEach(token => {
-                let bal = bmath.bnum(results[j]);
-                j++;
-                p.tokens.push({
-                    address: token.address,
-                    balance: bal,
-                    decimals: Number(token.decimals),
-                    denormWeight: bmath.scale(
-                        bmath.bnum(token.denormWeight),
-                        18
-                    ),
-                });
+        pools.pools[i].tokens.forEach(token => {
+            let bal = bmath.bnum(results[j]);
+            j++;
+            p.tokens.push({
+                address: token.address,
+                balance: bal,
+                decimals: Number(token.decimals),
+                denormWeight: bmath.scale(bmath.bnum(token.denormWeight), 18),
             });
-            onChainPools.pools.push(p);
-        }
-        return onChainPools;
-    } catch (e) {
-        console.error('Failure querying onchain balances', { error: e });
-        return;
+        });
+        onChainPools.pools.push(p);
     }
+    return onChainPools;
 }

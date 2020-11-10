@@ -89,8 +89,11 @@ export class SOR {
 
             return true;
         } catch (err) {
+            // On error clear all caches and return false so user knows to try again.
             this.isAllFetched = false;
-            console.error(`fetchPools(): ${err.message}`);
+            this.onChainCache = { pools: [] };
+            this.processedDataCache = {};
+            console.error(`Error: fetchPools(): ${err.message}`);
             return false;
         }
     }
@@ -142,7 +145,7 @@ export class SOR {
         } else {
             // Haven't retrieved all pools/balances so we use the pools for pairs if previously fetched
             if (!this.poolsForPairsCache[this.createKey(TokenIn, TokenOut)])
-                return [[], bnum(0)];
+                return [[[]], bnum(0)];
 
             [swaps, total] = await this.processSwaps(
                 TokenIn,
@@ -167,7 +170,7 @@ export class SOR {
         OnChainPools: Pools,
         UserProcessCache: boolean = true
     ): Promise<[Swap[][], BigNumber]> {
-        if (OnChainPools.pools.length === 0) return [[], bnum(0)];
+        if (OnChainPools.pools.length === 0) return [[[]], bnum(0)];
 
         let pools: PoolDictionary,
             paths: Path[],
