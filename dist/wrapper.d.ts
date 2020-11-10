@@ -48,7 +48,7 @@ export declare class SOR {
         OnChainPools: Pools,
         UserProcessCache?: boolean
     ): Promise<[Swap[][], BigNumber]>;
-    fetchFilteredPairPools(TokenIn: string, TokenOut: string): Promise<void>;
+    fetchFilteredPairPools(TokenIn: string, TokenOut: string): Promise<boolean>;
     processPairPools(
         TokenIn: string,
         TokenOut: string,

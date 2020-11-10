@@ -241,137 +241,167 @@ export class SOR {
     A subset of pools for token pair is found by checking swaps for range of input amounts.
     The onchain balances for the subset of pools is retrieved and cached for future swap calculations (i.e. when amts change).
     */
-    async fetchFilteredPairPools(TokenIn: string, TokenOut: string) {
+    async fetchFilteredPairPools(
+        TokenIn: string,
+        TokenOut: string
+    ): Promise<boolean> {
         TokenIn = TokenIn.toLowerCase();
         TokenOut = TokenOut.toLowerCase();
 
-        // Get all IPFS pools (with balance)
-        let allPoolsNonBig = await this.pools.getAllPublicSwapPools(
-            this.poolsUrl
-        );
+        try {
+            // Get all IPFS pools (with balance)
+            let allPoolsNonBig = await this.pools.getAllPublicSwapPools(
+                this.poolsUrl
+            );
 
-        // Convert to BigNumber format
-        let allPools = await this.pools.formatPoolsBigNumber(allPoolsNonBig);
+            // Convert to BigNumber format
+            let allPools = await this.pools.formatPoolsBigNumber(
+                allPoolsNonBig
+            );
 
-        let decimalsIn = 0;
-        let decimalsOut = 0;
+            let decimalsIn = 0;
+            let decimalsOut = 0;
 
-        // Find token decimals for scaling
-        for (let i = 0; i < allPools.pools.length; i++) {
-            for (let j = 0; j < allPools.pools[i].tokens.length; j++) {
-                if (allPools.pools[i].tokens[j].address === TokenIn) {
-                    decimalsIn = Number(allPools.pools[i].tokens[j].decimals);
-                    if (decimalsIn > 0 && decimalsOut > 0) break;
-                } else if (allPools.pools[i].tokens[j].address === TokenOut) {
-                    decimalsOut = Number(allPools.pools[i].tokens[j].decimals);
-                    if (decimalsIn > 0 && decimalsOut > 0) break;
+            // Find token decimals for scaling
+            for (let i = 0; i < allPools.pools.length; i++) {
+                for (let j = 0; j < allPools.pools[i].tokens.length; j++) {
+                    if (allPools.pools[i].tokens[j].address === TokenIn) {
+                        decimalsIn = Number(
+                            allPools.pools[i].tokens[j].decimals
+                        );
+                        if (decimalsIn > 0 && decimalsOut > 0) break;
+                    } else if (
+                        allPools.pools[i].tokens[j].address === TokenOut
+                    ) {
+                        decimalsOut = Number(
+                            allPools.pools[i].tokens[j].decimals
+                        );
+                        if (decimalsIn > 0 && decimalsOut > 0) break;
+                    }
+                }
+
+                if (decimalsIn > 0 && decimalsOut > 0) break;
+            }
+
+            // These can be shared for both swap Types
+            let pools: PoolDictionary, pathData: Path[];
+            [pools, pathData] = this.processPairPools(
+                TokenIn,
+                TokenOut,
+                allPools
+            );
+
+            // Find paths and prices for swap types
+            let pathsExactIn: Path[], epsExactIn: EffectivePrice[];
+            [pathsExactIn, epsExactIn] = this.processPathsAndPrices(
+                JSON.parse(JSON.stringify(pathData)),
+                pools,
+                'swapExactIn'
+            );
+
+            let pathsExactOut: Path[], epsExactOut: EffectivePrice[];
+            [pathsExactOut, epsExactOut] = this.processPathsAndPrices(
+                pathData,
+                pools,
+                'swapExactOut'
+            );
+
+            // Use previously stored value if exists else default to 0
+            let costOutputToken = this.tokenCost[TokenOut];
+            if (costOutputToken === undefined) {
+                costOutputToken = new BigNumber(0);
+            }
+
+            let allSwaps = [];
+
+            let range = [
+                bnum('0.01'),
+                bnum('0.1'),
+                bnum('1'),
+                bnum('10'),
+                bnum('100'),
+                bnum('1000'),
+            ];
+
+            // Calculate swaps for swapExactIn/Out over range and save swaps (with pools) returned
+            range.forEach(amt => {
+                let amtIn = scale(amt, decimalsIn);
+                let amtOut = amtIn;
+                if (decimalsIn !== decimalsOut)
+                    amtOut = scale(amt, decimalsOut);
+
+                let swaps, total;
+                [swaps, total] = sor.smartOrderRouterMultiHopEpsOfInterest(
+                    JSON.parse(JSON.stringify(pools)), // Need to keep original pools
+                    pathsExactIn,
+                    'swapExactIn',
+                    amtIn,
+                    this.maxPools,
+                    costOutputToken,
+                    epsExactIn
+                );
+
+                allSwaps.push(swaps);
+                [swaps, total] = sor.smartOrderRouterMultiHopEpsOfInterest(
+                    JSON.parse(JSON.stringify(pools)), // Need to keep original pools
+                    pathsExactOut,
+                    'swapExactOut',
+                    amtOut,
+                    this.maxPools,
+                    costOutputToken,
+                    epsExactOut
+                );
+
+                allSwaps.push(swaps);
+            });
+
+            // List of unique pool addresses
+            let filteredPools: string[] = [];
+            // get unique swap pools
+            allSwaps.forEach(swap => {
+                swap.forEach(seq => {
+                    seq.forEach(p => {
+                        if (!filteredPools.includes(p.pool))
+                            filteredPools.push(p.pool);
+                    });
+                });
+            });
+
+            // Get list of pool infos for pools of interest
+            let poolsOfInterest: SubGraphPool[] = [];
+            for (let i = 0; i < allPoolsNonBig.pools.length; i++) {
+                let index = filteredPools.indexOf(allPoolsNonBig.pools[i].id);
+                if (index > -1) {
+                    filteredPools.splice(index, 1);
+                    poolsOfInterest.push(allPoolsNonBig.pools[i]);
+                    if (filteredPools.length === 0) break;
                 }
             }
 
-            if (decimalsIn > 0 && decimalsOut > 0) break;
-        }
-
-        // These can be shared for both swap Types
-        let pools: PoolDictionary, pathData: Path[];
-        [pools, pathData] = this.processPairPools(TokenIn, TokenOut, allPools);
-
-        // Find paths and prices for swap types
-        let pathsExactIn: Path[], epsExactIn: EffectivePrice[];
-        [pathsExactIn, epsExactIn] = this.processPathsAndPrices(
-            JSON.parse(JSON.stringify(pathData)),
-            pools,
-            'swapExactIn'
-        );
-
-        let pathsExactOut: Path[], epsExactOut: EffectivePrice[];
-        [pathsExactOut, epsExactOut] = this.processPathsAndPrices(
-            pathData,
-            pools,
-            'swapExactOut'
-        );
-
-        // Use previously stored value if exists else default to 0
-        let costOutputToken = this.tokenCost[TokenOut];
-        if (costOutputToken === undefined) {
-            costOutputToken = new BigNumber(0);
-        }
-
-        let allSwaps = [];
-
-        let range = [
-            bnum('0.01'),
-            bnum('0.1'),
-            bnum('1'),
-            bnum('10'),
-            bnum('100'),
-            bnum('1000'),
-        ];
-
-        // Calculate swaps for swapExactIn/Out over range and save swaps (with pools) returned
-        range.forEach(amt => {
-            let amtIn = scale(amt, decimalsIn);
-            let amtOut = amtIn;
-            if (decimalsIn !== decimalsOut) amtOut = scale(amt, decimalsOut);
-
-            let swaps, total;
-            [swaps, total] = sor.smartOrderRouterMultiHopEpsOfInterest(
-                JSON.parse(JSON.stringify(pools)), // Need to keep original pools
-                pathsExactIn,
-                'swapExactIn',
-                amtIn,
-                this.maxPools,
-                costOutputToken,
-                epsExactIn
-            );
-
-            allSwaps.push(swaps);
-            [swaps, total] = sor.smartOrderRouterMultiHopEpsOfInterest(
-                JSON.parse(JSON.stringify(pools)), // Need to keep original pools
-                pathsExactOut,
-                'swapExactOut',
-                amtOut,
-                this.maxPools,
-                costOutputToken,
-                epsExactOut
-            );
-
-            allSwaps.push(swaps);
-        });
-
-        // List of unique pool addresses
-        let filteredPools: string[] = [];
-        // get unique swap pools
-        allSwaps.forEach(swap => {
-            swap.forEach(seq => {
-                seq.forEach(p => {
-                    if (!filteredPools.includes(p.pool))
-                        filteredPools.push(p.pool);
-                });
-            });
-        });
-
-        // Get list of pool infos for pools of interest
-        let poolsOfInterest: SubGraphPool[] = [];
-        for (let i = 0; i < allPoolsNonBig.pools.length; i++) {
-            let index = filteredPools.indexOf(allPoolsNonBig.pools[i].id);
-            if (index > -1) {
-                filteredPools.splice(index, 1);
-                poolsOfInterest.push(allPoolsNonBig.pools[i]);
-                if (filteredPools.length === 0) break;
+            let onChainPools: Pools = { pools: [] };
+            if (poolsOfInterest.length !== 0) {
+                // Retrieves onchain balances for pools list
+                onChainPools = await sor.getAllPoolDataOnChain(
+                    { pools: poolsOfInterest },
+                    this.MULTIADDR[this.chainId],
+                    this.provider
+                );
             }
+
+            // Add to cache for future use
+            this.poolsForPairsCache[
+                this.createKey(TokenIn, TokenOut)
+            ] = onChainPools;
+
+            return true;
+        } catch (err) {
+            console.error(`Error: fetchFilteredPairPools(): ${err.message}`);
+            // Add to cache for future use
+            this.poolsForPairsCache[this.createKey(TokenIn, TokenOut)] = {
+                pools: [],
+            };
+            return false;
         }
-
-        // Retrieves onchain balances for pools list
-        let onChainPools: Pools = await sor.getAllPoolDataOnChain(
-            { pools: poolsOfInterest },
-            this.MULTIADDR[this.chainId],
-            this.provider
-        );
-
-        // Add to cache for future use
-        this.poolsForPairsCache[
-            this.createKey(TokenIn, TokenOut)
-        ] = onChainPools;
     }
 
     // Finds pools and paths for token pairs. Independent of swap type.
