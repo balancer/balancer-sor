@@ -53,7 +53,7 @@ async function simpleSwap() {
     await SOR.setCostOutputToken(tokenOut);
     console.timeEnd(`setCostOutputToken`);
 
-    // This fetches a subset of pair pools onchain information - Must be called for each swapType
+    // This fetches a subset of pair pools onchain information
     console.time('fetchFilteredPairPools');
     await SOR.fetchFilteredPairPools(tokenIn, tokenOut);
     console.timeEnd('fetchFilteredPairPools');
