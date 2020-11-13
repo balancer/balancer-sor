@@ -213,7 +213,7 @@ export class SOR {
             pools = cache.pools;
             paths = cache.paths;
             epsOfInterest = cache.epsOfInterest;
-            marketSp = marketSp;
+            marketSp = cache.marketSp;
         }
 
         // Use previously stored value if exists else default to 0
