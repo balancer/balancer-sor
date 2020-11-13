@@ -39,7 +39,7 @@ export declare class SOR {
         TokenOut: string,
         SwapType: string,
         SwapAmt: BigNumber
-    ): Promise<[Swap[][], BigNumber]>;
+    ): Promise<[Swap[][], BigNumber, BigNumber]>;
     processSwaps(
         TokenIn: string,
         TokenOut: string,
@@ -47,7 +47,7 @@ export declare class SOR {
         SwapAmt: BigNumber,
         OnChainPools: Pools,
         UserProcessCache?: boolean
-    ): Promise<[Swap[][], BigNumber]>;
+    ): Promise<[Swap[][], BigNumber, BigNumber]>;
     fetchFilteredPairPools(TokenIn: string, TokenOut: string): Promise<boolean>;
     processPairPools(
         TokenIn: string,
@@ -58,7 +58,7 @@ export declare class SOR {
         PathArray: Path[],
         PoolsDict: PoolDictionary,
         SwapType: string
-    ): [Path[], EffectivePrice[]];
+    ): [Path[], EffectivePrice[], BigNumber];
     private createKey;
     hasDataForPair(TokenIn: string, TokenOut: string): boolean;
 }

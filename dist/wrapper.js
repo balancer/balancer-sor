@@ -142,10 +142,10 @@ class SOR {
             // The Subgraph returns tokens in lower case format so we must match this
             TokenIn = TokenIn.toLowerCase();
             TokenOut = TokenOut.toLowerCase();
-            let swaps, total;
+            let swaps, total, marketSp;
             if (this.isAllFetched) {
                 // All Pools with OnChain Balances is already fetched so use that
-                [swaps, total] = yield this.processSwaps(
+                [swaps, total, marketSp] = yield this.processSwaps(
                     TokenIn,
                     TokenOut,
                     SwapType,
@@ -155,8 +155,8 @@ class SOR {
             } else {
                 // Haven't retrieved all pools/balances so we use the pools for pairs if previously fetched
                 if (!this.poolsForPairsCache[this.createKey(TokenIn, TokenOut)])
-                    return [[[]], bmath_1.bnum(0)];
-                [swaps, total] = yield this.processSwaps(
+                    return [[[]], bmath_1.bnum(0), bmath_1.bnum(0)];
+                [swaps, total, marketSp] = yield this.processSwaps(
                     TokenIn,
                     TokenOut,
                     SwapType,
@@ -165,7 +165,7 @@ class SOR {
                     false
                 );
             }
-            return [swaps, total];
+            return [swaps, total, marketSp];
         });
     }
     // Will process swap/pools data and return best swaps
@@ -179,8 +179,9 @@ class SOR {
         UserProcessCache = true
     ) {
         return __awaiter(this, void 0, void 0, function*() {
-            if (OnChainPools.pools.length === 0) return [[[]], bmath_1.bnum(0)];
-            let pools, paths, epsOfInterest;
+            if (OnChainPools.pools.length === 0)
+                return [[[]], bmath_1.bnum(0), bmath_1.bnum(0)];
+            let pools, paths, epsOfInterest, marketSp;
             // If token pair has been processed before that info can be reused to speed up execution
             let cache = this.processedDataCache[
                 `${TokenIn}${TokenOut}${SwapType}`
@@ -197,7 +198,7 @@ class SOR {
                     TokenOut,
                     poolsList
                 );
-                [paths, epsOfInterest] = this.processPathsAndPrices(
+                [paths, epsOfInterest, marketSp] = this.processPathsAndPrices(
                     pathData,
                     pools,
                     SwapType
@@ -210,12 +211,14 @@ class SOR {
                         pools: pools,
                         paths: paths,
                         epsOfInterest: epsOfInterest,
+                        marketSp: marketSp,
                     };
             } else {
                 // Using pre-processed data from cache
                 pools = cache.pools;
                 paths = cache.paths;
                 epsOfInterest = cache.epsOfInterest;
+                marketSp = marketSp;
             }
             // Use previously stored value if exists else default to 0
             let costOutputToken = this.tokenCost[TokenOut];
@@ -235,7 +238,7 @@ class SOR {
                 costOutputToken,
                 epsOfInterest
             );
-            return [swaps, total];
+            return [swaps, total, marketSp];
         });
     }
     /*
@@ -426,12 +429,13 @@ class SOR {
     // SwapType dependent - calculates paths prices/amounts
     processPathsAndPrices(PathArray, PoolsDict, SwapType) {
         const paths = sor.processPaths(PathArray, PoolsDict, SwapType);
+        const bestSpotPrice = sor.getMarketSpotPrice(paths);
         const eps = sor.processEpsOfInterestMultiHop(
             paths,
             SwapType,
             this.maxPools
         );
-        return [paths, eps];
+        return [paths, eps, bestSpotPrice];
     }
     // Used for cache ids
     createKey(Token1, Token2) {

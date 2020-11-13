@@ -8,6 +8,7 @@ export {
     formatSubgraphPools,
     filterPools,
     sortPoolsMostLiquid,
+    getMarketSpotPrice,
 } from './helpers';
 export { getAllPoolDataOnChain } from './multicall';
 import * as bmath from './bmath';

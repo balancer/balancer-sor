@@ -21,6 +21,7 @@ exports.parsePoolData = helpers_1.parsePoolData;
 exports.formatSubgraphPools = helpers_1.formatSubgraphPools;
 exports.filterPools = helpers_1.filterPools;
 exports.sortPoolsMostLiquid = helpers_1.sortPoolsMostLiquid;
+exports.getMarketSpotPrice = helpers_1.getMarketSpotPrice;
 var multicall_1 = require('./multicall');
 exports.getAllPoolDataOnChain = multicall_1.getAllPoolDataOnChain;
 const bmath = __importStar(require('./bmath'));

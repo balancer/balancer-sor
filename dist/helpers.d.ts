@@ -80,3 +80,4 @@ export declare function sortPoolsMostLiquid(
     poolsTokenInNoTokenOut: PoolDictionary,
     poolsTokenOutNoTokenIn: PoolDictionary
 ): [Pool[], Pool[]];
+export declare function getMarketSpotPrice(paths: Path[]): BigNumber;
