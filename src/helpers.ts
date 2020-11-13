@@ -647,3 +647,18 @@ export function sortPoolsMostLiquid(
 
     return [mostLiquidPoolsFirstHop, mostLiquidPoolsSecondHop];
 }
+
+export function getMarketSpotPrice(paths: Path[]): BigNumber {
+    // Take the spotPrice of the path that has the lowest slippage.
+    let min = bnum(paths[0].slippage);
+    let marketSp = bnum(paths[0].spotPrice);
+    for (let i = 1; i < paths.length; i++) {
+        let value = bnum(paths[i].slippage);
+        if (value.lt(min)) {
+            min = value;
+            marketSp = bnum(paths[i].spotPrice);
+        }
+    }
+
+    return marketSp;
+}
