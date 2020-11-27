@@ -31,7 +31,7 @@ async function makeSwap() {
         USDC = '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48'; // Mainnet USDC
         DAI = '0x6B175474E89094C44Da98b954EedeAC495271d0F';
         chainId = 1;
-        poolsUrl = `https://ipfs.io/ipns/balancer-team-bucket.storage.fleek.co/balancer-exchange/pools`;
+        poolsUrl = `https://ipfs.fleek.co/ipns/balancer-team-bucket.storage.fleek.co/balancer-exchange/pools`;
         proxyAddr = '0x3E66B66Fd1d0b02fDa6C811Da9E0547970DB2f21'; // Mainnet proxy
     } else {
         // Will use Kovan addresses
@@ -42,7 +42,7 @@ async function makeSwap() {
         USDC = '0x2F375e94FC336Cdec2Dc0cCB5277FE59CBf1cAe5'; // Kovan USDC
         DAI = '0x1528F3FCc26d13F7079325Fb78D9442607781c8C'; // Kovan DAI
         chainId = 42;
-        poolsUrl = `https://ipfs.io/ipns/balancer-team-bucket.storage.fleek.co/balancer-exchange-kovan/pools`;
+        poolsUrl = `https://ipfs.fleek.co/ipns/balancer-team-bucket.storage.fleek.co/balancer-exchange-kovan/pools`;
         proxyAddr = '0x4e67bf5bD28Dd4b570FBAFe11D0633eCbA2754Ec'; // Kovan proxy
     }
 

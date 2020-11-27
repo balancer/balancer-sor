@@ -17,7 +17,7 @@ const noPools = 4; // This determines how many pools the SOR will use to swap.
 const gasPrice = new BigNumber('30000000000'); // You can set gas price to whatever the current price is.
 const swapCost = new BigNumber('100000'); // A pool swap costs approx 100000 gas
 // URL for pools data
-const poolsUrl = `https://cloudflare-ipfs.com/ipns/balancer-team-bucket.storage.fleek.co/balancer-exchange/pools`;
+const poolsUrl = `https://ipfs.fleek.co/ipns/balancer-team-bucket.storage.fleek.co/balancer-exchange-kovan/pools`;
 
 async function swapExactIn() {
     // This calculates the cost to make a swap which is used as an input to SOR to allow it to make gas efficient recommendations
