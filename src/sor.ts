@@ -474,10 +474,15 @@ function calculateBestPathIdsForPricesOfInterest(
 
             if (index1 != -1) {
                 if (index2 != -1) {
-                    let bestPath1 = bestPathsIds[index1];
-                    let bestPath2 = bestPathsIds[index2];
-                    bestPathsIds[index1] = bestPath2;
-                    bestPathsIds[index2] = bestPath1;
+                    // If both paths are already in bestPaths then we have to
+                    // make sure index1 < index2 to avoid a bug in an edge case
+                    // where multiple paths swaps happen at the exact same priceOfInterest
+                    if (index1 < index2) {
+                        let bestPath1 = bestPathsIds[index1];
+                        let bestPath2 = bestPathsIds[index2];
+                        bestPathsIds[index1] = bestPath2;
+                        bestPathsIds[index2] = bestPath1;
+                    }
                 } else {
                     bestPathsIds[index1] = poi.swap[1];
                 }
