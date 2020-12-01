@@ -1,14 +1,19 @@
 export {
-    smartOrderRouter,
-    smartOrderRouterEpsOfInterest,
-    calcTotalOutput,
-    calcTotalInput,
-    formatSwapsExactAmountIn,
-    formatSwapsExactAmountOut,
-    processBalancers,
-    processEpsOfInterest,
+    smartOrderRouterMultiHopEpsOfInterest,
+    processPaths,
+    processEpsOfInterestMultiHop,
 } from './sor';
-export { getPoolsWithTokens, getTokenPairs, parsePoolData } from './subgraph';
-export { parsePoolDataOnChain } from './multicall';
+
+export {
+    parsePoolData,
+    formatSubgraphPools,
+    filterPools,
+    sortPoolsMostLiquid,
+    getMarketSpotPrice,
+} from './helpers';
+export { getAllPoolDataOnChain } from './multicall';
 import * as bmath from './bmath';
 export { bmath };
+export { getCostOutputToken } from './costToken';
+export { POOLS } from './pools';
+export { SOR } from './wrapper';

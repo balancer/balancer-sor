@@ -1,7 +1,7 @@
 {
     "compilerOptions": {
         "module": "commonjs",
-        "target": "es5",
+        "target": "es6",
         "declaration": true,
         "lib": ["es2017", "es2018.promise"],
         "outDir": "./dist/",
@@ -12,5 +12,5 @@
         "experimentalDecorators": true,
         "strictNullChecks": false
     },
-    "include": ["src", "src/abi/*.json"]
+    "include": ["src", "src/abi/*.json", "src/disabled-tokens.json"]
 }

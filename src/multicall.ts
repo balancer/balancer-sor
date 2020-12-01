@@ -1,75 +1,62 @@
-import { Interface } from '@ethersproject/abi';
 import { Contract } from '@ethersproject/contracts';
-import { Web3Provider } from '@ethersproject/providers';
-import { Pool } from './types';
+import { BaseProvider } from '@ethersproject/providers';
+import { Pools, Pool, SubGraphPools, Token } from './types';
 import * as bmath from './bmath';
 
-export async function parsePoolDataOnChain(
-    pools,
-    tokenIn: string,
-    tokenOut: string,
+export async function getAllPoolDataOnChain(
+    pools: SubGraphPools,
     multiAddress: string,
-    provider: Web3Provider
-): Promise<Pool[]> {
-    if (pools.length === 0)
-        throw Error('There are no pools with selected tokens');
+    provider: BaseProvider
+): Promise<Pools> {
+    if (pools.pools.length === 0) throw Error('There are no pools.');
 
-    const multiAbi = require('./abi/multicall.json');
-    const bpoolAbi = require('./abi/bpool.json');
+    const customMultiAbi = require('./abi/customMulticall.json');
+    const contract = new Contract(multiAddress, customMultiAbi, provider);
 
-    const multi = new Contract(multiAddress, multiAbi, provider);
+    let addresses = [];
+    let total = 0;
 
-    const iface = new Interface(bpoolAbi);
+    for (let i = 0; i < pools.pools.length; i++) {
+        let pool = pools.pools[i];
 
-    const promises: Promise<any>[] = [];
-
-    let calls = [];
-
-    let poolData: Pool[] = [];
-    pools.forEach(p => {
-        calls.push([p.id, iface.encodeFunctionData('getBalance', [tokenIn])]);
-        calls.push([p.id, iface.encodeFunctionData('getBalance', [tokenOut])]);
-        calls.push([
-            p.id,
-            iface.encodeFunctionData('getNormalizedWeight', [tokenIn]),
-        ]);
-        calls.push([
-            p.id,
-            iface.encodeFunctionData('getNormalizedWeight', [tokenOut]),
-        ]);
-        calls.push([p.id, iface.encodeFunctionData('getSwapFee', [])]);
-    });
-
-    try {
-        const [blockNumber, response] = await multi.aggregate(calls);
-        let i = 0;
-        let chunkResponse = [];
-        let returnPools: Pool[] = [];
-        for (let i = 0; i < response.length; i += 5) {
-            let chunk = response.slice(i, i + 5);
-            chunkResponse.push(chunk);
-        }
-
-        chunkResponse.forEach((r, j) => {
-            let obj = {
-                id: pools[j].id,
-                balanceIn: bmath.bnum(r[0]),
-                balanceOut: bmath.bnum(r[1]),
-                weightIn: bmath.bnum(r[2]),
-                weightOut: bmath.bnum(r[3]),
-                swapFee: bmath.bnum(r[4]),
-            };
-            if (
-                obj.balanceIn.gt(bmath.bnum(0)) &&
-                obj.balanceOut.gt(bmath.bnum(0))
-            ) {
-                returnPools.push(obj);
-            }
+        addresses.push([pool.id]);
+        total++;
+        pool.tokens.forEach(token => {
+            addresses[i].push(token.address);
+            total++;
         });
-
-        return returnPools;
-    } catch (e) {
-        console.error('Failure querying onchain balances', { error: e });
-        return;
     }
+
+    let results = await contract.getPoolInfo(addresses, total);
+
+    let j = 0;
+    let onChainPools: Pools = { pools: [] };
+
+    for (let i = 0; i < pools.pools.length; i++) {
+        let tokens: Token[] = [];
+
+        let p: Pool = {
+            id: pools.pools[i].id,
+            swapFee: bmath.scale(bmath.bnum(pools.pools[i].swapFee), 18),
+            totalWeight: bmath.scale(
+                bmath.bnum(pools.pools[i].totalWeight),
+                18
+            ),
+            tokens: tokens,
+            tokensList: pools.pools[i].tokensList,
+        };
+
+        pools.pools[i].tokens.forEach(token => {
+            let bal = bmath.bnum(results[j]);
+            j++;
+            p.tokens.push({
+                address: token.address,
+                balance: bal,
+                decimals: Number(token.decimals),
+                denormWeight: bmath.scale(bmath.bnum(token.denormWeight), 18),
+            });
+        });
+        onChainPools.pools.push(p);
+    }
+    return onChainPools;
 }
