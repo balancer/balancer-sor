@@ -92,16 +92,25 @@ async function swapExactIn() {
     // The limit amount is due to the fact that Balancer protocol limits a trade to 50% of the pool 
     // balance of tokenIn (for swapExactIn) and 33.33% of the pool balance of tokenOut (for 
     // swapExactOut)
+    // 'paths' are ordered by ascending spot price
     let paths = sor.processPaths(pathData, pools, swapType);
 
-
+    // epsOfInterest stores a list of all relevant prices: these are either 
+    // 1) Spot prices of a path
+    // 2) Prices where paths cross, meaning they would move to the same spot price after trade
+    //    for the same amount traded.
+    // For each price of interest we have:
+    //   - 'bestPathsIds' a list of the id of the best paths to get to this price and
+    //   - 'amounts' a list of how much each path would need to trade to get to that price of
+    //     interest
     let epsOfInterest = sor.processEpsOfInterestMultiHop(
         paths,
         swapType,
         noPools
     );
 
-    // Returns  total amount of DAI swapped and list of swaps to make
+    // Returns 'swaps' which is the optimal list of swaps to make and 
+    // 'totalReturnWei' which is the total amount of tokenOut (eg. DAI) will be returned 
     let swaps, totalReturnWei;
     [swaps, totalReturnWei] = sor.smartOrderRouterMultiHopEpsOfInterest(
         pools,

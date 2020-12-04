@@ -192,6 +192,8 @@ export const smartOrderRouterMultiHopEpsOfInterest = (
         totalReturn = 0;
 
         let priceBefore, swapAmountsPriceBefore, swapAmountsPriceAfter;
+
+        // Sweep all pricesOfInterest until we reach the amount we aim for (totalSwapAmount) 
         for (let i = 0; i < pricesOfInterest.length; i++) {
             if (i === 0) {
                 priceBefore = pricesOfInterest[i];
@@ -203,6 +205,9 @@ export const smartOrderRouterMultiHopEpsOfInterest = (
                 .slice(0, b)
                 .reduce((a, b) => a.plus(b));
 
+            // If totalInputAmountAfter is greater than totalSwapAmount we know 
+            // we found a solution to trade, now all we need to do is interpolate
+            // between swapAmountsPriceBefore and swapAmountsPriceAfter
             if (totalInputAmountAfter.isGreaterThan(totalSwapAmount)) {
                 pathIds = priceBefore.bestPathsIds.slice(0, b);
                 swapAmountsPriceBefore = priceBefore.amounts.slice(0, b);
@@ -214,6 +219,7 @@ export const smartOrderRouterMultiHopEpsOfInterest = (
                     totalSwapAmount
                 );
 
+                // We found a priceOfInterest that can yield enough amount for trade
                 highestPoiNotEnough = false;
                 break;
             }
@@ -221,6 +227,9 @@ export const smartOrderRouterMultiHopEpsOfInterest = (
             priceBefore = pricesOfInterest[i];
         }
 
+        // If we swept the whole table with pricesOfInterest and didn't get enough amounts
+        // it means that Balancer does not have enough liquidity for this totalSwapAmount.
+        // We return an empty list of swaps to represent this exception case.
         if (highestPoiNotEnough) {
             pathIds = [];
             swapAmounts = [];
