@@ -19,10 +19,11 @@ const swapCost = new BigNumber('100000'); // A pool swap costs approx 100000 gas
 // URL for pools data
 const poolsUrl = `https://ipfs.fleek.co/ipns/balancer-team-bucket.storage.fleek.co/balancer-exchange-kovan/pools`;
 
-async function swapExactIn() {
+async function swapExactOut() {
     // This calculates the cost to make a swap which is used as an input to SOR to allow it to make gas efficient recommendations
+    // Notice that outputToken is tokenOut if swapType == 'swapExactIn' and tokenIn if swapType == 'swapExactOut'
     const costOutputToken = await sor.getCostOutputToken(
-        DAI,
+        tokenIn,
         gasPrice,
         swapCost,
         provider
@@ -103,4 +104,4 @@ async function swapExactIn() {
     console.log(swaps);
 }
 
-swapExactIn();
+swapExactOut();

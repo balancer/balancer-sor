@@ -20,13 +20,14 @@ const swapCost = new BigNumber('100000'); // A pool swap costs approx 100000 gas
 const poolsUrl = `https://ipfs.fleek.co/ipns/balancer-team-bucket.storage.fleek.co/balancer-exchange-kovan/pools`;
 
 async function swapExactIn() {
-    // This calculates the cost in output token (output token is tokenOut for swapExactIn and 
-    // tokenIn for a swapExactOut) for each additional pool added to the final SOR swap result. 
-    // This is used as an input to SOR to allow it to make gas efficient recommendations, i.e. 
+    // This calculates the cost in output token (output token is tokenOut for swapExactIn and
+    // tokenIn for a swapExactOut) for each additional pool added to the final SOR swap result.
+    // This is used as an input to SOR to allow it to make gas efficient recommendations, i.e.
     // if it costs 5 DAI to add another pool to the SOR solution and that only generates 1 more DAI,
     // then SOR should not add that pool (if gas costs were zero that pool would be added)
+    // Notice that outputToken is tokenOut if swapType == 'swapExactIn' and tokenIn if swapType == 'swapExactOut'
     const costOutputToken = await sor.getCostOutputToken(
-        DAI,
+        tokenOut,
         gasPrice,
         swapCost,
         provider
@@ -47,10 +48,10 @@ async function swapExactIn() {
     );
 
     console.log(`Processing Data...`);
-    // 'directPools' are all pools that contain both tokenIn and tokenOut, i.e. pools that 
+    // 'directPools' are all pools that contain both tokenIn and tokenOut, i.e. pools that
     // can be used for direct swaps
-    // 'hopTokens' are all tokens that can connect tokenIn and tokenOut in a multihop swap 
-    // with two legs. WETH is a hopToken if its possible to trade USDC to WETH then WETH to DAI 
+    // 'hopTokens' are all tokens that can connect tokenIn and tokenOut in a multihop swap
+    // with two legs. WETH is a hopToken if its possible to trade USDC to WETH then WETH to DAI
     // 'poolsTokenIn' are the pools that contain tokenIn and a hopToken
     // 'poolsTokenOut' are the pools that contain a hopToken and tokenOut
     let directPools, hopTokens, poolsTokenIn, poolsTokenOut;
@@ -74,8 +75,8 @@ async function swapExactIn() {
         poolsTokenOut
     );
 
-    // Finds the possible paths to make the swap, each path can be a direct swap 
-    // or a multihop composed of 2 swaps 
+    // Finds the possible paths to make the swap, each path can be a direct swap
+    // or a multihop composed of 2 swaps
     let pools, pathData;
     [pools, pathData] = sor.parsePoolData(
         directPools,
@@ -83,19 +84,19 @@ async function swapExactIn() {
         tokenOut.toLowerCase(),
         mostLiquidPoolsFirstHop,
         mostLiquidPoolsSecondHop,
-        hopTokens    
+        hopTokens
     );
 
     // For each path, find its spot price, slippage and limit amount
     // The spot price of a multihop is simply the multiplication of the spot prices of each
     // of the swaps. The slippage of a multihop is a bit more complicated (out of scope for here)
-    // The limit amount is due to the fact that Balancer protocol limits a trade to 50% of the pool 
-    // balance of tokenIn (for swapExactIn) and 33.33% of the pool balance of tokenOut (for 
+    // The limit amount is due to the fact that Balancer protocol limits a trade to 50% of the pool
+    // balance of tokenIn (for swapExactIn) and 33.33% of the pool balance of tokenOut (for
     // swapExactOut)
     // 'paths' are ordered by ascending spot price
     let paths = sor.processPaths(pathData, pools, swapType);
 
-    // epsOfInterest stores a list of all relevant prices: these are either 
+    // epsOfInterest stores a list of all relevant prices: these are either
     // 1) Spot prices of a path
     // 2) Prices where paths cross, meaning they would move to the same spot price after trade
     //    for the same amount traded.
@@ -109,8 +110,8 @@ async function swapExactIn() {
         noPools
     );
 
-    // Returns 'swaps' which is the optimal list of swaps to make and 
-    // 'totalReturnWei' which is the total amount of tokenOut (eg. DAI) will be returned 
+    // Returns 'swaps' which is the optimal list of swaps to make and
+    // 'totalReturnWei' which is the total amount of tokenOut (eg. DAI) will be returned
     let swaps, totalReturnWei;
     [swaps, totalReturnWei] = sor.smartOrderRouterMultiHopEpsOfInterest(
         pools,
