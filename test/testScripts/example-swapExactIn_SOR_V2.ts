@@ -17,7 +17,7 @@ const noPools = 4; // This determines how many pools the SOR will use to swap.
 const gasPrice = new BigNumber('30000000000'); // You can set gas price to whatever the current price is.
 const swapCost = new BigNumber('100000'); // A pool swap costs approx 100000 gas
 // URL for pools data
-const poolsUrl = `https://ipfs.fleek.co/ipns/balancer-team-bucket.storage.fleek.co/balancer-exchange-kovan/pools`;
+const poolsUrl = `https://ipfs.fleek.co/ipns/balancer-team-bucket.storage.fleek.co/balancer-exchange/pools`;
 
 async function swapExactIn() {
     // This calculates the cost in output token (output token is tokenOut for swapExactIn and
@@ -62,65 +62,59 @@ async function swapExactIn() {
         noPools
     );
 
-    // For each hopToken, find the most liquid pool for the first and the second hops
-    let mostLiquidPoolsFirstHop, mostLiquidPoolsSecondHop;
-    [
-        mostLiquidPoolsFirstHop,
-        mostLiquidPoolsSecondHop,
-    ] = sor.sortPoolsMostLiquid(
-        tokenIn,
-        tokenOut,
-        hopTokens,
-        poolsTokenIn,
-        poolsTokenOut
-    );
+    // We are commenting this part as this first version only supports direct pairs
+
+    // // For each hopToken, find the most liquid pool for the first and the second hops
+    // let mostLiquidPoolsFirstHop, mostLiquidPoolsSecondHop;
+    // [
+    //     mostLiquidPoolsFirstHop,
+    //     mostLiquidPoolsSecondHop,
+    // ] = sor.sortPoolsMostLiquid(
+    //     tokenIn,
+    //     tokenOut,
+    //     hopTokens,
+    //     poolsTokenIn,
+    //     poolsTokenOut
+    // );
+
+    // // Finds the possible paths to make the swap, each path can be a direct swap
+    // // or a multihop composed of 2 swaps
+    // let pools, pathDataList;
+    // [pools, pathDataList] = sor.parsePoolData(
+    //     directPools,
+    //     tokenIn.toLowerCase(),
+    //     tokenOut.toLowerCase(),
+    //     mostLiquidPoolsFirstHop,
+    //     mostLiquidPoolsSecondHop,
+    //     hopTokens
+    // );
 
     // Finds the possible paths to make the swap, each path can be a direct swap
     // or a multihop composed of 2 swaps
-    let pools, pathData;
-    [pools, pathData] = sor.parsePoolData(
+    let pools, pathDataList;
+    [pools, pathDataList] = sor.parsePoolData(
         directPools,
         tokenIn.toLowerCase(),
         tokenOut.toLowerCase(),
-        mostLiquidPoolsFirstHop,
-        mostLiquidPoolsSecondHop,
-        hopTokens
+        [],
+        [],
+        []
     );
 
-    // For each path, find its spot price, slippage and limit amount
-    // The spot price of a multihop is simply the multiplication of the spot prices of each
-    // of the swaps. The slippage of a multihop is a bit more complicated (out of scope for here)
-    // The limit amount is due to the fact that Balancer protocol limits a trade to 50% of the pool
-    // balance of tokenIn (for swapExactIn) and 33.33% of the pool balance of tokenOut (for
-    // swapExactOut)
-    // 'paths' are ordered by ascending spot price
-    let paths = sor.processPaths(pathData, pools, swapType);
-
-    // epsOfInterest stores a list of all relevant prices: these are either
-    // 1) Spot prices of a path
-    // 2) Prices where paths cross, meaning they would move to the same spot price after trade
-    //    for the same amount traded.
-    // For each price of interest we have:
-    //   - 'bestPathsIds' a list of the id of the best paths to get to this price and
-    //   - 'amounts' a list of how much each path would need to trade to get to that price of
-    //     interest
-    let epsOfInterest = sor.processEpsOfInterestMultiHop(
-        paths,
-        swapType,
-        noPools
-    );
+    // For each path find limitAmount (maximum that it can trade)
+    // 'paths' are then ordered by descending limitAmount
+    let paths = sor.processPaths(pathDataList, pools, swapType);
 
     // Returns 'swaps' which is the optimal list of swaps to make and
     // 'totalReturnWei' which is the total amount of tokenOut (eg. DAI) will be returned
     let swaps, totalReturnWei;
-    [swaps, totalReturnWei] = sor.smartOrderRouterMultiHopEpsOfInterest(
+    [swaps, totalReturnWei] = sor.smartOrderRouter(
         pools,
         paths,
         swapType,
         amountIn,
         noPools,
-        costOutputToken,
-        epsOfInterest
+        costOutputToken
     );
 
     console.log(`Total DAI Return: ${totalReturnWei.toString()}`);

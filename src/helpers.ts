@@ -216,6 +216,25 @@ export function getSlippageLinearizedSpotPriceAfterSwap(
     }
 }
 
+export function getEffectivePriceSwapPath(
+    pools: PoolDictionary,
+    path: Path,
+    swapType: string,
+    amount: BigNumber
+): BigNumber {
+    let returnAmountSwap = getReturnAmountSwapPath(
+        pools,
+        path,
+        swapType,
+        amount
+    );
+    if (swapType === 'swapExactIn') {
+        return amount.div(returnAmountSwap); // amountIn/AmountOut
+    } else {
+        return returnAmountSwap.div(amount); // amountIn/AmountOut
+    }
+}
+
 export function getReturnAmountSwapPath(
     pools: PoolDictionary,
     path: Path,
@@ -663,4 +682,18 @@ export function getMarketSpotPrice(paths: Path[]): BigNumber {
     }
 
     return marketSp;
+}
+
+export function getHighestLimitAmountsForPaths(
+    paths: Path[],
+    swapType: string,
+    maxPools: number
+): BigNumber[] {
+    if (paths.length === 0) return [];
+    let limitAmounts = [];
+    for (let i = 1; i < maxPools + 1; i++) {
+        let limitAmount = paths[i].limitAmount;
+        limitAmounts.push(limitAmount);
+    }
+    return limitAmounts;
 }
