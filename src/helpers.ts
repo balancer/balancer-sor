@@ -32,215 +32,479 @@ export function getLimitAmountSwap(
     }
 }
 
-export function getLimitAmountSwapPath(
+export function getLimitAmountSwapForPath(
     pools: PoolDictionary,
     path: Path,
-    swapType: string,
-    poolPairData: any
-): BigNumber {
-    let swaps: Swap[] = path.swaps;
-    if (swaps.length == 1) {
-        let id = `${swaps[0].pool}${swaps[0].tokenIn}${swaps[0].tokenOut}`;
-        let poolPairDataSwap1 = poolPairData[id];
-        return getLimitAmountSwap(poolPairDataSwap1.poolPairData, swapType);
-    } else if (swaps.length == 2) {
-        let id = `${swaps[0].pool}${swaps[0].tokenIn}${swaps[0].tokenOut}`;
-        let poolPairDataSwap1 = poolPairData[id];
-        id = `${swaps[1].pool}${swaps[1].tokenIn}${swaps[1].tokenOut}`;
-        let poolPairDataSwap2 = poolPairData[id];
-
-        if (swapType === 'swapExactIn') {
-            return BigNumber.min(
-                // The limit is either set by limit_IN of poolPairData 1 or indirectly by limit_IN of poolPairData 2
-                getLimitAmountSwap(poolPairDataSwap1.poolPairData, swapType),
-                bmul(
-                    getLimitAmountSwap(
-                        poolPairDataSwap2.poolPairData,
-                        swapType
-                    ),
-                    poolPairDataSwap1.sp
-                ) // we need to multiply the limit_IN of
-                // poolPairData 2 by the spotPrice of poolPairData 1 to get the equivalent in token IN
-            );
-        } else {
-            return BigNumber.min(
-                // The limit is either set by limit_OUT of poolPairData 2 or indirectly by limit_OUT of poolPairData 1
-                getLimitAmountSwap(poolPairDataSwap2.poolPairData, swapType),
-                bdiv(
-                    getLimitAmountSwap(
-                        poolPairDataSwap1.poolPairData,
-                        swapType
-                    ),
-                    poolPairDataSwap2.sp
-                ) // we need to divide the limit_OUT of
-                // poolPairData 1 by the spotPrice of poolPairData 2 to get the equivalent in token OUT
-            );
-        }
-    } else {
-        throw new Error('Path with more than 2 swaps not supported');
-    }
-}
-
-export function getSpotPricePath(
-    pools: PoolDictionary,
-    path: Path,
-    poolPairData: any
-): BigNumber {
-    let swaps = path.swaps;
-    if (swaps.length == 1) {
-        let id = `${swaps[0].pool}${swaps[0].tokenIn}${swaps[0].tokenOut}`;
-        let poolPairDataSwap1 = poolPairData[id];
-        return poolPairDataSwap1.sp;
-    } else if (swaps.length == 2) {
-        let id = `${swaps[0].pool}${swaps[0].tokenIn}${swaps[0].tokenOut}`;
-        let poolPairDataSwap1 = poolPairData[id];
-        id = `${swaps[1].pool}${swaps[1].tokenIn}${swaps[1].tokenOut}`;
-        let poolPairDataSwap2 = poolPairData[id];
-
-        return bmul(poolPairDataSwap1.sp, poolPairDataSwap2.sp);
-    } else {
-        throw new Error('Path with more than 2 swaps not supported');
-    }
-}
-
-export function getSpotPrice(poolPairData: PoolPairData): BigNumber {
-    let inRatio = bdiv(poolPairData.balanceIn, poolPairData.weightIn);
-    let outRatio = bdiv(poolPairData.balanceOut, poolPairData.weightOut);
-    if (outRatio.isEqualTo(bnum(0))) {
-        return bnum(0);
-    } else {
-        return bdiv(bdiv(inRatio, outRatio), BONE.minus(poolPairData.swapFee));
-    }
-}
-
-export function getSlippageLinearizedSpotPriceAfterSwapPath(
-    pools: PoolDictionary,
-    path: Path,
-    swapType: string,
-    poolPairData: any
-): BigNumber {
-    let swaps: Swap[] = path.swaps;
-    if (swaps.length == 1) {
-        let id = `${swaps[0].pool}${swaps[0].tokenIn}${swaps[0].tokenOut}`;
-        let poolPairDataSwap1: PoolPairData = poolPairData[id].poolPairData;
-
-        return getSlippageLinearizedSpotPriceAfterSwap(
-            poolPairDataSwap1,
-            swapType
-        );
-    } else if (swaps.length == 2) {
-        let id = `${swaps[0].pool}${swaps[0].tokenIn}${swaps[0].tokenOut}`;
-        let p1: PoolPairData = poolPairData[id].poolPairData;
-
-        id = `${swaps[1].pool}${swaps[1].tokenIn}${swaps[1].tokenOut}`;
-        let p2: PoolPairData = poolPairData[id].poolPairData;
-
-        if (
-            p1.balanceIn.isEqualTo(bnum(0)) ||
-            p2.balanceIn.isEqualTo(bnum(0))
-        ) {
-            return bnum(0);
-        } else {
-            // Since the numerator is the same for both 'swapExactIn' and 'swapExactOut' we do this first
-            // See formulas on https://one.wolframcloud.com/env/fernando.martinel/SOR_multihop_analysis.nb
-            let numerator1 = bmul(
-                bmul(
-                    bmul(BONE.minus(p1.swapFee), BONE.minus(p2.swapFee)), // In mathematica both terms are the negative (which compensates)
-                    p1.balanceOut
-                ),
-                bmul(p1.weightIn, p2.weightIn)
-            );
-
-            let numerator2 = bmul(
-                bmul(
-                    p1.balanceOut.plus(p2.balanceIn),
-                    BONE.minus(p1.swapFee) // In mathematica this is the negative but we add (instead of subtracting) numerator2 to compensate
-                ),
-                bmul(p1.weightIn, p2.weightOut)
-            );
-
-            let numerator3 = bmul(
-                p2.balanceIn,
-                bmul(p1.weightOut, p2.weightOut)
-            );
-
-            let numerator = numerator1.plus(numerator2).plus(numerator3);
-
-            // The denominator is different for 'swapExactIn' and 'swapExactOut'
-            if (swapType === 'swapExactIn') {
-                let denominator1 = bmul(p1.balanceIn, p1.weightOut);
-                let denominator2 = bmul(p2.balanceIn, p2.weightOut);
-
-                return bdiv(bdiv(numerator, denominator1), denominator2);
-            } else {
-                let denominator1 = bmul(
-                    BONE.minus(p1.swapFee),
-                    bmul(p1.balanceOut, p1.weightIn)
-                );
-                let denominator2 = bmul(
-                    BONE.minus(p2.swapFee),
-                    bmul(p2.balanceOut, p2.weightIn)
-                );
-
-                return bdiv(bdiv(numerator, denominator1), denominator2);
-            }
-        }
-    } else {
-        throw new Error('Path with more than 2 swaps not supported');
-    }
-}
-
-export function getSlippageLinearizedSpotPriceAfterSwap(
-    poolPairData: PoolPairData,
     swapType: string
 ): BigNumber {
-    let { weightIn, weightOut, balanceIn, balanceOut, swapFee } = poolPairData;
+    let poolPairData = parsePoolPairDataForPath(pools, path, swapType);
+    if (poolPairData.length == 1) {
+        return getLimitAmountSwap(poolPairData[0], swapType);
+    } else if (poolPairData.length == 2) {
+        if (swapType === 'swapExactIn') {
+            let limitAmountSwap1 = getLimitAmountSwap(
+                poolPairData[0],
+                swapType
+            );
+            let limitAmountSwap2 = getLimitAmountSwap(
+                poolPairData[1],
+                swapType
+            );
+            let limitOutputAmountSwap1 = getOutputAmountSwap(
+                poolPairData[0],
+                swapType,
+                limitAmountSwap1
+            );
+            if (limitOutputAmountSwap1.gt(limitAmountSwap2))
+                // This means second hop is limiting the path
+                return getOutputAmountSwap(
+                    poolPairData[0],
+                    'swapExactOut',
+                    limitAmountSwap2
+                );
+            // This means first hop is limiting the path
+            else return limitAmountSwap1;
+        } else {
+            let limitAmountSwap1 = getLimitAmountSwap(
+                poolPairData[0],
+                swapType
+            );
+            let limitAmountSwap2 = getLimitAmountSwap(
+                poolPairData[1],
+                swapType
+            );
+            let limitOutputAmountSwap2 = getOutputAmountSwap(
+                poolPairData[1],
+                swapType,
+                limitAmountSwap2
+            );
+            if (limitOutputAmountSwap2.gt(limitAmountSwap1))
+                // This means first hop is limiting the path
+                return getOutputAmountSwap(
+                    poolPairData[1],
+                    'swapExactIn',
+                    limitAmountSwap1
+                );
+            // This means second hop is limiting the path
+            else return limitAmountSwap2;
+        }
+    } else {
+        throw new Error('Path with more than 2 swaps not supported');
+    }
+}
+
+// TODO: Add cases for pairType = [BTP->token, token->BTP] and poolType = [weighted, stable]
+export function getOutputAmountSwap(
+    poolPairData: PoolPairData,
+    swapType: string,
+    amount: BigNumber
+): BigNumber {
+    let {
+        weightIn,
+        weightOut,
+        balanceIn,
+        balanceOut,
+        swapFee,
+        tokenIn,
+        tokenOut,
+    } = poolPairData;
+    let returnAmount: BigNumber;
+
+    // TODO: won't be necessary once we change the type of PoolPairData
+    let wi, wo, Bi, Bo, f;
+    wi = weightIn.toNumber();
+    wo = weightOut.toNumber();
+    Bi = balanceIn.toNumber();
+    Bo = balanceOut.toNumber();
+    f = swapFee.toNumber();
+
+    // TODO: check if necessary to check if amount > limitAmount
     if (swapType === 'swapExactIn') {
         if (balanceIn.isEqualTo(bnum(0))) {
             return bnum(0);
         } else {
-            return bdiv(
-                bmul(BONE.minus(swapFee), bdiv(weightIn, weightOut)).plus(BONE),
-                balanceIn
-            );
+            let Ai = amount.toNumber();
+            // return Bo-Bo*(Bi/(Ai+Bi-Ai*f))**(wi/wo)
+            return bnum(Bo - Bo * Math.pow(Bi / (Ai + Bi - Ai * f), wi / wo));
         }
     } else {
         if (balanceOut.isEqualTo(bnum(0))) {
             return bnum(0);
         } else {
-            return bdiv(
-                bdiv(weightOut, bmul(BONE.minus(swapFee), weightIn)).plus(BONE),
-                balanceOut
-            );
+            let Ao = amount.toNumber();
+            if (Ao >= Bo) return bnum('Infinity');
+            // return -((Bi*(-1+(Bo/(-Ao+Bo))**(wo/wi)))/(-1+f))
+            else
+                return bnum(
+                    -(
+                        (Bi * (-1 + Math.pow(Bo / (-Ao + Bo), wo / wi))) /
+                        (-1 + f)
+                    )
+                );
         }
     }
 }
 
-export function getEffectivePriceSwapPath(
+export function getOutputAmountSwapForPath(
     pools: PoolDictionary,
     path: Path,
     swapType: string,
     amount: BigNumber
 ): BigNumber {
-    let returnAmountSwap = getReturnAmountSwapPath(
+    let poolPairData = parsePoolPairDataForPath(pools, path, swapType);
+    if (poolPairData.length == 1) {
+        return getOutputAmountSwap(poolPairData[0], swapType, amount);
+    } else if (poolPairData.length == 2) {
+        if (swapType === 'swapExactIn') {
+            // The outputAmount is number of tokenOut we receive from the second poolPairData
+            let outputAmountSwap1 = getOutputAmountSwap(
+                poolPairData[0],
+                swapType,
+                amount
+            );
+            return getOutputAmountSwap(
+                poolPairData[1],
+                swapType,
+                outputAmountSwap1
+            );
+        } else {
+            // The outputAmount is number of tokenIn we send to the first poolPairData
+            let outputAmountSwap2 = getOutputAmountSwap(
+                poolPairData[1],
+                swapType,
+                amount
+            );
+            return getOutputAmountSwap(
+                poolPairData[0],
+                swapType,
+                outputAmountSwap2
+            );
+        }
+    } else {
+        throw new Error('Path with more than 2 swaps not supported');
+    }
+}
+
+export function getEffectivePriceSwapForPath(
+    pools: PoolDictionary,
+    path: Path,
+    swapType: string,
+    amount: BigNumber
+): BigNumber {
+    let outputAmountSwap = getOutputAmountSwapForPath(
         pools,
         path,
         swapType,
         amount
     );
     if (swapType === 'swapExactIn') {
-        return amount.div(returnAmountSwap); // amountIn/AmountOut
+        return amount.div(outputAmountSwap); // amountIn/AmountOut
     } else {
-        return returnAmountSwap.div(amount); // amountIn/AmountOut
+        return outputAmountSwap.div(amount); // amountIn/AmountOut
     }
 }
 
-export function getReturnAmountSwapPath(
+// TODO: Add cases for pairType = [BTP->token, token->BTP] and poolType = [weighted, stable]
+export function getSpotPriceAfterSwap(
+    poolPairData: PoolPairData,
+    swapType: string,
+    amount: BigNumber
+): BigNumber {
+    let {
+        weightIn,
+        weightOut,
+        balanceIn,
+        balanceOut,
+        swapFee,
+        tokenIn,
+        tokenOut,
+    } = poolPairData;
+    let returnAmount: BigNumber;
+
+    // TODO: won't be necessary once we change the type of PoolPairData
+    let wi, wo, Bi, Bo, f;
+    wi = weightIn.toNumber();
+    wo = weightOut.toNumber();
+    Bi = balanceIn.toNumber();
+    Bo = balanceOut.toNumber();
+    f = swapFee.toNumber();
+
+    // TODO: check if necessary to check if amount > limitAmount
+    if (swapType === 'swapExactIn') {
+        if (balanceIn.isEqualTo(bnum(0))) {
+            return bnum(0);
+        } else {
+            let Ai = amount.toNumber();
+            // return -((Bi*wo)/(Bo*(-1+f)*(Bi/(Ai+Bi-Ai*f))**((wi+wo)/wo)*wi))
+            return bnum(
+                -(
+                    (Bi * wo) /
+                    (Bo *
+                        (-1 + f) *
+                        Math.pow(Bi / (Ai + Bi - Ai * f), (wi + wo) / wo) *
+                        wi)
+                )
+            );
+        }
+    } else {
+        if (balanceOut.isEqualTo(bnum(0))) {
+            return bnum(0);
+        } else {
+            let Ao = amount.toNumber();
+            // return return -((Bi*(Bo/(-Ao+Bo))**((wi+wo)/wi)*wo)/(Bo*(-1+f)*wi))
+            return bnum(
+                -(
+                    (Bi * Math.pow(Bo / (-Ao + Bo), (wi + wo) / wi) * wo) /
+                    (Bo * (-1 + f) * wi)
+                )
+            );
+        }
+    }
+}
+
+export function getSpotPriceAfterSwapForPath(
     pools: PoolDictionary,
     path: Path,
     swapType: string,
     amount: BigNumber
 ): BigNumber {
+    let poolPairData = parsePoolPairDataForPath(pools, path, swapType);
+    if (poolPairData.length == 1) {
+        return getSpotPriceAfterSwap(poolPairData[0], swapType, amount);
+    } else if (poolPairData.length == 2) {
+        if (swapType === 'swapExactIn') {
+            let outputAmountSwap1 = getOutputAmountSwap(
+                poolPairData[0],
+                swapType,
+                amount
+            );
+            let spotPriceAfterSwap1 = getSpotPriceAfterSwap(
+                poolPairData[0],
+                swapType,
+                amount
+            );
+            let spotPriceAfterSwap2 = getSpotPriceAfterSwap(
+                poolPairData[1],
+                swapType,
+                outputAmountSwap1
+            );
+            return spotPriceAfterSwap1.times(spotPriceAfterSwap2);
+        } else {
+            let outputAmountSwap2 = getOutputAmountSwap(
+                poolPairData[1],
+                swapType,
+                amount
+            );
+            let spotPriceAfterSwap1 = getSpotPriceAfterSwap(
+                poolPairData[0],
+                swapType,
+                outputAmountSwap2
+            );
+            let spotPriceAfterSwap2 = getSpotPriceAfterSwap(
+                poolPairData[1],
+                swapType,
+                amount
+            );
+            return spotPriceAfterSwap1.times(spotPriceAfterSwap2);
+        }
+    } else {
+        throw new Error('Path with more than 2 swaps not supported');
+    }
+}
+
+// TODO: Add cases for pairType = [BTP->token, token->BTP] and poolType = [weighted, stable]
+export function getDerivativeSpotPriceAfterSwap(
+    poolPairData: PoolPairData,
+    swapType: string,
+    amount: BigNumber
+): BigNumber {
+    let {
+        weightIn,
+        weightOut,
+        balanceIn,
+        balanceOut,
+        swapFee,
+        tokenIn,
+        tokenOut,
+    } = poolPairData;
+    let returnAmount: BigNumber;
+
+    // TODO: won't be necessary once we change the type of PoolPairData
+    let wi, wo, Bi, Bo, f;
+    wi = weightIn.toNumber();
+    wo = weightOut.toNumber();
+    Bi = balanceIn.toNumber();
+    Bo = balanceOut.toNumber();
+    f = swapFee.toNumber();
+
+    // TODO: check if necessary to check if amount > limitAmount
+    if (swapType === 'swapExactIn') {
+        if (balanceIn.isEqualTo(bnum(0))) {
+            return bnum(0);
+        } else {
+            let Ai = amount.toNumber();
+            // return (wi+wo)/(Bo*(Bi/(Ai+Bi-Ai*f))**(wi/wo)*wi)
+            return bnum(
+                (wi + wo) /
+                    (Bo * Math.pow(Bi / (Ai + Bi - Ai * f), wi / wo) * wi)
+            );
+        }
+    } else {
+        if (balanceOut.isEqualTo(bnum(0))) {
+            return bnum(0);
+        } else {
+            let Ao = amount.toNumber();
+            if (Ao >= Bo) return bnum('Infinity');
+            // return -((Bi*(Bo/(-Ao + Bo))**(wo/wi)*wo*(wi + wo))/((Ao - Bo)**2*(-1 + f)*wi**2))
+            else
+                return bnum(
+                    -(
+                        (Bi *
+                            Math.pow(Bo / (-Ao + Bo), wo / wi) *
+                            wo *
+                            (wi + wo)) /
+                        (Math.pow(Ao - Bo, 2) * (-1 + f) * wi * wi)
+                    )
+                );
+        }
+    }
+}
+
+export function getDerivativeSpotPriceAfterSwapForPath(
+    pools: PoolDictionary,
+    path: Path,
+    swapType: string,
+    amount: BigNumber
+): BigNumber {
+    let poolPairData = parsePoolPairDataForPath(pools, path, swapType);
+    if (poolPairData.length == 1) {
+        return getDerivativeSpotPriceAfterSwap(
+            poolPairData[0],
+            swapType,
+            amount
+        );
+    } else if (poolPairData.length == 2) {
+        if (swapType === 'swapExactIn') {
+            let outputAmountSwap1 = getOutputAmountSwap(
+                poolPairData[0],
+                swapType,
+                amount
+            );
+            let SPaS1 = getSpotPriceAfterSwap(
+                poolPairData[0],
+                swapType,
+                amount
+            );
+            let SPaS2 = getSpotPriceAfterSwap(
+                poolPairData[1],
+                swapType,
+                outputAmountSwap1
+            );
+            let dSPaS1 = getDerivativeSpotPriceAfterSwap(
+                poolPairData[0],
+                swapType,
+                amount
+            );
+            let dSPaS2 = getDerivativeSpotPriceAfterSwap(
+                poolPairData[1],
+                swapType,
+                outputAmountSwap1
+            );
+            // Using the rule of the derivative of the multiplication: d[f(x)*g(x)] = d[f(x)]*g(x) + f(x)*d[g(x)]
+            // where SPaS1 is SpotPriceAfterSwap of pool 1 and OA1 is OutputAmount of pool 1. We then have:
+            // d[SPaS1(x) * SPaS2(OA1(x))] = d[SPaS1(x)] * SPaS2(OA1(x)) + SPaS1(x) * d[SPaS2(OA1(x))]
+            // Let's expand the term d[SPaS2(OA1(x))] which is trickier:
+            // d[SPaS2(OA1(x))] at x0 = d[SPaS2(x)] at OA1(x0) * d[OA1(x)] at x0,
+            // Since d[OA1(x)] = SPaS1(x) we then have:
+            // d[SPaS2(OA1(x))] = d[SPaS2(x)] * SPaS1(x). Which leads us to:
+            // d[SPaS1(x) * SPaS2(OA1(x))] = d[SPaS1(x)] * SPaS2(OA1(x)) + SPaS1(x)**2 * d[SPaS2(OA1(x))]
+            // return dSPaS1 * SPaS2 + SPaS1*SPaS1 * dSPaS2
+            return dSPaS1.times(SPaS2).plus(SPaS1.times(SPaS1).times(dSPaS2));
+        } else {
+            let outputAmountSwap2 = getOutputAmountSwap(
+                poolPairData[1],
+                swapType,
+                amount
+            );
+            let SPaS1 = getSpotPriceAfterSwap(
+                poolPairData[0],
+                swapType,
+                outputAmountSwap2
+            );
+            let SPaS2 = getSpotPriceAfterSwap(
+                poolPairData[1],
+                swapType,
+                amount
+            );
+            let dSPaS1 = getDerivativeSpotPriceAfterSwap(
+                poolPairData[0],
+                swapType,
+                outputAmountSwap2
+            );
+            let dSPaS2 = getDerivativeSpotPriceAfterSwap(
+                poolPairData[1],
+                swapType,
+                amount
+            );
+            // Using an analogy to swapExactIn described above (just swap 1 for 2) we have
+            // return dSPaS2 * SPaS1 + SPaS2*SPaS2 * dSPaS1
+            return dSPaS2.times(SPaS1).plus(SPaS2.times(SPaS2).times(dSPaS1));
+        }
+    } else {
+        throw new Error('Path with more than 2 swaps not supported');
+    }
+}
+
+export function getHighestLimitAmountsForPaths(
+    paths: Path[],
+    maxPools: number
+): BigNumber[] {
+    if (paths.length === 0) return [];
+    let limitAmounts = [];
+    for (let i = 1; i < maxPools + 1; i++) {
+        let limitAmount = paths[i].limitAmount;
+        limitAmounts.push(limitAmount);
+    }
+    return limitAmounts;
+}
+
+export const parsePoolPairData = (
+    p: Pool,
+    tokenIn: string,
+    tokenOut: string
+): PoolPairData => {
+    let tI = p.tokens.find(t => getAddress(t.address) === getAddress(tokenIn));
+    // console.log("tI")
+    // console.log(tI.balance.toString());
+    // console.log(tI)
+    let tO = p.tokens.find(t => getAddress(t.address) === getAddress(tokenOut));
+
+    // console.log("tO")
+    // console.log(tO.balance.toString());
+    // console.log(tO)
+
+    let poolPairData = {
+        id: p.id,
+        tokenIn: tokenIn,
+        tokenOut: tokenOut,
+        decimalsIn: tI.decimals,
+        decimalsOut: tO.decimals,
+        balanceIn: bnum(tI.balance),
+        balanceOut: bnum(tO.balance),
+        weightIn: scale(bnum(tI.denormWeight).div(bnum(p.totalWeight)), 18),
+        weightOut: scale(bnum(tO.denormWeight).div(bnum(p.totalWeight)), 18),
+        swapFee: bnum(p.swapFee),
+    };
+
+    return poolPairData;
+};
+
+// Transfors path information into poolPairData list
+export function parsePoolPairDataForPath(
+    pools: PoolDictionary,
+    path: Path,
+    swapType: string
+): PoolPairData[] {
     let swaps = path.swaps;
     if (swaps.length == 1) {
         let swap1 = swaps[0];
@@ -250,7 +514,7 @@ export function getReturnAmountSwapPath(
             swap1.tokenIn,
             swap1.tokenOut
         );
-        return getReturnAmountSwap(pools, poolPairDataSwap1, swapType, amount);
+        return [poolPairDataSwap1];
     } else if (swaps.length == 2) {
         let swap1 = swaps[0];
         let poolSwap1 = pools[swap1.pool];
@@ -259,7 +523,6 @@ export function getReturnAmountSwapPath(
             swap1.tokenIn,
             swap1.tokenOut
         );
-
         let swap2 = swaps[1];
         let poolSwap2 = pools[swap2.pool];
         let poolPairDataSwap2 = parsePoolPairData(
@@ -267,43 +530,11 @@ export function getReturnAmountSwapPath(
             swap2.tokenIn,
             swap2.tokenOut
         );
-
-        if (swapType === 'swapExactIn') {
-            // The outputAmount is number of tokenOut we receive from the second poolPairData
-            let returnAmountSwap1 = getReturnAmountSwap(
-                pools,
-                poolPairDataSwap1,
-                swapType,
-                amount
-            );
-
-            return getReturnAmountSwap(
-                pools,
-                poolPairDataSwap2,
-                swapType,
-                returnAmountSwap1
-            );
-        } else {
-            // The outputAmount is number of tokenIn we send to the first poolPairData
-            let returnAmountSwap2 = getReturnAmountSwap(
-                pools,
-                poolPairDataSwap2,
-                swapType,
-                amount
-            );
-            return getReturnAmountSwap(
-                pools,
-                poolPairDataSwap1,
-                swapType,
-                returnAmountSwap2
-            );
-        }
-    } else {
-        throw new Error('Path with more than 2 swaps not supported');
+        return [poolPairDataSwap1, poolPairDataSwap2];
     }
 }
 
-export function getReturnAmountSwap(
+export function EVMgetOutputAmountSwap(
     pools: PoolDictionary,
     poolPairData: PoolPairData,
     swapType: string,
@@ -461,37 +692,6 @@ export const parsePoolData = (
         pathDataList.push(path);
     }
     return [pools, pathDataList];
-};
-
-export const parsePoolPairData = (
-    p: Pool,
-    tokenIn: string,
-    tokenOut: string
-): PoolPairData => {
-    let tI = p.tokens.find(t => getAddress(t.address) === getAddress(tokenIn));
-    // console.log("tI")
-    // console.log(tI.balance.toString());
-    // console.log(tI)
-    let tO = p.tokens.find(t => getAddress(t.address) === getAddress(tokenOut));
-
-    // console.log("tO")
-    // console.log(tO.balance.toString());
-    // console.log(tO)
-
-    let poolPairData = {
-        id: p.id,
-        tokenIn: tokenIn,
-        tokenOut: tokenOut,
-        decimalsIn: tI.decimals,
-        decimalsOut: tO.decimals,
-        balanceIn: bnum(tI.balance),
-        balanceOut: bnum(tO.balance),
-        weightIn: scale(bnum(tI.denormWeight).div(bnum(p.totalWeight)), 18),
-        weightOut: scale(bnum(tO.denormWeight).div(bnum(p.totalWeight)), 18),
-        swapFee: bnum(p.swapFee),
-    };
-
-    return poolPairData;
 };
 
 function filterPoolsWithoutToken(pools, token) {
@@ -665,35 +865,4 @@ export function sortPoolsMostLiquid(
     }
 
     return [mostLiquidPoolsFirstHop, mostLiquidPoolsSecondHop];
-}
-
-export function getMarketSpotPrice(paths: Path[]): BigNumber {
-    if (paths.length === 0) return bnum(0);
-
-    let min = bnum(paths[0].slippage);
-    let marketSp = bnum(paths[0].spotPrice);
-
-    for (let i = 1; i < paths.length; i++) {
-        let value = bnum(paths[i].slippage);
-        if (value.lt(min) || min.eq(0)) {
-            min = value;
-            marketSp = bnum(paths[i].spotPrice);
-        }
-    }
-
-    return marketSp;
-}
-
-export function getHighestLimitAmountsForPaths(
-    paths: Path[],
-    swapType: string,
-    maxPools: number
-): BigNumber[] {
-    if (paths.length === 0) return [];
-    let limitAmounts = [];
-    for (let i = 1; i < maxPools + 1; i++) {
-        let limitAmount = paths[i].limitAmount;
-        limitAmounts.push(limitAmount);
-    }
-    return limitAmounts;
 }

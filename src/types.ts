@@ -1,5 +1,6 @@
 import { BigNumber } from './utils/bignumber';
 
+// TODO: add poolType and pairType
 export interface PoolPairData {
     id: string;
     tokenIn: string;
@@ -14,10 +15,7 @@ export interface PoolPairData {
 export interface Path {
     id: string; // pool address if direct path, contactenation of pool addresses if multihop
     swaps: Swap[];
-    spotPrice?: BigNumber;
-    slippage?: BigNumber;
     limitAmount?: BigNumber;
-    slippagePriceFactor?: BigNumber;
 }
 
 export interface EffectivePrice {
