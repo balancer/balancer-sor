@@ -1,6 +1,7 @@
 import { BigNumber } from './utils/bignumber';
 
 // TODO: add poolType and pairType
+// TODO: rename balanceIn -> Bi to easily use maths from python
 export interface PoolPairData {
     id: string;
     tokenIn: string;

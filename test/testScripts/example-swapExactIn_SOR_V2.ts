@@ -13,6 +13,13 @@ const amountIn = new BigNumber('1000000'); // 1 USDC, Always pay attention to To
 const tokenIn = USDC;
 const tokenOut = DAI;
 const swapType = 'swapExactIn';
+// const WBTC = '0x2260fac5e5542a773aa44fbcfedf7c193bc2c599'; // WBTC Address
+// const WETH = '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2'; // WETH Address
+// // const amountIn = new BigNumber('5000000'); // 0.5 wbtc, Always pay attention to Token Decimals. i.e. In this case USDC has 6 decimals.
+// const amountIn = new BigNumber('10000000000000000000'); // 10 weth, Always pay attention to Token Decimals. i.e. In this case USDC has 6 decimals.
+// const tokenIn = WBTC;
+// const tokenOut = WETH;
+// const swapType = 'swapExactOut';
 const noPools = 4; // This determines how many pools the SOR will use to swap.
 const gasPrice = new BigNumber('30000000000'); // You can set gas price to whatever the current price is.
 const swapCost = new BigNumber('100000'); // A pool swap costs approx 100000 gas
@@ -89,6 +96,7 @@ async function swapExactIn() {
     //     hopTokens
     // );
 
+    console.time('SOR');
     // Finds the possible paths to make the swap, each path can be a direct swap
     // or a multihop composed of 2 swaps
     let pools, pathDataList;
@@ -117,6 +125,7 @@ async function swapExactIn() {
         costOutputToken
     );
 
+    console.timeEnd('SOR');
     console.log(`Total DAI Return: ${totalReturnWei.toString()}`);
     console.log(`Swaps: `);
     console.log(swaps);

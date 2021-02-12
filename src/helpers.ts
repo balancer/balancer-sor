@@ -116,7 +116,7 @@ export function getOutputAmountSwap(
     wo = weightOut.toNumber();
     Bi = balanceIn.toNumber();
     Bo = balanceOut.toNumber();
-    f = swapFee.toNumber();
+    f = swapFee.div(bnum(1000000000000000000)).toNumber();
 
     // TODO: check if necessary to check if amount > limitAmount
     if (swapType === 'swapExactIn') {
@@ -191,6 +191,10 @@ export function getEffectivePriceSwapForPath(
     swapType: string,
     amount: BigNumber
 ): BigNumber {
+    if (amount.isZero()) {
+        // Return spot price as code below would be 0/0 = undefined
+        return getSpotPriceAfterSwapForPath(pools, path, swapType, amount);
+    }
     let outputAmountSwap = getOutputAmountSwapForPath(
         pools,
         path,
@@ -227,7 +231,7 @@ export function getSpotPriceAfterSwap(
     wo = weightOut.toNumber();
     Bi = balanceIn.toNumber();
     Bo = balanceOut.toNumber();
-    f = swapFee.toNumber();
+    f = swapFee.div(bnum(1000000000000000000)).toNumber();
 
     // TODO: check if necessary to check if amount > limitAmount
     if (swapType === 'swapExactIn') {
@@ -335,7 +339,7 @@ export function getDerivativeSpotPriceAfterSwap(
     wo = weightOut.toNumber();
     Bi = balanceIn.toNumber();
     Bo = balanceOut.toNumber();
-    f = swapFee.toNumber();
+    f = swapFee.div(bnum(1000000000000000000)).toNumber();
 
     // TODO: check if necessary to check if amount > limitAmount
     if (swapType === 'swapExactIn') {
