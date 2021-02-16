@@ -37,7 +37,7 @@ export function getLimitAmountSwapForPath(
     path: Path,
     swapType: string
 ): BigNumber {
-    let poolPairData = parsePoolPairDataForPath(pools, path, swapType);
+    let poolPairData = path.poolPairData;
     if (poolPairData.length == 1) {
         return getLimitAmountSwap(poolPairData[0], swapType);
     } else if (poolPairData.length == 2) {
@@ -112,15 +112,26 @@ export function getOutputAmountSwap(
 
     // TODO: won't be necessary once we change the type of PoolPairData
     let wi, wo, Bi, Bo, f;
-    wi = weightIn.toNumber();
-    wo = weightOut.toNumber();
-    Bi = balanceIn.toNumber();
-    Bo = balanceOut.toNumber();
-    f = swapFee.div(bnum(1000000000000000000)).toNumber();
+
+    // TODO solve problem with deep copy turning Bignumber into Number
+    // This if is a temporary solution
+    if (typeof weightIn == 'string') {
+        wi = Number(weightIn);
+        wo = Number(weightOut);
+        Bi = Number(balanceIn);
+        Bo = Number(balanceOut);
+        f = Number(swapFee) / 1000000000000000000;
+    } else {
+        wi = weightIn.toNumber();
+        wo = weightOut.toNumber();
+        Bi = balanceIn.toNumber();
+        Bo = balanceOut.toNumber();
+        f = swapFee.div(bnum(1000000000000000000)).toNumber();
+    }
 
     // TODO: check if necessary to check if amount > limitAmount
     if (swapType === 'swapExactIn') {
-        if (balanceIn.isEqualTo(bnum(0))) {
+        if (Bi == 0) {
             return bnum(0);
         } else {
             let Ai = amount.toNumber();
@@ -128,7 +139,7 @@ export function getOutputAmountSwap(
             return bnum(Bo - Bo * Math.pow(Bi / (Ai + Bi - Ai * f), wi / wo));
         }
     } else {
-        if (balanceOut.isEqualTo(bnum(0))) {
+        if (Bo == 0) {
             return bnum(0);
         } else {
             let Ao = amount.toNumber();
@@ -151,7 +162,17 @@ export function getOutputAmountSwapForPath(
     swapType: string,
     amount: BigNumber
 ): BigNumber {
-    let poolPairData = parsePoolPairDataForPath(pools, path, swapType);
+    // First of all check if the amount is above limit, if so, return 0 for
+    // 'swapExactIn' or Inf for swapExactOut
+    if (amount.gt(path.limitAmount)) {
+        if (swapType === 'swapExactIn') {
+            return bnum(0);
+        } else {
+            return bnum(Infinity);
+        }
+    }
+
+    let poolPairData = path.poolPairData;
     if (poolPairData.length == 1) {
         return getOutputAmountSwap(poolPairData[0], swapType, amount);
     } else if (poolPairData.length == 2) {
@@ -227,15 +248,26 @@ export function getSpotPriceAfterSwap(
 
     // TODO: won't be necessary once we change the type of PoolPairData
     let wi, wo, Bi, Bo, f;
-    wi = weightIn.toNumber();
-    wo = weightOut.toNumber();
-    Bi = balanceIn.toNumber();
-    Bo = balanceOut.toNumber();
-    f = swapFee.div(bnum(1000000000000000000)).toNumber();
+
+    // TODO solve problem with deep copy turning Bignumber into Number
+    // This if is a temporary solution
+    if (typeof weightIn == 'string') {
+        wi = Number(weightIn);
+        wo = Number(weightOut);
+        Bi = Number(balanceIn);
+        Bo = Number(balanceOut);
+        f = Number(swapFee) / 1000000000000000000;
+    } else {
+        wi = weightIn.toNumber();
+        wo = weightOut.toNumber();
+        Bi = balanceIn.toNumber();
+        Bo = balanceOut.toNumber();
+        f = swapFee.div(bnum(1000000000000000000)).toNumber();
+    }
 
     // TODO: check if necessary to check if amount > limitAmount
     if (swapType === 'swapExactIn') {
-        if (balanceIn.isEqualTo(bnum(0))) {
+        if (Bi == 0) {
             return bnum(0);
         } else {
             let Ai = amount.toNumber();
@@ -251,7 +283,7 @@ export function getSpotPriceAfterSwap(
             );
         }
     } else {
-        if (balanceOut.isEqualTo(bnum(0))) {
+        if (Bo == 0) {
             return bnum(0);
         } else {
             let Ao = amount.toNumber();
@@ -272,7 +304,7 @@ export function getSpotPriceAfterSwapForPath(
     swapType: string,
     amount: BigNumber
 ): BigNumber {
-    let poolPairData = parsePoolPairDataForPath(pools, path, swapType);
+    let poolPairData = path.poolPairData;
     if (poolPairData.length == 1) {
         return getSpotPriceAfterSwap(poolPairData[0], swapType, amount);
     } else if (poolPairData.length == 2) {
@@ -335,15 +367,26 @@ export function getDerivativeSpotPriceAfterSwap(
 
     // TODO: won't be necessary once we change the type of PoolPairData
     let wi, wo, Bi, Bo, f;
-    wi = weightIn.toNumber();
-    wo = weightOut.toNumber();
-    Bi = balanceIn.toNumber();
-    Bo = balanceOut.toNumber();
-    f = swapFee.div(bnum(1000000000000000000)).toNumber();
+
+    // TODO solve problem with deep copy turning Bignumber into Number
+    // This if is a temporary solution
+    if (typeof weightIn == 'string') {
+        wi = Number(weightIn);
+        wo = Number(weightOut);
+        Bi = Number(balanceIn);
+        Bo = Number(balanceOut);
+        f = Number(swapFee) / 1000000000000000000;
+    } else {
+        wi = weightIn.toNumber();
+        wo = weightOut.toNumber();
+        Bi = balanceIn.toNumber();
+        Bo = balanceOut.toNumber();
+        f = swapFee.div(bnum(1000000000000000000)).toNumber();
+    }
 
     // TODO: check if necessary to check if amount > limitAmount
     if (swapType === 'swapExactIn') {
-        if (balanceIn.isEqualTo(bnum(0))) {
+        if (Bi == 0) {
             return bnum(0);
         } else {
             let Ai = amount.toNumber();
@@ -354,7 +397,7 @@ export function getDerivativeSpotPriceAfterSwap(
             );
         }
     } else {
-        if (balanceOut.isEqualTo(bnum(0))) {
+        if (Bo == 0) {
             return bnum(0);
         } else {
             let Ao = amount.toNumber();
@@ -380,7 +423,7 @@ export function getDerivativeSpotPriceAfterSwapForPath(
     swapType: string,
     amount: BigNumber
 ): BigNumber {
-    let poolPairData = parsePoolPairDataForPath(pools, path, swapType);
+    let poolPairData = path.poolPairData;
     if (poolPairData.length == 1) {
         return getDerivativeSpotPriceAfterSwap(
             poolPairData[0],
@@ -538,78 +581,80 @@ export function parsePoolPairDataForPath(
     }
 }
 
-export function EVMgetOutputAmountSwap(
-    pools: PoolDictionary,
-    poolPairData: PoolPairData,
-    swapType: string,
-    amount: BigNumber
-): BigNumber {
-    let {
-        weightIn,
-        weightOut,
-        balanceIn,
-        balanceOut,
-        swapFee,
-        tokenIn,
-        tokenOut,
-    } = poolPairData;
-    let returnAmount: BigNumber;
+// TODO calculate exact EVM result using bmath
 
-    if (swapType === 'swapExactIn') {
-        if (balanceIn.isEqualTo(bnum(0))) {
-            return bnum(0);
-        } else {
-            returnAmount = calcOutGivenIn(
-                balanceIn,
-                weightIn,
-                balanceOut,
-                weightOut,
-                amount,
-                swapFee
-            );
-            // Update balances of tokenIn and tokenOut
-            pools[poolPairData.id] = updateTokenBalanceForPool(
-                pools[poolPairData.id],
-                tokenIn,
-                balanceIn.plus(amount)
-            );
-            pools[poolPairData.id] = updateTokenBalanceForPool(
-                pools[poolPairData.id],
-                tokenOut,
-                balanceOut.minus(returnAmount)
-            );
-            return returnAmount;
-        }
-    } else {
-        if (balanceOut.isEqualTo(bnum(0))) {
-            return bnum(0);
-        } else if (amount.times(3).gte(balanceOut)) {
-            // The maximum amoutOut you can have is 1/3 of the balanceOut to ensure binomial approximation diverges
-            return bnum(0);
-        } else {
-            returnAmount = calcInGivenOut(
-                balanceIn,
-                weightIn,
-                balanceOut,
-                weightOut,
-                amount,
-                swapFee
-            );
-            // Update balances of tokenIn and tokenOut
-            pools[poolPairData.id] = updateTokenBalanceForPool(
-                pools[poolPairData.id],
-                tokenIn,
-                balanceIn.plus(returnAmount)
-            );
-            pools[poolPairData.id] = updateTokenBalanceForPool(
-                pools[poolPairData.id],
-                tokenOut,
-                balanceOut.minus(amount)
-            );
-            return returnAmount;
-        }
-    }
-}
+// export function EVMgetOutputAmountSwap(
+//     pools: PoolDictionary,
+//     poolPairData: PoolPairData,
+//     swapType: string,
+//     amount: BigNumber
+// ): BigNumber {
+//     let {
+//         weightIn,
+//         weightOut,
+//         balanceIn,
+//         balanceOut,
+//         swapFee,
+//         tokenIn,
+//         tokenOut,
+//     } = poolPairData;
+//     let returnAmount: BigNumber;
+
+//     if (swapType === 'swapExactIn') {
+//         if (balanceIn.isEqualTo(bnum(0))) {
+//             return bnum(0);
+//         } else {
+//             returnAmount = calcOutGivenIn(
+//                 balanceIn,
+//                 weightIn,
+//                 balanceOut,
+//                 weightOut,
+//                 amount,
+//                 swapFee
+//             );
+//             // Update balances of tokenIn and tokenOut
+//             pools[poolPairData.id] = updateTokenBalanceForPool(
+//                 pools[poolPairData.id],
+//                 tokenIn,
+//                 balanceIn.plus(amount)
+//             );
+//             pools[poolPairData.id] = updateTokenBalanceForPool(
+//                 pools[poolPairData.id],
+//                 tokenOut,
+//                 balanceOut.minus(returnAmount)
+//             );
+//             return returnAmount;
+//         }
+//     } else {
+//         if (balanceOut.isEqualTo(bnum(0))) {
+//             return bnum(0);
+//         } else if (amount.times(3).gte(balanceOut)) {
+//             // The maximum amoutOut you can have is 1/3 of the balanceOut to ensure binomial approximation diverges
+//             return bnum(0);
+//         } else {
+//             returnAmount = calcInGivenOut(
+//                 balanceIn,
+//                 weightIn,
+//                 balanceOut,
+//                 weightOut,
+//                 amount,
+//                 swapFee
+//             );
+//             // Update balances of tokenIn and tokenOut
+//             pools[poolPairData.id] = updateTokenBalanceForPool(
+//                 pools[poolPairData.id],
+//                 tokenIn,
+//                 balanceIn.plus(returnAmount)
+//             );
+//             pools[poolPairData.id] = updateTokenBalanceForPool(
+//                 pools[poolPairData.id],
+//                 tokenOut,
+//                 balanceOut.minus(amount)
+//             );
+//             return returnAmount;
+//         }
+//     }
+// }
 
 // Updates the balance of a given token for a given pool passed as parameter
 export function updateTokenBalanceForPool(

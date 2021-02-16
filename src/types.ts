@@ -16,6 +16,7 @@ export interface PoolPairData {
 export interface Path {
     id: string; // pool address if direct path, contactenation of pool addresses if multihop
     swaps: Swap[];
+    poolPairData?: PoolPairData[];
     limitAmount?: BigNumber;
 }
 

@@ -9,7 +9,7 @@ const provider = new JsonRpcProvider(
 );
 const DAI = '0x6B175474E89094C44Da98b954EedeAC495271d0F'; // DAI Address
 const USDC = '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48'; // USDC Address
-const amountIn = new BigNumber('1000000'); // 1 USDC, Always pay attention to Token Decimals. i.e. In this case USDC has 6 decimals.
+const amountIn = new BigNumber('10000000000'); // 1 USDC, Always pay attention to Token Decimals. i.e. In this case USDC has 6 decimals.
 const tokenIn = USDC;
 const tokenOut = DAI;
 const swapType = 'swapExactIn';
@@ -20,8 +20,9 @@ const swapType = 'swapExactIn';
 // const tokenIn = WBTC;
 // const tokenOut = WETH;
 // const swapType = 'swapExactOut';
-const noPools = 4; // This determines how many pools the SOR will use to swap.
-const gasPrice = new BigNumber('30000000000'); // You can set gas price to whatever the current price is.
+const noPools = 6; // This determines how many pools the SOR will use to swap.
+// const gasPrice = new BigNumber('30000000000'); // You can set gas price to whatever the current price is.
+const gasPrice = new BigNumber('0'); // You can set gas price to whatever the current price is.
 const swapCost = new BigNumber('100000'); // A pool swap costs approx 100000 gas
 // URL for pools data
 const poolsUrl = `https://ipfs.fleek.co/ipns/balancer-team-bucket.storage.fleek.co/balancer-exchange/pools`;
@@ -71,18 +72,30 @@ async function swapExactIn() {
 
     // We are commenting this part as this first version only supports direct pairs
 
-    // // For each hopToken, find the most liquid pool for the first and the second hops
-    // let mostLiquidPoolsFirstHop, mostLiquidPoolsSecondHop;
-    // [
-    //     mostLiquidPoolsFirstHop,
-    //     mostLiquidPoolsSecondHop,
-    // ] = sor.sortPoolsMostLiquid(
-    //     tokenIn,
-    //     tokenOut,
-    //     hopTokens,
-    //     poolsTokenIn,
-    //     poolsTokenOut
-    // );
+    // For each hopToken, find the most liquid pool for the first and the second hops
+    let mostLiquidPoolsFirstHop, mostLiquidPoolsSecondHop;
+    [
+        mostLiquidPoolsFirstHop,
+        mostLiquidPoolsSecondHop,
+    ] = sor.sortPoolsMostLiquid(
+        tokenIn,
+        tokenOut,
+        hopTokens,
+        poolsTokenIn,
+        poolsTokenOut
+    );
+
+    // Finds the possible paths to make the swap, each path can be a direct swap
+    // or a multihop composed of 2 swaps
+    let pools, pathDataList;
+    [pools, pathDataList] = sor.parsePoolData(
+        directPools,
+        tokenIn.toLowerCase(),
+        tokenOut.toLowerCase(),
+        mostLiquidPoolsFirstHop,
+        mostLiquidPoolsSecondHop,
+        hopTokens
+    );
 
     // // Finds the possible paths to make the swap, each path can be a direct swap
     // // or a multihop composed of 2 swaps
@@ -91,23 +104,12 @@ async function swapExactIn() {
     //     directPools,
     //     tokenIn.toLowerCase(),
     //     tokenOut.toLowerCase(),
-    //     mostLiquidPoolsFirstHop,
-    //     mostLiquidPoolsSecondHop,
-    //     hopTokens
+    //     [],
+    //     [],
+    //     []
     // );
 
     console.time('SOR');
-    // Finds the possible paths to make the swap, each path can be a direct swap
-    // or a multihop composed of 2 swaps
-    let pools, pathDataList;
-    [pools, pathDataList] = sor.parsePoolData(
-        directPools,
-        tokenIn.toLowerCase(),
-        tokenOut.toLowerCase(),
-        [],
-        [],
-        []
-    );
 
     // For each path find limitAmount (maximum that it can trade)
     // 'paths' are then ordered by descending limitAmount
