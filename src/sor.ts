@@ -118,13 +118,12 @@ export const smartOrderRouter = (
             // // make sure that it won't be considered as a non viable amount (which would
             // // be the case if it started at 0)
 
-            // Start new path at 10% of totalSwapAmount. We need then to multiply all current
-            // swapAmounts by 90%.
-            // TODO: bring 10% to a config file
+            // Start new path at 1/b of totalSwapAmount. We need then to multiply all current
+            // swapAmounts by 1-1/b.
             swapAmounts.forEach((swapAmount, i) => {
-                swapAmounts[i] = swapAmounts[i].times(bnum(0.9));
+                swapAmounts[i] = swapAmounts[i].times(bnum(1 - 1 / b));
             });
-            swapAmounts.push(totalSwapAmount.times(bnum(0.1)));
+            swapAmounts.push(totalSwapAmount.times(bnum(1 / b)));
         }
 
         //  iterate until we converge to the best pools for a given totalSwapAmount
@@ -388,18 +387,21 @@ function getBestPathIds(
         let bestPathIndex = -1;
         let bestEffectivePrice = bnum('Infinity'); // Start with worst price possible
         paths.forEach((path, j) => {
-            // Calculate effective price of this path for this swapAmount
-            // TODO for optimization: pass already calculated limitAmount as input
-            // to getEffectivePriceSwapForPath()
-            let effectivePrice = getEffectivePriceSwapForPath(
-                pools,
-                path,
-                swapType,
-                swapAmount
-            );
-            if (effectivePrice < bestEffectivePrice) {
-                bestEffectivePrice = effectivePrice;
-                bestPathIndex = j;
+            // Do not consider this path if its limit is equal or below swapAmount
+            if (path.limitAmount.gt(swapAmount)) {
+                // Calculate effective price of this path for this swapAmount
+                // TODO for optimization: pass already calculated limitAmount as input
+                // to getEffectivePriceSwapForPath()
+                let effectivePrice = getEffectivePriceSwapForPath(
+                    pools,
+                    path,
+                    swapType,
+                    swapAmount
+                );
+                if (effectivePrice < bestEffectivePrice) {
+                    bestEffectivePrice = effectivePrice;
+                    bestPathIndex = j;
+                }
             }
         });
         bestPathIds.push(paths[bestPathIndex].id);
@@ -434,6 +436,19 @@ function iterateSwapAmounts(
     let priceErrorTolerance = bnum(0.00001); // 0.001% of tolerance -> this does not change much execution time as convergence is fast
     let priceError = bnum(1); // Initialize priceError just so that while starts
     let prices = [];
+    // Since this is the beginning of an iteration with a new set of paths, we
+    // set any swapAmounts that were set to 0 previously to 1 wei just so that they
+    // are considered as viable for iterateSwapAmountsApproximation(). If they were
+    // left at 0 iterateSwapAmountsApproximation() would consider them already outside
+    // the viable range and would not iterate on them. This is useful when
+    // iterateSwapAmountsApproximation() is being repeatedly called within the while loop
+    // below, but not when a new execution of iterateSwapAmounts() happens with new
+    // paths.
+    for (let i = 0; i < swapAmounts.length; ++i) {
+        if (swapAmounts[i].isZero()) {
+            swapAmounts[i] = bnum(0.0000000000001); // Small value different from 0
+        }
+    }
     while (priceError.isGreaterThan(priceErrorTolerance)) {
         [
             prices,

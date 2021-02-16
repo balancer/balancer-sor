@@ -9,7 +9,7 @@ const provider = new JsonRpcProvider(
 );
 const DAI = '0x6B175474E89094C44Da98b954EedeAC495271d0F'; // DAI Address
 const USDC = '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48'; // USDC Address
-const amountIn = new BigNumber('10000000000'); // 1 USDC, Always pay attention to Token Decimals. i.e. In this case USDC has 6 decimals.
+const amountIn = new BigNumber('10000000'); // 1 USDC, Always pay attention to Token Decimals. i.e. In this case USDC has 6 decimals.
 const tokenIn = USDC;
 const tokenOut = DAI;
 const swapType = 'swapExactIn';
