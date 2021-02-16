@@ -128,11 +128,11 @@ export const smartOrderRouter = (
         }
 
         //  iterate until we converge to the best pools for a given totalSwapAmount
-        //  first initialize previousPathIds and pathIds
-        let previousPathIds;
+        //  first initialize variables
         let historyOfSortedPathIds = [];
+        let selectedPaths;
         let [
-            selectedPaths,
+            newSelectedPaths,
             exceedingAmounts,
             selectedPathLimitAmounts,
             pathIds,
@@ -142,17 +142,18 @@ export const smartOrderRouter = (
         let sortedPathIdsJSON = JSON.stringify([...pathIds].sort()); // Just to check if this set of paths has already been chosen
         while (!historyOfSortedPathIds.includes(sortedPathIdsJSON)) {
             historyOfSortedPathIds.push(sortedPathIdsJSON); // We store all previous paths ids to avoid infinite loops because of local minima
-            previousPathIds = pathIds;
+            selectedPaths = newSelectedPaths;
             [swapAmounts, exceedingAmounts] = iterateSwapAmounts(
                 pools,
                 selectedPaths,
                 swapType,
+                totalSwapAmount,
                 swapAmounts,
                 exceedingAmounts,
                 selectedPathLimitAmounts
             );
             [
-                selectedPaths,
+                newSelectedPaths,
                 exceedingAmounts,
                 selectedPathLimitAmounts,
                 pathIds,
@@ -374,10 +375,12 @@ function getBestPathIds(
     let selectedPaths = [];
     let selectedPathLimitAmounts = [];
     let selectedPathExceedingAmounts = [];
-    let paths = JSON.parse(JSON.stringify(originalPaths)); // Deep copy to avoid changing the original path data
+    // TODO find out which deep copy way is better: JSON.parse breaks bignumbers!!
+    // let paths = JSON.parse(JSON.stringify(originalPaths)); // Deep copy to avoid changing the original path data
+    let paths = [...originalPaths]; // Deep copy to avoid changing the original path data
 
-    // Sort swapAmounts in descending order
-    sortedSwapAmounts = swapAmounts.sort((a, b) => {
+    // Sort swapAmounts in descending order without changing original: https://stackoverflow.com/a/42442909
+    sortedSwapAmounts = [...swapAmounts].sort((a, b) => {
         return b.minus(a).toNumber();
     });
     sortedSwapAmounts.forEach((swapAmount, i) => {
@@ -422,6 +425,7 @@ function iterateSwapAmounts(
     pools: PoolDictionary,
     selectedPaths: Path[],
     swapType: string,
+    totalSwapAmount: BigNumber,
     swapAmounts: BigNumber[],
     exceedingAmounts: BigNumber[],
     pathLimitAmounts: BigNumber[]
@@ -439,6 +443,7 @@ function iterateSwapAmounts(
             pools,
             selectedPaths,
             swapType,
+            totalSwapAmount,
             swapAmounts,
             exceedingAmounts,
             pathLimitAmounts
@@ -454,6 +459,7 @@ function iterateSwapAmountsApproximation(
     pools: PoolDictionary,
     selectedPaths: Path[],
     swapType: string,
+    totalSwapAmount: BigNumber,
     swapAmounts: BigNumber[],
     exceedingAmounts: BigNumber[], // This is the amount by which swapAmount exceeds the pool limit_amount
     pathLimitAmounts: BigNumber[]
@@ -513,13 +519,18 @@ function iterateSwapAmountsApproximation(
         BigNumber.max.apply(null, exceedingAmounts).gt(bnum(0))
     )
         [swapAmounts, exceedingAmounts] = redistributeInputAmounts(
+            totalSwapAmount,
             swapAmounts,
             exceedingAmounts,
             derivativeSPaSs
         );
 
     let pricesForViableAmounts = []; // Get prices for all non-negative AND below-limit input amounts
+    let swapAmountsSumWithRoundingErrors = bnum(0);
     swapAmounts.forEach((swapAmount, i) => {
+        swapAmountsSumWithRoundingErrors = swapAmountsSumWithRoundingErrors.plus(
+            swapAmount
+        );
         if (swapAmount.gt(bnum(0)) && exceedingAmounts[i].lt(bnum(0)))
             pricesForViableAmounts.push(
                 getSpotPriceAfterSwapForPath(
@@ -531,10 +542,35 @@ function iterateSwapAmountsApproximation(
             );
     });
 
+    let roundingError = totalSwapAmount.minus(swapAmountsSumWithRoundingErrors);
+    // console.log("Rounding error")
+    // console.log(roundingError.div(totalSwapAmount).toNumber())
+    // // let errorLimit = totalSwapAmount.times(bnum(0.001))
+    // // if(roundingError>errorLimit)
+    // //     throw "Rounding error in iterateSwapAmountsApproximation() too large";
+
+    // Add rounding error to make sum be exactly equal to totalSwapAmount to avoid error compounding
+    // Add to the first swapAmount that is already not zero or at the limit
+    // AND only if swapAmoung would not leave the viable range (i.e. swapAmoung
+    // would still be >0 and <limit) after adding the error
+    // I.d. we need: (swapAmount+error)>0 AND (exceedingAmount+error)<0
+    for (let i = 0; i < swapAmounts.length; ++i) {
+        if (swapAmounts[i].gt(bnum(0)) && exceedingAmounts[i].lt(bnum(0))) {
+            if (
+                swapAmounts[i].plus(roundingError).gt(bnum(0)) &&
+                exceedingAmounts[i].plus(roundingError).lt(bnum(0))
+            ) {
+                swapAmounts[i] = swapAmounts[i].plus(roundingError);
+                break;
+            }
+        }
+    }
+
     return [pricesForViableAmounts, swapAmounts, exceedingAmounts];
 }
 
 function redistributeInputAmounts(
+    totalSwapAmount: BigNumber,
     swapAmounts: BigNumber[],
     exceedingAmounts: BigNumber[],
     derivativeSPaSs: BigNumber[]

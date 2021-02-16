@@ -251,19 +251,19 @@ export function getSpotPriceAfterSwap(
 
     // TODO solve problem with deep copy turning Bignumber into Number
     // This if is a temporary solution
-    if (typeof weightIn == 'string') {
-        wi = Number(weightIn);
-        wo = Number(weightOut);
-        Bi = Number(balanceIn);
-        Bo = Number(balanceOut);
-        f = Number(swapFee) / 1000000000000000000;
-    } else {
-        wi = weightIn.toNumber();
-        wo = weightOut.toNumber();
-        Bi = balanceIn.toNumber();
-        Bo = balanceOut.toNumber();
-        f = swapFee.div(bnum(1000000000000000000)).toNumber();
-    }
+    // if (typeof weightIn == 'string') {
+    //     wi = Number(weightIn);
+    //     wo = Number(weightOut);
+    //     Bi = Number(balanceIn);
+    //     Bo = Number(balanceOut);
+    //     f = Number(swapFee) / 1000000000000000000;
+    // } else {
+    wi = weightIn.toNumber();
+    wo = weightOut.toNumber();
+    Bi = balanceIn.toNumber();
+    Bo = balanceOut.toNumber();
+    f = swapFee.div(bnum(1000000000000000000)).toNumber();
+    // }
 
     // TODO: check if necessary to check if amount > limitAmount
     if (swapType === 'swapExactIn') {
