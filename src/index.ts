@@ -1,4 +1,4 @@
-export { smartOrderRouter, processPaths } from './sor';
+export { smartOrderRouter, processPaths, filterPaths } from './sor';
 
 export {
     parsePoolData,

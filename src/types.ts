@@ -18,6 +18,7 @@ export interface Path {
     swaps: Swap[];
     poolPairData?: PoolPairData[];
     limitAmount?: BigNumber;
+    filterEffectivePrice?: BigNumber; // TODO: This is just used for filtering, maybe there is a better way to filter?
 }
 
 export interface EffectivePrice {

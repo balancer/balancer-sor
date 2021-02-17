@@ -10,6 +10,8 @@ import {
     getHighestLimitAmountsForPaths,
     getEffectivePriceSwapForPath,
     parsePoolPairDataForPath,
+    EVMgetOutputAmountSwapForPath,
+    EVMgetOutputAmountSwap,
 } from './helpers';
 import { bmul, bdiv, bnum, BONE } from './bmath';
 import { BigNumber } from './utils/bignumber';
@@ -34,16 +36,65 @@ const maxPrice = MAX_UINT;
 export function processPaths(
     paths: Path[],
     pools: PoolDictionary,
-    swapType: string
-): Path[] {
+    swapType: string,
+    maxPools: Number
+): [Path[], BigNumber] {
+    let maxLiquidityAvailable = bnum(0);
     paths.forEach(path => {
         path.poolPairData = parsePoolPairDataForPath(pools, path, swapType);
         path.limitAmount = getLimitAmountSwapForPath(pools, path, swapType);
+        // console.log(path.limitAmount.toNumber())
+        maxLiquidityAvailable = maxLiquidityAvailable.plus(path.limitAmount);
     });
     let sortedPaths = paths.sort((a, b) => {
         return b.limitAmount.minus(a.limitAmount).toNumber();
     });
-    return sortedPaths;
+    return [sortedPaths, maxLiquidityAvailable];
+}
+
+export function filterPaths(
+    pools: PoolDictionary,
+    paths: Path[],
+    swapType: string,
+    maxPools: Number,
+    maxLiquidityAvailable: BigNumber,
+    costOutputToken: BigNumber
+): Path[] {
+    // TODO: move this constant to config file
+    const maxFilterSwapAmounts = 10;
+    const filterSwapAmountsRatio = 10;
+    let filteredPaths = [];
+    let filteredPathIds = [];
+    let filterSwapAmount = maxLiquidityAvailable.div(
+        bnum(filterSwapAmountsRatio)
+    );
+    for (let i = 0; i < maxFilterSwapAmounts; ++i) {
+        for (let j = 0; j < paths.length; ++j) {
+            paths[j].filterEffectivePrice = getOutputAmountSwapForPath(
+                pools,
+                paths[j],
+                swapType,
+                filterSwapAmount
+            );
+        }
+        // Sort paths based on lowest effectivePrice
+        let sortedPaths = paths.sort((a, b) => {
+            return b.filterEffectivePrice
+                .minus(a.filterEffectivePrice)
+                .toNumber();
+        });
+        // Add best maxPools paths to filteredPaths if path not already present
+        for (let j = 0; j < maxPools; ++j) {
+            if (!filteredPathIds.includes(sortedPaths[j].id)) {
+                filteredPathIds.push(sortedPaths[j].id);
+                filteredPaths.push(sortedPaths[j]);
+            }
+        }
+        filterSwapAmount = filterSwapAmount
+            .div(filterSwapAmountsRatio)
+            .integerValue();
+    }
+    return filteredPaths;
 }
 
 /* TODO: review
@@ -57,7 +108,6 @@ maxPools: the maximum number of pools accepted for the SOR final swaps suggestio
 costReturnToken: how much in outputToken the gas for trading with one pool costs
                  Notice that outputToken is tokenOut if swapType == 'swapExactIn'
                  and tokenIn if swapType == 'swapExactOut'
-pricesOfInterest: pricesOfInterest built previously by other functions
 
 < OUTPUTS >
 swaps: information of the optimal swaps
@@ -221,13 +271,20 @@ export const smartOrderRouter = (
     let totalSwapAmountWithRoundingErrors: BigNumber = new BigNumber(0);
     let dust: BigNumber = new BigNumber(0);
     let lenghtFirstPath;
+    bestTotalReturn = bnum(0); // Reset totalReturn as this time it will be
+    // calculated with the EVM maths so the return is exactly what the user will get
+    // after executing the transaction (given there are no front-runners)
     bestPaths.forEach((path, i) => {
+        swapAmounts[i] = swapAmounts[i].integerValue(); // Make sure we truncate the swapAmount
         let swapAmount = swapAmounts[i];
         totalSwapAmountWithRoundingErrors = totalSwapAmountWithRoundingErrors.plus(
             swapAmount
         );
 
         // // TODO: remove. To debug only!
+        console.log(
+            'Prices should be all very close (unless one of the paths is on the limit!'
+        );
         console.log(
             getSpotPriceAfterSwapForPath(
                 pools,
@@ -242,6 +299,7 @@ export const smartOrderRouter = (
             // Store lenght of first path to add dust to correct rounding error at the end
             lenghtFirstPath = path.swaps.length;
 
+        let returnAmount;
         if (poolPairData.length == 1) {
             // Direct trade: add swap from only pool
             let swap: Swap = {
@@ -256,6 +314,13 @@ export const smartOrderRouter = (
                 maxPrice: maxPrice.toString(),
             };
             swaps.push([swap]);
+            // Call EVMgetOutputAmountSwap to guarantee pool state is updated
+            returnAmount = EVMgetOutputAmountSwap(
+                pools,
+                poolPairData[0],
+                swapType,
+                swapAmount
+            );
         } else {
             // Multi-hop:
 
@@ -265,19 +330,47 @@ export const smartOrderRouter = (
             let swap2 = path.swaps[1];
             let poolSwap2 = pools[swap2.pool];
 
+            let amountSwap1, amountSwap2;
+            if (swapType === 'swapExactIn') {
+                amountSwap1 = swapAmount;
+                amountSwap2 = EVMgetOutputAmountSwap(
+                    pools,
+                    poolPairData[0],
+                    swapType,
+                    swapAmount
+                );
+                // Call EVMgetOutputAmountSwap to update the pool state
+                // for the second hop as well (the first was updated above)
+                returnAmount = EVMgetOutputAmountSwap(
+                    pools,
+                    poolPairData[1],
+                    swapType,
+                    amountSwap2
+                );
+            } else {
+                amountSwap1 = EVMgetOutputAmountSwap(
+                    pools,
+                    poolPairData[1],
+                    swapType,
+                    swapAmount
+                );
+                amountSwap2 = swapAmount;
+                // Call EVMgetOutputAmountSwap to update the pool state
+                // for the second hop as well (the first was updated above)
+                returnAmount = EVMgetOutputAmountSwap(
+                    pools,
+                    poolPairData[0],
+                    swapType,
+                    amountSwap1
+                );
+            }
+
             // Add swap from first pool
             let swap1hop: Swap = {
                 pool: path.swaps[0].pool,
                 tokenIn: path.swaps[0].tokenIn,
                 tokenOut: path.swaps[0].tokenOut,
-                swapAmount:
-                    swapType === 'swapExactIn'
-                        ? swapAmount.toString()
-                        : getOutputAmountSwap(
-                              poolPairData[1],
-                              swapType,
-                              swapAmount
-                          ).toString(),
+                swapAmount: amountSwap1.toString(),
                 limitReturnAmount:
                     swapType === 'swapExactIn'
                         ? minAmountOut.toString()
@@ -290,14 +383,7 @@ export const smartOrderRouter = (
                 pool: path.swaps[1].pool,
                 tokenIn: path.swaps[1].tokenIn,
                 tokenOut: path.swaps[1].tokenOut,
-                swapAmount:
-                    swapType === 'swapExactIn'
-                        ? getOutputAmountSwap(
-                              poolPairData[0],
-                              swapType,
-                              swapAmount
-                          ).toString()
-                        : swapAmount.toString(),
+                swapAmount: amountSwap2.toString(),
                 limitReturnAmount:
                     swapType === 'swapExactIn'
                         ? minAmountOut.toString()
@@ -306,9 +392,8 @@ export const smartOrderRouter = (
             };
             swaps.push([swap1hop, swap2hop]);
         }
-        // Updates the pools in the path with the swaps so that if
-        // the new paths use these pools they will have the updated balances
-        getOutputAmountSwapForPath(pools, path, swapType, swapAmount);
+        // Update bestTotalReturn with EVM return
+        bestTotalReturn = bestTotalReturn.plus(returnAmount);
     });
 
     // Since the individual swapAmounts for each path are integers, the sum of all swapAmounts

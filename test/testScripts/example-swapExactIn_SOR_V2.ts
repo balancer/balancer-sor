@@ -16,7 +16,7 @@ const swapType = 'swapExactIn';
 // const WBTC = '0x2260fac5e5542a773aa44fbcfedf7c193bc2c599'; // WBTC Address
 // const WETH = '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2'; // WETH Address
 // // const amountIn = new BigNumber('5000000'); // 0.5 wbtc, Always pay attention to Token Decimals. i.e. In this case USDC has 6 decimals.
-// const amountIn = new BigNumber('10000000000000000000'); // 10 weth, Always pay attention to Token Decimals. i.e. In this case USDC has 6 decimals.
+// const amountIn = new BigNumber('100000000000000000000'); // 100 weth, Always pay attention to Token Decimals. i.e. In this case USDC has 6 decimals.
 // const tokenIn = WBTC;
 // const tokenOut = WETH;
 // const swapType = 'swapExactOut';
@@ -109,12 +109,27 @@ async function swapExactIn() {
     //     []
     // );
 
-    console.time('SOR');
-
     // For each path find limitAmount (maximum that it can trade)
     // 'paths' are then ordered by descending limitAmount
-    let paths = sor.processPaths(pathDataList, pools, swapType);
+    let [paths, maxLiquidityAvailable] = sor.processPaths(
+        pathDataList,
+        pools,
+        swapType,
+        noPools
+    );
 
+    console.time('Filter paths');
+    let filteredPaths = sor.filterPaths(
+        pools,
+        paths,
+        swapType,
+        noPools,
+        maxLiquidityAvailable,
+        costOutputToken
+    );
+    console.timeEnd('Filter paths');
+
+    console.time('SOR');
     // Returns 'swaps' which is the optimal list of swaps to make and
     // 'totalReturnWei' which is the total amount of tokenOut (eg. DAI) will be returned
     let swaps, totalReturnWei;
@@ -126,9 +141,26 @@ async function swapExactIn() {
         noPools,
         costOutputToken
     );
-
     console.timeEnd('SOR');
     console.log(`Total DAI Return: ${totalReturnWei.toString()}`);
+    console.log(`Swaps: `);
+    console.log(swaps);
+
+    console.time('SOR_filteredPaths');
+    // Returns 'swaps' which is the optimal list of swaps to make and
+    // 'totalReturnWei' which is the total amount of tokenOut (eg. DAI) will be returned
+    [swaps, totalReturnWei] = sor.smartOrderRouter(
+        JSON.parse(JSON.stringify(pools)),
+        filteredPaths,
+        swapType,
+        amountIn,
+        noPools,
+        costOutputToken
+    );
+    console.timeEnd('SOR_filteredPaths');
+    console.log(
+        `Total DAI Return Filtered Paths: ${totalReturnWei.toString()}`
+    );
     console.log(`Swaps: `);
     console.log(swaps);
 }

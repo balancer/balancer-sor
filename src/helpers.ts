@@ -475,7 +475,7 @@ export function getHighestLimitAmountsForPaths(
 ): BigNumber[] {
     if (paths.length === 0) return [];
     let limitAmounts = [];
-    for (let i = 1; i < maxPools + 1; i++) {
+    for (let i = 0; i < maxPools; i++) {
         let limitAmount = paths[i].limitAmount;
         limitAmounts.push(limitAmount);
     }
@@ -548,80 +548,135 @@ export function parsePoolPairDataForPath(
     }
 }
 
-// TODO calculate exact EVM result using bmath
+// TODO calculate exact EVM result using solidity maths (for V1 it's bmath)
+export function EVMgetOutputAmountSwapForPath(
+    pools: PoolDictionary,
+    path: Path,
+    swapType: string,
+    amount: BigNumber
+): BigNumber {
+    // First of all check if the amount is above limit, if so, return 0 for
+    // 'swapExactIn' or Inf for swapExactOut
+    if (amount.gt(path.limitAmount)) {
+        if (swapType === 'swapExactIn') {
+            return bnum(0);
+        } else {
+            return bnum(Infinity);
+        }
+    }
 
-// export function EVMgetOutputAmountSwap(
-//     pools: PoolDictionary,
-//     poolPairData: PoolPairData,
-//     swapType: string,
-//     amount: BigNumber
-// ): BigNumber {
-//     let {
-//         weightIn,
-//         weightOut,
-//         balanceIn,
-//         balanceOut,
-//         swapFee,
-//         tokenIn,
-//         tokenOut,
-//     } = poolPairData;
-//     let returnAmount: BigNumber;
+    let poolPairData = path.poolPairData;
+    if (poolPairData.length == 1) {
+        return EVMgetOutputAmountSwap(pools, poolPairData[0], swapType, amount);
+    } else if (poolPairData.length == 2) {
+        if (swapType === 'swapExactIn') {
+            // The outputAmount is number of tokenOut we receive from the second poolPairData
+            let outputAmountSwap1 = EVMgetOutputAmountSwap(
+                pools,
+                poolPairData[0],
+                swapType,
+                amount
+            );
+            return EVMgetOutputAmountSwap(
+                pools,
+                poolPairData[1],
+                swapType,
+                outputAmountSwap1
+            );
+        } else {
+            // The outputAmount is number of tokenIn we send to the first poolPairData
+            let outputAmountSwap2 = EVMgetOutputAmountSwap(
+                pools,
+                poolPairData[1],
+                swapType,
+                amount
+            );
+            return EVMgetOutputAmountSwap(
+                pools,
+                poolPairData[0],
+                swapType,
+                outputAmountSwap2
+            );
+        }
+    } else {
+        throw new Error('Path with more than 2 swaps not supported');
+    }
+}
 
-//     if (swapType === 'swapExactIn') {
-//         if (balanceIn.isEqualTo(bnum(0))) {
-//             return bnum(0);
-//         } else {
-//             returnAmount = calcOutGivenIn(
-//                 balanceIn,
-//                 weightIn,
-//                 balanceOut,
-//                 weightOut,
-//                 amount,
-//                 swapFee
-//             );
-//             // Update balances of tokenIn and tokenOut
-//             pools[poolPairData.id] = updateTokenBalanceForPool(
-//                 pools[poolPairData.id],
-//                 tokenIn,
-//                 balanceIn.plus(amount)
-//             );
-//             pools[poolPairData.id] = updateTokenBalanceForPool(
-//                 pools[poolPairData.id],
-//                 tokenOut,
-//                 balanceOut.minus(returnAmount)
-//             );
-//             return returnAmount;
-//         }
-//     } else {
-//         if (balanceOut.isEqualTo(bnum(0))) {
-//             return bnum(0);
-//         } else if (amount.times(3).gte(balanceOut)) {
-//             // The maximum amoutOut you can have is 1/3 of the balanceOut to ensure binomial approximation diverges
-//             return bnum(0);
-//         } else {
-//             returnAmount = calcInGivenOut(
-//                 balanceIn,
-//                 weightIn,
-//                 balanceOut,
-//                 weightOut,
-//                 amount,
-//                 swapFee
-//             );
-//             // Update balances of tokenIn and tokenOut
-//             pools[poolPairData.id] = updateTokenBalanceForPool(
-//                 pools[poolPairData.id],
-//                 tokenIn,
-//                 balanceIn.plus(returnAmount)
-//             );
-//             pools[poolPairData.id] = updateTokenBalanceForPool(
-//                 pools[poolPairData.id],
-//                 tokenOut,
-//                 balanceOut.minus(amount)
-//             );
-//             return returnAmount;
-//         }
-//     }
-// }
+// We need do pass 'pools' here because this function has to update the pools state
+// in case a pool is used twice in two different paths
+export function EVMgetOutputAmountSwap(
+    pools: PoolDictionary,
+    poolPairData: PoolPairData,
+    swapType: string,
+    amount: BigNumber
+): BigNumber {
+    let {
+        weightIn,
+        weightOut,
+        balanceIn,
+        balanceOut,
+        swapFee,
+        tokenIn,
+        tokenOut,
+    } = poolPairData;
+    let returnAmount: BigNumber;
+
+    if (swapType === 'swapExactIn') {
+        if (balanceIn.isEqualTo(bnum(0))) {
+            return bnum(0);
+        } else {
+            returnAmount = calcOutGivenIn(
+                balanceIn,
+                weightIn,
+                balanceOut,
+                weightOut,
+                amount,
+                swapFee
+            );
+            // Update balances of tokenIn and tokenOut
+            pools[poolPairData.id] = updateTokenBalanceForPool(
+                pools[poolPairData.id],
+                tokenIn,
+                balanceIn.plus(amount)
+            );
+            pools[poolPairData.id] = updateTokenBalanceForPool(
+                pools[poolPairData.id],
+                tokenOut,
+                balanceOut.minus(returnAmount)
+            );
+            return returnAmount;
+        }
+    } else {
+        if (balanceOut.isEqualTo(bnum(0))) {
+            return bnum(0);
+        } else if (amount.times(3).gte(balanceOut)) {
+            // The maximum amoutOut you can have is 1/3 of the balanceOut to ensure binomial approximation diverges
+            return bnum(0);
+        } else {
+            returnAmount = calcInGivenOut(
+                balanceIn,
+                weightIn,
+                balanceOut,
+                weightOut,
+                amount,
+                swapFee
+            );
+            // Update balances of tokenIn and tokenOut
+            pools[poolPairData.id] = updateTokenBalanceForPool(
+                pools[poolPairData.id],
+                tokenIn,
+                balanceIn.plus(returnAmount)
+            );
+            pools[poolPairData.id] = updateTokenBalanceForPool(
+                pools[poolPairData.id],
+                tokenOut,
+                balanceOut.minus(amount)
+            );
+            return returnAmount;
+        }
+    }
+}
 
 // Updates the balance of a given token for a given pool passed as parameter
 export function updateTokenBalanceForPool(
@@ -710,22 +765,22 @@ export const parsePoolData = (
     return [pools, pathDataList];
 };
 
-function filterPoolsWithoutToken(pools, token) {
-    let found;
-    let OutputPools = {};
-    for (let i in pools) {
-        found = false;
-        for (let k = 0; k < pools[i].tokensList.length; k++) {
-            if (pools[i].tokensList[k].toLowerCase() == token.toLowerCase()) {
-                found = true;
-                break;
-            }
-        }
-        //Add pool if token not found
-        if (!found) OutputPools[i] = pools[i];
-    }
-    return OutputPools;
-}
+// function filterPoolsWithoutToken(pools, token) {
+//     let found;
+//     let OutputPools = {};
+//     for (let i in pools) {
+//         found = false;
+//         for (let k = 0; k < pools[i].tokensList.length; k++) {
+//             if (pools[i].tokensList[k].toLowerCase() == token.toLowerCase()) {
+//                 found = true;
+//                 break;
+//             }
+//         }
+//         //Add pool if token not found
+//         if (!found) OutputPools[i] = pools[i];
+//     }
+//     return OutputPools;
+// }
 
 export const formatSubgraphPools = pools => {
     for (let pool of pools.pools) {
