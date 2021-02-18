@@ -599,8 +599,16 @@ function iterateSwapAmountsApproximation(
             SPaSs.push(bnum('NaN'));
         }
     });
-    let weighted_average_SPaS = sumSPaSDividedByDerivativeSPaSs.div(
-        sumInverseDerivativeSPaSs
+    // // This division using BigNumber below lost precision. Its result was for example
+    // 1.042818e-12 while using normal js math operations it was
+    // 1.0428184989387553e-12. This loss of precision caused an important bug
+
+    // let weighted_average_SPaS = sumSPaSDividedByDerivativeSPaSs.div(
+    //     sumInverseDerivativeSPaSs
+    // );
+    let weighted_average_SPaS = bnum(
+        sumSPaSDividedByDerivativeSPaSs.toNumber() /
+            sumInverseDerivativeSPaSs.toNumber()
     );
 
     swapAmounts.forEach((swapAmount, i) => {
