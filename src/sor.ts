@@ -78,7 +78,7 @@ export function filterPaths(
             );
         }
         // Sort paths based on lowest effectivePrice
-        let sortedPaths = paths.sort((a, b) => {
+        let sortedPaths = [...paths].sort((a, b) => {
             return b.filterEffectivePrice
                 .minus(a.filterEffectivePrice)
                 .toNumber();
@@ -229,32 +229,29 @@ export const smartOrderRouter = (
         // This is because for the case of 'swapExactOut', totalReturn means the
         // amount of tokenIn needed to buy totalSwapAmount of tokenOut
         let improvementCondition: boolean = false;
-        if (totalNumberOfPools <= maxPools) {
-            if (swapType === 'swapExactIn') {
-                totalReturnConsideringFees = totalReturn.minus(
-                    bmul(
-                        new BigNumber(totalNumberOfPools).times(BONE),
-                        costReturnToken
-                    )
-                );
-                improvementCondition =
-                    totalReturnConsideringFees.isGreaterThan(
-                        bestTotalReturnConsideringFees
-                    ) || b === 1; // b === 1 means its the first iteration so bestTotalReturnConsideringFees isn't currently a value
-            } else {
-                totalReturnConsideringFees = totalReturn.plus(
-                    bmul(
-                        new BigNumber(totalNumberOfPools).times(BONE),
-                        costReturnToken
-                    )
-                );
-                improvementCondition =
-                    totalReturnConsideringFees.isLessThan(
-                        bestTotalReturnConsideringFees
-                    ) || b === 1; // b === 1 means its the first iteration so bestTotalReturnConsideringFees isn't currently a value
-            }
+        if (swapType === 'swapExactIn') {
+            totalReturnConsideringFees = totalReturn.minus(
+                bmul(
+                    new BigNumber(totalNumberOfPools).times(BONE),
+                    costReturnToken
+                )
+            );
+            improvementCondition =
+                totalReturnConsideringFees.isGreaterThan(
+                    bestTotalReturnConsideringFees
+                ) || b === 1; // b === 1 means its the first iteration so bestTotalReturnConsideringFees isn't currently a value
+        } else {
+            totalReturnConsideringFees = totalReturn.plus(
+                bmul(
+                    new BigNumber(totalNumberOfPools).times(BONE),
+                    costReturnToken
+                )
+            );
+            improvementCondition =
+                totalReturnConsideringFees.isLessThan(
+                    bestTotalReturnConsideringFees
+                ) || b === 1; // b === 1 means its the first iteration so bestTotalReturnConsideringFees isn't currently a value
         }
-
         if (improvementCondition === true) {
             bestSwapAmounts = swapAmounts;
             bestPathIds = pathIds;
@@ -264,6 +261,9 @@ export const smartOrderRouter = (
         } else {
             break;
         }
+
+        // Stop if max number of pools has been reached
+        if (totalNumberOfPools >= maxPools) break;
     }
 
     //// Prepare swap data from paths
