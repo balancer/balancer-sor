@@ -112,8 +112,16 @@ export function testSwapsExactIn(
         }
     }
 
-    assert.equal(totalIn.toString(), amountIn.toString());
-    assert.equal(totalOut.toString(), totalAmtOut.toString());
+    assert.equal(
+        totalIn.toString(),
+        amountIn.toString(),
+        'testSwapsExactIn - Amount In Should Should Match'
+    );
+    assert.equal(
+        totalOut.toString(),
+        totalAmtOut.toString(),
+        'testSwapsExactIn - Amount Out Should Should Match'
+    );
 }
 
 export function testSwapsExactOut(
@@ -170,7 +178,10 @@ export function testSwapsExactOut(
         }
     }
 
-    expect(totalOut.toString()).to.eql(amountOut.toString());
+    expect(totalOut.toString()).to.eql(
+        amountOut.toString(),
+        'testSwapsExactOut - Amount Out Should Should Match'
+    );
     // expect(totalAmtIn.toString()).to.eql(totalIn.toString());
 }
 
@@ -257,6 +268,9 @@ export function fullSwap(
     amount,
     disabledTokens
 ): [Swap[][], BigNumber] {
+    tokenIn = tokenIn.toLowerCase();
+    tokenOut = tokenOut.toLowerCase();
+
     let poolsTokenIn, poolsTokenOut, directPools, hopTokens;
     [directPools, hopTokens, poolsTokenIn, poolsTokenOut] = sor.filterPools(
         allPoolsNonZeroBalances.pools,
@@ -291,23 +305,21 @@ export function fullSwap(
         hopTokens
     );
 
-    let paths = sor.processPaths(pathData, pools, swapType);
-
-    let epsOfInterest = sor.processEpsOfInterestMultiHop(
-        paths,
+    let [paths, maxLiquidityAvailable] = sor.processPaths(
+        pathData,
+        pools,
         swapType,
         noPools
     );
 
     let swaps: Swap[][], total: BigNumber;
-    [swaps, total] = sor.smartOrderRouterMultiHopEpsOfInterest(
+    [swaps, total] = sor.smartOrderRouter(
         JSON.parse(JSON.stringify(pools)),
         paths,
         swapType,
         amount,
         noPools,
-        new BigNumber(0),
-        epsOfInterest
+        bnum(0) // costOutputToken
     );
 
     return [swaps, total];

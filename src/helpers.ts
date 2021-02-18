@@ -476,8 +476,10 @@ export function getHighestLimitAmountsForPaths(
     if (paths.length === 0) return [];
     let limitAmounts = [];
     for (let i = 0; i < maxPools; i++) {
-        let limitAmount = paths[i].limitAmount;
-        limitAmounts.push(limitAmount);
+        if (i < paths.length) {
+            let limitAmount = paths[i].limitAmount;
+            limitAmounts.push(limitAmount);
+        }
     }
     return limitAmounts;
 }
