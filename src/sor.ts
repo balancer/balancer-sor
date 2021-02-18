@@ -130,6 +130,10 @@ export const smartOrderRouter = (
         bestPaths,
         swapAmounts;
 
+    // No paths available, return empty solution
+    if (paths.length == 0) {
+        return [[], bnum(0)];
+    }
     // Before we start the main loop, we first check if there is enough liquidity for this totalSwapAmount at all
     let highestLimitAmounts = getHighestLimitAmountsForPaths(paths, maxPools);
 
@@ -160,7 +164,7 @@ export const smartOrderRouter = (
     // First get the optimal totalReturn to trade 'totalSwapAmount' with
     // one path only (b=1). Then increase the number of pools as long as
     // improvementCondition is true (see more information below)
-    for (let b = initialNumPools; b <= paths.length + 1; b++) {
+    for (let b = initialNumPools; b <= paths.length; b++) {
         totalReturn = 0;
         if (b != initialNumPools) {
             // We already had a previous iteration and are adding another pool this new iteration
