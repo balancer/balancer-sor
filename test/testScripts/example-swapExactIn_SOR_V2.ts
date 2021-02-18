@@ -120,7 +120,7 @@ async function swapExactIn() {
 
     console.time('Filter paths');
     let filteredPaths = sor.filterPaths(
-        pools,
+        JSON.parse(JSON.stringify(pools)),
         paths,
         swapType,
         noPools,
@@ -134,7 +134,7 @@ async function swapExactIn() {
     // 'totalReturnWei' which is the total amount of tokenOut (eg. DAI) will be returned
     let swaps, totalReturnWei;
     [swaps, totalReturnWei] = sor.smartOrderRouter(
-        pools,
+        JSON.parse(JSON.stringify(pools)),
         paths,
         swapType,
         amountIn,
