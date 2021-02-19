@@ -149,6 +149,7 @@ export async function getV1Swap(
             console.timeEnd('V1getAllPoolDataOnChain');
         }
     } else {
+        // console.log(`Using saved balances`)
         // Helper - Filters for only pools with balance and converts to wei/bnum format.
         onChainPools = formatAndFilterPools(
             JSON.parse(JSON.stringify(AllSubgraphPools))
@@ -339,6 +340,7 @@ export async function getV2Swap(
             console.timeEnd('V2getAllPoolDataOnChain');
         }
     } else {
+        // console.log(`Using saved balances`)
         // Helper - Filters for only pools with balance and converts to wei/bnum format.
         onChainPools = formatAndFilterPools(
             JSON.parse(JSON.stringify(AllSubgraphPools))
