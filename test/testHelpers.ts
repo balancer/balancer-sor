@@ -2,18 +2,49 @@ import { BigNumber } from 'bignumber.js';
 import * as sor from '@balancer-labs/sor';
 import * as sorv2 from '../src';
 import { BaseProvider } from '@ethersproject/providers';
+import { bnum, scale } from '../src/bmath';
 
 export const Tokens = {
-    WETH: '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2',
-    DAI: '0x6b175474e89094c44da98b954eedeac495271d0f',
-    BAL: '0xba100000625a3754423978a60c9317c58a424e3d',
-    USDC: '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48',
-    WBTC: '0x2260fac5e5542a773aa44fbcfedf7c193bc2c599',
-    MKR: '0x9f8f72aa9304c8b593d555f12ef6589cc3a579a2',
-    AAVE: '0x7fc66500c84a76ad7e9c93437bfc5ac33e2ddae9',
-    UNI: '0x1f9840a85d5af5bf1d1762f925bdaddc4201f984',
-    SNX: '0xc011a73ee8576fb46f5e1c5751ca3b9fe0af2a6f',
-    COMP: '0xc00e94cb662c3520282e6f5717214004a7f26888',
+    WETH: {
+        address: '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2',
+        decimals: 18,
+    },
+    DAI: {
+        address: '0x6b175474e89094c44da98b954eedeac495271d0f',
+        decimals: 18,
+    },
+    BAL: {
+        address: '0xba100000625a3754423978a60c9317c58a424e3d',
+        decimals: 18,
+    },
+    USDC: {
+        address: '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48',
+        decimals: 6,
+    },
+    WBTC: {
+        address: '0x2260fac5e5542a773aa44fbcfedf7c193bc2c599',
+        decimals: 8,
+    },
+    MKR: {
+        address: '0x9f8f72aa9304c8b593d555f12ef6589cc3a579a2',
+        decimals: 18,
+    },
+    AAVE: {
+        address: '0x7fc66500c84a76ad7e9c93437bfc5ac33e2ddae9',
+        decimals: 18,
+    },
+    UNI: {
+        address: '0x1f9840a85d5af5bf1d1762f925bdaddc4201f984',
+        decimals: 18,
+    },
+    SNX: {
+        address: '0xc011a73ee8576fb46f5e1c5751ca3b9fe0af2a6f',
+        decimals: 18,
+    },
+    COMP: {
+        address: '0xc00e94cb662c3520282e6f5717214004a7f26888',
+        decimals: 18,
+    },
 };
 
 export interface SubGraphPools {
@@ -439,4 +470,50 @@ export async function getV2Swap(
     }
 
     return [swaps, totalReturnWei];
+}
+
+function getAmounts(decimals) {
+    const min = 10 ** -decimals;
+    const mid = 1;
+    const max = 10 ** 6;
+    const smallAmt = Math.random() * (mid - min) + min;
+    const highAmt = Math.random() * (max - mid) + mid;
+    const smallSwapAmt = scale(bnum(smallAmt), decimals);
+    const largeSwapAmt = scale(bnum(highAmt), decimals);
+
+    return [smallSwapAmt, largeSwapAmt];
+}
+
+export function getRandomTradeData() {
+    // Find a random token from list
+    const symbols = Object.keys(Tokens);
+    const symbolIn = symbols[Math.floor(Math.random() * symbols.length)];
+    const tokenIn = Tokens[symbolIn];
+    const symbolOut = symbols[Math.floor(Math.random() * symbols.length)];
+    const tokenOut = Tokens[symbolOut];
+
+    const decimalsIn = tokenIn.decimals;
+    const decimalsOut = tokenOut.decimals;
+
+    const [smallSwapAmtIn, largeSwapAmtIn] = getAmounts(decimalsIn);
+    const [smallSwapAmtOut, largeSwapAmtOut] = getAmounts(decimalsOut);
+    const maxPools = Math.floor(Math.random() * Math.floor(7));
+
+    console.log(`In: ${symbolIn}`);
+    console.log(`Out: ${symbolOut}`);
+    console.log(`Small Swap Amt In: ${smallSwapAmtIn.toString()}`);
+    console.log(`Large Swap Amt In: ${largeSwapAmtIn.toString()}`);
+    console.log(`Small Swap Amt Out: ${smallSwapAmtOut.toString()}`);
+    console.log(`Large Swap Amt Out: ${largeSwapAmtOut.toString()}`);
+    console.log(`MaxPools: ${maxPools}`);
+
+    return {
+        tokenIn: tokenIn.address,
+        tokenOut: tokenOut.address,
+        smallSwapAmtIn,
+        largeSwapAmtIn,
+        smallSwapAmtOut,
+        largeSwapAmtOut,
+        maxPools,
+    };
 }

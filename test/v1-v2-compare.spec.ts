@@ -8,8 +8,8 @@ import { getV1Swap, getV2Swap, Tokens } from './testHelpers';
 // npx mocha -r ts-node/register test/compareTest.spec.ts
 describe('Comparing V1/V2 Using Static Pool Data', () => {
     it('swapExactIn', async () => {
-        const tokenIn = Tokens.WETH;
-        const tokenOut = Tokens.DAI;
+        const tokenIn = Tokens.WETH.address;
+        const tokenOut = Tokens.DAI.address;
         const swapAmount = new BigNumber('1000000000000000000');
         const swapType = 'swapExactIn';
         const provider = new JsonRpcProvider(
@@ -59,8 +59,8 @@ describe('Comparing V1/V2 Using Static Pool Data', () => {
     }).timeout(100000);
 
     it('swapExactOut', async () => {
-        const tokenIn = Tokens.WETH;
-        const tokenOut = Tokens.DAI;
+        const tokenIn = Tokens.WETH.address;
+        const tokenOut = Tokens.DAI.address;
         const swapAmount = new BigNumber('1000000000000000000');
         const swapType = 'swapExactOut';
         const provider = new JsonRpcProvider(
@@ -117,8 +117,8 @@ describe('Comparing V1/V2 Using Static Pool Data', () => {
         V2 Swap Amount: 1332239105722954534706 // Static
         ExactIn, V2<V1: In: 0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2 Out: 0x6b175474e89094c44da98b954eedeac495271d0f Amt: 1000000000000000000
         */
-        const tokenIn = Tokens.WETH;
-        const tokenOut = Tokens.DAI;
+        const tokenIn = Tokens.WETH.address;
+        const tokenOut = Tokens.DAI.address;
         const swapAmount = new BigNumber('1000000000000000000');
         const swapType = 'swapExactIn';
         const provider = new JsonRpcProvider(

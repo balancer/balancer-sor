@@ -8,8 +8,8 @@ import { getV1Swap, getV2Swap, Tokens } from './testHelpers';
 // npx mocha -r ts-node/register test/compare-livepools.spec.ts
 describe('Comparing V1/V2 Using Live Pool Data', () => {
     it('swapExactIn', async () => {
-        const tokenIn = Tokens.WETH;
-        const tokenOut = Tokens.DAI;
+        const tokenIn = Tokens.WETH.address;
+        const tokenOut = Tokens.DAI.address;
         const swapAmount = new BigNumber('1000000000000000000');
         const swapType = 'swapExactIn';
         const provider = new JsonRpcProvider(
@@ -34,7 +34,7 @@ describe('Comparing V1/V2 Using Live Pool Data', () => {
             gasPrice,
             maxNoPools,
             chainId,
-            allPools,
+            JSON.parse(JSON.stringify(allPools)),
             swapType,
             tokenIn,
             tokenOut,
@@ -47,7 +47,7 @@ describe('Comparing V1/V2 Using Live Pool Data', () => {
             gasPrice,
             maxNoPools,
             chainId,
-            allPools,
+            JSON.parse(JSON.stringify(allPools)),
             swapType,
             tokenIn,
             tokenOut,
@@ -62,8 +62,8 @@ describe('Comparing V1/V2 Using Live Pool Data', () => {
     }).timeout(100000);
 
     it('swapExactOut', async () => {
-        const tokenIn = Tokens.WETH;
-        const tokenOut = Tokens.DAI;
+        const tokenIn = Tokens.WETH.address;
+        const tokenOut = Tokens.DAI.address;
         const swapAmount = new BigNumber('1000000000000000000');
         const swapType = 'swapExactOut';
         const provider = new JsonRpcProvider(
@@ -88,7 +88,7 @@ describe('Comparing V1/V2 Using Live Pool Data', () => {
             gasPrice,
             maxNoPools,
             chainId,
-            allPools,
+            JSON.parse(JSON.stringify(allPools)),
             swapType,
             tokenIn,
             tokenOut,
@@ -101,7 +101,7 @@ describe('Comparing V1/V2 Using Live Pool Data', () => {
             gasPrice,
             maxNoPools,
             chainId,
-            allPools,
+            JSON.parse(JSON.stringify(allPools)),
             swapType,
             tokenIn,
             tokenOut,
