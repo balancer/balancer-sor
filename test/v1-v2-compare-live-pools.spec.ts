@@ -2,7 +2,7 @@ require('dotenv').config();
 import { POOLS } from '@balancer-labs/sor';
 import { BigNumber } from 'bignumber.js';
 import { JsonRpcProvider } from '@ethersproject/providers';
-import { expect } from 'chai';
+import { assert } from 'chai';
 import { getV1Swap, getV2Swap, Tokens } from './testHelpers';
 
 // npx mocha -r ts-node/register test/compare-livepools.spec.ts
