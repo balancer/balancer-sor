@@ -23,6 +23,7 @@
         "dist"
     ],
     "devDependencies": {
+        "@balancer-labs/sor": "^1.0.0",
         "@ethersproject/wallet": "^5.0.7",
         "@types/chai": "^4.2.10",
         "@types/mocha": "^7.0.2",
