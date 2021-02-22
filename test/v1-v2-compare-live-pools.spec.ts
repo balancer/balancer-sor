@@ -6,6 +6,9 @@ import { assert } from 'chai';
 import { getV1Swap, getV2Swap, Tokens } from './testHelpers';
 
 // npx mocha -r ts-node/register test/compare-livepools.spec.ts
+// This is using the live pools list from IPFS and on-chain balances so it’s non-deterministic.
+// Uses hardcoded trade data - useful for manually checking specific trades.
+// Compare V1 vs V2.
 describe('Comparing V1/V2 Using Live Pool Data', () => {
     it('swapExactIn', async () => {
         const tokenIn = Tokens.WETH.address;

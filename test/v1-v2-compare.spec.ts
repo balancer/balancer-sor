@@ -5,7 +5,10 @@ import { JsonRpcProvider } from '@ethersproject/providers';
 import { assert } from 'chai';
 import { getV1Swap, getV2Swap, Tokens } from './testHelpers';
 
-// npx mocha -r ts-node/register test/compareTest.spec.ts
+// npx mocha -r ts-node/register test/compare.spec.ts
+// This compare V1 vs V2 swaps and V2 vs V2 with pool from a specified IPFS.
+// Compare V1 vs V2.
+// !!! Note - this can be deleted if compare-testPools ends up being used.
 describe('Comparing V1/V2 Using Static Pool Data', () => {
     it('swapExactIn', async () => {
         const tokenIn = Tokens.WETH.address;

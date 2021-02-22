@@ -293,8 +293,8 @@ export async function getV1Swap(
             `-------------------- V1 Result ---------------------------`
         );
         console.timeEnd('V1FullSwap');
-        console.log(`V1 Swap Amount: ${totalReturnWei.toString()}`);
-        console.log(`V1 Swaps: `);
+        console.log(`Swap Amount: ${totalReturnWei.toString()}`);
+        console.log(`Swaps: `);
         console.log(swaps);
         console.log(
             `----------------------------------------------------------`
@@ -465,8 +465,194 @@ export async function getV2Swap(
             `-------------------- V2 Result ---------------------------`
         );
         console.timeEnd('V2FullSwap');
-        console.log(`V2 Swap Amount: ${totalReturnWei.toString()}`);
-        console.log(`V2 Swaps: `);
+        console.log(`Swap Amount: ${totalReturnWei.toString()}`);
+        console.log(`Swaps: `);
+        console.log(swaps);
+        console.log(
+            `----------------------------------------------------------`
+        );
+        console.log();
+    }
+
+    return [swaps, totalReturnWei];
+}
+
+export async function getV2SwapWithFilter(
+    Provider: BaseProvider,
+    GasPrice: BigNumber,
+    MaxNoPools: number,
+    ChainId: number,
+    AllSubgraphPools: SubGraphPools,
+    SwapType: string,
+    TokenIn: string,
+    TokenOut: string,
+    SwapAmount: BigNumber,
+    Profiling: Profiling = {
+        display: false,
+        detailed: false,
+        onChainBalances: true,
+    }
+) {
+    TokenIn = TokenIn.toLowerCase();
+    TokenOut = TokenOut.toLowerCase();
+
+    const MULTIADDR: { [ChainId: number]: string } = {
+        1: '0x514053acec7177e277b947b1ebb5c08ab4c4580e',
+        42: '0x71c7f1086aFca7Aa1B0D4d73cfa77979d10D3210',
+    };
+
+    const swapCost = new BigNumber('100000'); // A pool swap costs approx 100000 gas
+
+    if (Profiling.display) console.time('V2FullSwap');
+
+    if (Profiling.display && Profiling.detailed)
+        console.time('V2getCostOutputToken');
+    // This calculates the cost in output token (output token is TokenOut for swapExactIn and
+    // TokenIn for a swapExactOut) for each additional pool added to the final SOR swap result.
+    // This is used as an input to SOR to allow it to make gas efficient recommendations, i.e.
+    // if it costs 5 DAI to add another pool to the SOR solution and that only generates 1 more DAI,
+    // then SOR should not add that pool (if gas costs were zero that pool would be added)
+    // Notice that outputToken is TokenOut if SwapType == 'swapExactIn' and TokenIn if SwapType == 'swapExactOut'
+    let costOutputToken: BigNumber;
+    if (SwapType === 'swapExactIn')
+        costOutputToken = await sorv2.getCostOutputToken(
+            TokenOut,
+            GasPrice,
+            swapCost,
+            Provider
+        );
+    else
+        costOutputToken = await sorv2.getCostOutputToken(
+            TokenIn,
+            GasPrice,
+            swapCost,
+            Provider
+        );
+
+    if (Profiling.display && Profiling.detailed)
+        console.timeEnd('V2getCostOutputToken');
+
+    let onChainPools;
+
+    if (Profiling.onChainBalances) {
+        if (Profiling.display && Profiling.detailed)
+            console.time('V2getAllPoolDataOnChain');
+
+        onChainPools = await sorv2.getAllPoolDataOnChain(
+            AllSubgraphPools,
+            MULTIADDR[ChainId],
+            Provider
+        );
+
+        if (Profiling.display && Profiling.detailed) {
+            console.timeEnd('V2getAllPoolDataOnChain');
+        }
+    } else {
+        // console.log(`Using saved balances`)
+        // Helper - Filters for only pools with balance and converts to wei/bnum format.
+        onChainPools = formatAndFilterPools(
+            JSON.parse(JSON.stringify(AllSubgraphPools))
+        );
+    }
+
+    if (Profiling.display && Profiling.detailed) {
+        console.time('V2filterPools');
+    }
+
+    let poolsTokenIn, poolsTokenOut, directPools, hopTokens;
+    [directPools, hopTokens, poolsTokenIn, poolsTokenOut] = sorv2.filterPools(
+        onChainPools.pools,
+        TokenIn,
+        TokenOut,
+        MaxNoPools
+    );
+
+    if (Profiling.display && Profiling.detailed) {
+        console.timeEnd('V2filterPools');
+        console.time('V2sortPoolsMostLiquid');
+    }
+
+    // For each hopToken, find the most liquid pool for the first and the second hops
+    let mostLiquidPoolsFirstHop, mostLiquidPoolsSecondHop;
+    [
+        mostLiquidPoolsFirstHop,
+        mostLiquidPoolsSecondHop,
+    ] = sorv2.sortPoolsMostLiquid(
+        TokenIn,
+        TokenOut,
+        hopTokens,
+        poolsTokenIn,
+        poolsTokenOut
+    );
+
+    if (Profiling.display && Profiling.detailed) {
+        console.timeEnd('V2sortPoolsMostLiquid');
+        console.time('V2parsePoolData');
+    }
+    // Finds the possible paths to make the swap, each path can be a direct swap
+    // or a multihop composed of 2 swaps
+    let pools, pathData;
+    [pools, pathData] = sorv2.parsePoolData(
+        directPools,
+        TokenIn,
+        TokenOut,
+        mostLiquidPoolsFirstHop,
+        mostLiquidPoolsSecondHop,
+        hopTokens
+    );
+
+    if (Profiling.display && Profiling.detailed) {
+        console.timeEnd('V2parsePoolData');
+        console.time('V2processPaths');
+    }
+
+    let [paths, maxLiquidityAvailable] = sorv2.processPaths(
+        pathData,
+        pools,
+        SwapType,
+        MaxNoPools
+    );
+
+    if (Profiling.display && Profiling.detailed) {
+        console.timeEnd('V2processPaths');
+        console.time('filterPaths');
+    }
+
+    let filteredPaths = sorv2.filterPaths(
+        JSON.parse(JSON.stringify(pools)),
+        paths,
+        SwapType,
+        MaxNoPools,
+        maxLiquidityAvailable,
+        costOutputToken
+    );
+
+    if (Profiling.display && Profiling.detailed) {
+        console.timeEnd('filterPaths');
+        console.time('V2smartOrderRouter');
+    }
+
+    let swaps: any, totalReturnWei: BigNumber;
+    [swaps, totalReturnWei] = sorv2.smartOrderRouter(
+        JSON.parse(JSON.stringify(pools)),
+        filteredPaths,
+        SwapType,
+        SwapAmount,
+        MaxNoPools,
+        costOutputToken
+    );
+
+    if (Profiling.display && Profiling.detailed) {
+        console.timeEnd('V2smartOrderRouter');
+    }
+
+    if (Profiling.display) {
+        console.log(
+            `-------------------- V2 With Filter Result ---------------------------`
+        );
+        console.timeEnd('V2FullSwap');
+        console.log(`Swap Amount: ${totalReturnWei.toString()}`);
+        console.log(`Swaps: `);
         console.log(swaps);
         console.log(
             `----------------------------------------------------------`
@@ -502,7 +688,7 @@ export function getRandomTradeData() {
 
     const [smallSwapAmtIn, largeSwapAmtIn] = getAmounts(decimalsIn);
     const [smallSwapAmtOut, largeSwapAmtOut] = getAmounts(decimalsOut);
-    const maxPools = Math.floor(Math.random() * Math.floor(7));
+    const maxPools = Math.floor(Math.random() * (7 - 1 + 1) + 1);
 
     console.log(`In: ${symbolIn}`);
     console.log(`Out: ${symbolOut}`);
@@ -558,8 +744,40 @@ export function saveTestFile(
     console.log(`Test saved at: ${FilePath}/${id}.json`);
 }
 
+export function deleteTestFile(
+    Pools: Pools | SubGraphPools,
+    SwapType: string,
+    TokenIn: string,
+    TokenOut: string,
+    NoPools: string,
+    SwapAmount: string,
+    GasPrice: string,
+    FilePath: string
+) {
+    const tradeInfo = {
+        tradeInfo: {
+            SwapType,
+            TokenIn,
+            TokenOut,
+            NoPools,
+            SwapAmount,
+            GasPrice,
+        },
+        pools: Pools.pools,
+    };
+
+    const id = hashMessage(JSON.stringify(tradeInfo));
+
+    fs.unlink(`${FilePath}/${id}.json`, function(err) {
+        if (err) {
+            console.log(err);
+        }
+    });
+}
+
 export async function listTestFiles(TestFilesPath: string) {
     const files = await readdir(TestFilesPath);
+    console.log(files);
     return files;
 }
 
@@ -572,3 +790,5 @@ export function loadTestFile(File: string) {
     );
     return fileJson;
 }
+
+// const files = listTestFiles(`${__dirname}/testPools/`);
