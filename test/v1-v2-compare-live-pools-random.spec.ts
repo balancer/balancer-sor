@@ -8,6 +8,7 @@ import {
     getV2Swap,
     Tokens,
     getRandomTradeData,
+    saveTestFile,
 } from './testHelpers';
 
 let tradeData;
@@ -72,6 +73,20 @@ describe('Comparing V1/V2 Using Live Pool Data', async () => {
             swapAmount,
             { display: true, detailed: true, onChainBalances: onChainBalances }
         );
+
+        // If the test fails save it for future
+        if (!v2SwapAmt.gte(v1SwapAmt))
+            saveTestFile(
+                allPools,
+                swapType,
+                tokenIn,
+                tokenOut,
+                maxNoPools,
+                swapAmount.toString(),
+                gasPrice.toString(),
+                './test/testPools/'
+            );
+
         assert(
             v2SwapAmt.gte(v1SwapAmt),
             `ExactIn, V2<V1: \nIn: ${tokenIn} \nOut: ${tokenOut} \nSwap Amt: ${swapAmount.toString()} \n${v1SwapAmt.toString()} \n${v2SwapAmt.toString()}`
@@ -115,6 +130,19 @@ describe('Comparing V1/V2 Using Live Pool Data', async () => {
             swapAmount,
             { display: true, detailed: true, onChainBalances: onChainBalances }
         );
+
+        // If the test fails save it for future
+        if (!v2SwapAmt.gte(v1SwapAmt))
+            saveTestFile(
+                allPools,
+                swapType,
+                tokenIn,
+                tokenOut,
+                maxNoPools,
+                swapAmount.toString(),
+                gasPrice.toString(),
+                './test/testPools/'
+            );
 
         assert(
             v2SwapAmt.gte(v1SwapAmt),
@@ -160,9 +188,22 @@ describe('Comparing V1/V2 Using Live Pool Data', async () => {
             { display: true, detailed: true, onChainBalances: onChainBalances }
         );
 
+        // If the test fails save it for future
+        if (!v2SwapAmt.lte(v1SwapAmt))
+            saveTestFile(
+                allPools,
+                swapType,
+                tokenIn,
+                tokenOut,
+                maxNoPools,
+                swapAmount.toString(),
+                gasPrice.toString(),
+                './test/testPools/'
+            );
+
         assert(
-            v2SwapAmt.gte(v1SwapAmt),
-            `ExactIn, V2<V1: \nIn: ${tokenIn} \nOut: ${tokenOut} \nSwap Amt: ${swapAmount.toString()} \n${v1SwapAmt.toString()} \n${v2SwapAmt.toString()}`
+            v2SwapAmt.lte(v1SwapAmt),
+            `ExactOut, V2<V1: \nIn: ${tokenIn} \nOut: ${tokenOut} \nSwap Amt: ${swapAmount.toString()} \n${v1SwapAmt.toString()} \n${v2SwapAmt.toString()}`
         );
     }).timeout(100000);
 
@@ -204,9 +245,22 @@ describe('Comparing V1/V2 Using Live Pool Data', async () => {
             { display: true, detailed: true, onChainBalances: onChainBalances }
         );
 
+        // If the test fails save it for future
+        if (!v2SwapAmt.lte(v1SwapAmt))
+            saveTestFile(
+                allPools,
+                swapType,
+                tokenIn,
+                tokenOut,
+                maxNoPools,
+                swapAmount.toString(),
+                gasPrice.toString(),
+                './test/testPools/'
+            );
+
         assert(
-            v2SwapAmt.gte(v1SwapAmt),
-            `ExactIn, V2<V1: \nIn: ${tokenIn} \nOut: ${tokenOut} \nSwap Amt: ${swapAmount.toString()} \n${v1SwapAmt.toString()} \n${v2SwapAmt.toString()}`
+            v2SwapAmt.lte(v1SwapAmt),
+            `ExactOut, V2<V1: \nIn: ${tokenIn} \nOut: ${tokenOut} \nSwap Amt: ${swapAmount.toString()} \n${v1SwapAmt.toString()} \n${v2SwapAmt.toString()}`
         );
     }).timeout(100000);
 });

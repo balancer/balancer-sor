@@ -3,6 +3,11 @@ import * as sor from '@balancer-labs/sor';
 import * as sorv2 from '../src';
 import { BaseProvider } from '@ethersproject/providers';
 import { bnum, scale } from '../src/bmath';
+import { keccak256 } from '@ethersproject/keccak256';
+import { sha256 } from '@ethersproject/sha2';
+import { hashMessage } from '@ethersproject/hash';
+import * as fs from 'fs';
+import { readdir } from 'fs/promises';
 
 export const Tokens = {
     WETH: {
@@ -516,4 +521,54 @@ export function getRandomTradeData() {
         largeSwapAmtOut,
         maxPools,
     };
+}
+
+export function saveTestFile(
+    Pools: Pools | SubGraphPools,
+    SwapType: string,
+    TokenIn: string,
+    TokenOut: string,
+    NoPools: string,
+    SwapAmount: string,
+    GasPrice: string,
+    FilePath: string
+) {
+    const tradeInfo = {
+        tradeInfo: {
+            SwapType,
+            TokenIn,
+            TokenOut,
+            NoPools,
+            SwapAmount,
+            GasPrice,
+        },
+        pools: Pools.pools,
+    };
+
+    const id = hashMessage(JSON.stringify(tradeInfo));
+
+    fs.writeFile(`${FilePath}/${id}.json`, JSON.stringify(tradeInfo), function(
+        err
+    ) {
+        if (err) {
+            console.log(err);
+        }
+    });
+
+    console.log(`Test saved at: ${FilePath}/${id}.json`);
+}
+
+export async function listTestFiles(TestFilesPath: string) {
+    const files = await readdir(TestFilesPath);
+    return files;
+}
+
+export function loadTestFile(File: string) {
+    const fileString = fs.readFileSync(File, 'utf8');
+    const fileJson = JSON.parse(fileString);
+    fileJson.tradeInfo.GasPrice = new BigNumber(fileJson.tradeInfo.GasPrice);
+    fileJson.tradeInfo.SwapAmount = new BigNumber(
+        fileJson.tradeInfo.SwapAmount
+    );
+    return fileJson;
 }
