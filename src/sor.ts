@@ -54,7 +54,8 @@ export function processPaths(
 
 export function filterPaths(
     pools: PoolDictionary,
-    paths: Path[],
+    paths: Path[], // Paths must come already sorted by descending limitAmount
+    // which is done in processPaths()
     swapType: string,
     maxPools: Number,
     maxLiquidityAvailable: BigNumber,
@@ -65,12 +66,25 @@ export function filterPaths(
     const filterSwapAmountsRatio = 10;
     let filteredPaths = [];
     let filteredPathIds = [];
+    // Always add the maxPools most liquid paths to the filteredPaths
+    for (let j = 0; j < maxPools; ++j) {
+        filteredPathIds.push(paths[j].id);
+        filteredPaths.push(paths[j]);
+    }
+
+    // Now filter for decreasing filterSwapAmounts, starting with
+    // filterSwapAmount = maxLiquidityAvailable/filterSwapAmountsRatio
     let filterSwapAmount = maxLiquidityAvailable.div(
         bnum(filterSwapAmountsRatio)
     );
-    for (let i = 0; i < maxFilterSwapAmounts; ++i) {
+    for (
+        let i = 0;
+        i < maxFilterSwapAmounts && filterSwapAmount.gt(bnum(1)); // Stop for values less than 1 wei
+        // TODO: stop for values of swapAmount less than the cost of adding a new pool to the swap
+        ++i
+    ) {
         for (let j = 0; j < paths.length; ++j) {
-            paths[j].filterEffectivePrice = getOutputAmountSwapForPath(
+            paths[j].filterEffectivePrice = getEffectivePriceSwapForPath(
                 pools,
                 paths[j],
                 swapType,
@@ -141,13 +155,13 @@ export const smartOrderRouter = (
     //  highest_limit is lower than totalSwapAmount, then we should obviously not waste time trying to calculate the SOR suggestion for 1 pool,
     //  Same for 2, 3 pools etc.
     let initialNumPools = -1; // Initializing
-    for (let i = 1; i < maxPools; i++) {
+    for (let i = 0; i < maxPools; i++) {
         let sumHighestLimitAmounts = highestLimitAmounts
-            .slice(0, i)
+            .slice(0, i + 1)
             .reduce((a, b) => a.plus(b));
         if (totalSwapAmount.gt(sumHighestLimitAmounts)) continue; // the i initial pools are not enough to get to totalSwapAmount, continue
         //  If above is false, it means we have enough liquidity with first i pools
-        initialNumPools = i;
+        initialNumPools = i + 1;
         swapAmounts = highestLimitAmounts.slice(0, initialNumPools);
         //  Since the sum of the first i highest limits will be less than totalSwapAmount, we remove the difference to the last swapAmount
         //  so we are sure that the sum of swapAmounts will be equal to totalSwapAmount
@@ -172,12 +186,24 @@ export const smartOrderRouter = (
             // // make sure that it won't be considered as a non viable amount (which would
             // // be the case if it started at 0)
 
-            // Start new path at 1/b of totalSwapAmount. We need then to multiply all current
-            // swapAmounts by 1-1/b.
+            // Start new path at 1/b of totalSwapAmount (i.e. if this is the 5th pool, we start with
+            // 20% of the totalSwapAmount for this new swapAmount added). However, we need to make sure
+            // that this value is not higher then the bth limit of the paths available otherwise there
+            // won't be any possible path to process this swapAmount. We also subtract 1 wei from the limit
+            // so that the effective price for that path won't be Infinity (which is the case
+            // for exactly the limit):
+            let newSwapAmount = BigNumber.min.apply(null, [
+                totalSwapAmount.times(bnum(1 / b)),
+                highestLimitAmounts[b - 1].minus(1),
+            ]);
+            // We need then to multiply all current
+            // swapAmounts by 1-newSwapAmount/totalSwapAmount.
             swapAmounts.forEach((swapAmount, i) => {
-                swapAmounts[i] = swapAmounts[i].times(bnum(1 - 1 / b));
+                swapAmounts[i] = swapAmounts[i].times(
+                    bnum(1).minus(newSwapAmount.div(totalSwapAmount))
+                );
             });
-            swapAmounts.push(totalSwapAmount.times(bnum(1 / b)));
+            swapAmounts.push(newSwapAmount);
         }
 
         //  iterate until we converge to the best pools for a given totalSwapAmount
@@ -194,6 +220,7 @@ export const smartOrderRouter = (
         // Copy array https://stackoverflow.com/a/42442909
         let sortedPathIdsJSON = JSON.stringify([...pathIds].sort()); // Just to check if this set of paths has already been chosen
         while (!historyOfSortedPathIds.includes(sortedPathIdsJSON)) {
+            // TODO: not necessary to enter while b = 1 (just with one pool)
             historyOfSortedPathIds.push(sortedPathIdsJSON); // We store all previous paths ids to avoid infinite loops because of local minima
             selectedPaths = newSelectedPaths;
             [swapAmounts, exceedingAmounts] = iterateSwapAmounts(
@@ -528,7 +555,8 @@ function iterateSwapAmounts(
     let priceError = bnum(1); // Initialize priceError just so that while starts
     let prices = [];
     // Since this is the beginning of an iteration with a new set of paths, we
-    // set any swapAmounts that were set to 0 previously to 1 wei just so that they
+    // set any swapAmounts that were 0 previously to 1 wei or at the limit
+    // to limit minus 1 wei just so that they
     // are considered as viable for iterateSwapAmountsApproximation(). If they were
     // left at 0 iterateSwapAmountsApproximation() would consider them already outside
     // the viable range and would not iterate on them. This is useful when
@@ -537,7 +565,12 @@ function iterateSwapAmounts(
     // paths.
     for (let i = 0; i < swapAmounts.length; ++i) {
         if (swapAmounts[i].isZero()) {
-            swapAmounts[i] = bnum(0.0000000000001); // Small value different from 0
+            swapAmounts[i] = bnum(1); // 1 wei
+            exceedingAmounts[i] = exceedingAmounts[i].plus(bnum(1));
+        }
+        if (exceedingAmounts[i].isZero()) {
+            swapAmounts[i] = swapAmounts[i].minus(bnum(1)); // 1 wei
+            exceedingAmounts[i] = exceedingAmounts[i].minus(bnum(1));
         }
     }
     while (priceError.isGreaterThan(priceErrorTolerance)) {
