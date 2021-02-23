@@ -429,11 +429,11 @@ export function getDerivativeSpotPriceAfterSwapForPath(
             // d[SPaS1(x) * SPaS2(OA1(x))] = d[SPaS1(x)] * SPaS2(OA1(x)) + SPaS1(x) * d[SPaS2(OA1(x))]
             // Let's expand the term d[SPaS2(OA1(x))] which is trickier:
             // d[SPaS2(OA1(x))] at x0 = d[SPaS2(x)] at OA1(x0) * d[OA1(x)] at x0,
-            // Since d[OA1(x)] = SPaS1(x) we then have:
-            // d[SPaS2(OA1(x))] = d[SPaS2(x)] * SPaS1(x). Which leads us to:
-            // d[SPaS1(x) * SPaS2(OA1(x))] = d[SPaS1(x)] * SPaS2(OA1(x)) + SPaS1(x)**2 * d[SPaS2(OA1(x))]
-            // return dSPaS1 * SPaS2 + SPaS1*SPaS1 * dSPaS2
-            return dSPaS1.times(SPaS2).plus(SPaS1.times(SPaS1).times(dSPaS2));
+            // Since d[OA1(x)] = 1/SPaS1(x) we then have:
+            // d[SPaS2(OA1(x))] = d[SPaS2(x)] * 1/SPaS1(x). Which leads us to:
+            // d[SPaS1(x) * SPaS2(OA1(x))] = d[SPaS1(x)] * SPaS2(OA1(x)) + d[SPaS2(OA1(x))]
+            // return dSPaS1 * SPaS2 + dSPaS2
+            return dSPaS1.times(SPaS2).plus(dSPaS2);
         } else {
             let outputAmountSwap2 = getOutputAmountSwap(
                 poolPairData[1],
@@ -460,8 +460,16 @@ export function getDerivativeSpotPriceAfterSwapForPath(
                 swapType,
                 amount
             );
-            // Using an analogy to swapExactIn described above (just swap 1 for 2) we have
-            // return dSPaS2 * SPaS1 + SPaS2*SPaS2 * dSPaS1
+            // For swapExactOut we the outputToken is the amount of tokenIn necessary to buy a given amount of tokenOut
+            // Using the rule of the derivative of the multiplication: d[f(x)*g(x)] = d[f(x)]*g(x) + f(x)*d[g(x)]
+            // where SPaS1 is SpotPriceAfterSwap of pool 1 and OA2 is OutputAmount of pool 2. We then have:
+            // d[SPaS1(OA2(x)) * SPaS2(x)] = d[SPaS1(OA2(x))] * SPaS2(x) + SPaS1(OA2(x)) * d[SPaS2(x)]
+            // Let's expand the term d[SPaS1(OA2(x))] which is trickier:
+            // d[SPaS1(OA2(x))] at x0 = d[SPaS1(x)] at OA2(x0) * d[OA2(x)] at x0,
+            // Since d[OA2(x)] = SPaS2(x) we then have:
+            // d[SPaS1(OA2(x))] = d[SPaS1(x)] * SPaS2(x). Which leads us to:
+            // d[SPaS1(OA2(x)) * SPaS2(x)] = d[SPaS1(x)] * SPaS2(x) * SPaS2(x) + SPaS1(OA2(x)) * d[SPaS2(x)]
+            // return dSPaS2 * SPaS1 + dSPaS1 * SPaS2 * SPaS2
             return dSPaS2.times(SPaS1).plus(SPaS2.times(SPaS2).times(dSPaS1));
         }
     } else {
