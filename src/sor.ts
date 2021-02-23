@@ -101,9 +101,9 @@ export function filterPaths(
 < INPUTS >
 pools: pools information
 paths: paths information
-swapType: 'swapExactIn' or 'swapExactOut'. 
+swapType: 'swapExactIn' or 'swapExactOut'.
 totalSwapAmount: the amount of tokenIn to sell if swapType == 'swapExactIn' OR
-                 the amount of tokenOut to buy if swapType == 'swapExactOut' 
+                 the amount of tokenOut to buy if swapType == 'swapExactOut'
 maxPools: the maximum number of pools accepted for the SOR final swaps suggestion
 costReturnToken: how much in outputToken the gas for trading with one pool costs
                  Notice that outputToken is tokenOut if swapType == 'swapExactIn'
@@ -286,6 +286,7 @@ export const smartOrderRouter = (
         );
 
         // // TODO: remove. To debug only!
+        /*
         console.log(
             'Prices should be all very close (unless one of the paths is on the limit!'
         );
@@ -297,6 +298,7 @@ export const smartOrderRouter = (
                 swapAmount
             ).toNumber()
         );
+        */
         let poolPairData = path.poolPairData;
 
         if (i == 0)

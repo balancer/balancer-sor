@@ -8,6 +8,7 @@ import { sha256 } from '@ethersproject/sha2';
 import { hashMessage } from '@ethersproject/hash';
 import * as fs from 'fs';
 import { readdir } from 'fs/promises';
+import { performance } from 'perf_hooks';
 
 export const Tokens = {
     WETH: {
@@ -92,8 +93,6 @@ export interface Token {
 }
 
 interface Profiling {
-    display: boolean;
-    detailed: boolean;
     onChainBalances: boolean;
 }
 
@@ -125,8 +124,6 @@ export async function getV1Swap(
     TokenOut: string,
     SwapAmount: BigNumber,
     Profiling: Profiling = {
-        display: false,
-        detailed: false,
         onChainBalances: true,
     }
 ) {
@@ -140,10 +137,8 @@ export async function getV1Swap(
 
     const swapCost = new BigNumber('100000'); // A pool swap costs approx 100000 gas
 
-    if (Profiling.display) console.time('V1FullSwap');
-
-    if (Profiling.display && Profiling.detailed)
-        console.time('V1getCostOutputToken');
+    const fullSwapStart = performance.now();
+    const getCostOutputTokenStart = performance.now();
     // This calculates the cost in output token (output token is TokenOut for swapExactIn and
     // TokenIn for a swapExactOut) for each additional pool added to the final SOR swap result.
     // This is used as an input to SOR to allow it to make gas efficient recommendations, i.e.
@@ -166,14 +161,11 @@ export async function getV1Swap(
             Provider
         );
 
-    if (Profiling.display && Profiling.detailed)
-        console.timeEnd('V1getCostOutputToken');
-
+    const getCostOutputTokenEnd = performance.now();
     let onChainPools;
 
     if (Profiling.onChainBalances) {
-        if (Profiling.display && Profiling.detailed)
-            console.time('V1getAllPoolDataOnChain');
+        const getAllPoolDataOnChainStart = performance.now();
 
         onChainPools = await sor.getAllPoolDataOnChain(
             AllSubgraphPools,
@@ -181,20 +173,18 @@ export async function getV1Swap(
             Provider
         );
 
-        if (Profiling.display && Profiling.detailed) {
-            console.timeEnd('V1getAllPoolDataOnChain');
-        }
+        const getAllPoolDataOnChainEnd = performance.now();
     } else {
+        const getAllPoolDataOnChainStart = performance.now();
         // console.log(`Using saved balances`)
         // Helper - Filters for only pools with balance and converts to wei/bnum format.
         onChainPools = formatAndFilterPools(
             JSON.parse(JSON.stringify(AllSubgraphPools))
         );
+        const getAllPoolDataOnChainEnd = performance.now();
     }
 
-    if (Profiling.display && Profiling.detailed) {
-        console.time('V1filterPools');
-    }
+    const filterPoolsStart = performance.now();
 
     let poolsTokenIn, poolsTokenOut, directPools, hopTokens;
     [directPools, hopTokens, poolsTokenIn, poolsTokenOut] = sor.filterPools(
@@ -203,11 +193,8 @@ export async function getV1Swap(
         TokenOut,
         MaxNoPools
     );
-
-    if (Profiling.display && Profiling.detailed) {
-        console.timeEnd('V1filterPools');
-        console.time('V1sortPoolsMostLiquid');
-    }
+    const filterPoolsEnd = performance.now();
+    const sortPoolsMostLiquidStart = performance.now();
 
     // For each hopToken, find the most liquid pool for the first and the second hops
     let mostLiquidPoolsFirstHop, mostLiquidPoolsSecondHop;
@@ -222,10 +209,9 @@ export async function getV1Swap(
         poolsTokenOut
     );
 
-    if (Profiling.display && Profiling.detailed) {
-        console.timeEnd('V1sortPoolsMostLiquid');
-        console.time('V1parsePoolData');
-    }
+    const sortPoolsMostLiquidEnd = performance.now();
+    const parsePoolDataStart = performance.now();
+
     // Finds the possible paths to make the swap, each path can be a direct swap
     // or a multihop composed of 2 swaps
     let pools, pathData;
@@ -237,10 +223,9 @@ export async function getV1Swap(
         mostLiquidPoolsSecondHop,
         hopTokens
     );
-    if (Profiling.display && Profiling.detailed) {
-        console.timeEnd('V1parsePoolData');
-        console.time('V1processPaths');
-    }
+
+    const parsePoolDataEnd = performance.now();
+    const processPathsStart = performance.now();
 
     // For each path, find its spot price, slippage and limit amount
     // The spot price of a multihop is simply the multiplication of the spot prices of each
@@ -251,10 +236,9 @@ export async function getV1Swap(
     // 'paths' are ordered by ascending spot price
     let paths = sor.processPaths(pathData, pools, SwapType);
 
-    if (Profiling.display && Profiling.detailed) {
-        console.timeEnd('V1processPaths');
-        console.time('V1processEpsOfInterestMultiHop');
-    }
+    const processPathsEnd = performance.now();
+    const processEpsOfInterestMultiHopStart = performance.now();
+
     // epsOfInterest stores a list of all relevant prices: these are either
     // 1) Spot prices of a path
     // 2) Prices where paths cross, meaning they would move to the same spot price after trade
@@ -268,15 +252,14 @@ export async function getV1Swap(
         SwapType,
         MaxNoPools
     );
-    if (Profiling.display && Profiling.detailed) {
-        console.timeEnd('V1processEpsOfInterestMultiHop');
-        console.time('V1smartOrderRouterMultiHopEpsOfInterest');
-    }
+
+    const processEpsOfInterestMultiHopEnd = performance.now();
+    const smartOrderRouterMultiHopEpsOfInterestStart = performance.now();
 
     // Returns 'swaps' which is the optimal list of swaps to make and
-    // 'totalReturnWei' which is the total amount of TokenOut (eg. DAI) will be returned
-    let swaps, totalReturnWei;
-    [swaps, totalReturnWei] = sor.smartOrderRouterMultiHopEpsOfInterest(
+    // 'swapAmount' which is the total amount of TokenOut (eg. DAI) will be returned
+    let swaps, swapAmount;
+    [swaps, swapAmount] = sor.smartOrderRouterMultiHopEpsOfInterest(
         pools,
         paths,
         SwapType,
@@ -285,24 +268,27 @@ export async function getV1Swap(
         costOutputToken,
         epsOfInterest
     );
-    if (Profiling.display && Profiling.detailed)
-        console.timeEnd('V1smartOrderRouterMultiHopEpsOfInterest');
 
-    if (Profiling.display) {
-        console.log(
-            `-------------------- V1 Result ---------------------------`
-        );
-        console.timeEnd('V1FullSwap');
-        console.log(`Swap Amount: ${totalReturnWei.toString()}`);
-        console.log(`Swaps: `);
-        console.log(swaps);
-        console.log(
-            `----------------------------------------------------------`
-        );
-        console.log();
-    }
+    const smartOrderRouterMultiHopEpsOfInterestEnd = performance.now();
+    const fullSwapEnd = performance.now();
 
-    return [swaps, totalReturnWei];
+    const timeData = {
+        fullSwap: fullSwapEnd - fullSwapStart,
+        costOutputToken: getCostOutputTokenEnd - getCostOutputTokenStart,
+        // 'getAllPoolDataOnChain': getAllPoolDataOnChainEnd - getAllPoolDataOnChainStart,
+        filterPools: filterPoolsEnd - filterPoolsStart,
+        sortPools: sortPoolsMostLiquidEnd - sortPoolsMostLiquidStart,
+        parsePool: parsePoolDataEnd - parsePoolDataStart,
+        processPaths: processPathsEnd - processPathsStart,
+        processEps:
+            processEpsOfInterestMultiHopEnd - processEpsOfInterestMultiHopStart,
+        filter: 'N/A',
+        sor:
+            smartOrderRouterMultiHopEpsOfInterestEnd -
+            smartOrderRouterMultiHopEpsOfInterestStart,
+    };
+
+    return { title: 'v1', swaps, swapAmount, timeData };
 }
 
 export async function getV2Swap(
@@ -316,8 +302,6 @@ export async function getV2Swap(
     TokenOut: string,
     SwapAmount: BigNumber,
     Profiling: Profiling = {
-        display: false,
-        detailed: false,
         onChainBalances: true,
     }
 ) {
@@ -331,10 +315,8 @@ export async function getV2Swap(
 
     const swapCost = new BigNumber('100000'); // A pool swap costs approx 100000 gas
 
-    if (Profiling.display) console.time('V2FullSwap');
-
-    if (Profiling.display && Profiling.detailed)
-        console.time('V2getCostOutputToken');
+    const fullSwapStart = performance.now();
+    const getCostOutputTokenStart = performance.now();
     // This calculates the cost in output token (output token is TokenOut for swapExactIn and
     // TokenIn for a swapExactOut) for each additional pool added to the final SOR swap result.
     // This is used as an input to SOR to allow it to make gas efficient recommendations, i.e.
@@ -357,14 +339,11 @@ export async function getV2Swap(
             Provider
         );
 
-    if (Profiling.display && Profiling.detailed)
-        console.timeEnd('V2getCostOutputToken');
-
+    const getCostOutputTokenEnd = performance.now();
     let onChainPools;
 
     if (Profiling.onChainBalances) {
-        if (Profiling.display && Profiling.detailed)
-            console.time('V2getAllPoolDataOnChain');
+        const getAllPoolDataOnChainStart = performance.now();
 
         onChainPools = await sorv2.getAllPoolDataOnChain(
             AllSubgraphPools,
@@ -372,20 +351,18 @@ export async function getV2Swap(
             Provider
         );
 
-        if (Profiling.display && Profiling.detailed) {
-            console.timeEnd('V2getAllPoolDataOnChain');
-        }
+        const getAllPoolDataOnChainEnd = performance.now();
     } else {
+        const getAllPoolDataOnChainStart = performance.now();
         // console.log(`Using saved balances`)
         // Helper - Filters for only pools with balance and converts to wei/bnum format.
         onChainPools = formatAndFilterPools(
             JSON.parse(JSON.stringify(AllSubgraphPools))
         );
+        const getAllPoolDataOnChainEnd = performance.now();
     }
 
-    if (Profiling.display && Profiling.detailed) {
-        console.time('V2filterPools');
-    }
+    const filterPoolsStart = performance.now();
 
     let poolsTokenIn, poolsTokenOut, directPools, hopTokens;
     [directPools, hopTokens, poolsTokenIn, poolsTokenOut] = sorv2.filterPools(
@@ -394,11 +371,8 @@ export async function getV2Swap(
         TokenOut,
         MaxNoPools
     );
-
-    if (Profiling.display && Profiling.detailed) {
-        console.timeEnd('V2filterPools');
-        console.time('V2sortPoolsMostLiquid');
-    }
+    const filterPoolsEnd = performance.now();
+    const sortPoolsMostLiquidStart = performance.now();
 
     // For each hopToken, find the most liquid pool for the first and the second hops
     let mostLiquidPoolsFirstHop, mostLiquidPoolsSecondHop;
@@ -413,10 +387,9 @@ export async function getV2Swap(
         poolsTokenOut
     );
 
-    if (Profiling.display && Profiling.detailed) {
-        console.timeEnd('V2sortPoolsMostLiquid');
-        console.time('V2parsePoolData');
-    }
+    const sortPoolsMostLiquidEnd = performance.now();
+    const parsePoolDataStart = performance.now();
+
     // Finds the possible paths to make the swap, each path can be a direct swap
     // or a multihop composed of 2 swaps
     let pools, pathData;
@@ -429,10 +402,8 @@ export async function getV2Swap(
         hopTokens
     );
 
-    if (Profiling.display && Profiling.detailed) {
-        console.timeEnd('V2parsePoolData');
-        console.time('V2processPaths');
-    }
+    const parsePoolDataEnd = performance.now();
+    const processPathsStart = performance.now();
 
     let [paths, maxLiquidityAvailable] = sorv2.processPaths(
         pathData,
@@ -441,13 +412,11 @@ export async function getV2Swap(
         MaxNoPools
     );
 
-    if (Profiling.display && Profiling.detailed) {
-        console.timeEnd('V2processPaths');
-        console.time('V2smartOrderRouter');
-    }
+    const processPathsEnd = performance.now();
+    const sorStart = performance.now();
 
-    let swaps: any, totalReturnWei: BigNumber;
-    [swaps, totalReturnWei] = sorv2.smartOrderRouter(
+    let swaps: any, swapAmount: BigNumber;
+    [swaps, swapAmount] = sorv2.smartOrderRouter(
         JSON.parse(JSON.stringify(pools)),
         paths,
         SwapType,
@@ -456,25 +425,23 @@ export async function getV2Swap(
         costOutputToken
     );
 
-    if (Profiling.display && Profiling.detailed) {
-        console.timeEnd('V2smartOrderRouter');
-    }
+    const sorEnd = performance.now();
+    const fullSwapEnd = sorEnd;
 
-    if (Profiling.display) {
-        console.log(
-            `-------------------- V2 Result ---------------------------`
-        );
-        console.timeEnd('V2FullSwap');
-        console.log(`Swap Amount: ${totalReturnWei.toString()}`);
-        console.log(`Swaps: `);
-        console.log(swaps);
-        console.log(
-            `----------------------------------------------------------`
-        );
-        console.log();
-    }
+    const timeData = {
+        fullSwap: fullSwapEnd - fullSwapStart,
+        costOutputToken: getCostOutputTokenEnd - getCostOutputTokenStart,
+        // 'getAllPoolDataOnChain': getAllPoolDataOnChainEnd - getAllPoolDataOnChainStart,
+        filterPools: filterPoolsEnd - filterPoolsStart,
+        sortPools: sortPoolsMostLiquidEnd - sortPoolsMostLiquidStart,
+        parsePool: parsePoolDataEnd - parsePoolDataStart,
+        processPaths: processPathsEnd - processPathsStart,
+        processEps: 'N/A',
+        filter: 'N/A',
+        sor: sorEnd - sorStart,
+    };
 
-    return [swaps, totalReturnWei];
+    return { title: 'v2', swaps, swapAmount, timeData };
 }
 
 export async function getV2SwapWithFilter(
@@ -488,8 +455,6 @@ export async function getV2SwapWithFilter(
     TokenOut: string,
     SwapAmount: BigNumber,
     Profiling: Profiling = {
-        display: false,
-        detailed: false,
         onChainBalances: true,
     }
 ) {
@@ -503,10 +468,8 @@ export async function getV2SwapWithFilter(
 
     const swapCost = new BigNumber('100000'); // A pool swap costs approx 100000 gas
 
-    if (Profiling.display) console.time('V2FullSwap');
-
-    if (Profiling.display && Profiling.detailed)
-        console.time('V2getCostOutputToken');
+    const fullSwapStart = performance.now();
+    const getCostOutputTokenStart = performance.now();
     // This calculates the cost in output token (output token is TokenOut for swapExactIn and
     // TokenIn for a swapExactOut) for each additional pool added to the final SOR swap result.
     // This is used as an input to SOR to allow it to make gas efficient recommendations, i.e.
@@ -529,35 +492,29 @@ export async function getV2SwapWithFilter(
             Provider
         );
 
-    if (Profiling.display && Profiling.detailed)
-        console.timeEnd('V2getCostOutputToken');
-
+    const getCostOutputTokenEnd = performance.now();
     let onChainPools;
 
     if (Profiling.onChainBalances) {
-        if (Profiling.display && Profiling.detailed)
-            console.time('V2getAllPoolDataOnChain');
+        const getAllPoolDataOnChainStart = performance.now();
 
         onChainPools = await sorv2.getAllPoolDataOnChain(
             AllSubgraphPools,
             MULTIADDR[ChainId],
             Provider
         );
-
-        if (Profiling.display && Profiling.detailed) {
-            console.timeEnd('V2getAllPoolDataOnChain');
-        }
+        const getAllPoolDataOnChainEnd = performance.now();
     } else {
+        const getAllPoolDataOnChainStart = performance.now();
         // console.log(`Using saved balances`)
         // Helper - Filters for only pools with balance and converts to wei/bnum format.
         onChainPools = formatAndFilterPools(
             JSON.parse(JSON.stringify(AllSubgraphPools))
         );
+        const getAllPoolDataOnChainEnd = performance.now();
     }
 
-    if (Profiling.display && Profiling.detailed) {
-        console.time('V2filterPools');
-    }
+    const filterPoolsStart = performance.now();
 
     let poolsTokenIn, poolsTokenOut, directPools, hopTokens;
     [directPools, hopTokens, poolsTokenIn, poolsTokenOut] = sorv2.filterPools(
@@ -567,10 +524,8 @@ export async function getV2SwapWithFilter(
         MaxNoPools
     );
 
-    if (Profiling.display && Profiling.detailed) {
-        console.timeEnd('V2filterPools');
-        console.time('V2sortPoolsMostLiquid');
-    }
+    const filterPoolsEnd = performance.now();
+    const sortPoolsMostLiquidStart = performance.now();
 
     // For each hopToken, find the most liquid pool for the first and the second hops
     let mostLiquidPoolsFirstHop, mostLiquidPoolsSecondHop;
@@ -585,10 +540,9 @@ export async function getV2SwapWithFilter(
         poolsTokenOut
     );
 
-    if (Profiling.display && Profiling.detailed) {
-        console.timeEnd('V2sortPoolsMostLiquid');
-        console.time('V2parsePoolData');
-    }
+    const sortPoolsMostLiquidEnd = performance.now();
+    const parsePoolDataStart = performance.now();
+
     // Finds the possible paths to make the swap, each path can be a direct swap
     // or a multihop composed of 2 swaps
     let pools, pathData;
@@ -601,10 +555,8 @@ export async function getV2SwapWithFilter(
         hopTokens
     );
 
-    if (Profiling.display && Profiling.detailed) {
-        console.timeEnd('V2parsePoolData');
-        console.time('V2processPaths');
-    }
+    const parsePoolDataEnd = performance.now();
+    const processPathsStart = performance.now();
 
     let [paths, maxLiquidityAvailable] = sorv2.processPaths(
         pathData,
@@ -613,10 +565,8 @@ export async function getV2SwapWithFilter(
         MaxNoPools
     );
 
-    if (Profiling.display && Profiling.detailed) {
-        console.timeEnd('V2processPaths');
-        console.time('filterPaths');
-    }
+    const processPathsEnd = performance.now();
+    const filterStart = performance.now();
 
     let filteredPaths = sorv2.filterPaths(
         JSON.parse(JSON.stringify(pools)),
@@ -627,13 +577,11 @@ export async function getV2SwapWithFilter(
         costOutputToken
     );
 
-    if (Profiling.display && Profiling.detailed) {
-        console.timeEnd('filterPaths');
-        console.time('V2smartOrderRouter');
-    }
+    const filterEnd = performance.now();
+    const sorStart = performance.now();
 
-    let swaps: any, totalReturnWei: BigNumber;
-    [swaps, totalReturnWei] = sorv2.smartOrderRouter(
+    let swaps: any, swapAmount: BigNumber;
+    [swaps, swapAmount] = sorv2.smartOrderRouter(
         JSON.parse(JSON.stringify(pools)),
         filteredPaths,
         SwapType,
@@ -642,25 +590,23 @@ export async function getV2SwapWithFilter(
         costOutputToken
     );
 
-    if (Profiling.display && Profiling.detailed) {
-        console.timeEnd('V2smartOrderRouter');
-    }
+    const sorEnd = performance.now();
+    const fullSwapEnd = sorEnd;
 
-    if (Profiling.display) {
-        console.log(
-            `-------------------- V2 With Filter Result ---------------------------`
-        );
-        console.timeEnd('V2FullSwap');
-        console.log(`Swap Amount: ${totalReturnWei.toString()}`);
-        console.log(`Swaps: `);
-        console.log(swaps);
-        console.log(
-            `----------------------------------------------------------`
-        );
-        console.log();
-    }
+    const timeData = {
+        fullSwap: fullSwapEnd - fullSwapStart,
+        costOutputToken: getCostOutputTokenEnd - getCostOutputTokenStart,
+        // 'getAllPoolDataOnChain': getAllPoolDataOnChainEnd - getAllPoolDataOnChainStart,
+        filterPools: filterPoolsEnd - filterPoolsStart,
+        sortPools: sortPoolsMostLiquidEnd - sortPoolsMostLiquidStart,
+        parsePool: parsePoolDataEnd - parsePoolDataStart,
+        processPaths: processPathsEnd - processPathsStart,
+        processEps: 'N/A',
+        filter: filterEnd - filterStart,
+        sor: sorEnd - sorStart,
+    };
 
-    return [swaps, totalReturnWei];
+    return { title: 'v2WithFilter', swaps, swapAmount, timeData };
 }
 
 function getAmounts(decimals) {
@@ -742,6 +688,7 @@ export function saveTestFile(
     });
 
     console.log(`Test saved at: ${FilePath}/${id}.json`);
+    return id;
 }
 
 export function deleteTestFile(
@@ -789,6 +736,47 @@ export function loadTestFile(File: string) {
         fileJson.tradeInfo.SwapAmount
     );
     return fileJson;
+}
+
+export function displayResults(
+    TestTitle: string,
+    TradeInfo: any,
+    Results: any[],
+    Verbose: boolean
+) {
+    let symbolIn, symbolOut;
+    const symbols = Object.keys(Tokens);
+    symbols.forEach(symbol => {
+        if (Tokens[symbol].address === TradeInfo.TokenIn) symbolIn = symbol;
+
+        if (Tokens[symbol].address === TradeInfo.TokenOut) symbolOut = symbol;
+    });
+    const tokenIn = Tokens[symbolIn];
+
+    console.log(`Test File: ${TestTitle}`);
+    console.log(
+        `${
+            TradeInfo.SwapType
+        }\n${symbolIn}>${symbolOut}\nSwap Amt: ${TradeInfo.SwapAmount.toString()}`
+    );
+
+    let tableData = [];
+    Results.forEach(result => {
+        tableData.push({
+            SOR: result.title,
+            'Full SOR Time': result.timeData.fullSwap,
+            'Return Amt': result.swapAmount.toString(),
+        });
+    });
+
+    console.table(tableData);
+
+    if (Verbose) {
+        Results.forEach(result => {
+            console.log(`${result.title} Swaps: `);
+            console.log(result.swaps);
+        });
+    }
 }
 
 // const files = listTestFiles(`${__dirname}/testPools/`);
