@@ -11,6 +11,7 @@ import {
     getRandomTradeData,
     saveTestFile,
     deleteTestFile,
+    displayResults,
 } from './testHelpers';
 
 let tradeData;
@@ -28,6 +29,9 @@ const poolsUrl = `https://ipfs.fleek.co/ipns/balancer-team-bucket.storage.fleek.
 let allPools;
 
 const onChainBalances = true;
+let v1SwapData;
+let v2SwapData;
+let v2WithFilterSwapData;
 
 // npx mocha -r ts-node/register test/compare-live-pools-random.spec.ts
 // This is using the live pools list from IPFS and on-chain balances so it’s non-deterministic.
@@ -48,15 +52,8 @@ describe('Comparing V1/V2 Using Live Pool Data', async () => {
         const swapAmount = tradeData.smallSwapAmtIn;
         const swapType = 'swapExactIn';
 
-        let v1Swaps = [];
-        let v1SwapAmt;
-        let v2Swaps = [];
-        let v2SwapAmt;
-        let v2WithFilterSwaps = [];
-        let v2WithFilterSwapAmt;
-
         // We save the test file ahead of a failed test because there are times when the test hangs and we want to capture those
-        saveTestFile(
+        const file = saveTestFile(
             allPools,
             swapType,
             tokenIn,
@@ -67,7 +64,7 @@ describe('Comparing V1/V2 Using Live Pool Data', async () => {
             './test/testPools/'
         );
 
-        [v1Swaps, v1SwapAmt] = await getV1Swap(
+        v1SwapData = await getV1Swap(
             provider,
             gasPrice,
             maxNoPools,
@@ -77,10 +74,10 @@ describe('Comparing V1/V2 Using Live Pool Data', async () => {
             tokenIn,
             tokenOut,
             swapAmount,
-            { display: true, detailed: false, onChainBalances: onChainBalances }
+            { onChainBalances: onChainBalances }
         );
 
-        [v2Swaps, v2SwapAmt] = await getV2Swap(
+        v2SwapData = await getV2Swap(
             provider,
             gasPrice,
             maxNoPools,
@@ -90,33 +87,37 @@ describe('Comparing V1/V2 Using Live Pool Data', async () => {
             tokenIn,
             tokenOut,
             swapAmount,
-            { display: true, detailed: true, onChainBalances: onChainBalances }
+            { onChainBalances: onChainBalances }
+        );
+
+        v2WithFilterSwapData = await getV2SwapWithFilter(
+            provider,
+            gasPrice,
+            maxNoPools,
+            chainId,
+            JSON.parse(JSON.stringify(allPools)),
+            swapType,
+            tokenIn,
+            tokenOut,
+            swapAmount,
+            { onChainBalances: onChainBalances }
+        );
+
+        displayResults(
+            `${file}.json`,
+            { TokenIn: tokenIn, TokenOut: tokenOut, SwapAmount: swapAmount },
+            [v1SwapData, v2SwapData, v2WithFilterSwapData],
+            false
         );
 
         assert(
-            v2SwapAmt.gte(v1SwapAmt),
-            `ExactIn, V2<V1: \nIn: ${tokenIn} \nOut: ${tokenOut} \nSwap Amt: ${swapAmount.toString()} \n${v1SwapAmt.toString()} \n${v2SwapAmt.toString()}`
-        );
-
-        [
-            v2WithFilterSwaps,
-            v2WithFilterSwapAmt,
-        ] = await getV2SwapWithFilter(
-            provider,
-            gasPrice,
-            maxNoPools,
-            chainId,
-            JSON.parse(JSON.stringify(allPools)),
-            swapType,
-            tokenIn,
-            tokenOut,
-            swapAmount,
-            { display: true, detailed: true, onChainBalances: onChainBalances }
+            v2SwapData.swapAmount.gte(v1SwapData.swapAmount),
+            `ExactIn, V2<V1: \nIn: ${tokenIn} \nOut: ${tokenOut} \nSwap Amt: ${swapAmount.toString()} \n${v1SwapData.swapAmount.toString()} \n${v2SwapData.swapAmount.toString()}`
         );
 
         assert(
-            v2SwapAmt.eq(v2WithFilterSwapAmt),
-            `ExactIn, V2 !== V2 Filter\nIn: ${tokenIn} \nOut: ${tokenOut} \nSwap Amt: ${swapAmount.toString()} \n${v2SwapAmt.toString()} \n${v2WithFilterSwapAmt.toString()}`
+            v2SwapData.swapAmount.eq(v2WithFilterSwapData.swapAmount),
+            `ExactIn, V2 !== V2 Filter\nIn: ${tokenIn} \nOut: ${tokenOut} \nSwap Amt: ${swapAmount.toString()} \n${v2SwapData.swapAmount.toString()} \n${v2WithFilterSwapData.swapAmount.toString()}`
         );
 
         // All tests passed so no need to keep file
@@ -139,15 +140,8 @@ describe('Comparing V1/V2 Using Live Pool Data', async () => {
         const swapAmount = tradeData.largeSwapAmtIn;
         const swapType = 'swapExactIn';
 
-        let v1Swaps = [];
-        let v1SwapAmt;
-        let v2Swaps = [];
-        let v2SwapAmt;
-        let v2WithFilterSwaps = [];
-        let v2WithFilterSwapAmt;
-
         // We save the test file ahead of a failed test because there are times when the test hangs and we want to capture those
-        saveTestFile(
+        const file = saveTestFile(
             allPools,
             swapType,
             tokenIn,
@@ -158,7 +152,7 @@ describe('Comparing V1/V2 Using Live Pool Data', async () => {
             './test/testPools/'
         );
 
-        [v1Swaps, v1SwapAmt] = await getV1Swap(
+        v1SwapData = await getV1Swap(
             provider,
             gasPrice,
             maxNoPools,
@@ -168,10 +162,10 @@ describe('Comparing V1/V2 Using Live Pool Data', async () => {
             tokenIn,
             tokenOut,
             swapAmount,
-            { display: true, detailed: false, onChainBalances: onChainBalances }
+            { onChainBalances: onChainBalances }
         );
 
-        [v2Swaps, v2SwapAmt] = await getV2Swap(
+        v2SwapData = await getV2Swap(
             provider,
             gasPrice,
             maxNoPools,
@@ -181,33 +175,37 @@ describe('Comparing V1/V2 Using Live Pool Data', async () => {
             tokenIn,
             tokenOut,
             swapAmount,
-            { display: true, detailed: true, onChainBalances: onChainBalances }
+            { onChainBalances: onChainBalances }
+        );
+
+        v2WithFilterSwapData = await getV2SwapWithFilter(
+            provider,
+            gasPrice,
+            maxNoPools,
+            chainId,
+            JSON.parse(JSON.stringify(allPools)),
+            swapType,
+            tokenIn,
+            tokenOut,
+            swapAmount,
+            { onChainBalances: onChainBalances }
+        );
+
+        displayResults(
+            `${file}.json`,
+            { TokenIn: tokenIn, TokenOut: tokenOut, SwapAmount: swapAmount },
+            [v1SwapData, v2SwapData, v2WithFilterSwapData],
+            false
         );
 
         assert(
-            v2SwapAmt.gte(v1SwapAmt),
-            `ExactIn, V2<V1: \nIn: ${tokenIn} \nOut: ${tokenOut} \nSwap Amt: ${swapAmount.toString()} \n${v1SwapAmt.toString()} \n${v2SwapAmt.toString()}`
-        );
-
-        [
-            v2WithFilterSwaps,
-            v2WithFilterSwapAmt,
-        ] = await getV2SwapWithFilter(
-            provider,
-            gasPrice,
-            maxNoPools,
-            chainId,
-            JSON.parse(JSON.stringify(allPools)),
-            swapType,
-            tokenIn,
-            tokenOut,
-            swapAmount,
-            { display: true, detailed: true, onChainBalances: onChainBalances }
+            v2SwapData.swapAmount.gte(v1SwapData.swapAmount),
+            `ExactIn, V2<V1: \nIn: ${tokenIn} \nOut: ${tokenOut} \nSwap Amt: ${swapAmount.toString()} \n${v1SwapData.swapAmount.toString()} \n${v2SwapData.swapAmount.toString()}`
         );
 
         assert(
-            v2SwapAmt.eq(v2WithFilterSwapAmt),
-            `ExactIn, V2 !== V2 Filter\nIn: ${tokenIn} \nOut: ${tokenOut} \nSwap Amt: ${swapAmount.toString()} \n${v2SwapAmt.toString()} \n${v2WithFilterSwapAmt.toString()}`
+            v2SwapData.swapAmount.eq(v2WithFilterSwapData.swapAmount),
+            `ExactIn, V2 !== V2 Filter\nIn: ${tokenIn} \nOut: ${tokenOut} \nSwap Amt: ${swapAmount.toString()} \n${v2SwapData.swapAmount.toString()} \n${v2WithFilterSwapData.swapAmount.toString()}`
         );
 
         // All tests passed so no need to keep file
@@ -230,15 +228,8 @@ describe('Comparing V1/V2 Using Live Pool Data', async () => {
         const swapAmount = tradeData.smallSwapAmtOut;
         const swapType = 'swapExactOut';
 
-        let v1Swaps = [];
-        let v1SwapAmt;
-        let v2Swaps = [];
-        let v2SwapAmt;
-        let v2WithFilterSwaps = [];
-        let v2WithFilterSwapAmt;
-
         // We save the test file ahead of a failed test because there are times when the test hangs and we want to capture those
-        saveTestFile(
+        const file = saveTestFile(
             allPools,
             swapType,
             tokenIn,
@@ -249,7 +240,7 @@ describe('Comparing V1/V2 Using Live Pool Data', async () => {
             './test/testPools/'
         );
 
-        [v1Swaps, v1SwapAmt] = await getV1Swap(
+        v1SwapData = await getV1Swap(
             provider,
             gasPrice,
             maxNoPools,
@@ -259,10 +250,10 @@ describe('Comparing V1/V2 Using Live Pool Data', async () => {
             tokenIn,
             tokenOut,
             swapAmount,
-            { display: true, detailed: false, onChainBalances: onChainBalances }
+            { onChainBalances: onChainBalances }
         );
 
-        [v2Swaps, v2SwapAmt] = await getV2Swap(
+        v2SwapData = await getV2Swap(
             provider,
             gasPrice,
             maxNoPools,
@@ -272,33 +263,37 @@ describe('Comparing V1/V2 Using Live Pool Data', async () => {
             tokenIn,
             tokenOut,
             swapAmount,
-            { display: true, detailed: true, onChainBalances: onChainBalances }
+            { onChainBalances: onChainBalances }
+        );
+
+        v2WithFilterSwapData = await getV2SwapWithFilter(
+            provider,
+            gasPrice,
+            maxNoPools,
+            chainId,
+            JSON.parse(JSON.stringify(allPools)),
+            swapType,
+            tokenIn,
+            tokenOut,
+            swapAmount,
+            { onChainBalances: onChainBalances }
+        );
+
+        displayResults(
+            `${file}.json`,
+            { TokenIn: tokenIn, TokenOut: tokenOut, SwapAmount: swapAmount },
+            [v1SwapData, v2SwapData, v2WithFilterSwapData],
+            false
         );
 
         assert(
-            v2SwapAmt.lte(v1SwapAmt),
-            `ExactOut, V2<V1: \nIn: ${tokenIn} \nOut: ${tokenOut} \nSwap Amt: ${swapAmount.toString()} \n${v1SwapAmt.toString()} \n${v2SwapAmt.toString()}`
-        );
-
-        [
-            v2WithFilterSwaps,
-            v2WithFilterSwapAmt,
-        ] = await getV2SwapWithFilter(
-            provider,
-            gasPrice,
-            maxNoPools,
-            chainId,
-            JSON.parse(JSON.stringify(allPools)),
-            swapType,
-            tokenIn,
-            tokenOut,
-            swapAmount,
-            { display: true, detailed: true, onChainBalances: onChainBalances }
+            v2SwapData.swapAmount.lte(v1SwapData.swapAmount),
+            `ExactOut, V2<V1: \nIn: ${tokenIn} \nOut: ${tokenOut} \nSwap Amt: ${swapAmount.toString()} \n${v1SwapData.swapAmount.toString()} \n${v2SwapData.swapAmount.toString()}`
         );
 
         assert(
-            v2SwapAmt.eq(v2WithFilterSwapAmt),
-            `ExactIn, V2 !== V2 Filter\nIn: ${tokenIn} \nOut: ${tokenOut} \nSwap Amt: ${swapAmount.toString()} \n${v2SwapAmt.toString()} \n${v2WithFilterSwapAmt.toString()}`
+            v2SwapData.swapAmount.eq(v2WithFilterSwapData.swapAmount),
+            `ExactIn, V2 !== V2 Filter\nIn: ${tokenIn} \nOut: ${tokenOut} \nSwap Amt: ${swapAmount.toString()} \n${v2SwapData.swapAmount.toString()} \n${v2WithFilterSwapData.swapAmount.toString()}`
         );
 
         // All tests passed so no need to keep file
@@ -321,15 +316,8 @@ describe('Comparing V1/V2 Using Live Pool Data', async () => {
         const swapAmount = tradeData.largeSwapAmtOut;
         const swapType = 'swapExactOut';
 
-        let v1Swaps = [];
-        let v1SwapAmt;
-        let v2Swaps = [];
-        let v2SwapAmt;
-        let v2WithFilterSwaps = [];
-        let v2WithFilterSwapAmt;
-
         // We save the test file ahead of a failed test because there are times when the test hangs and we want to capture those
-        saveTestFile(
+        const file = saveTestFile(
             allPools,
             swapType,
             tokenIn,
@@ -340,7 +328,7 @@ describe('Comparing V1/V2 Using Live Pool Data', async () => {
             './test/testPools/'
         );
 
-        [v1Swaps, v1SwapAmt] = await getV1Swap(
+        v1SwapData = await getV1Swap(
             provider,
             gasPrice,
             maxNoPools,
@@ -350,10 +338,10 @@ describe('Comparing V1/V2 Using Live Pool Data', async () => {
             tokenIn,
             tokenOut,
             swapAmount,
-            { display: true, detailed: false, onChainBalances: onChainBalances }
+            { onChainBalances: onChainBalances }
         );
 
-        [v2Swaps, v2SwapAmt] = await getV2Swap(
+        v2SwapData = await getV2Swap(
             provider,
             gasPrice,
             maxNoPools,
@@ -363,33 +351,37 @@ describe('Comparing V1/V2 Using Live Pool Data', async () => {
             tokenIn,
             tokenOut,
             swapAmount,
-            { display: true, detailed: true, onChainBalances: onChainBalances }
+            { onChainBalances: onChainBalances }
+        );
+
+        v2WithFilterSwapData = await getV2SwapWithFilter(
+            provider,
+            gasPrice,
+            maxNoPools,
+            chainId,
+            JSON.parse(JSON.stringify(allPools)),
+            swapType,
+            tokenIn,
+            tokenOut,
+            swapAmount,
+            { onChainBalances: onChainBalances }
+        );
+
+        displayResults(
+            `${file}.json`,
+            { TokenIn: tokenIn, TokenOut: tokenOut, SwapAmount: swapAmount },
+            [v1SwapData, v2SwapData, v2WithFilterSwapData],
+            false
         );
 
         assert(
-            v2SwapAmt.lte(v1SwapAmt),
-            `ExactOut, V2<V1: \nIn: ${tokenIn} \nOut: ${tokenOut} \nSwap Amt: ${swapAmount.toString()} \n${v1SwapAmt.toString()} \n${v2SwapAmt.toString()}`
-        );
-
-        [
-            v2WithFilterSwaps,
-            v2WithFilterSwapAmt,
-        ] = await getV2SwapWithFilter(
-            provider,
-            gasPrice,
-            maxNoPools,
-            chainId,
-            JSON.parse(JSON.stringify(allPools)),
-            swapType,
-            tokenIn,
-            tokenOut,
-            swapAmount,
-            { display: true, detailed: true, onChainBalances: onChainBalances }
+            v2SwapData.swapAmount.lte(v1SwapData.swapAmount),
+            `ExactOut, V2<V1: \nIn: ${tokenIn} \nOut: ${tokenOut} \nSwap Amt: ${swapAmount.toString()} \n${v1SwapData.swapAmount.toString()} \n${v2SwapData.swapAmount.toString()}`
         );
 
         assert(
-            v2SwapAmt.eq(v2WithFilterSwapAmt),
-            `ExactIn, V2 !== V2 Filter\nIn: ${tokenIn} \nOut: ${tokenOut} \nSwap Amt: ${swapAmount.toString()} \n${v2SwapAmt.toString()} \n${v2WithFilterSwapAmt.toString()}`
+            v2SwapData.swapAmount.eq(v2WithFilterSwapData.swapAmount),
+            `ExactIn, V2 !== V2 Filter\nIn: ${tokenIn} \nOut: ${tokenOut} \nSwap Amt: ${swapAmount.toString()} \n${v2SwapData.swapAmount.toString()} \n${v2WithFilterSwapData.swapAmount.toString()}`
         );
 
         // All tests passed so no need to keep file
