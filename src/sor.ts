@@ -139,10 +139,7 @@ export const smartOrderRouter = (
     let bestTotalReturn: BigNumber = new BigNumber(0);
     let bestTotalReturnConsideringFees: BigNumber = new BigNumber(0);
     let totalReturn, totalReturnConsideringFees;
-    let bestSwapAmounts = [],
-        bestPathIds,
-        bestPaths,
-        swapAmounts;
+    let bestSwapAmounts, bestPathIds, bestPaths, swapAmounts;
 
     // No paths available, return empty solution
     if (paths.length == 0) {
@@ -284,9 +281,9 @@ export const smartOrderRouter = (
                 ) || b === 1; // b === 1 means its the first iteration so bestTotalReturnConsideringFees isn't currently a value
         }
         if (improvementCondition === true) {
-            bestSwapAmounts = swapAmounts;
-            bestPathIds = pathIds;
-            bestPaths = selectedPaths;
+            bestSwapAmounts = [...swapAmounts]; // Copy to avoid linking variables
+            bestPathIds = [...pathIds];
+            bestPaths = [...selectedPaths];
             bestTotalReturn = totalReturn;
             bestTotalReturnConsideringFees = totalReturnConsideringFees;
         } else {
@@ -306,8 +303,8 @@ export const smartOrderRouter = (
     // calculated with the EVM maths so the return is exactly what the user will get
     // after executing the transaction (given there are no front-runners)
     bestPaths.forEach((path, i) => {
-        swapAmounts[i] = swapAmounts[i].integerValue(); // Make sure we truncate the swapAmount
-        let swapAmount = swapAmounts[i];
+        bestSwapAmounts[i] = bestSwapAmounts[i].integerValue(); // Make sure we truncate the swapAmount
+        let swapAmount = bestSwapAmounts[i];
         totalSwapAmountWithRoundingErrors = totalSwapAmountWithRoundingErrors.plus(
             swapAmount
         );
