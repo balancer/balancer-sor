@@ -724,7 +724,11 @@ export function deleteTestFile(
 
 export async function listTestFiles(TestFilesPath: string) {
     const files = await readdir(TestFilesPath);
-    console.log(files);
+    // This is useful output to update test list
+    files.forEach(file => {
+        console.log(`'${file.split('.json')[0]}',`);
+    });
+
     return files;
 }
 
