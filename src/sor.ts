@@ -63,7 +63,7 @@ export function filterPaths(
 ): Path[] {
     // TODO: move this constant to config file
     const maxFilterSwapAmounts = 10;
-    const filterSwapAmountsRatio = 10;
+    const filterSwapAmountsRatio = 100;
     let filteredPaths = [];
     let filteredPathIds = [];
     // Always add the maxPools most liquid paths to the filteredPaths
@@ -108,6 +108,9 @@ export function filterPaths(
             .div(filterSwapAmountsRatio)
             .integerValue();
     }
+    console.log('maxLiquidityAvailable: ' + maxLiquidityAvailable.toString());
+    console.log('#paths before filter: ' + paths.length.toString());
+    console.log('#paths after filter : ' + filteredPaths.length.toString());
     return filteredPaths;
 }
 
@@ -141,8 +144,8 @@ export const smartOrderRouter = (
     let totalReturn, totalReturnConsideringFees;
     let bestSwapAmounts, bestPathIds, bestPaths, swapAmounts;
 
-    // No paths available, return empty solution
-    if (paths.length == 0) {
+    // No paths available or totalSwapAmount == 0, return empty solution
+    if (paths.length == 0 || totalSwapAmount.isZero()) {
         return [[], bnum(0)];
     }
     // Before we start the main loop, we first check if there is enough liquidity for this totalSwapAmount at all
@@ -449,6 +452,7 @@ export const smartOrderRouter = (
                     .toString(); // Add dust to second swapExactOut
         }
     }
+    console.log('Number of paths: ' + bestPaths.length.toString());
     return [swaps, bestTotalReturn];
 };
 
