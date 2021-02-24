@@ -9,6 +9,7 @@ import { hashMessage } from '@ethersproject/hash';
 import * as fs from 'fs';
 import { readdir } from 'fs/promises';
 import { performance } from 'perf_hooks';
+import { assert } from 'chai';
 
 export const Tokens = {
     WETH: {
@@ -615,8 +616,12 @@ function getAmounts(decimals) {
     const max = 10 ** 6;
     const smallAmt = Math.random() * (mid - min) + min;
     const highAmt = Math.random() * (max - mid) + mid;
-    const smallSwapAmt = scale(bnum(smallAmt), decimals);
-    const largeSwapAmt = scale(bnum(highAmt), decimals);
+    let smallSwapAmt = scale(bnum(smallAmt), decimals);
+    let largeSwapAmt = scale(bnum(highAmt), decimals);
+
+    // Gets rid of decimal places that causes issue between V1/V2 compare
+    smallSwapAmt = new BigNumber(smallSwapAmt.toString().split('.')[0]);
+    largeSwapAmt = new BigNumber(largeSwapAmt.toString().split('.')[0]);
 
     return [smallSwapAmt, largeSwapAmt];
 }
@@ -737,7 +742,7 @@ export function loadTestFile(File: string) {
     const fileJson = JSON.parse(fileString);
     fileJson.tradeInfo.GasPrice = new BigNumber(fileJson.tradeInfo.GasPrice);
     fileJson.tradeInfo.SwapAmount = new BigNumber(
-        fileJson.tradeInfo.SwapAmount
+        fileJson.tradeInfo.SwapAmount.split('.')[0] // This is getting rid of decimals that shouldn't be there.
     );
     return fileJson;
 }
@@ -783,4 +788,45 @@ export function displayResults(
     }
 }
 
+export function assertResults(
+    file,
+    testData,
+    v1SwapData,
+    v2SwapData,
+    v2WithFilterSwapData
+) {
+    if (testData.tradeInfo.SwapType === `swapExactIn`) {
+        assert(
+            v2SwapData.swapAmount.gte(v1SwapData.swapAmount),
+            `File: ${file}\nV2<V1\nIn: ${testData.tradeInfo.TokenIn} \nOut: ${
+                testData.tradeInfo.TokenOut
+            } \nSwap Amt: ${testData.tradeInfo.SwapAmount.toString()} \n${v1SwapData.swapAmount.toString()} \n${v2SwapData.swapAmount.toString()}`
+        );
+    } else {
+        if (v2SwapData.swapAmount.eq(0))
+            assert(
+                v1SwapData.swapAmount.eq(0),
+                `File: ${file}, V2 Should Not Have 0 Swap If V1 > 0.`
+            );
+
+        assert(
+            v2SwapData.swapAmount.lte(v1SwapData.swapAmount),
+            `File: ${file}\nV2<V1\nIn: ${testData.tradeInfo.TokenIn} \nOut: ${
+                testData.tradeInfo.TokenOut
+            } \nSwap Amt: ${testData.tradeInfo.SwapAmount.toString()} \n${v1SwapData.swapAmount.toString()} \n${v2SwapData.swapAmount.toString()}`
+        );
+    }
+
+    assert(
+        v2SwapData.swapAmount.eq(v2WithFilterSwapData.swapAmount),
+        `File: ${file}\nV2 !== V2 Filter\nIn: ${
+            testData.tradeInfo.TokenIn
+        } \nOut: ${
+            testData.tradeInfo.TokenOut
+        } \nSwap Amt: ${testData.tradeInfo.SwapAmount.toString()} \n${v2SwapData.swapAmount.toString()} \n${v2WithFilterSwapData.swapAmount.toString()}`
+    );
+}
+
+// Generates file output for v1-v2-compare-testPools.spec.ts
+// ts-node ./test/testHelpers.ts
 // const files = listTestFiles(`${__dirname}/testPools/`);

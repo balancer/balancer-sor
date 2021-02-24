@@ -12,6 +12,7 @@ import {
     saveTestFile,
     deleteTestFile,
     displayResults,
+    assertResults,
 } from './testHelpers';
 
 let tradeData;
@@ -103,21 +104,28 @@ describe('Comparing V1/V2 Using Live Pool Data', async () => {
             { onChainBalances: onChainBalances }
         );
 
+        const testData = {
+            tradeInfo: {
+                SwapType: swapType,
+                TokenIn: tokenIn,
+                TokenOut: tokenOut,
+                SwapAmount: swapAmount,
+            },
+        };
+
         displayResults(
             `${file}.json`,
-            { TokenIn: tokenIn, TokenOut: tokenOut, SwapAmount: swapAmount },
+            testData.tradeInfo,
             [v1SwapData, v2SwapData, v2WithFilterSwapData],
             false
         );
 
-        assert(
-            v2SwapData.swapAmount.gte(v1SwapData.swapAmount),
-            `ExactIn, V2<V1: \nIn: ${tokenIn} \nOut: ${tokenOut} \nSwap Amt: ${swapAmount.toString()} \n${v1SwapData.swapAmount.toString()} \n${v2SwapData.swapAmount.toString()}`
-        );
-
-        assert(
-            v2SwapData.swapAmount.eq(v2WithFilterSwapData.swapAmount),
-            `ExactIn, V2 !== V2 Filter\nIn: ${tokenIn} \nOut: ${tokenOut} \nSwap Amt: ${swapAmount.toString()} \n${v2SwapData.swapAmount.toString()} \n${v2WithFilterSwapData.swapAmount.toString()}`
+        assertResults(
+            file,
+            testData,
+            v1SwapData,
+            v2SwapData,
+            v2WithFilterSwapData
         );
 
         // All tests passed so no need to keep file
@@ -191,21 +199,28 @@ describe('Comparing V1/V2 Using Live Pool Data', async () => {
             { onChainBalances: onChainBalances }
         );
 
+        const testData = {
+            tradeInfo: {
+                SwapType: swapType,
+                TokenIn: tokenIn,
+                TokenOut: tokenOut,
+                SwapAmount: swapAmount,
+            },
+        };
+
         displayResults(
             `${file}.json`,
-            { TokenIn: tokenIn, TokenOut: tokenOut, SwapAmount: swapAmount },
+            testData.tradeInfo,
             [v1SwapData, v2SwapData, v2WithFilterSwapData],
             false
         );
 
-        assert(
-            v2SwapData.swapAmount.gte(v1SwapData.swapAmount),
-            `ExactIn, V2<V1: \nIn: ${tokenIn} \nOut: ${tokenOut} \nSwap Amt: ${swapAmount.toString()} \n${v1SwapData.swapAmount.toString()} \n${v2SwapData.swapAmount.toString()}`
-        );
-
-        assert(
-            v2SwapData.swapAmount.eq(v2WithFilterSwapData.swapAmount),
-            `ExactIn, V2 !== V2 Filter\nIn: ${tokenIn} \nOut: ${tokenOut} \nSwap Amt: ${swapAmount.toString()} \n${v2SwapData.swapAmount.toString()} \n${v2WithFilterSwapData.swapAmount.toString()}`
+        assertResults(
+            file,
+            testData,
+            v1SwapData,
+            v2SwapData,
+            v2WithFilterSwapData
         );
 
         // All tests passed so no need to keep file
@@ -279,21 +294,28 @@ describe('Comparing V1/V2 Using Live Pool Data', async () => {
             { onChainBalances: onChainBalances }
         );
 
+        const testData = {
+            tradeInfo: {
+                SwapType: swapType,
+                TokenIn: tokenIn,
+                TokenOut: tokenOut,
+                SwapAmount: swapAmount,
+            },
+        };
+
         displayResults(
             `${file}.json`,
-            { TokenIn: tokenIn, TokenOut: tokenOut, SwapAmount: swapAmount },
+            testData.tradeInfo,
             [v1SwapData, v2SwapData, v2WithFilterSwapData],
             false
         );
 
-        assert(
-            v2SwapData.swapAmount.lte(v1SwapData.swapAmount),
-            `ExactOut, V2<V1: \nIn: ${tokenIn} \nOut: ${tokenOut} \nSwap Amt: ${swapAmount.toString()} \n${v1SwapData.swapAmount.toString()} \n${v2SwapData.swapAmount.toString()}`
-        );
-
-        assert(
-            v2SwapData.swapAmount.eq(v2WithFilterSwapData.swapAmount),
-            `ExactIn, V2 !== V2 Filter\nIn: ${tokenIn} \nOut: ${tokenOut} \nSwap Amt: ${swapAmount.toString()} \n${v2SwapData.swapAmount.toString()} \n${v2WithFilterSwapData.swapAmount.toString()}`
+        assertResults(
+            file,
+            testData,
+            v1SwapData,
+            v2SwapData,
+            v2WithFilterSwapData
         );
 
         // All tests passed so no need to keep file
@@ -367,21 +389,28 @@ describe('Comparing V1/V2 Using Live Pool Data', async () => {
             { onChainBalances: onChainBalances }
         );
 
+        const testData = {
+            tradeInfo: {
+                SwapType: swapType,
+                TokenIn: tokenIn,
+                TokenOut: tokenOut,
+                SwapAmount: swapAmount,
+            },
+        };
+
         displayResults(
             `${file}.json`,
-            { TokenIn: tokenIn, TokenOut: tokenOut, SwapAmount: swapAmount },
+            testData.tradeInfo,
             [v1SwapData, v2SwapData, v2WithFilterSwapData],
             false
         );
 
-        assert(
-            v2SwapData.swapAmount.lte(v1SwapData.swapAmount),
-            `ExactOut, V2<V1: \nIn: ${tokenIn} \nOut: ${tokenOut} \nSwap Amt: ${swapAmount.toString()} \n${v1SwapData.swapAmount.toString()} \n${v2SwapData.swapAmount.toString()}`
-        );
-
-        assert(
-            v2SwapData.swapAmount.eq(v2WithFilterSwapData.swapAmount),
-            `ExactIn, V2 !== V2 Filter\nIn: ${tokenIn} \nOut: ${tokenOut} \nSwap Amt: ${swapAmount.toString()} \n${v2SwapData.swapAmount.toString()} \n${v2WithFilterSwapData.swapAmount.toString()}`
+        assertResults(
+            file,
+            testData,
+            v1SwapData,
+            v2SwapData,
+            v2WithFilterSwapData
         );
 
         // All tests passed so no need to keep file

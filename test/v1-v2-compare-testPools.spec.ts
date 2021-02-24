@@ -11,6 +11,7 @@ import {
     listTestFiles,
     loadTestFile,
     displayResults,
+    assertResults,
 } from './testHelpers';
 
 const provider = new JsonRpcProvider(
@@ -36,9 +37,12 @@ describe('Run Tests From Saved Pools', () => {
         '0x462bd3a36b8a1fdf64e0d9dcf88d18c1d246b4dfca1704f26f883face2612c18',
         '0x5fd850f563e180d962bc8e243fbfa27a410e9610faff5f1ecbd2ccdf6599f907',
         '0x6b4011c5e4c17293c0db18fb63e334544107b6451d7e74ce9c88b0b1c07b8fda',
+        '0x820b13539ec5117e04380b53c766de9aa604bfb5d751392d3df3d1beff26e30a',
         '0x855d140758a5d0e8839d772ffa8e3afecc522bfbae621cdc91069bfeaaac490c',
         '0x9308920064cab0e15ca98444ec9f91092d24aba03dd383c168f6cc2e45954e0e',
         '0x995a2d20a846226c7680fff641cee4397f81c6e1f0675d69c7d26d05a60b39f3',
+        '0x99cc915640bbb9ef7dd6979062fea2a34eff2b400398a4c00405462840956818',
+        '0xab11cdebd9d96f2f4d9d29f0df62de0640c457882d92435aff2a7c1049a0be6a',
         '0xbdce4f52f4a863e9d137e44475cc913eb82154e9998819ce55846530dbd3025d',
         '0xfab93b6aece1282a829e8bdcdf2a1aee193a10134279a0a16c989ca71644e85b',
     ];
@@ -95,32 +99,12 @@ describe('Run Tests From Saved Pools', () => {
                 false
             );
 
-            if (testData.tradeInfo.SwapType === `swapExactIn`)
-                assert(
-                    v2SwapData.swapAmount.gte(v1SwapData.swapAmount),
-                    `File: ${file}\nV2<V1\nIn: ${
-                        testData.tradeInfo.TokenIn
-                    } \nOut: ${
-                        testData.tradeInfo.TokenOut
-                    } \nSwap Amt: ${testData.tradeInfo.SwapAmount.toString()} \n${v1SwapData.swapAmount.toString()} \n${v2SwapData.swapAmount.toString()}`
-                );
-            else
-                assert(
-                    v2SwapData.swapAmount.lte(v1SwapData.swapAmount),
-                    `File: ${file}\nV2<V1\nIn: ${
-                        testData.tradeInfo.TokenIn
-                    } \nOut: ${
-                        testData.tradeInfo.TokenOut
-                    } \nSwap Amt: ${testData.tradeInfo.SwapAmount.toString()} \n${v1SwapData.swapAmount.toString()} \n${v2SwapData.swapAmount.toString()}`
-                );
-
-            assert(
-                v2SwapData.swapAmount.eq(v2WithFilterSwapData.swapAmount),
-                `File: ${file}\nV2 !== V2 Filter\nIn: ${
-                    testData.tradeInfo.TokenIn
-                } \nOut: ${
-                    testData.tradeInfo.TokenOut
-                } \nSwap Amt: ${testData.tradeInfo.SwapAmount.toString()} \n${v2SwapData.swapAmount.toString()} \n${v2WithFilterSwapData.swapAmount.toString()}`
+            assertResults(
+                file,
+                testData,
+                v1SwapData,
+                v2SwapData,
+                v2WithFilterSwapData
             );
         }).timeout(100000);
     });
