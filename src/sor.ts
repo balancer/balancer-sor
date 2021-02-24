@@ -513,7 +513,7 @@ function getBestPathIds(
                     swapType,
                     swapAmount
                 );
-                if (effectivePrice < bestEffectivePrice) {
+                if (effectivePrice.lt(bestEffectivePrice)) {
                     bestEffectivePrice = effectivePrice;
                     bestPathIndex = j;
                 }
