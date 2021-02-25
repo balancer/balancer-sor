@@ -1,0 +1,451 @@
+{
+    "pools": [
+        {
+            "id": "0x0f9cb53ebe405d49a0bbdbd291a65ff571bc83e1",
+            "swapFee": "0.04",
+            "amp": "52",
+            "tokens": [
+                {
+                    "address": "0x674C6Ad92Fd080e4004b2312b45f796a192D27a0",
+                    "balance": "124431239.18583986813651537",
+                    "decimals": "18",
+                    "denormWeight": "0"
+                },
+                {
+                    "address": "0x6c3F90f043a72FA612cbac8115EE7e52BDe6E490",
+                    "balance": "118700931.733804236587009451",
+                    "decimals": "18",
+                    "denormWeight": "0"
+                }
+            ],
+            "tokensList": [
+                "0x674C6Ad92Fd080e4004b2312b45f796a192D27a0",
+                "0x6c3F90f043a72FA612cbac8115EE7e52BDe6E490"
+            ],
+            "totalWeight": "0"
+        },
+        {
+            "id": "0x3e01dd8a5e1fb3481f0f589056b428fc308af0fb",
+            "swapFee": "0.04",
+            "amp": "200",
+            "tokens": [
+                {
+                    "address": "0x1c48f86ae57291F7686349F12601910BD8D470bb",
+                    "balance": "619988.17526590929263206",
+                    "decimals": "18",
+                    "denormWeight": "0"
+                },
+                {
+                    "address": "0x6c3F90f043a72FA612cbac8115EE7e52BDe6E490",
+                    "balance": "864248.22523637039968063",
+                    "decimals": "18",
+                    "denormWeight": "0"
+                }
+            ],
+            "tokensList": [
+                "0x1c48f86ae57291F7686349F12601910BD8D470bb",
+                "0x6c3F90f043a72FA612cbac8115EE7e52BDe6E490"
+            ],
+            "totalWeight": "0"
+        },
+        {
+            "id": "0x3ef6a01a0f81d6046290f3e2a8c5b843e738e604",
+            "swapFee": "0.04",
+            "amp": "200",
+            "tokens": [
+                {
+                    "address": "0xdF574c24545E5FfEcb9a659c229253D4111d87e1",
+                    "balance": "940492.11175952",
+                    "decimals": "8",
+                    "denormWeight": "0"
+                },
+                {
+                    "address": "0x6c3F90f043a72FA612cbac8115EE7e52BDe6E490",
+                    "balance": "960130.219886386237528684",
+                    "decimals": "18",
+                    "denormWeight": "0"
+                }
+            ],
+            "tokensList": [
+                "0xdF574c24545E5FfEcb9a659c229253D4111d87e1",
+                "0x6c3F90f043a72FA612cbac8115EE7e52BDe6E490"
+            ],
+            "totalWeight": "0"
+        },
+        {
+            "id": "0x45f783cce6b7ff23b2ab2d70e416cdb7d6055f51",
+            "swapFee": "0.04",
+            "amp": "1000",
+            "tokens": [
+                {
+                    "address": "0x16de59092dAE5CcF4A1E6439D611fd0653f0Bd01",
+                    "balance": "20087014186825512938249476",
+                    "decimals": "18",
+                    "denormWeight": "0"
+                },
+                {
+                    "address": "0xd6aD7a6750A7593E092a9B218d66C0A814a3436e",
+                    "balance": "32532953434326",
+                    "decimals": "6",
+                    "denormWeight": "0"
+                },
+                {
+                    "address": "0x83f798e925BcD4017Eb265844FDDAbb448f1707D",
+                    "balance": "34990924297475",
+                    "decimals": "6",
+                    "denormWeight": "0"
+                },
+                {
+                    "address": "0x73a052500105205d34Daf004eAb301916DA8190f",
+                    "balance": "33123442695512088194470814",
+                    "decimals": "18",
+                    "denormWeight": "0"
+                }
+            ],
+            "tokensList": [
+                "0x16de59092dAE5CcF4A1E6439D611fd0653f0Bd01",
+                "0xd6aD7a6750A7593E092a9B218d66C0A814a3436e",
+                "0x83f798e925BcD4017Eb265844FDDAbb448f1707D",
+                "0x73a052500105205d34Daf004eAb301916DA8190f"
+            ],
+            "totalWeight": "0"
+        },
+        {
+            "id": "0x4ca9b3063ec5866a4b82e437059d2c43d1be596f",
+            "swapFee": "0.04",
+            "amp": "300",
+            "tokens": [
+                {
+                    "address": "0x0316EB71485b0Ab14103307bf65a021042c6d380",
+                    "balance": "3079.393698284799103096",
+                    "decimals": "18",
+                    "denormWeight": "0"
+                },
+                {
+                    "address": "0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599",
+                    "balance": "3123.61728565",
+                    "decimals": "8",
+                    "denormWeight": "0"
+                }
+            ],
+            "tokensList": [
+                "0x0316EB71485b0Ab14103307bf65a021042c6d380",
+                "0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599"
+            ],
+            "totalWeight": "0"
+        },
+        {
+            "id": "0x4f062658eaaf2c1ccf8c8e36d6824cdf41167956",
+            "swapFee": "0.04",
+            "amp": "200",
+            "tokens": [
+                {
+                    "address": "0x056Fd409E1d7A124BD7017459dFEa2F387b6d5Cd",
+                    "balance": "103332069.23",
+                    "decimals": "2",
+                    "denormWeight": "0"
+                },
+                {
+                    "address": "0x6c3F90f043a72FA612cbac8115EE7e52BDe6E490",
+                    "balance": "84167744.199084999689943551",
+                    "decimals": "18",
+                    "denormWeight": "0"
+                }
+            ],
+            "tokensList": [
+                "0x056Fd409E1d7A124BD7017459dFEa2F387b6d5Cd",
+                "0x6c3F90f043a72FA612cbac8115EE7e52BDe6E490"
+            ],
+            "totalWeight": "0"
+        },
+        {
+            "id": "0x52ea46506b9cc5ef470c5bf89f17dc28bb35d85c",
+            "swapFee": "0.04",
+            "amp": "2000",
+            "tokens": [
+                {
+                    "address": "0x5d3a536E4D6DbD6114cc1Ead35777bAB948E3643",
+                    "balance": "311952766200624",
+                    "decimals": "8",
+                    "denormWeight": "0"
+                },
+                {
+                    "address": "0x39AA39c021dfbaE8faC545936693aC917d5E7563",
+                    "balance": "761638911886575",
+                    "decimals": "8",
+                    "denormWeight": "0"
+                },
+                {
+                    "address": "0xdAC17F958D2ee523a2206206994597C13D831ec7",
+                    "balance": "298258672294",
+                    "decimals": "6",
+                    "denormWeight": "0"
+                }
+            ],
+            "tokensList": [
+                "0x5d3a536E4D6DbD6114cc1Ead35777bAB948E3643",
+                "0x39AA39c021dfbaE8faC545936693aC917d5E7563",
+                "0xdAC17F958D2ee523a2206206994597C13D831ec7"
+            ],
+            "totalWeight": "0"
+        },
+        {
+            "id": "0x79a8c46dea5ada233abaffd40f3a0a2b1e5a4f27",
+            "swapFee": "0.04",
+            "amp": "500",
+            "tokens": [
+                {
+                    "address": "0xC2cB1040220768554cf699b0d863A3cd4324ce32",
+                    "balance": "27822082200004100632013457",
+                    "decimals": "18",
+                    "denormWeight": "0"
+                },
+                {
+                    "address": "0x26EA744E5B887E5205727f55dFBE8685e3b21951",
+                    "balance": "37739681167044",
+                    "decimals": "6",
+                    "denormWeight": "0"
+                },
+                {
+                    "address": "0xE6354ed5bC4b393a5Aad09f21c46E101e692d447",
+                    "balance": "40498453014758",
+                    "decimals": "6",
+                    "denormWeight": "0"
+                },
+                {
+                    "address": "0x04bC0Ab673d88aE9dbC9DA2380cB6B79C4BCa9aE",
+                    "balance": "38716296498927011997866210",
+                    "decimals": "18",
+                    "denormWeight": "0"
+                }
+            ],
+            "tokensList": [
+                "0xC2cB1040220768554cf699b0d863A3cd4324ce32",
+                "0x26EA744E5B887E5205727f55dFBE8685e3b21951",
+                "0xE6354ed5bC4b393a5Aad09f21c46E101e692d447",
+                "0x04bC0Ab673d88aE9dbC9DA2380cB6B79C4BCa9aE"
+            ],
+            "totalWeight": "0"
+        },
+        {
+            "id": "0x7fc77b5c7614e1533320ea6ddc2eb61fa00a9714",
+            "swapFee": "0.04",
+            "amp": "100",
+            "tokens": [
+                {
+                    "address": "0xEB4C2781e4ebA804CE9a9803C67d0893436bB27D",
+                    "balance": "487548453989",
+                    "decimals": "8",
+                    "denormWeight": "0"
+                },
+                {
+                    "address": "0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599",
+                    "balance": "421988824721",
+                    "decimals": "8",
+                    "denormWeight": "0"
+                },
+                {
+                    "address": "0xfE18be6b3Bd88A2D2A7f928d00292E7a9963CfC6",
+                    "balance": "2601361851791959023346",
+                    "decimals": "18",
+                    "denormWeight": "0"
+                }
+            ],
+            "tokensList": [
+                "0xEB4C2781e4ebA804CE9a9803C67d0893436bB27D",
+                "0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599",
+                "0xfE18be6b3Bd88A2D2A7f928d00292E7a9963CfC6"
+            ],
+            "totalWeight": "0"
+        },
+        {
+            "id": "0x93054188d876f558f4a66b2ef1d97d16edf0895b",
+            "swapFee": "0.04",
+            "amp": "200",
+            "tokens": [
+                {
+                    "address": "0xEB4C2781e4ebA804CE9a9803C67d0893436bB27D",
+                    "balance": "837209120433",
+                    "decimals": "8",
+                    "denormWeight": "0"
+                },
+                {
+                    "address": "0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599",
+                    "balance": "636884032889",
+                    "decimals": "8",
+                    "denormWeight": "0"
+                }
+            ],
+            "tokensList": [
+                "0xEB4C2781e4ebA804CE9a9803C67d0893436bB27D",
+                "0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599"
+            ],
+            "totalWeight": "0"
+        },
+        {
+            "id": "0xa2b47e3d5c44877cca798226b7b8118f9bfb7a56",
+            "swapFee": "0.04",
+            "amp": "450",
+            "tokens": [
+                {
+                    "address": "0x5d3a536E4D6DbD6114cc1Ead35777bAB948E3643",
+                    "balance": "296198534162425865",
+                    "decimals": "8",
+                    "denormWeight": "0"
+                },
+                {
+                    "address": "0x39AA39c021dfbaE8faC545936693aC917d5E7563",
+                    "balance": "383025333884494036",
+                    "decimals": "8",
+                    "denormWeight": "0"
+                }
+            ],
+            "tokensList": [
+                "0x5d3a536E4D6DbD6114cc1Ead35777bAB948E3643",
+                "0x39AA39c021dfbaE8faC545936693aC917d5E7563"
+            ],
+            "totalWeight": "0"
+        },
+        {
+            "id": "0xa5407eae9ba41422680e2e00537571bcc53efbfd",
+            "swapFee": "0.04",
+            "amp": "100",
+            "tokens": [
+                {
+                    "address": "0x6B175474E89094C44Da98b954EedeAC495271d0F",
+                    "balance": "43029683314660768694722493",
+                    "decimals": "18",
+                    "denormWeight": "0"
+                },
+                {
+                    "address": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+                    "balance": "46370806660701",
+                    "decimals": "6",
+                    "denormWeight": "0"
+                },
+                {
+                    "address": "0xdAC17F958D2ee523a2206206994597C13D831ec7",
+                    "balance": "45818552479216",
+                    "decimals": "6",
+                    "denormWeight": "0"
+                },
+                {
+                    "address": "0x57Ab1ec28D129707052df4dF418D58a2D46d5f51",
+                    "balance": "21228905576395508210201235",
+                    "decimals": "18",
+                    "denormWeight": "0"
+                }
+            ],
+            "tokensList": [
+                "0x6B175474E89094C44Da98b954EedeAC495271d0F",
+                "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+                "0xdAC17F958D2ee523a2206206994597C13D831ec7",
+                "0x57Ab1ec28D129707052df4dF418D58a2D46d5f51"
+            ],
+            "totalWeight": "0"
+        },
+        {
+            "id": "0xbebc44782c7db0a1a60cb6fe97d0b483032ff1c7",
+            "swapFee": "0.04",
+            "amp": "577",
+            "tokens": [
+                {
+                    "address": "0x6B175474E89094C44Da98b954EedeAC495271d0F",
+                    "balance": "183868515.942633109400403189",
+                    "decimals": "18",
+                    "denormWeight": "0"
+                },
+                {
+                    "address": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+                    "balance": "261255659.47942",
+                    "decimals": "6",
+                    "denormWeight": "0"
+                },
+                {
+                    "address": "0xdAC17F958D2ee523a2206206994597C13D831ec7",
+                    "balance": "255031297.43044",
+                    "decimals": "6",
+                    "denormWeight": "0"
+                }
+            ],
+            "tokensList": [
+                "0x6B175474E89094C44Da98b954EedeAC495271d0F",
+                "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+                "0xdAC17F958D2ee523a2206206994597C13D831ec7"
+            ],
+            "totalWeight": "0"
+        },
+        {
+            "id": "0xc18cc39da8b11da8c3541c598ee022258f9744da",
+            "swapFee": "0.04",
+            "amp": "200",
+            "tokens": [
+                {
+                    "address": "0x196f4727526eA7FB1e17b2071B3d8eAA38486988",
+                    "balance": "188664.13605931169538985",
+                    "decimals": "18",
+                    "denormWeight": "0"
+                },
+                {
+                    "address": "0x6c3F90f043a72FA612cbac8115EE7e52BDe6E490",
+                    "balance": "232520.573146388096422829",
+                    "decimals": "18",
+                    "denormWeight": "0"
+                }
+            ],
+            "tokensList": [
+                "0x196f4727526eA7FB1e17b2071B3d8eAA38486988",
+                "0x6c3F90f043a72FA612cbac8115EE7e52BDe6E490"
+            ],
+            "totalWeight": "0"
+        },
+        {
+            "id": "0xc25099792e9349c7dd09759744ea681c7de2cb66",
+            "swapFee": "0.04",
+            "amp": "150",
+            "tokens": [
+                {
+                    "address": "0x8dAEBADE922dF735c38C80C7eBD708Af50815fAa",
+                    "balance": "1241.694633805302969938",
+                    "decimals": "18",
+                    "denormWeight": "0"
+                },
+                {
+                    "address": "0x075b1bb99792c9E1041bA13afEf80C91a1e70fB3",
+                    "balance": "3101.887436027221177242",
+                    "decimals": "18",
+                    "denormWeight": "0"
+                }
+            ],
+            "tokensList": [
+                "0x8dAEBADE922dF735c38C80C7eBD708Af50815fAa",
+                "0x075b1bb99792c9E1041bA13afEf80C91a1e70fB3"
+            ],
+            "totalWeight": "0"
+        },
+        {
+            "id": "0xe7a24ef0c5e95ffb0f6684b813a78f2a3ad7d171",
+            "swapFee": "0.04",
+            "amp": "5",
+            "tokens": [
+                {
+                    "address": "0x0E2EC54fC0B509F445631Bf4b91AB8168230C752",
+                    "balance": "22539.335137729931263554",
+                    "decimals": "18",
+                    "denormWeight": "0"
+                },
+                {
+                    "address": "0x6c3F90f043a72FA612cbac8115EE7e52BDe6E490",
+                    "balance": "24911.849484924224056756",
+                    "decimals": "18",
+                    "denormWeight": "0"
+                }
+            ],
+            "tokensList": [
+                "0x0E2EC54fC0B509F445631Bf4b91AB8168230C752",
+                "0x6c3F90f043a72FA612cbac8115EE7e52BDe6E490"
+            ],
+            "totalWeight": "0"
+        }
+    ]
+}
