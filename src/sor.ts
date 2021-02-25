@@ -52,6 +52,8 @@ export function processPaths(
     return [sortedPaths, maxLiquidityAvailable];
 }
 
+// TODO: needs to be refined. Maybe we only do this server side when the amount
+// of pools make SOR v2 slow.
 export function filterPaths(
     pools: PoolDictionary,
     paths: Path[], // Paths must come already sorted by descending limitAmount
@@ -219,8 +221,9 @@ export const smartOrderRouter = (
         // Check if ids are in history of ids, but first sort and stringify to make comparison possible
         // Copy array https://stackoverflow.com/a/42442909
         let sortedPathIdsJSON = JSON.stringify([...pathIds].sort()); // Just to check if this set of paths has already been chosen
-        while (!historyOfSortedPathIds.includes(sortedPathIdsJSON)) {
-            // TODO: not necessary to enter while b = 1 (just with one pool)
+        // We now loop to iterateSwapAmounts until we converge. This is not necessary
+        // for just 1 path because swapAmount will always be totalSwapAmount
+        while (!historyOfSortedPathIds.includes(sortedPathIdsJSON) && b > 1) {
             historyOfSortedPathIds.push(sortedPathIdsJSON); // We store all previous paths ids to avoid infinite loops because of local minima
             selectedPaths = newSelectedPaths;
             [swapAmounts, exceedingAmounts] = iterateSwapAmounts(
@@ -240,6 +243,8 @@ export const smartOrderRouter = (
             ] = getBestPathIds(pools, paths, swapType, swapAmounts);
             sortedPathIdsJSON = JSON.stringify([...pathIds].sort());
         }
+        // In case b = 1 the while above was skipped and we need to define selectedPaths
+        if (b == 1) selectedPaths = newSelectedPaths;
 
         totalReturn = calcTotalReturn(
             pools,

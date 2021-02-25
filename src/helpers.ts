@@ -124,8 +124,8 @@ export function getOutputAmountSwap(
             return bnum(0);
         } else {
             let Ai = amount.toNumber();
-            // return Bo-Bo*(Bi/(Ai+Bi-Ai*f))**(wi/wo)
-            return bnum(Bo - Bo * Math.pow(Bi / (Ai + Bi - Ai * f), wi / wo));
+            // return Bo*(1 - (Bi/(Bi + Ai*(1 - f)))**(wi/wo))
+            return bnum(Bo * (1 - Math.pow(Bi / (Bi + Ai * (1 - f)), wi / wo)));
         }
     } else {
         if (Bo == 0) {
@@ -133,13 +133,10 @@ export function getOutputAmountSwap(
         } else {
             let Ao = amount.toNumber();
             if (Ao >= Bo) return bnum('Infinity');
-            // return -((Bi*(-1+(Bo/(-Ao+Bo))**(wo/wi)))/(-1+f))
+            // return (Bi*(-1 + (Bo/(-Ao + Bo))**(wo/wi)))/(1 - f)
             else
                 return bnum(
-                    -(
-                        (Bi * (-1 + Math.pow(Bo / (-Ao + Bo), wo / wi))) /
-                        (-1 + f)
-                    )
+                    (Bi * (-1 + Math.pow(Bo / (-Ao + Bo), wo / wi))) / (1 - f)
                 );
         }
     }
