@@ -1,6 +1,15 @@
 import { BigNumber } from 'bignumber.js';
 import * as sor from '@balancer-labs/sor';
 import * as sorv2 from '../src';
+import {
+    SubGraphPool,
+    SubGraphPools,
+    SubGraphToken,
+    Pools,
+    Pool,
+    Token,
+} from '../src/types';
+import { SubGraphPools as SubGraphPoolsV1 } from '@balancer-labs/sor/dist/types';
 import { BaseProvider } from '@ethersproject/providers';
 import { bnum, scale } from '../src/bmath';
 import { keccak256 } from '@ethersproject/keccak256';
@@ -54,45 +63,6 @@ export const Tokens = {
     },
 };
 
-export interface SubGraphPools {
-    pools: SubGraphPool[];
-}
-
-export interface SubGraphPool {
-    id: string;
-    swapFee: string;
-    totalWeight: string;
-    publicSwap: string;
-    tokens: SubGraphToken[];
-    tokensList: string[];
-}
-
-export interface SubGraphToken {
-    address: string;
-    balance: string;
-    decimals: string;
-    denormWeight: string;
-}
-
-export interface Pools {
-    pools: Pool[];
-}
-
-export interface Pool {
-    id: string;
-    swapFee: BigNumber;
-    totalWeight: BigNumber;
-    tokens: Token[];
-    tokensList: string[];
-}
-
-export interface Token {
-    address: string;
-    balance: BigNumber;
-    decimals: number;
-    denormWeight: BigNumber;
-}
-
 interface Profiling {
     onChainBalances: boolean;
 }
@@ -119,7 +89,7 @@ export async function getV1Swap(
     GasPrice: BigNumber,
     MaxNoPools: number,
     ChainId: number,
-    AllSubgraphPools: SubGraphPools,
+    AllSubgraphPools: SubGraphPoolsV1,
     SwapType: string,
     TokenIn: string,
     TokenOut: string,
@@ -130,6 +100,11 @@ export async function getV1Swap(
 ) {
     TokenIn = TokenIn.toLowerCase();
     TokenOut = TokenOut.toLowerCase();
+
+    // V1 will always ONLY use Weighted Pools
+    const weightedPools = filterToWeightedPoolsOnly(AllSubgraphPools);
+    if (weightedPools.pools.length === 0)
+        return { title: 'v1', swaps: [], swapAmount: bnum(0), timeData: {} };
 
     const MULTIADDR: { [ChainId: number]: string } = {
         1: '0x514053acec7177e277b947b1ebb5c08ab4c4580e',
@@ -169,7 +144,7 @@ export async function getV1Swap(
         const getAllPoolDataOnChainStart = performance.now();
 
         onChainPools = await sor.getAllPoolDataOnChain(
-            AllSubgraphPools,
+            weightedPools,
             MULTIADDR[ChainId],
             Provider
         );
@@ -180,7 +155,7 @@ export async function getV1Swap(
         // console.log(`Using saved balances`)
         // Helper - Filters for only pools with balance and converts to wei/bnum format.
         onChainPools = formatAndFilterPools(
-            JSON.parse(JSON.stringify(AllSubgraphPools))
+            JSON.parse(JSON.stringify(weightedPools))
         );
         const getAllPoolDataOnChainEnd = performance.now();
     }
@@ -825,6 +800,16 @@ export function assertResults(
             testData.tradeInfo.TokenOut
         } \nSwap Amt: ${testData.tradeInfo.SwapAmount.toString()} \n${v2SwapData.swapAmount.toString()} \n${v2WithFilterSwapData.swapAmount.toString()}`
     );
+}
+
+// Helper to filter pools to contain only Weighted pools
+export function filterToWeightedPoolsOnly(pools: SubGraphPools) {
+    let weightedPools = { pools: [] };
+
+    for (let pool of pools.pools) {
+        if (pool.amp === undefined) weightedPools.pools.push(pool);
+    }
+    return weightedPools;
 }
 
 // Generates file output for v1-v2-compare-testPools.spec.ts
