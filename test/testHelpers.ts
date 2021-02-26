@@ -8,10 +8,11 @@ import {
     Pools,
     Pool,
     Token,
+    PoolPairData,
 } from '../src/types';
 import { SubGraphPools as SubGraphPoolsV1 } from '@balancer-labs/sor/dist/types';
 import { BaseProvider } from '@ethersproject/providers';
-import { bnum, scale } from '../src/bmath';
+import { bnum, scale, BONE, bdiv } from '../src/bmath';
 import { keccak256 } from '@ethersproject/keccak256';
 import { sha256 } from '@ethersproject/sha2';
 import { hashMessage } from '@ethersproject/hash';
@@ -96,7 +97,7 @@ export function formatAndFilterPoolsV2(AllSubgraphPools: SubGraphPools): Pools {
     }
 
     // Formats Subgraph to wei/bnum format
-    sor.formatSubgraphPools(allPoolsNonZeroBalances);
+    // sor.formatSubgraphPools(allPoolsNonZeroBalances);
 
     return allPoolsNonZeroBalances;
 }
@@ -817,6 +818,16 @@ export function assertResults(
             testData.tradeInfo.TokenOut
         } \nSwap Amt: ${testData.tradeInfo.SwapAmount.toString()} \n${v2SwapData.swapAmount.toString()} \n${v2WithFilterSwapData.swapAmount.toString()}`
     );
+}
+
+export function getSpotPrice(poolPairData: PoolPairData): BigNumber {
+    let inRatio = bdiv(poolPairData.balanceIn, poolPairData.weightIn);
+    let outRatio = bdiv(poolPairData.balanceOut, poolPairData.weightOut);
+    if (outRatio.isEqualTo(bnum(0))) {
+        return bnum(0);
+    } else {
+        return bdiv(bdiv(inRatio, outRatio), BONE.minus(poolPairData.swapFee));
+    }
 }
 
 // Helper to filter pools to contain only Weighted pools
