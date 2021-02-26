@@ -4,13 +4,19 @@ import { BigNumber } from './utils/bignumber';
 // TODO: rename balanceIn -> Bi to easily use maths from python
 export interface PoolPairData {
     id: string;
+    poolType?: string; // Todo: make this a mandatory field
     tokenIn: string;
     tokenOut: string;
     balanceIn: BigNumber;
     balanceOut: BigNumber;
-    weightIn: BigNumber;
-    weightOut: BigNumber;
+    weightIn?: BigNumber; // Weights are only defined for weighted pools
+    weightOut?: BigNumber; // Weights are only defined for weighted pools
     swapFee: BigNumber;
+    n: BigNumber; // Only for stable pools
+    invariant?: BigNumber; // Only for stable pools
+    sum?: BigNumber; // Only for stable pools
+    prod?: BigNumber; // Only for stable pools
+    amp?: BigNumber; // Only for stable pools
 }
 
 export interface Path {
@@ -55,7 +61,8 @@ export interface Pools {
 export interface Pool {
     id: string;
     swapFee: BigNumber;
-    totalWeight: BigNumber;
+    amp?: BigNumber;
+    totalWeight?: BigNumber;
     tokens: Token[];
     tokensList: string[];
 }
@@ -74,6 +81,7 @@ export interface SubGraphPools {
 export interface SubGraphPool {
     id: string;
     swapFee: string;
+    amp?: BigNumber;
     totalWeight: string;
     publicSwap: string;
     tokens: SubGraphToken[];
@@ -84,7 +92,7 @@ export interface SubGraphToken {
     address: string;
     balance: string;
     decimals: string;
-    denormWeight: string;
+    denormWeight?: string;
 }
 
 export interface PoolDictionary {

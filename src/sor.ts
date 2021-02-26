@@ -318,7 +318,7 @@ export const smartOrderRouter = (
         );
 
         // // TODO: remove. To debug only!
-        /*
+
         console.log(
             'Prices should be all very close (unless one of the paths is on the limit!'
         );
@@ -330,7 +330,7 @@ export const smartOrderRouter = (
                 swapAmount
             ).toNumber()
         );
-        */
+
         let poolPairData = path.poolPairData;
 
         if (i == 0)
