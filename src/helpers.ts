@@ -1151,3 +1151,18 @@ export function sortPoolsMostLiquid(
 
     return [mostLiquidPoolsFirstHop, mostLiquidPoolsSecondHop];
 }
+
+export function normalizePools(pools) {
+    let normalizedPools = { pools: [] };
+
+    for (let i = 0; i < pools.length; i++) {
+        let normalizedPool = pools[i];
+        normalizedPool.tokens.forEach(token => {
+            token.balance = scale(token.balance, token.decimal);
+        });
+
+        normalizedPools.pools.push(normalizedPool);
+    }
+
+    return normalizedPools;
+}

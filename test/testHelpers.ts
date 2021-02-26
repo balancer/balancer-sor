@@ -84,6 +84,23 @@ export function formatAndFilterPools(AllSubgraphPools: SubGraphPools): Pools {
     return allPoolsNonZeroBalances;
 }
 
+// Filters for only pools with balance > 0 and converts to wei/bnum format.
+export function formatAndFilterPoolsV2(AllSubgraphPools: SubGraphPools): Pools {
+    let allPoolsNonZeroBalances: any = { pools: [] };
+
+    for (let pool of AllSubgraphPools.pools) {
+        // Only check first balance since AFAIK either all balances are zero or none are:
+        if (pool.tokens.length != 0)
+            if (pool.tokens[0].balance != '0')
+                allPoolsNonZeroBalances.pools.push(pool);
+    }
+
+    // Formats Subgraph to wei/bnum format
+    sor.formatSubgraphPools(allPoolsNonZeroBalances);
+
+    return allPoolsNonZeroBalances;
+}
+
 export async function getV1Swap(
     Provider: BaseProvider,
     GasPrice: BigNumber,
@@ -332,7 +349,7 @@ export async function getV2Swap(
         const getAllPoolDataOnChainStart = performance.now();
         // console.log(`Using saved balances`)
         // Helper - Filters for only pools with balance and converts to wei/bnum format.
-        onChainPools = formatAndFilterPools(
+        onChainPools = formatAndFilterPoolsV2(
             JSON.parse(JSON.stringify(AllSubgraphPools))
         );
         const getAllPoolDataOnChainEnd = performance.now();
@@ -484,7 +501,7 @@ export async function getV2SwapWithFilter(
         const getAllPoolDataOnChainStart = performance.now();
         // console.log(`Using saved balances`)
         // Helper - Filters for only pools with balance and converts to wei/bnum format.
-        onChainPools = formatAndFilterPools(
+        onChainPools = formatAndFilterPoolsV2(
             JSON.parse(JSON.stringify(AllSubgraphPools))
         );
         const getAllPoolDataOnChainEnd = performance.now();
