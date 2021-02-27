@@ -248,26 +248,36 @@ export function getSpotPriceAfterSwap(
     amount: BigNumber
 ): BigNumber {
     let poolType = poolPairData.poolType;
-    let Bi = poolPairData.balanceIn.toNumber();
-    let Bo = poolPairData.balanceOut.toNumber();
-    let f = poolPairData.swapFee.div(bnum(1000000000000000000)).toNumber();
-    let wi, wo, A, S, P, DD, n; // Variables as used in wolfram
+    let Bi = poolPairData.balanceIn;
+    let Bo = poolPairData.balanceOut;
+    let f = poolPairData.swapFee.div(bnum(1000000000000000000));
+    let wi, wo, amp, allBalances, tokenIndexIn, tokenIndexOut;
     if (poolType == 'Weighted') {
-        wi = poolPairData.weightIn.toNumber();
-        wo = poolPairData.weightOut.toNumber();
+        wi = poolPairData.weightIn;
+        wo = poolPairData.weightOut;
     } else {
-        A = poolPairData.amp.toNumber();
-        DD = poolPairData.invariant.toNumber();
+        amp = poolPairData.amp;
+        allBalances = poolPairData.allBalances;
+        tokenIndexIn = poolPairData.tokenIndexIn;
+        tokenIndexOut = poolPairData.tokenIndexOut;
     }
 
     // TODO: check if necessary to check if amount > limitAmount
     if (swapType === 'swapExactIn') {
-        if (Bi == 0) {
+        if (Bi.isZero()) {
             return bnum(0);
         } else {
-            let Ai = amount.toNumber();
             if (poolType == 'Weighted') {
                 // return -((Bi*wo)/(Bo*(-1+f)*(Bi/(Ai+Bi-Ai*f))**((wi+wo)/wo)*wi))
+                // TODO: decide if we need to convert the formula below to BigNumber
+                let Bi = poolPairData.balanceIn.toNumber();
+                let Bo = poolPairData.balanceOut.toNumber();
+                let wi = poolPairData.weightIn.toNumber();
+                let wo = poolPairData.weightOut.toNumber();
+                let Ai = amount.toNumber();
+                let f = poolPairData.swapFee
+                    .div(bnum(1000000000000000000))
+                    .toNumber();
                 return bnum(
                     -(
                         (Bi * wo) /
@@ -278,36 +288,31 @@ export function getSpotPriceAfterSwap(
                     )
                 );
             } else if (poolType == 'Stable') {
-                // return -2/(-1 + (1.*((DD*(n**n - (2*Bi*Bo*DD**n)/((Ai + Bi)**2*P)))/n**(2*n) +
-                //             A*(Ai - Bo - DD + S)))/
-                //         ((4*A*Bi*Bo*DD**(1 + n))/((Ai + Bi)*n**(2*n)*P) +
-                //             (DD/n**n + A*(Ai - Bo - DD + S))**2)**0.5)
-                // return bnum(
-                //     -2 /
-                //         (-1 +
-                //             (1 *
-                //                 ((DD *
-                //                     (n ** n -
-                //                         (2 * Bi * Bo * DD ** n) /
-                //                             ((Ai + Bi) ** 2 * P))) /
-                //                     n ** (2 * n) +
-                //                     A * (Ai - Bo - DD + S))) /
-                //                 ((4 * A * Bi * Bo * DD ** (1 + n)) /
-                //                     ((Ai + Bi) * n ** (2 * n) * P) +
-                //                     (DD / n ** n + A * (Ai - Bo - DD + S)) **
-                //                         2) **
-                //                     0.5)
-                // );
-                return bnum(1);
+                return stableMath_sol._spotPriceAfterSwapOutGivenIn(
+                    amp,
+                    allBalances,
+                    tokenIndexIn,
+                    tokenIndexOut,
+                    amount
+                );
             }
         }
     } else {
-        if (Bo == 0) {
+        if (Bo.isZero()) {
             return bnum(0);
         } else {
-            let Ao = amount.toNumber();
-            if (Ao >= Bo) return bnum('Infinity');
+            let Ao = amount;
+            if (Ao.gte(Bo)) return bnum('Infinity');
             if (poolType == 'Weighted') {
+                // TODO: decide if we need to convert the formula below to BigNumber
+                let Bi = poolPairData.balanceIn.toNumber();
+                let Bo = poolPairData.balanceOut.toNumber();
+                let wi = poolPairData.weightIn.toNumber();
+                let wo = poolPairData.weightOut.toNumber();
+                let Ao = amount.toNumber();
+                let f = poolPairData.swapFee
+                    .div(bnum(1000000000000000000))
+                    .toNumber();
                 // return -((Bi*(Bo/(-Ao+Bo))**((wi+wo)/wi)*wo)/(Bo*(-1+f)*wi))
                 return bnum(
                     -(
@@ -316,26 +321,13 @@ export function getSpotPriceAfterSwap(
                     )
                 );
             } else if (poolType == 'Stable') {
-                // return 0.5 + (0.5*((DD*(-(n**n) + (2*Bi*Bo*DD**n)/((Ao - Bo)**2*P)))/n**(2*n) +
-                //             A*(Ao + Bi + DD - S)))/
-                //         ((4*A*Bi*Bo*DD**(1 + n))/((-Ao + Bo)*n**(2*n)*P) +
-                //         (DD/n**n - A*(Ao + Bi + DD - S))**2)**0.5
-                // return bnum(
-                //     0.5 +
-                //         (0.5 *
-                //             ((DD *
-                //                 (-(n ** n) +
-                //                     (2 * Bi * Bo * DD ** n) /
-                //                         ((Ao - Bo) ** 2 * P))) /
-                //                 n ** (2 * n) +
-                //                 A * (Ao + Bi + DD - S))) /
-                //             ((4 * A * Bi * Bo * DD ** (1 + n)) /
-                //                 ((-Ao + Bo) * n ** (2 * n) * P) +
-                //                 (DD / n ** n - A * (Ao + Bi + DD - S)) ** 2) **
-                //                 0.5
-                // );
-
-                return bnum(1);
+                return stableMath_sol._spotPriceAfterSwapInGivenOut(
+                    amp,
+                    allBalances,
+                    tokenIndexIn,
+                    tokenIndexOut,
+                    amount
+                );
             }
         }
     }
@@ -398,81 +390,67 @@ export function getDerivativeSpotPriceAfterSwap(
     amount: BigNumber
 ): BigNumber {
     let poolType = poolPairData.poolType;
-    let Bi = poolPairData.balanceIn.toNumber();
-    let Bo = poolPairData.balanceOut.toNumber();
-    let f = poolPairData.swapFee.div(bnum(1000000000000000000)).toNumber();
-    let wi, wo, A, S, P, DD, n; // Variables as used in wolfram
+    let Bi = poolPairData.balanceIn;
+    let Bo = poolPairData.balanceOut;
+    let f = poolPairData.swapFee.div(bnum(1000000000000000000));
+    let wi, wo, amp, allBalances, tokenIndexIn, tokenIndexOut;
     if (poolType == 'Weighted') {
-        wi = poolPairData.weightIn.toNumber();
-        wo = poolPairData.weightOut.toNumber();
+        wi = poolPairData.weightIn;
+        wo = poolPairData.weightOut;
     } else {
-        A = poolPairData.amp.toNumber();
-        DD = poolPairData.invariant.toNumber();
+        amp = poolPairData.amp;
+        allBalances = poolPairData.allBalances;
+        tokenIndexIn = poolPairData.tokenIndexIn;
+        tokenIndexOut = poolPairData.tokenIndexOut;
     }
 
     // TODO: check if necessary to check if amount > limitAmount
     if (swapType === 'swapExactIn') {
-        if (Bi == 0) {
+        if (Bi.isZero()) {
             return bnum(0);
         } else {
-            let Ai = amount.toNumber();
+            let Ai = amount;
             if (poolType == 'Weighted') {
+                // TODO: decide if we need to convert the formula below to BigNumber
+                let Bi = poolPairData.balanceIn.toNumber();
+                let Bo = poolPairData.balanceOut.toNumber();
+                let wi = poolPairData.weightIn.toNumber();
+                let wo = poolPairData.weightOut.toNumber();
+                let Ai = amount.toNumber();
+                let f = poolPairData.swapFee
+                    .div(bnum(1000000000000000000))
+                    .toNumber();
                 // return (wi+wo)/(Bo*(Bi/(Ai+Bi-Ai*f))**(wi/wo)*wi)
                 return bnum(
                     (wi + wo) /
                         (Bo * (Bi / (Ai + Bi - Ai * f)) ** (wi / wo) * wi)
                 );
             } else if (poolType == 'Stable') {
-                // return bnum(
-                //     (2 *
-                //         ((-1 *
-                //             A *
-                //             ((DD *
-                //                 (n ** n -
-                //                     (2 * Bi * Bo * DD ** n) /
-                //                         ((Ai + Bi) ** 2 * P))) /
-                //                 n ** (2 * n) +
-                //                 A * (Ai - Bo - DD + S)) **
-                //                 2) /
-                //             ((4 * A * Bi * Bo * DD ** (1 + n)) /
-                //                 ((Ai + Bi) * n ** (2 * n) * P) +
-                //                 (DD / n ** n + A * (Ai - Bo - DD + S)) ** 2) **
-                //                 1.5 +
-                //             (1 *
-                //                 (A +
-                //                     (4 * Bi * Bo * DD ** (1 + n)) /
-                //                         ((Ai + Bi) ** 3 * n ** (2 * n) * P))) /
-                //                 ((4 * A * Bi * Bo * DD ** (1 + n)) /
-                //                     ((Ai + Bi) * n ** (2 * n) * P) +
-                //                     (DD / n ** n + A * (Ai - Bo - DD + S)) **
-                //                         2) **
-                //                     0.5)) /
-                //         (1 -
-                //             (1 *
-                //                 ((DD *
-                //                     (n ** n -
-                //                         (2 * Bi * Bo * DD ** n) /
-                //                             ((Ai + Bi) ** 2 * P))) /
-                //                     n ** (2 * n) +
-                //                     A * (Ai - Bo - DD + S))) /
-                //                 ((4 * A * Bi * Bo * DD ** (1 + n)) /
-                //                     ((Ai + Bi) * n ** (2 * n) * P) +
-                //                     (DD / n ** n + A * (Ai - Bo - DD + S)) **
-                //                         2) **
-                //                     0.5) **
-                //             2
-                // );
-
-                return bnum(1);
+                return stableMath_sol._derivativeSpotPriceAfterSwapOutGivenIn(
+                    amp,
+                    allBalances,
+                    tokenIndexIn,
+                    tokenIndexOut,
+                    amount
+                );
             }
         }
     } else {
-        if (Bo == 0) {
+        if (Bo.isZero()) {
             return bnum(0);
         } else {
-            let Ao = amount.toNumber();
-            if (Ao >= Bo) return bnum('Infinity');
+            let Ao = amount;
+            if (Ao.gte(Bo)) return bnum('Infinity');
             if (poolType == 'Weighted') {
+                // TODO: decide if we need to convert the formula below to BigNumber
+                let Bi = poolPairData.balanceIn.toNumber();
+                let Bo = poolPairData.balanceOut.toNumber();
+                let wi = poolPairData.weightIn.toNumber();
+                let wo = poolPairData.weightOut.toNumber();
+                let Ao = amount.toNumber();
+                let f = poolPairData.swapFee
+                    .div(bnum(1000000000000000000))
+                    .toNumber();
                 // return -((Bi*(Bo/(-Ao + Bo))**(wo/wi)*wo*(wi + wo))/((Ao - Bo)**2*(-1 + f)*wi**2))
                 return bnum(
                     -(
@@ -481,30 +459,13 @@ export function getDerivativeSpotPriceAfterSwap(
                     )
                 );
             } else if (poolType == 'Stable') {
-                // return bnum(
-                //     (0.5 *
-                //         (A +
-                //             (4 * Bi * Bo * DD ** (1 + n)) /
-                //                 ((-Ao + Bo) ** 3 * n ** (2 * n) * P))) /
-                //         ((4 * A * Bi * Bo * DD ** (1 + n)) /
-                //             ((-Ao + Bo) * n ** (2 * n) * P) +
-                //             (DD / n ** n - A * (Ao + Bi + DD - S)) ** 2) **
-                //             0.5 -
-                //         (0.5 *
-                //             A *
-                //             ((DD *
-                //                 (-(n ** n) +
-                //                     (2 * Bi * Bo * DD ** n) /
-                //                         ((Ao - Bo) ** 2 * P))) /
-                //                 n ** (2 * n) +
-                //                 A * (Ao + Bi + DD - S)) **
-                //                 2) /
-                //             ((4 * A * Bi * Bo * DD ** (1 + n)) /
-                //                 ((-Ao + Bo) * n ** (2 * n) * P) +
-                //                 (DD / n ** n - A * (Ao + Bi + DD - S)) ** 2) **
-                //                 1.5
-                // );
-                return bnum(1);
+                return stableMath_sol._derivativeSpotPriceAfterSwapInGivenOut(
+                    amp,
+                    allBalances,
+                    tokenIndexIn,
+                    tokenIndexOut,
+                    amount
+                );
             }
         }
     }
