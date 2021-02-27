@@ -529,7 +529,7 @@ function getBestPathIds(
         selectedPaths.push(paths[bestPathIndex]);
         selectedPathLimitAmounts.push(paths[bestPathIndex].limitAmount);
         selectedPathExceedingAmounts.push(
-            swapAmounts[i].minus(paths[bestPathIndex].limitAmount)
+            swapAmount.minus(paths[bestPathIndex].limitAmount)
         );
         paths.splice(bestPathIndex, 1); // Remove path from list
     });

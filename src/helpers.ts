@@ -128,7 +128,7 @@ export function getOutputAmountSwap(
                         bnum(
                             Bi.div(
                                 Bi.plus(Ai.times(bnum(1).minus(f)))
-                            ).toNumber() ** wi.div(wo).toNumber
+                            ).toNumber() ** wi.div(wo).toNumber()
                         )
                     )
                 );
@@ -669,16 +669,12 @@ export const parsePoolPairData = (
         }
 
         let inv = stableMath_sol._invariant(bnum(p.amp), allBalances);
-        let invVF = stableMath_sol._invariantValueFunction(
-            bnum(p.amp),
-            allBalances,
-            inv
-        );
-        let invVF2 = stableMath_sol._invariantValueFunction(
-            bnum(p.amp),
-            allBalances,
-            bnum(698966156.1055329178187)
-        );
+        // Just to debug we confirm that the invariant value function is extremely close to zero as it should:
+        // let invVF = stableMath_sol._invariantValueFunction(
+        //     bnum(p.amp),
+        //     allBalances,
+        //     inv
+        // );
 
         poolPairData = {
             id: p.id,
