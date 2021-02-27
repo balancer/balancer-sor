@@ -252,8 +252,8 @@ export async function getV1Swap(
 
     // Returns 'swaps' which is the optimal list of swaps to make and
     // 'swapAmount' which is the total amount of TokenOut (eg. DAI) will be returned
-    let swaps, swapAmount;
-    [swaps, swapAmount] = sor.smartOrderRouterMultiHopEpsOfInterest(
+    let swaps, returnAmount;
+    [swaps, returnAmount] = sor.smartOrderRouterMultiHopEpsOfInterest(
         pools,
         paths,
         SwapType,
@@ -282,7 +282,7 @@ export async function getV1Swap(
             smartOrderRouterMultiHopEpsOfInterestStart,
     };
 
-    return { title: 'v1', swaps, swapAmount, timeData };
+    return { title: 'v1', swaps, returnAmount, timeData };
 }
 
 export async function getV2Swap(
@@ -409,8 +409,8 @@ export async function getV2Swap(
     const processPathsEnd = performance.now();
     const sorStart = performance.now();
 
-    let swaps: any, swapAmount: BigNumber;
-    [swaps, swapAmount] = sorv2.smartOrderRouter(
+    let swaps: any, returnAmount: BigNumber;
+    [swaps, returnAmount] = sorv2.smartOrderRouter(
         JSON.parse(JSON.stringify(pools)),
         paths,
         SwapType,
@@ -435,7 +435,7 @@ export async function getV2Swap(
         sor: sorEnd - sorStart,
     };
 
-    return { title: 'v2', swaps, swapAmount, timeData };
+    return { title: 'v2', swaps, returnAmount, timeData };
 }
 
 export async function getV2SwapWithFilter(
@@ -574,8 +574,8 @@ export async function getV2SwapWithFilter(
     const filterEnd = performance.now();
     const sorStart = performance.now();
 
-    let swaps: any, swapAmount: BigNumber;
-    [swaps, swapAmount] = sorv2.smartOrderRouter(
+    let swaps: any, returnAmount: BigNumber;
+    [swaps, returnAmount] = sorv2.smartOrderRouter(
         JSON.parse(JSON.stringify(pools)),
         filteredPaths,
         SwapType,
@@ -600,7 +600,7 @@ export async function getV2SwapWithFilter(
         sor: sorEnd - sorStart,
     };
 
-    return { title: 'v2WithFilter', swaps, swapAmount, timeData };
+    return { title: 'v2WithFilter', swaps, returnAmount, timeData };
 }
 
 function getAmounts(decimals) {
@@ -767,7 +767,7 @@ export function displayResults(
         tableData.push({
             SOR: result.title,
             'Full SOR Time': result.timeData.fullSwap,
-            'Return Amt': result.swapAmount.toString(),
+            'Return Amt': result.returnAmount.toString(),
         });
     });
 
@@ -790,33 +790,33 @@ export function assertResults(
 ) {
     if (testData.tradeInfo.SwapType === `swapExactIn`) {
         assert(
-            v2SwapData.swapAmount.gte(v1SwapData.swapAmount),
+            v2SwapData.returnAmount.gte(v1SwapData.returnAmount),
             `File: ${file}\nV2<V1\nIn: ${testData.tradeInfo.TokenIn} \nOut: ${
                 testData.tradeInfo.TokenOut
-            } \nSwap Amt: ${testData.tradeInfo.SwapAmount.toString()} \n${v1SwapData.swapAmount.toString()} \n${v2SwapData.swapAmount.toString()}`
+            } \nSwap Amt: ${testData.tradeInfo.SwapAmount.toString()} \n${v1SwapData.returnAmount.toString()} \n${v2SwapData.returnAmount.toString()}`
         );
     } else {
-        if (v2SwapData.swapAmount.eq(0))
+        if (v2SwapData.returnAmount.eq(0))
             assert(
-                v1SwapData.swapAmount.eq(0),
+                v1SwapData.returnAmount.eq(0),
                 `File: ${file}, V2 Should Not Have 0 Swap If V1 > 0.`
             );
 
         assert(
-            v2SwapData.swapAmount.lte(v1SwapData.swapAmount),
+            v2SwapData.returnAmount.lte(v1SwapData.returnAmount),
             `File: ${file}\nV2<V1\nIn: ${testData.tradeInfo.TokenIn} \nOut: ${
                 testData.tradeInfo.TokenOut
-            } \nSwap Amt: ${testData.tradeInfo.SwapAmount.toString()} \n${v1SwapData.swapAmount.toString()} \n${v2SwapData.swapAmount.toString()}`
+            } \nSwap Amt: ${testData.tradeInfo.SwapAmount.toString()} \n${v1SwapData.returnAmount.toString()} \n${v2SwapData.returnAmount.toString()}`
         );
     }
 
     assert(
-        v2SwapData.swapAmount.eq(v2WithFilterSwapData.swapAmount),
+        v2SwapData.returnAmount.eq(v2WithFilterSwapData.returnAmount),
         `File: ${file}\nV2 !== V2 Filter\nIn: ${
             testData.tradeInfo.TokenIn
         } \nOut: ${
             testData.tradeInfo.TokenOut
-        } \nSwap Amt: ${testData.tradeInfo.SwapAmount.toString()} \n${v2SwapData.swapAmount.toString()} \n${v2WithFilterSwapData.swapAmount.toString()}`
+        } \nSwap Amt: ${testData.tradeInfo.SwapAmount.toString()} \n${v2SwapData.returnAmount.toString()} \n${v2WithFilterSwapData.returnAmount.toString()}`
     );
 }
 

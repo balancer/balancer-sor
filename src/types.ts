@@ -12,11 +12,11 @@ export interface PoolPairData {
     weightIn?: BigNumber; // Weights are only defined for weighted pools
     weightOut?: BigNumber; // Weights are only defined for weighted pools
     swapFee: BigNumber;
-    n: BigNumber; // Only for stable pools
+    allBalances: BigNumber[]; // Only for stable pools
     invariant?: BigNumber; // Only for stable pools
-    sum?: BigNumber; // Only for stable pools
-    prod?: BigNumber; // Only for stable pools
     amp?: BigNumber; // Only for stable pools
+    tokenIndexIn?: number; // Only for stable pools
+    tokenIndexOut?: number; // Only for stable pools
 }
 
 export interface Path {

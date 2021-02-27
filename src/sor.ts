@@ -106,9 +106,7 @@ export function filterPaths(
                 filteredPaths.push(sortedPaths[j]);
             }
         }
-        filterSwapAmount = filterSwapAmount
-            .div(filterSwapAmountsRatio)
-            .integerValue();
+        filterSwapAmount = filterSwapAmount.div(filterSwapAmountsRatio);
     }
     console.log('maxLiquidityAvailable: ' + maxLiquidityAvailable.toString());
     console.log('#paths before filter: ' + paths.length.toString());
@@ -311,7 +309,6 @@ export const smartOrderRouter = (
     // calculated with the EVM maths so the return is exactly what the user will get
     // after executing the transaction (given there are no front-runners)
     bestPaths.forEach((path, i) => {
-        bestSwapAmounts[i] = bestSwapAmounts[i].integerValue(); // Make sure we truncate the swapAmount
         let swapAmount = bestSwapAmounts[i];
         totalSwapAmountWithRoundingErrors = totalSwapAmountWithRoundingErrors.plus(
             swapAmount

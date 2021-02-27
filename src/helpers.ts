@@ -19,6 +19,7 @@ import {
     calcInGivenOut,
     scale,
 } from './bmath';
+import * as stableMath_sol from './stableMath_sol';
 import disabledTokensDefault from './disabled-tokens.json';
 
 export function getLimitAmountSwap(
@@ -100,66 +101,68 @@ export function getOutputAmountSwap(
     amount: BigNumber
 ): BigNumber {
     let poolType = poolPairData.poolType;
-    let Bi = poolPairData.balanceIn.toNumber();
-    let Bo = poolPairData.balanceOut.toNumber();
-    let f = poolPairData.swapFee.div(bnum(1000000000000000000)).toNumber();
-    let wi, wo, A, S, P, DD, n; // Variables as used in wolfram
+    let Bi = poolPairData.balanceIn;
+    let Bo = poolPairData.balanceOut;
+    let f = poolPairData.swapFee.div(bnum(1000000000000000000));
+    let wi, wo, amp, allBalances, tokenIndexIn, tokenIndexOut;
     if (poolType == 'Weighted') {
-        wi = poolPairData.weightIn.toNumber();
-        wo = poolPairData.weightOut.toNumber();
+        wi = poolPairData.weightIn;
+        wo = poolPairData.weightOut;
     } else {
-        A = poolPairData.amp.toNumber();
-        S = poolPairData.sum.toNumber();
-        P = poolPairData.prod.toNumber();
-        DD = poolPairData.invariant.toNumber();
-        n = poolPairData.n.toNumber();
+        amp = poolPairData.amp;
+        allBalances = poolPairData.allBalances;
+        tokenIndexIn = poolPairData.tokenIndexIn;
+        tokenIndexOut = poolPairData.tokenIndexOut;
     }
 
     // TODO: check if necessary to check if amount > limitAmount
     if (swapType === 'swapExactIn') {
-        if (Bi == 0) {
+        if (Bi.toNumber() == 0) {
             return bnum(0);
         } else {
-            let Ai = amount.toNumber();
+            let Ai = amount;
             if (poolType == 'Weighted') {
-                // return Bo*(1 - (Bi/(Bi + Ai*(1 - f)))**(wi/wo))
-                return bnum(Bo * (1 - (Bi / (Bi + Ai * (1 - f))) ** (wi / wo)));
+                // Bo * (1 - (Bi / (Bi + Ai * (1 - f))) ** (wi / wo));
+                return Bo.times(
+                    bnum(1).minus(
+                        bnum(
+                            Bi.div(
+                                Bi.plus(Ai.times(bnum(1).minus(f)))
+                            ).toNumber() ** wi.div(wo).toNumber
+                        )
+                    )
+                );
             } else if (poolType == 'Stable') {
-                // return Bo-(DD*(A-n**(-n))-A*(Ai-Bo+S)+((4*A*Bi*Bo*DD**(1+n))/((Ai+Bi)*n**(2*n)*P)+(DD/n**n+A*(Ai-Bo-DD+S))**2)**0.5)/(2.*A)
-                return bnum(
-                    Bo -
-                        (DD * (A - n ** -n) -
-                            A * (Ai - Bo + S) +
-                            ((4 * A * Bi * Bo * DD ** (1 + n)) /
-                                ((Ai + Bi) * n ** (2 * n) * P) +
-                                (DD / n ** n + A * (Ai - Bo - DD + S)) ** 2) **
-                                0.5) /
-                            (2 * A)
+                return stableMath_sol._outGivenIn(
+                    amp,
+                    allBalances,
+                    tokenIndexIn,
+                    tokenIndexOut,
+                    amount
                 );
             }
         }
     } else {
-        if (Bo == 0) {
+        if (Bo.isZero()) {
             return bnum(0);
         } else {
-            let Ao = amount.toNumber();
-            if (Ao >= Bo) return bnum('Infinity');
+            let Ao = amount;
+            if (Ao.gte(Bo)) return bnum('Infinity');
             if (poolType == 'Weighted') {
                 // return (Bi*(-1 + (Bo/(-Ao + Bo))**(wo/wi)))/(1 - f)
-                return bnum(
-                    (Bi * (-1 + (Bo / (-Ao + Bo)) ** (wo / wi))) / (1 - f)
-                );
+                return Bi.times(
+                    bnum(-1).plus(
+                        Bo.div(-Ao.plus(Bo)).toNumber() ** wo.div(wi).toNumber()
+                    )
+                ).div(bnum(1).minus(f));
             } else if (poolType == 'Stable') {
                 // return -Bi+(DD*(A-n**(-n))+((4*A*Bi*Bo*DD**(1+n))/((-Ao+Bo)*n**(2*n)*P)+(DD/n**n-A*(Ao+Bi+DD-S))**2)**0.5+A*(Ao+Bi-S))/(2.*A)
-                return bnum(
-                    -Bi +
-                        (DD * (A - n ** -n) +
-                            ((4 * A * Bi * Bo * DD ** (1 + n)) /
-                                ((-Ao + Bo) * n ** (2 * n) * P) +
-                                (DD / n ** n - A * (Ao + Bi + DD - S)) ** 2) **
-                                0.5 +
-                            A * (Ao + Bi - S)) /
-                            (2 * A)
+                return stableMath_sol._inGivenOut(
+                    amp,
+                    allBalances,
+                    tokenIndexIn,
+                    tokenIndexOut,
+                    amount
                 );
             }
         }
@@ -254,10 +257,7 @@ export function getSpotPriceAfterSwap(
         wo = poolPairData.weightOut.toNumber();
     } else {
         A = poolPairData.amp.toNumber();
-        S = poolPairData.sum.toNumber();
-        P = poolPairData.prod.toNumber();
         DD = poolPairData.invariant.toNumber();
-        n = poolPairData.n.toNumber();
     }
 
     // TODO: check if necessary to check if amount > limitAmount
@@ -282,22 +282,23 @@ export function getSpotPriceAfterSwap(
                 //             A*(Ai - Bo - DD + S)))/
                 //         ((4*A*Bi*Bo*DD**(1 + n))/((Ai + Bi)*n**(2*n)*P) +
                 //             (DD/n**n + A*(Ai - Bo - DD + S))**2)**0.5)
-                return bnum(
-                    -2 /
-                        (-1 +
-                            (1 *
-                                ((DD *
-                                    (n ** n -
-                                        (2 * Bi * Bo * DD ** n) /
-                                            ((Ai + Bi) ** 2 * P))) /
-                                    n ** (2 * n) +
-                                    A * (Ai - Bo - DD + S))) /
-                                ((4 * A * Bi * Bo * DD ** (1 + n)) /
-                                    ((Ai + Bi) * n ** (2 * n) * P) +
-                                    (DD / n ** n + A * (Ai - Bo - DD + S)) **
-                                        2) **
-                                    0.5)
-                );
+                // return bnum(
+                //     -2 /
+                //         (-1 +
+                //             (1 *
+                //                 ((DD *
+                //                     (n ** n -
+                //                         (2 * Bi * Bo * DD ** n) /
+                //                             ((Ai + Bi) ** 2 * P))) /
+                //                     n ** (2 * n) +
+                //                     A * (Ai - Bo - DD + S))) /
+                //                 ((4 * A * Bi * Bo * DD ** (1 + n)) /
+                //                     ((Ai + Bi) * n ** (2 * n) * P) +
+                //                     (DD / n ** n + A * (Ai - Bo - DD + S)) **
+                //                         2) **
+                //                     0.5)
+                // );
+                return bnum(1);
             }
         }
     } else {
@@ -319,20 +320,22 @@ export function getSpotPriceAfterSwap(
                 //             A*(Ao + Bi + DD - S)))/
                 //         ((4*A*Bi*Bo*DD**(1 + n))/((-Ao + Bo)*n**(2*n)*P) +
                 //         (DD/n**n - A*(Ao + Bi + DD - S))**2)**0.5
-                return bnum(
-                    0.5 +
-                        (0.5 *
-                            ((DD *
-                                (-(n ** n) +
-                                    (2 * Bi * Bo * DD ** n) /
-                                        ((Ao - Bo) ** 2 * P))) /
-                                n ** (2 * n) +
-                                A * (Ao + Bi + DD - S))) /
-                            ((4 * A * Bi * Bo * DD ** (1 + n)) /
-                                ((-Ao + Bo) * n ** (2 * n) * P) +
-                                (DD / n ** n - A * (Ao + Bi + DD - S)) ** 2) **
-                                0.5
-                );
+                // return bnum(
+                //     0.5 +
+                //         (0.5 *
+                //             ((DD *
+                //                 (-(n ** n) +
+                //                     (2 * Bi * Bo * DD ** n) /
+                //                         ((Ao - Bo) ** 2 * P))) /
+                //                 n ** (2 * n) +
+                //                 A * (Ao + Bi + DD - S))) /
+                //             ((4 * A * Bi * Bo * DD ** (1 + n)) /
+                //                 ((-Ao + Bo) * n ** (2 * n) * P) +
+                //                 (DD / n ** n - A * (Ao + Bi + DD - S)) ** 2) **
+                //                 0.5
+                // );
+
+                return bnum(1);
             }
         }
     }
@@ -404,10 +407,7 @@ export function getDerivativeSpotPriceAfterSwap(
         wo = poolPairData.weightOut.toNumber();
     } else {
         A = poolPairData.amp.toNumber();
-        S = poolPairData.sum.toNumber();
-        P = poolPairData.prod.toNumber();
         DD = poolPairData.invariant.toNumber();
-        n = poolPairData.n.toNumber();
     }
 
     // TODO: check if necessary to check if amount > limitAmount
@@ -423,45 +423,47 @@ export function getDerivativeSpotPriceAfterSwap(
                         (Bo * (Bi / (Ai + Bi - Ai * f)) ** (wi / wo) * wi)
                 );
             } else if (poolType == 'Stable') {
-                return bnum(
-                    (2 *
-                        ((-1 *
-                            A *
-                            ((DD *
-                                (n ** n -
-                                    (2 * Bi * Bo * DD ** n) /
-                                        ((Ai + Bi) ** 2 * P))) /
-                                n ** (2 * n) +
-                                A * (Ai - Bo - DD + S)) **
-                                2) /
-                            ((4 * A * Bi * Bo * DD ** (1 + n)) /
-                                ((Ai + Bi) * n ** (2 * n) * P) +
-                                (DD / n ** n + A * (Ai - Bo - DD + S)) ** 2) **
-                                1.5 +
-                            (1 *
-                                (A +
-                                    (4 * Bi * Bo * DD ** (1 + n)) /
-                                        ((Ai + Bi) ** 3 * n ** (2 * n) * P))) /
-                                ((4 * A * Bi * Bo * DD ** (1 + n)) /
-                                    ((Ai + Bi) * n ** (2 * n) * P) +
-                                    (DD / n ** n + A * (Ai - Bo - DD + S)) **
-                                        2) **
-                                    0.5)) /
-                        (1 -
-                            (1 *
-                                ((DD *
-                                    (n ** n -
-                                        (2 * Bi * Bo * DD ** n) /
-                                            ((Ai + Bi) ** 2 * P))) /
-                                    n ** (2 * n) +
-                                    A * (Ai - Bo - DD + S))) /
-                                ((4 * A * Bi * Bo * DD ** (1 + n)) /
-                                    ((Ai + Bi) * n ** (2 * n) * P) +
-                                    (DD / n ** n + A * (Ai - Bo - DD + S)) **
-                                        2) **
-                                    0.5) **
-                            2
-                );
+                // return bnum(
+                //     (2 *
+                //         ((-1 *
+                //             A *
+                //             ((DD *
+                //                 (n ** n -
+                //                     (2 * Bi * Bo * DD ** n) /
+                //                         ((Ai + Bi) ** 2 * P))) /
+                //                 n ** (2 * n) +
+                //                 A * (Ai - Bo - DD + S)) **
+                //                 2) /
+                //             ((4 * A * Bi * Bo * DD ** (1 + n)) /
+                //                 ((Ai + Bi) * n ** (2 * n) * P) +
+                //                 (DD / n ** n + A * (Ai - Bo - DD + S)) ** 2) **
+                //                 1.5 +
+                //             (1 *
+                //                 (A +
+                //                     (4 * Bi * Bo * DD ** (1 + n)) /
+                //                         ((Ai + Bi) ** 3 * n ** (2 * n) * P))) /
+                //                 ((4 * A * Bi * Bo * DD ** (1 + n)) /
+                //                     ((Ai + Bi) * n ** (2 * n) * P) +
+                //                     (DD / n ** n + A * (Ai - Bo - DD + S)) **
+                //                         2) **
+                //                     0.5)) /
+                //         (1 -
+                //             (1 *
+                //                 ((DD *
+                //                     (n ** n -
+                //                         (2 * Bi * Bo * DD ** n) /
+                //                             ((Ai + Bi) ** 2 * P))) /
+                //                     n ** (2 * n) +
+                //                     A * (Ai - Bo - DD + S))) /
+                //                 ((4 * A * Bi * Bo * DD ** (1 + n)) /
+                //                     ((Ai + Bi) * n ** (2 * n) * P) +
+                //                     (DD / n ** n + A * (Ai - Bo - DD + S)) **
+                //                         2) **
+                //                     0.5) **
+                //             2
+                // );
+
+                return bnum(1);
             }
         }
     } else {
@@ -479,29 +481,30 @@ export function getDerivativeSpotPriceAfterSwap(
                     )
                 );
             } else if (poolType == 'Stable') {
-                return bnum(
-                    (0.5 *
-                        (A +
-                            (4 * Bi * Bo * DD ** (1 + n)) /
-                                ((-Ao + Bo) ** 3 * n ** (2 * n) * P))) /
-                        ((4 * A * Bi * Bo * DD ** (1 + n)) /
-                            ((-Ao + Bo) * n ** (2 * n) * P) +
-                            (DD / n ** n - A * (Ao + Bi + DD - S)) ** 2) **
-                            0.5 -
-                        (0.5 *
-                            A *
-                            ((DD *
-                                (-(n ** n) +
-                                    (2 * Bi * Bo * DD ** n) /
-                                        ((Ao - Bo) ** 2 * P))) /
-                                n ** (2 * n) +
-                                A * (Ao + Bi + DD - S)) **
-                                2) /
-                            ((4 * A * Bi * Bo * DD ** (1 + n)) /
-                                ((-Ao + Bo) * n ** (2 * n) * P) +
-                                (DD / n ** n - A * (Ao + Bi + DD - S)) ** 2) **
-                                1.5
-                );
+                // return bnum(
+                //     (0.5 *
+                //         (A +
+                //             (4 * Bi * Bo * DD ** (1 + n)) /
+                //                 ((-Ao + Bo) ** 3 * n ** (2 * n) * P))) /
+                //         ((4 * A * Bi * Bo * DD ** (1 + n)) /
+                //             ((-Ao + Bo) * n ** (2 * n) * P) +
+                //             (DD / n ** n - A * (Ao + Bi + DD - S)) ** 2) **
+                //             0.5 -
+                //         (0.5 *
+                //             A *
+                //             ((DD *
+                //                 (-(n ** n) +
+                //                     (2 * Bi * Bo * DD ** n) /
+                //                         ((Ao - Bo) ** 2 * P))) /
+                //                 n ** (2 * n) +
+                //                 A * (Ao + Bi + DD - S)) **
+                //                 2) /
+                //             ((4 * A * Bi * Bo * DD ** (1 + n)) /
+                //                 ((-Ao + Bo) * n ** (2 * n) * P) +
+                //                 (DD / n ** n - A * (Ao + Bi + DD - S)) ** 2) **
+                //                 1.5
+                // );
+                return bnum(1);
             }
         }
     }
@@ -620,11 +623,17 @@ export const parsePoolPairData = (
     tokenIn: string,
     tokenOut: string
 ): PoolPairData => {
-    let tI = p.tokens.find(t => getAddress(t.address) === getAddress(tokenIn));
+    let tokenIndexIn = p.tokens.findIndex(
+        t => getAddress(t.address) === getAddress(tokenIn)
+    );
+    let tI = p.tokens[tokenIndexIn];
     // console.log("tI")
     // console.log(tI.balance.toString());
     // console.log(tI)
-    let tO = p.tokens.find(t => getAddress(t.address) === getAddress(tokenOut));
+    let tokenIndexOut = p.tokens.findIndex(
+        t => getAddress(t.address) === getAddress(tokenOut)
+    );
+    let tO = p.tokens[tokenIndexOut];
 
     // console.log("tO")
     // console.log(tO.balance.toString());
@@ -654,14 +663,23 @@ export const parsePoolPairData = (
         };
     } else if (poolType == 'Stable') {
         // Get all token balances
-        let sumBalances = bnum(0);
-        let prodBalances = bnum(1);
-
-        // Calculate sum and prod. Note that balances need to be scaled to 18 decimals
+        let allBalances = [];
         for (let i = 0; i < p.tokens.length; i++) {
-            sumBalances = sumBalances.plus(bnum(p.tokens[i].balance));
-            prodBalances = prodBalances.times(bnum(p.tokens[i].balance));
+            allBalances.push(bnum(p.tokens[i].balance));
         }
+
+        let inv = stableMath_sol._invariant(bnum(p.amp), allBalances);
+        let invVF = stableMath_sol._invariantValueFunction(
+            bnum(p.amp),
+            allBalances,
+            inv
+        );
+        let invVF2 = stableMath_sol._invariantValueFunction(
+            bnum(p.amp),
+            allBalances,
+            bnum(698966156.1055329178187)
+        );
+
         poolPairData = {
             id: p.id,
             poolType: poolType,
@@ -671,19 +689,12 @@ export const parsePoolPairData = (
             decimalsOut: tO.decimals,
             balanceIn: bnum(tI.balance),
             balanceOut: bnum(tO.balance),
-            n: bnum(p.tokens.length),
-            invariant: bnum(
-                getInvariantStablePool(
-                    bnum(p.amp).toNumber(),
-                    p.tokens.length,
-                    sumBalances.toNumber(),
-                    prodBalances.toNumber()
-                )
-            ),
-            sum: sumBalances,
-            prod: prodBalances,
+            invariant: stableMath_sol._invariant(bnum(p.amp), allBalances),
             swapFee: bnum(p.swapFee),
+            allBalances: allBalances,
             amp: bnum(p.amp),
+            tokenIndexIn: tokenIndexIn,
+            tokenIndexOut: tokenIndexOut,
         };
     } else {
         throw 'Pool type unknown';
@@ -782,18 +793,6 @@ export function EVMgetOutputAmountSwapForPath(
     }
 }
 
-// Get the invariant D for stable pools from formula based on https://www.notion.so/Analytical-for-2-tokens-1cd46debef6648dd81f2d75bae941fea
-export function getInvariantStablePool(
-    A: number, // amp
-    n: number, // number of tokens
-    S: number, // sum of balances
-    P: number // product of balances
-): number {
-    let q = -A * Math.pow(n, 2 * n) * P * S;
-    let p = -(1 / n ** n - A) * n ** (2 * n) * P;
-    let C = (-q / 2 + (q ** 2 / 4 + p ** 3 / 27) ** 0.5) ** (1 / 3);
-    return C - p / (3 * C);
-}
 // We need do pass 'pools' here because this function has to update the pools state
 // in case a pool is used twice in two different paths
 export function EVMgetOutputAmountSwap(
@@ -817,23 +816,8 @@ export function EVMgetOutputAmountSwap(
         if (balanceIn.isEqualTo(bnum(0))) {
             return bnum(0);
         } else {
-            // TODO: Add EVM calculation for Stable pools also
-            if (poolPairData.poolType == 'Weighted') {
-                returnAmount = calcOutGivenIn(
-                    balanceIn,
-                    weightIn,
-                    balanceOut,
-                    weightOut,
-                    amount,
-                    swapFee
-                );
-            } else if (poolPairData.poolType == 'Stable') {
-                returnAmount = getOutputAmountSwap(
-                    poolPairData,
-                    swapType,
-                    amount
-                );
-            }
+            // TODO: Add EVM calculation implemented in V2 so numbers match perfectly
+            returnAmount = getOutputAmountSwap(poolPairData, swapType, amount);
             // Update balances of tokenIn and tokenOut
             pools[poolPairData.id] = updateTokenBalanceForPool(
                 pools[poolPairData.id],
@@ -854,24 +838,8 @@ export function EVMgetOutputAmountSwap(
             // The maximum amoutOut you can have is 1/3 of the balanceOut to ensure binomial approximation diverges
             return bnum(0);
         } else {
-            // TODO: Add EVM calculation for Stable pools also
-            if (poolPairData.poolType == 'Weighted') {
-                returnAmount = calcInGivenOut(
-                    balanceIn,
-                    weightIn,
-                    balanceOut,
-                    weightOut,
-                    amount,
-                    swapFee
-                );
-            } else if (poolPairData.poolType == 'Stable') {
-                returnAmount = getOutputAmountSwap(
-                    poolPairData,
-                    swapType,
-                    amount
-                );
-            }
-
+            // TODO: Add EVM calculation implemented in V2 so numbers match perfectly
+            returnAmount = getOutputAmountSwap(poolPairData, swapType, amount);
             // Update balances of tokenIn and tokenOut
             pools[poolPairData.id] = updateTokenBalanceForPool(
                 pools[poolPairData.id],
