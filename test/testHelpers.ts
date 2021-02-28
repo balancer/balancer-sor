@@ -42,6 +42,10 @@ export const Tokens = {
         address: '0x2260fac5e5542a773aa44fbcfedf7c193bc2c599',
         decimals: 8,
     },
+    sBTC: {
+        address: '0xfe18be6b3bd88a2d2a7f928d00292e7a9963cfc6',
+        decimals: 18,
+    },
     MKR: {
         address: '0x9f8f72aa9304c8b593d555f12ef6589cc3a579a2',
         decimals: 18,
@@ -122,7 +126,7 @@ export async function getV1Swap(
     // V1 will always ONLY use Weighted Pools
     const weightedPools = filterToWeightedPoolsOnly(AllSubgraphPools);
     if (weightedPools.pools.length === 0)
-        return { title: 'v1', swaps: [], swapAmount: bnum(0), timeData: {} };
+        return { title: 'v1', swaps: [], returnAmount: bnum(0), timeData: {} };
 
     const MULTIADDR: { [ChainId: number]: string } = {
         1: '0x514053acec7177e277b947b1ebb5c08ab4c4580e',

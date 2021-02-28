@@ -43,6 +43,7 @@ export function processPaths(
     paths.forEach(path => {
         path.poolPairData = parsePoolPairDataForPath(pools, path, swapType);
         path.limitAmount = getLimitAmountSwapForPath(pools, path, swapType);
+        if (path.limitAmount.isNaN()) throw 'path.limitAmount.isNaN'; // This should never happen
         // console.log(path.limitAmount.toNumber())
         maxLiquidityAvailable = maxLiquidityAvailable.plus(path.limitAmount);
     });
@@ -69,7 +70,7 @@ export function filterPaths(
     let filteredPaths = [];
     let filteredPathIds = [];
     // Always add the maxPools most liquid paths to the filteredPaths
-    for (let j = 0; j < maxPools; ++j) {
+    for (let j = 0; j < maxPools && j < paths.length; ++j) {
         filteredPathIds.push(paths[j].id);
         filteredPaths.push(paths[j]);
     }
@@ -100,7 +101,7 @@ export function filterPaths(
                 .toNumber();
         });
         // Add best maxPools paths to filteredPaths if path not already present
-        for (let j = 0; j < maxPools; ++j) {
+        for (let j = 0; j < maxPools && j < paths.length; ++j) {
             if (!filteredPathIds.includes(sortedPaths[j].id)) {
                 filteredPathIds.push(sortedPaths[j].id);
                 filteredPaths.push(sortedPaths[j]);

@@ -26,10 +26,13 @@ export function getLimitAmountSwap(
     poolPairData: PoolPairData,
     swapType: string
 ): BigNumber {
+    // We multiply ratios by 10**-18 because we are in normalized space
+    // so 0.5 should be 0.5 and not 500000000000000000
+    // TODO: update bmath to use everything normalized
     if (swapType === 'swapExactIn') {
-        return bmul(poolPairData.balanceIn, MAX_IN_RATIO);
+        return poolPairData.balanceIn.times(MAX_IN_RATIO.times(10 ** -18));
     } else {
-        return bmul(poolPairData.balanceOut, MAX_OUT_RATIO);
+        return poolPairData.balanceOut.times(MAX_OUT_RATIO.times(10 ** -18));
     }
 }
 
@@ -57,12 +60,16 @@ export function getLimitAmountSwapForPath(
                 limitAmountSwap1
             );
             if (limitOutputAmountSwap1.gt(limitAmountSwap2))
-                // This means second hop is limiting the path
-                return getOutputAmountSwap(
-                    poolPairData[0],
-                    'swapExactOut',
-                    limitAmountSwap2
-                );
+                if (limitAmountSwap2.isZero())
+                    // This means second hop is limiting the path
+                    return bnum(0);
+                // this is necessary to avoid return NaN
+                else
+                    return getOutputAmountSwap(
+                        poolPairData[0],
+                        'swapExactOut',
+                        limitAmountSwap2
+                    );
             // This means first hop is limiting the path
             else return limitAmountSwap1;
         } else {
@@ -152,7 +159,7 @@ export function getOutputAmountSwap(
                 // return (Bi*(-1 + (Bo/(-Ao + Bo))**(wo/wi)))/(1 - f)
                 return Bi.times(
                     bnum(-1).plus(
-                        Bo.div(-Ao.plus(Bo)).toNumber() ** wo.div(wi).toNumber()
+                        Bo.div(Bo.minus(Ao)).toNumber() ** wo.div(wi).toNumber()
                     )
                 ).div(bnum(1).minus(f));
             } else if (poolType == 'Stable') {

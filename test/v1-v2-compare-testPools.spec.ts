@@ -27,13 +27,15 @@ const provider = new JsonRpcProvider(
 describe('Run Tests From Saved Pools', () => {
     // This must be updated with pools of interest (see ./test/testPools)
     let testFiles = [
-        // 'stable-pools-only'
-        'stable-and-weighted',
+        // 'stable-pools-only-wbtc-to-sbtc-exactIn',
+        // 'stable-pools-only-wbtc-to-sbtc-exactOut',
+        // 'stable-and-weighted',
+        // 'stable-and-weighted-gas-price-zero',
         // '0x04ec8acaa4f419bc1525eaa8d37faae2d4acb64c5521a3718593c626962de170',
-        // '0x0a554ce1e35b9820f121ac7faa97069650df754117d6c5eb7c1158f915878343',
-        // '0x139894ec2cacfeca1035e78968124dbb2d34034bde146f5f2ab311ada75ad04f',
-        // '0x21d5562b317f9d3b57b3406ee868ad882ab3c87cd67f7af2ff55042e59702bef',
-        // '0x221c2f98afb75ae7ba165e70c647fc76c777b434eb84375d7261a0c951a0510c',
+        '0x0a554ce1e35b9820f121ac7faa97069650df754117d6c5eb7c1158f915878343',
+        '0x139894ec2cacfeca1035e78968124dbb2d34034bde146f5f2ab311ada75ad04f',
+        '0x21d5562b317f9d3b57b3406ee868ad882ab3c87cd67f7af2ff55042e59702bef',
+        '0x221c2f98afb75ae7ba165e70c647fc76c777b434eb84375d7261a0c951a0510c',
         // '0x2db088f092121c107a1bfe97984be190e5ab72fce044c9749c3611ce2365e4da',
         // '0x39fbeeaacdffc7186135ad169c0bbdbdddb42901a3c12cac2081af603f52ccda',
         // '0x4538a9ba66778343983d39a744e6c337ee497247be50090e8feb18761d275306',
