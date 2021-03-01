@@ -33,6 +33,7 @@ const onChainBalances = true;
 let v1SwapData;
 let v2SwapData;
 let v2WithFilterSwapData;
+let tokenInDecimals, tokenOutDecimals;
 
 // npx mocha -r ts-node/register test/v1-v2-compare-live-pools-random.spec.ts
 // This is using the live pools list from IPFS and on-chain balances so it’s non-deterministic.
@@ -43,6 +44,8 @@ describe('Comparing V1/V2 Using Live Pool Data', async () => {
         tradeData = getRandomTradeData();
         tokenIn = tradeData.tokenIn;
         tokenOut = tradeData.tokenOut;
+        tokenInDecimals = tradeData.tokenInDecimals;
+        tokenOutDecimals = tradeData.tokenOutDecimals;
         maxNoPools = tradeData.maxPools;
     });
 
@@ -59,6 +62,8 @@ describe('Comparing V1/V2 Using Live Pool Data', async () => {
             swapType,
             tokenIn,
             tokenOut,
+            tokenInDecimals,
+            tokenOutDecimals,
             maxNoPools,
             swapAmount.toString(),
             gasPrice.toString(),
@@ -135,6 +140,8 @@ describe('Comparing V1/V2 Using Live Pool Data', async () => {
             swapType,
             tokenIn,
             tokenOut,
+            tokenInDecimals,
+            tokenOutDecimals,
             maxNoPools,
             swapAmount.toString(),
             gasPrice.toString(),
@@ -155,6 +162,8 @@ describe('Comparing V1/V2 Using Live Pool Data', async () => {
             swapType,
             tokenIn,
             tokenOut,
+            tokenInDecimals,
+            tokenOutDecimals,
             maxNoPools,
             swapAmount.toString(),
             gasPrice.toString(),
@@ -230,6 +239,8 @@ describe('Comparing V1/V2 Using Live Pool Data', async () => {
             swapType,
             tokenIn,
             tokenOut,
+            tokenInDecimals,
+            tokenOutDecimals,
             maxNoPools,
             swapAmount.toString(),
             gasPrice.toString(),
@@ -250,6 +261,8 @@ describe('Comparing V1/V2 Using Live Pool Data', async () => {
             swapType,
             tokenIn,
             tokenOut,
+            tokenInDecimals,
+            tokenOutDecimals,
             maxNoPools,
             swapAmount.toString(),
             gasPrice.toString(),
@@ -326,6 +339,8 @@ describe('Comparing V1/V2 Using Live Pool Data', async () => {
             swapType,
             tokenIn,
             tokenOut,
+            tokenInDecimals,
+            tokenOutDecimals,
             maxNoPools,
             swapAmount.toString(),
             gasPrice.toString(),
@@ -346,6 +361,8 @@ describe('Comparing V1/V2 Using Live Pool Data', async () => {
             swapType,
             tokenIn,
             tokenOut,
+            tokenInDecimals,
+            tokenOutDecimals,
             maxNoPools,
             swapAmount.toString(),
             gasPrice.toString(),
@@ -422,6 +439,8 @@ describe('Comparing V1/V2 Using Live Pool Data', async () => {
             swapType,
             tokenIn,
             tokenOut,
+            tokenInDecimals,
+            tokenOutDecimals,
             maxNoPools,
             swapAmount.toString(),
             gasPrice.toString(),

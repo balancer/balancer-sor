@@ -649,6 +649,8 @@ export function getRandomTradeData() {
     return {
         tokenIn: tokenIn.address,
         tokenOut: tokenOut.address,
+        tokenInDecimals: decimalsIn,
+        tokenOutDecimals: decimalsOut,
         smallSwapAmtIn,
         largeSwapAmtIn,
         smallSwapAmtOut,
@@ -662,11 +664,21 @@ export function saveTestFile(
     SwapType: string,
     TokenIn: string,
     TokenOut: string,
+    TokenInDecimals: string,
+    TokenOutDecimals: string,
     NoPools: string,
     SwapAmount: string,
     GasPrice: string,
     FilePath: string
 ) {
+    let SwapAmountDecimals = TokenInDecimals.toString();
+    let ReturnAmountDecimals = TokenOutDecimals.toString();
+
+    if (SwapType === 'swapExactOut') {
+        SwapAmountDecimals = TokenOutDecimals.toString();
+        ReturnAmountDecimals = TokenInDecimals.toString();
+    }
+
     const tradeInfo = {
         tradeInfo: {
             SwapType,
@@ -675,6 +687,8 @@ export function saveTestFile(
             NoPools,
             SwapAmount,
             GasPrice,
+            SwapAmountDecimals,
+            ReturnAmountDecimals,
         },
         pools: Pools.pools,
     };
@@ -698,11 +712,21 @@ export function deleteTestFile(
     SwapType: string,
     TokenIn: string,
     TokenOut: string,
+    TokenInDecimals: string,
+    TokenOutDecimals: string,
     NoPools: string,
     SwapAmount: string,
     GasPrice: string,
     FilePath: string
 ) {
+    let SwapAmountDecimals = TokenInDecimals.toString();
+    let ReturnAmountDecimals = TokenOutDecimals.toString();
+
+    if (SwapType === 'swapExactOut') {
+        SwapAmountDecimals = TokenOutDecimals.toString();
+        ReturnAmountDecimals = TokenInDecimals.toString();
+    }
+
     const tradeInfo = {
         tradeInfo: {
             SwapType,
@@ -711,6 +735,8 @@ export function deleteTestFile(
             NoPools,
             SwapAmount,
             GasPrice,
+            SwapAmountDecimals,
+            ReturnAmountDecimals,
         },
         pools: Pools.pools,
     };
