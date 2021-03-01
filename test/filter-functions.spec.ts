@@ -3,7 +3,7 @@
 import * as sor from '../src';
 import { assert } from 'chai';
 import 'mocha';
-import { formatAndFilterPools } from './utils';
+import { formatAndFilterPools } from './lib/testHelpers';
 // Following has:
 // Both DAI&USDC: 4 pools
 // DAI, No USDC: 3
@@ -14,15 +14,13 @@ const allPools = require('./testData/testPools/subgraphPoolsSmall.json');
 const DAI = '0x6B175474E89094C44Da98b954EedeAC495271d0F'.toLowerCase(); // DAI
 const USDC = '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48'.toLowerCase();
 
-let allTokensSet, allPoolsNonZeroBalances;
+let allPoolsNonZeroBalances;
 
 describe('Test Filter Functions using subgraphPoolsSmall.json & full SOR comparrions', () => {
     it('Saved pool check', async () => {
         assert.equal(allPools.pools.length, 12, 'Should be 12 pools');
 
-        [allTokensSet, allPoolsNonZeroBalances] = formatAndFilterPools(
-            allPools
-        );
+        allPoolsNonZeroBalances = formatAndFilterPools(allPools);
         assert.equal(
             allPoolsNonZeroBalances.pools.length,
             8,

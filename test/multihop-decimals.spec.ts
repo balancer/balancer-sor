@@ -10,7 +10,7 @@ import {
     testSwapsExactOut,
     fullSwap,
     alterPools,
-} from './utils';
+} from './lib/testHelpers';
 
 const allPools = require('./testData/testPools/subgraphPoolsDecimalsTest.json');
 const disabledTokens = require('./testData/disabled-tokens.json');
@@ -24,9 +24,8 @@ let allPoolsCorrect;
 describe('Tests Multihop SOR vs static allPoolsDecimals.json', () => {
     it('Saved pool check - without disabled filter', async () => {
         assert.equal(allPools.pools.length, 3, 'Should be 3 pools');
-        let allTokensSet;
         // Converts Subgraph string format to Wei/Bnum format
-        [allTokensSet, allPoolsCorrect] = formatAndFilterPools(
+        allPoolsCorrect = formatAndFilterPools(
             JSON.parse(JSON.stringify(allPools))
         );
 

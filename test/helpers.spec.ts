@@ -5,8 +5,7 @@ import {
     normalizePools,
 } from '../src/helpers';
 import { assert, expect } from 'chai';
-import { formatAndFilterPools } from './testHelpers';
-import { getSpotPrice } from './testHelpers';
+import { formatAndFilterPools, getSpotPrice } from './lib/testHelpers';
 import { bnum, scale } from '../src/bmath';
 import { Pools, PoolPairData } from '../src/types';
 import { BigNumber } from '../src/utils/bignumber';

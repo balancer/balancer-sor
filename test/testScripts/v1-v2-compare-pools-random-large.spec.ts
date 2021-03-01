@@ -10,7 +10,7 @@ import {
     displayResults,
     assertResults,
     loadTestFile,
-} from '../testHelpers';
+} from '../lib/testHelpers';
 import { bnum } from '../../src/bmath';
 
 // Each pool will have 4 tests. Total number will be MIN_TESTS * 4 * NoPools. Will always test each pool at least once.

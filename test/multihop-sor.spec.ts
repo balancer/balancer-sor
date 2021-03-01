@@ -4,17 +4,17 @@ import * as sor from '../src';
 import { assert, expect } from 'chai';
 import { Swap } from '../src/types';
 import { BigNumber } from '../src/utils/bignumber';
+import { BONE } from '../src/bmath';
+import { formatEther } from '@ethersproject/units';
 import {
-    formatAndFilterPools,
+    formatAndFilterPoolsAndTokens,
     filterPools,
     testSwapsExactIn,
     testSwapsExactOut,
     fullSwap,
     alterPools,
-} from './utils';
-import { BONE } from '../src/bmath';
-import { formatEther } from '@ethersproject/units';
-import { getTokenPairsMultiHop } from './utils';
+    getTokenPairsMultiHop,
+} from './lib/testHelpers';
 
 const allPools = require('./testData/testPools/subgraphPoolsLarge.json');
 const disabledTokens = require('./testData/disabled-tokens.json');
@@ -34,7 +34,7 @@ describe('Tests Multihop SOR vs static subgraphPoolsLarge.json', () => {
         assert.equal(allPools.pools.length, 64, 'Should be 64 pools');
         let allTokensSet;
         // Converts Subgraph string format to Wei/Bnum format
-        [allTokensSet, allPoolsCorrect] = formatAndFilterPools(
+        [allTokensSet, allPoolsCorrect] = formatAndFilterPoolsAndTokens(
             JSON.parse(JSON.stringify(allPools))
         );
 
@@ -51,7 +51,7 @@ describe('Tests Multihop SOR vs static subgraphPoolsLarge.json', () => {
         assert.equal(allPools.pools.length, 64, 'Should be 64 pools');
         let allTokensSet;
         // Converts Subgraph string format to Wei/Bnum format
-        [allTokensSet, allPoolsCorrect] = formatAndFilterPools(
+        [allTokensSet, allPoolsCorrect] = formatAndFilterPoolsAndTokens(
             JSON.parse(JSON.stringify(allPools)),
             disabledTokens.tokens
         );
@@ -67,7 +67,7 @@ describe('Tests Multihop SOR vs static subgraphPoolsLarge.json', () => {
     it('getTokenPairsMultiHop - Should return direct & multihop partner tokens', async () => {
         let allTokensSet;
         // Converts Subgraph string format to Wei/Bnum format
-        [allTokensSet, allPoolsCorrect] = formatAndFilterPools(
+        [allTokensSet, allPoolsCorrect] = formatAndFilterPoolsAndTokens(
             JSON.parse(JSON.stringify(allPools)),
             disabledTokens.tokens
         );

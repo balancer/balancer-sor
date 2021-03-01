@@ -12,7 +12,7 @@ import {
     loadTestFile,
     displayResults,
     assertResults,
-} from './testHelpers';
+} from './lib/testHelpers';
 import { bnum } from '../src/bmath';
 
 const provider = new JsonRpcProvider(

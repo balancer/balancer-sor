@@ -11,7 +11,7 @@ import {
     deleteTestFile,
     displayResults,
     assertResults,
-} from '../testHelpers';
+} from '../lib/testHelpers';
 
 let tradeData;
 let tokenIn;
