@@ -19,7 +19,7 @@ const provider = new JsonRpcProvider(
     `https://mainnet.infura.io/v3/${process.env.INFURA}`
 );
 
-// npx mocha -r ts-node/register test/compare-testPools.spec.ts
+// npx mocha -r ts-node/register test/v1-v2-compare-testPools.spec.ts
 // This compare V1 vs V2 swaps and V2 vs V2 with filter swaps pools saved in ./test/testPools folder.
 // Does not use OnChain balances as the pools were originally saved after a failure and snapshot should have balances, etc that caused issues.
 // Compare V1 vs V2 and V2 vs V2 with filter.
@@ -89,7 +89,7 @@ describe('Run Tests From Saved Pools', () => {
                 ),
                 { onChainBalances: false }
             );
-
+            /*
             let v2WithFilterSwapData = await getV2SwapWithFilter(
                 provider,
                 testData.tradeInfo.GasPrice,
@@ -104,11 +104,12 @@ describe('Run Tests From Saved Pools', () => {
                 ),
                 { onChainBalances: false }
             );
+            */
 
             displayResults(
                 `${file}.json`,
                 testData.tradeInfo,
-                [v1SwapData, v2SwapData, v2WithFilterSwapData],
+                [v1SwapData, v2SwapData /*, v2WithFilterSwapData*/],
                 false
             );
 
@@ -116,8 +117,8 @@ describe('Run Tests From Saved Pools', () => {
                 file,
                 testData,
                 v1SwapData,
-                v2SwapData,
-                v2WithFilterSwapData
+                v2SwapData
+                // v2WithFilterSwapData
             );
         }).timeout(100000);
     });

@@ -790,7 +790,7 @@ export function assertResults(
     testData,
     v1SwapData,
     v2SwapData,
-    v2WithFilterSwapData
+    v2WithFilterSwapData = undefined
 ) {
     if (testData.tradeInfo.SwapType === `swapExactIn`) {
         assert(
@@ -814,14 +814,16 @@ export function assertResults(
         );
     }
 
-    assert(
-        v2SwapData.returnAmount.eq(v2WithFilterSwapData.returnAmount),
-        `File: ${file}\nV2 !== V2 Filter\nIn: ${
-            testData.tradeInfo.TokenIn
-        } \nOut: ${
-            testData.tradeInfo.TokenOut
-        } \nSwap Amt: ${testData.tradeInfo.SwapAmount.toString()} \n${v2SwapData.returnAmount.toString()} \n${v2WithFilterSwapData.returnAmount.toString()}`
-    );
+    if (v2WithFilterSwapData !== undefined) {
+        assert(
+            v2SwapData.returnAmount.eq(v2WithFilterSwapData.returnAmount),
+            `File: ${file}\nV2 !== V2 Filter\nIn: ${
+                testData.tradeInfo.TokenIn
+            } \nOut: ${
+                testData.tradeInfo.TokenOut
+            } \nSwap Amt: ${testData.tradeInfo.SwapAmount.toString()} \n${v2SwapData.returnAmount.toString()} \n${v2WithFilterSwapData.returnAmount.toString()}`
+        );
+    }
 }
 
 export function getSpotPrice(poolPairData: PoolPairData): BigNumber {

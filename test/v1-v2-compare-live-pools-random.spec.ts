@@ -34,7 +34,7 @@ let v1SwapData;
 let v2SwapData;
 let v2WithFilterSwapData;
 
-// npx mocha -r ts-node/register test/compare-live-pools-random.spec.ts
+// npx mocha -r ts-node/register test/v1-v2-compare-live-pools-random.spec.ts
 // This is using the live pools list from IPFS and on-chain balances so it’s non-deterministic.
 // It’s taking a random pair from a list of 10 tokens along with random swap amounts and max pools.
 // Compare V1 vs V2 and V2 vs V2 with filter.
@@ -90,7 +90,7 @@ describe('Comparing V1/V2 Using Live Pool Data', async () => {
             swapAmount,
             { onChainBalances: onChainBalances }
         );
-
+        /*
         v2WithFilterSwapData = await getV2SwapWithFilter(
             provider,
             gasPrice,
@@ -103,6 +103,7 @@ describe('Comparing V1/V2 Using Live Pool Data', async () => {
             swapAmount,
             { onChainBalances: onChainBalances }
         );
+        */
 
         const testData = {
             tradeInfo: {
@@ -116,7 +117,7 @@ describe('Comparing V1/V2 Using Live Pool Data', async () => {
         displayResults(
             `${file}.json`,
             testData.tradeInfo,
-            [v1SwapData, v2SwapData, v2WithFilterSwapData],
+            [v1SwapData, v2SwapData /*, v2WithFilterSwapData*/],
             false
         );
 
@@ -124,8 +125,8 @@ describe('Comparing V1/V2 Using Live Pool Data', async () => {
             file,
             testData,
             v1SwapData,
-            v2SwapData,
-            v2WithFilterSwapData
+            v2SwapData
+            // v2WithFilterSwapData
         );
 
         // All tests passed so no need to keep file
@@ -185,7 +186,7 @@ describe('Comparing V1/V2 Using Live Pool Data', async () => {
             swapAmount,
             { onChainBalances: onChainBalances }
         );
-
+        /*
         v2WithFilterSwapData = await getV2SwapWithFilter(
             provider,
             gasPrice,
@@ -198,7 +199,7 @@ describe('Comparing V1/V2 Using Live Pool Data', async () => {
             swapAmount,
             { onChainBalances: onChainBalances }
         );
-
+        */
         const testData = {
             tradeInfo: {
                 SwapType: swapType,
@@ -211,7 +212,7 @@ describe('Comparing V1/V2 Using Live Pool Data', async () => {
         displayResults(
             `${file}.json`,
             testData.tradeInfo,
-            [v1SwapData, v2SwapData, v2WithFilterSwapData],
+            [v1SwapData, v2SwapData /*, v2WithFilterSwapData*/],
             false
         );
 
@@ -219,8 +220,8 @@ describe('Comparing V1/V2 Using Live Pool Data', async () => {
             file,
             testData,
             v1SwapData,
-            v2SwapData,
-            v2WithFilterSwapData
+            v2SwapData
+            // v2WithFilterSwapData
         );
 
         // All tests passed so no need to keep file
@@ -280,7 +281,7 @@ describe('Comparing V1/V2 Using Live Pool Data', async () => {
             swapAmount,
             { onChainBalances: onChainBalances }
         );
-
+        /*
         v2WithFilterSwapData = await getV2SwapWithFilter(
             provider,
             gasPrice,
@@ -293,6 +294,7 @@ describe('Comparing V1/V2 Using Live Pool Data', async () => {
             swapAmount,
             { onChainBalances: onChainBalances }
         );
+        */
 
         const testData = {
             tradeInfo: {
@@ -306,7 +308,7 @@ describe('Comparing V1/V2 Using Live Pool Data', async () => {
         displayResults(
             `${file}.json`,
             testData.tradeInfo,
-            [v1SwapData, v2SwapData, v2WithFilterSwapData],
+            [v1SwapData, v2SwapData /*, v2WithFilterSwapData*/],
             false
         );
 
@@ -314,8 +316,8 @@ describe('Comparing V1/V2 Using Live Pool Data', async () => {
             file,
             testData,
             v1SwapData,
-            v2SwapData,
-            v2WithFilterSwapData
+            v2SwapData
+            // v2WithFilterSwapData
         );
 
         // All tests passed so no need to keep file
@@ -375,7 +377,7 @@ describe('Comparing V1/V2 Using Live Pool Data', async () => {
             swapAmount,
             { onChainBalances: onChainBalances }
         );
-
+        /*
         v2WithFilterSwapData = await getV2SwapWithFilter(
             provider,
             gasPrice,
@@ -388,6 +390,7 @@ describe('Comparing V1/V2 Using Live Pool Data', async () => {
             swapAmount,
             { onChainBalances: onChainBalances }
         );
+        */
 
         const testData = {
             tradeInfo: {
@@ -401,7 +404,7 @@ describe('Comparing V1/V2 Using Live Pool Data', async () => {
         displayResults(
             `${file}.json`,
             testData.tradeInfo,
-            [v1SwapData, v2SwapData, v2WithFilterSwapData],
+            [v1SwapData, v2SwapData /*, v2WithFilterSwapData*/],
             false
         );
 
@@ -409,8 +412,8 @@ describe('Comparing V1/V2 Using Live Pool Data', async () => {
             file,
             testData,
             v1SwapData,
-            v2SwapData,
-            v2WithFilterSwapData
+            v2SwapData
+            // v2WithFilterSwapData
         );
 
         // All tests passed so no need to keep file
