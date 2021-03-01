@@ -67,8 +67,7 @@ describe('Run Large Amount Of Tests Using Saved Pools Data', async () => {
     );
 
     testFiles.forEach(async function(file) {
-        // for(let i = 0;i < testsPerPool;i++){
-        for (let i = 0; i < 1; i++) {
+        for (let i = 0; i < testsPerPool; i++) {
             await testSwap(`swapExactIn`, true, `${testDir}/${file}.json`);
             await testSwap(`swapExactIn`, false, `${testDir}/${file}.json`);
             await testSwap(`swapExactOut`, true, `${testDir}/${file}.json`);
