@@ -5,7 +5,9 @@
         "TokenOut": "0xba100000625a3754423978a60c9317c58a424e3d",
         "NoPools": 2,
         "SwapAmount": "81014119817736980",
-        "GasPrice": "30000000000"
+        "GasPrice": "30000000000",
+        "SwapAmountDecimals": "18",
+        "ReturnAmountDecimals": "18"
     },
     "pools": [
         {
