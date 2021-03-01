@@ -13,7 +13,7 @@ import {
 } from '../testHelpers';
 import { bnum } from '../../src/bmath';
 
-// Each pool will have 4 tests. Will always test each pool at least once.
+// Each pool will have 4 tests. Total number will be MIN_TESTS * 4 * NoPools. Will always test each pool at least once.
 const MIN_TESTS = 30;
 
 const provider = new JsonRpcProvider(
