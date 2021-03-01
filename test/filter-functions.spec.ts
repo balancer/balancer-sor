@@ -1,5 +1,5 @@
 // Tests multihop filter methods by comparing to old SOR getMultihopPoolsWithTokens function
-// which was replaced as too slow - uses allPoolsSmall.json for pool data.
+// which was replaced as too slow - uses subgraphPoolsSmall.json for pool data.
 import * as sor from '../src';
 import { assert } from 'chai';
 import 'mocha';
@@ -9,14 +9,14 @@ import { formatAndFilterPools } from './utils';
 // DAI, No USDC: 3
 // No DAI, USDC: 2
 // Neither: 3
-const allPools = require('./allPoolsSmall.json');
+const allPools = require('./testData/testPools/subgraphPoolsSmall.json');
 
 const DAI = '0x6B175474E89094C44Da98b954EedeAC495271d0F'.toLowerCase(); // DAI
 const USDC = '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48'.toLowerCase();
 
 let allTokensSet, allPoolsNonZeroBalances;
 
-describe('Test Filter Functions using allPoolsSmall.json & full SOR comparrions', () => {
+describe('Test Filter Functions using subgraphPoolsSmall.json & full SOR comparrions', () => {
     it('Saved pool check', async () => {
         assert.equal(allPools.pools.length, 12, 'Should be 12 pools');
 

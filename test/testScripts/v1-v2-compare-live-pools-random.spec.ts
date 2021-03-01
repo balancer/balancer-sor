@@ -2,18 +2,16 @@ require('dotenv').config();
 import { POOLS } from '@balancer-labs/sor';
 import { BigNumber } from 'bignumber.js';
 import { JsonRpcProvider } from '@ethersproject/providers';
-import { assert } from 'chai';
 import {
     getV1Swap,
     getV2Swap,
     getV2SwapWithFilter,
-    Tokens,
     getRandomTradeData,
     saveTestFile,
     deleteTestFile,
     displayResults,
     assertResults,
-} from './testHelpers';
+} from '../testHelpers';
 
 let tradeData;
 let tokenIn;
@@ -35,7 +33,7 @@ let v2SwapData;
 let v2WithFilterSwapData;
 let tokenInDecimals, tokenOutDecimals;
 
-// npx mocha -r ts-node/register test/v1-v2-compare-live-pools-random.spec.ts
+// npx mocha -r ts-node/register test/testScripts/v1-v2-compare-live-pools-random.spec.ts
 // This is using the live pools list from IPFS and on-chain balances so it’s non-deterministic.
 // It’s taking a random pair from a list of 10 tokens along with random swap amounts and max pools.
 // Compare V1 vs V2 and V2 vs V2 with filter.
@@ -67,7 +65,7 @@ describe('Comparing V1/V2 Using Live Pool Data', async () => {
             maxNoPools,
             swapAmount.toString(),
             gasPrice.toString(),
-            './test/testPools/'
+            './test/testData/testPools/'
         );
 
         v1SwapData = await getV1Swap(
@@ -145,7 +143,7 @@ describe('Comparing V1/V2 Using Live Pool Data', async () => {
             maxNoPools,
             swapAmount.toString(),
             gasPrice.toString(),
-            './test/testPools/'
+            './test/testData/testPools/'
         );
     }).timeout(100000);
 
@@ -167,7 +165,7 @@ describe('Comparing V1/V2 Using Live Pool Data', async () => {
             maxNoPools,
             swapAmount.toString(),
             gasPrice.toString(),
-            './test/testPools/'
+            './test/testData/testPools/'
         );
 
         v1SwapData = await getV1Swap(
@@ -244,7 +242,7 @@ describe('Comparing V1/V2 Using Live Pool Data', async () => {
             maxNoPools,
             swapAmount.toString(),
             gasPrice.toString(),
-            './test/testPools/'
+            './test/testData/testPools/'
         );
     }).timeout(100000);
 
@@ -266,7 +264,7 @@ describe('Comparing V1/V2 Using Live Pool Data', async () => {
             maxNoPools,
             swapAmount.toString(),
             gasPrice.toString(),
-            './test/testPools/'
+            './test/testData/testPools/'
         );
 
         v1SwapData = await getV1Swap(
@@ -344,7 +342,7 @@ describe('Comparing V1/V2 Using Live Pool Data', async () => {
             maxNoPools,
             swapAmount.toString(),
             gasPrice.toString(),
-            './test/testPools/'
+            './test/testData/testPools/'
         );
     }).timeout(100000);
 
@@ -366,7 +364,7 @@ describe('Comparing V1/V2 Using Live Pool Data', async () => {
             maxNoPools,
             swapAmount.toString(),
             gasPrice.toString(),
-            './test/testPools/'
+            './test/testData/testPools/'
         );
 
         v1SwapData = await getV1Swap(
@@ -444,7 +442,7 @@ describe('Comparing V1/V2 Using Live Pool Data', async () => {
             maxNoPools,
             swapAmount.toString(),
             gasPrice.toString(),
-            './test/testPools/'
+            './test/testData/testPools/'
         );
     }).timeout(100000);
 });

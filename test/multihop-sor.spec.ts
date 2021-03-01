@@ -1,4 +1,4 @@
-// Tests Multihop SOR vs static allPools.json file.
+// Tests Multihop SOR vs static sungraphPoolsLarge.json file.
 // Includes timing data.
 import * as sor from '../src';
 import { assert, expect } from 'chai';
@@ -16,8 +16,8 @@ import { BONE } from '../src/bmath';
 import { formatEther } from '@ethersproject/units';
 import { getTokenPairsMultiHop } from './utils';
 
-const allPools = require('./allPools.json');
-const disabledTokens = require('./disabled-tokens.json');
+const allPools = require('./testData/testPools/subgraphPoolsLarge.json');
+const disabledTokens = require('./testData/disabled-tokens.json');
 
 const WETH = '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2'; // WETH lower case
 const DAI = '0x6b175474e89094c44da98b954eedeac495271d0f'; // DAI lower case
@@ -28,7 +28,7 @@ const OCEAN = '0x985dd3d42de1e256d09e1c10f112bccb8015ad41';
 
 let allPoolsCorrect;
 
-describe('Tests Multihop SOR vs static allPools.json', () => {
+describe('Tests Multihop SOR vs static subgraphPoolsLarge.json', () => {
     it('Saved pool check - without disabled filter', async () => {
         // Uses saved pools @25/05/20.
         assert.equal(allPools.pools.length, 64, 'Should be 64 pools');

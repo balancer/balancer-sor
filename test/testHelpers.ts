@@ -763,6 +763,8 @@ export async function listTestFiles(TestFilesPath: string) {
 export function loadTestFile(File: string) {
     const fileString = fs.readFileSync(File, 'utf8');
     const fileJson = JSON.parse(fileString);
+    if (!fileJson.tradeInfo) return fileJson;
+
     fileJson.tradeInfo.GasPrice = new BigNumber(fileJson.tradeInfo.GasPrice);
     fileJson.tradeInfo.SwapAmount = new BigNumber(
         fileJson.tradeInfo.SwapAmount.split('.')[0] // This is getting rid of decimals that shouldn't be there.

@@ -12,8 +12,8 @@ import {
     alterPools,
 } from './utils';
 
-const allPools = require('./allPoolsDecimals.json');
-const disabledTokens = require('./disabled-tokens.json');
+const allPools = require('./testData/testPools/subgraphPoolsDecimalsTest.json');
+const disabledTokens = require('./testData/disabled-tokens.json');
 const WBTC = '0xe0C9275E44Ea80eF17579d33c55136b7DA269aEb'.toLowerCase();
 const MKR = '0xef13C0c8abcaf5767160018d268f9697aE4f5375'.toLowerCase();
 const USDC = '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48';

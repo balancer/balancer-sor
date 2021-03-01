@@ -23,13 +23,13 @@ const gasPrice = new BigNumber('30000000000');
 const chainId = 1;
 
 // npx mocha -r ts-node/register test/testScripts/v1-v2-compare-pools-random-large.spec.ts
-// This is using pools list from ./testPools which can change so it’s non-deterministic.
+// This is using pools list from ./testData/testPools which can change so it’s non-deterministic.
 // It’s taking a random pair from a list of 10 tokens along with random swap amounts and max pools.
 // Compare V1 vs V2 and V2 vs V2 with filter.
 // Assumes script running from root (see testDir if not).
 // Will do a large amount of tests and save any that fail. Change MIN_TESTS for number of tests to be run.
 describe('Run Large Amount Of Tests Using Saved Pools Data', async () => {
-    // This must be updated with pools of interest (see ./test/testPools)
+    // This must be updated with pools of interest (see ./test/testData/testPools)
     let testFiles = [
         // 'stable-pools-only-wbtc-to-sbtc-exactIn',
         // 'stable-pools-only-wbtc-to-sbtc-exactOut',
@@ -57,7 +57,7 @@ describe('Run Large Amount Of Tests Using Saved Pools Data', async () => {
     ];
 
     // Assumes script running from root
-    const testDir = `${process.cwd()}/test/testPools/`;
+    const testDir = `${process.cwd()}/test/testData/testPools/`;
 
     let testsPerPool = MIN_TESTS / testFiles.length;
     if (testsPerPool < 1) testsPerPool = 1;
@@ -116,7 +116,7 @@ async function testSwap(swapType, isSmall, file) {
             maxNoPools.toString(),
             swapAmount.toString(),
             gasPrice.toString(),
-            './test/testPools/'
+            './test/testData/testPools/'
         );
 
         let v1SwapData = await getV1Swap(
@@ -178,7 +178,7 @@ async function testSwap(swapType, isSmall, file) {
             maxNoPools.toString(),
             swapAmount.toString(),
             gasPrice.toString(),
-            './test/testPools/'
+            './test/testData/testPools/'
         );
     }).timeout(100000);
 }

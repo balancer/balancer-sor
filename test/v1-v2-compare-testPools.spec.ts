@@ -20,12 +20,12 @@ const provider = new JsonRpcProvider(
 );
 
 // npx mocha -r ts-node/register test/v1-v2-compare-testPools.spec.ts
-// This compare V1 vs V2 swaps and V2 vs V2 with filter swaps pools saved in ./test/testPools folder.
+// This compare V1 vs V2 swaps and V2 vs V2 with filter swaps pools saved in ./test/testData/testPools folder.
 // Does not use OnChain balances as the pools were originally saved after a failure and snapshot should have balances, etc that caused issues.
 // Compare V1 vs V2 and V2 vs V2 with filter.
 // !!! Note - testFiles array must be manually updated to contain pools of interest.
 describe('Run Tests From Saved Pools', () => {
-    // This must be updated with pools of interest (see ./test/testPools)
+    // This must be updated with pools of interest (see ./test/testData/testPools)
     let testFiles = [
         // 'stable-pools-only-wbtc-to-sbtc-exactIn',
         // 'stable-pools-only-wbtc-to-sbtc-exactOut',
@@ -50,15 +50,17 @@ describe('Run Tests From Saved Pools', () => {
         // '0xab11cdebd9d96f2f4d9d29f0df62de0640c457882d92435aff2a7c1049a0be6a',
         // '0xbdce4f52f4a863e9d137e44475cc913eb82154e9998819ce55846530dbd3025d',
         // '0xfab93b6aece1282a829e8bdcdf2a1aee193a10134279a0a16c989ca71644e85b',
-        // '0x80422d69eb9272c7b786f602bbce7caad3559a2bd714b5eafb254cfbdd26361c'
+        // '0x80422d69eb9272c7b786f602bbce7caad3559a2bd714b5eafb254cfbdd26361c',
     ];
 
-    const testDir = `${__dirname}/testPools/`;
+    const testDir = `${__dirname}/testData/testPools/`;
 
     testFiles.forEach(function(file) {
-        it(`${file}`, async () => {
-            const testData = loadTestFile(`${testDir}/${file}.json`);
+        const testData = loadTestFile(`${testDir}/${file}.json`);
 
+        if (!testData.tradeInfo) return;
+
+        it(`${file}`, async () => {
             let v1SwapData = await getV1Swap(
                 provider,
                 testData.tradeInfo.GasPrice,
