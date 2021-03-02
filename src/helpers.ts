@@ -844,7 +844,7 @@ export function updateTokenBalanceForPool(
 // so we can find the most liquid poolPairData considering the effect of uneven weigths
 export function getNormalizedLiquidity(poolPairData: PoolPairData): BigNumber {
     let { weightIn, weightOut, balanceIn, balanceOut, swapFee } = poolPairData;
-    return bdiv(bmul(balanceOut, weightIn), weightIn.plus(weightOut));
+    return balanceOut.times(weightIn).div(weightIn.plus(weightOut));
 }
 
 // LEGACY FUNCTION - Keep Input/Output Format
