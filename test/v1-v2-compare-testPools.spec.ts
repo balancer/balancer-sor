@@ -1,14 +1,8 @@
 require('dotenv').config();
-import { SOR, POOLS } from '@balancer-labs/sor';
-import { BigNumber } from 'bignumber.js';
 import { JsonRpcProvider } from '@ethersproject/providers';
-import { assert } from 'chai';
 import {
     getV1Swap,
     getV2Swap,
-    getV2SwapWithFilter,
-    Tokens,
-    listTestFiles,
     loadTestFile,
     displayResults,
     assertResults,

@@ -1,13 +1,9 @@
 import { BigNumber } from 'bignumber.js';
-import * as sor from '@balancer-labs/sor';
+import * as sorv1 from '@balancer-labs/sor';
 import * as sorv2 from '../../src';
 import {
-    SubGraphPool,
     SubGraphPools,
-    SubGraphToken,
     Pools,
-    Pool,
-    Token,
     PoolPairData,
     Swap,
     DisabledToken,
@@ -23,8 +19,6 @@ import {
     calcOutGivenIn,
     calcInGivenOut,
 } from '../../src/bmath';
-import { keccak256 } from '@ethersproject/keccak256';
-import { sha256 } from '@ethersproject/sha2';
 import { hashMessage } from '@ethersproject/hash';
 import * as fs from 'fs';
 import { readdir } from 'fs/promises';
@@ -33,7 +27,8 @@ import { assert, expect } from 'chai';
 import { getAddress } from '@ethersproject/address';
 import { parsePoolPairData } from '../../src/helpers';
 
-export const Tokens = {
+// Mainnet reference tokens with addresses & decimals
+const Tokens = {
     WETH: {
         address: '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2',
         decimals: 18,
@@ -96,29 +91,12 @@ export function formatAndFilterPools(AllSubgraphPools: SubGraphPools): Pools {
     }
 
     // Formats Subgraph to wei/bnum format
-    sor.formatSubgraphPools(allPoolsNonZeroBalances);
+    sorv2.formatSubgraphPools(allPoolsNonZeroBalances);
 
     return allPoolsNonZeroBalances;
 }
 
-// Filters for only pools with balance > 0 and converts to wei/bnum format.
-export function formatAndFilterPoolsV2(AllSubgraphPools: SubGraphPools): Pools {
-    let allPoolsNonZeroBalances: any = { pools: [] };
-
-    for (let pool of AllSubgraphPools.pools) {
-        // Only check first balance since AFAIK either all balances are zero or none are:
-        if (pool.tokens.length != 0)
-            if (pool.tokens[0].balance != '0')
-                allPoolsNonZeroBalances.pools.push(pool);
-    }
-
-    // Formats Subgraph to wei/bnum format
-    // sor.formatSubgraphPools(allPoolsNonZeroBalances);
-
-    return allPoolsNonZeroBalances;
-}
-
-// Filters for only pools with balance and converts to wei/bnum format.
+// Filters for only pools with balance and converts to wei/bnum format, returns token list too.
 export function formatAndFilterPoolsAndTokens(
     allPools: SubGraphPools,
     disabledTokens: DisabledToken[] = []
@@ -159,7 +137,7 @@ export function formatAndFilterPoolsAndTokens(
     );
 
     // Formats Subgraph to wei/bnum format
-    sor.formatSubgraphPools(allPoolsNonZeroBalances);
+    sorv2.formatSubgraphPools(allPoolsNonZeroBalances);
 
     return [allTokensSet, allPoolsNonZeroBalances];
 }
@@ -203,14 +181,14 @@ export async function getV1Swap(
     // Notice that outputToken is TokenOut if SwapType == 'swapExactIn' and TokenIn if SwapType == 'swapExactOut'
     let costOutputToken: BigNumber;
     if (SwapType === 'swapExactIn')
-        costOutputToken = await sor.getCostOutputToken(
+        costOutputToken = await sorv1.getCostOutputToken(
             TokenOut,
             GasPrice,
             swapCost,
             Provider
         );
     else
-        costOutputToken = await sor.getCostOutputToken(
+        costOutputToken = await sorv1.getCostOutputToken(
             TokenIn,
             GasPrice,
             swapCost,
@@ -223,7 +201,7 @@ export async function getV1Swap(
     if (Profiling.onChainBalances) {
         const getAllPoolDataOnChainStart = performance.now();
 
-        onChainPools = await sor.getAllPoolDataOnChain(
+        onChainPools = await sorv1.getAllPoolDataOnChain(
             weightedPools,
             MULTIADDR[ChainId],
             Provider
@@ -243,7 +221,7 @@ export async function getV1Swap(
     const filterPoolsStart = performance.now();
 
     let poolsTokenIn, poolsTokenOut, directPools, hopTokens;
-    [directPools, hopTokens, poolsTokenIn, poolsTokenOut] = sor.filterPools(
+    [directPools, hopTokens, poolsTokenIn, poolsTokenOut] = sorv1.filterPools(
         onChainPools.pools, // AllSubgraphPoolsCorrect.pools,
         TokenIn,
         TokenOut,
@@ -257,7 +235,7 @@ export async function getV1Swap(
     [
         mostLiquidPoolsFirstHop,
         mostLiquidPoolsSecondHop,
-    ] = sor.sortPoolsMostLiquid(
+    ] = sorv1.sortPoolsMostLiquid(
         TokenIn,
         TokenOut,
         hopTokens,
@@ -271,7 +249,7 @@ export async function getV1Swap(
     // Finds the possible paths to make the swap, each path can be a direct swap
     // or a multihop composed of 2 swaps
     let pools, pathData;
-    [pools, pathData] = sor.parsePoolData(
+    [pools, pathData] = sorv1.parsePoolData(
         directPools,
         TokenIn,
         TokenOut,
@@ -290,7 +268,7 @@ export async function getV1Swap(
     // balance of TokenIn (for swapExactIn) and 33.33% of the pool balance of TokenOut (for
     // swapExactOut)
     // 'paths' are ordered by ascending spot price
-    let paths = sor.processPaths(pathData, pools, SwapType);
+    let paths = sorv1.processPaths(pathData, pools, SwapType);
 
     const processPathsEnd = performance.now();
     const processEpsOfInterestMultiHopStart = performance.now();
@@ -303,7 +281,7 @@ export async function getV1Swap(
     //   - 'bestPathsIds' a list of the id of the best paths to get to this price and
     //   - 'amounts' a list of how much each path would need to trade to get to that price of
     //     interest
-    let epsOfInterest = sor.processEpsOfInterestMultiHop(
+    let epsOfInterest = sorv1.processEpsOfInterestMultiHop(
         paths,
         SwapType,
         MaxNoPools
@@ -315,7 +293,7 @@ export async function getV1Swap(
     // Returns 'swaps' which is the optimal list of swaps to make and
     // 'swapAmount' which is the total amount of TokenOut (eg. DAI) will be returned
     let swaps, returnAmount;
-    [swaps, returnAmount] = sor.smartOrderRouterMultiHopEpsOfInterest(
+    [swaps, returnAmount] = sorv1.smartOrderRouterMultiHopEpsOfInterest(
         pools,
         paths,
         SwapType,
@@ -410,11 +388,9 @@ export async function getV2Swap(
         const getAllPoolDataOnChainEnd = performance.now();
     } else {
         const getAllPoolDataOnChainStart = performance.now();
-        // console.log(`Using saved balances`)
-        // Helper - Filters for only pools with balance and converts to wei/bnum format.
-        onChainPools = formatAndFilterPoolsV2(
-            JSON.parse(JSON.stringify(AllSubgraphPools))
-        );
+        // V2 uses Subgraph normalized balances so no need to format
+        onChainPools = JSON.parse(JSON.stringify(AllSubgraphPools));
+
         const getAllPoolDataOnChainEnd = performance.now();
     }
 
@@ -562,11 +538,8 @@ export async function getV2SwapWithFilter(
         const getAllPoolDataOnChainEnd = performance.now();
     } else {
         const getAllPoolDataOnChainStart = performance.now();
-        // console.log(`Using saved balances`)
-        // Helper - Filters for only pools with balance and converts to wei/bnum format.
-        onChainPools = formatAndFilterPoolsV2(
-            JSON.parse(JSON.stringify(AllSubgraphPools))
-        );
+        // V2 uses Subgraph normalized balances so no need to format
+        onChainPools = JSON.parse(JSON.stringify(AllSubgraphPools));
         const getAllPoolDataOnChainEnd = performance.now();
     }
 
