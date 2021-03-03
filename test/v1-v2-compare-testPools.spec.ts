@@ -44,7 +44,7 @@ describe('Run Tests From Saved Pools', () => {
         // '0xab11cdebd9d96f2f4d9d29f0df62de0640c457882d92435aff2a7c1049a0be6a',
         // '0xbdce4f52f4a863e9d137e44475cc913eb82154e9998819ce55846530dbd3025d',
         // '0xfab93b6aece1282a829e8bdcdf2a1aee193a10134279a0a16c989ca71644e85b',
-        '0x80422d69eb9272c7b786f602bbce7caad3559a2bd714b5eafb254cfbdd26361c',
+        // '0x80422d69eb9272c7b786f602bbce7caad3559a2bd714b5eafb254cfbdd26361c',
     ];
 
     const testDir = `${__dirname}/testData/testPools/`;
@@ -84,7 +84,8 @@ describe('Run Tests From Saved Pools', () => {
                 testData.tradeInfo.SwapAmount.div(
                     bnum(10 ** testData.tradeInfo.SwapAmountDecimals)
                 ),
-                { onChainBalances: false }
+                { onChainBalances: false },
+                testData.tradeInfo.ReturnAmountDecimals
             );
             /*
             let v2WithFilterSwapData = await getV2SwapWithFilter(

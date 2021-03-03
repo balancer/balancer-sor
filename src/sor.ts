@@ -266,10 +266,7 @@ export const smartOrderRouter = (
         let improvementCondition: boolean = false;
         if (swapType === 'swapExactIn') {
             totalReturnConsideringFees = totalReturn.minus(
-                bmul(
-                    new BigNumber(totalNumberOfPools).times(BONE),
-                    costReturnToken
-                )
+                bnum(totalNumberOfPools).times(costReturnToken)
             );
             improvementCondition =
                 totalReturnConsideringFees.isGreaterThan(
@@ -277,10 +274,7 @@ export const smartOrderRouter = (
                 ) || b === 1; // b === 1 means its the first iteration so bestTotalReturnConsideringFees isn't currently a value
         } else {
             totalReturnConsideringFees = totalReturn.plus(
-                bmul(
-                    new BigNumber(totalNumberOfPools).times(BONE),
-                    costReturnToken
-                )
+                bnum(totalNumberOfPools).times(costReturnToken)
             );
             improvementCondition =
                 totalReturnConsideringFees.isLessThan(

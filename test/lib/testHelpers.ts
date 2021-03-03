@@ -337,7 +337,8 @@ export async function getV2Swap(
     SwapAmount: BigNumber,
     Profiling: Profiling = {
         onChainBalances: true,
-    }
+    },
+    ReturnAmountDecimals: number
 ) {
     TokenIn = TokenIn.toLowerCase();
     TokenOut = TokenOut.toLowerCase();
@@ -372,6 +373,9 @@ export async function getV2Swap(
             swapCost,
             Provider
         );
+
+    // Normalize to ReturnAmountDecimals
+    costOutputToken = costOutputToken.div(bnum(10 ** ReturnAmountDecimals));
 
     const getCostOutputTokenEnd = performance.now();
     let onChainPools;
