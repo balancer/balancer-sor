@@ -107,3 +107,19 @@ export interface DisabledToken {
     address: string;
     symbol: string;
 }
+
+export interface SwapV2 {
+    poolId: string;
+    tokenInIndex: number;
+    tokenOutIndex: number;
+    amountIn: string;
+    userData: string;
+}
+
+export interface SwapInfo {
+    tokenAddresses: string[];
+    swaps: SwapV2[];
+    tradeAmount: BigNumber;
+    tokenIn: string;
+    tokenOut: string;
+}

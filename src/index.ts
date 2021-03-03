@@ -14,4 +14,4 @@ export { bmath };
 // export { stableMath_sol };
 export { getCostOutputToken } from './costToken';
 export { POOLS } from './pools';
-// export { SOR } from './wrapper';
+export { SOR } from './wrapper';
