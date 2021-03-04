@@ -110,7 +110,7 @@ export function getOutputAmountSwap(
     let poolType = poolPairData.poolType;
     let Bi = poolPairData.balanceIn;
     let Bo = poolPairData.balanceOut;
-    let f = poolPairData.swapFee.div(bnum(1000000000000000000));
+    let f = poolPairData.swapFee;
     let wi, wo, amp, allBalances, tokenIndexIn, tokenIndexOut;
     if (poolType == 'Weighted') {
         wi = poolPairData.weightIn;
@@ -259,7 +259,7 @@ export function getSpotPriceAfterSwap(
     let poolType = poolPairData.poolType;
     let Bi = poolPairData.balanceIn;
     let Bo = poolPairData.balanceOut;
-    let f = poolPairData.swapFee.div(bnum(1000000000000000000));
+    let f = poolPairData.swapFee;
     let wi, wo, amp, allBalances, tokenIndexIn, tokenIndexOut;
     if (poolType == 'Weighted') {
         wi = poolPairData.weightIn;
@@ -284,9 +284,7 @@ export function getSpotPriceAfterSwap(
                 let wi = poolPairData.weightIn.toNumber();
                 let wo = poolPairData.weightOut.toNumber();
                 let Ai = amount.toNumber();
-                let f = poolPairData.swapFee
-                    .div(bnum(1000000000000000000))
-                    .toNumber();
+                let f = poolPairData.swapFee.toNumber();
                 return bnum(
                     -(
                         (Bi * wo) /
@@ -320,9 +318,7 @@ export function getSpotPriceAfterSwap(
                 let wi = poolPairData.weightIn.toNumber();
                 let wo = poolPairData.weightOut.toNumber();
                 let Ao = amount.toNumber();
-                let f = poolPairData.swapFee
-                    .div(bnum(1000000000000000000))
-                    .toNumber();
+                let f = poolPairData.swapFee.toNumber();
                 // return -((Bi*(Bo/(-Ao+Bo))**((wi+wo)/wi)*wo)/(Bo*(-1+f)*wi))
                 return bnum(
                     -(
@@ -403,7 +399,7 @@ export function getDerivativeSpotPriceAfterSwap(
     let poolType = poolPairData.poolType;
     let Bi = poolPairData.balanceIn;
     let Bo = poolPairData.balanceOut;
-    let f = poolPairData.swapFee.div(bnum(1000000000000000000));
+    let f = poolPairData.swapFee;
     let wi, wo, amp, allBalances, tokenIndexIn, tokenIndexOut;
     if (poolType == 'Weighted') {
         wi = poolPairData.weightIn;
@@ -428,9 +424,7 @@ export function getDerivativeSpotPriceAfterSwap(
                 let wi = poolPairData.weightIn.toNumber();
                 let wo = poolPairData.weightOut.toNumber();
                 let Ai = amount.toNumber();
-                let f = poolPairData.swapFee
-                    .div(bnum(1000000000000000000))
-                    .toNumber();
+                let f = poolPairData.swapFee.toNumber();
                 // return (wi+wo)/(Bo*(Bi/(Ai+Bi-Ai*f))**(wi/wo)*wi)
                 return bnum(
                     (wi + wo) /
@@ -460,9 +454,7 @@ export function getDerivativeSpotPriceAfterSwap(
                 let wi = poolPairData.weightIn.toNumber();
                 let wo = poolPairData.weightOut.toNumber();
                 let Ao = amount.toNumber();
-                let f = poolPairData.swapFee
-                    .div(bnum(1000000000000000000))
-                    .toNumber();
+                let f = poolPairData.swapFee.toNumber();
                 // return -((Bi*(Bo/(-Ao + Bo))**(wo/wi)*wo*(wi + wo))/((Ao - Bo)**2*(-1 + f)*wi**2))
                 return bnum(
                     -(
@@ -1088,4 +1080,18 @@ export function sortPoolsMostLiquid(
     }
 
     return [mostLiquidPoolsFirstHop, mostLiquidPoolsSecondHop];
+}
+
+export function normalizePools(pools) {
+    let normalizedPools = { pools: [] };
+    for (let i = 0; i < pools.pools.length; i++) {
+        let normalizedPool = pools.pools[i];
+        normalizedPool.tokens.forEach(token => {
+            token.balance = scale(token.balance, -token.decimals);
+        });
+
+        normalizedPools.pools.push(normalizedPool);
+    }
+
+    return normalizedPools;
 }

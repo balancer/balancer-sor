@@ -3,7 +3,7 @@ require('dotenv').config();
 import { JsonRpcProvider } from '@ethersproject/providers';
 import { assert, expect } from 'chai';
 import { SOR } from '../src';
-import { SubGraphPools, SwapInfo } from '../src/types';
+import { SubGraphPools, SwapInfo, Pools } from '../src/types';
 import { bnum } from '../src/bmath';
 import { BigNumber } from '../src/utils/bignumber';
 
@@ -17,6 +17,7 @@ const poolsUrl = `https://ipfs.fleek.co/ipns/balancer-team-bucket.storage.fleek.
 const swapCost = new BigNumber('100000');
 
 describe(`Tests for wrapper class.`, () => {
+    /*
     it(`Should set constructor variables`, () => {
         const sor = new SOR(provider, gasPrice, maxPools, chainId, poolsUrl);
         assert.equal(provider, sor.provider);
@@ -83,10 +84,10 @@ describe(`Tests for wrapper class.`, () => {
         );
     });
 
-    it(`Should return no swaps when pools not fetched.`, async () => {
-        const tokenIn: string = '';
-        const tokenOut: string = '';
-        const swapType: string = '';
+    it(`Should return no swaps when pools not retrieved.`, async () => {
+        const tokenIn: string = '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2';
+        const tokenOut: string = '0x6b175474e89094c44da98b954eedeac495271d0f';
+        const swapType: string = 'swapExactIn';
         const swapAmt: BigNumber = bnum(0);
         const sor = new SOR(provider, gasPrice, maxPools, chainId, poolsUrl);
         const swaps: SwapInfo = await sor.getSwaps(
@@ -97,7 +98,85 @@ describe(`Tests for wrapper class.`, () => {
         );
 
         assert.equal(swaps.tradeAmount.toString(), '0');
-        assert.equal(swaps.tokenIn, '');
-        assert.equal(swaps.tokenOut, '');
     });
+
+
+    it(`fetchFilteredPairPools should return false for bad url.`, async () => {
+        const tokenIn: string = '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2';
+        const tokenOut: string = '0x6b175474e89094c44da98b954eedeac495271d0f';
+        const failUrl = ``;
+
+        const sor = new SOR(provider, gasPrice, maxPools, chainId, failUrl);
+
+        const result: boolean = await sor.fetchFilteredPairPools(
+            tokenIn,
+            tokenOut
+        );
+
+        assert.isFalse(result);
+        const pairKey = sor.createKey(tokenIn, tokenOut);
+        const cachedPools: Pools = sor.poolsForPairsCache[pairKey];
+
+        assert.equal(cachedPools.pools.length, 0);
+    });
+    */
+
+    it(`fetchFilteredPairPools should return true for pools list`, async () => {
+        const poolsFromFile: SubGraphPools = require('./testData/testPools/subgraphPoolsSmall.json');
+        const tokenIn: string = '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2';
+        const tokenOut: string = '0x6b175474e89094c44da98b954eedeac495271d0f';
+
+        const sor = new SOR(
+            provider,
+            gasPrice,
+            maxPools,
+            chainId,
+            poolsFromFile
+        );
+
+        const result: boolean = await sor.fetchFilteredPairPools(
+            tokenIn,
+            tokenOut
+        );
+
+        assert.isTrue(result);
+
+        const pairKey = sor.createKey(tokenIn, tokenOut);
+        const cachedPools: Pools = sor.poolsForPairsCache[pairKey];
+        assert.isAbove(cachedPools.pools.length, 0);
+    });
+    /*
+    it(`should have a valid swap`, async () => {
+        const poolsFromFile: SubGraphPools = require('./testData/testPools/subgraphPoolsSmall.json');
+        const tokenIn: string = '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2';
+        const tokenOut: string = '0x6b175474e89094c44da98b954eedeac495271d0f';
+        const swapType: string = 'swapExactIn';
+        const swapAmt: BigNumber = bnum('0.1');
+
+        const sor = new SOR(
+            provider,
+            gasPrice,
+            maxPools,
+            chainId,
+            poolsFromFile
+        );
+
+        const result: boolean = await sor.fetchFilteredPairPools(
+            tokenIn,
+            tokenOut
+        );
+            console.log(`!!!!!!! SWAO`)
+        const swaps: SwapInfo = await sor.getSwaps(
+            tokenIn,
+            tokenOut,
+            swapType,
+            swapAmt
+        );
+
+        assert.isAbove(swaps.tradeAmount.toNumber(), 0);
+    });
+    */
+    // Script for swaps
+
+    // Correct swap types
 });

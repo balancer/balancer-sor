@@ -17,11 +17,8 @@ export class POOLS {
 
             let p: Pool = {
                 id: pools.pools[i].id,
-                swapFee: bmath.scale(bmath.bnum(pools.pools[i].swapFee), 18),
-                totalWeight: bmath.scale(
-                    bmath.bnum(pools.pools[i].totalWeight),
-                    18
-                ),
+                swapFee: bmath.bnum(pools.pools[i].swapFee),
+                totalWeight: bmath.bnum(pools.pools[i].totalWeight),
                 tokens: tokens,
                 tokensList: pools.pools[i].tokensList,
             };
@@ -31,12 +28,9 @@ export class POOLS {
 
                 p.tokens.push({
                     address: token.address,
-                    balance: bmath.scale(bmath.bnum(token.balance), decimals),
+                    balance: bmath.bnum(token.balance),
                     decimals: decimals,
-                    denormWeight: bmath.scale(
-                        bmath.bnum(token.denormWeight),
-                        18
-                    ),
+                    denormWeight: bmath.bnum(token.denormWeight),
                 });
             });
             onChainPools.pools.push(p);

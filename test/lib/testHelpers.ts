@@ -340,6 +340,7 @@ export async function getV2Swap(
     },
     ReturnAmountDecimals: number
 ) {
+    console.log(`AMT: ${SwapAmount.toString()}`);
     TokenIn = TokenIn.toLowerCase();
     TokenOut = TokenOut.toLowerCase();
 
