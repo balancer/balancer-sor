@@ -73,6 +73,10 @@ const Tokens = {
         address: '0xc00e94cb662c3520282e6f5717214004a7f26888',
         decimals: 18,
     },
+    GUSD: {
+        address: '0x056fd409e1d7a124bd7017459dfea2f387b6d5cd',
+        decimals: 2,
+    },
 };
 
 interface Profiling {

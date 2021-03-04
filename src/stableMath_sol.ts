@@ -89,7 +89,7 @@ export function _invariant(
 //     return invariantValueFunction;
 // }
 
-// Adapted from StableMath.sol
+// Adapted from StableMath.sol, _outGivenIn()
 // * Added swap fee at very first line
 /**********************************************************************************************
     // outGivenIn token x for y - polynomial equation to solve                                   //
@@ -102,7 +102,7 @@ export function _invariant(
     // S = sum of final balances but y                                                           //
     // P = product of final balances but y                                                       //
     **********************************************************************************************/
-export function _outGivenIn(
+export function _exactTokenInForTokenOut(
     amp: BigNumber,
     balances: BigNumber[],
     tokenIndexIn: number,
@@ -142,7 +142,7 @@ export function _outGivenIn(
     return balances[tokenIndexOut].minus(y);
 }
 
-// Adapted from StableMath.sol
+// Adapted from StableMath.sol, _inGivenOut()
 // * Added swap fee at very last line
 /**********************************************************************************************
     // inGivenOut token x for y - polynomial equation to solve                                   //
@@ -155,7 +155,7 @@ export function _outGivenIn(
     // S = sum of final balances but x                                                           //
     // P = product of final balances but x                                                       //
     **********************************************************************************************/
-export function _inGivenOut(
+export function _tokenInForExactTokenOut(
     amp: BigNumber,
     balances: BigNumber[],
     tokenIndexIn: number,
@@ -262,7 +262,7 @@ export function _solveAnalyticalBalance(
 Adapted from StableMath.sol _exactTokensInForBPTOut() 
     * renamed it to _exactTokenInForBPTOut (i.e. just one token in)
 */
-function _exactTokenInForBPTOut(
+export function _exactTokenInForBPTOut(
     amp: BigNumber,
     balances: BigNumber[],
     bptTotalSupply: BigNumber,
@@ -312,7 +312,7 @@ Flow of calculations:
 amountBPTOut -> newInvariant -> (amountInProportional, amountInAfterFee) ->
 amountInPercentageExcess -> amountIn
 */
-function _tokenInForExactBPTOut(
+export function _tokenInForExactBPTOut(
     amp: BigNumber,
     balances: BigNumber[],
     bptTotalSupply: BigNumber,
@@ -357,7 +357,7 @@ function _tokenInForExactBPTOut(
 Adapted from StableMath.sol _BPTInForExactTokensOut() to reduce it to 
 _BPTInForExactTokenOut (i.e. just one token out)
 */
-function _BPTInForExactTokenOut(
+export function _BPTInForExactTokenOut(
     amp: BigNumber,
     balances: BigNumber[],
     bptTotalSupply: BigNumber,
@@ -406,7 +406,7 @@ Flow of calculations:
 amountBPTin -> newInvariant -> (amountOutProportional, amountOutBeforeFee) ->
 amountOutPercentageExcess -> amountOut
 */
-function _exactBPTInForTokenOut(
+export function _exactBPTInForTokenOut(
     amp: BigNumber,
     balances: BigNumber[],
     bptTotalSupply: BigNumber,
@@ -455,7 +455,7 @@ function _exactBPTInForTokenOut(
 ////  These functions have been added exclusively for the SORv2
 //////////////////////
 
-export function _derivative(f: Function, input: any): BigNumber {
+export function _derivative(func: Function, input: any): BigNumber {
     let amp = input.amp;
     let balances = input.balances;
     let tokenIndexIn = input.tokenIndexIn;
@@ -466,7 +466,7 @@ export function _derivative(f: Function, input: any): BigNumber {
     let delta = amount.times(0.0001);
     let prevDerivative = bnum(0);
     let derivative = bnum(0);
-    let amountIn = f(
+    let amountIn = func(
         amp,
         balances,
         tokenIndexIn,
@@ -475,7 +475,7 @@ export function _derivative(f: Function, input: any): BigNumber {
         swapFee
     );
     for (let i = 0; i < 255; i++) {
-        let amountInDelta = f(
+        let amountInDelta = func(
             amp,
             balances,
             tokenIndexIn,
@@ -514,7 +514,7 @@ export function _derivative(f: Function, input: any): BigNumber {
 
 // PairType = 'token-token'
 // SwapType = 'swapExactIn'
-export function _spotPriceAfterSwapOutGivenIn(
+export function _spotPriceAfterSwapExactTokenInForTokenOut(
     amp: BigNumber,
     balances: BigNumber[],
     tokenIndexIn: number,
@@ -530,12 +530,12 @@ export function _spotPriceAfterSwapOutGivenIn(
         amount: tokenAmountIn,
         swapFee: swapFee,
     };
-    return bnum(1).div(_derivative(_outGivenIn, input));
+    return bnum(1).div(_derivative(_exactTokenInForTokenOut, input));
 }
 
 // PairType = 'token-token'
 // SwapType = 'swapExactOut'
-export function _spotPriceAfterSwapInGivenOut(
+export function _spotPriceAfterSwapTokenInForExactTokenOut(
     amp: BigNumber,
     balances: BigNumber[],
     tokenIndexIn: number,
@@ -551,24 +551,24 @@ export function _spotPriceAfterSwapInGivenOut(
         amount: tokenAmountOut,
         swapFee: swapFee,
     };
-    return _derivative(_inGivenOut, input);
+    return _derivative(_tokenInForExactTokenOut, input);
 }
 
 // PairType = 'token-BPT'
 // SwapType = 'swapExactIn'
-export function _spotPriceAfterSwapBptOutGivenTokenIn(
+export function _spotPriceAfterSwapExactTokenInForBPTOut(
     amp: BigNumber,
     balances: BigNumber[],
+    bptTotalSupply: BigNumber,
     tokenIndexIn: number,
-    tokenIndexOut: number,
     tokenAmountIn: BigNumber,
     swapFee: BigNumber
 ): BigNumber {
     let input = {
         amp: amp,
         balances: balances,
+        bptTotalSupply: bptTotalSupply,
         tokenIndexIn: tokenIndexIn,
-        tokenIndexOut: tokenIndexOut,
         amount: tokenAmountIn,
         swapFee: swapFee,
     };
@@ -577,19 +577,19 @@ export function _spotPriceAfterSwapBptOutGivenTokenIn(
 
 // PairType = 'token-BPT'
 // SwapType = 'swapExactOut'
-export function _spotPriceAfterSwapTokenInGivenBptOut(
+export function _spotPriceAfterSwapTokenInForExactBPTOut(
     amp: BigNumber,
     balances: BigNumber[],
+    bptTotalSupply: BigNumber,
     tokenIndexIn: number,
-    tokenIndexOut: number,
     bptAmountOut: BigNumber,
     swapFee: BigNumber
 ): BigNumber {
     let input = {
         amp: amp,
         balances: balances,
+        bptTotalSupply: bptTotalSupply,
         tokenIndexIn: tokenIndexIn,
-        tokenIndexOut: tokenIndexOut,
         amount: bptAmountOut,
         swapFee: swapFee,
     };
@@ -598,10 +598,10 @@ export function _spotPriceAfterSwapTokenInGivenBptOut(
 
 // PairType = 'BPT-token'
 // SwapType = 'swapExactIn'
-export function _spotPriceAfterSwapTokenOutGivenBptIn(
+export function _spotPriceAfterSwapExactBPTInForTokenOut(
     amp: BigNumber,
     balances: BigNumber[],
-    tokenIndexIn: number,
+    bptTotalSupply: BigNumber,
     tokenIndexOut: number,
     bptAmountIn: BigNumber,
     swapFee: BigNumber
@@ -609,7 +609,7 @@ export function _spotPriceAfterSwapTokenOutGivenBptIn(
     let input = {
         amp: amp,
         balances: balances,
-        tokenIndexIn: tokenIndexIn,
+        bptTotalSupply: bptTotalSupply,
         tokenIndexOut: tokenIndexOut,
         amount: bptAmountIn,
         swapFee: swapFee,
@@ -619,10 +619,10 @@ export function _spotPriceAfterSwapTokenOutGivenBptIn(
 
 // PairType = 'BPT-token'
 // SwapType = 'swapExactOut'
-export function _spotPriceAfterSwapBptInGivenTokenOut(
+export function _spotPriceAfterSwapBPTInForExactTokenOut(
     amp: BigNumber,
     balances: BigNumber[],
-    tokenIndexIn: number,
+    bptTotalSupply: BigNumber,
     tokenIndexOut: number,
     tokenAmountOut: BigNumber,
     swapFee: BigNumber
@@ -630,7 +630,7 @@ export function _spotPriceAfterSwapBptInGivenTokenOut(
     let input = {
         amp: amp,
         balances: balances,
-        tokenIndexIn: tokenIndexIn,
+        bptTotalSupply: bptTotalSupply,
         tokenIndexOut: tokenIndexOut,
         amount: tokenAmountOut,
         swapFee: swapFee,
@@ -644,7 +644,7 @@ export function _spotPriceAfterSwapBptInGivenTokenOut(
 
 // PairType = 'token-token'
 // SwapType = 'swapExactIn'
-export function _derivativeSpotPriceAfterSwapOutGivenIn(
+export function _derivativeSpotPriceAfterSwapExactTokenInForTokenOut(
     amp: BigNumber,
     balances: BigNumber[],
     tokenIndexIn: number,
@@ -660,12 +660,12 @@ export function _derivativeSpotPriceAfterSwapOutGivenIn(
         amount: tokenAmountIn,
         swapFee: swapFee,
     };
-    return _derivative(_spotPriceAfterSwapOutGivenIn, input);
+    return _derivative(_spotPriceAfterSwapExactTokenInForTokenOut, input);
 }
 
 // PairType = 'token-token'
 // SwapType = 'swapExactOut'
-export function _derivativeSpotPriceAfterSwapInGivenOut(
+export function _derivativeSpotPriceAfterSwapTokenInForExactTokenOut(
     amp: BigNumber,
     balances: BigNumber[],
     tokenIndexIn: number,
@@ -681,57 +681,57 @@ export function _derivativeSpotPriceAfterSwapInGivenOut(
         amount: tokenAmountOut,
         swapFee: swapFee,
     };
-    return _derivative(_spotPriceAfterSwapInGivenOut, input);
+    return _derivative(_spotPriceAfterSwapTokenInForExactTokenOut, input);
 }
 
 // PairType = 'token-BPT'
 // SwapType = 'swapExactIn'
-export function _derivativeSpotPriceAfterSwapBptOutGivenTokenIn(
+export function _derivativeSpotPriceAfterSwapExactTokenInForBPTOut(
     amp: BigNumber,
     balances: BigNumber[],
+    bptTotalSupply: BigNumber,
     tokenIndexIn: number,
-    tokenIndexOut: number,
     tokenAmountIn: BigNumber,
     swapFee: BigNumber
 ): BigNumber {
     let input = {
         amp: amp,
         balances: balances,
+        bptTotalSupply: bptTotalSupply,
         tokenIndexIn: tokenIndexIn,
-        tokenIndexOut: tokenIndexOut,
         amount: tokenAmountIn,
         swapFee: swapFee,
     };
-    return _derivative(_spotPriceAfterSwapBptOutGivenTokenIn, input);
+    return _derivative(_spotPriceAfterSwapExactTokenInForBPTOut, input);
 }
 
 // PairType = 'token-BPT'
 // SwapType = 'swapExactOut'
-export function _derivativeSpotPriceAfterSwapTokenInGivenBptOut(
+export function _derivativeSpotPriceAfterSwapTokenInForExactBPTOut(
     amp: BigNumber,
     balances: BigNumber[],
+    bptTotalSupply: BigNumber,
     tokenIndexIn: number,
-    tokenIndexOut: number,
     bptAmountOut: BigNumber,
     swapFee: BigNumber
 ): BigNumber {
     let input = {
         amp: amp,
         balances: balances,
+        bptTotalSupply: bptTotalSupply,
         tokenIndexIn: tokenIndexIn,
-        tokenIndexOut: tokenIndexOut,
         amount: bptAmountOut,
         swapFee: swapFee,
     };
-    return _derivative(_spotPriceAfterSwapTokenInGivenBptOut, input);
+    return _derivative(_spotPriceAfterSwapTokenInForExactBPTOut, input);
 }
 
 // PairType = 'BPT-token'
 // SwapType = 'swapExactIn'
-export function _derivativeSpotPriceAfterSwapTokenOutGivenBptIn(
+export function _derivativeSpotPriceAfterSwapExactBPTInForTokenOut(
     amp: BigNumber,
     balances: BigNumber[],
-    tokenIndexIn: number,
+    bptTotalSupply: BigNumber,
     tokenIndexOut: number,
     bptAmountIn: BigNumber,
     swapFee: BigNumber
@@ -739,20 +739,20 @@ export function _derivativeSpotPriceAfterSwapTokenOutGivenBptIn(
     let input = {
         amp: amp,
         balances: balances,
-        tokenIndexIn: tokenIndexIn,
+        bptTotalSupply: bptTotalSupply,
         tokenIndexOut: tokenIndexOut,
         amount: bptAmountIn,
         swapFee: swapFee,
     };
-    return _derivative(_spotPriceAfterSwapTokenOutGivenBptIn, input);
+    return _derivative(_spotPriceAfterSwapExactBPTInForTokenOut, input);
 }
 
 // PairType = 'BPT-token'
 // SwapType = 'swapExactOut'
-export function _derivativeSpotPriceAfterSwapBptInGivenTokenOut(
+export function _derivativeSpotPriceAfterSwapBPTInForExactTokenOut(
     amp: BigNumber,
     balances: BigNumber[],
-    tokenIndexIn: number,
+    bptTotalSupply: BigNumber,
     tokenIndexOut: number,
     tokenAmountOut: BigNumber,
     swapFee: BigNumber
@@ -760,10 +760,10 @@ export function _derivativeSpotPriceAfterSwapBptInGivenTokenOut(
     let input = {
         amp: amp,
         balances: balances,
-        tokenIndexIn: tokenIndexIn,
+        bptTotalSupply: bptTotalSupply,
         tokenIndexOut: tokenIndexOut,
         amount: tokenAmountOut,
         swapFee: swapFee,
     };
-    return _derivative(_spotPriceAfterSwapBptInGivenTokenOut, input);
+    return _derivative(_spotPriceAfterSwapBPTInForExactTokenOut, input);
 }

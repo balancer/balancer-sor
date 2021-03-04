@@ -108,6 +108,7 @@ export function getOutputAmountSwap(
     amount: BigNumber
 ): BigNumber {
     let poolType = poolPairData.poolType;
+    let pairType = poolPairData.pairType;
     let Bi = poolPairData.balanceIn;
     let Bo = poolPairData.balanceOut;
     let f = poolPairData.swapFee;
@@ -129,25 +130,51 @@ export function getOutputAmountSwap(
         } else {
             let Ai = amount;
             if (poolType == 'Weighted') {
-                // Bo * (1 - (Bi / (Bi + Ai * (1 - f))) ** (wi / wo));
-                return Bo.times(
-                    bnum(1).minus(
-                        bnum(
-                            Bi.div(
-                                Bi.plus(Ai.times(bnum(1).minus(f)))
-                            ).toNumber() ** wi.div(wo).toNumber()
+                if (pairType == 'token-token') {
+                    // Bo * (1 - (Bi / (Bi + Ai * (1 - f))) ** (wi / wo));
+                    return Bo.times(
+                        bnum(1).minus(
+                            bnum(
+                                Bi.div(
+                                    Bi.plus(Ai.times(bnum(1).minus(f)))
+                                ).toNumber() ** wi.div(wo).toNumber()
+                            )
                         )
-                    )
-                );
+                    );
+                } else if (pairType == 'token-BPT') {
+                    throw 'Still have to write equations';
+                } else if (pairType == 'BPT-token') {
+                    throw 'Still have to write equations';
+                }
             } else if (poolType == 'Stable') {
-                return stableMath_sol._outGivenIn(
-                    amp,
-                    allBalances,
-                    tokenIndexIn,
-                    tokenIndexOut,
-                    amount,
-                    f
-                );
+                if (pairType == 'token-token') {
+                    return stableMath_sol._exactTokenInForTokenOut(
+                        amp,
+                        allBalances,
+                        tokenIndexIn,
+                        tokenIndexOut,
+                        amount,
+                        f
+                    );
+                } else if (pairType == 'token-BPT') {
+                    return stableMath_sol._exactTokenInForBPTOut(
+                        amp,
+                        allBalances,
+                        Bo, // bptTotalSupply
+                        tokenIndexIn,
+                        amount,
+                        f
+                    );
+                } else if (pairType == 'BPT-token') {
+                    return stableMath_sol._exactBPTInForTokenOut(
+                        amp,
+                        allBalances,
+                        Bi, // bptTotalSupply
+                        tokenIndexOut,
+                        amount,
+                        f
+                    );
+                }
             }
         }
     } else {
@@ -157,22 +184,48 @@ export function getOutputAmountSwap(
             let Ao = amount;
             if (Ao.gte(Bo)) return bnum('Infinity');
             if (poolType == 'Weighted') {
-                // return (Bi*(-1 + (Bo/(-Ao + Bo))**(wo/wi)))/(1 - f)
-                return Bi.times(
-                    bnum(-1).plus(
-                        Bo.div(Bo.minus(Ao)).toNumber() ** wo.div(wi).toNumber()
-                    )
-                ).div(bnum(1).minus(f));
+                if (pairType == 'token-token') {
+                    // return (Bi*(-1 + (Bo/(-Ao + Bo))**(wo/wi)))/(1 - f)
+                    return Bi.times(
+                        bnum(-1).plus(
+                            Bo.div(Bo.minus(Ao)).toNumber() **
+                                wo.div(wi).toNumber()
+                        )
+                    ).div(bnum(1).minus(f));
+                } else if (pairType == 'token-BPT') {
+                    throw 'Still have to write equations';
+                } else if (pairType == 'BPT-token') {
+                    throw 'Still have to write equations';
+                }
             } else if (poolType == 'Stable') {
-                // return -Bi+(DD*(A-n**(-n))+((4*A*Bi*Bo*DD**(1+n))/((-Ao+Bo)*n**(2*n)*P)+(DD/n**n-A*(Ao+Bi+DD-S))**2)**0.5+A*(Ao+Bi-S))/(2.*A)
-                return stableMath_sol._inGivenOut(
-                    amp,
-                    allBalances,
-                    tokenIndexIn,
-                    tokenIndexOut,
-                    amount,
-                    f
-                );
+                if (pairType == 'token-token') {
+                    return stableMath_sol._tokenInForExactTokenOut(
+                        amp,
+                        allBalances,
+                        tokenIndexIn,
+                        tokenIndexOut,
+                        amount,
+                        f
+                    );
+                } else if (pairType == 'token-BPT') {
+                    return stableMath_sol._tokenInForExactBPTOut(
+                        amp,
+                        allBalances,
+                        Bo, // bptTotalSupply
+                        tokenIndexIn,
+                        amount,
+                        f
+                    );
+                } else if (pairType == 'BPT-token') {
+                    return stableMath_sol._BPTInForExactTokenOut(
+                        amp,
+                        allBalances,
+                        Bi, // bptTotalSupply
+                        tokenIndexOut,
+                        amount,
+                        f
+                    );
+                }
             }
         }
     }
@@ -233,8 +286,9 @@ export function getEffectivePriceSwapForPath(
     swapType: string,
     amount: BigNumber
 ): BigNumber {
-    if (amount.isZero()) {
+    if (amount.lt(bnum(10 ** -10))) {
         // Return spot price as code below would be 0/0 = undefined
+        // or small_amount/0 or 0/small_amount which would cause bugs
         return getSpotPriceAfterSwapForPath(pools, path, swapType, amount);
     }
     let outputAmountSwap = getOutputAmountSwapForPath(
@@ -257,6 +311,7 @@ export function getSpotPriceAfterSwap(
     amount: BigNumber
 ): BigNumber {
     let poolType = poolPairData.poolType;
+    let pairType = poolPairData.pairType;
     let Bi = poolPairData.balanceIn;
     let Bo = poolPairData.balanceOut;
     let f = poolPairData.swapFee;
@@ -285,24 +340,50 @@ export function getSpotPriceAfterSwap(
                 let wo = poolPairData.weightOut.toNumber();
                 let Ai = amount.toNumber();
                 let f = poolPairData.swapFee.toNumber();
-                return bnum(
-                    -(
-                        (Bi * wo) /
-                        (Bo *
-                            (-1 + f) *
-                            (Bi / (Ai + Bi - Ai * f)) ** ((wi + wo) / wo) *
-                            wi)
-                    )
-                );
+                if (pairType == 'token-token') {
+                    return bnum(
+                        -(
+                            (Bi * wo) /
+                            (Bo *
+                                (-1 + f) *
+                                (Bi / (Ai + Bi - Ai * f)) ** ((wi + wo) / wo) *
+                                wi)
+                        )
+                    );
+                } else if (pairType == 'token-BPT') {
+                    throw 'Still have to write equations';
+                } else if (pairType == 'BPT-token') {
+                    throw 'Still have to write equations';
+                }
             } else if (poolType == 'Stable') {
-                return stableMath_sol._spotPriceAfterSwapOutGivenIn(
-                    amp,
-                    allBalances,
-                    tokenIndexIn,
-                    tokenIndexOut,
-                    amount,
-                    f
-                );
+                if (pairType == 'token-token') {
+                    return stableMath_sol._spotPriceAfterSwapExactTokenInForTokenOut(
+                        amp,
+                        allBalances,
+                        tokenIndexIn,
+                        tokenIndexOut,
+                        amount,
+                        f
+                    );
+                } else if (pairType == 'token-BPT') {
+                    return stableMath_sol._spotPriceAfterSwapExactTokenInForBPTOut(
+                        amp,
+                        allBalances,
+                        Bo, // bptTotalSupply
+                        tokenIndexIn,
+                        amount,
+                        f
+                    );
+                } else if (pairType == 'BPT-token') {
+                    return stableMath_sol._spotPriceAfterSwapExactBPTInForTokenOut(
+                        amp,
+                        allBalances,
+                        Bi, // bptTotalSupply
+                        tokenIndexOut,
+                        amount,
+                        f
+                    );
+                }
             }
         }
     } else {
@@ -319,22 +400,48 @@ export function getSpotPriceAfterSwap(
                 let wo = poolPairData.weightOut.toNumber();
                 let Ao = amount.toNumber();
                 let f = poolPairData.swapFee.toNumber();
-                // return -((Bi*(Bo/(-Ao+Bo))**((wi+wo)/wi)*wo)/(Bo*(-1+f)*wi))
-                return bnum(
-                    -(
-                        (Bi * (Bo / (-Ao + Bo)) ** ((wi + wo) / wi) * wo) /
-                        (Bo * (-1 + f) * wi)
-                    )
-                );
+                if (pairType == 'token-token') {
+                    // return -((Bi*(Bo/(-Ao+Bo))**((wi+wo)/wi)*wo)/(Bo*(-1+f)*wi))
+                    return bnum(
+                        -(
+                            (Bi * (Bo / (-Ao + Bo)) ** ((wi + wo) / wi) * wo) /
+                            (Bo * (-1 + f) * wi)
+                        )
+                    );
+                } else if (pairType == 'token-BPT') {
+                    throw 'Still have to write equations';
+                } else if (pairType == 'BPT-token') {
+                    throw 'Still have to write equations';
+                }
             } else if (poolType == 'Stable') {
-                return stableMath_sol._spotPriceAfterSwapInGivenOut(
-                    amp,
-                    allBalances,
-                    tokenIndexIn,
-                    tokenIndexOut,
-                    amount,
-                    f
-                );
+                if (pairType == 'token-token') {
+                    return stableMath_sol._spotPriceAfterSwapTokenInForExactTokenOut(
+                        amp,
+                        allBalances,
+                        tokenIndexIn,
+                        tokenIndexOut,
+                        amount,
+                        f
+                    );
+                } else if (pairType == 'token-BPT') {
+                    return stableMath_sol._spotPriceAfterSwapTokenInForExactBPTOut(
+                        amp,
+                        allBalances,
+                        Bo, // bptTotalSupply
+                        tokenIndexIn,
+                        amount,
+                        f
+                    );
+                } else if (pairType == 'BPT-token') {
+                    return stableMath_sol._spotPriceAfterSwapBPTInForExactTokenOut(
+                        amp,
+                        allBalances,
+                        Bi, // bptTotalSupply
+                        tokenIndexOut,
+                        amount,
+                        f
+                    );
+                }
             }
         }
     }
@@ -397,6 +504,7 @@ export function getDerivativeSpotPriceAfterSwap(
     amount: BigNumber
 ): BigNumber {
     let poolType = poolPairData.poolType;
+    let pairType = poolPairData.pairType;
     let Bi = poolPairData.balanceIn;
     let Bo = poolPairData.balanceOut;
     let f = poolPairData.swapFee;
@@ -418,6 +526,7 @@ export function getDerivativeSpotPriceAfterSwap(
         } else {
             let Ai = amount;
             if (poolType == 'Weighted') {
+                // return -((Bi*wo)/(Bo*(-1+f)*(Bi/(Ai+Bi-Ai*f))**((wi+wo)/wo)*wi))
                 // TODO: decide if we need to convert the formula below to BigNumber
                 let Bi = poolPairData.balanceIn.toNumber();
                 let Bo = poolPairData.balanceOut.toNumber();
@@ -425,20 +534,46 @@ export function getDerivativeSpotPriceAfterSwap(
                 let wo = poolPairData.weightOut.toNumber();
                 let Ai = amount.toNumber();
                 let f = poolPairData.swapFee.toNumber();
-                // return (wi+wo)/(Bo*(Bi/(Ai+Bi-Ai*f))**(wi/wo)*wi)
-                return bnum(
-                    (wi + wo) /
-                        (Bo * (Bi / (Ai + Bi - Ai * f)) ** (wi / wo) * wi)
-                );
+                if (pairType == 'token-token') {
+                    // return (wi+wo)/(Bo*(Bi/(Ai+Bi-Ai*f))**(wi/wo)*wi)
+                    return bnum(
+                        (wi + wo) /
+                            (Bo * (Bi / (Ai + Bi - Ai * f)) ** (wi / wo) * wi)
+                    );
+                } else if (pairType == 'token-BPT') {
+                    throw 'Still have to write equations';
+                } else if (pairType == 'BPT-token') {
+                    throw 'Still have to write equations';
+                }
             } else if (poolType == 'Stable') {
-                return stableMath_sol._derivativeSpotPriceAfterSwapOutGivenIn(
-                    amp,
-                    allBalances,
-                    tokenIndexIn,
-                    tokenIndexOut,
-                    amount,
-                    f
-                );
+                if (pairType == 'token-token') {
+                    return stableMath_sol._derivativeSpotPriceAfterSwapExactTokenInForTokenOut(
+                        amp,
+                        allBalances,
+                        tokenIndexIn,
+                        tokenIndexOut,
+                        amount,
+                        f
+                    );
+                } else if (pairType == 'token-BPT') {
+                    return stableMath_sol._derivativeSpotPriceAfterSwapExactTokenInForBPTOut(
+                        amp,
+                        allBalances,
+                        Bo, // bptTotalSupply
+                        tokenIndexIn,
+                        amount,
+                        f
+                    );
+                } else if (pairType == 'BPT-token') {
+                    return stableMath_sol._derivativeSpotPriceAfterSwapExactBPTInForTokenOut(
+                        amp,
+                        allBalances,
+                        Bi, // bptTotalSupply
+                        tokenIndexOut,
+                        amount,
+                        f
+                    );
+                }
             }
         }
     } else {
@@ -455,22 +590,51 @@ export function getDerivativeSpotPriceAfterSwap(
                 let wo = poolPairData.weightOut.toNumber();
                 let Ao = amount.toNumber();
                 let f = poolPairData.swapFee.toNumber();
-                // return -((Bi*(Bo/(-Ao + Bo))**(wo/wi)*wo*(wi + wo))/((Ao - Bo)**2*(-1 + f)*wi**2))
-                return bnum(
-                    -(
-                        (Bi * (Bo / (-Ao + Bo)) ** (wo / wi) * wo * (wi + wo)) /
-                        ((Ao - Bo) ** 2 * (-1 + f) * wi ** 2)
-                    )
-                );
+                if (pairType == 'token-token') {
+                    // return -((Bi*(Bo/(-Ao + Bo))**(wo/wi)*wo*(wi + wo))/((Ao - Bo)**2*(-1 + f)*wi**2))
+                    return bnum(
+                        -(
+                            (Bi *
+                                (Bo / (-Ao + Bo)) ** (wo / wi) *
+                                wo *
+                                (wi + wo)) /
+                            ((Ao - Bo) ** 2 * (-1 + f) * wi ** 2)
+                        )
+                    );
+                } else if (pairType == 'token-BPT') {
+                    throw 'Still have to write equations';
+                } else if (pairType == 'BPT-token') {
+                    throw 'Still have to write equations';
+                }
             } else if (poolType == 'Stable') {
-                return stableMath_sol._derivativeSpotPriceAfterSwapInGivenOut(
-                    amp,
-                    allBalances,
-                    tokenIndexIn,
-                    tokenIndexOut,
-                    amount,
-                    f
-                );
+                if (pairType == 'token-token') {
+                    return stableMath_sol._derivativeSpotPriceAfterSwapTokenInForExactTokenOut(
+                        amp,
+                        allBalances,
+                        tokenIndexIn,
+                        tokenIndexOut,
+                        amount,
+                        f
+                    );
+                } else if (pairType == 'token-BPT') {
+                    return stableMath_sol._derivativeSpotPriceAfterSwapTokenInForExactBPTOut(
+                        amp,
+                        allBalances,
+                        Bo, // bptTotalSupply
+                        tokenIndexIn,
+                        amount,
+                        f
+                    );
+                } else if (pairType == 'BPT-token') {
+                    return stableMath_sol._derivativeSpotPriceAfterSwapBPTInForExactTokenOut(
+                        amp,
+                        allBalances,
+                        Bi, // bptTotalSupply
+                        tokenIndexOut,
+                        amount,
+                        f
+                    );
+                }
             }
         }
     }
@@ -589,23 +753,50 @@ export const parsePoolPairData = (
     tokenIn: string,
     tokenOut: string
 ): PoolPairData => {
-    let tokenIndexIn = p.tokens.findIndex(
-        t => getAddress(t.address) === getAddress(tokenIn)
-    );
-    let tI = p.tokens[tokenIndexIn];
-    // console.log("tI")
-    // console.log(tI.balance.toString());
-    // console.log(tI)
-    let tokenIndexOut = p.tokens.findIndex(
-        t => getAddress(t.address) === getAddress(tokenOut)
-    );
-    let tO = p.tokens[tokenIndexOut];
+    let poolPairData,
+        poolType,
+        pairType,
+        tI,
+        tO,
+        tokenIndexIn,
+        tokenIndexOut,
+        balanceIn,
+        balanceOut,
+        decimalsOut,
+        decimalsIn;
 
-    // console.log("tO")
-    // console.log(tO.balance.toString());
-    // console.log(tO)
+    // Check if tokenIn is the pool token itself (BPT)
+    if (tokenIn == p.id) {
+        pairType = 'BPT-token';
+        balanceIn = p.balanceBpt;
+        decimalsIn = '18';
+    } else if (tokenOut == p.id) {
+        pairType = 'token-BPT';
+        balanceOut = p.balanceBpt;
+        decimalsOut = '18';
+    } else {
+        pairType = 'token-token';
+    }
 
-    let poolPairData, poolType;
+    if (pairType != 'BPT-token') {
+        tokenIndexIn = p.tokens.findIndex(
+            t => getAddress(t.address) === getAddress(tokenIn)
+        );
+        if (tokenIndexIn < 0) throw 'Pool does not contain tokenIn';
+        tI = p.tokens[tokenIndexIn];
+        balanceIn = tI.balance;
+        decimalsIn = tI.decimals;
+    }
+    if (pairType != 'token-BPT') {
+        tokenIndexOut = p.tokens.findIndex(
+            t => getAddress(t.address) === getAddress(tokenOut)
+        );
+        if (tokenIndexOut < 0) throw 'Pool does not contain tokenOut';
+        tO = p.tokens[tokenIndexOut];
+        balanceOut = tO.balance;
+        decimalsOut = tO.decimals;
+    }
+
     // Todo: the pool type should be already on subgraph
     if (typeof p.amp === 'undefined') poolType = 'Weighted';
     else poolType = 'Stable';
@@ -614,12 +805,13 @@ export const parsePoolPairData = (
         poolPairData = {
             id: p.id,
             poolType: poolType,
+            pairType: pairType,
             tokenIn: tokenIn,
             tokenOut: tokenOut,
-            decimalsIn: tI.decimals,
-            decimalsOut: tO.decimals,
-            balanceIn: bnum(tI.balance),
-            balanceOut: bnum(tO.balance),
+            decimalsIn: decimalsIn,
+            decimalsOut: decimalsOut,
+            balanceIn: bnum(balanceIn),
+            balanceOut: bnum(balanceOut),
             weightIn: scale(bnum(tI.denormWeight).div(bnum(p.totalWeight)), 18),
             weightOut: scale(
                 bnum(tO.denormWeight).div(bnum(p.totalWeight)),
@@ -645,12 +837,13 @@ export const parsePoolPairData = (
         poolPairData = {
             id: p.id,
             poolType: poolType,
+            pairType: pairType,
             tokenIn: tokenIn,
             tokenOut: tokenOut,
-            decimalsIn: tI.decimals,
-            decimalsOut: tO.decimals,
-            balanceIn: bnum(tI.balance),
-            balanceOut: bnum(tO.balance),
+            decimalsIn: decimalsIn,
+            decimalsOut: decimalsOut,
+            balanceIn: bnum(balanceIn),
+            balanceOut: bnum(balanceOut),
             invariant: stableMath_sol._invariant(bnum(p.amp), allBalances),
             swapFee: bnum(p.swapFee),
             allBalances: allBalances,
@@ -837,12 +1030,31 @@ export function updateTokenBalanceForPool(
     return pool;
 }
 
-// Based on the function of same name of file onchain-sor in file: BRegistry.sol
-// Normalized liquidity is not used in any calculationf, but instead for comparison between poolPairDataList only
-// so we can find the most liquid poolPairData considering the effect of uneven weigths
+// This is just used to compare how liquid the different pools are. We are
+// using as unit of reference the liquidity in tokenOut. We also account
+// for the different poolTypes and poolPairs
 export function getNormalizedLiquidity(poolPairData: PoolPairData): BigNumber {
-    let { weightIn, weightOut, balanceIn, balanceOut, swapFee } = poolPairData;
-    return balanceOut.times(weightIn).div(weightIn.plus(weightOut));
+    let {
+        poolType,
+        pairType,
+        weightIn,
+        weightOut,
+        balanceIn,
+        balanceOut,
+        amp,
+    } = poolPairData;
+    if (poolType == 'Weighted') {
+        if (pairType == 'token-token') {
+            return balanceOut.times(weightIn).div(weightIn.plus(weightOut));
+        } else if (pairType == 'token-BPT') {
+            return balanceOut; // Liquidity in tokenOut is balanceBpt
+        } else if (pairType == 'BPT-token') {
+            return balanceOut.div(bnum(1).plus(weightOut)); // Liquidity in tokenOut is Bo/wo
+        }
+    } else if (poolType == 'Stable') {
+        return balanceOut.times(amp); // This is an approximation as the actual
+        // normalized liquidity is a lot more complicated to calculate
+    } else throw 'Pool type unknown';
 }
 
 // LEGACY FUNCTION - Keep Input/Output Format
@@ -956,6 +1168,8 @@ export function filterPools(
 
     allPools.forEach(pool => {
         let tokenListSet = new Set(pool.tokensList);
+        // we add the BPT as well as we can join/exit as part of the multihop
+        tokenListSet.add(pool.id);
         disabledTokens.forEach(token => tokenListSet.delete(token.address));
 
         if (
@@ -1012,7 +1226,7 @@ export function sortPoolsMostLiquid(
     // only for those that have hopToken
     let mostLiquidPoolsFirstHop: Pool[] = [];
     let mostLiquidPoolsSecondHop: Pool[] = [];
-    let poolPair = {}; // Store pair liquidity incase it is reused
+    let poolPair = {}; // Store pair liquidity in case it is reused
 
     for (let i = 0; i < hopTokens.length; i++) {
         let highestNormalizedLiquidityFirst = bnum(0); // Aux variable to find pool with most liquidity for pair (tokenIn -> hopToken)
@@ -1021,7 +1235,9 @@ export function sortPoolsMostLiquid(
         for (let k in poolsTokenInNoTokenOut) {
             // If this pool has hopTokens[i] calculate its normalized liquidity
             if (
-                new Set(poolsTokenInNoTokenOut[k].tokensList).has(hopTokens[i])
+                new Set(poolsTokenInNoTokenOut[k].tokensList)
+                    .add(poolsTokenInNoTokenOut[k].id)
+                    .has(hopTokens[i])
             ) {
                 let normalizedLiquidity = getNormalizedLiquidity(
                     parsePoolPairData(

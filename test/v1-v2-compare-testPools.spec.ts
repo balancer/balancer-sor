@@ -21,8 +21,8 @@ const provider = new JsonRpcProvider(
 describe('Run Tests From Saved Pools', () => {
     // This must be updated with pools of interest (see ./test/testData/testPools)
     let testFiles = [
-        // 'stable-and-weighted-token-btp-test',
-        'stable-pools-only-wbtc-to-sbtc-exactIn',
+        'stable-and-weighted-token-btp-test',
+        // 'stable-pools-only-wbtc-to-sbtc-exactIn',
         // 'stable-pools-only-wbtc-to-sbtc-exactOut',
         // 'stable-and-weighted',
         // 'stable-and-weighted-gas-price-zero',

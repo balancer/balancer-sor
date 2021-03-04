@@ -4,14 +4,15 @@
         "TokenIn": "0x6b175474e89094c44da98b954eedeac495271d0f",
         "TokenOut": "0x056fd409e1d7a124bd7017459dfea2f387b6d5cd",
         "NoPools": 4,
-        "SwapAmount": "100000",
+        "SwapAmount": "100000000000000000000000",
         "GasPrice": "0",
-        "SwapAmountDecimals": "2",
-        "ReturnAmountDecimals": "6"
+        "SwapAmountDecimals": "18",
+        "ReturnAmountDecimals": "2"
     },
     "pools": [
         {
             "id": "0x6c3F90f043a72FA612cbac8115EE7e52BDe6E490",
+            "balanceBpt": "600000000",
             "swapFee": "0.04",
             "amp": "588",
             "tokens": [
