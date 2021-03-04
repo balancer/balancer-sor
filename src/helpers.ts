@@ -145,7 +145,8 @@ export function getOutputAmountSwap(
                     allBalances,
                     tokenIndexIn,
                     tokenIndexOut,
-                    amount
+                    amount,
+                    f
                 );
             }
         }
@@ -169,7 +170,8 @@ export function getOutputAmountSwap(
                     allBalances,
                     tokenIndexIn,
                     tokenIndexOut,
-                    amount
+                    amount,
+                    f
                 );
             }
         }
@@ -300,7 +302,8 @@ export function getSpotPriceAfterSwap(
                     allBalances,
                     tokenIndexIn,
                     tokenIndexOut,
-                    amount
+                    amount,
+                    f
                 );
             }
         }
@@ -333,7 +336,8 @@ export function getSpotPriceAfterSwap(
                     allBalances,
                     tokenIndexIn,
                     tokenIndexOut,
-                    amount
+                    amount,
+                    f
                 );
             }
         }
@@ -438,7 +442,8 @@ export function getDerivativeSpotPriceAfterSwap(
                     allBalances,
                     tokenIndexIn,
                     tokenIndexOut,
-                    amount
+                    amount,
+                    f
                 );
             }
         }
@@ -471,7 +476,8 @@ export function getDerivativeSpotPriceAfterSwap(
                     allBalances,
                     tokenIndexIn,
                     tokenIndexOut,
-                    amount
+                    amount,
+                    f
                 );
             }
         }
