@@ -21,6 +21,7 @@ const provider = new JsonRpcProvider(
 describe('Run Tests From Saved Pools', () => {
     // This must be updated with pools of interest (see ./test/testData/testPools)
     let testFiles = [
+        // 'stable-and-weighted-token-btp-test',
         'stable-pools-only-wbtc-to-sbtc-exactIn',
         'stable-pools-only-wbtc-to-sbtc-exactOut',
         'stable-and-weighted',
@@ -55,6 +56,22 @@ describe('Run Tests From Saved Pools', () => {
         if (!testData.tradeInfo) return;
 
         it(`${file}`, async () => {
+            let v2SwapData = await getV2Swap(
+                provider,
+                testData.tradeInfo.GasPrice,
+                testData.tradeInfo.NoPools,
+                1,
+                JSON.parse(JSON.stringify(testData)),
+                testData.tradeInfo.SwapType,
+                testData.tradeInfo.TokenIn,
+                testData.tradeInfo.TokenOut,
+                testData.tradeInfo.SwapAmount.div(
+                    bnum(10 ** testData.tradeInfo.SwapAmountDecimals)
+                ),
+                { onChainBalances: false },
+                testData.tradeInfo.ReturnAmountDecimals
+            );
+
             let v1SwapData = await getV1Swap(
                 provider,
                 testData.tradeInfo.GasPrice,
@@ -70,22 +87,6 @@ describe('Run Tests From Saved Pools', () => {
             // Normalize returnAmount
             v1SwapData.returnAmount = v1SwapData.returnAmount.div(
                 bnum(10 ** testData.tradeInfo.ReturnAmountDecimals)
-            );
-
-            let v2SwapData = await getV2Swap(
-                provider,
-                testData.tradeInfo.GasPrice,
-                testData.tradeInfo.NoPools,
-                1,
-                JSON.parse(JSON.stringify(testData)),
-                testData.tradeInfo.SwapType,
-                testData.tradeInfo.TokenIn,
-                testData.tradeInfo.TokenOut,
-                testData.tradeInfo.SwapAmount.div(
-                    bnum(10 ** testData.tradeInfo.SwapAmountDecimals)
-                ),
-                { onChainBalances: false },
-                testData.tradeInfo.ReturnAmountDecimals
             );
             /*
             let v2WithFilterSwapData = await getV2SwapWithFilter(
@@ -108,7 +109,7 @@ describe('Run Tests From Saved Pools', () => {
                 `${file}.json`,
                 testData.tradeInfo,
                 [v1SwapData, v2SwapData /*, v2WithFilterSwapData*/],
-                false
+                true
             );
 
             assertResults(
