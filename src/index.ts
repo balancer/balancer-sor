@@ -5,7 +5,6 @@ export {
     formatSubgraphPools,
     filterPools,
     sortPoolsMostLiquid,
-    normalizePools,
 } from './helpers';
 export { getAllPoolDataOnChain } from './multicall';
 import * as bmath from './bmath';

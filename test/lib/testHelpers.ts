@@ -885,16 +885,6 @@ export function assertResults(
     }
 }
 
-export function getSpotPrice(poolPairData: PoolPairData): BigNumber {
-    let inRatio = bdiv(poolPairData.balanceIn, poolPairData.weightIn);
-    let outRatio = bdiv(poolPairData.balanceOut, poolPairData.weightOut);
-    if (outRatio.isEqualTo(bnum(0))) {
-        return bnum(0);
-    } else {
-        return bdiv(bdiv(inRatio, outRatio), BONE.minus(poolPairData.swapFee));
-    }
-}
-
 // Helper to filter pools to contain only Weighted pools
 export function filterToWeightedPoolsOnly(pools: SubGraphPools) {
     let weightedPools = { pools: [] };
