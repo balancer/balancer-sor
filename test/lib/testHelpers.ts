@@ -855,13 +855,32 @@ export function assertResults(
     v2SwapData,
     v2WithFilterSwapData = undefined
 ) {
+    const relDiff = calcRelativeDiff(
+        v2SwapData.returnAmount.toNumber(),
+        v1SwapData.returnAmount.toNumber()
+    );
+    const relDiffBn = calcRelativeDiffBn(
+        v2SwapData.returnAmount,
+        v1SwapData.returnAmount
+    );
+    const errorDelta = 10 ** -8;
+
     if (testData.tradeInfo.SwapType === `swapExactIn`) {
-        assert(
-            v2SwapData.returnAmount.gte(v1SwapData.returnAmount),
-            `File: ${file}\nV2<V1\nIn: ${testData.tradeInfo.TokenIn} \nOut: ${
-                testData.tradeInfo.TokenOut
-            } \nSwap Amt: ${testData.tradeInfo.SwapAmount.toString()} \n${v1SwapData.returnAmount.toString()} \n${v2SwapData.returnAmount.toString()}`
-        );
+        if (v2SwapData.returnAmount.gte(v1SwapData.returnAmount)) {
+            assert(
+                v2SwapData.returnAmount.gte(v1SwapData.returnAmount),
+                `File: ${file}\nV2<V1\nIn: ${
+                    testData.tradeInfo.TokenIn
+                } \nOut: ${
+                    testData.tradeInfo.TokenOut
+                } \nSwap Amt: ${testData.tradeInfo.SwapAmount.toString()} \n${v1SwapData.returnAmount.toString()} \n${v2SwapData.returnAmount.toString()}`
+            );
+        } else {
+            assert.isAtMost(relDiffBn.toNumber(), errorDelta);
+            console.log(
+                `!!!!!! V2 < V1 but error delta ok. (${relDiffBn.toString()})`
+            );
+        }
     } else {
         if (v2SwapData.returnAmount.eq(0))
             assert(
@@ -869,12 +888,26 @@ export function assertResults(
                 `File: ${file}, V2 Should Not Have 0 Swap If V1 > 0.`
             );
 
-        assert(
-            v2SwapData.returnAmount.lte(v1SwapData.returnAmount),
-            `File: ${file}\nV2<V1\nIn: ${testData.tradeInfo.TokenIn} \nOut: ${
-                testData.tradeInfo.TokenOut
-            } \nSwap Amt: ${testData.tradeInfo.SwapAmount.toString()} \n${v1SwapData.returnAmount.toString()} \n${v2SwapData.returnAmount.toString()}`
-        );
+        if (v1SwapData.returnAmount.eq(0) && v2SwapData.returnAmount.gt(0)) {
+            console.log(`!!!!!! V1 has no swap but V2 has.`);
+            return;
+        }
+
+        if (v2SwapData.returnAmount.lte(v1SwapData.returnAmount)) {
+            assert(
+                v2SwapData.returnAmount.lte(v1SwapData.returnAmount),
+                `File: ${file}\nV2<V1\nIn: ${
+                    testData.tradeInfo.TokenIn
+                } \nOut: ${
+                    testData.tradeInfo.TokenOut
+                } \nSwap Amt: ${testData.tradeInfo.SwapAmount.toString()} \n${v1SwapData.returnAmount.toString()} \n${v2SwapData.returnAmount.toString()}`
+            );
+        } else {
+            assert.isAtMost(relDiffBn.toNumber(), errorDelta);
+            console.log(
+                `!!!!!! V2 > V1 but error delta ok. (${relDiffBn.toString()})`
+            );
+        }
     }
 
     if (v2WithFilterSwapData !== undefined) {
@@ -1237,6 +1270,17 @@ export function getTokenPairsMultiHop(token: string, poolsTokensListSet: any) {
     let directTokenPairs = [...directTokenPairsSet];
     let allTokenPairs = [...allTokenPairsSet];
     return [directTokenPairs, allTokenPairs];
+}
+
+export function calcRelativeDiff(expected: number, actual: number) {
+    return Math.abs((expected - actual) / expected);
+}
+
+export function calcRelativeDiffBn(expected: BigNumber, actual: BigNumber) {
+    return expected
+        .minus(actual)
+        .div(expected)
+        .abs();
 }
 
 // Generates file output for v1-v2-compare-testPools.spec.ts
