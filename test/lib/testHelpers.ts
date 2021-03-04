@@ -863,7 +863,7 @@ export function assertResults(
         v2SwapData.returnAmount,
         v1SwapData.returnAmount
     );
-    const errorDelta = 10 ** -8;
+    const errorDelta = 10 ** -6;
 
     if (testData.tradeInfo.SwapType === `swapExactIn`) {
         if (v2SwapData.returnAmount.gte(v1SwapData.returnAmount)) {
