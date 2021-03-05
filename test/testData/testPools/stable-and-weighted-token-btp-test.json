@@ -12,25 +12,25 @@
     "pools": [
         {
             "id": "0x6c3F90f043a72FA612cbac8115EE7e52BDe6E490",
-            "balanceBpt": "600000000",
-            "swapFee": "0.04",
-            "amp": "588",
+            "balanceBpt": "811723149.6763058",
+            "swapFee": "0.0004",
+            "amp": "600",
             "tokens": [
                 {
                     "address": "0x6b175474e89094c44da98b954eedeac495271d0f",
-                    "balance": "185227360.25436262246474558",
+                    "balance": "192253877.402366975172250103",
                     "decimals": "18",
                     "denormWeight": "0"
                 },
                 {
                     "address": "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
-                    "balance": "265953765.068324",
+                    "balance": "264799514.813006",
                     "decimals": "6",
                     "denormWeight": "0"
                 },
                 {
                     "address": "0xdAC17F958D2ee523a2206206994597C13D831ec7",
-                    "balance": "247741004.192076",
+                    "balance": "366274364.41928",
                     "decimals": "6",
                     "denormWeight": "0"
                 }
@@ -106,18 +106,18 @@
         },
         {
             "id": "0xD2967f45c4f384DEEa880F807Be904762a3DeA07",
-            "swapFee": "0.04",
+            "swapFee": "0.0004",
             "amp": "200",
             "tokens": [
                 {
                     "address": "0x056fd409e1d7a124bd7017459dfea2f387b6d5cd",
-                    "balance": "103352020.5",
+                    "balance": "100366334.42",
                     "decimals": "2",
                     "denormWeight": "0"
                 },
                 {
                     "address": "0x6c3F90f043a72FA612cbac8115EE7e52BDe6E490",
-                    "balance": "84427206.483675489238339004",
+                    "balance": "81584278.574180828349908466",
                     "decimals": "18",
                     "denormWeight": "0"
                 }

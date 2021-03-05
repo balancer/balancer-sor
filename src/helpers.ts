@@ -118,7 +118,7 @@ export function getOutputAmountSwap(
         wo = poolPairData.weightOut;
     } else {
         amp = poolPairData.amp;
-        allBalances = poolPairData.allBalances;
+        allBalances = [...poolPairData.allBalances]; // [... ] to avoid linking
         tokenIndexIn = poolPairData.tokenIndexIn;
         tokenIndexOut = poolPairData.tokenIndexOut;
     }
@@ -148,32 +148,32 @@ export function getOutputAmountSwap(
                 }
             } else if (poolType == 'Stable') {
                 if (pairType == 'token-token') {
-                    return stableMath_sol._exactTokenInForTokenOut(
-                        amp,
-                        allBalances,
-                        tokenIndexIn,
-                        tokenIndexOut,
-                        amount,
-                        f
-                    );
+                    return stableMath_sol._exactTokenInForTokenOut({
+                        amp: amp,
+                        balances: allBalances,
+                        tokenIndexIn: tokenIndexIn,
+                        tokenIndexOut: tokenIndexOut,
+                        amount: amount,
+                        swapFee: f,
+                    });
                 } else if (pairType == 'token-BPT') {
-                    return stableMath_sol._exactTokenInForBPTOut(
-                        amp,
-                        allBalances,
-                        Bo, // bptTotalSupply
-                        tokenIndexIn,
-                        amount,
-                        f
-                    );
+                    return stableMath_sol._exactTokenInForBPTOut({
+                        amp: amp,
+                        balances: allBalances,
+                        bptTotalSupply: Bo,
+                        tokenIndexIn: tokenIndexIn,
+                        amount: amount,
+                        swapFee: f,
+                    });
                 } else if (pairType == 'BPT-token') {
-                    return stableMath_sol._exactBPTInForTokenOut(
-                        amp,
-                        allBalances,
-                        Bi, // bptTotalSupply
-                        tokenIndexOut,
-                        amount,
-                        f
-                    );
+                    return stableMath_sol._exactBPTInForTokenOut({
+                        amp: amp,
+                        balances: allBalances,
+                        bptTotalSupply: Bi,
+                        tokenIndexOut: tokenIndexOut,
+                        amount: amount,
+                        swapFee: f,
+                    });
                 }
             }
         }
@@ -199,32 +199,32 @@ export function getOutputAmountSwap(
                 }
             } else if (poolType == 'Stable') {
                 if (pairType == 'token-token') {
-                    return stableMath_sol._tokenInForExactTokenOut(
-                        amp,
-                        allBalances,
-                        tokenIndexIn,
-                        tokenIndexOut,
-                        amount,
-                        f
-                    );
+                    return stableMath_sol._tokenInForExactTokenOut({
+                        amp: amp,
+                        balances: allBalances,
+                        tokenIndexIn: tokenIndexIn,
+                        tokenIndexOut: tokenIndexOut,
+                        amount: amount,
+                        swapFee: f,
+                    });
                 } else if (pairType == 'token-BPT') {
-                    return stableMath_sol._tokenInForExactBPTOut(
-                        amp,
-                        allBalances,
-                        Bo, // bptTotalSupply
-                        tokenIndexIn,
-                        amount,
-                        f
-                    );
+                    return stableMath_sol._tokenInForExactBPTOut({
+                        amp: amp,
+                        balances: allBalances,
+                        bptTotalSupply: Bo,
+                        tokenIndexIn: tokenIndexIn,
+                        amount: amount,
+                        swapFee: f,
+                    });
                 } else if (pairType == 'BPT-token') {
-                    return stableMath_sol._BPTInForExactTokenOut(
-                        amp,
-                        allBalances,
-                        Bi, // bptTotalSupply
-                        tokenIndexOut,
-                        amount,
-                        f
-                    );
+                    return stableMath_sol._BPTInForExactTokenOut({
+                        amp: amp,
+                        balances: allBalances,
+                        bptTotalSupply: Bi,
+                        tokenIndexOut: tokenIndexOut,
+                        amount: amount,
+                        swapFee: f,
+                    });
                 }
             }
         }
@@ -321,7 +321,7 @@ export function getSpotPriceAfterSwap(
         wo = poolPairData.weightOut;
     } else {
         amp = poolPairData.amp;
-        allBalances = poolPairData.allBalances;
+        allBalances = [...poolPairData.allBalances]; // [... ] to avoid linking
         tokenIndexIn = poolPairData.tokenIndexIn;
         tokenIndexOut = poolPairData.tokenIndexOut;
     }
@@ -358,30 +358,36 @@ export function getSpotPriceAfterSwap(
             } else if (poolType == 'Stable') {
                 if (pairType == 'token-token') {
                     return stableMath_sol._spotPriceAfterSwapExactTokenInForTokenOut(
-                        amp,
-                        allBalances,
-                        tokenIndexIn,
-                        tokenIndexOut,
-                        amount,
-                        f
+                        {
+                            amp: amp,
+                            balances: allBalances,
+                            tokenIndexIn: tokenIndexIn,
+                            tokenIndexOut: tokenIndexOut,
+                            amount: amount,
+                            swapFee: f,
+                        }
                     );
                 } else if (pairType == 'token-BPT') {
                     return stableMath_sol._spotPriceAfterSwapExactTokenInForBPTOut(
-                        amp,
-                        allBalances,
-                        Bo, // bptTotalSupply
-                        tokenIndexIn,
-                        amount,
-                        f
+                        {
+                            amp: amp,
+                            balances: allBalances,
+                            bptTotalSupply: Bo,
+                            tokenIndexIn: tokenIndexIn,
+                            amount: amount,
+                            swapFee: f,
+                        }
                     );
                 } else if (pairType == 'BPT-token') {
                     return stableMath_sol._spotPriceAfterSwapExactBPTInForTokenOut(
-                        amp,
-                        allBalances,
-                        Bi, // bptTotalSupply
-                        tokenIndexOut,
-                        amount,
-                        f
+                        {
+                            amp: amp,
+                            balances: allBalances,
+                            bptTotalSupply: Bi,
+                            tokenIndexOut: tokenIndexOut,
+                            amount: amount,
+                            swapFee: f,
+                        }
                     );
                 }
             }
@@ -416,30 +422,36 @@ export function getSpotPriceAfterSwap(
             } else if (poolType == 'Stable') {
                 if (pairType == 'token-token') {
                     return stableMath_sol._spotPriceAfterSwapTokenInForExactTokenOut(
-                        amp,
-                        allBalances,
-                        tokenIndexIn,
-                        tokenIndexOut,
-                        amount,
-                        f
+                        {
+                            amp: amp,
+                            balances: allBalances,
+                            tokenIndexIn: tokenIndexIn,
+                            tokenIndexOut: tokenIndexOut,
+                            amount: amount,
+                            swapFee: f,
+                        }
                     );
                 } else if (pairType == 'token-BPT') {
                     return stableMath_sol._spotPriceAfterSwapTokenInForExactBPTOut(
-                        amp,
-                        allBalances,
-                        Bo, // bptTotalSupply
-                        tokenIndexIn,
-                        amount,
-                        f
+                        {
+                            amp: amp,
+                            balances: allBalances,
+                            bptTotalSupply: Bo,
+                            tokenIndexIn: tokenIndexIn,
+                            amount: amount,
+                            swapFee: f,
+                        }
                     );
                 } else if (pairType == 'BPT-token') {
                     return stableMath_sol._spotPriceAfterSwapBPTInForExactTokenOut(
-                        amp,
-                        allBalances,
-                        Bi, // bptTotalSupply
-                        tokenIndexOut,
-                        amount,
-                        f
+                        {
+                            amp: amp,
+                            balances: allBalances,
+                            bptTotalSupply: Bi,
+                            tokenIndexOut: tokenIndexOut,
+                            amount: amount,
+                            swapFee: f,
+                        }
                     );
                 }
             }
@@ -514,7 +526,7 @@ export function getDerivativeSpotPriceAfterSwap(
         wo = poolPairData.weightOut;
     } else {
         amp = poolPairData.amp;
-        allBalances = poolPairData.allBalances;
+        allBalances = [...poolPairData.allBalances]; // [... ] to avoid linking
         tokenIndexIn = poolPairData.tokenIndexIn;
         tokenIndexOut = poolPairData.tokenIndexOut;
     }
@@ -548,30 +560,36 @@ export function getDerivativeSpotPriceAfterSwap(
             } else if (poolType == 'Stable') {
                 if (pairType == 'token-token') {
                     return stableMath_sol._derivativeSpotPriceAfterSwapExactTokenInForTokenOut(
-                        amp,
-                        allBalances,
-                        tokenIndexIn,
-                        tokenIndexOut,
-                        amount,
-                        f
+                        {
+                            amp: amp,
+                            balances: allBalances,
+                            tokenIndexIn: tokenIndexIn,
+                            tokenIndexOut: tokenIndexOut,
+                            amount: amount,
+                            swapFee: f,
+                        }
                     );
                 } else if (pairType == 'token-BPT') {
                     return stableMath_sol._derivativeSpotPriceAfterSwapExactTokenInForBPTOut(
-                        amp,
-                        allBalances,
-                        Bo, // bptTotalSupply
-                        tokenIndexIn,
-                        amount,
-                        f
+                        {
+                            amp: amp,
+                            balances: allBalances,
+                            bptTotalSupply: Bo,
+                            tokenIndexIn: tokenIndexIn,
+                            amount: amount,
+                            swapFee: f,
+                        }
                     );
                 } else if (pairType == 'BPT-token') {
                     return stableMath_sol._derivativeSpotPriceAfterSwapExactBPTInForTokenOut(
-                        amp,
-                        allBalances,
-                        Bi, // bptTotalSupply
-                        tokenIndexOut,
-                        amount,
-                        f
+                        {
+                            amp: amp,
+                            balances: allBalances,
+                            bptTotalSupply: Bi,
+                            tokenIndexOut: tokenIndexOut,
+                            amount: amount,
+                            swapFee: f,
+                        }
                     );
                 }
             }
@@ -609,30 +627,36 @@ export function getDerivativeSpotPriceAfterSwap(
             } else if (poolType == 'Stable') {
                 if (pairType == 'token-token') {
                     return stableMath_sol._derivativeSpotPriceAfterSwapTokenInForExactTokenOut(
-                        amp,
-                        allBalances,
-                        tokenIndexIn,
-                        tokenIndexOut,
-                        amount,
-                        f
+                        {
+                            amp: amp,
+                            balances: allBalances,
+                            tokenIndexIn: tokenIndexIn,
+                            tokenIndexOut: tokenIndexOut,
+                            amount: amount,
+                            swapFee: f,
+                        }
                     );
                 } else if (pairType == 'token-BPT') {
                     return stableMath_sol._derivativeSpotPriceAfterSwapTokenInForExactBPTOut(
-                        amp,
-                        allBalances,
-                        Bo, // bptTotalSupply
-                        tokenIndexIn,
-                        amount,
-                        f
+                        {
+                            amp: amp,
+                            balances: allBalances,
+                            bptTotalSupply: Bo,
+                            tokenIndexIn: tokenIndexIn,
+                            amount: amount,
+                            swapFee: f,
+                        }
                     );
                 } else if (pairType == 'BPT-token') {
                     return stableMath_sol._derivativeSpotPriceAfterSwapBPTInForExactTokenOut(
-                        amp,
-                        allBalances,
-                        Bi, // bptTotalSupply
-                        tokenIndexOut,
-                        amount,
-                        f
+                        {
+                            amp: amp,
+                            balances: allBalances,
+                            bptTotalSupply: Bi,
+                            tokenIndexOut: tokenIndexOut,
+                            amount: amount,
+                            swapFee: f,
+                        }
                     );
                 }
             }
@@ -956,15 +980,7 @@ export function EVMgetOutputAmountSwap(
     swapType: string,
     amount: BigNumber
 ): BigNumber {
-    let {
-        weightIn,
-        weightOut,
-        balanceIn,
-        balanceOut,
-        swapFee,
-        tokenIn,
-        tokenOut,
-    } = poolPairData;
+    let { balanceIn, balanceOut, tokenIn, tokenOut } = poolPairData;
     let returnAmount: BigNumber;
 
     if (swapType === 'swapExactIn') {
@@ -1017,17 +1033,15 @@ export function updateTokenBalanceForPool(
     token: string,
     balance: BigNumber
 ): any {
-    // console.log("pool")
-    // console.log(pool)
-    // console.log("token")
-    // console.log(token)
-    // console.log("balance")
-    // console.log(balance)
-
-    // Scale down back as balances are stored scaled down by the decimals
-    let T = pool.tokens.find(t => t.address === token);
-    T.balance = balance;
-    return pool;
+    // token is BPT
+    if (pool.id == token) {
+        pool.balanceBpt = balance;
+    } else {
+        // token is underlying in the pool
+        let T = pool.tokens.find(t => t.address === token);
+        T.balance = balance;
+        return pool;
+    }
 }
 
 // This is just used to compare how liquid the different pools are. We are
