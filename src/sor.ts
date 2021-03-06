@@ -41,6 +41,11 @@ export function processPaths(
 ): [Path[], BigNumber] {
     let maxLiquidityAvailable = bnum(0);
     paths.forEach(path => {
+        if (
+            path.id ==
+            '0x0e511aa1a137aad267dfe3a6bfca0b856c1a36820x5664e55ebfbc7dfc283ac9a4c9e7237d546a9a7b'
+        )
+            var a = 1;
         path.poolPairData = parsePoolPairDataForPath(pools, path, swapType);
         path.limitAmount = getLimitAmountSwapForPath(pools, path, swapType);
         if (path.limitAmount.isNaN()) throw 'path.limitAmount.isNaN'; // This should never happen
@@ -190,12 +195,10 @@ export const smartOrderRouter = (
             // Start new path at 1/b of totalSwapAmount (i.e. if this is the 5th pool, we start with
             // 20% of the totalSwapAmount for this new swapAmount added). However, we need to make sure
             // that this value is not higher then the bth limit of the paths available otherwise there
-            // won't be any possible path to process this swapAmount. We also subtract 1 wei from the limit
-            // so that the effective price for that path won't be Infinity (which is the case
-            // for exactly the limit):
+            // won't be any possible path to process this swapAmount:
             let newSwapAmount = BigNumber.min.apply(null, [
                 totalSwapAmount.times(bnum(1 / b)),
-                highestLimitAmounts[b - 1].minus(1),
+                highestLimitAmounts[b - 1],
             ]);
             // We need then to multiply all current
             // swapAmounts by 1-newSwapAmount/totalSwapAmount.
@@ -503,18 +506,26 @@ function getBestPathIds(
         let bestPathIndex = -1;
         let bestEffectivePrice = bnum('Infinity'); // Start with worst price possible
         paths.forEach((path, j) => {
-            // Do not consider this path if its limit is equal or below swapAmount
-            if (path.limitAmount.gt(swapAmount)) {
+            // Do not consider this path if its limit is below swapAmount
+            if (path.limitAmount.gte(swapAmount)) {
                 // Calculate effective price of this path for this swapAmount
-                // TODO for optimization: pass already calculated limitAmount as input
-                // to getEffectivePriceSwapForPath()
-                let effectivePrice = getEffectivePriceSwapForPath(
-                    pools,
-                    path,
-                    swapType,
-                    swapAmount
-                );
-                if (effectivePrice.lt(bestEffectivePrice)) {
+                // If path.limitAmount = swapAmount we set effectivePrice as
+                // Infinity because we know this path is maxed out and we want
+                // to select other paths that can still be improved on
+                let effectivePrice;
+                if (path.limitAmount.eq(swapAmount)) {
+                    effectivePrice = bnum('Infinity');
+                } else {
+                    // TODO for optimization: pass already calculated limitAmount as input
+                    // to getEffectivePriceSwapForPath()
+                    effectivePrice = getEffectivePriceSwapForPath(
+                        pools,
+                        path,
+                        swapType,
+                        swapAmount
+                    );
+                }
+                if (effectivePrice.lte(bestEffectivePrice)) {
                     bestEffectivePrice = effectivePrice;
                     bestPathIndex = j;
                 }
@@ -563,12 +574,16 @@ function iterateSwapAmounts(
     // paths.
     for (let i = 0; i < swapAmounts.length; ++i) {
         if (swapAmounts[i].isZero()) {
-            swapAmounts[i] = bnum(1); // 1 wei
-            exceedingAmounts[i] = exceedingAmounts[i].plus(bnum(1));
+            // Very small amount: TODO put in config file
+            const epsilon = totalSwapAmount.times(bnum(10 ** -6));
+            swapAmounts[i] = epsilon;
+            exceedingAmounts[i] = exceedingAmounts[i].plus(epsilon);
         }
         if (exceedingAmounts[i].isZero()) {
-            swapAmounts[i] = swapAmounts[i].minus(bnum(1)); // 1 wei
-            exceedingAmounts[i] = exceedingAmounts[i].minus(bnum(1));
+            // Very small amount: TODO put in config file
+            const epsilon = totalSwapAmount.times(bnum(10 ** -6));
+            swapAmounts[i] = swapAmounts[i].minus(epsilon); // Very small amount
+            exceedingAmounts[i] = exceedingAmounts[i].minus(epsilon);
         }
     }
     while (priceError.isGreaterThan(priceErrorTolerance)) {
@@ -662,13 +677,14 @@ function iterateSwapAmountsApproximation(
     while (
         BigNumber.min.apply(null, swapAmounts).lt(bnum(0)) ||
         BigNumber.max.apply(null, exceedingAmounts).gt(bnum(0))
-    )
+    ) {
         [swapAmounts, exceedingAmounts] = redistributeInputAmounts(
             totalSwapAmount,
             swapAmounts,
             exceedingAmounts,
             derivativeSPaSs
         );
+    }
 
     let pricesForViableAmounts = []; // Get prices for all non-negative AND below-limit input amounts
     let swapAmountsSumWithRoundingErrors = bnum(0);

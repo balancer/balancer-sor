@@ -121,21 +121,65 @@ export function getOutputAmountSwap(
         }
         if (amount.gte(poolPairData.balanceOut)) return bnum('Infinity');
     }
-    if (poolType == 'Weighted') {
-        if (pairType == 'token-token') {
-            return weightedMath._exactTokenInForTokenOut(amount, poolPairData);
-        } else if (pairType == 'token-BPT') {
-            return weightedMath._exactTokenInForBPTOut(amount, poolPairData);
-        } else if (pairType == 'BPT-token') {
-            return weightedMath._exactBPTInForTokenOut(amount, poolPairData);
+    if (swapType === 'swapExactIn') {
+        if (poolType == 'Weighted') {
+            if (pairType == 'token-token') {
+                return weightedMath._exactTokenInForTokenOut(
+                    amount,
+                    poolPairData
+                );
+            } else if (pairType == 'token-BPT') {
+                return weightedMath._exactTokenInForBPTOut(
+                    amount,
+                    poolPairData
+                );
+            } else if (pairType == 'BPT-token') {
+                return weightedMath._exactBPTInForTokenOut(
+                    amount,
+                    poolPairData
+                );
+            }
+        } else if (poolType == 'Stable') {
+            if (pairType == 'token-token') {
+                return stableMath._exactTokenInForTokenOut(
+                    amount,
+                    poolPairData
+                );
+            } else if (pairType == 'token-BPT') {
+                return stableMath._exactTokenInForBPTOut(amount, poolPairData);
+            } else if (pairType == 'BPT-token') {
+                return stableMath._exactBPTInForTokenOut(amount, poolPairData);
+            }
         }
-    } else if (poolType == 'Stable') {
-        if (pairType == 'token-token') {
-            return stableMath._exactTokenInForTokenOut(amount, poolPairData);
-        } else if (pairType == 'token-BPT') {
-            return stableMath._exactTokenInForBPTOut(amount, poolPairData);
-        } else if (pairType == 'BPT-token') {
-            return stableMath._exactBPTInForTokenOut(amount, poolPairData);
+    } else {
+        if (poolType == 'Weighted') {
+            if (pairType == 'token-token') {
+                return weightedMath._tokenInForExactTokenOut(
+                    amount,
+                    poolPairData
+                );
+            } else if (pairType == 'token-BPT') {
+                return weightedMath._tokenInForExactBPTOut(
+                    amount,
+                    poolPairData
+                );
+            } else if (pairType == 'BPT-token') {
+                return weightedMath._BPTInForExactTokenOut(
+                    amount,
+                    poolPairData
+                );
+            }
+        } else if (poolType == 'Stable') {
+            if (pairType == 'token-token') {
+                return stableMath._tokenInForExactTokenOut(
+                    amount,
+                    poolPairData
+                );
+            } else if (pairType == 'token-BPT') {
+                return stableMath._tokenInForExactBPTOut(amount, poolPairData);
+            } else if (pairType == 'BPT-token') {
+                return stableMath._BPTInForExactTokenOut(amount, poolPairData);
+            }
         }
     }
 }
@@ -232,39 +276,77 @@ export function getSpotPriceAfterSwap(
         }
         if (amount.gte(poolPairData.balanceOut)) return bnum('Infinity');
     }
-    if (poolType == 'Weighted') {
-        if (pairType == 'token-token') {
-            return weightedMath._spotPriceAfterSwapExactTokenInForTokenOut(
-                amount,
-                poolPairData
-            );
-        } else if (pairType == 'token-BPT') {
-            return weightedMath._spotPriceAfterSwapExactTokenInForBPTOut(
-                amount,
-                poolPairData
-            );
-        } else if (pairType == 'BPT-token') {
-            return weightedMath._spotPriceAfterSwapExactBPTInForTokenOut(
-                amount,
-                poolPairData
-            );
+    if (swapType === 'swapExactIn') {
+        if (poolType == 'Weighted') {
+            if (pairType == 'token-token') {
+                return weightedMath._spotPriceAfterSwapExactTokenInForTokenOut(
+                    amount,
+                    poolPairData
+                );
+            } else if (pairType == 'token-BPT') {
+                return weightedMath._spotPriceAfterSwapExactTokenInForBPTOut(
+                    amount,
+                    poolPairData
+                );
+            } else if (pairType == 'BPT-token') {
+                return weightedMath._spotPriceAfterSwapExactBPTInForTokenOut(
+                    amount,
+                    poolPairData
+                );
+            }
+        } else if (poolType == 'Stable') {
+            if (pairType == 'token-token') {
+                return stableMath._spotPriceAfterSwapExactTokenInForTokenOut(
+                    amount,
+                    poolPairData
+                );
+            } else if (pairType == 'token-BPT') {
+                return stableMath._spotPriceAfterSwapExactTokenInForBPTOut(
+                    amount,
+                    poolPairData
+                );
+            } else if (pairType == 'BPT-token') {
+                return stableMath._spotPriceAfterSwapExactBPTInForTokenOut(
+                    amount,
+                    poolPairData
+                );
+            }
         }
-    } else if (poolType == 'Stable') {
-        if (pairType == 'token-token') {
-            return stableMath._spotPriceAfterSwapExactTokenInForTokenOut(
-                amount,
-                poolPairData
-            );
-        } else if (pairType == 'token-BPT') {
-            return stableMath._spotPriceAfterSwapExactTokenInForBPTOut(
-                amount,
-                poolPairData
-            );
-        } else if (pairType == 'BPT-token') {
-            return stableMath._spotPriceAfterSwapExactBPTInForTokenOut(
-                amount,
-                poolPairData
-            );
+    } else {
+        if (poolType == 'Weighted') {
+            if (pairType == 'token-token') {
+                return weightedMath._spotPriceAfterSwapTokenInForExactTokenOut(
+                    amount,
+                    poolPairData
+                );
+            } else if (pairType == 'token-BPT') {
+                return weightedMath._spotPriceAfterSwapTokenInForExactBPTOut(
+                    amount,
+                    poolPairData
+                );
+            } else if (pairType == 'BPT-token') {
+                return weightedMath._spotPriceAfterSwapBPTInForExactTokenOut(
+                    amount,
+                    poolPairData
+                );
+            }
+        } else if (poolType == 'Stable') {
+            if (pairType == 'token-token') {
+                return stableMath._spotPriceAfterSwapTokenInForExactTokenOut(
+                    amount,
+                    poolPairData
+                );
+            } else if (pairType == 'token-BPT') {
+                return stableMath._spotPriceAfterSwapTokenInForExactBPTOut(
+                    amount,
+                    poolPairData
+                );
+            } else if (pairType == 'BPT-token') {
+                return stableMath._spotPriceAfterSwapBPTInForExactTokenOut(
+                    amount,
+                    poolPairData
+                );
+            }
         }
     }
 }
@@ -338,40 +420,77 @@ export function getDerivativeSpotPriceAfterSwap(
         }
         if (amount.gte(poolPairData.balanceOut)) return bnum('Infinity');
     }
-
-    if (poolType == 'Weighted') {
-        if (pairType == 'token-token') {
-            return weightedMath._derivativeSpotPriceAfterSwapExactTokenInForTokenOut(
-                amount,
-                poolPairData
-            );
-        } else if (pairType == 'token-BPT') {
-            return weightedMath._derivativeSpotPriceAfterSwapExactTokenInForBPTOut(
-                amount,
-                poolPairData
-            );
-        } else if (pairType == 'BPT-token') {
-            return weightedMath._derivativeSpotPriceAfterSwapExactBPTInForTokenOut(
-                amount,
-                poolPairData
-            );
+    if (swapType === 'swapExactIn') {
+        if (poolType == 'Weighted') {
+            if (pairType == 'token-token') {
+                return weightedMath._derivativeSpotPriceAfterSwapExactTokenInForTokenOut(
+                    amount,
+                    poolPairData
+                );
+            } else if (pairType == 'token-BPT') {
+                return weightedMath._derivativeSpotPriceAfterSwapExactTokenInForBPTOut(
+                    amount,
+                    poolPairData
+                );
+            } else if (pairType == 'BPT-token') {
+                return weightedMath._derivativeSpotPriceAfterSwapExactBPTInForTokenOut(
+                    amount,
+                    poolPairData
+                );
+            }
+        } else if (poolType == 'Stable') {
+            if (pairType == 'token-token') {
+                return stableMath._derivativeSpotPriceAfterSwapExactTokenInForTokenOut(
+                    amount,
+                    poolPairData
+                );
+            } else if (pairType == 'token-BPT') {
+                return stableMath._derivativeSpotPriceAfterSwapExactTokenInForBPTOut(
+                    amount,
+                    poolPairData
+                );
+            } else if (pairType == 'BPT-token') {
+                return stableMath._derivativeSpotPriceAfterSwapExactBPTInForTokenOut(
+                    amount,
+                    poolPairData
+                );
+            }
         }
-    } else if (poolType == 'Stable') {
-        if (pairType == 'token-token') {
-            return stableMath._derivativeSpotPriceAfterSwapExactTokenInForTokenOut(
-                amount,
-                poolPairData
-            );
-        } else if (pairType == 'token-BPT') {
-            return stableMath._derivativeSpotPriceAfterSwapExactTokenInForBPTOut(
-                amount,
-                poolPairData
-            );
-        } else if (pairType == 'BPT-token') {
-            return stableMath._derivativeSpotPriceAfterSwapExactBPTInForTokenOut(
-                amount,
-                poolPairData
-            );
+    } else {
+        if (poolType == 'Weighted') {
+            if (pairType == 'token-token') {
+                return weightedMath._derivativeSpotPriceAfterSwapTokenInForExactTokenOut(
+                    amount,
+                    poolPairData
+                );
+            } else if (pairType == 'token-BPT') {
+                return weightedMath._derivativeSpotPriceAfterSwapTokenInForExactBPTOut(
+                    amount,
+                    poolPairData
+                );
+            } else if (pairType == 'BPT-token') {
+                return weightedMath._derivativeSpotPriceAfterSwapBPTInForExactTokenOut(
+                    amount,
+                    poolPairData
+                );
+            }
+        } else if (poolType == 'Stable') {
+            if (pairType == 'token-token') {
+                return stableMath._derivativeSpotPriceAfterSwapTokenInForExactTokenOut(
+                    amount,
+                    poolPairData
+                );
+            } else if (pairType == 'token-BPT') {
+                return stableMath._derivativeSpotPriceAfterSwapTokenInForExactBPTOut(
+                    amount,
+                    poolPairData
+                );
+            } else if (pairType == 'BPT-token') {
+                return stableMath._derivativeSpotPriceAfterSwapBPTInForExactTokenOut(
+                    amount,
+                    poolPairData
+                );
+            }
         }
     }
 }
@@ -499,17 +618,21 @@ export const parsePoolPairData = (
         balanceIn,
         balanceOut,
         decimalsOut,
-        decimalsIn;
+        decimalsIn,
+        weightIn,
+        weightOut;
 
     // Check if tokenIn is the pool token itself (BPT)
     if (tokenIn == p.id) {
         pairType = 'BPT-token';
         balanceIn = p.balanceBpt;
-        decimalsIn = '18';
+        decimalsIn = '18'; // Not used but has to be defined
+        weightIn = bnum(1); // Not used but has to be defined
     } else if (tokenOut == p.id) {
         pairType = 'token-BPT';
         balanceOut = p.balanceBpt;
-        decimalsOut = '18';
+        decimalsOut = '18'; // Not used but has to be defined
+        weightOut = bnum(1); // Not used but has to be defined
     } else {
         pairType = 'token-token';
     }
@@ -522,6 +645,7 @@ export const parsePoolPairData = (
         tI = p.tokens[tokenIndexIn];
         balanceIn = tI.balance;
         decimalsIn = tI.decimals;
+        weightIn = bnum(tI.denormWeight).div(bnum(p.totalWeight));
     }
     if (pairType != 'token-BPT') {
         tokenIndexOut = p.tokens.findIndex(
@@ -531,6 +655,7 @@ export const parsePoolPairData = (
         tO = p.tokens[tokenIndexOut];
         balanceOut = tO.balance;
         decimalsOut = tO.decimals;
+        weightOut = bnum(tO.denormWeight).div(bnum(p.totalWeight));
     }
 
     // Todo: the pool type should be already on subgraph
@@ -548,11 +673,8 @@ export const parsePoolPairData = (
             decimalsOut: decimalsOut,
             balanceIn: bnum(balanceIn),
             balanceOut: bnum(balanceOut),
-            weightIn: scale(bnum(tI.denormWeight).div(bnum(p.totalWeight)), 18),
-            weightOut: scale(
-                bnum(tO.denormWeight).div(bnum(p.totalWeight)),
-                18
-            ),
+            weightIn: weightIn,
+            weightOut: weightOut,
             swapFee: bnum(p.swapFee),
         };
     } else if (poolType == 'Stable') {
@@ -995,7 +1117,9 @@ export function sortPoolsMostLiquid(
         for (let k in poolsTokenOutNoTokenIn) {
             // If this pool has hopTokens[i] calculate its normalized liquidity
             if (
-                new Set(poolsTokenOutNoTokenIn[k].tokensList).has(hopTokens[i])
+                new Set(poolsTokenOutNoTokenIn[k].tokensList)
+                    .add(poolsTokenOutNoTokenIn[k].id)
+                    .has(hopTokens[i])
             ) {
                 let normalizedLiquidity = getNormalizedLiquidity(
                     parsePoolPairData(

@@ -1758,7 +1758,9 @@
         },
         {
             "id": "0x0e511aa1a137aad267dfe3a6bfca0b856c1a3682",
+            "balanceBpt": "1",
             "swapFee": "0.01",
+            "balanceBpt": "2171426.91693768",
             "tokens": [
                 {
                     "address": "0x2260fac5e5542a773aa44fbcfedf7c193bc2c599",
