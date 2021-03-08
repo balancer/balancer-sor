@@ -1,6 +1,5 @@
 import fetch from 'isomorphic-fetch';
-import { SubGraphPools, Pools, Pool, Token } from './types';
-import * as bmath from './bmath';
+import { SubGraphPools } from './types';
 
 export class POOLS {
     async getAllPublicSwapPools(URL: string): Promise<SubGraphPools> {
@@ -8,14 +7,14 @@ export class POOLS {
         const allPools = result.json();
         return allPools;
     }
-
+    /* !!!!!!! TODO Remove This
     async formatPoolsBigNumber(pools: SubGraphPools): Promise<Pools> {
         let onChainPools: Pools = { pools: [] };
 
         for (let i = 0; i < pools.pools.length; i++) {
             let tokens: Token[] = [];
 
-            let p: Pool = {
+            let p: SubGraphPool = {
                 id: pools.pools[i].id,
                 swapFee: bmath.bnum(pools.pools[i].swapFee),
                 totalWeight: bmath.bnum(pools.pools[i].totalWeight),
@@ -38,4 +37,5 @@ export class POOLS {
 
         return onChainPools;
     }
+    */
 }

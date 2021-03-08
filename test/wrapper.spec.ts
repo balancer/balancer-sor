@@ -3,7 +3,7 @@ require('dotenv').config();
 import { JsonRpcProvider } from '@ethersproject/providers';
 import { assert, expect } from 'chai';
 import { SOR } from '../src';
-import { SubGraphPools, SwapInfo, Pools } from '../src/types';
+import { SubGraphPools, SwapInfo } from '../src/types';
 import { bnum } from '../src/bmath';
 import { BigNumber } from '../src/utils/bignumber';
 
@@ -113,7 +113,7 @@ describe(`Tests for wrapper class.`, () => {
 
         assert.isFalse(result);
         const pairKey = sor.createKey(tokenIn, tokenOut);
-        const cachedPools: Pools = sor.poolsForPairsCache[pairKey];
+        const cachedPools: SubGraphPools = sor.poolsForPairsCache[pairKey];
 
         assert.equal(cachedPools.pools.length, 0);
     });
@@ -139,7 +139,7 @@ describe(`Tests for wrapper class.`, () => {
         assert.isTrue(result);
 
         const pairKey = sor.createKey(tokenIn, tokenOut);
-        const cachedPools: Pools = sor.poolsForPairsCache[pairKey];
+        const cachedPools: SubGraphPools = sor.poolsForPairsCache[pairKey];
         assert.isAbove(cachedPools.pools.length, 0);
     });
 

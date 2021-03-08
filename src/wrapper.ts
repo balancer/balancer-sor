@@ -7,11 +7,8 @@ import {
     SwapInfo,
     SubGraphPools,
     SubGraphPool,
-    Pools,
-    Token,
-    Pool,
-    PoolDictionary,
     Path,
+    SubGraphPoolDictionary,
 } from './types';
 import { bnum } from './bmath';
 
@@ -32,7 +29,7 @@ export class SOR {
     subgraphPools: SubGraphPools;
     tokenCost = {};
     pools: POOLS;
-    onChainCache: Pools = { pools: [] };
+    onChainCache: SubGraphPools = { pools: [] };
     poolsForPairsCache = {};
     processedDataCache = {};
     finishedFetchingOnChain: boolean = false;
@@ -124,7 +121,7 @@ export class SOR {
     */
     private async fetchOnChainPools(
         SubgraphPools: SubGraphPools
-    ): Promise<Pools> {
+    ): Promise<SubGraphPools> {
         if (SubgraphPools.pools.length === 0) {
             console.error('ERROR: No Pools To Fetch.');
             return { pools: [] };
@@ -140,12 +137,12 @@ export class SOR {
         if (!onChainPools) return { pools: [] };
         */
         // !!!!!!! TODO - Below is a placeholder for multicall that converts to bignumber format with NO scaling
-        const onChainPools: Pools = { pools: [] };
-
+        const onChainPools: SubGraphPools = { pools: [] };
+        /*
         for (let i = 0; i < SubgraphPools.pools.length; i++) {
             let tokens: Token[] = [];
 
-            let p: Pool = {
+            let p: SubGraphPool = {
                 id: SubgraphPools.pools[i].id,
                 swapFee: bnum(SubgraphPools.pools[i].swapFee),
                 totalWeight: bnum(SubgraphPools.pools[i].totalWeight),
@@ -165,6 +162,7 @@ export class SOR {
             });
             onChainPools.pools.push(p);
         }
+        */
 
         return onChainPools;
     }
@@ -223,7 +221,7 @@ export class SOR {
         tokenOut: string,
         swapType: string,
         swapAmt: BigNumber,
-        onChainPools: Pools,
+        onChainPools: SubGraphPools,
         useProcessCache: boolean = true
     ): Promise<SwapInfo> {
         let swapInfo: SwapInfo = {
@@ -252,7 +250,7 @@ export class SOR {
             tokenOut,
         };
 
-        let pools: PoolDictionary, paths: Path[], marketSp: BigNumber;
+        let pools: SubGraphPoolDictionary, paths: Path[], marketSp: BigNumber;
         // If token pair has been processed before that info can be reused to speed up execution
         let cache = this.processedDataCache[`${tokenIn}${tokenOut}${swapType}`];
 
@@ -345,7 +343,7 @@ export class SOR {
             let allPools = allPoolsNonBig;
 
             // These can be shared for both swap Types
-            let pools: PoolDictionary, pathData: Path[];
+            let pools: SubGraphPoolDictionary, pathData: Path[];
             [pools, pathData] = this.processPairPools(
                 tokenIn,
                 tokenOut,
@@ -435,14 +433,17 @@ export class SOR {
                 }
             }
 
-            let onChainPools: Pools = { pools: [] };
+            let onChainPools: SubGraphPools = { pools: [] };
             if (poolsOfInterest.length !== 0) {
                 // Retrieves onchain balances for pools list
+                // TODO !!!!!!!
+                /*
                 onChainPools = await sor.getAllPoolDataOnChain(
                     { pools: poolsOfInterest },
                     this.MULTIADDR[this.chainId],
                     this.provider
                 );
+                */
             }
 
             // Add to cache for future use
@@ -466,12 +467,12 @@ export class SOR {
         tokenIn: string,
         tokenOut: string,
         poolsList
-    ): [PoolDictionary, Path[]] {
+    ): [SubGraphPoolDictionary, Path[]] {
         // Retrieves intermediate pools along with tokens that are contained in these.
-        let directPools: PoolDictionary,
+        let directPools: SubGraphPoolDictionary,
             hopTokens: string[],
-            poolsTokenIn: PoolDictionary,
-            poolsTokenOut: PoolDictionary;
+            poolsTokenIn: SubGraphPoolDictionary,
+            poolsTokenOut: SubGraphPoolDictionary;
         [directPools, hopTokens, poolsTokenIn, poolsTokenOut] = sor.filterPools(
             poolsList.pools,
             tokenIn,
@@ -494,7 +495,7 @@ export class SOR {
 
         // Finds the possible paths to make the swap
         let pathData: Path[];
-        let pools: PoolDictionary;
+        let pools: SubGraphPoolDictionary;
         [pools, pathData] = sor.parsePoolData(
             directPools,
             tokenIn,
@@ -510,15 +511,10 @@ export class SOR {
     // SwapType dependent - calculates paths prices/amounts
     processPathsAndPrices(
         PathArray: Path[],
-        PoolsDict: PoolDictionary,
+        PoolsDict: SubGraphPoolDictionary,
         SwapType: string
     ): [Path[], BigNumber] {
-        const [paths] = sor.processPaths(
-            PathArray,
-            PoolsDict,
-            SwapType,
-            this.maxPools
-        );
+        const [paths] = sor.processPaths(PathArray, PoolsDict, SwapType);
 
         const bestSpotPrice = bnum(0);
         // !!!!!!! TODO - Add this.
