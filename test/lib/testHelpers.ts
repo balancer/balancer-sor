@@ -110,10 +110,21 @@ export function filterAndScalePools(AllSubgraphPools: SubGraphPools): Pools {
     }
 
     // Formats Subgraph to wei/bnum format
-    sorv2.formatSubgraphPools(allPoolsNonZeroBalances);
+    formatSubgraphPools(allPoolsNonZeroBalances);
 
     return allPoolsNonZeroBalances;
 }
+
+const formatSubgraphPools = pools => {
+    for (let pool of pools.pools) {
+        pool.swapFee = scale(bnum(pool.swapFee), 18);
+        pool.totalWeight = scale(bnum(pool.totalWeight), 18);
+        pool.tokens.forEach(token => {
+            token.balance = scale(bnum(token.balance), token.decimals);
+            token.denormWeight = scale(bnum(token.denormWeight), 18);
+        });
+    }
+};
 
 // Filters for only pools with balance > 0.
 export function filterPoolsWithBalance(

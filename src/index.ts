@@ -1,10 +1,5 @@
 export { smartOrderRouter, processPaths, filterPaths } from './sor';
-export {
-    parsePoolData,
-    formatSubgraphPools,
-    filterPools,
-    sortPoolsMostLiquid,
-} from './helpers';
+export { parsePoolData, filterPools, sortPoolsMostLiquid } from './helpers';
 export { getAllPoolDataOnChain } from './multicall';
 import * as bmath from './bmath';
 export { bmath };
