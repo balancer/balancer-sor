@@ -83,8 +83,8 @@ interface Profiling {
     onChainBalances: boolean;
 }
 
-// Filters for only pools with balance > 0 and converts to wei/bnum format.
-export function formatAndFilterPools(AllSubgraphPools: SubGraphPools): Pools {
+// Filters for only pools with balance > 0 and converts to SCALED wei/bnum format (used for V1).
+export function filterAndScalePools(AllSubgraphPools: SubGraphPools): Pools {
     let allPoolsNonZeroBalances: any = { pools: [] };
 
     for (let pool of AllSubgraphPools.pools) {
@@ -96,6 +96,22 @@ export function formatAndFilterPools(AllSubgraphPools: SubGraphPools): Pools {
 
     // Formats Subgraph to wei/bnum format
     sorv2.formatSubgraphPools(allPoolsNonZeroBalances);
+
+    return allPoolsNonZeroBalances;
+}
+
+// Filters for only pools with balance > 0.
+export function filterPoolsWithBalance(
+    AllSubgraphPools: SubGraphPools
+): SubGraphPools {
+    let allPoolsNonZeroBalances: SubGraphPools = { pools: [] };
+
+    for (let pool of AllSubgraphPools.pools) {
+        // Only check first balance since AFAIK either all balances are zero or none are:
+        if (pool.tokens.length != 0)
+            if (pool.tokens[0].balance != '0')
+                allPoolsNonZeroBalances.pools.push(pool);
+    }
 
     return allPoolsNonZeroBalances;
 }
@@ -216,7 +232,7 @@ export async function getV1Swap(
         const getAllPoolDataOnChainStart = performance.now();
         // console.log(`Using saved balances`)
         // Helper - Filters for only pools with balance and converts to wei/bnum format.
-        onChainPools = formatAndFilterPools(
+        onChainPools = filterAndScalePools(
             JSON.parse(JSON.stringify(weightedPools))
         );
         const getAllPoolDataOnChainEnd = performance.now();
@@ -1148,6 +1164,10 @@ export function fullSwap(
 ): [Swap[][], BigNumber] {
     tokenIn = tokenIn.toLowerCase();
     tokenOut = tokenOut.toLowerCase();
+
+    allPoolsNonZeroBalances = JSON.parse(
+        JSON.stringify(allPoolsNonZeroBalances)
+    );
 
     let poolsTokenIn, poolsTokenOut, directPools, hopTokens;
     [directPools, hopTokens, poolsTokenIn, poolsTokenOut] = sorv2.filterPools(

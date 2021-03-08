@@ -1,9 +1,10 @@
 // Tests multihop filter methods by comparing to old SOR getMultihopPoolsWithTokens function
 // which was replaced as too slow - uses subgraphPoolsSmall.json for pool data.
+// npx mocha -r ts-node/register test/filter-functions.spec.ts
 import * as sor from '../src';
 import { assert } from 'chai';
 import 'mocha';
-import { formatAndFilterPools } from './lib/testHelpers';
+import { filterPoolsWithBalance } from './lib/testHelpers';
 // Following has:
 // Both DAI&USDC: 4 pools
 // DAI, No USDC: 3
@@ -20,7 +21,7 @@ describe('Test Filter Functions using subgraphPoolsSmall.json & full SOR comparr
     it('Saved pool check', async () => {
         assert.equal(allPools.pools.length, 12, 'Should be 12 pools');
 
-        allPoolsNonZeroBalances = formatAndFilterPools(allPools);
+        allPoolsNonZeroBalances = filterPoolsWithBalance(allPools);
         assert.equal(
             allPoolsNonZeroBalances.pools.length,
             8,
