@@ -13,7 +13,7 @@ import {
     PoolDictionary,
     Path,
 } from './types';
-import { bnum, scale } from './bmath';
+import { bnum } from './bmath';
 
 export class SOR {
     MULTIADDR: { [chainId: number]: string } = {
@@ -83,7 +83,7 @@ export class SOR {
         }
     }
 
-    // Fetch allPools from URL then retrieve OnChain balances
+    // Fetch all pools, in Subgraph format (strings/not scaled) from URL then retrieve OnChain balances
     async fetchPools(): Promise<boolean> {
         try {
             let subgraphPools: SubGraphPools;
@@ -386,7 +386,6 @@ export class SOR {
 
             // Calculate swaps for swapExactIn/Out over range and save swaps (with pools) returned
             range.forEach(amt => {
-                console.log(`!!!!!!! AMT: ${amt.toString()}`);
                 let amtIn = amt;
                 let amtOut = amtIn;
 

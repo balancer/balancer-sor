@@ -17,7 +17,6 @@ const poolsUrl = `https://ipfs.fleek.co/ipns/balancer-team-bucket.storage.fleek.
 const swapCost = new BigNumber('100000');
 
 describe(`Tests for wrapper class.`, () => {
-    /*
     it(`Should set constructor variables`, () => {
         const sor = new SOR(provider, gasPrice, maxPools, chainId, poolsUrl);
         assert.equal(provider, sor.provider);
@@ -100,7 +99,6 @@ describe(`Tests for wrapper class.`, () => {
         assert.equal(swaps.tradeAmount.toString(), '0');
     });
 
-
     it(`fetchFilteredPairPools should return false for bad url.`, async () => {
         const tokenIn: string = '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2';
         const tokenOut: string = '0x6b175474e89094c44da98b954eedeac495271d0f';
@@ -119,7 +117,6 @@ describe(`Tests for wrapper class.`, () => {
 
         assert.equal(cachedPools.pools.length, 0);
     });
-    */
 
     it(`fetchFilteredPairPools should return true for pools list`, async () => {
         const poolsFromFile: SubGraphPools = require('./testData/testPools/subgraphPoolsSmall.json');
@@ -145,7 +142,7 @@ describe(`Tests for wrapper class.`, () => {
         const cachedPools: Pools = sor.poolsForPairsCache[pairKey];
         assert.isAbove(cachedPools.pools.length, 0);
     });
-    /*
+
     it(`should have a valid swap`, async () => {
         const poolsFromFile: SubGraphPools = require('./testData/testPools/subgraphPoolsSmall.json');
         const tokenIn: string = '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2';
@@ -165,7 +162,7 @@ describe(`Tests for wrapper class.`, () => {
             tokenIn,
             tokenOut
         );
-            console.log(`!!!!!!! SWAO`)
+
         const swaps: SwapInfo = await sor.getSwaps(
             tokenIn,
             tokenOut,
@@ -175,7 +172,6 @@ describe(`Tests for wrapper class.`, () => {
 
         assert.isAbove(swaps.tradeAmount.toNumber(), 0);
     });
-    */
     // Script for swaps
 
     // Correct swap types
