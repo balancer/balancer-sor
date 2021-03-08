@@ -4,11 +4,12 @@ import { BigNumber } from './utils/bignumber';
 // TODO: rename balanceIn -> Bi to easily use maths from python
 export interface PoolPairData {
     id: string;
-    poolType?: string; // Todo: make this a mandatory field
+    poolType?: string; // Todo: make this a mandatory field?
+    pairType?: string; // Todo: make this a mandatory field?
     tokenIn: string;
     tokenOut: string;
-    balanceIn: BigNumber;
-    balanceOut: BigNumber;
+    balanceIn?: BigNumber;
+    balanceOut?: BigNumber;
     weightIn?: BigNumber; // Weights are only defined for weighted pools
     weightOut?: BigNumber; // Weights are only defined for weighted pools
     swapFee: BigNumber;
@@ -63,6 +64,7 @@ export interface Pool {
     swapFee: BigNumber;
     amp?: BigNumber;
     totalWeight?: BigNumber;
+    balanceBpt?: BigNumber;
     tokens: Token[];
     tokensList: string[];
 }

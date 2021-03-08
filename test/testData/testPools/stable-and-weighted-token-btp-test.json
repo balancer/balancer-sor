@@ -1,15 +1,796 @@
 {
     "tradeInfo": {
-        "SwapType": "swapExactOut",
-        "TokenIn": "0x9f8f72aa9304c8b593d555f12ef6589cc3a579a2",
-        "TokenOut": "0xc00e94cb662c3520282e6f5717214004a7f26888",
-        "NoPools": 2,
-        "SwapAmount": "263847896196207400",
-        "GasPrice": "30000000000",
+        "SwapType": "swapExactIn",
+        "TokenIn": "0x6b175474e89094c44da98b954eedeac495271d0f",
+        "TokenOut": "0x056fd409e1d7a124bd7017459dfea2f387b6d5cd",
+        "NoPools": 4,
+        "SwapAmount": "100000000000000000000000",
+        "GasPrice": "0",
         "SwapAmountDecimals": "18",
-        "ReturnAmountDecimals": "18"
+        "ReturnAmountDecimals": "2"
     },
     "pools": [
+        {
+            "id": "0x6c3F90f043a72FA612cbac8115EE7e52BDe6E490",
+            "balanceBpt": "811723149.6763058",
+            "swapFee": "0.0004",
+            "amp": "600",
+            "tokens": [
+                {
+                    "address": "0x6b175474e89094c44da98b954eedeac495271d0f",
+                    "balance": "192253877.402366975172250103",
+                    "decimals": "18",
+                    "denormWeight": "0"
+                },
+                {
+                    "address": "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+                    "balance": "264799514.813006",
+                    "decimals": "6",
+                    "denormWeight": "0"
+                },
+                {
+                    "address": "0xdAC17F958D2ee523a2206206994597C13D831ec7",
+                    "balance": "366274364.41928",
+                    "decimals": "6",
+                    "denormWeight": "0"
+                }
+            ],
+            "tokensList": [
+                "0x6b175474e89094c44da98b954eedeac495271d0f",
+                "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+                "0xdAC17F958D2ee523a2206206994597C13D831ec7"
+            ],
+            "totalWeight": "0"
+        },
+        {
+            "id": "0x3B3Ac5386837Dc563660FB6a0937DFAa5924333B",
+            "swapFee": "0.04",
+            "amp": "500",
+            "tokens": [
+                {
+                    "address": "0xC2cB1040220768554cf699b0d863A3cd4324ce32",
+                    "balance": "27734480.446638165127865285",
+                    "decimals": "18",
+                    "denormWeight": "0"
+                },
+                {
+                    "address": "0x26EA744E5B887E5205727f55dFBE8685e3b21951",
+                    "balance": "39198836.344557",
+                    "decimals": "6",
+                    "denormWeight": "0"
+                },
+                {
+                    "address": "0xE6354ed5bC4b393a5Aad09f21c46E101e692d447",
+                    "balance": "39147834.03919",
+                    "decimals": "6",
+                    "denormWeight": "0"
+                },
+                {
+                    "address": "0x04bC0Ab673d88aE9dbC9DA2380cB6B79C4BCa9aE",
+                    "balance": "38140433.771774372342011607",
+                    "decimals": "18",
+                    "denormWeight": "0"
+                }
+            ],
+            "tokensList": [
+                "0xC2cB1040220768554cf699b0d863A3cd4324ce32",
+                "0x26EA744E5B887E5205727f55dFBE8685e3b21951",
+                "0xE6354ed5bC4b393a5Aad09f21c46E101e692d447",
+                "0x04bC0Ab673d88aE9dbC9DA2380cB6B79C4BCa9aE"
+            ],
+            "totalWeight": "0"
+        },
+        {
+            "id": "0x845838DF265Dcd2c412A1Dc9e959c7d08537f8a2",
+            "swapFee": "0.04",
+            "amp": "450",
+            "tokens": [
+                {
+                    "address": "0x5d3a536E4D6DbD6114cc1Ead35777bAB948E3643",
+                    "balance": "2961186138.48568566",
+                    "decimals": "8",
+                    "denormWeight": "0"
+                },
+                {
+                    "address": "0x39AA39c021dfbaE8faC545936693aC917d5E7563",
+                    "balance": "3826818847.76597292",
+                    "decimals": "8",
+                    "denormWeight": "0"
+                }
+            ],
+            "tokensList": [
+                "0x5d3a536E4D6DbD6114cc1Ead35777bAB948E3643",
+                "0x39AA39c021dfbaE8faC545936693aC917d5E7563"
+            ],
+            "totalWeight": "0"
+        },
+        {
+            "id": "0xD2967f45c4f384DEEa880F807Be904762a3DeA07",
+            "swapFee": "0.0004",
+            "amp": "200",
+            "tokens": [
+                {
+                    "address": "0x056fd409e1d7a124bd7017459dfea2f387b6d5cd",
+                    "balance": "100366334.42",
+                    "decimals": "2",
+                    "denormWeight": "0"
+                },
+                {
+                    "address": "0x6c3F90f043a72FA612cbac8115EE7e52BDe6E490",
+                    "balance": "81584278.574180828349908466",
+                    "decimals": "18",
+                    "denormWeight": "0"
+                }
+            ],
+            "tokensList": [
+                "0x056fd409e1d7a124bd7017459dfea2f387b6d5cd",
+                "0x6c3F90f043a72FA612cbac8115EE7e52BDe6E490"
+            ],
+            "totalWeight": "0"
+        },
+        {
+            "id": "0xb19059ebb43466C323583928285a49f558E572Fd",
+            "swapFee": "0.04",
+            "amp": "300",
+            "tokens": [
+                {
+                    "address": "0x0316EB71485b0Ab14103307bf65a021042c6d380",
+                    "balance": "3086.15656144557059685",
+                    "decimals": "18",
+                    "denormWeight": "0"
+                },
+                {
+                    "address": "0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599",
+                    "balance": "3041.5595098",
+                    "decimals": "8",
+                    "denormWeight": "0"
+                }
+            ],
+            "tokensList": [
+                "0x0316EB71485b0Ab14103307bf65a021042c6d380",
+                "0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599"
+            ],
+            "totalWeight": "0"
+        },
+        {
+            "id": "0x5B5CFE992AdAC0C9D48E05854B2d91C73a003858",
+            "swapFee": "0.04",
+            "amp": "200",
+            "tokens": [
+                {
+                    "address": "0xdF574c24545E5FfEcb9a659c229253D4111d87e1",
+                    "balance": "940492.11175952",
+                    "decimals": "8",
+                    "denormWeight": "0"
+                },
+                {
+                    "address": "0x6c3F90f043a72FA612cbac8115EE7e52BDe6E490",
+                    "balance": "960130.219886386237528684",
+                    "decimals": "18",
+                    "denormWeight": "0"
+                }
+            ],
+            "tokensList": [
+                "0xdF574c24545E5FfEcb9a659c229253D4111d87e1",
+                "0x6c3F90f043a72FA612cbac8115EE7e52BDe6E490"
+            ],
+            "totalWeight": "0"
+        },
+        {
+            "id": "0x6D65b498cb23deAba52db31c93Da9BFFb340FB8F",
+            "swapFee": "0.04",
+            "amp": "5",
+            "tokens": [
+                {
+                    "address": "0x0E2EC54fC0B509F445631Bf4b91AB8168230C752",
+                    "balance": "22539.335137729931263554",
+                    "decimals": "18",
+                    "denormWeight": "0"
+                },
+                {
+                    "address": "0x6c3F90f043a72FA612cbac8115EE7e52BDe6E490",
+                    "balance": "24911.849484924224056756",
+                    "decimals": "18",
+                    "denormWeight": "0"
+                }
+            ],
+            "tokensList": [
+                "0x0E2EC54fC0B509F445631Bf4b91AB8168230C752",
+                "0x6c3F90f043a72FA612cbac8115EE7e52BDe6E490"
+            ],
+            "totalWeight": "0"
+        },
+        {
+            "id": "0x1AEf73d49Dedc4b1778d0706583995958Dc862e6",
+            "swapFee": "0.04",
+            "amp": "200",
+            "tokens": [
+                {
+                    "address": "0xe2f2a5C287993345a840Db3B0845fbC70f5935a5",
+                    "balance": "6319938.486449404610908319",
+                    "decimals": "18",
+                    "denormWeight": "0"
+                },
+                {
+                    "address": "0x6c3F90f043a72FA612cbac8115EE7e52BDe6E490",
+                    "balance": "4237533.721071551646274416",
+                    "decimals": "18",
+                    "denormWeight": "0"
+                }
+            ],
+            "tokensList": [
+                "0xe2f2a5C287993345a840Db3B0845fbC70f5935a5",
+                "0x6c3F90f043a72FA612cbac8115EE7e52BDe6E490"
+            ],
+            "totalWeight": "0"
+        },
+        {
+            "id": "0xD905e2eaeBe188fc92179b6350807D8bd91Db0D8",
+            "swapFee": "0.04",
+            "amp": "200",
+            "tokens": [
+                {
+                    "address": "0x99d1Fa417f94dcD62BfE781a1213c092a47041Bc",
+                    "balance": "1067964.934249153462643798",
+                    "decimals": "18",
+                    "denormWeight": "0"
+                },
+                {
+                    "address": "0x9777d7E2b60bB01759D0E2f8be2095df444cb07E",
+                    "balance": "1206335.889564",
+                    "decimals": "6",
+                    "denormWeight": "0"
+                },
+                {
+                    "address": "0x1bE5d71F2dA660BFdee8012dDc58D024448A0A59",
+                    "balance": "1240810.065862",
+                    "decimals": "6",
+                    "denormWeight": "0"
+                },
+                {
+                    "address": "0x8E870D67F660D95d5be530380D0eC0bd388289E1",
+                    "balance": "1247681.84723139318670298",
+                    "decimals": "18",
+                    "denormWeight": "0"
+                }
+            ],
+            "tokensList": [
+                "0x99d1Fa417f94dcD62BfE781a1213c092a47041Bc",
+                "0x9777d7E2b60bB01759D0E2f8be2095df444cb07E",
+                "0x1bE5d71F2dA660BFdee8012dDc58D024448A0A59",
+                "0x8E870D67F660D95d5be530380D0eC0bd388289E1"
+            ],
+            "totalWeight": "0"
+        },
+        {
+            "id": "0x49849C98ae39Fff122806C06791Fa73784FB3675",
+            "swapFee": "0.04",
+            "amp": "200",
+            "tokens": [
+                {
+                    "address": "0xEB4C2781e4ebA804CE9a9803C67d0893436bB27D",
+                    "balance": "8438.70078263",
+                    "decimals": "8",
+                    "denormWeight": "0"
+                },
+                {
+                    "address": "0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599",
+                    "balance": "6296.79849603",
+                    "decimals": "8",
+                    "denormWeight": "0"
+                }
+            ],
+            "tokensList": [
+                "0xEB4C2781e4ebA804CE9a9803C67d0893436bB27D",
+                "0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599"
+            ],
+            "totalWeight": "0"
+        },
+        {
+            "id": "0xC2Ee6b0334C261ED60C72f6054450b61B8f18E35",
+            "swapFee": "0.04",
+            "amp": "200",
+            "tokens": [
+                {
+                    "address": "0x196f4727526eA7FB1e17b2071B3d8eAA38486988",
+                    "balance": "188664.13605931169538985",
+                    "decimals": "18",
+                    "denormWeight": "0"
+                },
+                {
+                    "address": "0x6c3F90f043a72FA612cbac8115EE7e52BDe6E490",
+                    "balance": "232520.573146388096422829",
+                    "decimals": "18",
+                    "denormWeight": "0"
+                }
+            ],
+            "tokensList": [
+                "0x196f4727526eA7FB1e17b2071B3d8eAA38486988",
+                "0x6c3F90f043a72FA612cbac8115EE7e52BDe6E490"
+            ],
+            "totalWeight": "0"
+        },
+        {
+            "id": "0x075b1bb99792c9E1041bA13afEf80C91a1e70fB3",
+            "swapFee": "0.04",
+            "amp": "100",
+            "tokens": [
+                {
+                    "address": "0xEB4C2781e4ebA804CE9a9803C67d0893436bB27D",
+                    "balance": "4873.57602419",
+                    "decimals": "8",
+                    "denormWeight": "0"
+                },
+                {
+                    "address": "0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599",
+                    "balance": "4378.74013389",
+                    "decimals": "8",
+                    "denormWeight": "0"
+                },
+                {
+                    "address": "0xfE18be6b3Bd88A2D2A7f928d00292E7a9963CfC6",
+                    "balance": "2593.343896301815052661",
+                    "decimals": "18",
+                    "denormWeight": "0"
+                }
+            ],
+            "tokensList": [
+                "0xEB4C2781e4ebA804CE9a9803C67d0893436bB27D",
+                "0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599",
+                "0xfE18be6b3Bd88A2D2A7f928d00292E7a9963CfC6"
+            ],
+            "totalWeight": "0"
+        },
+        {
+            "id": "0xC25a3A3b969415c80451098fa907EC722572917F",
+            "swapFee": "0.04",
+            "amp": "100",
+            "tokens": [
+                {
+                    "address": "0x6B175474E89094C44Da98b954EedeAC495271d0F",
+                    "balance": "43228932.272188926409835749",
+                    "decimals": "18",
+                    "denormWeight": "0"
+                },
+                {
+                    "address": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+                    "balance": "46081651.762974",
+                    "decimals": "6",
+                    "denormWeight": "0"
+                },
+                {
+                    "address": "0xdAC17F958D2ee523a2206206994597C13D831ec7",
+                    "balance": "45787311.431512",
+                    "decimals": "6",
+                    "denormWeight": "0"
+                },
+                {
+                    "address": "0x57Ab1ec28D129707052df4dF418D58a2D46d5f51",
+                    "balance": "21325202.450756051516550693",
+                    "decimals": "18",
+                    "denormWeight": "0"
+                }
+            ],
+            "tokensList": [
+                "0x6B175474E89094C44Da98b954EedeAC495271d0F",
+                "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+                "0xdAC17F958D2ee523a2206206994597C13D831ec7",
+                "0x57Ab1ec28D129707052df4dF418D58a2D46d5f51"
+            ],
+            "totalWeight": "0"
+        },
+        {
+            "id": "0x64eda51d3Ad40D56b9dFc5554E06F94e1Dd786Fd",
+            "swapFee": "0.04",
+            "amp": "150",
+            "tokens": [
+                {
+                    "address": "0x8dAEBADE922dF735c38C80C7eBD708Af50815fAa",
+                    "balance": "1171.76084899369018212",
+                    "decimals": "18",
+                    "denormWeight": "0"
+                },
+                {
+                    "address": "0x075b1bb99792c9E1041bA13afEf80C91a1e70fB3",
+                    "balance": "3150.476893648380983407",
+                    "decimals": "18",
+                    "denormWeight": "0"
+                }
+            ],
+            "tokensList": [
+                "0x8dAEBADE922dF735c38C80C7eBD708Af50815fAa",
+                "0x075b1bb99792c9E1041bA13afEf80C91a1e70fB3"
+            ],
+            "totalWeight": "0"
+        },
+        {
+            "id": "0x97E2768e8E73511cA874545DC5Ff8067eB19B787",
+            "swapFee": "0.04",
+            "amp": "200",
+            "tokens": [
+                {
+                    "address": "0x1c48f86ae57291F7686349F12601910BD8D470bb",
+                    "balance": "619988.17526590929263206",
+                    "decimals": "18",
+                    "denormWeight": "0"
+                },
+                {
+                    "address": "0x6c3F90f043a72FA612cbac8115EE7e52BDe6E490",
+                    "balance": "864248.22523637039968063",
+                    "decimals": "18",
+                    "denormWeight": "0"
+                }
+            ],
+            "tokensList": [
+                "0x1c48f86ae57291F7686349F12601910BD8D470bb",
+                "0x6c3F90f043a72FA612cbac8115EE7e52BDe6E490"
+            ],
+            "totalWeight": "0"
+        },
+        {
+            "id": "0x4f3E8F405CF5aFC05D68142F3783bDfE13811522",
+            "swapFee": "0.04",
+            "amp": "51",
+            "tokens": [
+                {
+                    "address": "0x674C6Ad92Fd080e4004b2312b45f796a192D27a0",
+                    "balance": "124587973.715299269134499193",
+                    "decimals": "18",
+                    "denormWeight": "0"
+                },
+                {
+                    "address": "0x6c3F90f043a72FA612cbac8115EE7e52BDe6E490",
+                    "balance": "118852172.761799604648560584",
+                    "decimals": "18",
+                    "denormWeight": "0"
+                }
+            ],
+            "tokensList": [
+                "0x674C6Ad92Fd080e4004b2312b45f796a192D27a0",
+                "0x6c3F90f043a72FA612cbac8115EE7e52BDe6E490"
+            ],
+            "totalWeight": "0"
+        },
+        {
+            "id": "0x9fC689CCaDa600B6DF723D9E47D84d76664a1F23",
+            "swapFee": "0.04",
+            "amp": "2000",
+            "tokens": [
+                {
+                    "address": "0x5d3a536E4D6DbD6114cc1Ead35777bAB948E3643",
+                    "balance": "3119527.66200624",
+                    "decimals": "8",
+                    "denormWeight": "0"
+                },
+                {
+                    "address": "0x39AA39c021dfbaE8faC545936693aC917d5E7563",
+                    "balance": "6625586.00878963",
+                    "decimals": "8",
+                    "denormWeight": "0"
+                },
+                {
+                    "address": "0xdAC17F958D2ee523a2206206994597C13D831ec7",
+                    "balance": "319752.644516",
+                    "decimals": "6",
+                    "denormWeight": "0"
+                }
+            ],
+            "tokensList": [
+                "0x5d3a536E4D6DbD6114cc1Ead35777bAB948E3643",
+                "0x39AA39c021dfbaE8faC545936693aC917d5E7563",
+                "0xdAC17F958D2ee523a2206206994597C13D831ec7"
+            ],
+            "totalWeight": "0"
+        },
+        {
+            "id": "0xdF5e0e81Dff6FAF3A7e52BA697820c5e32D806A8",
+            "swapFee": "0.04",
+            "amp": "1000",
+            "tokens": [
+                {
+                    "address": "0x16de59092dAE5CcF4A1E6439D611fd0653f0Bd01",
+                    "balance": "20087107.884263259614021524",
+                    "decimals": "18",
+                    "denormWeight": "0"
+                },
+                {
+                    "address": "0xd6aD7a6750A7593E092a9B218d66C0A814a3436e",
+                    "balance": "32533037.003814",
+                    "decimals": "6",
+                    "denormWeight": "0"
+                },
+                {
+                    "address": "0x83f798e925BcD4017Eb265844FDDAbb448f1707D",
+                    "balance": "35369172.033612",
+                    "decimals": "6",
+                    "denormWeight": "0"
+                },
+                {
+                    "address": "0x73a052500105205d34Daf004eAb301916DA8190f",
+                    "balance": "32737320.41072457233569364",
+                    "decimals": "18",
+                    "denormWeight": "0"
+                }
+            ],
+            "tokensList": [
+                "0x16de59092dAE5CcF4A1E6439D611fd0653f0Bd01",
+                "0xd6aD7a6750A7593E092a9B218d66C0A814a3436e",
+                "0x83f798e925BcD4017Eb265844FDDAbb448f1707D",
+                "0x73a052500105205d34Daf004eAb301916DA8190f"
+            ],
+            "totalWeight": "0"
+        },
+        {
+            "id": "0x3a664Ab939FD8482048609f652f9a0B0677337B9",
+            "swapFee": "0.04",
+            "amp": "200",
+            "tokens": [
+                {
+                    "address": "0x5BC25f649fc4e26069dDF4cF4010F9f706c23831",
+                    "balance": "5232475.918542125502795914",
+                    "decimals": "18",
+                    "denormWeight": "0"
+                },
+                {
+                    "address": "0x6c3F90f043a72FA612cbac8115EE7e52BDe6E490",
+                    "balance": "4539986.11359897990151962",
+                    "decimals": "18",
+                    "denormWeight": "0"
+                }
+            ],
+            "tokensList": [
+                "0x5BC25f649fc4e26069dDF4cF4010F9f706c23831",
+                "0x6c3F90f043a72FA612cbac8115EE7e52BDe6E490"
+            ],
+            "totalWeight": "0"
+        },
+        {
+            "id": "0x410e3E86ef427e30B9235497143881f717d93c2A",
+            "swapFee": "0.04",
+            "amp": "200",
+            "tokens": [
+                {
+                    "address": "0x9BE89D2a4cd102D8Fecc6BF9dA793be995C22541",
+                    "balance": "1010.48854685",
+                    "decimals": "8",
+                    "denormWeight": "0"
+                },
+                {
+                    "address": "0x075b1bb99792c9E1041bA13afEf80C91a1e70fB3",
+                    "balance": "585.258142743967941902",
+                    "decimals": "18",
+                    "denormWeight": "0"
+                }
+            ],
+            "tokensList": [
+                "0x9BE89D2a4cd102D8Fecc6BF9dA793be995C22541",
+                "0x075b1bb99792c9E1041bA13afEf80C91a1e70fB3"
+            ],
+            "totalWeight": "0"
+        },
+        {
+            "id": "0x2fE94ea3d5d4a175184081439753DE15AeF9d614",
+            "swapFee": "0.04",
+            "amp": "200",
+            "tokens": [
+                {
+                    "address": "0x8064d9Ae6cDf087b1bcd5BDf3531bD5d8C537a68",
+                    "balance": "311.623217849559528062",
+                    "decimals": "18",
+                    "denormWeight": "0"
+                },
+                {
+                    "address": "0x075b1bb99792c9E1041bA13afEf80C91a1e70fB3",
+                    "balance": "178.900887615003574596",
+                    "decimals": "18",
+                    "denormWeight": "0"
+                }
+            ],
+            "tokensList": [
+                "0x8064d9Ae6cDf087b1bcd5BDf3531bD5d8C537a68",
+                "0x075b1bb99792c9E1041bA13afEf80C91a1e70fB3"
+            ],
+            "totalWeight": "0"
+        },
+        {
+            "id": "0xDE5331AC4B3630f94853Ff322B66407e0D6331E8",
+            "swapFee": "0.04",
+            "amp": "200",
+            "tokens": [
+                {
+                    "address": "0x5228a22e72ccC52d415EcFd199F99D0665E7733b",
+                    "balance": "183.795639492647424191",
+                    "decimals": "18",
+                    "denormWeight": "0"
+                },
+                {
+                    "address": "0x075b1bb99792c9E1041bA13afEf80C91a1e70fB3",
+                    "balance": "133.438833489712065313",
+                    "decimals": "18",
+                    "denormWeight": "0"
+                }
+            ],
+            "tokensList": [
+                "0x5228a22e72ccC52d415EcFd199F99D0665E7733b",
+                "0x075b1bb99792c9E1041bA13afEf80C91a1e70fB3"
+            ],
+            "totalWeight": "0"
+        },
+        {
+            "id": "0x94e131324b6054c0D789b190b2dAC504e4361b53",
+            "swapFee": "0.04",
+            "amp": "100",
+            "tokens": [
+                {
+                    "address": "0xa47c8bf37f92aBed4A126BDA807A7b7498661acD",
+                    "balance": "33291187.269925552063900615",
+                    "decimals": "18",
+                    "denormWeight": "0"
+                },
+                {
+                    "address": "0x6c3F90f043a72FA612cbac8115EE7e52BDe6E490",
+                    "balance": "37864247.479477119770007922",
+                    "decimals": "18",
+                    "denormWeight": "0"
+                }
+            ],
+            "tokensList": [
+                "0xa47c8bf37f92aBed4A126BDA807A7b7498661acD",
+                "0x6c3F90f043a72FA612cbac8115EE7e52BDe6E490"
+            ],
+            "totalWeight": "0"
+        },
+        {
+            "id": "0x194eBd173F6cDacE046C53eACcE9B953F28411d1",
+            "swapFee": "0.04",
+            "amp": "100",
+            "tokens": [
+                {
+                    "address": "0xdB25f211AB05b1c97D595516F45794528a807ad8",
+                    "balance": "29551648.9",
+                    "decimals": "2",
+                    "denormWeight": "0"
+                },
+                {
+                    "address": "0xD71eCFF9342A5Ced620049e616c5035F1dB98620",
+                    "balance": "28202601.535295309348655641",
+                    "decimals": "18",
+                    "denormWeight": "0"
+                }
+            ],
+            "tokensList": [
+                "0xdB25f211AB05b1c97D595516F45794528a807ad8",
+                "0xD71eCFF9342A5Ced620049e616c5035F1dB98620"
+            ],
+            "totalWeight": "0"
+        },
+        {
+            "id": "0xA3D87FffcE63B53E0d54fAa1cc983B7eB0b74A9c",
+            "swapFee": "0.04",
+            "amp": "100",
+            "tokens": [
+                {
+                    "address": "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE",
+                    "balance": "95478.447951924926496003",
+                    "decimals": "18",
+                    "denormWeight": "0"
+                },
+                {
+                    "address": "0x5e74C9036fb86BD7eCdcb084a0673EFc32eA31cb",
+                    "balance": "48219.514569637147623812",
+                    "decimals": "18",
+                    "denormWeight": "0"
+                }
+            ],
+            "tokensList": [
+                "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE",
+                "0x5e74C9036fb86BD7eCdcb084a0673EFc32eA31cb"
+            ],
+            "totalWeight": "0"
+        },
+        {
+            "id": "0x06325440D014e39736583c165C2963BA99fAf14E",
+            "swapFee": "0.04",
+            "amp": "9",
+            "tokens": [
+                {
+                    "address": "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE",
+                    "balance": "114099.768049277590582593",
+                    "decimals": "18",
+                    "denormWeight": "0"
+                },
+                {
+                    "address": "0xae7ab96520DE3A18E5e111B5EaAb095312D7fE84",
+                    "balance": "130085.277897346803384537",
+                    "decimals": "18",
+                    "denormWeight": "0"
+                }
+            ],
+            "tokensList": [
+                "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE",
+                "0xae7ab96520DE3A18E5e111B5EaAb095312D7fE84"
+            ],
+            "totalWeight": "0"
+        },
+        {
+            "id": "0xaA17A236F2bAdc98DDc0Cf999AbB47D47Fc0A6Cf",
+            "swapFee": "0.04",
+            "amp": "10",
+            "tokens": [
+                {
+                    "address": "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE",
+                    "balance": "6033.389502315042961422",
+                    "decimals": "18",
+                    "denormWeight": "0"
+                },
+                {
+                    "address": "0xE95A203B1a91a908F9B9CE46459d101078c2c3cb",
+                    "balance": "7820.356899745578017835",
+                    "decimals": "18",
+                    "denormWeight": "0"
+                }
+            ],
+            "tokensList": [
+                "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE",
+                "0xE95A203B1a91a908F9B9CE46459d101078c2c3cb"
+            ],
+            "totalWeight": "0"
+        },
+        {
+            "id": "0x5282a4eF67D9C33135340fB3289cc1711c13638C",
+            "swapFee": "0.04",
+            "amp": "600",
+            "tokens": [
+                {
+                    "address": "0x8e595470Ed749b85C6F7669de83EAe304C2ec68F",
+                    "balance": "274396223.43997567",
+                    "decimals": "8",
+                    "denormWeight": "0"
+                },
+                {
+                    "address": "0x76Eb2FE28b36B3ee97F3Adae0C69606eeDB2A37c",
+                    "balance": "383421132.24014159",
+                    "decimals": "8",
+                    "denormWeight": "0"
+                },
+                {
+                    "address": "0x48759F220ED983dB51fA7A8C0D2AAb8f3ce4166a",
+                    "balance": "455248678.52457231",
+                    "decimals": "8",
+                    "denormWeight": "0"
+                }
+            ],
+            "tokensList": [
+                "0x8e595470Ed749b85C6F7669de83EAe304C2ec68F",
+                "0x76Eb2FE28b36B3ee97F3Adae0C69606eeDB2A37c",
+                "0x48759F220ED983dB51fA7A8C0D2AAb8f3ce4166a"
+            ],
+            "totalWeight": "0"
+        },
+        {
+            "id": "0xcee60cFa923170e4f8204AE08B4fA6A3F5656F3a",
+            "swapFee": "0.04",
+            "amp": "100",
+            "tokens": [
+                {
+                    "address": "0x514910771AF9Ca656af840dff83E8264EcF986CA",
+                    "balance": "257697.982033186869191286",
+                    "decimals": "18",
+                    "denormWeight": "0"
+                },
+                {
+                    "address": "0xbBC455cb4F1B9e4bFC4B73970d360c8f032EfEE6",
+                    "balance": "59896.837931390487407218",
+                    "decimals": "18",
+                    "denormWeight": "0"
+                }
+            ],
+            "tokensList": [
+                "0x514910771AF9Ca656af840dff83E8264EcF986CA",
+                "0xbBC455cb4F1B9e4bFC4B73970d360c8f032EfEE6"
+            ],
+            "totalWeight": "0"
+        },
         {
             "id": "0x003a70265a3662342010823bea15dc84c6f7ed54",
             "swapFee": "0.001",
@@ -1695,7 +2476,7 @@
             "tokens": [
                 {
                     "address": "0x0cf0ee63788a0849fe5297f3407f701e122cc023",
-                    "balance": "22004.514844499317155467",
+                    "balance": "23726.364844499317155467",
                     "decimals": 18,
                     "denormWeight": "16"
                 },
@@ -1719,7 +2500,7 @@
                 },
                 {
                     "address": "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
-                    "balance": "0.5806059661037312",
+                    "balance": "0.475850476354690758",
                     "decimals": 18,
                     "denormWeight": "6"
                 }
@@ -1876,13 +2657,13 @@
                 },
                 {
                     "address": "0x7fc66500c84a76ad7e9c93437bfc5ac33e2ddae9",
-                    "balance": "2358.82924355706594687",
+                    "balance": "2376.962891924179508055",
                     "decimals": 18,
                     "denormWeight": "8.0954"
                 },
                 {
                     "address": "0x9f8f72aa9304c8b593d555f12ef6589cc3a579a2",
-                    "balance": "242.98562134846871763",
+                    "balance": "240.039085821903611415",
                     "decimals": 18,
                     "denormWeight": "5.0308"
                 },
@@ -2126,7 +2907,7 @@
             "tokens": [
                 {
                     "address": "0x2260fac5e5542a773aa44fbcfedf7c193bc2c599",
-                    "balance": "11.2395724",
+                    "balance": "11.34419557",
                     "decimals": 8,
                     "denormWeight": "16.5"
                 },
@@ -2138,7 +2919,7 @@
                 },
                 {
                     "address": "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
-                    "balance": "354.557666559716239508",
+                    "balance": "351.320117881211779708",
                     "decimals": 18,
                     "denormWeight": "16.5"
                 }
@@ -2301,7 +3082,7 @@
             "tokens": [
                 {
                     "address": "0x6b175474e89094c44da98b954eedeac495271d0f",
-                    "balance": "15825.708215851765576087",
+                    "balance": "16723.839395055551444493",
                     "decimals": 18,
                     "denormWeight": "10"
                 },
@@ -2313,7 +3094,7 @@
                 },
                 {
                     "address": "0x9f8f72aa9304c8b593d555f12ef6589cc3a579a2",
-                    "balance": "8.459220863933176534",
+                    "balance": "8.009231096020990427",
                     "decimals": 18,
                     "denormWeight": "10"
                 },
@@ -2789,13 +3570,13 @@
                 },
                 {
                     "address": "0x5732046a883704404f284ce41ffadd5b007fd668",
-                    "balance": "15646.498171997055354279",
+                    "balance": "18002.754437834056996476",
                     "decimals": 18,
                     "denormWeight": "20"
                 },
                 {
                     "address": "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
-                    "balance": "1720.973246",
+                    "balance": "1300.472141",
                     "decimals": 6,
                     "denormWeight": "10"
                 },
@@ -4067,13 +4848,13 @@
             "tokens": [
                 {
                     "address": "0x2260fac5e5542a773aa44fbcfedf7c193bc2c599",
-                    "balance": "2385.91205446",
+                    "balance": "2389.47331401",
                     "decimals": 8,
                     "denormWeight": "25"
                 },
                 {
                     "address": "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
-                    "balance": "73119.004909090916261252",
+                    "balance": "73010.463971525674009822",
                     "decimals": 18,
                     "denormWeight": "25"
                 }
@@ -4247,13 +5028,13 @@
             "tokens": [
                 {
                     "address": "0x2260fac5e5542a773aa44fbcfedf7c193bc2c599",
-                    "balance": "465.62604468",
+                    "balance": "467.71891779",
                     "decimals": 8,
                     "denormWeight": "25"
                 },
                 {
                     "address": "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
-                    "balance": "14353.599952740543209883",
+                    "balance": "14289.564602740543218075",
                     "decimals": 18,
                     "denormWeight": "25"
                 }
@@ -4632,13 +5413,13 @@
             "tokens": [
                 {
                     "address": "0x58b6a8a3302369daec383334672404ee733ab239",
-                    "balance": "66102.084242276846586586",
+                    "balance": "65506.837766693995818387",
                     "decimals": 18,
                     "denormWeight": "25"
                 },
                 {
                     "address": "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
-                    "balance": "153.040200003927009995",
+                    "balance": "154.44156293902899548",
                     "decimals": 18,
                     "denormWeight": "25"
                 }
@@ -6159,13 +6940,13 @@
             "tokens": [
                 {
                     "address": "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
-                    "balance": "25.808234036325865625",
+                    "balance": "24.883357446745273211",
                     "decimals": 18,
                     "denormWeight": "25"
                 },
                 {
                     "address": "0xdf2c7238198ad8b389666574f2d8bc411a4b7428",
-                    "balance": "2868825.032129008923587216",
+                    "balance": "2975775.75196201041764008",
                     "decimals": 18,
                     "denormWeight": "25"
                 }
@@ -6779,7 +7560,7 @@
             "tokens": [
                 {
                     "address": "0x7fc66500c84a76ad7e9c93437bfc5ac33e2ddae9",
-                    "balance": "609.491980872816887667",
+                    "balance": "623.212539778515687522",
                     "decimals": 18,
                     "denormWeight": "12.5"
                 },
@@ -6791,7 +7572,7 @@
                 },
                 {
                     "address": "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
-                    "balance": "139.358613899654502064",
+                    "balance": "136.29951666925786926",
                     "decimals": 18,
                     "denormWeight": "12.5"
                 }
@@ -7801,13 +8582,13 @@
             "tokens": [
                 {
                     "address": "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
-                    "balance": "190.633059728069853218",
+                    "balance": "188.164573765035788167",
                     "decimals": 18,
                     "denormWeight": "6"
                 },
                 {
                     "address": "0xfb5453340c03db5ade474b27e68b6a9c6b2823eb",
-                    "balance": "16809.0331042548811868",
+                    "balance": "16790.964497451148059394",
                     "decimals": 18,
                     "denormWeight": "14"
                 }
@@ -8420,13 +9201,13 @@
             "tokens": [
                 {
                     "address": "0xa3bed4e1c75d00fa6f4e5e6922db7261b5e9acd2",
-                    "balance": "47211.748869782442527962",
+                    "balance": "47592.945580112844641615",
                     "decimals": 18,
                     "denormWeight": "47.5"
                 },
                 {
                     "address": "0xe2f2a5c287993345a840db3b0845fbc70f5935a5",
-                    "balance": "6673.804458996205866484",
+                    "balance": "5729.915701878256749556",
                     "decimals": 18,
                     "denormWeight": "2.5"
                 }
@@ -8604,13 +9385,13 @@
             "tokens": [
                 {
                     "address": "0x0bc529c00c6401aef6d220be8c6ea1667f6ad93e",
-                    "balance": "43.7369636658544973",
+                    "balance": "43.916137442353029742",
                     "decimals": 18,
                     "denormWeight": "15"
                 },
                 {
                     "address": "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
-                    "balance": "956.636574178182162556",
+                    "balance": "952.76468302235467608",
                     "decimals": 18,
                     "denormWeight": "15"
                 }
@@ -9818,13 +10599,13 @@
                 },
                 {
                     "address": "0x408e41876cccdc0f92210600ef50372656052a38",
-                    "balance": "715328.234482364741724595",
+                    "balance": "723403.795047346471315891",
                     "decimals": 18,
                     "denormWeight": "5"
                 },
                 {
                     "address": "0x514910771af9ca656af840dff83e8264ecf986ca",
-                    "balance": "30535.767491144663883621",
+                    "balance": "30759.401481990000727711",
                     "decimals": 18,
                     "denormWeight": "5"
                 },
@@ -9848,7 +10629,7 @@
                 },
                 {
                     "address": "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
-                    "balance": "1157.351965916130802548",
+                    "balance": "1147.891431902550171943",
                     "decimals": 18,
                     "denormWeight": "11.25"
                 }
@@ -9907,13 +10688,13 @@
             "tokens": [
                 {
                     "address": "0x04fa0d235c4abf4bcf4787af4cf447de572ef828",
-                    "balance": "71240.287880945318992574",
+                    "balance": "71731.827880945318992574",
                     "decimals": 18,
                     "denormWeight": "25"
                 },
                 {
                     "address": "0xba100000625a3754423978a60c9317c58a424e3d",
-                    "balance": "43795.819632086245142976",
+                    "balance": "43495.799629249156835063",
                     "decimals": 18,
                     "denormWeight": "25"
                 }
@@ -10258,13 +11039,13 @@
             "tokens": [
                 {
                     "address": "0x27702a26126e0b3702af63ee09ac4d1a084ef628",
-                    "balance": "1276806.221430824223599127",
+                    "balance": "1265123.300358061409105358",
                     "decimals": 18,
                     "denormWeight": "40"
                 },
                 {
                     "address": "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
-                    "balance": "63.034184746777959653",
+                    "balance": "65.398567536777959653",
                     "decimals": 18,
                     "denormWeight": "10"
                 }
@@ -11785,19 +12566,19 @@
             "tokens": [
                 {
                     "address": "0x00a8b738e453ffd858a7edf03bccfe20412f0eb0",
-                    "balance": "1033917.866518692362677804",
+                    "balance": "1034392.440795661332299211",
                     "decimals": 18,
                     "denormWeight": "16.5"
                 },
                 {
                     "address": "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
-                    "balance": "418.19100026590058074",
+                    "balance": "413.943652127051711005",
                     "decimals": 18,
                     "denormWeight": "16.5"
                 },
                 {
                     "address": "0xf8c3527cc04340b208c854e985240c02f7b7793f",
-                    "balance": "224512.360718882284686804",
+                    "balance": "226727.643875462424999147",
                     "decimals": 18,
                     "denormWeight": "16.5"
                 }
@@ -12528,13 +13309,13 @@
             "tokens": [
                 {
                     "address": "0xba100000625a3754423978a60c9317c58a424e3d",
-                    "balance": "3606974.734023161386421321",
+                    "balance": "3603525.700634454807308207",
                     "decimals": 18,
                     "denormWeight": "40"
                 },
                 {
                     "address": "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
-                    "balance": "19892.981085795346743107",
+                    "balance": "19970.054671339161270179",
                     "decimals": 18,
                     "denormWeight": "10"
                 }
@@ -12574,13 +13355,13 @@
             "tokens": [
                 {
                     "address": "0x1776e1f26f98b1a5df9cd347953a26dd3cb46671",
-                    "balance": "1886.92417168446058405",
+                    "balance": "1972.72162228446058405",
                     "decimals": 18,
                     "denormWeight": "25"
                 },
                 {
                     "address": "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
-                    "balance": "47.682107869587498084",
+                    "balance": "45.611297042154606356",
                     "decimals": 18,
                     "denormWeight": "25"
                 }
@@ -13277,13 +14058,13 @@
             "tokens": [
                 {
                     "address": "0x90f802c7e8fb5d40b0de583e34c065a3bd2020d8",
-                    "balance": "10605141.727597219078208077",
+                    "balance": "10619185.851027927404393075",
                     "decimals": 18,
                     "denormWeight": "25"
                 },
                 {
                     "address": "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
-                    "balance": "10685286.888483",
+                    "balance": "10671156.756159",
                     "decimals": 6,
                     "denormWeight": "25"
                 }
@@ -13415,19 +14196,19 @@
             "tokens": [
                 {
                     "address": "0x408e41876cccdc0f92210600ef50372656052a38",
-                    "balance": "667484.120556135421284609",
+                    "balance": "674733.004992889815237801",
                     "decimals": 18,
                     "denormWeight": "15"
                 },
                 {
                     "address": "0x514910771af9ca656af840dff83e8264ecf986ca",
-                    "balance": "28441.067651717282724882",
+                    "balance": "28705.882339217282724882",
                     "decimals": 18,
                     "denormWeight": "15"
                 },
                 {
                     "address": "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
-                    "balance": "749747.443834",
+                    "balance": "734894.487137",
                     "decimals": 6,
                     "denormWeight": "15"
                 },
@@ -14607,13 +15388,13 @@
             "tokens": [
                 {
                     "address": "0x5f0e628b693018f639d10e4a4f59bd4d8b2b6b44",
-                    "balance": "70.104375447488968188",
+                    "balance": "72.313401481329262119",
                     "decimals": 18,
                     "denormWeight": "40"
                 },
                 {
                     "address": "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
-                    "balance": "38.792868735226126632",
+                    "balance": "34.642509728218999644",
                     "decimals": 18,
                     "denormWeight": "10"
                 }
@@ -15133,13 +15914,13 @@
             "tokens": [
                 {
                     "address": "0x467bccd9d29f223bce8043b84e8c8b282827790f",
-                    "balance": "1276612370.75",
+                    "balance": "1275144951.83",
                     "decimals": 2,
                     "denormWeight": "40"
                 },
                 {
                     "address": "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
-                    "balance": "652.275286245618894115",
+                    "balance": "655.293119525003154583",
                     "decimals": 18,
                     "denormWeight": "10"
                 }
@@ -16648,13 +17429,13 @@
             "tokens": [
                 {
                     "address": "0x514910771af9ca656af840dff83e8264ecf986ca",
-                    "balance": "28686.04931794893792816",
+                    "balance": "28886.188066375710627999",
                     "decimals": 18,
                     "denormWeight": "25"
                 },
                 {
                     "address": "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
-                    "balance": "482.575627506174575313",
+                    "balance": "479.23839779071718574",
                     "decimals": 18,
                     "denormWeight": "25"
                 }
@@ -16701,13 +17482,13 @@
             "tokens": [
                 {
                     "address": "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
-                    "balance": "2655655.439112",
+                    "balance": "2653203.859459",
                     "decimals": 6,
                     "denormWeight": "4.741164679759090177"
                 },
                 {
                     "address": "0xd46ba6d942050d489dbd938a2c909a5d5039a161",
-                    "balance": "6852064.473437192",
+                    "balance": "6854197.555044916",
                     "decimals": 9,
                     "denormWeight": "10.545931933881825755"
                 }
@@ -16770,13 +17551,13 @@
             "tokens": [
                 {
                     "address": "0x70e8de73ce538da2beed35d14187f6959a8eca96",
-                    "balance": "35540.951352",
+                    "balance": "41242.62242",
                     "decimals": 6,
                     "denormWeight": "10"
                 },
                 {
                     "address": "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
-                    "balance": "27818.179635",
+                    "balance": "32280.92202",
                     "decimals": 6,
                     "denormWeight": "10"
                 }
@@ -17083,13 +17864,13 @@
             "tokens": [
                 {
                     "address": "0x0202be363b8a4820f3f4de7faf5224ff05943ab1",
-                    "balance": "61493.417271855941688255",
+                    "balance": "61391.342189351881067029",
                     "decimals": 18,
                     "denormWeight": "25"
                 },
                 {
                     "address": "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
-                    "balance": "102.233417435224420198",
+                    "balance": "102.403417435224420198",
                     "decimals": 18,
                     "denormWeight": "25"
                 }
@@ -17106,13 +17887,13 @@
             "tokens": [
                 {
                     "address": "0x6b175474e89094c44da98b954eedeac495271d0f",
-                    "balance": "932137.243496655351010516",
+                    "balance": "935813.25132226639359714",
                     "decimals": 18,
                     "denormWeight": "25"
                 },
                 {
                     "address": "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
-                    "balance": "600.387969511782005585",
+                    "balance": "598.033083737541730358",
                     "decimals": 18,
                     "denormWeight": "25"
                 }
@@ -17288,13 +18069,13 @@
             "tokens": [
                 {
                     "address": "0x7fc66500c84a76ad7e9c93437bfc5ac33e2ddae9",
-                    "balance": "6105.171851729981087984",
+                    "balance": "6149.15385193892455259",
                     "decimals": 18,
                     "denormWeight": "25"
                 },
                 {
                     "address": "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
-                    "balance": "1346.89892701205337493",
+                    "balance": "1337.279541000587579386",
                     "decimals": 18,
                     "denormWeight": "25"
                 }
@@ -17636,13 +18417,13 @@
             "tokens": [
                 {
                     "address": "0xbbbbca6a901c926f240b89eacb641d8aec7aeafd",
-                    "balance": "706494.407267836520820669",
+                    "balance": "713899.821857258955599805",
                     "decimals": 18,
                     "denormWeight": "37.5"
                 },
                 {
                     "address": "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
-                    "balance": "84.716107194178182235",
+                    "balance": "82.113420474861323322",
                     "decimals": 18,
                     "denormWeight": "12.5"
                 }
@@ -18331,13 +19112,13 @@
             "tokens": [
                 {
                     "address": "0x00a8b738e453ffd858a7edf03bccfe20412f0eb0",
-                    "balance": "1269878.252268147514184845",
+                    "balance": "1261153.600870426298081886",
                     "decimals": 18,
                     "denormWeight": "16.6666666666665"
                 },
                 {
                     "address": "0x967da4048cd07ab37855c090aaf366e4ce1b9f48",
-                    "balance": "878993.091519642260091507",
+                    "balance": "885092.256801315423150974",
                     "decimals": 18,
                     "denormWeight": "16.6666666666665"
                 },
@@ -18361,19 +19142,19 @@
             "tokens": [
                 {
                     "address": "0x04fa0d235c4abf4bcf4787af4cf447de572ef828",
-                    "balance": "41000.115165284087580159",
+                    "balance": "41334.123916153630901759",
                     "decimals": 18,
                     "denormWeight": "15"
                 },
                 {
                     "address": "0xba11d00c5f74255f56a5e366f4f77f5a186d7f55",
-                    "balance": "65888.256248886069937868",
+                    "balance": "66277.461289617340810956",
                     "decimals": 18,
                     "denormWeight": "15"
                 },
                 {
                     "address": "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
-                    "balance": "743.930784584289827479",
+                    "balance": "736.181724017450283706",
                     "decimals": 18,
                     "denormWeight": "20"
                 }
@@ -19083,13 +19864,13 @@
             "tokens": [
                 {
                     "address": "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
-                    "balance": "2428767.119812",
+                    "balance": "2436731.347825",
                     "decimals": 6,
                     "denormWeight": "25"
                 },
                 {
                     "address": "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
-                    "balance": "1582.485481944666435653",
+                    "balance": "1577.627623856882044997",
                     "decimals": 18,
                     "denormWeight": "25"
                 }
@@ -19129,13 +19910,13 @@
             "tokens": [
                 {
                     "address": "0x6b175474e89094c44da98b954eedeac495271d0f",
-                    "balance": "22169615.736474643108023497",
+                    "balance": "22263065.143191046094666908",
                     "decimals": 18,
                     "denormWeight": "10"
                 },
                 {
                     "address": "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
-                    "balance": "57107.871751417152280731",
+                    "balance": "57050.127350279131312917",
                     "decimals": 18,
                     "denormWeight": "40"
                 }
@@ -20358,13 +21139,13 @@
             "tokens": [
                 {
                     "address": "0x1494ca1f11d487c2bbe4543e90080aeba4ba3c2b",
-                    "balance": "162.209036681888965146",
+                    "balance": "155.342820258823364237",
                     "decimals": 18,
                     "denormWeight": "12.5"
                 },
                 {
                     "address": "0x2260fac5e5542a773aa44fbcfedf7c193bc2c599",
-                    "balance": "1.15355535",
+                    "balance": "1.205058",
                     "decimals": 8,
                     "denormWeight": "12.5"
                 },
@@ -20874,13 +21655,13 @@
             "tokens": [
                 {
                     "address": "0x9f8f72aa9304c8b593d555f12ef6589cc3a579a2",
-                    "balance": "2797.136246068861530978",
+                    "balance": "2800.082781595426637193",
                     "decimals": 18,
                     "denormWeight": "30"
                 },
                 {
                     "address": "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
-                    "balance": "2528.426480356139761019",
+                    "balance": "2524.444493738328705582",
                     "decimals": 18,
                     "denormWeight": "20"
                 }
@@ -20920,13 +21701,13 @@
             "tokens": [
                 {
                     "address": "0xb705268213d593b8fd88d3fdeff93aff5cbdcfae",
-                    "balance": "13608370.882909141107815437",
+                    "balance": "13648370.882909141107815437",
                     "decimals": 18,
                     "denormWeight": "40"
                 },
                 {
                     "address": "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
-                    "balance": "124.183407389366374",
+                    "balance": "122.738307891874128056",
                     "decimals": 18,
                     "denormWeight": "10"
                 }
@@ -23082,7 +23863,7 @@
                 },
                 {
                     "address": "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
-                    "balance": "728.097451235873578897",
+                    "balance": "730.097451235873578897",
                     "decimals": 18,
                     "denormWeight": "15"
                 },
@@ -23967,13 +24748,13 @@
             "tokens": [
                 {
                     "address": "0x0e29e5abbb5fd88e28b2d355774e73bd47de3bcd",
-                    "balance": "8182729.227526090429834433",
+                    "balance": "8112261.254828714825475204",
                     "decimals": 18,
                     "denormWeight": "25"
                 },
                 {
                     "address": "0x35101c731b1548b5e48bb23f99edbc2f5c341935",
-                    "balance": "798828.033766868595753333",
+                    "balance": "805828.033766868595753333",
                     "decimals": 18,
                     "denormWeight": "25"
                 }
@@ -24296,13 +25077,13 @@
             "tokens": [
                 {
                     "address": "0x04fa0d235c4abf4bcf4787af4cf447de572ef828",
-                    "balance": "718732.112516255611495594",
+                    "balance": "719523.321382971264996129",
                     "decimals": 18,
                     "denormWeight": "40"
                 },
                 {
                     "address": "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
-                    "balance": "2419.476888629460874401",
+                    "balance": "2408.884105812847287857",
                     "decimals": 18,
                     "denormWeight": "10"
                 }
@@ -25527,13 +26308,13 @@
             "tokens": [
                 {
                     "address": "0x2260fac5e5542a773aa44fbcfedf7c193bc2c599",
-                    "balance": "59.50022894",
+                    "balance": "59.34702255",
                     "decimals": 8,
                     "denormWeight": "25"
                 },
                 {
                     "address": "0xba100000625a3754423978a60c9317c58a424e3d",
-                    "balance": "81886.850880543756423699",
+                    "balance": "82098.540980543756423699",
                     "decimals": 18,
                     "denormWeight": "25"
                 }
@@ -25981,13 +26762,13 @@
             "tokens": [
                 {
                     "address": "0x111111111117dc0aa78b770fa6a738034120c302",
-                    "balance": "50214.987513777122417742",
+                    "balance": "51399.849093913647667684",
                     "decimals": 18,
                     "denormWeight": "10"
                 },
                 {
                     "address": "0x1f9840a85d5af5bf1d1762f925bdaddc4201f984",
-                    "balance": "16202.278698833323323247",
+                    "balance": "16014.997429620735495405",
                     "decimals": 18,
                     "denormWeight": "20"
                 },
@@ -26011,13 +26792,13 @@
             "tokens": [
                 {
                     "address": "0x1f9840a85d5af5bf1d1762f925bdaddc4201f984",
-                    "balance": "208264.60684060770473739",
+                    "balance": "208339.68184060770473739",
                     "decimals": 18,
                     "denormWeight": "25"
                 },
                 {
                     "address": "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
-                    "balance": "3115.709516252613468479",
+                    "balance": "3114.589579232744531138",
                     "decimals": 18,
                     "denormWeight": "25"
                 }
@@ -26126,13 +26907,13 @@
             "tokens": [
                 {
                     "address": "0x6de037ef9ad2725eb40118bb1702ebb27e4aeb24",
-                    "balance": "106564.813622230864895767",
+                    "balance": "108454.270607758085704828",
                     "decimals": 18,
                     "denormWeight": "40"
                 },
                 {
                     "address": "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
-                    "balance": "4.944317932808684919",
+                    "balance": "4.610270482093103181",
                     "decimals": 18,
                     "denormWeight": "10"
                 }
@@ -26375,13 +27156,13 @@
             "tokens": [
                 {
                     "address": "0x0bc529c00c6401aef6d220be8c6ea1667f6ad93e",
-                    "balance": "20.868776418420032726",
+                    "balance": "20.689602641921500284",
                     "decimals": 18,
                     "denormWeight": "20"
                 },
                 {
                     "address": "0x2260fac5e5542a773aa44fbcfedf7c193bc2c599",
-                    "balance": "14.42236062",
+                    "balance": "14.54763535",
                     "decimals": 8,
                     "denormWeight": "20"
                 },
@@ -26642,13 +27423,13 @@
             "tokens": [
                 {
                     "address": "0x1776e1f26f98b1a5df9cd347953a26dd3cb46671",
-                    "balance": "24973.916874652839145467",
+                    "balance": "25074.78950684762074694",
                     "decimals": 18,
                     "denormWeight": "40"
                 },
                 {
                     "address": "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
-                    "balance": "152.913207577720240875",
+                    "balance": "150.48762279881027029",
                     "decimals": 18,
                     "denormWeight": "10"
                 }
@@ -26845,13 +27626,13 @@
             "tokens": [
                 {
                     "address": "0x429881672b9ae42b8eba0e26cd9c73711b891ca5",
-                    "balance": "38882.076517999476345272",
+                    "balance": "41645.439341553680923257",
                     "decimals": 18,
                     "denormWeight": "20"
                 },
                 {
                     "address": "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
-                    "balance": "88.938085286993938157",
+                    "balance": "95.258946220601741776",
                     "decimals": 18,
                     "denormWeight": "5"
                 }
@@ -26937,13 +27718,13 @@
             "tokens": [
                 {
                     "address": "0x7fc66500c84a76ad7e9c93437bfc5ac33e2ddae9",
-                    "balance": "436385.213401737090935855",
+                    "balance": "437061.999822839436498891",
                     "decimals": 18,
                     "denormWeight": "40"
                 },
                 {
                     "address": "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
-                    "balance": "23969.556907433627510751",
+                    "balance": "23821.742560437755224214",
                     "decimals": 18,
                     "denormWeight": "10"
                 }
@@ -27970,7 +28751,7 @@
             "tokens": [
                 {
                     "address": "0x2260fac5e5542a773aa44fbcfedf7c193bc2c599",
-                    "balance": "0.38489627",
+                    "balance": "0.40339974",
                     "decimals": 8,
                     "denormWeight": "5"
                 },
@@ -27994,7 +28775,7 @@
                 },
                 {
                     "address": "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
-                    "balance": "38.600310905958567446",
+                    "balance": "38.006678250756879729",
                     "decimals": 18,
                     "denormWeight": "15"
                 }
@@ -28714,13 +29495,13 @@
             "tokens": [
                 {
                     "address": "0x476c5e26a75bd202a9683ffd34359c0cc15be0ff",
-                    "balance": "1563627.567458",
+                    "balance": "1553387.146556",
                     "decimals": 6,
                     "denormWeight": "25"
                 },
                 {
                     "address": "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
-                    "balance": "6767.608696377013259962",
+                    "balance": "6812.350079062961739274",
                     "decimals": 18,
                     "denormWeight": "25"
                 }
@@ -29516,13 +30297,13 @@
                 },
                 {
                     "address": "0x7fc66500c84a76ad7e9c93437bfc5ac33e2ddae9",
-                    "balance": "681.318218227026800646",
+                    "balance": "695.639881917322407942",
                     "decimals": 18,
                     "denormWeight": "12.5"
                 },
                 {
                     "address": "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
-                    "balance": "155.10081391911205403",
+                    "balance": "151.917019201128390696",
                     "decimals": 18,
                     "denormWeight": "12.5"
                 }
@@ -29964,13 +30745,13 @@
             "tokens": [
                 {
                     "address": "0x6810e776880c02933d47db1b9fc05908e5386b96",
-                    "balance": "32407.080617422010947576",
+                    "balance": "32169.963769301146134089",
                     "decimals": 18,
                     "denormWeight": "25"
                 },
                 {
                     "address": "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
-                    "balance": "2659.067739064764963316",
+                    "balance": "2678.742500637387934241",
                     "decimals": 18,
                     "denormWeight": "25"
                 }
@@ -30559,13 +31340,13 @@
             "tokens": [
                 {
                     "address": "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
-                    "balance": "2425.488150911773942058",
+                    "balance": "2422.478150911773942058",
                     "decimals": 18,
                     "denormWeight": "25"
                 },
                 {
                     "address": "0xe2f2a5c287993345a840db3b0845fbc70f5935a5",
-                    "balance": "3779709.88052021590517334",
+                    "balance": "3784475.466986695695010602",
                     "decimals": 18,
                     "denormWeight": "25"
                 }
@@ -30695,13 +31476,13 @@
             "tokens": [
                 {
                     "address": "0x0d438f3b5175bebc262bf23753c1e53d03432bde",
-                    "balance": "41579.070732293878268311",
+                    "balance": "42005.353732293878268311",
                     "decimals": 18,
                     "denormWeight": "30"
                 },
                 {
                     "address": "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
-                    "balance": "874.927693122080409976",
+                    "balance": "861.774175273002126091",
                     "decimals": 18,
                     "denormWeight": "20"
                 }
@@ -31073,13 +31854,13 @@
             "tokens": [
                 {
                     "address": "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
-                    "balance": "725103.197206",
+                    "balance": "733897.635938",
                     "decimals": 6,
                     "denormWeight": "25"
                 },
                 {
                     "address": "0xba100000625a3754423978a60c9317c58a424e3d",
-                    "balance": "21337.133947407894966599",
+                    "balance": "21081.825844744616041508",
                     "decimals": 18,
                     "denormWeight": "25"
                 }
@@ -31149,13 +31930,13 @@
             "tokens": [
                 {
                     "address": "0x6810e776880c02933d47db1b9fc05908e5386b96",
-                    "balance": "163821.400301950283554048",
+                    "balance": "163175.365119818554385334",
                     "decimals": 18,
                     "denormWeight": "40"
                 },
                 {
                     "address": "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
-                    "balance": "3363.82783575644855907",
+                    "balance": "3417.57783575644855907",
                     "decimals": 18,
                     "denormWeight": "10"
                 }
@@ -31308,13 +32089,13 @@
             "tokens": [
                 {
                     "address": "0xc011a73ee8576fb46f5e1c5751ca3b9fe0af2a6f",
-                    "balance": "134447.346376667042603286",
+                    "balance": "135169.148166376479187222",
                     "decimals": 18,
                     "denormWeight": "25"
                 },
                 {
                     "address": "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
-                    "balance": "1538.374772372145588537",
+                    "balance": "1530.241582456205277581",
                     "decimals": 18,
                     "denormWeight": "25"
                 }
@@ -31501,13 +32282,13 @@
                 },
                 {
                     "address": "0x514910771af9ca656af840dff83e8264ecf986ca",
-                    "balance": "26572.142427839577699205",
+                    "balance": "26808.533662800696502755",
                     "decimals": 18,
                     "denormWeight": "12.5"
                 },
                 {
                     "address": "0x57ab1ec28d129707052df4df418d58a2d46d5f51",
-                    "balance": "560404.597195077768886635",
+                    "balance": "554252.855702484151743406",
                     "decimals": 18,
                     "denormWeight": "10"
                 },
@@ -31920,13 +32701,13 @@
             "tokens": [
                 {
                     "address": "0xba100000625a3754423978a60c9317c58a424e3d",
-                    "balance": "129789.498639334651779432",
+                    "balance": "129515.570967792880909178",
                     "decimals": 18,
                     "denormWeight": "25"
                 },
                 {
                     "address": "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
-                    "balance": "2871.96697635970507772",
+                    "balance": "2878.089553169564625976",
                     "decimals": 18,
                     "denormWeight": "25"
                 }
@@ -32077,13 +32858,13 @@
             "tokens": [
                 {
                     "address": "0xba100000625a3754423978a60c9317c58a424e3d",
-                    "balance": "108472.607162310220715004",
+                    "balance": "109197.710653518110069917",
                     "decimals": 18,
                     "denormWeight": "30"
                 },
                 {
                     "address": "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
-                    "balance": "1615.880781058937710556",
+                    "balance": "1599.860481058937712604",
                     "decimals": 18,
                     "denormWeight": "20"
                 }
@@ -32268,13 +33049,13 @@
             "tokens": [
                 {
                     "address": "0x12b19d3e2ccc14da04fae33e63652ce469b3f2fd",
-                    "balance": "3126220.632675917999",
+                    "balance": "3117505.979516177209",
                     "decimals": 12,
                     "denormWeight": "42.5"
                 },
                 {
                     "address": "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
-                    "balance": "65.430470642910458584",
+                    "balance": "66.477899032910458712",
                     "decimals": 18,
                     "denormWeight": "7.5"
                 }
@@ -32879,13 +33660,13 @@
             "tokens": [
                 {
                     "address": "0x2260fac5e5542a773aa44fbcfedf7c193bc2c599",
-                    "balance": "23.06015707",
+                    "balance": "23.17680885",
                     "decimals": 8,
                     "denormWeight": "25"
                 },
                 {
                     "address": "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
-                    "balance": "711.576689272458316527",
+                    "balance": "707.998441930882608768",
                     "decimals": 18,
                     "denormWeight": "25"
                 }
@@ -32925,7 +33706,7 @@
             "tokens": [
                 {
                     "address": "0x7fc66500c84a76ad7e9c93437bfc5ac33e2ddae9",
-                    "balance": "1721.082071881710951458",
+                    "balance": "1745.407309707439172642",
                     "decimals": 18,
                     "denormWeight": "10"
                 },
@@ -32937,7 +33718,7 @@
                 },
                 {
                     "address": "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
-                    "balance": "595281.898537",
+                    "balance": "587010.169532",
                     "decimals": 6,
                     "denormWeight": "10"
                 },
@@ -33785,13 +34566,13 @@
             "tokens": [
                 {
                     "address": "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
-                    "balance": "7267736.748163",
+                    "balance": "7241938.894193",
                     "decimals": 6,
                     "denormWeight": "10"
                 },
                 {
                     "address": "0xbc396689893d065f41bc2c6ecbee5e0085233447",
-                    "balance": "4702454.956577434777749261",
+                    "balance": "4706643.528419434777749261",
                     "decimals": 18,
                     "denormWeight": "40"
                 }
@@ -34101,13 +34882,13 @@
             "tokens": [
                 {
                     "address": "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
-                    "balance": "3622480.034627",
+                    "balance": "3627458.900324",
                     "decimals": 6,
                     "denormWeight": "18"
                 },
                 {
                     "address": "0xf1f955016ecbcd7321c7266bccfb96c68ea5e49b",
-                    "balance": "1560457.569448424673338363",
+                    "balance": "1541296.338668413007077917",
                     "decimals": 18,
                     "denormWeight": "2"
                 }
@@ -34237,19 +35018,19 @@
             "tokens": [
                 {
                     "address": "0x2260fac5e5542a773aa44fbcfedf7c193bc2c599",
-                    "balance": "6.12253075",
+                    "balance": "6.20967842",
                     "decimals": 8,
                     "denormWeight": "17"
                 },
                 {
                     "address": "0xba100000625a3754423978a60c9317c58a424e3d",
-                    "balance": "12799.973254099187862042",
+                    "balance": "12668.821230872935857786",
                     "decimals": 18,
                     "denormWeight": "25"
                 },
                 {
                     "address": "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
-                    "balance": "88.913228196553386395",
+                    "balance": "89.108958979068046037",
                     "decimals": 18,
                     "denormWeight": "8"
                 }
