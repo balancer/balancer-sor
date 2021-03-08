@@ -28,24 +28,6 @@ export interface Path {
     filterEffectivePrice?: BigNumber; // TODO: This is just used for filtering, maybe there is a better way to filter?
 }
 
-export interface EffectivePrice {
-    price?: BigNumber;
-    id?: string;
-    maxAmount?: string;
-    swap?: string[];
-    amounts?: BigNumber[];
-    bestPools?: string[];
-}
-
-export interface Price {
-    price?: BigNumber;
-    id?: string;
-    maxAmount?: string;
-    swap?: string[];
-    amounts?: BigNumber[];
-    bestPathsIds?: string[];
-}
-
 export type Swap = {
     pool: string;
     tokenIn: string;
@@ -54,27 +36,6 @@ export type Swap = {
     limitReturnAmount?: string;
     maxPrice?: string;
 };
-
-export interface Pools {
-    pools: Pool[];
-}
-
-export interface Pool {
-    id: string;
-    swapFee: BigNumber;
-    amp?: BigNumber;
-    totalWeight?: BigNumber;
-    balanceBpt?: BigNumber;
-    tokens: Token[];
-    tokensList: string[];
-}
-
-export interface Token {
-    address: string;
-    balance: BigNumber;
-    decimals: number;
-    denormWeight: BigNumber;
-}
 
 export interface SubGraphPools {
     pools: SubGraphPool[];
@@ -85,6 +46,7 @@ export interface SubGraphPool {
     swapFee: string;
     amp?: BigNumber;
     totalWeight: string;
+    balanceBpt?: BigNumber;
     publicSwap: string;
     tokens: SubGraphToken[];
     tokensList: string[];
@@ -97,8 +59,8 @@ export interface SubGraphToken {
     denormWeight?: string;
 }
 
-export interface PoolDictionary {
-    [poolId: string]: Pool;
+export interface SubGraphPoolDictionary {
+    [poolId: string]: SubGraphPool;
 }
 
 export interface DisabledOptions {

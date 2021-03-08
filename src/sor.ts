@@ -1,29 +1,16 @@
 import {
     getLimitAmountSwapForPath,
-    getOutputAmountSwap,
     getOutputAmountSwapForPath,
-    getSpotPriceAfterSwap,
     getSpotPriceAfterSwapForPath,
-    getDerivativeSpotPriceAfterSwap,
     getDerivativeSpotPriceAfterSwapForPath,
-    parsePoolPairData,
     getHighestLimitAmountsForPaths,
     getEffectivePriceSwapForPath,
     parsePoolPairDataForPath,
-    EVMgetOutputAmountSwapForPath,
     EVMgetOutputAmountSwap,
 } from './helpers';
-import { bmul, bdiv, bnum, BONE } from './bmath';
+import { bnum } from './bmath';
 import { BigNumber } from './utils/bignumber';
-import {
-    PoolPairData,
-    Path,
-    Swap,
-    Price,
-    EffectivePrice,
-    PoolDictionary,
-    Pool,
-} from './types';
+import { Path, Swap, SubGraphPoolDictionary } from './types';
 import { MaxUint256 } from '@ethersproject/constants';
 
 // TODO give the option to choose a % of slippage beyond current price?
@@ -35,7 +22,7 @@ const maxPrice = MAX_UINT;
 
 export function processPaths(
     paths: Path[],
-    pools: PoolDictionary,
+    pools: SubGraphPoolDictionary,
     swapType: string,
     maxPools: Number
 ): [Path[], BigNumber] {
@@ -61,7 +48,7 @@ export function processPaths(
 // TODO: needs to be refined. Maybe we only do this server side when the amount
 // of pools make SOR v2 slow.
 export function filterPaths(
-    pools: PoolDictionary,
+    pools: SubGraphPoolDictionary,
     paths: Path[], // Paths must come already sorted by descending limitAmount
     // which is done in processPaths()
     swapType: string,
@@ -138,7 +125,7 @@ bestTotalReturn: amount of tokenOut the swaps will return if swapType == 'swapEx
                 amount of tokenIn the swaps will pull if swapType == 'swapExactOut'
 */
 export const smartOrderRouter = (
-    pools: PoolDictionary,
+    pools: SubGraphPoolDictionary,
     paths: Path[],
     swapType: string,
     totalSwapAmount: BigNumber,
@@ -458,7 +445,7 @@ export const smartOrderRouter = (
 
 // TODO: calculate EVM return (use bmath) and update pool balances like current SOR
 export const calcTotalReturn = (
-    pools: PoolDictionary,
+    pools: SubGraphPoolDictionary,
     paths: Path[],
     swapType: string,
     swapAmounts: BigNumber[]
@@ -483,7 +470,7 @@ export const calcTotalReturn = (
 //  Always choose best pool for highest swapAmount first, then 2nd swapAmount and so on. This is
 //  because it's best to use the best effective price for the highest amount to be traded
 function getBestPathIds(
-    pools: PoolDictionary,
+    pools: SubGraphPoolDictionary,
     originalPaths: Path[],
     swapType: string,
     swapAmounts: BigNumber[]
@@ -551,7 +538,7 @@ function getBestPathIds(
 // that are not negative or equal to limitAmount) bring their respective prices after swap to the
 // same price (which means that this is the optimal solution for the paths analyzed)
 function iterateSwapAmounts(
-    pools: PoolDictionary,
+    pools: SubGraphPoolDictionary,
     selectedPaths: Path[],
     swapType: string,
     totalSwapAmount: BigNumber,
@@ -608,7 +595,7 @@ function iterateSwapAmounts(
 }
 
 function iterateSwapAmountsApproximation(
-    pools: PoolDictionary,
+    pools: SubGraphPoolDictionary,
     selectedPaths: Path[],
     swapType: string,
     totalSwapAmount: BigNumber,

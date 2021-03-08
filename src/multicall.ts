@@ -1,7 +1,30 @@
 import { Contract } from '@ethersproject/contracts';
 import { BaseProvider } from '@ethersproject/providers';
-import { Pools, Pool, SubGraphPools, Token } from './types';
+import { SubGraphPools } from './types';
 import * as bmath from './bmath';
+
+import { BigNumber } from './utils/bignumber';
+
+export interface Pools {
+    pools: Pool[];
+}
+
+export interface Pool {
+    id: string;
+    swapFee: BigNumber;
+    amp?: BigNumber;
+    totalWeight?: BigNumber;
+    balanceBpt?: BigNumber;
+    tokens: Token[];
+    tokensList: string[];
+}
+
+export interface Token {
+    address: string;
+    balance: BigNumber;
+    decimals: number;
+    denormWeight: BigNumber;
+}
 
 export async function getAllPoolDataOnChain(
     pools: SubGraphPools,
