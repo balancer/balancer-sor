@@ -7,6 +7,7 @@ import {
     PoolPairData,
     Swap,
     DisabledToken,
+    DisabledOptions,
 } from '../../src/types';
 import { SubGraphPools as SubGraphPoolsV1 } from '@balancer-labs/sor/dist/types';
 import { BaseProvider } from '@ethersproject/providers';
@@ -83,8 +84,8 @@ interface Profiling {
     onChainBalances: boolean;
 }
 
-// Filters for only pools with balance > 0 and converts to wei/bnum format.
-export function formatAndFilterPools(AllSubgraphPools: SubGraphPools): Pools {
+// Filters for only pools with balance > 0 and converts to SCALED wei/bnum format (used for V1).
+export function filterAndScalePools(AllSubgraphPools: SubGraphPools): Pools {
     let allPoolsNonZeroBalances: any = { pools: [] };
 
     for (let pool of AllSubgraphPools.pools) {
@@ -100,8 +101,24 @@ export function formatAndFilterPools(AllSubgraphPools: SubGraphPools): Pools {
     return allPoolsNonZeroBalances;
 }
 
-// Filters for only pools with balance and converts to wei/bnum format, returns token list too.
-export function formatAndFilterPoolsAndTokens(
+// Filters for only pools with balance > 0.
+export function filterPoolsWithBalance(
+    AllSubgraphPools: SubGraphPools
+): SubGraphPools {
+    let allPoolsNonZeroBalances: SubGraphPools = { pools: [] };
+
+    for (let pool of AllSubgraphPools.pools) {
+        // Only check first balance since AFAIK either all balances are zero or none are:
+        if (pool.tokens.length != 0)
+            if (pool.tokens[0].balance != '0')
+                allPoolsNonZeroBalances.pools.push(pool);
+    }
+
+    return allPoolsNonZeroBalances;
+}
+
+// Filters for only pools with balance and returns token list too.
+export function filterPoolsAndTokens(
     allPools: SubGraphPools,
     disabledTokens: DisabledToken[] = []
 ) {
@@ -140,9 +157,6 @@ export function formatAndFilterPoolsAndTokens(
         )
     );
 
-    // Formats Subgraph to wei/bnum format
-    sorv2.formatSubgraphPools(allPoolsNonZeroBalances);
-
     return [allTokensSet, allPoolsNonZeroBalances];
 }
 
@@ -158,7 +172,8 @@ export async function getV1Swap(
     SwapAmount: BigNumber,
     Profiling: Profiling = {
         onChainBalances: true,
-    }
+    },
+    disabledOptions: DisabledOptions = { isOverRide: false, disabledTokens: [] }
 ) {
     TokenIn = TokenIn.toLowerCase();
     TokenOut = TokenOut.toLowerCase();
@@ -216,7 +231,7 @@ export async function getV1Swap(
         const getAllPoolDataOnChainStart = performance.now();
         // console.log(`Using saved balances`)
         // Helper - Filters for only pools with balance and converts to wei/bnum format.
-        onChainPools = formatAndFilterPools(
+        onChainPools = filterAndScalePools(
             JSON.parse(JSON.stringify(weightedPools))
         );
         const getAllPoolDataOnChainEnd = performance.now();
@@ -229,7 +244,8 @@ export async function getV1Swap(
         onChainPools.pools, // AllSubgraphPoolsCorrect.pools,
         TokenIn,
         TokenOut,
-        MaxNoPools
+        MaxNoPools,
+        disabledOptions
     );
     const filterPoolsEnd = performance.now();
     const sortPoolsMostLiquidStart = performance.now();
@@ -342,9 +358,9 @@ export async function getV2Swap(
     Profiling: Profiling = {
         onChainBalances: true,
     },
-    ReturnAmountDecimals: number
+    ReturnAmountDecimals: number,
+    disabledOptions: DisabledOptions = { isOverRide: false, disabledTokens: [] }
 ) {
-    console.log(`AMT: ${SwapAmount.toString()}`);
     TokenIn = TokenIn.toLowerCase();
     TokenOut = TokenOut.toLowerCase();
 
@@ -410,7 +426,8 @@ export async function getV2Swap(
         onChainPools.pools,
         TokenIn,
         TokenOut,
-        MaxNoPools
+        MaxNoPools,
+        disabledOptions
     );
     const filterPoolsEnd = performance.now();
     const sortPoolsMostLiquidStart = performance.now();
@@ -860,10 +877,6 @@ export function assertResults(
     v2SwapData,
     v2WithFilterSwapData = undefined
 ) {
-    const relDiff = calcRelativeDiff(
-        v2SwapData.returnAmount.toNumber(),
-        v1SwapData.returnAmount.toNumber()
-    );
     const relDiffBn = calcRelativeDiffBn(
         v2SwapData.returnAmount,
         v1SwapData.returnAmount
@@ -935,340 +948,6 @@ export function filterToWeightedPoolsOnly(pools: SubGraphPools) {
         if (pool.amp === undefined) weightedPools.pools.push(pool);
     }
     return weightedPools;
-}
-
-export function getAmountOut(
-    Pools,
-    PoolAddr: string,
-    TokenIn: string,
-    TokenOut: string,
-    AmtIn
-) {
-    const swapPool = Pools.pools.find(p => p.id === PoolAddr);
-
-    let pool: PoolPairData = parsePoolPairData(swapPool, TokenIn, TokenOut);
-
-    const amtOut = calcOutGivenIn(
-        pool.balanceIn,
-        pool.weightIn,
-        pool.balanceOut,
-        pool.weightOut,
-        AmtIn,
-        pool.swapFee
-    );
-
-    return amtOut;
-}
-
-export function getAmountIn(
-    Pools,
-    PoolAddr: string,
-    TokenIn: string,
-    TokenOut: string,
-    AmtIn
-) {
-    const swapPool = Pools.pools.find(p => p.id === PoolAddr);
-
-    let pool: PoolPairData = parsePoolPairData(swapPool, TokenIn, TokenOut);
-
-    const amtOut = calcInGivenOut(
-        pool.balanceIn,
-        pool.weightIn,
-        pool.balanceOut,
-        pool.weightOut,
-        AmtIn,
-        pool.swapFee
-    );
-
-    return amtOut;
-}
-
-export function testSwapsExactIn(
-    swaps: Swap[][],
-    tokenIn: string,
-    tokenOut: string,
-    amountIn: BigNumber,
-    totalAmtOut: BigNumber,
-    allPoolsNonZeroBalances
-) {
-    let totalOut = bnum(0);
-    let totalIn = bnum(0);
-
-    for (let i = 0; i < swaps.length; i++) {
-        if (swaps[i].length === 1) {
-            assert.equal(swaps[i][0].tokenIn, tokenIn);
-            assert.equal(swaps[i][0].tokenOut, tokenOut);
-            totalIn = totalIn.plus(swaps[i][0].swapAmount);
-            let amtOutFirstSequence = getAmountOut(
-                allPoolsNonZeroBalances,
-                swaps[i][0].pool,
-                swaps[i][0].tokenIn,
-                swaps[i][0].tokenOut,
-                bnum(swaps[i][0].swapAmount)
-            );
-            totalOut = totalOut.plus(amtOutFirstSequence);
-        } else {
-            assert.equal(swaps[i][0].tokenIn, tokenIn);
-            assert.equal(swaps[i][1].tokenIn, swaps[i][0].tokenOut);
-            assert.equal(swaps[i][1].tokenOut, tokenOut);
-            totalIn = totalIn.plus(swaps[i][0].swapAmount);
-
-            let amtOutFirstSequence = getAmountOut(
-                allPoolsNonZeroBalances,
-                swaps[i][0].pool,
-                swaps[i][0].tokenIn,
-                swaps[i][0].tokenOut,
-                bnum(swaps[i][0].swapAmount)
-            );
-            assert.equal(
-                swaps[i][1].swapAmount,
-                amtOutFirstSequence.toString()
-            );
-
-            let amtOutSecondSequence = getAmountOut(
-                allPoolsNonZeroBalances,
-                swaps[i][1].pool,
-                swaps[i][1].tokenIn,
-                swaps[i][1].tokenOut,
-                bnum(swaps[i][1].swapAmount)
-            );
-            totalOut = totalOut.plus(amtOutSecondSequence);
-        }
-    }
-
-    assert.equal(
-        totalIn.toString(),
-        amountIn.toString(),
-        'testSwapsExactIn - Amount In Should Should Match'
-    );
-    assert.equal(
-        totalOut.toString(),
-        totalAmtOut.toString(),
-        'testSwapsExactIn - Amount Out Should Should Match'
-    );
-}
-
-export function testSwapsExactOut(
-    swaps: Swap[][],
-    tokenIn: string,
-    tokenOut: string,
-    amountOut: BigNumber,
-    totalAmtIn: BigNumber,
-    allPoolsNonZeroBalances
-) {
-    let totalOut = bnum(0);
-    let totalIn = bnum(0);
-
-    for (let i = 0; i < swaps.length; i++) {
-        if (swaps[i].length === 1) {
-            assert.equal(swaps[i][0].tokenIn, tokenIn);
-            assert.equal(swaps[i][0].tokenOut, tokenOut);
-            totalOut = totalOut.plus(swaps[i][0].swapAmount);
-            let amtInFirstSequence = getAmountIn(
-                allPoolsNonZeroBalances,
-                swaps[i][0].pool,
-                swaps[i][0].tokenIn,
-                swaps[i][0].tokenOut,
-                bnum(swaps[i][0].swapAmount)
-            );
-            totalIn = totalIn.plus(amtInFirstSequence);
-        } else {
-            assert.equal(swaps[i][0].tokenIn, tokenIn);
-
-            let amtInSecondSequence = getAmountIn(
-                allPoolsNonZeroBalances,
-                swaps[i][1].pool,
-                swaps[i][1].tokenIn,
-                swaps[i][1].tokenOut,
-                swaps[i][1].swapAmount
-            );
-            assert.equal(
-                swaps[i][0].swapAmount,
-                amtInSecondSequence.toString()
-            ); // Amount out of first swap which is input to second swap
-            assert.equal(swaps[i][1].tokenIn, swaps[i][0].tokenOut);
-            assert.equal(swaps[i][1].tokenOut, tokenOut);
-            totalOut = totalOut.plus(swaps[i][1].swapAmount);
-
-            let amtInFirstSequence = getAmountIn(
-                allPoolsNonZeroBalances,
-                swaps[i][0].pool,
-                swaps[i][0].tokenIn,
-                swaps[i][0].tokenOut,
-                bnum(swaps[i][0].swapAmount)
-            ); // Swap amount is amount out
-
-            totalIn = totalIn.plus(amtInFirstSequence);
-        }
-    }
-
-    expect(totalOut.toString()).to.eql(
-        amountOut.toString(),
-        'testSwapsExactOut - Amount Out Should Should Match'
-    );
-    // expect(totalAmtIn.toString()).to.eql(totalIn.toString());
-}
-
-export function filterPools(allPools: any) {
-    let allTokens = [];
-    let allTokensSet = new Set();
-    let allPoolsNonZeroBalances = [];
-
-    let i = 0;
-
-    for (let pool of allPools.pools) {
-        // Build list of non-zero balance pools
-        // Only check first balance since AFAIK either all balances are zero or none are:
-        if (pool.tokens.length != 0) {
-            if (pool.tokens[0].balance != '0') {
-                allTokens.push(pool.tokensList.sort()); // Will add without duplicate
-                allPoolsNonZeroBalances.push(pool);
-                i++;
-            }
-        }
-    }
-
-    allTokensSet = new Set(
-        Array.from(new Set(allTokens.map(a => JSON.stringify(a))), json =>
-            JSON.parse(json)
-        )
-    );
-
-    return [allTokensSet, allPoolsNonZeroBalances];
-}
-
-export function fullSwap(
-    allPoolsNonZeroBalances,
-    tokenIn,
-    tokenOut,
-    swapType,
-    noPools,
-    amount,
-    disabledTokens
-): [Swap[][], BigNumber] {
-    tokenIn = tokenIn.toLowerCase();
-    tokenOut = tokenOut.toLowerCase();
-
-    let poolsTokenIn, poolsTokenOut, directPools, hopTokens;
-    [directPools, hopTokens, poolsTokenIn, poolsTokenOut] = sorv2.filterPools(
-        allPoolsNonZeroBalances.pools,
-        tokenIn,
-        tokenOut,
-        noPools,
-        {
-            isOverRide: true,
-            disabledTokens: disabledTokens.tokens,
-        }
-    );
-
-    let mostLiquidPoolsFirstHop, mostLiquidPoolsSecondHop;
-    [
-        mostLiquidPoolsFirstHop,
-        mostLiquidPoolsSecondHop,
-    ] = sorv2.sortPoolsMostLiquid(
-        tokenIn,
-        tokenOut,
-        hopTokens,
-        poolsTokenIn,
-        poolsTokenOut
-    );
-
-    let pools, pathData;
-    [pools, pathData] = sorv2.parsePoolData(
-        directPools,
-        tokenIn,
-        tokenOut,
-        mostLiquidPoolsFirstHop,
-        mostLiquidPoolsSecondHop,
-        hopTokens
-    );
-
-    let [paths, maxLiquidityAvailable] = sorv2.processPaths(
-        pathData,
-        pools,
-        swapType,
-        noPools
-    );
-
-    let swaps: Swap[][], total: BigNumber;
-    [swaps, total] = sorv2.smartOrderRouter(
-        JSON.parse(JSON.stringify(pools)),
-        paths,
-        swapType,
-        amount,
-        noPools,
-        bnum(0) // costOutputToken
-    );
-
-    return [swaps, total];
-}
-
-export function alterPools(allPools: any) {
-    for (let pool of allPools.pools) {
-        if (pool.tokens.length != 0) {
-            pool.tokens.forEach(token => {
-                // let change = Math.random() * (1.4 - 0.6) + 0.6;
-                let change = Math.random() * (1.1 - 0.9) + 0.9;
-                // change = 1.0001;
-                let changeBn = scale(bnum(change), 18);
-                // let change = bnum(1100000000000000000) // 1.1
-                let balanceBn = scale(bnum(token.balance), token.decimals);
-                let newBalanceBn = bmul(balanceBn, changeBn);
-                newBalanceBn = scale(newBalanceBn, -token.decimals);
-                token.balance = newBalanceBn.toString();
-            });
-        }
-    }
-
-    return allPools;
-}
-
-// Returns two arrays
-// First array contains all tokens in direct pools containing tokenIn
-// Second array contains all tokens in multi-hop pools containing tokenIn
-export function getTokenPairsMultiHop(token: string, poolsTokensListSet: any) {
-    let poolsWithToken = [];
-    let poolsWithoutToken = [];
-
-    let directTokenPairsSet = new Set();
-
-    // If pool contains token add all its tokens to direct list
-    poolsTokensListSet.forEach((poolTokenList, index) => {
-        if (poolTokenList.includes(token)) {
-            poolsWithToken.push(poolTokenList);
-        } else {
-            poolsWithoutToken.push(poolTokenList);
-        }
-    });
-
-    directTokenPairsSet = new Set([].concat(...poolsWithToken));
-
-    let multihopTokenPools = [];
-    let multihopTokenPairsSet = new Set();
-
-    poolsWithoutToken.forEach((pool, index) => {
-        let intersection = [...pool].filter(x =>
-            [...directTokenPairsSet].includes(x)
-        );
-        if (intersection.length != 0) {
-            multihopTokenPools.push(pool);
-        }
-    });
-
-    multihopTokenPairsSet = new Set([].concat(...multihopTokenPools));
-    let allTokenPairsSet = new Set();
-    allTokenPairsSet = new Set([
-        ...directTokenPairsSet,
-        ...multihopTokenPairsSet,
-    ]);
-
-    let directTokenPairs = [...directTokenPairsSet];
-    let allTokenPairs = [...allTokenPairsSet];
-    return [directTokenPairs, allTokenPairs];
-}
-
-export function calcRelativeDiff(expected: number, actual: number) {
-    return Math.abs((expected - actual) / expected);
 }
 
 export function calcRelativeDiffBn(expected: BigNumber, actual: BigNumber) {
