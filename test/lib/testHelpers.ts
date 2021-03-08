@@ -494,8 +494,7 @@ export async function getV2Swap(
     [paths, maxLiquidityAvailable] = sorv2.processPaths(
         pathData,
         pools,
-        SwapType,
-        MaxNoPools
+        SwapType
     );
 
     const processPathsEnd = performance.now();
@@ -644,8 +643,7 @@ export async function getV2SwapWithFilter(
     let [paths, maxLiquidityAvailable] = sorv2.processPaths(
         pathData,
         pools,
-        SwapType,
-        MaxNoPools
+        SwapType
     );
 
     const processPathsEnd = performance.now();

@@ -23,8 +23,7 @@ const maxPrice = MAX_UINT;
 export function processPaths(
     paths: Path[],
     pools: SubGraphPoolDictionary,
-    swapType: string,
-    maxPools: Number
+    swapType: string
 ): [Path[], BigNumber] {
     let maxLiquidityAvailable = bnum(0);
     paths.forEach(path => {
