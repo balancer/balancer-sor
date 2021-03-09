@@ -19,6 +19,7 @@ import { readdir } from 'fs/promises';
 import { performance } from 'perf_hooks';
 import { assert, expect } from 'chai';
 import { getAddress } from '@ethersproject/address';
+import { Contract } from '@ethersproject/contracts';
 
 // These types are used for V1 compare
 interface Pools {
@@ -594,7 +595,7 @@ export async function getV2SwapWithFilter(
     if (Profiling.onChainBalances) {
         const getAllPoolDataOnChainStart = performance.now();
 
-        poolsWithOnChainBalances = await sorv2.getAllPoolDataOnChain(
+        poolsWithOnChainBalances = await getAllPoolDataOnChain(
             AllSubgraphPools,
             MULTIADDR[ChainId],
             Provider
@@ -978,7 +979,7 @@ export function assertResults(
 }
 
 // Helper to filter pools to contain only Weighted pools
-export function filterToWeightedPoolsOnly(pools: SubGraphPools) {
+export function filterToWeightedPoolsOnly(pools: any) {
     let weightedPools = { pools: [] };
 
     for (let pool of pools.pools) {
@@ -992,6 +993,61 @@ export function calcRelativeDiffBn(expected: BigNumber, actual: BigNumber) {
         .minus(actual)
         .div(expected)
         .abs();
+}
+
+async function getAllPoolDataOnChain(
+    pools: SubGraphPools,
+    multiAddress: string,
+    provider: BaseProvider
+): Promise<Pools> {
+    if (pools.pools.length === 0) throw Error('There are no pools.');
+
+    const customMultiAbi = require('./abi/customMulticall.json');
+    const contract = new Contract(multiAddress, customMultiAbi, provider);
+
+    let addresses = [];
+    let total = 0;
+
+    for (let i = 0; i < pools.pools.length; i++) {
+        let pool = pools.pools[i];
+
+        addresses.push([pool.id]);
+        total++;
+        pool.tokens.forEach(token => {
+            addresses[i].push(token.address);
+            total++;
+        });
+    }
+
+    let results = await contract.getPoolInfo(addresses, total);
+
+    let j = 0;
+    let onChainPools: Pools = { pools: [] };
+
+    for (let i = 0; i < pools.pools.length; i++) {
+        let tokens: Token[] = [];
+
+        let p: Pool = {
+            id: pools.pools[i].id,
+            swapFee: scale(bnum(pools.pools[i].swapFee), 18),
+            totalWeight: scale(bnum(pools.pools[i].totalWeight), 18),
+            tokens: tokens,
+            tokensList: pools.pools[i].tokensList,
+        };
+
+        pools.pools[i].tokens.forEach(token => {
+            let bal = bnum(results[j]);
+            j++;
+            p.tokens.push({
+                address: token.address,
+                balance: bal,
+                decimals: Number(token.decimals),
+                denormWeight: scale(bnum(token.denormWeight), 18),
+            });
+        });
+        onChainPools.pools.push(p);
+    }
+    return onChainPools;
 }
 
 // Generates file output for v1-v2-compare-testPools.spec.ts
