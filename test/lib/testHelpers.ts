@@ -536,7 +536,7 @@ export async function getV2Swap(
         sor: sorEnd - sorStart,
     };
 
-    return { title: 'v2', swaps, returnAmount, timeData };
+    return { title: 'v2', swaps, returnAmount, timeData, costOutputToken };
 }
 
 function getAmounts(decimals) {

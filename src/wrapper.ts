@@ -265,8 +265,12 @@ export class SOR {
             marketSp = cache.marketSp;
         }
 
-        // Use previously stored value if exists else default to 0
         let costOutputToken = this.tokenCost[tokenOut];
+
+        if (swapType === 'swapExactOut')
+            costOutputToken = this.tokenCost[tokenIn];
+
+        // Use previously stored value if exists else default to 0
         if (costOutputToken === undefined) {
             costOutputToken = new BigNumber(0);
         }
@@ -295,7 +299,7 @@ export class SOR {
         swapInfo = {
             tokenAddresses: [tokenIn, tokenOut],
             swaps: [swap],
-            tradeAmount: swapAmt,
+            tradeAmount: total,
             tokenIn,
             tokenOut,
         };
