@@ -73,13 +73,10 @@ describe(`Tests for wrapper class.`, () => {
         const fetchSuccess = await sor.fetchPools();
         assert.isTrue(fetchSuccess);
         assert.isTrue(sor.finishedFetchingOnChain);
-        // Should be bignumber format but with NO scaling
-        assert.isTrue(
-            BigNumber.isBigNumber(sor.onChainCache.pools[1].tokens[1].balance)
-        );
+
         assert.equal(
             poolsFromFile.pools[1].tokens[1].balance,
-            sor.onChainCache.pools[1].tokens[1].balance.toString()
+            sor.onChainCache.pools[1].tokens[1].balance
         );
     });
 
