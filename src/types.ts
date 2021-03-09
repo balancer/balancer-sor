@@ -44,10 +44,9 @@ export interface SubGraphPools {
 export interface SubGraphPool {
     id: string;
     swapFee: string;
-    amp?: BigNumber;
+    amp: string;
     totalWeight: string;
-    balanceBpt?: BigNumber;
-    publicSwap: string;
+    balanceBpt: string;
     tokens: SubGraphToken[];
     tokensList: string[];
 }

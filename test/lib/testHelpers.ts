@@ -9,6 +9,7 @@ import {
     SubGraphPoolDictionary,
     SubGraphPool,
     Path,
+    SubGraphToken,
 } from '../../src/types';
 import { SubGraphPools as SubGraphPoolsV1 } from '@balancer-labs/sor/dist/types';
 import { BaseProvider } from '@ethersproject/providers';
@@ -17,8 +18,9 @@ import { hashMessage } from '@ethersproject/hash';
 import * as fs from 'fs';
 import { readdir } from 'fs/promises';
 import { performance } from 'perf_hooks';
-import { assert, expect } from 'chai';
+import { assert } from 'chai';
 import { getAddress } from '@ethersproject/address';
+import { Contract } from '@ethersproject/contracts';
 
 // These types are used for V1 compare
 interface Pools {
@@ -110,10 +112,21 @@ export function filterAndScalePools(AllSubgraphPools: SubGraphPools): Pools {
     }
 
     // Formats Subgraph to wei/bnum format
-    sorv2.formatSubgraphPools(allPoolsNonZeroBalances);
+    formatSubgraphPools(allPoolsNonZeroBalances);
 
     return allPoolsNonZeroBalances;
 }
+
+const formatSubgraphPools = pools => {
+    for (let pool of pools.pools) {
+        pool.swapFee = scale(bnum(pool.swapFee), 18);
+        pool.totalWeight = scale(bnum(pool.totalWeight), 18);
+        pool.tokens.forEach(token => {
+            token.balance = scale(bnum(token.balance), token.decimals);
+            token.denormWeight = scale(bnum(token.denormWeight), 18);
+        });
+    }
+};
 
 // Filters for only pools with balance > 0.
 export function filterPoolsWithBalance(
@@ -418,15 +431,12 @@ export async function getV2Swap(
     if (Profiling.onChainBalances) {
         const getAllPoolDataOnChainStart = performance.now();
 
-        // !!!!!!! TODO - Add onchain balances and return in Subgraph pools format
-        poolsWithOnChainBalances = JSON.parse(JSON.stringify(AllSubgraphPools));
-        /*
-        poolsWithOnChainBalances = await sorv2.getAllPoolDataOnChain(
+        // This is only suitable for V1 pools as it uses old contract ABI. Shouldn't be an issue as using as compare vs V1 SOR.
+        poolsWithOnChainBalances = await getAllPoolDataOnChain(
             AllSubgraphPools,
             MULTIADDR[ChainId],
             Provider
         );
-        */
 
         const getAllPoolDataOnChainEnd = performance.now();
     } else {
@@ -527,167 +537,6 @@ export async function getV2Swap(
     };
 
     return { title: 'v2', swaps, returnAmount, timeData };
-}
-
-export async function getV2SwapWithFilter(
-    Provider: BaseProvider,
-    GasPrice: BigNumber,
-    MaxNoPools: number,
-    ChainId: number,
-    AllSubgraphPools: SubGraphPools,
-    SwapType: string,
-    TokenIn: string,
-    TokenOut: string,
-    SwapAmount: BigNumber,
-    Profiling: Profiling = {
-        onChainBalances: true,
-    }
-) {
-    TokenIn = TokenIn.toLowerCase();
-    TokenOut = TokenOut.toLowerCase();
-
-    const MULTIADDR: { [ChainId: number]: string } = {
-        1: '0x514053acec7177e277b947b1ebb5c08ab4c4580e',
-        42: '0x71c7f1086aFca7Aa1B0D4d73cfa77979d10D3210',
-    };
-
-    const swapCost = new BigNumber('100000'); // A pool swap costs approx 100000 gas
-
-    const fullSwapStart = performance.now();
-    const getCostOutputTokenStart = performance.now();
-    // This calculates the cost in output token (output token is TokenOut for swapExactIn and
-    // TokenIn for a swapExactOut) for each additional pool added to the final SOR swap result.
-    // This is used as an input to SOR to allow it to make gas efficient recommendations, i.e.
-    // if it costs 5 DAI to add another pool to the SOR solution and that only generates 1 more DAI,
-    // then SOR should not add that pool (if gas costs were zero that pool would be added)
-    // Notice that outputToken is TokenOut if SwapType == 'swapExactIn' and TokenIn if SwapType == 'swapExactOut'
-    let costOutputToken: BigNumber;
-    if (SwapType === 'swapExactIn')
-        costOutputToken = await sorv2.getCostOutputToken(
-            TokenOut,
-            GasPrice,
-            swapCost,
-            Provider
-        );
-    else
-        costOutputToken = await sorv2.getCostOutputToken(
-            TokenIn,
-            GasPrice,
-            swapCost,
-            Provider
-        );
-
-    const getCostOutputTokenEnd = performance.now();
-    let poolsWithOnChainBalances;
-
-    if (Profiling.onChainBalances) {
-        const getAllPoolDataOnChainStart = performance.now();
-
-        poolsWithOnChainBalances = await sorv2.getAllPoolDataOnChain(
-            AllSubgraphPools,
-            MULTIADDR[ChainId],
-            Provider
-        );
-        const getAllPoolDataOnChainEnd = performance.now();
-    } else {
-        const getAllPoolDataOnChainStart = performance.now();
-        // V2 uses Subgraph normalized balances so no need to format
-        poolsWithOnChainBalances = JSON.parse(JSON.stringify(AllSubgraphPools));
-        const getAllPoolDataOnChainEnd = performance.now();
-    }
-
-    const filterPoolsStart = performance.now();
-
-    let poolsTokenIn, poolsTokenOut, directPools, hopTokens;
-    [directPools, hopTokens, poolsTokenIn, poolsTokenOut] = sorv2.filterPools(
-        poolsWithOnChainBalances.pools,
-        TokenIn,
-        TokenOut,
-        MaxNoPools
-    );
-
-    const filterPoolsEnd = performance.now();
-    const sortPoolsMostLiquidStart = performance.now();
-
-    // For each hopToken, find the most liquid pool for the first and the second hops
-    let mostLiquidPoolsFirstHop, mostLiquidPoolsSecondHop;
-    [
-        mostLiquidPoolsFirstHop,
-        mostLiquidPoolsSecondHop,
-    ] = sorv2.sortPoolsMostLiquid(
-        TokenIn,
-        TokenOut,
-        hopTokens,
-        poolsTokenIn,
-        poolsTokenOut
-    );
-
-    const sortPoolsMostLiquidEnd = performance.now();
-    const parsePoolDataStart = performance.now();
-
-    // Finds the possible paths to make the swap, each path can be a direct swap
-    // or a multihop composed of 2 swaps
-    let pools, pathData;
-    [pools, pathData] = sorv2.parsePoolData(
-        directPools,
-        TokenIn,
-        TokenOut,
-        mostLiquidPoolsFirstHop,
-        mostLiquidPoolsSecondHop,
-        hopTokens
-    );
-
-    const parsePoolDataEnd = performance.now();
-    const processPathsStart = performance.now();
-
-    let [paths, maxLiquidityAvailable] = sorv2.processPaths(
-        pathData,
-        pools,
-        SwapType
-    );
-
-    const processPathsEnd = performance.now();
-    const filterStart = performance.now();
-
-    let filteredPaths = sorv2.filterPaths(
-        JSON.parse(JSON.stringify(pools)),
-        paths,
-        SwapType,
-        MaxNoPools,
-        maxLiquidityAvailable,
-        costOutputToken
-    );
-
-    const filterEnd = performance.now();
-    const sorStart = performance.now();
-
-    let swaps: any, returnAmount: BigNumber;
-    [swaps, returnAmount] = sorv2.smartOrderRouter(
-        JSON.parse(JSON.stringify(pools)),
-        filteredPaths,
-        SwapType,
-        SwapAmount,
-        MaxNoPools,
-        costOutputToken
-    );
-
-    const sorEnd = performance.now();
-    const fullSwapEnd = sorEnd;
-
-    const timeData = {
-        fullSwap: fullSwapEnd - fullSwapStart,
-        costOutputToken: getCostOutputTokenEnd - getCostOutputTokenStart,
-        // 'getAllPoolDataOnChain': getAllPoolDataOnChainEnd - getAllPoolDataOnChainStart,
-        filterPools: filterPoolsEnd - filterPoolsStart,
-        sortPools: sortPoolsMostLiquidEnd - sortPoolsMostLiquidStart,
-        parsePool: parsePoolDataEnd - parsePoolDataStart,
-        processPaths: processPathsEnd - processPathsStart,
-        processEps: 'N/A',
-        filter: filterEnd - filterStart,
-        sor: sorEnd - sorStart,
-    };
-
-    return { title: 'v2WithFilter', swaps, returnAmount, timeData };
 }
 
 function getAmounts(decimals) {
@@ -967,7 +816,7 @@ export function assertResults(
 }
 
 // Helper to filter pools to contain only Weighted pools
-export function filterToWeightedPoolsOnly(pools: SubGraphPools) {
+export function filterToWeightedPoolsOnly(pools: any) {
     let weightedPools = { pools: [] };
 
     for (let pool of pools.pools) {
@@ -981,6 +830,67 @@ export function calcRelativeDiffBn(expected: BigNumber, actual: BigNumber) {
         .minus(actual)
         .div(expected)
         .abs();
+}
+
+async function getAllPoolDataOnChain(
+    pools: SubGraphPools,
+    multiAddress: string,
+    provider: BaseProvider
+): Promise<SubGraphPools> {
+    if (pools.pools.length === 0) throw Error('There are no pools.');
+
+    const customMultiAbi = require('./abi/customMulticall.json');
+    const contract = new Contract(multiAddress, customMultiAbi, provider);
+
+    let addresses = [];
+    let total = 0;
+
+    for (let i = 0; i < pools.pools.length; i++) {
+        let pool = pools.pools[i];
+
+        addresses.push([pool.id]);
+        total++;
+        pool.tokens.forEach(token => {
+            addresses[i].push(token.address);
+            total++;
+        });
+    }
+
+    let results = await contract.getPoolInfo(addresses, total);
+
+    let j = 0;
+    let onChainPools: SubGraphPools = { pools: [] };
+
+    for (let i = 0; i < pools.pools.length; i++) {
+        let tokens: SubGraphToken[] = [];
+
+        let p: SubGraphPool = {
+            id: pools.pools[i].id,
+            swapFee: pools.pools[i].swapFee,
+            totalWeight: pools.pools[i].totalWeight,
+            tokens: tokens,
+            tokensList: pools.pools[i].tokensList,
+            amp: '0',
+            balanceBpt: pools.pools[i].balanceBpt,
+        };
+
+        pools.pools[i].tokens.forEach(token => {
+            // let bal = bnum(results[j]);
+            let bal = scale(
+                bnum(results[j]),
+                -Number(token.decimals)
+            ).toString();
+            j++;
+            p.tokens.push({
+                address: token.address,
+                balance: bal,
+                decimals: token.decimals,
+                denormWeight: token.denormWeight,
+            });
+        });
+        onChainPools.pools.push(p);
+    }
+    return onChainPools;
 }
 
 // Generates file output for v1-v2-compare-testPools.spec.ts

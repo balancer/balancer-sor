@@ -120,9 +120,9 @@ export class SOR {
     Uses multicall contract to fetch all onchain balances for pools.
     */
     private async fetchOnChainPools(
-        SubgraphPools: SubGraphPools
+        subgraphPools: SubGraphPools
     ): Promise<SubGraphPools> {
-        if (SubgraphPools.pools.length === 0) {
+        if (subgraphPools.pools.length === 0) {
             console.error('ERROR: No Pools To Fetch.');
             return { pools: [] };
         }
@@ -137,7 +137,7 @@ export class SOR {
         if (!onChainPools) return { pools: [] };
         */
         // !!!!!!! TODO - Below is a placeholder for multicall that converts to bignumber format with NO scaling
-        const onChainPools: SubGraphPools = { pools: [] };
+        const onChainPools: SubGraphPools = subgraphPools;
         /*
         for (let i = 0; i < SubgraphPools.pools.length; i++) {
             let tokens: Token[] = [];
@@ -436,14 +436,9 @@ export class SOR {
             let onChainPools: SubGraphPools = { pools: [] };
             if (poolsOfInterest.length !== 0) {
                 // Retrieves onchain balances for pools list
-                // TODO !!!!!!!
-                /*
-                onChainPools = await sor.getAllPoolDataOnChain(
-                    { pools: poolsOfInterest },
-                    this.MULTIADDR[this.chainId],
-                    this.provider
-                );
-                */
+                onChainPools = await this.fetchOnChainPools({
+                    pools: poolsOfInterest,
+                });
             }
 
             // Add to cache for future use

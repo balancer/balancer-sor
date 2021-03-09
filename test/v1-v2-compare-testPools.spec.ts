@@ -58,6 +58,7 @@ describe('Run Tests From Saved Pools', () => {
 
         it(`${file}`, async () => {
             // V2 first to debug faster
+            // This method will only work for V1 pools onChain balances as uses BPool V1 contract to compare vs V1.
             let v2SwapData = await getV2Swap(
                 provider,
                 testData.tradeInfo.GasPrice,
@@ -90,22 +91,6 @@ describe('Run Tests From Saved Pools', () => {
             v1SwapData.returnAmount = v1SwapData.returnAmount.div(
                 bnum(10 ** testData.tradeInfo.ReturnAmountDecimals)
             );
-            /*
-            let v2WithFilterSwapData = await getV2SwapWithFilter(
-                provider,
-                testData.tradeInfo.GasPrice,
-                testData.tradeInfo.NoPools,
-                1,
-                JSON.parse(JSON.stringify(testData)),
-                testData.tradeInfo.SwapType,
-                testData.tradeInfo.TokenIn,
-                testData.tradeInfo.TokenOut,
-                testData.tradeInfo.SwapAmount.div(
-                    bnum(10 ** testData.tradeInfo.SwapAmountDecimals)
-                ),
-                { onChainBalances: false }
-            );
-            */
 
             displayResults(
                 `${file}.json`,

@@ -972,17 +972,6 @@ export const parsePoolData = (
 //     return OutputPools;
 // }
 
-export const formatSubgraphPools = pools => {
-    for (let pool of pools.pools) {
-        pool.swapFee = scale(bnum(pool.swapFee), 18);
-        pool.totalWeight = scale(bnum(pool.totalWeight), 18);
-        pool.tokens.forEach(token => {
-            token.balance = scale(bnum(token.balance), token.decimals);
-            token.denormWeight = scale(bnum(token.denormWeight), 18);
-        });
-    }
-};
-
 export function filterPools(
     allPools: SubGraphPool[], // The complete information of the pools
     tokenIn: string,
