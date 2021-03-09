@@ -3,29 +3,46 @@ import * as sorv1 from '@balancer-labs/sor';
 import * as sorv2 from '../../src';
 import {
     SubGraphPools,
-    Pools,
-    PoolPairData,
     Swap,
     DisabledToken,
+    DisabledOptions,
+    SubGraphPoolDictionary,
+    SubGraphPool,
+    Path,
+    SubGraphToken,
 } from '../../src/types';
 import { SubGraphPools as SubGraphPoolsV1 } from '@balancer-labs/sor/dist/types';
 import { BaseProvider } from '@ethersproject/providers';
-import {
-    bnum,
-    scale,
-    BONE,
-    bdiv,
-    bmul,
-    calcOutGivenIn,
-    calcInGivenOut,
-} from '../../src/bmath';
+import { bnum, scale } from '../../src/bmath';
 import { hashMessage } from '@ethersproject/hash';
 import * as fs from 'fs';
 import { readdir } from 'fs/promises';
 import { performance } from 'perf_hooks';
-import { assert, expect } from 'chai';
+import { assert } from 'chai';
 import { getAddress } from '@ethersproject/address';
-import { parsePoolPairData } from '../../src/helpers';
+import { Contract } from '@ethersproject/contracts';
+
+// These types are used for V1 compare
+interface Pools {
+    pools: Pool[];
+}
+
+interface Pool {
+    id: string;
+    swapFee: BigNumber;
+    amp?: BigNumber;
+    totalWeight?: BigNumber;
+    balanceBpt?: BigNumber;
+    tokens: Token[];
+    tokensList: string[];
+}
+
+interface Token {
+    address: string;
+    balance: BigNumber;
+    decimals: number;
+    denormWeight: BigNumber;
+}
 
 // Mainnet reference tokens with addresses & decimals
 const Tokens = {
@@ -83,8 +100,8 @@ interface Profiling {
     onChainBalances: boolean;
 }
 
-// Filters for only pools with balance > 0 and converts to wei/bnum format.
-export function formatAndFilterPools(AllSubgraphPools: SubGraphPools): Pools {
+// Filters for only pools with balance > 0 and converts to SCALED wei/bnum format (used for V1).
+export function filterAndScalePools(AllSubgraphPools: SubGraphPools): Pools {
     let allPoolsNonZeroBalances: any = { pools: [] };
 
     for (let pool of AllSubgraphPools.pools) {
@@ -95,19 +112,46 @@ export function formatAndFilterPools(AllSubgraphPools: SubGraphPools): Pools {
     }
 
     // Formats Subgraph to wei/bnum format
-    sorv2.formatSubgraphPools(allPoolsNonZeroBalances);
+    formatSubgraphPools(allPoolsNonZeroBalances);
 
     return allPoolsNonZeroBalances;
 }
 
-// Filters for only pools with balance and converts to wei/bnum format, returns token list too.
-export function formatAndFilterPoolsAndTokens(
+const formatSubgraphPools = pools => {
+    for (let pool of pools.pools) {
+        pool.swapFee = scale(bnum(pool.swapFee), 18);
+        pool.totalWeight = scale(bnum(pool.totalWeight), 18);
+        pool.tokens.forEach(token => {
+            token.balance = scale(bnum(token.balance), token.decimals);
+            token.denormWeight = scale(bnum(token.denormWeight), 18);
+        });
+    }
+};
+
+// Filters for only pools with balance > 0.
+export function filterPoolsWithBalance(
+    AllSubgraphPools: SubGraphPools
+): SubGraphPools {
+    let allPoolsNonZeroBalances: SubGraphPools = { pools: [] };
+
+    for (let pool of AllSubgraphPools.pools) {
+        // Only check first balance since AFAIK either all balances are zero or none are:
+        if (pool.tokens.length != 0)
+            if (pool.tokens[0].balance != '0')
+                allPoolsNonZeroBalances.pools.push(pool);
+    }
+
+    return allPoolsNonZeroBalances;
+}
+
+// Filters for only pools with balance and returns token list too.
+export function filterPoolsAndTokens(
     allPools: SubGraphPools,
     disabledTokens: DisabledToken[] = []
-) {
+): [any, SubGraphPools] {
     let allTokens = [];
     let allTokensSet = new Set();
-    let allPoolsNonZeroBalances = { pools: [] };
+    let allPoolsNonZeroBalances: SubGraphPools = { pools: [] };
 
     for (let pool of allPools.pools) {
         // Build list of non-zero balance pools
@@ -140,9 +184,6 @@ export function formatAndFilterPoolsAndTokens(
         )
     );
 
-    // Formats Subgraph to wei/bnum format
-    sorv2.formatSubgraphPools(allPoolsNonZeroBalances);
-
     return [allTokensSet, allPoolsNonZeroBalances];
 }
 
@@ -158,7 +199,8 @@ export async function getV1Swap(
     SwapAmount: BigNumber,
     Profiling: Profiling = {
         onChainBalances: true,
-    }
+    },
+    disabledOptions: DisabledOptions = { isOverRide: false, disabledTokens: [] }
 ) {
     TokenIn = TokenIn.toLowerCase();
     TokenOut = TokenOut.toLowerCase();
@@ -200,12 +242,12 @@ export async function getV1Swap(
         );
 
     const getCostOutputTokenEnd = performance.now();
-    let onChainPools;
+    let poolsWithOnChainBalances;
 
     if (Profiling.onChainBalances) {
         const getAllPoolDataOnChainStart = performance.now();
 
-        onChainPools = await sorv1.getAllPoolDataOnChain(
+        poolsWithOnChainBalances = await sorv1.getAllPoolDataOnChain(
             weightedPools,
             MULTIADDR[ChainId],
             Provider
@@ -216,7 +258,7 @@ export async function getV1Swap(
         const getAllPoolDataOnChainStart = performance.now();
         // console.log(`Using saved balances`)
         // Helper - Filters for only pools with balance and converts to wei/bnum format.
-        onChainPools = formatAndFilterPools(
+        poolsWithOnChainBalances = filterAndScalePools(
             JSON.parse(JSON.stringify(weightedPools))
         );
         const getAllPoolDataOnChainEnd = performance.now();
@@ -226,10 +268,11 @@ export async function getV1Swap(
 
     let poolsTokenIn, poolsTokenOut, directPools, hopTokens;
     [directPools, hopTokens, poolsTokenIn, poolsTokenOut] = sorv1.filterPools(
-        onChainPools.pools, // AllSubgraphPoolsCorrect.pools,
+        poolsWithOnChainBalances.pools, // AllSubgraphPoolsCorrect.pools,
         TokenIn,
         TokenOut,
-        MaxNoPools
+        MaxNoPools,
+        disabledOptions
     );
     const filterPoolsEnd = performance.now();
     const sortPoolsMostLiquidStart = performance.now();
@@ -342,7 +385,8 @@ export async function getV2Swap(
     Profiling: Profiling = {
         onChainBalances: true,
     },
-    ReturnAmountDecimals: number
+    ReturnAmountDecimals: number,
+    disabledOptions: DisabledOptions = { isOverRide: false, disabledTokens: [] }
 ) {
     TokenIn = TokenIn.toLowerCase();
     TokenOut = TokenOut.toLowerCase();
@@ -382,12 +426,13 @@ export async function getV2Swap(
     costOutputToken = costOutputToken.div(bnum(10 ** ReturnAmountDecimals));
 
     const getCostOutputTokenEnd = performance.now();
-    let onChainPools;
+    let poolsWithOnChainBalances: SubGraphPools;
 
     if (Profiling.onChainBalances) {
         const getAllPoolDataOnChainStart = performance.now();
 
-        onChainPools = await sorv2.getAllPoolDataOnChain(
+        // This is only suitable for V1 pools as it uses old contract ABI. Shouldn't be an issue as using as compare vs V1 SOR.
+        poolsWithOnChainBalances = await getAllPoolDataOnChain(
             AllSubgraphPools,
             MULTIADDR[ChainId],
             Provider
@@ -397,25 +442,31 @@ export async function getV2Swap(
     } else {
         const getAllPoolDataOnChainStart = performance.now();
         // V2 uses Subgraph normalized balances so no need to format
-        onChainPools = JSON.parse(JSON.stringify(AllSubgraphPools));
+        poolsWithOnChainBalances = JSON.parse(JSON.stringify(AllSubgraphPools));
 
         const getAllPoolDataOnChainEnd = performance.now();
     }
 
     const filterPoolsStart = performance.now();
 
-    let poolsTokenIn, poolsTokenOut, directPools, hopTokens;
+    let directPools: SubGraphPoolDictionary;
+    let hopTokens: string[];
+    let poolsTokenIn: SubGraphPoolDictionary;
+    let poolsTokenOut: SubGraphPoolDictionary;
+
     [directPools, hopTokens, poolsTokenIn, poolsTokenOut] = sorv2.filterPools(
-        onChainPools.pools,
+        poolsWithOnChainBalances.pools,
         TokenIn,
         TokenOut,
-        MaxNoPools
+        MaxNoPools,
+        disabledOptions
     );
     const filterPoolsEnd = performance.now();
     const sortPoolsMostLiquidStart = performance.now();
 
     // For each hopToken, find the most liquid pool for the first and the second hops
-    let mostLiquidPoolsFirstHop, mostLiquidPoolsSecondHop;
+    let mostLiquidPoolsFirstHop: SubGraphPool[],
+        mostLiquidPoolsSecondHop: SubGraphPool[];
     [
         mostLiquidPoolsFirstHop,
         mostLiquidPoolsSecondHop,
@@ -432,7 +483,9 @@ export async function getV2Swap(
 
     // Finds the possible paths to make the swap, each path can be a direct swap
     // or a multihop composed of 2 swaps
-    let pools, pathData;
+    let pools: SubGraphPoolDictionary;
+    let pathData: Path[];
+
     [pools, pathData] = sorv2.parsePoolData(
         directPools,
         TokenIn,
@@ -445,17 +498,19 @@ export async function getV2Swap(
     const parsePoolDataEnd = performance.now();
     const processPathsStart = performance.now();
 
-    let [paths, maxLiquidityAvailable] = sorv2.processPaths(
+    let paths: Path[];
+    let maxLiquidityAvailable: BigNumber;
+
+    [paths, maxLiquidityAvailable] = sorv2.processPaths(
         pathData,
         pools,
-        SwapType,
-        MaxNoPools
+        SwapType
     );
 
     const processPathsEnd = performance.now();
     const sorStart = performance.now();
 
-    let swaps: any, returnAmount: BigNumber;
+    let swaps: Swap[][], returnAmount: BigNumber;
     [swaps, returnAmount] = sorv2.smartOrderRouter(
         JSON.parse(JSON.stringify(pools)),
         paths,
@@ -481,169 +536,7 @@ export async function getV2Swap(
         sor: sorEnd - sorStart,
     };
 
-    return { title: 'v2', swaps, returnAmount, timeData };
-}
-
-export async function getV2SwapWithFilter(
-    Provider: BaseProvider,
-    GasPrice: BigNumber,
-    MaxNoPools: number,
-    ChainId: number,
-    AllSubgraphPools: SubGraphPools,
-    SwapType: string,
-    TokenIn: string,
-    TokenOut: string,
-    SwapAmount: BigNumber,
-    Profiling: Profiling = {
-        onChainBalances: true,
-    }
-) {
-    TokenIn = TokenIn.toLowerCase();
-    TokenOut = TokenOut.toLowerCase();
-
-    const MULTIADDR: { [ChainId: number]: string } = {
-        1: '0x514053acec7177e277b947b1ebb5c08ab4c4580e',
-        42: '0x71c7f1086aFca7Aa1B0D4d73cfa77979d10D3210',
-    };
-
-    const swapCost = new BigNumber('100000'); // A pool swap costs approx 100000 gas
-
-    const fullSwapStart = performance.now();
-    const getCostOutputTokenStart = performance.now();
-    // This calculates the cost in output token (output token is TokenOut for swapExactIn and
-    // TokenIn for a swapExactOut) for each additional pool added to the final SOR swap result.
-    // This is used as an input to SOR to allow it to make gas efficient recommendations, i.e.
-    // if it costs 5 DAI to add another pool to the SOR solution and that only generates 1 more DAI,
-    // then SOR should not add that pool (if gas costs were zero that pool would be added)
-    // Notice that outputToken is TokenOut if SwapType == 'swapExactIn' and TokenIn if SwapType == 'swapExactOut'
-    let costOutputToken: BigNumber;
-    if (SwapType === 'swapExactIn')
-        costOutputToken = await sorv2.getCostOutputToken(
-            TokenOut,
-            GasPrice,
-            swapCost,
-            Provider
-        );
-    else
-        costOutputToken = await sorv2.getCostOutputToken(
-            TokenIn,
-            GasPrice,
-            swapCost,
-            Provider
-        );
-
-    const getCostOutputTokenEnd = performance.now();
-    let onChainPools;
-
-    if (Profiling.onChainBalances) {
-        const getAllPoolDataOnChainStart = performance.now();
-
-        onChainPools = await sorv2.getAllPoolDataOnChain(
-            AllSubgraphPools,
-            MULTIADDR[ChainId],
-            Provider
-        );
-        const getAllPoolDataOnChainEnd = performance.now();
-    } else {
-        const getAllPoolDataOnChainStart = performance.now();
-        // V2 uses Subgraph normalized balances so no need to format
-        onChainPools = JSON.parse(JSON.stringify(AllSubgraphPools));
-        const getAllPoolDataOnChainEnd = performance.now();
-    }
-
-    const filterPoolsStart = performance.now();
-
-    let poolsTokenIn, poolsTokenOut, directPools, hopTokens;
-    [directPools, hopTokens, poolsTokenIn, poolsTokenOut] = sorv2.filterPools(
-        onChainPools.pools,
-        TokenIn,
-        TokenOut,
-        MaxNoPools
-    );
-
-    const filterPoolsEnd = performance.now();
-    const sortPoolsMostLiquidStart = performance.now();
-
-    // For each hopToken, find the most liquid pool for the first and the second hops
-    let mostLiquidPoolsFirstHop, mostLiquidPoolsSecondHop;
-    [
-        mostLiquidPoolsFirstHop,
-        mostLiquidPoolsSecondHop,
-    ] = sorv2.sortPoolsMostLiquid(
-        TokenIn,
-        TokenOut,
-        hopTokens,
-        poolsTokenIn,
-        poolsTokenOut
-    );
-
-    const sortPoolsMostLiquidEnd = performance.now();
-    const parsePoolDataStart = performance.now();
-
-    // Finds the possible paths to make the swap, each path can be a direct swap
-    // or a multihop composed of 2 swaps
-    let pools, pathData;
-    [pools, pathData] = sorv2.parsePoolData(
-        directPools,
-        TokenIn,
-        TokenOut,
-        mostLiquidPoolsFirstHop,
-        mostLiquidPoolsSecondHop,
-        hopTokens
-    );
-
-    const parsePoolDataEnd = performance.now();
-    const processPathsStart = performance.now();
-
-    let [paths, maxLiquidityAvailable] = sorv2.processPaths(
-        pathData,
-        pools,
-        SwapType,
-        MaxNoPools
-    );
-
-    const processPathsEnd = performance.now();
-    const filterStart = performance.now();
-
-    let filteredPaths = sorv2.filterPaths(
-        JSON.parse(JSON.stringify(pools)),
-        paths,
-        SwapType,
-        MaxNoPools,
-        maxLiquidityAvailable,
-        costOutputToken
-    );
-
-    const filterEnd = performance.now();
-    const sorStart = performance.now();
-
-    let swaps: any, returnAmount: BigNumber;
-    [swaps, returnAmount] = sorv2.smartOrderRouter(
-        JSON.parse(JSON.stringify(pools)),
-        filteredPaths,
-        SwapType,
-        SwapAmount,
-        MaxNoPools,
-        costOutputToken
-    );
-
-    const sorEnd = performance.now();
-    const fullSwapEnd = sorEnd;
-
-    const timeData = {
-        fullSwap: fullSwapEnd - fullSwapStart,
-        costOutputToken: getCostOutputTokenEnd - getCostOutputTokenStart,
-        // 'getAllPoolDataOnChain': getAllPoolDataOnChainEnd - getAllPoolDataOnChainStart,
-        filterPools: filterPoolsEnd - filterPoolsStart,
-        sortPools: sortPoolsMostLiquidEnd - sortPoolsMostLiquidStart,
-        parsePool: parsePoolDataEnd - parsePoolDataStart,
-        processPaths: processPathsEnd - processPathsStart,
-        processEps: 'N/A',
-        filter: filterEnd - filterStart,
-        sor: sorEnd - sorStart,
-    };
-
-    return { title: 'v2WithFilter', swaps, returnAmount, timeData };
+    return { title: 'v2', swaps, returnAmount, timeData, costOutputToken };
 }
 
 function getAmounts(decimals) {
@@ -699,7 +592,7 @@ export function getRandomTradeData() {
 }
 
 export function saveTestFile(
-    Pools: Pools | SubGraphPools,
+    Pools: SubGraphPools,
     SwapType: string,
     TokenIn: string,
     TokenOut: string,
@@ -747,7 +640,7 @@ export function saveTestFile(
 }
 
 export function deleteTestFile(
-    Pools: Pools | SubGraphPools,
+    Pools: SubGraphPools,
     SwapType: string,
     TokenIn: string,
     TokenOut: string,
@@ -859,10 +752,6 @@ export function assertResults(
     v2SwapData,
     v2WithFilterSwapData = undefined
 ) {
-    const relDiff = calcRelativeDiff(
-        v2SwapData.returnAmount.toNumber(),
-        v1SwapData.returnAmount.toNumber()
-    );
     const relDiffBn = calcRelativeDiffBn(
         v2SwapData.returnAmount,
         v1SwapData.returnAmount
@@ -926,18 +815,8 @@ export function assertResults(
     }
 }
 
-export function getSpotPrice(poolPairData: PoolPairData): BigNumber {
-    let inRatio = bdiv(poolPairData.balanceIn, poolPairData.weightIn);
-    let outRatio = bdiv(poolPairData.balanceOut, poolPairData.weightOut);
-    if (outRatio.isEqualTo(bnum(0))) {
-        return bnum(0);
-    } else {
-        return bdiv(bdiv(inRatio, outRatio), BONE.minus(poolPairData.swapFee));
-    }
-}
-
 // Helper to filter pools to contain only Weighted pools
-export function filterToWeightedPoolsOnly(pools: SubGraphPools) {
+export function filterToWeightedPoolsOnly(pools: any) {
     let weightedPools = { pools: [] };
 
     for (let pool of pools.pools) {
@@ -946,345 +825,72 @@ export function filterToWeightedPoolsOnly(pools: SubGraphPools) {
     return weightedPools;
 }
 
-export function getAmountOut(
-    Pools,
-    PoolAddr: string,
-    TokenIn: string,
-    TokenOut: string,
-    AmtIn
-) {
-    const swapPool = Pools.pools.find(p => p.id === PoolAddr);
-
-    let pool: PoolPairData = parsePoolPairData(swapPool, TokenIn, TokenOut);
-
-    const amtOut = calcOutGivenIn(
-        pool.balanceIn,
-        pool.weightIn,
-        pool.balanceOut,
-        pool.weightOut,
-        AmtIn,
-        pool.swapFee
-    );
-
-    return amtOut;
-}
-
-export function getAmountIn(
-    Pools,
-    PoolAddr: string,
-    TokenIn: string,
-    TokenOut: string,
-    AmtIn
-) {
-    const swapPool = Pools.pools.find(p => p.id === PoolAddr);
-
-    let pool: PoolPairData = parsePoolPairData(swapPool, TokenIn, TokenOut);
-
-    const amtOut = calcInGivenOut(
-        pool.balanceIn,
-        pool.weightIn,
-        pool.balanceOut,
-        pool.weightOut,
-        AmtIn,
-        pool.swapFee
-    );
-
-    return amtOut;
-}
-
-export function testSwapsExactIn(
-    swaps: Swap[][],
-    tokenIn: string,
-    tokenOut: string,
-    amountIn: BigNumber,
-    totalAmtOut: BigNumber,
-    allPoolsNonZeroBalances
-) {
-    let totalOut = bnum(0);
-    let totalIn = bnum(0);
-
-    for (let i = 0; i < swaps.length; i++) {
-        if (swaps[i].length === 1) {
-            assert.equal(swaps[i][0].tokenIn, tokenIn);
-            assert.equal(swaps[i][0].tokenOut, tokenOut);
-            totalIn = totalIn.plus(swaps[i][0].swapAmount);
-            let amtOutFirstSequence = getAmountOut(
-                allPoolsNonZeroBalances,
-                swaps[i][0].pool,
-                swaps[i][0].tokenIn,
-                swaps[i][0].tokenOut,
-                bnum(swaps[i][0].swapAmount)
-            );
-            totalOut = totalOut.plus(amtOutFirstSequence);
-        } else {
-            assert.equal(swaps[i][0].tokenIn, tokenIn);
-            assert.equal(swaps[i][1].tokenIn, swaps[i][0].tokenOut);
-            assert.equal(swaps[i][1].tokenOut, tokenOut);
-            totalIn = totalIn.plus(swaps[i][0].swapAmount);
-
-            let amtOutFirstSequence = getAmountOut(
-                allPoolsNonZeroBalances,
-                swaps[i][0].pool,
-                swaps[i][0].tokenIn,
-                swaps[i][0].tokenOut,
-                bnum(swaps[i][0].swapAmount)
-            );
-            assert.equal(
-                swaps[i][1].swapAmount,
-                amtOutFirstSequence.toString()
-            );
-
-            let amtOutSecondSequence = getAmountOut(
-                allPoolsNonZeroBalances,
-                swaps[i][1].pool,
-                swaps[i][1].tokenIn,
-                swaps[i][1].tokenOut,
-                bnum(swaps[i][1].swapAmount)
-            );
-            totalOut = totalOut.plus(amtOutSecondSequence);
-        }
-    }
-
-    assert.equal(
-        totalIn.toString(),
-        amountIn.toString(),
-        'testSwapsExactIn - Amount In Should Should Match'
-    );
-    assert.equal(
-        totalOut.toString(),
-        totalAmtOut.toString(),
-        'testSwapsExactIn - Amount Out Should Should Match'
-    );
-}
-
-export function testSwapsExactOut(
-    swaps: Swap[][],
-    tokenIn: string,
-    tokenOut: string,
-    amountOut: BigNumber,
-    totalAmtIn: BigNumber,
-    allPoolsNonZeroBalances
-) {
-    let totalOut = bnum(0);
-    let totalIn = bnum(0);
-
-    for (let i = 0; i < swaps.length; i++) {
-        if (swaps[i].length === 1) {
-            assert.equal(swaps[i][0].tokenIn, tokenIn);
-            assert.equal(swaps[i][0].tokenOut, tokenOut);
-            totalOut = totalOut.plus(swaps[i][0].swapAmount);
-            let amtInFirstSequence = getAmountIn(
-                allPoolsNonZeroBalances,
-                swaps[i][0].pool,
-                swaps[i][0].tokenIn,
-                swaps[i][0].tokenOut,
-                bnum(swaps[i][0].swapAmount)
-            );
-            totalIn = totalIn.plus(amtInFirstSequence);
-        } else {
-            assert.equal(swaps[i][0].tokenIn, tokenIn);
-
-            let amtInSecondSequence = getAmountIn(
-                allPoolsNonZeroBalances,
-                swaps[i][1].pool,
-                swaps[i][1].tokenIn,
-                swaps[i][1].tokenOut,
-                swaps[i][1].swapAmount
-            );
-            assert.equal(
-                swaps[i][0].swapAmount,
-                amtInSecondSequence.toString()
-            ); // Amount out of first swap which is input to second swap
-            assert.equal(swaps[i][1].tokenIn, swaps[i][0].tokenOut);
-            assert.equal(swaps[i][1].tokenOut, tokenOut);
-            totalOut = totalOut.plus(swaps[i][1].swapAmount);
-
-            let amtInFirstSequence = getAmountIn(
-                allPoolsNonZeroBalances,
-                swaps[i][0].pool,
-                swaps[i][0].tokenIn,
-                swaps[i][0].tokenOut,
-                bnum(swaps[i][0].swapAmount)
-            ); // Swap amount is amount out
-
-            totalIn = totalIn.plus(amtInFirstSequence);
-        }
-    }
-
-    expect(totalOut.toString()).to.eql(
-        amountOut.toString(),
-        'testSwapsExactOut - Amount Out Should Should Match'
-    );
-    // expect(totalAmtIn.toString()).to.eql(totalIn.toString());
-}
-
-export function filterPools(allPools: any) {
-    let allTokens = [];
-    let allTokensSet = new Set();
-    let allPoolsNonZeroBalances = [];
-
-    let i = 0;
-
-    for (let pool of allPools.pools) {
-        // Build list of non-zero balance pools
-        // Only check first balance since AFAIK either all balances are zero or none are:
-        if (pool.tokens.length != 0) {
-            if (pool.tokens[0].balance != '0') {
-                allTokens.push(pool.tokensList.sort()); // Will add without duplicate
-                allPoolsNonZeroBalances.push(pool);
-                i++;
-            }
-        }
-    }
-
-    allTokensSet = new Set(
-        Array.from(new Set(allTokens.map(a => JSON.stringify(a))), json =>
-            JSON.parse(json)
-        )
-    );
-
-    return [allTokensSet, allPoolsNonZeroBalances];
-}
-
-export function fullSwap(
-    allPoolsNonZeroBalances,
-    tokenIn,
-    tokenOut,
-    swapType,
-    noPools,
-    amount,
-    disabledTokens
-): [Swap[][], BigNumber] {
-    tokenIn = tokenIn.toLowerCase();
-    tokenOut = tokenOut.toLowerCase();
-
-    let poolsTokenIn, poolsTokenOut, directPools, hopTokens;
-    [directPools, hopTokens, poolsTokenIn, poolsTokenOut] = sorv2.filterPools(
-        allPoolsNonZeroBalances.pools,
-        tokenIn,
-        tokenOut,
-        noPools,
-        {
-            isOverRide: true,
-            disabledTokens: disabledTokens.tokens,
-        }
-    );
-
-    let mostLiquidPoolsFirstHop, mostLiquidPoolsSecondHop;
-    [
-        mostLiquidPoolsFirstHop,
-        mostLiquidPoolsSecondHop,
-    ] = sorv2.sortPoolsMostLiquid(
-        tokenIn,
-        tokenOut,
-        hopTokens,
-        poolsTokenIn,
-        poolsTokenOut
-    );
-
-    let pools, pathData;
-    [pools, pathData] = sorv2.parsePoolData(
-        directPools,
-        tokenIn,
-        tokenOut,
-        mostLiquidPoolsFirstHop,
-        mostLiquidPoolsSecondHop,
-        hopTokens
-    );
-
-    let [paths, maxLiquidityAvailable] = sorv2.processPaths(
-        pathData,
-        pools,
-        swapType,
-        noPools
-    );
-
-    let swaps: Swap[][], total: BigNumber;
-    [swaps, total] = sorv2.smartOrderRouter(
-        JSON.parse(JSON.stringify(pools)),
-        paths,
-        swapType,
-        amount,
-        noPools,
-        bnum(0) // costOutputToken
-    );
-
-    return [swaps, total];
-}
-
-export function alterPools(allPools: any) {
-    for (let pool of allPools.pools) {
-        if (pool.tokens.length != 0) {
-            pool.tokens.forEach(token => {
-                // let change = Math.random() * (1.4 - 0.6) + 0.6;
-                let change = Math.random() * (1.1 - 0.9) + 0.9;
-                // change = 1.0001;
-                let changeBn = scale(bnum(change), 18);
-                // let change = bnum(1100000000000000000) // 1.1
-                let balanceBn = scale(bnum(token.balance), token.decimals);
-                let newBalanceBn = bmul(balanceBn, changeBn);
-                newBalanceBn = scale(newBalanceBn, -token.decimals);
-                token.balance = newBalanceBn.toString();
-            });
-        }
-    }
-
-    return allPools;
-}
-
-// Returns two arrays
-// First array contains all tokens in direct pools containing tokenIn
-// Second array contains all tokens in multi-hop pools containing tokenIn
-export function getTokenPairsMultiHop(token: string, poolsTokensListSet: any) {
-    let poolsWithToken = [];
-    let poolsWithoutToken = [];
-
-    let directTokenPairsSet = new Set();
-
-    // If pool contains token add all its tokens to direct list
-    poolsTokensListSet.forEach((poolTokenList, index) => {
-        if (poolTokenList.includes(token)) {
-            poolsWithToken.push(poolTokenList);
-        } else {
-            poolsWithoutToken.push(poolTokenList);
-        }
-    });
-
-    directTokenPairsSet = new Set([].concat(...poolsWithToken));
-
-    let multihopTokenPools = [];
-    let multihopTokenPairsSet = new Set();
-
-    poolsWithoutToken.forEach((pool, index) => {
-        let intersection = [...pool].filter(x =>
-            [...directTokenPairsSet].includes(x)
-        );
-        if (intersection.length != 0) {
-            multihopTokenPools.push(pool);
-        }
-    });
-
-    multihopTokenPairsSet = new Set([].concat(...multihopTokenPools));
-    let allTokenPairsSet = new Set();
-    allTokenPairsSet = new Set([
-        ...directTokenPairsSet,
-        ...multihopTokenPairsSet,
-    ]);
-
-    let directTokenPairs = [...directTokenPairsSet];
-    let allTokenPairs = [...allTokenPairsSet];
-    return [directTokenPairs, allTokenPairs];
-}
-
-export function calcRelativeDiff(expected: number, actual: number) {
-    return Math.abs((expected - actual) / expected);
-}
-
 export function calcRelativeDiffBn(expected: BigNumber, actual: BigNumber) {
     return expected
         .minus(actual)
         .div(expected)
         .abs();
+}
+
+async function getAllPoolDataOnChain(
+    pools: SubGraphPools,
+    multiAddress: string,
+    provider: BaseProvider
+): Promise<SubGraphPools> {
+    if (pools.pools.length === 0) throw Error('There are no pools.');
+
+    const customMultiAbi = require('./abi/customMulticall.json');
+    const contract = new Contract(multiAddress, customMultiAbi, provider);
+
+    let addresses = [];
+    let total = 0;
+
+    for (let i = 0; i < pools.pools.length; i++) {
+        let pool = pools.pools[i];
+
+        addresses.push([pool.id]);
+        total++;
+        pool.tokens.forEach(token => {
+            addresses[i].push(token.address);
+            total++;
+        });
+    }
+
+    let results = await contract.getPoolInfo(addresses, total);
+
+    let j = 0;
+    let onChainPools: SubGraphPools = { pools: [] };
+
+    for (let i = 0; i < pools.pools.length; i++) {
+        let tokens: SubGraphToken[] = [];
+
+        let p: SubGraphPool = {
+            id: pools.pools[i].id,
+            swapFee: pools.pools[i].swapFee,
+            totalWeight: pools.pools[i].totalWeight,
+            tokens: tokens,
+            tokensList: pools.pools[i].tokensList,
+            amp: '0',
+            balanceBpt: pools.pools[i].balanceBpt,
+        };
+
+        pools.pools[i].tokens.forEach(token => {
+            // let bal = bnum(results[j]);
+            let bal = scale(
+                bnum(results[j]),
+                -Number(token.decimals)
+            ).toString();
+            j++;
+            p.tokens.push({
+                address: token.address,
+                balance: bal,
+                decimals: token.decimals,
+                denormWeight: token.denormWeight,
+            });
+        });
+        onChainPools.pools.push(p);
+    }
+    return onChainPools;
 }
 
 // Generates file output for v1-v2-compare-testPools.spec.ts

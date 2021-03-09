@@ -1,20 +1,20 @@
 // Tests Multihop SOR vs static sungraphPoolsLarge.json file.
 // Includes timing data.
+// npx mocha -r ts-node/register test/multihop-sor.spec.ts
+require('dotenv').config();
+import { JsonRpcProvider } from '@ethersproject/providers';
 import * as sor from '../src';
-import { assert, expect } from 'chai';
-import { Swap } from '../src/types';
+import { assert } from 'chai';
+import { DisabledOptions, Swap } from '../src/types';
 import { BigNumber } from '../src/utils/bignumber';
-import { BONE } from '../src/bmath';
-import { formatEther } from '@ethersproject/units';
 import {
-    formatAndFilterPoolsAndTokens,
-    filterPools,
-    testSwapsExactIn,
-    testSwapsExactOut,
-    fullSwap,
-    alterPools,
-    getTokenPairsMultiHop,
+    getV1Swap,
+    getV2Swap,
+    displayResults,
+    assertResults,
+    filterPoolsAndTokens,
 } from './lib/testHelpers';
+import { bnum } from '../src/bmath';
 
 const allPools = require('./testData/testPools/subgraphPoolsLarge.json');
 const disabledTokens = require('./testData/disabled-tokens.json');
@@ -28,13 +28,19 @@ const OCEAN = '0x985dd3d42de1e256d09e1c10f112bccb8015ad41';
 
 let allPoolsCorrect;
 
+const provider = new JsonRpcProvider(
+    `https://mainnet.infura.io/v3/${process.env.INFURA}`
+);
+
+const gasPrice = new BigNumber('30000000000');
+
 describe('Tests Multihop SOR vs static subgraphPoolsLarge.json', () => {
     it('Saved pool check - without disabled filter', async () => {
         // Uses saved pools @25/05/20.
         assert.equal(allPools.pools.length, 64, 'Should be 64 pools');
         let allTokensSet;
         // Converts Subgraph string format to Wei/Bnum format
-        [allTokensSet, allPoolsCorrect] = formatAndFilterPoolsAndTokens(
+        [allTokensSet, allPoolsCorrect] = filterPoolsAndTokens(
             JSON.parse(JSON.stringify(allPools))
         );
 
@@ -51,7 +57,7 @@ describe('Tests Multihop SOR vs static subgraphPoolsLarge.json', () => {
         assert.equal(allPools.pools.length, 64, 'Should be 64 pools');
         let allTokensSet;
         // Converts Subgraph string format to Wei/Bnum format
-        [allTokensSet, allPoolsCorrect] = formatAndFilterPoolsAndTokens(
+        [allTokensSet, allPoolsCorrect] = filterPoolsAndTokens(
             JSON.parse(JSON.stringify(allPools)),
             disabledTokens.tokens
         );
@@ -61,32 +67,6 @@ describe('Tests Multihop SOR vs static subgraphPoolsLarge.json', () => {
             allPoolsCorrect.pools.length,
             50,
             'Should be 48 pools with non-zero balance'
-        );
-    });
-
-    it('getTokenPairsMultiHop - Should return direct & multihop partner tokens', async () => {
-        let allTokensSet;
-        // Converts Subgraph string format to Wei/Bnum format
-        [allTokensSet, allPoolsCorrect] = formatAndFilterPoolsAndTokens(
-            JSON.parse(JSON.stringify(allPools)),
-            disabledTokens.tokens
-        );
-
-        let [directTokenPairsSET, allTokenPairsSET] = getTokenPairsMultiHop(
-            DAI,
-            allTokensSet
-        );
-
-        assert.equal(
-            directTokenPairsSET.length,
-            16,
-            'Should have 16 direct tokens'
-        );
-
-        assert.equal(
-            allTokenPairsSET.length,
-            33,
-            'Should be 33 multi-hop tokens'
         );
     });
 
@@ -143,257 +123,479 @@ describe('Tests Multihop SOR vs static subgraphPoolsLarge.json', () => {
         );
     });
 
-    it('Full Multihop SOR, WETH>DAI, swapExactIn', async () => {
-        const amountIn = new BigNumber(1).times(BONE);
-        const swapType = 'swapExactIn';
-        const noPools = 4;
-        const tokenIn = WETH;
-        const tokenOut = DAI;
-
-        let swapsCorrect: Swap[][], totalAmtOutCorrect: BigNumber;
-        [swapsCorrect, totalAmtOutCorrect] = fullSwap(
-            allPoolsCorrect,
-            tokenIn,
-            tokenOut,
-            swapType,
-            noPools,
-            amountIn,
-            disabledTokens
-        );
-
-        assert.equal(swapsCorrect.length, 3, 'Should have 3 swaps.');
-
-        testSwapsExactIn(
-            swapsCorrect,
-            tokenIn,
-            tokenOut,
-            amountIn,
-            totalAmtOutCorrect,
-            allPoolsCorrect
-        );
-    });
-
-    it('Full Multihop SOR, WETH>DAI, swapExactOut', async () => {
-        const amountOut = new BigNumber(1000).times(BONE);
-        const swapType = 'swapExactOut';
-        const noPools = 4;
-        const tokenIn = WETH;
-        const tokenOut = DAI;
-
-        let swapsCorrect: Swap[][], totalAmtInCorrect: BigNumber;
-        [swapsCorrect, totalAmtInCorrect] = fullSwap(
-            allPoolsCorrect,
-            tokenIn,
-            tokenOut,
-            swapType,
-            noPools,
-            amountOut,
-            disabledTokens
-        );
-
-        assert.equal(swapsCorrect.length, 4, 'Should have 4 swaps.');
-        testSwapsExactOut(
-            swapsCorrect,
-            tokenIn,
-            tokenOut,
-            amountOut,
-            totalAmtInCorrect,
-            allPoolsCorrect
-        );
-    });
-
     it('Full Multihop SOR, DAI>ANT, swapExactIn - No Disabled Tokens, should have swap', async () => {
-        const amountIn = new BigNumber(1).times(BONE);
+        const name = 'DAI>ANT, swapExactIn, No Disabled Tokens';
+        const amountIn = new BigNumber(1);
         const swapType = 'swapExactIn';
         const noPools = 4;
         const tokenIn = DAI;
         const tokenOut = ANT;
 
-        let disabledTokens = { tokens: [] };
-        let swaps: Swap[][], totalAmtOut: BigNumber;
-        [swaps, totalAmtOut] = fullSwap(
-            allPoolsCorrect,
-            tokenIn,
-            tokenOut,
-            swapType,
-            noPools,
-            amountIn,
-            disabledTokens
+        const disabledOptions: DisabledOptions = {
+            isOverRide: true,
+            disabledTokens: [],
+        };
+
+        const tradeInfo = {
+            SwapType: swapType,
+            TokenIn: tokenIn,
+            TokenOut: tokenOut,
+            NoPools: noPools,
+            SwapAmount: amountIn,
+            GasPrice: gasPrice,
+            SwapAmountDecimals: 18,
+            ReturnAmountDecimals: 18,
+        };
+
+        const testData = {
+            // pools: allPoolsCorrect.pools,
+            pools: allPools.pools,
+            tradeInfo,
+        };
+
+        // V2 first to debug faster
+        let v2SwapData = await getV2Swap(
+            provider,
+            testData.tradeInfo.GasPrice,
+            testData.tradeInfo.NoPools,
+            1,
+            JSON.parse(JSON.stringify(testData)),
+            testData.tradeInfo.SwapType,
+            testData.tradeInfo.TokenIn,
+            testData.tradeInfo.TokenOut,
+            testData.tradeInfo.SwapAmount,
+            { onChainBalances: false },
+            testData.tradeInfo.ReturnAmountDecimals,
+            disabledOptions
         );
 
-        assert.equal(swaps.length, 1, 'Should have 1 swaps.');
-        testSwapsExactIn(
-            swaps,
-            tokenIn,
-            tokenOut,
-            amountIn,
-            totalAmtOut,
-            allPoolsCorrect
+        let v1SwapData = await getV1Swap(
+            provider,
+            testData.tradeInfo.GasPrice,
+            testData.tradeInfo.NoPools,
+            1,
+            JSON.parse(JSON.stringify(testData)),
+            testData.tradeInfo.SwapType,
+            testData.tradeInfo.TokenIn,
+            testData.tradeInfo.TokenOut,
+            testData.tradeInfo.SwapAmount.times(
+                bnum(10 ** testData.tradeInfo.SwapAmountDecimals)
+            ),
+            { onChainBalances: false },
+            disabledOptions
         );
-    });
+        // Normalize returnAmount
+        v1SwapData.returnAmount = v1SwapData.returnAmount.div(
+            bnum(10 ** testData.tradeInfo.ReturnAmountDecimals)
+        );
+
+        displayResults(
+            name,
+            testData.tradeInfo,
+            [v1SwapData, v2SwapData],
+            false
+        );
+
+        assertResults(name, testData, v1SwapData, v2SwapData);
+
+        assert.equal(v2SwapData.swaps.length, 1, 'Should have 1 swaps.');
+    }).timeout(10000);
 
     it('Full Multihop SOR, DAI>ANT, swapExactIn - Disabled Tokens, should not have swap', async () => {
-        const amountIn = new BigNumber(1).times(BONE);
+        const name = 'DAI>ANT, swapExactIn, Disabled Tokens';
+        const amountIn = new BigNumber(1);
         const swapType = 'swapExactIn';
         const noPools = 4;
         const tokenIn = DAI;
         const tokenOut = ANT;
 
-        let swaps: Swap[][], totalAmtOut: BigNumber;
-        [swaps, totalAmtOut] = fullSwap(
-            allPoolsCorrect,
-            tokenIn,
-            tokenOut,
-            swapType,
-            noPools,
-            amountIn,
-            disabledTokens
+        const disabledOptions: DisabledOptions = {
+            isOverRide: true,
+            disabledTokens: disabledTokens.tokens,
+        };
+
+        const tradeInfo = {
+            SwapType: swapType,
+            TokenIn: tokenIn,
+            TokenOut: tokenOut,
+            NoPools: noPools,
+            SwapAmount: amountIn,
+            GasPrice: gasPrice,
+            SwapAmountDecimals: 18,
+            ReturnAmountDecimals: 18,
+        };
+
+        const testData = {
+            pools: allPools.pools,
+            tradeInfo,
+        };
+
+        // V2 first to debug faster
+        let v2SwapData = await getV2Swap(
+            provider,
+            testData.tradeInfo.GasPrice,
+            testData.tradeInfo.NoPools,
+            1,
+            JSON.parse(JSON.stringify(testData)),
+            testData.tradeInfo.SwapType,
+            testData.tradeInfo.TokenIn,
+            testData.tradeInfo.TokenOut,
+            testData.tradeInfo.SwapAmount,
+            { onChainBalances: false },
+            testData.tradeInfo.ReturnAmountDecimals,
+            disabledOptions
         );
 
-        assert.equal(swaps.length, 0, 'Should have 0 swaps.');
-        assert.equal(
-            formatEther(totalAmtOut.toString()),
-            '0.0',
-            'Total Out Should Match'
+        let v1SwapData = await getV1Swap(
+            provider,
+            testData.tradeInfo.GasPrice,
+            testData.tradeInfo.NoPools,
+            1,
+            JSON.parse(JSON.stringify(testData)),
+            testData.tradeInfo.SwapType,
+            testData.tradeInfo.TokenIn,
+            testData.tradeInfo.TokenOut,
+            testData.tradeInfo.SwapAmount.times(
+                bnum(10 ** testData.tradeInfo.SwapAmountDecimals)
+            ),
+            { onChainBalances: false },
+            disabledOptions
         );
-    });
+        // Normalize returnAmount
+        v1SwapData.returnAmount = v1SwapData.returnAmount.div(
+            bnum(10 ** testData.tradeInfo.ReturnAmountDecimals)
+        );
+
+        displayResults(
+            name,
+            testData.tradeInfo,
+            [v1SwapData, v2SwapData],
+            false
+        );
+
+        assertResults(name, testData, v1SwapData, v2SwapData);
+
+        assert.equal(v2SwapData.swaps.length, 0, 'Should have 0 swaps.');
+        assert.equal(
+            v2SwapData.returnAmount.toString(),
+            '0',
+            'Should have 0 amount.'
+        );
+    }).timeout(10000);
 
     it('Full Multihop SOR, WETH>ANT, swapExactIn', async () => {
-        const amountIn = new BigNumber(1).times(BONE);
+        const name = 'WETH>ANT, swapExactIn';
+        const amountIn = new BigNumber(1);
         const swapType = 'swapExactIn';
         const noPools = 4;
         const tokenIn = WETH;
         const tokenOut = ANT;
 
-        let swaps: Swap[][], totalAmtOut: BigNumber;
-        [swaps, totalAmtOut] = fullSwap(
-            allPoolsCorrect,
-            tokenIn,
-            tokenOut,
-            swapType,
-            noPools,
-            amountIn,
-            disabledTokens
+        const disabledOptions: DisabledOptions = {
+            isOverRide: true,
+            disabledTokens: disabledTokens.tokens,
+        };
+
+        const tradeInfo = {
+            SwapType: swapType,
+            TokenIn: tokenIn,
+            TokenOut: tokenOut,
+            NoPools: noPools,
+            SwapAmount: amountIn,
+            GasPrice: gasPrice,
+            SwapAmountDecimals: 18,
+            ReturnAmountDecimals: 18,
+        };
+
+        const testData = {
+            pools: allPools.pools,
+            tradeInfo,
+        };
+
+        // V2 first to debug faster
+        let v2SwapData = await getV2Swap(
+            provider,
+            testData.tradeInfo.GasPrice,
+            testData.tradeInfo.NoPools,
+            1,
+            JSON.parse(JSON.stringify(testData)),
+            testData.tradeInfo.SwapType,
+            testData.tradeInfo.TokenIn,
+            testData.tradeInfo.TokenOut,
+            testData.tradeInfo.SwapAmount,
+            { onChainBalances: false },
+            testData.tradeInfo.ReturnAmountDecimals,
+            disabledOptions
         );
 
-        assert.equal(swaps.length, 0, 'Should have 0 swaps.');
-        assert.equal(
-            formatEther(totalAmtOut.toString()),
-            '0.0',
-            'Total Out Should Match'
+        let v1SwapData = await getV1Swap(
+            provider,
+            testData.tradeInfo.GasPrice,
+            testData.tradeInfo.NoPools,
+            1,
+            JSON.parse(JSON.stringify(testData)),
+            testData.tradeInfo.SwapType,
+            testData.tradeInfo.TokenIn,
+            testData.tradeInfo.TokenOut,
+            testData.tradeInfo.SwapAmount.times(
+                bnum(10 ** testData.tradeInfo.SwapAmountDecimals)
+            ),
+            { onChainBalances: false },
+            disabledOptions
         );
-    });
+        // Normalize returnAmount
+        v1SwapData.returnAmount = v1SwapData.returnAmount.div(
+            bnum(10 ** testData.tradeInfo.ReturnAmountDecimals)
+        );
+
+        displayResults(
+            name,
+            testData.tradeInfo,
+            [v1SwapData, v2SwapData],
+            false
+        );
+
+        assertResults(name, testData, v1SwapData, v2SwapData);
+
+        assert.equal(v2SwapData.swaps.length, 0, 'Should have 0 swaps.');
+        assert.equal(
+            v2SwapData.returnAmount.toString(),
+            '0',
+            'Should have 0 amount.'
+        );
+    }).timeout(10000);
 
     it('Full Multihop SOR, WETH>ANT, swapExactOut', async () => {
-        const amountOut = new BigNumber(1000).times(BONE);
+        const name = 'WETH>ANT, swapExactOut';
+        const amount = new BigNumber(1000);
         const swapType = 'swapExactOut';
         const noPools = 4;
         const tokenIn = WETH;
         const tokenOut = ANT;
 
-        let swaps: Swap[][], totalAmtIn: BigNumber;
-        [swaps, totalAmtIn] = fullSwap(
-            allPoolsCorrect,
-            tokenIn,
-            tokenOut,
-            swapType,
-            noPools,
-            amountOut,
-            disabledTokens
+        const disabledOptions: DisabledOptions = {
+            isOverRide: true,
+            disabledTokens: disabledTokens.tokens,
+        };
+
+        const tradeInfo = {
+            SwapType: swapType,
+            TokenIn: tokenIn,
+            TokenOut: tokenOut,
+            NoPools: noPools,
+            SwapAmount: amount,
+            GasPrice: gasPrice,
+            SwapAmountDecimals: 18,
+            ReturnAmountDecimals: 18,
+        };
+
+        const testData = {
+            pools: allPools.pools,
+            tradeInfo,
+        };
+
+        // V2 first to debug faster
+        let v2SwapData = await getV2Swap(
+            provider,
+            testData.tradeInfo.GasPrice,
+            testData.tradeInfo.NoPools,
+            1,
+            JSON.parse(JSON.stringify(testData)),
+            testData.tradeInfo.SwapType,
+            testData.tradeInfo.TokenIn,
+            testData.tradeInfo.TokenOut,
+            testData.tradeInfo.SwapAmount,
+            { onChainBalances: false },
+            testData.tradeInfo.ReturnAmountDecimals,
+            disabledOptions
         );
 
-        assert.equal(swaps.length, 0, 'Should have 0 swaps.');
-        assert.equal(
-            formatEther(totalAmtIn.toString()),
-            '0.0',
-            'Total Out Should Match'
+        let v1SwapData = await getV1Swap(
+            provider,
+            testData.tradeInfo.GasPrice,
+            testData.tradeInfo.NoPools,
+            1,
+            JSON.parse(JSON.stringify(testData)),
+            testData.tradeInfo.SwapType,
+            testData.tradeInfo.TokenIn,
+            testData.tradeInfo.TokenOut,
+            testData.tradeInfo.SwapAmount.times(
+                bnum(10 ** testData.tradeInfo.SwapAmountDecimals)
+            ),
+            { onChainBalances: false },
+            disabledOptions
         );
-    });
+        // Normalize returnAmount
+        v1SwapData.returnAmount = v1SwapData.returnAmount.div(
+            bnum(10 ** testData.tradeInfo.ReturnAmountDecimals)
+        );
+
+        displayResults(
+            name,
+            testData.tradeInfo,
+            [v1SwapData, v2SwapData],
+            false
+        );
+
+        assertResults(name, testData, v1SwapData, v2SwapData);
+
+        assert.equal(v2SwapData.swaps.length, 0, 'Should have 0 swaps.');
+        assert.equal(
+            v2SwapData.returnAmount.toString(),
+            '0',
+            'Should have 0 amount.'
+        );
+    }).timeout(10000);
 
     it('Full Multihop SOR, USDC>MKR, swapExactIn', async () => {
-        const amountIn = new BigNumber('1000000'); // 1 USDC
+        const name = 'USDC>MKR, swapExactIn';
+        const amountIn = new BigNumber('1'); // 1 USDC
         const swapType = 'swapExactIn';
         const noPools = 4;
         const tokenIn = USDC;
         const tokenOut = MKR;
 
-        let swapsCorrect: Swap[][], totalAmtOutCorrect: BigNumber;
-        [swapsCorrect, totalAmtOutCorrect] = fullSwap(
-            allPoolsCorrect,
-            tokenIn,
-            tokenOut,
-            swapType,
-            noPools,
-            amountIn,
-            disabledTokens
+        const disabledOptions: DisabledOptions = {
+            isOverRide: true,
+            disabledTokens: disabledTokens.tokens,
+        };
+
+        const tradeInfo = {
+            SwapType: swapType,
+            TokenIn: tokenIn,
+            TokenOut: tokenOut,
+            NoPools: noPools,
+            SwapAmount: amountIn,
+            GasPrice: gasPrice,
+            SwapAmountDecimals: 6,
+            ReturnAmountDecimals: 18,
+        };
+
+        const testData = {
+            pools: allPools.pools,
+            tradeInfo,
+        };
+
+        // V2 first to debug faster
+        let v2SwapData = await getV2Swap(
+            provider,
+            testData.tradeInfo.GasPrice,
+            testData.tradeInfo.NoPools,
+            1,
+            JSON.parse(JSON.stringify(testData)),
+            testData.tradeInfo.SwapType,
+            testData.tradeInfo.TokenIn,
+            testData.tradeInfo.TokenOut,
+            testData.tradeInfo.SwapAmount,
+            { onChainBalances: false },
+            testData.tradeInfo.ReturnAmountDecimals,
+            disabledOptions
         );
 
-        assert.equal(swapsCorrect.length, 2, 'Should have 2 swaps.');
-        testSwapsExactIn(
-            swapsCorrect,
-            tokenIn,
-            tokenOut,
-            amountIn,
-            totalAmtOutCorrect,
-            allPoolsCorrect
+        let v1SwapData = await getV1Swap(
+            provider,
+            testData.tradeInfo.GasPrice,
+            testData.tradeInfo.NoPools,
+            1,
+            JSON.parse(JSON.stringify(testData)),
+            testData.tradeInfo.SwapType,
+            testData.tradeInfo.TokenIn,
+            testData.tradeInfo.TokenOut,
+            testData.tradeInfo.SwapAmount.times(
+                bnum(10 ** testData.tradeInfo.SwapAmountDecimals)
+            ),
+            { onChainBalances: false },
+            disabledOptions
         );
-    });
-
-    it('Full Multihop SOR, USDC>MKR, swapExactOut', async () => {
-        const amountOut = new BigNumber(10).times(BONE);
-        const swapType = 'swapExactOut';
-        const noPools = 4;
-        const tokenIn = USDC;
-        const tokenOut = MKR;
-
-        let swapsCorrect: Swap[][], totalAmtInCorrect: BigNumber;
-        [swapsCorrect, totalAmtInCorrect] = fullSwap(
-            allPoolsCorrect,
-            tokenIn,
-            tokenOut,
-            swapType,
-            noPools,
-            amountOut,
-            disabledTokens
+        // Normalize returnAmount
+        v1SwapData.returnAmount = v1SwapData.returnAmount.div(
+            bnum(10 ** testData.tradeInfo.ReturnAmountDecimals)
         );
 
-        assert.equal(swapsCorrect.length, 2, 'Should have 2 swaps.');
-        testSwapsExactOut(
-            swapsCorrect,
-            tokenIn,
-            tokenOut,
-            amountOut,
-            totalAmtInCorrect,
-            allPoolsCorrect
+        displayResults(
+            name,
+            testData.tradeInfo,
+            [v1SwapData, v2SwapData],
+            false
         );
-    });
+
+        assertResults(name, testData, v1SwapData, v2SwapData);
+    }).timeout(10000);
 
     it('Full Multihop SOR, Should still complete multihop with disabled token pool', async () => {
-        const amountOut = new BigNumber(10).times(BONE);
+        const name = 'Test Tokens';
+        const amountOut = new BigNumber(10);
         const swapType = 'swapExactOut';
         const noPools = 4;
         const tokenIn = '0x9f8f72aa9304c8b593d555f12ef6589cc3a579a1';
         const tokenOut = '0x9f8f72aa9304c8b593d555f12ef6589cc3a579a4';
 
-        let swapsCorrect: Swap[][], totalAmtInCorrect: BigNumber;
-        [swapsCorrect, totalAmtInCorrect] = fullSwap(
-            allPoolsCorrect,
-            tokenIn,
-            tokenOut,
-            swapType,
-            noPools,
-            amountOut,
-            disabledTokens
+        const disabledOptions: DisabledOptions = {
+            isOverRide: true,
+            disabledTokens: disabledTokens.tokens,
+        };
+
+        const tradeInfo = {
+            SwapType: swapType,
+            TokenIn: tokenIn,
+            TokenOut: tokenOut,
+            NoPools: noPools,
+            SwapAmount: amountOut,
+            GasPrice: gasPrice,
+            SwapAmountDecimals: 18,
+            ReturnAmountDecimals: 18,
+        };
+
+        const testData = {
+            pools: allPools.pools,
+            tradeInfo,
+        };
+
+        // V2 first to debug faster
+        let v2SwapData = await getV2Swap(
+            provider,
+            testData.tradeInfo.GasPrice,
+            testData.tradeInfo.NoPools,
+            1,
+            JSON.parse(JSON.stringify(testData)),
+            testData.tradeInfo.SwapType,
+            testData.tradeInfo.TokenIn,
+            testData.tradeInfo.TokenOut,
+            testData.tradeInfo.SwapAmount,
+            { onChainBalances: false },
+            testData.tradeInfo.ReturnAmountDecimals,
+            disabledOptions
         );
 
-        assert.equal(swapsCorrect.length, 1, 'Should have 1 swaps.');
-        testSwapsExactOut(
-            swapsCorrect,
-            tokenIn,
-            tokenOut,
-            amountOut,
-            totalAmtInCorrect,
-            allPoolsCorrect
+        let v1SwapData = await getV1Swap(
+            provider,
+            testData.tradeInfo.GasPrice,
+            testData.tradeInfo.NoPools,
+            1,
+            JSON.parse(JSON.stringify(testData)),
+            testData.tradeInfo.SwapType,
+            testData.tradeInfo.TokenIn,
+            testData.tradeInfo.TokenOut,
+            testData.tradeInfo.SwapAmount.times(
+                bnum(10 ** testData.tradeInfo.SwapAmountDecimals)
+            ),
+            { onChainBalances: false },
+            disabledOptions
         );
-    });
+        // Normalize returnAmount
+        v1SwapData.returnAmount = v1SwapData.returnAmount.div(
+            bnum(10 ** testData.tradeInfo.ReturnAmountDecimals)
+        );
+
+        displayResults(
+            name,
+            testData.tradeInfo,
+            [v1SwapData, v2SwapData],
+            false
+        );
+
+        assertResults(name, testData, v1SwapData, v2SwapData);
+
+        assert.isAtLeast(v2SwapData.swaps.length, 1);
+    }).timeout(10000);
 });

@@ -8,6 +8,9 @@ import {
     assertResults,
 } from './lib/testHelpers';
 import { bnum } from '../src/bmath';
+import { SOR } from '../src';
+import { SwapInfo } from '../src/types';
+import { assert } from 'chai';
 
 const provider = new JsonRpcProvider(
     `https://mainnet.infura.io/v3/${process.env.INFURA}`
@@ -58,6 +61,7 @@ describe('Run Tests From Saved Pools', () => {
 
         it(`${file}`, async () => {
             // V2 first to debug faster
+            // This method will only work for V1 pools onChain balances as uses BPool V1 contract to compare vs V1.
             let v2SwapData = await getV2Swap(
                 provider,
                 testData.tradeInfo.GasPrice,
@@ -90,37 +94,54 @@ describe('Run Tests From Saved Pools', () => {
             v1SwapData.returnAmount = v1SwapData.returnAmount.div(
                 bnum(10 ** testData.tradeInfo.ReturnAmountDecimals)
             );
-            /*
-            let v2WithFilterSwapData = await getV2SwapWithFilter(
-                provider,
-                testData.tradeInfo.GasPrice,
-                testData.tradeInfo.NoPools,
-                1,
-                JSON.parse(JSON.stringify(testData)),
-                testData.tradeInfo.SwapType,
-                testData.tradeInfo.TokenIn,
-                testData.tradeInfo.TokenOut,
-                testData.tradeInfo.SwapAmount.div(
-                    bnum(10 ** testData.tradeInfo.SwapAmountDecimals)
-                ),
-                { onChainBalances: false }
-            );
-            */
 
             displayResults(
                 `${file}.json`,
                 testData.tradeInfo,
-                [v1SwapData, v2SwapData /*, v2WithFilterSwapData*/],
+                [v1SwapData, v2SwapData],
                 false
             );
 
-            assertResults(
-                file,
-                testData,
-                v1SwapData,
-                v2SwapData
-                // v2WithFilterSwapData
+            assertResults(file, testData, v1SwapData, v2SwapData);
+
+            const sor = new SOR(
+                provider,
+                testData.tradeInfo.GasPrice,
+                testData.tradeInfo.NoPools,
+                1,
+                testData
             );
+
+            if (testData.tradeInfo.SwapType === 'swapExactIn')
+                await sor.setCostOutputToken(
+                    testData.tradeInfo.TokenOut,
+                    v2SwapData.costOutputToken
+                );
+            else
+                await sor.setCostOutputToken(
+                    testData.tradeInfo.TokenIn,
+                    v2SwapData.costOutputToken
+                );
+
+            const isFetched = await sor.fetchPools(false);
+            assert(isFetched, 'Pools should be fetched in wrapper');
+
+            const swapInfo: SwapInfo = await sor.getSwaps(
+                testData.tradeInfo.TokenIn,
+                testData.tradeInfo.TokenOut,
+                testData.tradeInfo.SwapType,
+                testData.tradeInfo.SwapAmount.div(
+                    bnum(10 ** testData.tradeInfo.SwapAmountDecimals)
+                )
+            );
+
+            assert.equal(
+                swapInfo.tradeAmount.toString(),
+                v2SwapData.returnAmount.toString(),
+                `Wrapper should have same amount as helper.`
+            );
+            // !!!!!!! TODO Add swap info compare.
+            // !!!!!!! TODO Add filter compare method if required
         }).timeout(100000);
     });
 });

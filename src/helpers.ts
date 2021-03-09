@@ -3,22 +3,12 @@ import { getAddress } from '@ethersproject/address';
 import {
     PoolPairData,
     Path,
-    Pool,
-    PoolDictionary,
     Swap,
     DisabledOptions,
+    SubGraphPool,
+    SubGraphPoolDictionary,
 } from './types';
-import {
-    BONE,
-    MAX_IN_RATIO,
-    MAX_OUT_RATIO,
-    bmul,
-    bdiv,
-    bnum,
-    calcOutGivenIn,
-    calcInGivenOut,
-    scale,
-} from './bmath';
+import { MAX_IN_RATIO, MAX_OUT_RATIO, bnum, scale } from './bmath';
 import * as stableMath from './poolMath/stableMath';
 import * as weightedMath from './poolMath/weightedMath';
 import disabledTokensDefault from './disabled-tokens.json';
@@ -38,7 +28,7 @@ export function getLimitAmountSwap(
 }
 
 export function getLimitAmountSwapForPath(
-    pools: PoolDictionary,
+    pools: SubGraphPoolDictionary,
     path: Path,
     swapType: string
 ): BigNumber {
@@ -185,7 +175,7 @@ export function getOutputAmountSwap(
 }
 
 export function getOutputAmountSwapForPath(
-    pools: PoolDictionary,
+    pools: SubGraphPoolDictionary,
     path: Path,
     swapType: string,
     amount: BigNumber
@@ -234,7 +224,7 @@ export function getOutputAmountSwapForPath(
 }
 
 export function getEffectivePriceSwapForPath(
-    pools: PoolDictionary,
+    pools: SubGraphPoolDictionary,
     path: Path,
     swapType: string,
     amount: BigNumber
@@ -352,7 +342,7 @@ export function getSpotPriceAfterSwap(
 }
 
 export function getSpotPriceAfterSwapForPath(
-    pools: PoolDictionary,
+    pools: SubGraphPoolDictionary,
     path: Path,
     swapType: string,
     amount: BigNumber
@@ -496,7 +486,7 @@ export function getDerivativeSpotPriceAfterSwap(
 }
 
 export function getDerivativeSpotPriceAfterSwapForPath(
-    pools: PoolDictionary,
+    pools: SubGraphPoolDictionary,
     path: Path,
     swapType: string,
     amount: BigNumber
@@ -604,7 +594,7 @@ export function getHighestLimitAmountsForPaths(
 }
 
 export const parsePoolPairData = (
-    p: Pool,
+    p: SubGraphPool,
     tokenIn: string,
     tokenOut: string
 ): PoolPairData => {
@@ -718,7 +708,7 @@ export const parsePoolPairData = (
 
 // Transfors path information into poolPairData list
 export function parsePoolPairDataForPath(
-    pools: PoolDictionary,
+    pools: SubGraphPoolDictionary,
     path: Path,
     swapType: string
 ): PoolPairData[] {
@@ -753,7 +743,7 @@ export function parsePoolPairDataForPath(
 
 // TODO calculate exact EVM result using solidity maths (for V1 it's bmath)
 export function EVMgetOutputAmountSwapForPath(
-    pools: PoolDictionary,
+    pools: SubGraphPoolDictionary,
     path: Path,
     swapType: string,
     amount: BigNumber
@@ -809,7 +799,7 @@ export function EVMgetOutputAmountSwapForPath(
 // We need do pass 'pools' here because this function has to update the pools state
 // in case a pool is used twice in two different paths
 export function EVMgetOutputAmountSwap(
-    pools: PoolDictionary,
+    pools: SubGraphPoolDictionary,
     poolPairData: PoolPairData,
     swapType: string,
     amount: BigNumber
@@ -907,19 +897,19 @@ export function getNormalizedLiquidity(poolPairData: PoolPairData): BigNumber {
 
 // LEGACY FUNCTION - Keep Input/Output Format
 export const parsePoolData = (
-    directPools: PoolDictionary,
+    directPools: SubGraphPoolDictionary,
     tokenIn: string,
     tokenOut: string,
-    mostLiquidPoolsFirstHop: Pool[] = [],
-    mostLiquidPoolsSecondHop: Pool[] = [],
+    mostLiquidPoolsFirstHop: SubGraphPool[] = [],
+    mostLiquidPoolsSecondHop: SubGraphPool[] = [],
     hopTokens: string[] = []
-): [PoolDictionary, Path[]] => {
+): [SubGraphPoolDictionary, Path[]] => {
     let pathDataList: Path[] = [];
-    let pools: PoolDictionary = {};
+    let pools: SubGraphPoolDictionary = {};
 
     // First add direct pair paths
     for (let idKey in directPools) {
-        let p: Pool = directPools[idKey];
+        let p: SubGraphPool = directPools[idKey];
         // Add pool to the set with all pools (only adds if it's still not present in dict)
         pools[idKey] = p;
 
@@ -982,31 +972,25 @@ export const parsePoolData = (
 //     return OutputPools;
 // }
 
-export const formatSubgraphPools = pools => {
-    for (let pool of pools.pools) {
-        pool.swapFee = scale(bnum(pool.swapFee), 18);
-        pool.totalWeight = scale(bnum(pool.totalWeight), 18);
-        pool.tokens.forEach(token => {
-            token.balance = scale(bnum(token.balance), token.decimals);
-            token.denormWeight = scale(bnum(token.denormWeight), 18);
-        });
-    }
-};
-
 export function filterPools(
-    allPools: Pool[], // The complete information of the pools
+    allPools: SubGraphPool[], // The complete information of the pools
     tokenIn: string,
     tokenOut: string,
     maxPools: number,
     disabledOptions: DisabledOptions = { isOverRide: false, disabledTokens: [] }
-): [PoolDictionary, string[], PoolDictionary, PoolDictionary] {
+): [
+    SubGraphPoolDictionary,
+    string[],
+    SubGraphPoolDictionary,
+    SubGraphPoolDictionary
+] {
     // If pool contains token add all its tokens to direct list
     // Multi-hop trades: we find the best pools that connect tokenIn and tokenOut through a multi-hop (intermediate) token
     // First: we get all tokens that can be used to be traded with tokenIn excluding
     // tokens that are in pools that already contain tokenOut (in which case multi-hop is not necessary)
-    let poolsDirect: PoolDictionary = {};
-    let poolsTokenOne: PoolDictionary = {};
-    let poolsTokenTwo: PoolDictionary = {};
+    let poolsDirect: SubGraphPoolDictionary = {};
+    let poolsTokenOne: SubGraphPoolDictionary = {};
+    let poolsTokenTwo: SubGraphPoolDictionary = {};
     let tokenInPairedTokens: Set<string> = new Set();
     let tokenOutPairedTokens: Set<string> = new Set();
 
@@ -1064,16 +1048,16 @@ export function sortPoolsMostLiquid(
     tokenIn: string,
     tokenOut: string,
     hopTokens: string[],
-    poolsTokenInNoTokenOut: PoolDictionary,
-    poolsTokenOutNoTokenIn: PoolDictionary
-): [Pool[], Pool[]] {
+    poolsTokenInNoTokenOut: SubGraphPoolDictionary,
+    poolsTokenOutNoTokenIn: SubGraphPoolDictionary
+): [SubGraphPool[], SubGraphPool[]] {
     // Find the most liquid pool for each pair (tokenIn -> hopToken). We store an object in the form:
     // mostLiquidPoolsFirstHop = {hopToken1: mostLiquidPool, hopToken2: mostLiquidPool, ... , hopTokenN: mostLiquidPool}
     // Here we could query subgraph for all pools with pair (tokenIn -> hopToken), but to
     // minimize subgraph calls we loop through poolsTokenInNoTokenOut, and check the liquidity
     // only for those that have hopToken
-    let mostLiquidPoolsFirstHop: Pool[] = [];
-    let mostLiquidPoolsSecondHop: Pool[] = [];
+    let mostLiquidPoolsFirstHop: SubGraphPool[] = [];
+    let mostLiquidPoolsSecondHop: SubGraphPool[] = [];
     let poolPair = {}; // Store pair liquidity in case it is reused
 
     for (let i = 0; i < hopTokens.length; i++) {

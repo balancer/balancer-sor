@@ -28,24 +28,6 @@ export interface Path {
     filterEffectivePrice?: BigNumber; // TODO: This is just used for filtering, maybe there is a better way to filter?
 }
 
-export interface EffectivePrice {
-    price?: BigNumber;
-    id?: string;
-    maxAmount?: string;
-    swap?: string[];
-    amounts?: BigNumber[];
-    bestPools?: string[];
-}
-
-export interface Price {
-    price?: BigNumber;
-    id?: string;
-    maxAmount?: string;
-    swap?: string[];
-    amounts?: BigNumber[];
-    bestPathsIds?: string[];
-}
-
 export type Swap = {
     pool: string;
     tokenIn: string;
@@ -55,27 +37,6 @@ export type Swap = {
     maxPrice?: string;
 };
 
-export interface Pools {
-    pools: Pool[];
-}
-
-export interface Pool {
-    id: string;
-    swapFee: BigNumber;
-    amp?: BigNumber;
-    totalWeight?: BigNumber;
-    balanceBpt?: BigNumber;
-    tokens: Token[];
-    tokensList: string[];
-}
-
-export interface Token {
-    address: string;
-    balance: BigNumber;
-    decimals: number;
-    denormWeight: BigNumber;
-}
-
 export interface SubGraphPools {
     pools: SubGraphPool[];
 }
@@ -83,9 +44,9 @@ export interface SubGraphPools {
 export interface SubGraphPool {
     id: string;
     swapFee: string;
-    amp?: BigNumber;
+    amp: string;
     totalWeight: string;
-    publicSwap: string;
+    balanceBpt: string;
     tokens: SubGraphToken[];
     tokensList: string[];
 }
@@ -97,8 +58,8 @@ export interface SubGraphToken {
     denormWeight?: string;
 }
 
-export interface PoolDictionary {
-    [poolId: string]: Pool;
+export interface SubGraphPoolDictionary {
+    [poolId: string]: SubGraphPool;
 }
 
 export interface DisabledOptions {
@@ -108,4 +69,20 @@ export interface DisabledOptions {
 export interface DisabledToken {
     address: string;
     symbol: string;
+}
+
+export interface SwapV2 {
+    poolId: string;
+    tokenInIndex: number;
+    tokenOutIndex: number;
+    amountIn: string;
+    userData: string;
+}
+
+export interface SwapInfo {
+    tokenAddresses: string[];
+    swaps: SwapV2[];
+    tradeAmount: BigNumber;
+    tokenIn: string;
+    tokenOut: string;
 }

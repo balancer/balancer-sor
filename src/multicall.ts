@@ -1,62 +1,79 @@
 import { Contract } from '@ethersproject/contracts';
 import { BaseProvider } from '@ethersproject/providers';
-import { Pools, Pool, SubGraphPools, Token } from './types';
+import { Interface } from '@ethersproject/abi';
+import { SubGraphPools, SubGraphPool, SubGraphToken } from './types';
 import * as bmath from './bmath';
 
-export async function getAllPoolDataOnChain(
+export async function getOnChainBalances(
     pools: SubGraphPools,
     multiAddress: string,
+    vaultAddress: string,
     provider: BaseProvider
-): Promise<Pools> {
-    if (pools.pools.length === 0) throw Error('There are no pools.');
+): Promise<SubGraphPools> {
+    let poolsWithOnChainBalance: SubGraphPools = { pools: [] };
 
-    const customMultiAbi = require('./abi/customMulticall.json');
-    const contract = new Contract(multiAddress, customMultiAbi, provider);
+    if (pools.pools.length === 0) return poolsWithOnChainBalance;
 
-    let addresses = [];
-    let total = 0;
+    const multiAbi = require('./abi/multicall.json');
+    const vaultAbi = require('./abi/vault.json');
 
-    for (let i = 0; i < pools.pools.length; i++) {
-        let pool = pools.pools[i];
+    const multicallContract = new Contract(multiAddress, multiAbi, provider);
+    const vaultInterface = new Interface(vaultAbi);
+    const calls = [];
 
-        addresses.push([pool.id]);
-        total++;
-        pool.tokens.forEach(token => {
-            addresses[i].push(token.address);
-            total++;
-        });
-    }
+    pools.pools.forEach(pool => {
+        calls.push([
+            vaultAddress,
+            vaultInterface.encodeFunctionData('getPoolTokens', [pool.id]),
+        ]);
+    });
 
-    let results = await contract.getPoolInfo(addresses, total);
+    try {
+        const [, response] = await multicallContract.aggregate(calls);
 
-    let j = 0;
-    let onChainPools: Pools = { pools: [] };
+        for (let i = 0; i < response.length; i++) {
+            const result = vaultInterface.decodeFunctionResult(
+                'getPoolTokens',
+                response[i]
+            );
 
-    for (let i = 0; i < pools.pools.length; i++) {
-        let tokens: Token[] = [];
+            const poolTokens: SubGraphToken[] = [];
 
-        let p: Pool = {
-            id: pools.pools[i].id,
-            swapFee: bmath.scale(bmath.bnum(pools.pools[i].swapFee), 18),
-            totalWeight: bmath.scale(
-                bmath.bnum(pools.pools[i].totalWeight),
-                18
-            ),
-            tokens: tokens,
-            tokensList: pools.pools[i].tokensList,
-        };
+            const poolWithBalances: SubGraphPool = {
+                id: pools.pools[i].id,
+                // !!!!!!! TO DO address?: pools.pools[i].address,
+                swapFee: pools.pools[i].swapFee,
+                totalWeight: pools.pools[i].totalWeight,
+                tokens: poolTokens,
+                tokensList: pools.pools[i].tokensList.map(token =>
+                    token.toLowerCase()
+                ),
+                amp: pools.pools[i].amp,
+                balanceBpt: pools.pools[i].balanceBpt,
+            };
 
-        pools.pools[i].tokens.forEach(token => {
-            let bal = bmath.bnum(results[j]);
-            j++;
-            p.tokens.push({
-                address: token.address,
-                balance: bal,
-                decimals: Number(token.decimals),
-                denormWeight: bmath.scale(bmath.bnum(token.denormWeight), 18),
+            pools.pools[i].tokens.forEach(token => {
+                let resultIndex = result.tokens.indexOf(token.address);
+
+                poolWithBalances.tokens.push({
+                    address: token.address.toLowerCase(),
+                    balance: bmath
+                        .scale(
+                            bmath.bnum(result.balances[resultIndex]),
+                            -Number(token.decimals)
+                        )
+                        .toString(),
+                    decimals: token.decimals,
+                    denormWeight: token.denormWeight,
+                });
             });
-        });
-        onChainPools.pools.push(p);
+
+            poolsWithOnChainBalance.pools.push(poolWithBalances);
+        }
+    } catch (e) {
+        console.error('Failure querying onchain balances', { error: e });
+        return;
     }
-    return onChainPools;
+
+    return poolsWithOnChainBalance;
 }
