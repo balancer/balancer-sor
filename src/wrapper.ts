@@ -14,8 +14,13 @@ import { bnum } from './bmath';
 
 export class SOR {
     MULTIADDR: { [chainId: number]: string } = {
-        1: '0x514053acec7177e277b947b1ebb5c08ab4c4580e',
-        42: '0x71c7f1086aFca7Aa1B0D4d73cfa77979d10D3210',
+        1: '0xeefba1e63905ef1d7acba5a8513c70307c1ce441',
+        42: '0x2cc8688C5f75E365aaEEb4ea8D6a480405A48D2A',
+    };
+
+    VAULTADDR: { [chainId: number]: string } = {
+        1: '0x99EceD8Ba43D090CA4283539A31431108FD34438',
+        42: '0x99EceD8Ba43D090CA4283539A31431108FD34438',
     };
 
     provider: BaseProvider;
@@ -29,7 +34,7 @@ export class SOR {
     subgraphPools: SubGraphPools;
     tokenCost = {};
     pools: POOLS;
-    onChainCache: SubGraphPools = { pools: [] };
+    onChainBalanceCache: SubGraphPools = { pools: [] };
     poolsForPairsCache = {};
     processedDataCache = {};
     finishedFetchingOnChain: boolean = false;
@@ -81,7 +86,7 @@ export class SOR {
     }
 
     // Fetch all pools, in Subgraph format (strings/not scaled) from URL then retrieve OnChain balances
-    async fetchPools(): Promise<boolean> {
+    async fetchPools(isOnChain: boolean = true): Promise<boolean> {
         try {
             let subgraphPools: SubGraphPools;
 
@@ -92,14 +97,18 @@ export class SOR {
                 );
             else subgraphPools = this.subgraphPools;
 
-            let previousStringify = JSON.stringify(this.onChainCache); // Used for compare
+            let previousStringify = JSON.stringify(this.onChainBalanceCache); // Used for compare
 
-            // Get latest on-chain data TODO - IMPLEMENT THIS FOR V2
-            // Convert to BigNumber format - THIS IS A PLACE HOLDER FOR NOW
-            this.onChainCache = await this.fetchOnChainPools(subgraphPools);
+            // Get latest on-chain balances (returns data in string/normalized format)
+            this.onChainBalanceCache = await this.fetchOnChainBalances(
+                subgraphPools,
+                isOnChain
+            );
 
             // If new pools are different from previous then any previous processed data is out of date so clear
-            if (previousStringify !== JSON.stringify(this.onChainCache)) {
+            if (
+                previousStringify !== JSON.stringify(this.onChainBalanceCache)
+            ) {
                 this.processedDataCache = {};
             }
 
@@ -109,7 +118,7 @@ export class SOR {
         } catch (err) {
             // On error clear all caches and return false so user knows to try again.
             this.finishedFetchingOnChain = false;
-            this.onChainCache = { pools: [] };
+            this.onChainBalanceCache = { pools: [] };
             this.processedDataCache = {};
             console.error(`Error: fetchPools(): ${err.message}`);
             return false;
@@ -119,50 +128,33 @@ export class SOR {
     /*
     Uses multicall contract to fetch all onchain balances for pools.
     */
-    private async fetchOnChainPools(
-        subgraphPools: SubGraphPools
+    private async fetchOnChainBalances(
+        subgraphPools: SubGraphPools,
+        isOnChain: boolean = true
     ): Promise<SubGraphPools> {
         if (subgraphPools.pools.length === 0) {
             console.error('ERROR: No Pools To Fetch.');
             return { pools: [] };
         }
-        /*
-        let onChainPools: Pools = await sor.getAllPoolDataOnChain(
-            SubgraphPools,
+
+        // Allows for testing
+        if (!isOnChain) {
+            console.log(
+                `!!!!!!! WARNING - Not Using Real OnChain Balances !!!!!!`
+            );
+            return subgraphPools;
+        }
+
+        // This will return in normalized/string format
+        const onChainPools = await sor.getOnChainBalances(
+            subgraphPools,
             this.MULTIADDR[this.chainId],
+            this.VAULTADDR[this.chainId],
             this.provider
         );
 
         // Error with multicall
         if (!onChainPools) return { pools: [] };
-        */
-        // !!!!!!! TODO - Below is a placeholder for multicall that converts to bignumber format with NO scaling
-        const onChainPools: SubGraphPools = subgraphPools;
-        /*
-        for (let i = 0; i < SubgraphPools.pools.length; i++) {
-            let tokens: Token[] = [];
-
-            let p: SubGraphPool = {
-                id: SubgraphPools.pools[i].id,
-                swapFee: bnum(SubgraphPools.pools[i].swapFee),
-                totalWeight: bnum(SubgraphPools.pools[i].totalWeight),
-                tokens: tokens,
-                tokensList: SubgraphPools.pools[i].tokensList,
-            };
-
-            SubgraphPools.pools[i].tokens.forEach(token => {
-                let decimals = Number(token.decimals);
-
-                p.tokens.push({
-                    address: token.address,
-                    balance: bnum(token.balance),
-                    decimals: decimals,
-                    denormWeight: bnum(token.denormWeight),
-                });
-            });
-            onChainPools.pools.push(p);
-        }
-        */
 
         return onChainPools;
     }
@@ -192,7 +184,7 @@ export class SOR {
                 tokenOut,
                 swapType,
                 swapAmt,
-                this.onChainCache
+                this.onChainBalanceCache
             );
         } else {
             // Haven't retrieved all pools/balances so we use the pools for pairs if previously fetched
@@ -233,22 +225,6 @@ export class SOR {
         };
 
         if (onChainPools.pools.length === 0) return swapInfo;
-
-        const swap: SwapV2 = {
-            poolId: 'test',
-            tokenInIndex: 0,
-            tokenOutIndex: 1,
-            amountIn: '1000000000000000000',
-            userData: '0x',
-        };
-
-        swapInfo = {
-            tokenAddresses: [tokenIn, tokenOut],
-            swaps: [swap],
-            tradeAmount: swapAmt,
-            tokenIn,
-            tokenOut,
-        };
 
         let pools: SubGraphPoolDictionary, paths: Path[], marketSp: BigNumber;
         // If token pair has been processed before that info can be reused to speed up execution
@@ -307,6 +283,22 @@ export class SOR {
             this.maxPools,
             costOutputToken
         );
+        // !!!!!!! TODO - Use Helper to convert to correct swap types.
+        const swap: SwapV2 = {
+            poolId: 'test',
+            tokenInIndex: 0,
+            tokenOutIndex: 1,
+            amountIn: '1000000000000000000',
+            userData: '0x',
+        };
+
+        swapInfo = {
+            tokenAddresses: [tokenIn, tokenOut],
+            swaps: [swap],
+            tradeAmount: swapAmt,
+            tokenIn,
+            tokenOut,
+        };
 
         return swapInfo;
     }
@@ -318,7 +310,8 @@ export class SOR {
     */
     async fetchFilteredPairPools(
         tokenIn: string,
-        tokenOut: string
+        tokenOut: string,
+        isOnChain: boolean = true
     ): Promise<boolean> {
         tokenIn = tokenIn.toLowerCase();
         tokenOut = tokenOut.toLowerCase();
@@ -435,10 +428,13 @@ export class SOR {
 
             let onChainPools: SubGraphPools = { pools: [] };
             if (poolsOfInterest.length !== 0) {
-                // Retrieves onchain balances for pools list
-                onChainPools = await this.fetchOnChainPools({
-                    pools: poolsOfInterest,
-                });
+                // Get latest onchain balances for pools of interest(returns data in string / normalized format)
+                onChainPools = await this.fetchOnChainBalances(
+                    {
+                        pools: poolsOfInterest,
+                    },
+                    isOnChain
+                );
             }
 
             // Add to cache for future use

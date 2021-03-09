@@ -70,13 +70,13 @@ describe(`Tests for wrapper class.`, () => {
             chainId,
             poolsFromFile
         );
-        const fetchSuccess = await sor.fetchPools();
+        const fetchSuccess = await sor.fetchPools(false);
         assert.isTrue(fetchSuccess);
         assert.isTrue(sor.finishedFetchingOnChain);
 
         assert.equal(
             poolsFromFile.pools[1].tokens[1].balance,
-            sor.onChainCache.pools[1].tokens[1].balance
+            sor.onChainBalanceCache.pools[1].tokens[1].balance
         );
     });
 
@@ -130,7 +130,8 @@ describe(`Tests for wrapper class.`, () => {
 
         const result: boolean = await sor.fetchFilteredPairPools(
             tokenIn,
-            tokenOut
+            tokenOut,
+            false
         );
 
         assert.isTrue(result);
@@ -157,7 +158,8 @@ describe(`Tests for wrapper class.`, () => {
 
         const result: boolean = await sor.fetchFilteredPairPools(
             tokenIn,
-            tokenOut
+            tokenOut,
+            false
         );
 
         const swaps: SwapInfo = await sor.getSwaps(
