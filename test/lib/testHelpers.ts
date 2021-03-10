@@ -407,21 +407,21 @@ export async function getV2Swap(
     // then SOR should not add that pool (if gas costs were zero that pool would be added)
     // Notice that outputToken is TokenOut if SwapType == 'swapExactIn' and TokenIn if SwapType == 'swapExactOut'
     let costOutputToken: BigNumber;
-    if (SwapType === 'swapExactIn')
+    if (SwapType === 'swapExactIn') {
         costOutputToken = await sorv2.getCostOutputToken(
             TokenOut,
             GasPrice,
             swapCost,
             Provider
         );
-    else
+    } else {
         costOutputToken = await sorv2.getCostOutputToken(
             TokenIn,
             GasPrice,
             swapCost,
             Provider
         );
-
+    }
     // Normalize to ReturnAmountDecimals
     costOutputToken = costOutputToken.div(bnum(10 ** ReturnAmountDecimals));
 

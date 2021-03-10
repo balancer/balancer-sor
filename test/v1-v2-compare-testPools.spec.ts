@@ -140,7 +140,15 @@ describe('Run Tests From Saved Pools', () => {
                 v2SwapData.returnAmount.toString(),
                 `Wrapper should have same amount as helper.`
             );
-            // !!!!!!! TODO Add swap info compare.
+
+            // Rough check for same swaps
+            if (swapInfo.swaps.length > 0) {
+                assert.equal(
+                    swapInfo.swaps[0].poolId,
+                    v2SwapData.swaps[0][0].pool
+                );
+            }
+
             // !!!!!!! TODO Add filter compare method if required
         }).timeout(100000);
     });

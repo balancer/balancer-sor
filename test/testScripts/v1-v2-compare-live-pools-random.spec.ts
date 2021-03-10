@@ -5,7 +5,6 @@ import { JsonRpcProvider } from '@ethersproject/providers';
 import {
     getV1Swap,
     getV2Swap,
-    getV2SwapWithFilter,
     getRandomTradeData,
     saveTestFile,
     deleteTestFile,
@@ -30,7 +29,6 @@ let allPools;
 const onChainBalances = true;
 let v1SwapData;
 let v2SwapData;
-let v2WithFilterSwapData;
 let tokenInDecimals, tokenOutDecimals;
 
 // npx mocha -r ts-node/register test/testScripts/v1-v2-compare-live-pools-random.spec.ts
@@ -91,22 +89,9 @@ describe('Comparing V1/V2 Using Live Pool Data', async () => {
             tokenIn,
             tokenOut,
             swapAmount,
-            { onChainBalances: onChainBalances }
+            { onChainBalances: onChainBalances },
+            returnAmountDecimals
         );
-        /*
-        v2WithFilterSwapData = await getV2SwapWithFilter(
-            provider,
-            gasPrice,
-            maxNoPools,
-            chainId,
-            JSON.parse(JSON.stringify(allPools)),
-            swapType,
-            tokenIn,
-            tokenOut,
-            swapAmount,
-            { onChainBalances: onChainBalances }
-        );
-        */
 
         const testData = {
             tradeInfo: {

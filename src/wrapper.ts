@@ -504,7 +504,8 @@ export class SOR {
         PoolsDict: SubGraphPoolDictionary,
         SwapType: string
     ): [Path[], BigNumber] {
-        const [paths] = sor.processPaths(PathArray, PoolsDict, SwapType);
+        let paths: Path[];
+        [paths] = sor.processPaths(PathArray, PoolsDict, SwapType);
 
         const bestSpotPrice = bnum(0);
         // !!!!!!! TODO - Add this.
