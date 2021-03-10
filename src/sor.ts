@@ -260,7 +260,7 @@ export const smartOrderRouter = (
             improvementCondition =
                 totalReturnConsideringFees.isGreaterThan(
                     bestTotalReturnConsideringFees
-                ) || b === 1; // b === 1 means its the first iteration so bestTotalReturnConsideringFees isn't currently a value
+                ) || b === initialNumPools; // b === initialNumPools means its the first iteration so bestTotalReturnConsideringFees isn't currently a value
         } else {
             totalReturnConsideringFees = totalReturn.plus(
                 bnum(totalNumberOfPools).times(costReturnToken)
@@ -268,7 +268,7 @@ export const smartOrderRouter = (
             improvementCondition =
                 totalReturnConsideringFees.isLessThan(
                     bestTotalReturnConsideringFees
-                ) || b === 1; // b === 1 means its the first iteration so bestTotalReturnConsideringFees isn't currently a value
+                ) || b === initialNumPools; // b === initialNumPools means its the first iteration so bestTotalReturnConsideringFees isn't currently a value
         }
         if (improvementCondition === true) {
             bestSwapAmounts = [...swapAmounts]; // Copy to avoid linking variables

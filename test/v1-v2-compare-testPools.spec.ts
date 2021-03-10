@@ -112,7 +112,7 @@ describe('Run Tests From Saved Pools', () => {
                 `${file}.json`,
                 testData.tradeInfo,
                 [v1SwapData, v2SwapData],
-                false
+                true
             );
 
             assertResults(file, testData, v1SwapData, v2SwapData);
