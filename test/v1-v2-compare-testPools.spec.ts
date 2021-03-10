@@ -99,7 +99,7 @@ describe('Run Tests From Saved Pools', () => {
                 `${file}.json`,
                 testData.tradeInfo,
                 [v1SwapData, v2SwapData],
-                true
+                false
             );
 
             assertResults(file, testData, v1SwapData, v2SwapData);
@@ -136,7 +136,7 @@ describe('Run Tests From Saved Pools', () => {
             );
 
             assert.equal(
-                swapInfo.tradeAmount.toString(),
+                swapInfo.returnAmount.toString(),
                 v2SwapData.returnAmount.toString(),
                 `Wrapper should have same amount as helper.`
             );
