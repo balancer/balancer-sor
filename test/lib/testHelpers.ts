@@ -895,4 +895,4 @@ async function getAllPoolDataOnChain(
 
 // Generates file output for v1-v2-compare-testPools.spec.ts
 // ts-node ./test/lib/testHelpers.ts
-// const files = listTestFiles(`${__dirname}/testPools/`);
+// const files = listTestFiles(`/Users/jg/Documents/balancer-sor-v2/test/testData/testPools/`);
