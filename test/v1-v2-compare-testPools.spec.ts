@@ -136,7 +136,7 @@ describe('Run Tests From Saved Pools', () => {
             );
 
             assert.equal(
-                swapInfo.tradeAmount.toString(),
+                swapInfo.returnAmount.toString(),
                 v2SwapData.returnAmount.toString(),
                 `Wrapper should have same amount as helper.`
             );

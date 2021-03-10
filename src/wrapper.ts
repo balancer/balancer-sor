@@ -172,9 +172,10 @@ export class SOR {
         let swapInfo: SwapInfo = {
             tokenAddresses: [],
             swaps: [],
-            tradeAmount: bnum(0),
+            swapAmount: bnum(0),
             tokenIn: '',
             tokenOut: '',
+            returnAmount: bnum(0),
         };
 
         if (this.finishedFetchingOnChain) {
@@ -219,9 +220,10 @@ export class SOR {
         let swapInfo: SwapInfo = {
             tokenAddresses: [],
             swaps: [],
-            tradeAmount: bnum(0),
+            swapAmount: bnum(0),
             tokenIn: '',
             tokenOut: '',
+            returnAmount: bnum(0),
         };
 
         if (onChainPools.pools.length === 0) return swapInfo;
@@ -287,22 +289,15 @@ export class SOR {
             this.maxPools,
             costOutputToken
         );
-        // !!!!!!! TODO - Use Helper to convert to correct swap types.
-        const swap: SwapV2 = {
-            poolId: 'test',
-            tokenInIndex: 0,
-            tokenOutIndex: 1,
-            amountIn: '1000000000000000000',
-            userData: '0x',
-        };
 
-        swapInfo = {
-            tokenAddresses: [tokenIn, tokenOut],
-            swaps: [swap],
-            tradeAmount: total,
+        swapInfo = sor.formatSwaps(
+            swaps,
+            swapType,
+            swapAmt,
             tokenIn,
             tokenOut,
-        };
+            total
+        );
 
         return swapInfo;
     }

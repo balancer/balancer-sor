@@ -7,6 +7,8 @@ import {
     DisabledOptions,
     SubGraphPool,
     SubGraphPoolDictionary,
+    SwapInfo,
+    SwapV2,
 } from './types';
 import { MAX_IN_RATIO, MAX_OUT_RATIO, bnum, scale } from './bmath';
 import * as stableMath from './poolMath/stableMath';
@@ -1144,4 +1146,84 @@ export function normalizePools(pools) {
     }
 
     return normalizedPools;
+}
+
+export function formatSwaps(
+    swaps: Swap[][],
+    swapType: string,
+    swapAmount: BigNumber,
+    tokenIn: string,
+    tokenOut: string,
+    returnAmount: BigNumber
+): SwapInfo {
+    const tokenAddressesSet: Set<string> = new Set();
+
+    swaps.forEach(sequence => {
+        sequence.forEach(swap => {
+            tokenAddressesSet.add(swap.tokenIn);
+            tokenAddressesSet.add(swap.tokenOut);
+        });
+    });
+
+    const tokenArray = [...tokenAddressesSet];
+
+    let swapInfo: SwapInfo;
+
+    if (swapType === 'swapExactIn') {
+        const swapsV2: SwapV2[] = [];
+
+        swaps.forEach(sequence => {
+            sequence.forEach(swap => {
+                const inIndex = tokenArray.indexOf(swap.tokenIn);
+                const outIndex = tokenArray.indexOf(swap.tokenOut);
+                const swapV2: SwapV2 = {
+                    poolId: swap.pool,
+                    tokenInIndex: inIndex,
+                    tokenOutIndex: outIndex,
+                    amountIn: swap.swapAmount,
+                    userData: '0x',
+                };
+
+                swapsV2.push(swapV2);
+            });
+        });
+
+        swapInfo = {
+            tokenAddresses: tokenArray,
+            swaps: swapsV2,
+            swapAmount: swapAmount,
+            tokenIn: tokenIn,
+            tokenOut: tokenOut,
+            returnAmount,
+        };
+    } else {
+        const swapsV2: SwapV2[] = [];
+
+        swaps.forEach(sequence => {
+            sequence.forEach(swap => {
+                const inIndex = tokenArray.indexOf(swap.tokenIn);
+                const outIndex = tokenArray.indexOf(swap.tokenOut);
+                const swapV2: SwapV2 = {
+                    poolId: swap.pool,
+                    tokenInIndex: inIndex,
+                    tokenOutIndex: outIndex,
+                    amountOut: swap.swapAmount,
+                    userData: '0x',
+                };
+
+                swapsV2.push(swapV2);
+            });
+        });
+
+        swapInfo = {
+            tokenAddresses: tokenArray,
+            swaps: swapsV2,
+            swapAmount: swapAmount,
+            tokenIn: tokenIn,
+            tokenOut: tokenOut,
+            returnAmount,
+        };
+    }
+
+    return swapInfo;
 }
