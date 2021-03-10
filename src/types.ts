@@ -75,14 +75,16 @@ export interface SwapV2 {
     poolId: string;
     tokenInIndex: number;
     tokenOutIndex: number;
-    amountIn: string;
+    amountIn?: string;
+    amountOut?: string;
     userData: string;
 }
 
 export interface SwapInfo {
     tokenAddresses: string[];
     swaps: SwapV2[];
-    tradeAmount: BigNumber;
+    swapAmount: BigNumber;
+    returnAmount: BigNumber;
     tokenIn: string;
     tokenOut: string;
 }

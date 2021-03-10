@@ -61,7 +61,7 @@ describe(`Tests for wrapper class.`, () => {
         assert.isFalse(sor.finishedFetchingOnChain);
     });
 
-    it(`fetchPools should fetch and convert to BigNumbers with NO scaling - THIS WILL FAIL ONCE PROPER ON-CHAIN METHOD ADDED`, async () => {
+    it(`fetchPools should fetch with NO scaling`, async () => {
         const poolsFromFile: SubGraphPools = require('./testData/testPools/subgraphPoolsSmall.json');
         const sor = new SOR(
             provider,
@@ -73,7 +73,6 @@ describe(`Tests for wrapper class.`, () => {
         const fetchSuccess = await sor.fetchPools(false);
         assert.isTrue(fetchSuccess);
         assert.isTrue(sor.finishedFetchingOnChain);
-
         assert.equal(
             poolsFromFile.pools[1].tokens[1].balance,
             sor.onChainBalanceCache.pools[1].tokens[1].balance
@@ -93,7 +92,7 @@ describe(`Tests for wrapper class.`, () => {
             swapAmt
         );
 
-        assert.equal(swaps.tradeAmount.toString(), '0');
+        assert.equal(swaps.swapAmount.toString(), '0');
     });
 
     it(`fetchFilteredPairPools should return false for bad url.`, async () => {
@@ -162,14 +161,18 @@ describe(`Tests for wrapper class.`, () => {
             false
         );
 
-        const swaps: SwapInfo = await sor.getSwaps(
+        const swapInfo: SwapInfo = await sor.getSwaps(
             tokenIn,
             tokenOut,
             swapType,
             swapAmt
         );
 
-        assert.isAbove(swaps.tradeAmount.toNumber(), 0);
+        assert.isAbove(swapInfo.returnAmount.toNumber(), 0);
+        assert.isAbove(bnum(swapInfo.swaps[0].amountIn).toNumber(), 0);
+        assert.equal(tokenIn, swapInfo.tokenIn);
+        assert.equal(tokenOut, swapInfo.tokenOut);
+        assert.equal(swapInfo.swapAmount.toString(), swapAmt.toString());
     });
     // Script for swaps
 
