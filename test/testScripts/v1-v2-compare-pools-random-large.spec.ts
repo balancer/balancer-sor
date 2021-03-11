@@ -17,7 +17,7 @@ import { SOR } from '../../src';
 import { assert } from 'chai';
 
 // Each pool will have 4 tests. Total number will be MIN_TESTS * 4 * NoPools. Will always test each pool at least once.
-const MIN_TESTS = 1;
+const MIN_TESTS = 50;
 
 const provider = new JsonRpcProvider(
     `https://mainnet.infura.io/v3/${process.env.INFURA}`
@@ -78,7 +78,7 @@ describe('Run Large Amount Of Tests Using Saved Pools Data', async () => {
     if (testsPerPool < 1) testsPerPool = 1;
 
     console.log(
-        `Total Number of tests: ${testsPerPool * testFiles.length * 4}`
+        `Total Number of tests: ${testsPerPool * testFiles.length * 10}`
     );
 
     testFiles.forEach(async function(file) {
