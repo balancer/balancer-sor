@@ -6,7 +6,7 @@ import { bnum } from '../bmath';
 /// Swap functions
 /////////
 
-// PairType = 'token-token'
+// PairType = 'token->token'
 // SwapType = 'swapExactIn'
 export function _exactTokenInForTokenOut(amount, poolPairData): BigNumber {
     let Bi = poolPairData.balanceIn.toNumber();
@@ -27,7 +27,7 @@ export function _exactTokenInForTokenOut(amount, poolPairData): BigNumber {
     // )
 }
 
-// PairType = 'token-token'
+// PairType = 'token->token'
 // SwapType = 'swapExactOut'
 export function _tokenInForExactTokenOut(amount, poolPairData): BigNumber {
     let Bi = poolPairData.balanceIn.toNumber();
@@ -45,7 +45,7 @@ export function _tokenInForExactTokenOut(amount, poolPairData): BigNumber {
     // ).div(bnum(1).minus(f));
 }
 
-// PairType = 'token-BPT'
+// PairType = 'token->BPT'
 // SwapType = 'swapExactIn'
 export function _exactTokenInForBPTOut(amount, poolPairData): BigNumber {
     let Bi = poolPairData.balanceIn.toNumber();
@@ -56,7 +56,7 @@ export function _exactTokenInForBPTOut(amount, poolPairData): BigNumber {
     return bnum(Bbpt * (-1 + (1 + (Ai * (1 - f * (1 - wi))) / Bi) ** wi));
 }
 
-// PairType = 'token-BPT'
+// PairType = 'token->BPT'
 // SwapType = 'swapExactOut'
 export function _tokenInForExactBPTOut(amount, poolPairData): BigNumber {
     let Bi = poolPairData.balanceIn.toNumber();
@@ -69,7 +69,7 @@ export function _tokenInForExactBPTOut(amount, poolPairData): BigNumber {
     );
 }
 
-// PairType = 'BPT-token'
+// PairType = 'BPT->token'
 // SwapType = 'swapExactIn'
 export function _BPTInForExactTokenOut(amount, poolPairData): BigNumber {
     let Bbpt = poolPairData.balanceIn.toNumber();
@@ -82,7 +82,7 @@ export function _BPTInForExactTokenOut(amount, poolPairData): BigNumber {
     );
 }
 
-// PairType = 'BPT-token'
+// PairType = 'BPT->token'
 // SwapType = 'swapExactOut'
 export function _exactBPTInForTokenOut(amount, poolPairData): BigNumber {
     let Bbpt = poolPairData.balanceIn.toNumber();
@@ -97,7 +97,7 @@ export function _exactBPTInForTokenOut(amount, poolPairData): BigNumber {
 /// SpotPriceAfterSwap
 /////////
 
-// PairType = 'token-token'
+// PairType = 'token->token'
 // SwapType = 'swapExactIn'
 export function _spotPriceAfterSwapExactTokenInForTokenOut(
     amount,
@@ -117,7 +117,7 @@ export function _spotPriceAfterSwapExactTokenInForTokenOut(
     );
 }
 
-// PairType = 'token-token'
+// PairType = 'token->token'
 // SwapType = 'swapExactOut'
 export function _spotPriceAfterSwapTokenInForExactTokenOut(
     amount,
@@ -137,7 +137,7 @@ export function _spotPriceAfterSwapTokenInForExactTokenOut(
     );
 }
 
-// PairType = 'token-BPT'
+// PairType = 'token->BPT'
 // SwapType = 'swapExactIn'
 export function _spotPriceAfterSwapExactTokenInForBPTOut(
     amount,
@@ -154,7 +154,7 @@ export function _spotPriceAfterSwapExactTokenInForBPTOut(
     );
 }
 
-// PairType = 'token-BPT'
+// PairType = 'token->BPT'
 // SwapType = 'swapExactOut'
 export function _spotPriceAfterSwapTokenInForExactBPTOut(
     amount,
@@ -171,7 +171,7 @@ export function _spotPriceAfterSwapTokenInForExactBPTOut(
     );
 }
 
-// PairType = 'BPT-token'
+// PairType = 'BPT->token'
 // SwapType = 'swapExactIn'
 export function _spotPriceAfterSwapExactBPTInForTokenOut(
     amount,
@@ -191,7 +191,7 @@ export function _spotPriceAfterSwapExactBPTInForTokenOut(
     );
 }
 
-// PairType = 'BPT-token'
+// PairType = 'BPT->token'
 // SwapType = 'swapExactOut'
 export function _spotPriceAfterSwapBPTInForExactTokenOut(
     amount,
@@ -215,7 +215,7 @@ export function _spotPriceAfterSwapBPTInForExactTokenOut(
 ///  Derivatives of spotPriceAfterSwap
 /////////
 
-// PairType = 'token-token'
+// PairType = 'token->token'
 // SwapType = 'swapExactIn'
 export function _derivativeSpotPriceAfterSwapExactTokenInForTokenOut(
     amount,
@@ -230,7 +230,7 @@ export function _derivativeSpotPriceAfterSwapExactTokenInForTokenOut(
     return bnum((wi + wo) / (Bo * (Bi / (Ai + Bi - Ai * f)) ** (wi / wo) * wi));
 }
 
-// PairType = 'token-token'
+// PairType = 'token->token'
 // SwapType = 'swapExactOut'
 export function _derivativeSpotPriceAfterSwapTokenInForExactTokenOut(
     amount,
@@ -250,7 +250,7 @@ export function _derivativeSpotPriceAfterSwapTokenInForExactTokenOut(
     );
 }
 
-// PairType = 'token-BPT'
+// PairType = 'token->BPT'
 // SwapType = 'swapExactIn'
 export function _derivativeSpotPriceAfterSwapExactTokenInForBPTOut(
     amount,
@@ -266,7 +266,7 @@ export function _derivativeSpotPriceAfterSwapExactTokenInForBPTOut(
     );
 }
 
-// PairType = 'token-BPT'
+// PairType = 'token->BPT'
 // SwapType = 'swapExactOut'
 export function _derivativeSpotPriceAfterSwapTokenInForExactBPTOut(
     amount,
@@ -285,7 +285,7 @@ export function _derivativeSpotPriceAfterSwapTokenInForExactBPTOut(
     );
 }
 
-// PairType = 'BPT-token'
+// PairType = 'BPT->token'
 // SwapType = 'swapExactIn'
 export function _derivativeSpotPriceAfterSwapExactBPTInForTokenOut(
     amount,
@@ -304,7 +304,7 @@ export function _derivativeSpotPriceAfterSwapExactBPTInForTokenOut(
     );
 }
 
-// PairType = 'BPT-token'
+// PairType = 'BPT->token'
 // SwapType = 'swapExactOut'
 export function _derivativeSpotPriceAfterSwapBPTInForExactTokenOut(
     amount,
