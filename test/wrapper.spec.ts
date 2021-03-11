@@ -174,7 +174,4 @@ describe(`Tests for wrapper class.`, () => {
         assert.equal(tokenOut, swapInfo.tokenOut);
         assert.equal(swapInfo.swapAmount.toString(), swapAmt.toString());
     });
-    // Script for swaps
-
-    // Correct swap types
 });

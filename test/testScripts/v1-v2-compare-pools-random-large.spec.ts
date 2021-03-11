@@ -194,7 +194,9 @@ async function testSwap(swapType, isSmall, file) {
 
         assert.equal(
             swapInfo.returnAmount.toString(),
-            v2SwapData.returnAmount.toString(),
+            v2SwapData.returnAmount
+                .times(bnum(10 ** returnAmountDecimals))
+                .toString(),
             `Wrapper should have same amount as helper.`
         );
 

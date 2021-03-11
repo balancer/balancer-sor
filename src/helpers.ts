@@ -920,6 +920,8 @@ export const parsePoolData = (
             pool: p.id,
             tokenIn: tokenIn,
             tokenOut: tokenOut,
+            tokenInDecimals: 18, // Placeholder for actual decimals
+            tokenOutDecimals: 18,
         };
 
         let path: Path = {
@@ -941,12 +943,16 @@ export const parsePoolData = (
             pool: mostLiquidPoolsFirstHop[i].id,
             tokenIn: tokenIn,
             tokenOut: hopTokens[i],
+            tokenInDecimals: 18, // Placeholder for actual decimals
+            tokenOutDecimals: 18,
         };
 
         let swap2: Swap = {
             pool: mostLiquidPoolsSecondHop[i].id,
             tokenIn: hopTokens[i],
             tokenOut: tokenOut,
+            tokenInDecimals: 18, // Placeholder for actual decimals
+            tokenOutDecimals: 18,
         };
 
         let path: Path = {
@@ -1159,16 +1165,35 @@ export function formatSwaps(
 ): SwapInfo {
     const tokenAddressesSet: Set<string> = new Set();
 
+    let tokenInDecimals: number;
+    let tokenOutDecimals: number;
+
+    let swapInfo: SwapInfo = {
+        tokenAddresses: [],
+        swaps: [],
+        swapAmount: bnum(0),
+        returnAmount: bnum(0),
+        tokenIn: '',
+        tokenOut: '',
+    };
+
+    if (swaps.length === 0) {
+        return swapInfo;
+    }
+
     swaps.forEach(sequence => {
         sequence.forEach(swap => {
             tokenAddressesSet.add(swap.tokenIn);
             tokenAddressesSet.add(swap.tokenOut);
+            if (swap.tokenIn === tokenIn)
+                tokenInDecimals = swap.tokenInDecimals;
+
+            if (swap.tokenOut === tokenOut)
+                tokenOutDecimals = swap.tokenOutDecimals;
         });
     });
 
     const tokenArray = [...tokenAddressesSet];
-
-    let swapInfo: SwapInfo;
 
     if (swapType === 'swapExactIn') {
         const swapsV2: SwapV2[] = [];
@@ -1181,7 +1206,10 @@ export function formatSwaps(
                     poolId: swap.pool,
                     tokenInIndex: inIndex,
                     tokenOutIndex: outIndex,
-                    amountIn: swap.swapAmount,
+                    amountIn: scale(
+                        bnum(swap.swapAmount),
+                        swap.tokenInDecimals
+                    ).toString(),
                     userData: '0x',
                 };
 
@@ -1189,14 +1217,9 @@ export function formatSwaps(
             });
         });
 
-        swapInfo = {
-            tokenAddresses: tokenArray,
-            swaps: swapsV2,
-            swapAmount: swapAmount,
-            tokenIn: tokenIn,
-            tokenOut: tokenOut,
-            returnAmount,
-        };
+        swapInfo.swapAmount = scale(swapAmount, tokenInDecimals);
+        swapInfo.returnAmount = scale(returnAmount, tokenOutDecimals);
+        swapInfo.swaps = swapsV2;
     } else {
         const swapsV2: SwapV2[] = [];
 
@@ -1208,7 +1231,10 @@ export function formatSwaps(
                     poolId: swap.pool,
                     tokenInIndex: inIndex,
                     tokenOutIndex: outIndex,
-                    amountOut: swap.swapAmount,
+                    amountOut: scale(
+                        bnum(swap.swapAmount),
+                        swap.tokenOutDecimals
+                    ).toString(),
                     userData: '0x',
                 };
 
@@ -1216,15 +1242,13 @@ export function formatSwaps(
             });
         });
 
-        swapInfo = {
-            tokenAddresses: tokenArray,
-            swaps: swapsV2,
-            swapAmount: swapAmount,
-            tokenIn: tokenIn,
-            tokenOut: tokenOut,
-            returnAmount,
-        };
+        swapInfo.swapAmount = scale(swapAmount, tokenOutDecimals);
+        swapInfo.returnAmount = scale(returnAmount, tokenInDecimals);
+        swapInfo.swaps = swapsV2;
     }
 
+    swapInfo.tokenAddresses = tokenArray;
+    swapInfo.tokenIn = tokenIn;
+    swapInfo.tokenOut = tokenOut;
     return swapInfo;
 }

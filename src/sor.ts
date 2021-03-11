@@ -331,6 +331,8 @@ export const smartOrderRouter = (
                         ? minAmountOut.toString()
                         : maxAmountIn.toString(),
                 maxPrice: maxPrice.toString(),
+                tokenInDecimals: path.poolPairData[0].decimalsIn,
+                tokenOutDecimals: path.poolPairData[0].decimalsOut,
             };
             swaps.push([swap]);
             // Call EVMgetOutputAmountSwap to guarantee pool state is updated
@@ -395,6 +397,8 @@ export const smartOrderRouter = (
                         ? minAmountOut.toString()
                         : maxAmountIn.toString(),
                 maxPrice: maxPrice.toString(),
+                tokenInDecimals: path.poolPairData[0].decimalsIn,
+                tokenOutDecimals: path.poolPairData[0].decimalsOut,
             };
 
             // Add swap from second pool
@@ -408,6 +412,8 @@ export const smartOrderRouter = (
                         ? minAmountOut.toString()
                         : maxAmountIn.toString(),
                 maxPrice: maxPrice.toString(),
+                tokenInDecimals: path.poolPairData[1].decimalsIn,
+                tokenOutDecimals: path.poolPairData[1].decimalsOut,
             };
             swaps.push([swap1hop, swap2hop]);
         }

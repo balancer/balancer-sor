@@ -9,11 +9,11 @@ describe(`Tests for Helpers.`, () => {
     it(`Should format directhop swapExactIn`, () => {
         const swapAmount = new BigNumber(1);
         const returnAmount = new BigNumber(2);
-        const tokenIn = '0x8b6e6e7b5b3801fed2cafd4b22b8a16c2f2db21a';
-        const tokenOut = '0x056fd409e1d7a124bd7017459dfea2f387b6d5cd';
+        const tokenIn = '0x6b175474e89094c44da98b954eedeac495271d0f';
+        const tokenOut = '0xba100000625a3754423978a60c9317c58a424e3d';
         const swapType = 'swapExactIn';
 
-        const swapsV1Format: Swap[][] = testSwaps.directhops;
+        const swapsV1Format: any = testSwaps.directhops;
 
         const expectedTokenAddresses: string[] = [
             '0x6b175474e89094c44da98b954eedeac495271d0f',
@@ -31,8 +31,8 @@ describe(`Tests for Helpers.`, () => {
 
         expect(expectedTokenAddresses).to.deep.eq(swapInfo.tokenAddresses);
         assert.equal(swapInfo.swaps.length, 2);
-        assert.equal(swapAmount.toString(), swapInfo.swapAmount.toString());
-        assert.equal(returnAmount.toString(), swapInfo.returnAmount.toString());
+        assert.equal('1000000000000000000', swapInfo.swapAmount.toString());
+        assert.equal('2000000000000000000', swapInfo.returnAmount.toString());
         assert.equal(tokenIn, swapInfo.tokenIn);
         assert.equal(tokenOut, swapInfo.tokenOut);
         assert.equal(swapInfo.swaps[0].tokenInIndex, 0);
@@ -48,11 +48,11 @@ describe(`Tests for Helpers.`, () => {
     it(`Should format multihop swapExactIn`, () => {
         const swapAmount = new BigNumber(1);
         const returnAmount = new BigNumber(2);
-        const tokenIn = '0x8b6e6e7b5b3801fed2cafd4b22b8a16c2f2db21a';
+        const tokenIn = '0x6b175474e89094c44da98b954eedeac495271d0f';
         const tokenOut = '0x056fd409e1d7a124bd7017459dfea2f387b6d5cd';
         const swapType = 'swapExactIn';
 
-        const swapsV1Format: Swap[][] = testSwaps.multihops;
+        const swapsV1Format: any = testSwaps.multihops;
 
         const expectedTokenAddresses: string[] = [
             '0x6b175474e89094c44da98b954eedeac495271d0f',
@@ -72,8 +72,8 @@ describe(`Tests for Helpers.`, () => {
 
         expect(expectedTokenAddresses).to.deep.eq(swapInfo.tokenAddresses);
         assert.equal(swapInfo.swaps.length, 4);
-        assert.equal(swapAmount.toString(), swapInfo.swapAmount.toString());
-        assert.equal(returnAmount.toString(), swapInfo.returnAmount.toString());
+        assert.equal('1000000000000000000', swapInfo.swapAmount.toString());
+        assert.equal('2000000000000000000', swapInfo.returnAmount.toString());
         assert.equal(tokenIn, swapInfo.tokenIn);
         assert.equal(tokenOut, swapInfo.tokenOut);
         assert.equal(swapInfo.swaps[0].tokenInIndex, 0);
@@ -97,11 +97,11 @@ describe(`Tests for Helpers.`, () => {
     it(`Should format direct & multihop swapExactIn`, () => {
         const swapAmount = new BigNumber(1);
         const returnAmount = new BigNumber(2);
-        const tokenIn = '0x8b6e6e7b5b3801fed2cafd4b22b8a16c2f2db21a';
+        const tokenIn = '0x6b175474e89094c44da98b954eedeac495271d0f';
         const tokenOut = '0x056fd409e1d7a124bd7017459dfea2f387b6d5cd';
         const swapType = 'swapExactIn';
 
-        const swapsV1Format: Swap[][] = testSwaps.directandmultihops;
+        const swapsV1Format: any = testSwaps.directandmultihops;
 
         const expectedTokenAddresses: string[] = [
             '0x6b175474e89094c44da98b954eedeac495271d0f',
@@ -120,8 +120,8 @@ describe(`Tests for Helpers.`, () => {
 
         expect(expectedTokenAddresses).to.deep.eq(swapInfo.tokenAddresses);
         assert.equal(swapInfo.swaps.length, 3);
-        assert.equal(swapAmount.toString(), swapInfo.swapAmount.toString());
-        assert.equal(returnAmount.toString(), swapInfo.returnAmount.toString());
+        assert.equal('1000000000000000000', swapInfo.swapAmount.toString());
+        assert.equal('2000000000000000000', swapInfo.returnAmount.toString());
         assert.equal(tokenIn, swapInfo.tokenIn);
         assert.equal(tokenOut, swapInfo.tokenOut);
         assert.equal(swapInfo.swaps[0].tokenInIndex, 0);
@@ -141,11 +141,11 @@ describe(`Tests for Helpers.`, () => {
     it(`Should format directhop swapExactOut`, () => {
         const swapAmount = new BigNumber(1);
         const returnAmount = new BigNumber(1);
-        const tokenIn = '0x8b6e6e7b5b3801fed2cafd4b22b8a16c2f2db21a';
-        const tokenOut = '0x056fd409e1d7a124bd7017459dfea2f387b6d5cd';
+        const tokenIn = '0x6b175474e89094c44da98b954eedeac495271d0f';
+        const tokenOut = '0xba100000625a3754423978a60c9317c58a424e3d';
         const swapType = 'swapExactOut';
 
-        const swapsV1Format: Swap[][] = testSwaps.directhops;
+        const swapsV1Format: any = testSwaps.directhops;
 
         const expectedTokenAddresses: string[] = [
             '0x6b175474e89094c44da98b954eedeac495271d0f',
@@ -163,8 +163,8 @@ describe(`Tests for Helpers.`, () => {
 
         expect(expectedTokenAddresses).to.deep.eq(swapInfo.tokenAddresses);
         assert.equal(swapInfo.swaps.length, 2);
-        assert.equal(swapAmount.toString(), swapInfo.swapAmount.toString());
-        assert.equal(returnAmount.toString(), swapInfo.returnAmount.toString());
+        assert.equal('1000000000000000000', swapInfo.swapAmount.toString());
+        assert.equal('1000000000000000000', swapInfo.returnAmount.toString());
         assert.equal(tokenIn, swapInfo.tokenIn);
         assert.equal(tokenOut, swapInfo.tokenOut);
         assert.equal(swapInfo.swaps[0].tokenInIndex, 0);
@@ -180,11 +180,11 @@ describe(`Tests for Helpers.`, () => {
     it(`Should format multihop swapExactOut`, () => {
         const swapAmount = new BigNumber(1);
         const returnAmount = new BigNumber(2);
-        const tokenIn = '0x8b6e6e7b5b3801fed2cafd4b22b8a16c2f2db21a';
+        const tokenIn = '0x6b175474e89094c44da98b954eedeac495271d0f';
         const tokenOut = '0x056fd409e1d7a124bd7017459dfea2f387b6d5cd';
         const swapType = 'swapExactOut';
 
-        const swapsV1Format: Swap[][] = testSwaps.multihops;
+        const swapsV1Format: any = testSwaps.multihops;
 
         const expectedTokenAddresses: string[] = [
             '0x6b175474e89094c44da98b954eedeac495271d0f',
@@ -204,8 +204,8 @@ describe(`Tests for Helpers.`, () => {
 
         expect(expectedTokenAddresses).to.deep.eq(swapInfo.tokenAddresses);
         assert.equal(swapInfo.swaps.length, 4);
-        assert.equal(swapAmount.toString(), swapInfo.swapAmount.toString());
-        assert.equal(returnAmount.toString(), swapInfo.returnAmount.toString());
+        assert.equal('1000000000000000000', swapInfo.swapAmount.toString());
+        assert.equal('2000000000000000000', swapInfo.returnAmount.toString());
         assert.equal(tokenIn, swapInfo.tokenIn);
         assert.equal(tokenOut, swapInfo.tokenOut);
         assert.equal(swapInfo.swaps[0].tokenInIndex, 0);
@@ -229,11 +229,11 @@ describe(`Tests for Helpers.`, () => {
     it(`Should format direct & multihop swapExactOut`, () => {
         const swapAmount = new BigNumber(1);
         const returnAmount = new BigNumber(2);
-        const tokenIn = '0x8b6e6e7b5b3801fed2cafd4b22b8a16c2f2db21a';
+        const tokenIn = '0x6b175474e89094c44da98b954eedeac495271d0f';
         const tokenOut = '0x056fd409e1d7a124bd7017459dfea2f387b6d5cd';
         const swapType = 'swapExactOut';
 
-        const swapsV1Format: Swap[][] = testSwaps.directandmultihops;
+        const swapsV1Format: any = testSwaps.directandmultihops;
 
         const expectedTokenAddresses: string[] = [
             '0x6b175474e89094c44da98b954eedeac495271d0f',
@@ -252,8 +252,8 @@ describe(`Tests for Helpers.`, () => {
 
         expect(expectedTokenAddresses).to.deep.eq(swapInfo.tokenAddresses);
         assert.equal(swapInfo.swaps.length, 3);
-        assert.equal(swapAmount.toString(), swapInfo.swapAmount.toString());
-        assert.equal(returnAmount.toString(), swapInfo.returnAmount.toString());
+        assert.equal('1000000000000000000', swapInfo.swapAmount.toString());
+        assert.equal('2000000000000000000', swapInfo.returnAmount.toString());
         assert.equal(tokenIn, swapInfo.tokenIn);
         assert.equal(tokenOut, swapInfo.tokenOut);
         assert.equal(swapInfo.swaps[0].tokenInIndex, 0);
@@ -268,5 +268,173 @@ describe(`Tests for Helpers.`, () => {
         assert.equal(swapInfo.swaps[0].amountIn, undefined);
         assert.equal(swapInfo.swaps[1].amountIn, undefined);
         assert.equal(swapInfo.swaps[2].amountIn, undefined);
+    });
+
+    it(`Should scale 6 decimal token correctly swapExactIn, USDC In`, () => {
+        const swapAmount = new BigNumber(1);
+        const returnAmount = new BigNumber(2);
+        const tokenIn = '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48';
+        const tokenOut = '0x6b175474e89094c44da98b954eedeac495271d0f';
+        const swapType = 'swapExactIn';
+
+        const swapsV1Format: any = testSwaps.directhopUSDCIn;
+
+        const expectedTokenAddresses: string[] = [
+            '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48',
+            '0x6b175474e89094c44da98b954eedeac495271d0f',
+        ];
+
+        const swapInfo: SwapInfo = formatSwaps(
+            swapsV1Format,
+            swapType,
+            swapAmount,
+            tokenIn,
+            tokenOut,
+            returnAmount
+        );
+
+        assert.equal(swapInfo.swaps.length, 1);
+        assert.equal('1000000', swapInfo.swapAmount.toString());
+        assert.equal('2000000000000000000', swapInfo.returnAmount.toString());
+        assert.equal(tokenIn, swapInfo.tokenIn);
+        assert.equal(tokenOut, swapInfo.tokenOut);
+        expect(expectedTokenAddresses).to.deep.eq(swapInfo.tokenAddresses);
+        assert.equal(swapInfo.swaps[0].tokenInIndex, 0);
+        assert.equal(swapInfo.swaps[0].tokenOutIndex, 1);
+        assert.equal(swapInfo.swaps[0].amountIn, '77777777');
+        assert.equal(swapInfo.swaps[0].amountOut, undefined);
+    });
+
+    it(`Should scale 6 decimal token correctly swapExactOut, USDC In`, () => {
+        const swapAmount = new BigNumber(1);
+        const returnAmount = new BigNumber(2);
+        const tokenIn = '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48';
+        const tokenOut = '0x6b175474e89094c44da98b954eedeac495271d0f';
+        const swapType = 'swapExactOut';
+
+        const swapsV1Format: any = testSwaps.directhopUSDCIn;
+
+        const expectedTokenAddresses: string[] = [
+            '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48',
+            '0x6b175474e89094c44da98b954eedeac495271d0f',
+        ];
+
+        const swapInfo: SwapInfo = formatSwaps(
+            swapsV1Format,
+            swapType,
+            swapAmount,
+            tokenIn,
+            tokenOut,
+            returnAmount
+        );
+
+        assert.equal(swapInfo.swaps.length, 1);
+        assert.equal('1000000000000000000', swapInfo.swapAmount.toString());
+        assert.equal('2000000', swapInfo.returnAmount.toString());
+        assert.equal(tokenIn, swapInfo.tokenIn);
+        assert.equal(tokenOut, swapInfo.tokenOut);
+        expect(expectedTokenAddresses).to.deep.eq(swapInfo.tokenAddresses);
+        assert.equal(swapInfo.swaps[0].tokenInIndex, 0);
+        assert.equal(swapInfo.swaps[0].tokenOutIndex, 1);
+        assert.equal(swapInfo.swaps[0].amountOut, '77777777000000000000');
+        assert.equal(swapInfo.swaps[0].amountIn, undefined);
+    });
+
+    it(`Should scale 6 decimal token correctly swapExactIn, USDC Out`, () => {
+        const swapAmount = new BigNumber(1);
+        const returnAmount = new BigNumber(2);
+        const tokenIn = '0x6b175474e89094c44da98b954eedeac495271d0f';
+        const tokenOut = '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48';
+        const swapType = 'swapExactIn';
+
+        const swapsV1Format: any = testSwaps.directhopUSDCOut;
+
+        const expectedTokenAddresses: string[] = [
+            '0x6b175474e89094c44da98b954eedeac495271d0f',
+            '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48',
+        ];
+
+        const swapInfo: SwapInfo = formatSwaps(
+            swapsV1Format,
+            swapType,
+            swapAmount,
+            tokenIn,
+            tokenOut,
+            returnAmount
+        );
+
+        assert.equal(swapInfo.swaps.length, 1);
+        assert.equal('1000000000000000000', swapInfo.swapAmount.toString());
+        assert.equal('2000000', swapInfo.returnAmount.toString());
+        assert.equal(tokenIn, swapInfo.tokenIn);
+        assert.equal(tokenOut, swapInfo.tokenOut);
+        expect(expectedTokenAddresses).to.deep.eq(swapInfo.tokenAddresses);
+        assert.equal(swapInfo.swaps[0].tokenInIndex, 0);
+        assert.equal(swapInfo.swaps[0].tokenOutIndex, 1);
+        assert.equal(swapInfo.swaps[0].amountIn, '77777777000000000000');
+        assert.equal(swapInfo.swaps[0].amountOut, undefined);
+    });
+
+    it(`Should scale 6 decimal token correctly swapExactOut, USDC Out`, () => {
+        const swapAmount = new BigNumber(1);
+        const returnAmount = new BigNumber(2);
+        const tokenIn = '0x6b175474e89094c44da98b954eedeac495271d0f';
+        const tokenOut = '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48';
+        const swapType = 'swapExactOut';
+
+        const swapsV1Format: any = testSwaps.directhopUSDCOut;
+
+        const expectedTokenAddresses: string[] = [
+            '0x6b175474e89094c44da98b954eedeac495271d0f',
+            '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48',
+        ];
+
+        const swapInfo: SwapInfo = formatSwaps(
+            swapsV1Format,
+            swapType,
+            swapAmount,
+            tokenIn,
+            tokenOut,
+            returnAmount
+        );
+
+        assert.equal(swapInfo.swaps.length, 1);
+        assert.equal('1000000', swapInfo.swapAmount.toString());
+        assert.equal('2000000000000000000', swapInfo.returnAmount.toString());
+        assert.equal(tokenIn, swapInfo.tokenIn);
+        assert.equal(tokenOut, swapInfo.tokenOut);
+        expect(expectedTokenAddresses).to.deep.eq(swapInfo.tokenAddresses);
+        assert.equal(swapInfo.swaps[0].tokenInIndex, 0);
+        assert.equal(swapInfo.swaps[0].tokenOutIndex, 1);
+        assert.equal(swapInfo.swaps[0].amountOut, '77777777');
+        assert.equal(swapInfo.swaps[0].amountIn, undefined);
+    });
+
+    it(`Should handle no swaps case`, () => {
+        const swapAmount = new BigNumber(1);
+        const returnAmount = new BigNumber(2);
+        const tokenIn = '0x6b175474e89094c44da98b954eedeac495271d0f';
+        const tokenOut = '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48';
+        const swapType = 'swapExactOut';
+
+        const swapsV1Format: any = [];
+
+        const expectedTokenAddresses: string[] = [];
+
+        const swapInfo: SwapInfo = formatSwaps(
+            swapsV1Format,
+            swapType,
+            swapAmount,
+            tokenIn,
+            tokenOut,
+            returnAmount
+        );
+
+        assert.equal(swapInfo.swaps.length, 0);
+        assert.equal('0', swapInfo.swapAmount.toString());
+        assert.equal('0', swapInfo.returnAmount.toString());
+        assert.equal('', swapInfo.tokenIn);
+        assert.equal('', swapInfo.tokenOut);
+        expect(expectedTokenAddresses).to.deep.eq(swapInfo.tokenAddresses);
     });
 });
