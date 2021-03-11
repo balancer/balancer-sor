@@ -164,7 +164,18 @@ describe('Run Tests From Saved Pools', () => {
                 );
             }
 
-            // !!!!!!! TODO Add filter compare method if required
+            if (testData.tradeInfo.RefResultV1) {
+                assert.equal(
+                    v1SwapData.returnAmount.toString(),
+                    testData.tradeInfo.RefResultV1,
+                    'Result should be same as saved reference'
+                );
+                assert.equal(
+                    v2SwapData.returnAmount.toString(),
+                    testData.tradeInfo.RefResultV2,
+                    'Result should be same as saved reference'
+                );
+            }
         }).timeout(100000);
     });
 });

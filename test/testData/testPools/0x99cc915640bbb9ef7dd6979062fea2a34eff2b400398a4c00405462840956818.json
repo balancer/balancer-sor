@@ -7,7 +7,10 @@
         "SwapAmount": "77192492.484009",
         "GasPrice": "30000000000",
         "SwapAmountDecimals": "8",
-        "ReturnAmountDecimals": "18"
+        "ReturnAmountDecimals": "18",
+        "RefResultV1": "966.871664465149869082",
+        "RefResultV2": "967.07394145588686",
+        "RefTimeStamp": "1615466252"
     },
     "pools": [
         {
