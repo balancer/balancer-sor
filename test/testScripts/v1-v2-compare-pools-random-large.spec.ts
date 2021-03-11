@@ -30,6 +30,7 @@ enum SwapAmt {
     Large,
     Inter1,
     Inter2,
+    Single,
 }
 
 // npx mocha -r ts-node/register test/testScripts/v1-v2-compare-pools-random-large.spec.ts
@@ -122,6 +123,18 @@ describe('Run Large Amount Of Tests Using Saved Pools Data', async () => {
                 SwapAmt.Inter2,
                 `${testDir}/${file}.json`
             );
+
+            await testSwap(
+                `swapExactIn`,
+                SwapAmt.Single,
+                `${testDir}/${file}.json`
+            );
+
+            await testSwap(
+                `swapExactOut`,
+                SwapAmt.Single,
+                `${testDir}/${file}.json`
+            );
         }
     });
 });
@@ -151,6 +164,10 @@ async function testSwap(swapType: string, swapAmtType: SwapAmt, file: string) {
             swapAmount = tradeData.largeSwapAmtOut;
         else if (swapType === 'swapExactOut' && swapAmtType === SwapAmt.Inter1)
             swapAmount = tradeData.inter1SwapAmtOut;
+        else if (swapType === 'swapExactIn' && swapAmtType === SwapAmt.Single)
+            swapAmount = bnum(1).times(bnum(10 ** tokenInDecimals));
+        else if (swapType === 'swapExactOut' && swapAmtType === SwapAmt.Single)
+            swapAmount = bnum(1).times(bnum(10 ** tokenOutDecimals));
         else swapAmount = tradeData.inter2SwapAmtOut;
 
         let swapAmountDecimals = tradeData.tokenInDecimals.toString();
