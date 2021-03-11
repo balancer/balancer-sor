@@ -618,12 +618,12 @@ export const parsePoolPairData = (
     if (tokenIn == p.id) {
         pairType = 'BPT-token';
         balanceIn = p.balanceBpt;
-        decimalsIn = '18'; // Not used but has to be defined
+        decimalsIn = bnum(18); // Not used but has to be defined
         weightIn = bnum(1); // Not used but has to be defined
     } else if (tokenOut == p.id) {
         pairType = 'token-BPT';
         balanceOut = p.balanceBpt;
-        decimalsOut = '18'; // Not used but has to be defined
+        decimalsOut = bnum(18); // Not used but has to be defined
         weightOut = bnum(1); // Not used but has to be defined
     } else {
         pairType = 'token-token';
@@ -862,6 +862,7 @@ export function updateTokenBalanceForPool(
     // token is BPT
     if (pool.id == token) {
         pool.balanceBpt = balance;
+        return pool;
     } else {
         // token is underlying in the pool
         let T = pool.tokens.find(t => t.address === token);
