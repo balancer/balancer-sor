@@ -18,6 +18,8 @@ export interface PoolPairData {
     amp?: BigNumber; // Only for stable pools
     tokenIndexIn?: number; // Only for stable pools
     tokenIndexOut?: number; // Only for stable pools
+    decimalsIn: number;
+    decimalsOut: number;
 }
 
 export interface Path {
@@ -35,6 +37,8 @@ export type Swap = {
     swapAmount?: string;
     limitReturnAmount?: string;
     maxPrice?: string;
+    tokenInDecimals: number;
+    tokenOutDecimals: number;
 };
 
 export interface SubGraphPools {
