@@ -517,6 +517,11 @@ function getBestPathIds(
                 }
             }
         });
+
+        if (bestPathIndex === -1) {
+            return [[], [], [], []];
+        }
+
         bestPathIds.push(paths[bestPathIndex].id);
         selectedPaths.push(paths[bestPathIndex]);
         selectedPathLimitAmounts.push(paths[bestPathIndex].limitAmount);

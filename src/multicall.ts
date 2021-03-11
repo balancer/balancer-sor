@@ -37,6 +37,10 @@ export async function getOnChainBalances(
                 response[i]
             );
 
+            const resultTokens = result.tokens.map(token =>
+                token.toLowerCase()
+            );
+
             const poolTokens: SubGraphToken[] = [];
 
             const poolWithBalances: SubGraphPool = {
@@ -53,16 +57,17 @@ export async function getOnChainBalances(
             };
 
             pools.pools[i].tokens.forEach(token => {
-                let resultIndex = result.tokens.indexOf(token.address);
+                let resultIndex = resultTokens.indexOf(token.address);
 
+                const balance = bmath
+                    .scale(
+                        bmath.bnum(result.balances[resultIndex]),
+                        -Number(token.decimals)
+                    )
+                    .toString();
                 poolWithBalances.tokens.push({
                     address: token.address.toLowerCase(),
-                    balance: bmath
-                        .scale(
-                            bmath.bnum(result.balances[resultIndex]),
-                            -Number(token.decimals)
-                        )
-                        .toString(),
+                    balance: balance,
                     decimals: token.decimals,
                     denormWeight: token.denormWeight,
                 });

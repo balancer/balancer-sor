@@ -651,7 +651,7 @@ export const parsePoolPairData = (
     }
 
     // Todo: the pool type should be already on subgraph
-    if (typeof p.amp === 'undefined') poolType = 'Weighted';
+    if (typeof p.amp === 'undefined' || p.amp === '0') poolType = 'Weighted';
     else poolType = 'Stable';
 
     if (poolType == 'Weighted') {
