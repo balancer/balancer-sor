@@ -489,20 +489,26 @@ export async function getV2Swap(
     return { title: 'v2', swaps, returnAmount, timeData, costOutputToken };
 }
 
-function getAmounts(decimals) {
+function getAmountsScaled(decimals) {
     const min = 10 ** -decimals;
     const mid = 1;
     const max = 10 ** 6;
     const smallAmt = Math.random() * (mid - min) + min;
     const highAmt = Math.random() * (max - mid) + mid;
+    const interAmt1 = Math.random() * (highAmt - smallAmt) + smallAmt;
+    const interAmt2 = Math.random() * (highAmt - smallAmt) + smallAmt;
     let smallSwapAmt = scale(bnum(smallAmt), decimals);
     let largeSwapAmt = scale(bnum(highAmt), decimals);
+    let inter1SwapAmt = scale(bnum(interAmt1), decimals);
+    let inter2SwapAmt = scale(bnum(interAmt2), decimals);
 
     // Gets rid of decimal places that causes issue between V1/V2 compare
     smallSwapAmt = new BigNumber(smallSwapAmt.toString().split('.')[0]);
     largeSwapAmt = new BigNumber(largeSwapAmt.toString().split('.')[0]);
+    inter1SwapAmt = new BigNumber(inter1SwapAmt.toString().split('.')[0]);
+    inter2SwapAmt = new BigNumber(inter2SwapAmt.toString().split('.')[0]);
 
-    return [smallSwapAmt, largeSwapAmt];
+    return [smallSwapAmt, largeSwapAmt, inter1SwapAmt, inter2SwapAmt];
 }
 
 export function getRandomTradeData() {
@@ -521,27 +527,47 @@ export function getRandomTradeData() {
     const decimalsIn = tokenIn.decimals;
     const decimalsOut = tokenOut.decimals;
 
-    const [smallSwapAmtIn, largeSwapAmtIn] = getAmounts(decimalsIn);
-    const [smallSwapAmtOut, largeSwapAmtOut] = getAmounts(decimalsOut);
+    // These are in scaled BigNumber format.
+    const [
+        smallSwapAmtIn,
+        largeSwapAmtIn,
+        inter1SwapAmtIn,
+        inter2SwapAmtIn,
+    ] = getAmountsScaled(decimalsIn);
+    const [
+        smallSwapAmtOut,
+        largeSwapAmtOut,
+        inter1SwapAmtOut,
+        inter2SwapAmtOut,
+    ] = getAmountsScaled(decimalsOut);
     const maxPools = Math.floor(Math.random() * (7 - 1 + 1) + 1);
-
-    console.log(`In: ${symbolIn}`);
-    console.log(`Out: ${symbolOut}`);
+    /*
+    console.log(`In: ${symbolIn} ${tokenIn.address.toLowerCase()}`);
+    console.log(`Out: ${symbolOut} ${tokenOut.address.toLowerCase()}`);
     console.log(`Small Swap Amt In: ${smallSwapAmtIn.toString()}`);
     console.log(`Large Swap Amt In: ${largeSwapAmtIn.toString()}`);
+    console.log(`Inter1 Swap Amt In: ${inter1SwapAmtIn.toString()}`);
+    console.log(`Inter2 Swap Amt In: ${inter2SwapAmtIn.toString()}`);
     console.log(`Small Swap Amt Out: ${smallSwapAmtOut.toString()}`);
     console.log(`Large Swap Amt Out: ${largeSwapAmtOut.toString()}`);
+    console.log(`Inter1 Swap Amt Out: ${inter1SwapAmtOut.toString()}`);
+    console.log(`Inter2 Swap Amt Out: ${inter2SwapAmtOut.toString()}`);
     console.log(`MaxPools: ${maxPools}`);
+    */
 
     return {
-        tokenIn: tokenIn.address,
-        tokenOut: tokenOut.address,
+        tokenIn: tokenIn.address.toLowerCase(),
+        tokenOut: tokenOut.address.toLowerCase(),
         tokenInDecimals: decimalsIn,
         tokenOutDecimals: decimalsOut,
         smallSwapAmtIn,
         largeSwapAmtIn,
+        inter1SwapAmtIn,
+        inter2SwapAmtIn,
         smallSwapAmtOut,
         largeSwapAmtOut,
+        inter1SwapAmtOut,
+        inter2SwapAmtOut,
         maxPools,
     };
 }
@@ -663,23 +689,31 @@ export function displayResults(
     TestTitle: string,
     TradeInfo: any,
     Results: any[],
-    Verbose: boolean
+    Verbose: boolean,
+    MaxPools: number
 ) {
     let symbolIn, symbolOut;
     const symbols = Object.keys(Tokens);
     symbols.forEach(symbol => {
-        if (Tokens[symbol].address === TradeInfo.TokenIn) symbolIn = symbol;
+        if (
+            Tokens[symbol].address.toLowerCase() ===
+            TradeInfo.TokenIn.toLowerCase()
+        )
+            symbolIn = symbol;
 
-        if (Tokens[symbol].address === TradeInfo.TokenOut) symbolOut = symbol;
+        if (
+            Tokens[symbol].address.toLowerCase() ===
+            TradeInfo.TokenOut.toLowerCase()
+        )
+            symbolOut = symbol;
     });
     const tokenIn = Tokens[symbolIn];
 
-    console.log(`Test File: ${TestTitle}`);
-    console.log(
-        `${
-            TradeInfo.SwapType
-        }\n${symbolIn}>${symbolOut}\nSwap Amt: ${TradeInfo.SwapAmount.toString()}`
-    );
+    console.log(`Pools From File: ${TestTitle}`);
+    console.log(`In: ${symbolIn} ${TradeInfo.TokenIn.toLowerCase()}`);
+    console.log(`Out: ${symbolOut} ${TradeInfo.TokenOut.toLowerCase()}`);
+    console.log(`Swap Amt: ${TradeInfo.SwapAmount.toString()}`);
+    console.log(`Max Pools: ${MaxPools}`);
 
     let tableData = [];
     Results.forEach(result => {
