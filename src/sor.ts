@@ -146,15 +146,15 @@ export const smartOrderRouter = (
     //  We use the highest limits to define the initial number of pools considered and the initial guess for swapAmounts. If the
     //  highest_limit is lower than totalSwapAmount, then we should obviously not waste time trying to calculate the SOR suggestion for 1 pool,
     //  Same for 2, 3 pools etc.
-    let initialNumPools = -1; // Initializing
+    let initialNumPaths = -1; // Initializing
     for (let i = 0; i < maxPools; i++) {
         let sumHighestLimitAmounts = highestLimitAmounts
             .slice(0, i + 1)
             .reduce((a, b) => a.plus(b));
         if (totalSwapAmount.gt(sumHighestLimitAmounts)) continue; // the i initial pools are not enough to get to totalSwapAmount, continue
         //  If above is false, it means we have enough liquidity with first i pools
-        initialNumPools = i + 1;
-        swapAmounts = highestLimitAmounts.slice(0, initialNumPools);
+        initialNumPaths = i + 1;
+        swapAmounts = highestLimitAmounts.slice(0, initialNumPaths);
         //  Since the sum of the first i highest limits will be less than totalSwapAmount, we remove the difference to the last swapAmount
         //  so we are sure that the sum of swapAmounts will be equal to totalSwapAmount
         let difference = sumHighestLimitAmounts.minus(totalSwapAmount);
@@ -163,16 +163,16 @@ export const smartOrderRouter = (
         ].minus(difference);
         break; // No need to keep looping as this number of pools (i) has enough liquidity
     }
-    if (initialNumPools == -1) {
+    if (initialNumPaths == -1) {
         return [[], bnum(0)]; // Not enough liquidity, return empty
     }
 
     // First get the optimal totalReturn to trade 'totalSwapAmount' with
     // one path only (b=1). Then increase the number of pools as long as
     // improvementCondition is true (see more information below)
-    for (let b = initialNumPools; b <= paths.length; b++) {
+    for (let b = initialNumPaths; b <= paths.length; b++) {
         totalReturn = 0;
-        if (b != initialNumPools) {
+        if (b != initialNumPaths) {
             // We already had a previous iteration and are adding another pool this new iteration
             // swapAmounts.push(bnum(1)); // Initialize new swapAmount with 1 wei to
             // // make sure that it won't be considered as a non viable amount (which would
@@ -260,7 +260,7 @@ export const smartOrderRouter = (
             improvementCondition =
                 totalReturnConsideringFees.isGreaterThan(
                     bestTotalReturnConsideringFees
-                ) || b === initialNumPools; // b === initialNumPools means its the first iteration so bestTotalReturnConsideringFees isn't currently a value
+                ) || b === initialNumPaths; // b === initialNumPaths means its the first iteration so bestTotalReturnConsideringFees isn't currently a value
         } else {
             totalReturnConsideringFees = totalReturn.plus(
                 bnum(totalNumberOfPools).times(costReturnToken)
@@ -268,7 +268,7 @@ export const smartOrderRouter = (
             improvementCondition =
                 totalReturnConsideringFees.isLessThan(
                     bestTotalReturnConsideringFees
-                ) || b === initialNumPools; // b === initialNumPools means its the first iteration so bestTotalReturnConsideringFees isn't currently a value
+                ) || b === initialNumPaths; // b === initialNumPaths means its the first iteration so bestTotalReturnConsideringFees isn't currently a value
         }
         if (improvementCondition === true) {
             bestSwapAmounts = [...swapAmounts]; // Copy to avoid linking variables
