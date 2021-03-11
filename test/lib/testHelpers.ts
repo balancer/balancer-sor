@@ -21,6 +21,8 @@ import { performance } from 'perf_hooks';
 import { assert } from 'chai';
 import { getAddress } from '@ethersproject/address';
 import { Contract } from '@ethersproject/contracts';
+// Mainnet reference tokens with addresses & decimals
+import Tokens from '../testData/eligibleTokens.json';
 
 // These types are used for V1 compare
 interface Pools {
@@ -43,58 +45,6 @@ interface Token {
     decimals: number;
     denormWeight: BigNumber;
 }
-
-// Mainnet reference tokens with addresses & decimals
-const Tokens = {
-    WETH: {
-        address: '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2',
-        decimals: 18,
-    },
-    DAI: {
-        address: '0x6b175474e89094c44da98b954eedeac495271d0f',
-        decimals: 18,
-    },
-    BAL: {
-        address: '0xba100000625a3754423978a60c9317c58a424e3d',
-        decimals: 18,
-    },
-    USDC: {
-        address: '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48',
-        decimals: 6,
-    },
-    WBTC: {
-        address: '0x2260fac5e5542a773aa44fbcfedf7c193bc2c599',
-        decimals: 8,
-    },
-    sBTC: {
-        address: '0xfe18be6b3bd88a2d2a7f928d00292e7a9963cfc6',
-        decimals: 18,
-    },
-    MKR: {
-        address: '0x9f8f72aa9304c8b593d555f12ef6589cc3a579a2',
-        decimals: 18,
-    },
-    AAVE: {
-        address: '0x7fc66500c84a76ad7e9c93437bfc5ac33e2ddae9',
-        decimals: 18,
-    },
-    UNI: {
-        address: '0x1f9840a85d5af5bf1d1762f925bdaddc4201f984',
-        decimals: 18,
-    },
-    SNX: {
-        address: '0xc011a73ee8576fb46f5e1c5751ca3b9fe0af2a6f',
-        decimals: 18,
-    },
-    COMP: {
-        address: '0xc00e94cb662c3520282e6f5717214004a7f26888',
-        decimals: 18,
-    },
-    GUSD: {
-        address: '0x056fd409e1d7a124bd7017459dfea2f387b6d5cd',
-        decimals: 2,
-    },
-};
 
 interface Profiling {
     onChainBalances: boolean;
@@ -558,9 +508,14 @@ function getAmounts(decimals) {
 export function getRandomTradeData() {
     // Find a random token from list
     const symbols = Object.keys(Tokens);
-    const symbolIn = symbols[Math.floor(Math.random() * symbols.length)];
+    const randomIn = Math.floor(Math.random() * symbols.length);
+    let randomOut = Math.floor(Math.random() * symbols.length);
+    while (randomOut === randomIn)
+        randomOut = Math.floor(Math.random() * symbols.length);
+
+    const symbolIn = symbols[randomIn];
     const tokenIn = Tokens[symbolIn];
-    const symbolOut = symbols[Math.floor(Math.random() * symbols.length)];
+    const symbolOut = symbols[randomOut];
     const tokenOut = Tokens[symbolOut];
 
     const decimalsIn = tokenIn.decimals;
