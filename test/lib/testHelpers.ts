@@ -22,7 +22,8 @@ import { assert } from 'chai';
 import { getAddress } from '@ethersproject/address';
 import { Contract } from '@ethersproject/contracts';
 // Mainnet reference tokens with addresses & decimals
-import Tokens from '../testData/eligibleTokens.json';
+import WeightedTokens from '../testData/eligibleTokens.json';
+import StableTokens from '../testData/stableTokens.json';
 
 // These types are used for V1 compare
 interface Pools {
@@ -511,18 +512,21 @@ function getAmountsScaled(decimals) {
     return [smallSwapAmt, largeSwapAmt, inter1SwapAmt, inter2SwapAmt];
 }
 
-export function getRandomTradeData() {
+export function getRandomTradeData(isStableOnly: boolean) {
+    let tokens: any = WeightedTokens;
+    if (isStableOnly) tokens = StableTokens;
+
     // Find a random token from list
-    const symbols = Object.keys(Tokens);
+    const symbols = Object.keys(tokens);
     const randomIn = Math.floor(Math.random() * symbols.length);
     let randomOut = Math.floor(Math.random() * symbols.length);
     while (randomOut === randomIn)
         randomOut = Math.floor(Math.random() * symbols.length);
 
     const symbolIn = symbols[randomIn];
-    const tokenIn = Tokens[symbolIn];
+    const tokenIn = tokens[symbolIn];
     const symbolOut = symbols[randomOut];
-    const tokenOut = Tokens[symbolOut];
+    const tokenOut = tokens[symbolOut];
 
     const decimalsIn = tokenIn.decimals;
     const decimalsOut = tokenOut.decimals;
@@ -693,21 +697,23 @@ export function displayResults(
     MaxPools: number
 ) {
     let symbolIn, symbolOut;
-    const symbols = Object.keys(Tokens);
+    let allTokens = WeightedTokens;
+    Object.assign(allTokens, StableTokens);
+    const symbols = Object.keys(allTokens);
     symbols.forEach(symbol => {
         if (
-            Tokens[symbol].address.toLowerCase() ===
+            allTokens[symbol].address.toLowerCase() ===
             TradeInfo.TokenIn.toLowerCase()
         )
             symbolIn = symbol;
 
         if (
-            Tokens[symbol].address.toLowerCase() ===
+            allTokens[symbol].address.toLowerCase() ===
             TradeInfo.TokenOut.toLowerCase()
         )
             symbolOut = symbol;
     });
-    const tokenIn = Tokens[symbolIn];
+    const tokenIn = allTokens[symbolIn];
 
     console.log(`Pools From File: ${TestTitle}`);
     console.log(`In: ${symbolIn} ${TradeInfo.TokenIn.toLowerCase()}`);
