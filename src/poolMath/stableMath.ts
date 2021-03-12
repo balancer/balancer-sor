@@ -464,6 +464,11 @@ export function _exactBPTInForTokenOut(amount, poolPairData): BigNumber {
 //////////////////////
 
 export function _derivative(func: Function, amount, poolPairData): BigNumber {
+    const INFINITESIMAL = bnum(10 ** -6); // Todo: put in config file
+
+    // If amount is zero we have to change it to a small value otherwise the calculation
+    // below won't work as delta will also be 0 and we'll have 0/0
+    if (amount.isZero()) amount = INFINITESIMAL;
     let x = amount;
     let delta = x.times(0.0001);
     let prevDerivative = bnum(0);
@@ -478,7 +483,7 @@ export function _derivative(func: Function, amount, poolPairData): BigNumber {
             derivative
                 .minus(prevDerivative)
                 .abs()
-                .lt(bnum(10 ** -6))
+                .lt(INFINITESIMAL)
         )
             break;
         prevDerivative = derivative;
