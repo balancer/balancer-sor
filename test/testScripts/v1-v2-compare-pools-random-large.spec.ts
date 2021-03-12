@@ -2,19 +2,13 @@ require('dotenv').config();
 import { BigNumber } from 'bignumber.js';
 import { JsonRpcProvider } from '@ethersproject/providers';
 import {
-    getV1Swap,
-    getV2Swap,
     getRandomTradeData,
     saveTestFile,
     deleteTestFile,
-    displayResults,
-    assertResults,
     loadTestFile,
 } from '../lib/testHelpers';
-import { SwapInfo } from '../../src/types';
+import { compareTest } from '../lib/compareHelper';
 import { bnum } from '../../src/bmath';
-import { SOR } from '../../src';
-import { assert } from 'chai';
 
 // Each pool will have 4 tests. Total number will be MIN_TESTS * 4 * NoPools. Will always test each pool at least once.
 const MIN_TESTS = 50;
@@ -192,86 +186,28 @@ async function testSwap(swapType: string, swapAmtType: SwapAmt, file: string) {
             './test/testData/testPools/'
         );
 
-        let v1SwapData = await getV1Swap(
-            provider,
-            gasPrice,
-            maxNoPools,
-            1,
-            JSON.parse(JSON.stringify(testData)),
-            swapType,
-            tokenIn,
-            tokenOut,
-            swapAmount,
-            { onChainBalances: false }
-        );
-        // Normalize returnAmount
-        v1SwapData.returnAmount = v1SwapData.returnAmount.div(
-            bnum(10 ** returnAmountDecimals)
-        );
-
-        let v2SwapData = await getV2Swap(
-            provider,
-            gasPrice,
-            maxNoPools,
-            1,
-            JSON.parse(JSON.stringify(testData)),
-            swapType,
-            tokenIn,
-            tokenOut,
-            swapAmount.div(bnum(10 ** swapAmountDecimals)),
-            { onChainBalances: false },
-            returnAmountDecimals
-        );
-
-        const displayData = {
-            tradeInfo: {
-                SwapType: swapType,
-                TokenIn: tokenIn,
-                TokenOut: tokenOut,
-                SwapAmount: swapAmount,
-            },
+        // Pools are loaded from the test file but all other trade info is new
+        const tradeInfo = {
+            SwapType: swapType,
+            TokenIn: tokenIn,
+            TokenOut: tokenOut,
+            NoPools: maxNoPools,
+            SwapAmount: swapAmount,
+            GasPrice: gasPrice,
+            SwapAmountDecimals: swapAmountDecimals,
+            ReturnAmountDecimals: returnAmountDecimals,
         };
 
-        displayResults(
-            `${file}`,
-            displayData.tradeInfo,
-            [v1SwapData, v2SwapData],
-            false,
-            maxNoPools
+        const newTestData = {
+            pools: testData.pools,
+            tradeInfo,
+        };
+
+        const [v1SwapData, v2SwapData] = await compareTest(
+            `subgraphPoolsDecimalsTest`,
+            provider,
+            newTestData
         );
-
-        assertResults(file, displayData, v1SwapData, v2SwapData);
-
-        const sor = new SOR(provider, gasPrice, maxNoPools, 1, testData);
-
-        if (swapType === 'swapExactIn')
-            await sor.setCostOutputToken(tokenOut, v2SwapData.costOutputToken);
-        else {
-            await sor.setCostOutputToken(tokenIn, v2SwapData.costOutputToken);
-        }
-
-        const isFetched = await sor.fetchPools(false);
-        assert(isFetched, 'Pools should be fetched in wrapper');
-
-        const swapInfo: SwapInfo = await sor.getSwaps(
-            tokenIn,
-            tokenOut,
-            swapType,
-            swapAmount.div(bnum(10 ** swapAmountDecimals))
-        );
-
-        assert.equal(
-            swapInfo.returnAmount.toString(),
-            v2SwapData.returnAmount
-                .times(bnum(10 ** returnAmountDecimals))
-                .toString(),
-            `Wrapper should have same amount as helper.`
-        );
-
-        // Rough check for same swaps
-        if (swapInfo.swaps.length > 0) {
-            assert.equal(swapInfo.swaps[0].poolId, v2SwapData.swaps[0][0].pool);
-        }
 
         // All tests passed so no need to keep file
         deleteTestFile(
