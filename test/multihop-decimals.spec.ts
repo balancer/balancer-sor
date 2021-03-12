@@ -4,14 +4,8 @@ require('dotenv').config();
 import { JsonRpcProvider } from '@ethersproject/providers';
 import { assert } from 'chai';
 import { BigNumber } from '../src/utils/bignumber';
-import {
-    getV1Swap,
-    getV2Swap,
-    displayResults,
-    assertResults,
-    filterPoolsWithBalance,
-} from './lib/testHelpers';
-import { bnum } from '../src/bmath';
+import { filterPoolsWithBalance } from './lib/testHelpers';
+import { compareTest } from './lib/compareHelper';
 
 const allPools = require('./testData/testPools/subgraphPoolsDecimalsTest.json');
 const WBTC = '0xe0C9275E44Ea80eF17579d33c55136b7DA269aEb'.toLowerCase();
@@ -43,7 +37,7 @@ describe('Tests Multihop SOR vs static allPoolsDecimals.json', () => {
     });
 
     it('Full Multihop SOR, WBTC>MKR, swapExactIn', async () => {
-        const amountIn = new BigNumber(0.001); // 0.00100000 WBTC
+        const amountIn = new BigNumber(100000); // 0.00100000 WBTC
         const swapType = 'swapExactIn';
         const noPools = 4;
         const tokenIn = WBTC;
@@ -65,59 +59,22 @@ describe('Tests Multihop SOR vs static allPoolsDecimals.json', () => {
             tradeInfo,
         };
 
-        // V2 first to debug faster
-        let v2SwapData = await getV2Swap(
+        const [v1SwapData, v2SwapData] = await compareTest(
+            `subgraphPoolsDecimalsTest`,
             provider,
-            testData.tradeInfo.GasPrice,
-            testData.tradeInfo.NoPools,
-            1,
-            JSON.parse(JSON.stringify(testData)),
-            testData.tradeInfo.SwapType,
-            testData.tradeInfo.TokenIn,
-            testData.tradeInfo.TokenOut,
-            testData.tradeInfo.SwapAmount,
-            { onChainBalances: false },
-            testData.tradeInfo.ReturnAmountDecimals
-        );
-
-        let v1SwapData = await getV1Swap(
-            provider,
-            testData.tradeInfo.GasPrice,
-            testData.tradeInfo.NoPools,
-            1,
-            JSON.parse(JSON.stringify(testData)),
-            testData.tradeInfo.SwapType,
-            testData.tradeInfo.TokenIn,
-            testData.tradeInfo.TokenOut,
-            testData.tradeInfo.SwapAmount.times(
-                bnum(10 ** testData.tradeInfo.SwapAmountDecimals)
-            ),
-            { onChainBalances: false }
-        );
-        // Normalize returnAmount
-        v1SwapData.returnAmount = v1SwapData.returnAmount.div(
-            bnum(10 ** testData.tradeInfo.ReturnAmountDecimals)
-        );
-
-        displayResults(
-            `WBTC>MKR, swapExactIn`,
-            testData.tradeInfo,
-            [v1SwapData, v2SwapData],
-            false
-        );
-
-        assertResults(
-            `WBTC>MKR, swapExactIn`,
-            testData,
-            v1SwapData,
-            v2SwapData
+            testData
         );
 
         assert.equal(v2SwapData.swaps.length, 1, 'Should have 1 multiswap.');
+        assert.equal(
+            v2SwapData.returnAmount.toString(),
+            '0.09489946703329291',
+            'Amount should match previous result.'
+        );
     }).timeout(10000);
 
     it('Full Multihop SOR, WBTC>MKR, swapExactOut', async () => {
-        const amountOut = new BigNumber(0.001);
+        const amountOut = new BigNumber(1000000000000000);
         const swapType = 'swapExactOut';
         const noPools = 4;
         const tokenIn = WBTC;
@@ -139,59 +96,22 @@ describe('Tests Multihop SOR vs static allPoolsDecimals.json', () => {
             tradeInfo,
         };
 
-        // V2 first to debug faster
-        let v2SwapData = await getV2Swap(
+        const [v1SwapData, v2SwapData] = await compareTest(
+            `subgraphPoolsDecimalsTest`,
             provider,
-            testData.tradeInfo.GasPrice,
-            testData.tradeInfo.NoPools,
-            1,
-            JSON.parse(JSON.stringify(testData)),
-            testData.tradeInfo.SwapType,
-            testData.tradeInfo.TokenIn,
-            testData.tradeInfo.TokenOut,
-            testData.tradeInfo.SwapAmount,
-            { onChainBalances: false },
-            testData.tradeInfo.ReturnAmountDecimals
-        );
-
-        let v1SwapData = await getV1Swap(
-            provider,
-            testData.tradeInfo.GasPrice,
-            testData.tradeInfo.NoPools,
-            1,
-            JSON.parse(JSON.stringify(testData)),
-            testData.tradeInfo.SwapType,
-            testData.tradeInfo.TokenIn,
-            testData.tradeInfo.TokenOut,
-            testData.tradeInfo.SwapAmount.times(
-                bnum(10 ** testData.tradeInfo.SwapAmountDecimals)
-            ),
-            { onChainBalances: false }
-        );
-        // Normalize returnAmount
-        v1SwapData.returnAmount = v1SwapData.returnAmount.div(
-            bnum(10 ** testData.tradeInfo.ReturnAmountDecimals)
-        );
-
-        displayResults(
-            `WBTC>MKR, swapExactOut`,
-            testData.tradeInfo,
-            [v1SwapData, v2SwapData],
-            false
-        );
-
-        assertResults(
-            `WBTC>MKR, swapExactOut`,
-            testData,
-            v1SwapData,
-            v2SwapData
+            testData
         );
 
         assert.equal(v2SwapData.swaps.length, 1, 'Should have 1 multiswap.');
+        assert.equal(
+            v2SwapData.returnAmount.toString(),
+            '0.0000070196233350782296',
+            'Amount should match previous result.'
+        );
     }).timeout(10000);
 
     it('Full Multihop SOR, USDC>yUSD, swapExactIn', async () => {
-        const amountIn = new BigNumber(1);
+        const amountIn = new BigNumber(1000000);
         const swapType = 'swapExactIn';
         const noPools = 4;
         const tokenIn = USDC;
@@ -213,59 +133,22 @@ describe('Tests Multihop SOR vs static allPoolsDecimals.json', () => {
             tradeInfo,
         };
 
-        // V2 first to debug faster
-        let v2SwapData = await getV2Swap(
+        const [v1SwapData, v2SwapData] = await compareTest(
+            `subgraphPoolsDecimalsTest`,
             provider,
-            testData.tradeInfo.GasPrice,
-            testData.tradeInfo.NoPools,
-            1,
-            JSON.parse(JSON.stringify(testData)),
-            testData.tradeInfo.SwapType,
-            testData.tradeInfo.TokenIn,
-            testData.tradeInfo.TokenOut,
-            testData.tradeInfo.SwapAmount,
-            { onChainBalances: false },
-            testData.tradeInfo.ReturnAmountDecimals
-        );
-
-        let v1SwapData = await getV1Swap(
-            provider,
-            testData.tradeInfo.GasPrice,
-            testData.tradeInfo.NoPools,
-            1,
-            JSON.parse(JSON.stringify(testData)),
-            testData.tradeInfo.SwapType,
-            testData.tradeInfo.TokenIn,
-            testData.tradeInfo.TokenOut,
-            testData.tradeInfo.SwapAmount.times(
-                bnum(10 ** testData.tradeInfo.SwapAmountDecimals)
-            ),
-            { onChainBalances: false }
-        );
-        // Normalize returnAmount
-        v1SwapData.returnAmount = v1SwapData.returnAmount.div(
-            bnum(10 ** testData.tradeInfo.ReturnAmountDecimals)
-        );
-
-        displayResults(
-            `USDC>yUSD, swapExactIn`,
-            testData.tradeInfo,
-            [v1SwapData, v2SwapData],
-            false
-        );
-
-        assertResults(
-            `USDC>yUSD, swapExactIn`,
-            testData,
-            v1SwapData,
-            v2SwapData
+            testData
         );
 
         assert.equal(v2SwapData.swaps.length, 1, 'Should have 1 multiswap.');
+        assert.equal(
+            v2SwapData.returnAmount.toString(),
+            '0.9622085344103445',
+            'Amount should match previous result.'
+        );
     }).timeout(10000);
 
     it('Full Multihop SOR, USDC>yUSD, swapExactOut', async () => {
-        const amountOut = new BigNumber(0.01);
+        const amountOut = new BigNumber(10000000000000000);
         const swapType = 'swapExactOut';
         const noPools = 4;
         const tokenIn = USDC;
@@ -287,54 +170,17 @@ describe('Tests Multihop SOR vs static allPoolsDecimals.json', () => {
             tradeInfo,
         };
 
-        // V2 first to debug faster
-        let v2SwapData = await getV2Swap(
+        const [v1SwapData, v2SwapData] = await compareTest(
+            `subgraphPoolsDecimalsTest`,
             provider,
-            testData.tradeInfo.GasPrice,
-            testData.tradeInfo.NoPools,
-            1,
-            JSON.parse(JSON.stringify(testData)),
-            testData.tradeInfo.SwapType,
-            testData.tradeInfo.TokenIn,
-            testData.tradeInfo.TokenOut,
-            testData.tradeInfo.SwapAmount,
-            { onChainBalances: false },
-            testData.tradeInfo.ReturnAmountDecimals
-        );
-
-        let v1SwapData = await getV1Swap(
-            provider,
-            testData.tradeInfo.GasPrice,
-            testData.tradeInfo.NoPools,
-            1,
-            JSON.parse(JSON.stringify(testData)),
-            testData.tradeInfo.SwapType,
-            testData.tradeInfo.TokenIn,
-            testData.tradeInfo.TokenOut,
-            testData.tradeInfo.SwapAmount.times(
-                bnum(10 ** testData.tradeInfo.SwapAmountDecimals)
-            ),
-            { onChainBalances: false }
-        );
-        // Normalize returnAmount
-        v1SwapData.returnAmount = v1SwapData.returnAmount.div(
-            bnum(10 ** testData.tradeInfo.ReturnAmountDecimals)
-        );
-
-        displayResults(
-            `USDC>yUSD, swapExactOut`,
-            testData.tradeInfo,
-            [v1SwapData, v2SwapData],
-            false
-        );
-
-        assertResults(
-            `USDC>yUSD, swapExactOut`,
-            testData,
-            v1SwapData,
-            v2SwapData
+            testData
         );
 
         assert.equal(v2SwapData.swaps.length, 1, 'Should have 1 multiswap.');
+        assert.equal(
+            v2SwapData.returnAmount.toString(),
+            '0.010392755926718752',
+            'Amount should match previous result.'
+        );
     }).timeout(10000);
 });

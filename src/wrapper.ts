@@ -9,6 +9,7 @@ import {
     SubGraphPool,
     Path,
     SubGraphPoolDictionary,
+    DisabledOptions,
 } from './types';
 import { bnum } from './bmath';
 
@@ -38,13 +39,18 @@ export class SOR {
     poolsForPairsCache = {};
     processedDataCache = {};
     finishedFetchingOnChain: boolean = false;
+    disabledOptions: DisabledOptions;
 
     constructor(
         provider: BaseProvider,
         gasPrice: BigNumber,
         maxPools: number,
         chainId: number,
-        poolsSource: string | SubGraphPools
+        poolsSource: string | SubGraphPools,
+        disabledOptions: DisabledOptions = {
+            isOverRide: false,
+            disabledTokens: [],
+        }
     ) {
         this.provider = provider;
         this.gasPrice = gasPrice;
@@ -58,7 +64,7 @@ export class SOR {
             this.isUsingPoolsUrl = false;
             this.subgraphPools = poolsSource;
         }
-
+        this.disabledOptions = disabledOptions;
         this.pools = new POOLS();
     }
 
@@ -467,7 +473,8 @@ export class SOR {
             poolsList.pools,
             tokenIn,
             tokenOut,
-            this.maxPools
+            this.maxPools,
+            this.disabledOptions
         );
 
         // Sort intermediate pools by order of liquidity
