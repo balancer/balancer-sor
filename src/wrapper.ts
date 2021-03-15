@@ -72,7 +72,10 @@ export class SOR {
     Find and cache cost of token.
     If cost is passed then it manually sets the value.
     */
-    async setCostOutputToken(tokenOut: string, cost: BigNumber = null) {
+    async setCostOutputToken(
+        tokenOut: string,
+        cost: BigNumber = null
+    ): Promise<BigNumber> {
         tokenOut = tokenOut.toLowerCase();
 
         if (cost === null) {
@@ -86,8 +89,10 @@ export class SOR {
             );
 
             this.tokenCost[tokenOut] = costOutputToken;
+            return costOutputToken;
         } else {
             this.tokenCost[tokenOut] = cost;
+            return cost;
         }
     }
 
