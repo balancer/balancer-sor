@@ -1,8 +1,10 @@
 import { assert, expect } from 'chai';
-import { Swap, SwapInfo } from '../src/types';
+import { SwapInfo } from '../src/types';
 import { BigNumber } from '../src/utils/bignumber';
 import { formatSwaps } from '../src/helpers';
 import testSwaps from './testData/swapsForFormatting.json';
+
+const marketSp: BigNumber = new BigNumber(7);
 
 // npx mocha -r ts-node/register test/helpers.spec.ts
 describe(`Tests for Helpers.`, () => {
@@ -26,7 +28,8 @@ describe(`Tests for Helpers.`, () => {
             swapAmount,
             tokenIn,
             tokenOut,
-            returnAmount
+            returnAmount,
+            marketSp
         );
 
         expect(expectedTokenAddresses).to.deep.eq(swapInfo.tokenAddresses);
@@ -67,7 +70,8 @@ describe(`Tests for Helpers.`, () => {
             swapAmount,
             tokenIn,
             tokenOut,
-            returnAmount
+            returnAmount,
+            marketSp
         );
 
         expect(expectedTokenAddresses).to.deep.eq(swapInfo.tokenAddresses);
@@ -115,7 +119,8 @@ describe(`Tests for Helpers.`, () => {
             swapAmount,
             tokenIn,
             tokenOut,
-            returnAmount
+            returnAmount,
+            marketSp
         );
 
         expect(expectedTokenAddresses).to.deep.eq(swapInfo.tokenAddresses);
@@ -158,7 +163,8 @@ describe(`Tests for Helpers.`, () => {
             swapAmount,
             tokenIn,
             tokenOut,
-            returnAmount
+            returnAmount,
+            marketSp
         );
 
         expect(expectedTokenAddresses).to.deep.eq(swapInfo.tokenAddresses);
@@ -199,7 +205,8 @@ describe(`Tests for Helpers.`, () => {
             swapAmount,
             tokenIn,
             tokenOut,
-            returnAmount
+            returnAmount,
+            marketSp
         );
 
         expect(expectedTokenAddresses).to.deep.eq(swapInfo.tokenAddresses);
@@ -247,7 +254,8 @@ describe(`Tests for Helpers.`, () => {
             swapAmount,
             tokenIn,
             tokenOut,
-            returnAmount
+            returnAmount,
+            marketSp
         );
 
         expect(expectedTokenAddresses).to.deep.eq(swapInfo.tokenAddresses);
@@ -290,7 +298,8 @@ describe(`Tests for Helpers.`, () => {
             swapAmount,
             tokenIn,
             tokenOut,
-            returnAmount
+            returnAmount,
+            marketSp
         );
 
         assert.equal(swapInfo.swaps.length, 1);
@@ -325,7 +334,8 @@ describe(`Tests for Helpers.`, () => {
             swapAmount,
             tokenIn,
             tokenOut,
-            returnAmount
+            returnAmount,
+            marketSp
         );
 
         assert.equal(swapInfo.swaps.length, 1);
@@ -360,7 +370,8 @@ describe(`Tests for Helpers.`, () => {
             swapAmount,
             tokenIn,
             tokenOut,
-            returnAmount
+            returnAmount,
+            marketSp
         );
 
         assert.equal(swapInfo.swaps.length, 1);
@@ -395,7 +406,8 @@ describe(`Tests for Helpers.`, () => {
             swapAmount,
             tokenIn,
             tokenOut,
-            returnAmount
+            returnAmount,
+            marketSp
         );
 
         assert.equal(swapInfo.swaps.length, 1);
@@ -427,7 +439,8 @@ describe(`Tests for Helpers.`, () => {
             swapAmount,
             tokenIn,
             tokenOut,
-            returnAmount
+            returnAmount,
+            marketSp
         );
 
         assert.equal(swapInfo.swaps.length, 0);
@@ -436,5 +449,29 @@ describe(`Tests for Helpers.`, () => {
         assert.equal('', swapInfo.tokenIn);
         assert.equal('', swapInfo.tokenOut);
         expect(expectedTokenAddresses).to.deep.eq(swapInfo.tokenAddresses);
+    });
+
+    it(`Should return marketSp`, () => {
+        const swapAmount = new BigNumber(1);
+        const returnAmount = new BigNumber(2);
+        const tokenIn = '0x6b175474e89094c44da98b954eedeac495271d0f';
+        const tokenOut = '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48';
+        const swapType = 'swapExactOut';
+
+        const swapsV1Format: any = [];
+
+        const expectedTokenAddresses: string[] = [];
+
+        const swapInfo: SwapInfo = formatSwaps(
+            swapsV1Format,
+            swapType,
+            swapAmount,
+            tokenIn,
+            tokenOut,
+            returnAmount,
+            marketSp
+        );
+
+        assert.equal(swapInfo.marketSp, marketSp);
     });
 });

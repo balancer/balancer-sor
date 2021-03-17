@@ -91,4 +91,5 @@ export interface SwapInfo {
     returnAmount: BigNumber;
     tokenIn: string;
     tokenOut: string;
+    marketSp: BigNumber;
 }

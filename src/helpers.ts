@@ -1161,7 +1161,8 @@ export function formatSwaps(
     swapAmount: BigNumber,
     tokenIn: string,
     tokenOut: string,
-    returnAmount: BigNumber
+    returnAmount: BigNumber,
+    marketSp: BigNumber
 ): SwapInfo {
     const tokenAddressesSet: Set<string> = new Set();
 
@@ -1175,6 +1176,7 @@ export function formatSwaps(
         returnAmount: bnum(0),
         tokenIn: '',
         tokenOut: '',
+        marketSp: marketSp,
     };
 
     if (swaps.length === 0) {

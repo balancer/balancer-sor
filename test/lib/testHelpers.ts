@@ -720,6 +720,7 @@ export function displayResults(
     console.log(`Out: ${symbolOut} ${TradeInfo.TokenOut.toLowerCase()}`);
     console.log(`Swap Amt: ${TradeInfo.SwapAmount.toString()}`);
     console.log(`Max Pools: ${MaxPools}`);
+    console.log(TradeInfo.SwapType);
 
     let tableData = [];
     Results.forEach(result => {
