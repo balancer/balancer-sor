@@ -468,7 +468,7 @@ export function _derivative(func: Function, amount, poolPairData): BigNumber {
 
     // If amount is zero we have to change it to a small value otherwise the calculation
     // below won't work as delta will also be 0 and we'll have 0/0
-    if (amount.isZero()) amount = INFINITESIMAL;
+    if (amount.lt(INFINITESIMAL)) amount = INFINITESIMAL;
     let x = amount;
     let delta = x.times(0.0001);
     let prevDerivative = bnum(0);
@@ -481,9 +481,10 @@ export function _derivative(func: Function, amount, poolPairData): BigNumber {
         // Break if precision reached
         if (
             derivative
-                .minus(prevDerivative)
+                .div(prevDerivative)
+                .minus(bnum(1))
                 .abs()
-                .lt(INFINITESIMAL)
+                .lt(bnum(0.01)) // Variation of less than 1% means convergence
         )
             break;
         prevDerivative = derivative;
