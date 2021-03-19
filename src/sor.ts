@@ -130,7 +130,7 @@ export const smartOrderRouter = (
     totalSwapAmount: BigNumber,
     maxPools: number,
     costReturnToken: BigNumber
-): [Swap[][], BigNumber] => {
+): [Swap[][], BigNumber, BigNumber] => {
     let bestTotalReturn: BigNumber = new BigNumber(0);
     let bestTotalReturnConsideringFees: BigNumber = new BigNumber(0);
     let totalReturn, totalReturnConsideringFees;
@@ -138,7 +138,7 @@ export const smartOrderRouter = (
 
     // No paths available or totalSwapAmount == 0, return empty solution
     if (paths.length == 0 || totalSwapAmount.isZero()) {
-        return [[], bnum(0)];
+        return [[], bnum(0), bnum(0)];
     }
     // Before we start the main loop, we first check if there is enough liquidity for this totalSwapAmount at all
     let highestLimitAmounts = getHighestLimitAmountsForPaths(paths, maxPools);
@@ -164,7 +164,7 @@ export const smartOrderRouter = (
         break; // No need to keep looping as this number of pools (i) has enough liquidity
     }
     if (initialNumPaths == -1) {
-        return [[], bnum(0)]; // Not enough liquidity, return empty
+        return [[], bnum(0), bnum(0)]; // Not enough liquidity, return empty
     }
 
     // First get the optimal totalReturn to trade 'totalSwapAmount' with
@@ -289,11 +289,18 @@ export const smartOrderRouter = (
     let totalSwapAmountWithRoundingErrors: BigNumber = new BigNumber(0);
     let dust: BigNumber = new BigNumber(0);
     let lenghtFirstPath;
+    let highestSwapAmt = bnum(0);
+    let largestSwapPath: Path;
     bestTotalReturn = bnum(0); // Reset totalReturn as this time it will be
     // calculated with the EVM maths so the return is exactly what the user will get
     // after executing the transaction (given there are no front-runners)
     bestPaths.forEach((path, i) => {
         let swapAmount = bestSwapAmounts[i];
+        console.log(swapAmount.toString());
+        if (swapAmount.gt(highestSwapAmt)) {
+            highestSwapAmt = swapAmount;
+            largestSwapPath = path;
+        }
         totalSwapAmountWithRoundingErrors = totalSwapAmountWithRoundingErrors.plus(
             swapAmount
         );
@@ -445,7 +452,15 @@ export const smartOrderRouter = (
         }
     }
     console.log('Number of paths: ' + bestPaths.length.toString());
-    return [swaps, bestTotalReturn];
+
+    const marketSp = getSpotPriceAfterSwapForPath(
+        pools,
+        largestSwapPath,
+        swapType,
+        bnum(0)
+    );
+
+    return [swaps, bestTotalReturn, marketSp];
 };
 
 // TODO: calculate EVM return (use bmath) and update pool balances like current SOR
