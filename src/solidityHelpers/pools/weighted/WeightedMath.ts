@@ -16,7 +16,7 @@
 // https://github.com/balancer-labs/balancer-core-v2/blob/master/contracts/pools/weighted/WeightedMath.sol
 
 // import { BigNumber } from '../../../utils/bignumber';
-// import { complement, powUp, powDown, pow, divUp, divDown, div, mulUp, mulDown, mul, sub, add, bnum} from "../../math/FixedPoint";
+import { complement, powUp, powDown, pow, divUp, divDown, div, mulUp, mulDown, mul, sub, add, bnum} from "../../math/FixedPoint";
 import * as FixedPoint from "../../math/FixedPoint";
 import { FixedPoint as BigNumber } from "../../math/FixedPoint";
 
@@ -32,7 +32,7 @@ function _outGivenIn(
     tokenWeightIn: BigNumber,
     tokenBalanceOut: BigNumber,
     tokenWeightOut: BigNumber,
-    tokenAmountIn
+    tokenAmountIn: BigNumber
 ): BigNumber {
     /**********************************************************************************************
     // outGivenIn                                                                                //
@@ -64,7 +64,7 @@ function _inGivenOut(
     tokenWeightIn: BigNumber,
     tokenBalanceOut: BigNumber,
     tokenWeightOut: BigNumber,
-    tokenAmountOut
+    tokenAmountOut: BigNumber
 ): BigNumber {
     /**********************************************************************************************
     // inGivenOut                                                                                //
@@ -112,7 +112,7 @@ function _exactTokensInForBPTOut(
     normalizedWeights: BigNumber[],
     amountsIn: BigNumber[],
     bptTotalSupply: BigNumber,
-    swapFee
+    swapFee: BigNumber
 ): BigNumber {
     // BPT out, so we round down overall.
 
@@ -163,7 +163,7 @@ function _tokenInForExactBPTOut(
     tokenNormalizedWeight: BigNumber,
     bptAmountOut: BigNumber,
     bptTotalSupply: BigNumber,
-    swapFee
+    swapFee: BigNumber
 ): BigNumber {
     /******************************************************************************************
     // tokenInForExactBPTOut                                                                 //
@@ -194,7 +194,7 @@ function _exactBPTInForTokenOut(
     tokenNormalizedWeight: BigNumber,
     bptAmountIn: BigNumber,
     bptTotalSupply: BigNumber,
-    swapFee
+    swapFee: BigNumber
 ): BigNumber {
     /*****************************************************************************************
     // exactBPTInForTokenOut                                                                //
@@ -225,8 +225,8 @@ function _exactBPTInForTokenOut(
 function _exactBPTInForTokensOut(
     currentBalances: BigNumber[],
     bptAmountIn: BigNumber,
-    totalBPT
-) internal pure returns (uint256[] memory) {
+    totalBPT: BigNumber
+): BigNumber[] {
     /**********************************************************************************************
     // exactBPTInForAllTokensOut                                                                 //
     // (per token)                                                                               //
@@ -312,10 +312,10 @@ function _calculateDueTokenProtocolSwapFee(
     // Fee percentage and balance multiplications round down, while the subtrahend (power) rounds up (as does the
     // base). Because previousInvariant / currentInvariant <= 1, the exponent rounds down.
 
-    if (currentInvariant < previousInvariant) {
+    if (currentInvariant.lt(previousInvariant)) {
         // This should never happen, but this acts as a safeguard to prevent the Pool from entering a locked state
         // in which joins and exits revert while computing accumulated swap fees.
-        return 0;
+        return bnum(0);
     }
 
     let base = previousInvariant.divUp(currentInvariant);
