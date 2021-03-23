@@ -67,10 +67,12 @@ export class FixedPoint extends BigNumber {
             // divUp(x, y) := (x - 1) / y + 1
             // Note that this requires x != 0, which we already tested for.
 
-            return new FixedPoint(product
-                .minus(bnum(1))
-                .div(ONE)
-                .plus(bnum(1)));
+            return new FixedPoint(
+                product
+                    .minus(bnum(1))
+                    .div(ONE)
+                    .plus(bnum(1))
+            );
         }
     }
 
@@ -104,10 +106,12 @@ export class FixedPoint extends BigNumber {
             // divUp(x, y) := (x - 1) / y + 1
             // Note that this requires x != 0, which we already tested for.
 
-            return new FixedPoint(aInflated
-                .minus(bnum(1))
-                .div(ONE)
-                .plus(bnum(1)));
+            return new FixedPoint(
+                aInflated
+                    .minus(bnum(1))
+                    .div(ONE)
+                    .plus(bnum(1))
+            );
         }
     }
 
@@ -134,7 +138,8 @@ export class FixedPoint extends BigNumber {
     /**
      * @dev Tells the complement of a given value capped to zero to avoid overflow
      */
-    complement(x: FixedPoint): FixedPoint {
+    complement(): FixedPoint {
+        let x = this;
         return new FixedPoint(x >= ONE ? bnum(0) : sub(ONE, x));
     }
 }
@@ -183,10 +188,12 @@ export function mulUp(a: FixedPoint, b: FixedPoint): FixedPoint {
         // divUp(x, y) := (x - 1) / y + 1
         // Note that this requires x != 0, which we already tested for.
 
-        return new FixedPoint(product
-            .minus(bnum(1))
-            .div(ONE)
-            .plus(bnum(1)));
+        return new FixedPoint(
+            product
+                .minus(bnum(1))
+                .div(ONE)
+                .plus(bnum(1))
+        );
     }
 }
 
@@ -217,10 +224,12 @@ export function divUp(a: FixedPoint, b: FixedPoint): FixedPoint {
         // divUp(x, y) := (x - 1) / y + 1
         // Note that this requires x != 0, which we already tested for.
 
-        return new FixedPoint(aInflated
-            .minus(bnum(1))
-            .div(ONE)
-            .plus(bnum(1)));
+        return new FixedPoint(
+            aInflated
+                .minus(bnum(1))
+                .div(ONE)
+                .plus(bnum(1))
+        );
     }
 }
 
@@ -233,12 +242,16 @@ export function powDown(x: FixedPoint, y: FixedPoint): FixedPoint {
     if (result.isZero()) {
         return result;
     }
-    return new FixedPoint(sub(sub(result, mulDown(result, MAX_POW_RELATIVE_ERROR)), bnum(1)));
+    return new FixedPoint(
+        sub(sub(result, mulDown(result, MAX_POW_RELATIVE_ERROR)), bnum(1))
+    );
 }
 
 export function powUp(x: FixedPoint, y: FixedPoint): FixedPoint {
     let result = new FixedPoint(LogExpMath.pow(x, y));
-    return new FixedPoint(add(add(result, mulUp(result, MAX_POW_RELATIVE_ERROR)), bnum(1)));
+    return new FixedPoint(
+        add(add(result, mulUp(result, MAX_POW_RELATIVE_ERROR)), bnum(1))
+    );
 }
 
 /**

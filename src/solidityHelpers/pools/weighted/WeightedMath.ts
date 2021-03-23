@@ -16,9 +16,23 @@
 // https://github.com/balancer-labs/balancer-core-v2/blob/master/contracts/pools/weighted/WeightedMath.sol
 
 // import { BigNumber } from '../../../utils/bignumber';
-import { complement, powUp, powDown, pow, divUp, divDown, div, mulUp, mulDown, mul, sub, add, bnum} from "../../math/FixedPoint";
-import * as FixedPoint from "../../math/FixedPoint";
-import { FixedPoint as BigNumber } from "../../math/FixedPoint";
+import {
+    complement,
+    powUp,
+    powDown,
+    pow,
+    divUp,
+    divDown,
+    div,
+    mulUp,
+    mulDown,
+    mul,
+    sub,
+    add,
+    bnum,
+} from '../../math/FixedPoint';
+import * as FixedPoint from '../../math/FixedPoint';
+import { FixedPoint as BigNumber } from '../../math/FixedPoint';
 
 // This is a contract to emulate file-level functions. Convert to a library
 // after the migration to solc v0.7.1.
@@ -90,9 +104,10 @@ function _inGivenOut(
     return tokenBalanceIn.mulUp(ratio);
 }
 
-function _invariant(normalizedWeights: BigNumber[], balances: BigNumber[])
-: BigNumber
-{
+function _invariant(
+    normalizedWeights: BigNumber[],
+    balances: BigNumber[]
+): BigNumber {
     /**********************************************************************************************
     // invariant               _____                                                             //
     // wi = weight index i      | |      wi                                                      //
@@ -102,7 +117,9 @@ function _invariant(normalizedWeights: BigNumber[], balances: BigNumber[])
 
     let invariant = FixedPoint.ONE;
     for (let i = 0; i < normalizedWeights.length; i++) {
-        invariant = invariant.mul(FixedPoint.pow(balances[i], normalizedWeights[i]));
+        invariant = invariant.mul(
+            FixedPoint.pow(balances[i], normalizedWeights[i])
+        );
     }
     return invariant;
 }
@@ -121,9 +138,11 @@ function _exactTokensInForBPTOut(
     // not accounting swap fees
     let tokenBalanceRatiosWithoutFee = new Array(amountsIn.length);
     // The weighted sum of token balance rations sans fee
-    let weightedBalanceRatio = 0;
+    let weightedBalanceRatio = bnum(0);
     for (let i = 0; i < balances.length; i++) {
-        tokenBalanceRatiosWithoutFee[i] = balances[i].add(amountsIn[i]).divDown(balances[i]);
+        tokenBalanceRatiosWithoutFee[i] = balances[i]
+            .add(amountsIn[i])
+            .divDown(balances[i]);
         weightedBalanceRatio = weightedBalanceRatio.add(
             tokenBalanceRatiosWithoutFee[i].mulDown(normalizedWeights[i])
         );
@@ -139,20 +158,24 @@ function _exactTokensInForBPTOut(
         // the token's balance ratio sans fee is larger than the weighted balance ratio, and swap fees charged
         // on the amount to swap
         if (weightedBalanceRatio >= tokenBalanceRatiosWithoutFee[i]) {
-            tokenBalancePercentageExcess = 0;
+            tokenBalancePercentageExcess = bnum(0);
         } else {
-            tokenBalancePercentageExcess = tokenBalanceRatiosWithoutFee[i].sub(weightedBalanceRatio).divUp(
-                tokenBalanceRatiosWithoutFee[i].sub(FixedPoint.ONE)
-            );
+            tokenBalancePercentageExcess = tokenBalanceRatiosWithoutFee[i]
+                .sub(weightedBalanceRatio)
+                .divUp(tokenBalanceRatiosWithoutFee[i].sub(FixedPoint.ONE));
         }
 
         let swapFeeExcess = swapFee.mulUp(tokenBalancePercentageExcess);
 
         let amountInAfterFee = amountsIn[i].mulDown(swapFeeExcess.complement());
 
-        let tokenBalanceRatio = FixedPoint.ONE.add(amountInAfterFee.divDown(balances[i]));
+        let tokenBalanceRatio = FixedPoint.ONE.add(
+            amountInAfterFee.divDown(balances[i])
+        );
 
-        invariantRatio = invariantRatio.mulDown(FixedPoint.powDown(tokenBalanceRatio, normalizedWeights[i]));
+        invariantRatio = invariantRatio.mulDown(
+            FixedPoint.powDown(tokenBalanceRatio, normalizedWeights[i])
+        );
     }
 
     return bptTotalSupply.mulDown(invariantRatio.sub(FixedPoint.ONE));
@@ -180,9 +203,14 @@ function _tokenInForExactBPTOut(
     let invariantRatio = bptTotalSupply.add(bptAmountOut).divUp(bptTotalSupply);
 
     // Calculate by how much the token balance has to increase to cause invariantRatio
-    let tokenBalanceRatio = FixedPoint.powUp(invariantRatio, FixedPoint.ONE.divUp(tokenNormalizedWeight));
+    let tokenBalanceRatio = FixedPoint.powUp(
+        invariantRatio,
+        FixedPoint.ONE.divUp(tokenNormalizedWeight)
+    );
     let tokenBalancePercentageExcess = tokenNormalizedWeight.complement();
-    let amountInAfterFee = tokenBalance.mulUp(tokenBalanceRatio.sub(FixedPoint.ONE));
+    let amountInAfterFee = tokenBalance.mulUp(
+        tokenBalanceRatio.sub(FixedPoint.ONE)
+    );
 
     let swapFeeExcess = swapFee.mulUp(tokenBalancePercentageExcess);
 
@@ -211,11 +239,16 @@ function _exactBPTInForTokenOut(
     let invariantRatio = bptTotalSupply.sub(bptAmountIn).divUp(bptTotalSupply);
 
     // Calculate by how much the token balance has to increase to cause invariantRatio
-    let tokenBalanceRatio = FixedPoint.powUp(invariantRatio, FixedPoint.ONE.divUp(tokenNormalizedWeight));
+    let tokenBalanceRatio = FixedPoint.powUp(
+        invariantRatio,
+        FixedPoint.ONE.divUp(tokenNormalizedWeight)
+    );
     let tokenBalancePercentageExcess = tokenNormalizedWeight.complement();
 
     //Because of rounding up, tokenBalanceRatio can be greater than one
-    let amountOutBeforeFee = tokenBalance.mulDown(tokenBalanceRatio.complement());
+    let amountOutBeforeFee = tokenBalance.mulDown(
+        tokenBalanceRatio.complement()
+    );
 
     let swapFeeExcess = swapFee.mulUp(tokenBalancePercentageExcess);
 
@@ -260,9 +293,11 @@ function _bptInForExactTokensOut(
 
     // First loop to calculate the weighted balance ratio
     let tokenBalanceRatiosWithoutFee = new Array(amountsOut.length);
-    let weightedBalanceRatio = 0;
+    let weightedBalanceRatio = bnum(0);
     for (let i = 0; i < balances.length; i++) {
-        tokenBalanceRatiosWithoutFee[i] = balances[i].sub(amountsOut[i]).divUp(balances[i]);
+        tokenBalanceRatiosWithoutFee[i] = balances[i]
+            .sub(amountsOut[i])
+            .divUp(balances[i]);
         weightedBalanceRatio = weightedBalanceRatio.add(
             tokenBalanceRatiosWithoutFee[i].mulUp(normalizedWeights[i])
         );
@@ -276,20 +311,24 @@ function _bptInForExactTokensOut(
         // For each ratioSansFee, compare with the total weighted ratio (weightedBalanceRatio) and
         // decrease the fee from what goes above it
         if (weightedBalanceRatio <= tokenBalanceRatiosWithoutFee[i]) {
-            tokenBalancePercentageExcess = 0;
+            tokenBalancePercentageExcess = bnum(0);
         } else {
-            tokenBalancePercentageExcess = weightedBalanceRatio.sub(tokenBalanceRatiosWithoutFee[i]).divUp(
-                tokenBalanceRatiosWithoutFee[i].complement()
-            );
+            tokenBalancePercentageExcess = weightedBalanceRatio
+                .sub(tokenBalanceRatiosWithoutFee[i])
+                .divUp(tokenBalanceRatiosWithoutFee[i].complement());
         }
 
         let swapFeeExcess = swapFee.mulUp(tokenBalancePercentageExcess);
 
-        let amountOutBeforeFee = amountsOut[i].divUp(swapFeeExcess.complement());
+        let amountOutBeforeFee = amountsOut[i].divUp(
+            swapFeeExcess.complement()
+        );
 
         tokenBalanceRatio = amountOutBeforeFee.divUp(balances[i]).complement();
 
-        invariantRatio = invariantRatio.mulDown(FixedPoint.powDown(tokenBalanceRatio, normalizedWeights[i]));
+        invariantRatio = invariantRatio.mulDown(
+            FixedPoint.powDown(tokenBalanceRatio, normalizedWeights[i])
+        );
     }
 
     return bptTotalSupply.mulUp(invariantRatio.complement());
