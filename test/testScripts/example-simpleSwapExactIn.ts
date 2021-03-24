@@ -2,6 +2,7 @@
 require('dotenv').config();
 import { SOR } from '../../src';
 import { SwapInfo } from '../../src/types';
+import { scale } from '../../src/bmath';
 import { BigNumber } from 'bignumber.js';
 import { JsonRpcProvider } from '@ethersproject/providers';
 import { Wallet } from '@ethersproject/wallet';
@@ -17,11 +18,6 @@ export type FundManagement = {
     fromInternalBalance: boolean;
     toInternalBalance: boolean;
 };
-
-// Taken from V2_core repo
-const maxInt = new BigNumber(2)
-    .pow(new BigNumber(256).minus(new BigNumber(1)))
-    .minus(new BigNumber(1));
 
 // rc01 Kovan addresses
 const WETH = '0xe1329748c41A140536e41049C95c36A53bCACee6';
@@ -54,6 +50,7 @@ async function simpleSwap() {
     const tokenOut = MKR;
     const swapType = 'swapExactIn'; // Two different swap types are used: swapExactIn & swapExactOut
     const amountIn = new BigNumber(0.1); // In normalized format, i.e. 1USDC = 1
+    const decimalsIn = 18;
 
     const sor = new SOR(provider, gasPrice, maxNoPools, chainId, poolsUrl);
 
@@ -108,27 +105,25 @@ async function simpleSwap() {
     // For a multihop the intermediate tokens should be ok at 0?
 
     const limits = [];
-
     swapInfo.tokenAddresses.forEach((token, i) => {
         if (token.toLowerCase() === tokenIn.toLowerCase()) {
-            console.log('Token In');
-            // TO DO
-            limits[i] = maxInt.toString();
+            limits[i] = scale(amountIn, decimalsIn).toString();
         } else if (token.toLowerCase() === tokenOut.toLowerCase()) {
-            console.log('Token Out');
             // This should be amt + slippage in UI
-            limits[i] = swapInfo.returnAmount.times(-1).toString();
+            limits[i] = swapInfo.returnAmount
+                .times(-1)
+                .times(0.9)
+                .toString();
         } else {
-            console.log('Token Intermmediate');
-            limits[i] = maxInt.toString();
-            // To do - this doesn't work?
-            // limits[i] = '0';
+            limits[i] = '0';
         }
     });
 
+    console.log(swapInfo.tokenAddresses);
     console.log(limits);
-    //
+
     const deadline = MaxUint256;
+    console.log('Swapping...');
 
     let tx = await vaultContract
         .connect(wallet)
