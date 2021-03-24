@@ -13,6 +13,9 @@ import {
 import { MAX_IN_RATIO, MAX_OUT_RATIO, bnum, scale } from './bmath';
 import * as stableMath from './poolMath/stableMath';
 import * as weightedMath from './poolMath/weightedMath';
+import * as weightedSolidity from './solidityHelpers/pools/weighted';
+import { FixedPoint } from './solidityHelpers/math/FixedPoint';
+
 import disabledTokensDefault from './disabled-tokens.json';
 
 export function getLimitAmountSwap(
@@ -806,51 +809,150 @@ export function EVMgetOutputAmountSwap(
     swapType: string,
     amount: BigNumber
 ): BigNumber {
-    let { balanceIn, balanceOut, tokenIn, tokenOut } = poolPairData;
+    let {
+        poolType,
+        pairType,
+        balanceIn,
+        balanceOut,
+        tokenIn,
+        tokenOut,
+        decimalsIn,
+        decimalsOut,
+        swapFee,
+    } = poolPairData;
     let returnAmount: BigNumber;
 
     if (swapType === 'swapExactIn') {
-        if (balanceIn.isEqualTo(bnum(0))) {
+        if (poolPairData.balanceIn.isZero()) {
             return bnum(0);
-        } else {
-            // TODO: Add EVM calculation implemented in V2 so numbers match perfectly
-            returnAmount = getOutputAmountSwap(poolPairData, swapType, amount);
-            // Update balances of tokenIn and tokenOut
-            pools[poolPairData.id] = updateTokenBalanceForPool(
-                pools[poolPairData.id],
-                tokenIn,
-                balanceIn.plus(amount)
-            );
-            pools[poolPairData.id] = updateTokenBalanceForPool(
-                pools[poolPairData.id],
-                tokenOut,
-                balanceOut.minus(returnAmount)
-            );
-            return returnAmount;
         }
     } else {
-        if (balanceOut.isEqualTo(bnum(0))) {
+        if (poolPairData.balanceOut.isZero()) {
             return bnum(0);
-        } else if (amount.times(3).gte(balanceOut)) {
-            // The maximum amoutOut you can have is 1/3 of the balanceOut to ensure binomial approximation diverges
-            return bnum(0);
-        } else {
-            // TODO: Add EVM calculation implemented in V2 so numbers match perfectly
+        }
+        if (amount.gte(poolPairData.balanceOut)) return bnum('Infinity');
+    }
+    if (swapType === 'swapExactIn') {
+        if (poolType == 'Weighted') {
+            let { weightIn, weightOut } = poolPairData;
+            if (pairType == 'token->token') {
+                returnAmount = weightedSolidity._outGivenIn(
+                    new FixedPoint(scale(balanceIn, decimalsIn)),
+                    new FixedPoint(scale(weightIn, 18)),
+                    new FixedPoint(scale(balanceOut, decimalsOut)),
+                    new FixedPoint(scale(weightOut, 18)),
+                    new FixedPoint(scale(amount, decimalsIn)),
+                    new FixedPoint(scale(swapFee, 18))
+                );
+                // TODO: scaling down may not be necessary since we have to
+                // scale it up anyways for the swap info later?
+                returnAmount = scale(returnAmount, -decimalsOut);
+            } else if (pairType == 'token->BPT') {
+                // returnAmount = getOutputAmountSwap(poolPairData,swapType,amount);
+                returnAmount = weightedSolidity._exactTokenInForBPTOut(
+                    new FixedPoint(scale(balanceIn, decimalsIn)),
+                    new FixedPoint(scale(weightIn, 18)),
+                    new FixedPoint(scale(amount, decimalsIn)),
+                    new FixedPoint(scale(balanceOut, 18)), // BPT is always 18 decimals
+                    new FixedPoint(scale(swapFee, 18))
+                );
+                // TODO: scaling down may not be necessary since we have to
+                // scale it up anyways for the swap info later?
+                returnAmount = scale(returnAmount, -18); // BPT is always 18 decimals
+            } else if (pairType == 'BPT->token') {
+                // returnAmount = getOutputAmountSwap(poolPairData,swapType,amount);
+                returnAmount = weightedSolidity._exactBPTInForTokenOut(
+                    new FixedPoint(scale(balanceOut, decimalsOut)),
+                    new FixedPoint(scale(weightOut, 18)),
+                    new FixedPoint(scale(amount, 18)), // BPT is always 18 decimals
+                    new FixedPoint(scale(balanceIn, 18)), // BPT is always 18 decimals
+                    new FixedPoint(scale(swapFee, 18))
+                );
+                // TODO: scaling down may not be necessary since we have to
+                // scale it up anyways for the swap info later?
+                returnAmount = scale(returnAmount, -decimalsOut);
+            }
+        } else if (poolType == 'Stable') {
+            // TODO update when sol helpers available for stable pools also
             returnAmount = getOutputAmountSwap(poolPairData, swapType, amount);
-            // Update balances of tokenIn and tokenOut
-            pools[poolPairData.id] = updateTokenBalanceForPool(
-                pools[poolPairData.id],
-                tokenIn,
-                balanceIn.plus(returnAmount)
-            );
-            pools[poolPairData.id] = updateTokenBalanceForPool(
-                pools[poolPairData.id],
-                tokenOut,
-                balanceOut.minus(amount)
-            );
-            return returnAmount;
+            // if (pairType == 'token->token') {
+            //     returnAmount = stableMath._exactTokenInForTokenOut(
+            //         amount,
+            //         poolPairData
+            //     );
+            // } else if (pairType == 'token->BPT') {
+            //     returnAmount = stableMath._exactTokenInForBPTOut(amount, poolPairData);
+            // } else if (pairType == 'BPT->token') {
+            //     returnAmount = stableMath._exactBPTInForTokenOut(amount, poolPairData);
+            // }
+        }
+    } else {
+        if (poolType == 'Weighted') {
+            let { weightIn, weightOut } = poolPairData;
+            if (pairType == 'token->token') {
+                returnAmount = weightedSolidity._inGivenOut(
+                    new FixedPoint(scale(balanceIn, decimalsIn)),
+                    new FixedPoint(scale(weightIn, 18)),
+                    new FixedPoint(scale(balanceOut, decimalsOut)),
+                    new FixedPoint(scale(weightOut, 18)),
+                    new FixedPoint(scale(amount, decimalsOut)),
+                    new FixedPoint(scale(swapFee, 18))
+                );
+                // TODO: scaling down may not be necessary since we have to
+                // scale it up anyways for the swap info later?
+                returnAmount = scale(returnAmount, -decimalsIn);
+            } else if (pairType == 'token->BPT') {
+                // returnAmount = getOutputAmountSwap(poolPairData,swapType,amount);
+                returnAmount = weightedSolidity._tokenInForExactBPTOut(
+                    new FixedPoint(scale(balanceIn, decimalsIn)),
+                    new FixedPoint(scale(weightIn, 18)),
+                    new FixedPoint(scale(amount, 18)), // BPT is always 18 decimals
+                    new FixedPoint(scale(balanceOut, 18)), // BPT is always 18 decimals
+                    new FixedPoint(scale(swapFee, 18))
+                );
+                // TODO: scaling down may not be necessary since we have to
+                // scale it up anyways for the swap info later?
+                returnAmount = scale(returnAmount, -decimalsIn);
+            } else if (pairType == 'BPT->token') {
+                // returnAmount = getOutputAmountSwap(poolPairData,swapType,amount);
+                returnAmount = weightedSolidity._bptInForExactTokenOut(
+                    new FixedPoint(scale(balanceOut, decimalsOut)),
+                    new FixedPoint(scale(weightOut, 18)),
+                    new FixedPoint(scale(amount, decimalsOut)),
+                    new FixedPoint(scale(balanceIn, 18)), // BPT is always 18 decimals
+                    new FixedPoint(scale(swapFee, 18))
+                );
+                // TODO: scaling down may not be necessary since we have to
+                // scale it up anyways for the swap info later?
+                returnAmount = scale(returnAmount, -18); // BPT is always 18 decimals
+            }
+        } else if (poolType == 'Stable') {
+            // TODO update when sol helpers available for stable pools also
+            returnAmount = getOutputAmountSwap(poolPairData, swapType, amount);
+            // if (pairType == 'token->token') {
+            //     returnAmount = stableMath._tokenInForExactTokenOut(
+            //         amount,
+            //         poolPairData
+            //     );
+            // } else if (pairType == 'token->BPT') {
+            //     returnAmount = stableMath._tokenInForExactBPTOut(amount, poolPairData);
+            // } else if (pairType == 'BPT->token') {
+            //     returnAmount = stableMath._BPTInForExactTokenOut(amount, poolPairData);
+            // }
         }
     }
+    // Update balances of tokenIn and tokenOut
+    pools[poolPairData.id] = updateTokenBalanceForPool(
+        pools[poolPairData.id],
+        tokenIn,
+        balanceIn.plus(returnAmount)
+    );
+    pools[poolPairData.id] = updateTokenBalanceForPool(
+        pools[poolPairData.id],
+        tokenOut,
+        balanceOut.minus(amount)
+    );
+    return returnAmount;
 }
 
 // Updates the balance of a given token for a given pool passed as parameter

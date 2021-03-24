@@ -44,7 +44,7 @@ export class FixedPoint extends BigNumber {
     mul(b: FixedPoint): FixedPoint {
         let a = this;
         let c0 = a.times(b);
-        let c1 = c0.plus(ONE.div(new BigNumber(2)));
+        let c1 = c0.plus(ONE.idiv(new BigNumber(2)));
         let c2 = c1.idiv(ONE);
         return new FixedPoint(c2);
     }
@@ -70,7 +70,7 @@ export class FixedPoint extends BigNumber {
             return new FixedPoint(
                 product
                     .minus(bnum(1))
-                    .div(ONE)
+                    .idiv(ONE)
                     .plus(bnum(1))
             );
         }
@@ -79,7 +79,7 @@ export class FixedPoint extends BigNumber {
     // div(b: FixedPoint): FixedPoint {
     //     let a = this;
     //     let c0 = a.times(ONE);
-    //     let c1 = c0.plus(b.div(new FixedPoint(2)));
+    //     let c1 = c0.plus(b.idiv(new FixedPoint(2)));
     //     let c2 = c1.idiv(b);
     //     return new FixedPoint(c2);
     // }
@@ -109,7 +109,7 @@ export class FixedPoint extends BigNumber {
             return new FixedPoint(
                 aInflated
                     .minus(bnum(1))
-                    .div(ONE)
+                    .idiv(b)
                     .plus(bnum(1))
             );
         }
@@ -140,7 +140,7 @@ export class FixedPoint extends BigNumber {
      */
     complement(): FixedPoint {
         let x = this;
-        return new FixedPoint(x >= ONE ? bnum(0) : sub(ONE, x));
+        return new FixedPoint(x.gte(ONE) ? bnum(0) : sub(ONE, x));
     }
 }
 
@@ -167,7 +167,7 @@ export function sub(a: FixedPoint, b: FixedPoint): FixedPoint {
 
 export function mul(a: FixedPoint, b: FixedPoint): FixedPoint {
     let c0 = a.times(b);
-    let c1 = c0.plus(ONE.div(new BigNumber(2)));
+    let c1 = c0.plus(ONE.idiv(new BigNumber(2)));
     let c2 = c1.idiv(ONE);
     return new FixedPoint(c2);
 }
@@ -191,7 +191,7 @@ export function mulUp(a: FixedPoint, b: FixedPoint): FixedPoint {
         return new FixedPoint(
             product
                 .minus(bnum(1))
-                .div(ONE)
+                .idiv(ONE)
                 .plus(bnum(1))
         );
     }
@@ -199,7 +199,7 @@ export function mulUp(a: FixedPoint, b: FixedPoint): FixedPoint {
 
 export function div(a: FixedPoint, b: FixedPoint): FixedPoint {
     let c0 = a.times(ONE);
-    let c1 = c0.plus(b.div(new FixedPoint(2)));
+    let c1 = c0.plus(b.idiv(new FixedPoint(2)));
     let c2 = c1.idiv(b);
     return new FixedPoint(c2);
 }
@@ -227,7 +227,7 @@ export function divUp(a: FixedPoint, b: FixedPoint): FixedPoint {
         return new FixedPoint(
             aInflated
                 .minus(bnum(1))
-                .div(ONE)
+                .idiv(b)
                 .plus(bnum(1))
         );
     }
@@ -258,5 +258,5 @@ export function powUp(x: FixedPoint, y: FixedPoint): FixedPoint {
  * @dev Tells the complement of a given value capped to zero to avoid overflow
  */
 export function complement(x: FixedPoint): FixedPoint {
-    return new FixedPoint(x >= ONE ? bnum(0) : sub(ONE, x));
+    return new FixedPoint(x.gte(ONE) ? bnum(0) : sub(ONE, x));
 }
