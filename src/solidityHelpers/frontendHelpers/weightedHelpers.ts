@@ -14,8 +14,7 @@ export function BPTForTokensZeroPriceImpact(
     decimals: number[],
     normalizedWeights: BigNumber[],
     amounts: BigNumber[],
-    bptTotalSupply: BigNumber,
-    swapFee: BigNumber
+    bptTotalSupply: BigNumber
 ): BigNumber {
     let zero = new BigNumber(0);
     let amountBPTOut = new BigNumber(0);
@@ -28,7 +27,7 @@ export function BPTForTokensZeroPriceImpact(
             balanceIn: balances[i].times(new BigNumber(10).pow(-decimals[i])),
             balanceOut: bptTotalSupply.times(new BigNumber(10).pow(-18)),
             weightIn: normalizedWeights[i].times(new BigNumber(10).pow(-18)),
-            swapFee: swapFee.times(new BigNumber(10).pow(-18)),
+            swapFee: zero,
         };
         let BPTPrice = weightedMath._spotPriceAfterSwapTokenInForExactBPTOut(
             zero,

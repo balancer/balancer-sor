@@ -63,18 +63,18 @@ let testFiles = [
     // 'subgraphPoolsSmallWithTrade',
     // '0x03b36dce65627cf8a2a392788c2d319659c8de26b2f83f8d117558891fa59216',
     // '0x18a934486971129d335b5a166e5d9dc2c271c8b7ff6c7ea079e2b97d45273403', // approx.
-    '0x24ecf45a2fc734c487abcfcdaec558e5d6cc1fb4a7c85ad6b362c017649d3156', // balanceBpt
-    '0x2ee23274910c172db9de340b1740e63f34b7d86db79827024316f173bf1284d9', // balanceBpt
+    // '0x24ecf45a2fc734c487abcfcdaec558e5d6cc1fb4a7c85ad6b362c017649d3156', // balanceBpt
+    // '0x2ee23274910c172db9de340b1740e63f34b7d86db79827024316f173bf1284d9', // balanceBpt
     '0x2f455a0e72ad4a2f6be9a5969a2e646ec8c1c2f4cc19adfffa53ba5ba468f02e', // approx
-    '0x32c912f8f82952f631c39be6c69bd72a1da978d8d0704a7d32b8310431375bfa', // balanceBpt
-    '0x3fd20d1d22910c0ee8ae926a1e90afca679cbcc65962135eff43e16fbae12745', // SOLVED: Cannot read property 'isZero' of undefined
-    '0x56164d81bf21d9ec5c2a3f6d93dec8cf39e5ed1567e155bbd66f9d2360b15c95', // balanceBpt
-    '0x5dd7b4c527806eba0d0ae9e381ea9143ed1e91554e8e060f6d1dcd76119bfdcc', // balanceBpt
-    '0x726355cd7b33332ea32101ecc1fe0b0c214328d6fb6d277b0bbc14360e7ddd71', // Approx
-    '0x81ddc85bdd36b0e8d21f340615d37e151017b516be2f6f20213654c45d75d6a9', // Approx
-    '0x88bf77edcbdfc9483904316ac6fdb6e162cf7bfa85a73bc1960ccdab22be351b', // Cannot read property 'plus' of undefined
-    '0x8e0ea7b408b21005b73238a7e718c8f0320f569ea0c001a1a672bef88288cd91', // Cannot read property 'plus' of undefined
-    '0x8ff899ff6a8729bb4b2600f6a491d1262001a4a591f11eac532bb20c30cb0074', // Approx
+    // '0x32c912f8f82952f631c39be6c69bd72a1da978d8d0704a7d32b8310431375bfa', // balanceBpt
+    // '0x3fd20d1d22910c0ee8ae926a1e90afca679cbcc65962135eff43e16fbae12745', // SOLVED: Cannot read property 'isZero' of undefined
+    // '0x56164d81bf21d9ec5c2a3f6d93dec8cf39e5ed1567e155bbd66f9d2360b15c95', // balanceBpt
+    // '0x5dd7b4c527806eba0d0ae9e381ea9143ed1e91554e8e060f6d1dcd76119bfdcc', // balanceBpt
+    // '0x726355cd7b33332ea32101ecc1fe0b0c214328d6fb6d277b0bbc14360e7ddd71', // Approx
+    // '0x81ddc85bdd36b0e8d21f340615d37e151017b516be2f6f20213654c45d75d6a9', // Approx
+    // '0x88bf77edcbdfc9483904316ac6fdb6e162cf7bfa85a73bc1960ccdab22be351b', // Cannot read property 'plus' of undefined
+    // '0x8e0ea7b408b21005b73238a7e718c8f0320f569ea0c001a1a672bef88288cd91', // Cannot read property 'plus' of undefined
+    // '0x8ff899ff6a8729bb4b2600f6a491d1262001a4a591f11eac532bb20c30cb0074', // Approx
     // '0x94d106cd9a7e5f2d30ea82a404b1dcfb31c4f6bb85fba228769cf543c5ecf2f5', // balanceBpt
     // '0x958eb7095ad851133bb2d3282a370108832094082e7554e48c9218cf376cd0be', // Cannot read property 'plus' of undefined
     // '0xabfeac41f0b0798e67e24557004eea1b1f18f973ea40689425267794ce88f35c', // Approx

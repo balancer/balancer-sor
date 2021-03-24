@@ -25,6 +25,14 @@ import { Contract } from '@ethersproject/contracts';
 import WeightedTokens from '../testData/eligibleTokens.json';
 import StableTokens from '../testData/stableTokens.json';
 
+// Just for testing weighted helpers:
+import { BPTForTokensZeroPriceImpact } from '../../src/solidityHelpers/frontendHelpers/weightedHelpers';
+import {
+    _bptInForExactTokensOut,
+    _exactTokensInForBPTOut,
+} from '../../src/solidityHelpers/pools/weighted';
+import { FixedPoint } from '../../src/solidityHelpers/math/FixedPoint';
+
 // These types are used for V1 compare
 interface Pools {
     pools: Pool[];
@@ -255,6 +263,104 @@ export async function getV1Swap(
         mostLiquidPoolsSecondHop,
         hopTokens
     );
+
+    ///////////// Start - Just for testing BPTForTokensZeroPriceImpact /////
+    let pool = pools[Object.keys(pools)[0]]; // Get first pool
+    let balances = [];
+    let decimals = [];
+    let normalizedWeights = [];
+    let amounts = [];
+
+    // bptTotalSupply is not scaled above (as it's not used in SOR V1)
+    let bptTotalSupply = new FixedPoint(pool.balanceBpt);
+    bptTotalSupply = new FixedPoint(
+        bptTotalSupply.times(new FixedPoint(10 ** 18))
+    );
+    let swapFee = new FixedPoint(pool.swapFee);
+    for (let i = 0; i < pool.tokens.length; i++) {
+        let decimal = pool.tokens[i].decimals;
+        decimals.push(decimal);
+        let balance = new FixedPoint(pool.tokens[i].balance);
+        balances.push(balance);
+        let amount = new FixedPoint(balance.div(new FixedPoint(100))); // We are considering a proportional add/remove of 1% of the balances
+        amounts.push(amount);
+        normalizedWeights.push(
+            new FixedPoint(
+                pool.tokens[i].denormWeight
+                    .div(pool.totalWeight)
+                    .times(new FixedPoint(10 ** 18))
+            )
+        );
+    }
+
+    let BPTForTokensZPI = BPTForTokensZeroPriceImpact(
+        balances,
+        decimals,
+        normalizedWeights,
+        [...amounts], // passing copy as somehow BPTForTokensZeroPriceImpact is changing amounts type from FixedPoint to BigNumber
+        bptTotalSupply
+    );
+
+    let BPTForTokensRealJoin = _exactTokensInForBPTOut(
+        balances,
+        normalizedWeights,
+        amounts,
+        bptTotalSupply,
+        swapFee
+    );
+
+    let BPTForTokensRealExit = _bptInForExactTokensOut(
+        balances,
+        normalizedWeights,
+        amounts,
+        bptTotalSupply,
+        swapFee
+    );
+
+    // This has to be true for a proportional join/exit, except
+    // for rounding errors (which should always be in favor of the pool)
+    // BPTForTokensRealExit = BPTForTokensZPI = BPTForTokensRealJoin
+    console.log(
+        'All three numbers below should be the same (except for rounding errors): '
+    );
+    console.log(BPTForTokensRealJoin.toNumber());
+    console.log(BPTForTokensZPI.toNumber());
+    console.log(BPTForTokensRealExit.toNumber());
+
+    // To simulate a non-proportional join/exit we just zero one of the amounts:
+    amounts[0] = new FixedPoint(0);
+    let BPTForTokensZPI_NP = BPTForTokensZeroPriceImpact(
+        balances,
+        decimals,
+        normalizedWeights,
+        [...amounts], // passing copy as somehow BPTForTokensZeroPriceImpact is changing amounts type from FixedPoint to BigNumber
+        bptTotalSupply
+    );
+
+    let BPTForTokensRealJoin_NP = _exactTokensInForBPTOut(
+        balances,
+        normalizedWeights,
+        amounts,
+        bptTotalSupply,
+        swapFee
+    );
+
+    let BPTForTokensRealExit_NP = _bptInForExactTokensOut(
+        balances,
+        normalizedWeights,
+        amounts,
+        bptTotalSupply,
+        swapFee
+    );
+    // This has to be true for a non-proportional join/exit:
+    // BPTForTokensRealExit_NP > BPTForTokensZPI_NP > BPTForTokensRealJoin_NP
+
+    console.log('Three numbers below should be in ascending order: ');
+    console.log(BPTForTokensRealJoin_NP.toNumber());
+    console.log(BPTForTokensZPI_NP.toNumber());
+    console.log(BPTForTokensRealExit_NP.toNumber());
+
+    ///////////// End - Just for testing BPTForTokensZeroPriceImpact /////
 
     const parsePoolDataEnd = performance.now();
     const processPathsStart = performance.now();
