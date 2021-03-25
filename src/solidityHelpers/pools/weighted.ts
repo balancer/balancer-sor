@@ -19,9 +19,9 @@
 // * Added _exactTokenInForBptOut and _bptInForExactTokenOut for convenience
 
 // import { BigNumber } from '../../../utils/bignumber';
-import { bnum } from '../math/FixedPoint';
-import * as FixedPoint from '../math/FixedPoint';
-import { FixedPoint as BigNumber } from '../math/FixedPoint';
+import { fnum } from '../math/lib/fixedPoint';
+import * as FixedPoint from '../math/lib/fixedPoint';
+import { FixedPointNumber as BigNumber } from '../math/FixedPointNumber';
 
 // This is a contract to emulate file-level functions. Convert to a library
 // after the migration to solc v0.7.1.
@@ -133,7 +133,7 @@ export function _exactTokensInForBPTOut(
     // not accounting swap fees
     let tokenBalanceRatiosWithoutFee = new Array(amountsIn.length);
     // The weighted sum of token balance rations sans fee
-    let weightedBalanceRatio = bnum(0);
+    let weightedBalanceRatio = fnum(0);
     for (let i = 0; i < balances.length; i++) {
         tokenBalanceRatiosWithoutFee[i] = balances[i]
             .add(amountsIn[i])
@@ -153,7 +153,7 @@ export function _exactTokensInForBPTOut(
         // the token's balance ratio sans fee is larger than the weighted balance ratio, and swap fees charged
         // on the amount to swap
         if (weightedBalanceRatio >= tokenBalanceRatiosWithoutFee[i]) {
-            tokenBalancePercentageExcess = bnum(0);
+            tokenBalancePercentageExcess = fnum(0);
         } else {
             tokenBalancePercentageExcess = tokenBalanceRatiosWithoutFee[i]
                 .sub(weightedBalanceRatio)
@@ -188,7 +188,7 @@ export function _exactTokenInForBPTOut(
 
     let tokenBalanceRatioWithoutFee;
     // The weighted sum of token balance rations sans fee
-    let weightedBalanceRatio = bnum(0);
+    let weightedBalanceRatio = fnum(0);
 
     tokenBalanceRatioWithoutFee = balance.add(amountIn).divDown(balance);
     weightedBalanceRatio = weightedBalanceRatio.add(
@@ -203,7 +203,7 @@ export function _exactTokenInForBPTOut(
     // the token's balance ratio sans fee is larger than the weighted balance ratio, and swap fees charged
     // on the amount to swap
     if (weightedBalanceRatio >= tokenBalanceRatioWithoutFee) {
-        tokenBalancePercentageExcess = bnum(0);
+        tokenBalancePercentageExcess = fnum(0);
     } else {
         tokenBalancePercentageExcess = tokenBalanceRatioWithoutFee
             .sub(weightedBalanceRatio)
@@ -337,7 +337,7 @@ export function _bptInForExactTokensOut(
 
     // First loop to calculate the weighted balance ratio
     let tokenBalanceRatiosWithoutFee = new Array(amountsOut.length);
-    let weightedBalanceRatio = bnum(0);
+    let weightedBalanceRatio = fnum(0);
     for (let i = 0; i < balances.length; i++) {
         tokenBalanceRatiosWithoutFee[i] = balances[i]
             .sub(amountsOut[i])
@@ -355,7 +355,7 @@ export function _bptInForExactTokensOut(
         // For each ratioSansFee, compare with the total weighted ratio (weightedBalanceRatio) and
         // decrease the fee from what goes above it
         if (weightedBalanceRatio <= tokenBalanceRatiosWithoutFee[i]) {
-            tokenBalancePercentageExcess = bnum(0);
+            tokenBalancePercentageExcess = fnum(0);
         } else {
             tokenBalancePercentageExcess = weightedBalanceRatio
                 .sub(tokenBalanceRatiosWithoutFee[i])
@@ -389,7 +389,7 @@ export function _bptInForExactTokenOut(
     // BPT in, so we round up overall.
 
     let tokenBalanceRatioWithoutFee;
-    let weightedBalanceRatio = bnum(0);
+    let weightedBalanceRatio = fnum(0);
     tokenBalanceRatioWithoutFee = balance.sub(amountOut).divUp(balance);
     weightedBalanceRatio = weightedBalanceRatio.add(
         tokenBalanceRatioWithoutFee.mulUp(normalizedWeight)
@@ -401,7 +401,7 @@ export function _bptInForExactTokenOut(
     // For each ratioSansFee, compare with the total weighted ratio (weightedBalanceRatio) and
     // decrease the fee from what goes above it
     if (weightedBalanceRatio <= tokenBalanceRatioWithoutFee) {
-        tokenBalancePercentageExcess = bnum(0);
+        tokenBalancePercentageExcess = fnum(0);
     } else {
         tokenBalancePercentageExcess = weightedBalanceRatio
             .sub(tokenBalanceRatioWithoutFee)
@@ -441,7 +441,7 @@ export function _calculateDueTokenProtocolSwapFee(
     if (currentInvariant.lt(previousInvariant)) {
         // This should never happen, but this acts as a safeguard to prevent the Pool from entering a locked state
         // in which joins and exits revert while computing accumulated swap fees.
-        return bnum(0);
+        return fnum(0);
     }
 
     let base = previousInvariant.divUp(currentInvariant);

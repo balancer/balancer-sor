@@ -14,7 +14,7 @@ import { MAX_IN_RATIO, MAX_OUT_RATIO, bnum, scale } from './bmath';
 import * as stableMath from './poolMath/stableMath';
 import * as weightedMath from './poolMath/weightedMath';
 import * as weightedSolidity from './solidityHelpers/pools/weighted';
-import { FixedPoint } from './solidityHelpers/math/FixedPoint';
+import { FixedPointNumber } from './solidityHelpers/math/FixedPointNumber';
 
 import disabledTokensDefault from './disabled-tokens.json';
 
@@ -837,12 +837,12 @@ export function EVMgetOutputAmountSwap(
             let { weightIn, weightOut } = poolPairData;
             if (pairType == 'token->token') {
                 returnAmount = weightedSolidity._outGivenIn(
-                    new FixedPoint(scale(balanceIn, decimalsIn)),
-                    new FixedPoint(scale(weightIn, 18)),
-                    new FixedPoint(scale(balanceOut, decimalsOut)),
-                    new FixedPoint(scale(weightOut, 18)),
-                    new FixedPoint(scale(amount, decimalsIn)),
-                    new FixedPoint(scale(swapFee, 18))
+                    new FixedPointNumber(scale(balanceIn, decimalsIn)),
+                    new FixedPointNumber(scale(weightIn, 18)),
+                    new FixedPointNumber(scale(balanceOut, decimalsOut)),
+                    new FixedPointNumber(scale(weightOut, 18)),
+                    new FixedPointNumber(scale(amount, decimalsIn)),
+                    new FixedPointNumber(scale(swapFee, 18))
                 );
                 // TODO: scaling down may not be necessary since we have to
                 // scale it up anyways for the swap info later?
@@ -850,11 +850,11 @@ export function EVMgetOutputAmountSwap(
             } else if (pairType == 'token->BPT') {
                 // returnAmount = getOutputAmountSwap(poolPairData,swapType,amount);
                 returnAmount = weightedSolidity._exactTokenInForBPTOut(
-                    new FixedPoint(scale(balanceIn, decimalsIn)),
-                    new FixedPoint(scale(weightIn, 18)),
-                    new FixedPoint(scale(amount, decimalsIn)),
-                    new FixedPoint(scale(balanceOut, 18)), // BPT is always 18 decimals
-                    new FixedPoint(scale(swapFee, 18))
+                    new FixedPointNumber(scale(balanceIn, decimalsIn)),
+                    new FixedPointNumber(scale(weightIn, 18)),
+                    new FixedPointNumber(scale(amount, decimalsIn)),
+                    new FixedPointNumber(scale(balanceOut, 18)), // BPT is always 18 decimals
+                    new FixedPointNumber(scale(swapFee, 18))
                 );
                 // TODO: scaling down may not be necessary since we have to
                 // scale it up anyways for the swap info later?
@@ -862,11 +862,11 @@ export function EVMgetOutputAmountSwap(
             } else if (pairType == 'BPT->token') {
                 // returnAmount = getOutputAmountSwap(poolPairData,swapType,amount);
                 returnAmount = weightedSolidity._exactBPTInForTokenOut(
-                    new FixedPoint(scale(balanceOut, decimalsOut)),
-                    new FixedPoint(scale(weightOut, 18)),
-                    new FixedPoint(scale(amount, 18)), // BPT is always 18 decimals
-                    new FixedPoint(scale(balanceIn, 18)), // BPT is always 18 decimals
-                    new FixedPoint(scale(swapFee, 18))
+                    new FixedPointNumber(scale(balanceOut, decimalsOut)),
+                    new FixedPointNumber(scale(weightOut, 18)),
+                    new FixedPointNumber(scale(amount, 18)), // BPT is always 18 decimals
+                    new FixedPointNumber(scale(balanceIn, 18)), // BPT is always 18 decimals
+                    new FixedPointNumber(scale(swapFee, 18))
                 );
                 // TODO: scaling down may not be necessary since we have to
                 // scale it up anyways for the swap info later?
@@ -891,12 +891,12 @@ export function EVMgetOutputAmountSwap(
             let { weightIn, weightOut } = poolPairData;
             if (pairType == 'token->token') {
                 returnAmount = weightedSolidity._inGivenOut(
-                    new FixedPoint(scale(balanceIn, decimalsIn)),
-                    new FixedPoint(scale(weightIn, 18)),
-                    new FixedPoint(scale(balanceOut, decimalsOut)),
-                    new FixedPoint(scale(weightOut, 18)),
-                    new FixedPoint(scale(amount, decimalsOut)),
-                    new FixedPoint(scale(swapFee, 18))
+                    new FixedPointNumber(scale(balanceIn, decimalsIn)),
+                    new FixedPointNumber(scale(weightIn, 18)),
+                    new FixedPointNumber(scale(balanceOut, decimalsOut)),
+                    new FixedPointNumber(scale(weightOut, 18)),
+                    new FixedPointNumber(scale(amount, decimalsOut)),
+                    new FixedPointNumber(scale(swapFee, 18))
                 );
                 // TODO: scaling down may not be necessary since we have to
                 // scale it up anyways for the swap info later?
@@ -904,11 +904,11 @@ export function EVMgetOutputAmountSwap(
             } else if (pairType == 'token->BPT') {
                 // returnAmount = getOutputAmountSwap(poolPairData,swapType,amount);
                 returnAmount = weightedSolidity._tokenInForExactBPTOut(
-                    new FixedPoint(scale(balanceIn, decimalsIn)),
-                    new FixedPoint(scale(weightIn, 18)),
-                    new FixedPoint(scale(amount, 18)), // BPT is always 18 decimals
-                    new FixedPoint(scale(balanceOut, 18)), // BPT is always 18 decimals
-                    new FixedPoint(scale(swapFee, 18))
+                    new FixedPointNumber(scale(balanceIn, decimalsIn)),
+                    new FixedPointNumber(scale(weightIn, 18)),
+                    new FixedPointNumber(scale(amount, 18)), // BPT is always 18 decimals
+                    new FixedPointNumber(scale(balanceOut, 18)), // BPT is always 18 decimals
+                    new FixedPointNumber(scale(swapFee, 18))
                 );
                 // TODO: scaling down may not be necessary since we have to
                 // scale it up anyways for the swap info later?
@@ -916,11 +916,11 @@ export function EVMgetOutputAmountSwap(
             } else if (pairType == 'BPT->token') {
                 // returnAmount = getOutputAmountSwap(poolPairData,swapType,amount);
                 returnAmount = weightedSolidity._bptInForExactTokenOut(
-                    new FixedPoint(scale(balanceOut, decimalsOut)),
-                    new FixedPoint(scale(weightOut, 18)),
-                    new FixedPoint(scale(amount, decimalsOut)),
-                    new FixedPoint(scale(balanceIn, 18)), // BPT is always 18 decimals
-                    new FixedPoint(scale(swapFee, 18))
+                    new FixedPointNumber(scale(balanceOut, decimalsOut)),
+                    new FixedPointNumber(scale(weightOut, 18)),
+                    new FixedPointNumber(scale(amount, decimalsOut)),
+                    new FixedPointNumber(scale(balanceIn, 18)), // BPT is always 18 decimals
+                    new FixedPointNumber(scale(swapFee, 18))
                 );
                 // TODO: scaling down may not be necessary since we have to
                 // scale it up anyways for the swap info later?

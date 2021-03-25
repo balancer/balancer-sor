@@ -31,7 +31,7 @@ import {
     _bptInForExactTokensOut,
     _exactTokensInForBPTOut,
 } from '../../src/solidityHelpers/pools/weighted';
-import { FixedPoint } from '../../src/solidityHelpers/math/FixedPoint';
+import { FixedPointNumber } from '../../src/solidityHelpers/math/FixedPointNumber';
 
 // These types are used for V1 compare
 interface Pools {
@@ -272,23 +272,25 @@ export async function getV1Swap(
     let amounts = [];
 
     // bptTotalSupply is not scaled above (as it's not used in SOR V1)
-    let bptTotalSupply = new FixedPoint(pool.balanceBpt);
-    bptTotalSupply = new FixedPoint(
-        bptTotalSupply.times(new FixedPoint(10 ** 18))
+    let bptTotalSupply = new FixedPointNumber(pool.balanceBpt);
+    bptTotalSupply = new FixedPointNumber(
+        bptTotalSupply.times(new FixedPointNumber(10 ** 18))
     );
-    let swapFee = new FixedPoint(pool.swapFee);
+    let swapFee = new FixedPointNumber(pool.swapFee);
     for (let i = 0; i < pool.tokens.length; i++) {
         let decimal = pool.tokens[i].decimals;
         decimals.push(decimal);
-        let balance = new FixedPoint(pool.tokens[i].balance);
+        let balance = new FixedPointNumber(pool.tokens[i].balance);
         balances.push(balance);
-        let amount = new FixedPoint(balance.div(new FixedPoint(100))); // We are considering a proportional add/remove of 1% of the balances
+        let amount = new FixedPointNumber(
+            balance.div(new FixedPointNumber(100))
+        ); // We are considering a proportional add/remove of 1% of the balances
         amounts.push(amount);
         normalizedWeights.push(
-            new FixedPoint(
+            new FixedPointNumber(
                 pool.tokens[i].denormWeight
                     .div(pool.totalWeight)
-                    .times(new FixedPoint(10 ** 18))
+                    .times(new FixedPointNumber(10 ** 18))
             )
         );
     }
@@ -328,7 +330,7 @@ export async function getV1Swap(
     console.log(BPTForTokensExit.toNumber());
 
     // To simulate a non-proportional join/exit we just zero one of the amounts:
-    amounts[0] = new FixedPoint(0);
+    amounts[0] = new FixedPointNumber(0);
     let BPTForTokensZPI_NP = BPTForTokensZeroPriceImpact(
         balances,
         decimals,
