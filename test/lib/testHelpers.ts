@@ -301,7 +301,7 @@ export async function getV1Swap(
         bptTotalSupply
     );
 
-    let BPTForTokensRealJoin = _exactTokensInForBPTOut(
+    let BPTForTokensJoin = _exactTokensInForBPTOut(
         balances,
         normalizedWeights,
         amounts,
@@ -309,7 +309,7 @@ export async function getV1Swap(
         swapFee
     );
 
-    let BPTForTokensRealExit = _bptInForExactTokensOut(
+    let BPTForTokensExit = _bptInForExactTokensOut(
         balances,
         normalizedWeights,
         amounts,
@@ -319,13 +319,13 @@ export async function getV1Swap(
 
     // This has to be true for a proportional join/exit, except
     // for rounding errors (which should always be in favor of the pool)
-    // BPTForTokensRealExit = BPTForTokensZPI = BPTForTokensRealJoin
+    // BPTForTokensExit = BPTForTokensZPI = BPTForTokensJoin
     console.log(
         'All three numbers below should be the same (except for rounding errors): '
     );
-    console.log(BPTForTokensRealJoin.toNumber());
+    console.log(BPTForTokensJoin.toNumber());
     console.log(BPTForTokensZPI.toNumber());
-    console.log(BPTForTokensRealExit.toNumber());
+    console.log(BPTForTokensExit.toNumber());
 
     // To simulate a non-proportional join/exit we just zero one of the amounts:
     amounts[0] = new FixedPoint(0);
@@ -337,7 +337,7 @@ export async function getV1Swap(
         bptTotalSupply
     );
 
-    let BPTForTokensRealJoin_NP = _exactTokensInForBPTOut(
+    let BPTForTokensJoin_NP = _exactTokensInForBPTOut(
         balances,
         normalizedWeights,
         amounts,
@@ -345,7 +345,7 @@ export async function getV1Swap(
         swapFee
     );
 
-    let BPTForTokensRealExit_NP = _bptInForExactTokensOut(
+    let BPTForTokensExit_NP = _bptInForExactTokensOut(
         balances,
         normalizedWeights,
         amounts,
@@ -353,12 +353,12 @@ export async function getV1Swap(
         swapFee
     );
     // This has to be true for a non-proportional join/exit:
-    // BPTForTokensRealExit_NP > BPTForTokensZPI_NP > BPTForTokensRealJoin_NP
+    // BPTForTokensExit_NP > BPTForTokensZPI_NP > BPTForTokensJoin_NP
 
     console.log('Three numbers below should be in ascending order: ');
-    console.log(BPTForTokensRealJoin_NP.toNumber());
+    console.log(BPTForTokensJoin_NP.toNumber());
     console.log(BPTForTokensZPI_NP.toNumber());
-    console.log(BPTForTokensRealExit_NP.toNumber());
+    console.log(BPTForTokensExit_NP.toNumber());
 
     ///////////// End - Just for testing BPTForTokensZeroPriceImpact /////
 
