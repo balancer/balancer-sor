@@ -20,8 +20,8 @@ export class SOR {
     };
 
     VAULTADDR: { [chainId: number]: string } = {
-        1: '0x99EceD8Ba43D090CA4283539A31431108FD34438',
-        42: '0x99EceD8Ba43D090CA4283539A31431108FD34438',
+        1: '0xba1c01474A7598c2B49015FdaFc67DdF06ce15f7',
+        42: '0xba1c01474A7598c2B49015FdaFc67DdF06ce15f7',
     };
 
     provider: BaseProvider;
