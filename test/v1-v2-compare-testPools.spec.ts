@@ -65,7 +65,7 @@ let testFiles = [
     // '0x18a934486971129d335b5a166e5d9dc2c271c8b7ff6c7ea079e2b97d45273403', // approx.
     // '0x24ecf45a2fc734c487abcfcdaec558e5d6cc1fb4a7c85ad6b362c017649d3156', // balanceBpt
     // '0x2ee23274910c172db9de340b1740e63f34b7d86db79827024316f173bf1284d9', // balanceBpt
-    '0x2f455a0e72ad4a2f6be9a5969a2e646ec8c1c2f4cc19adfffa53ba5ba468f02e', // approx
+    // '0x2f455a0e72ad4a2f6be9a5969a2e646ec8c1c2f4cc19adfffa53ba5ba468f02e', // approx
     // '0x32c912f8f82952f631c39be6c69bd72a1da978d8d0704a7d32b8310431375bfa', // balanceBpt
     // '0x3fd20d1d22910c0ee8ae926a1e90afca679cbcc65962135eff43e16fbae12745', // SOLVED: Cannot read property 'isZero' of undefined
     // '0x56164d81bf21d9ec5c2a3f6d93dec8cf39e5ed1567e155bbd66f9d2360b15c95', // balanceBpt
