@@ -11,6 +11,7 @@ import {
     Path,
     SubGraphToken,
 } from '../../src/types';
+import customMultiAbi from '../abi/customMulticall.json';
 import { SubGraphPools as SubGraphPoolsV1 } from '@balancer-labs/sor/dist/types';
 import { BaseProvider } from '@ethersproject/providers';
 import { bnum, scale } from '../../src/bmath';
@@ -835,7 +836,6 @@ async function getAllPoolDataOnChain(
 ): Promise<SubGraphPools> {
     if (pools.pools.length === 0) throw Error('There are no pools.');
 
-    const customMultiAbi = require('./abi/customMulticall.json');
     const contract = new Contract(multiAddress, customMultiAbi, provider);
 
     let addresses = [];
