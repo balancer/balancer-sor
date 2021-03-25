@@ -7,8 +7,9 @@ import {
 } from './testHelpers';
 import { bnum } from '../../src/bmath';
 import { SOR } from '../../src';
+import { formatSwaps } from '../../src/helpers';
 import { SwapInfo, DisabledOptions } from '../../src/types';
-import { assert } from 'chai';
+import { assert, expect } from 'chai';
 
 export async function compareTest(
     file: string,
@@ -16,6 +17,10 @@ export async function compareTest(
     testData: any,
     disabledOptions: DisabledOptions = { isOverRide: false, disabledTokens: [] }
 ) {
+    const amountNormalised = testData.tradeInfo.SwapAmount.div(
+        bnum(10 ** testData.tradeInfo.SwapAmountDecimals)
+    );
+
     // V2 first to debug faster
     // This method will only work for V1 pools onChain balances as uses BPool V1 contract to compare vs V1.
     let v2SwapData = await getV2Swap(
@@ -27,9 +32,7 @@ export async function compareTest(
         testData.tradeInfo.SwapType,
         testData.tradeInfo.TokenIn,
         testData.tradeInfo.TokenOut,
-        testData.tradeInfo.SwapAmount.div(
-            bnum(10 ** testData.tradeInfo.SwapAmountDecimals)
-        ),
+        amountNormalised,
         { onChainBalances: false },
         testData.tradeInfo.ReturnAmountDecimals,
         disabledOptions
@@ -57,12 +60,13 @@ export async function compareTest(
         `${file}.json`,
         testData.tradeInfo,
         [v1SwapData, v2SwapData],
-        true,
+        false,
         testData.tradeInfo.NoPools
     );
 
     assertResults(file, testData, v1SwapData, v2SwapData);
 
+    // Now checks the Wrapper swap which should be the same as V2
     const sor = new SOR(
         provider,
         testData.tradeInfo.GasPrice,
@@ -86,7 +90,7 @@ export async function compareTest(
     const isFetched = await sor.fetchPools(false);
     assert(isFetched, 'Pools should be fetched in wrapper');
 
-    const swapInfo: SwapInfo = await sor.getSwaps(
+    const swapInfoWrapper: SwapInfo = await sor.getSwaps(
         testData.tradeInfo.TokenIn,
         testData.tradeInfo.TokenOut,
         testData.tradeInfo.SwapType,
@@ -96,17 +100,24 @@ export async function compareTest(
     );
 
     assert.equal(
-        swapInfo.returnAmount.toString(),
+        swapInfoWrapper.returnAmount.toString(),
         v2SwapData.returnAmount
             .times(bnum(10 ** testData.tradeInfo.ReturnAmountDecimals))
             .toString(),
         `Wrapper should have same amount as helper.`
     );
 
-    // Rough check for same swaps
-    if (swapInfo.swaps.length > 0) {
-        assert.equal(swapInfo.swaps[0].poolId, v2SwapData.swaps[0][0].pool);
-    }
+    const v2formatted = formatSwaps(
+        v2SwapData.swaps,
+        testData.tradeInfo.SwapType,
+        amountNormalised,
+        testData.tradeInfo.TokenIn,
+        testData.tradeInfo.TokenOut,
+        v2SwapData.returnAmount,
+        swapInfoWrapper.marketSp
+    );
+
+    expect(swapInfoWrapper).to.deep.equal(v2formatted);
 
     if (testData.tradeInfo.RefResultV1) {
         assert.equal(

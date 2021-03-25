@@ -87,8 +87,8 @@ let testFiles = [
     // '0xf2826c2b04aef9ddab2c3a7088f33dbc7a0485d57b37b5220f9d86da9eb95b2a', // balanceBpt
     // '0xf4a5ecfa278f50beb4155bc7bbd3ada5e57d5ceb9825852531981fa66bc94844', // balanceBpt
     // '0xf4b9d3efbe306a94a8487d15fc80f9e701b42bfedcbd6246574d5278690c4a37', // Approx
-    '0xf521d8b5c199c57a5544f478af253e619eb0d05b4cb09e8298f3a704d8f119f0', // Too BIG an error, V1 seems to have the bug
-    '0xf6e67f7aa877caa7add6d4c85ef2737bc342a578ab8ecb4b62ddaba15fe1c6ca', // Too BIG an error, V1 seems to have the bug
+    // '0xf521d8b5c199c57a5544f478af253e619eb0d05b4cb09e8298f3a704d8f119f0', // Too BIG an error, V1 seems to have the bug
+    // '0xf6e67f7aa877caa7add6d4c85ef2737bc342a578ab8ecb4b62ddaba15fe1c6ca', // Too BIG an error, V1 seems to have the bug
     // '0xfdd81d285a2d103a8d6dac5c68d9bcc48cc107590656c0ab44cd8877c75a9430', // Approx
 ];
 
