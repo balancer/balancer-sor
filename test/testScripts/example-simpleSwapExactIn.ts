@@ -10,7 +10,7 @@ import { Contract } from '@ethersproject/contracts';
 import { MaxUint256 } from '@ethersproject/constants';
 
 import vaultArtifact from '../../src/abi/vault.json';
-import erc20abi from '../../src/abi/ERC20.json';
+import erc20abi from '../abi/ERC20.json';
 
 export type FundManagement = {
     sender: string;
