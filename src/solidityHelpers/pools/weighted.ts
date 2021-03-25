@@ -54,7 +54,7 @@ export function _outGivenIn(
     // Because bI / (bI + aI) <= 1, the exponent rounds down.
 
     // Added fee which was not in original code
-    tokenBalanceIn = tokenBalanceIn.mulDown(swapFee.complement());
+    tokenAmountIn = tokenAmountIn.mulDown(swapFee.complement());
 
     let newBalance = tokenBalanceIn.add(tokenAmountIn);
     let base = tokenBalanceIn.divUp(newBalance);
