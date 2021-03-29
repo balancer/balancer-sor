@@ -68,7 +68,7 @@ describe('Tests Multihop SOR vs static allPoolsDecimals.json', () => {
         assert.equal(v2SwapData.swaps.length, 1, 'Should have 1 multiswap.');
         assert.equal(
             v2SwapData.returnAmount.toString(),
-            '0.09489946703329291',
+            '0.094899465593600104',
             'Amount should match previous result.'
         );
     }).timeout(10000);
@@ -142,7 +142,7 @@ describe('Tests Multihop SOR vs static allPoolsDecimals.json', () => {
         assert.equal(v2SwapData.swaps.length, 1, 'Should have 1 multiswap.');
         assert.equal(
             v2SwapData.returnAmount.toString(),
-            '0.9622085344103445',
+            '0.962208461003483771',
             'Amount should match previous result.'
         );
     }).timeout(10000);

@@ -329,7 +329,7 @@ describe('Tests Multihop SOR vs static subgraphPoolsLarge.json', () => {
 
         assert.equal(
             v2SwapData.returnAmount.toString(),
-            '0.002931223513420838',
+            '0.002931223512061991',
             'Amount should match previous result.'
         );
     }).timeout(10000);

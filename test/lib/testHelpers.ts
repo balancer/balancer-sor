@@ -266,6 +266,7 @@ export async function getV1Swap(
     );
 
     ///////////// Start - Just for testing BPTForTokensZeroPriceImpact /////
+    /*
     let pool = pools[Object.keys(pools)[0]]; // Get first pool
     let balances = [];
     let decimals = [];
@@ -362,7 +363,7 @@ export async function getV1Swap(
     console.log(BPTForTokensJoin_NP.toNumber());
     console.log(BPTForTokensZPI_NP.toNumber());
     console.log(BPTForTokensExit_NP.toNumber());
-
+    */
     ///////////// End - Just for testing BPTForTokensZeroPriceImpact /////
 
     const parsePoolDataEnd = performance.now();
