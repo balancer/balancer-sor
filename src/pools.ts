@@ -5,9 +5,13 @@ import {
     SubgraphPoolBase,
     PoolDictionary,
     TypesForSwap,
+    Path,
+    Swap,
+    PoolBase,
 } from './types';
 import { WeightedPool } from './pools/weightedPool';
 import { StablePool } from './pools/StablePool';
+import { bnum } from './bmath';
 
 import disabledTokensDefault from './disabled-tokens.json';
 
@@ -60,7 +64,8 @@ export function filterPoolsOfInterest(
                 pool.swapFee,
                 pool.totalWeight,
                 pool.totalShares,
-                pool.tokens
+                pool.tokens,
+                pool.tokensList
             );
         else
             newPool = new StablePool(
@@ -68,7 +73,8 @@ export function filterPoolsOfInterest(
                 pool.amp,
                 pool.swapFee,
                 pool.totalShares,
-                pool.tokens
+                pool.tokens,
+                pool.tokensList
             );
 
         let tokenListSet = new Set(pool.tokensList);
@@ -119,4 +125,160 @@ export function filterPoolsOfInterest(
     // Transform set into Array
     const hopTokens = [...hopTokensSet];
     return [poolsDictionary, hopTokens];
+}
+/*
+Find the most liquid pool for each hop (i.e. tokenIn->hopToken & hopToken->tokenOut).
+Creates paths for each pool of interest (multi & direct pools).
+*/
+export function filterHopPools(
+    tokenIn: string,
+    tokenOut: string,
+    hopTokens: string[],
+    poolsOfInterest: PoolDictionary
+): [PoolDictionary, Path[]] {
+    const filteredPoolsOfInterest: PoolDictionary = {};
+    const paths: Path[] = [];
+    let firstPoolLoop = true;
+
+    // No multihop pool but still need to create paths for direct pools
+    if (hopTokens.length === 0) {
+        for (let id in poolsOfInterest) {
+            const path = createDirectPath(
+                poolsOfInterest[id],
+                tokenIn,
+                tokenOut
+            );
+            paths.push(path);
+            filteredPoolsOfInterest[id] = poolsOfInterest[id];
+        }
+    }
+
+    for (let i = 0; i < hopTokens.length; i++) {
+        let highestNormalizedLiquidityFirst = bnum(0); // Aux variable to find pool with most liquidity for pair (tokenIn -> hopToken)
+        let highestNormalizedLiquidityFirstPoolId: string; // Aux variable to find pool with most liquidity for pair (tokenIn -> hopToken)
+        let highestNormalizedLiquiditySecond = bnum(0); // Aux variable to find pool with most liquidity for pair (hopToken -> tokenOut)
+        let highestNormalizedLiquiditySecondPoolId: string; // Aux variable to find pool with most liquidity for pair (hopToken -> tokenOut)
+
+        for (let id in poolsOfInterest) {
+            const pool = poolsOfInterest[id];
+
+            // We don't consider direct pools for the multihop but we do add it's path
+            if (pool.typeForSwap === TypesForSwap.Direct) {
+                // First loop of all pools we add paths to list
+                if (firstPoolLoop) {
+                    const path = createDirectPath(pool, tokenIn, tokenOut);
+                    paths.push(path);
+                    filteredPoolsOfInterest[id] = pool;
+                }
+                continue;
+            }
+
+            // If pool doesn't have  hopTokens[i] then ignore
+            if (!new Set(pool.tokensList).add(pool.id).has(hopTokens[i]))
+                continue;
+
+            if (pool.typeForSwap === TypesForSwap.HopIn) {
+                pool.parsePoolPairData(tokenIn, hopTokens[i]);
+                // const normalizedLiquidity = pool.getNormalizedLiquidity(tokenIn, hopTokens[i]);
+                const normalizedLiquidity = pool.getNormalizedLiquidity();
+                // Cannot be strictly greater otherwise highestNormalizedLiquidityPoolId = 0 if hopTokens[i] balance is 0 in this pool.
+                if (
+                    normalizedLiquidity.isGreaterThanOrEqualTo(
+                        highestNormalizedLiquidityFirst
+                    )
+                ) {
+                    highestNormalizedLiquidityFirst = normalizedLiquidity;
+                    highestNormalizedLiquidityFirstPoolId = id;
+                }
+            } else if (pool.typeForSwap === TypesForSwap.HopOut) {
+                pool.parsePoolPairData(hopTokens[i], tokenOut);
+                // const normalizedLiquidity = pool.getNormalizedLiquidity(hopTokens[i], tokenOut);
+                const normalizedLiquidity = pool.getNormalizedLiquidity();
+                // Cannot be strictly greater otherwise highestNormalizedLiquidityPoolId = 0 if hopTokens[i] balance is 0 in this pool.
+                if (
+                    normalizedLiquidity.isGreaterThanOrEqualTo(
+                        highestNormalizedLiquiditySecond
+                    )
+                ) {
+                    highestNormalizedLiquiditySecond = normalizedLiquidity;
+                    highestNormalizedLiquiditySecondPoolId = id;
+                }
+            } else {
+                // Unknown type
+                continue;
+            }
+        }
+
+        firstPoolLoop = false;
+
+        filteredPoolsOfInterest[highestNormalizedLiquidityFirstPoolId] =
+            poolsOfInterest[highestNormalizedLiquidityFirstPoolId];
+        filteredPoolsOfInterest[highestNormalizedLiquiditySecondPoolId] =
+            poolsOfInterest[highestNormalizedLiquiditySecondPoolId];
+
+        const path = createMultihopPath(
+            poolsOfInterest[highestNormalizedLiquidityFirstPoolId],
+            poolsOfInterest[highestNormalizedLiquiditySecondPoolId],
+            tokenIn,
+            hopTokens[i],
+            tokenOut
+        );
+
+        paths.push(path);
+    }
+
+    return [filteredPoolsOfInterest, paths];
+}
+
+function createDirectPath(
+    pool: PoolBase,
+    tokenIn: string,
+    tokenOut: string
+): Path {
+    const swap: Swap = {
+        pool: pool.id,
+        tokenIn: tokenIn,
+        tokenOut: tokenOut,
+        tokenInDecimals: 18, // TO DO - Add decimals here
+        tokenOutDecimals: 18,
+    };
+
+    const path: Path = {
+        id: pool.id,
+        swaps: [swap],
+    };
+
+    return path;
+}
+
+function createMultihopPath(
+    firstPool: PoolBase,
+    secondPool: PoolBase,
+    tokenIn: string,
+    hopToken: string,
+    tokenOut: string
+): Path {
+    const swap1: Swap = {
+        pool: firstPool.id,
+        tokenIn: tokenIn,
+        tokenOut: hopToken,
+        tokenInDecimals: 18, // Placeholder for actual decimals TO DO
+        tokenOutDecimals: 18,
+    };
+
+    const swap2: Swap = {
+        pool: secondPool.id,
+        tokenIn: hopToken,
+        tokenOut: tokenOut,
+        tokenInDecimals: 18, // Placeholder for actual decimals TO DO
+        tokenOutDecimals: 18,
+    };
+
+    // Path id is the concatenation of the ids of poolFirstHop and poolSecondHop
+    const path: Path = {
+        id: firstPool.id + secondPool.id,
+        swaps: [swap1, swap2],
+    };
+
+    return path;
 }

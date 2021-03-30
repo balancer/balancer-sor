@@ -131,7 +131,9 @@ export interface PoolBase {
     poolType: PoolTypes;
     typeForSwap: TypesForSwap;
     id: string;
+    tokensList: string[];
     parsePoolPairData: (tokenIn: string, tokenOut: string) => void;
+    getNormalizedLiquidity: () => BigNumber;
 }
 
 export interface WeightedPool extends PoolBase {

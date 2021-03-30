@@ -36,6 +36,7 @@ export class StablePool implements PoolBase {
     swapFee: string;
     totalShares: string;
     tokens: StablePoolToken[];
+    tokensList: string[];
     poolPairData: StablePoolPairData;
 
     constructor(
@@ -43,13 +44,15 @@ export class StablePool implements PoolBase {
         amp: string,
         swapFee: string,
         totalShares: string,
-        tokens: StablePoolToken[]
+        tokens: StablePoolToken[],
+        tokensList: string[]
     ) {
         this.id = id;
         this.amp = amp;
         this.swapFee = swapFee;
         this.totalShares = totalShares;
         this.tokens = tokens;
+        this.tokensList = tokensList;
     }
 
     setTypeForSwap(type: TypesForSwap) {
@@ -126,5 +129,10 @@ export class StablePool implements PoolBase {
         };
 
         this.poolPairData = poolPairData;
+    }
+
+    getNormalizedLiquidity() {
+        // This is an approximation as the actual normalized liquidity is a lot more complicated to calculate
+        return this.poolPairData.balanceOut.times(this.poolPairData.amp);
     }
 }

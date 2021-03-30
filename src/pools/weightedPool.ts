@@ -33,6 +33,7 @@ export class WeightedPool implements PoolBase {
     totalShares: string;
     tokens: WeightedPoolToken[];
     totalWeight: string;
+    tokensList: string[];
     poolPairData: WeightedPoolPairData;
 
     constructor(
@@ -40,13 +41,15 @@ export class WeightedPool implements PoolBase {
         swapFee: string,
         totalWeight: string,
         totalShares: string,
-        tokens: WeightedPoolToken[]
+        tokens: WeightedPoolToken[],
+        tokensList: string[]
     ) {
         this.id = id;
         this.swapFee = swapFee;
         this.totalShares = totalShares;
         this.tokens = tokens;
         this.totalWeight = totalWeight;
+        this.tokensList = tokensList;
     }
 
     setTypeForSwap(type: TypesForSwap) {
@@ -116,5 +119,21 @@ export class WeightedPool implements PoolBase {
         };
 
         this.poolPairData = poolPairData;
+    }
+
+    getNormalizedLiquidity() {
+        if (this.poolPairData.pairType == PairTypes.TokenToToken) {
+            return this.poolPairData.balanceOut
+                .times(this.poolPairData.weightIn)
+                .div(
+                    this.poolPairData.weightIn.plus(this.poolPairData.weightOut)
+                );
+        } else if (this.poolPairData.pairType == PairTypes.TokenToBpt) {
+            return this.poolPairData.balanceOut; // Liquidity in tokenOut is balanceBpt
+        } else if (this.poolPairData.pairType == PairTypes.BptToToken) {
+            return this.poolPairData.balanceOut.div(
+                bnum(1).plus(this.poolPairData.weightOut)
+            ); // Liquidity in tokenOut is Bo/wo
+        }
     }
 }
