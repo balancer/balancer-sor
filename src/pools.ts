@@ -5,7 +5,7 @@ import {
     SubgraphPoolBase,
     PoolDictionary,
     TypesForSwap,
-    Path,
+    NewPath,
     Swap,
     PoolBase,
 } from './types';
@@ -135,9 +135,9 @@ export function filterHopPools(
     tokenOut: string,
     hopTokens: string[],
     poolsOfInterest: PoolDictionary
-): [PoolDictionary, Path[]] {
+): [PoolDictionary, NewPath[]] {
     const filteredPoolsOfInterest: PoolDictionary = {};
-    const paths: Path[] = [];
+    const paths: NewPath[] = [];
     let firstPoolLoop = true;
 
     // No multihop pool but still need to create paths for direct pools
@@ -234,7 +234,7 @@ function createDirectPath(
     pool: PoolBase,
     tokenIn: string,
     tokenOut: string
-): Path {
+): NewPath {
     const swap: Swap = {
         pool: pool.id,
         tokenIn: tokenIn,
@@ -243,9 +243,12 @@ function createDirectPath(
         tokenOutDecimals: 18,
     };
 
-    const path: Path = {
+    const path: NewPath = {
         id: pool.id,
         swaps: [swap],
+        limitAmount: bnum(0),
+        poolPairData: [pool.poolPairData],
+        pools: [pool],
     };
 
     return path;
@@ -257,7 +260,7 @@ function createMultihopPath(
     tokenIn: string,
     hopToken: string,
     tokenOut: string
-): Path {
+): NewPath {
     const swap1: Swap = {
         pool: firstPool.id,
         tokenIn: tokenIn,
@@ -275,9 +278,12 @@ function createMultihopPath(
     };
 
     // Path id is the concatenation of the ids of poolFirstHop and poolSecondHop
-    const path: Path = {
+    const path: NewPath = {
         id: firstPool.id + secondPool.id,
         swaps: [swap1, swap2],
+        limitAmount: bnum(0),
+        poolPairData: [firstPool.poolPairData, secondPool.poolPairData],
+        pools: [firstPool, secondPool],
     };
 
     return path;

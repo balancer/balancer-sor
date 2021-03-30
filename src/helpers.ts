@@ -617,6 +617,10 @@ export const parsePoolPairData = (
         weightIn,
         weightOut;
 
+    // Todo: the pool type should be already on subgraph
+    if (typeof p.amp === 'undefined' || p.amp === '0') poolType = 'Weighted';
+    else poolType = 'Stable';
+
     // Check if tokenIn is the pool token itself (BPT)
     if (tokenIn == p.id) {
         pairType = 'BPT->token';
@@ -640,7 +644,8 @@ export const parsePoolPairData = (
         tI = p.tokens[tokenIndexIn];
         balanceIn = tI.balance;
         decimalsIn = tI.decimals;
-        weightIn = bnum(tI.denormWeight).div(bnum(p.totalWeight));
+        if (poolType === 'Weighted')
+            weightIn = bnum(tI.denormWeight).div(bnum(p.totalWeight));
     }
     if (pairType != 'token->BPT') {
         tokenIndexOut = p.tokens.findIndex(
@@ -650,12 +655,9 @@ export const parsePoolPairData = (
         tO = p.tokens[tokenIndexOut];
         balanceOut = tO.balance;
         decimalsOut = tO.decimals;
-        weightOut = bnum(tO.denormWeight).div(bnum(p.totalWeight));
+        if (poolType === 'Weighted')
+            weightOut = bnum(tO.denormWeight).div(bnum(p.totalWeight));
     }
-
-    // Todo: the pool type should be already on subgraph
-    if (typeof p.amp === 'undefined' || p.amp === '0') poolType = 'Weighted';
-    else poolType = 'Stable';
 
     if (poolType == 'Weighted') {
         poolPairData = {

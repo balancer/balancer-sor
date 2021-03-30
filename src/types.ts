@@ -94,6 +94,11 @@ export interface SwapInfo {
     marketSp: BigNumber;
 }
 // NEW CLASS CODE
+export enum SwapTypes {
+    SwapExactIn,
+    SwapExactOut,
+}
+
 export enum PoolTypes {
     Weighted,
     Stable,
@@ -116,6 +121,21 @@ export interface PoolDictionary {
 }
 
 // TODO - This will change with SG schema update
+export interface PoolPairBase {
+    balanceIn: BigNumber;
+    balanceOut: BigNumber;
+    poolType: PoolTypes;
+    pairType: PairTypes;
+}
+
+export interface NewPath {
+    id: string; // pool address if direct path, contactenation of pool addresses if multihop
+    swaps: Swap[];
+    poolPairData: PoolPairBase[];
+    limitAmount: BigNumber;
+    pools: PoolBase[];
+    filterEffectivePrice?: BigNumber; // TODO: This is just used for filtering, maybe there is a better way to filter?
+}
 
 export interface SubgraphPoolBase {
     id: string;
@@ -132,8 +152,15 @@ export interface PoolBase {
     typeForSwap: TypesForSwap;
     id: string;
     tokensList: string[];
+    poolPairData: PoolPairBase;
     parsePoolPairData: (tokenIn: string, tokenOut: string) => void;
     getNormalizedLiquidity: () => BigNumber;
+    _exactTokenInForTokenOut: (amount: BigNumber) => BigNumber;
+    _exactTokenInForBPTOut: (amount: BigNumber) => BigNumber;
+    _exactBPTInForTokenOut: (amount: BigNumber) => BigNumber;
+    _tokenInForExactTokenOut: (amount: BigNumber) => BigNumber;
+    _tokenInForExactBPTOut: (amount: BigNumber) => BigNumber;
+    _BPTInForExactTokenOut: (amount: BigNumber) => BigNumber;
 }
 
 export interface WeightedPool extends PoolBase {

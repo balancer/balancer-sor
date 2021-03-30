@@ -5,12 +5,22 @@ import * as sor from '../src';
 import { assert } from 'chai';
 import 'mocha';
 import { filterPoolsWithBalance } from './lib/testHelpers';
+import BigNumber from 'bignumber.js';
 // Following has:
 // Both DAI&USDC: 4 pools
 // DAI, No USDC: 3
 // No DAI, USDC: 2
 // Neither: 3
 let allPools = require('./testData/filterTestPools.json');
+import {
+    SwapV2,
+    SwapInfo,
+    SubGraphPools,
+    SubGraphPool,
+    Path,
+    SubGraphPoolDictionary,
+    DisabledOptions,
+} from '../src/types';
 allPools = { pools: allPools.weightedOnly };
 
 const DAI = '0x6B175474E89094C44Da98b954EedeAC495271d0F'.toLowerCase(); // DAI
@@ -83,5 +93,103 @@ describe('Test Filter Functions using subgraphPoolsSmall.json & full SOR comparr
             '0x12d6b6e24fdd9849abd42afd8f5775d36084a828',
             'Pool Addresses should match.'
         );
+    });
+
+    it(`runs full`, () => {
+        let tokenIn = DAI;
+        let tokenOut = USDC;
+
+        let poolsTokenIn, poolsTokenOut, directPools, hopTokensFilter;
+        [
+            directPools,
+            hopTokensFilter,
+            poolsTokenIn,
+            poolsTokenOut,
+        ] = sor.filterPools(allPoolsNonZeroBalances.pools, DAI, USDC, 4);
+
+        let mostLiquidPoolsFirstHopFilter, mostLiquidPoolsSecondHopFilter;
+        [
+            mostLiquidPoolsFirstHopFilter,
+            mostLiquidPoolsSecondHopFilter,
+        ] = sor.sortPoolsMostLiquid(
+            DAI,
+            USDC,
+            hopTokensFilter,
+            poolsTokenIn,
+            poolsTokenOut
+        );
+
+        // Finds the possible paths to make the swap
+        let pathArray: Path[];
+        let pools: SubGraphPoolDictionary;
+        [pools, pathArray] = sor.parsePoolData(
+            directPools,
+            tokenIn,
+            tokenOut,
+            mostLiquidPoolsFirstHopFilter,
+            mostLiquidPoolsSecondHopFilter,
+            hopTokensFilter
+        );
+
+        let paths: Path[];
+        let maxAmt: BigNumber;
+        [paths, maxAmt] = sor.processPaths(pathArray, pools, 'swapExactIn');
+
+        console.log(maxAmt.toString());
+        paths.forEach(path => {
+            console.log(path.id);
+            console.log(path.limitAmount.toString());
+        });
+    });
+
+    it(`runs full stable`, () => {
+        let allPools = require('./testData/filterTestPools.json');
+        allPools = { pools: allPools.stableOnly };
+        let tokenIn = DAI;
+        let tokenOut = USDC;
+
+        console.log(allPools);
+
+        let poolsTokenIn, poolsTokenOut, directPools, hopTokensFilter;
+        [
+            directPools,
+            hopTokensFilter,
+            poolsTokenIn,
+            poolsTokenOut,
+        ] = sor.filterPools(allPools.pools, DAI, USDC, 4);
+
+        let mostLiquidPoolsFirstHopFilter, mostLiquidPoolsSecondHopFilter;
+        [
+            mostLiquidPoolsFirstHopFilter,
+            mostLiquidPoolsSecondHopFilter,
+        ] = sor.sortPoolsMostLiquid(
+            DAI,
+            USDC,
+            hopTokensFilter,
+            poolsTokenIn,
+            poolsTokenOut
+        );
+
+        // Finds the possible paths to make the swap
+        let pathArray: Path[];
+        let pools: SubGraphPoolDictionary;
+        [pools, pathArray] = sor.parsePoolData(
+            directPools,
+            tokenIn,
+            tokenOut,
+            mostLiquidPoolsFirstHopFilter,
+            mostLiquidPoolsSecondHopFilter,
+            hopTokensFilter
+        );
+
+        let paths: Path[];
+        let maxAmt: BigNumber;
+        [paths, maxAmt] = sor.processPaths(pathArray, pools, 'swapExactIn');
+
+        console.log(maxAmt.toString());
+        paths.forEach(path => {
+            console.log(path.id);
+            console.log(path.limitAmount.toString());
+        });
     });
 });

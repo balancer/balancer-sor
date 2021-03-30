@@ -1,8 +1,22 @@
 import { BigNumber } from '../utils/bignumber';
-import { PoolBase, PoolTypes, TypesForSwap, PairTypes } from '../types';
+import {
+    PoolBase,
+    PoolTypes,
+    TypesForSwap,
+    PairTypes,
+    PoolPairBase,
+} from '../types';
 import { getAddress } from '@ethersproject/address';
 import { bnum } from '../bmath';
 import * as stableMath from '../poolMath/stableMath';
+import {
+    _exactTokenInForTokenOut,
+    _exactTokenInForBPTOut,
+    _exactBPTInForTokenOut,
+    _tokenInForExactTokenOut,
+    _tokenInForExactBPTOut,
+    _BPTInForExactTokenOut,
+} from '../poolMath/stableMath';
 
 export interface StablePoolToken {
     address: string;
@@ -10,7 +24,7 @@ export interface StablePoolToken {
     decimals: string | number;
 }
 
-export interface StablePoolPairData {
+export interface StablePoolPairData extends PoolPairBase {
     id: string;
     poolType: PoolTypes;
     pairType: PairTypes;
@@ -134,5 +148,29 @@ export class StablePool implements PoolBase {
     getNormalizedLiquidity() {
         // This is an approximation as the actual normalized liquidity is a lot more complicated to calculate
         return this.poolPairData.balanceOut.times(this.poolPairData.amp);
+    }
+
+    _exactTokenInForTokenOut(amount: BigNumber): BigNumber {
+        return _exactTokenInForTokenOut(amount, this.poolPairData);
+    }
+
+    _exactTokenInForBPTOut(amount: BigNumber): BigNumber {
+        return _exactTokenInForBPTOut(amount, this.poolPairData);
+    }
+
+    _exactBPTInForTokenOut(amount: BigNumber): BigNumber {
+        return _exactBPTInForTokenOut(amount, this.poolPairData);
+    }
+
+    _tokenInForExactTokenOut(amount: BigNumber): BigNumber {
+        return _tokenInForExactTokenOut(amount, this.poolPairData);
+    }
+
+    _tokenInForExactBPTOut(amount: BigNumber): BigNumber {
+        return _tokenInForExactBPTOut(amount, this.poolPairData);
+    }
+
+    _BPTInForExactTokenOut(amount: BigNumber): BigNumber {
+        return _exactBPTInForTokenOut(amount, this.poolPairData);
     }
 }

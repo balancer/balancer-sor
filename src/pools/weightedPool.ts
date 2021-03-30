@@ -1,5 +1,19 @@
 import { BigNumber } from '../utils/bignumber';
-import { PoolBase, PoolTypes, TypesForSwap, PairTypes } from '../types';
+import {
+    PoolBase,
+    PoolTypes,
+    TypesForSwap,
+    PairTypes,
+    PoolPairBase,
+} from '../types';
+import {
+    _exactTokenInForTokenOut,
+    _exactTokenInForBPTOut,
+    _exactBPTInForTokenOut,
+    _tokenInForExactTokenOut,
+    _tokenInForExactBPTOut,
+    _BPTInForExactTokenOut,
+} from '../poolMath/weightedMath';
 import { getAddress } from '@ethersproject/address';
 import { bnum } from '../bmath';
 
@@ -10,7 +24,7 @@ export interface WeightedPoolToken {
     denormWeight?: string;
 }
 
-export interface WeightedPoolPairData {
+export interface WeightedPoolPairData extends PoolPairBase {
     id: string;
     poolType: PoolTypes;
     pairType: PairTypes;
@@ -135,5 +149,29 @@ export class WeightedPool implements PoolBase {
                 bnum(1).plus(this.poolPairData.weightOut)
             ); // Liquidity in tokenOut is Bo/wo
         }
+    }
+
+    _exactTokenInForTokenOut(amount: BigNumber): BigNumber {
+        return _exactTokenInForTokenOut(amount, this.poolPairData);
+    }
+
+    _exactTokenInForBPTOut(amount: BigNumber): BigNumber {
+        return _exactTokenInForBPTOut(amount, this.poolPairData);
+    }
+
+    _exactBPTInForTokenOut(amount: BigNumber): BigNumber {
+        return _exactBPTInForTokenOut(amount, this.poolPairData);
+    }
+
+    _tokenInForExactTokenOut(amount: BigNumber): BigNumber {
+        return _tokenInForExactTokenOut(amount, this.poolPairData);
+    }
+
+    _tokenInForExactBPTOut(amount: BigNumber): BigNumber {
+        return _tokenInForExactBPTOut(amount, this.poolPairData);
+    }
+
+    _BPTInForExactTokenOut(amount: BigNumber): BigNumber {
+        return _exactBPTInForTokenOut(amount, this.poolPairData);
     }
 }

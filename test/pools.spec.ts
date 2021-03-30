@@ -1,9 +1,15 @@
 // npx mocha -r ts-node/register test/pools.spec.ts
-require('dotenv').config();
-import * as sor from '../src';
 import { assert, expect } from 'chai';
-import { PoolDictionary, TypesForSwap, PoolTypes, Path } from '../src/types';
+import {
+    PoolDictionary,
+    TypesForSwap,
+    PoolTypes,
+    NewPath,
+    SwapTypes,
+} from '../src/types';
 import { filterPoolsOfInterest, filterHopPools } from '../src/pools';
+import { calculatePathLimits } from '../src/sorClass';
+import BigNumber from 'bignumber.js';
 
 import testPools from './testData/filterTestPools.json';
 import disabledTokens from './testData/disabled-tokens.json';
@@ -199,7 +205,7 @@ describe('Tests pools helpers', () => {
     it('should filter weighted only hop pools correctly', () => {
         let hopTokens: string[];
         let poolsOfInterestDictionary: PoolDictionary;
-        let pathData: Path[];
+        let pathData: NewPath[];
 
         [poolsOfInterestDictionary, hopTokens] = filterPoolsOfInterest(
             testPools.weightedOnly,
@@ -319,7 +325,7 @@ describe('Tests pools helpers', () => {
     it('should filter stable only hop pools correctly', () => {
         let hopTokens: string[];
         let poolsOfInterestDictionary: PoolDictionary;
-        let pathData: Path[];
+        let pathData: NewPath[];
 
         [poolsOfInterestDictionary, hopTokens] = filterPoolsOfInterest(
             testPools.stableOnly,
@@ -375,5 +381,92 @@ describe('Tests pools helpers', () => {
         );
         assert.equal(pathData[0].swaps[0].tokenIn, DAI);
         assert.equal(pathData[0].swaps[0].tokenOut, USDC);
+    });
+
+    it('should calc weighted path limits', () => {
+        let hopTokens: string[];
+        let poolsOfInterestDictionary: PoolDictionary;
+        let pathData: NewPath[];
+
+        [poolsOfInterestDictionary, hopTokens] = filterPoolsOfInterest(
+            testPools.weightedOnly,
+            DAI,
+            USDC,
+            4
+        );
+
+        [poolsOfInterestDictionary, pathData] = filterHopPools(
+            DAI,
+            USDC,
+            hopTokens,
+            poolsOfInterestDictionary
+        );
+
+        let paths: NewPath[];
+        let maxAmt: BigNumber;
+        [paths, maxAmt] = calculatePathLimits(pathData, SwapTypes.SwapExactIn);
+
+        // Known results taken from previous version
+        assert.equal(
+            maxAmt.toString(),
+            '2701.18959849598293269784114035126711'
+        );
+        assert.equal(paths[0].id, '0x75286e183d923a5f52f52be205e358c5c9101b09');
+        assert.equal(
+            paths[0].limitAmount.toString(),
+            '2448.917784422694261994931154601680339'
+        );
+        assert.equal(paths[1].id, '0x57755f7dec33320bca83159c26e93751bfd30fbe');
+        assert.equal(
+            paths[1].limitAmount.toString(),
+            '236.223017620930140067464758138774973'
+        );
+        assert.equal(paths[2].id, '0x2dbd24322757d2e28de4230b1ca5b88e49a76979');
+        assert.equal(
+            paths[2].limitAmount.toString(),
+            '15.992777386194562115445227610811798'
+        );
+        assert.equal(
+            paths[3].id,
+            '0x29f55de880d4dcae40ba3e63f16407a31b4d44ee0x12d6b6e24fdd9849abd42afd8f5775d36084a828'
+        );
+        assert.equal(paths[3].limitAmount.toString(), '0.05601906616396852');
+        assert.equal(paths[4].id, '0x0481d726c3d25250a8963221945ed93b8a5315a9');
+        assert.equal(paths[4].limitAmount.toString(), '0');
+    });
+
+    it('should calc stable path limits', () => {
+        let hopTokens: string[];
+        let poolsOfInterestDictionary: PoolDictionary;
+        let pathData: NewPath[];
+
+        [poolsOfInterestDictionary, hopTokens] = filterPoolsOfInterest(
+            testPools.stableOnly,
+            DAI,
+            USDC,
+            4
+        );
+
+        [poolsOfInterestDictionary, pathData] = filterHopPools(
+            DAI,
+            USDC,
+            hopTokens,
+            poolsOfInterestDictionary
+        );
+
+        let paths: NewPath[];
+        let maxAmt: BigNumber;
+        [paths, maxAmt] = calculatePathLimits(pathData, SwapTypes.SwapExactIn);
+
+        // Known results taken from previous version
+        assert.equal(
+            maxAmt.toString(),
+            '75041081.008900386726414241698926382847481'
+        );
+        assert.equal(paths[0].id, '0x6c3f90f043a72fa612cbac8115ee7e52bde6e490');
+        assert.equal(
+            paths[0].limitAmount.toString(),
+            '75041081.008900386726414241698926382847481'
+        );
     });
 });
