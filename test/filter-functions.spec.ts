@@ -10,7 +10,8 @@ import { filterPoolsWithBalance } from './lib/testHelpers';
 // DAI, No USDC: 3
 // No DAI, USDC: 2
 // Neither: 3
-const allPools = require('./testData/testPools/subgraphPoolsSmall.json');
+let allPools = require('./testData/filterTestPools.json');
+allPools = { pools: allPools.weightedOnly };
 
 const DAI = '0x6B175474E89094C44Da98b954EedeAC495271d0F'.toLowerCase(); // DAI
 const USDC = '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48'.toLowerCase();
@@ -37,6 +38,12 @@ describe('Test Filter Functions using subgraphPoolsSmall.json & full SOR comparr
             poolsTokenIn,
             poolsTokenOut,
         ] = sor.filterPools(allPoolsNonZeroBalances.pools, DAI, USDC, 4);
+
+        assert.equal(Object.keys(poolsTokenIn).length, 2, 'PoolsTokenIn');
+
+        assert.equal(Object.keys(poolsTokenOut).length, 1, 'PoolsTokenIn');
+
+        assert.equal(Object.keys(directPools).length, 3, 'Direct');
 
         let mostLiquidPoolsFirstHopFilter, mostLiquidPoolsSecondHopFilter;
         [

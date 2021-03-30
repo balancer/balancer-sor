@@ -58,7 +58,7 @@ export interface SubGraphPool {
 export interface SubGraphToken {
     address: string;
     balance: string;
-    decimals: string;
+    decimals: string | number;
     denormWeight?: string;
 }
 
@@ -92,4 +92,48 @@ export interface SwapInfo {
     tokenIn: string;
     tokenOut: string;
     marketSp: BigNumber;
+}
+// NEW CLASS CODE
+export enum PoolTypes {
+    Weighted,
+    Stable,
+}
+
+export enum TypesForSwap {
+    Direct,
+    HopIn,
+    HopOut,
+}
+
+export enum PairTypes {
+    BptToToken,
+    TokenToBpt,
+    TokenToToken,
+}
+
+export interface PoolDictionary {
+    [poolId: string]: PoolBase;
+}
+
+// TODO - This will change with SG schema update
+
+export interface SubgraphPoolBase {
+    id: string;
+    swapFee: string;
+    totalShares: string;
+    tokens: SubGraphToken[];
+    tokensList: string[];
+    amp?: string; // This should be removed in future for actual pool type from Subgraph
+    totalWeight?: string;
+}
+
+export interface PoolBase {
+    poolType: PoolTypes;
+    typeForSwap: TypesForSwap;
+    id: string;
+    parsePoolPairData: (tokenIn: string, tokenOut: string) => void;
+}
+
+export interface WeightedPool extends PoolBase {
+    totalWeight: string;
 }
