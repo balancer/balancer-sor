@@ -1,8 +1,8 @@
 import { getAddress } from '@ethersproject/address';
 import { bnum, scale } from '../../bmath';
 import { BigNumber } from '../../utils/bignumber';
-import * as weightedSolidity from '../../solidityHelpers/pools/weighted';
-import { FixedPointNumber } from '../../solidityHelpers/math/FixedPointNumber';
+import * as weightedSolidity from './weightedMathEvm';
+import { FixedPointNumber } from '../../math/FixedPointNumber';
 import {
     PoolBase,
     PoolTypes,

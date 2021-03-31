@@ -27,12 +27,12 @@ import WeightedTokens from '../testData/eligibleTokens.json';
 import StableTokens from '../testData/stableTokens.json';
 
 // Just for testing weighted helpers:
-import { BPTForTokensZeroPriceImpact } from '../../src/solidityHelpers/frontendHelpers/weightedHelpers';
+import { BPTForTokensZeroPriceImpact } from '../../src/frontendHelpers/weightedHelpers';
 import {
     _bptInForExactTokensOut,
     _exactTokensInForBPTOut,
-} from '../../src/solidityHelpers/pools/weighted';
-import { FixedPointNumber } from '../../src/solidityHelpers/math/FixedPointNumber';
+} from '../../src/pools/weightedPool/weightedMathEvm';
+import { FixedPointNumber } from '../../src/math/FixedPointNumber';
 
 // These types are used for V1 compare
 interface Pools {

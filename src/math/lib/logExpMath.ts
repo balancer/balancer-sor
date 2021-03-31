@@ -15,7 +15,7 @@
 // This is ported to JS from solidity
 // https://github.com/balancer-labs/balancer-core-v2/blob/master/contracts/lib/math/LogExpMath.sol
 
-import { BigNumber } from '../../../utils/bignumber';
+import { BigNumber } from '../../utils/bignumber';
 
 const DECIMALS = new BigNumber(10 ** 18);
 const DOUBLE_DECIMALS = DECIMALS.times(DECIMALS);

@@ -1,5 +1,5 @@
-import { BigNumber } from '../../utils/bignumber';
-import * as weightedMath from '../../poolMath/weightedMath';
+import { BigNumber } from '../utils/bignumber';
+import * as weightedMath from '../pools/weightedPool/weightedMath';
 
 /////////
 /// UI Helpers

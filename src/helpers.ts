@@ -11,10 +11,10 @@ import {
     SwapV2,
 } from './types';
 import { MAX_IN_RATIO, MAX_OUT_RATIO, bnum, scale } from './bmath';
-import * as stableMath from './poolMath/stableMath';
-import * as weightedMath from './poolMath/weightedMath';
-import * as weightedSolidity from './solidityHelpers/pools/weighted';
-import { FixedPointNumber } from './solidityHelpers/math/FixedPointNumber';
+import * as stableMath from './pools/stablePool/stableMath';
+import * as weightedMath from './pools/weightedPool/weightedMath';
+import * as weightedSolidity from './pools/weightedPool/weightedMathEvm';
+import { FixedPointNumber } from './math/FixedPointNumber';
 
 import disabledTokensDefault from './disabled-tokens.json';
 

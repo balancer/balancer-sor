@@ -1,4 +1,4 @@
-import { BigNumber } from '../../../utils/bignumber';
+import { BigNumber } from '../../utils/bignumber';
 import { FixedPointNumber } from '../FixedPointNumber';
 import * as logExpMath from './logExpMath';
 

@@ -19,9 +19,9 @@
 // * Added _exactTokenInForBptOut and _bptInForExactTokenOut for convenience
 
 // import { BigNumber } from '../../../utils/bignumber';
-import { fnum } from '../math/lib/fixedPoint';
-import * as FixedPoint from '../math/lib/fixedPoint';
-import { FixedPointNumber as BigNumber } from '../math/FixedPointNumber';
+import { fnum } from '../../math/lib/fixedPoint';
+import * as FixedPoint from '../../math/lib/fixedPoint';
+import { FixedPointNumber as BigNumber } from '../../math/FixedPointNumber';
 
 // This is a contract to emulate file-level functions. Convert to a library
 // after the migration to solc v0.7.1.
@@ -378,7 +378,7 @@ export function _bptInForExactTokensOut(
     return bptTotalSupply.mulUp(invariantRatio.complement());
 }
 
-// This function was added for convinience based on _bptInForExactTokensOut above
+// This function was added for convenience based on _bptInForExactTokensOut above
 export function _bptInForExactTokenOut(
     balance: BigNumber,
     normalizedWeight: BigNumber,

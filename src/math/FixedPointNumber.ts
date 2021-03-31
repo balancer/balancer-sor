@@ -15,7 +15,7 @@
 // This is ported to JS from solidity
 // https://github.com/balancer-labs/balancer-core-v2/blob/master/contracts/lib/math/FixedPoint.sol
 
-import { BigNumber } from '../../utils/bignumber';
+import { BigNumber } from '../utils/bignumber';
 import * as LogExpMath from './lib/logExpMath';
 import {
     ONE,
