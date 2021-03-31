@@ -126,6 +126,10 @@ export interface PoolPairBase {
     balanceOut: BigNumber;
     poolType: PoolTypes;
     pairType: PairTypes;
+    tokenIn: string;
+    tokenOut: string;
+    decimalsIn: number;
+    decimalsOut: number;
 }
 
 export interface NewPath {
@@ -155,12 +159,47 @@ export interface PoolBase {
     poolPairData: PoolPairBase;
     parsePoolPairData: (tokenIn: string, tokenOut: string) => void;
     getNormalizedLiquidity: () => BigNumber;
+    updateTokenBalanceForPool: (token: string, newBalance: BigNumber) => void;
     _exactTokenInForTokenOut: (amount: BigNumber) => BigNumber;
     _exactTokenInForBPTOut: (amount: BigNumber) => BigNumber;
     _exactBPTInForTokenOut: (amount: BigNumber) => BigNumber;
     _tokenInForExactTokenOut: (amount: BigNumber) => BigNumber;
     _tokenInForExactBPTOut: (amount: BigNumber) => BigNumber;
     _BPTInForExactTokenOut: (amount: BigNumber) => BigNumber;
+    _spotPriceAfterSwapExactTokenInForTokenOut: (
+        amount: BigNumber
+    ) => BigNumber;
+    _spotPriceAfterSwapExactTokenInForBPTOut: (amount: BigNumber) => BigNumber;
+    _spotPriceAfterSwapExactBPTInForTokenOut: (amount: BigNumber) => BigNumber;
+    _spotPriceAfterSwapTokenInForExactTokenOut: (
+        amount: BigNumber
+    ) => BigNumber;
+    _spotPriceAfterSwapTokenInForExactBPTOut: (amount: BigNumber) => BigNumber;
+    _spotPriceAfterSwapBPTInForExactTokenOut: (amount: BigNumber) => BigNumber;
+    _derivativeSpotPriceAfterSwapExactTokenInForTokenOut: (
+        amount: BigNumber
+    ) => BigNumber;
+    _derivativeSpotPriceAfterSwapExactTokenInForBPTOut: (
+        amount: BigNumber
+    ) => BigNumber;
+    _derivativeSpotPriceAfterSwapExactBPTInForTokenOut: (
+        amount: BigNumber
+    ) => BigNumber;
+    _derivativeSpotPriceAfterSwapTokenInForExactTokenOut: (
+        amount: BigNumber
+    ) => BigNumber;
+    _derivativeSpotPriceAfterSwapTokenInForExactBPTOut: (
+        amount: BigNumber
+    ) => BigNumber;
+    _derivativeSpotPriceAfterSwapBPTInForExactTokenOut: (
+        amount: BigNumber
+    ) => BigNumber;
+    _evmoutGivenIn: (amount: BigNumber) => BigNumber;
+    _evmexactTokenInForBPTOut: (amount: BigNumber) => BigNumber;
+    _evmexactBPTInForTokenOut: (amount: BigNumber) => BigNumber;
+    _evminGivenOut: (amount: BigNumber) => BigNumber;
+    _evmtokenInForExactBPTOut: (amount: BigNumber) => BigNumber;
+    _evmbptInForExactTokenOut: (amount: BigNumber) => BigNumber;
 }
 
 export interface WeightedPool extends PoolBase {

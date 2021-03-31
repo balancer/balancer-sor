@@ -16,6 +16,18 @@ import {
     _tokenInForExactTokenOut,
     _tokenInForExactBPTOut,
     _BPTInForExactTokenOut,
+    _spotPriceAfterSwapExactTokenInForTokenOut,
+    _spotPriceAfterSwapExactTokenInForBPTOut,
+    _spotPriceAfterSwapExactBPTInForTokenOut,
+    _spotPriceAfterSwapTokenInForExactTokenOut,
+    _spotPriceAfterSwapTokenInForExactBPTOut,
+    _spotPriceAfterSwapBPTInForExactTokenOut,
+    _derivativeSpotPriceAfterSwapExactTokenInForTokenOut,
+    _derivativeSpotPriceAfterSwapExactTokenInForBPTOut,
+    _derivativeSpotPriceAfterSwapExactBPTInForTokenOut,
+    _derivativeSpotPriceAfterSwapTokenInForExactTokenOut,
+    _derivativeSpotPriceAfterSwapTokenInForExactBPTOut,
+    _derivativeSpotPriceAfterSwapBPTInForExactTokenOut,
 } from '../poolMath/stableMath';
 
 export interface StablePoolToken {
@@ -150,6 +162,24 @@ export class StablePool implements PoolBase {
         return this.poolPairData.balanceOut.times(this.poolPairData.amp);
     }
 
+    // Updates the balance of a given token for the pool
+    updateTokenBalanceForPool(token: string, newBalance: BigNumber): void {
+        // token is BPT
+        if (this.id == token) {
+            this.totalShares = newBalance.toString();
+        } else {
+            // token is underlying in the pool
+            const T = this.tokens.find(t => t.address === token);
+            T.balance = newBalance.toString();
+        }
+
+        // Also need to update poolPairData if relevant
+        if (this.poolPairData.tokenIn === token)
+            this.poolPairData.balanceIn = newBalance;
+        else if (this.poolPairData.tokenOut === token)
+            this.poolPairData.balanceOut = newBalance;
+    }
+
     _exactTokenInForTokenOut(amount: BigNumber): BigNumber {
         return _exactTokenInForTokenOut(amount, this.poolPairData);
     }
@@ -173,4 +203,108 @@ export class StablePool implements PoolBase {
     _BPTInForExactTokenOut(amount: BigNumber): BigNumber {
         return _exactBPTInForTokenOut(amount, this.poolPairData);
     }
+
+    _spotPriceAfterSwapExactTokenInForTokenOut(amount: BigNumber): BigNumber {
+        return _spotPriceAfterSwapExactTokenInForTokenOut(
+            amount,
+            this.poolPairData
+        );
+    }
+
+    _spotPriceAfterSwapExactTokenInForBPTOut(amount: BigNumber): BigNumber {
+        return _spotPriceAfterSwapExactTokenInForBPTOut(
+            amount,
+            this.poolPairData
+        );
+    }
+
+    _spotPriceAfterSwapExactBPTInForTokenOut(amount: BigNumber): BigNumber {
+        return _spotPriceAfterSwapExactBPTInForTokenOut(
+            amount,
+            this.poolPairData
+        );
+    }
+
+    _spotPriceAfterSwapTokenInForExactTokenOut(amount: BigNumber): BigNumber {
+        return _spotPriceAfterSwapExactTokenInForTokenOut(
+            amount,
+            this.poolPairData
+        );
+    }
+
+    _spotPriceAfterSwapTokenInForExactBPTOut(amount: BigNumber): BigNumber {
+        return _spotPriceAfterSwapExactTokenInForBPTOut(
+            amount,
+            this.poolPairData
+        );
+    }
+
+    _spotPriceAfterSwapBPTInForExactTokenOut(amount: BigNumber): BigNumber {
+        return _spotPriceAfterSwapExactBPTInForTokenOut(
+            amount,
+            this.poolPairData
+        );
+    }
+
+    _derivativeSpotPriceAfterSwapExactTokenInForTokenOut(
+        amount: BigNumber
+    ): BigNumber {
+        return _derivativeSpotPriceAfterSwapExactTokenInForTokenOut(
+            amount,
+            this.poolPairData
+        );
+    }
+
+    _derivativeSpotPriceAfterSwapExactTokenInForBPTOut(
+        amount: BigNumber
+    ): BigNumber {
+        return _derivativeSpotPriceAfterSwapExactTokenInForBPTOut(
+            amount,
+            this.poolPairData
+        );
+    }
+
+    _derivativeSpotPriceAfterSwapExactBPTInForTokenOut(
+        amount: BigNumber
+    ): BigNumber {
+        return _derivativeSpotPriceAfterSwapExactBPTInForTokenOut(
+            amount,
+            this.poolPairData
+        );
+    }
+
+    _derivativeSpotPriceAfterSwapTokenInForExactTokenOut(
+        amount: BigNumber
+    ): BigNumber {
+        return _derivativeSpotPriceAfterSwapTokenInForExactTokenOut(
+            amount,
+            this.poolPairData
+        );
+    }
+
+    _derivativeSpotPriceAfterSwapTokenInForExactBPTOut(
+        amount: BigNumber
+    ): BigNumber {
+        return _derivativeSpotPriceAfterSwapTokenInForExactBPTOut(
+            amount,
+            this.poolPairData
+        );
+    }
+
+    _derivativeSpotPriceAfterSwapBPTInForExactTokenOut(
+        amount: BigNumber
+    ): BigNumber {
+        return _derivativeSpotPriceAfterSwapBPTInForExactTokenOut(
+            amount,
+            this.poolPairData
+        );
+    }
+
+    // TODO - These need updated with real maths
+    _evmoutGivenIn: (amount: BigNumber) => BigNumber;
+    _evmexactTokenInForBPTOut: (amount: BigNumber) => BigNumber;
+    _evmexactBPTInForTokenOut: (amount: BigNumber) => BigNumber;
+    _evminGivenOut: (amount: BigNumber) => BigNumber;
+    _evmtokenInForExactBPTOut: (amount: BigNumber) => BigNumber;
+    _evmbptInForExactTokenOut: (amount: BigNumber) => BigNumber;
 }

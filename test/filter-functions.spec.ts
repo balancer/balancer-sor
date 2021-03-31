@@ -134,21 +134,22 @@ describe('Test Filter Functions using subgraphPoolsSmall.json & full SOR comparr
         let paths: Path[];
         let maxAmt: BigNumber;
         [paths, maxAmt] = sor.processPaths(pathArray, pools, 'swapExactIn');
-
+        /*
         console.log(maxAmt.toString());
         paths.forEach(path => {
             console.log(path.id);
             console.log(path.limitAmount.toString());
         });
+        */
     });
 
-    it(`runs full stable`, () => {
+    it(`runs full weighted`, () => {
         let allPools = require('./testData/filterTestPools.json');
-        allPools = { pools: allPools.stableOnly };
+        allPools = { pools: allPools.weightedOnly };
         let tokenIn = DAI;
         let tokenOut = USDC;
 
-        console.log(allPools);
+        // console.log(allPools);
 
         let poolsTokenIn, poolsTokenOut, directPools, hopTokensFilter;
         [
@@ -186,10 +187,93 @@ describe('Test Filter Functions using subgraphPoolsSmall.json & full SOR comparr
         let maxAmt: BigNumber;
         [paths, maxAmt] = sor.processPaths(pathArray, pools, 'swapExactIn');
 
-        console.log(maxAmt.toString());
-        paths.forEach(path => {
-            console.log(path.id);
-            console.log(path.limitAmount.toString());
-        });
+        //console.log(maxAmt.toString());
+        //paths.forEach(path => {
+        //    console.log(path.id);
+        //    console.log(path.limitAmount.toString());
+        //});
+
+        let swapType = 'swapExactIn';
+        let swapAmt = new BigNumber(0.1);
+
+        let swaps: any, total: BigNumber, marketSp: BigNumber;
+        [swaps, total, marketSp] = sor.smartOrderRouter(
+            JSON.parse(JSON.stringify(pools)), // Need to keep original pools for cache
+            paths,
+            swapType,
+            swapAmt,
+            4,
+            new BigNumber(0)
+        );
+
+        //console.log(total.toString());
+        //console.log(swaps);
+    });
+
+    it(`runs full stable`, () => {
+        let allPools = require('./testData/filterTestPools.json');
+        allPools = { pools: allPools.stableOnly };
+        let tokenIn = DAI;
+        let tokenOut = USDC;
+
+        // console.log(allPools);
+
+        let poolsTokenIn, poolsTokenOut, directPools, hopTokensFilter;
+        [
+            directPools,
+            hopTokensFilter,
+            poolsTokenIn,
+            poolsTokenOut,
+        ] = sor.filterPools(allPools.pools, DAI, USDC, 4);
+
+        let mostLiquidPoolsFirstHopFilter, mostLiquidPoolsSecondHopFilter;
+        [
+            mostLiquidPoolsFirstHopFilter,
+            mostLiquidPoolsSecondHopFilter,
+        ] = sor.sortPoolsMostLiquid(
+            DAI,
+            USDC,
+            hopTokensFilter,
+            poolsTokenIn,
+            poolsTokenOut
+        );
+
+        // Finds the possible paths to make the swap
+        let pathArray: Path[];
+        let pools: SubGraphPoolDictionary;
+        [pools, pathArray] = sor.parsePoolData(
+            directPools,
+            tokenIn,
+            tokenOut,
+            mostLiquidPoolsFirstHopFilter,
+            mostLiquidPoolsSecondHopFilter,
+            hopTokensFilter
+        );
+
+        let paths: Path[];
+        let maxAmt: BigNumber;
+        [paths, maxAmt] = sor.processPaths(pathArray, pools, 'swapExactIn');
+
+        //console.log(maxAmt.toString());
+        //paths.forEach(path => {
+        //    console.log(path.id);
+        //    console.log(path.limitAmount.toString());
+        //});
+
+        let swapType = 'swapExactIn';
+        let swapAmt = new BigNumber(0.1);
+
+        let swaps: any, total: BigNumber, marketSp: BigNumber;
+        [swaps, total, marketSp] = sor.smartOrderRouter(
+            JSON.parse(JSON.stringify(pools)), // Need to keep original pools for cache
+            paths,
+            swapType,
+            swapAmt,
+            4,
+            new BigNumber(0)
+        );
+
+        console.log(total.toString());
+        console.log(swaps);
     });
 });

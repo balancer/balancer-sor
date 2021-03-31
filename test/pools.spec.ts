@@ -8,7 +8,7 @@ import {
     SwapTypes,
 } from '../src/types';
 import { filterPoolsOfInterest, filterHopPools } from '../src/pools';
-import { calculatePathLimits } from '../src/sorClass';
+import { calculatePathLimits, smartOrderRouter } from '../src/sorClass';
 import BigNumber from 'bignumber.js';
 
 import testPools from './testData/filterTestPools.json';
@@ -468,5 +468,95 @@ describe('Tests pools helpers', () => {
             paths[0].limitAmount.toString(),
             '75041081.008900386726414241698926382847481'
         );
+    });
+
+    it('should full swap weighted', () => {
+        let hopTokens: string[];
+        let poolsOfInterestDictionary: PoolDictionary;
+        let pathData: NewPath[];
+
+        [poolsOfInterestDictionary, hopTokens] = filterPoolsOfInterest(
+            testPools.weightedOnly,
+            DAI,
+            USDC,
+            4
+        );
+
+        [poolsOfInterestDictionary, pathData] = filterHopPools(
+            DAI,
+            USDC,
+            hopTokens,
+            poolsOfInterestDictionary
+        );
+
+        let paths: NewPath[];
+        let maxAmt: BigNumber;
+        [paths, maxAmt] = calculatePathLimits(pathData, SwapTypes.SwapExactIn);
+
+        console.log(maxAmt.toString());
+        paths.forEach(path => {
+            console.log(path.id);
+            console.log(path.limitAmount.toString());
+        });
+
+        let swapAmt = new BigNumber(0.1);
+
+        let swaps: any, total: BigNumber, marketSp: BigNumber;
+        [swaps, total, marketSp] = smartOrderRouter(
+            JSON.parse(JSON.stringify(poolsOfInterestDictionary)), // Need to keep original pools for cache
+            paths,
+            SwapTypes.SwapExactIn,
+            swapAmt,
+            4,
+            new BigNumber(0)
+        );
+
+        console.log(total.toString());
+        console.log(swaps);
+    });
+
+    it('should full swap stable', () => {
+        let hopTokens: string[];
+        let poolsOfInterestDictionary: PoolDictionary;
+        let pathData: NewPath[];
+
+        [poolsOfInterestDictionary, hopTokens] = filterPoolsOfInterest(
+            testPools.stableOnly,
+            DAI,
+            USDC,
+            4
+        );
+
+        [poolsOfInterestDictionary, pathData] = filterHopPools(
+            DAI,
+            USDC,
+            hopTokens,
+            poolsOfInterestDictionary
+        );
+
+        let paths: NewPath[];
+        let maxAmt: BigNumber;
+        [paths, maxAmt] = calculatePathLimits(pathData, SwapTypes.SwapExactIn);
+
+        console.log(maxAmt.toString());
+        paths.forEach(path => {
+            console.log(path.id);
+            console.log(path.limitAmount.toString());
+        });
+
+        let swapAmt = new BigNumber(0.1);
+
+        let swaps: any, total: BigNumber, marketSp: BigNumber;
+        [swaps, total, marketSp] = smartOrderRouter(
+            JSON.parse(JSON.stringify(poolsOfInterestDictionary)), // Need to keep original pools for cache
+            paths,
+            SwapTypes.SwapExactIn,
+            swapAmt,
+            4,
+            new BigNumber(0)
+        );
+
+        console.log(total.toString());
+        console.log(swaps);
     });
 });
