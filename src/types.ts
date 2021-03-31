@@ -104,7 +104,7 @@ export enum PoolTypes {
     Stable,
 }
 
-export enum TypesForSwap {
+export enum SwapPairType {
     Direct,
     HopIn,
     HopOut,
@@ -147,13 +147,13 @@ export interface SubgraphPoolBase {
     totalShares: string;
     tokens: SubGraphToken[];
     tokensList: string[];
-    amp?: string; // This should be removed in future for actual pool type from Subgraph
+    amp?: string;
     totalWeight?: string;
 }
 
 export interface PoolBase {
     poolType: PoolTypes;
-    typeForSwap: TypesForSwap;
+    swapPairType: SwapPairType;
     id: string;
     tokensList: string[];
     poolPairData: PoolPairBase;

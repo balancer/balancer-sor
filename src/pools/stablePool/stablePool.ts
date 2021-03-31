@@ -1,15 +1,15 @@
-import { BigNumber } from '../utils/bignumber';
+import { BigNumber } from '../../utils/bignumber';
 import {
     PoolBase,
     PoolTypes,
-    TypesForSwap,
+    SwapPairType,
     PairTypes,
     PoolPairBase,
-} from '../types';
+} from '../../types';
 import { getAddress } from '@ethersproject/address';
-import { bnum } from '../bmath';
-import * as stableMath from '../poolMath/stableMath';
+import { bnum } from '../../bmath';
 import {
+    _invariant,
     _exactTokenInForTokenOut,
     _exactTokenInForBPTOut,
     _exactBPTInForTokenOut,
@@ -28,7 +28,7 @@ import {
     _derivativeSpotPriceAfterSwapTokenInForExactTokenOut,
     _derivativeSpotPriceAfterSwapTokenInForExactBPTOut,
     _derivativeSpotPriceAfterSwapBPTInForExactTokenOut,
-} from '../poolMath/stableMath';
+} from './stableMath';
 
 export interface StablePoolToken {
     address: string;
@@ -56,7 +56,7 @@ export interface StablePoolPairData extends PoolPairBase {
 
 export class StablePool implements PoolBase {
     poolType: PoolTypes = PoolTypes.Stable;
-    typeForSwap: TypesForSwap;
+    swapPairType: SwapPairType;
     id: string;
     amp: string;
     swapFee: string;
@@ -81,8 +81,8 @@ export class StablePool implements PoolBase {
         this.tokensList = tokensList;
     }
 
-    setTypeForSwap(type: TypesForSwap) {
-        this.typeForSwap = type;
+    setTypeForSwap(type: SwapPairType) {
+        this.swapPairType = type;
     }
 
     parsePoolPairData(tokenIn: string, tokenOut: string): void {
@@ -134,7 +134,7 @@ export class StablePool implements PoolBase {
             allBalances.push(bnum(this.tokens[i].balance));
         }
 
-        let inv = stableMath._invariant(bnum(this.amp), allBalances);
+        let inv = _invariant(bnum(this.amp), allBalances);
 
         const poolPairData: StablePoolPairData = {
             id: this.id,

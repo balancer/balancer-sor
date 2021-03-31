@@ -1,5 +1,5 @@
-import { BigNumber } from '../utils/bignumber';
-import { bnum } from '../bmath';
+import { BigNumber } from '../../utils/bignumber';
+import { bnum } from '../../bmath';
 // All functions came from https://www.wolframcloud.com/obj/fernando.martinel/Published/SOR_equations_published.nb
 
 /////////

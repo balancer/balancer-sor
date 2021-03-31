@@ -4,13 +4,13 @@ import {
     DisabledOptions,
     SubgraphPoolBase,
     PoolDictionary,
-    TypesForSwap,
+    SwapPairType,
     NewPath,
     Swap,
     PoolBase,
 } from './types';
-import { WeightedPool } from './pools/weightedPool';
-import { StablePool } from './pools/StablePool';
+import { WeightedPool } from './pools/weightedPool/weightedPool';
+import { StablePool } from './pools/stablePool/stablePool';
 import { bnum } from './bmath';
 
 import disabledTokensDefault from './disabled-tokens.json';
@@ -88,7 +88,7 @@ export function filterPoolsOfInterest(
             (tokenListSet.has(tokenIn.toLowerCase()) &&
                 tokenListSet.has(tokenOut.toLowerCase()))
         ) {
-            newPool.setTypeForSwap(TypesForSwap.Direct);
+            newPool.setTypeForSwap(SwapPairType.Direct);
             // parsePoolPairData for Direct pools as it avoids having to loop later
             newPool.parsePoolPairData(tokenIn, tokenOut);
             poolsDictionary[pool.id] = newPool;
@@ -104,14 +104,14 @@ export function filterPoolsOfInterest(
                     ...tokenInPairedTokens,
                     ...tokenListSet,
                 ]);
-                newPool.setTypeForSwap(TypesForSwap.HopIn);
+                newPool.setTypeForSwap(SwapPairType.HopIn);
                 poolsDictionary[pool.id] = newPool;
             } else if (!containsTokenIn && containsTokenOut) {
                 tokenOutPairedTokens = new Set([
                     ...tokenOutPairedTokens,
                     ...tokenListSet,
                 ]);
-                newPool.setTypeForSwap(TypesForSwap.HopOut);
+                newPool.setTypeForSwap(SwapPairType.HopOut);
                 poolsDictionary[pool.id] = newPool;
             }
         }
@@ -163,7 +163,7 @@ export function filterHopPools(
             const pool = poolsOfInterest[id];
 
             // We don't consider direct pools for the multihop but we do add it's path
-            if (pool.typeForSwap === TypesForSwap.Direct) {
+            if (pool.swapPairType === SwapPairType.Direct) {
                 // First loop of all pools we add paths to list
                 if (firstPoolLoop) {
                     const path = createDirectPath(pool, tokenIn, tokenOut);
@@ -177,7 +177,7 @@ export function filterHopPools(
             if (!new Set(pool.tokensList).add(pool.id).has(hopTokens[i]))
                 continue;
 
-            if (pool.typeForSwap === TypesForSwap.HopIn) {
+            if (pool.swapPairType === SwapPairType.HopIn) {
                 pool.parsePoolPairData(tokenIn, hopTokens[i]);
                 // const normalizedLiquidity = pool.getNormalizedLiquidity(tokenIn, hopTokens[i]);
                 const normalizedLiquidity = pool.getNormalizedLiquidity();
@@ -190,7 +190,7 @@ export function filterHopPools(
                     highestNormalizedLiquidityFirst = normalizedLiquidity;
                     highestNormalizedLiquidityFirstPoolId = id;
                 }
-            } else if (pool.typeForSwap === TypesForSwap.HopOut) {
+            } else if (pool.swapPairType === SwapPairType.HopOut) {
                 pool.parsePoolPairData(hopTokens[i], tokenOut);
                 // const normalizedLiquidity = pool.getNormalizedLiquidity(hopTokens[i], tokenOut);
                 const normalizedLiquidity = pool.getNormalizedLiquidity();

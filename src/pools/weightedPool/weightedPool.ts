@@ -1,11 +1,15 @@
-import { BigNumber } from '../utils/bignumber';
+import { getAddress } from '@ethersproject/address';
+import { bnum, scale } from '../../bmath';
+import { BigNumber } from '../../utils/bignumber';
+import * as weightedSolidity from '../../solidityHelpers/pools/weighted';
+import { FixedPointNumber } from '../../solidityHelpers/math/FixedPointNumber';
 import {
     PoolBase,
     PoolTypes,
-    TypesForSwap,
+    SwapPairType,
     PairTypes,
     PoolPairBase,
-} from '../types';
+} from '../../types';
 import {
     _exactTokenInForTokenOut,
     _exactTokenInForBPTOut,
@@ -25,11 +29,7 @@ import {
     _derivativeSpotPriceAfterSwapTokenInForExactTokenOut,
     _derivativeSpotPriceAfterSwapTokenInForExactBPTOut,
     _derivativeSpotPriceAfterSwapBPTInForExactTokenOut,
-} from '../poolMath/weightedMath';
-import { getAddress } from '@ethersproject/address';
-import { bnum, scale } from '../bmath';
-import * as weightedSolidity from '../solidityHelpers/pools/weighted';
-import { FixedPointNumber } from '../solidityHelpers/math/FixedPointNumber';
+} from './weightedMath';
 
 export interface WeightedPoolToken {
     address: string;
@@ -55,7 +55,7 @@ export interface WeightedPoolPairData extends PoolPairBase {
 
 export class WeightedPool implements PoolBase {
     poolType: PoolTypes = PoolTypes.Weighted;
-    typeForSwap: TypesForSwap;
+    swapPairType: SwapPairType;
     id: string;
     swapFee: string;
     totalShares: string;
@@ -80,8 +80,8 @@ export class WeightedPool implements PoolBase {
         this.tokensList = tokensList;
     }
 
-    setTypeForSwap(type: TypesForSwap) {
-        this.typeForSwap = type;
+    setTypeForSwap(type: SwapPairType) {
+        this.swapPairType = type;
     }
 
     parsePoolPairData(tokenIn: string, tokenOut: string): void {

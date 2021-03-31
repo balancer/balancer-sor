@@ -1,5 +1,5 @@
-import { BigNumber } from '../utils/bignumber';
-import { bnum } from '../bmath';
+import { BigNumber } from '../../utils/bignumber';
+import { bnum } from '../../bmath';
 // All functions are adapted from the solidity ones to be found on:
 // https://github.com/balancer-labs/balancer-core-v2/blob/master/contracts/pools/stable/StableMath.sol
 

@@ -2,7 +2,7 @@
 import { assert, expect } from 'chai';
 import {
     PoolDictionary,
-    TypesForSwap,
+    SwapPairType,
     PoolTypes,
     NewPath,
     SwapTypes,
@@ -48,15 +48,17 @@ describe('Tests pools helpers', () => {
             noHopOut = 0;
         for (let k in poolsOfInterestDictionary) {
             if (
-                poolsOfInterestDictionary[k].typeForSwap === TypesForSwap.Direct
+                poolsOfInterestDictionary[k].swapPairType ===
+                SwapPairType.Direct
             )
                 noDirect++;
             else if (
-                poolsOfInterestDictionary[k].typeForSwap === TypesForSwap.HopIn
+                poolsOfInterestDictionary[k].swapPairType === SwapPairType.HopIn
             )
                 noHopIn++;
             else if (
-                poolsOfInterestDictionary[k].typeForSwap === TypesForSwap.HopOut
+                poolsOfInterestDictionary[k].swapPairType ===
+                SwapPairType.HopOut
             )
                 noHopOut++;
 
@@ -88,15 +90,17 @@ describe('Tests pools helpers', () => {
             noHopOut = 0;
         for (let k in poolsOfInterestDictionary) {
             if (
-                poolsOfInterestDictionary[k].typeForSwap === TypesForSwap.Direct
+                poolsOfInterestDictionary[k].swapPairType ===
+                SwapPairType.Direct
             )
                 noDirect++;
             else if (
-                poolsOfInterestDictionary[k].typeForSwap === TypesForSwap.HopIn
+                poolsOfInterestDictionary[k].swapPairType === SwapPairType.HopIn
             )
                 noHopIn++;
             else if (
-                poolsOfInterestDictionary[k].typeForSwap === TypesForSwap.HopOut
+                poolsOfInterestDictionary[k].swapPairType ===
+                SwapPairType.HopOut
             )
                 noHopOut++;
 
@@ -132,15 +136,17 @@ describe('Tests pools helpers', () => {
             noHopOut = 0;
         for (let k in poolsOfInterestDictionary) {
             if (
-                poolsOfInterestDictionary[k].typeForSwap === TypesForSwap.Direct
+                poolsOfInterestDictionary[k].swapPairType ===
+                SwapPairType.Direct
             )
                 noDirect++;
             else if (
-                poolsOfInterestDictionary[k].typeForSwap === TypesForSwap.HopIn
+                poolsOfInterestDictionary[k].swapPairType === SwapPairType.HopIn
             )
                 noHopIn++;
             else if (
-                poolsOfInterestDictionary[k].typeForSwap === TypesForSwap.HopOut
+                poolsOfInterestDictionary[k].swapPairType ===
+                SwapPairType.HopOut
             )
                 noHopOut++;
 
@@ -176,15 +182,17 @@ describe('Tests pools helpers', () => {
             noStable = 0;
         for (let k in poolsOfInterestDictionary) {
             if (
-                poolsOfInterestDictionary[k].typeForSwap === TypesForSwap.Direct
+                poolsOfInterestDictionary[k].swapPairType ===
+                SwapPairType.Direct
             )
                 noDirect++;
             else if (
-                poolsOfInterestDictionary[k].typeForSwap === TypesForSwap.HopIn
+                poolsOfInterestDictionary[k].swapPairType === SwapPairType.HopIn
             )
                 noHopIn++;
             else if (
-                poolsOfInterestDictionary[k].typeForSwap === TypesForSwap.HopOut
+                poolsOfInterestDictionary[k].swapPairType ===
+                SwapPairType.HopOut
             )
                 noHopOut++;
 
@@ -226,11 +234,12 @@ describe('Tests pools helpers', () => {
             noHopOut = 0;
         for (let k in poolsOfInterestDictionary) {
             if (
-                poolsOfInterestDictionary[k].typeForSwap === TypesForSwap.Direct
+                poolsOfInterestDictionary[k].swapPairType ===
+                SwapPairType.Direct
             )
                 noDirect++;
             else if (
-                poolsOfInterestDictionary[k].typeForSwap === TypesForSwap.HopIn
+                poolsOfInterestDictionary[k].swapPairType === SwapPairType.HopIn
             ) {
                 noHopIn++;
                 assert.equal(
@@ -239,7 +248,8 @@ describe('Tests pools helpers', () => {
                     'Pool Addresses should match.'
                 );
             } else if (
-                poolsOfInterestDictionary[k].typeForSwap === TypesForSwap.HopOut
+                poolsOfInterestDictionary[k].swapPairType ===
+                SwapPairType.HopOut
             ) {
                 noHopOut++;
                 assert.equal(
@@ -347,15 +357,17 @@ describe('Tests pools helpers', () => {
 
         for (let k in poolsOfInterestDictionary) {
             if (
-                poolsOfInterestDictionary[k].typeForSwap === TypesForSwap.Direct
+                poolsOfInterestDictionary[k].swapPairType ===
+                SwapPairType.Direct
             )
                 noDirect++;
             else if (
-                poolsOfInterestDictionary[k].typeForSwap === TypesForSwap.HopIn
+                poolsOfInterestDictionary[k].swapPairType === SwapPairType.HopIn
             ) {
                 noHopIn++;
             } else if (
-                poolsOfInterestDictionary[k].typeForSwap === TypesForSwap.HopOut
+                poolsOfInterestDictionary[k].swapPairType ===
+                SwapPairType.HopOut
             ) {
                 noHopOut++;
             }
