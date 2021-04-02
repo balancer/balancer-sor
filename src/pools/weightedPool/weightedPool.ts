@@ -98,11 +98,15 @@ export class WeightedPool implements PoolBase {
         // Check if tokenIn is the pool token itself (BPT)
         if (tokenIn == this.id) {
             pairType = PairTypes.BptToToken;
+            if (this.totalShares === undefined)
+                throw 'Pool missing totalShares field';
             balanceIn = this.totalShares;
             decimalsIn = '18'; // Not used but has to be defined
             weightIn = bnum(1); // Not used but has to be defined
         } else if (tokenOut == this.id) {
             pairType = PairTypes.TokenToBpt;
+            if (this.totalShares === undefined)
+                throw 'Pool missing totalShares field';
             balanceOut = this.totalShares;
             decimalsOut = '18'; // Not used but has to be defined
             weightOut = bnum(1); // Not used but has to be defined
