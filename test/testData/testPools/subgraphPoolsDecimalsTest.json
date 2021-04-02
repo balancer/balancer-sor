@@ -25,7 +25,8 @@
                 "0xe0c9275e44ea80ef17579d33c55136b7da269aeb",
                 "0x2f375e94fc336cdec2dc0ccb5277fe59cbf1cae5"
             ],
-            "totalWeight": "50"
+            "totalWeight": "50",
+            "totalShares": "100"
         },
         {
             "id": "0x072f057ff96028f8a21a2dc5b04e3cb9585704d7",
@@ -88,7 +89,8 @@
                 "0xef13c0c8abcaf5767160018d268f9697ae4f5375",
                 "0xd0a1e359811322d97991e03f863a0c30c2cf029c"
             ],
-            "totalWeight": "50"
+            "totalWeight": "50",
+            "totalShares": "100"
         },
         {
             "id": "0xd2f574637898526fcddfb3d487cc73c957fa0268",
@@ -115,7 +117,8 @@
                 "0xb2fdd60ad80ca7ba89b9bab3b5336c2601c020b4",
                 "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48"
             ],
-            "totalWeight": "50"
+            "totalWeight": "50",
+            "totalShares": "100"
         }
     ]
 }

@@ -1,7 +1,7 @@
 import { assert, expect } from 'chai';
 import { SwapInfo } from '../src/types';
 import { BigNumber } from '../src/utils/bignumber';
-import { formatSwaps } from '../src/helpers';
+import { formatSwaps } from '../src/helpersClass';
 import testSwaps from './testData/swapsForFormatting.json';
 
 const marketSp: BigNumber = new BigNumber(7);

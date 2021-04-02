@@ -97,6 +97,13 @@ describe('Tests Multihop SOR vs static subgraphPoolsLarge.json', () => {
             hopTokens
         );
 
+        console.log(`DIRECT`);
+        for (let k in directPools) console.log(directPools[k].id);
+        console.log('first');
+        mostLiquidPoolsFirstHop.forEach(pool => console.log(pool.id));
+        console.log('second');
+        mostLiquidPoolsSecondHop.forEach(pool => console.log(pool.id));
+
         assert.equal(
             mostLiquidPoolsFirstHop.length,
             4,
@@ -112,6 +119,16 @@ describe('Tests Multihop SOR vs static subgraphPoolsLarge.json', () => {
             Object.keys(pools).length,
             16,
             'Should have 16 multi-hop pools'
+        );
+
+        console.log(pathData.length);
+        assert.equal(
+            pathData[0].id,
+            '0x165a50bc092f6870dc111c349bae5fc35147ac86'
+        );
+
+        pathData.forEach((path, i) =>
+            console.log(`assert.equal(pathData[${i}].id, '${path.id}');`)
         );
     });
 

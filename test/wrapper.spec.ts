@@ -33,7 +33,7 @@ describe(`Tests for wrapper class.`, () => {
     });
 
     it(`Should set pools source to pools passed`, () => {
-        const poolsFromFile: SubGraphPools = require('./testData/testPools/subgraphPoolsSmall.json');
+        const poolsFromFile: SubGraphPools = require('./testData/testPools/subgraphPoolsSmallWithTrade.json');
         const sor = new SOR(
             provider,
             gasPrice,
@@ -62,7 +62,7 @@ describe(`Tests for wrapper class.`, () => {
     });
 
     it(`fetchPools should fetch with NO scaling`, async () => {
-        const poolsFromFile: SubGraphPools = require('./testData/testPools/subgraphPoolsSmall.json');
+        const poolsFromFile: SubGraphPools = require('./testData/testPools/subgraphPoolsSmallWithTrade.json');
         const sor = new SOR(
             provider,
             gasPrice,
@@ -115,7 +115,7 @@ describe(`Tests for wrapper class.`, () => {
     });
 
     it(`fetchFilteredPairPools should return true for pools list`, async () => {
-        const poolsFromFile: SubGraphPools = require('./testData/testPools/subgraphPoolsSmall.json');
+        const poolsFromFile: SubGraphPools = require('./testData/testPools/subgraphPoolsSmallWithTrade.json');
         const tokenIn: string = '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2';
         const tokenOut: string = '0x6b175474e89094c44da98b954eedeac495271d0f';
 
@@ -141,7 +141,7 @@ describe(`Tests for wrapper class.`, () => {
     });
 
     it(`should have a valid swap`, async () => {
-        const poolsFromFile: SubGraphPools = require('./testData/testPools/subgraphPoolsSmall.json');
+        const poolsFromFile: SubGraphPools = require('./testData/testPools/subgraphPoolsSmallWithTrade.json');
         const tokenIn: string = '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2';
         const tokenOut: string = '0x6b175474e89094c44da98b954eedeac495271d0f';
         const swapType: string = 'swapExactIn';

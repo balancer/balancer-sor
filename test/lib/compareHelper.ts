@@ -4,6 +4,7 @@ import {
     getV2Swap,
     displayResults,
     assertResults,
+    v2classSwap,
 } from './testHelpers';
 import { bnum } from '../../src/bmath';
 import { SOR } from '../../src';
@@ -15,7 +16,11 @@ export async function compareTest(
     file: string,
     provider: JsonRpcProvider,
     testData: any,
-    disabledOptions: DisabledOptions = { isOverRide: false, disabledTokens: [] }
+    disabledOptions: DisabledOptions = {
+        isOverRide: false,
+        disabledTokens: [],
+    },
+    costOutputTokenOveride = { isOverRide: false, overRideCost: bnum(0) }
 ) {
     const amountNormalised = testData.tradeInfo.SwapAmount.div(
         bnum(10 ** testData.tradeInfo.SwapAmountDecimals)
@@ -35,8 +40,32 @@ export async function compareTest(
         amountNormalised,
         { onChainBalances: false },
         testData.tradeInfo.ReturnAmountDecimals,
+        disabledOptions,
+        costOutputTokenOveride
+    );
+
+    let [swaps, total, marketSp] = v2classSwap(
+        JSON.parse(JSON.stringify(testData)),
+        testData.tradeInfo.TokenIn,
+        testData.tradeInfo.TokenOut,
+        testData.tradeInfo.NoPools,
+        testData.tradeInfo.SwapType,
+        amountNormalised,
+        v2SwapData.costOutputToken,
         disabledOptions
     );
+
+    // console.log(v2SwapData.swaps);
+    // console.log(swaps);
+    console.log(`!!!!!!! `);
+    console.log(total.toString());
+
+    assert.equal(
+        v2SwapData.returnAmount.toString(),
+        total.toString(),
+        'V2 Class should have same return'
+    );
+    expect(v2SwapData.swaps).to.deep.equal(swaps);
 
     let v1SwapData = await getV1Swap(
         provider,

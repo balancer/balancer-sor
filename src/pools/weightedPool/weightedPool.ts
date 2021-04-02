@@ -9,6 +9,7 @@ import {
     SwapPairType,
     PairTypes,
     PoolPairBase,
+    PoolPairDictionary,
 } from '../../types';
 import {
     _exactTokenInForTokenOut,
@@ -62,7 +63,6 @@ export class WeightedPool implements PoolBase {
     tokens: WeightedPoolToken[];
     totalWeight: string;
     tokensList: string[];
-    poolPairData: WeightedPoolPairData;
 
     constructor(
         id: string,
@@ -84,7 +84,7 @@ export class WeightedPool implements PoolBase {
         this.swapPairType = type;
     }
 
-    parsePoolPairData(tokenIn: string, tokenOut: string): void {
+    parsePoolPairData(tokenIn: string, tokenOut: string): WeightedPoolPairData {
         let pairType: PairTypes;
         let tI: WeightedPoolToken;
         let tO: WeightedPoolToken;
@@ -146,21 +146,19 @@ export class WeightedPool implements PoolBase {
             swapFee: bnum(this.swapFee),
         };
 
-        this.poolPairData = poolPairData;
+        return poolPairData;
     }
 
-    getNormalizedLiquidity() {
-        if (this.poolPairData.pairType == PairTypes.TokenToToken) {
-            return this.poolPairData.balanceOut
-                .times(this.poolPairData.weightIn)
-                .div(
-                    this.poolPairData.weightIn.plus(this.poolPairData.weightOut)
-                );
-        } else if (this.poolPairData.pairType == PairTypes.TokenToBpt) {
-            return this.poolPairData.balanceOut; // Liquidity in tokenOut is balanceBpt
-        } else if (this.poolPairData.pairType == PairTypes.BptToToken) {
-            return this.poolPairData.balanceOut.div(
-                bnum(1).plus(this.poolPairData.weightOut)
+    getNormalizedLiquidity(poolPairData: WeightedPoolPairData) {
+        if (poolPairData.pairType == PairTypes.TokenToToken) {
+            return poolPairData.balanceOut
+                .times(poolPairData.weightIn)
+                .div(poolPairData.weightIn.plus(poolPairData.weightOut));
+        } else if (poolPairData.pairType == PairTypes.TokenToBpt) {
+            return poolPairData.balanceOut; // Liquidity in tokenOut is balanceBpt
+        } else if (poolPairData.pairType == PairTypes.BptToToken) {
+            return poolPairData.balanceOut.div(
+                bnum(1).plus(poolPairData.weightOut)
             ); // Liquidity in tokenOut is Bo/wo
         }
     }
@@ -175,231 +173,255 @@ export class WeightedPool implements PoolBase {
             const T = this.tokens.find(t => t.address === token);
             T.balance = newBalance.toString();
         }
-
-        // Also need to update poolPairData if relevant
-        if (this.poolPairData.tokenIn === token)
-            this.poolPairData.balanceIn = newBalance;
-        else if (this.poolPairData.tokenOut === token)
-            this.poolPairData.balanceOut = newBalance;
     }
 
-    _exactTokenInForTokenOut(amount: BigNumber): BigNumber {
-        return _exactTokenInForTokenOut(amount, this.poolPairData);
+    _exactTokenInForTokenOut(
+        poolPairData: WeightedPoolPairData,
+        amount: BigNumber
+    ): BigNumber {
+        return _exactTokenInForTokenOut(amount, poolPairData);
     }
 
-    _exactTokenInForBPTOut(amount: BigNumber): BigNumber {
-        return _exactTokenInForBPTOut(amount, this.poolPairData);
+    _exactTokenInForBPTOut(
+        poolPairData: WeightedPoolPairData,
+        amount: BigNumber
+    ): BigNumber {
+        return _exactTokenInForBPTOut(amount, poolPairData);
     }
 
-    _exactBPTInForTokenOut(amount: BigNumber): BigNumber {
-        return _exactBPTInForTokenOut(amount, this.poolPairData);
+    _exactBPTInForTokenOut(
+        poolPairData: WeightedPoolPairData,
+        amount: BigNumber
+    ): BigNumber {
+        return _exactBPTInForTokenOut(amount, poolPairData);
     }
 
-    _tokenInForExactTokenOut(amount: BigNumber): BigNumber {
-        return _tokenInForExactTokenOut(amount, this.poolPairData);
+    _tokenInForExactTokenOut(
+        poolPairData: WeightedPoolPairData,
+        amount: BigNumber
+    ): BigNumber {
+        return _tokenInForExactTokenOut(amount, poolPairData);
     }
 
-    _tokenInForExactBPTOut(amount: BigNumber): BigNumber {
-        return _tokenInForExactBPTOut(amount, this.poolPairData);
+    _tokenInForExactBPTOut(
+        poolPairData: WeightedPoolPairData,
+        amount: BigNumber
+    ): BigNumber {
+        return _tokenInForExactBPTOut(amount, poolPairData);
     }
 
-    _BPTInForExactTokenOut(amount: BigNumber): BigNumber {
-        return _exactBPTInForTokenOut(amount, this.poolPairData);
+    _BPTInForExactTokenOut(
+        poolPairData: WeightedPoolPairData,
+        amount: BigNumber
+    ): BigNumber {
+        return _BPTInForExactTokenOut(amount, poolPairData);
     }
 
-    _spotPriceAfterSwapExactTokenInForTokenOut(amount: BigNumber): BigNumber {
-        return _spotPriceAfterSwapExactTokenInForTokenOut(
-            amount,
-            this.poolPairData
-        );
+    _spotPriceAfterSwapExactTokenInForTokenOut(
+        poolPairData: WeightedPoolPairData,
+        amount: BigNumber
+    ): BigNumber {
+        return _spotPriceAfterSwapExactTokenInForTokenOut(amount, poolPairData);
     }
 
-    _spotPriceAfterSwapExactTokenInForBPTOut(amount: BigNumber): BigNumber {
-        return _spotPriceAfterSwapExactTokenInForBPTOut(
-            amount,
-            this.poolPairData
-        );
+    _spotPriceAfterSwapExactTokenInForBPTOut(
+        poolPairData: WeightedPoolPairData,
+        amount: BigNumber
+    ): BigNumber {
+        return _spotPriceAfterSwapExactTokenInForBPTOut(amount, poolPairData);
     }
 
-    _spotPriceAfterSwapExactBPTInForTokenOut(amount: BigNumber): BigNumber {
-        return _spotPriceAfterSwapExactBPTInForTokenOut(
-            amount,
-            this.poolPairData
-        );
+    _spotPriceAfterSwapExactBPTInForTokenOut(
+        poolPairData: WeightedPoolPairData,
+        amount: BigNumber
+    ): BigNumber {
+        return _spotPriceAfterSwapExactBPTInForTokenOut(amount, poolPairData);
     }
 
-    _spotPriceAfterSwapTokenInForExactTokenOut(amount: BigNumber): BigNumber {
-        return _spotPriceAfterSwapExactTokenInForTokenOut(
-            amount,
-            this.poolPairData
-        );
+    _spotPriceAfterSwapTokenInForExactTokenOut(
+        poolPairData: WeightedPoolPairData,
+        amount: BigNumber
+    ): BigNumber {
+        return _spotPriceAfterSwapTokenInForExactTokenOut(amount, poolPairData);
     }
 
-    _spotPriceAfterSwapTokenInForExactBPTOut(amount: BigNumber): BigNumber {
-        return _spotPriceAfterSwapExactTokenInForBPTOut(
-            amount,
-            this.poolPairData
-        );
+    _spotPriceAfterSwapTokenInForExactBPTOut(
+        poolPairData: WeightedPoolPairData,
+        amount: BigNumber
+    ): BigNumber {
+        return _spotPriceAfterSwapTokenInForExactBPTOut(amount, poolPairData);
     }
 
-    _spotPriceAfterSwapBPTInForExactTokenOut(amount: BigNumber): BigNumber {
-        return _spotPriceAfterSwapExactBPTInForTokenOut(
-            amount,
-            this.poolPairData
-        );
+    _spotPriceAfterSwapBPTInForExactTokenOut(
+        poolPairData: WeightedPoolPairData,
+        amount: BigNumber
+    ): BigNumber {
+        return _spotPriceAfterSwapBPTInForExactTokenOut(amount, poolPairData);
     }
 
     _derivativeSpotPriceAfterSwapExactTokenInForTokenOut(
+        poolPairData: WeightedPoolPairData,
         amount: BigNumber
     ): BigNumber {
         return _derivativeSpotPriceAfterSwapExactTokenInForTokenOut(
             amount,
-            this.poolPairData
+            poolPairData
         );
     }
 
     _derivativeSpotPriceAfterSwapExactTokenInForBPTOut(
+        poolPairData: WeightedPoolPairData,
         amount: BigNumber
     ): BigNumber {
         return _derivativeSpotPriceAfterSwapExactTokenInForBPTOut(
             amount,
-            this.poolPairData
+            poolPairData
         );
     }
 
     _derivativeSpotPriceAfterSwapExactBPTInForTokenOut(
+        poolPairData: WeightedPoolPairData,
         amount: BigNumber
     ): BigNumber {
         return _derivativeSpotPriceAfterSwapExactBPTInForTokenOut(
             amount,
-            this.poolPairData
+            poolPairData
         );
     }
 
     _derivativeSpotPriceAfterSwapTokenInForExactTokenOut(
+        poolPairData: WeightedPoolPairData,
         amount: BigNumber
     ): BigNumber {
         return _derivativeSpotPriceAfterSwapTokenInForExactTokenOut(
             amount,
-            this.poolPairData
+            poolPairData
         );
     }
 
     _derivativeSpotPriceAfterSwapTokenInForExactBPTOut(
+        poolPairData: WeightedPoolPairData,
         amount: BigNumber
     ): BigNumber {
         return _derivativeSpotPriceAfterSwapTokenInForExactBPTOut(
             amount,
-            this.poolPairData
+            poolPairData
         );
     }
 
     _derivativeSpotPriceAfterSwapBPTInForExactTokenOut(
+        poolPairData: WeightedPoolPairData,
         amount: BigNumber
     ): BigNumber {
         return _derivativeSpotPriceAfterSwapBPTInForExactTokenOut(
             amount,
-            this.poolPairData
+            poolPairData
         );
     }
 
-    _evmoutGivenIn(amount: BigNumber): BigNumber {
+    _evmoutGivenIn(
+        poolPairData: WeightedPoolPairData,
+        amount: BigNumber
+    ): BigNumber {
         const amt = weightedSolidity._outGivenIn(
             new FixedPointNumber(
-                scale(this.poolPairData.balanceIn, this.poolPairData.decimalsIn)
+                scale(poolPairData.balanceIn, poolPairData.decimalsIn)
             ),
-            new FixedPointNumber(scale(this.poolPairData.weightIn, 18)),
+            new FixedPointNumber(scale(poolPairData.weightIn, 18)),
             new FixedPointNumber(
-                scale(
-                    this.poolPairData.balanceOut,
-                    this.poolPairData.decimalsOut
-                )
+                scale(poolPairData.balanceOut, poolPairData.decimalsOut)
             ),
-            new FixedPointNumber(scale(this.poolPairData.weightOut, 18)),
-            new FixedPointNumber(scale(amount, this.poolPairData.decimalsIn)),
-            new FixedPointNumber(scale(this.poolPairData.swapFee, 18))
+            new FixedPointNumber(scale(poolPairData.weightOut, 18)),
+            new FixedPointNumber(scale(amount, poolPairData.decimalsIn)),
+            new FixedPointNumber(scale(poolPairData.swapFee, 18))
         );
 
         return bnum(amt.toString());
     }
 
-    _evmexactTokenInForBPTOut(amount: BigNumber): BigNumber {
+    _evmexactTokenInForBPTOut(
+        poolPairData: WeightedPoolPairData,
+        amount: BigNumber
+    ): BigNumber {
         const amt = weightedSolidity._exactTokenInForBPTOut(
             new FixedPointNumber(
-                scale(this.poolPairData.balanceIn, this.poolPairData.decimalsIn)
+                scale(poolPairData.balanceIn, poolPairData.decimalsIn)
             ),
-            new FixedPointNumber(scale(this.poolPairData.weightIn, 18)),
-            new FixedPointNumber(scale(amount, this.poolPairData.decimalsIn)),
-            new FixedPointNumber(scale(this.poolPairData.balanceOut, 18)), // BPT is always 18 decimals
-            new FixedPointNumber(scale(this.poolPairData.swapFee, 18))
+            new FixedPointNumber(scale(poolPairData.weightIn, 18)),
+            new FixedPointNumber(scale(amount, poolPairData.decimalsIn)),
+            new FixedPointNumber(scale(poolPairData.balanceOut, 18)), // BPT is always 18 decimals
+            new FixedPointNumber(scale(poolPairData.swapFee, 18))
         );
 
         return bnum(amt.toString());
     }
 
-    _evmexactBPTInForTokenOut(amount: BigNumber): BigNumber {
+    _evmexactBPTInForTokenOut(
+        poolPairData: WeightedPoolPairData,
+        amount: BigNumber
+    ): BigNumber {
         const amt = weightedSolidity._exactBPTInForTokenOut(
             new FixedPointNumber(
-                scale(
-                    this.poolPairData.balanceOut,
-                    this.poolPairData.decimalsOut
-                )
+                scale(poolPairData.balanceOut, poolPairData.decimalsOut)
             ),
-            new FixedPointNumber(scale(this.poolPairData.weightOut, 18)),
+            new FixedPointNumber(scale(poolPairData.weightOut, 18)),
             new FixedPointNumber(scale(amount, 18)), // BPT is always 18 decimals
-            new FixedPointNumber(scale(this.poolPairData.balanceIn, 18)), // BPT is always 18 decimals
-            new FixedPointNumber(scale(this.poolPairData.swapFee, 18))
+            new FixedPointNumber(scale(poolPairData.balanceIn, 18)), // BPT is always 18 decimals
+            new FixedPointNumber(scale(poolPairData.swapFee, 18))
         );
 
         return bnum(amt.toString());
     }
 
-    _evminGivenOut(amount: BigNumber): BigNumber {
+    _evminGivenOut(
+        poolPairData: WeightedPoolPairData,
+        amount: BigNumber
+    ): BigNumber {
         const amt = weightedSolidity._inGivenOut(
             new FixedPointNumber(
-                scale(this.poolPairData.balanceIn, this.poolPairData.decimalsIn)
+                scale(poolPairData.balanceIn, poolPairData.decimalsIn)
             ),
-            new FixedPointNumber(scale(this.poolPairData.weightIn, 18)),
+            new FixedPointNumber(scale(poolPairData.weightIn, 18)),
             new FixedPointNumber(
-                scale(
-                    this.poolPairData.balanceOut,
-                    this.poolPairData.decimalsOut
-                )
+                scale(poolPairData.balanceOut, poolPairData.decimalsOut)
             ),
-            new FixedPointNumber(scale(this.poolPairData.weightOut, 18)),
-            new FixedPointNumber(scale(amount, this.poolPairData.decimalsOut)),
-            new FixedPointNumber(scale(this.poolPairData.swapFee, 18))
+            new FixedPointNumber(scale(poolPairData.weightOut, 18)),
+            new FixedPointNumber(scale(amount, poolPairData.decimalsOut)),
+            new FixedPointNumber(scale(poolPairData.swapFee, 18))
         );
 
         return bnum(amt.toString());
     }
 
-    _evmtokenInForExactBPTOut(amount: BigNumber): BigNumber {
+    _evmtokenInForExactBPTOut(
+        poolPairData: WeightedPoolPairData,
+        amount: BigNumber
+    ): BigNumber {
         const amt = weightedSolidity._tokenInForExactBPTOut(
             new FixedPointNumber(
-                scale(this.poolPairData.balanceIn, this.poolPairData.decimalsIn)
+                scale(poolPairData.balanceIn, poolPairData.decimalsIn)
             ),
-            new FixedPointNumber(scale(this.poolPairData.weightIn, 18)),
+            new FixedPointNumber(scale(poolPairData.weightIn, 18)),
             new FixedPointNumber(scale(amount, 18)),
-            new FixedPointNumber(scale(this.poolPairData.balanceOut, 18)), // BPT is always 18 decimals
-            new FixedPointNumber(scale(this.poolPairData.swapFee, 18))
+            new FixedPointNumber(scale(poolPairData.balanceOut, 18)), // BPT is always 18 decimals
+            new FixedPointNumber(scale(poolPairData.swapFee, 18))
         );
 
         return bnum(amt.toString());
     }
 
-    _evmbptInForExactTokenOut(amount: BigNumber): BigNumber {
-        const amt = weightedSolidity._exactBPTInForTokenOut(
+    _evmbptInForExactTokenOut(
+        poolPairData: WeightedPoolPairData,
+        amount: BigNumber
+    ): BigNumber {
+        const amt = weightedSolidity._bptInForExactTokenOut(
             new FixedPointNumber(
-                scale(
-                    this.poolPairData.balanceOut,
-                    this.poolPairData.decimalsOut
-                )
+                scale(poolPairData.balanceOut, poolPairData.decimalsOut)
             ),
-            new FixedPointNumber(scale(this.poolPairData.weightOut, 18)),
-            new FixedPointNumber(scale(amount, this.poolPairData.decimalsOut)),
-            new FixedPointNumber(scale(this.poolPairData.balanceIn, 18)), // BPT is always 18 decimals
-            new FixedPointNumber(scale(this.poolPairData.swapFee, 18))
+            new FixedPointNumber(scale(poolPairData.weightOut, 18)),
+            new FixedPointNumber(scale(amount, poolPairData.decimalsOut)),
+            new FixedPointNumber(scale(poolPairData.balanceIn, 18)), // BPT is always 18 decimals
+            new FixedPointNumber(scale(poolPairData.swapFee, 18))
         );
 
         return bnum(amt.toString());

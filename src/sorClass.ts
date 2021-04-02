@@ -34,6 +34,7 @@ export function calculatePathLimits(
 ): [NewPath[], BigNumber] {
     let maxLiquidityAvailable = bnum(0);
     paths.forEach(path => {
+        // Original parsedPoolPairForPath here but this has already been done.
         path.limitAmount = getLimitAmountSwapForPath(path, swapType);
         if (path.limitAmount.isNaN()) throw 'path.limitAmount.isNaN';
         // console.log(path.limitAmount.toNumber())
@@ -78,6 +79,7 @@ export function getLimitAmountSwapForPath(
             );
             let limitOutputAmountSwap1 = getOutputAmountSwap(
                 path.pools[0],
+                path.poolPairData[0],
                 swapType,
                 limitAmountSwap1
             );
@@ -89,6 +91,7 @@ export function getLimitAmountSwapForPath(
                 else
                     return getOutputAmountSwap(
                         path.pools[0],
+                        path.poolPairData[0],
                         SwapTypes.SwapExactOut,
                         limitAmountSwap2
                     );
@@ -105,6 +108,7 @@ export function getLimitAmountSwapForPath(
             );
             let limitOutputAmountSwap2 = getOutputAmountSwap(
                 path.pools[1],
+                path.poolPairData[1],
                 swapType,
                 limitAmountSwap2
             );
@@ -112,6 +116,7 @@ export function getLimitAmountSwapForPath(
                 // This means first hop is limiting the path
                 return getOutputAmountSwap(
                     path.pools[1],
+                    path.poolPairData[1],
                     SwapTypes.SwapExactIn,
                     limitAmountSwap1
                 );
@@ -327,8 +332,8 @@ export const smartOrderRouter = (
                         ? minAmountOut.toString()
                         : maxAmountIn.toString(),
                 maxPrice: maxPrice.toString(),
-                tokenInDecimals: path.poolPairData[0].decimalsIn,
-                tokenOutDecimals: path.poolPairData[0].decimalsOut,
+                tokenInDecimals: path.poolPairData[0].decimalsIn.toString(),
+                tokenOutDecimals: path.poolPairData[0].decimalsOut.toString(),
             };
             swaps.push([swap]);
             // Call EVMgetOutputAmountSwap to guarantee pool state is updated
@@ -393,8 +398,8 @@ export const smartOrderRouter = (
                         ? minAmountOut.toString()
                         : maxAmountIn.toString(),
                 maxPrice: maxPrice.toString(),
-                tokenInDecimals: path.poolPairData[0].decimalsIn,
-                tokenOutDecimals: path.poolPairData[0].decimalsOut,
+                tokenInDecimals: path.poolPairData[0].decimalsIn.toString(),
+                tokenOutDecimals: path.poolPairData[0].decimalsOut.toString(),
             };
 
             // Add swap from second pool
@@ -408,8 +413,8 @@ export const smartOrderRouter = (
                         ? minAmountOut.toString()
                         : maxAmountIn.toString(),
                 maxPrice: maxPrice.toString(),
-                tokenInDecimals: path.poolPairData[1].decimalsIn,
-                tokenOutDecimals: path.poolPairData[1].decimalsOut,
+                tokenInDecimals: path.poolPairData[1].decimalsIn.toString(),
+                tokenOutDecimals: path.poolPairData[1].decimalsOut.toString(),
             };
             swaps.push([swap1hop, swap2hop]);
         }

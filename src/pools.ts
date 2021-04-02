@@ -55,6 +55,9 @@ export function filterPoolsOfInterest(
         disabledTokens = disabledOptions.disabledTokens;
 
     allPools.forEach(pool => {
+        if (pool.tokensList.length === 0 || pool.tokens[0].balance === '0') {
+            return;
+        }
         let newPool: WeightedPool | StablePool;
 
         // TODO - Update for new Schema
@@ -143,6 +146,11 @@ export function filterHopPools(
     // No multihop pool but still need to create paths for direct pools
     if (hopTokens.length === 0) {
         for (let id in poolsOfInterest) {
+            if (poolsOfInterest[id].swapPairType !== SwapPairType.Direct) {
+                delete poolsOfInterest[id];
+                continue;
+            }
+
             const path = createDirectPath(
                 poolsOfInterest[id],
                 tokenIn,
@@ -173,14 +181,20 @@ export function filterHopPools(
                 continue;
             }
 
+            // MAKE THIS A FLAG IN FILTER?
             // If pool doesn't have  hopTokens[i] then ignore
             if (!new Set(pool.tokensList).add(pool.id).has(hopTokens[i]))
                 continue;
 
             if (pool.swapPairType === SwapPairType.HopIn) {
-                pool.parsePoolPairData(tokenIn, hopTokens[i]);
+                const poolPairData = pool.parsePoolPairData(
+                    tokenIn,
+                    hopTokens[i]
+                );
                 // const normalizedLiquidity = pool.getNormalizedLiquidity(tokenIn, hopTokens[i]);
-                const normalizedLiquidity = pool.getNormalizedLiquidity();
+                const normalizedLiquidity = pool.getNormalizedLiquidity(
+                    poolPairData
+                );
                 // Cannot be strictly greater otherwise highestNormalizedLiquidityPoolId = 0 if hopTokens[i] balance is 0 in this pool.
                 if (
                     normalizedLiquidity.isGreaterThanOrEqualTo(
@@ -191,9 +205,14 @@ export function filterHopPools(
                     highestNormalizedLiquidityFirstPoolId = id;
                 }
             } else if (pool.swapPairType === SwapPairType.HopOut) {
-                pool.parsePoolPairData(hopTokens[i], tokenOut);
+                const poolPairData = pool.parsePoolPairData(
+                    hopTokens[i],
+                    tokenOut
+                );
                 // const normalizedLiquidity = pool.getNormalizedLiquidity(hopTokens[i], tokenOut);
-                const normalizedLiquidity = pool.getNormalizedLiquidity();
+                const normalizedLiquidity = pool.getNormalizedLiquidity(
+                    poolPairData
+                );
                 // Cannot be strictly greater otherwise highestNormalizedLiquidityPoolId = 0 if hopTokens[i] balance is 0 in this pool.
                 if (
                     normalizedLiquidity.isGreaterThanOrEqualTo(
@@ -243,11 +262,13 @@ function createDirectPath(
         tokenOutDecimals: 18,
     };
 
+    const poolPairData = pool.parsePoolPairData(tokenIn, tokenOut);
+
     const path: NewPath = {
         id: pool.id,
         swaps: [swap],
         limitAmount: bnum(0),
-        poolPairData: [pool.poolPairData],
+        poolPairData: [poolPairData],
         pools: [pool],
     };
 
@@ -277,12 +298,15 @@ function createMultihopPath(
         tokenOutDecimals: 18,
     };
 
+    const poolPairDataFirst = firstPool.parsePoolPairData(tokenIn, hopToken);
+    const poolPairDataSecond = secondPool.parsePoolPairData(hopToken, tokenOut);
+
     // Path id is the concatenation of the ids of poolFirstHop and poolSecondHop
     const path: NewPath = {
         id: firstPool.id + secondPool.id,
         swaps: [swap1, swap2],
         limitAmount: bnum(0),
-        poolPairData: [firstPool.poolPairData, secondPool.poolPairData],
+        poolPairData: [poolPairDataFirst, poolPairDataSecond],
         pools: [firstPool, secondPool],
     };
 

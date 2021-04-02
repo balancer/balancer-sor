@@ -580,5 +580,166 @@
             ],
             "balanceBpt": "78350279.810168052058997162"
         }
+    ],
+    "pathTestDirectAndMulti": [
+        {
+            "id": "0x0481d726c3d25250a8963221945ed93b8a5315a9",
+            "totalShares": "100",
+            "swapFee": "0.01",
+            "tokens": [
+                {
+                    "address": "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+                    "balance": "1000",
+                    "decimals": 6,
+                    "denormWeight": "10",
+                    "id": "0x0481d726c3d25250a8963221945ed93b8a5315a9-0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+                    "symbol": "USDC"
+                },
+                {
+                    "address": "0x6b175474e89094c44da98b954eedeac495271d0f",
+                    "balance": "0.001",
+                    "decimals": 18,
+                    "denormWeight": "10",
+                    "id": "0x0481d726c3d25250a8963221945ed93b8a5315a9-0x6b175474e89094c44da98b954eedeac495271d0f",
+                    "symbol": "DAI"
+                },
+                {
+                    "address": "0x0000000000085d4780b73119b644ae5ecd22b376",
+                    "balance": "1000",
+                    "decimals": 18,
+                    "denormWeight": "10",
+                    "id": "0x0481d726c3d25250a8963221945ed93b8a5315a9-0x0000000000085d4780b73119b644ae5ecd22b376",
+                    "symbol": "TUSD"
+                },
+                {
+                    "address": "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
+                    "balance": "1000",
+                    "decimals": 18,
+                    "denormWeight": "10",
+                    "id": "0x0481d726c3d25250a8963221945ed93b8a5315a9-0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
+                    "symbol": "WETH"
+                }
+            ],
+            "tokensList": [
+                "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+                "0x6b175474e89094c44da98b954eedeac495271d0f",
+                "0x0000000000085d4780b73119b644ae5ecd22b376",
+                "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2"
+            ],
+            "totalWeight": "40"
+        },
+        {
+            "id": "0x07d13ed39ee291c1506675ff42f9b2b6b50e2d3e",
+            "totalShares": "100",
+            "swapFee": "0.01",
+            "tokens": [
+                {
+                    "address": "0x6b175474e89094c44da98b954eedeac495271d0f",
+                    "balance": "1000",
+                    "decimals": 18,
+                    "denormWeight": "10",
+                    "id": "0x07d13ed39ee291c1506675ff42f9b2b6b50e2d3e-0x6b175474e89094c44da98b954eedeac495271d0f",
+                    "symbol": "DAI"
+                },
+                {
+                    "address": "0x0000000000085d4780b73119b644ae5ecd22b376",
+                    "balance": "1000",
+                    "decimals": 18,
+                    "denormWeight": "10",
+                    "id": "0x07d13ed39ee291c1506675ff42f9b2b6b50e2d3e-0x0000000000085d4780b73119b644ae5ecd22b376",
+                    "symbol": "TUSD"
+                },
+                {
+                    "address": "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
+                    "balance": "1000",
+                    "decimals": 18,
+                    "denormWeight": "10",
+                    "id": "0x07d13ed39ee291c1506675ff42f9b2b6b50e2d3e-0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
+                    "symbol": "WETH"
+                }
+            ],
+            "tokensList": [
+                "0x6b175474e89094c44da98b954eedeac495271d0f",
+                "0x0000000000085d4780b73119b644ae5ecd22b376",
+                "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2"
+            ],
+            "totalWeight": "30"
+        }
+    ],
+    "pathTestPoolTwoMultiHops": [
+        {
+            "id": "0x0481d726c3d25250a8963221945ed93b8a5315a9",
+            "totalShares": "100",
+            "swapFee": "0.01",
+            "tokens": [
+                {
+                    "address": "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+                    "balance": "1000",
+                    "decimals": 6,
+                    "denormWeight": "10",
+                    "id": "0x0481d726c3d25250a8963221945ed93b8a5315a9-0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+                    "symbol": "USDC"
+                },
+                {
+                    "address": "0x0000000000085d4780b73119b644ae5ecd22b376",
+                    "balance": "1000",
+                    "decimals": 18,
+                    "denormWeight": "10",
+                    "id": "0x0481d726c3d25250a8963221945ed93b8a5315a9-0x0000000000085d4780b73119b644ae5ecd22b376",
+                    "symbol": "TUSD"
+                },
+                {
+                    "address": "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
+                    "balance": "1000",
+                    "decimals": 18,
+                    "denormWeight": "10",
+                    "id": "0x0481d726c3d25250a8963221945ed93b8a5315a9-0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
+                    "symbol": "WETH"
+                }
+            ],
+            "tokensList": [
+                "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+                "0x0000000000085d4780b73119b644ae5ecd22b376",
+                "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2"
+            ],
+            "totalWeight": "30"
+        },
+        {
+            "id": "0x07d13ed39ee291c1506675ff42f9b2b6b50e2d3e",
+            "totalShares": "100",
+            "swapFee": "0.01",
+            "tokens": [
+                {
+                    "address": "0x6b175474e89094c44da98b954eedeac495271d0f",
+                    "balance": "1000",
+                    "decimals": 18,
+                    "denormWeight": "10",
+                    "id": "0x07d13ed39ee291c1506675ff42f9b2b6b50e2d3e-0x6b175474e89094c44da98b954eedeac495271d0f",
+                    "symbol": "DAI"
+                },
+                {
+                    "address": "0x0000000000085d4780b73119b644ae5ecd22b376",
+                    "balance": "1000",
+                    "decimals": 18,
+                    "denormWeight": "10",
+                    "id": "0x07d13ed39ee291c1506675ff42f9b2b6b50e2d3e-0x0000000000085d4780b73119b644ae5ecd22b376",
+                    "symbol": "TUSD"
+                },
+                {
+                    "address": "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
+                    "balance": "1000",
+                    "decimals": 18,
+                    "denormWeight": "10",
+                    "id": "0x07d13ed39ee291c1506675ff42f9b2b6b50e2d3e-0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
+                    "symbol": "WETH"
+                }
+            ],
+            "tokensList": [
+                "0x6b175474e89094c44da98b954eedeac495271d0f",
+                "0x0000000000085d4780b73119b644ae5ecd22b376",
+                "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2"
+            ],
+            "totalWeight": "30"
+        }
     ]
 }

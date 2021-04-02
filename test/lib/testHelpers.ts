@@ -10,6 +10,11 @@ import {
     SubGraphPool,
     Path,
     SubGraphToken,
+    PoolDictionary,
+    SwapPairType,
+    NewPath,
+    SwapTypes,
+    SubgraphPoolBase,
 } from '../../src/types';
 import customMultiAbi from '../abi/customMulticall.json';
 import { SubGraphPools as SubGraphPoolsV1 } from '@balancer-labs/sor/dist/types';
@@ -25,6 +30,8 @@ import { Contract } from '@ethersproject/contracts';
 // Mainnet reference tokens with addresses & decimals
 import WeightedTokens from '../testData/eligibleTokens.json';
 import StableTokens from '../testData/stableTokens.json';
+import { filterPoolsOfInterest, filterHopPools } from '../../src/pools';
+import { calculatePathLimits, smartOrderRouter } from '../../src/sorClass';
 
 // Just for testing weighted helpers:
 import { BPTForTokensZeroPriceImpact } from '../../src/frontendHelpers/weightedHelpers';
@@ -447,7 +454,14 @@ export async function getV2Swap(
         onChainBalances: true,
     },
     ReturnAmountDecimals: number,
-    disabledOptions: DisabledOptions = { isOverRide: false, disabledTokens: [] }
+    disabledOptions: DisabledOptions = {
+        isOverRide: false,
+        disabledTokens: [],
+    },
+    costOutputTokenOveride = {
+        isOverRide: false,
+        overRideCost: new BigNumber(0),
+    }
 ) {
     TokenIn = TokenIn.toLowerCase();
     TokenOut = TokenOut.toLowerCase();
@@ -461,27 +475,30 @@ export async function getV2Swap(
 
     const fullSwapStart = performance.now();
     const getCostOutputTokenStart = performance.now();
-    // This calculates the cost in output token (output token is TokenOut for swapExactIn and
-    // TokenIn for a swapExactOut) for each additional pool added to the final SOR swap result.
-    // This is used as an input to SOR to allow it to make gas efficient recommendations, i.e.
-    // if it costs 5 DAI to add another pool to the SOR solution and that only generates 1 more DAI,
-    // then SOR should not add that pool (if gas costs were zero that pool would be added)
-    // Notice that outputToken is TokenOut if SwapType == 'swapExactIn' and TokenIn if SwapType == 'swapExactOut'
-    let costOutputToken: BigNumber;
-    if (SwapType === 'swapExactIn') {
-        costOutputToken = await sorv2.getCostOutputToken(
-            TokenOut,
-            GasPrice,
-            swapCost,
-            Provider
-        );
-    } else {
-        costOutputToken = await sorv2.getCostOutputToken(
-            TokenIn,
-            GasPrice,
-            swapCost,
-            Provider
-        );
+    let costOutputToken: BigNumber = costOutputTokenOveride.overRideCost;
+
+    if (!costOutputTokenOveride.isOverRide) {
+        // This calculates the cost in output token (output token is TokenOut for swapExactIn and
+        // TokenIn for a swapExactOut) for each additional pool added to the final SOR swap result.
+        // This is used as an input to SOR to allow it to make gas efficient recommendations, i.e.
+        // if it costs 5 DAI to add another pool to the SOR solution and that only generates 1 more DAI,
+        // then SOR should not add that pool (if gas costs were zero that pool would be added)
+        // Notice that outputToken is TokenOut if SwapType == 'swapExactIn' and TokenIn if SwapType == 'swapExactOut'
+        if (SwapType === 'swapExactIn') {
+            costOutputToken = await sorv2.getCostOutputToken(
+                TokenOut,
+                GasPrice,
+                swapCost,
+                Provider
+            );
+        } else {
+            costOutputToken = await sorv2.getCostOutputToken(
+                TokenIn,
+                GasPrice,
+                swapCost,
+                Provider
+            );
+        }
     }
     // Normalize to ReturnAmountDecimals
     costOutputToken = costOutputToken.div(bnum(10 ** ReturnAmountDecimals));
@@ -996,6 +1013,80 @@ async function getAllPoolDataOnChain(
         onChainPools.pools.push(p);
     }
     return onChainPools;
+}
+
+export function countPoolSwapPairTypes(
+    poolsOfInterestDictionary: PoolDictionary
+) {
+    let noDirect = 0,
+        noHopIn = 0,
+        noHopOut = 0;
+    for (let k in poolsOfInterestDictionary) {
+        if (poolsOfInterestDictionary[k].swapPairType === SwapPairType.Direct)
+            noDirect++;
+        else if (
+            poolsOfInterestDictionary[k].swapPairType === SwapPairType.HopIn
+        )
+            noHopIn++;
+        else if (
+            poolsOfInterestDictionary[k].swapPairType === SwapPairType.HopOut
+        )
+            noHopOut++;
+    }
+
+    return [noDirect, noHopIn, noHopOut];
+}
+
+export function v2classSwap(
+    pools: any,
+    tokenIn: string,
+    tokenOut: string,
+    maxPools: number,
+    swapType: string | SwapTypes,
+    swapAmount: BigNumber,
+    costOutputToken: BigNumber,
+    disabledOptions: DisabledOptions = { isOverRide: false, disabledTokens: [] }
+) {
+    let swapTypeCorrect = SwapTypes.SwapExactIn;
+
+    if (swapType === 'swapExactOut' || swapType === SwapTypes.SwapExactOut)
+        swapTypeCorrect = SwapTypes.SwapExactOut;
+
+    let hopTokens: string[];
+    let poolsOfInterestDictionary: PoolDictionary;
+    let pathData: NewPath[];
+
+    [poolsOfInterestDictionary, hopTokens] = filterPoolsOfInterest(
+        JSON.parse(JSON.stringify(pools.pools)),
+        tokenIn,
+        tokenOut,
+        maxPools,
+        disabledOptions
+    );
+
+    [poolsOfInterestDictionary, pathData] = filterHopPools(
+        tokenIn,
+        tokenOut,
+        hopTokens,
+        poolsOfInterestDictionary
+    );
+
+    let paths: NewPath[];
+    let maxAmt: BigNumber;
+
+    [paths, maxAmt] = calculatePathLimits(pathData, swapTypeCorrect);
+
+    let swaps: any, total: BigNumber, marketSp: BigNumber;
+    [swaps, total, marketSp] = smartOrderRouter(
+        JSON.parse(JSON.stringify(poolsOfInterestDictionary)), // Need to keep original pools for cache
+        paths,
+        swapTypeCorrect,
+        swapAmount,
+        maxPools,
+        costOutputToken
+    );
+
+    return [swaps, total, marketSp];
 }
 
 // Generates file output for v1-v2-compare-testPools.spec.ts
