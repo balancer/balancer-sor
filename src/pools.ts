@@ -61,7 +61,8 @@ export function filterPoolsOfInterest(
         let newPool: WeightedPool | StablePool;
 
         // TODO - Update for new Schema
-        if (typeof pool.amp === 'undefined' || pool.amp === '0')
+        // if (typeof pool.amp === 'undefined' || pool.amp === '0')
+        if (pool.poolType === 'Weighted')
             newPool = new WeightedPool(
                 pool.id,
                 pool.swapFee,
@@ -70,7 +71,7 @@ export function filterPoolsOfInterest(
                 pool.tokens,
                 pool.tokensList
             );
-        else
+        else if (pool.poolType === 'Stable')
             newPool = new StablePool(
                 pool.id,
                 pool.amp,
@@ -79,6 +80,7 @@ export function filterPoolsOfInterest(
                 pool.tokens,
                 pool.tokensList
             );
+        else throw `Unknown pool type or type field missing: ${pool.poolType}`;
 
         let tokenListSet = new Set(pool.tokensList);
         // we add the BPT as well as we can join/exit as part of the multihop

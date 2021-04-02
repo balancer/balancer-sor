@@ -147,6 +147,7 @@ export interface NewPath {
 
 export interface SubgraphPoolBase {
     id: string;
+    poolType: string;
     swapFee: string;
     totalShares: string;
     tokens: SubGraphToken[];
