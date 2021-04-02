@@ -262,6 +262,7 @@ describe('Test Filter Functions using subgraphPoolsSmall.json & full SOR comparr
             console.log(path.id);
             console.log(path.limitAmount.toString());
         });
+        // assert.equal(paths.length, 4);
 
         let swaps: any, total: BigNumber, marketSp: BigNumber;
         [swaps, total, marketSp] = sor.smartOrderRouter(

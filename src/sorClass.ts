@@ -295,7 +295,6 @@ export const smartOrderRouter = (
     // after executing the transaction (given there are no front-runners)
     bestPaths.forEach((path, i) => {
         let swapAmount = bestSwapAmounts[i];
-        console.log(swapAmount.toString());
         if (swapAmount.gt(highestSwapAmt)) {
             highestSwapAmt = swapAmount;
             largestSwapPath = path;
@@ -305,14 +304,14 @@ export const smartOrderRouter = (
         );
 
         // // TODO: remove. To debug only!
-
+        /*
         console.log(
             'Prices should be all very close (unless one of the paths is on the limit!'
         );
         console.log(
             getSpotPriceAfterSwapForPath(path, swapType, swapAmount).toNumber()
         );
-
+            */
         let poolPairData = path.poolPairData;
 
         if (i == 0)
@@ -445,7 +444,6 @@ export const smartOrderRouter = (
                     .toString(); // Add dust to second swapExactOut
         }
     }
-    console.log('Number of paths: ' + bestPaths.length.toString());
 
     const marketSp = getSpotPriceAfterSwapForPath(
         largestSwapPath,

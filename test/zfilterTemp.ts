@@ -75,6 +75,13 @@ describe('Test Filter Functions using subgraphPoolsSmall.json & full SOR comparr
             SwapTypes.SwapExactOut
         );
 
+        console.log(`PATHS::`);
+        paths.forEach(path => {
+            console.log(path.id);
+            console.log(path.limitAmount.toString());
+        });
+        console.log(`DONE`);
+
         assert.equal(
             maxLiquidityAvailable.toString(),
             '1406.590114333331926743219'

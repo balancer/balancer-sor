@@ -150,7 +150,7 @@ export function getSpotPriceAfterSwapForPath(
             );
             let spotPriceAfterSwap1 = getSpotPriceAfterSwap(
                 pools[0],
-                path.poolPairData[1],
+                path.poolPairData[0],
                 swapType,
                 outputAmountSwap2
             );
