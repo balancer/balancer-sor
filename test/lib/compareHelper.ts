@@ -8,8 +8,8 @@ import {
 } from './testHelpers';
 import { bnum } from '../../src/bmath';
 import { SOR } from '../../src';
-import { formatSwaps } from '../../src/helpers';
-import { SwapInfo, DisabledOptions } from '../../src/types';
+import { formatSwaps } from '../../src/helpersClass';
+import { SwapInfo, DisabledOptions, SwapTypes } from '../../src/types';
 import { assert, expect } from 'chai';
 
 export async function compareTest(
@@ -105,16 +105,20 @@ export async function compareTest(
         disabledOptions
     );
 
+    let swapTypeCorrect = SwapTypes.SwapExactIn;
+
     if (testData.tradeInfo.SwapType === 'swapExactIn')
         await sor.setCostOutputToken(
             testData.tradeInfo.TokenOut,
             v2SwapData.costOutputToken
         );
-    else
+    else {
+        swapTypeCorrect = SwapTypes.SwapExactOut;
         await sor.setCostOutputToken(
             testData.tradeInfo.TokenIn,
             v2SwapData.costOutputToken
         );
+    }
 
     const isFetched = await sor.fetchPools(false);
     assert(isFetched, 'Pools should be fetched in wrapper');
@@ -122,7 +126,7 @@ export async function compareTest(
     const swapInfoWrapper: SwapInfo = await sor.getSwaps(
         testData.tradeInfo.TokenIn,
         testData.tradeInfo.TokenOut,
-        testData.tradeInfo.SwapType,
+        swapTypeCorrect,
         testData.tradeInfo.SwapAmount.div(
             bnum(10 ** testData.tradeInfo.SwapAmountDecimals)
         )
@@ -138,7 +142,7 @@ export async function compareTest(
 
     const v2formatted = formatSwaps(
         v2SwapData.swaps,
-        testData.tradeInfo.SwapType,
+        swapTypeCorrect,
         amountNormalised,
         testData.tradeInfo.TokenIn,
         testData.tradeInfo.TokenOut,

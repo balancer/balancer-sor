@@ -3,7 +3,7 @@ require('dotenv').config();
 import { JsonRpcProvider } from '@ethersproject/providers';
 import { assert, expect } from 'chai';
 import { SOR } from '../src';
-import { SubGraphPools, SwapInfo } from '../src/types';
+import { SubGraphPoolsBase, SwapInfo, SwapTypes } from '../src/types';
 import { bnum } from '../src/bmath';
 import { BigNumber } from '../src/utils/bignumber';
 
@@ -33,7 +33,7 @@ describe(`Tests for wrapper class.`, () => {
     });
 
     it(`Should set pools source to pools passed`, () => {
-        const poolsFromFile: SubGraphPools = require('./testData/testPools/subgraphPoolsSmallWithTrade.json');
+        const poolsFromFile: SubGraphPoolsBase = require('./testData/testPools/subgraphPoolsSmallWithTrade.json');
         const sor = new SOR(
             provider,
             gasPrice,
@@ -62,7 +62,7 @@ describe(`Tests for wrapper class.`, () => {
     });
 
     it(`fetchPools should fetch with NO scaling`, async () => {
-        const poolsFromFile: SubGraphPools = require('./testData/testPools/subgraphPoolsSmallWithTrade.json');
+        const poolsFromFile: SubGraphPoolsBase = require('./testData/testPools/subgraphPoolsSmallWithTrade.json');
         const sor = new SOR(
             provider,
             gasPrice,
@@ -80,9 +80,9 @@ describe(`Tests for wrapper class.`, () => {
     });
 
     it(`Should return no swaps when pools not retrieved.`, async () => {
-        const tokenIn: string = '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2';
-        const tokenOut: string = '0x6b175474e89094c44da98b954eedeac495271d0f';
-        const swapType: string = 'swapExactIn';
+        const tokenIn = '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2';
+        const tokenOut = '0x6b175474e89094c44da98b954eedeac495271d0f';
+        const swapType = SwapTypes.SwapExactIn;
         const swapAmt: BigNumber = bnum(0);
         const sor = new SOR(provider, gasPrice, maxPools, chainId, poolsUrl);
         const swaps: SwapInfo = await sor.getSwaps(
@@ -96,8 +96,8 @@ describe(`Tests for wrapper class.`, () => {
     });
 
     it(`fetchFilteredPairPools should return false for bad url.`, async () => {
-        const tokenIn: string = '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2';
-        const tokenOut: string = '0x6b175474e89094c44da98b954eedeac495271d0f';
+        const tokenIn = '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2';
+        const tokenOut = '0x6b175474e89094c44da98b954eedeac495271d0f';
         const failUrl = ``;
 
         const sor = new SOR(provider, gasPrice, maxPools, chainId, failUrl);
@@ -109,13 +109,13 @@ describe(`Tests for wrapper class.`, () => {
 
         assert.isFalse(result);
         const pairKey = sor.createKey(tokenIn, tokenOut);
-        const cachedPools: SubGraphPools = sor.poolsForPairsCache[pairKey];
+        const cachedPools: SubGraphPoolsBase = sor.poolsForPairsCache[pairKey];
 
         assert.equal(cachedPools.pools.length, 0);
     });
 
     it(`fetchFilteredPairPools should return true for pools list`, async () => {
-        const poolsFromFile: SubGraphPools = require('./testData/testPools/subgraphPoolsSmallWithTrade.json');
+        const poolsFromFile: SubGraphPoolsBase = require('./testData/testPools/subgraphPoolsSmallWithTrade.json');
         const tokenIn: string = '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2';
         const tokenOut: string = '0x6b175474e89094c44da98b954eedeac495271d0f';
 
@@ -136,15 +136,15 @@ describe(`Tests for wrapper class.`, () => {
         assert.isTrue(result);
 
         const pairKey = sor.createKey(tokenIn, tokenOut);
-        const cachedPools: SubGraphPools = sor.poolsForPairsCache[pairKey];
+        const cachedPools: SubGraphPoolsBase = sor.poolsForPairsCache[pairKey];
         assert.isAbove(cachedPools.pools.length, 0);
     });
 
     it(`should have a valid swap`, async () => {
-        const poolsFromFile: SubGraphPools = require('./testData/testPools/subgraphPoolsSmallWithTrade.json');
-        const tokenIn: string = '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2';
-        const tokenOut: string = '0x6b175474e89094c44da98b954eedeac495271d0f';
-        const swapType: string = 'swapExactIn';
+        const poolsFromFile: SubGraphPoolsBase = require('./testData/testPools/subgraphPoolsSmallWithTrade.json');
+        const tokenIn = '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2';
+        const tokenOut = '0x6b175474e89094c44da98b954eedeac495271d0f';
+        const swapType = SwapTypes.SwapExactIn;
         const swapAmt: BigNumber = bnum('0.1');
 
         const sor = new SOR(

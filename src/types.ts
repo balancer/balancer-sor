@@ -145,6 +145,10 @@ export interface NewPath {
     filterEffectivePrice?: BigNumber; // TODO: This is just used for filtering, maybe there is a better way to filter?
 }
 
+export interface SubGraphPoolsBase {
+    pools: SubgraphPoolBase[];
+}
+
 export interface SubgraphPoolBase {
     id: string;
     poolType: string;

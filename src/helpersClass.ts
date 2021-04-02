@@ -527,7 +527,7 @@ export function EVMgetOutputAmountSwap(
 
 export function formatSwaps(
     swaps: Swap[][],
-    swapType: string,
+    swapType: SwapTypes,
     swapAmount: BigNumber,
     tokenIn: string,
     tokenOut: string,
@@ -567,7 +567,7 @@ export function formatSwaps(
 
     const tokenArray = [...tokenAddressesSet];
 
-    if (swapType === 'swapExactIn') {
+    if (swapType === SwapTypes.SwapExactIn) {
         const swapsV2: SwapV2[] = [];
 
         /*

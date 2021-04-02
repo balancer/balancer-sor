@@ -1,16 +1,16 @@
 import { Contract } from '@ethersproject/contracts';
 import { BaseProvider } from '@ethersproject/providers';
 import { Interface } from '@ethersproject/abi';
-import { SubGraphPools, SubGraphPool, SubGraphToken } from './types';
+import { SubGraphPoolsBase, SubgraphPoolBase, SubGraphToken } from './types';
 import * as bmath from './bmath';
 
 export async function getOnChainBalances(
-    pools: SubGraphPools,
+    pools: SubGraphPoolsBase,
     multiAddress: string,
     vaultAddress: string,
     provider: BaseProvider
-): Promise<SubGraphPools> {
-    let poolsWithOnChainBalance: SubGraphPools = { pools: [] };
+): Promise<SubGraphPoolsBase> {
+    let poolsWithOnChainBalance: SubGraphPoolsBase = { pools: [] };
 
     if (pools.pools.length === 0) return poolsWithOnChainBalance;
 
@@ -43,8 +43,9 @@ export async function getOnChainBalances(
 
             const poolTokens: SubGraphToken[] = [];
 
-            const poolWithBalances: SubGraphPool = {
+            const poolWithBalances: SubgraphPoolBase = {
                 id: pools.pools[i].id,
+                poolType: pools.pools[i].poolType,
                 // !!!!!!! TO DO address?: pools.pools[i].address,
                 swapFee: pools.pools[i].swapFee,
                 totalWeight: pools.pools[i].totalWeight,
@@ -53,7 +54,7 @@ export async function getOnChainBalances(
                     token.toLowerCase()
                 ),
                 amp: pools.pools[i].amp,
-                balanceBpt: pools.pools[i].balanceBpt,
+                totalShares: pools.pools[i].totalShares,
             };
 
             pools.pools[i].tokens.forEach(token => {

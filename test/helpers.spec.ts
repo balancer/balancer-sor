@@ -1,5 +1,5 @@
 import { assert, expect } from 'chai';
-import { SwapInfo } from '../src/types';
+import { SwapInfo, SwapTypes } from '../src/types';
 import { BigNumber } from '../src/utils/bignumber';
 import { formatSwaps } from '../src/helpersClass';
 import testSwaps from './testData/swapsForFormatting.json';
@@ -13,7 +13,7 @@ describe(`Tests for Helpers.`, () => {
         const returnAmount = new BigNumber(2);
         const tokenIn = '0x6b175474e89094c44da98b954eedeac495271d0f';
         const tokenOut = '0xba100000625a3754423978a60c9317c58a424e3d';
-        const swapType = 'swapExactIn';
+        const swapType = SwapTypes.SwapExactIn;
 
         const swapsV1Format: any = testSwaps.directhops;
 
@@ -53,7 +53,7 @@ describe(`Tests for Helpers.`, () => {
         const returnAmount = new BigNumber(2);
         const tokenIn = '0x6b175474e89094c44da98b954eedeac495271d0f';
         const tokenOut = '0x056fd409e1d7a124bd7017459dfea2f387b6d5cd';
-        const swapType = 'swapExactIn';
+        const swapType = SwapTypes.SwapExactIn;
 
         const swapsV1Format: any = testSwaps.multihops;
 
@@ -103,7 +103,7 @@ describe(`Tests for Helpers.`, () => {
         const returnAmount = new BigNumber(2);
         const tokenIn = '0x6b175474e89094c44da98b954eedeac495271d0f';
         const tokenOut = '0x056fd409e1d7a124bd7017459dfea2f387b6d5cd';
-        const swapType = 'swapExactIn';
+        const swapType = SwapTypes.SwapExactIn;
 
         const swapsV1Format: any = testSwaps.directandmultihops;
 
@@ -148,7 +148,7 @@ describe(`Tests for Helpers.`, () => {
         const returnAmount = new BigNumber(1);
         const tokenIn = '0x6b175474e89094c44da98b954eedeac495271d0f';
         const tokenOut = '0xba100000625a3754423978a60c9317c58a424e3d';
-        const swapType = 'swapExactOut';
+        const swapType = SwapTypes.SwapExactOut;
 
         const swapsV1Format: any = testSwaps.directhops;
 
@@ -188,7 +188,7 @@ describe(`Tests for Helpers.`, () => {
         const returnAmount = new BigNumber(2);
         const tokenIn = '0x6b175474e89094c44da98b954eedeac495271d0f';
         const tokenOut = '0x056fd409e1d7a124bd7017459dfea2f387b6d5cd';
-        const swapType = 'swapExactOut';
+        const swapType = SwapTypes.SwapExactOut;
 
         const swapsV1Format: any = testSwaps.multihops;
 
@@ -238,7 +238,7 @@ describe(`Tests for Helpers.`, () => {
         const returnAmount = new BigNumber(2);
         const tokenIn = '0x6b175474e89094c44da98b954eedeac495271d0f';
         const tokenOut = '0x056fd409e1d7a124bd7017459dfea2f387b6d5cd';
-        const swapType = 'swapExactOut';
+        const swapType = SwapTypes.SwapExactOut;
 
         const swapsV1Format: any = testSwaps.directandmultihops;
 
@@ -284,7 +284,7 @@ describe(`Tests for Helpers.`, () => {
         const returnAmount = new BigNumber(2);
         const tokenIn = '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48';
         const tokenOut = '0x6b175474e89094c44da98b954eedeac495271d0f';
-        const swapType = 'swapExactIn';
+        const swapType = SwapTypes.SwapExactIn;
 
         const swapsV1Format: any = testSwaps.directhopUSDCIn;
 
@@ -320,7 +320,7 @@ describe(`Tests for Helpers.`, () => {
         const returnAmount = new BigNumber(2);
         const tokenIn = '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48';
         const tokenOut = '0x6b175474e89094c44da98b954eedeac495271d0f';
-        const swapType = 'swapExactOut';
+        const swapType = SwapTypes.SwapExactOut;
 
         const swapsV1Format: any = testSwaps.directhopUSDCIn;
 
@@ -356,7 +356,7 @@ describe(`Tests for Helpers.`, () => {
         const returnAmount = new BigNumber(2);
         const tokenIn = '0x6b175474e89094c44da98b954eedeac495271d0f';
         const tokenOut = '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48';
-        const swapType = 'swapExactIn';
+        const swapType = SwapTypes.SwapExactIn;
 
         const swapsV1Format: any = testSwaps.directhopUSDCOut;
 
@@ -392,7 +392,7 @@ describe(`Tests for Helpers.`, () => {
         const returnAmount = new BigNumber(2);
         const tokenIn = '0x6b175474e89094c44da98b954eedeac495271d0f';
         const tokenOut = '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48';
-        const swapType = 'swapExactOut';
+        const swapType = SwapTypes.SwapExactOut;
 
         const swapsV1Format: any = testSwaps.directhopUSDCOut;
 
@@ -428,7 +428,7 @@ describe(`Tests for Helpers.`, () => {
         const returnAmount = new BigNumber(2);
         const tokenIn = '0x6b175474e89094c44da98b954eedeac495271d0f';
         const tokenOut = '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48';
-        const swapType = 'swapExactOut';
+        const swapType = SwapTypes.SwapExactOut;
 
         const swapsV1Format: any = [];
 
@@ -457,7 +457,7 @@ describe(`Tests for Helpers.`, () => {
         const returnAmount = new BigNumber(2);
         const tokenIn = '0x6b175474e89094c44da98b954eedeac495271d0f';
         const tokenOut = '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48';
-        const swapType = 'swapExactOut';
+        const swapType = SwapTypes.SwapExactOut;
 
         const swapsV1Format: any = [];
 

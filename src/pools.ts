@@ -3,6 +3,7 @@ import { SubGraphPools } from './types';
 import {
     DisabledOptions,
     SubgraphPoolBase,
+    SubGraphPoolsBase,
     PoolDictionary,
     SwapPairType,
     NewPath,
@@ -16,7 +17,7 @@ import { bnum } from './bmath';
 import disabledTokensDefault from './disabled-tokens.json';
 
 export class POOLS {
-    async getAllPublicSwapPools(URL: string): Promise<SubGraphPools> {
+    async getAllPublicSwapPools(URL: string): Promise<SubGraphPoolsBase> {
         const result = await fetch(URL);
         const allPools = result.json();
         return allPools;
