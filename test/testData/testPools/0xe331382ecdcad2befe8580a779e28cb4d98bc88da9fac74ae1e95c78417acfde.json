@@ -41,7 +41,8 @@
             ],
             "totalWeight": "0",
             "balanceBpt": "785224145.723155205181003818",
-            "totalShares": "785224145.723155205181003818"
+            "totalShares": "785224145.723155205181003818",
+            "poolType": "Stable"
         },
         {
             "id": "0x3b3ac5386837dc563660fb6a0937dfaa5924333b",
@@ -81,7 +82,8 @@
             ],
             "totalWeight": "0",
             "balanceBpt": "78350279.810168052058997162",
-            "totalShares": "78350279.810168052058997162"
+            "totalShares": "78350279.810168052058997162",
+            "poolType": "Stable"
         },
         {
             "id": "0x845838df265dcd2c412a1dc9e959c7d08537f8a2",
@@ -107,7 +109,8 @@
             ],
             "totalWeight": "0",
             "balanceBpt": "130257219.433128260878947018",
-            "totalShares": "130257219.433128260878947018"
+            "totalShares": "130257219.433128260878947018",
+            "poolType": "Stable"
         },
         {
             "id": "0xd2967f45c4f384deea880f807be904762a3dea07",
@@ -133,7 +136,8 @@
             ],
             "totalWeight": "0",
             "balanceBpt": "176767260.573887543004237546",
-            "totalShares": "176767260.573887543004237546"
+            "totalShares": "176767260.573887543004237546",
+            "poolType": "Stable"
         },
         {
             "id": "0xb19059ebb43466c323583928285a49f558e572fd",
@@ -159,7 +163,8 @@
             ],
             "totalWeight": "0",
             "balanceBpt": "6241.09089955559171898",
-            "totalShares": "6241.09089955559171898"
+            "totalShares": "6241.09089955559171898",
+            "poolType": "Stable"
         },
         {
             "id": "0x5b5cfe992adac0c9d48e05854b2d91c73a003858",
@@ -185,7 +190,8 @@
             ],
             "totalWeight": "0",
             "balanceBpt": "3060150.794777194169980587",
-            "totalShares": "3060150.794777194169980587"
+            "totalShares": "3060150.794777194169980587",
+            "poolType": "Stable"
         },
         {
             "id": "0x6d65b498cb23deaba52db31c93da9bffb340fb8f",
@@ -211,7 +217,8 @@
             ],
             "totalWeight": "0",
             "balanceBpt": "47597.652790040337801526",
-            "totalShares": "47597.652790040337801526"
+            "totalShares": "47597.652790040337801526",
+            "poolType": "Stable"
         },
         {
             "id": "0x1aef73d49dedc4b1778d0706583995958dc862e6",
@@ -237,7 +244,8 @@
             ],
             "totalWeight": "0",
             "balanceBpt": "10317675.188246770072279668",
-            "totalShares": "10317675.188246770072279668"
+            "totalShares": "10317675.188246770072279668",
+            "poolType": "Stable"
         },
         {
             "id": "0xd905e2eaebe188fc92179b6350807d8bd91db0d8",
@@ -277,7 +285,8 @@
             ],
             "totalWeight": "0",
             "balanceBpt": "6701166.455045313562297391",
-            "totalShares": "6701166.455045313562297391"
+            "totalShares": "6701166.455045313562297391",
+            "poolType": "Stable"
         },
         {
             "id": "0x49849c98ae39fff122806c06791fa73784fb3675",
@@ -303,7 +312,8 @@
             ],
             "totalWeight": "0",
             "balanceBpt": "9145.740856515896674181",
-            "totalShares": "9145.740856515896674181"
+            "totalShares": "9145.740856515896674181",
+            "poolType": "Stable"
         },
         {
             "id": "0xc2ee6b0334c261ed60c72f6054450b61b8f18e35",
@@ -329,7 +339,8 @@
             ],
             "totalWeight": "0",
             "balanceBpt": "403145.272586437806747404",
-            "totalShares": "403145.272586437806747404"
+            "totalShares": "403145.272586437806747404",
+            "poolType": "Stable"
         },
         {
             "id": "0x075b1bb99792c9e1041ba13afef80c91a1e70fb3",
@@ -362,7 +373,8 @@
             ],
             "totalWeight": "0",
             "balanceBpt": "8344.732986077874727564",
-            "totalShares": "8344.732986077874727564"
+            "totalShares": "8344.732986077874727564",
+            "poolType": "Stable"
         },
         {
             "id": "0xc25a3a3b969415c80451098fa907ec722572917f",
@@ -402,7 +414,8 @@
             ],
             "totalWeight": "0",
             "balanceBpt": "189544577.082200885106933188",
-            "totalShares": "189544577.082200885106933188"
+            "totalShares": "189544577.082200885106933188",
+            "poolType": "Stable"
         },
         {
             "id": "0x64eda51d3ad40d56b9dfc5554e06f94e1dd786fd",
@@ -428,7 +441,8 @@
             ],
             "totalWeight": "0",
             "balanceBpt": "3463.289652651412422971",
-            "totalShares": "3463.289652651412422971"
+            "totalShares": "3463.289652651412422971",
+            "poolType": "Stable"
         },
         {
             "id": "0x97e2768e8e73511ca874545dc5ff8067eb19b787",
@@ -454,7 +468,8 @@
             ],
             "totalWeight": "0",
             "balanceBpt": "566979.928037020244630497",
-            "totalShares": "566979.928037020244630497"
+            "totalShares": "566979.928037020244630497",
+            "poolType": "Stable"
         },
         {
             "id": "0x4f3e8f405cf5afc05d68142f3783bdfe13811522",
@@ -480,7 +495,8 @@
             ],
             "totalWeight": "0",
             "balanceBpt": "247114809.283632322750889394",
-            "totalShares": "247114809.283632322750889394"
+            "totalShares": "247114809.283632322750889394",
+            "poolType": "Stable"
         },
         {
             "id": "0x9fc689ccada600b6df723d9e47d84d76664a1f23",
@@ -513,7 +529,8 @@
             ],
             "totalWeight": "0",
             "balanceBpt": "776330.924270778577797086",
-            "totalShares": "776330.924270778577797086"
+            "totalShares": "776330.924270778577797086",
+            "poolType": "Stable"
         },
         {
             "id": "0xdf5e0e81dff6faf3a7e52ba697820c5e32d806a8",
@@ -553,7 +570,8 @@
             ],
             "totalWeight": "0",
             "balanceBpt": "95890268.100961763004689059",
-            "totalShares": "95890268.100961763004689059"
+            "totalShares": "95890268.100961763004689059",
+            "poolType": "Stable"
         },
         {
             "id": "0x3a664ab939fd8482048609f652f9a0b0677337b9",
@@ -579,7 +597,8 @@
             ],
             "totalWeight": "0",
             "balanceBpt": "9382236.417093337368789253",
-            "totalShares": "9382236.417093337368789253"
+            "totalShares": "9382236.417093337368789253",
+            "poolType": "Stable"
         },
         {
             "id": "0x410e3e86ef427e30b9235497143881f717d93c2a",
@@ -605,7 +624,8 @@
             ],
             "totalWeight": "0",
             "balanceBpt": "566.442406434323042121",
-            "totalShares": "566.442406434323042121"
+            "totalShares": "566.442406434323042121",
+            "poolType": "Stable"
         },
         {
             "id": "0x2fe94ea3d5d4a175184081439753de15aef9d614",
@@ -631,7 +651,8 @@
             ],
             "totalWeight": "0",
             "balanceBpt": "651.849882964119308775",
-            "totalShares": "651.849882964119308775"
+            "totalShares": "651.849882964119308775",
+            "poolType": "Stable"
         },
         {
             "id": "0xde5331ac4b3630f94853ff322b66407e0d6331e8",
@@ -657,7 +678,8 @@
             ],
             "totalWeight": "0",
             "balanceBpt": "328.10509538677717503",
-            "totalShares": "328.10509538677717503"
+            "totalShares": "328.10509538677717503",
+            "poolType": "Stable"
         },
         {
             "id": "0x94e131324b6054c0d789b190b2dac504e4361b53",
@@ -683,7 +705,8 @@
             ],
             "totalWeight": "0",
             "balanceBpt": "70709685.449203738865903436",
-            "totalShares": "70709685.449203738865903436"
+            "totalShares": "70709685.449203738865903436",
+            "poolType": "Stable"
         },
         {
             "id": "0x194ebd173f6cdace046c53eacce9b953f28411d1",
@@ -709,7 +732,8 @@
             ],
             "totalWeight": "0",
             "balanceBpt": "49525452.059504973052698928",
-            "totalShares": "49525452.059504973052698928"
+            "totalShares": "49525452.059504973052698928",
+            "poolType": "Stable"
         },
         {
             "id": "0xa3d87fffce63b53e0d54faa1cc983b7eb0b74a9c",
@@ -735,7 +759,8 @@
             ],
             "totalWeight": "0",
             "balanceBpt": "200883.643998455915842631",
-            "totalShares": "200883.643998455915842631"
+            "totalShares": "200883.643998455915842631",
+            "poolType": "Stable"
         },
         {
             "id": "0x06325440d014e39736583c165c2963ba99faf14e",
@@ -761,7 +786,8 @@
             ],
             "totalWeight": "0",
             "balanceBpt": "195462.394762603394589742",
-            "totalShares": "195462.394762603394589742"
+            "totalShares": "195462.394762603394589742",
+            "poolType": "Stable"
         },
         {
             "id": "0xaa17a236f2badc98ddc0cf999abb47d47fc0a6cf",
@@ -787,7 +813,8 @@
             ],
             "totalWeight": "0",
             "balanceBpt": "9205.363867781904897357",
-            "totalShares": "9205.363867781904897357"
+            "totalShares": "9205.363867781904897357",
+            "poolType": "Stable"
         },
         {
             "id": "0x5282a4ef67d9c33135340fb3289cc1711c13638c",
@@ -820,7 +847,8 @@
             ],
             "totalWeight": "0",
             "balanceBpt": "4485645.299464193750509996",
-            "totalShares": "4485645.299464193750509996"
+            "totalShares": "4485645.299464193750509996",
+            "poolType": "Stable"
         },
         {
             "id": "0xcee60cfa923170e4f8204ae08b4fa6a3f5656f3a",
@@ -846,7 +874,8 @@
             ],
             "totalWeight": "0",
             "balanceBpt": "2696237.243629509472920807",
-            "totalShares": "2696237.243629509472920807"
+            "totalShares": "2696237.243629509472920807",
+            "poolType": "Stable"
         },
         {
             "id": "0x7eb40e450b9655f4b3cc4259bcc731c63ff55ae6",
@@ -872,7 +901,8 @@
             ],
             "totalWeight": "0",
             "balanceBpt": "117469984.649647264506827089",
-            "totalShares": "117469984.649647264506827089"
+            "totalShares": "117469984.649647264506827089",
+            "poolType": "Stable"
         }
     ]
 }
