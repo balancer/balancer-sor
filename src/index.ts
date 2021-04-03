@@ -1,3 +1,4 @@
+require('dotenv').config();
 export { smartOrderRouter, processPaths, filterPaths } from './sor';
 export {
     parsePoolData,
@@ -11,3 +12,5 @@ export { bmath };
 export { getCostOutputToken } from './costToken';
 export { POOLS } from './pools';
 export { SOR } from './wrapper';
+export * from './config';
+export * from './types';

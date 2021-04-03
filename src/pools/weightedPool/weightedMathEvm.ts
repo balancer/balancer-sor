@@ -420,35 +420,3 @@ export function _bptInForExactTokenOut(
 
     return bptTotalSupply.mulUp(invariantRatio.complement());
 }
-
-export function _calculateDueTokenProtocolSwapFee(
-    balance: BigNumber,
-    normalizedWeight: BigNumber,
-    previousInvariant: BigNumber,
-    currentInvariant: BigNumber,
-    protocolSwapFeePercentage
-): BigNumber {
-    /*********************************************************************************
-    /*  protocolSwapFee * balanceToken * ( 1 - (previousInvariant / currentInvariant) ^ (1 / weightToken))
-    *********************************************************************************/
-
-    // We round down to prevent issues in the Pool's accounting, even if it means paying slightly less protocol fees
-    // to the Vault.
-
-    // Fee percentage and balance multiplications round down, while the subtrahend (power) rounds up (as does the
-    // base). Because previousInvariant / currentInvariant <= 1, the exponent rounds down.
-
-    if (currentInvariant.lt(previousInvariant)) {
-        // This should never happen, but this acts as a safeguard to prevent the Pool from entering a locked state
-        // in which joins and exits revert while computing accumulated swap fees.
-        return fnum(0);
-    }
-
-    let base = previousInvariant.divUp(currentInvariant);
-    let exponent = FixedPoint.ONE.divDown(normalizedWeight);
-
-    let power = FixedPoint.powUp(base, exponent);
-
-    let tokenAccruedFees = balance.mulDown(power.complement());
-    return tokenAccruedFees.mulDown(protocolSwapFeePercentage);
-}

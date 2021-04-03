@@ -1,5 +1,5 @@
+import { ALLOW_ADD_REMOVE } from './config';
 import fetch from 'isomorphic-fetch';
-import { SubGraphPools } from './types';
 import {
     DisabledOptions,
     SubgraphPoolBase,
@@ -84,8 +84,10 @@ export function filterPoolsOfInterest(
         else throw `Unknown pool type or type field missing: ${pool.poolType}`;
 
         let tokenListSet = new Set(pool.tokensList);
-        // we add the BPT as well as we can join/exit as part of the multihop
-        tokenListSet.add(pool.id);
+        // Depending on env file, we add the BPT as well as
+        // we can join/exit as part of the multihop
+        if (ALLOW_ADD_REMOVE) tokenListSet.add(pool.id);
+
         disabledTokens.forEach(token => tokenListSet.delete(token.address));
 
         // This is a direct pool as has both tokenIn and tokenOut
@@ -184,10 +186,13 @@ export function filterHopPools(
                 continue;
             }
 
+            let tokenListSet = new Set(pool.tokensList);
+            // Depending on env file, we add the BPT as well as
+            // we can join/exit as part of the multihop
+            if (ALLOW_ADD_REMOVE) tokenListSet.add(pool.id);
             // MAKE THIS A FLAG IN FILTER?
             // If pool doesn't have  hopTokens[i] then ignore
-            if (!new Set(pool.tokensList).add(pool.id).has(hopTokens[i]))
-                continue;
+            if (!tokenListSet.has(hopTokens[i])) continue;
 
             if (pool.swapPairType === SwapPairType.HopIn) {
                 const poolPairData = pool.parsePoolPairData(
