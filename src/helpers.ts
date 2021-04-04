@@ -24,6 +24,10 @@ export function getLimitAmountSwap(
     poolPairData: PoolPairData,
     swapType: string
 ): BigNumber {
+    // TODO: this function should also be defined by the pool class
+    // TODO: Add following limits for Element:
+    // swapExactIn: Ai < (Bi**(1-t)+Bo**(1-t))**(1/(1-t))-Bi
+    // swapExactOut: no limit
     // We multiply ratios by 10**-18 because we are in normalized space
     // so 0.5 should be 0.5 and not 500000000000000000
     // TODO: update bmath to use everything normalized
@@ -698,6 +702,16 @@ export const parsePoolPairData = (
         weightIn,
         weightOut;
 
+    // Todo: the pool type should be already on subgraph
+    if (
+        (typeof p.amp !== 'undefined' && p.amp === '0') ||
+        p.poolType === 'Stable'
+    )
+        poolType = 'Stable';
+    else if (typeof p.poolType !== 'undefined' && p.poolType === 'Element')
+        poolType = 'Element';
+    else poolType = 'Weighted';
+
     // Check if tokenIn is the pool token itself (BPT)
     if (tokenIn == p.id) {
         pairType = 'BPT->token';
@@ -721,7 +735,8 @@ export const parsePoolPairData = (
         tI = p.tokens[tokenIndexIn];
         balanceIn = tI.balance;
         decimalsIn = tI.decimals;
-        weightIn = bnum(tI.denormWeight).div(bnum(p.totalWeight));
+        if (poolType !== 'Stable')
+            weightIn = bnum(tI.denormWeight).div(bnum(p.totalWeight));
     }
     if (pairType != 'token->BPT') {
         tokenIndexOut = p.tokens.findIndex(
@@ -731,14 +746,9 @@ export const parsePoolPairData = (
         tO = p.tokens[tokenIndexOut];
         balanceOut = tO.balance;
         decimalsOut = tO.decimals;
-        weightOut = bnum(tO.denormWeight).div(bnum(p.totalWeight));
+        if (poolType !== 'Stable')
+            weightOut = bnum(tO.denormWeight).div(bnum(p.totalWeight));
     }
-
-    // Todo: the pool type should be already on subgraph
-    if (typeof p.amp !== 'undefined' && p.amp === '0') poolType = 'Stable';
-    else if (typeof p.poolType !== 'undefined' && p.poolType === 'Element')
-        poolType = 'Element';
-    else poolType = 'Weighted';
 
     if (poolType == 'Weighted') {
         poolPairData = {

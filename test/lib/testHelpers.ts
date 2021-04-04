@@ -75,11 +75,9 @@ export function filterAndScalePools(AllSubgraphPools: SubGraphPools): Pools {
         // Only check first balance since AFAIK either all balances are zero or none are:
         if (pool.tokens.length != 0)
             if (pool.tokens[0].balance != '0')
-                if (typeof pool.poolType == 'undefined')
-                    // Do not include element pools
-                    allPoolsNonZeroBalances.pools.push(pool);
+                if (pool.poolType !== 'Element')
+                    allPoolsNonZeroBalances.pools.push(pool); // Do not include element pools
     }
-
     // Formats Subgraph to wei/bnum format
     formatSubgraphPools(allPoolsNonZeroBalances);
 
@@ -945,7 +943,8 @@ export function filterToWeightedPoolsOnly(pools: any) {
     let weightedPools = { pools: [] };
 
     for (let pool of pools.pools) {
-        if (pool.amp === undefined) weightedPools.pools.push(pool);
+        if (pool.poolType === 'Weighted') weightedPools.pools.push(pool);
+        // if (pool.amp === undefined) weightedPools.pools.push(pool);
     }
     return weightedPools;
 }
