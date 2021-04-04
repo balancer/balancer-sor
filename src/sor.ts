@@ -13,6 +13,7 @@ import { bnum } from './bmath';
 import { BigNumber } from './utils/bignumber';
 import { Path, Swap, SubGraphPoolDictionary } from './types';
 import { MaxUint256 } from '@ethersproject/constants';
+import * as elementMath from './pools/elementPool/elementMath';
 
 // TODO get max price from slippage tolerance given by user options
 export const MAX_UINT = MaxUint256;
@@ -320,6 +321,22 @@ export const smartOrderRouter = (
             ).toNumber()
         );
 
+        // console.log(
+        //     elementMath._NUMERICALspotPriceAfterSwapExactTokenInForTokenOut(
+        //         swapAmount,
+        //         path.poolPairData[0]
+        //     ).toNumber()
+        // );
+
+        console.log(
+            getDerivativeSpotPriceAfterSwapForPath(
+                pools,
+                path,
+                swapType,
+                swapAmount
+            ).toNumber()
+        );
+
         let poolPairData = path.poolPairData;
 
         if (i == 0)
@@ -514,6 +531,15 @@ function getBestPathIds(
         let bestPathIndex = -1;
         let bestEffectivePrice = bnum('Infinity'); // Start with worst price possible
         paths.forEach((path, j) => {
+            // // Just to debug
+            // console.log(
+            //     getSpotPriceAfterSwapForPath(
+            //         pools,
+            //         path,
+            //         swapType,
+            //         swapAmount
+            //     ).toNumber()
+            // );
             // Do not consider this path if its limit is below swapAmount
             if (path.limitAmount.gte(swapAmount)) {
                 // Calculate effective price of this path for this swapAmount

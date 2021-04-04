@@ -75,7 +75,9 @@ export function filterAndScalePools(AllSubgraphPools: SubGraphPools): Pools {
         // Only check first balance since AFAIK either all balances are zero or none are:
         if (pool.tokens.length != 0)
             if (pool.tokens[0].balance != '0')
-                allPoolsNonZeroBalances.pools.push(pool);
+                if (typeof pool.poolType == 'undefined')
+                    // Do not include element pools
+                    allPoolsNonZeroBalances.pools.push(pool);
     }
 
     // Formats Subgraph to wei/bnum format

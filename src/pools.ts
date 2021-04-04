@@ -12,6 +12,7 @@ import {
 } from './types';
 import { WeightedPool } from './pools/weightedPool/weightedPool';
 import { StablePool } from './pools/stablePool/stablePool';
+import { ElementPool } from './pools/elementPool/elementPool';
 import { bnum } from './bmath';
 
 import disabledTokensDefault from './disabled-tokens.json';
@@ -59,7 +60,7 @@ export function filterPoolsOfInterest(
         if (pool.tokensList.length === 0 || pool.tokens[0].balance === '0') {
             return;
         }
-        let newPool: WeightedPool | StablePool;
+        let newPool: WeightedPool | StablePool | ElementPool;
 
         // TODO - Update for new Schema
         // if (typeof pool.amp === 'undefined' || pool.amp === '0')
@@ -80,6 +81,18 @@ export function filterPoolsOfInterest(
                 pool.totalShares,
                 pool.tokens,
                 pool.tokensList
+            );
+        else if (pool.poolType === 'Element')
+            newPool = new ElementPool(
+                pool.id,
+                pool.swapFee,
+                pool.totalShares,
+                pool.tokens,
+                pool.tokensList,
+                pool.lpShares,
+                pool.time,
+                pool.principalToken,
+                pool.baseToken
             );
         else throw `Unknown pool type or type field missing: ${pool.poolType}`;
 
