@@ -1,13 +1,12 @@
 // Example showing SOR use with Vault batchSwapGivenIn, run using: $ ts-node ./test/testScripts/example-simpleSwapExactOut.ts
 require('dotenv').config();
-import { SOR } from '../../src';
-import { SwapInfo } from '../../src/types';
-import { scale } from '../../src/bmath';
 import { BigNumber } from 'bignumber.js';
 import { JsonRpcProvider } from '@ethersproject/providers';
 import { Wallet } from '@ethersproject/wallet';
 import { Contract } from '@ethersproject/contracts';
 import { MaxUint256 } from '@ethersproject/constants';
+import { SOR, SwapInfo, SwapTypes } from '../../src';
+import { scale } from '../../src/bmath';
 
 import vaultArtifact from '../../src/abi/vault.json';
 import erc20abi from '../abi/ERC20.json';
@@ -26,7 +25,7 @@ const MKR = '0xD9D9E09604c0C14B592e6E383582291b026EBced';
 const vaultAddr = '0xba1c01474A7598c2B49015FdaFc67DdF06ce15f7';
 
 // TODO - Update with ipns when ready.
-const poolsUrl = `https://storageapi.fleek.co/johngrantuk-team-bucket/poolsRc1-22-03.json`;
+const poolsUrl = `https://storageapi.fleek.co/balancer-bucket/balancer-kovan-v2/exchange`;
 
 async function simpleSwap() {
     // If running this example make sure you have a .env file saved in root DIR with INFURA=your_key
@@ -48,7 +47,7 @@ async function simpleSwap() {
     const chainId = 42;
     const tokenIn = BAL;
     const tokenOut = MKR;
-    const swapType = 'swapExactOut'; // Two different swap types are used: swapExactIn & swapExactOut
+    const swapType = SwapTypes.SwapExactOut; // Two different swap types are used: SwapExactIn & SwapExactOut
     const amountOut = new BigNumber(0.1); // In normalized format, i.e. 1USDC = 1
     const decimalsOut = 18;
 
@@ -60,7 +59,7 @@ async function simpleSwap() {
     await sor.setCostOutputToken(tokenIn);
 
     // This fetches all pools list from URL in constructor then onChain balances using Multicall
-    await sor.fetchPools();
+    await sor.fetchPools(false);
     const isFinishedFetchingOnChain = sor.finishedFetchingOnChain;
     console.log(`isFinishedFetchingOnChain ${isFinishedFetchingOnChain}`);
 
@@ -118,15 +117,12 @@ async function simpleSwap() {
         if (token.toLowerCase() === tokenIn.toLowerCase()) {
             // This should be amt + slippage in UI
             limits[i] = swapInfo.returnAmount.times(1.1).toString();
-            // limits[i] = '10000000000000000000';
         } else if (token.toLowerCase() === tokenOut.toLowerCase()) {
             limits[i] = scale(amountOut, decimalsOut)
                 .times(-1)
                 .toString();
-            // limits[i] = '10000000000000000000';
         } else {
             limits[i] = '0';
-            // limits[i] = '10000000000000000000';
         }
     });
 
