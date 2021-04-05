@@ -79,7 +79,7 @@ export interface SubGraphToken {
     balance: string;
     decimals: string | number;
     // Stable & Element field
-    denormWeight?: string;
+    weight?: string;
 }
 
 export interface SubGraphPoolDictionary {

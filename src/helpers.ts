@@ -736,7 +736,7 @@ export const parsePoolPairData = (
         balanceIn = tI.balance;
         decimalsIn = tI.decimals;
         if (poolType !== 'Stable')
-            weightIn = bnum(tI.denormWeight).div(bnum(p.totalWeight));
+            weightIn = bnum(tI.weight).div(bnum(p.totalWeight));
     }
     if (pairType != 'token->BPT') {
         tokenIndexOut = p.tokens.findIndex(
@@ -747,7 +747,7 @@ export const parsePoolPairData = (
         balanceOut = tO.balance;
         decimalsOut = tO.decimals;
         if (poolType !== 'Stable')
-            weightOut = bnum(tO.denormWeight).div(bnum(p.totalWeight));
+            weightOut = bnum(tO.weight).div(bnum(p.totalWeight));
     }
 
     if (poolType == 'Weighted') {

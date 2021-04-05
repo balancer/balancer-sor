@@ -60,7 +60,7 @@ interface Token {
     address: string;
     balance: BigNumber;
     decimals: number;
-    denormWeight: BigNumber;
+    weight: BigNumber;
 }
 
 interface Profiling {
@@ -90,7 +90,7 @@ const formatSubgraphPools = pools => {
         pool.totalWeight = scale(bnum(pool.totalWeight), 18);
         pool.tokens.forEach(token => {
             token.balance = scale(bnum(token.balance), token.decimals);
-            token.denormWeight = scale(bnum(token.denormWeight), 18);
+            token.weight = scale(bnum(token.weight), 18);
         });
     }
 };
@@ -297,7 +297,7 @@ export async function getV1Swap(
         amounts.push(amount);
         normalizedWeights.push(
             new FixedPointNumber(
-                pool.tokens[i].denormWeight
+                pool.tokens[i].weight
                     .div(pool.totalWeight)
                     .times(new FixedPointNumber(10 ** 18))
             )
@@ -1008,7 +1008,7 @@ async function getAllPoolDataOnChain(
                 address: token.address,
                 balance: bal,
                 decimals: token.decimals,
-                denormWeight: token.denormWeight,
+                weight: token.weight,
             });
         });
         onChainPools.pools.push(p);
