@@ -73,17 +73,11 @@ export class WeightedPool implements PoolBase {
         tokensList: string[]
     ) {
         this.id = id;
-        // TO DO - Temp fix
-        let sf = bnum(swapFee).div(1e18);
-        // this.swapFee = sf.toString();
         this.swapFee = swapFee;
         this.totalShares = totalShares;
         this.tokens = tokens;
         this.tokensList = tokensList;
-        // TO DO - Temp fix
-        let total = 0;
-        tokens.forEach(token => (total += Number(token.weight)));
-        this.totalWeight = total.toString();
+        this.totalWeight = totalWeight;
     }
 
     setTypeForSwap(type: SwapPairType) {

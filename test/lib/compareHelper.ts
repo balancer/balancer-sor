@@ -22,6 +22,7 @@ export async function compareTest(
     },
     costOutputTokenOveride = { isOverRide: false, overRideCost: bnum(0) }
 ) {
+    costOutputTokenOveride = { isOverRide: true, overRideCost: bnum(0) };
     const amountNormalised = testData.tradeInfo.SwapAmount.div(
         bnum(10 ** testData.tradeInfo.SwapAmountDecimals)
     );
