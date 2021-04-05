@@ -59,7 +59,7 @@ export interface SubGraphPool {
     id: string;
     swapFee: string;
     totalWeight: string;
-    balanceBpt: string;
+    totalShares: string;
     tokens: SubGraphToken[];
     tokensList: string[];
     poolType?: string;
@@ -79,7 +79,7 @@ export interface SubGraphToken {
     balance: string;
     decimals: string | number;
     // Stable & Element field
-    denormWeight?: string;
+    weight?: string;
 }
 
 export interface SubGraphPoolDictionary {

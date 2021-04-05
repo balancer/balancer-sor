@@ -24,7 +24,7 @@ export async function getPoolsWithSingleToken(token) {
               balance
               decimals
               symbol
-              denormWeight
+              weight
             }
           }
         }

@@ -75,8 +75,8 @@ export class WeightedPool implements PoolBase {
         this.id = id;
         // TO DO - Temp fix
         let sf = bnum(swapFee).div(1e18);
-        this.swapFee = sf.toString();
-        // this.swapFee = swapFee;
+        // this.swapFee = sf.toString();
+        this.swapFee = swapFee;
         this.totalShares = totalShares;
         this.tokens = tokens;
         this.tokensList = tokensList;
@@ -165,7 +165,7 @@ export class WeightedPool implements PoolBase {
                 .times(poolPairData.weightIn)
                 .div(poolPairData.weightIn.plus(poolPairData.weightOut));
         } else if (poolPairData.pairType == PairTypes.TokenToBpt) {
-            return poolPairData.balanceOut; // Liquidity in tokenOut is balanceBpt
+            return poolPairData.balanceOut; // Liquidity in tokenOut is totalShares
         } else if (poolPairData.pairType == PairTypes.BptToToken) {
             return poolPairData.balanceOut.div(
                 bnum(1).plus(poolPairData.weightOut)

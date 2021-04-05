@@ -715,12 +715,12 @@ export const parsePoolPairData = (
     // Check if tokenIn is the pool token itself (BPT)
     if (tokenIn == p.id) {
         pairType = 'BPT->token';
-        balanceIn = p.balanceBpt;
+        balanceIn = p.totalShares;
         decimalsIn = bnum(18); // Not used but has to be defined
         weightIn = bnum(1); // Not used but has to be defined
     } else if (tokenOut == p.id) {
         pairType = 'token->BPT';
-        balanceOut = p.balanceBpt;
+        balanceOut = p.totalShares;
         decimalsOut = bnum(18); // Not used but has to be defined
         weightOut = bnum(1); // Not used but has to be defined
     } else {
@@ -736,7 +736,7 @@ export const parsePoolPairData = (
         balanceIn = tI.balance;
         decimalsIn = tI.decimals;
         if (poolType !== 'Stable')
-            weightIn = bnum(tI.denormWeight).div(bnum(p.totalWeight));
+            weightIn = bnum(tI.weight).div(bnum(p.totalWeight));
     }
     if (pairType != 'token->BPT') {
         tokenIndexOut = p.tokens.findIndex(
@@ -747,7 +747,7 @@ export const parsePoolPairData = (
         balanceOut = tO.balance;
         decimalsOut = tO.decimals;
         if (poolType !== 'Stable')
-            weightOut = bnum(tO.denormWeight).div(bnum(p.totalWeight));
+            weightOut = bnum(tO.weight).div(bnum(p.totalWeight));
     }
 
     if (poolType == 'Weighted') {
@@ -1107,7 +1107,7 @@ export function updateTokenBalanceForPool(
 ): any {
     // token is BPT
     if (pool.id == token) {
-        pool.balanceBpt = balance;
+        pool.totalShares = balance;
         return pool;
     } else {
         // token is underlying in the pool
@@ -1134,7 +1134,7 @@ export function getNormalizedLiquidity(poolPairData: PoolPairData): BigNumber {
         if (pairType == 'token->token') {
             return balanceOut.times(weightIn).div(weightIn.plus(weightOut));
         } else if (pairType == 'token->BPT') {
-            return balanceOut; // Liquidity in tokenOut is balanceBpt
+            return balanceOut; // Liquidity in tokenOut is totalShares
         } else if (pairType == 'BPT->token') {
             return balanceOut.div(bnum(1).plus(weightOut)); // Liquidity in tokenOut is Bo/wo
         }

@@ -2,6 +2,8 @@ import { BigNumber } from 'bignumber.js';
 import * as sorv1 from '@balancer-labs/sor';
 import * as sorv2 from '../../src';
 import {
+    SubGraphPoolsBase,
+    SubgraphPoolBase,
     SubGraphPools,
     Swap,
     DisabledToken,
@@ -14,7 +16,6 @@ import {
     SwapPairType,
     NewPath,
     SwapTypes,
-    SubgraphPoolBase,
 } from '../../src/types';
 import customMultiAbi from '../abi/customMulticall.json';
 import { SubGraphPools as SubGraphPoolsV1 } from '@balancer-labs/sor/dist/types';
@@ -42,83 +43,90 @@ import {
 import { FixedPointNumber } from '../../src/math/FixedPointNumber';
 
 // These types are used for V1 compare
-interface Pools {
-    pools: Pool[];
-}
-
-interface Pool {
-    id: string;
-    swapFee: BigNumber;
-    amp?: BigNumber;
-    totalWeight?: BigNumber;
-    balanceBpt?: BigNumber;
-    tokens: Token[];
-    tokensList: string[];
-}
-
-interface Token {
-    address: string;
-    balance: BigNumber;
-    decimals: number;
-    denormWeight: BigNumber;
-}
-
 interface Profiling {
     onChainBalances: boolean;
 }
 
-// Filters for only pools with balance > 0 and converts to SCALED wei/bnum format (used for V1).
-export function filterAndScalePools(AllSubgraphPools: SubGraphPools): Pools {
-    let allPoolsNonZeroBalances: any = { pools: [] };
-
-    for (let pool of AllSubgraphPools.pools) {
-        // Only check first balance since AFAIK either all balances are zero or none are:
-        if (pool.tokens.length != 0)
-            if (pool.tokens[0].balance != '0')
-                if (pool.poolType !== 'Element')
-                    allPoolsNonZeroBalances.pools.push(pool); // Do not include element pools
-    }
-    // Formats Subgraph to wei/bnum format
-    formatSubgraphPools(allPoolsNonZeroBalances);
-
-    return allPoolsNonZeroBalances;
+interface SubgraphPoolsV1 {
+    pools: SubGraphPoolV1[];
 }
 
-const formatSubgraphPools = pools => {
-    for (let pool of pools.pools) {
-        pool.swapFee = scale(bnum(pool.swapFee), 18);
-        pool.totalWeight = scale(bnum(pool.totalWeight), 18);
-        pool.tokens.forEach(token => {
-            token.balance = scale(bnum(token.balance), token.decimals);
-            token.denormWeight = scale(bnum(token.denormWeight), 18);
-        });
-    }
-};
+export interface SubGraphPoolV1 {
+    id: string;
+    swapFee: string;
+    totalWeight: string;
+    totalShares: string;
+    tokens: SubGraphTokenV1[];
+    tokensList: string[];
+}
 
-// Filters for only pools with balance > 0.
-export function filterPoolsWithBalance(
-    AllSubgraphPools: SubGraphPools
-): SubGraphPools {
-    let allPoolsNonZeroBalances: SubGraphPools = { pools: [] };
+export interface SubGraphTokenV1 {
+    address: string;
+    balance: string;
+    decimals: string;
+    denormWeight: string;
+}
 
-    for (let pool of AllSubgraphPools.pools) {
+/*
+Helper to format V2 pools to V1 pool format.
+Only weighted pools with balance.
+Scales from normalised field values.
+Changes weight field to denormWeight.
+*/
+function formatToV1schema(poolsV2: SubGraphPoolsBase): SubgraphPoolsV1 {
+    let weightedPools: SubGraphPoolsBase = { pools: [] };
+
+    for (let pool of poolsV2.pools) {
         // Only check first balance since AFAIK either all balances are zero or none are:
         if (pool.tokens.length != 0)
             if (pool.tokens[0].balance != '0')
-                allPoolsNonZeroBalances.pools.push(pool);
+                if (pool.poolType !== 'Stable' && pool.poolType !== 'Element')
+                    weightedPools.pools.push(pool); // Do not include element pools
+    }
+    const poolsv1: SubGraphPoolV1[] = [];
+
+    for (let i = 0; i < weightedPools.pools.length; i++) {
+        const v1Pool: SubGraphPoolV1 = formatToV1Pool(weightedPools.pools[i]);
+        poolsv1.push(v1Pool);
     }
 
-    return allPoolsNonZeroBalances;
+    return { pools: poolsv1 };
+}
+
+function formatToV1Pool(pool: SubgraphPoolBase): SubGraphPoolV1 {
+    const v1tokens: SubGraphTokenV1[] = [];
+    pool.tokens.forEach(token => {
+        v1tokens.push({
+            address: token.address,
+            balance: scale(
+                bnum(token.balance),
+                Number(token.decimals)
+            ).toString(),
+            decimals: token.decimals.toString(),
+            denormWeight: scale(bnum(token.weight), 18).toString(),
+        });
+    });
+
+    const v1Pool: SubGraphPoolV1 = {
+        id: pool.id,
+        swapFee: scale(bnum(pool.swapFee), 18).toString(),
+        totalWeight: scale(bnum(pool.totalWeight), 18).toString(),
+        totalShares: pool.totalShares,
+        tokensList: pool.tokensList,
+        tokens: v1tokens,
+    };
+
+    return v1Pool;
 }
 
 // Filters for only pools with balance and returns token list too.
 export function filterPoolsAndTokens(
-    allPools: SubGraphPools,
+    allPools: SubGraphPoolsBase,
     disabledTokens: DisabledToken[] = []
-): [any, SubGraphPools] {
+): [Set<unknown>, SubGraphPoolsBase] {
     let allTokens = [];
     let allTokensSet = new Set();
-    let allPoolsNonZeroBalances: SubGraphPools = { pools: [] };
+    let allPoolsNonZeroBalances: SubGraphPoolsBase = { pools: [] };
 
     for (let pool of allPools.pools) {
         // Build list of non-zero balance pools
@@ -156,7 +164,7 @@ export function filterPoolsAndTokens(
 
 export async function getV1Swap(
     Provider: BaseProvider,
-    GasPrice: BigNumber,
+    costOutputToken: BigNumber,
     MaxNoPools: number,
     ChainId: number,
     AllSubgraphPools: SubGraphPoolsV1,
@@ -185,30 +193,32 @@ export async function getV1Swap(
     const swapCost = new BigNumber('100000'); // A pool swap costs approx 100000 gas
 
     const fullSwapStart = performance.now();
+    // costOutputToken should be the same as V2 as that's what we compare to.
     const getCostOutputTokenStart = performance.now();
-    // This calculates the cost in output token (output token is TokenOut for swapExactIn and
-    // TokenIn for a swapExactOut) for each additional pool added to the final SOR swap result.
-    // This is used as an input to SOR to allow it to make gas efficient recommendations, i.e.
-    // if it costs 5 DAI to add another pool to the SOR solution and that only generates 1 more DAI,
-    // then SOR should not add that pool (if gas costs were zero that pool would be added)
-    // Notice that outputToken is TokenOut if SwapType == 'swapExactIn' and TokenIn if SwapType == 'swapExactOut'
-    let costOutputToken: BigNumber;
-    if (SwapType === 'swapExactIn')
-        costOutputToken = await sorv1.getCostOutputToken(
-            TokenOut,
-            GasPrice,
-            swapCost,
-            Provider
-        );
-    else
-        costOutputToken = await sorv1.getCostOutputToken(
-            TokenIn,
-            GasPrice,
-            swapCost,
-            Provider
-        );
+    // // This calculates the cost in output token (output token is TokenOut for swapExactIn and
+    // // TokenIn for a swapExactOut) for each additional pool added to the final SOR swap result.
+    // // This is used as an input to SOR to allow it to make gas efficient recommendations, i.e.
+    // // if it costs 5 DAI to add another pool to the SOR solution and that only generates 1 more DAI,
+    // // then SOR should not add that pool (if gas costs were zero that pool would be added)
+    // // Notice that outputToken is TokenOut if SwapType == 'swapExactIn' and TokenIn if SwapType == 'swapExactOut'
+    // let costOutputToken: BigNumber;
+    // if (SwapType === 'swapExactIn')
+    //     costOutputToken = await sorv1.getCostOutputToken(
+    //         TokenOut,
+    //         GasPrice,
+    //         swapCost,
+    //         Provider
+    //     );
+    // else
+    //     costOutputToken = await sorv1.getCostOutputToken(
+    //         TokenIn,
+    //         GasPrice,
+    //         swapCost,
+    //         Provider
+    //     );
 
     const getCostOutputTokenEnd = performance.now();
+
     let poolsWithOnChainBalances;
 
     if (Profiling.onChainBalances) {
@@ -225,7 +235,7 @@ export async function getV1Swap(
         const getAllPoolDataOnChainStart = performance.now();
         // console.log(`Using saved balances`)
         // Helper - Filters for only pools with balance and converts to wei/bnum format.
-        poolsWithOnChainBalances = filterAndScalePools(
+        poolsWithOnChainBalances = formatToV1schema(
             JSON.parse(JSON.stringify(weightedPools))
         );
         const getAllPoolDataOnChainEnd = performance.now();
@@ -281,7 +291,7 @@ export async function getV1Swap(
     let amounts = [];
 
     // bptTotalSupply is not scaled above (as it's not used in SOR V1)
-    let bptTotalSupply = new FixedPointNumber(pool.balanceBpt);
+    let bptTotalSupply = new FixedPointNumber(pool.totalShares);
     bptTotalSupply = new FixedPointNumber(
         bptTotalSupply.times(new FixedPointNumber(10 ** 18))
     );
@@ -297,7 +307,7 @@ export async function getV1Swap(
         amounts.push(amount);
         normalizedWeights.push(
             new FixedPointNumber(
-                pool.tokens[i].denormWeight
+                pool.tokens[i].weight
                     .div(pool.totalWeight)
                     .times(new FixedPointNumber(10 ** 18))
             )
@@ -994,7 +1004,7 @@ async function getAllPoolDataOnChain(
             tokens: tokens,
             tokensList: pools.pools[i].tokensList,
             amp: '0',
-            balanceBpt: pools.pools[i].balanceBpt,
+            totalShares: pools.pools[i].totalShares,
         };
 
         pools.pools[i].tokens.forEach(token => {
@@ -1008,7 +1018,7 @@ async function getAllPoolDataOnChain(
                 address: token.address,
                 balance: bal,
                 decimals: token.decimals,
-                denormWeight: token.denormWeight,
+                weight: token.weight,
             });
         });
         onChainPools.pools.push(p);

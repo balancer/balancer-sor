@@ -70,7 +70,7 @@ export async function getOnChainBalances(
                     address: token.address.toLowerCase(),
                     balance: balance,
                     decimals: token.decimals,
-                    denormWeight: token.denormWeight,
+                    weight: token.weight,
                 });
             });
 

@@ -596,8 +596,8 @@ export const parsePoolPairData = (
         decimalsOut: tO.decimals,
         balanceIn: scale(bnum(tI.balance), tI.decimals),
         balanceOut: scale(bnum(tO.balance), tO.decimals),
-        weightIn: scale(bnum(tI.denormWeight).div(bnum(p.totalWeight)), 18),
-        weightOut: scale(bnum(tO.denormWeight).div(bnum(p.totalWeight)), 18),
+        weightIn: scale(bnum(tI.weight).div(bnum(p.totalWeight)), 18),
+        weightOut: scale(bnum(tO.weight).div(bnum(p.totalWeight)), 18),
         swapFee: scale(bnum(p.swapFee), 18),
     };
 
