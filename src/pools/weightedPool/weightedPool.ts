@@ -36,7 +36,7 @@ export interface WeightedPoolToken {
     address: string;
     balance: string;
     decimals: string | number;
-    denormWeight?: string;
+    weight?: string;
 }
 
 export interface WeightedPoolPairData extends PoolPairBase {
@@ -73,11 +73,17 @@ export class WeightedPool implements PoolBase {
         tokensList: string[]
     ) {
         this.id = id;
-        this.swapFee = swapFee;
+        // TO DO - Temp fix
+        let sf = bnum(swapFee).div(1e18);
+        this.swapFee = sf.toString();
+        // this.swapFee = swapFee;
         this.totalShares = totalShares;
         this.tokens = tokens;
-        this.totalWeight = totalWeight;
         this.tokensList = tokensList;
+        // TO DO - Temp fix
+        let total = 0;
+        tokens.forEach(token => (total += Number(token.weight)));
+        this.totalWeight = total.toString();
     }
 
     setTypeForSwap(type: SwapPairType) {
@@ -122,7 +128,7 @@ export class WeightedPool implements PoolBase {
             tI = this.tokens[tokenIndexIn];
             balanceIn = tI.balance;
             decimalsIn = tI.decimals;
-            weightIn = bnum(tI.denormWeight).div(bnum(this.totalWeight));
+            weightIn = bnum(tI.weight).div(bnum(this.totalWeight));
         }
         if (pairType != PairTypes.TokenToBpt) {
             let tokenIndexOut = this.tokens.findIndex(
@@ -132,7 +138,7 @@ export class WeightedPool implements PoolBase {
             tO = this.tokens[tokenIndexOut];
             balanceOut = tO.balance;
             decimalsOut = tO.decimals;
-            weightOut = bnum(tO.denormWeight).div(bnum(this.totalWeight));
+            weightOut = bnum(tO.weight).div(bnum(this.totalWeight));
         }
 
         const poolPairData: WeightedPoolPairData = {

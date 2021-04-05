@@ -446,11 +446,13 @@ export const smartOrderRouter = (
         }
     }
 
-    const marketSp = getSpotPriceAfterSwapForPath(
-        largestSwapPath,
-        swapType,
-        bnum(0)
-    );
+    let marketSp = bnum(0);
+    if (!bestTotalReturn.eq(0))
+        marketSp = getSpotPriceAfterSwapForPath(
+            largestSwapPath,
+            swapType,
+            bnum(0)
+        );
 
     return [swaps, bestTotalReturn, marketSp];
 };
