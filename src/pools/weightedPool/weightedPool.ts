@@ -165,7 +165,7 @@ export class WeightedPool implements PoolBase {
                 .times(poolPairData.weightIn)
                 .div(poolPairData.weightIn.plus(poolPairData.weightOut));
         } else if (poolPairData.pairType == PairTypes.TokenToBpt) {
-            return poolPairData.balanceOut; // Liquidity in tokenOut is balanceBpt
+            return poolPairData.balanceOut; // Liquidity in tokenOut is totalShares
         } else if (poolPairData.pairType == PairTypes.BptToToken) {
             return poolPairData.balanceOut.div(
                 bnum(1).plus(poolPairData.weightOut)

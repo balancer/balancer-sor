@@ -27,7 +27,7 @@ export async function compareTest(
     );
 
     // V2 first to debug faster
-    // This method will only work for V1 pools onChain balances as uses BPool V1 contract to compare vs V1.
+    // Uses saved balances instead of onChain. Test data is a snapshot of balance state. Onchain balances can change between calls.
     let v2SwapData = await getV2Swap(
         provider,
         testData.tradeInfo.GasPrice,
@@ -44,6 +44,7 @@ export async function compareTest(
         costOutputTokenOveride
     );
 
+    // Uses costOutputToken returned from above.
     let [swaps, total, marketSp] = v2classSwap(
         JSON.parse(JSON.stringify(testData)),
         testData.tradeInfo.TokenIn,
@@ -55,11 +56,6 @@ export async function compareTest(
         disabledOptions
     );
 
-    // console.log(v2SwapData.swaps);
-    // console.log(swaps);
-    console.log(`!!!!!!! `);
-    console.log(total.toString());
-
     assert.equal(
         v2SwapData.returnAmount.toString(),
         total.toString(),
@@ -67,9 +63,12 @@ export async function compareTest(
     );
     expect(v2SwapData.swaps).to.deep.equal(swaps);
 
+    // Uses scaled costOutputToken returned from above.
     let v1SwapData = await getV1Swap(
         provider,
-        testData.tradeInfo.GasPrice,
+        v2SwapData.costOutputToken.times(
+            bnum(10 ** testData.tradeInfo.ReturnAmountDecimals)
+        ),
         testData.tradeInfo.NoPools,
         1,
         JSON.parse(JSON.stringify(testData)),

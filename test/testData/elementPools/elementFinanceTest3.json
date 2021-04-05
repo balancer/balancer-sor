@@ -23,13 +23,13 @@
                     "address": "0x0000000000000000000000000000000000000000",
                     "balance": "252853.96590876798",
                     "decimals": 18,
-                    "denormWeight": "5"
+                    "weight": "5"
                 },
                 {
                     "address": "0x000000000000000000000000000000000000000b",
                     "balance": "674971.6048091053",
                     "decimals": 18,
-                    "denormWeight": "5"
+                    "weight": "5"
                 }
             ],
             "tokensList": [
