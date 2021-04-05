@@ -1,3 +1,4 @@
+import { PRICE_ERROR_TOLERANCE, INFINITESIMAL } from './config';
 import {
     getLimitAmountSwapForPath,
     getOutputAmountSwapForPath,
@@ -12,8 +13,9 @@ import { bnum } from './bmath';
 import { BigNumber } from './utils/bignumber';
 import { Path, Swap, SubGraphPoolDictionary } from './types';
 import { MaxUint256 } from '@ethersproject/constants';
+import * as elementMath from './pools/elementPool/elementMath';
 
-// TODO give the option to choose a % of slippage beyond current price?
+// TODO get max price from slippage tolerance given by user options
 export const MAX_UINT = MaxUint256;
 
 const minAmountOut = 0;
@@ -319,6 +321,22 @@ export const smartOrderRouter = (
             ).toNumber()
         );
 
+        // console.log(
+        //     elementMath._NUMERICALspotPriceAfterSwapExactTokenInForTokenOut(
+        //         swapAmount,
+        //         path.poolPairData[0]
+        //     ).toNumber()
+        // );
+
+        console.log(
+            getDerivativeSpotPriceAfterSwapForPath(
+                pools,
+                path,
+                swapType,
+                swapAmount
+            ).toNumber()
+        );
+
         let poolPairData = path.poolPairData;
 
         if (i == 0)
@@ -513,6 +531,15 @@ function getBestPathIds(
         let bestPathIndex = -1;
         let bestEffectivePrice = bnum('Infinity'); // Start with worst price possible
         paths.forEach((path, j) => {
+            // // Just to debug
+            // console.log(
+            //     getSpotPriceAfterSwapForPath(
+            //         pools,
+            //         path,
+            //         swapType,
+            //         swapAmount
+            //     ).toNumber()
+            // );
             // Do not consider this path if its limit is below swapAmount
             if (path.limitAmount.gte(swapAmount)) {
                 // Calculate effective price of this path for this swapAmount
@@ -571,8 +598,6 @@ function iterateSwapAmounts(
     exceedingAmounts: BigNumber[],
     pathLimitAmounts: BigNumber[]
 ): [BigNumber[], BigNumber[]] {
-    // TODO define priceErrorTolerance in config file or in main file
-    let priceErrorTolerance = bnum(0.00001); // 0.001% of tolerance -> this does not change much execution time as convergence is fast
     let priceError = bnum(1); // Initialize priceError just so that while starts
     let prices = [];
     // Since this is the beginning of an iteration with a new set of paths, we
@@ -587,18 +612,18 @@ function iterateSwapAmounts(
     for (let i = 0; i < swapAmounts.length; ++i) {
         if (swapAmounts[i].isZero()) {
             // Very small amount: TODO put in config file
-            const epsilon = totalSwapAmount.times(bnum(10 ** -6));
+            const epsilon = totalSwapAmount.times(INFINITESIMAL);
             swapAmounts[i] = epsilon;
             exceedingAmounts[i] = exceedingAmounts[i].plus(epsilon);
         }
         if (exceedingAmounts[i].isZero()) {
             // Very small amount: TODO put in config file
-            const epsilon = totalSwapAmount.times(bnum(10 ** -6));
+            const epsilon = totalSwapAmount.times(INFINITESIMAL);
             swapAmounts[i] = swapAmounts[i].minus(epsilon); // Very small amount
             exceedingAmounts[i] = exceedingAmounts[i].minus(epsilon);
         }
     }
-    while (priceError.isGreaterThan(priceErrorTolerance)) {
+    while (priceError.isGreaterThan(PRICE_ERROR_TOLERANCE)) {
         [
             prices,
             swapAmounts,

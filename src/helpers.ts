@@ -11,8 +11,10 @@ import {
     SwapV2,
 } from './types';
 import { MAX_IN_RATIO, MAX_OUT_RATIO, bnum, scale } from './bmath';
+import { ALLOW_ADD_REMOVE, INFINITESIMAL } from './config';
 import * as stableMath from './pools/stablePool/stableMath';
 import * as weightedMath from './pools/weightedPool/weightedMath';
+import * as elementMath from './pools/elementPool/elementMath';
 import * as weightedSolidity from './pools/weightedPool/weightedMathEvm';
 import { FixedPointNumber } from './math/FixedPointNumber';
 
@@ -22,6 +24,10 @@ export function getLimitAmountSwap(
     poolPairData: PoolPairData,
     swapType: string
 ): BigNumber {
+    // TODO: this function should also be defined by the pool class
+    // TODO: Add following limits for Element:
+    // swapExactIn: Ai < (Bi**(1-t)+Bo**(1-t))**(1/(1-t))-Bi
+    // swapExactOut: no limit
     // We multiply ratios by 10**-18 because we are in normalized space
     // so 0.5 should be 0.5 and not 500000000000000000
     // TODO: update bmath to use everything normalized
@@ -145,6 +151,19 @@ export function getOutputAmountSwap(
             } else if (pairType == 'BPT->token') {
                 return stableMath._exactBPTInForTokenOut(amount, poolPairData);
             }
+        } else if (poolType == 'Element') {
+            if (pairType == 'token->token') {
+                return elementMath._exactTokenInForTokenOut(
+                    amount,
+                    poolPairData
+                );
+            } else if (pairType == 'token->BPT') {
+                throw 'Element pool does not support SOR add/remove liquidity';
+                return bnum(-1);
+            } else if (pairType == 'BPT->token') {
+                throw 'Element pool does not support SOR add/remove liquidity';
+                return bnum(-1);
+            }
         }
     } else {
         if (poolType == 'Weighted') {
@@ -174,6 +193,19 @@ export function getOutputAmountSwap(
                 return stableMath._tokenInForExactBPTOut(amount, poolPairData);
             } else if (pairType == 'BPT->token') {
                 return stableMath._BPTInForExactTokenOut(amount, poolPairData);
+            }
+        } else if (poolType == 'Element') {
+            if (pairType == 'token->token') {
+                return elementMath._tokenInForExactTokenOut(
+                    amount,
+                    poolPairData
+                );
+            } else if (pairType == 'token->BPT') {
+                throw 'Element pool does not support SOR add/remove liquidity';
+                return bnum(-1);
+            } else if (pairType == 'BPT->token') {
+                throw 'Element pool does not support SOR add/remove liquidity';
+                return bnum(-1);
             }
         }
     }
@@ -234,7 +266,7 @@ export function getEffectivePriceSwapForPath(
     swapType: string,
     amount: BigNumber
 ): BigNumber {
-    if (amount.lt(bnum(10 ** -10))) {
+    if (amount.lt(INFINITESIMAL)) {
         // Return spot price as code below would be 0/0 = undefined
         // or small_amount/0 or 0/small_amount which would cause bugs
         return getSpotPriceAfterSwapForPath(pools, path, swapType, amount);
@@ -306,6 +338,19 @@ export function getSpotPriceAfterSwap(
                     poolPairData
                 );
             }
+        } else if (poolType == 'Element') {
+            if (pairType == 'token->token') {
+                return elementMath._spotPriceAfterSwapExactTokenInForTokenOut(
+                    amount,
+                    poolPairData
+                );
+            } else if (pairType == 'token->BPT') {
+                throw 'Element pool does not support SOR add/remove liquidity';
+                return bnum(-1);
+            } else if (pairType == 'BPT->token') {
+                throw 'Element pool does not support SOR add/remove liquidity';
+                return bnum(-1);
+            }
         }
     } else {
         if (poolType == 'Weighted') {
@@ -341,6 +386,19 @@ export function getSpotPriceAfterSwap(
                     amount,
                     poolPairData
                 );
+            }
+        } else if (poolType == 'Element') {
+            if (pairType == 'token->token') {
+                return elementMath._spotPriceAfterSwapTokenInForExactTokenOut(
+                    amount,
+                    poolPairData
+                );
+            } else if (pairType == 'token->BPT') {
+                throw 'Element pool does not support SOR add/remove liquidity';
+                return bnum(-1);
+            } else if (pairType == 'BPT->token') {
+                throw 'Element pool does not support SOR add/remove liquidity';
+                return bnum(-1);
             }
         }
     }
@@ -450,6 +508,19 @@ export function getDerivativeSpotPriceAfterSwap(
                     poolPairData
                 );
             }
+        } else if (poolType == 'Element') {
+            if (pairType == 'token->token') {
+                return elementMath._derivativeSpotPriceAfterSwapExactTokenInForTokenOut(
+                    amount,
+                    poolPairData
+                );
+            } else if (pairType == 'token->BPT') {
+                throw 'Element pool does not support SOR add/remove liquidity';
+                return bnum(-1);
+            } else if (pairType == 'BPT->token') {
+                throw 'Element pool does not support SOR add/remove liquidity';
+                return bnum(-1);
+            }
         }
     } else {
         if (poolType == 'Weighted') {
@@ -485,6 +556,19 @@ export function getDerivativeSpotPriceAfterSwap(
                     amount,
                     poolPairData
                 );
+            }
+        } else if (poolType == 'Element') {
+            if (pairType == 'token->token') {
+                return elementMath._derivativeSpotPriceAfterSwapTokenInForExactTokenOut(
+                    amount,
+                    poolPairData
+                );
+            } else if (pairType == 'token->BPT') {
+                throw 'Element pool does not support SOR add/remove liquidity';
+                return bnum(-1);
+            } else if (pairType == 'BPT->token') {
+                throw 'Element pool does not support SOR add/remove liquidity';
+                return bnum(-1);
             }
         }
     }
@@ -598,6 +682,7 @@ export function getHighestLimitAmountsForPaths(
     return limitAmounts;
 }
 
+// This has to be a method by the pool class
 export const parsePoolPairData = (
     p: SubGraphPool,
     tokenIn: string,
@@ -618,8 +703,14 @@ export const parsePoolPairData = (
         weightOut;
 
     // Todo: the pool type should be already on subgraph
-    if (typeof p.amp === 'undefined' || p.amp === '0') poolType = 'Weighted';
-    else poolType = 'Stable';
+    if (
+        (typeof p.amp !== 'undefined' && p.amp === '0') ||
+        p.poolType === 'Stable'
+    )
+        poolType = 'Stable';
+    else if (typeof p.poolType !== 'undefined' && p.poolType === 'Element')
+        poolType = 'Element';
+    else poolType = 'Weighted';
 
     // Check if tokenIn is the pool token itself (BPT)
     if (tokenIn == p.id) {
@@ -644,7 +735,7 @@ export const parsePoolPairData = (
         tI = p.tokens[tokenIndexIn];
         balanceIn = tI.balance;
         decimalsIn = tI.decimals;
-        if (poolType === 'Weighted')
+        if (poolType !== 'Stable')
             weightIn = bnum(tI.denormWeight).div(bnum(p.totalWeight));
     }
     if (pairType != 'token->BPT') {
@@ -655,7 +746,7 @@ export const parsePoolPairData = (
         tO = p.tokens[tokenIndexOut];
         balanceOut = tO.balance;
         decimalsOut = tO.decimals;
-        if (poolType === 'Weighted')
+        if (poolType !== 'Stable')
             weightOut = bnum(tO.denormWeight).div(bnum(p.totalWeight));
     }
 
@@ -705,6 +796,31 @@ export const parsePoolPairData = (
             amp: bnum(p.amp),
             tokenIndexIn: tokenIndexIn,
             tokenIndexOut: tokenIndexOut,
+        };
+    } else if (poolType == 'Element') {
+        // We already add the virtual LP shares to the right balance
+        let bnumBalanceIn = bnum(balanceIn);
+        let bnumBalanceOut = bnum(balanceOut);
+        if (tokenIn == p.principalToken) {
+            bnumBalanceIn = bnumBalanceIn.plus(bnum(p.lpShares));
+        } else if (tokenOut == p.principalToken) {
+            bnumBalanceOut = bnumBalanceOut.plus(bnum(p.lpShares));
+        }
+        poolPairData = {
+            id: p.id,
+            poolType: poolType,
+            pairType: pairType,
+            tokenIn: tokenIn,
+            tokenOut: tokenOut,
+            principalToken: p.principalToken,
+            baseToken: p.baseToken,
+            decimalsIn: decimalsIn,
+            decimalsOut: decimalsOut,
+            balanceIn: bnumBalanceIn,
+            balanceOut: bnumBalanceOut,
+            swapFee: bnum(p.swapFee),
+            lpShares: bnum(p.lpShares),
+            time: bnum(p.time),
         };
     } else {
         throw 'Pool type unknown';
@@ -887,6 +1003,19 @@ export function EVMgetOutputAmountSwap(
             // } else if (pairType == 'BPT->token') {
             //     returnAmount = stableMath._exactBPTInForTokenOut(amount, poolPairData);
             // }
+        } else if (poolType == 'Element') {
+            // TODO update when sol helpers available for element pools also
+            returnAmount = getOutputAmountSwap(poolPairData, swapType, amount);
+            // if (pairType == 'token->token') {
+            //     returnAmount = stableMath._exactTokenInForTokenOut(
+            //         amount,
+            //         poolPairData
+            //     );
+            // } else if (pairType == 'token->BPT') {
+            //     returnAmount = stableMath._exactTokenInForBPTOut(amount, poolPairData);
+            // } else if (pairType == 'BPT->token') {
+            //     returnAmount = stableMath._exactBPTInForTokenOut(amount, poolPairData);
+            // }
         }
     } else {
         if (poolType == 'Weighted') {
@@ -940,6 +1069,19 @@ export function EVMgetOutputAmountSwap(
             //     returnAmount = stableMath._tokenInForExactBPTOut(amount, poolPairData);
             // } else if (pairType == 'BPT->token') {
             //     returnAmount = stableMath._BPTInForExactTokenOut(amount, poolPairData);
+            // }
+        } else if (poolType == 'Element') {
+            // TODO update when sol helpers available for element pools also
+            returnAmount = getOutputAmountSwap(poolPairData, swapType, amount);
+            // if (pairType == 'token->token') {
+            //     returnAmount = stableMath._exactTokenInForTokenOut(
+            //         amount,
+            //         poolPairData
+            //     );
+            // } else if (pairType == 'token->BPT') {
+            //     returnAmount = stableMath._exactTokenInForBPTOut(amount, poolPairData);
+            // } else if (pairType == 'BPT->token') {
+            //     returnAmount = stableMath._exactBPTInForTokenOut(amount, poolPairData);
             // }
         }
     }
@@ -1113,8 +1255,9 @@ export function filterPools(
 
     allPools.forEach(pool => {
         let tokenListSet = new Set(pool.tokensList);
-        // we add the BPT as well as we can join/exit as part of the multihop
-        tokenListSet.add(pool.id);
+        // Depending on config file, we add the BPT as well as
+        // we can join/exit as part of the multihop
+        if (ALLOW_ADD_REMOVE) tokenListSet.add(pool.id);
         disabledTokens.forEach(token => tokenListSet.delete(token.address));
 
         if (
@@ -1179,11 +1322,11 @@ export function sortPoolsMostLiquid(
 
         for (let k in poolsTokenInNoTokenOut) {
             // If this pool has hopTokens[i] calculate its normalized liquidity
-            if (
-                new Set(poolsTokenInNoTokenOut[k].tokensList)
-                    .add(poolsTokenInNoTokenOut[k].id)
-                    .has(hopTokens[i])
-            ) {
+            let tokens = new Set(poolsTokenInNoTokenOut[k].tokensList);
+            // Depending on config file, we add the BPT as well as
+            // we can join/exit as part of the multihop
+            if (ALLOW_ADD_REMOVE) tokens.add(poolsTokenInNoTokenOut[k].id);
+            if (tokens.has(hopTokens[i])) {
                 let normalizedLiquidity = getNormalizedLiquidity(
                     parsePoolPairData(
                         poolsTokenInNoTokenOut[k],
@@ -1213,11 +1356,11 @@ export function sortPoolsMostLiquid(
 
         for (let k in poolsTokenOutNoTokenIn) {
             // If this pool has hopTokens[i] calculate its normalized liquidity
-            if (
-                new Set(poolsTokenOutNoTokenIn[k].tokensList)
-                    .add(poolsTokenOutNoTokenIn[k].id)
-                    .has(hopTokens[i])
-            ) {
+            let tokens = new Set(poolsTokenOutNoTokenIn[k].tokensList);
+            // Depending on config file, we add the BPT as well as
+            // we can join/exit as part of the multihop
+            if (ALLOW_ADD_REMOVE) tokens.add(poolsTokenOutNoTokenIn[k].id);
+            if (tokens.has(hopTokens[i])) {
                 let normalizedLiquidity = getNormalizedLiquidity(
                     parsePoolPairData(
                         poolsTokenOutNoTokenIn[k],

@@ -93,6 +93,11 @@ describe('Tests Multihop SOR with token filtering vs static subgraphPoolsLarge.j
             disabledOptions
         );
 
+        assert.equal(
+            v1SwapData.returnAmount.toString(),
+            '0.976143999926789198',
+            'V1 Sanity check.'
+        );
         assert.equal(v2SwapData.swaps.length, 1, 'Should have 1 swaps.');
         assert.equal(
             v2SwapData.returnAmount.toString(),
@@ -137,6 +142,11 @@ describe('Tests Multihop SOR with token filtering vs static subgraphPoolsLarge.j
             disabledOptions
         );
 
+        assert.equal(
+            v1SwapData.returnAmount.toString(),
+            '0',
+            'V1 Sanity check.'
+        );
         assert.equal(v2SwapData.swaps.length, 0, 'Should have 0 swaps.');
         assert.equal(
             v2SwapData.returnAmount.toString(),
@@ -184,6 +194,11 @@ describe('Tests Multihop SOR with token filtering vs static subgraphPoolsLarge.j
             disabledOptions
         );
 
+        assert.equal(
+            v1SwapData.returnAmount.toString(),
+            '10.24439019279202427',
+            'V1 Sanity check.'
+        );
         assert.isAtLeast(v2SwapData.swaps.length, 1);
         assert.equal(
             v2SwapData.returnAmount.toString(),

@@ -10,16 +10,26 @@ export interface PoolPairData {
     tokenOut: string;
     balanceIn?: BigNumber;
     balanceOut?: BigNumber;
-    weightIn?: BigNumber; // Weights are only defined for weighted pools
-    weightOut?: BigNumber; // Weights are only defined for weighted pools
-    swapFee: BigNumber;
-    allBalances: BigNumber[]; // Only for stable pools
-    invariant?: BigNumber; // Only for stable pools
-    amp?: BigNumber; // Only for stable pools
-    tokenIndexIn?: number; // Only for stable pools
-    tokenIndexOut?: number; // Only for stable pools
     decimalsIn: number;
     decimalsOut: number;
+    swapFee: BigNumber;
+
+    // For weighted & element pools
+    weightIn?: BigNumber;
+    weightOut?: BigNumber;
+
+    // Only for stable pools
+    allBalances: BigNumber[];
+    invariant?: BigNumber;
+    amp?: BigNumber;
+    tokenIndexIn?: number;
+    tokenIndexOut?: number;
+
+    // Only for element pools
+    lpShares?: BigNumber;
+    time?: BigNumber;
+    principalToken?: string;
+    baseToken?: string;
 }
 
 export interface Path {
@@ -48,17 +58,27 @@ export interface SubGraphPools {
 export interface SubGraphPool {
     id: string;
     swapFee: string;
-    amp: string;
     totalWeight: string;
     balanceBpt: string;
     tokens: SubGraphToken[];
     tokensList: string[];
+    poolType?: string;
+
+    // Only for stable pools
+    amp: string;
+
+    // Only for element pools
+    lpShares?: BigNumber;
+    time?: BigNumber;
+    principalToken?: string;
+    baseToken?: string;
 }
 
 export interface SubGraphToken {
     address: string;
     balance: string;
     decimals: string | number;
+    // Stable & Element field
     denormWeight?: string;
 }
 
@@ -102,6 +122,7 @@ export enum SwapTypes {
 export enum PoolTypes {
     Weighted,
     Stable,
+    Element,
 }
 
 export enum SwapPairType {
@@ -156,8 +177,18 @@ export interface SubgraphPoolBase {
     totalShares: string;
     tokens: SubGraphToken[];
     tokensList: string[];
-    amp?: string;
+
+    // Weighted & Element field
     totalWeight?: string;
+
+    // Stable specific fields
+    amp?: string;
+
+    // Element specific fields
+    lpShares?: BigNumber;
+    time?: BigNumber;
+    principalToken?: string;
+    baseToken?: string;
 }
 
 export interface PoolBase {

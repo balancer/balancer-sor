@@ -12,6 +12,7 @@ import {
     SwapInfo,
 } from './types';
 import { bnum, scale } from './bmath';
+import { INFINITESIMAL } from './config';
 
 export function getHighestLimitAmountsForPaths(
     paths: NewPath[],
@@ -34,7 +35,7 @@ export function getEffectivePriceSwapForPath(
     swapType: SwapTypes,
     amount: BigNumber
 ): BigNumber {
-    if (amount.lt(bnum(10 ** -10))) {
+    if (amount.lt(INFINITESIMAL)) {
         // Return spot price as code below would be 0/0 = undefined
         // or small_amount/0 or 0/small_amount which would cause bugs
         return getSpotPriceAfterSwapForPath(path, swapType, amount);
@@ -482,6 +483,14 @@ export function EVMgetOutputAmountSwap(
                 swapType,
                 amount
             );
+        } else if (pool.poolType === PoolTypes.Element) {
+            // TODO this will just be part of above once maths available
+            returnAmount = getOutputAmountSwap(
+                pool,
+                poolPairData,
+                swapType,
+                amount
+            );
         }
     } else {
         // TODO we will be able to remove pooltype check once all EVM maths is available
@@ -509,6 +518,14 @@ export function EVMgetOutputAmountSwap(
                 returnAmount = scale(returnAmount, -18); // BPT is always 18 decimals
             }
         } else if (pool.poolType === PoolTypes.Stable) {
+            // TODO this will just be part of above once maths available
+            returnAmount = getOutputAmountSwap(
+                pool,
+                poolPairData,
+                swapType,
+                amount
+            );
+        } else if (pool.poolType === PoolTypes.Element) {
             // TODO this will just be part of above once maths available
             returnAmount = getOutputAmountSwap(
                 pool,
