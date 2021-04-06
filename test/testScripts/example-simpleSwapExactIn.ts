@@ -5,7 +5,14 @@ import { JsonRpcProvider } from '@ethersproject/providers';
 import { Wallet } from '@ethersproject/wallet';
 import { Contract } from '@ethersproject/contracts';
 import { MaxUint256 } from '@ethersproject/constants';
-import { SOR, SwapInfo, SwapTypes, POOLS, SubGraphPoolsBase } from '../../src';
+import {
+    SOR,
+    getPoolsFromUrl,
+    SwapInfo,
+    SwapTypes,
+    SubGraphPoolsBase,
+    fetchSubgraphPools,
+} from '../../src';
 import { scale } from '../../src/bmath';
 
 import vaultArtifact from '../../src/abi/vault.json';
@@ -37,17 +44,26 @@ async function simpleSwap() {
         `https://kovan.infura.io/v3/${process.env.INFURA}`
     );
 
-    const p = new POOLS();
-    const poolsFromUrl: SubGraphPoolsBase = await p.getAllPublicSwapPools(
-        poolsUrl
-    );
+    // Fetches pools list from URL (i.e. IPFS)
+    //const pools: SubGraphPoolsBase = await getPoolsFromUrl(poolsUrl);
 
-    const subgraphPools = await getOnChainBalances(
-        poolsFromUrl,
+    // Fetches pools list from Subgraph API
+    // const subgraphPools = await fetchSubgraphPools();    // Uses default API or env
+    const subgraphPools = await fetchSubgraphPools(
+        'https://api.thegraph.com/subgraphs/name/destiner/balancer-kovan-v2'
+    ); // Uses api passed in function
+    console.log(subgraphPools.pools[0]);
+
+    const onChainPools = await getOnChainBalances(
+        subgraphPools,
         '0x2cc8688C5f75E365aaEEb4ea8D6a480405A48D2A',
         vaultAddr,
         provider
     );
+
+    console.log(onChainPools.pools[0]);
+
+    return;
 
     // Add TRADE_KEY pk to env for address that will exectute trade
     const wallet = new Wallet(process.env.TRADER_KEY, provider);
@@ -74,7 +90,7 @@ async function simpleSwap() {
     await sor.setCostOutputToken(tokenOut);
 
     // This fetches all pools list from URL in constructor then onChain balances using Multicall
-    await sor.fetchPools(false);
+    await sor.fetchPools(true);
     const isFinishedFetchingOnChain = sor.finishedFetchingOnChain;
     console.log(`isFinishedFetchingOnChain ${isFinishedFetchingOnChain}`);
 

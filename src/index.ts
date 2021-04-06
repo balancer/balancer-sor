@@ -6,11 +6,12 @@ export {
     sortPoolsMostLiquid,
     formatSwaps,
 } from './helpers';
+export { fetchSubgraphPools } from './subgraph';
 export { getOnChainBalances } from './multicall';
 import * as bmath from './bmath';
 export { bmath };
 export { getCostOutputToken } from './costToken';
-export { POOLS } from './pools';
+export { getPoolsFromUrl } from './pools';
 export { SOR } from './wrapper';
 export * from './config';
 export * from './types';

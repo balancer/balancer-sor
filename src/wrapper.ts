@@ -3,7 +3,11 @@ import { BigNumber } from './utils/bignumber';
 import { bnum } from './bmath';
 import { getCostOutputToken } from './costToken';
 import { getOnChainBalances } from './multicall';
-import { filterPoolsOfInterest, filterHopPools, POOLS } from '../src/pools';
+import {
+    filterPoolsOfInterest,
+    filterHopPools,
+    getPoolsFromUrl,
+} from '../src/pools';
 import { calculatePathLimits, smartOrderRouter } from '../src/sorClass';
 import { formatSwaps } from '../src/helpersClass';
 import {
@@ -37,7 +41,6 @@ export class SOR {
     poolsUrl: string;
     subgraphPools: SubGraphPoolsBase;
     tokenCost = {};
-    pools: POOLS;
     onChainBalanceCache: SubGraphPoolsBase = { pools: [] };
     poolsForPairsCache = {};
     processedDataCache = {};
@@ -68,7 +71,6 @@ export class SOR {
             this.subgraphPools = poolsSource;
         }
         this.disabledOptions = disabledOptions;
-        this.pools = new POOLS();
     }
 
     /*
@@ -106,9 +108,7 @@ export class SOR {
 
             // Retrieve from URL if set otherwise use data passed
             if (this.isUsingPoolsUrl)
-                subgraphPools = await this.pools.getAllPublicSwapPools(
-                    this.poolsUrl
-                );
+                subgraphPools = await getPoolsFromUrl(this.poolsUrl);
             else subgraphPools = this.subgraphPools;
 
             let previousStringify = JSON.stringify(this.onChainBalanceCache); // Used for compare
@@ -335,9 +335,7 @@ export class SOR {
 
             // Retrieve from URL if set otherwise use data passed
             if (this.isUsingPoolsUrl)
-                allPoolsNonBig = await this.pools.getAllPublicSwapPools(
-                    this.poolsUrl
-                );
+                allPoolsNonBig = await getPoolsFromUrl(this.poolsUrl);
             else
                 allPoolsNonBig = JSON.parse(JSON.stringify(this.subgraphPools));
 

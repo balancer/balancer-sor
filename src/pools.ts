@@ -17,12 +17,10 @@ import { bnum } from './bmath';
 
 import disabledTokensDefault from './disabled-tokens.json';
 
-export class POOLS {
-    async getAllPublicSwapPools(URL: string): Promise<SubGraphPoolsBase> {
-        const result = await fetch(URL);
-        const allPools = result.json();
-        return allPools;
-    }
+export async function getPoolsFromUrl(URL: string): Promise<SubGraphPoolsBase> {
+    const result = await fetch(URL);
+    const allPools = result.json();
+    return allPools;
 }
 
 /*
