@@ -3,7 +3,12 @@ require('dotenv').config();
 import { JsonRpcProvider } from '@ethersproject/providers';
 import { assert, expect } from 'chai';
 import { SOR } from '../src';
-import { SubGraphPoolsBase, SwapInfo, SwapTypes } from '../src/types';
+import {
+    SubgraphPoolBase,
+    SubGraphPoolsBase,
+    SwapInfo,
+    SwapTypes,
+} from '../src/types';
 import { bnum } from '../src/bmath';
 import { BigNumber } from '../src/utils/bignumber';
 
@@ -77,6 +82,40 @@ describe(`Tests for wrapper class.`, () => {
             poolsFromFile.pools[1].tokens[1].balance,
             sor.onChainBalanceCache.pools[1].tokens[1].balance
         );
+    });
+
+    it(`fetchPools with pools passed as input should overwrite pools`, async () => {
+        const poolsFromFile: SubGraphPoolsBase = require('./testData/testPools/subgraphPoolsSmallWithTrade.json');
+        const sor = new SOR(
+            provider,
+            gasPrice,
+            maxPools,
+            chainId,
+            JSON.parse(JSON.stringify(poolsFromFile))
+        );
+
+        const testPools = require('./testData/filterTestPools.json');
+        const newPools: SubGraphPoolsBase = { pools: testPools.stableOnly };
+
+        // Initial cache should be empty
+        expect(poolsFromFile).not.deep.equal(newPools);
+        expect(newPools).not.deep.equal(sor.onChainBalanceCache);
+        expect({ pools: [] }).deep.equal(sor.onChainBalanceCache);
+
+        // First fetch uses data passed as constructor
+        let fetchSuccess = await sor.fetchPools(false);
+        assert.isTrue(fetchSuccess);
+        assert.isTrue(sor.finishedFetchingOnChain);
+        expect(poolsFromFile).not.deep.equal(newPools);
+        expect(poolsFromFile).deep.equal(sor.onChainBalanceCache);
+
+        // Second fetch uses newPools passed
+        fetchSuccess = await sor.fetchPools(false, newPools);
+        assert.isTrue(fetchSuccess);
+        assert.isTrue(sor.finishedFetchingOnChain);
+        expect(poolsFromFile).not.deep.equal(newPools);
+        expect(poolsFromFile).not.deep.equal(sor.onChainBalanceCache);
+        expect(newPools).deep.equal(sor.onChainBalanceCache);
     });
 
     it(`Should return no swaps when pools not retrieved.`, async () => {

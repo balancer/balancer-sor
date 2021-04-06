@@ -101,15 +101,34 @@ export class SOR {
         }
     }
 
-    // Fetch all pools, in Subgraph format (strings/not scaled) from URL then retrieve OnChain balances
-    async fetchPools(isOnChain: boolean = true): Promise<boolean> {
+    /*
+    Saves updated pools data to internal onChainBalanceCache.
+    If isOnChain is true will retrieve all required onChain data. (false is advised to only be used for testing)
+    If poolsData is passed as parameter - uses this as pools source.
+    If poolsData was passed in to constructor - uses this as pools source.
+    If pools url was passed in to constructor - uses this to fetch pools source.
+    */
+    async fetchPools(
+        isOnChain: boolean = true,
+        poolsData: SubGraphPoolsBase = { pools: [] }
+    ): Promise<boolean> {
         try {
+            // If poolsData has been passed to function these pools should be used
+            const isExternalPoolData =
+                poolsData.pools.length > 0 ? true : false;
+
             let subgraphPools: SubGraphPoolsBase;
 
-            // Retrieve from URL if set otherwise use data passed
-            if (this.isUsingPoolsUrl)
-                subgraphPools = await getPoolsFromUrl(this.poolsUrl);
-            else subgraphPools = this.subgraphPools;
+            if (isExternalPoolData) {
+                subgraphPools = JSON.parse(JSON.stringify(poolsData));
+                // Store as latest pools data
+                if (!this.isUsingPoolsUrl) this.subgraphPools = subgraphPools;
+            } else {
+                // Retrieve from URL if set otherwise use data passed in constructor
+                if (this.isUsingPoolsUrl)
+                    subgraphPools = await getPoolsFromUrl(this.poolsUrl);
+                else subgraphPools = this.subgraphPools;
+            }
 
             let previousStringify = JSON.stringify(this.onChainBalanceCache); // Used for compare
 

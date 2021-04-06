@@ -1,4 +1,4 @@
-// Example showing SOR use with Vault batchSwapGivenIn, run using: $ ts-node ./test/testScripts/example-simpleSwapExactOut.ts
+// Example showing SOR use with Vault batchSwapGivenIn, run using: $ ts-node ./test/testScripts/swapExactOutIpfs.ts
 require('dotenv').config();
 import { BigNumber } from 'bignumber.js';
 import { JsonRpcProvider } from '@ethersproject/providers';
@@ -24,13 +24,11 @@ const BAL = '0x1688C45BC51Faa1B783D274E03Da0A0B28A0A871';
 const MKR = '0xD9D9E09604c0C14B592e6E383582291b026EBced';
 const vaultAddr = '0xba1c01474A7598c2B49015FdaFc67DdF06ce15f7';
 
-// TODO - Update with ipns when ready.
 const poolsUrl = `https://storageapi.fleek.co/balancer-bucket/balancer-kovan-v2/exchange`;
 
 async function simpleSwap() {
     // If running this example make sure you have a .env file saved in root DIR with INFURA=your_key
     const provider = new JsonRpcProvider(
-        // `https://mainnet.infura.io/v3/${process.env.INFURA}`
         `https://kovan.infura.io/v3/${process.env.INFURA}`
     );
 
@@ -59,7 +57,7 @@ async function simpleSwap() {
     await sor.setCostOutputToken(tokenIn);
 
     // This fetches all pools list from URL in constructor then onChain balances using Multicall
-    await sor.fetchPools(false);
+    await sor.fetchPools();
     const isFinishedFetchingOnChain = sor.finishedFetchingOnChain;
     console.log(`isFinishedFetchingOnChain ${isFinishedFetchingOnChain}`);
 
@@ -115,8 +113,9 @@ async function simpleSwap() {
     const limits = [];
     swapInfo.tokenAddresses.forEach((token, i) => {
         if (token.toLowerCase() === tokenIn.toLowerCase()) {
+            limits[i] = swapInfo.returnAmount.toString();
             // This should be amt + slippage in UI
-            limits[i] = swapInfo.returnAmount.times(1.1).toString();
+            // limits[i] = swapInfo.returnAmount.times(1.1).toString();
         } else if (token.toLowerCase() === tokenOut.toLowerCase()) {
             limits[i] = scale(amountOut, decimalsOut)
                 .times(-1)
