@@ -5,7 +5,13 @@ import { JsonRpcProvider } from '@ethersproject/providers';
 import { Wallet } from '@ethersproject/wallet';
 import { Contract } from '@ethersproject/contracts';
 import { MaxUint256 } from '@ethersproject/constants';
-import { SOR, SwapInfo, SwapTypes, POOLS, SubGraphPoolsBase } from '../../src';
+import {
+    SOR,
+    getPoolsFromUrl,
+    SwapInfo,
+    SwapTypes,
+    SubGraphPoolsBase,
+} from '../../src';
 import { scale } from '../../src/bmath';
 
 import vaultArtifact from '../../src/abi/vault.json';
@@ -37,10 +43,7 @@ async function simpleSwap() {
         `https://kovan.infura.io/v3/${process.env.INFURA}`
     );
 
-    const p = new POOLS();
-    const poolsFromUrl: SubGraphPoolsBase = await p.getAllPublicSwapPools(
-        poolsUrl
-    );
+    const poolsFromUrl: SubGraphPoolsBase = await getPoolsFromUrl(poolsUrl);
 
     const subgraphPools = await getOnChainBalances(
         poolsFromUrl,
@@ -74,7 +77,7 @@ async function simpleSwap() {
     await sor.setCostOutputToken(tokenOut);
 
     // This fetches all pools list from URL in constructor then onChain balances using Multicall
-    await sor.fetchPools(false);
+    await sor.fetchPools(true);
     const isFinishedFetchingOnChain = sor.finishedFetchingOnChain;
     console.log(`isFinishedFetchingOnChain ${isFinishedFetchingOnChain}`);
 
