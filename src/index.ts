@@ -6,6 +6,7 @@ export {
     sortPoolsMostLiquid,
     formatSwaps,
 } from './helpers';
+export { fetchSubgraphPools } from './subgraph';
 export { getOnChainBalances } from './multicall';
 import * as bmath from './bmath';
 export { bmath };
