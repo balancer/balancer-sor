@@ -5,11 +5,13 @@ import { JsonRpcProvider } from '@ethersproject/providers';
 import { Wallet } from '@ethersproject/wallet';
 import { Contract } from '@ethersproject/contracts';
 import { MaxUint256 } from '@ethersproject/constants';
-import { SOR, SwapInfo, SwapTypes } from '../../src';
+import { SOR, SwapInfo, SwapTypes, POOLS, SubGraphPoolsBase } from '../../src';
 import { scale } from '../../src/bmath';
 
 import vaultArtifact from '../../src/abi/vault.json';
 import erc20abi from '../abi/ERC20.json';
+
+import { getOnChainBalances } from '../../src/multicall';
 
 export type FundManagement = {
     sender: string;
@@ -33,6 +35,18 @@ async function simpleSwap() {
     const provider = new JsonRpcProvider(
         // `https://mainnet.infura.io/v3/${process.env.INFURA}`
         `https://kovan.infura.io/v3/${process.env.INFURA}`
+    );
+
+    const p = new POOLS();
+    const poolsFromUrl: SubGraphPoolsBase = await p.getAllPublicSwapPools(
+        poolsUrl
+    );
+
+    const subgraphPools = await getOnChainBalances(
+        poolsFromUrl,
+        '0x2cc8688C5f75E365aaEEb4ea8D6a480405A48D2A',
+        vaultAddr,
+        provider
     );
 
     // Add TRADE_KEY pk to env for address that will exectute trade

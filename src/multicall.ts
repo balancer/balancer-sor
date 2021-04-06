@@ -1,85 +1,91 @@
-import { Contract } from '@ethersproject/contracts';
 import { BaseProvider } from '@ethersproject/providers';
-import { Interface } from '@ethersproject/abi';
-import { SubGraphPoolsBase, SubgraphPoolBase, SubGraphToken } from './types';
-import * as bmath from './bmath';
+import { SubGraphPoolsBase } from './types';
+import { scale, bnum } from './bmath';
+import { Multicaller } from './utils/multicaller';
+import _ from 'lodash';
+import { default as vaultAbi } from './abi/Vault.json';
+import { default as weightedPoolAbi } from './pools/weightedPool/weightedPoolAbi.json';
+import { default as stablePoolAbi } from './pools/stablePool/stablePoolAbi.json';
 
+// Combine all the ABIs and remove duplicates
+export const abis = Object.values(
+    Object.fromEntries(
+        [...vaultAbi, ...weightedPoolAbi, ...stablePoolAbi].map(row => [
+            row.name,
+            row,
+        ])
+    )
+);
+
+// Load pools data with multicalls
 export async function getOnChainBalances(
-    pools: SubGraphPoolsBase,
+    subgraphPools: SubGraphPoolsBase,
     multiAddress: string,
     vaultAddress: string,
     provider: BaseProvider
 ): Promise<SubGraphPoolsBase> {
-    let poolsWithOnChainBalance: SubGraphPoolsBase = { pools: [] };
+    // ): Promise<Pool[]> {
+    console.time('getPools');
+    if (subgraphPools.pools.length === 0) return subgraphPools;
 
-    if (pools.pools.length === 0) return poolsWithOnChainBalance;
+    const multiPool = new Multicaller(multiAddress, provider, abis);
 
-    const multiAbi = require('./abi/multicall.json');
-    const vaultAbi = require('./abi/vault.json');
+    let pools = {};
 
-    const multicallContract = new Contract(multiAddress, multiAbi, provider);
-    const vaultInterface = new Interface(vaultAbi);
-    const calls = [];
-
-    pools.pools.forEach(pool => {
-        calls.push([
-            vaultAddress,
-            vaultInterface.encodeFunctionData('getPoolTokens', [pool.id]),
+    subgraphPools.pools.forEach(pool => {
+        _.set(pools, `${pool.id}.id`, pool.id);
+        multiPool.call(`${pool.id}.poolTokens`, vaultAddress, 'getPoolTokens', [
+            pool.id,
         ]);
+        multiPool.call(`${pool.id}.swapFee`, pool.address, 'getSwapFee');
+        multiPool.call(`${pool.id}.totalSupply`, pool.address, 'totalSupply');
+        // TO DO - Make this part of class to make more flexible?
+        if (pool.poolType === 'Weighted') {
+            multiPool.call(
+                `${pool.id}.weights`,
+                pool.address,
+                'getNormalizedWeights',
+                []
+            );
+        } else if (pool.poolType === 'Stable') {
+            multiPool.call(
+                `${pool.id}.amp`,
+                pool.address,
+                'getAmplificationParameter'
+            );
+        }
     });
 
-    try {
-        const [, response] = await multicallContract.aggregate(calls);
+    pools = await multiPool.execute(pools);
 
-        for (let i = 0; i < response.length; i++) {
-            const result = vaultInterface.decodeFunctionResult(
-                'getPoolTokens',
-                response[i]
-            );
+    subgraphPools.pools.forEach(subgraphPool => {
+        const onChainResult = pools[subgraphPool.id];
+        subgraphPool.swapFee = scale(
+            bnum(onChainResult.swapFee),
+            -18
+        ).toString();
+        onChainResult.poolTokens.tokens.forEach((token, i) => {
+            const tokenAddress = onChainResult.poolTokens.tokens[i]
+                .toString()
+                .toLowerCase();
+            const T = subgraphPool.tokens.find(t => t.address === tokenAddress);
+            const balance = scale(
+                bnum(onChainResult.poolTokens.balances[i]),
+                -Number(T.decimals)
+            ).toString();
+            T.balance = balance;
+            if (subgraphPool.poolType === 'Weighted')
+                T.weight = scale(
+                    bnum(onChainResult.weights[i]),
+                    -18
+                ).toString();
+        });
 
-            const resultTokens = result.tokens.map(token =>
-                token.toLowerCase()
-            );
-
-            const poolTokens: SubGraphToken[] = [];
-
-            const poolWithBalances: SubgraphPoolBase = {
-                id: pools.pools[i].id,
-                poolType: pools.pools[i].poolType,
-                // !!!!!!! TO DO address?: pools.pools[i].address,
-                swapFee: pools.pools[i].swapFee,
-                totalWeight: pools.pools[i].totalWeight,
-                tokens: poolTokens,
-                tokensList: pools.pools[i].tokensList.map(token =>
-                    token.toLowerCase()
-                ),
-                amp: pools.pools[i].amp,
-                totalShares: pools.pools[i].totalShares,
-            };
-
-            pools.pools[i].tokens.forEach(token => {
-                let resultIndex = resultTokens.indexOf(token.address);
-
-                const balance = bmath
-                    .scale(
-                        bmath.bnum(result.balances[resultIndex]),
-                        -Number(token.decimals)
-                    )
-                    .toString();
-                poolWithBalances.tokens.push({
-                    address: token.address.toLowerCase(),
-                    balance: balance,
-                    decimals: token.decimals,
-                    weight: token.weight,
-                });
-            });
-
-            poolsWithOnChainBalance.pools.push(poolWithBalances);
+        if (subgraphPool.poolType === 'Stable') {
+            subgraphPool.amp = scale(bnum(onChainResult.amp), -18).toString();
         }
-    } catch (e) {
-        console.error('Failure querying onchain balances', { error: e });
-        return;
-    }
+    });
 
-    return poolsWithOnChainBalance;
+    console.timeEnd('getPools');
+    return subgraphPools;
 }

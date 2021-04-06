@@ -172,6 +172,7 @@ export interface SubGraphPoolsBase {
 
 export interface SubgraphPoolBase {
     id: string;
+    address: string;
     poolType: string;
     swapFee: string;
     totalShares: string;
