@@ -701,6 +701,8 @@ export function getRandomTradeData(isStableOnly: boolean) {
     console.log(`MaxPools: ${maxPools}`);
     */
 
+    const dustRandom = bnum(Math.floor(Math.random() * (5000 - 1 + 1) + 1));
+
     return {
         tokenIn: tokenIn.address.toLowerCase(),
         tokenOut: tokenOut.address.toLowerCase(),
@@ -715,6 +717,7 @@ export function getRandomTradeData(isStableOnly: boolean) {
         inter1SwapAmtOut,
         inter2SwapAmtOut,
         maxPools,
+        dustRandom,
     };
 }
 
