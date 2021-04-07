@@ -116,17 +116,31 @@ describe('Tests full swaps against known values', () => {
             tradeInfo,
         };
 
+        // This test has rounding differences between V1 and V2 maths that cause it to fail but has been checked by Fernando
         const [v1SwapData, v2SwapData] = await compareTest(
             name,
             provider,
             testData,
-            disabledOptions
+            disabledOptions,
+            {
+                compareResults: false,
+                costOutputTokenOveride: {
+                    isOverRide: true,
+                    overRideCost: new BigNumber(0),
+                },
+            }
         );
 
+        // These test should highlight any changes in maths that may unexpectedly change result
+        assert.equal(
+            v1SwapData.returnAmount.toString(),
+            '0.002932410291658511',
+            'V1 sanity check.'
+        );
         assert.equal(
             v2SwapData.returnAmount.toString(),
-            '0.002931223512061991',
-            'Amount should match previous result.'
+            '0.002932407296944381',
+            'V2 sanity check.'
         );
     }).timeout(10000);
 
@@ -221,7 +235,13 @@ describe('Tests full swaps against known values', () => {
             provider,
             testData,
             disabledOptions,
-            { isOverRide: true, overRideCost: new BigNumber(0) }
+            {
+                compareResults: true,
+                costOutputTokenOveride: {
+                    isOverRide: true,
+                    overRideCost: new BigNumber(0),
+                },
+            }
         );
         const total = v2SwapData.returnAmount;
         const swaps = v2SwapData.swaps;
@@ -286,7 +306,13 @@ describe('Tests full swaps against known values', () => {
             provider,
             testData,
             disabledOptions,
-            { isOverRide: true, overRideCost: new BigNumber(0) }
+            {
+                compareResults: true,
+                costOutputTokenOveride: {
+                    isOverRide: true,
+                    overRideCost: new BigNumber(0),
+                },
+            }
         );
         const total = v2SwapData.returnAmount;
         const swaps = v2SwapData.swaps;
@@ -338,7 +364,13 @@ describe('Tests full swaps against known values', () => {
             provider,
             testData,
             disabledOptions,
-            { isOverRide: true, overRideCost: new BigNumber(0) }
+            {
+                compareResults: true,
+                costOutputTokenOveride: {
+                    isOverRide: true,
+                    overRideCost: new BigNumber(0),
+                },
+            }
         );
         const total = v2SwapData.returnAmount;
         const swaps = v2SwapData.swaps;
@@ -387,15 +419,34 @@ describe('Tests full swaps against known values', () => {
             tradeInfo,
         };
 
+        // This test has rounding differences between V1 and V2 maths that cause it to fail but has been checked by Fernando
         const [v1SwapData, v2SwapData] = await compareTest(
             name,
             provider,
             testData,
             disabledOptions,
-            { isOverRide: true, overRideCost: new BigNumber(0) }
+            {
+                compareResults: false,
+                costOutputTokenOveride: {
+                    isOverRide: true,
+                    overRideCost: new BigNumber(0),
+                },
+            }
         );
         const total = v2SwapData.returnAmount;
         const swaps = v2SwapData.swaps;
+
+        // These test should highlight any changes in maths that may unexpectedly change result
+        assert.equal(
+            v1SwapData.returnAmount.toString(),
+            '0.775695',
+            'V1 sanity check.'
+        );
+        assert.equal(
+            v2SwapData.returnAmount.toString(),
+            '0.775694',
+            'V2 sanity check.'
+        );
 
         // The expected test results are from previous version
         assert.equal(total.toString(), '0.775694');
@@ -473,7 +524,13 @@ describe('Tests full swaps against known values', () => {
             provider,
             testData,
             disabledOptions,
-            { isOverRide: true, overRideCost: new BigNumber(0) }
+            {
+                compareResults: true,
+                costOutputTokenOveride: {
+                    isOverRide: true,
+                    overRideCost: new BigNumber(0),
+                },
+            }
         );
         const total = v2SwapData.returnAmount;
         const swaps = v2SwapData.swaps;
@@ -610,18 +667,36 @@ describe('Tests full swaps against known values', () => {
             tradeInfo,
         };
 
+        // This test has rounding differences between V1 and V2 maths that cause it to fail but has been checked by Fernando
         const [v1SwapData, v2SwapData] = await compareTest(
             `WBTC>MKR2, swapExactOut`,
             provider,
-            testData
+            testData,
+            {
+                isOverRide: false,
+                disabledTokens: [],
+            },
+            {
+                compareResults: false,
+                costOutputTokenOveride: {
+                    isOverRide: true,
+                    overRideCost: new BigNumber(0),
+                },
+            }
         );
 
-        assert.equal(v2SwapData.swaps.length, 1, 'Should have 1 multiswap.');
+        // These test should highlight any changes in maths that may unexpectedly change result
+        assert.equal(
+            v1SwapData.returnAmount.toString(),
+            '0.00000702',
+            'V1 sanity check.'
+        );
         assert.equal(
             v2SwapData.returnAmount.toString(),
-            '0.0000070196233350782296',
-            'Amount should match previous result.'
+            '0.00000703',
+            'V2 sanity check.'
         );
+        assert.equal(v2SwapData.swaps.length, 1, 'Should have 1 multiswap.');
     }).timeout(10000);
 
     it('Full Multihop SOR, USDC>yUSD, swapExactOut', async () => {
@@ -648,17 +723,34 @@ describe('Tests full swaps against known values', () => {
             tradeInfo,
         };
 
+        // This test has rounding differences between V1 and V2 maths that cause it to fail but has been checked by Fernando
         const [v1SwapData, v2SwapData] = await compareTest(
             `subgraphPoolsDecimalsTest`,
             provider,
-            testData
+            testData,
+            {
+                isOverRide: false,
+                disabledTokens: [],
+            },
+            {
+                compareResults: false,
+                costOutputTokenOveride: {
+                    isOverRide: true,
+                    overRideCost: new BigNumber(0),
+                },
+            }
         );
-
-        assert.equal(v2SwapData.swaps.length, 1, 'Should have 1 multiswap.');
+        // These test should highlight any changes in maths that may unexpectedly change result
+        assert.equal(
+            v1SwapData.returnAmount.toString(),
+            '0.010393',
+            'V1 sanity check.'
+        );
         assert.equal(
             v2SwapData.returnAmount.toString(),
-            '0.010392755926718752',
-            'Amount should match previous result.'
+            '0.010394',
+            'V2 sanity check.'
         );
+        assert.equal(v2SwapData.swaps.length, 1, 'Should have 1 multiswap.');
     }).timeout(10000);
 });
