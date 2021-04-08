@@ -1001,17 +1001,16 @@ export function assertResults(
         );
     }
 
+    // console.log(`------- Wrapper Swaps (formatted): `)
+    // console.log(wrapperSwapData.swaps);
+
     // Test that swap amounts equal swaps amounts
     if (wrapperSwapData.returnAmount.gt(0)) {
-        const totalSwapAmount = totalSwapInfoAmounts(
+        const totalSwapInfo = totalSwapInfoAmounts(
             swapTypeCorrect,
             wrapperSwapData
         );
-        assert.equal(
-            totalFromSwaps.toString(),
-            totalSwapAmount.toString(),
-            'Wrapper should have same total as direct swaps'
-        );
+
         assert.equal(
             testData.tradeInfo.SwapAmount.toString(),
             wrapperSwapData.swapAmount.toString(),
@@ -1019,8 +1018,14 @@ export function assertResults(
         );
         assert.equal(
             testData.tradeInfo.SwapAmount.toString(),
-            totalSwapAmount.toString(),
+            totalSwapInfo.toString(),
             'Total From SwapInfo Should Equal Swap Amount.'
+        );
+
+        assert.equal(
+            totalFromSwaps.toString(),
+            totalSwapInfo.toString(),
+            'Wrapper should have same total as direct swaps'
         );
     } else
         assert.equal(
@@ -1029,7 +1034,6 @@ export function assertResults(
             'Swap Amount Should Be 0 For No Swaps'
         );
 
-    console.log(wrapperSwapData.swaps);
     checkSwapAmountsForDecimals(swapTypeCorrect, wrapperSwapData);
 }
 

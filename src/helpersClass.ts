@@ -587,6 +587,7 @@ export function formatSwaps(
     if (swapType === SwapTypes.SwapExactIn) {
         const swapsV2: SwapV2[] = [];
 
+        let totalSwapAmount = bnum(0);
         /*
          * Multihop swaps can be executed by passing an`amountIn` value of zero for a swap.This will cause the amount out
          * of the previous swap to be used as the amount in of the current one.In such a scenario, `tokenIn` must equal the
@@ -596,18 +597,14 @@ export function formatSwaps(
             sequence.forEach((swap, i) => {
                 let amountScaled = '0'; // amount will be 0 for second swap in multihop swap
                 if (i == 0) {
+                    // First swap so should have a value for both single and multihop
                     amountScaled = scale(
                         bnum(swap.swapAmount),
                         swap.tokenInDecimals
-                    ).toString();
-                    // First swap so should have a value for both single and multihop
-                    //!!!!!!! TO DO - Not sure if this is a correct way to handle?
-                    // amountScaled = scale(
-                    //     bnum(swap.swapAmount),
-                    //     swap.tokenInDecimals
-                    // )
-                    //     .toString()
-                    //     .split('.')[0];
+                    )
+                        .decimalPlaces(0, 1)
+                        .toString();
+                    totalSwapAmount = totalSwapAmount.plus(amountScaled);
                 }
 
                 const inIndex = tokenArray.indexOf(swap.tokenIn);
@@ -624,11 +621,20 @@ export function formatSwaps(
             });
         });
 
-        swapInfo.swapAmount = scale(swapAmount, tokenInDecimals);
+        // We need to account for any rounding losses by adding dust to first path
+        let swapAmountScaled = scale(swapAmount, tokenInDecimals);
+        let dust = swapAmountScaled.minus(totalSwapAmount);
+        if (dust.gt(0))
+            swapsV2[0].amountIn = bnum(swapsV2[0].amountIn)
+                .plus(dust)
+                .toString();
+
+        swapInfo.swapAmount = swapAmountScaled;
         swapInfo.returnAmount = scale(returnAmount, tokenOutDecimals);
         swapInfo.swaps = swapsV2;
     } else {
         let swapsV2: SwapV2[] = [];
+        let totalSwapAmount = bnum(0);
         /*
         SwapExactOut will have order reversed in V2.
         v1 = [[x, y]], [[a, b]]
@@ -658,14 +664,10 @@ export function formatSwaps(
                     let amountScaled = scale(
                         bnum(swap.swapAmount),
                         swap.tokenOutDecimals
-                    ).toString();
-                    // let amountScaled = scale(
-                    //     bnum(swap.swapAmount),
-                    //     swap.tokenOutDecimals
-                    // )
-                    //     .toString()
-                    //     .split('.')[0];
-
+                    )
+                        .decimalPlaces(0, 1)
+                        .toString();
+                    totalSwapAmount = totalSwapAmount.plus(amountScaled);
                     swapV2.amountOut = amountScaled; // Make the swap the first in V2 order for the sequence with the value
                     sequenceSwaps[0] = swapV2;
                 }
@@ -674,7 +676,15 @@ export function formatSwaps(
             swapsV2 = swapsV2.concat(sequenceSwaps);
         });
 
-        swapInfo.swapAmount = scale(swapAmount, tokenOutDecimals);
+        // We need to account for any rounding losses by adding dust to first path
+        let swapAmountScaled = scale(swapAmount, tokenOutDecimals);
+        let dust = swapAmountScaled.minus(totalSwapAmount);
+        if (dust.gt(0))
+            swapsV2[0].amountOut = bnum(swapsV2[0].amountOut)
+                .plus(dust)
+                .toString();
+
+        swapInfo.swapAmount = swapAmountScaled;
         swapInfo.returnAmount = scale(returnAmount, tokenInDecimals);
         swapInfo.swaps = swapsV2;
     }

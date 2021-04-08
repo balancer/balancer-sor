@@ -298,7 +298,6 @@ export const smartOrderRouter = (
     // after executing the transaction (given there are no front-runners)
     bestPaths.forEach((path, i) => {
         let swapAmount = bestSwapAmounts[i];
-        console.log(swapAmount.toString());
         if (swapAmount.gt(highestSwapAmt)) {
             highestSwapAmt = swapAmount;
             largestSwapPath = path;
@@ -308,18 +307,17 @@ export const smartOrderRouter = (
         );
 
         // // TODO: remove. To debug only!
-
-        console.log(
-            'Prices should be all very close (unless one of the paths is on the limit!'
-        );
-        console.log(
-            getSpotPriceAfterSwapForPath(
-                pools,
-                path,
-                swapType,
-                swapAmount
-            ).toNumber()
-        );
+        // console.log(
+        //     'Prices should be all very close (unless one of the paths is on the limit!'
+        // );
+        // console.log(
+        //     getSpotPriceAfterSwapForPath(
+        //         pools,
+        //         path,
+        //         swapType,
+        //         swapAmount
+        //     ).toNumber()
+        // );
 
         // console.log(
         //     elementMath._NUMERICALspotPriceAfterSwapExactTokenInForTokenOut(
@@ -328,14 +326,14 @@ export const smartOrderRouter = (
         //     ).toNumber()
         // );
 
-        console.log(
-            getDerivativeSpotPriceAfterSwapForPath(
-                pools,
-                path,
-                swapType,
-                swapAmount
-            ).toNumber()
-        );
+        // console.log(
+        //     getDerivativeSpotPriceAfterSwapForPath(
+        //         pools,
+        //         path,
+        //         swapType,
+        //         swapAmount
+        //     ).toNumber()
+        // );
 
         let poolPairData = path.poolPairData;
 
