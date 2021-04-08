@@ -469,7 +469,6 @@ export const smartOrderRouter = (
                     .toString(); // Add dust to second swapExactOut
         }
     }
-    console.log('Number of paths: ' + bestPaths.length.toString());
 
     const marketSp = getSpotPriceAfterSwapForPath(
         pools,

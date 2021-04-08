@@ -1,3 +1,4 @@
+import { JsonRpcProvider } from '@ethersproject/providers';
 import { BigNumber } from 'bignumber.js';
 import * as sorv1 from '@balancer-labs/sor';
 import * as sorv2 from '../../src';
@@ -16,6 +17,7 @@ import {
     SwapPairType,
     NewPath,
     SwapTypes,
+    SwapInfo,
 } from '../../src/types';
 import customMultiAbi from '../abi/customMulticall.json';
 import { SubGraphPools as SubGraphPoolsV1 } from '@balancer-labs/sor/dist/types';
@@ -25,7 +27,7 @@ import { hashMessage } from '@ethersproject/hash';
 import * as fs from 'fs';
 import { readdir } from 'fs/promises';
 import { performance } from 'perf_hooks';
-import { assert } from 'chai';
+import { assert, expect } from 'chai';
 import { getAddress } from '@ethersproject/address';
 import { Contract } from '@ethersproject/contracts';
 // Mainnet reference tokens with addresses & decimals
@@ -33,6 +35,7 @@ import WeightedTokens from '../testData/eligibleTokens.json';
 import StableTokens from '../testData/stableTokens.json';
 import { filterPoolsOfInterest, filterHopPools } from '../../src/pools';
 import { calculatePathLimits, smartOrderRouter } from '../../src/sorClass';
+import { formatSwaps } from '../../src/helpersClass';
 
 // Just for testing weighted helpers:
 import { BPTForTokensZeroPriceImpact } from '../../src/frontendHelpers/weightedHelpers';
@@ -281,6 +284,8 @@ export async function getV1Swap(
         mostLiquidPoolsSecondHop,
         hopTokens
     );
+
+    console.log(`****** V1 Paths: ${pathData.length}`);
 
     ///////////// Start - Just for testing BPTForTokensZeroPriceImpact /////
     /*
@@ -696,6 +701,8 @@ export function getRandomTradeData(isStableOnly: boolean) {
     console.log(`MaxPools: ${maxPools}`);
     */
 
+    const dustRandom = bnum(Math.floor(Math.random() * (5000 - 1 + 1) + 1));
+
     return {
         tokenIn: tokenIn.address.toLowerCase(),
         tokenOut: tokenOut.address.toLowerCase(),
@@ -710,6 +717,7 @@ export function getRandomTradeData(isStableOnly: boolean) {
         inter1SwapAmtOut,
         inter2SwapAmtOut,
         maxPools,
+        dustRandom,
     };
 }
 
@@ -883,6 +891,7 @@ export function assertResults(
     testData,
     v1SwapData,
     v2SwapData,
+    wrapperSwapData: SwapInfo,
     v2WithFilterSwapData = undefined
 ) {
     const relDiffBn = calcRelativeDiffBn(
@@ -946,6 +955,36 @@ export function assertResults(
             } \nSwap Amt: ${testData.tradeInfo.SwapAmount.toString()} \n${v2SwapData.returnAmount.toString()} \n${v2WithFilterSwapData.returnAmount.toString()}`
         );
     }
+
+    assert.equal(
+        wrapperSwapData.returnAmount.toString(),
+        v2SwapData.returnAmount
+            .times(bnum(10 ** testData.tradeInfo.ReturnAmountDecimals))
+            .toString(),
+        `Wrapper should have same amount as helper.`
+    );
+
+    let swapTypeCorrect = SwapTypes.SwapExactIn;
+    if (testData.tradeInfo.SwapType !== 'swapExactIn') {
+        swapTypeCorrect = SwapTypes.SwapExactOut;
+    }
+
+    const amountNormalised = testData.tradeInfo.SwapAmount.div(
+        bnum(10 ** testData.tradeInfo.SwapAmountDecimals)
+    );
+
+    const v2formatted = formatSwaps(
+        v2SwapData.swaps,
+        swapTypeCorrect,
+        amountNormalised,
+        testData.tradeInfo.TokenIn,
+        testData.tradeInfo.TokenOut,
+        v2SwapData.returnAmount,
+        wrapperSwapData.marketSp
+    );
+
+    // Wrapper and direct SOR code should have the same swaps
+    expect(wrapperSwapData).to.deep.equal(v2formatted);
 }
 
 // Helper to filter pools to contain only Weighted pools
@@ -1082,6 +1121,8 @@ export function v2classSwap(
         poolsOfInterestDictionary
     );
 
+    console.log(`****** V2 Paths: ${pathData.length}`);
+
     let paths: NewPath[];
     let maxAmt: BigNumber;
 
@@ -1098,6 +1139,49 @@ export function v2classSwap(
     );
 
     return [swaps, total, marketSp];
+}
+
+export async function getWrapperSwap(
+    pools: any,
+    tokenIn: string,
+    tokenOut: string,
+    maxPools: number,
+    swapType: string | SwapTypes,
+    swapAmountNormalised: BigNumber,
+    costOutputToken: BigNumber,
+    gasPrice: BigNumber,
+    provider: JsonRpcProvider,
+    disabledOptions: DisabledOptions = { isOverRide: false, disabledTokens: [] }
+): Promise<SwapInfo> {
+    const sor = new sorv2.SOR(
+        provider,
+        gasPrice,
+        maxPools,
+        1,
+        JSON.parse(JSON.stringify(pools)),
+        disabledOptions
+    );
+
+    let swapTypeCorrect = SwapTypes.SwapExactIn;
+
+    if (swapType === 'swapExactIn')
+        await sor.setCostOutputToken(tokenOut, costOutputToken);
+    else {
+        swapTypeCorrect = SwapTypes.SwapExactOut;
+        await sor.setCostOutputToken(tokenIn, costOutputToken);
+    }
+
+    const isFetched = await sor.fetchPools(false);
+    assert(isFetched, 'Pools should be fetched in wrapper');
+
+    const swapInfo: SwapInfo = await sor.getSwaps(
+        tokenIn,
+        tokenOut,
+        swapTypeCorrect,
+        swapAmountNormalised
+    );
+
+    return swapInfo;
 }
 
 // Generates file output for v1-v2-compare-testPools.spec.ts
