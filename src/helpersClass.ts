@@ -596,14 +596,18 @@ export function formatSwaps(
             sequence.forEach((swap, i) => {
                 let amountScaled = '0'; // amount will be 0 for second swap in multihop swap
                 if (i == 0) {
-                    // First swap so should have a value for both single and multihop
-                    //!!!!!!! TO DO - Not sure if this is a correct way to handle?
                     amountScaled = scale(
                         bnum(swap.swapAmount),
                         swap.tokenInDecimals
-                    )
-                        .toString()
-                        .split('.')[0];
+                    ).toString();
+                    // First swap so should have a value for both single and multihop
+                    //!!!!!!! TO DO - Not sure if this is a correct way to handle?
+                    // amountScaled = scale(
+                    //     bnum(swap.swapAmount),
+                    //     swap.tokenInDecimals
+                    // )
+                    //     .toString()
+                    //     .split('.')[0];
                 }
 
                 const inIndex = tokenArray.indexOf(swap.tokenIn);
@@ -654,9 +658,13 @@ export function formatSwaps(
                     let amountScaled = scale(
                         bnum(swap.swapAmount),
                         swap.tokenOutDecimals
-                    )
-                        .toString()
-                        .split('.')[0];
+                    ).toString();
+                    // let amountScaled = scale(
+                    //     bnum(swap.swapAmount),
+                    //     swap.tokenOutDecimals
+                    // )
+                    //     .toString()
+                    //     .split('.')[0];
 
                     swapV2.amountOut = amountScaled; // Make the swap the first in V2 order for the sequence with the value
                     sequenceSwaps[0] = swapV2;

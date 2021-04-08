@@ -985,6 +985,121 @@ export function assertResults(
 
     // Wrapper and direct SOR code should have the same swaps
     expect(wrapperSwapData).to.deep.equal(v2formatted);
+
+    let totalFromSwaps: BigNumber;
+    if (v2SwapData.returnAmount.gt(0)) {
+        totalFromSwaps = totalSwapAmounts(
+            swapTypeCorrect,
+            testData.tradeInfo.TokenIn,
+            testData.tradeInfo.TokenOut,
+            v2SwapData.swaps
+        );
+        assert.equal(
+            testData.tradeInfo.SwapAmount.toString(),
+            totalFromSwaps.toString(),
+            'Total From Swaps Should Be Equal.'
+        );
+    }
+
+    // Test that swap amounts equal swaps amounts
+    if (wrapperSwapData.returnAmount.gt(0)) {
+        const totalSwapAmount = totalSwapInfoAmounts(
+            swapTypeCorrect,
+            wrapperSwapData
+        );
+        assert.equal(
+            totalFromSwaps.toString(),
+            totalSwapAmount.toString(),
+            'Wrapper should have same total as direct swaps'
+        );
+        assert.equal(
+            testData.tradeInfo.SwapAmount.toString(),
+            wrapperSwapData.swapAmount.toString(),
+            'Swap Amounts Should Be Equal.'
+        );
+        assert.equal(
+            testData.tradeInfo.SwapAmount.toString(),
+            totalSwapAmount.toString(),
+            'Total From SwapInfo Should Equal Swap Amount.'
+        );
+    } else
+        assert.equal(
+            '0',
+            wrapperSwapData.swapAmount.toString(),
+            'Swap Amount Should Be 0 For No Swaps'
+        );
+
+    console.log(wrapperSwapData.swaps);
+    checkSwapAmountsForDecimals(swapTypeCorrect, wrapperSwapData);
+}
+
+function checkSwapAmountsForDecimals(
+    swapType: SwapTypes,
+    swapInfo: SwapInfo
+): void {
+    swapInfo.swaps.forEach(swap => {
+        if (swapType === SwapTypes.SwapExactIn) {
+            let check = swap.amountIn.split('.');
+            assert.isTrue(
+                check.length === 1,
+                `Swap Amounts Should Not Have Decimal: ${swap.amountIn.toString()}`
+            );
+        } else {
+            let check = swap.amountOut.split('.');
+            assert.isTrue(
+                check.length === 1,
+                `Swap Amounts Should Not Have Decimal: ${swap.amountOut.toString()}`
+            );
+        }
+    });
+}
+
+// Helper to sum all amounts traded by swaps
+function totalSwapInfoAmounts(
+    swapType: SwapTypes,
+    swapInfo: SwapInfo
+): BigNumber {
+    let total = bnum(0);
+    const inIndex = swapInfo.tokenAddresses.indexOf(swapInfo.tokenIn);
+    const outIndex = swapInfo.tokenAddresses.indexOf(swapInfo.tokenOut);
+
+    swapInfo.swaps.forEach(swap => {
+        if (swapType === SwapTypes.SwapExactIn) {
+            if (swap.tokenInIndex === inIndex)
+                total = total.plus(swap.amountIn);
+        } else {
+            if (swap.tokenOutIndex === outIndex)
+                total = total.plus(swap.amountOut);
+        }
+    });
+    return total;
+}
+
+// Helper to sum all amounts traded by swaps
+function totalSwapAmounts(
+    swapType: SwapTypes,
+    tokenIn: string,
+    tokenOut: string,
+    swaps: Swap[][]
+): BigNumber {
+    let total = bnum(0);
+
+    swaps.forEach(swapSeq => {
+        swapSeq.forEach(swap => {
+            if (swapType === SwapTypes.SwapExactIn) {
+                if (swap.tokenIn === tokenIn)
+                    total = total.plus(
+                        scale(bnum(swap.swapAmount), swap.tokenInDecimals)
+                    );
+            } else {
+                if (swap.tokenOut === tokenOut)
+                    total = total.plus(
+                        scale(bnum(swap.swapAmount), swap.tokenOutDecimals)
+                    );
+            }
+        });
+    });
+    return total;
 }
 
 // Helper to filter pools to contain only Weighted pools

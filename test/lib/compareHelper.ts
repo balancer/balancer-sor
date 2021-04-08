@@ -8,9 +8,7 @@ import {
     getWrapperSwap,
 } from './testHelpers';
 import { bnum } from '../../src/bmath';
-import { SOR } from '../../src';
-import { formatSwaps } from '../../src/helpersClass';
-import { SwapInfo, DisabledOptions, SwapTypes } from '../../src/types';
+import { SwapInfo, DisabledOptions } from '../../src/types';
 import { assert, expect } from 'chai';
 import BigNumber from 'bignumber.js';
 
