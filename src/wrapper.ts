@@ -7,9 +7,9 @@ import {
     filterPoolsOfInterest,
     filterHopPools,
     getPoolsFromUrl,
-} from '../src/pools';
-import { calculatePathLimits, smartOrderRouter } from '../src/sorClass';
-import { formatSwaps } from '../src/helpersClass';
+} from './pools';
+import { calculatePathLimits, smartOrderRouter } from './sorClass';
+import { formatSwaps } from './helpersClass';
 import {
     SwapInfo,
     DisabledOptions,

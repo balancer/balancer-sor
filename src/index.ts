@@ -15,3 +15,6 @@ export { getPoolsFromUrl } from './pools';
 export { SOR } from './wrapper';
 export * from './config';
 export * from './types';
+export * from './helpersClass';
+export * from './pools';
+export * from './sorClass';
