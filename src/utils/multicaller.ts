@@ -2,7 +2,6 @@ import _ from 'lodash';
 import { BaseProvider } from '@ethersproject/providers';
 import { Contract } from '@ethersproject/contracts';
 import { Interface } from '@ethersproject/abi';
-import { default as multicallAbi } from '../abi/multicall.json';
 
 export async function call(provider, abi: any[], call: any[], options?) {
     const contract = new Contract(call[0], abi, provider);
@@ -21,6 +20,7 @@ export async function multicall(
     calls: any[],
     options?
 ) {
+    const multicallAbi = require('../abi/Multicall.json');
     const multi = new Contract(multiAddress, multicallAbi, provider);
     const itf = new Interface(abi);
     try {
