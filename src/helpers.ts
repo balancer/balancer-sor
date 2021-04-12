@@ -954,7 +954,7 @@ export function EVMgetOutputAmountSwap(
         if (poolType == 'Weighted') {
             let { weightIn, weightOut } = poolPairData;
             if (pairType == 'token->token') {
-                returnAmount = weightedSolidity._outGivenIn(
+                returnAmount = weightedSolidity._exactTokenInForTokenOut(
                     new FixedPointNumber(scale(balanceIn, decimalsIn)),
                     new FixedPointNumber(scale(weightIn, 18)),
                     new FixedPointNumber(scale(balanceOut, decimalsOut)),
@@ -1021,7 +1021,7 @@ export function EVMgetOutputAmountSwap(
         if (poolType == 'Weighted') {
             let { weightIn, weightOut } = poolPairData;
             if (pairType == 'token->token') {
-                returnAmount = weightedSolidity._inGivenOut(
+                returnAmount = weightedSolidity._tokenInForExactTokenOut(
                     new FixedPointNumber(scale(balanceIn, decimalsIn)),
                     new FixedPointNumber(scale(weightIn, 18)),
                     new FixedPointNumber(scale(balanceOut, decimalsOut)),
