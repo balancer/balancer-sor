@@ -327,7 +327,7 @@ export class WeightedPool implements PoolBase {
         poolPairData: WeightedPoolPairData,
         amount: BigNumber
     ): BigNumber {
-        const amt = weightedSolidity._outGivenIn(
+        const amt = weightedSolidity._exactTokenInForTokenOut(
             new FixedPointNumber(
                 scale(poolPairData.balanceIn, poolPairData.decimalsIn)
             ),
@@ -381,7 +381,7 @@ export class WeightedPool implements PoolBase {
         poolPairData: WeightedPoolPairData,
         amount: BigNumber
     ): BigNumber {
-        const amt = weightedSolidity._inGivenOut(
+        const amt = weightedSolidity._tokenInForExactTokenOut(
             new FixedPointNumber(
                 scale(poolPairData.balanceIn, poolPairData.decimalsIn)
             ),

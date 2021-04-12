@@ -30,7 +30,7 @@ import { FixedPointNumber as BigNumber } from '../../math/FixedPointNumber';
 
 // Computes how many tokens can be taken out of a pool if `tokenAmountIn` are sent, given the
 // current balances and weights.
-export function _outGivenIn(
+export function _exactTokenInForTokenOut(
     tokenBalanceIn: BigNumber,
     tokenWeightIn: BigNumber,
     tokenBalanceOut: BigNumber,
@@ -66,7 +66,7 @@ export function _outGivenIn(
 
 // Computes how many tokens must be sent to a pool in order to take `tokenAmountOut`, given the
 // current balances and weights.
-export function _inGivenOut(
+export function _tokenInForExactTokenOut(
     tokenBalanceIn: BigNumber,
     tokenWeightIn: BigNumber,
     tokenBalanceOut: BigNumber,
