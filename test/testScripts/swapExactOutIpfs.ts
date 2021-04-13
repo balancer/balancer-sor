@@ -24,7 +24,8 @@ const BAL = '0x41286Bb1D3E870f3F750eB7E1C25d7E48c8A1Ac7';
 const MKR = '0xAf9ac3235be96eD496db7969f60D354fe5e426B0';
 const vaultAddr = '0xba1222227c37746aDA22d10Da6265E02E44400DD';
 
-const poolsUrl = `https://storageapi.fleek.co/balancer-bucket/balancer-kovan-v2/exchange`;
+// const poolsUrl = `https://storageapi.fleek.co/balancer-bucket/balancer-kovan-v2/exchange`;
+const poolsUrl = `https://storageapi.fleek.co/johngrantuk-team-bucket/poolsRc02.json`;
 
 async function simpleSwap() {
     // If running this example make sure you have a .env file saved in root DIR with INFURA=your_key
@@ -44,7 +45,7 @@ async function simpleSwap() {
     const maxNoPools = 4;
     const chainId = 42;
     const tokenIn = BAL;
-    const tokenOut = MKR;
+    const tokenOut = WETH;
     const swapType = SwapTypes.SwapExactOut; // Two different swap types are used: SwapExactIn & SwapExactOut
     const amountOut = new BigNumber(0.1); // In normalized format, i.e. 1USDC = 1
     const decimalsOut = 18;
@@ -133,7 +134,8 @@ async function simpleSwap() {
 
     let tx = await vaultContract
         .connect(wallet)
-        .batchSwapGivenOut(
+        .batchSwap(
+            swapType,
             swapInfo.swaps,
             swapInfo.tokenAddresses,
             funds,

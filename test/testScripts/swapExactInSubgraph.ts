@@ -143,7 +143,8 @@ async function simpleSwap() {
 
     let tx = await vaultContract
         .connect(wallet)
-        .batchSwapGivenIn(
+        .batchSwap(
+            swapType,
             swapInfo.swaps,
             swapInfo.tokenAddresses,
             funds,
