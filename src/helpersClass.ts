@@ -13,6 +13,7 @@ import {
 } from './types';
 import { bnum, scale } from './bmath';
 import { INFINITESIMAL } from './config';
+import { ZERO_ADDRESS } from './index';
 
 export function getHighestLimitAmountsForPaths(
     paths: NewPath[],
@@ -543,15 +544,18 @@ export function EVMgetOutputAmountSwap(
 }
 
 export function formatSwaps(
-    swaps: Swap[][],
+    swapsOriginal: Swap[][],
     swapType: SwapTypes,
     swapAmount: BigNumber,
     tokenIn: string,
     tokenOut: string,
     returnAmount: BigNumber,
-    marketSp: BigNumber
+    marketSp: BigNumber,
+    isEthSwap: boolean = false
 ): SwapInfo {
     const tokenAddressesSet: Set<string> = new Set();
+
+    const swaps: Swap[][] = JSON.parse(JSON.stringify(swapsOriginal));
 
     let tokenInDecimals: number;
     let tokenOutDecimals: number;
@@ -570,15 +574,22 @@ export function formatSwaps(
         return swapInfo;
     }
 
+    const WETH = '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2';
+
     swaps.forEach(sequence => {
         sequence.forEach(swap => {
-            tokenAddressesSet.add(swap.tokenIn);
-            tokenAddressesSet.add(swap.tokenOut);
             if (swap.tokenIn === tokenIn)
                 tokenInDecimals = swap.tokenInDecimals;
 
             if (swap.tokenOut === tokenOut)
                 tokenOutDecimals = swap.tokenOutDecimals;
+
+            if (isEthSwap) {
+                if (swap.tokenIn === WETH) swap.tokenIn = ZERO_ADDRESS;
+                if (swap.tokenOut === WETH) swap.tokenOut = ZERO_ADDRESS;
+            }
+            tokenAddressesSet.add(swap.tokenIn);
+            tokenAddressesSet.add(swap.tokenOut);
         });
     });
 
