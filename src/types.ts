@@ -97,10 +97,9 @@ export interface DisabledToken {
 
 export interface SwapV2 {
     poolId: string;
-    tokenInIndex: number;
-    tokenOutIndex: number;
-    amountIn?: string;
-    amountOut?: string;
+    assetInIndex: number;
+    assetOutIndex: number;
+    amount: string;
     userData: string;
 }
 

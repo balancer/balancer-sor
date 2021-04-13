@@ -611,9 +611,9 @@ export function formatSwaps(
                 const outIndex = tokenArray.indexOf(swap.tokenOut);
                 const swapV2: SwapV2 = {
                     poolId: swap.pool,
-                    tokenInIndex: inIndex,
-                    tokenOutIndex: outIndex,
-                    amountIn: amountScaled,
+                    assetInIndex: inIndex,
+                    assetOutIndex: outIndex,
+                    amount: amountScaled,
                     userData: '0x',
                 };
 
@@ -625,7 +625,7 @@ export function formatSwaps(
         let swapAmountScaled = scale(swapAmount, tokenInDecimals);
         let dust = swapAmountScaled.minus(totalSwapAmount);
         if (dust.gt(0))
-            swapsV2[0].amountIn = bnum(swapsV2[0].amountIn)
+            swapsV2[0].amount = bnum(swapsV2[0].amount)
                 .plus(dust)
                 .toString();
 
@@ -652,9 +652,9 @@ export function formatSwaps(
                 const outIndex = tokenArray.indexOf(swap.tokenOut);
                 const swapV2: SwapV2 = {
                     poolId: swap.pool,
-                    tokenInIndex: inIndex,
-                    tokenOutIndex: outIndex,
-                    amountOut: '0', // For a multihop the first swap in sequence should be last in order and have amt = 0
+                    assetInIndex: inIndex,
+                    assetOutIndex: outIndex,
+                    amount: '0', // For a multihop the first swap in sequence should be last in order and have amt = 0
                     userData: '0x',
                 };
 
@@ -668,7 +668,7 @@ export function formatSwaps(
                         .decimalPlaces(0, 1)
                         .toString();
                     totalSwapAmount = totalSwapAmount.plus(amountScaled);
-                    swapV2.amountOut = amountScaled; // Make the swap the first in V2 order for the sequence with the value
+                    swapV2.amount = amountScaled; // Make the swap the first in V2 order for the sequence with the value
                     sequenceSwaps[0] = swapV2;
                 }
             });
@@ -680,7 +680,7 @@ export function formatSwaps(
         let swapAmountScaled = scale(swapAmount, tokenOutDecimals);
         let dust = swapAmountScaled.minus(totalSwapAmount);
         if (dust.gt(0))
-            swapsV2[0].amountOut = bnum(swapsV2[0].amountOut)
+            swapsV2[0].amount = bnum(swapsV2[0].amount)
                 .plus(dust)
                 .toString();
 

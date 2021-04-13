@@ -1470,9 +1470,9 @@ export function formatSwaps(
                 const outIndex = tokenArray.indexOf(swap.tokenOut);
                 const swapV2: SwapV2 = {
                     poolId: swap.pool,
-                    tokenInIndex: inIndex,
-                    tokenOutIndex: outIndex,
-                    amountIn: amountScaled,
+                    assetInIndex: inIndex,
+                    assetOutIndex: outIndex,
+                    amount: amountScaled,
                     userData: '0x',
                 };
 
@@ -1502,9 +1502,9 @@ export function formatSwaps(
                 const outIndex = tokenArray.indexOf(swap.tokenOut);
                 const swapV2: SwapV2 = {
                     poolId: swap.pool,
-                    tokenInIndex: inIndex,
-                    tokenOutIndex: outIndex,
-                    amountOut: '0', // For a multihop the first swap in sequence should be last in order and have amt = 0
+                    assetInIndex: inIndex,
+                    assetOutIndex: outIndex,
+                    amount: '0', // For a multihop the first swap in sequence should be last in order and have amt = 0
                     userData: '0x',
                 };
 
@@ -1518,7 +1518,7 @@ export function formatSwaps(
                         .toString()
                         .split('.')[0];
 
-                    swapV2.amountOut = amountScaled; // Make the swap the first in V2 order for the sequence with the value
+                    swapV2.amount = amountScaled; // Make the swap the first in V2 order for the sequence with the value
                     sequenceSwaps[0] = swapV2;
                 }
             });

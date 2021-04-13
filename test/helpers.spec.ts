@@ -38,14 +38,12 @@ describe(`Tests for Helpers.`, () => {
         assert.equal('2000000000000000000', swapInfo.returnAmount.toString());
         assert.equal(tokenIn, swapInfo.tokenIn);
         assert.equal(tokenOut, swapInfo.tokenOut);
-        assert.equal(swapInfo.swaps[0].tokenInIndex, 0);
-        assert.equal(swapInfo.swaps[0].tokenOutIndex, 1);
-        assert.equal(swapInfo.swaps[1].tokenInIndex, 0);
-        assert.equal(swapInfo.swaps[1].tokenOutIndex, 1);
-        assert.equal(swapInfo.swaps[0].amountIn, '79025357871722424185502');
-        assert.equal(swapInfo.swaps[1].amountIn, '20974642128277575814498');
-        assert.equal(swapInfo.swaps[0].amountOut, undefined);
-        assert.equal(swapInfo.swaps[1].amountOut, undefined);
+        assert.equal(swapInfo.swaps[0].assetInIndex, 0);
+        assert.equal(swapInfo.swaps[0].assetOutIndex, 1);
+        assert.equal(swapInfo.swaps[1].assetInIndex, 0);
+        assert.equal(swapInfo.swaps[1].assetOutIndex, 1);
+        assert.equal(swapInfo.swaps[0].amount, '79025357871722424185502');
+        assert.equal(swapInfo.swaps[1].amount, '20974642128277575814498');
     });
 
     it(`Should format multihop swapExactIn`, () => {
@@ -80,22 +78,18 @@ describe(`Tests for Helpers.`, () => {
         assert.equal('2000000000000000000', swapInfo.returnAmount.toString());
         assert.equal(tokenIn, swapInfo.tokenIn);
         assert.equal(tokenOut, swapInfo.tokenOut);
-        assert.equal(swapInfo.swaps[0].tokenInIndex, 0);
-        assert.equal(swapInfo.swaps[0].tokenOutIndex, 1);
-        assert.equal(swapInfo.swaps[1].tokenInIndex, 1);
-        assert.equal(swapInfo.swaps[1].tokenOutIndex, 2);
-        assert.equal(swapInfo.swaps[2].tokenInIndex, 0);
-        assert.equal(swapInfo.swaps[2].tokenOutIndex, 3);
-        assert.equal(swapInfo.swaps[3].tokenInIndex, 3);
-        assert.equal(swapInfo.swaps[3].tokenOutIndex, 2);
-        assert.equal(swapInfo.swaps[0].amountIn, '79025357871722424185502');
-        assert.equal(swapInfo.swaps[1].amountIn, '0');
-        assert.equal(swapInfo.swaps[2].amountIn, '20974642128277575814498');
-        assert.equal(swapInfo.swaps[3].amountIn, '0');
-        assert.equal(swapInfo.swaps[0].amountOut, undefined);
-        assert.equal(swapInfo.swaps[1].amountOut, undefined);
-        assert.equal(swapInfo.swaps[2].amountOut, undefined);
-        assert.equal(swapInfo.swaps[3].amountOut, undefined);
+        assert.equal(swapInfo.swaps[0].assetInIndex, 0);
+        assert.equal(swapInfo.swaps[0].assetOutIndex, 1);
+        assert.equal(swapInfo.swaps[1].assetInIndex, 1);
+        assert.equal(swapInfo.swaps[1].assetOutIndex, 2);
+        assert.equal(swapInfo.swaps[2].assetInIndex, 0);
+        assert.equal(swapInfo.swaps[2].assetOutIndex, 3);
+        assert.equal(swapInfo.swaps[3].assetInIndex, 3);
+        assert.equal(swapInfo.swaps[3].assetOutIndex, 2);
+        assert.equal(swapInfo.swaps[0].amount, '79025357871722424185502');
+        assert.equal(swapInfo.swaps[1].amount, '0');
+        assert.equal(swapInfo.swaps[2].amount, '20974642128277575814498');
+        assert.equal(swapInfo.swaps[3].amount, '0');
     });
 
     it(`Should format direct & multihop swapExactIn`, () => {
@@ -129,18 +123,15 @@ describe(`Tests for Helpers.`, () => {
         assert.equal('2000000000000000000', swapInfo.returnAmount.toString());
         assert.equal(tokenIn, swapInfo.tokenIn);
         assert.equal(tokenOut, swapInfo.tokenOut);
-        assert.equal(swapInfo.swaps[0].tokenInIndex, 0);
-        assert.equal(swapInfo.swaps[0].tokenOutIndex, 1);
-        assert.equal(swapInfo.swaps[1].tokenInIndex, 0);
-        assert.equal(swapInfo.swaps[1].tokenOutIndex, 2);
-        assert.equal(swapInfo.swaps[2].tokenInIndex, 2);
-        assert.equal(swapInfo.swaps[2].tokenOutIndex, 1);
-        assert.equal(swapInfo.swaps[0].amountIn, '79025357871722424185502');
-        assert.equal(swapInfo.swaps[1].amountIn, '20974642128277575814498');
-        assert.equal(swapInfo.swaps[2].amountIn, '0');
-        assert.equal(swapInfo.swaps[0].amountOut, undefined);
-        assert.equal(swapInfo.swaps[1].amountOut, undefined);
-        assert.equal(swapInfo.swaps[2].amountOut, undefined);
+        assert.equal(swapInfo.swaps[0].assetInIndex, 0);
+        assert.equal(swapInfo.swaps[0].assetOutIndex, 1);
+        assert.equal(swapInfo.swaps[1].assetInIndex, 0);
+        assert.equal(swapInfo.swaps[1].assetOutIndex, 2);
+        assert.equal(swapInfo.swaps[2].assetInIndex, 2);
+        assert.equal(swapInfo.swaps[2].assetOutIndex, 1);
+        assert.equal(swapInfo.swaps[0].amount, '79025357871722424185502');
+        assert.equal(swapInfo.swaps[1].amount, '20974642128277575814498');
+        assert.equal(swapInfo.swaps[2].amount, '0');
     });
 
     it(`Should format directhop swapExactOut`, () => {
@@ -173,14 +164,12 @@ describe(`Tests for Helpers.`, () => {
         assert.equal('1000000000000000000', swapInfo.returnAmount.toString());
         assert.equal(tokenIn, swapInfo.tokenIn);
         assert.equal(tokenOut, swapInfo.tokenOut);
-        assert.equal(swapInfo.swaps[0].tokenInIndex, 0);
-        assert.equal(swapInfo.swaps[0].tokenOutIndex, 1);
-        assert.equal(swapInfo.swaps[1].tokenInIndex, 0);
-        assert.equal(swapInfo.swaps[1].tokenOutIndex, 1);
-        assert.equal(swapInfo.swaps[0].amountOut, '79025357871722424185502');
-        assert.equal(swapInfo.swaps[1].amountOut, '20974642128277575814498');
-        assert.equal(swapInfo.swaps[0].amountIn, undefined);
-        assert.equal(swapInfo.swaps[1].amountIn, undefined);
+        assert.equal(swapInfo.swaps[0].assetInIndex, 0);
+        assert.equal(swapInfo.swaps[0].assetOutIndex, 1);
+        assert.equal(swapInfo.swaps[1].assetInIndex, 0);
+        assert.equal(swapInfo.swaps[1].assetOutIndex, 1);
+        assert.equal(swapInfo.swaps[0].amount, '79025357871722424185502');
+        assert.equal(swapInfo.swaps[1].amount, '20974642128277575814498');
     });
 
     it(`Should format multihop swapExactOut`, () => {
@@ -215,22 +204,18 @@ describe(`Tests for Helpers.`, () => {
         assert.equal('2000000000000000000', swapInfo.returnAmount.toString());
         assert.equal(tokenIn, swapInfo.tokenIn);
         assert.equal(tokenOut, swapInfo.tokenOut);
-        assert.equal(swapInfo.swaps[0].tokenInIndex, 1);
-        assert.equal(swapInfo.swaps[0].tokenOutIndex, 2);
-        assert.equal(swapInfo.swaps[1].tokenInIndex, 0);
-        assert.equal(swapInfo.swaps[1].tokenOutIndex, 1);
-        assert.equal(swapInfo.swaps[2].tokenInIndex, 3);
-        assert.equal(swapInfo.swaps[2].tokenOutIndex, 2);
-        assert.equal(swapInfo.swaps[3].tokenInIndex, 0);
-        assert.equal(swapInfo.swaps[3].tokenOutIndex, 3);
-        assert.equal(swapInfo.swaps[0].amountOut, '50388502611813030611'); // '79025357871722424185502');
-        assert.equal(swapInfo.swaps[1].amountOut, '0');
-        assert.equal(swapInfo.swaps[2].amountOut, '576855408194315533683'); //'20974642128277575814498');
-        assert.equal(swapInfo.swaps[3].amountOut, '0');
-        assert.equal(swapInfo.swaps[0].amountIn, undefined);
-        assert.equal(swapInfo.swaps[1].amountIn, undefined);
-        assert.equal(swapInfo.swaps[2].amountIn, undefined);
-        assert.equal(swapInfo.swaps[3].amountIn, undefined);
+        assert.equal(swapInfo.swaps[0].assetInIndex, 1);
+        assert.equal(swapInfo.swaps[0].assetOutIndex, 2);
+        assert.equal(swapInfo.swaps[1].assetInIndex, 0);
+        assert.equal(swapInfo.swaps[1].assetOutIndex, 1);
+        assert.equal(swapInfo.swaps[2].assetInIndex, 3);
+        assert.equal(swapInfo.swaps[2].assetOutIndex, 2);
+        assert.equal(swapInfo.swaps[3].assetInIndex, 0);
+        assert.equal(swapInfo.swaps[3].assetOutIndex, 3);
+        assert.equal(swapInfo.swaps[0].amount, '50388502611813030611'); // '79025357871722424185502');
+        assert.equal(swapInfo.swaps[1].amount, '0');
+        assert.equal(swapInfo.swaps[2].amount, '576855408194315533683'); //'20974642128277575814498');
+        assert.equal(swapInfo.swaps[3].amount, '0');
     });
 
     it(`Should format direct & multihop swapExactOut`, () => {
@@ -264,19 +249,16 @@ describe(`Tests for Helpers.`, () => {
         assert.equal('2000000000000000000', swapInfo.returnAmount.toString());
         assert.equal(tokenIn, swapInfo.tokenIn);
         assert.equal(tokenOut, swapInfo.tokenOut);
-        assert.equal(swapInfo.swaps[0].tokenInIndex, 0);
-        assert.equal(swapInfo.swaps[0].tokenOutIndex, 1);
-        assert.equal(swapInfo.swaps[1].tokenInIndex, 2);
-        assert.equal(swapInfo.swaps[1].tokenOutIndex, 1);
-        assert.equal(swapInfo.swaps[2].tokenInIndex, 0);
-        assert.equal(swapInfo.swaps[2].tokenOutIndex, 2);
+        assert.equal(swapInfo.swaps[0].assetInIndex, 0);
+        assert.equal(swapInfo.swaps[0].assetOutIndex, 1);
+        assert.equal(swapInfo.swaps[1].assetInIndex, 2);
+        assert.equal(swapInfo.swaps[1].assetOutIndex, 1);
+        assert.equal(swapInfo.swaps[2].assetInIndex, 0);
+        assert.equal(swapInfo.swaps[2].assetOutIndex, 2);
 
-        assert.equal(swapInfo.swaps[0].amountOut, '79025357871722424185502');
-        assert.equal(swapInfo.swaps[1].amountOut, '576855408194315533683');
-        assert.equal(swapInfo.swaps[2].amountOut, '0');
-        assert.equal(swapInfo.swaps[0].amountIn, undefined);
-        assert.equal(swapInfo.swaps[1].amountIn, undefined);
-        assert.equal(swapInfo.swaps[2].amountIn, undefined);
+        assert.equal(swapInfo.swaps[0].amount, '79025357871722424185502');
+        assert.equal(swapInfo.swaps[1].amount, '576855408194315533683');
+        assert.equal(swapInfo.swaps[2].amount, '0');
     });
 
     it(`Should scale 6 decimal token correctly swapExactIn, USDC In`, () => {
@@ -309,10 +291,9 @@ describe(`Tests for Helpers.`, () => {
         assert.equal(tokenIn, swapInfo.tokenIn);
         assert.equal(tokenOut, swapInfo.tokenOut);
         expect(expectedTokenAddresses).to.deep.eq(swapInfo.tokenAddresses);
-        assert.equal(swapInfo.swaps[0].tokenInIndex, 0);
-        assert.equal(swapInfo.swaps[0].tokenOutIndex, 1);
-        assert.equal(swapInfo.swaps[0].amountIn, '77777777');
-        assert.equal(swapInfo.swaps[0].amountOut, undefined);
+        assert.equal(swapInfo.swaps[0].assetInIndex, 0);
+        assert.equal(swapInfo.swaps[0].assetOutIndex, 1);
+        assert.equal(swapInfo.swaps[0].amount, '77777777');
     });
 
     it(`Should scale 6 decimal token correctly swapExactOut, USDC In`, () => {
@@ -345,10 +326,9 @@ describe(`Tests for Helpers.`, () => {
         assert.equal(tokenIn, swapInfo.tokenIn);
         assert.equal(tokenOut, swapInfo.tokenOut);
         expect(expectedTokenAddresses).to.deep.eq(swapInfo.tokenAddresses);
-        assert.equal(swapInfo.swaps[0].tokenInIndex, 0);
-        assert.equal(swapInfo.swaps[0].tokenOutIndex, 1);
-        assert.equal(swapInfo.swaps[0].amountOut, '77777777000000000000');
-        assert.equal(swapInfo.swaps[0].amountIn, undefined);
+        assert.equal(swapInfo.swaps[0].assetInIndex, 0);
+        assert.equal(swapInfo.swaps[0].assetOutIndex, 1);
+        assert.equal(swapInfo.swaps[0].amount, '77777777000000000000');
     });
 
     it(`Should scale 6 decimal token correctly swapExactIn, USDC Out`, () => {
@@ -381,10 +361,9 @@ describe(`Tests for Helpers.`, () => {
         assert.equal(tokenIn, swapInfo.tokenIn);
         assert.equal(tokenOut, swapInfo.tokenOut);
         expect(expectedTokenAddresses).to.deep.eq(swapInfo.tokenAddresses);
-        assert.equal(swapInfo.swaps[0].tokenInIndex, 0);
-        assert.equal(swapInfo.swaps[0].tokenOutIndex, 1);
-        assert.equal(swapInfo.swaps[0].amountIn, '77777777000000000000');
-        assert.equal(swapInfo.swaps[0].amountOut, undefined);
+        assert.equal(swapInfo.swaps[0].assetInIndex, 0);
+        assert.equal(swapInfo.swaps[0].assetOutIndex, 1);
+        assert.equal(swapInfo.swaps[0].amount, '77777777000000000000');
     });
 
     it(`Should scale 6 decimal token correctly swapExactOut, USDC Out`, () => {
@@ -417,10 +396,9 @@ describe(`Tests for Helpers.`, () => {
         assert.equal(tokenIn, swapInfo.tokenIn);
         assert.equal(tokenOut, swapInfo.tokenOut);
         expect(expectedTokenAddresses).to.deep.eq(swapInfo.tokenAddresses);
-        assert.equal(swapInfo.swaps[0].tokenInIndex, 0);
-        assert.equal(swapInfo.swaps[0].tokenOutIndex, 1);
-        assert.equal(swapInfo.swaps[0].amountOut, '77777777');
-        assert.equal(swapInfo.swaps[0].amountIn, undefined);
+        assert.equal(swapInfo.swaps[0].assetInIndex, 0);
+        assert.equal(swapInfo.swaps[0].assetOutIndex, 1);
+        assert.equal(swapInfo.swaps[0].amount, '77777777');
     });
 
     it(`Should handle no swaps case`, () => {

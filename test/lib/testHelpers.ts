@@ -1043,16 +1043,16 @@ function checkSwapAmountsForDecimals(
 ): void {
     swapInfo.swaps.forEach(swap => {
         if (swapType === SwapTypes.SwapExactIn) {
-            let check = swap.amountIn.split('.');
+            let check = swap.amount.split('.');
             assert.isTrue(
                 check.length === 1,
-                `Swap Amounts Should Not Have Decimal: ${swap.amountIn.toString()}`
+                `Swap Amounts Should Not Have Decimal: ${swap.amount.toString()}`
             );
         } else {
-            let check = swap.amountOut.split('.');
+            let check = swap.amount.split('.');
             assert.isTrue(
                 check.length === 1,
-                `Swap Amounts Should Not Have Decimal: ${swap.amountOut.toString()}`
+                `Swap Amounts Should Not Have Decimal: ${swap.amount.toString()}`
             );
         }
     });
@@ -1069,11 +1069,10 @@ function totalSwapInfoAmounts(
 
     swapInfo.swaps.forEach(swap => {
         if (swapType === SwapTypes.SwapExactIn) {
-            if (swap.tokenInIndex === inIndex)
-                total = total.plus(swap.amountIn);
+            if (swap.assetInIndex === inIndex) total = total.plus(swap.amount);
         } else {
-            if (swap.tokenOutIndex === outIndex)
-                total = total.plus(swap.amountOut);
+            if (swap.assetOutIndex === outIndex)
+                total = total.plus(swap.amount);
         }
     });
     return total;
