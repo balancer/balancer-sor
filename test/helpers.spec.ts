@@ -646,13 +646,87 @@ describe(`Tests for Helpers.`, () => {
         const tokenIn = '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2';
         const tokenOut = '0xba100000625a3754423978a60c9317c58a424e3d';
         const swapType = SwapTypes.SwapExactOut;
-        const isEthSwap = false;
+        const isEthSwap = true;
 
         const swapsV1Format: any = testSwaps.directhopsWethIn;
 
         const expectedTokenAddresses: string[] = [
             ZERO_ADDRESS,
             '0xba100000625a3754423978a60c9317c58a424e3d',
+        ];
+
+        const swapInfo: SwapInfo = formatSwaps(
+            swapsV1Format,
+            swapType,
+            swapAmount,
+            tokenIn,
+            tokenOut,
+            returnAmount,
+            marketSp,
+            isEthSwap
+        );
+
+        expect(expectedTokenAddresses).to.deep.eq(swapInfo.tokenAddresses);
+        assert.equal(swapInfo.swaps.length, 1);
+        assert.equal('2000000000000000000', swapInfo.swapAmount.toString());
+        assert.equal('1000000000000000000', swapInfo.returnAmount.toString());
+        assert.equal(tokenIn, swapInfo.tokenIn);
+        assert.equal(tokenOut, swapInfo.tokenOut);
+        assert.equal(swapInfo.swaps[0].assetInIndex, 0);
+        assert.equal(swapInfo.swaps[0].assetOutIndex, 1);
+        assert.equal(swapInfo.swaps[0].amount, '79025357871722424185502');
+    });
+
+    it(`Should format directhop swapExactOut for No Eth Wrap, Weth Out`, () => {
+        const swapAmount = new BigNumber(2);
+        const returnAmount = new BigNumber(1);
+        const tokenIn = '0xba100000625a3754423978a60c9317c58a424e3d';
+        const tokenOut = '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2';
+        const swapType = SwapTypes.SwapExactOut;
+        const isEthSwap = false;
+
+        const swapsV1Format: any = testSwaps.directhopsWethIn;
+
+        const expectedTokenAddresses: string[] = [
+            '0xba100000625a3754423978a60c9317c58a424e3d',
+            '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2',
+        ];
+
+        const swapInfo: SwapInfo = formatSwaps(
+            swapsV1Format,
+            swapType,
+            swapAmount,
+            tokenIn,
+            tokenOut,
+            returnAmount,
+            marketSp,
+            isEthSwap
+        );
+
+        expect(expectedTokenAddresses).to.deep.eq(swapInfo.tokenAddresses);
+        assert.equal(swapInfo.swaps.length, 1);
+        assert.equal('2000000000000000000', swapInfo.swapAmount.toString());
+        assert.equal('1000000000000000000', swapInfo.returnAmount.toString());
+        assert.equal(tokenIn, swapInfo.tokenIn);
+        assert.equal(tokenOut, swapInfo.tokenOut);
+        assert.equal(swapInfo.swaps[0].assetInIndex, 0);
+        assert.equal(swapInfo.swaps[0].assetOutIndex, 1);
+        assert.equal(swapInfo.swaps[0].amount, '79025357871722424185502');
+    });
+
+    it(`Should format directhop swapExactOut for Eth Wrap, Weth Out`, () => {
+        const swapAmount = new BigNumber(2);
+        const returnAmount = new BigNumber(1);
+        const tokenIn = '0xba100000625a3754423978a60c9317c58a424e3d';
+        const tokenOut = '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2';
+        const swapType = SwapTypes.SwapExactOut;
+        const isEthSwap = true;
+
+        const swapsV1Format: any = testSwaps.directhopsWethIn;
+
+        const expectedTokenAddresses: string[] = [
+            '0xba100000625a3754423978a60c9317c58a424e3d',
+            ZERO_ADDRESS,
         ];
 
         const swapInfo: SwapInfo = formatSwaps(
