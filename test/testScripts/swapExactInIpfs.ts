@@ -19,12 +19,14 @@ export type FundManagement = {
 };
 
 // rc01 Kovan addresses
-const WETH = '0xe1329748c41A140536e41049C95c36A53bCACee6';
-const BAL = '0x1688C45BC51Faa1B783D274E03Da0A0B28A0A871';
-const MKR = '0xD9D9E09604c0C14B592e6E383582291b026EBced';
-const vaultAddr = '0xba1c01474A7598c2B49015FdaFc67DdF06ce15f7';
+const WETH = '0x02822e968856186a20fEc2C824D4B174D0b70502';
+const BAL = '0x41286Bb1D3E870f3F750eB7E1C25d7E48c8A1Ac7';
+const MKR = '0xAf9ac3235be96eD496db7969f60D354fe5e426B0';
+const USDC = '0xc2569dd7d0fd715B054fBf16E75B001E5c0C1115';
+const DEC = '0xC91c699D432323B020E3DE0Fc49761E040D60aB3';
+const vaultAddr = '0xba1222227c37746aDA22d10Da6265E02E44400DD';
 
-const poolsUrl = `https://storageapi.fleek.co/balancer-bucket/balancer-kovan-v2/exchange`;
+const poolsUrl = `https://storageapi.fleek.co/johngrantuk-team-bucket/poolsRc02.json`;
 
 async function simpleSwap() {
     // If running this example make sure you have a .env file saved in root DIR with INFURA=your_key
@@ -43,11 +45,11 @@ async function simpleSwap() {
     // This determines the max no of pools the SOR will use to swap.
     const maxNoPools = 4;
     const chainId = 42;
-    const tokenIn = BAL;
-    const tokenOut = MKR;
+    const tokenIn = USDC;
+    const tokenOut = DEC;
     const swapType = SwapTypes.SwapExactIn; // Two different swap types are used: SwapExactIn & SwapExactOut
     const amountIn = new BigNumber(0.1); // In normalized format, i.e. 1USDC = 1
-    const decimalsIn = 18;
+    const decimalsIn = 6;
 
     const sor = new SOR(provider, gasPrice, maxNoPools, chainId, poolsUrl);
 
@@ -73,18 +75,20 @@ async function simpleSwap() {
 
     // The rest of the code executes a swap using wallet funds
 
-    /*
     // Vault needs approval for swapping
-    console.log('Approving vault...');
-    let tokenInContract = new Contract(
-        tokenIn,
-        erc20abi,
-        provider
-    );
+    // console.log('Approving vault...');
+    let tokenInContract = new Contract(tokenIn, erc20abi, provider);
 
-    let txApprove = await tokenInContract.connect(wallet).approve(vaultAddr, MaxUint256);
-    console.log(txApprove);
-    */
+    const balance = await tokenInContract.balanceOf(wallet.address);
+    console.log(`Balance: ${balance.toString()}`);
+    const allowance = await tokenInContract.allowance(
+        wallet.address,
+        vaultAddr
+    );
+    console.log(`Allow: ${allowance.toString()}`);
+
+    // let txApprove = await tokenInContract.connect(wallet).approve(vaultAddr, MaxUint256);
+    // console.log(txApprove);
 
     const vaultContract = new Contract(vaultAddr, vaultArtifact, provider);
     vaultContract.connect(wallet);
@@ -105,6 +109,7 @@ async function simpleSwap() {
     swapInfo.tokenAddresses.forEach((token, i) => {
         if (token.toLowerCase() === tokenIn.toLowerCase()) {
             limits[i] = scale(amountIn, decimalsIn).toString();
+            // limits[i] = '10000000000000000000000';
         } else if (token.toLowerCase() === tokenOut.toLowerCase()) {
             // This should be amt + slippage in UI
             // limits[i] = swapInfo.returnAmount
@@ -125,7 +130,8 @@ async function simpleSwap() {
 
     let tx = await vaultContract
         .connect(wallet)
-        .batchSwapGivenIn(
+        .batchSwap(
+            swapType,
             swapInfo.swaps,
             swapInfo.tokenAddresses,
             funds,
