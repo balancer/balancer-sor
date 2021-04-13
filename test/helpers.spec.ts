@@ -685,7 +685,7 @@ describe(`Tests for Helpers.`, () => {
         const swapType = SwapTypes.SwapExactOut;
         const isEthSwap = false;
 
-        const swapsV1Format: any = testSwaps.directhopsWethIn;
+        const swapsV1Format: any = testSwaps.directhopsWethOut;
 
         const expectedTokenAddresses: string[] = [
             '0xba100000625a3754423978a60c9317c58a424e3d',
@@ -722,7 +722,7 @@ describe(`Tests for Helpers.`, () => {
         const swapType = SwapTypes.SwapExactOut;
         const isEthSwap = true;
 
-        const swapsV1Format: any = testSwaps.directhopsWethIn;
+        const swapsV1Format: any = testSwaps.directhopsWethOut;
 
         const expectedTokenAddresses: string[] = [
             '0xba100000625a3754423978a60c9317c58a424e3d',
