@@ -15,7 +15,7 @@ import {
 } from '../../src';
 import { scale } from '../../src/bmath';
 
-import vaultArtifact from '../../src/abi/vault.json';
+import vaultArtifact from '../../src/abi/Vault.json';
 import erc20abi from '../abi/ERC20.json';
 
 import { getOnChainBalances } from '../../src/multicall';

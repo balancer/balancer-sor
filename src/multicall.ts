@@ -3,9 +3,6 @@ import { SubGraphPoolsBase } from './types';
 import { scale, bnum } from './bmath';
 import { Multicaller } from './utils/multicaller';
 import _ from 'lodash';
-import { default as vaultAbi } from './abi/vault.json';
-import { default as weightedPoolAbi } from './pools/weightedPool/weightedPoolAbi.json';
-import { default as stablePoolAbi } from './pools/stablePool/stablePoolAbi.json';
 
 // Load pools data with multicalls
 export async function getOnChainBalances(

@@ -8,7 +8,7 @@ import { MaxUint256 } from '@ethersproject/constants';
 import { SOR, SwapInfo, SwapTypes, ZERO_ADDRESS } from '../../src';
 import { scale } from '../../src/bmath';
 
-import vaultArtifact from '../../src/abi/vault.json';
+import vaultArtifact from '../../src/abi/Vault.json';
 import erc20abi from '../abi/ERC20.json';
 
 export type FundManagement = {
