@@ -461,7 +461,6 @@ describe(`Tests for Helpers.`, () => {
         const tokenIn = '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2'; // Weth In
         const tokenOut = '0xba100000625a3754423978a60c9317c58a424e3d';
         const swapType = SwapTypes.SwapExactIn;
-        const isEthSwap = false;
 
         const swapsV1Format: any = testSwaps.directhopsWethIn;
 
@@ -477,8 +476,7 @@ describe(`Tests for Helpers.`, () => {
             tokenIn,
             tokenOut,
             returnAmount,
-            marketSp,
-            isEthSwap
+            marketSp
         );
 
         expect(expectedTokenAddresses).to.deep.eq(swapInfo.tokenAddresses);
@@ -498,7 +496,10 @@ describe(`Tests for Helpers.`, () => {
         const tokenIn = '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2'; // Weth In
         const tokenOut = '0xba100000625a3754423978a60c9317c58a424e3d';
         const swapType = SwapTypes.SwapExactIn;
-        const isEthSwap = true;
+        const isEthSwap = {
+            isEthSwap: true,
+            wethAddress: '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2',
+        };
 
         const swapsV1Format: any = testSwaps.directhopsWethIn;
 
@@ -535,7 +536,6 @@ describe(`Tests for Helpers.`, () => {
         const tokenIn = '0xba100000625a3754423978a60c9317c58a424e3d';
         const tokenOut = '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2'; // Weth Out
         const swapType = SwapTypes.SwapExactIn;
-        const isEthSwap = false;
 
         const swapsV1Format: any = testSwaps.directhopsWethOut;
 
@@ -551,8 +551,7 @@ describe(`Tests for Helpers.`, () => {
             tokenIn,
             tokenOut,
             returnAmount,
-            marketSp,
-            isEthSwap
+            marketSp
         );
 
         expect(expectedTokenAddresses).to.deep.eq(swapInfo.tokenAddresses);
@@ -572,7 +571,10 @@ describe(`Tests for Helpers.`, () => {
         const tokenIn = '0xba100000625a3754423978a60c9317c58a424e3d';
         const tokenOut = '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2'; // Weth Out
         const swapType = SwapTypes.SwapExactIn;
-        const isEthSwap = true;
+        const isEthSwap = {
+            isEthSwap: true,
+            wethAddress: '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2',
+        };
 
         const swapsV1Format: any = testSwaps.directhopsWethOut;
 
@@ -609,7 +611,6 @@ describe(`Tests for Helpers.`, () => {
         const tokenIn = '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2';
         const tokenOut = '0xba100000625a3754423978a60c9317c58a424e3d';
         const swapType = SwapTypes.SwapExactOut;
-        const isEthSwap = false;
 
         const swapsV1Format: any = testSwaps.directhopsWethIn;
 
@@ -625,8 +626,7 @@ describe(`Tests for Helpers.`, () => {
             tokenIn,
             tokenOut,
             returnAmount,
-            marketSp,
-            isEthSwap
+            marketSp
         );
 
         expect(expectedTokenAddresses).to.deep.eq(swapInfo.tokenAddresses);
@@ -646,7 +646,10 @@ describe(`Tests for Helpers.`, () => {
         const tokenIn = '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2';
         const tokenOut = '0xba100000625a3754423978a60c9317c58a424e3d';
         const swapType = SwapTypes.SwapExactOut;
-        const isEthSwap = true;
+        const isEthSwap = {
+            isEthSwap: true,
+            wethAddress: '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2',
+        };
 
         const swapsV1Format: any = testSwaps.directhopsWethIn;
 
@@ -683,7 +686,6 @@ describe(`Tests for Helpers.`, () => {
         const tokenIn = '0xba100000625a3754423978a60c9317c58a424e3d';
         const tokenOut = '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2';
         const swapType = SwapTypes.SwapExactOut;
-        const isEthSwap = false;
 
         const swapsV1Format: any = testSwaps.directhopsWethOut;
 
@@ -699,8 +701,7 @@ describe(`Tests for Helpers.`, () => {
             tokenIn,
             tokenOut,
             returnAmount,
-            marketSp,
-            isEthSwap
+            marketSp
         );
 
         expect(expectedTokenAddresses).to.deep.eq(swapInfo.tokenAddresses);
@@ -720,7 +721,10 @@ describe(`Tests for Helpers.`, () => {
         const tokenIn = '0xba100000625a3754423978a60c9317c58a424e3d';
         const tokenOut = '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2';
         const swapType = SwapTypes.SwapExactOut;
-        const isEthSwap = true;
+        const isEthSwap = {
+            isEthSwap: true,
+            wethAddress: '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2',
+        };
 
         const swapsV1Format: any = testSwaps.directhopsWethOut;
 
@@ -757,7 +761,6 @@ describe(`Tests for Helpers.`, () => {
         const tokenIn = '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2';
         const tokenOut = '0x056fd409e1d7a124bd7017459dfea2f387b6d5cd';
         const swapType = SwapTypes.SwapExactIn;
-        const isEthSwap = false;
 
         const swapsV1Format: any = testSwaps.directandmultihopsWethIn;
 
@@ -774,8 +777,7 @@ describe(`Tests for Helpers.`, () => {
             tokenIn,
             tokenOut,
             returnAmount,
-            marketSp,
-            isEthSwap
+            marketSp
         );
 
         expect(expectedTokenAddresses).to.deep.eq(swapInfo.tokenAddresses);
@@ -801,7 +803,10 @@ describe(`Tests for Helpers.`, () => {
         const tokenIn = '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2';
         const tokenOut = '0x056fd409e1d7a124bd7017459dfea2f387b6d5cd';
         const swapType = SwapTypes.SwapExactIn;
-        const isEthSwap = true;
+        const isEthSwap = {
+            isEthSwap: true,
+            wethAddress: '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2',
+        };
 
         const swapsV1Format: any = testSwaps.directandmultihopsWethIn;
 
@@ -888,7 +893,10 @@ describe(`Tests for Helpers.`, () => {
         const tokenIn = '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2';
         const tokenOut = '0x056fd409e1d7a124bd7017459dfea2f387b6d5cd';
         const swapType = SwapTypes.SwapExactOut;
-        const isEthSwap = true;
+        const isEthSwap = {
+            isEthSwap: true,
+            wethAddress: '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2',
+        };
 
         const swapsV1Format: any = testSwaps.directandmultihopsWethIn;
 
@@ -933,7 +941,6 @@ describe(`Tests for Helpers.`, () => {
         const tokenIn = '0x056fd409e1d7a124bd7017459dfea2f387b6d5cd';
         const tokenOut = '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2';
         const swapType = SwapTypes.SwapExactIn;
-        const isEthSwap = false;
 
         const swapsV1Format: any = testSwaps.directandmultihopsWethOut;
 
@@ -950,8 +957,7 @@ describe(`Tests for Helpers.`, () => {
             tokenIn,
             tokenOut,
             returnAmount,
-            marketSp,
-            isEthSwap
+            marketSp
         );
 
         expect(expectedTokenAddresses).to.deep.eq(swapInfo.tokenAddresses);
@@ -977,7 +983,10 @@ describe(`Tests for Helpers.`, () => {
         const tokenIn = '0x056fd409e1d7a124bd7017459dfea2f387b6d5cd';
         const tokenOut = '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2';
         const swapType = SwapTypes.SwapExactIn;
-        const isEthSwap = true;
+        const isEthSwap = {
+            isEthSwap: true,
+            wethAddress: '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2',
+        };
 
         const swapsV1Format: any = testSwaps.directandmultihopsWethOut;
 
@@ -1064,7 +1073,10 @@ describe(`Tests for Helpers.`, () => {
         const tokenIn = '0x056fd409e1d7a124bd7017459dfea2f387b6d5cd';
         const tokenOut = '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2';
         const swapType = SwapTypes.SwapExactOut;
-        const isEthSwap = true;
+        const isEthSwap = {
+            isEthSwap: true,
+            wethAddress: '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2',
+        };
 
         const swapsV1Format: any = testSwaps.directandmultihopsWethOut;
 

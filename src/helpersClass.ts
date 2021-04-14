@@ -551,7 +551,10 @@ export function formatSwaps(
     tokenOut: string,
     returnAmount: BigNumber,
     marketSp: BigNumber,
-    isEthSwap: boolean = false
+    wrapOptions = {
+        isEthSwap: false,
+        wethAddress: '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2',
+    }
 ): SwapInfo {
     const tokenAddressesSet: Set<string> = new Set();
 
@@ -574,7 +577,7 @@ export function formatSwaps(
         return swapInfo;
     }
 
-    const WETH = '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2';
+    const WETH = wrapOptions.wethAddress.toLowerCase();
 
     swaps.forEach(sequence => {
         sequence.forEach(swap => {
@@ -584,7 +587,7 @@ export function formatSwaps(
             if (swap.tokenOut === tokenOut)
                 tokenOutDecimals = swap.tokenOutDecimals;
 
-            if (isEthSwap) {
+            if (wrapOptions.isEthSwap) {
                 if (swap.tokenIn === WETH) swap.tokenIn = ZERO_ADDRESS;
                 if (swap.tokenOut === WETH) swap.tokenOut = ZERO_ADDRESS;
             }
