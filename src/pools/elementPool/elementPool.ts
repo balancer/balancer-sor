@@ -152,9 +152,15 @@ export class ElementPool implements PoolBase {
         return poolPairData;
     }
 
+    // Normalized liquidity is an abstract term that can be thought of the
+    // inverse of the slippage. It is proportional to the token balances in the
+    // pool but also depends on the shape of the invariant curve.
+    // As a standard, we define normalized liquidity in tokenOut
     getNormalizedLiquidity(poolPairData: ElementPoolPairData): BigNumber {
-        // TO DO This needs added
-        return bnum(0);
+        // This could be refined by using the inverse of the slippage, but
+        // in practice this won't have a big impact in path selection for
+        // multi-hops so not a big priority
+        return poolPairData.balanceOut;
     }
 
     // Updates the balance of a given token for the pool

@@ -153,6 +153,10 @@ export class WeightedPool implements PoolBase {
         return poolPairData;
     }
 
+    // Normalized liquidity is an abstract term that can be thought of the
+    // inverse of the slippage. It is proportional to the token balances in the
+    // pool but also depends on the shape of the invariant curve.
+    // As a standard, we define normalized liquidity in tokenOut
     getNormalizedLiquidity(poolPairData: WeightedPoolPairData) {
         if (poolPairData.pairType == PairTypes.TokenToToken) {
             return poolPairData.balanceOut

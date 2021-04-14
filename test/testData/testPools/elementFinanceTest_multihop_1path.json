@@ -1,15 +1,127 @@
 {
     "tradeInfo": {
         "SwapType": "swapExactIn",
-        "TokenIn": "0x6b175474e89094c44da98b954eedeac495271d0f",
-        "TokenOut": "0x056fd409e1d7a124bd7017459dfea2f387b6d5cd",
+        "TokenIn": "0x0000000000000000000000000000000000000001",
+        "TokenOut": "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
         "NoPools": 4,
-        "SwapAmount": "1000000000000000000000000",
-        "GasPrice": "0",
+        "SwapAmount": "21937193127622690000000",
+        "GasPrice": "1000000",
         "SwapAmountDecimals": "18",
-        "ReturnAmountDecimals": "2"
+        "ReturnAmountDecimals": "18"
     },
     "pools": [
+        {
+            "id": "0xelementPool1",
+            "poolType": "Element",
+            "swapFee": "0.05",
+            "lpShares": "265819.67027583614",
+            "time": "0.20475000000000002",
+            "principalToken": "0x0000000000000000000000000000000000000001",
+            "baseToken": "0x6b175474e89094c44da98b954eedeac495271d0f",
+            "tokens": [
+                {
+                    "address": "0x0000000000000000000000000000000000000001",
+                    "balance": "967438.5972366218",
+                    "decimals": 18,
+                    "weight": "5"
+                },
+                {
+                    "address": "0x6b175474e89094c44da98b954eedeac495271d0f",
+                    "balance": "447689.0001456285",
+                    "decimals": 18,
+                    "weight": "5"
+                }
+            ],
+            "tokensList": [
+                "0x0000000000000000000000000000000000000001",
+                "0x6b175474e89094c44da98b954eedeac495271d0f"
+            ],
+            "totalWeight": "10"
+        },
+        {
+            "id": "0xelementPool2",
+            "poolType": "Element",
+            "swapFee": "0.05",
+            "lpShares": "311863.7956289041",
+            "time": "0.12425",
+            "principalToken": "0x0000000000000000000000000000000000000001",
+            "baseToken": "0x6b175474e89094c44da98b954eedeac495271d0f",
+            "tokens": [
+                {
+                    "address": "0x0000000000000000000000000000000000000001",
+                    "balance": "230177.25143358269",
+                    "decimals": 18,
+                    "weight": "5"
+                },
+                {
+                    "address": "0x6b175474e89094c44da98b954eedeac495271d0f",
+                    "balance": "227297.54091594956",
+                    "decimals": 18,
+                    "weight": "5"
+                }
+            ],
+            "tokensList": [
+                "0x0000000000000000000000000000000000000001",
+                "0x6b175474e89094c44da98b954eedeac495271d0f"
+            ],
+            "totalWeight": "10"
+        },
+        {
+            "id": "0xelementPool3",
+            "poolType": "Element",
+            "swapFee": "0.05",
+            "lpShares": "888791.4151192267",
+            "time": "0.127",
+            "principalToken": "0x0000000000000000000000000000000000000001",
+            "baseToken": "0x6b175474e89094c44da98b954eedeac495271d0f",
+            "tokens": [
+                {
+                    "address": "0x0000000000000000000000000000000000000001",
+                    "balance": "252853.96590876798",
+                    "decimals": 18,
+                    "weight": "5"
+                },
+                {
+                    "address": "0x6b175474e89094c44da98b954eedeac495271d0f",
+                    "balance": "674971.6048091053",
+                    "decimals": 18,
+                    "weight": "5"
+                }
+            ],
+            "tokensList": [
+                "0x0000000000000000000000000000000000000001",
+                "0x6b175474e89094c44da98b954eedeac495271d0f"
+            ],
+            "totalWeight": "10"
+        },
+        {
+            "id": "0xelementPool4",
+            "poolType": "Element",
+            "swapFee": "0.05",
+            "lpShares": "203024.0527059632",
+            "time": "0.06075",
+            "principalToken": "0x0000000000000000000000000000000000000001",
+            "baseToken": "0x6b175474e89094c44da98b954eedeac495271d0f",
+            "tokens": [
+                {
+                    "address": "0x0000000000000000000000000000000000000001",
+                    "balance": "475364.5726183281",
+                    "decimals": 18,
+                    "weight": "5"
+                },
+                {
+                    "address": "0x6b175474e89094c44da98b954eedeac495271d0f",
+                    "balance": "251639.14235585282",
+                    "decimals": 18,
+                    "weight": "5"
+                }
+            ],
+            "tokensList": [
+                "0x0000000000000000000000000000000000000001",
+                "0x6b175474e89094c44da98b954eedeac495271d0f"
+            ],
+            "totalWeight": "10"
+        },
         {
             "id": "0x6c3F90f043a72FA612cbac8115EE7e52BDe6E490",
             "balanceBpt": "785224145.723155205181003818",

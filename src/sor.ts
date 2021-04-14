@@ -307,17 +307,17 @@ export const smartOrderRouter = (
         );
 
         // // TODO: remove. To debug only!
-        // console.log(
-        //     'Prices should be all very close (unless one of the paths is on the limit!'
-        // );
-        // console.log(
-        //     getSpotPriceAfterSwapForPath(
-        //         pools,
-        //         path,
-        //         swapType,
-        //         swapAmount
-        //     ).toNumber()
-        // );
+        console.log(
+            'Prices should be all very close (unless one of the paths is on the limit!'
+        );
+        console.log(
+            getSpotPriceAfterSwapForPath(
+                pools,
+                path,
+                swapType,
+                swapAmount
+            ).toNumber()
+        );
 
         // console.log(
         //     elementMath._NUMERICALspotPriceAfterSwapExactTokenInForTokenOut(
