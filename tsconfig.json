@@ -12,5 +12,11 @@
         "experimentalDecorators": true,
         "strictNullChecks": false
     },
-    "include": ["src", "src/abi/*.json", "src/disabled-tokens.json"]
+    "include": [
+        "src",
+        "src/abi/*.json",
+        "src/disabled-tokens.json",
+        "src/pools/stablePool/stablePoolAbi.json",
+        "src/pools/weightedPool/weightedPoolAbi.json"
+    ]
 }

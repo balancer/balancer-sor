@@ -19,6 +19,7 @@ import {
     SubgraphPoolBase,
     SubGraphPoolsBase,
 } from './types';
+import { ZERO_ADDRESS } from './index';
 
 export class SOR {
     MULTIADDR: { [chainId: number]: string } = {
@@ -29,6 +30,11 @@ export class SOR {
     VAULTADDR: { [chainId: number]: string } = {
         1: '0xba1222227c37746aDA22d10Da6265E02E44400DD',
         42: '0xba1222227c37746aDA22d10Da6265E02E44400DD',
+    };
+
+    WETHADDR: { [chainId: number]: string } = {
+        1: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2',
+        42: '0x02822e968856186a20fEc2C824D4B174D0b70502',
     };
 
     provider: BaseProvider;
@@ -198,10 +204,6 @@ export class SOR {
         swapType: SwapTypes,
         swapAmt: BigNumber
     ): Promise<SwapInfo> {
-        // The Subgraph returns tokens in lower case format so we must match this
-        tokenIn = tokenIn.toLowerCase();
-        tokenOut = tokenOut.toLowerCase();
-
         let swapInfo: SwapInfo = {
             tokenAddresses: [],
             swaps: [],
@@ -212,6 +214,22 @@ export class SOR {
             marketSp: bnum(0),
         };
 
+        // The Subgraph returns tokens in lower case format so we must match this
+        tokenIn = tokenIn.toLowerCase();
+        tokenOut = tokenOut.toLowerCase();
+
+        const WETH = this.WETHADDR[this.chainId].toLowerCase();
+        const wrapOptions = { isEthSwap: false, wethAddress: WETH };
+
+        if (tokenIn === ZERO_ADDRESS) {
+            tokenIn = WETH;
+            wrapOptions.isEthSwap = true;
+        }
+        if (tokenOut === ZERO_ADDRESS) {
+            tokenOut = WETH;
+            wrapOptions.isEthSwap = true;
+        }
+
         if (this.finishedFetchingOnChain) {
             // All Pools with OnChain Balances is already fetched so use that
             swapInfo = await this.processSwaps(
@@ -219,7 +237,8 @@ export class SOR {
                 tokenOut,
                 swapType,
                 swapAmt,
-                this.onChainBalanceCache
+                this.onChainBalanceCache,
+                wrapOptions
             );
         } else {
             // Haven't retrieved all pools/balances so we use the pools for pairs if previously fetched
@@ -232,6 +251,7 @@ export class SOR {
                 swapType,
                 swapAmt,
                 this.poolsForPairsCache[this.createKey(tokenIn, tokenOut)],
+                wrapOptions,
                 false
             );
         }
@@ -247,6 +267,7 @@ export class SOR {
         swapType: SwapTypes,
         swapAmt: BigNumber,
         onChainPools: SubGraphPoolsBase,
+        wrapOptions: any,
         useProcessCache: boolean = true
     ): Promise<SwapInfo> {
         let swapInfo: SwapInfo = {
@@ -330,8 +351,16 @@ export class SOR {
             tokenIn,
             tokenOut,
             total,
-            marketSp
+            marketSp,
+            wrapOptions
         );
+
+        if (wrapOptions.isEthSwap) {
+            if (swapInfo.tokenIn === wrapOptions.wethAddress)
+                swapInfo.tokenIn = ZERO_ADDRESS;
+            if (swapInfo.tokenOut === wrapOptions.wethAddress)
+                swapInfo.tokenOut = ZERO_ADDRESS;
+        }
 
         return swapInfo;
     }
@@ -348,6 +377,15 @@ export class SOR {
     ): Promise<boolean> {
         tokenIn = tokenIn.toLowerCase();
         tokenOut = tokenOut.toLowerCase();
+
+        // If Zero Address (Eth sentinel) is passed replace it with Weth
+        if (tokenIn === ZERO_ADDRESS) {
+            tokenIn = this.WETHADDR[this.chainId].toLowerCase();
+        }
+
+        if (tokenOut === ZERO_ADDRESS) {
+            tokenOut = this.WETHADDR[this.chainId].toLowerCase();
+        }
 
         try {
             let allPoolsNonBig: SubGraphPoolsBase;
