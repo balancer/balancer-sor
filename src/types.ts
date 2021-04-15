@@ -198,6 +198,10 @@ export interface PoolBase {
     tokensList: string[];
     parsePoolPairData: (tokenIn: string, tokenOut: string) => PoolPairBase;
     getNormalizedLiquidity: (poolPairData: PoolPairBase) => BigNumber;
+    getLimitAmountSwap: (
+        poolPairData: PoolPairBase,
+        swapType: SwapTypes
+    ) => BigNumber;
     updateTokenBalanceForPool: (token: string, newBalance: BigNumber) => void;
     _exactTokenInForTokenOut: (
         poolPairData: PoolPairBase,

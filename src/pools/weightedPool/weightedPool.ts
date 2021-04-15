@@ -1,5 +1,5 @@
 import { getAddress } from '@ethersproject/address';
-import { bnum, scale } from '../../bmath';
+import { bnum, scale, MAX_IN_RATIO, MAX_OUT_RATIO } from '../../bmath';
 import { BigNumber } from '../../utils/bignumber';
 import * as weightedSolidity from './weightedMathEvm';
 import { FixedPointNumber } from '../../math/FixedPointNumber';
@@ -9,7 +9,7 @@ import {
     SwapPairType,
     PairTypes,
     PoolPairBase,
-    PoolPairDictionary,
+    SwapTypes,
 } from '../../types';
 import {
     _exactTokenInForTokenOut,
@@ -164,6 +164,22 @@ export class WeightedPool implements PoolBase {
             return poolPairData.balanceOut.div(
                 bnum(1).plus(poolPairData.weightOut)
             ); // Liquidity in tokenOut is Bo/wo
+        }
+    }
+
+    getLimitAmountSwap(
+        poolPairData: PoolPairBase,
+        swapType: SwapTypes
+    ): BigNumber {
+        // We multiply ratios by 10**-18 because we are in normalized space
+        // so 0.5 should be 0.5 and not 500000000000000000
+        // TODO: update bmath to use everything normalized
+        if (swapType === SwapTypes.SwapExactIn) {
+            return poolPairData.balanceIn.times(MAX_IN_RATIO.times(10 ** -18));
+        } else {
+            return poolPairData.balanceOut.times(
+                MAX_OUT_RATIO.times(10 ** -18)
+            );
         }
     }
 
