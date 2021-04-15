@@ -1,16 +1,7 @@
 import { INFINITESIMAL, PRICE_ERROR_TOLERANCE } from './config';
 import { bnum } from './bmath';
 import { BigNumber } from './utils/bignumber';
-import {
-    SwapTypes,
-    PoolPairBase,
-    NewPath,
-    PoolBase,
-    PairTypes,
-    PoolDictionary,
-    Swap,
-} from './types';
-import { MAX_IN_RATIO, MAX_OUT_RATIO } from './bmath';
+import { SwapTypes, NewPath, PoolDictionary, Swap } from './types';
 import {
     getHighestLimitAmountsForPaths,
     getEffectivePriceSwapForPath,
@@ -47,34 +38,20 @@ export function calculatePathLimits(
     return [sortedPaths, maxLiquidityAvailable];
 }
 
-export function getLimitAmountSwap(
-    poolPairData: PoolPairBase,
-    swapType: SwapTypes
-): BigNumber {
-    // We multiply ratios by 10**-18 because we are in normalized space
-    // so 0.5 should be 0.5 and not 500000000000000000
-    // TODO: update bmath to use everything normalized
-    if (swapType === SwapTypes.SwapExactIn) {
-        return poolPairData.balanceIn.times(MAX_IN_RATIO.times(10 ** -18));
-    } else {
-        return poolPairData.balanceOut.times(MAX_OUT_RATIO.times(10 ** -18));
-    }
-}
-
 export function getLimitAmountSwapForPath(
     path: NewPath,
     swapType: SwapTypes
 ): BigNumber {
     let poolPairData = path.poolPairData;
     if (poolPairData.length == 1) {
-        return getLimitAmountSwap(poolPairData[0], swapType);
+        return path.pools[0].getLimitAmountSwap(poolPairData[0], swapType);
     } else if (poolPairData.length == 2) {
         if (swapType === SwapTypes.SwapExactIn) {
-            let limitAmountSwap1 = getLimitAmountSwap(
+            let limitAmountSwap1 = path.pools[0].getLimitAmountSwap(
                 poolPairData[0],
                 swapType
             );
-            let limitAmountSwap2 = getLimitAmountSwap(
+            let limitAmountSwap2 = path.pools[1].getLimitAmountSwap(
                 poolPairData[1],
                 swapType
             );
@@ -99,11 +76,11 @@ export function getLimitAmountSwapForPath(
             // This means first hop is limiting the path
             else return limitAmountSwap1;
         } else {
-            let limitAmountSwap1 = getLimitAmountSwap(
+            let limitAmountSwap1 = path.pools[0].getLimitAmountSwap(
                 poolPairData[0],
                 swapType
             );
-            let limitAmountSwap2 = getLimitAmountSwap(
+            let limitAmountSwap2 = path.pools[1].getLimitAmountSwap(
                 poolPairData[1],
                 swapType
             );
