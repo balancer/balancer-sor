@@ -165,14 +165,16 @@ export class ElementPool implements PoolBase {
     }
 
     getLimitAmountSwap(
-        poolPairData: PoolPairBase,
+        poolPairData: ElementPoolPairData,
         swapType: SwapTypes
     ): BigNumber {
-        // We multiply ratios by 10**-18 because we are in normalized space
-        // so 0.5 should be 0.5 and not 500000000000000000
-        // TODO: update bmath to use everything normalized
         if (swapType === SwapTypes.SwapExactIn) {
-            return poolPairData.balanceIn.times(MAX_IN_RATIO.times(10 ** -18));
+            // "Ai < (Bi**(1-t)+Bo**(1-t))**(1/(1-t))-Bi" must hold in order for
+            // base of root to be non-negative
+            let Bi = poolPairData.balanceIn.toNumber();
+            let Bo = poolPairData.balanceOut.toNumber();
+            let t = poolPairData.time.toNumber();
+            return bnum((Bi ** (1 - t) + Bo ** (1 - t)) ** (1 / (1 - t)) - Bi);
         } else {
             return poolPairData.balanceOut.times(
                 MAX_OUT_RATIO.times(10 ** -18)

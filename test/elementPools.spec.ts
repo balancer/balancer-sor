@@ -13,7 +13,6 @@ let testFiles = [
     'elementFinanceTest2',
     'elementFinanceTest3',
     'elementFinanceTest4',
-    'elementFinanceTestFourPools',
 ];
 
 const testDir = `${__dirname}/testData/elementPools/`;
