@@ -104,9 +104,7 @@ export async function compareTest(
         testData.tradeInfo.TokenOut,
         testData.tradeInfo.NoPools,
         testData.tradeInfo.SwapType,
-        testData.tradeInfo.SwapAmount.div(
-            bnum(10 ** testData.tradeInfo.SwapAmountDecimals)
-        ),
+        amountNormalised,
         v2SwapData.costOutputToken,
         testData.tradeInfo.GasPrice,
         provider,
@@ -120,6 +118,9 @@ export async function compareTest(
         true,
         testData.tradeInfo.NoPools
     );
+
+    // console.log(`--------- WRAPPER SWAPS:`);
+    // console.log(wrapperSwapData.swaps);
 
     if (testSettings.compareResults)
         assertResults(file, testData, v1SwapData, v2SwapData, wrapperSwapData);

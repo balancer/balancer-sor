@@ -900,6 +900,7 @@ export function assertResults(
     );
     const errorDelta = 10 ** -6;
 
+    // Compare V1 vs V2 results
     if (testData.tradeInfo.SwapType === `swapExactIn`) {
         if (v2SwapData.returnAmount.gte(v1SwapData.returnAmount)) {
             assert(
@@ -945,6 +946,7 @@ export function assertResults(
         }
     }
 
+    // Compare V2 filter (currently unused)
     if (v2WithFilterSwapData !== undefined) {
         assert(
             v2SwapData.returnAmount.eq(v2WithFilterSwapData.returnAmount),
@@ -956,6 +958,7 @@ export function assertResults(
         );
     }
 
+    // Compare V2 vs V2 wrapper
     assert.equal(
         wrapperSwapData.returnAmount.toString(),
         v2SwapData.returnAmount
@@ -994,6 +997,7 @@ export function assertResults(
             testData.tradeInfo.TokenOut,
             v2SwapData.swaps
         );
+
         assert.equal(
             testData.tradeInfo.SwapAmount.toString(),
             totalFromSwaps.toString(),
@@ -1021,7 +1025,6 @@ export function assertResults(
             totalSwapInfo.toString(),
             'Total From SwapInfo Should Equal Swap Amount.'
         );
-
         assert.equal(
             totalFromSwaps.toString(),
             totalSwapInfo.toString(),
@@ -1090,10 +1093,11 @@ function totalSwapAmounts(
     swaps.forEach(swapSeq => {
         swapSeq.forEach(swap => {
             if (swapType === SwapTypes.SwapExactIn) {
-                if (swap.tokenIn === tokenIn)
+                if (swap.tokenIn === tokenIn) {
                     total = total.plus(
                         scale(bnum(swap.swapAmount), swap.tokenInDecimals)
                     );
+                }
             } else {
                 if (swap.tokenOut === tokenOut)
                     total = total.plus(
