@@ -23,6 +23,7 @@ const WETH = '0x02822e968856186a20fEc2C824D4B174D0b70502';
 const BAL = '0x41286Bb1D3E870f3F750eB7E1C25d7E48c8A1Ac7';
 const MKR = '0xAf9ac3235be96eD496db7969f60D354fe5e426B0';
 const vaultAddr = '0xba1222227c37746aDA22d10Da6265E02E44400DD';
+const WBTC = '0x1C8E3Bcb3378a443CC591f154c5CE0EBb4dA9648';
 
 // const poolsUrl = `https://storageapi.fleek.co/balancer-bucket/balancer-kovan-v2/exchange`;
 const poolsUrl = `https://storageapi.fleek.co/johngrantuk-team-bucket/poolsRc02.json`;
@@ -45,10 +46,10 @@ async function simpleSwap() {
     const maxNoPools = 4;
     const chainId = 42;
     const tokenIn = BAL;
-    const tokenOut = WETH;
+    const tokenOut = WBTC;
     const swapType = SwapTypes.SwapExactOut; // Two different swap types are used: SwapExactIn & SwapExactOut
-    const amountOut = new BigNumber(0.1); // In normalized format, i.e. 1USDC = 1
-    const decimalsOut = 18;
+    const amountOut = new BigNumber(0.001); // In normalized format, i.e. 1USDC = 1
+    const decimalsOut = 8;
 
     const sor = new SOR(provider, gasPrice, maxNoPools, chainId, poolsUrl);
 

@@ -25,6 +25,7 @@ const MKR = '0xAf9ac3235be96eD496db7969f60D354fe5e426B0';
 const USDC = '0xc2569dd7d0fd715B054fBf16E75B001E5c0C1115';
 const DEC = '0xC91c699D432323B020E3DE0Fc49761E040D60aB3';
 const vaultAddr = '0xba1222227c37746aDA22d10Da6265E02E44400DD';
+const WBTC = '0x1C8E3Bcb3378a443CC591f154c5CE0EBb4dA9648';
 
 const poolsUrl = `https://storageapi.fleek.co/johngrantuk-team-bucket/poolsRc02.json`;
 
@@ -45,11 +46,11 @@ async function simpleSwap() {
     // This determines the max no of pools the SOR will use to swap.
     const maxNoPools = 4;
     const chainId = 42;
-    const tokenIn = USDC;
-    const tokenOut = DEC;
+    const tokenIn = BAL;
+    const tokenOut = WBTC;
     const swapType = SwapTypes.SwapExactIn; // Two different swap types are used: SwapExactIn & SwapExactOut
-    const amountIn = new BigNumber(0.1); // In normalized format, i.e. 1USDC = 1
-    const decimalsIn = 6;
+    const amountIn = new BigNumber(1.7); // In normalized format, i.e. 1USDC = 1
+    const decimalsIn = 18;
 
     const sor = new SOR(provider, gasPrice, maxNoPools, chainId, poolsUrl);
 
