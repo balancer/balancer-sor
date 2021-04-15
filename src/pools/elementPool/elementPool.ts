@@ -5,9 +5,10 @@ import {
     SwapPairType,
     PairTypes,
     PoolPairBase,
+    SwapTypes,
 } from '../../types';
 import { getAddress } from '@ethersproject/address';
-import { bnum } from '../../bmath';
+import { bnum, MAX_IN_RATIO, MAX_OUT_RATIO } from '../../bmath';
 import {
     _exactTokenInForTokenOut,
     _tokenInForExactTokenOut,
@@ -161,6 +162,22 @@ export class ElementPool implements PoolBase {
         // in practice this won't have a big impact in path selection for
         // multi-hops so not a big priority
         return poolPairData.balanceOut;
+    }
+
+    getLimitAmountSwap(
+        poolPairData: PoolPairBase,
+        swapType: SwapTypes
+    ): BigNumber {
+        // We multiply ratios by 10**-18 because we are in normalized space
+        // so 0.5 should be 0.5 and not 500000000000000000
+        // TODO: update bmath to use everything normalized
+        if (swapType === SwapTypes.SwapExactIn) {
+            return poolPairData.balanceIn.times(MAX_IN_RATIO.times(10 ** -18));
+        } else {
+            return poolPairData.balanceOut.times(
+                MAX_OUT_RATIO.times(10 ** -18)
+            );
+        }
     }
 
     // Updates the balance of a given token for the pool
