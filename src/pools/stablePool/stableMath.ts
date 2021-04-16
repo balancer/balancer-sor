@@ -104,6 +104,9 @@ export function _invariant(
     // P = product of final balances but y                                                       //
     **********************************************************************************************/
 export function _exactTokenInForTokenOut(amount, poolPairData): BigNumber {
+    // The formula below returns some dust (due to rounding errors) but when
+    // we input zero the output should be zero
+    if (amount.isZero()) return amount;
     let {
         amp,
         allBalances,
@@ -159,6 +162,9 @@ export function _exactTokenInForTokenOut(amount, poolPairData): BigNumber {
     // P = product of final balances but x                                                       //
     **********************************************************************************************/
 export function _tokenInForExactTokenOut(amount, poolPairData): BigNumber {
+    // The formula below returns some dust (due to rounding errors) but when
+    // we input zero the output should be zero
+    if (amount.isZero()) return amount;
     let {
         amp,
         allBalances,
@@ -268,6 +274,9 @@ Adapted from StableMath.sol _exactTokensInForBPTOut()
     * renamed it to _exactTokenInForBPTOut (i.e. just one token in)
 */
 export function _exactTokenInForBPTOut(amount, poolPairData): BigNumber {
+    // The formula below returns some dust (due to rounding errors) but when
+    // we input zero the output should be zero
+    if (amount.isZero()) return amount;
     let { amp, allBalances, balanceOut, tokenIndexIn, swapFee } = poolPairData;
     let balances = [...allBalances];
     let bptTotalSupply = balanceOut;
@@ -317,6 +326,9 @@ amountBPTOut -> newInvariant -> (amountInProportional, amountInAfterFee) ->
 amountInPercentageExcess -> amountIn
 */
 export function _tokenInForExactBPTOut(amount, poolPairData): BigNumber {
+    // The formula below returns some dust (due to rounding errors) but when
+    // we input zero the output should be zero
+    if (amount.isZero()) return amount;
     let { amp, allBalances, balanceOut, tokenIndexIn, swapFee } = poolPairData;
     let balances = [...allBalances];
     let bptTotalSupply = balanceOut;
@@ -365,6 +377,9 @@ Adapted from StableMath.sol _BPTInForExactTokensOut() to reduce it to
 _BPTInForExactTokenOut (i.e. just one token out)
 */
 export function _BPTInForExactTokenOut(amount, poolPairData): BigNumber {
+    // The formula below returns some dust (due to rounding errors) but when
+    // we input zero the output should be zero
+    if (amount.isZero()) return amount;
     let { amp, allBalances, balanceIn, tokenIndexOut, swapFee } = poolPairData;
     let balances = [...allBalances];
     let bptTotalSupply = balanceIn;
@@ -416,6 +431,9 @@ amountBPTin -> newInvariant -> (amountOutProportional, amountOutBeforeFee) ->
 amountOutPercentageExcess -> amountOut
 */
 export function _exactBPTInForTokenOut(amount, poolPairData): BigNumber {
+    // The formula below returns some dust (due to rounding errors) but when
+    // we input zero the output should be zero
+    if (amount.isZero()) return amount;
     let { amp, allBalances, balanceIn, tokenIndexOut, swapFee } = poolPairData;
     let balances = [...allBalances];
     let bptTotalSupply = balanceIn;
