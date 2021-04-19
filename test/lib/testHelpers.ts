@@ -1032,7 +1032,7 @@ export function countPoolSwapPairTypes(
     return [noDirect, noHopIn, noHopOut];
 }
 
-export async function v2classSwap(
+export async function getV2Swap(
     provider: BaseProvider,
     pools: any,
     tokenIn: string,
@@ -1057,6 +1057,7 @@ export async function v2classSwap(
         swapTypeCorrect = SwapTypes.SwapExactOut;
 
     const swapCost = new BigNumber('100000'); // A pool swap costs approx 100000 gas
+    const fullSwapStart = performance.now();
 
     let costOutputToken: BigNumber = costOutputTokenOveride.overRideCost;
 
@@ -1085,6 +1086,7 @@ export async function v2classSwap(
     }
     // Normalize to ReturnAmountDecimals
     costOutputToken = costOutputToken.div(bnum(10 ** returnAmountDecimals));
+    const getCostOutputTokenEnd = performance.now();
 
     let hopTokens: string[];
     let poolsOfInterestDictionary: PoolDictionary;
@@ -1122,11 +1124,16 @@ export async function v2classSwap(
         costOutputToken
     );
 
+    const fullSwapEnd = performance.now();
+    const timeData = {
+        fullSwap: fullSwapEnd - fullSwapStart,
+    };
+
     return {
         title: 'v2',
         swaps,
         returnAmount: total,
-        timeData: {},
+        timeData,
         costOutputToken,
     };
 }

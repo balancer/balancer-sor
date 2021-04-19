@@ -3,7 +3,7 @@ import {
     getV1Swap,
     displayResults,
     assertResults,
-    v2classSwap,
+    getV2Swap,
     getWrapperSwap,
 } from './testHelpers';
 import { bnum } from '../../src/bmath';
@@ -38,7 +38,7 @@ export async function compareTest(
 
     // V2 first to debug faster
     // Uses costOutputToken returned from above.
-    const v2SwapData = await v2classSwap(
+    const v2SwapData = await getV2Swap(
         provider,
         JSON.parse(JSON.stringify(testData)),
         testData.tradeInfo.TokenIn,

@@ -4,7 +4,7 @@ import { JsonRpcProvider } from '@ethersproject/providers';
 import { assert } from 'chai';
 import { SwapTypes, DisabledOptions } from '../src/types';
 import BigNumber from 'bignumber.js';
-import { v2classSwap } from './lib/testHelpers';
+import { getV2Swap } from './lib/testHelpers';
 import { compareTest } from './lib/compareHelper';
 
 const gasPrice = new BigNumber('30000000000');
@@ -48,7 +48,7 @@ describe('Tests full swaps against known values', () => {
         const tokenOut = ANT;
         const costOutputToken = new BigNumber(0);
 
-        const swapInfo = await v2classSwap(
+        const swapInfo = await getV2Swap(
             provider,
             JSON.parse(JSON.stringify(subgraphPoolsLarge)),
             tokenIn,
@@ -84,7 +84,7 @@ describe('Tests full swaps against known values', () => {
         const tokenOut = ANT;
         const costOutputToken = new BigNumber(0);
 
-        const swapInfo = await v2classSwap(
+        const swapInfo = await getV2Swap(
             provider,
             JSON.parse(JSON.stringify(subgraphPoolsLarge)),
             tokenIn,
