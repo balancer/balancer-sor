@@ -11,4 +11,5 @@ export * from './types';
 export * from './helpersClass';
 export * from './pools';
 export * from './sorClass';
+export * from './frontendHelpers/weightedHelpers';
 export const ZERO_ADDRESS = '0x0000000000000000000000000000000000000000';
