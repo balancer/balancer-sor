@@ -455,183 +455,6 @@ export async function getV1Swap(
     return { title: 'v1', swaps, returnAmount, timeData };
 }
 
-export async function getV2Swap(
-    Provider: BaseProvider,
-    GasPrice: BigNumber,
-    MaxNoPools: number,
-    ChainId: number,
-    AllSubgraphPools: SubGraphPools,
-    SwapType: string,
-    TokenIn: string,
-    TokenOut: string,
-    SwapAmount: BigNumber,
-    Profiling: Profiling = {
-        onChainBalances: true,
-    },
-    ReturnAmountDecimals: number,
-    disabledOptions: DisabledOptions = {
-        isOverRide: false,
-        disabledTokens: [],
-    },
-    costOutputTokenOveride = {
-        isOverRide: false,
-        overRideCost: new BigNumber(0),
-    }
-) {
-    TokenIn = TokenIn.toLowerCase();
-    TokenOut = TokenOut.toLowerCase();
-
-    const MULTIADDR: { [ChainId: number]: string } = {
-        1: '0x514053acec7177e277b947b1ebb5c08ab4c4580e',
-        42: '0x71c7f1086aFca7Aa1B0D4d73cfa77979d10D3210',
-    };
-
-    const swapCost = new BigNumber('100000'); // A pool swap costs approx 100000 gas
-
-    const fullSwapStart = performance.now();
-    const getCostOutputTokenStart = performance.now();
-    let costOutputToken: BigNumber = costOutputTokenOveride.overRideCost;
-
-    if (!costOutputTokenOveride.isOverRide) {
-        // This calculates the cost in output token (output token is TokenOut for swapExactIn and
-        // TokenIn for a swapExactOut) for each additional pool added to the final SOR swap result.
-        // This is used as an input to SOR to allow it to make gas efficient recommendations, i.e.
-        // if it costs 5 DAI to add another pool to the SOR solution and that only generates 1 more DAI,
-        // then SOR should not add that pool (if gas costs were zero that pool would be added)
-        // Notice that outputToken is TokenOut if SwapType == 'swapExactIn' and TokenIn if SwapType == 'swapExactOut'
-        if (SwapType === 'swapExactIn') {
-            costOutputToken = await sorv2.getCostOutputToken(
-                TokenOut,
-                GasPrice,
-                swapCost,
-                Provider
-            );
-        } else {
-            costOutputToken = await sorv2.getCostOutputToken(
-                TokenIn,
-                GasPrice,
-                swapCost,
-                Provider
-            );
-        }
-    }
-    // Normalize to ReturnAmountDecimals
-    costOutputToken = costOutputToken.div(bnum(10 ** ReturnAmountDecimals));
-
-    const getCostOutputTokenEnd = performance.now();
-    let poolsWithOnChainBalances: SubGraphPools;
-
-    if (Profiling.onChainBalances) {
-        const getAllPoolDataOnChainStart = performance.now();
-
-        // This is only suitable for V1 pools as it uses old contract ABI. Shouldn't be an issue as using as compare vs V1 SOR.
-        poolsWithOnChainBalances = await getAllPoolDataOnChain(
-            AllSubgraphPools,
-            MULTIADDR[ChainId],
-            Provider
-        );
-
-        const getAllPoolDataOnChainEnd = performance.now();
-    } else {
-        const getAllPoolDataOnChainStart = performance.now();
-        // V2 uses Subgraph normalized balances so no need to format
-        poolsWithOnChainBalances = JSON.parse(JSON.stringify(AllSubgraphPools));
-
-        const getAllPoolDataOnChainEnd = performance.now();
-    }
-
-    const filterPoolsStart = performance.now();
-
-    let directPools: SubGraphPoolDictionary;
-    let hopTokens: string[];
-    let poolsTokenIn: SubGraphPoolDictionary;
-    let poolsTokenOut: SubGraphPoolDictionary;
-
-    [directPools, hopTokens, poolsTokenIn, poolsTokenOut] = sorv2.filterPools(
-        poolsWithOnChainBalances.pools,
-        TokenIn,
-        TokenOut,
-        MaxNoPools,
-        disabledOptions
-    );
-    const filterPoolsEnd = performance.now();
-    const sortPoolsMostLiquidStart = performance.now();
-
-    // For each hopToken, find the most liquid pool for the first and the second hops
-    let mostLiquidPoolsFirstHop: SubGraphPool[],
-        mostLiquidPoolsSecondHop: SubGraphPool[];
-    [
-        mostLiquidPoolsFirstHop,
-        mostLiquidPoolsSecondHop,
-    ] = sorv2.sortPoolsMostLiquid(
-        TokenIn,
-        TokenOut,
-        hopTokens,
-        poolsTokenIn,
-        poolsTokenOut
-    );
-
-    const sortPoolsMostLiquidEnd = performance.now();
-    const parsePoolDataStart = performance.now();
-
-    // Finds the possible paths to make the swap, each path can be a direct swap
-    // or a multihop composed of 2 swaps
-    let pools: SubGraphPoolDictionary;
-    let pathData: Path[];
-
-    [pools, pathData] = sorv2.parsePoolData(
-        directPools,
-        TokenIn,
-        TokenOut,
-        mostLiquidPoolsFirstHop,
-        mostLiquidPoolsSecondHop,
-        hopTokens
-    );
-
-    const parsePoolDataEnd = performance.now();
-    const processPathsStart = performance.now();
-
-    let paths: Path[];
-    let maxLiquidityAvailable: BigNumber;
-
-    [paths, maxLiquidityAvailable] = sorv2.processPaths(
-        pathData,
-        pools,
-        SwapType
-    );
-
-    const processPathsEnd = performance.now();
-    const sorStart = performance.now();
-
-    let swaps: Swap[][], returnAmount: BigNumber;
-    [swaps, returnAmount] = sorv2.smartOrderRouter(
-        JSON.parse(JSON.stringify(pools)),
-        paths,
-        SwapType,
-        SwapAmount,
-        MaxNoPools,
-        costOutputToken
-    );
-
-    const sorEnd = performance.now();
-    const fullSwapEnd = sorEnd;
-
-    const timeData = {
-        fullSwap: fullSwapEnd - fullSwapStart,
-        costOutputToken: getCostOutputTokenEnd - getCostOutputTokenStart,
-        // 'getAllPoolDataOnChain': getAllPoolDataOnChainEnd - getAllPoolDataOnChainStart,
-        filterPools: filterPoolsEnd - filterPoolsStart,
-        sortPools: sortPoolsMostLiquidEnd - sortPoolsMostLiquidStart,
-        parsePool: parsePoolDataEnd - parsePoolDataStart,
-        processPaths: processPathsEnd - processPathsStart,
-        processEps: 'N/A',
-        filter: 'N/A',
-        sor: sorEnd - sorStart,
-    };
-
-    return { title: 'v2', swaps, returnAmount, timeData, costOutputToken };
-}
-
 function getAmountsScaled(decimals) {
     const min = 10 ** -decimals;
     const mid = 1;
@@ -1209,20 +1032,59 @@ export function countPoolSwapPairTypes(
     return [noDirect, noHopIn, noHopOut];
 }
 
-export function v2classSwap(
+export async function v2classSwap(
+    provider: BaseProvider,
     pools: any,
     tokenIn: string,
     tokenOut: string,
     maxPools: number,
     swapType: string | SwapTypes,
     swapAmount: BigNumber,
-    costOutputToken: BigNumber,
-    disabledOptions: DisabledOptions = { isOverRide: false, disabledTokens: [] }
+    gasPrice: BigNumber,
+    returnAmountDecimals: number,
+    disabledOptions: DisabledOptions = {
+        isOverRide: false,
+        disabledTokens: [],
+    },
+    costOutputTokenOveride = {
+        isOverRide: false,
+        overRideCost: new BigNumber(0),
+    }
 ) {
     let swapTypeCorrect = SwapTypes.SwapExactIn;
 
     if (swapType === 'swapExactOut' || swapType === SwapTypes.SwapExactOut)
         swapTypeCorrect = SwapTypes.SwapExactOut;
+
+    const swapCost = new BigNumber('100000'); // A pool swap costs approx 100000 gas
+
+    let costOutputToken: BigNumber = costOutputTokenOveride.overRideCost;
+
+    if (!costOutputTokenOveride.isOverRide) {
+        // This calculates the cost in output token (output token is TokenOut for swapExactIn and
+        // TokenIn for a swapExactOut) for each additional pool added to the final SOR swap result.
+        // This is used as an input to SOR to allow it to make gas efficient recommendations, i.e.
+        // if it costs 5 DAI to add another pool to the SOR solution and that only generates 1 more DAI,
+        // then SOR should not add that pool (if gas costs were zero that pool would be added)
+        // Notice that outputToken is TokenOut if SwapType == 'swapExactIn' and TokenIn if SwapType == 'swapExactOut'
+        if (swapType === 'swapExactIn') {
+            costOutputToken = await sorv2.getCostOutputToken(
+                tokenOut,
+                gasPrice,
+                swapCost,
+                provider
+            );
+        } else {
+            costOutputToken = await sorv2.getCostOutputToken(
+                tokenIn,
+                gasPrice,
+                swapCost,
+                provider
+            );
+        }
+    }
+    // Normalize to ReturnAmountDecimals
+    costOutputToken = costOutputToken.div(bnum(10 ** returnAmountDecimals));
 
     let hopTokens: string[];
     let poolsOfInterestDictionary: PoolDictionary;
@@ -1260,7 +1122,13 @@ export function v2classSwap(
         costOutputToken
     );
 
-    return [swaps, total, marketSp];
+    return {
+        title: 'v2',
+        swaps,
+        returnAmount: total,
+        timeData: {},
+        costOutputToken,
+    };
 }
 
 export async function getWrapperSwap(

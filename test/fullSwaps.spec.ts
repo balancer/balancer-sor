@@ -48,19 +48,32 @@ describe('Tests full swaps against known values', () => {
         const tokenOut = ANT;
         const costOutputToken = new BigNumber(0);
 
-        let swaps: any, total: BigNumber, marketSp: BigNumber;
-        [swaps, total, marketSp] = v2classSwap(
+        const swapInfo = await v2classSwap(
+            provider,
             JSON.parse(JSON.stringify(subgraphPoolsLarge)),
             tokenIn,
             tokenOut,
             maxPools,
             swapType,
             swapAmount,
-            costOutputToken
+            gasPrice,
+            18,
+            {
+                isOverRide: false,
+                disabledTokens: [],
+            },
+            {
+                isOverRide: true,
+                overRideCost: costOutputToken,
+            }
         );
 
-        assert.equal(swaps.length, 0, 'Should have 0 swaps.');
-        assert.equal(total.toString(), '0', 'Should have 0 amount.');
+        assert.equal(swapInfo.swaps.length, 0, 'Should have 0 swaps.');
+        assert.equal(
+            swapInfo.returnAmount.toString(),
+            '0',
+            'Should have 0 amount.'
+        );
     }).timeout(10000);
 
     it('Should have no swaps for pair with no routes, ExactOut', async () => {
@@ -71,19 +84,32 @@ describe('Tests full swaps against known values', () => {
         const tokenOut = ANT;
         const costOutputToken = new BigNumber(0);
 
-        let swaps: any, total: BigNumber, marketSp: BigNumber;
-        [swaps, total, marketSp] = v2classSwap(
+        const swapInfo = await v2classSwap(
+            provider,
             JSON.parse(JSON.stringify(subgraphPoolsLarge)),
             tokenIn,
             tokenOut,
             maxPools,
             swapType,
             swapAmount,
-            costOutputToken
+            gasPrice,
+            18,
+            {
+                isOverRide: false,
+                disabledTokens: [],
+            },
+            {
+                isOverRide: true,
+                overRideCost: costOutputToken,
+            }
         );
 
-        assert.equal(swaps.length, 0, 'Should have 0 swaps.');
-        assert.equal(total.toString(), '0', 'Should have 0 amount.');
+        assert.equal(swapInfo.swaps.length, 0, 'Should have 0 swaps.');
+        assert.equal(
+            swapInfo.returnAmount.toString(),
+            '0',
+            'Should have 0 amount.'
+        );
     }).timeout(10000);
 
     it('USDC>MKR, subgraphPoolsLarge.json, swapExactIn', async () => {
