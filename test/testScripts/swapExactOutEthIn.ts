@@ -1,4 +1,4 @@
-// Example showing SOR use with Vault batchSwap & Eth in, run using: $ ts-node ./test/testScripts/swapExactOutEthIn.ts
+// Example showing SOR with Vault batchSwap & Eth in, run using: $ ts-node ./test/testScripts/swapExactOutEthIn.ts
 require('dotenv').config();
 import { BigNumber } from 'bignumber.js';
 import { JsonRpcProvider } from '@ethersproject/providers';
@@ -45,11 +45,12 @@ async function simpleSwap() {
     // This determines the max no of pools the SOR will use to swap.
     const maxNoPools = 4;
     const chainId = 42;
-    // const tokenIn = WETH;
+    // The zero address is used to signal Eth used in swap
     const tokenIn = ZERO_ADDRESS;
     const tokenOut = USDC;
-    const swapType = SwapTypes.SwapExactOut; // Two different swap types are used: SwapExactIn & SwapExactOut
-    const amountOut = new BigNumber(0.1); // In normalized format, i.e. 1USDC = 1
+    const swapType = SwapTypes.SwapExactOut;
+    // In normalized format, i.e. 1USDC = 1
+    const amountOut = new BigNumber(0.1);
     const decimalsOut = 6;
 
     const sor = new SOR(provider, gasPrice, maxNoPools, chainId, poolsUrl);
@@ -74,23 +75,6 @@ async function simpleSwap() {
     console.log(swapInfo.returnAmount.toString());
     console.log(swapInfo.swaps);
 
-    // The rest of the code executes a swap using wallet funds
-
-    // Vault needs approval for swapping
-    // console.log('Approving vault...');
-    // let tokenInContract = new Contract(tokenIn, erc20abi, provider);
-
-    // const balance = await tokenInContract.balanceOf(wallet.address);
-    // console.log(`Balance: ${balance.toString()}`);
-    // const allowance = await tokenInContract.allowance(
-    //     wallet.address,
-    //     vaultAddr
-    // );
-    // console.log(`Allow: ${allowance.toString()}`);
-
-    // let txApprove = await tokenInContract.connect(wallet).approve(vaultAddr, MaxUint256);
-    // console.log(txApprove);
-
     const vaultContract = new Contract(vaultAddr, vaultArtifact, provider);
     vaultContract.connect(wallet);
 
@@ -104,15 +88,13 @@ async function simpleSwap() {
     // Limits:
     // +ve means max to send
     // -ve mean min to receive
-    // For a multihop the intermediate tokens should be ok at 0?
-
+    // For a multihop the intermediate tokens should be 0
+    // This is where slippage tolerance would be added
     const limits = [];
     swapInfo.tokenAddresses.forEach((token, i) => {
         if (token.toLowerCase() === tokenIn.toLowerCase()) {
             limits[i] = swapInfo.returnAmount.toString();
-            // limits[i] = '10000000000000000000000';
         } else if (token.toLowerCase() === tokenOut.toLowerCase()) {
-            // This should be amt + slippage in UI
             limits[i] = scale(amountOut, decimalsOut)
                 .times(-1)
                 .toString();
@@ -120,13 +102,9 @@ async function simpleSwap() {
             limits[i] = '0';
         }
     });
-
-    console.log(swapInfo.tokenAddresses);
-    console.log(limits);
-
     const deadline = MaxUint256;
-    console.log('Swapping...');
 
+    console.log('Swapping...');
     let tx = await vaultContract
         .connect(wallet)
         .batchSwap(
@@ -137,6 +115,7 @@ async function simpleSwap() {
             limits,
             deadline,
             {
+                // Note that value must be passed, i.e. send Eth
                 value: limits[0],
                 gasLimit: '200000',
                 gasPrice: '20000000000',

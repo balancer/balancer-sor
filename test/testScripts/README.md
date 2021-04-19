@@ -1,39 +1,57 @@
 # Test Scripts
 
-These scripts can be used to run non-deterministic tests.
+Examples and some non-deterministic testing helpers.
 
-### example-simpleSwap.ts
+### swapExactInEthIn.ts
 
-Run: `$ ts-node ./test/testScripts/example-simpleSwap.ts`
+Run: `$ ts-node ./test/testScripts/swapExactInEthIn.ts`
 
-Example showing various full swaps using the SOR wrapper. This is the easiest and quickest way to use the SOR.
+Example showing how to use SOR and Vault to execute an ExactIn, Eth to token swap.
 
-### example-simpleSwapWithProxy.ts
+### swapExactInEthOut.ts
 
-Run: `$ ts-node ./test/testScripts/example-simpleSwapWithProxy.ts`
+Run: `$ ts-node ./test/testScripts/swapExactInEthOut.ts`
 
-Example showing how to use SOR along with the Balancer Exchange Proxy contract to execute the swaps. (Will use real funds to swap.)
+Example showing how to use SOR and Vault to execute an ExactIn, token to Eth swap.
 
-### example-swapExactIn.ts
+### swapExactInIpfs.ts
 
-Run: `$ ts-node ./test/testScripts/example-swapExactIn.ts`
+Run: `$ ts-node ./test/testScripts/swapExactInIpfs.ts`
 
-Full swapExactIn example for USDC->DAI using SOR functions without wrapper.
+Example showing how to use SOR and Vault to execute an ExactIn, token to token swap using Pools data retrieved from an IPFS URL.
 
-### example-swapExactOut.ts
+### swapExactInSubgraph.ts
 
-Run: `$ ts-node ./test/testScripts/example-swapExactOut.ts`
+Run: `$ ts-node ./test/testScripts/swapExactInSubgraph.ts`
 
-Full swapExactOut example for USDC->DAI using SOR functions without wrapper.
+Example showing how to use SOR and Vault to execute an ExactIn, token to token swap using Pools data retrieved from Subgraph.
 
-### v1-v2-compare-live-pools-random.spec.ts
+### swapExactOutEthIn.ts
 
-Run: `npx mocha -r ts-node/register test/testScripts/v1-v2-compare-live-pools-random.spec.ts`
+Run: `$ ts-node ./test/testScripts/swapExactOutEthIn.ts`
 
-This is using the live pools list from IPFS and on-chain balances so it’s non-deterministic. It’s taking a random pair from a list of 10 tokens along with random swap amounts and max pools. Compare V1 vs V2 and V2 vs V2 with filter.
+Example showing how to use SOR and Vault to execute an ExactOut, Eth to token swap.
 
-### v1-v2-compare-pools-random-large.spec.ts
+### swapExactOutEthOut.ts
 
-Run: `npx mocha -r ts-node/register test/testScripts/v1-v2-compare-pools-random-large.spec.ts`
+Run: `$ ts-node ./test/testScripts/swapExactOutEthOut.ts`
 
-This is using pools list from ./testData/testPools which can change so it’s non-deterministic. It’s taking a random pair from a list of 10 tokens along with random swap amounts and max pools. Compare V1 vs V2 and V2 vs V2 with filter. Assumes script running from root (see testDir if not). Will do a large amount of tests and save any that fail. Change MIN_TESTS for number of tests to be run.
+Example showing how to use SOR and Vault to execute an ExactOut, token to Eth swap.
+
+### swapExactOutIpfs.ts
+
+Run: `$ ts-node ./test/testScripts/swapExactOutIpfs.ts`
+
+Example showing how to use SOR and Vault to execute an ExactOut, token to token swap using Pools data retrieved from an IPFS URL.
+
+### v1-v2-compareRandom.ts
+
+Run: `npx mocha -r ts-node/register test/testScripts/v1-v2-compareRandom.ts`
+
+This is using pools list from ./testData/testPools which can change so it’s non-deterministic. Takes a random pair from a list of tokens along with random swap amounts and max pools. Compares V1 vs V2 vs Wrapper. Used for generating large amount of random tests.
+
+### v1-v2-compareRandomStableOnly.ts
+
+Run: `npx mocha -r ts-node/register test/testScripts/v1-v2-compareRandomStableOnly.spec.ts`
+
+Same as above but only uses stable pools.

@@ -1,24 +1,14 @@
-// Example showing SOR use with Vault batchSwapGivenIn, run using: $ ts-node ./test/testScripts/swapExactInSubgraph.ts
+// Example showing SOR with Vault batchSwap and Subgraph pool data, run using: $ ts-node ./test/testScripts/swapExactInSubgraph.ts
 require('dotenv').config();
 import { BigNumber } from 'bignumber.js';
 import { JsonRpcProvider } from '@ethersproject/providers';
 import { Wallet } from '@ethersproject/wallet';
 import { Contract } from '@ethersproject/contracts';
 import { MaxUint256 } from '@ethersproject/constants';
-import {
-    SOR,
-    getPoolsFromUrl,
-    SwapInfo,
-    SwapTypes,
-    SubGraphPoolsBase,
-    fetchSubgraphPools,
-} from '../../src';
+import { SOR, SwapInfo, SwapTypes, fetchSubgraphPools } from '../../src';
 import { scale } from '../../src/bmath';
-
 import vaultArtifact from '../../src/abi/Vault.json';
 import erc20abi from '../abi/ERC20.json';
-
-import { getOnChainBalances } from '../../src/multicall';
 
 export type FundManagement = {
     sender: string;
@@ -27,20 +17,15 @@ export type FundManagement = {
     toInternalBalance: boolean;
 };
 
-// rc01 Kovan addresses
+// rc02 Kovan addresses
 const WETH = '0x02822e968856186a20fEc2C824D4B174D0b70502';
 const BAL = '0x41286Bb1D3E870f3F750eB7E1C25d7E48c8A1Ac7';
 const MKR = '0xAf9ac3235be96eD496db7969f60D354fe5e426B0';
 const vaultAddr = '0xba1222227c37746aDA22d10Da6265E02E44400DD';
 
-// TODO - Update with ipns when ready.
-// const poolsUrl = `https://storageapi.fleek.co/johngrantuk-team-bucket/poolsRc1-22-03.json`;
-const poolsUrl = `https://storageapi.fleek.co/balancer-bucket/balancer-kovan-v2/exchange`;
-
 async function simpleSwap() {
     // If running this example make sure you have a .env file saved in root DIR with INFURA=your_key
     const provider = new JsonRpcProvider(
-        // `https://mainnet.infura.io/v3/${process.env.INFURA}`
         `https://kovan.infura.io/v3/${process.env.INFURA}`
     );
 
@@ -57,12 +42,15 @@ async function simpleSwap() {
     const chainId = 42;
     const tokenIn = BAL;
     const tokenOut = MKR;
-    const swapType = SwapTypes.SwapExactIn; // Two different swap types are used: SwapExactIn & SwapExactOut
-    const amountIn = new BigNumber(0.1); // In normalized format, i.e. 1USDC = 1
+    const swapType = SwapTypes.SwapExactIn;
+    // In normalized format, i.e. 1USDC = 1
+    const amountIn = new BigNumber(0.1);
     const decimalsIn = 18;
 
     // Fetch pools list from Subgraph
-    let subgraphPools = await fetchSubgraphPools(); // Uses default API or env
+    // Uses default API or value set in env
+    // Can also pass in API address via parameter
+    let subgraphPools = await fetchSubgraphPools();
 
     const sor = new SOR(provider, gasPrice, maxNoPools, chainId, subgraphPools);
 
@@ -89,20 +77,18 @@ async function simpleSwap() {
     console.log(swapInfo.returnAmount.toString());
     console.log(swapInfo.swaps);
 
-    // The rest of the code executes a swap using wallet funds
+    // The rest of the code executes a swap using real wallet funds
 
-    /*
     // Vault needs approval for swapping
-    console.log('Approving vault...');
-    let tokenInContract = new Contract(
-        tokenIn,
-        erc20abi,
-        provider
-    );
+    // console.log('Approving vault...');
+    // let tokenInContract = new Contract(
+    //     tokenIn,
+    //     erc20abi,
+    //     provider
+    // );
 
-    let txApprove = await tokenInContract.connect(wallet).approve(vaultAddr, MaxUint256);
-    console.log(txApprove);
-    */
+    // let txApprove = await tokenInContract.connect(wallet).approve(vaultAddr, MaxUint256);
+    // console.log(txApprove);
 
     const vaultContract = new Contract(vaultAddr, vaultArtifact, provider);
     vaultContract.connect(wallet);
@@ -117,30 +103,21 @@ async function simpleSwap() {
     // Limits:
     // +ve means max to send
     // -ve mean min to receive
-    // For a multihop the intermediate tokens should be ok at 0?
-
+    // For a multihop the intermediate tokens should be 0
+    // This is where slippage tolerance would be added
     const limits = [];
     swapInfo.tokenAddresses.forEach((token, i) => {
         if (token.toLowerCase() === tokenIn.toLowerCase()) {
             limits[i] = scale(amountIn, decimalsIn).toString();
         } else if (token.toLowerCase() === tokenOut.toLowerCase()) {
-            // This should be amt + slippage in UI
-            // limits[i] = swapInfo.returnAmount
-            //     .times(-1)
-            //     .times(0.9)
-            //     .toString();
             limits[i] = swapInfo.returnAmount.times(-1).toString();
         } else {
             limits[i] = '0';
         }
     });
-
-    console.log(swapInfo.tokenAddresses);
-    console.log(limits);
-
     const deadline = MaxUint256;
-    console.log('Swapping...');
 
+    console.log('Swapping...');
     let tx = await vaultContract
         .connect(wallet)
         .batchSwap(

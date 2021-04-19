@@ -9,7 +9,6 @@ import { SOR, SwapInfo, SwapTypes, ZERO_ADDRESS } from '../../src';
 import { scale } from '../../src/bmath';
 
 import vaultArtifact from '../../src/abi/Vault.json';
-import erc20abi from '../abi/ERC20.json';
 
 export type FundManagement = {
     sender: string;
@@ -18,7 +17,7 @@ export type FundManagement = {
     toInternalBalance: boolean;
 };
 
-// rc01 Kovan addresses
+// rc02 Kovan addresses
 const WETH = '0x02822e968856186a20fEc2C824D4B174D0b70502';
 const BAL = '0x41286Bb1D3E870f3F750eB7E1C25d7E48c8A1Ac7';
 const MKR = '0xAf9ac3235be96eD496db7969f60D354fe5e426B0';
@@ -45,11 +44,12 @@ async function simpleSwap() {
     // This determines the max no of pools the SOR will use to swap.
     const maxNoPools = 4;
     const chainId = 42;
-    // const tokenIn = WETH;
+    // The zero address is used to signal Eth used in swap
     const tokenIn = ZERO_ADDRESS;
     const tokenOut = USDC;
-    const swapType = SwapTypes.SwapExactIn; // Two different swap types are used: SwapExactIn & SwapExactOut
-    const amountIn = new BigNumber(0.1); // In normalized format, i.e. 1USDC = 1
+    const swapType = SwapTypes.SwapExactIn;
+    // In normalized format, i.e. 1USDC = 1
+    const amountIn = new BigNumber(0.1);
     const decimalsIn = 18;
 
     const sor = new SOR(provider, gasPrice, maxNoPools, chainId, poolsUrl);
@@ -74,6 +74,8 @@ async function simpleSwap() {
     console.log(swapInfo.returnAmount.toString());
     console.log(swapInfo.swaps);
 
+    // The rest of the code executes a swap using real wallet funds
+
     const vaultContract = new Contract(vaultAddr, vaultArtifact, provider);
     vaultContract.connect(wallet);
 
@@ -87,29 +89,20 @@ async function simpleSwap() {
     // Limits:
     // +ve means max to send
     // -ve mean min to receive
-    // For a multihop the intermediate tokens should be ok at 0?
-
+    // For a multihop the intermediate tokens should be 0
+    // This is where slippage tolerance would be added
     const limits = [];
     swapInfo.tokenAddresses.forEach((token, i) => {
         if (token.toLowerCase() === tokenIn.toLowerCase()) {
             limits[i] = scale(amountIn, decimalsIn).toString();
-            // limits[i] = '10000000000000000000000';
         } else if (token.toLowerCase() === tokenOut.toLowerCase()) {
-            // This should be amt + slippage in UI
-            // limits[i] = swapInfo.returnAmount
-            //     .times(-1)
-            //     .times(0.9)
-            //     .toString();
             limits[i] = swapInfo.returnAmount.times(-1).toString();
         } else {
             limits[i] = '0';
         }
     });
-
-    console.log(swapInfo.tokenAddresses);
-    console.log(limits);
-
     const deadline = MaxUint256;
+
     console.log('Swapping...');
 
     let tx = await vaultContract
@@ -122,6 +115,7 @@ async function simpleSwap() {
             limits,
             deadline,
             {
+                // Note that value must be passed, i.e. send Eth
                 value: limits[0],
                 gasLimit: '200000',
                 gasPrice: '20000000000',

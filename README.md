@@ -49,55 +49,9 @@ There are two types of swap available:
 or  
 **swapExactOut** - i.e. You want to receive exactly 1 BAL and SOR will calculate X amount of ETH you must input.
 
-The SOR will return totalReturn/totalInput as well as a list swaps to achieve the total. Swaps can be through direct pools, i.e. A > POOL1 > B, or via a multihop pool, i.e. A > POOL1 > C > POOL2 > B. The swaps can be executed directly on-chain or with something like the [ExchangeProxy](https://github.com/balancer-labs/balancer-registry/blob/master/contracts/ExchangeProxy.sol).
+The SOR will return totalReturn/totalInput as well as a list swaps to achieve the total. Swaps can be through direct pools, i.e. A > POOL1 > B, or via a multihop pool, i.e. A > POOL1 > C > POOL2 > B. The swaps are returned in a format that can be directly to the Vault to execute the trade.
 
-Example Output:
-
-```js
-// Following is output for 1USDC->WETH swapExactIn
-[
-    swaps,
-    amountOut,
-] = await SOR.getSwaps(....
-
-  console.log(
-      `USDC>WETH, SwapExactIn, 1USDC, Total WETH Return: ${amountOut.toString()}`
-  );
-  // USDC>WETH, SwapExactIn, 1USDC, Total WETH Return: 3090385829490120 - This is the total amount of WETH received for 1USDC
-  console.log(`Swaps: `);
-  console.log(swaps);
-
-  /*
-    This demonstrates a multihop swap going:
-    USDC -> BTC++ via pool 0x75286...
-    Then BTC++ -> WETH via pool 0xd4dbf...
-  */
-  [
-    // Multihop swap
-    [
-      // First sequence in swap
-      {
-        pool: '0x75286e183d923a5f52f52be205e358c5c9101b09',
-        tokenIn: '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48',
-        tokenOut: '0x0327112423f3a68efdf1fcf402f6c5cb9f7c33fd',
-        swapAmount: '1000000',
-        limitReturnAmount: '0',
-        maxPrice: '115792089237316195423570985008687907853269984665640564039457584007913129639935'
-       },
-      // Second sequence in swap
-      {
-        pool: '0xd4dbf96db2fdf8ed40296d8d104b371adf7dee12',
-        tokenIn: '0x0327112423f3a68efdf1fcf402f6c5cb9f7c33fd',
-        tokenOut: '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2',
-        swapAmount: '89403274570637',
-        limitReturnAmount: '0',
-        maxPrice:'115792089237316195423570985008687907853269984665640564039457584007913129639935'
-      }
-    ]
-  ]
-```
-
-The file: [example-swapExactIn.ts](test/testScripts/example-swapExactIn.ts), shows full examples with comments for various swaps.
+The example files in: [./testScripts](test/testScripts/), demonstrates full examples with comments.
 
 To Run:
 
@@ -105,4 +59,4 @@ Create a .env file in root dir with your infura provider key: `INFURA=your_key`
 
 Install dependencies: `$ yarn install`
 
-Run example: `$ ts-node ./test/testScripts/example-swapExactIn.ts`
+Run example: `$ ts-node ./test/testScripts/swapExactInSubgraph.ts`

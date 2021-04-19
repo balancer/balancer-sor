@@ -1,3 +1,9 @@
+// npx mocha -r ts-node/register test/testScripts/v1-v2-compareRandom.ts
+// This is using pools list from ./testData/testPools which can change so it’s non-deterministic.
+// It’s taking a random pair from a list of tokens along with random swap amounts and max pools.
+// Compare V1 vs V2 vs Wrapper.
+// Assumes script running from root (see testDir if not).
+// Will do a large amount of tests and save any that fail. Change MIN_TESTS for number of tests to be run.
 require('dotenv').config();
 import { BigNumber } from 'bignumber.js';
 import { JsonRpcProvider } from '@ethersproject/providers';
@@ -28,12 +34,6 @@ enum SwapAmt {
     Dust,
 }
 
-// npx mocha -r ts-node/register test/testScripts/v1-v2-compareRandom.ts
-// This is using pools list from ./testData/testPools which can change so it’s non-deterministic.
-// It’s taking a random pair from a list of tokens along with random swap amounts and max pools.
-// Compare V1 vs V2 and V2 vs Wrapper.
-// Assumes script running from root (see testDir if not).
-// Will do a large amount of tests and save any that fail. Change MIN_TESTS for number of tests to be run.
 describe('Run Large Amount Of Tests Using Saved Pools Data', async () => {
     // This must be updated with pools of interest (see ./test/testData/testPools)
     let testFiles = [
