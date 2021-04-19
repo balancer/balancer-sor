@@ -1,7 +1,6 @@
 import { JsonRpcProvider } from '@ethersproject/providers';
 import {
     getV1Swap,
-    getV2Swap,
     displayResults,
     assertResults,
     v2classSwap,
@@ -38,44 +37,20 @@ export async function compareTest(
     );
 
     // V2 first to debug faster
-    // Uses saved balances instead of onChain. Test data is a snapshot of balance state. Onchain balances can change between calls.
-    let v2SwapData = await getV2Swap(
+    // Uses costOutputToken returned from above.
+    const v2SwapData = await v2classSwap(
         provider,
-        testData.tradeInfo.GasPrice,
-        testData.tradeInfo.NoPools,
-        1,
         JSON.parse(JSON.stringify(testData)),
-        testData.tradeInfo.SwapType,
         testData.tradeInfo.TokenIn,
         testData.tradeInfo.TokenOut,
+        testData.tradeInfo.NoPools,
+        testData.tradeInfo.SwapType,
         amountNormalised,
-        { onChainBalances: false },
+        testData.tradeInfo.GasPrice,
         testData.tradeInfo.ReturnAmountDecimals,
         disabledOptions,
         testSettings.costOutputTokenOveride
     );
-
-    // Uses costOutputToken returned from above.
-    let [swaps, total, marketSp] = v2classSwap(
-        JSON.parse(JSON.stringify(testData)),
-        testData.tradeInfo.TokenIn,
-        testData.tradeInfo.TokenOut,
-        testData.tradeInfo.NoPools,
-        testData.tradeInfo.SwapType,
-        amountNormalised,
-        v2SwapData.costOutputToken,
-        disabledOptions
-    );
-
-    // TO DO - Delete this once fully move to class code
-    if (testSettings.compareResults) {
-        assert.equal(
-            v2SwapData.returnAmount.toString(),
-            total.toString(),
-            'V2 Class should have same return'
-        );
-        expect(v2SwapData.swaps).to.deep.equal(swaps);
-    }
 
     // Uses scaled costOutputToken returned from above.
     let v1SwapData = await getV1Swap(
