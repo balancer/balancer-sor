@@ -19,12 +19,12 @@ export type FundManagement = {
 };
 
 // rc02 Kovan addresses
-const WETH = '0x02822e968856186a20fEc2C824D4B174D0b70502';
+const WETH = '0xdFCeA9088c8A88A76FF74892C1457C17dfeef9C1';
 const BAL = '0x41286Bb1D3E870f3F750eB7E1C25d7E48c8A1Ac7';
 const MKR = '0xAf9ac3235be96eD496db7969f60D354fe5e426B0';
 const USDC = '0xc2569dd7d0fd715B054fBf16E75B001E5c0C1115';
 const DEC = '0xC91c699D432323B020E3DE0Fc49761E040D60aB3';
-const vaultAddr = '0xba1222227c37746aDA22d10Da6265E02E44400DD';
+const vaultAddr = '0xBA12222222228d8Ba445958a75a0704d566BF2C8';
 const WBTC = '0x1C8E3Bcb3378a443CC591f154c5CE0EBb4dA9648';
 
 const poolsUrl = `https://storageapi.fleek.co/johngrantuk-team-bucket/poolsRc02.json`;

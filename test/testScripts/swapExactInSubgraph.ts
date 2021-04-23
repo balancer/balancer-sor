@@ -18,10 +18,11 @@ export type FundManagement = {
 };
 
 // rc02 Kovan addresses
-const WETH = '0x02822e968856186a20fEc2C824D4B174D0b70502';
+const WETH = '0xdFCeA9088c8A88A76FF74892C1457C17dfeef9C1';
 const BAL = '0x41286Bb1D3E870f3F750eB7E1C25d7E48c8A1Ac7';
 const MKR = '0xAf9ac3235be96eD496db7969f60D354fe5e426B0';
-const vaultAddr = '0xba1222227c37746aDA22d10Da6265E02E44400DD';
+const WBTC = '0x1C8E3Bcb3378a443CC591f154c5CE0EBb4dA9648';
+const vaultAddr = '0xBA12222222228d8Ba445958a75a0704d566BF2C8';
 
 async function simpleSwap() {
     // If running this example make sure you have a .env file saved in root DIR with INFURA=your_key
@@ -41,10 +42,10 @@ async function simpleSwap() {
     const maxNoPools = 4;
     const chainId = 42;
     const tokenIn = BAL;
-    const tokenOut = MKR;
+    const tokenOut = WBTC;
     const swapType = SwapTypes.SwapExactIn;
     // In normalized format, i.e. 1USDC = 1
-    const amountIn = new BigNumber(0.1);
+    const amountIn = new BigNumber(0.001);
     const decimalsIn = 18;
 
     // Fetch pools list from Subgraph
@@ -116,6 +117,10 @@ async function simpleSwap() {
         }
     });
     const deadline = MaxUint256;
+
+    console.log(funds);
+    console.log(swapInfo.tokenAddresses);
+    console.log(limits);
 
     console.log('Swapping...');
     let tx = await vaultContract

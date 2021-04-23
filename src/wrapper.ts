@@ -28,13 +28,13 @@ export class SOR {
     };
 
     VAULTADDR: { [chainId: number]: string } = {
-        1: '0xba1222227c37746aDA22d10Da6265E02E44400DD',
-        42: '0xba1222227c37746aDA22d10Da6265E02E44400DD',
+        1: '0xBA12222222228d8Ba445958a75a0704d566BF2C8',
+        42: '0xBA12222222228d8Ba445958a75a0704d566BF2C8',
     };
 
     WETHADDR: { [chainId: number]: string } = {
         1: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2',
-        42: '0x02822e968856186a20fEc2C824D4B174D0b70502',
+        42: '0xdFCeA9088c8A88A76FF74892C1457C17dfeef9C1',
     };
 
     provider: BaseProvider;

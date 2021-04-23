@@ -28,7 +28,9 @@ export async function fetchSubgraphPools(SubgraphUrl: string = '') {
       }
     `;
 
-    console.log(`fetchSubgraphPools: ${SUBGRAPH_URL}`);
+    console.log(
+        `fetchSubgraphPools: ${SubgraphUrl === '' ? SUBGRAPH_URL : SubgraphUrl}`
+    );
     const response = await fetch(
         SubgraphUrl === '' ? SUBGRAPH_URL : SubgraphUrl,
         {

@@ -13,12 +13,12 @@
             },
             {
                 "internalType": "uint256",
-                "name": "emergencyPeriod",
+                "name": "pauseWindowDuration",
                 "type": "uint256"
             },
             {
                 "internalType": "uint256",
-                "name": "emergencyPeriodCheckExtension",
+                "name": "bufferPeriodDuration",
                 "type": "uint256"
             }
         ],
@@ -31,30 +31,11 @@
             {
                 "indexed": true,
                 "internalType": "contract IAuthorizer",
-                "name": "oldAuthorizer",
-                "type": "address"
-            },
-            {
-                "indexed": true,
-                "internalType": "contract IAuthorizer",
                 "name": "newAuthorizer",
                 "type": "address"
             }
         ],
         "name": "AuthorizerChanged",
-        "type": "event"
-    },
-    {
-        "anonymous": false,
-        "inputs": [
-            {
-                "indexed": false,
-                "internalType": "bool",
-                "name": "active",
-                "type": "bool"
-            }
-        ],
-        "name": "EmergencyPeriodChanged",
         "type": "event"
     },
     {
@@ -93,6 +74,37 @@
         "inputs": [
             {
                 "indexed": true,
+                "internalType": "contract IFlashLoanRecipient",
+                "name": "recipient",
+                "type": "address"
+            },
+            {
+                "indexed": true,
+                "internalType": "contract IERC20",
+                "name": "token",
+                "type": "address"
+            },
+            {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "amount",
+                "type": "uint256"
+            },
+            {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "feeAmount",
+                "type": "uint256"
+            }
+        ],
+        "name": "FlashLoan",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": true,
                 "internalType": "address",
                 "name": "user",
                 "type": "address"
@@ -111,6 +123,19 @@
             }
         ],
         "name": "InternalBalanceChanged",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": false,
+                "internalType": "bool",
+                "name": "paused",
+                "type": "bool"
+            }
+        ],
+        "name": "PausedStateChanged",
         "type": "event"
     },
     {
@@ -137,13 +162,13 @@
             {
                 "indexed": false,
                 "internalType": "int256[]",
-                "name": "amounts",
+                "name": "deltas",
                 "type": "int256[]"
             },
             {
                 "indexed": false,
                 "internalType": "uint256[]",
-                "name": "protocolFees",
+                "name": "protocolFeeAmounts",
                 "type": "uint256[]"
             }
         ],
@@ -174,7 +199,13 @@
             {
                 "indexed": false,
                 "internalType": "int256",
-                "name": "amount",
+                "name": "cashDelta",
+                "type": "int256"
+            },
+            {
+                "indexed": false,
+                "internalType": "int256",
+                "name": "managedDelta",
                 "type": "int256"
             }
         ],
@@ -185,10 +216,22 @@
         "anonymous": false,
         "inputs": [
             {
-                "indexed": false,
+                "indexed": true,
                 "internalType": "bytes32",
                 "name": "poolId",
                 "type": "bytes32"
+            },
+            {
+                "indexed": true,
+                "internalType": "address",
+                "name": "poolAddress",
+                "type": "address"
+            },
+            {
+                "indexed": false,
+                "internalType": "enum IVault.PoolSpecialization",
+                "name": "specialization",
+                "type": "uint8"
             }
         ],
         "name": "PoolRegistered",
@@ -212,11 +255,11 @@
             {
                 "indexed": false,
                 "internalType": "bool",
-                "name": "allowed",
+                "name": "approved",
                 "type": "bool"
             }
         ],
-        "name": "RelayerAllowanceChanged",
+        "name": "RelayerApprovalChanged",
         "type": "event"
     },
     {
@@ -243,13 +286,13 @@
             {
                 "indexed": false,
                 "internalType": "uint256",
-                "name": "tokensIn",
+                "name": "amountIn",
                 "type": "uint256"
             },
             {
                 "indexed": false,
                 "internalType": "uint256",
-                "name": "tokensOut",
+                "name": "amountOut",
                 "type": "uint256"
             }
         ],
@@ -260,7 +303,7 @@
         "anonymous": false,
         "inputs": [
             {
-                "indexed": false,
+                "indexed": true,
                 "internalType": "bytes32",
                 "name": "poolId",
                 "type": "bytes32"
@@ -279,7 +322,7 @@
         "anonymous": false,
         "inputs": [
             {
-                "indexed": false,
+                "indexed": true,
                 "internalType": "bytes32",
                 "name": "poolId",
                 "type": "bytes32"
@@ -409,42 +452,6 @@
     {
         "inputs": [
             {
-                "internalType": "contract IAuthorizer",
-                "name": "newAuthorizer",
-                "type": "address"
-            }
-        ],
-        "name": "changeAuthorizer",
-        "outputs": [],
-        "stateMutability": "nonpayable",
-        "type": "function"
-    },
-    {
-        "inputs": [
-            {
-                "internalType": "address",
-                "name": "sender",
-                "type": "address"
-            },
-            {
-                "internalType": "address",
-                "name": "relayer",
-                "type": "address"
-            },
-            {
-                "internalType": "bool",
-                "name": "allowed",
-                "type": "bool"
-            }
-        ],
-        "name": "changeRelayerAllowance",
-        "outputs": [],
-        "stateMutability": "nonpayable",
-        "type": "function"
-    },
-    {
-        "inputs": [
-            {
                 "internalType": "bytes32",
                 "name": "poolId",
                 "type": "bytes32"
@@ -513,8 +520,8 @@
     {
         "inputs": [
             {
-                "internalType": "contract IFlashLoanReceiver",
-                "name": "receiver",
+                "internalType": "contract IFlashLoanRecipient",
+                "name": "recipient",
                 "type": "address"
             },
             {
@@ -529,13 +536,32 @@
             },
             {
                 "internalType": "bytes",
-                "name": "receiverData",
+                "name": "userData",
                 "type": "bytes"
             }
         ],
         "name": "flashLoan",
         "outputs": [],
         "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "bytes4",
+                "name": "selector",
+                "type": "bytes4"
+            }
+        ],
+        "name": "getActionId",
+        "outputs": [
+            {
+                "internalType": "bytes32",
+                "name": "",
+                "type": "bytes32"
+            }
+        ],
+        "stateMutability": "view",
         "type": "function"
     },
     {
@@ -559,29 +585,6 @@
                 "internalType": "bytes32",
                 "name": "",
                 "type": "bytes32"
-            }
-        ],
-        "stateMutability": "view",
-        "type": "function"
-    },
-    {
-        "inputs": [],
-        "name": "getEmergencyPeriod",
-        "outputs": [
-            {
-                "internalType": "bool",
-                "name": "active",
-                "type": "bool"
-            },
-            {
-                "internalType": "uint256",
-                "name": "endDate",
-                "type": "uint256"
-            },
-            {
-                "internalType": "uint256",
-                "name": "checkEndDate",
-                "type": "uint256"
             }
         ],
         "stateMutability": "view",
@@ -624,6 +627,29 @@
             {
                 "internalType": "uint256",
                 "name": "",
+                "type": "uint256"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "getPausedState",
+        "outputs": [
+            {
+                "internalType": "bool",
+                "name": "paused",
+                "type": "bool"
+            },
+            {
+                "internalType": "uint256",
+                "name": "pauseWindowEndTime",
+                "type": "uint256"
+            },
+            {
+                "internalType": "uint256",
+                "name": "bufferPeriodEndTime",
                 "type": "uint256"
             }
         ],
@@ -681,7 +707,7 @@
             },
             {
                 "internalType": "uint256",
-                "name": "blockNumber",
+                "name": "lastChangeBlock",
                 "type": "uint256"
             },
             {
@@ -715,7 +741,7 @@
             },
             {
                 "internalType": "uint256",
-                "name": "maxBlockNumber",
+                "name": "lastChangeBlock",
                 "type": "uint256"
             }
         ],
@@ -748,7 +774,7 @@
                 "type": "address"
             }
         ],
-        "name": "hasAllowedRelayer",
+        "name": "hasApprovedRelayer",
         "outputs": [
             {
                 "internalType": "bool",
@@ -812,17 +838,17 @@
     {
         "inputs": [
             {
-                "internalType": "bytes32",
-                "name": "poolId",
-                "type": "bytes32"
-            },
-            {
-                "internalType": "enum IVault.AssetManagerOpKind",
-                "name": "kind",
-                "type": "uint8"
-            },
-            {
                 "components": [
+                    {
+                        "internalType": "enum IVault.PoolBalanceOpKind",
+                        "name": "kind",
+                        "type": "uint8"
+                    },
+                    {
+                        "internalType": "bytes32",
+                        "name": "poolId",
+                        "type": "bytes32"
+                    },
                     {
                         "internalType": "contract IERC20",
                         "name": "token",
@@ -834,8 +860,8 @@
                         "type": "uint256"
                     }
                 ],
-                "internalType": "struct IVault.AssetManagerTransfer[]",
-                "name": "transfers",
+                "internalType": "struct IVault.PoolBalanceOp[]",
+                "name": "ops",
                 "type": "tuple[]"
             }
         ],
@@ -964,7 +990,7 @@
                 "type": "int256[]"
             }
         ],
-        "stateMutability": "nonpayable",
+        "stateMutability": "view",
         "type": "function"
     },
     {
@@ -1012,12 +1038,48 @@
     {
         "inputs": [
             {
+                "internalType": "contract IAuthorizer",
+                "name": "newAuthorizer",
+                "type": "address"
+            }
+        ],
+        "name": "setAuthorizer",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
                 "internalType": "bool",
-                "name": "active",
+                "name": "paused",
                 "type": "bool"
             }
         ],
-        "name": "setEmergencyPeriod",
+        "name": "setPaused",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "sender",
+                "type": "address"
+            },
+            {
+                "internalType": "address",
+                "name": "relayer",
+                "type": "address"
+            },
+            {
+                "internalType": "bool",
+                "name": "approved",
+                "type": "bool"
+            }
+        ],
+        "name": "setRelayerApproval",
         "outputs": [],
         "stateMutability": "nonpayable",
         "type": "function"
@@ -1058,7 +1120,7 @@
                     }
                 ],
                 "internalType": "struct IVault.SingleSwap",
-                "name": "request",
+                "name": "singleSwap",
                 "type": "tuple"
             },
             {
@@ -1103,7 +1165,7 @@
         "outputs": [
             {
                 "internalType": "uint256",
-                "name": "",
+                "name": "amountCalculated",
                 "type": "uint256"
             }
         ],
