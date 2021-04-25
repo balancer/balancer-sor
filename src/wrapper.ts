@@ -85,11 +85,19 @@ export class SOR {
     */
     async setCostOutputToken(
         tokenOut: string,
+        tokenDecimals: number,
         cost: BigNumber = null
     ): Promise<BigNumber> {
         tokenOut = tokenOut.toLowerCase();
 
         if (cost === null) {
+            // Handle ETH/WETH cost
+            if (
+                tokenOut === ZERO_ADDRESS ||
+                tokenOut === this.WETHADDR[this.chainId]
+            ) {
+                return this.gasPrice.times(this.swapCost).div(bnum(10 ** 18));
+            }
             // This calculates the cost to make a swap which is used as an input to SOR to allow it to make gas efficient recommendations
             const costOutputToken = await getCostOutputToken(
                 tokenOut,
@@ -99,8 +107,10 @@ export class SOR {
                 this.chainId
             );
 
-            this.tokenCost[tokenOut] = costOutputToken;
-            return costOutputToken;
+            this.tokenCost[tokenOut] = costOutputToken.div(
+                bnum(10 ** tokenDecimals)
+            );
+            return this.tokenCost[tokenOut];
         } else {
             this.tokenCost[tokenOut] = cost;
             return cost;

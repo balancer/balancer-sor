@@ -77,6 +77,8 @@ export async function compareTest(
         JSON.parse(JSON.stringify(testData)),
         testData.tradeInfo.TokenIn,
         testData.tradeInfo.TokenOut,
+        testData.tradeInfo.TokenInDecimals,
+        testData.tradeInfo.TokenOutDecimals,
         testData.tradeInfo.NoPools,
         testData.tradeInfo.SwapType,
         amountNormalised,

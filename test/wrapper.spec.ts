@@ -56,8 +56,29 @@ describe(`Tests for wrapper class.`, () => {
         const tokenOut = `0xba100000625a3754423978a60c9317c58a424e3d`;
         const manualCost = new BigNumber('700000000000');
         const sor = new SOR(provider, gasPrice, maxPools, chainId, poolsUrl);
-        sor.setCostOutputToken(tokenOut, manualCost);
-        assert(manualCost, sor.tokenCost[tokenOut]);
+        sor.setCostOutputToken(tokenOut, 18, manualCost);
+        assert.equal(manualCost, sor.tokenCost[tokenOut]);
+    });
+
+    it(`Should return correct costOutputToken for ZERO & WETH addresses`, async () => {
+        const tokenOut = ZERO_ADDRESS;
+        const sor = new SOR(provider, gasPrice, maxPools, chainId, poolsUrl);
+        let cost = await sor.setCostOutputToken(tokenOut, 18);
+        assert.equal(
+            cost.toString(),
+            gasPrice
+                .times(sor.swapCost)
+                .div(bnum(10 ** 18))
+                .toString()
+        );
+        cost = await sor.setCostOutputToken(WETHADDR, 18);
+        assert.equal(
+            cost.toString(),
+            gasPrice
+                .times(sor.swapCost)
+                .div(bnum(10 ** 18))
+                .toString()
+        );
     });
 
     it(`Should return false for fetchPools error`, async () => {

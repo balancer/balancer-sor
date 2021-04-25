@@ -1,11 +1,17 @@
-// Example showing SOR use with Vault batchSwap & Eth in, run using: $ ts-node ./test/testScripts/swapExactInEth.ts
+// Example showing SOR use with Vault batchSwap & Eth in, run using: $ ts-node ./test/testScripts/swapExactInEthIn.ts
 require('dotenv').config();
 import { BigNumber } from 'bignumber.js';
 import { JsonRpcProvider } from '@ethersproject/providers';
 import { Wallet } from '@ethersproject/wallet';
 import { Contract } from '@ethersproject/contracts';
 import { MaxUint256 } from '@ethersproject/constants';
-import { SOR, SwapInfo, SwapTypes, ZERO_ADDRESS } from '../../src';
+import {
+    SOR,
+    SwapInfo,
+    SwapTypes,
+    ZERO_ADDRESS,
+    fetchSubgraphPools,
+} from '../../src';
 import { scale } from '../../src/bmath';
 
 import vaultArtifact from '../../src/abi/Vault.json';
@@ -24,8 +30,6 @@ const MKR = '0xAf9ac3235be96eD496db7969f60D354fe5e426B0';
 const USDC = '0xc2569dd7d0fd715B054fBf16E75B001E5c0C1115';
 const DEC = '0xC91c699D432323B020E3DE0Fc49761E040D60aB3';
 const vaultAddr = '0xBA12222222228d8Ba445958a75a0704d566BF2C8';
-
-const poolsUrl = `https://storageapi.fleek.co/johngrantuk-team-bucket/poolsRc02.json`;
 
 async function simpleSwap() {
     // If running this example make sure you have a .env file saved in root DIR with INFURA=your_key
@@ -51,16 +55,26 @@ async function simpleSwap() {
     // In normalized format, i.e. 1USDC = 1
     const amountIn = new BigNumber(0.1);
     const decimalsIn = 18;
+    const decimalsOut = 6;
 
-    const sor = new SOR(provider, gasPrice, maxNoPools, chainId, poolsUrl);
+    // Fetch pools list from Subgraph
+    // Uses default API or value set in env
+    // Can also pass in API address via parameter
+    let subgraphPools = await fetchSubgraphPools();
+
+    const sor = new SOR(provider, gasPrice, maxNoPools, chainId, subgraphPools);
 
     // This calculates the cost to make a swap which is used as an input to sor to allow it to make gas efficient recommendations.
     // Can be set once and will be used for further swap calculations.
     // Defaults to 0 if not called or can be set manually using: await sor.setCostOutputToken(tokenOut, manualPriceBn)
-    await sor.setCostOutputToken(tokenOut);
+    const cost = await sor.setCostOutputToken(tokenOut, decimalsOut);
+    console.log(cost.toString());
 
-    // This fetches all pools list from URL in constructor then onChain balances using Multicall
-    await sor.fetchPools();
+    // Fetch refreshed pools list from Subgraph
+    subgraphPools = await fetchSubgraphPools();
+    // Will get onChain data for refreshed pools list
+    await sor.fetchPools(true, subgraphPools);
+
     const isFinishedFetchingOnChain = sor.finishedFetchingOnChain;
     console.log(`isFinishedFetchingOnChain ${isFinishedFetchingOnChain}`);
 
