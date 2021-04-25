@@ -93,10 +93,19 @@ class SOR {
     Find and cache cost of token.
     If cost is passed then it manually sets the value.
     */
-    setCostOutputToken(tokenOut, cost = null) {
+    setCostOutputToken(tokenOut, tokenDecimals, cost = null) {
         return __awaiter(this, void 0, void 0, function*() {
             tokenOut = tokenOut.toLowerCase();
             if (cost === null) {
+                // Handle ETH/WETH cost
+                if (
+                    tokenOut === index_1.ZERO_ADDRESS ||
+                    tokenOut === this.WETHADDR[this.chainId]
+                ) {
+                    return this.gasPrice
+                        .times(this.swapCost)
+                        .div(bmath_1.bnum(Math.pow(10, 18)));
+                }
                 // This calculates the cost to make a swap which is used as an input to SOR to allow it to make gas efficient recommendations
                 const costOutputToken = yield costToken_1.getCostOutputToken(
                     tokenOut,
@@ -105,8 +114,10 @@ class SOR {
                     this.provider,
                     this.chainId
                 );
-                this.tokenCost[tokenOut] = costOutputToken;
-                return costOutputToken;
+                this.tokenCost[tokenOut] = costOutputToken.div(
+                    bmath_1.bnum(Math.pow(10, tokenDecimals))
+                );
+                return this.tokenCost[tokenOut];
             } else {
                 this.tokenCost[tokenOut] = cost;
                 return cost;
