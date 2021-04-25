@@ -94,12 +94,13 @@ export class SOR {
             // Handle ETH/WETH cost
             if (
                 tokenOut === ZERO_ADDRESS ||
-                tokenOut === this.WETHADDR[this.chainId]
+                tokenOut.toLowerCase() ===
+                    this.WETHADDR[this.chainId].toLowerCase()
             ) {
-                this.tokenCost[tokenOut] = this.gasPrice
+                this.tokenCost[tokenOut.toLowerCase()] = this.gasPrice
                     .times(this.swapCost)
                     .div(bnum(10 ** 18));
-                return this.tokenCost[tokenOut];
+                return this.tokenCost[tokenOut.toLowerCase()];
             }
             // This calculates the cost to make a swap which is used as an input to SOR to allow it to make gas efficient recommendations
             const costOutputToken = await getCostOutputToken(
