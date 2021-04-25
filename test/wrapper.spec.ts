@@ -71,6 +71,7 @@ describe(`Tests for wrapper class.`, () => {
                 .div(bnum(10 ** 18))
                 .toString()
         );
+        assert.equal(cost.toString(), sor.tokenCost[tokenOut]);
         cost = await sor.setCostOutputToken(WETHADDR, 18);
         assert.equal(
             cost.toString(),
@@ -79,6 +80,7 @@ describe(`Tests for wrapper class.`, () => {
                 .div(bnum(10 ** 18))
                 .toString()
         );
+        assert.equal(cost.toString(), sor.tokenCost[WETHADDR]);
     });
 
     it(`Should return false for fetchPools error`, async () => {
