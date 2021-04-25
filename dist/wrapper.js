@@ -102,9 +102,10 @@ class SOR {
                     tokenOut === index_1.ZERO_ADDRESS ||
                     tokenOut === this.WETHADDR[this.chainId]
                 ) {
-                    return this.gasPrice
+                    this.tokenCost[tokenOut] = this.gasPrice
                         .times(this.swapCost)
                         .div(bmath_1.bnum(Math.pow(10, 18)));
+                    return this.tokenCost[tokenOut];
                 }
                 // This calculates the cost to make a swap which is used as an input to SOR to allow it to make gas efficient recommendations
                 const costOutputToken = yield costToken_1.getCostOutputToken(
