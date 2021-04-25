@@ -57,6 +57,7 @@ async function simpleSwap() {
     // In normalized format, i.e. 1USDC = 1
     const amountOut = new BigNumber(0.1);
     const decimalsOut = 6;
+    const decimalsIn = 18;
 
     // Fetch pools list from Subgraph
     // Uses default API or value set in env
@@ -68,7 +69,7 @@ async function simpleSwap() {
     // This calculates the cost to make a swap which is used as an input to sor to allow it to make gas efficient recommendations.
     // Can be set once and will be used for further swap calculations.
     // Defaults to 0 if not called or can be set manually using: await sor.setCostOutputToken(tokenOut, manualPriceBn)
-    await sor.setCostOutputToken(tokenOut);
+    await sor.setCostOutputToken(tokenIn, decimalsIn);
 
     // Fetch refreshed pools list from Subgraph
     subgraphPools = await fetchSubgraphPools();

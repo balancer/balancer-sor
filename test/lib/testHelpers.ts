@@ -1142,6 +1142,8 @@ export async function getWrapperSwap(
     pools: any,
     tokenIn: string,
     tokenOut: string,
+    tokenInDecimals: number,
+    tokenOutDecimals: number,
     maxPools: number,
     swapType: string | SwapTypes,
     swapAmountNormalised: BigNumber,
@@ -1162,10 +1164,14 @@ export async function getWrapperSwap(
     let swapTypeCorrect = SwapTypes.SwapExactIn;
 
     if (swapType === 'swapExactIn')
-        await sor.setCostOutputToken(tokenOut, costOutputToken);
+        await sor.setCostOutputToken(
+            tokenOut,
+            tokenOutDecimals,
+            costOutputToken
+        );
     else {
         swapTypeCorrect = SwapTypes.SwapExactOut;
-        await sor.setCostOutputToken(tokenIn, costOutputToken);
+        await sor.setCostOutputToken(tokenIn, tokenInDecimals, costOutputToken);
     }
 
     const isFetched = await sor.fetchPools(false);

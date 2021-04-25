@@ -52,13 +52,14 @@ async function simpleSwap() {
     // In normalized format, i.e. 1USDC = 1
     const amountOut = new BigNumber(0.0001);
     const decimalsOut = 18;
+    const decimalsIn = 18;
 
     const sor = new SOR(provider, gasPrice, maxNoPools, chainId, poolsUrl);
 
     // This calculates the cost to make a swap which is used as an input to sor to allow it to make gas efficient recommendations.
     // Can be set once and will be used for further swap calculations.
     // Defaults to 0 if not called or can be set manually using: await sor.setCostOutputToken(tokenOut, manualPriceBn)
-    await sor.setCostOutputToken(tokenOut);
+    await sor.setCostOutputToken(tokenIn, decimalsIn);
 
     // This fetches all pools list from URL in constructor then onChain balances using Multicall
     await sor.fetchPools();
