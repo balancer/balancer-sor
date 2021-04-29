@@ -806,6 +806,7 @@ export function assertResults(
         testData.tradeInfo.TokenIn,
         testData.tradeInfo.TokenOut,
         v2SwapData.returnAmount,
+        v2SwapData.returnAmountConsideringFees, // Not needed so just a value
         wrapperSwapData.marketSp
     );
 
@@ -1114,8 +1115,11 @@ export async function getV2Swap(
 
     [paths, maxAmt] = calculatePathLimits(pathData, swapTypeCorrect);
 
-    let swaps: any, total: BigNumber, marketSp: BigNumber;
-    [swaps, total, marketSp] = smartOrderRouter(
+    let swaps: any,
+        total: BigNumber,
+        marketSp: BigNumber,
+        totalConsideringFees: BigNumber;
+    [swaps, total, marketSp, totalConsideringFees] = smartOrderRouter(
         JSON.parse(JSON.stringify(poolsOfInterestDictionary)), // Need to keep original pools for cache
         paths,
         swapTypeCorrect,
@@ -1133,6 +1137,7 @@ export async function getV2Swap(
         title: 'v2',
         swaps,
         returnAmount: total,
+        returnAmountConsideringFees: totalConsideringFees,
         timeData,
         costOutputToken,
     };

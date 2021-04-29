@@ -113,7 +113,7 @@ export const smartOrderRouter = (
     totalSwapAmount: BigNumber,
     maxPools: number,
     costReturnToken: BigNumber
-): [Swap[][], BigNumber, BigNumber] => {
+): [Swap[][], BigNumber, BigNumber, BigNumber] => {
     let bestTotalReturn: BigNumber = new BigNumber(0);
     let bestTotalReturnConsideringFees: BigNumber = new BigNumber(0);
     let totalReturn, totalReturnConsideringFees;
@@ -121,7 +121,7 @@ export const smartOrderRouter = (
 
     // No paths available or totalSwapAmount == 0, return empty solution
     if (paths.length == 0 || totalSwapAmount.isZero()) {
-        return [[], bnum(0), bnum(0)];
+        return [[], bnum(0), bnum(0), bnum(0)];
     }
     // Before we start the main loop, we first check if there is enough liquidity for this totalSwapAmount at all
     let highestLimitAmounts = getHighestLimitAmountsForPaths(paths, maxPools);
@@ -147,7 +147,7 @@ export const smartOrderRouter = (
         break; // No need to keep looping as this number of pools (i) has enough liquidity
     }
     if (initialNumPaths == -1) {
-        return [[], bnum(0), bnum(0)]; // Not enough liquidity, return empty
+        return [[], bnum(0), bnum(0), bnum(0)]; // Not enough liquidity, return empty
     }
 
     // First get the optimal totalReturn to trade 'totalSwapAmount' with
@@ -431,7 +431,7 @@ export const smartOrderRouter = (
             bnum(0)
         );
 
-    return [swaps, bestTotalReturn, marketSp];
+    return [swaps, bestTotalReturn, marketSp, bestTotalReturnConsideringFees];
 };
 
 //  For a given list of swapAmounts, gets list of pools with best effective price for these amounts

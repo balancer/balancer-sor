@@ -12,6 +12,7 @@ describe(`Tests for Helpers.`, () => {
     it(`Should format directhop swapExactIn`, () => {
         const swapAmount = new BigNumber(1);
         const returnAmount = new BigNumber(2);
+        const returnAmountConsideringFees = new BigNumber(1.9);
         const tokenIn = '0x6b175474e89094c44da98b954eedeac495271d0f';
         const tokenOut = '0xba100000625a3754423978a60c9317c58a424e3d';
         const swapType = SwapTypes.SwapExactIn;
@@ -30,6 +31,7 @@ describe(`Tests for Helpers.`, () => {
             tokenIn,
             tokenOut,
             returnAmount,
+            returnAmountConsideringFees,
             marketSp
         );
 
@@ -37,6 +39,10 @@ describe(`Tests for Helpers.`, () => {
         assert.equal(swapInfo.swaps.length, 2);
         assert.equal('1000000000000000000', swapInfo.swapAmount.toString());
         assert.equal('2000000000000000000', swapInfo.returnAmount.toString());
+        assert.equal(
+            '1900000000000000000',
+            swapInfo.returnAmountConsideringFees.toString()
+        );
         assert.equal(tokenIn, swapInfo.tokenIn);
         assert.equal(tokenOut, swapInfo.tokenOut);
         assert.equal(swapInfo.swaps[0].assetInIndex, 0);
@@ -50,6 +56,7 @@ describe(`Tests for Helpers.`, () => {
     it(`Should format multihop swapExactIn`, () => {
         const swapAmount = new BigNumber(1);
         const returnAmount = new BigNumber(2);
+        const returnAmountConsideringFees = new BigNumber(1.9);
         const tokenIn = '0x6b175474e89094c44da98b954eedeac495271d0f';
         const tokenOut = '0x056fd409e1d7a124bd7017459dfea2f387b6d5cd';
         const swapType = SwapTypes.SwapExactIn;
@@ -70,6 +77,7 @@ describe(`Tests for Helpers.`, () => {
             tokenIn,
             tokenOut,
             returnAmount,
+            returnAmountConsideringFees,
             marketSp
         );
 
@@ -77,6 +85,10 @@ describe(`Tests for Helpers.`, () => {
         assert.equal(swapInfo.swaps.length, 4);
         assert.equal('1000000000000000000', swapInfo.swapAmount.toString());
         assert.equal('2000000000000000000', swapInfo.returnAmount.toString());
+        assert.equal(
+            '1900000000000000000',
+            swapInfo.returnAmountConsideringFees.toString()
+        );
         assert.equal(tokenIn, swapInfo.tokenIn);
         assert.equal(tokenOut, swapInfo.tokenOut);
         assert.equal(swapInfo.swaps[0].assetInIndex, 0);
@@ -96,6 +108,7 @@ describe(`Tests for Helpers.`, () => {
     it(`Should format direct & multihop swapExactIn`, () => {
         const swapAmount = new BigNumber(1);
         const returnAmount = new BigNumber(2);
+        const returnAmountConsideringFees = new BigNumber(1.9);
         const tokenIn = '0x6b175474e89094c44da98b954eedeac495271d0f';
         const tokenOut = '0x056fd409e1d7a124bd7017459dfea2f387b6d5cd';
         const swapType = SwapTypes.SwapExactIn;
@@ -115,6 +128,7 @@ describe(`Tests for Helpers.`, () => {
             tokenIn,
             tokenOut,
             returnAmount,
+            returnAmountConsideringFees,
             marketSp
         );
 
@@ -122,6 +136,10 @@ describe(`Tests for Helpers.`, () => {
         assert.equal(swapInfo.swaps.length, 3);
         assert.equal('1000000000000000000', swapInfo.swapAmount.toString());
         assert.equal('2000000000000000000', swapInfo.returnAmount.toString());
+        assert.equal(
+            '1900000000000000000',
+            swapInfo.returnAmountConsideringFees.toString()
+        );
         assert.equal(tokenIn, swapInfo.tokenIn);
         assert.equal(tokenOut, swapInfo.tokenOut);
         assert.equal(swapInfo.swaps[0].assetInIndex, 0);
@@ -138,6 +156,7 @@ describe(`Tests for Helpers.`, () => {
     it(`Should format directhop swapExactOut`, () => {
         const swapAmount = new BigNumber(1);
         const returnAmount = new BigNumber(1);
+        const returnAmountConsideringFees = new BigNumber(0.9);
         const tokenIn = '0x6b175474e89094c44da98b954eedeac495271d0f';
         const tokenOut = '0xba100000625a3754423978a60c9317c58a424e3d';
         const swapType = SwapTypes.SwapExactOut;
@@ -156,6 +175,7 @@ describe(`Tests for Helpers.`, () => {
             tokenIn,
             tokenOut,
             returnAmount,
+            returnAmountConsideringFees,
             marketSp
         );
 
@@ -163,6 +183,10 @@ describe(`Tests for Helpers.`, () => {
         assert.equal(swapInfo.swaps.length, 2);
         assert.equal('1000000000000000000', swapInfo.swapAmount.toString());
         assert.equal('1000000000000000000', swapInfo.returnAmount.toString());
+        assert.equal(
+            '900000000000000000',
+            swapInfo.returnAmountConsideringFees.toString()
+        );
         assert.equal(tokenIn, swapInfo.tokenIn);
         assert.equal(tokenOut, swapInfo.tokenOut);
         assert.equal(swapInfo.swaps[0].assetInIndex, 0);
@@ -176,6 +200,7 @@ describe(`Tests for Helpers.`, () => {
     it(`Should format multihop swapExactOut`, () => {
         const swapAmount = new BigNumber(1);
         const returnAmount = new BigNumber(2);
+        const returnAmountConsideringFees = new BigNumber(1.9);
         const tokenIn = '0x6b175474e89094c44da98b954eedeac495271d0f';
         const tokenOut = '0x056fd409e1d7a124bd7017459dfea2f387b6d5cd';
         const swapType = SwapTypes.SwapExactOut;
@@ -196,6 +221,7 @@ describe(`Tests for Helpers.`, () => {
             tokenIn,
             tokenOut,
             returnAmount,
+            returnAmountConsideringFees,
             marketSp
         );
 
@@ -222,6 +248,7 @@ describe(`Tests for Helpers.`, () => {
     it(`Should format direct & multihop swapExactOut`, () => {
         const swapAmount = new BigNumber(1);
         const returnAmount = new BigNumber(2);
+        const returnAmountConsideringFees = new BigNumber(1.9);
         const tokenIn = '0x6b175474e89094c44da98b954eedeac495271d0f';
         const tokenOut = '0x056fd409e1d7a124bd7017459dfea2f387b6d5cd';
         const swapType = SwapTypes.SwapExactOut;
@@ -241,6 +268,7 @@ describe(`Tests for Helpers.`, () => {
             tokenIn,
             tokenOut,
             returnAmount,
+            returnAmountConsideringFees,
             marketSp
         );
 
@@ -265,6 +293,7 @@ describe(`Tests for Helpers.`, () => {
     it(`Should scale 6 decimal token correctly swapExactIn, USDC In`, () => {
         const swapAmount = new BigNumber(1);
         const returnAmount = new BigNumber(2);
+        const returnAmountConsideringFees = new BigNumber(1.9);
         const tokenIn = '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48';
         const tokenOut = '0x6b175474e89094c44da98b954eedeac495271d0f';
         const swapType = SwapTypes.SwapExactIn;
@@ -283,6 +312,7 @@ describe(`Tests for Helpers.`, () => {
             tokenIn,
             tokenOut,
             returnAmount,
+            returnAmountConsideringFees,
             marketSp
         );
 
@@ -300,6 +330,7 @@ describe(`Tests for Helpers.`, () => {
     it(`Should scale 6 decimal token correctly swapExactOut, USDC In`, () => {
         const swapAmount = new BigNumber(1);
         const returnAmount = new BigNumber(2);
+        const returnAmountConsideringFees = new BigNumber(1.9);
         const tokenIn = '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48';
         const tokenOut = '0x6b175474e89094c44da98b954eedeac495271d0f';
         const swapType = SwapTypes.SwapExactOut;
@@ -318,6 +349,7 @@ describe(`Tests for Helpers.`, () => {
             tokenIn,
             tokenOut,
             returnAmount,
+            returnAmountConsideringFees,
             marketSp
         );
 
@@ -335,6 +367,7 @@ describe(`Tests for Helpers.`, () => {
     it(`Should scale 6 decimal token correctly swapExactIn, USDC Out`, () => {
         const swapAmount = new BigNumber(1);
         const returnAmount = new BigNumber(2);
+        const returnAmountConsideringFees = new BigNumber(1.9);
         const tokenIn = '0x6b175474e89094c44da98b954eedeac495271d0f';
         const tokenOut = '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48';
         const swapType = SwapTypes.SwapExactIn;
@@ -353,6 +386,7 @@ describe(`Tests for Helpers.`, () => {
             tokenIn,
             tokenOut,
             returnAmount,
+            returnAmountConsideringFees,
             marketSp
         );
 
@@ -370,6 +404,7 @@ describe(`Tests for Helpers.`, () => {
     it(`Should scale 6 decimal token correctly swapExactOut, USDC Out`, () => {
         const swapAmount = new BigNumber(1);
         const returnAmount = new BigNumber(2);
+        const returnAmountConsideringFees = new BigNumber(1.9);
         const tokenIn = '0x6b175474e89094c44da98b954eedeac495271d0f';
         const tokenOut = '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48';
         const swapType = SwapTypes.SwapExactOut;
@@ -388,6 +423,7 @@ describe(`Tests for Helpers.`, () => {
             tokenIn,
             tokenOut,
             returnAmount,
+            returnAmountConsideringFees,
             marketSp
         );
 
@@ -405,6 +441,7 @@ describe(`Tests for Helpers.`, () => {
     it(`Should handle no swaps case`, () => {
         const swapAmount = new BigNumber(1);
         const returnAmount = new BigNumber(2);
+        const returnAmountConsideringFees = new BigNumber(1.9);
         const tokenIn = '0x6b175474e89094c44da98b954eedeac495271d0f';
         const tokenOut = '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48';
         const swapType = SwapTypes.SwapExactOut;
@@ -420,6 +457,7 @@ describe(`Tests for Helpers.`, () => {
             tokenIn,
             tokenOut,
             returnAmount,
+            returnAmountConsideringFees,
             marketSp
         );
 
@@ -434,6 +472,7 @@ describe(`Tests for Helpers.`, () => {
     it(`Should return marketSp`, () => {
         const swapAmount = new BigNumber(1);
         const returnAmount = new BigNumber(2);
+        const returnAmountConsideringFees = new BigNumber(1.9);
         const tokenIn = '0x6b175474e89094c44da98b954eedeac495271d0f';
         const tokenOut = '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48';
         const swapType = SwapTypes.SwapExactOut;
@@ -449,6 +488,7 @@ describe(`Tests for Helpers.`, () => {
             tokenIn,
             tokenOut,
             returnAmount,
+            returnAmountConsideringFees,
             marketSp
         );
 
@@ -458,6 +498,7 @@ describe(`Tests for Helpers.`, () => {
     it(`Should format directhop swapExactIn for Weth In, no Eth Wrap`, () => {
         const swapAmount = new BigNumber(1);
         const returnAmount = new BigNumber(2);
+        const returnAmountConsideringFees = new BigNumber(1.9);
         const tokenIn = '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2'; // Weth In
         const tokenOut = '0xba100000625a3754423978a60c9317c58a424e3d';
         const swapType = SwapTypes.SwapExactIn;
@@ -476,6 +517,7 @@ describe(`Tests for Helpers.`, () => {
             tokenIn,
             tokenOut,
             returnAmount,
+            returnAmountConsideringFees,
             marketSp
         );
 
@@ -493,6 +535,7 @@ describe(`Tests for Helpers.`, () => {
     it(`Should format directhop swapExactIn for Eth Wrap, Weth In`, () => {
         const swapAmount = new BigNumber(1);
         const returnAmount = new BigNumber(2);
+        const returnAmountConsideringFees = new BigNumber(1.9);
         const tokenIn = '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2'; // Weth In
         const tokenOut = '0xba100000625a3754423978a60c9317c58a424e3d';
         const swapType = SwapTypes.SwapExactIn;
@@ -515,6 +558,7 @@ describe(`Tests for Helpers.`, () => {
             tokenIn,
             tokenOut,
             returnAmount,
+            returnAmountConsideringFees,
             marketSp,
             isEthSwap
         );
@@ -533,6 +577,7 @@ describe(`Tests for Helpers.`, () => {
     it(`Should format directhop swapExactIn for Weth Out, no Eth Wrap`, () => {
         const swapAmount = new BigNumber(1);
         const returnAmount = new BigNumber(2);
+        const returnAmountConsideringFees = new BigNumber(1.9);
         const tokenIn = '0xba100000625a3754423978a60c9317c58a424e3d';
         const tokenOut = '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2'; // Weth Out
         const swapType = SwapTypes.SwapExactIn;
@@ -551,6 +596,7 @@ describe(`Tests for Helpers.`, () => {
             tokenIn,
             tokenOut,
             returnAmount,
+            returnAmountConsideringFees,
             marketSp
         );
 
@@ -568,6 +614,7 @@ describe(`Tests for Helpers.`, () => {
     it(`Should format directhop swapExactIn for Eth Wrap, Weth Out`, () => {
         const swapAmount = new BigNumber(1);
         const returnAmount = new BigNumber(2);
+        const returnAmountConsideringFees = new BigNumber(1.9);
         const tokenIn = '0xba100000625a3754423978a60c9317c58a424e3d';
         const tokenOut = '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2'; // Weth Out
         const swapType = SwapTypes.SwapExactIn;
@@ -590,6 +637,7 @@ describe(`Tests for Helpers.`, () => {
             tokenIn,
             tokenOut,
             returnAmount,
+            returnAmountConsideringFees,
             marketSp,
             isEthSwap
         );
@@ -608,6 +656,7 @@ describe(`Tests for Helpers.`, () => {
     it(`Should format directhop swapExactOut for No Eth Wrap, Weth In`, () => {
         const swapAmount = new BigNumber(2);
         const returnAmount = new BigNumber(1);
+        const returnAmountConsideringFees = new BigNumber(0.9);
         const tokenIn = '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2';
         const tokenOut = '0xba100000625a3754423978a60c9317c58a424e3d';
         const swapType = SwapTypes.SwapExactOut;
@@ -626,6 +675,7 @@ describe(`Tests for Helpers.`, () => {
             tokenIn,
             tokenOut,
             returnAmount,
+            returnAmountConsideringFees,
             marketSp
         );
 
@@ -643,6 +693,7 @@ describe(`Tests for Helpers.`, () => {
     it(`Should format directhop swapExactOut for Eth Wrap, Weth In`, () => {
         const swapAmount = new BigNumber(2);
         const returnAmount = new BigNumber(1);
+        const returnAmountConsideringFees = new BigNumber(0.9);
         const tokenIn = '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2';
         const tokenOut = '0xba100000625a3754423978a60c9317c58a424e3d';
         const swapType = SwapTypes.SwapExactOut;
@@ -665,6 +716,7 @@ describe(`Tests for Helpers.`, () => {
             tokenIn,
             tokenOut,
             returnAmount,
+            returnAmountConsideringFees,
             marketSp,
             isEthSwap
         );
@@ -683,6 +735,7 @@ describe(`Tests for Helpers.`, () => {
     it(`Should format directhop swapExactOut for No Eth Wrap, Weth Out`, () => {
         const swapAmount = new BigNumber(2);
         const returnAmount = new BigNumber(1);
+        const returnAmountConsideringFees = new BigNumber(0.9);
         const tokenIn = '0xba100000625a3754423978a60c9317c58a424e3d';
         const tokenOut = '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2';
         const swapType = SwapTypes.SwapExactOut;
@@ -701,6 +754,7 @@ describe(`Tests for Helpers.`, () => {
             tokenIn,
             tokenOut,
             returnAmount,
+            returnAmountConsideringFees,
             marketSp
         );
 
@@ -718,6 +772,7 @@ describe(`Tests for Helpers.`, () => {
     it(`Should format directhop swapExactOut for Eth Wrap, Weth Out`, () => {
         const swapAmount = new BigNumber(2);
         const returnAmount = new BigNumber(1);
+        const returnAmountConsideringFees = new BigNumber(0.9);
         const tokenIn = '0xba100000625a3754423978a60c9317c58a424e3d';
         const tokenOut = '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2';
         const swapType = SwapTypes.SwapExactOut;
@@ -740,6 +795,7 @@ describe(`Tests for Helpers.`, () => {
             tokenIn,
             tokenOut,
             returnAmount,
+            returnAmountConsideringFees,
             marketSp,
             isEthSwap
         );
@@ -758,6 +814,7 @@ describe(`Tests for Helpers.`, () => {
     it(`Should format direct & multihop swapExactIn, No Eth Wrap, Weth In`, () => {
         const swapAmount = new BigNumber(1);
         const returnAmount = new BigNumber(2);
+        const returnAmountConsideringFees = new BigNumber(1.9);
         const tokenIn = '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2';
         const tokenOut = '0x056fd409e1d7a124bd7017459dfea2f387b6d5cd';
         const swapType = SwapTypes.SwapExactIn;
@@ -777,6 +834,7 @@ describe(`Tests for Helpers.`, () => {
             tokenIn,
             tokenOut,
             returnAmount,
+            returnAmountConsideringFees,
             marketSp
         );
 
@@ -800,6 +858,7 @@ describe(`Tests for Helpers.`, () => {
     it(`Should format direct & multihop swapExactIn, Eth Wrap, Weth In`, () => {
         const swapAmount = new BigNumber(1);
         const returnAmount = new BigNumber(2);
+        const returnAmountConsideringFees = new BigNumber(1.9);
         const tokenIn = '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2';
         const tokenOut = '0x056fd409e1d7a124bd7017459dfea2f387b6d5cd';
         const swapType = SwapTypes.SwapExactIn;
@@ -823,6 +882,7 @@ describe(`Tests for Helpers.`, () => {
             tokenIn,
             tokenOut,
             returnAmount,
+            returnAmountConsideringFees,
             marketSp,
             isEthSwap
         );
@@ -847,6 +907,7 @@ describe(`Tests for Helpers.`, () => {
     it(`Should format direct & multihop swapExactOut, No Eth Wrap, Weth In`, () => {
         const swapAmount = new BigNumber(1);
         const returnAmount = new BigNumber(2);
+        const returnAmountConsideringFees = new BigNumber(1.9);
         const tokenIn = '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2';
         const tokenOut = '0x056fd409e1d7a124bd7017459dfea2f387b6d5cd';
         const swapType = SwapTypes.SwapExactOut;
@@ -866,6 +927,7 @@ describe(`Tests for Helpers.`, () => {
             tokenIn,
             tokenOut,
             returnAmount,
+            returnAmountConsideringFees,
             marketSp
         );
 
@@ -890,6 +952,7 @@ describe(`Tests for Helpers.`, () => {
     it(`Should format direct & multihop swapExactOut, Eth Wrap, Weth In`, () => {
         const swapAmount = new BigNumber(1);
         const returnAmount = new BigNumber(2);
+        const returnAmountConsideringFees = new BigNumber(1.9);
         const tokenIn = '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2';
         const tokenOut = '0x056fd409e1d7a124bd7017459dfea2f387b6d5cd';
         const swapType = SwapTypes.SwapExactOut;
@@ -913,6 +976,7 @@ describe(`Tests for Helpers.`, () => {
             tokenIn,
             tokenOut,
             returnAmount,
+            returnAmountConsideringFees,
             marketSp,
             isEthSwap
         );
@@ -938,6 +1002,7 @@ describe(`Tests for Helpers.`, () => {
     it(`Should format direct & multihop swapExactIn, No Eth Wrap, Weth In`, () => {
         const swapAmount = new BigNumber(1);
         const returnAmount = new BigNumber(2);
+        const returnAmountConsideringFees = new BigNumber(1.9);
         const tokenIn = '0x056fd409e1d7a124bd7017459dfea2f387b6d5cd';
         const tokenOut = '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2';
         const swapType = SwapTypes.SwapExactIn;
@@ -957,6 +1022,7 @@ describe(`Tests for Helpers.`, () => {
             tokenIn,
             tokenOut,
             returnAmount,
+            returnAmountConsideringFees,
             marketSp
         );
 
@@ -980,6 +1046,7 @@ describe(`Tests for Helpers.`, () => {
     it(`Should format direct & multihop swapExactIn, Eth Wrap, Weth Out`, () => {
         const swapAmount = new BigNumber(1);
         const returnAmount = new BigNumber(2);
+        const returnAmountConsideringFees = new BigNumber(1.9);
         const tokenIn = '0x056fd409e1d7a124bd7017459dfea2f387b6d5cd';
         const tokenOut = '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2';
         const swapType = SwapTypes.SwapExactIn;
@@ -1003,6 +1070,7 @@ describe(`Tests for Helpers.`, () => {
             tokenIn,
             tokenOut,
             returnAmount,
+            returnAmountConsideringFees,
             marketSp,
             isEthSwap
         );
@@ -1027,6 +1095,7 @@ describe(`Tests for Helpers.`, () => {
     it(`Should format direct & multihop swapExactOut, No Eth Wrap, Weth Out`, () => {
         const swapAmount = new BigNumber(1);
         const returnAmount = new BigNumber(2);
+        const returnAmountConsideringFees = new BigNumber(1.9);
         const tokenIn = '0x056fd409e1d7a124bd7017459dfea2f387b6d5cd';
         const tokenOut = '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2';
         const swapType = SwapTypes.SwapExactOut;
@@ -1046,6 +1115,7 @@ describe(`Tests for Helpers.`, () => {
             tokenIn,
             tokenOut,
             returnAmount,
+            returnAmountConsideringFees,
             marketSp
         );
 
@@ -1070,6 +1140,7 @@ describe(`Tests for Helpers.`, () => {
     it(`Should format direct & multihop swapExactOut, Eth Wrap, Weth Out`, () => {
         const swapAmount = new BigNumber(1);
         const returnAmount = new BigNumber(2);
+        const returnAmountConsideringFees = new BigNumber(1.9);
         const tokenIn = '0x056fd409e1d7a124bd7017459dfea2f387b6d5cd';
         const tokenOut = '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2';
         const swapType = SwapTypes.SwapExactOut;
@@ -1093,6 +1164,7 @@ describe(`Tests for Helpers.`, () => {
             tokenIn,
             tokenOut,
             returnAmount,
+            returnAmountConsideringFees,
             marketSp,
             isEthSwap
         );
