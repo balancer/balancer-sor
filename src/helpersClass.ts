@@ -550,6 +550,7 @@ export function formatSwaps(
     tokenIn: string,
     tokenOut: string,
     returnAmount: BigNumber,
+    returnAmountConsideringFees: BigNumber,
     marketSp: BigNumber,
     wrapOptions = {
         isEthSwap: false,
@@ -568,6 +569,7 @@ export function formatSwaps(
         swaps: [],
         swapAmount: bnum(0),
         returnAmount: bnum(0),
+        returnAmountConsideringFees: bnum(0),
         tokenIn: '',
         tokenOut: '',
         marketSp: marketSp,
@@ -645,6 +647,10 @@ export function formatSwaps(
 
         swapInfo.swapAmount = swapAmountScaled;
         swapInfo.returnAmount = scale(returnAmount, tokenOutDecimals);
+        swapInfo.returnAmountConsideringFees = scale(
+            returnAmountConsideringFees,
+            tokenOutDecimals
+        );
         swapInfo.swaps = swapsV2;
     } else {
         let swapsV2: SwapV2[] = [];
@@ -700,6 +706,10 @@ export function formatSwaps(
 
         swapInfo.swapAmount = swapAmountScaled;
         swapInfo.returnAmount = scale(returnAmount, tokenInDecimals);
+        swapInfo.returnAmountConsideringFees = scale(
+            returnAmountConsideringFees,
+            tokenInDecimals
+        );
         swapInfo.swaps = swapsV2;
     }
 

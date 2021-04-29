@@ -225,6 +225,7 @@ export class SOR {
             tokenIn: '',
             tokenOut: '',
             returnAmount: bnum(0),
+            returnAmountConsideringFees: bnum(0),
             marketSp: bnum(0),
         };
 
@@ -291,6 +292,7 @@ export class SOR {
             tokenIn: '',
             tokenOut: '',
             returnAmount: bnum(0),
+            returnAmountConsideringFees: bnum(0),
             marketSp: bnum(0),
         };
 
@@ -343,8 +345,8 @@ export class SOR {
         // Returns list of swaps
         // swapExactIn - total = total amount swap will return of tokenOut
         // swapExactOut - total = total amount of tokenIn required for swap
-        let swaps: any, total: BigNumber;
-        [swaps, total, marketSp] = smartOrderRouter(
+        let swaps: any, total: BigNumber, totalConsideringFees: BigNumber;
+        [swaps, total, marketSp, totalConsideringFees] = smartOrderRouter(
             JSON.parse(JSON.stringify(pools)), // Need to keep original pools for cache
             paths,
             swapType,
@@ -365,6 +367,7 @@ export class SOR {
             tokenIn,
             tokenOut,
             total,
+            totalConsideringFees,
             marketSp,
             wrapOptions
         );
