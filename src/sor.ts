@@ -109,13 +109,12 @@ export function processEpsOfInterestMultiHop(
     swapType: string,
     maxPools: number
 ): EffectivePrice[] {
-
-    // Given sortedPaths, this function builds the list of prices of interest  
-    // wich is composed of all the spot prices of each of the paths and also 
-    // all the swap prices, i.e. prices where the chart of spot price after trade vs. 
-    // amount traded of any two pools cross. This means that up until that swap price 
+    // Given sortedPaths, this function builds the list of prices of interest
+    // wich is composed of all the spot prices of each of the paths and also
+    // all the swap prices, i.e. prices where the chart of spot price after trade vs.
+    // amount traded of any two pools cross. This means that up until that swap price
     // it's better to trade with one pool, but after that swap price it's better to trade with
-    // the other. 
+    // the other.
     let pricesOfInterest: Price[] = getPricesOfInterest(sortedPaths, swapType);
 
     // Sort all prices of interest in ascending order
@@ -123,17 +122,17 @@ export function processEpsOfInterestMultiHop(
         return a.price.minus(b.price).toNumber();
     });
 
-    // For each price of interest we calculate the list of best paths. 
-    // This list is built based on the information of prices of interest where 
-    // paths cross (i.e. one becomes better that the other). We only keep a list 
-    // of up to maxPools pathIds as we know we won't ever need more than that 
-    // since each path has at least one pool 
+    // For each price of interest we calculate the list of best paths.
+    // This list is built based on the information of prices of interest where
+    // paths cross (i.e. one becomes better that the other). We only keep a list
+    // of up to maxPools pathIds as we know we won't ever need more than that
+    // since each path has at least one pool
     pricesOfInterest = calculateBestPathIdsForPricesOfInterest(
         pricesOfInterest,
         maxPools
     );
 
-    // For each price of interest and list of best path ids, calculate how much 
+    // For each price of interest and list of best path ids, calculate how much
     // each of these paths would trade in order to get to that price of interest
     pricesOfInterest.forEach(poi => {
         let pathIds = poi.bestPathsIds;
@@ -174,7 +173,7 @@ export const smartOrderRouterMultiHopEpsOfInterest = (
     maxPools: number,
     costReturnToken: BigNumber,
     pricesOfInterest: EffectivePrice[]
-): [Swap[][], BigNumber] => {
+): [Swap[][], BigNumber, BigNumber] => {
     let bestTotalReturn: BigNumber = new BigNumber(0);
     let bestTotalReturnConsideringFees: BigNumber = new BigNumber(0);
     let highestPoiNotEnough: boolean = true;
@@ -185,15 +184,15 @@ export const smartOrderRouterMultiHopEpsOfInterest = (
 
     let bmin = paths.length + 1;
     // First get the optimal totalReturn to trade 'totalSwapAmount' with
-    // one path only (b=1). Then increase the number of pools as long as  
-    // improvementCondition is true (see more information below) 
+    // one path only (b=1). Then increase the number of pools as long as
+    // improvementCondition is true (see more information below)
 
     for (let b = 1; b <= bmin; b++) {
         totalReturn = 0;
 
         let priceBefore, swapAmountsPriceBefore, swapAmountsPriceAfter;
 
-        // Sweep all pricesOfInterest until we reach the amount we aim for (totalSwapAmount) 
+        // Sweep all pricesOfInterest until we reach the amount we aim for (totalSwapAmount)
         for (let i = 0; i < pricesOfInterest.length; i++) {
             if (i === 0) {
                 priceBefore = pricesOfInterest[i];
@@ -205,7 +204,7 @@ export const smartOrderRouterMultiHopEpsOfInterest = (
                 .slice(0, b)
                 .reduce((a, b) => a.plus(b));
 
-            // If totalInputAmountAfter is greater than totalSwapAmount we know 
+            // If totalInputAmountAfter is greater than totalSwapAmount we know
             // we found a solution to trade, now all we need to do is interpolate
             // between swapAmountsPriceBefore and swapAmountsPriceAfter
             if (totalInputAmountAfter.isGreaterThan(totalSwapAmount)) {
@@ -251,10 +250,10 @@ export const smartOrderRouterMultiHopEpsOfInterest = (
             totalNumberOfPools += path.swaps.length;
         });
 
-        // improvementCondition is true if we are improving the totalReturn 
-        // Notice that totalReturn has to be maximized for 'swapExactIn' 
+        // improvementCondition is true if we are improving the totalReturn
+        // Notice that totalReturn has to be maximized for 'swapExactIn'
         // and MINIMIZED for 'swapExactOut'
-        // This is because for the case of 'swapExactOut', totalReturn means the 
+        // This is because for the case of 'swapExactOut', totalReturn means the
         // amount of tokenIn needed to buy totalSwapAmount of tokenOut
         let improvementCondition: boolean = false;
         if (totalNumberOfPools <= maxPools) {
@@ -424,7 +423,7 @@ export const smartOrderRouterMultiHopEpsOfInterest = (
                     .toString(); // Add dust to second swapExactOut
         }
     }
-    return [swaps, bestTotalReturn];
+    return [swaps, bestTotalReturn, totalReturnConsideringFees];
 };
 
 function getPricesOfInterest(sortedPaths: Path[], swapType: string): Price[] {
@@ -447,25 +446,25 @@ function getPricesOfInterest(sortedPaths: Path[], swapType: string): Price[] {
         // Add price of interest
         pricesOfInterest.push(pi);
 
-        // slippagePriceFactor is the slope of the chart for this path. 
-        // Slippage (SL) has to be multiplied by spotPrice (SP) because 
+        // slippagePriceFactor is the slope of the chart for this path.
+        // Slippage (SL) has to be multiplied by spotPrice (SP) because
         // we have defined the linearized spot price after trade (SPaT) as:
         // SPaT (A) = SP * (1 + SL * A)      so if we want the slope we do:
-        // SPaT (A) = SP + SL*SP * A         the slope is therefore SL * SP      
+        // SPaT (A) = SP + SL*SP * A         the slope is therefore SL * SP
         path.slippagePriceFactor = bmul(path.slippage, path.spotPrice);
 
         // Now we have to check if this path we just added will cross with other
-        // previously added paths. For that we need to run a for loop with all the 
+        // previously added paths. For that we need to run a for loop with all the
         // previous paths and analyse all the different possibilities of them crossing.
-        // A detailed explanation of each of the cases can be found here: 
+        // A detailed explanation of each of the cases can be found here:
         // https://drive.google.com/file/d/1vNWyfAMGtieWK6Vksj4oUJcOKF7FqanV/view
         for (let k = 0; k < i; k++) {
             let prevPath = sortedPaths[k];
             // let prevSlippageFactor = slippageFactors[prevPath.id];
             let prevSlippageFactor = prevPath.slippagePriceFactor;
 
-            // If the slippagePriceFactor of this path is less than that of the 
-            // previous than they will cross at amountCross: 
+            // If the slippagePriceFactor of this path is less than that of the
+            // previous than they will cross at amountCross:
             if (path.slippagePriceFactor.isLessThan(prevSlippageFactor)) {
                 let amountCross = bdiv(
                     path.spotPrice.minus(prevPath.spotPrice),
@@ -481,7 +480,7 @@ function getPricesOfInterest(sortedPaths: Path[], swapType: string): Price[] {
                     epiA.price = path.spotPrice.plus(
                         bmul(amountCross, path.slippagePriceFactor)
                     );
-                    // Add price of interest with the information of the paths ids 
+                    // Add price of interest with the information of the paths ids
                     // that are crossing in the format [demoted path, promoted path],
                     // which means the first pathId is the one that's becoming worse after
                     // the cross, and the second path is becoming better.
@@ -517,8 +516,8 @@ function getPricesOfInterest(sortedPaths: Path[], swapType: string): Price[] {
                     pricesOfInterest.push(epiC);
                 }
             } else {
-                // This means the paths won't normally cross, so only case where 
-                // this could happen is if the limitAmount of the previous path 
+                // This means the paths won't normally cross, so only case where
+                // this could happen is if the limitAmount of the previous path
                 // is lower than that of this path
                 if (prevPath.limitAmount.isLessThan(path.limitAmount)) {
                     let epiD: Price = {};
