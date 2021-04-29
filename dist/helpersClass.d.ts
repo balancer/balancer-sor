@@ -64,6 +64,7 @@ export declare function formatSwaps(
     tokenIn: string,
     tokenOut: string,
     returnAmount: BigNumber,
+    returnAmountConsideringFees: BigNumber,
     marketSp: BigNumber,
     wrapOptions?: {
         isEthSwap: boolean;

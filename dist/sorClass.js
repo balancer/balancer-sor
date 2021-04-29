@@ -105,7 +105,7 @@ exports.smartOrderRouter = (
     let bestSwapAmounts, bestPaths, swapAmounts;
     // No paths available or totalSwapAmount == 0, return empty solution
     if (paths.length == 0 || totalSwapAmount.isZero()) {
-        return [[], bmath_1.bnum(0), bmath_1.bnum(0)];
+        return [[], bmath_1.bnum(0), bmath_1.bnum(0), bmath_1.bnum(0)];
     }
     // Before we start the main loop, we first check if there is enough liquidity for this totalSwapAmount at all
     let highestLimitAmounts = helpersClass_1.getHighestLimitAmountsForPaths(
@@ -133,7 +133,7 @@ exports.smartOrderRouter = (
         break; // No need to keep looping as this number of pools (i) has enough liquidity
     }
     if (initialNumPaths == -1) {
-        return [[], bmath_1.bnum(0), bmath_1.bnum(0)]; // Not enough liquidity, return empty
+        return [[], bmath_1.bnum(0), bmath_1.bnum(0), bmath_1.bnum(0)]; // Not enough liquidity, return empty
     }
     // First get the optimal totalReturn to trade 'totalSwapAmount' with
     // one path only (b=1). Then increase the number of pools as long as
@@ -408,7 +408,7 @@ exports.smartOrderRouter = (
             swapType,
             bmath_1.bnum(0)
         );
-    return [swaps, bestTotalReturn, marketSp];
+    return [swaps, bestTotalReturn, marketSp, bestTotalReturnConsideringFees];
 };
 //  For a given list of swapAmounts, gets list of pools with best effective price for these amounts
 //  Always choose best pool for highest swapAmount first, then 2nd swapAmount and so on. This is

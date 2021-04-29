@@ -219,6 +219,7 @@ class SOR {
                 tokenIn: '',
                 tokenOut: '',
                 returnAmount: bmath_1.bnum(0),
+                returnAmountConsideringFees: bmath_1.bnum(0),
                 marketSp: bmath_1.bnum(0),
             };
             // The Subgraph returns tokens in lower case format so we must match this
@@ -280,6 +281,7 @@ class SOR {
                 tokenIn: '',
                 tokenOut: '',
                 returnAmount: bmath_1.bnum(0),
+                returnAmountConsideringFees: bmath_1.bnum(0),
                 marketSp: bmath_1.bnum(0),
             };
             if (onChainPools.pools.length === 0) return swapInfo;
@@ -326,8 +328,13 @@ class SOR {
             // Returns list of swaps
             // swapExactIn - total = total amount swap will return of tokenOut
             // swapExactOut - total = total amount of tokenIn required for swap
-            let swaps, total;
-            [swaps, total, marketSp] = sorClass_1.smartOrderRouter(
+            let swaps, total, totalConsideringFees;
+            [
+                swaps,
+                total,
+                marketSp,
+                totalConsideringFees,
+            ] = sorClass_1.smartOrderRouter(
                 JSON.parse(JSON.stringify(pools)), // Need to keep original pools for cache
                 paths,
                 swapType,
@@ -346,6 +353,7 @@ class SOR {
                 tokenIn,
                 tokenOut,
                 total,
+                totalConsideringFees,
                 marketSp,
                 wrapOptions
             );

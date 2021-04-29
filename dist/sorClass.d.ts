@@ -16,7 +16,7 @@ export declare const smartOrderRouter: (
     totalSwapAmount: BigNumber,
     maxPools: number,
     costReturnToken: BigNumber
-) => [Swap[][], BigNumber, BigNumber];
+) => [Swap[][], BigNumber, BigNumber, BigNumber];
 export declare const calcTotalReturn: (
     paths: NewPath[],
     swapType: SwapTypes,

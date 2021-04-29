@@ -495,6 +495,7 @@ function formatSwaps(
     tokenIn,
     tokenOut,
     returnAmount,
+    returnAmountConsideringFees,
     marketSp,
     wrapOptions = {
         isEthSwap: false,
@@ -510,6 +511,7 @@ function formatSwaps(
         swaps: [],
         swapAmount: bmath_1.bnum(0),
         returnAmount: bmath_1.bnum(0),
+        returnAmountConsideringFees: bmath_1.bnum(0),
         tokenIn: '',
         tokenOut: '',
         marketSp: marketSp,
@@ -578,6 +580,10 @@ function formatSwaps(
                 .toString();
         swapInfo.swapAmount = swapAmountScaled;
         swapInfo.returnAmount = bmath_1.scale(returnAmount, tokenOutDecimals);
+        swapInfo.returnAmountConsideringFees = bmath_1.scale(
+            returnAmountConsideringFees,
+            tokenOutDecimals
+        );
         swapInfo.swaps = swapsV2;
     } else {
         let swapsV2 = [];
@@ -630,6 +636,10 @@ function formatSwaps(
                 .toString();
         swapInfo.swapAmount = swapAmountScaled;
         swapInfo.returnAmount = bmath_1.scale(returnAmount, tokenInDecimals);
+        swapInfo.returnAmountConsideringFees = bmath_1.scale(
+            returnAmountConsideringFees,
+            tokenInDecimals
+        );
         swapInfo.swaps = swapsV2;
     }
     swapInfo.tokenAddresses = tokenArray;

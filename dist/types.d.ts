@@ -85,6 +85,7 @@ export interface SwapInfo {
     swaps: SwapV2[];
     swapAmount: BigNumber;
     returnAmount: BigNumber;
+    returnAmountConsideringFees: BigNumber;
     tokenIn: string;
     tokenOut: string;
     marketSp: BigNumber;
