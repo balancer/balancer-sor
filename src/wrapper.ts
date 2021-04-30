@@ -228,7 +228,7 @@ export class SOR {
         }
 
         // Use previously stored value if exists else default to 0
-        let costOutputToken = this.tokenCost[TokenOut];
+        let costOutputToken = this.tokenCost[TokenOut.toLowerCase()];
         if (costOutputToken === undefined) {
             costOutputToken = new BigNumber(0);
         }
@@ -325,7 +325,7 @@ export class SOR {
             );
 
             // Use previously stored value if exists else default to 0
-            let costOutputToken = this.tokenCost[TokenOut];
+            let costOutputToken = this.tokenCost[TokenOut.toLowerCase()];
             if (costOutputToken === undefined) {
                 costOutputToken = new BigNumber(0);
             }

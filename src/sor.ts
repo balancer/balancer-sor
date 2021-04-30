@@ -423,7 +423,23 @@ export const smartOrderRouterMultiHopEpsOfInterest = (
                     .toString(); // Add dust to second swapExactOut
         }
     }
-    return [swaps, bestTotalReturn, totalReturnConsideringFees];
+
+    // totalReturnConsideringFees is used to compare V1 vs V2 liquidity
+    // To consider the fact that V1 uses the exchangeProxy we should add a constant initial 150k gas
+    // as we want for our UI to clearly choose V2 if both V1 and V2 have exactly the same liquidity and both are using a single pair swap
+    // We currently have a swap cost set to 100k for V1 and to take the fees into account we use costOutputToken which is gasPrice * swapCost * tokenPriceWei
+    // So we use 1.5 * costOutputToken as the extra 150k gas.
+    let totalReturnWithFeesAndExtra: BigNumber;
+    if (swapType === 'swapExactIn')
+        totalReturnWithFeesAndExtra = totalReturnConsideringFees.minus(
+            bmul(new BigNumber(1.5).times(BONE), costReturnToken)
+        );
+    else
+        totalReturnWithFeesAndExtra = totalReturnConsideringFees.plus(
+            bmul(new BigNumber(1.5).times(BONE), costReturnToken)
+        );
+
+    return [swaps, bestTotalReturn, totalReturnWithFeesAndExtra];
 };
 
 function getPricesOfInterest(sortedPaths: Path[], swapType: string): Price[] {
