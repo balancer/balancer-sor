@@ -374,6 +374,17 @@ exports.smartOrderRouterMultiHopEpsOfInterest = (
                     .toString(); // Add dust to second swapExactOut
         }
     }
+    console.log(`!!!!!!! SOR Debug`);
+    console.log(swaps);
+    console.log(totalReturnConsideringFees.toString());
+    console.log(
+        bmath_1
+            .bmul(
+                new bignumber_1.BigNumber(1.5).times(bmath_1.BONE),
+                costReturnToken
+            )
+            .toString()
+    );
     // totalReturnConsideringFees is used to compare V1 vs V2 liquidity
     // To consider the fact that V1 uses the exchangeProxy we should add a constant initial 150k gas
     // as we want for our UI to clearly choose V2 if both V1 and V2 have exactly the same liquidity and both are using a single pair swap
