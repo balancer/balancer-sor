@@ -241,7 +241,7 @@ class SOR {
                 marketSp = cache.marketSp;
             }
             // Use previously stored value if exists else default to 0
-            let costOutputToken = this.tokenCost[TokenOut];
+            let costOutputToken = this.tokenCost[TokenOut.toLowerCase()];
             if (costOutputToken === undefined) {
                 costOutputToken = new bignumber_1.BigNumber(0);
             }
@@ -325,7 +325,7 @@ class SOR {
                     'swapExactOut'
                 );
                 // Use previously stored value if exists else default to 0
-                let costOutputToken = this.tokenCost[TokenOut];
+                let costOutputToken = this.tokenCost[TokenOut.toLowerCase()];
                 if (costOutputToken === undefined) {
                     costOutputToken = new bignumber_1.BigNumber(0);
                 }
