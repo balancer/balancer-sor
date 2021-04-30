@@ -427,6 +427,7 @@ export const smartOrderRouterMultiHopEpsOfInterest = (
     console.log(`!!!!!!! SOR Debug`);
     console.log(swaps);
     console.log(totalReturnConsideringFees.toString());
+    console.log(bestTotalReturnConsideringFees.toString());
     console.log(
         bmul(new BigNumber(1.5).times(BONE), costReturnToken).toString()
     );
@@ -438,11 +439,11 @@ export const smartOrderRouterMultiHopEpsOfInterest = (
     // So we use 1.5 * costOutputToken as the extra 150k gas.
     let totalReturnWithFeesAndExtra: BigNumber;
     if (swapType === 'swapExactIn')
-        totalReturnWithFeesAndExtra = totalReturnConsideringFees.minus(
+        totalReturnWithFeesAndExtra = bestTotalReturnConsideringFees.minus(
             bmul(new BigNumber(1.5).times(BONE), costReturnToken)
         );
     else
-        totalReturnWithFeesAndExtra = totalReturnConsideringFees.plus(
+        totalReturnWithFeesAndExtra = bestTotalReturnConsideringFees.plus(
             bmul(new BigNumber(1.5).times(BONE), costReturnToken)
         );
 
