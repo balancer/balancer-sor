@@ -8,7 +8,7 @@ import {
     SwapTypes,
 } from '../../types';
 import { getAddress } from '@ethersproject/address';
-import { bnum, MAX_IN_RATIO, MAX_OUT_RATIO } from '../../bmath';
+import { bnum } from '../../bmath';
 import {
     _exactTokenInForTokenOut,
     _tokenInForExactTokenOut,
@@ -168,6 +168,7 @@ export class ElementPool implements PoolBase {
         poolPairData: ElementPoolPairData,
         swapType: SwapTypes
     ): BigNumber {
+        const MAX_OUT_RATIO = bnum(0.3);
         if (swapType === SwapTypes.SwapExactIn) {
             // "Ai < (Bi**(1-t)+Bo**(1-t))**(1/(1-t))-Bi" must hold in order for
             // base of root to be non-negative
@@ -176,9 +177,7 @@ export class ElementPool implements PoolBase {
             let t = poolPairData.time.toNumber();
             return bnum((Bi ** (1 - t) + Bo ** (1 - t)) ** (1 / (1 - t)) - Bi);
         } else {
-            return poolPairData.balanceOut.times(
-                MAX_OUT_RATIO.times(10 ** -18)
-            );
+            return poolPairData.balanceOut.times(MAX_OUT_RATIO);
         }
     }
 

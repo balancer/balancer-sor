@@ -8,7 +8,7 @@ import {
     SwapTypes,
 } from '../../types';
 import { getAddress } from '@ethersproject/address';
-import { bnum, MAX_IN_RATIO, MAX_OUT_RATIO } from '../../bmath';
+import { bnum } from '../../bmath';
 import {
     _invariant,
     _exactTokenInForTokenOut,
@@ -166,15 +166,15 @@ export class StablePool implements PoolBase {
         poolPairData: PoolPairBase,
         swapType: SwapTypes
     ): BigNumber {
+        const MAX_IN_RATIO = bnum(0.3);
+        const MAX_OUT_RATIO = bnum(0.3);
         // We multiply ratios by 10**-18 because we are in normalized space
         // so 0.5 should be 0.5 and not 500000000000000000
         // TODO: update bmath to use everything normalized
         if (swapType === SwapTypes.SwapExactIn) {
-            return poolPairData.balanceIn.times(MAX_IN_RATIO.times(10 ** -18));
+            return poolPairData.balanceIn.times(MAX_IN_RATIO);
         } else {
-            return poolPairData.balanceOut.times(
-                MAX_OUT_RATIO.times(10 ** -18)
-            );
+            return poolPairData.balanceOut.times(MAX_OUT_RATIO);
         }
     }
 
