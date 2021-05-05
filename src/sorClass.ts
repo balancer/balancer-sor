@@ -537,7 +537,7 @@ function iterateSwapAmounts(
             swapAmounts[i] = epsilon;
             exceedingAmounts[i] = exceedingAmounts[i].plus(epsilon);
         }
-        if (exceedingAmounts[i] && exceedingAmounts[i].isZero()) {
+        if (exceedingAmounts[i].isZero()) {
             // Very small amount: TODO put in config file
             const epsilon = totalSwapAmount.times(INFINITESIMAL);
             swapAmounts[i] = swapAmounts[i].minus(epsilon); // Very small amount
@@ -581,11 +581,7 @@ function iterateSwapAmountsApproximation(
 
     // We only iterate on the swapAmounts that are viable (i.e. no negative or > than path limit)
     swapAmounts.forEach((swapAmount, i) => {
-        if (
-            swapAmount.gt(bnum(0)) &&
-            exceedingAmounts[i] &&
-            exceedingAmounts[i].lt(bnum(0))
-        ) {
+        if (swapAmount.gt(bnum(0)) && exceedingAmounts[i].lt(bnum(0))) {
             let path = selectedPaths[i];
             let SPaS = getSpotPriceAfterSwapForPath(path, swapType, swapAmount);
             SPaSs.push(SPaS);
@@ -620,11 +616,7 @@ function iterateSwapAmountsApproximation(
     );
 
     swapAmounts.forEach((swapAmount, i) => {
-        if (
-            swapAmount.gt(bnum(0)) &&
-            exceedingAmounts[i] &&
-            exceedingAmounts[i].lt(bnum(0))
-        ) {
+        if (swapAmount.gt(bnum(0)) && exceedingAmounts[i].lt(bnum(0))) {
             let deltaSwapAmount = weighted_average_SPaS
                 .minus(SPaSs[i])
                 .div(derivativeSPaSs[i]);
@@ -651,11 +643,7 @@ function iterateSwapAmountsApproximation(
         swapAmountsSumWithRoundingErrors = swapAmountsSumWithRoundingErrors.plus(
             swapAmount
         );
-        if (
-            swapAmount.gt(bnum(0)) &&
-            exceedingAmounts[i] &&
-            exceedingAmounts[i].lt(bnum(0))
-        )
+        if (swapAmount.gt(bnum(0)) && exceedingAmounts[i].lt(bnum(0)))
             pricesForViableAmounts.push(
                 getSpotPriceAfterSwapForPath(
                     selectedPaths[i],
