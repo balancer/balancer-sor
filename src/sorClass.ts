@@ -662,7 +662,7 @@ function iterateSwapAmountsApproximation(
 
     // Add rounding error to make sum be exactly equal to totalSwapAmount to avoid error compounding
     // Add to the first swapAmount that is already not zero or at the limit
-    // AND only if swapAmoung would not leave the viable range (i.e. swapAmoung
+    // AND only if swapAmount would not leave the viable range (i.e. swapAmoung
     // would still be >0 and <limit) after adding the error
     // I.d. we need: (swapAmount+error)>0 AND (exceedingAmount+error)<0
     for (let i = 0; i < swapAmounts.length; ++i) {
@@ -672,6 +672,7 @@ function iterateSwapAmountsApproximation(
                 exceedingAmounts[i].plus(roundingError).lt(bnum(0))
             ) {
                 swapAmounts[i] = swapAmounts[i].plus(roundingError);
+                exceedingAmounts[i] = exceedingAmounts[i].plus(roundingError);
                 break;
             }
         }
@@ -722,6 +723,7 @@ function redistributeInputAmounts(
     swapAmounts.forEach((swapAmount, i) => {
         if (swapAmount.lte(bnum(0))) {
             swapAmounts[i] = bnum(0);
+            exceedingAmounts[i] = exceedingAmounts[i].minus(swapAmount);
         } else if (exceedingAmounts[i].gte(bnum(0))) {
             swapAmounts[i] = swapAmounts[i].minus(exceedingAmounts[i]); // This is the same as swapAmounts[i] = pathLimitAmounts[i]
             exceedingAmounts[i] = bnum(0);
