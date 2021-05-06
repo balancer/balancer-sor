@@ -274,6 +274,9 @@ export const smartOrderRouter = (
     // after executing the transaction (given there are no front-runners)
     bestPaths.forEach((path, i) => {
         let swapAmount = bestSwapAmounts[i];
+        // 0 swap amounts can occur due to rounding errors but we don't want to pass those on so filter out
+        if (swapAmount.isZero()) return;
+
         if (swapAmount.gt(highestSwapAmt)) {
             highestSwapAmt = swapAmount;
             largestSwapPath = path;
@@ -298,6 +301,7 @@ export const smartOrderRouter = (
             lenghtFirstPath = path.swaps.length;
 
         let returnAmount;
+
         if (poolPairData.length == 1) {
             // Direct trade: add swap from only pool
             let swap: Swap = {
