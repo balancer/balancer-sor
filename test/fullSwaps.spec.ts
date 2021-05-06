@@ -273,8 +273,8 @@ describe('Tests full swaps against known values', () => {
         const swaps = v2SwapData.swaps;
 
         // The expected test results are from previous version
-        assert.equal(total.toString(), '0.099251606996353501');
-        assert.equal(swaps.length, 3);
+        assert.equal(total.toString(), '0.099251606996030381');
+        assert.equal(swaps.length, 2);
         assert.equal(
             swaps[0][0].pool,
             '0x75286e183d923a5f52f52be205e358c5c9101b09'
@@ -476,7 +476,7 @@ describe('Tests full swaps against known values', () => {
 
         // The expected test results are from previous version
         assert.equal(total.toString(), '0.775694');
-        assert.equal(swaps.length, 4);
+        assert.equal(swaps.length, 2);
         assert.equal(
             swaps[0][0].pool,
             '0x75286e183d923a5f52f52be205e358c5c9101b09'
@@ -497,20 +497,6 @@ describe('Tests full swaps against known values', () => {
             swaps[1][0].swapAmount,
             '0.07774347549503325469579796203038985'
         );
-        assert.equal(
-            swaps[2][0].pool,
-            '0x6c3f90f043a72fa612cbac8115ee7e52bde6e490'
-        );
-        assert.equal(swaps[2][0].tokenIn, DAI);
-        assert.equal(swaps[2][0].tokenOut, USDC);
-        assert.equal(swaps[2][0].swapAmount, '0');
-        assert.equal(
-            swaps[3][0].pool,
-            '0x2dbd24322757d2e28de4230b1ca5b88e49a76979'
-        );
-        assert.equal(swaps[3][0].tokenIn, DAI);
-        assert.equal(swaps[3][0].tokenOut, USDC);
-        assert.equal(swaps[3][0].swapAmount, '0');
     }).timeout(10000);
 
     it('should full swap stable & weighted swapExactOut', async () => {
@@ -562,8 +548,8 @@ describe('Tests full swaps against known values', () => {
         const swaps = v2SwapData.swaps;
 
         // The expected test results are from previous version
-        assert.equal(total.toString(), '100.687676187071945949');
-        assert.equal(swaps.length, 4);
+        assert.equal(total.toString(), '100.687676187071622829');
+        assert.equal(swaps.length, 3);
         assert.equal(
             swaps[0][0].pool,
             '0x6c3f90f043a72fa612cbac8115ee7e52bde6e490'

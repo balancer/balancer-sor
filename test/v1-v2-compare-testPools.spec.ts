@@ -20,7 +20,7 @@ let testFiles = [
     'elementFinanceTest_multihop_2paths_swapExactOut', // Returning a second swap with -ve amount
     'elementFinanceTestFourPools',
 
-    // // 07/04/21 - Below have been checked and pass
+    // // // 07/04/21 - Below have been checked and pass
     '0x04ec8acaa4f419bc1525eaa8d37faae2d4acb64c5521a3718593c626962de170', // Dust amounts
     '0x80422d69eb9272c7b786f602bbce7caad3559a2bd714b5eafb254cfbdd26361c', // Dust amounts
     '0xa7a3cf76686c6d6aa6e976724b4463c6f7b0e98453ad3a8488b6e9daa2fecc42', // Dust amounts
@@ -33,7 +33,7 @@ let testFiles = [
     '0x39fbeeaacdffc7186135ad169c0bbdbdddb42901a3c12cac2081af603f52ccda',
     '0x4538a9ba66778343983d39a744e6c337ee497247be50090e8feb18761d275306',
     '0x462bd3a36b8a1fdf64e0d9dcf88d18c1d246b4dfca1704f26f883face2612c18',
-    '0x5fccb4ca1117b8a274bc6e939c63493203e5744cdf04d0045cf2bc08b01f4c18',
+    '0x5fccb4ca1117b8a274bc6e939c63493203e5744cdf04d0045cf2bc08b01f4c18', // This one has the bug
     '0x5fd850f563e180d962bc8e243fbfa27a410e9610faff5f1ecbd2ccdf6599f907',
     '0x6b4011c5e4c17293c0db18fb63e334544107b6451d7e74ce9c88b0b1c07b8fda',
     '0x820b13539ec5117e04380b53c766de9aa604bfb5d751392d3df3d1beff26e30a',
@@ -69,7 +69,7 @@ let testFiles = [
     '0xf4a5ecfa278f50beb4155bc7bbd3ada5e57d5ceb9825852531981fa66bc94844',
 
     // The following are cases that fail V1 vs V2 check but have been double checked and confirmed due to maths rounding
-    // '0xfc687c72aa619a5c4eb5f5597a2bd69ef1157848243700b57926d36060a6dedc',    // Failing - limit difference
+    // '0xfc687c72aa619a5c4eb5f5597a2bd69ef1157848243700b57926d36060a6dedc',    // Failing comparing V1 vs V2 - limit difference
     // '0x17497e9e5230493b79c19bad0dc165e06ac0aac3db8eaa4de441d44a70aa9a03',    // Failing - rounding
     // '0x19a742954302f2fee90e823696033c6758b119f17620806971d34e4cda4579af',    // Failing - rounding
     // '0x322749d6fee92b32d01f43d9d9e7cba98a3423194bc4d0e8cc1d724540f20aa2',      // Failing - V1 bug

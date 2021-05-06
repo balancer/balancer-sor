@@ -274,6 +274,9 @@ export const smartOrderRouter = (
     // after executing the transaction (given there are no front-runners)
     bestPaths.forEach((path, i) => {
         let swapAmount = bestSwapAmounts[i];
+        // 0 swap amounts can occur due to rounding errors but we don't want to pass those on so filter out
+        if (swapAmount.isZero()) return;
+
         if (swapAmount.gt(highestSwapAmt)) {
             highestSwapAmt = swapAmount;
             largestSwapPath = path;
@@ -298,6 +301,7 @@ export const smartOrderRouter = (
             lenghtFirstPath = path.swaps.length;
 
         let returnAmount;
+
         if (poolPairData.length == 1) {
             // Direct trade: add swap from only pool
             let swap: Swap = {
@@ -537,7 +541,7 @@ function iterateSwapAmounts(
             swapAmounts[i] = epsilon;
             exceedingAmounts[i] = exceedingAmounts[i].plus(epsilon);
         }
-        if (exceedingAmounts[i] && exceedingAmounts[i].isZero()) {
+        if (exceedingAmounts[i].isZero()) {
             // Very small amount: TODO put in config file
             const epsilon = totalSwapAmount.times(INFINITESIMAL);
             swapAmounts[i] = swapAmounts[i].minus(epsilon); // Very small amount
@@ -581,11 +585,7 @@ function iterateSwapAmountsApproximation(
 
     // We only iterate on the swapAmounts that are viable (i.e. no negative or > than path limit)
     swapAmounts.forEach((swapAmount, i) => {
-        if (
-            swapAmount.gt(bnum(0)) &&
-            exceedingAmounts[i] &&
-            exceedingAmounts[i].lt(bnum(0))
-        ) {
+        if (swapAmount.gt(bnum(0)) && exceedingAmounts[i].lt(bnum(0))) {
             let path = selectedPaths[i];
             let SPaS = getSpotPriceAfterSwapForPath(path, swapType, swapAmount);
             SPaSs.push(SPaS);
@@ -620,11 +620,7 @@ function iterateSwapAmountsApproximation(
     );
 
     swapAmounts.forEach((swapAmount, i) => {
-        if (
-            swapAmount.gt(bnum(0)) &&
-            exceedingAmounts[i] &&
-            exceedingAmounts[i].lt(bnum(0))
-        ) {
+        if (swapAmount.gt(bnum(0)) && exceedingAmounts[i].lt(bnum(0))) {
             let deltaSwapAmount = weighted_average_SPaS
                 .minus(SPaSs[i])
                 .div(derivativeSPaSs[i]);
@@ -651,11 +647,7 @@ function iterateSwapAmountsApproximation(
         swapAmountsSumWithRoundingErrors = swapAmountsSumWithRoundingErrors.plus(
             swapAmount
         );
-        if (
-            swapAmount.gt(bnum(0)) &&
-            exceedingAmounts[i] &&
-            exceedingAmounts[i].lt(bnum(0))
-        )
+        if (swapAmount.gt(bnum(0)) && exceedingAmounts[i].lt(bnum(0)))
             pricesForViableAmounts.push(
                 getSpotPriceAfterSwapForPath(
                     selectedPaths[i],
@@ -674,7 +666,7 @@ function iterateSwapAmountsApproximation(
 
     // Add rounding error to make sum be exactly equal to totalSwapAmount to avoid error compounding
     // Add to the first swapAmount that is already not zero or at the limit
-    // AND only if swapAmoung would not leave the viable range (i.e. swapAmoung
+    // AND only if swapAmount would not leave the viable range (i.e. swapAmoung
     // would still be >0 and <limit) after adding the error
     // I.d. we need: (swapAmount+error)>0 AND (exceedingAmount+error)<0
     for (let i = 0; i < swapAmounts.length; ++i) {
@@ -684,6 +676,7 @@ function iterateSwapAmountsApproximation(
                 exceedingAmounts[i].plus(roundingError).lt(bnum(0))
             ) {
                 swapAmounts[i] = swapAmounts[i].plus(roundingError);
+                exceedingAmounts[i] = exceedingAmounts[i].plus(roundingError);
                 break;
             }
         }
@@ -734,6 +727,7 @@ function redistributeInputAmounts(
     swapAmounts.forEach((swapAmount, i) => {
         if (swapAmount.lte(bnum(0))) {
             swapAmounts[i] = bnum(0);
+            exceedingAmounts[i] = exceedingAmounts[i].minus(swapAmount);
         } else if (exceedingAmounts[i].gte(bnum(0))) {
             swapAmounts[i] = swapAmounts[i].minus(exceedingAmounts[i]); // This is the same as swapAmounts[i] = pathLimitAmounts[i]
             exceedingAmounts[i] = bnum(0);
