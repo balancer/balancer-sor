@@ -1,46 +1,40 @@
 import { BigNumber } from './utils/bignumber';
 
-// TODO: add poolType and pairType
-// TODO: rename balanceIn -> Bi to easily use maths from python
-export interface PoolPairData {
-    id: string;
-    poolType?: string; // Todo: make this a mandatory field?
-    pairType?: string; // Todo: make this a mandatory field?
+export enum SwapTypes {
+    SwapExactIn,
+    SwapExactOut,
+}
+
+export enum PoolTypes {
+    Weighted,
+    Stable,
+    Element,
+}
+
+export enum SwapPairType {
+    Direct,
+    HopIn,
+    HopOut,
+}
+
+export enum PairTypes {
+    BptToToken,
+    TokenToBpt,
+    TokenToToken,
+}
+
+export interface PoolPairBase {
+    balanceIn: BigNumber;
+    balanceOut: BigNumber;
+    poolType: PoolTypes;
+    pairType: PairTypes;
     tokenIn: string;
     tokenOut: string;
-    balanceIn?: BigNumber;
-    balanceOut?: BigNumber;
     decimalsIn: number;
     decimalsOut: number;
-    swapFee: BigNumber;
-
-    // For weighted & element pools
-    weightIn?: BigNumber;
-    weightOut?: BigNumber;
-
-    // Only for stable pools
-    allBalances: BigNumber[];
-    invariant?: BigNumber;
-    amp?: BigNumber;
-    tokenIndexIn?: number;
-    tokenIndexOut?: number;
-
-    // Only for element pools
-    lpShares?: BigNumber;
-    time?: BigNumber;
-    principalToken?: string;
-    baseToken?: string;
 }
 
-export interface Path {
-    id: string; // pool address if direct path, contactenation of pool addresses if multihop
-    swaps: Swap[];
-    poolPairData?: PoolPairData[];
-    limitAmount?: BigNumber;
-    filterEffectivePrice?: BigNumber; // TODO: This is just used for filtering, maybe there is a better way to filter?
-}
-
-export type Swap = {
+export interface Swap {
     pool: string;
     tokenIn: string;
     tokenOut: string;
@@ -49,25 +43,28 @@ export type Swap = {
     maxPrice?: string;
     tokenInDecimals: number;
     tokenOutDecimals: number;
-};
-
-export interface SubGraphPools {
-    pools: SubGraphPool[];
 }
 
-export interface SubGraphPool {
+export interface SubGraphPoolsBase {
+    pools: SubgraphPoolBase[];
+}
+
+export interface SubgraphPoolBase {
     id: string;
+    address: string;
+    poolType: string;
     swapFee: string;
-    totalWeight: string;
     totalShares: string;
     tokens: SubGraphToken[];
     tokensList: string[];
-    poolType?: string;
 
-    // Only for stable pools
-    amp: string;
+    // Weighted & Element field
+    totalWeight?: string;
 
-    // Only for element pools
+    // Stable specific fields
+    amp?: string;
+
+    // Element specific fields
     lpShares?: BigNumber;
     time?: BigNumber;
     principalToken?: string;
@@ -80,10 +77,6 @@ export interface SubGraphToken {
     decimals: string | number;
     // Stable & Element field
     weight?: string;
-}
-
-export interface SubGraphPoolDictionary {
-    [poolId: string]: SubGraphPool;
 }
 
 export interface DisabledOptions {
@@ -113,29 +106,6 @@ export interface SwapInfo {
     tokenOut: string;
     marketSp: BigNumber;
 }
-// NEW CLASS CODE
-export enum SwapTypes {
-    SwapExactIn,
-    SwapExactOut,
-}
-
-export enum PoolTypes {
-    Weighted,
-    Stable,
-    Element,
-}
-
-export enum SwapPairType {
-    Direct,
-    HopIn,
-    HopOut,
-}
-
-export enum PairTypes {
-    BptToToken,
-    TokenToBpt,
-    TokenToToken,
-}
 
 export interface PoolDictionary {
     [poolId: string]: PoolBase;
@@ -145,18 +115,6 @@ export interface PoolPairDictionary {
     [tokenInOut: string]: PoolPairBase;
 }
 
-// TODO - This will change with SG schema update
-export interface PoolPairBase {
-    balanceIn: BigNumber;
-    balanceOut: BigNumber;
-    poolType: PoolTypes;
-    pairType: PairTypes;
-    tokenIn: string;
-    tokenOut: string;
-    decimalsIn: number;
-    decimalsOut: number;
-}
-
 export interface NewPath {
     id: string; // pool address if direct path, contactenation of pool addresses if multihop
     swaps: Swap[];
@@ -164,32 +122,6 @@ export interface NewPath {
     limitAmount: BigNumber;
     pools: PoolBase[];
     filterEffectivePrice?: BigNumber; // TODO: This is just used for filtering, maybe there is a better way to filter?
-}
-
-export interface SubGraphPoolsBase {
-    pools: SubgraphPoolBase[];
-}
-
-export interface SubgraphPoolBase {
-    id: string;
-    address: string;
-    poolType: string;
-    swapFee: string;
-    totalShares: string;
-    tokens: SubGraphToken[];
-    tokensList: string[];
-
-    // Weighted & Element field
-    totalWeight?: string;
-
-    // Stable specific fields
-    amp?: string;
-
-    // Element specific fields
-    lpShares?: BigNumber;
-    time?: BigNumber;
-    principalToken?: string;
-    baseToken?: string;
 }
 
 export interface PoolBase {
