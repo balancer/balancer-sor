@@ -66,7 +66,8 @@ export interface SubgraphPoolBase {
 
     // Element specific fields
     lpShares?: BigNumber;
-    time?: BigNumber;
+    expiryTime?: BigNumber;
+    unitSeconds?: BigNumber;
     principalToken?: string;
     baseToken?: string;
 }

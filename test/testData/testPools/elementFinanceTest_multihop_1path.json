@@ -15,7 +15,8 @@
             "poolType": "Element",
             "swapFee": "0.05",
             "lpShares": "265819.67027583614",
-            "time": "0.20475000000000002",
+            "unitSeconds": "60",
+            "expiryTime": "0.20475000000000002",
             "principalToken": "0x0000000000000000000000000000000000000001",
             "baseToken": "0x6b175474e89094c44da98b954eedeac495271d0f",
             "tokens": [
@@ -43,7 +44,8 @@
             "poolType": "Element",
             "swapFee": "0.05",
             "lpShares": "311863.7956289041",
-            "time": "0.12425",
+            "unitSeconds": "60",
+            "expiryTime": "0.20475000000000002",
             "principalToken": "0x0000000000000000000000000000000000000001",
             "baseToken": "0x6b175474e89094c44da98b954eedeac495271d0f",
             "tokens": [
@@ -71,7 +73,8 @@
             "poolType": "Element",
             "swapFee": "0.05",
             "lpShares": "888791.4151192267",
-            "time": "0.127",
+            "unitSeconds": "60",
+            "expiryTime": "0.20475000000000002",
             "principalToken": "0x0000000000000000000000000000000000000001",
             "baseToken": "0x6b175474e89094c44da98b954eedeac495271d0f",
             "tokens": [
@@ -99,7 +102,8 @@
             "poolType": "Element",
             "swapFee": "0.05",
             "lpShares": "203024.0527059632",
-            "time": "0.06075",
+            "unitSeconds": "60",
+            "expiryTime": "0.20475000000000002",
             "principalToken": "0x0000000000000000000000000000000000000001",
             "baseToken": "0x6b175474e89094c44da98b954eedeac495271d0f",
             "tokens": [

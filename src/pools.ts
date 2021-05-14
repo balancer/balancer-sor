@@ -88,7 +88,8 @@ export function filterPoolsOfInterest(
                 pool.tokens,
                 pool.tokensList,
                 pool.lpShares,
-                pool.time,
+                pool.expiryTime,
+                pool.unitSeconds,
                 pool.principalToken,
                 pool.baseToken
             );

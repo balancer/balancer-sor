@@ -37,7 +37,8 @@ export interface ElementPoolPairData extends PoolPairBase {
     decimalsOut: number;
     // Element specific fields
     lpShares: BigNumber;
-    time: BigNumber;
+    expiryTime: BigNumber;
+    unitSeconds: BigNumber;
     principalToken: string;
     baseToken: string;
 }
@@ -52,7 +53,8 @@ export class ElementPool implements PoolBase {
     tokensList: string[];
     // Element specific
     lpShares: BigNumber;
-    time: BigNumber;
+    expiryTime: BigNumber;
+    unitSeconds: BigNumber;
     principalToken: string;
     baseToken: string;
 
@@ -63,7 +65,8 @@ export class ElementPool implements PoolBase {
         tokens: ElementPoolToken[],
         tokensList: string[],
         lpShares: BigNumber,
-        time: BigNumber,
+        expiryTime: BigNumber,
+        unitSeconds: BigNumber,
         principalToken: string,
         baseToken: string
     ) {
@@ -73,7 +76,8 @@ export class ElementPool implements PoolBase {
         this.tokens = tokens;
         this.tokensList = tokensList;
         this.lpShares = lpShares;
-        this.time = time;
+        this.expiryTime = expiryTime;
+        this.unitSeconds = unitSeconds;
         this.principalToken = principalToken;
         this.baseToken = baseToken;
     }
@@ -147,7 +151,8 @@ export class ElementPool implements PoolBase {
             balanceOut: bnumBalanceOut,
             swapFee: bnum(this.swapFee),
             lpShares: bnum(this.lpShares),
-            time: bnum(this.time),
+            expiryTime: bnum(this.expiryTime),
+            unitSeconds: bnum(this.unitSeconds),
         };
 
         return poolPairData;
@@ -174,7 +179,9 @@ export class ElementPool implements PoolBase {
             // base of root to be non-negative
             let Bi = poolPairData.balanceIn.toNumber();
             let Bo = poolPairData.balanceOut.toNumber();
-            let t = poolPairData.time.toNumber();
+            // const block = await this.provider.getBlock('latest');
+            let t = poolPairData.expiryTime.toNumber();
+
             return bnum((Bi ** (1 - t) + Bo ** (1 - t)) ** (1 / (1 - t)) - Bi);
         } else {
             return poolPairData.balanceOut.times(MAX_OUT_RATIO);
