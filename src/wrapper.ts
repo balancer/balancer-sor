@@ -272,7 +272,7 @@ export class SOR {
         onChainPools: SubGraphPoolsBase,
         wrapOptions: any,
         useProcessCache: boolean = true,
-        timestamp: number = 0
+        currentBlockTimestamp: number = 0
     ): Promise<SwapInfo> {
         let swapInfo: SwapInfo = {
             tokenAddresses: [],
@@ -291,7 +291,7 @@ export class SOR {
 
         // If token pair has been processed before that info can be reused to speed up execution
         let cache = this.processedDataCache[
-            `${tokenIn}${tokenOut}${swapType}${timestamp}`
+            `${tokenIn}${tokenOut}${swapType}${currentBlockTimestamp}`
         ];
 
         // useProcessCache can be false to force fresh processing of paths/prices
@@ -308,7 +308,8 @@ export class SOR {
                 tokenIn,
                 tokenOut,
                 this.maxPools,
-                this.disabledOptions
+                this.disabledOptions,
+                currentBlockTimestamp
             );
 
             [pools, pathData] = filterHopPools(
@@ -323,7 +324,7 @@ export class SOR {
             // Update cache if used
             if (useProcessCache)
                 this.processedDataCache[
-                    `${tokenIn}${tokenOut}${swapType}${timestamp}`
+                    `${tokenIn}${tokenOut}${swapType}${currentBlockTimestamp}`
                 ] = {
                     pools: pools,
                     paths: paths,
@@ -361,7 +362,7 @@ export class SOR {
 
         if (useProcessCache)
             this.processedDataCache[
-                `${tokenIn}${tokenOut}${swapType}${timestamp}`
+                `${tokenIn}${tokenOut}${swapType}${currentBlockTimestamp}`
             ].marketSp = marketSp;
 
         swapInfo = formatSwaps(

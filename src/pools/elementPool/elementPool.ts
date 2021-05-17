@@ -16,6 +16,7 @@ import {
     _spotPriceAfterSwapTokenInForExactTokenOut,
     _derivativeSpotPriceAfterSwapExactTokenInForTokenOut,
     _derivativeSpotPriceAfterSwapTokenInForExactTokenOut,
+    getTimeTillExpiry,
 } from './elementMath';
 
 export interface ElementPoolToken {
@@ -37,10 +38,11 @@ export interface ElementPoolPairData extends PoolPairBase {
     decimalsOut: number;
     // Element specific fields
     lpShares: BigNumber;
-    expiryTime: BigNumber;
-    unitSeconds: BigNumber;
+    expiryTime: number;
+    unitSeconds: number;
     principalToken: string;
     baseToken: string;
+    currentBlockTimestamp: number;
 }
 
 export class ElementPool implements PoolBase {
@@ -53,10 +55,11 @@ export class ElementPool implements PoolBase {
     tokensList: string[];
     // Element specific
     lpShares: BigNumber;
-    expiryTime: BigNumber;
-    unitSeconds: BigNumber;
+    expiryTime: number;
+    unitSeconds: number;
     principalToken: string;
     baseToken: string;
+    currentBlockTimestamp: number;
 
     constructor(
         id: string,
@@ -65,8 +68,8 @@ export class ElementPool implements PoolBase {
         tokens: ElementPoolToken[],
         tokensList: string[],
         lpShares: BigNumber,
-        expiryTime: BigNumber,
-        unitSeconds: BigNumber,
+        expiryTime: number,
+        unitSeconds: number,
         principalToken: string,
         baseToken: string
     ) {
@@ -80,6 +83,11 @@ export class ElementPool implements PoolBase {
         this.unitSeconds = unitSeconds;
         this.principalToken = principalToken;
         this.baseToken = baseToken;
+        this.currentBlockTimestamp = 0;
+    }
+
+    setCurrentBlockTimestamp(timestamp: number) {
+        this.currentBlockTimestamp = timestamp;
     }
 
     setTypeForSwap(type: SwapPairType) {
@@ -151,8 +159,9 @@ export class ElementPool implements PoolBase {
             balanceOut: bnumBalanceOut,
             swapFee: bnum(this.swapFee),
             lpShares: bnum(this.lpShares),
-            expiryTime: bnum(this.expiryTime),
-            unitSeconds: bnum(this.unitSeconds),
+            expiryTime: this.expiryTime,
+            unitSeconds: this.unitSeconds,
+            currentBlockTimestamp: this.currentBlockTimestamp,
         };
 
         return poolPairData;
@@ -179,9 +188,11 @@ export class ElementPool implements PoolBase {
             // base of root to be non-negative
             let Bi = poolPairData.balanceIn.toNumber();
             let Bo = poolPairData.balanceOut.toNumber();
-            // const block = await this.provider.getBlock('latest');
-            let t = poolPairData.expiryTime.toNumber();
-
+            let t = getTimeTillExpiry(
+                poolPairData.expiryTime,
+                this.currentBlockTimestamp,
+                this.unitSeconds
+            );
             return bnum((Bi ** (1 - t) + Bo ** (1 - t)) ** (1 / (1 - t)) - Bi);
         } else {
             return poolPairData.balanceOut.times(MAX_OUT_RATIO);
@@ -204,6 +215,7 @@ export class ElementPool implements PoolBase {
         poolPairData: ElementPoolPairData,
         amount: BigNumber
     ): BigNumber {
+        poolPairData.currentBlockTimestamp = this.currentBlockTimestamp;
         return _exactTokenInForTokenOut(amount, poolPairData);
     }
 
@@ -227,6 +239,7 @@ export class ElementPool implements PoolBase {
         poolPairData: ElementPoolPairData,
         amount: BigNumber
     ): BigNumber {
+        poolPairData.currentBlockTimestamp = this.currentBlockTimestamp;
         return _tokenInForExactTokenOut(amount, poolPairData);
     }
 
@@ -250,6 +263,7 @@ export class ElementPool implements PoolBase {
         poolPairData: ElementPoolPairData,
         amount: BigNumber
     ): BigNumber {
+        poolPairData.currentBlockTimestamp = this.currentBlockTimestamp;
         return _spotPriceAfterSwapExactTokenInForTokenOut(amount, poolPairData);
     }
 
@@ -273,6 +287,7 @@ export class ElementPool implements PoolBase {
         poolPairData: ElementPoolPairData,
         amount: BigNumber
     ): BigNumber {
+        poolPairData.currentBlockTimestamp = this.currentBlockTimestamp;
         return _spotPriceAfterSwapTokenInForExactTokenOut(amount, poolPairData);
     }
 
@@ -296,6 +311,7 @@ export class ElementPool implements PoolBase {
         poolPairData: ElementPoolPairData,
         amount: BigNumber
     ): BigNumber {
+        poolPairData.currentBlockTimestamp = this.currentBlockTimestamp;
         return _derivativeSpotPriceAfterSwapExactTokenInForTokenOut(
             amount,
             poolPairData
@@ -322,6 +338,7 @@ export class ElementPool implements PoolBase {
         poolPairData: ElementPoolPairData,
         amount: BigNumber
     ): BigNumber {
+        poolPairData.currentBlockTimestamp = this.currentBlockTimestamp;
         return _derivativeSpotPriceAfterSwapTokenInForExactTokenOut(
             amount,
             poolPairData
