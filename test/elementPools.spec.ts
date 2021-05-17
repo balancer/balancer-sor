@@ -1,8 +1,19 @@
 require('dotenv').config();
 import { JsonRpcProvider } from '@ethersproject/providers';
-import { loadTestFile } from './lib/testHelpers';
-import { compareTest } from './lib/compareHelper';
+import { SOR } from '../src';
+import {
+    SubgraphPoolBase,
+    SubGraphPoolsBase,
+    SwapInfo,
+    SwapTypes,
+} from '../src/types';
+import { bnum } from '../src/bmath';
+import { BigNumber } from '../src/utils/bignumber';
+import { expect } from 'chai';
 
+const gasPrice = bnum('30000000000');
+const maxPools = 4;
+const chainId = 1;
 const provider = new JsonRpcProvider(
     `https://mainnet.infura.io/v3/${process.env.INFURA}`
 );
@@ -15,24 +26,61 @@ let testFiles = [
     'elementFinanceTest4',
 ];
 
-const testDir = `${__dirname}/testData/elementPools/`;
-
 // npx mocha -r ts-node/register test/elementPools.spec.ts
-// This compare V1 vs V2 swaps and V2 vs V2 with filter swaps pools saved in ./test/testData/testPools folder.
-// Does not use OnChain balances as the pools were originally saved after a failure and snapshot should have balances, etc that caused issues.
-// Compare V1 vs V2 and V2 vs V2 with filter.
-// !!! Note - testFiles array must be manually updated to contain pools of interest.
-async function loopTests(file) {
-    it(`Compare Testing: ${file}`, async () => {
-        const testData = loadTestFile(`${testDir}/${file}.json`);
+describe(`Tests for Element Pools.`, () => {
+    it(`swapExactIn Direct Pool`, async () => {
+        const poolsFromFile: SubGraphPoolsBase = require('./testData/elementPools/elementFinanceTest1.json');
+        const tokenIn = '0x0000000000000000000000000000000000000001';
+        const tokenOut = '0x000000000000000000000000000000000000000b';
+        const swapType = SwapTypes.SwapExactIn;
+        const swapAmt: BigNumber = bnum('0.1');
 
-        if (!testData.tradeInfo) return;
+        const sor = new SOR(
+            provider,
+            gasPrice,
+            maxPools,
+            chainId,
+            poolsFromFile
+        );
 
-        await compareTest(file, provider, testData);
-        // assert(false);
-    }).timeout(10000);
-}
+        const fetchSuccess = await sor.fetchPools(false);
 
-testFiles.forEach(file => {
-    loopTests(file);
+        let swapInfo: SwapInfo = await sor.getSwaps(
+            tokenIn,
+            tokenOut,
+            swapType,
+            swapAmt
+        );
+
+        // TO DO - Once Element Maths is finalised add real value check
+        expect(swapInfo.returnAmount.gt(0)).to.be.true;
+    });
+
+    it(`swapExactOut Direct Pool`, async () => {
+        const poolsFromFile: SubGraphPoolsBase = require('./testData/elementPools/elementFinanceTest1.json');
+        const tokenIn = '0x0000000000000000000000000000000000000001';
+        const tokenOut = '0x000000000000000000000000000000000000000b';
+        const swapType = SwapTypes.SwapExactOut;
+        const swapAmt: BigNumber = bnum('777');
+
+        const sor = new SOR(
+            provider,
+            gasPrice,
+            maxPools,
+            chainId,
+            poolsFromFile
+        );
+
+        const fetchSuccess = await sor.fetchPools(false);
+
+        let swapInfo: SwapInfo = await sor.getSwaps(
+            tokenIn,
+            tokenOut,
+            swapType,
+            swapAmt
+        );
+
+        // TO DO - Once Element Maths is finalised add real value check
+        expect(swapInfo.returnAmount.gt(0)).to.be.true;
+    });
 });
