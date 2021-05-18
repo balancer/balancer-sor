@@ -189,7 +189,7 @@ export class ElementPool implements PoolBase {
             let Bi = poolPairData.balanceIn.toNumber();
             let Bo = poolPairData.balanceOut.toNumber();
             let t = getTimeTillExpiry(
-                poolPairData.expiryTime,
+                this.expiryTime,
                 this.currentBlockTimestamp,
                 this.unitSeconds
             );

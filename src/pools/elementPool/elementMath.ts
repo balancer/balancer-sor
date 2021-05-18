@@ -246,6 +246,5 @@ export function getTimeTillExpiry(
             ? expiryTime - currentBlockTimestamp
             : 0;
     t = t / unitSeconds;
-    console.log(`!!!!!!! getTimeTillExpiry: ${t}`);
     return t;
 }
