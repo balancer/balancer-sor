@@ -62,7 +62,7 @@ describe(`Tests for Element Pools.`, () => {
             unitSeconds: pool.unitSeconds,
             principalToken: pool.principalToken,
             baseToken: pool.baseToken,
-            currentBlockTimestamp: 0, // This will be updated to use value set above in the function getLimitAmountSwap
+            currentBlockTimestamp: 0,
         };
 
         const limitAmt = newPool.getLimitAmountSwap(poolPairData, swapType);
@@ -91,8 +91,7 @@ describe(`Tests for Element Pools.`, () => {
             pool.baseToken
         );
 
-        console.log(pool.expiryTime);
-        console.log(pool.expiryTime - 10);
+        // Needs to be called to update the currentBlockTimestamp
         newPool.setCurrentBlockTimestamp(pool.expiryTime - 10);
 
         const poolPairData: ElementPoolPairData = {
@@ -115,9 +114,9 @@ describe(`Tests for Element Pools.`, () => {
         };
 
         const limitAmt = newPool.getLimitAmountSwap(poolPairData, swapType);
+        // TO DO - Confirm that behaviour is correct for timestamp
         // TO DO - Once Element Maths is finalised add real value check
         expect(limitAmt.gt(0)).to.be.true;
-        console.log(limitAmt.toString());
     });
 
     it(`tests getLimitAmountSwap SwapExactIn, outwith expiry`, async () => {
@@ -138,6 +137,7 @@ describe(`Tests for Element Pools.`, () => {
             pool.baseToken
         );
 
+        // Needs to be called to update the currentBlockTimestamp
         newPool.setCurrentBlockTimestamp(pool.expiryTime + 1);
 
         const poolPairData: ElementPoolPairData = {
@@ -160,9 +160,9 @@ describe(`Tests for Element Pools.`, () => {
         };
 
         const limitAmt = newPool.getLimitAmountSwap(poolPairData, swapType);
+        // TO DO - Confirm that behaviour is correct for timestamp
         // TO DO - Once Element Maths is finalised add real value check
         expect(limitAmt.gt(0)).to.be.true;
-        console.log(limitAmt.toString());
     });
 
     it(`Full Swap - swapExactIn Direct Pool, Within Expiry`, async () => {
@@ -187,10 +187,10 @@ describe(`Tests for Element Pools.`, () => {
             tokenOut,
             swapType,
             swapAmt,
-            poolsFromFile.pools[0].expiryTime - 22
+            poolsFromFile.pools[0].expiryTime - 22 // This is the value for currentBlockTimestamp
         );
 
-        console.log(swapInfo.swapAmount.toString());
+        // TO DO - Confirm that behaviour is correct for timestamp
         // TO DO - Once Element Maths is finalised add real value check
         expect(swapInfo.returnAmount.gt(0)).to.be.true;
     });
@@ -217,10 +217,10 @@ describe(`Tests for Element Pools.`, () => {
             tokenOut,
             swapType,
             swapAmt,
-            poolsFromFile.pools[0].expiryTime + 22
+            poolsFromFile.pools[0].expiryTime + 22 // This is the value for currentBlockTimestamp
         );
 
-        console.log(swapInfo.swapAmount.toString());
+        // TO DO - Confirm that behaviour is correct for timestamp
         // TO DO - Once Element Maths is finalised add real value check
         expect(swapInfo.returnAmount.gt(0)).to.be.true;
     });
@@ -247,12 +247,12 @@ describe(`Tests for Element Pools.`, () => {
             tokenOut,
             swapType,
             swapAmt,
-            poolsFromFile.pools[0].expiryTime - 22
+            poolsFromFile.pools[0].expiryTime - 22 // This is the value for currentBlockTimestamp
         );
 
+        // TO DO - Confirm that behaviour is correct for timestamp
         // TO DO - Once Element Maths is finalised add real value check
         expect(swapInfo.returnAmount.gt(0)).to.be.true;
-        console.log(swapInfo.swapAmount.toString());
     });
 
     it(`Full Swap - swapExactOut Direct Pool, Outwith Expiry`, async () => {
@@ -277,11 +277,11 @@ describe(`Tests for Element Pools.`, () => {
             tokenOut,
             swapType,
             swapAmt,
-            poolsFromFile.pools[0].expiryTime + 22
+            poolsFromFile.pools[0].expiryTime + 22 // This is the value for currentBlockTimestamp
         );
 
+        // TO DO - Confirm that behaviour is correct for timestamp
         // TO DO - Once Element Maths is finalised add real value check
         expect(swapInfo.returnAmount.gt(0)).to.be.true;
-        console.log(swapInfo.swapAmount.toString());
     });
 });
