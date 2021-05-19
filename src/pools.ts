@@ -91,7 +91,6 @@ export function filterPoolsOfInterest(
                 pool.totalShares,
                 pool.tokens,
                 pool.tokensList,
-                pool.lpShares,
                 pool.expiryTime,
                 pool.unitSeconds,
                 pool.principalToken,

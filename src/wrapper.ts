@@ -24,16 +24,19 @@ import { ZERO_ADDRESS } from './index';
 export class SOR {
     MULTIADDR: { [chainId: number]: string } = {
         1: '0xeefba1e63905ef1d7acba5a8513c70307c1ce441',
+        5: '0x3b2A02F22fCbc872AF77674ceD303eb269a46ce3',
         42: '0x2cc8688C5f75E365aaEEb4ea8D6a480405A48D2A',
     };
 
     VAULTADDR: { [chainId: number]: string } = {
         1: '0xBA12222222228d8Ba445958a75a0704d566BF2C8',
+        5: '0x65748E8287Ce4B9E6D83EE853431958851550311',
         42: '0xBA12222222228d8Ba445958a75a0704d566BF2C8',
     };
 
     WETHADDR: { [chainId: number]: string } = {
         1: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2',
+        5: '0x9A1000D492d40bfccbc03f413A48F5B6516Ec0Fd',
         42: '0xdFCeA9088c8A88A76FF74892C1457C17dfeef9C1',
     };
 

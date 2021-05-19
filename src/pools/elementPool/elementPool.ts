@@ -37,7 +37,7 @@ export interface ElementPoolPairData extends PoolPairBase {
     decimalsIn: number;
     decimalsOut: number;
     // Element specific fields
-    lpShares: BigNumber;
+    totalShares: BigNumber;
     expiryTime: number;
     unitSeconds: number;
     principalToken: string;
@@ -54,7 +54,6 @@ export class ElementPool implements PoolBase {
     tokens: ElementPoolToken[];
     tokensList: string[];
     // Element specific
-    lpShares: BigNumber;
     expiryTime: number;
     unitSeconds: number;
     principalToken: string;
@@ -67,7 +66,6 @@ export class ElementPool implements PoolBase {
         totalShares: string,
         tokens: ElementPoolToken[],
         tokensList: string[],
-        lpShares: BigNumber,
         expiryTime: number,
         unitSeconds: number,
         principalToken: string,
@@ -78,7 +76,6 @@ export class ElementPool implements PoolBase {
         this.totalShares = totalShares;
         this.tokens = tokens;
         this.tokensList = tokensList;
-        this.lpShares = lpShares;
         this.expiryTime = expiryTime;
         this.unitSeconds = unitSeconds;
         this.principalToken = principalToken;
@@ -141,9 +138,9 @@ export class ElementPool implements PoolBase {
         let bnumBalanceIn = bnum(balanceIn);
         let bnumBalanceOut = bnum(balanceOut);
         if (tokenIn == this.principalToken) {
-            bnumBalanceIn = bnumBalanceIn.plus(bnum(this.lpShares));
+            bnumBalanceIn = bnumBalanceIn.plus(bnum(this.totalShares));
         } else if (tokenOut == this.principalToken) {
-            bnumBalanceOut = bnumBalanceOut.plus(bnum(this.lpShares));
+            bnumBalanceOut = bnumBalanceOut.plus(bnum(this.totalShares));
         }
         const poolPairData: ElementPoolPairData = {
             id: this.id,
@@ -158,7 +155,7 @@ export class ElementPool implements PoolBase {
             balanceIn: bnumBalanceIn,
             balanceOut: bnumBalanceOut,
             swapFee: bnum(this.swapFee),
-            lpShares: bnum(this.lpShares),
+            totalShares: bnum(this.totalShares),
             expiryTime: this.expiryTime,
             unitSeconds: this.unitSeconds,
             currentBlockTimestamp: this.currentBlockTimestamp,

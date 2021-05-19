@@ -24,6 +24,10 @@ export async function fetchSubgraphPools(SubgraphUrl: string = '') {
           tokensList
           totalWeight
           amp
+          expiryTime
+          unitSeconds
+          principalToken
+          baseToken
         }
       }
     `;

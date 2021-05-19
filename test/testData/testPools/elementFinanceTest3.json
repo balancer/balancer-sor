@@ -14,7 +14,7 @@
             "id": "0xelementPool3",
             "poolType": "Element",
             "swapFee": "0.05",
-            "lpShares": "888791.4151192267",
+            "totalShares": "888791.4151192267",
             "unitSeconds": "60",
             "expiryTime": "0.127",
             "principalToken": "0x0000000000000000000000000000000000000001",
