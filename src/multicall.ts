@@ -18,12 +18,15 @@ export async function getOnChainBalances(
     const vaultAbi = require('./abi/Vault.json');
     const weightedPoolAbi = require('./pools/weightedPool/weightedPoolAbi.json');
     const stablePoolAbi = require('./pools/stablePool/stablePoolAbi.json');
+    const elementPoolAbi = require('./pools/elementPool/ConvergentCurvePool.json');
     const abis = Object.values(
         Object.fromEntries(
-            [...vaultAbi, ...weightedPoolAbi, ...stablePoolAbi].map(row => [
-                row.name,
-                row,
-            ])
+            [
+                ...vaultAbi,
+                ...weightedPoolAbi,
+                ...stablePoolAbi,
+                ...elementPoolAbi,
+            ].map(row => [row.name, row])
         )
     );
 
@@ -36,11 +39,7 @@ export async function getOnChainBalances(
         multiPool.call(`${pool.id}.poolTokens`, vaultAddress, 'getPoolTokens', [
             pool.id,
         ]);
-        multiPool.call(
-            `${pool.id}.swapFee`,
-            pool.address,
-            'getSwapFeePercentage'
-        );
+
         multiPool.call(`${pool.id}.totalSupply`, pool.address, 'totalSupply');
         // TO DO - Make this part of class to make more flexible?
         if (pool.poolType === 'Weighted') {
@@ -50,12 +49,24 @@ export async function getOnChainBalances(
                 'getNormalizedWeights',
                 []
             );
+            multiPool.call(
+                `${pool.id}.swapFee`,
+                pool.address,
+                'getSwapFeePercentage'
+            );
         } else if (pool.poolType === 'Stable') {
             multiPool.call(
                 `${pool.id}.amp`,
                 pool.address,
                 'getAmplificationParameter'
             );
+            multiPool.call(
+                `${pool.id}.swapFee`,
+                pool.address,
+                'getSwapFeePercentage'
+            );
+        } else if (pool.poolType === 'Element') {
+            multiPool.call(`${pool.id}.swapFee`, pool.address, 'percentFee');
         }
     });
 

@@ -63,7 +63,6 @@ async function simpleSwap() {
     await sor.setCostOutputToken(tokenOut, decimalsOut);
 
     // Will get onChain data for refreshed pools list
-    // await sor.fetchPools(false, subgraphPools);
     await sor.fetchPools(true, subgraphPools);
 
     const isFinishedFetchingOnChain = sor.finishedFetchingOnChain;
