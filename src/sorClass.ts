@@ -213,6 +213,9 @@ export const smartOrderRouter = (
                 selectedPathLimitAmounts,
                 pathIds,
             ] = getBestPathIds(pools, paths, swapType, swapAmounts);
+            // ??? Possible fix?
+            // if(pathIds.length === 0)
+            //     break;
             sortedPathIdsJSON = JSON.stringify([...pathIds].sort());
         }
         // In case b = 1 the while above was skipped and we need to define selectedPaths
