@@ -548,6 +548,7 @@ function iterateSwapAmounts(
             exceedingAmounts[i] = exceedingAmounts[i].minus(epsilon);
         }
     }
+    let iterationCount = 0;
     while (priceError.isGreaterThan(PRICE_ERROR_TOLERANCE)) {
         [
             prices,
@@ -565,6 +566,8 @@ function iterateSwapAmounts(
         let maxPrice = BigNumber.max.apply(null, prices);
         let minPrice = BigNumber.min.apply(null, prices);
         priceError = maxPrice.minus(minPrice).div(minPrice);
+        iterationCount++;
+        if (iterationCount === 100) break;
     }
     return [swapAmounts, exceedingAmounts];
 }
