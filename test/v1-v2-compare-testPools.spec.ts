@@ -10,10 +10,11 @@ const provider = new JsonRpcProvider(
 // This must be updated with pools of interest (see ./test/testData/testPools)
 let testFiles = [
     '20210521-bal-weth-infinite',
-    // 'stable-and-weighted-token-btp-test',
-    // Added pools 'stable-and-weighted-token-btp-test' to element pools
-    //  and replaced the base token with DAI. Also
-    // 'elementFinanceTest_multihop_1path',
+    '25178485-blockKovan', // UI-506, WETH to WBTC Bug
+    // // 'stable-and-weighted-token-btp-test',
+    // // Added pools 'stable-and-weighted-token-btp-test' to element pools
+    // //  and replaced the base token with DAI. Also
+    // // 'elementFinanceTest_multihop_1path',
     // // added a weighted pool (last in json) with DAI and 0x000...001 to test 2 paths
     // 'elementFinanceTest_multihop_2paths',
     // 'elementFinanceTest_multihop_1path_swapExactOut',
