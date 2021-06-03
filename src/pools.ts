@@ -39,7 +39,11 @@ export function filterPoolsOfInterest(
     tokenIn: string,
     tokenOut: string,
     maxPools: number,
-    disabledOptions: DisabledOptions = { isOverRide: false, disabledTokens: [] }
+    disabledOptions: DisabledOptions = {
+        isOverRide: false,
+        disabledTokens: [],
+    },
+    currentBlockTimestamp: number = 0
 ): [PoolDictionary, string[]] {
     const poolsDictionary: PoolDictionary = {};
 
@@ -80,19 +84,21 @@ export function filterPoolsOfInterest(
                 pool.tokens,
                 pool.tokensList
             );
-        else if (pool.poolType === 'Element')
+        else if (pool.poolType === 'Element') {
             newPool = new ElementPool(
                 pool.id,
                 pool.swapFee,
                 pool.totalShares,
                 pool.tokens,
                 pool.tokensList,
-                pool.lpShares,
-                pool.time,
+                pool.expiryTime,
+                pool.unitSeconds,
                 pool.principalToken,
                 pool.baseToken
             );
-        else throw `Unknown pool type or type field missing: ${pool.poolType}`;
+            newPool.setCurrentBlockTimestamp(currentBlockTimestamp);
+        } else
+            throw `Unknown pool type or type field missing: ${pool.poolType}`;
 
         let tokenListSet = new Set(pool.tokensList);
         // Depending on env file, we add the BPT as well as

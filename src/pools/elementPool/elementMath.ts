@@ -1,15 +1,23 @@
 import { BigNumber } from '../../utils/bignumber';
+import { ElementPoolPairData } from './elementPool';
 import { bnum } from '../../bmath';
 
 // calc_out_given_in (swap)
-export function _exactTokenInForTokenOut(amount, poolPairData) {
+export function _exactTokenInForTokenOut(
+    amount: BigNumber,
+    poolPairData: ElementPoolPairData
+) {
     // The formula below returns some dust (due to rounding errors) but when
     // we input zero the output should be zero
     if (amount.isZero()) return amount;
     let f = poolPairData.swapFee.toNumber();
     let Bi = poolPairData.balanceIn.toNumber();
     let Bo = poolPairData.balanceOut.toNumber();
-    let t = poolPairData.time.toNumber();
+    let t = getTimeTillExpiry(
+        poolPairData.expiryTime,
+        poolPairData.currentBlockTimestamp,
+        poolPairData.unitSeconds
+    );
     let Ai = amount.toNumber();
     return bnum(
         Bo -
@@ -26,14 +34,21 @@ export function _exactTokenInForTokenOut(amount, poolPairData) {
 }
 
 // calc_in_given_out (swap)
-export function _tokenInForExactTokenOut(amount, poolPairData) {
+export function _tokenInForExactTokenOut(
+    amount: BigNumber,
+    poolPairData: ElementPoolPairData
+) {
     // The formula below returns some dust (due to rounding errors) but when
     // we input zero the output should be zero
     if (amount.isZero()) return amount;
     let f = poolPairData.swapFee.toNumber();
     let Bi = poolPairData.balanceIn.toNumber();
     let Bo = poolPairData.balanceOut.toNumber();
-    let t = poolPairData.time.toNumber();
+    let t = getTimeTillExpiry(
+        poolPairData.expiryTime,
+        poolPairData.currentBlockTimestamp,
+        poolPairData.unitSeconds
+    );
     let Ao = amount.toNumber();
     return bnum(
         -Bi +
@@ -56,13 +71,17 @@ export function _tokenInForExactTokenOut(amount, poolPairData) {
 // PairType = 'token->token'
 // SwapType = 'swapExactIn'
 export function _spotPriceAfterSwapExactTokenInForTokenOut(
-    amount,
-    poolPairData
+    amount: BigNumber,
+    poolPairData: ElementPoolPairData
 ): BigNumber {
     let f = poolPairData.swapFee.toNumber();
     let Bi = poolPairData.balanceIn.toNumber();
     let Bo = poolPairData.balanceOut.toNumber();
-    let t = poolPairData.time.toNumber();
+    let t = getTimeTillExpiry(
+        poolPairData.expiryTime,
+        poolPairData.currentBlockTimestamp,
+        poolPairData.unitSeconds
+    );
     let Ai = amount.toNumber();
     return bnum(
         1 /
@@ -84,13 +103,17 @@ export function _spotPriceAfterSwapExactTokenInForTokenOut(
 // PairType = 'token->token'
 // SwapType = 'swapExactOut'
 export function _spotPriceAfterSwapTokenInForExactTokenOut(
-    amount,
-    poolPairData
+    amount: BigNumber,
+    poolPairData: ElementPoolPairData
 ): BigNumber {
     let f = poolPairData.swapFee.toNumber();
     let Bi = poolPairData.balanceIn.toNumber();
     let Bo = poolPairData.balanceOut.toNumber();
-    let t = poolPairData.time.toNumber();
+    let t = getTimeTillExpiry(
+        poolPairData.expiryTime,
+        poolPairData.currentBlockTimestamp,
+        poolPairData.unitSeconds
+    );
     let Ao = amount.toNumber();
     return bnum(
         (Bi ** (1 - t) + Bo ** (1 - t) - (-Ao + Bo) ** (1 - t)) **
@@ -113,13 +136,17 @@ export function _spotPriceAfterSwapTokenInForExactTokenOut(
 // PairType = 'token->token'
 // SwapType = 'swapExactIn'
 export function _derivativeSpotPriceAfterSwapExactTokenInForTokenOut(
-    amount,
-    poolPairData
+    amount: BigNumber,
+    poolPairData: ElementPoolPairData
 ): BigNumber {
     let f = poolPairData.swapFee.toNumber();
     let Bi = poolPairData.balanceIn.toNumber();
     let Bo = poolPairData.balanceOut.toNumber();
-    let t = poolPairData.time.toNumber();
+    let t = getTimeTillExpiry(
+        poolPairData.expiryTime,
+        poolPairData.currentBlockTimestamp,
+        poolPairData.unitSeconds
+    );
     let Ai = amount.toNumber();
     return bnum(
         -(
@@ -170,13 +197,17 @@ export function _derivativeSpotPriceAfterSwapExactTokenInForTokenOut(
 // PairType = 'token->token'
 // SwapType = 'swapExactOut'
 export function _derivativeSpotPriceAfterSwapTokenInForExactTokenOut(
-    amount,
-    poolPairData
+    amount: BigNumber,
+    poolPairData: ElementPoolPairData
 ): BigNumber {
     let f = poolPairData.swapFee.toNumber();
     let Bi = poolPairData.balanceIn.toNumber();
     let Bo = poolPairData.balanceOut.toNumber();
-    let t = poolPairData.time.toNumber();
+    let t = getTimeTillExpiry(
+        poolPairData.expiryTime,
+        poolPairData.currentBlockTimestamp,
+        poolPairData.unitSeconds
+    );
     let Ao = amount.toNumber();
     return bnum(
         ((Bi ** (1 - t) + Bo ** (1 - t) - (-Ao + Bo) ** (1 - t)) **
@@ -203,4 +234,17 @@ export function _derivativeSpotPriceAfterSwapTokenInForExactTokenOut(
                             t
                 )
     );
+}
+
+export function getTimeTillExpiry(
+    expiryTime: number,
+    currentBlockTimestamp: number,
+    unitSeconds: number
+): number {
+    let t =
+        currentBlockTimestamp < expiryTime
+            ? expiryTime - currentBlockTimestamp
+            : 0;
+    t = t / unitSeconds;
+    return t;
 }

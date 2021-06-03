@@ -5,13 +5,9 @@ import * as sorv2 from '../../src';
 import {
     SubGraphPoolsBase,
     SubgraphPoolBase,
-    SubGraphPools,
     Swap,
     DisabledToken,
     DisabledOptions,
-    SubGraphPoolDictionary,
-    SubGraphPool,
-    Path,
     SubGraphToken,
     PoolDictionary,
     SwapPairType,
@@ -545,7 +541,7 @@ export function getRandomTradeData(isStableOnly: boolean) {
 }
 
 export function saveTestFile(
-    Pools: SubGraphPools,
+    Pools: SubGraphPoolsBase,
     SwapType: string,
     TokenIn: string,
     TokenOut: string,
@@ -593,7 +589,7 @@ export function saveTestFile(
 }
 
 export function deleteTestFile(
-    Pools: SubGraphPools,
+    Pools: SubGraphPoolsBase,
     SwapType: string,
     TokenIn: string,
     TokenOut: string,
@@ -952,10 +948,10 @@ export function calcRelativeDiffBn(expected: BigNumber, actual: BigNumber) {
 }
 
 async function getAllPoolDataOnChain(
-    pools: SubGraphPools,
+    pools: SubGraphPoolsBase,
     multiAddress: string,
     provider: BaseProvider
-): Promise<SubGraphPools> {
+): Promise<SubGraphPoolsBase> {
     if (pools.pools.length === 0) throw Error('There are no pools.');
 
     const contract = new Contract(multiAddress, customMultiAbi, provider);
@@ -977,12 +973,14 @@ async function getAllPoolDataOnChain(
     let results = await contract.getPoolInfo(addresses, total);
 
     let j = 0;
-    let onChainPools: SubGraphPools = { pools: [] };
+    let onChainPools: SubGraphPoolsBase = { pools: [] };
 
     for (let i = 0; i < pools.pools.length; i++) {
         let tokens: SubGraphToken[] = [];
 
-        let p: SubGraphPool = {
+        let p: SubgraphPoolBase = {
+            address: 'n/a',
+            poolType: 'n/a',
             id: pools.pools[i].id,
             swapFee: pools.pools[i].swapFee,
             totalWeight: pools.pools[i].totalWeight,
