@@ -1,6 +1,5 @@
 'use strict';
 Object.defineProperty(exports, '__esModule', { value: true });
-// NEW CLASS CODE
 var SwapTypes;
 (function(SwapTypes) {
     SwapTypes[(SwapTypes['SwapExactIn'] = 0)] = 'SwapExactIn';

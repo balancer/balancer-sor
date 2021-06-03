@@ -9,7 +9,11 @@ function _exactTokenInForTokenOut(amount, poolPairData) {
     let f = poolPairData.swapFee.toNumber();
     let Bi = poolPairData.balanceIn.toNumber();
     let Bo = poolPairData.balanceOut.toNumber();
-    let t = poolPairData.time.toNumber();
+    let t = getTimeTillExpiry(
+        poolPairData.expiryTime,
+        poolPairData.currentBlockTimestamp,
+        poolPairData.unitSeconds
+    );
     let Ai = amount.toNumber();
     return bmath_1.bnum(
         Bo -
@@ -41,7 +45,11 @@ function _tokenInForExactTokenOut(amount, poolPairData) {
     let f = poolPairData.swapFee.toNumber();
     let Bi = poolPairData.balanceIn.toNumber();
     let Bo = poolPairData.balanceOut.toNumber();
-    let t = poolPairData.time.toNumber();
+    let t = getTimeTillExpiry(
+        poolPairData.expiryTime,
+        poolPairData.currentBlockTimestamp,
+        poolPairData.unitSeconds
+    );
     let Ao = amount.toNumber();
     return bmath_1.bnum(
         -Bi +
@@ -74,7 +82,11 @@ function _spotPriceAfterSwapExactTokenInForTokenOut(amount, poolPairData) {
     let f = poolPairData.swapFee.toNumber();
     let Bi = poolPairData.balanceIn.toNumber();
     let Bo = poolPairData.balanceOut.toNumber();
-    let t = poolPairData.time.toNumber();
+    let t = getTimeTillExpiry(
+        poolPairData.expiryTime,
+        poolPairData.currentBlockTimestamp,
+        poolPairData.unitSeconds
+    );
     let Ai = amount.toNumber();
     return bmath_1.bnum(
         1 /
@@ -105,7 +117,11 @@ function _spotPriceAfterSwapTokenInForExactTokenOut(amount, poolPairData) {
     let f = poolPairData.swapFee.toNumber();
     let Bi = poolPairData.balanceIn.toNumber();
     let Bo = poolPairData.balanceOut.toNumber();
-    let t = poolPairData.time.toNumber();
+    let t = getTimeTillExpiry(
+        poolPairData.expiryTime,
+        poolPairData.currentBlockTimestamp,
+        poolPairData.unitSeconds
+    );
     let Ao = amount.toNumber();
     return bmath_1.bnum(
         Math.pow(
@@ -141,7 +157,11 @@ function _derivativeSpotPriceAfterSwapExactTokenInForTokenOut(
     let f = poolPairData.swapFee.toNumber();
     let Bi = poolPairData.balanceIn.toNumber();
     let Bo = poolPairData.balanceOut.toNumber();
-    let t = poolPairData.time.toNumber();
+    let t = getTimeTillExpiry(
+        poolPairData.expiryTime,
+        poolPairData.currentBlockTimestamp,
+        poolPairData.unitSeconds
+    );
     let Ai = amount.toNumber();
     return bmath_1.bnum(
         -(
@@ -218,7 +238,11 @@ function _derivativeSpotPriceAfterSwapTokenInForExactTokenOut(
     let f = poolPairData.swapFee.toNumber();
     let Bi = poolPairData.balanceIn.toNumber();
     let Bo = poolPairData.balanceOut.toNumber();
-    let t = poolPairData.time.toNumber();
+    let t = getTimeTillExpiry(
+        poolPairData.expiryTime,
+        poolPairData.currentBlockTimestamp,
+        poolPairData.unitSeconds
+    );
     let Ao = amount.toNumber();
     return bmath_1.bnum(
         (Math.pow(
@@ -261,3 +285,12 @@ function _derivativeSpotPriceAfterSwapTokenInForExactTokenOut(
     );
 }
 exports._derivativeSpotPriceAfterSwapTokenInForExactTokenOut = _derivativeSpotPriceAfterSwapTokenInForExactTokenOut;
+function getTimeTillExpiry(expiryTime, currentBlockTimestamp, unitSeconds) {
+    let t =
+        currentBlockTimestamp < expiryTime
+            ? expiryTime - currentBlockTimestamp
+            : 0;
+    t = t / unitSeconds;
+    return t;
+}
+exports.getTimeTillExpiry = getTimeTillExpiry;

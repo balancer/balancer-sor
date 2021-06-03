@@ -74,7 +74,11 @@ function filterPoolsOfInterest(
     tokenIn,
     tokenOut,
     maxPools,
-    disabledOptions = { isOverRide: false, disabledTokens: [] }
+    disabledOptions = {
+        isOverRide: false,
+        disabledTokens: [],
+    },
+    currentBlockTimestamp = 0
 ) {
     const poolsDictionary = {};
     // If pool contains token add all its tokens to direct list
@@ -111,19 +115,21 @@ function filterPoolsOfInterest(
                 pool.tokens,
                 pool.tokensList
             );
-        else if (pool.poolType === 'Element')
+        else if (pool.poolType === 'Element') {
             newPool = new elementPool_1.ElementPool(
                 pool.id,
                 pool.swapFee,
                 pool.totalShares,
                 pool.tokens,
                 pool.tokensList,
-                pool.lpShares,
-                pool.time,
+                pool.expiryTime,
+                pool.unitSeconds,
                 pool.principalToken,
                 pool.baseToken
             );
-        else throw `Unknown pool type or type field missing: ${pool.poolType}`;
+            newPool.setCurrentBlockTimestamp(currentBlockTimestamp);
+        } else
+            throw `Unknown pool type or type field missing: ${pool.poolType}`;
         let tokenListSet = new Set(pool.tokensList);
         // Depending on env file, we add the BPT as well as
         // we can join/exit as part of the multihop

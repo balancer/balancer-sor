@@ -1,25 +1,31 @@
 import { BigNumber } from '../../utils/bignumber';
+import { ElementPoolPairData } from './elementPool';
 export declare function _exactTokenInForTokenOut(
-    amount: any,
-    poolPairData: any
-): any;
+    amount: BigNumber,
+    poolPairData: ElementPoolPairData
+): BigNumber;
 export declare function _tokenInForExactTokenOut(
-    amount: any,
-    poolPairData: any
-): any;
+    amount: BigNumber,
+    poolPairData: ElementPoolPairData
+): BigNumber;
 export declare function _spotPriceAfterSwapExactTokenInForTokenOut(
-    amount: any,
-    poolPairData: any
+    amount: BigNumber,
+    poolPairData: ElementPoolPairData
 ): BigNumber;
 export declare function _spotPriceAfterSwapTokenInForExactTokenOut(
-    amount: any,
-    poolPairData: any
+    amount: BigNumber,
+    poolPairData: ElementPoolPairData
 ): BigNumber;
 export declare function _derivativeSpotPriceAfterSwapExactTokenInForTokenOut(
-    amount: any,
-    poolPairData: any
+    amount: BigNumber,
+    poolPairData: ElementPoolPairData
 ): BigNumber;
 export declare function _derivativeSpotPriceAfterSwapTokenInForExactTokenOut(
-    amount: any,
-    poolPairData: any
+    amount: BigNumber,
+    poolPairData: ElementPoolPairData
 ): BigNumber;
+export declare function getTimeTillExpiry(
+    expiryTime: number,
+    currentBlockTimestamp: number,
+    unitSeconds: number
+): number;

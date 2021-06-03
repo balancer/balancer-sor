@@ -11,8 +11,8 @@ class ElementPool {
         totalShares,
         tokens,
         tokensList,
-        lpShares,
-        time,
+        expiryTime,
+        unitSeconds,
         principalToken,
         baseToken
     ) {
@@ -22,10 +22,14 @@ class ElementPool {
         this.totalShares = totalShares;
         this.tokens = tokens;
         this.tokensList = tokensList;
-        this.lpShares = lpShares;
-        this.time = time;
+        this.expiryTime = expiryTime;
+        this.unitSeconds = unitSeconds;
         this.principalToken = principalToken;
         this.baseToken = baseToken;
+        this.currentBlockTimestamp = 0;
+    }
+    setCurrentBlockTimestamp(timestamp) {
+        this.currentBlockTimestamp = timestamp;
     }
     setTypeForSwap(type) {
         this.swapPairType = type;
@@ -78,9 +82,11 @@ class ElementPool {
         let bnumBalanceIn = bmath_1.bnum(balanceIn);
         let bnumBalanceOut = bmath_1.bnum(balanceOut);
         if (tokenIn == this.principalToken) {
-            bnumBalanceIn = bnumBalanceIn.plus(bmath_1.bnum(this.lpShares));
+            bnumBalanceIn = bnumBalanceIn.plus(bmath_1.bnum(this.totalShares));
         } else if (tokenOut == this.principalToken) {
-            bnumBalanceOut = bnumBalanceOut.plus(bmath_1.bnum(this.lpShares));
+            bnumBalanceOut = bnumBalanceOut.plus(
+                bmath_1.bnum(this.totalShares)
+            );
         }
         const poolPairData = {
             id: this.id,
@@ -95,8 +101,10 @@ class ElementPool {
             balanceIn: bnumBalanceIn,
             balanceOut: bnumBalanceOut,
             swapFee: bmath_1.bnum(this.swapFee),
-            lpShares: bmath_1.bnum(this.lpShares),
-            time: bmath_1.bnum(this.time),
+            totalShares: bmath_1.bnum(this.totalShares),
+            expiryTime: this.expiryTime,
+            unitSeconds: this.unitSeconds,
+            currentBlockTimestamp: this.currentBlockTimestamp,
         };
         return poolPairData;
     }
@@ -117,7 +125,11 @@ class ElementPool {
             // base of root to be non-negative
             let Bi = poolPairData.balanceIn.toNumber();
             let Bo = poolPairData.balanceOut.toNumber();
-            let t = poolPairData.time.toNumber();
+            let t = elementMath_1.getTimeTillExpiry(
+                this.expiryTime,
+                this.currentBlockTimestamp,
+                this.unitSeconds
+            );
             return bmath_1.bnum(
                 Math.pow(
                     Math.pow(Bi, 1 - t) + Math.pow(Bo, 1 - t),
@@ -140,6 +152,7 @@ class ElementPool {
         }
     }
     _exactTokenInForTokenOut(poolPairData, amount) {
+        poolPairData.currentBlockTimestamp = this.currentBlockTimestamp;
         return elementMath_1._exactTokenInForTokenOut(amount, poolPairData);
     }
     _exactTokenInForBPTOut(poolPairData, amount) {
@@ -151,6 +164,7 @@ class ElementPool {
         return bmath_1.bnum(-1);
     }
     _tokenInForExactTokenOut(poolPairData, amount) {
+        poolPairData.currentBlockTimestamp = this.currentBlockTimestamp;
         return elementMath_1._tokenInForExactTokenOut(amount, poolPairData);
     }
     _tokenInForExactBPTOut(poolPairData, amount) {
@@ -162,6 +176,7 @@ class ElementPool {
         return bmath_1.bnum(-1);
     }
     _spotPriceAfterSwapExactTokenInForTokenOut(poolPairData, amount) {
+        poolPairData.currentBlockTimestamp = this.currentBlockTimestamp;
         return elementMath_1._spotPriceAfterSwapExactTokenInForTokenOut(
             amount,
             poolPairData
@@ -176,6 +191,7 @@ class ElementPool {
         return bmath_1.bnum(-1);
     }
     _spotPriceAfterSwapTokenInForExactTokenOut(poolPairData, amount) {
+        poolPairData.currentBlockTimestamp = this.currentBlockTimestamp;
         return elementMath_1._spotPriceAfterSwapTokenInForExactTokenOut(
             amount,
             poolPairData
@@ -190,6 +206,7 @@ class ElementPool {
         return bmath_1.bnum(-1);
     }
     _derivativeSpotPriceAfterSwapExactTokenInForTokenOut(poolPairData, amount) {
+        poolPairData.currentBlockTimestamp = this.currentBlockTimestamp;
         return elementMath_1._derivativeSpotPriceAfterSwapExactTokenInForTokenOut(
             amount,
             poolPairData
@@ -204,6 +221,7 @@ class ElementPool {
         return bmath_1.bnum(-1);
     }
     _derivativeSpotPriceAfterSwapTokenInForExactTokenOut(poolPairData, amount) {
+        poolPairData.currentBlockTimestamp = this.currentBlockTimestamp;
         return elementMath_1._derivativeSpotPriceAfterSwapTokenInForExactTokenOut(
             amount,
             poolPairData

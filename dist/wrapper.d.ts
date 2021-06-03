@@ -26,7 +26,6 @@ export declare class SOR {
     subgraphPools: SubGraphPoolsBase;
     tokenCost: {};
     onChainBalanceCache: SubGraphPoolsBase;
-    poolsForPairsCache: {};
     processedDataCache: {};
     finishedFetchingOnChain: boolean;
     disabledOptions: DisabledOptions;
@@ -52,7 +51,8 @@ export declare class SOR {
         tokenIn: string,
         tokenOut: string,
         swapType: SwapTypes,
-        swapAmt: BigNumber
+        swapAmt: BigNumber,
+        timestamp?: number
     ): Promise<SwapInfo>;
     processSwaps(
         tokenIn: string,
@@ -61,14 +61,7 @@ export declare class SOR {
         swapAmt: BigNumber,
         onChainPools: SubGraphPoolsBase,
         wrapOptions: any,
-        useProcessCache?: boolean
+        useProcessCache?: boolean,
+        currentBlockTimestamp?: number
     ): Promise<SwapInfo>;
-    fetchFilteredPairPools(
-        tokenIn: string,
-        tokenOut: string,
-        isOnChain?: boolean
-    ): Promise<boolean>;
-    private processPairPools;
-    createKey(Token1: string, Token2: string): string;
-    hasDataForPair(tokenIn: string, tokenOut: string): boolean;
 }

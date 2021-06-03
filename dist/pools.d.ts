@@ -13,7 +13,8 @@ export declare function filterPoolsOfInterest(
     tokenIn: string,
     tokenOut: string,
     maxPools: number,
-    disabledOptions?: DisabledOptions
+    disabledOptions?: DisabledOptions,
+    currentBlockTimestamp?: number
 ): [PoolDictionary, string[]];
 export declare function filterHopPools(
     tokenIn: string,

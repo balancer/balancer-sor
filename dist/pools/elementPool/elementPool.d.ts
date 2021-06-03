@@ -23,10 +23,12 @@ export interface ElementPoolPairData extends PoolPairBase {
     swapFee: BigNumber;
     decimalsIn: number;
     decimalsOut: number;
-    lpShares: BigNumber;
-    time: BigNumber;
+    totalShares: BigNumber;
+    expiryTime: number;
+    unitSeconds: number;
     principalToken: string;
     baseToken: string;
+    currentBlockTimestamp: number;
 }
 export declare class ElementPool implements PoolBase {
     poolType: PoolTypes;
@@ -36,21 +38,23 @@ export declare class ElementPool implements PoolBase {
     totalShares: string;
     tokens: ElementPoolToken[];
     tokensList: string[];
-    lpShares: BigNumber;
-    time: BigNumber;
+    expiryTime: number;
+    unitSeconds: number;
     principalToken: string;
     baseToken: string;
+    currentBlockTimestamp: number;
     constructor(
         id: string,
         swapFee: string,
         totalShares: string,
         tokens: ElementPoolToken[],
         tokensList: string[],
-        lpShares: BigNumber,
-        time: BigNumber,
+        expiryTime: number,
+        unitSeconds: number,
         principalToken: string,
         baseToken: string
     );
+    setCurrentBlockTimestamp(timestamp: number): void;
     setTypeForSwap(type: SwapPairType): void;
     parsePoolPairData(tokenIn: string, tokenOut: string): ElementPoolPairData;
     getNormalizedLiquidity(poolPairData: ElementPoolPairData): BigNumber;

@@ -57,12 +57,15 @@ function getOnChainBalances(
         const vaultAbi = require('./abi/Vault.json');
         const weightedPoolAbi = require('./pools/weightedPool/weightedPoolAbi.json');
         const stablePoolAbi = require('./pools/stablePool/stablePoolAbi.json');
+        const elementPoolAbi = require('./pools/elementPool/ConvergentCurvePool.json');
         const abis = Object.values(
             Object.fromEntries(
-                [...vaultAbi, ...weightedPoolAbi, ...stablePoolAbi].map(row => [
-                    row.name,
-                    row,
-                ])
+                [
+                    ...vaultAbi,
+                    ...weightedPoolAbi,
+                    ...stablePoolAbi,
+                    ...elementPoolAbi,
+                ].map(row => [row.name, row])
             )
         );
         const multiPool = new multicaller_1.Multicaller(
@@ -80,11 +83,6 @@ function getOnChainBalances(
                 [pool.id]
             );
             multiPool.call(
-                `${pool.id}.swapFee`,
-                pool.address,
-                'getSwapFeePercentage'
-            );
-            multiPool.call(
                 `${pool.id}.totalSupply`,
                 pool.address,
                 'totalSupply'
@@ -97,11 +95,27 @@ function getOnChainBalances(
                     'getNormalizedWeights',
                     []
                 );
+                multiPool.call(
+                    `${pool.id}.swapFee`,
+                    pool.address,
+                    'getSwapFeePercentage'
+                );
             } else if (pool.poolType === 'Stable') {
                 multiPool.call(
                     `${pool.id}.amp`,
                     pool.address,
                     'getAmplificationParameter'
+                );
+                multiPool.call(
+                    `${pool.id}.swapFee`,
+                    pool.address,
+                    'getSwapFeePercentage'
+                );
+            } else if (pool.poolType === 'Element') {
+                multiPool.call(
+                    `${pool.id}.swapFee`,
+                    pool.address,
+                    'percentFee'
                 );
             }
         });

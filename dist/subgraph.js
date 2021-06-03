@@ -65,6 +65,10 @@ function fetchSubgraphPools(SubgraphUrl = '') {
           tokensList
           totalWeight
           amp
+          expiryTime
+          unitSeconds
+          principalToken
+          baseToken
         }
       }
     `;
