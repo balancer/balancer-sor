@@ -214,8 +214,8 @@ export const smartOrderRouter = (
                 pathIds,
             ] = getBestPathIds(pools, paths, swapType, swapAmounts);
             // ??? Possible fix - getBestPathIds will return empty arrays in bug case
-            if (pathIds.length === 0) break;
-            sortedPathIdsJSON = JSON.stringify([...pathIds].sort());
+            //if (pathIds.length === 0) break;
+            //sortedPathIdsJSON = JSON.stringify([...pathIds].sort());
         }
         // In case b = 1 the while above was skipped and we need to define selectedPaths
         if (b == 1) selectedPaths = newSelectedPaths;
