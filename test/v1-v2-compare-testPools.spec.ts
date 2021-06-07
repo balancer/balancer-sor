@@ -62,12 +62,12 @@ let testFiles = [
     '0xe331382ecdcad2befe8580a779e28cb4d98bc88da9fac74ae1e95c78417acfde',
     '0xf2826c2b04aef9ddab2c3a7088f33dbc7a0485d57b37b5220f9d86da9eb95b2a',
     '0xf4a5ecfa278f50beb4155bc7bbd3ada5e57d5ceb9825852531981fa66bc94844',
+    '0x80422d69eb9272c7b786f602bbce7caad3559a2bd714b5eafb254cfbdd26361c', // Dust amounts
+    '0x2db088f092121c107a1bfe97984be190e5ab72fce044c9749c3611ce2365e4da',
+    '0x995a2d20a846226c7680fff641cee4397f81c6e1f0675d69c7d26d05a60b39f3',
+    '0x99dd2c21aa009e98e000a3bd515a8ddcbb52748642fde10f9137f9de3cfae957',
     // 07/06/21 - Following cases fail V1 vs V2 check after a bug fix (previously passing) but confirmed as ok by Fernando
     // '20210521-bal-weth-infinite',
-    // '0x80422d69eb9272c7b786f602bbce7caad3559a2bd714b5eafb254cfbdd26361c', // Dust amounts
-    // '0x2db088f092121c107a1bfe97984be190e5ab72fce044c9749c3611ce2365e4da',
-    // '0x995a2d20a846226c7680fff641cee4397f81c6e1f0675d69c7d26d05a60b39f3',
-    // '0x99dd2c21aa009e98e000a3bd515a8ddcbb52748642fde10f9137f9de3cfae957',
     // The following are cases that fail V1 vs V2 check but have been double checked and confirmed due to maths rounding
     // '0xfc687c72aa619a5c4eb5f5597a2bd69ef1157848243700b57926d36060a6dedc',    // Failing comparing V1 vs V2 - limit difference
     // '0x17497e9e5230493b79c19bad0dc165e06ac0aac3db8eaa4de441d44a70aa9a03',    // Failing - rounding

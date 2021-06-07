@@ -213,9 +213,10 @@ export const smartOrderRouter = (
                 selectedPathLimitAmounts,
                 pathIds,
             ] = getBestPathIds(pools, paths, swapType, swapAmounts);
-            // ??? Possible fix - getBestPathIds will return empty arrays in bug case
-            //if (pathIds.length === 0) break;
-            //sortedPathIdsJSON = JSON.stringify([...pathIds].sort());
+
+            if (pathIds.length === 0) break;
+
+            sortedPathIdsJSON = JSON.stringify([...pathIds].sort());
         }
         // In case b = 1 the while above was skipped and we need to define selectedPaths
         if (b == 1) selectedPaths = newSelectedPaths;
@@ -463,8 +464,7 @@ function getBestPathIds(
     sortedSwapAmounts = [...swapAmounts].sort((a, b) => {
         return b.minus(a).toNumber();
     });
-    // ??????? Possible fix -
-    // previous return for bestPathIndex === -1 in forEach loop would go to loop start rather than returning from function
+
     for (let i = 0; i < sortedSwapAmounts.length; i++) {
         let swapAmount: BigNumber = sortedSwapAmounts[i];
         // Find path that has best effective price
@@ -573,6 +573,7 @@ function iterateSwapAmounts(
         let minPrice = BigNumber.min.apply(null, prices);
         priceError = maxPrice.minus(minPrice).div(minPrice);
         iterationCount++;
+        if (iterationCount > 100) break;
     }
     return [swapAmounts, exceedingAmounts];
 }
