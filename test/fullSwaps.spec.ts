@@ -6,6 +6,7 @@ import { SwapTypes, DisabledOptions } from '../src/types';
 import BigNumber from 'bignumber.js';
 import { getV2Swap } from './lib/testHelpers';
 import { compareTest } from './lib/compareHelper';
+import { bnum } from '../src/bmath';
 
 const gasPrice = new BigNumber('30000000000');
 
@@ -199,16 +200,33 @@ describe('Tests full swaps against known values', () => {
             tradeInfo,
         };
 
-        const [v1SwapData, v2SwapData] = await compareTest(
-            name,
-            provider,
-            testData,
-            disabledOptions
+        const amountNormalised = testData.tradeInfo.SwapAmount.div(
+            bnum(10 ** testData.tradeInfo.SwapAmountDecimals)
         );
+
+        const testSettings = {
+            compareResults: true,
+            costOutputTokenOveride: { isOverRide: true, overRideCost: bnum(0) },
+        };
+
+        const v2SwapData = await getV2Swap(
+            provider,
+            JSON.parse(JSON.stringify(testData)),
+            testData.tradeInfo.TokenIn,
+            testData.tradeInfo.TokenOut,
+            testData.tradeInfo.NoPools,
+            testData.tradeInfo.SwapType,
+            amountNormalised,
+            testData.tradeInfo.GasPrice,
+            testData.tradeInfo.ReturnAmountDecimals,
+            disabledOptions,
+            testSettings.costOutputTokenOveride
+        );
+
         const total = v2SwapData.returnAmount;
         const swaps = v2SwapData.swaps;
         // The expected test results are from previous version
-        assert.equal(total.toString(), '0.100754');
+        assert.equal(total.toString(), '0.100753');
         assert.equal(swaps.length, 2);
         assert.equal(
             swaps[0][0].pool,
@@ -216,14 +234,20 @@ describe('Tests full swaps against known values', () => {
         );
         assert.equal(swaps[0][0].tokenIn, DAI);
         assert.equal(swaps[0][0].tokenOut, USDC);
-        assert.equal(swaps[0][0].swapAmount, '0.089882277269017451');
+        assert.equal(
+            swaps[0][0].swapAmount,
+            '0.0898837681429279943294092423005817'
+        );
         assert.equal(
             swaps[1][0].pool,
             '0x57755f7dec33320bca83159c26e93751bfd30fbe'
         );
         assert.equal(swaps[1][0].tokenIn, DAI);
         assert.equal(swaps[1][0].tokenOut, USDC);
-        assert.equal(swaps[1][0].swapAmount, '0.010117722730982549');
+        assert.equal(
+            swaps[1][0].swapAmount,
+            '0.0101162318570720056705907576994183'
+        );
         // assert.equal(marketSp.toString(), '0.9924950453298881'); // TODO Different method to V1 so find diff result 0.9925374301712606
     }).timeout(10000);
 
@@ -273,7 +297,7 @@ describe('Tests full swaps against known values', () => {
         const swaps = v2SwapData.swaps;
 
         // The expected test results are from previous version
-        assert.equal(total.toString(), '0.099251606996030381');
+        assert.equal(total.toString(), '0.099251606996029317');
         assert.equal(swaps.length, 2);
         assert.equal(
             swaps[0][0].pool,
@@ -283,7 +307,7 @@ describe('Tests full swaps against known values', () => {
         assert.equal(swaps[0][0].tokenOut, USDC);
         assert.equal(
             swaps[0][0].swapAmount,
-            '0.0898835978920223473293050501353607'
+            '0.089883596532642998246978787601520525'
         );
         assert.equal(
             swaps[1][0].pool,
@@ -293,7 +317,7 @@ describe('Tests full swaps against known values', () => {
         assert.equal(swaps[1][0].tokenOut, USDC);
         assert.equal(
             swaps[1][0].swapAmount,
-            '0.0101164021079776526706949498646393'
+            '0.010116403467357001753021212398479475'
         );
         // assert.equal(marketSp.toString(), '0.9924950453298881'); // TODO Different method to V1 so find diff result 0.9925374301712606
     }).timeout(10000);
@@ -485,7 +509,7 @@ describe('Tests full swaps against known values', () => {
         assert.equal(swaps[0][0].tokenOut, USDC);
         assert.equal(
             swaps[0][0].swapAmount,
-            '0.69225652450496674530420203796961015'
+            '0.6922565054733028450722693839594802'
         );
         assert.equal(
             swaps[1][0].pool,
@@ -495,7 +519,7 @@ describe('Tests full swaps against known values', () => {
         assert.equal(swaps[1][0].tokenOut, USDC);
         assert.equal(
             swaps[1][0].swapAmount,
-            '0.07774347549503325469579796203038985'
+            '0.0777434945266971549277306160405198'
         );
     }).timeout(10000);
 

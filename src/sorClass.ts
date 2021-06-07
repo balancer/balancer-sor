@@ -213,6 +213,9 @@ export const smartOrderRouter = (
                 selectedPathLimitAmounts,
                 pathIds,
             ] = getBestPathIds(pools, paths, swapType, swapAmounts);
+
+            if (pathIds.length === 0) break;
+
             sortedPathIdsJSON = JSON.stringify([...pathIds].sort());
         }
         // In case b = 1 the while above was skipped and we need to define selectedPaths
@@ -461,7 +464,9 @@ function getBestPathIds(
     sortedSwapAmounts = [...swapAmounts].sort((a, b) => {
         return b.minus(a).toNumber();
     });
-    sortedSwapAmounts.forEach((swapAmount, i) => {
+
+    for (let i = 0; i < sortedSwapAmounts.length; i++) {
+        let swapAmount: BigNumber = sortedSwapAmounts[i];
         // Find path that has best effective price
         let bestPathIndex = -1;
         let bestEffectivePrice = bnum('Infinity'); // Start with worst price possible
@@ -502,7 +507,7 @@ function getBestPathIds(
             swapAmount.minus(paths[bestPathIndex].limitAmount)
         );
         paths.splice(bestPathIndex, 1); // Remove path from list
-    });
+    }
     return [
         selectedPaths,
         selectedPathExceedingAmounts,
@@ -525,29 +530,30 @@ function iterateSwapAmounts(
 ): [BigNumber[], BigNumber[]] {
     let priceError = bnum(1); // Initialize priceError just so that while starts
     let prices = [];
-    // Since this is the beginning of an iteration with a new set of paths, we
-    // set any swapAmounts that were 0 previously to 1 wei or at the limit
-    // to limit minus 1 wei just so that they
-    // are considered as viable for iterateSwapAmountsApproximation(). If they were
-    // left at 0 iterateSwapAmountsApproximation() would consider them already outside
-    // the viable range and would not iterate on them. This is useful when
-    // iterateSwapAmountsApproximation() is being repeatedly called within the while loop
-    // below, but not when a new execution of iterateSwapAmounts() happens with new
-    // paths.
-    for (let i = 0; i < swapAmounts.length; ++i) {
-        if (swapAmounts[i].isZero()) {
-            // Very small amount: TODO put in config file
-            const epsilon = totalSwapAmount.times(INFINITESIMAL);
-            swapAmounts[i] = epsilon;
-            exceedingAmounts[i] = exceedingAmounts[i].plus(epsilon);
-        }
-        if (exceedingAmounts[i].isZero()) {
-            // Very small amount: TODO put in config file
-            const epsilon = totalSwapAmount.times(INFINITESIMAL);
-            swapAmounts[i] = swapAmounts[i].minus(epsilon); // Very small amount
-            exceedingAmounts[i] = exceedingAmounts[i].minus(epsilon);
-        }
-    }
+    // // Since this is the beginning of an iteration with a new set of paths, we
+    // // set any swapAmounts that were 0 previously to 1 wei or at the limit
+    // // to limit minus 1 wei just so that they
+    // // are considered as viable for iterateSwapAmountsApproximation(). If they were
+    // // left at 0 iterateSwapAmountsApproximation() would consider them already outside
+    // // the viable range and would not iterate on them. This is useful when
+    // // iterateSwapAmountsApproximation() is being repeatedly called within the while loop
+    // // below, but not when a new execution of iterateSwapAmounts() happens with new
+    // // paths.
+    // for (let i = 0; i < swapAmounts.length; ++i) {
+    //     if (swapAmounts[i].isZero()) {
+    //         // Very small amount: TODO put in config file
+    //         const epsilon = totalSwapAmount.times(INFINITESIMAL);
+    //         swapAmounts[i] = epsilon;
+    //         exceedingAmounts[i] = exceedingAmounts[i].plus(epsilon);
+    //     }
+    //     if (exceedingAmounts[i].isZero()) {
+    //         // Very small amount: TODO put in config file
+    //         const epsilon = totalSwapAmount.times(INFINITESIMAL);
+    //         swapAmounts[i] = swapAmounts[i].minus(epsilon); // Very small amount
+    //         exceedingAmounts[i] = exceedingAmounts[i].minus(epsilon);
+    //     }
+    // }
+    let iterationCount = 0;
     while (priceError.isGreaterThan(PRICE_ERROR_TOLERANCE)) {
         [
             prices,
@@ -560,11 +566,14 @@ function iterateSwapAmounts(
             totalSwapAmount,
             swapAmounts,
             exceedingAmounts,
-            pathLimitAmounts
+            pathLimitAmounts,
+            iterationCount
         );
         let maxPrice = BigNumber.max.apply(null, prices);
         let minPrice = BigNumber.min.apply(null, prices);
         priceError = maxPrice.minus(minPrice).div(minPrice);
+        iterationCount++;
+        if (iterationCount > 100) break;
     }
     return [swapAmounts, exceedingAmounts];
 }
@@ -576,7 +585,8 @@ function iterateSwapAmountsApproximation(
     totalSwapAmount: BigNumber,
     swapAmounts: BigNumber[],
     exceedingAmounts: BigNumber[], // This is the amount by which swapAmount exceeds the pool limit_amount
-    pathLimitAmounts: BigNumber[]
+    pathLimitAmounts: BigNumber[],
+    iterationCount: number
 ): [BigNumber[], BigNumber[], BigNumber[]] {
     let sumInverseDerivativeSPaSs = bnum(0);
     let sumSPaSDividedByDerivativeSPaSs = bnum(0);
@@ -584,8 +594,19 @@ function iterateSwapAmountsApproximation(
     let derivativeSPaSs = [];
 
     // We only iterate on the swapAmounts that are viable (i.e. no negative or > than path limit)
+    // OR if this is the first time "iterateSwapAmountsApproximation" is called
+    // within "iterateSwapAmounts()". In this case swapAmounts should be considered viable
+    // also if they are on the limit.
     swapAmounts.forEach((swapAmount, i) => {
-        if (swapAmount.gt(bnum(0)) && exceedingAmounts[i].lt(bnum(0))) {
+        // if (swapAmount.gt(bnum(0)) && exceedingAmounts[i].lt(bnum(0))) {
+        if (
+            (iterationCount == 0 &&
+                swapAmount.gte(bnum(0)) &&
+                exceedingAmounts[i].lte(bnum(0))) ||
+            (iterationCount != 0 &&
+                swapAmount.gt(bnum(0)) &&
+                exceedingAmounts[i].lt(bnum(0)))
+        ) {
             let path = selectedPaths[i];
             let SPaS = getSpotPriceAfterSwapForPath(path, swapType, swapAmount);
             SPaSs.push(SPaS);
@@ -620,7 +641,14 @@ function iterateSwapAmountsApproximation(
     );
 
     swapAmounts.forEach((swapAmount, i) => {
-        if (swapAmount.gt(bnum(0)) && exceedingAmounts[i].lt(bnum(0))) {
+        if (
+            (iterationCount == 0 &&
+                swapAmount.gte(bnum(0)) &&
+                exceedingAmounts[i].lte(bnum(0))) ||
+            (iterationCount != 0 &&
+                swapAmount.gt(bnum(0)) &&
+                exceedingAmounts[i].lt(bnum(0)))
+        ) {
             let deltaSwapAmount = weighted_average_SPaS
                 .minus(SPaSs[i])
                 .div(derivativeSPaSs[i]);
@@ -629,7 +657,7 @@ function iterateSwapAmountsApproximation(
         }
     });
 
-    // Make sure no input amount is negative or above the pool limit
+    // Make sure no input amount is negative or above the path limit
     while (
         BigNumber.min.apply(null, swapAmounts).lt(bnum(0)) ||
         BigNumber.max.apply(null, exceedingAmounts).gt(bnum(0))
@@ -647,7 +675,14 @@ function iterateSwapAmountsApproximation(
         swapAmountsSumWithRoundingErrors = swapAmountsSumWithRoundingErrors.plus(
             swapAmount
         );
-        if (swapAmount.gt(bnum(0)) && exceedingAmounts[i].lt(bnum(0)))
+        if (
+            (iterationCount == 0 &&
+                swapAmount.gte(bnum(0)) &&
+                exceedingAmounts[i].lte(bnum(0))) ||
+            (iterationCount != 0 &&
+                swapAmount.gt(bnum(0)) &&
+                exceedingAmounts[i].lt(bnum(0)))
+        )
             pricesForViableAmounts.push(
                 getSpotPriceAfterSwapForPath(
                     selectedPaths[i],

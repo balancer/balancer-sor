@@ -1,4 +1,4 @@
-// Example showing SOR with Vault batchSwap and Subgraph pool data, run using: $ ts-node ./test/testScripts/swapExactInSubgraph.ts
+// Example showing SOR with Vault batchSwap and Subgraph pool data, run using: $ ts-node ./test/testScripts/swapMain.ts
 require('dotenv').config();
 import { BigNumber } from 'bignumber.js';
 import { JsonRpcProvider } from '@ethersproject/providers';
@@ -17,6 +17,7 @@ export type FundManagement = {
     toInternalBalance: boolean;
 };
 
+const BAL = '0xba100000625a3754423978a60c9317c58a424e3d';
 const USDC = '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48';
 const WBTC = '0x2260fac5e5542a773aa44fbcfedf7c193bc2c599';
 const WETH = '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2';
@@ -40,25 +41,31 @@ async function simpleSwap() {
     // This determines the max no of pools the SOR will use to swap.
     const maxNoPools = 4;
     const chainId = 1;
-    const tokenIn = DAI;
+    const tokenIn = BAL;
     const tokenOut = WETH;
-    const swapType = SwapTypes.SwapExactIn;
+    const swapType = SwapTypes.SwapExactOut;
     // In normalized format, i.e. 1USDC = 1
-    const amountIn = new BigNumber(1);
-    const decimalsIn = 8;
+    const swapAmount = new BigNumber(0.1);
+    const decimalsIn = 18;
     const decimalsOut = 18;
 
     // Fetch pools list from Subgraph
     // Uses default API or value set in env
     // Can also pass in API address via parameter
-    let subgraphPools = await fetchSubgraphPools();
+    let subgraphPools = await fetchSubgraphPools(
+        'https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-v2'
+    );
+    console.log(subgraphPools);
 
     const sor = new SOR(provider, gasPrice, maxNoPools, chainId, subgraphPools);
 
     // This calculates the cost to make a swap which is used as an input to sor to allow it to make gas efficient recommendations.
     // Can be set once and will be used for further swap calculations.
     // Defaults to 0 if not called or can be set manually using: await sor.setCostOutputToken(tokenOut, manualPriceBn)
-    const cost = await sor.setCostOutputToken(tokenOut, decimalsOut);
+    // tokenOut for SwapExactIn, tokenIn for SwapExactOut
+    // const cost = await sor.setCostOutputToken(tokenOut, decimalsOut);
+    const cost = await sor.setCostOutputToken(tokenIn, decimalsIn);
+
     console.log('Cost:');
     console.log(cost.toString());
 
@@ -76,7 +83,7 @@ async function simpleSwap() {
         tokenIn,
         tokenOut,
         swapType,
-        amountIn
+        swapAmount
     );
 
     console.log(swapInfo.returnAmount.toString());
@@ -113,7 +120,7 @@ async function simpleSwap() {
     // const limits = [];
     // swapInfo.tokenAddresses.forEach((token, i) => {
     //     if (token.toLowerCase() === tokenIn.toLowerCase()) {
-    //         limits[i] = scale(amountIn, decimalsIn).toString();
+    //         limits[i] = scale(swapAmount, decimalsIn).toString();
     //     } else if (token.toLowerCase() === tokenOut.toLowerCase()) {
     //         limits[i] = swapInfo.returnAmount.times(-1).toString();
     //     } else {
