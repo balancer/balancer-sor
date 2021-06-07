@@ -19,6 +19,10 @@ let testFiles = [
     'elementFinanceTest_multihop_1path_swapExactOut',
     'elementFinanceTest_multihop_2paths_swapExactOut', // Returning a second swap with -ve amount
     'elementFinanceTestFourPools',
+    'elementFinanceTest1',
+    'elementFinanceTest2',
+    'elementFinanceTest3',
+    'elementFinanceTest4',
     // 07/04/21 - Below have been checked and pass
     '0x04ec8acaa4f419bc1525eaa8d37faae2d4acb64c5521a3718593c626962de170', // Dust amounts
     '0xa7a3cf76686c6d6aa6e976724b4463c6f7b0e98453ad3a8488b6e9daa2fecc42', // Dust amounts

@@ -24,16 +24,19 @@ import { ZERO_ADDRESS } from './index';
 export class SOR {
     MULTIADDR: { [chainId: number]: string } = {
         1: '0xeefba1e63905ef1d7acba5a8513c70307c1ce441',
+        5: '0x3b2A02F22fCbc872AF77674ceD303eb269a46ce3',
         42: '0x2cc8688C5f75E365aaEEb4ea8D6a480405A48D2A',
     };
 
     VAULTADDR: { [chainId: number]: string } = {
         1: '0xBA12222222228d8Ba445958a75a0704d566BF2C8',
+        5: '0x65748E8287Ce4B9E6D83EE853431958851550311',
         42: '0xBA12222222228d8Ba445958a75a0704d566BF2C8',
     };
 
     WETHADDR: { [chainId: number]: string } = {
         1: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2',
+        5: '0x9A1000D492d40bfccbc03f413A48F5B6516Ec0Fd',
         42: '0xdFCeA9088c8A88A76FF74892C1457C17dfeef9C1',
     };
 
@@ -48,7 +51,6 @@ export class SOR {
     subgraphPools: SubGraphPoolsBase;
     tokenCost = {};
     onChainBalanceCache: SubGraphPoolsBase = { pools: [] };
-    poolsForPairsCache = {};
     processedDataCache = {};
     finishedFetchingOnChain: boolean = false;
     disabledOptions: DisabledOptions;
@@ -216,7 +218,8 @@ export class SOR {
         tokenIn: string,
         tokenOut: string,
         swapType: SwapTypes,
-        swapAmt: BigNumber
+        swapAmt: BigNumber,
+        timestamp: number = 0
     ): Promise<SwapInfo> {
         let swapInfo: SwapInfo = {
             tokenAddresses: [],
@@ -253,21 +256,9 @@ export class SOR {
                 swapType,
                 swapAmt,
                 this.onChainBalanceCache,
-                wrapOptions
-            );
-        } else {
-            // Haven't retrieved all pools/balances so we use the pools for pairs if previously fetched
-            if (!this.poolsForPairsCache[this.createKey(tokenIn, tokenOut)])
-                return swapInfo;
-
-            swapInfo = await this.processSwaps(
-                tokenIn,
-                tokenOut,
-                swapType,
-                swapAmt,
-                this.poolsForPairsCache[this.createKey(tokenIn, tokenOut)],
                 wrapOptions,
-                false
+                true,
+                timestamp
             );
         }
 
@@ -283,7 +274,8 @@ export class SOR {
         swapAmt: BigNumber,
         onChainPools: SubGraphPoolsBase,
         wrapOptions: any,
-        useProcessCache: boolean = true
+        useProcessCache: boolean = true,
+        currentBlockTimestamp: number = 0
     ): Promise<SwapInfo> {
         let swapInfo: SwapInfo = {
             tokenAddresses: [],
@@ -299,8 +291,11 @@ export class SOR {
         if (onChainPools.pools.length === 0) return swapInfo;
 
         let pools: PoolDictionary, paths: NewPath[], marketSp: BigNumber;
+
         // If token pair has been processed before that info can be reused to speed up execution
-        let cache = this.processedDataCache[`${tokenIn}${tokenOut}${swapType}`];
+        let cache = this.processedDataCache[
+            `${tokenIn}${tokenOut}${swapType}${currentBlockTimestamp}`
+        ];
 
         // useProcessCache can be false to force fresh processing of paths/prices
         if (!useProcessCache || !cache) {
@@ -310,17 +305,30 @@ export class SOR {
             // Some functions alter pools list directly but we want to keep original so make a copy to work from
             let poolsList = JSON.parse(JSON.stringify(onChainPools));
             let pathData: NewPath[];
-            [pools, pathData] = this.processPairPools(
+            let hopTokens: string[];
+            [pools, hopTokens] = filterPoolsOfInterest(
+                poolsList.pools,
                 tokenIn,
                 tokenOut,
-                poolsList.pools
+                this.maxPools,
+                this.disabledOptions,
+                currentBlockTimestamp
+            );
+
+            [pools, pathData] = filterHopPools(
+                tokenIn,
+                tokenOut,
+                hopTokens,
+                pools
             );
 
             [paths] = calculatePathLimits(pathData, swapType);
 
             // Update cache if used
             if (useProcessCache)
-                this.processedDataCache[`${tokenIn}${tokenOut}${swapType}`] = {
+                this.processedDataCache[
+                    `${tokenIn}${tokenOut}${swapType}${currentBlockTimestamp}`
+                ] = {
                     pools: pools,
                     paths: paths,
                     marketSp: marketSp,
@@ -357,7 +365,7 @@ export class SOR {
 
         if (useProcessCache)
             this.processedDataCache[
-                `${tokenIn}${tokenOut}${swapType}`
+                `${tokenIn}${tokenOut}${swapType}${currentBlockTimestamp}`
             ].marketSp = marketSp;
 
         swapInfo = formatSwaps(
@@ -380,207 +388,5 @@ export class SOR {
         }
 
         return swapInfo;
-    }
-
-    /*
-    This is used as a quicker alternative to fetching all pools information.
-    A subset of pools for token pair is found by checking swaps for range of input amounts.
-    The onchain balances for the subset of pools is retrieved and cached for future swap calculations (i.e. when amts change).
-    */
-    async fetchFilteredPairPools(
-        tokenIn: string,
-        tokenOut: string,
-        isOnChain: boolean = true
-    ): Promise<boolean> {
-        tokenIn = tokenIn.toLowerCase();
-        tokenOut = tokenOut.toLowerCase();
-
-        // If Zero Address (Eth sentinel) is passed replace it with Weth
-        if (tokenIn === ZERO_ADDRESS) {
-            tokenIn = this.WETHADDR[this.chainId].toLowerCase();
-        }
-
-        if (tokenOut === ZERO_ADDRESS) {
-            tokenOut = this.WETHADDR[this.chainId].toLowerCase();
-        }
-
-        try {
-            let allPoolsNonBig: SubGraphPoolsBase;
-
-            // Retrieve from URL if set otherwise use data passed
-            if (this.isUsingPoolsUrl)
-                allPoolsNonBig = await getPoolsFromUrl(this.poolsUrl);
-            else
-                allPoolsNonBig = JSON.parse(JSON.stringify(this.subgraphPools));
-
-            // Convert to BigNumber format
-            /*
-            let allPools = await this.pools.formatPoolsBigNumber(
-                allPoolsNonBig
-            );
-            */
-            let allPools: SubGraphPoolsBase = allPoolsNonBig;
-
-            // These can be shared for both swap Types
-            let pools: PoolDictionary, pathData: NewPath[];
-            [pools, pathData] = this.processPairPools(
-                tokenIn,
-                tokenOut,
-                allPools.pools
-            );
-
-            // Find paths and prices for swap types
-            let pathsExactIn: NewPath[];
-            // Deep copy that keeps BigNumber format
-            let pathsCopy = [...pathData];
-            [pathsExactIn] = calculatePathLimits(
-                pathsCopy,
-                SwapTypes.SwapExactIn
-            );
-
-            let pathsExactOut: NewPath[];
-            pathsCopy = [...pathData];
-            [pathsExactOut] = calculatePathLimits(
-                pathsCopy,
-                SwapTypes.SwapExactOut
-            );
-
-            // Use previously stored value if exists else default to 0
-            let costOutputToken = this.tokenCost[tokenOut];
-            if (costOutputToken === undefined) {
-                costOutputToken = new BigNumber(0);
-            }
-
-            let allSwaps = [];
-
-            let range = [
-                bnum('0.01'),
-                bnum('0.1'),
-                bnum('1'),
-                bnum('10'),
-                bnum('100'),
-                bnum('1000'),
-            ];
-
-            // Calculate swaps for swapExactIn/Out over range and save swaps (with pools) returned
-            range.forEach(amt => {
-                let amtIn = amt;
-                let amtOut = amtIn;
-
-                let swaps: any, total: BigNumber;
-                [swaps, total] = smartOrderRouter(
-                    JSON.parse(JSON.stringify(pools)), // Need to keep original pools
-                    pathsExactIn,
-                    SwapTypes.SwapExactIn,
-                    amtIn,
-                    this.maxPools,
-                    costOutputToken
-                );
-
-                allSwaps.push(swaps);
-                [swaps, total] = smartOrderRouter(
-                    JSON.parse(JSON.stringify(pools)), // Need to keep original pools
-                    pathsExactOut,
-                    SwapTypes.SwapExactOut,
-                    amtOut,
-                    this.maxPools,
-                    costOutputToken
-                );
-
-                allSwaps.push(swaps);
-            });
-
-            // List of unique pool addresses
-            let filteredPools: string[] = [];
-            // get unique swap pools
-            allSwaps.forEach(swap => {
-                swap.forEach(seq => {
-                    seq.forEach(p => {
-                        if (!filteredPools.includes(p.pool))
-                            filteredPools.push(p.pool);
-                    });
-                });
-            });
-
-            // Get list of pool infos for pools of interest
-            let poolsOfInterest: SubgraphPoolBase[] = [];
-            for (let i = 0; i < allPoolsNonBig.pools.length; i++) {
-                let index = filteredPools.indexOf(allPoolsNonBig.pools[i].id);
-                if (index > -1) {
-                    filteredPools.splice(index, 1);
-                    poolsOfInterest.push(allPoolsNonBig.pools[i]);
-                    if (filteredPools.length === 0) break;
-                }
-            }
-
-            let onChainPools: SubGraphPoolsBase = { pools: [] };
-            if (poolsOfInterest.length !== 0) {
-                // Get latest onchain balances for pools of interest(returns data in string / normalized format)
-                onChainPools = await this.fetchOnChainBalances(
-                    {
-                        pools: poolsOfInterest,
-                    },
-                    isOnChain
-                );
-            }
-
-            // Add to cache for future use
-            this.poolsForPairsCache[
-                this.createKey(tokenIn, tokenOut)
-            ] = onChainPools;
-
-            return true;
-        } catch (err) {
-            console.error(`Error: fetchFilteredPairPools(): ${err.message}`);
-            // Add to cache for future use
-            this.poolsForPairsCache[this.createKey(tokenIn, tokenOut)] = {
-                pools: [],
-            };
-            return false;
-        }
-    }
-
-    // Finds pools and paths for token pairs. Independent of swap type.
-    private processPairPools(
-        tokenIn: string,
-        tokenOut: string,
-        poolsList: SubgraphPoolBase[]
-    ): [PoolDictionary, NewPath[]] {
-        let hopTokens: string[];
-        let poolsOfInterestDictionary: PoolDictionary;
-        let pathData: NewPath[];
-        [poolsOfInterestDictionary, hopTokens] = filterPoolsOfInterest(
-            poolsList,
-            tokenIn,
-            tokenOut,
-            this.maxPools,
-            this.disabledOptions
-        );
-        [poolsOfInterestDictionary, pathData] = filterHopPools(
-            tokenIn,
-            tokenOut,
-            hopTokens,
-            poolsOfInterestDictionary
-        );
-
-        return [poolsOfInterestDictionary, pathData];
-    }
-
-    // Used for cache ids
-    createKey(Token1: string, Token2: string): string {
-        return Token1 < Token2 ? `${Token1}${Token2}` : `${Token2}${Token1}`;
-    }
-
-    // Check if pair data already fetched (using fetchFilteredPairPools)
-    hasDataForPair(tokenIn: string, tokenOut: string): boolean {
-        tokenIn = tokenIn.toLowerCase();
-        tokenOut = tokenOut.toLowerCase();
-
-        if (
-            this.finishedFetchingOnChain ||
-            this.poolsForPairsCache[this.createKey(tokenIn, tokenOut)]
-        )
-            return true;
-        else return false;
     }
 }
