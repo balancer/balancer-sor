@@ -9,7 +9,6 @@ const provider = new JsonRpcProvider(
 
 // This must be updated with pools of interest (see ./test/testData/testPools)
 let testFiles = [
-    '20210521-bal-weth-infinite',
     '25178485-blockKovan', // UI-506, WETH to WBTC Bug
     // 'stable-and-weighted-token-btp-test',
     // Added pools 'stable-and-weighted-token-btp-test' to element pools
@@ -22,13 +21,11 @@ let testFiles = [
     'elementFinanceTestFourPools',
     // 07/04/21 - Below have been checked and pass
     '0x04ec8acaa4f419bc1525eaa8d37faae2d4acb64c5521a3718593c626962de170', // Dust amounts
-    '0x80422d69eb9272c7b786f602bbce7caad3559a2bd714b5eafb254cfbdd26361c', // Dust amounts
     '0xa7a3cf76686c6d6aa6e976724b4463c6f7b0e98453ad3a8488b6e9daa2fecc42', // Dust amounts
     '0xab11cdebd9d96f2f4d9d29f0df62de0640c457882d92435aff2a7c1049a0be6a', // Dust amounts
     '0x0a554ce1e35b9820f121ac7faa97069650df754117d6c5eb7c1158f915878343',
     '0x139894ec2cacfeca1035e78968124dbb2d34034bde146f5f2ab311ada75ad04f',
     '0x21d5562b317f9d3b57b3406ee868ad882ab3c87cd67f7af2ff55042e59702bef',
-    '0x2db088f092121c107a1bfe97984be190e5ab72fce044c9749c3611ce2365e4da',
     '0x32286e13c9dbfe92f4d9527bfe2ff18edf10dedb55e08b11710bf84cebf4de6d',
     '0x39fbeeaacdffc7186135ad169c0bbdbdddb42901a3c12cac2081af603f52ccda',
     '0x4538a9ba66778343983d39a744e6c337ee497247be50090e8feb18761d275306',
@@ -39,9 +36,7 @@ let testFiles = [
     '0x820b13539ec5117e04380b53c766de9aa604bfb5d751392d3df3d1beff26e30a',
     '0x855d140758a5d0e8839d772ffa8e3afecc522bfbae621cdc91069bfeaaac490c',
     '0x9308920064cab0e15ca98444ec9f91092d24aba03dd383c168f6cc2e45954e0e',
-    '0x995a2d20a846226c7680fff641cee4397f81c6e1f0675d69c7d26d05a60b39f3',
     '0x99cc915640bbb9ef7dd6979062fea2a34eff2b400398a4c00405462840956818',
-    '0x99dd2c21aa009e98e000a3bd515a8ddcbb52748642fde10f9137f9de3cfae957',
     '0xfab93b6aece1282a829e8bdcdf2a1aee193a10134279a0a16c989ca71644e85b',
     'fleek-11-03-21',
     'stable-and-weighted-gas-price-zero',
@@ -67,7 +62,12 @@ let testFiles = [
     '0xe331382ecdcad2befe8580a779e28cb4d98bc88da9fac74ae1e95c78417acfde',
     '0xf2826c2b04aef9ddab2c3a7088f33dbc7a0485d57b37b5220f9d86da9eb95b2a',
     '0xf4a5ecfa278f50beb4155bc7bbd3ada5e57d5ceb9825852531981fa66bc94844',
-
+    // 07/06/21 - Following cases fail V1 vs V2 check after a bug fix (previously passing) but confirmed as ok by Fernando
+    // '20210521-bal-weth-infinite',
+    // '0x80422d69eb9272c7b786f602bbce7caad3559a2bd714b5eafb254cfbdd26361c', // Dust amounts
+    // '0x2db088f092121c107a1bfe97984be190e5ab72fce044c9749c3611ce2365e4da',
+    // '0x995a2d20a846226c7680fff641cee4397f81c6e1f0675d69c7d26d05a60b39f3',
+    // '0x99dd2c21aa009e98e000a3bd515a8ddcbb52748642fde10f9137f9de3cfae957',
     // The following are cases that fail V1 vs V2 check but have been double checked and confirmed due to maths rounding
     // '0xfc687c72aa619a5c4eb5f5597a2bd69ef1157848243700b57926d36060a6dedc',    // Failing comparing V1 vs V2 - limit difference
     // '0x17497e9e5230493b79c19bad0dc165e06ac0aac3db8eaa4de441d44a70aa9a03',    // Failing - rounding
