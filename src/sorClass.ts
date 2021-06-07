@@ -573,7 +573,6 @@ function iterateSwapAmounts(
         let minPrice = BigNumber.min.apply(null, prices);
         priceError = maxPrice.minus(minPrice).div(minPrice);
         iterationCount++;
-        if (iterationCount === 100) break;
     }
     return [swapAmounts, exceedingAmounts];
 }
