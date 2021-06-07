@@ -13,8 +13,8 @@ let testFiles = [
     // 'stable-and-weighted-token-btp-test',
     // Added pools 'stable-and-weighted-token-btp-test' to element pools
     //  and replaced the base token with DAI. Also
-    // 'elementFinanceTest_multihop_1path',
     // added a weighted pool (last in json) with DAI and 0x000...001 to test 2 paths
+    'elementFinanceTest_multihop_1path',
     'elementFinanceTest_multihop_2paths',
     'elementFinanceTest_multihop_1path_swapExactOut',
     'elementFinanceTest_multihop_2paths_swapExactOut', // Returning a second swap with -ve amount
