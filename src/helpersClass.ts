@@ -636,10 +636,16 @@ export function formatSwaps(
                 .toString();
 
         swapInfo.swapAmount = swapAmountScaled;
-        swapInfo.returnAmount = scale(returnAmount, tokenOutDecimals);
-        swapInfo.returnAmountConsideringFees = scale(
-            returnAmountConsideringFees,
-            tokenOutDecimals
+        // Using this split to remove any decimals
+        swapInfo.returnAmount = bnum(
+            scale(returnAmount, tokenOutDecimals)
+                .toString()
+                .split('.')[0]
+        );
+        swapInfo.returnAmountConsideringFees = bnum(
+            scale(returnAmountConsideringFees, tokenOutDecimals)
+                .toString()
+                .split('.')[0]
         );
         swapInfo.swaps = swapsV2;
     } else {
@@ -695,10 +701,16 @@ export function formatSwaps(
                 .toString();
 
         swapInfo.swapAmount = swapAmountScaled;
-        swapInfo.returnAmount = scale(returnAmount, tokenInDecimals);
-        swapInfo.returnAmountConsideringFees = scale(
-            returnAmountConsideringFees,
-            tokenInDecimals
+        // Using this split to remove any decimals
+        swapInfo.returnAmount = bnum(
+            scale(returnAmount, tokenInDecimals)
+                .toString()
+                .split('.')[0]
+        );
+        swapInfo.returnAmountConsideringFees = bnum(
+            scale(returnAmountConsideringFees, tokenInDecimals)
+                .toString()
+                .split('.')[0]
         );
         swapInfo.swaps = swapsV2;
     }

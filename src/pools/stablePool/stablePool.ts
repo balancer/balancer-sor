@@ -368,10 +368,11 @@ export class StablePool implements PoolBase {
         // const norm = scale(result, -18);
         // return scale(norm, poolPairData.decimalsOut);
         // Scaling to correct decimals and removing any extra non-integer
-        const scaledResult = scale(result, -18 + poolPairData.decimalsOut)
-            .toString()
-            .split('.')[0];
-        return new BigNumber(scaledResult);
+        // const scaledResult = scale(result, -18 + poolPairData.decimalsOut)
+        //     .toString()
+        //     .split('.')[0];
+        // return new BigNumber(scaledResult);
+        return scale(result, -18 + poolPairData.decimalsOut);
     }
 
     _evminGivenOut(
@@ -402,10 +403,11 @@ export class StablePool implements PoolBase {
         // const norm = scale(result, -18);
         // return scale(norm, poolPairData.decimalsOut);
         // Scaling to correct decimals and removing any extra non-integer
-        const scaledResult = scale(result, -18 + poolPairData.decimalsIn)
-            .toString()
-            .split('.')[0];
-        return new BigNumber(scaledResult);
+        // const scaledResult = scale(result, -18 + poolPairData.decimalsIn)
+        //     .toString()
+        //     .split('.')[0];
+        // return new BigNumber(scaledResult);
+        return scale(result, -18 + poolPairData.decimalsIn);
     }
 
     _evmexactTokenInForBPTOut(
