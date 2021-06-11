@@ -35,6 +35,7 @@ describe(`Tests for Element Pools.`, () => {
 
         const newPool = new ElementPool(
             pool.id,
+            pool.address,
             pool.swapFee,
             pool.totalShares,
             pool.tokens,
@@ -47,6 +48,7 @@ describe(`Tests for Element Pools.`, () => {
 
         const poolPairData: ElementPoolPairData = {
             id: pool.id,
+            address: pool.address,
             poolType: PoolTypes.Element,
             pairType: PairTypes.TokenToToken,
             tokenIn: pool.tokens[0].address,
@@ -79,6 +81,7 @@ describe(`Tests for Element Pools.`, () => {
 
         const newPool = new ElementPool(
             pool.id,
+            pool.address,
             pool.swapFee,
             pool.totalShares,
             pool.tokens,
@@ -94,6 +97,7 @@ describe(`Tests for Element Pools.`, () => {
 
         const poolPairData: ElementPoolPairData = {
             id: pool.id,
+            address: pool.address,
             poolType: PoolTypes.Element,
             pairType: PairTypes.TokenToToken,
             tokenIn: pool.tokens[0].address,
@@ -124,6 +128,7 @@ describe(`Tests for Element Pools.`, () => {
 
         const newPool = new ElementPool(
             pool.id,
+            pool.address,
             pool.swapFee,
             pool.totalShares,
             pool.tokens,
@@ -139,6 +144,7 @@ describe(`Tests for Element Pools.`, () => {
 
         const poolPairData: ElementPoolPairData = {
             id: pool.id,
+            address: pool.address,
             poolType: PoolTypes.Element,
             pairType: PairTypes.TokenToToken,
             tokenIn: pool.tokens[0].address,

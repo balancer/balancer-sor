@@ -41,6 +41,7 @@ export interface WeightedPoolToken {
 
 export interface WeightedPoolPairData extends PoolPairBase {
     id: string;
+    address: string;
     poolType: PoolTypes;
     pairType: PairTypes;
     tokenIn: string;
@@ -58,6 +59,7 @@ export class WeightedPool implements PoolBase {
     poolType: PoolTypes = PoolTypes.Weighted;
     swapPairType: SwapPairType;
     id: string;
+    address: string;
     swapFee: string;
     totalShares: string;
     tokens: WeightedPoolToken[];
@@ -66,6 +68,7 @@ export class WeightedPool implements PoolBase {
 
     constructor(
         id: string,
+        address: string,
         swapFee: string,
         totalWeight: string,
         totalShares: string,
@@ -73,6 +76,7 @@ export class WeightedPool implements PoolBase {
         tokensList: string[]
     ) {
         this.id = id;
+        this.address = address;
         this.swapFee = swapFee;
         this.totalShares = totalShares;
         this.tokens = tokens;
@@ -96,14 +100,14 @@ export class WeightedPool implements PoolBase {
         let weightOut: BigNumber;
 
         // Check if tokenIn is the pool token itself (BPT)
-        if (tokenIn == this.id) {
+        if (tokenIn == this.address) {
             pairType = PairTypes.BptToToken;
             if (this.totalShares === undefined)
                 throw 'Pool missing totalShares field';
             balanceIn = this.totalShares;
             decimalsIn = '18'; // Not used but has to be defined
             weightIn = bnum(1); // Not used but has to be defined
-        } else if (tokenOut == this.id) {
+        } else if (tokenOut == this.address) {
             pairType = PairTypes.TokenToBpt;
             if (this.totalShares === undefined)
                 throw 'Pool missing totalShares field';
@@ -137,6 +141,7 @@ export class WeightedPool implements PoolBase {
 
         const poolPairData: WeightedPoolPairData = {
             id: this.id,
+            address: this.address,
             poolType: this.poolType,
             pairType: pairType,
             tokenIn: tokenIn,
@@ -188,7 +193,7 @@ export class WeightedPool implements PoolBase {
     // Updates the balance of a given token for the pool
     updateTokenBalanceForPool(token: string, newBalance: BigNumber): void {
         // token is BPT
-        if (this.id == token) {
+        if (this.address == token) {
             this.totalShares = newBalance.toString();
         } else {
             // token is underlying in the pool

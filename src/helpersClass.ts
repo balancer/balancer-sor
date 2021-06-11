@@ -452,8 +452,11 @@ export function EVMgetOutputAmountSwap(
         if (amount.gte(poolPairData.balanceOut)) return bnum('Infinity');
     }
     if (swapType === SwapTypes.SwapExactIn) {
-        // TODO we will be able to remove pooltype check once all EVM maths is available
-        if (pool.poolType === PoolTypes.Weighted) {
+        // TODO we will be able to remove pooltype check once Element EVM maths is available
+        if (
+            pool.poolType === PoolTypes.Weighted ||
+            pool.poolType === PoolTypes.Stable
+        ) {
             if (pairType === PairTypes.TokenToToken) {
                 returnAmount = pool._evmoutGivenIn(poolPairData, amount);
                 // TODO: scaling down may not be necessary since we have to
@@ -476,14 +479,6 @@ export function EVMgetOutputAmountSwap(
                 // scale it up anyways for the swap info later?
                 returnAmount = scale(returnAmount, -decimalsOut);
             }
-        } else if (pool.poolType === PoolTypes.Stable) {
-            // TODO this will just be part of above once maths available
-            returnAmount = getOutputAmountSwap(
-                pool,
-                poolPairData,
-                swapType,
-                amount
-            );
         } else if (pool.poolType === PoolTypes.Element) {
             // TODO this will just be part of above once maths available
             returnAmount = getOutputAmountSwap(
@@ -494,8 +489,11 @@ export function EVMgetOutputAmountSwap(
             );
         }
     } else {
-        // TODO we will be able to remove pooltype check once all EVM maths is available
-        if (pool.poolType === PoolTypes.Weighted) {
+        // TODO we will be able to remove pooltype check once Element EVM maths is available
+        if (
+            pool.poolType === PoolTypes.Weighted ||
+            pool.poolType === PoolTypes.Stable
+        ) {
             if (pairType === PairTypes.TokenToToken) {
                 returnAmount = pool._evminGivenOut(poolPairData, amount);
                 // TODO: scaling down may not be necessary since we have to
@@ -518,14 +516,6 @@ export function EVMgetOutputAmountSwap(
                 // scale it up anyways for the swap info later?
                 returnAmount = scale(returnAmount, -18); // BPT is always 18 decimals
             }
-        } else if (pool.poolType === PoolTypes.Stable) {
-            // TODO this will just be part of above once maths available
-            returnAmount = getOutputAmountSwap(
-                pool,
-                poolPairData,
-                swapType,
-                amount
-            );
         } else if (pool.poolType === PoolTypes.Element) {
             // TODO this will just be part of above once maths available
             returnAmount = getOutputAmountSwap(

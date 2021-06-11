@@ -43,11 +43,6 @@ let testFiles = [
     '0x99cc915640bbb9ef7dd6979062fea2a34eff2b400398a4c00405462840956818',
     '0xfab93b6aece1282a829e8bdcdf2a1aee193a10134279a0a16c989ca71644e85b',
     'fleek-11-03-21',
-    'stable-and-weighted-gas-price-zero',
-    'stable-and-weighted-token-btp-test',
-    'stable-and-weighted-gas-price-zero',
-    'stable-pools-only-wbtc-to-sbtc-exactIn',
-    'stable-pools-only-wbtc-to-sbtc-exactOut',
     'subgraphPoolsDecimalsTest',
     'subgraphPoolsLarge',
     'subgraphPoolsSmallWithTrade',
@@ -70,6 +65,12 @@ let testFiles = [
     '0x2db088f092121c107a1bfe97984be190e5ab72fce044c9749c3611ce2365e4da',
     '0x995a2d20a846226c7680fff641cee4397f81c6e1f0675d69c7d26d05a60b39f3',
     '0x99dd2c21aa009e98e000a3bd515a8ddcbb52748642fde10f9137f9de3cfae957',
+    'stable-and-weighted-gas-price-zero',
+    'stable-and-weighted-token-btp-test',
+    'stable-and-weighted-gas-price-zero',
+    'stable-pools-only-wbtc-to-sbtc-exactIn',
+    'stable-pools-only-wbtc-to-sbtc-exactOut',
+
     // 07/06/21 - Following cases fail V1 vs V2 check after a bug fix (previously passing) but confirmed as ok by Fernando
     // '20210521-bal-weth-infinite',
     // The following are cases that fail V1 vs V2 check but have been double checked and confirmed due to maths rounding

@@ -48,6 +48,7 @@
         "@ethersproject/solidity": "^5.0.5",
         "@ethersproject/units": "^5.0.6",
         "bignumber.js": "^9.0.0",
+        "decimal.js": "^10.2.1",
         "isomorphic-fetch": "^2.2.1"
     }
 }

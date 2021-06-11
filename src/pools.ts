@@ -69,6 +69,7 @@ export function filterPoolsOfInterest(
         if (pool.poolType === 'Weighted')
             newPool = new WeightedPool(
                 pool.id,
+                pool.address,
                 pool.swapFee,
                 pool.totalWeight,
                 pool.totalShares,
@@ -78,6 +79,7 @@ export function filterPoolsOfInterest(
         else if (pool.poolType === 'Stable')
             newPool = new StablePool(
                 pool.id,
+                pool.address,
                 pool.amp,
                 pool.swapFee,
                 pool.totalShares,
@@ -87,6 +89,7 @@ export function filterPoolsOfInterest(
         else if (pool.poolType === 'Element') {
             newPool = new ElementPool(
                 pool.id,
+                pool.address,
                 pool.swapFee,
                 pool.totalShares,
                 pool.tokens,
@@ -103,10 +106,9 @@ export function filterPoolsOfInterest(
         let tokenListSet = new Set(pool.tokensList);
         // Depending on env file, we add the BPT as well as
         // we can join/exit as part of the multihop
-        if (ALLOW_ADD_REMOVE) tokenListSet.add(pool.id);
+        if (ALLOW_ADD_REMOVE) tokenListSet.add(pool.address);
 
         disabledTokens.forEach(token => tokenListSet.delete(token.address));
-
         // This is a direct pool as has both tokenIn and tokenOut
         if (
             (tokenListSet.has(tokenIn) && tokenListSet.has(tokenOut)) ||

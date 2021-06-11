@@ -27,6 +27,7 @@ export interface ElementPoolToken {
 
 export interface ElementPoolPairData extends PoolPairBase {
     id: string;
+    address: string;
     poolType: PoolTypes;
     pairType: PairTypes;
     tokenIn: string;
@@ -49,6 +50,7 @@ export class ElementPool implements PoolBase {
     poolType: PoolTypes = PoolTypes.Element;
     swapPairType: SwapPairType;
     id: string;
+    address: string;
     swapFee: string;
     totalShares: string;
     tokens: ElementPoolToken[];
@@ -62,6 +64,7 @@ export class ElementPool implements PoolBase {
 
     constructor(
         id: string,
+        address: string,
         swapFee: string,
         totalShares: string,
         tokens: ElementPoolToken[],
@@ -72,6 +75,7 @@ export class ElementPool implements PoolBase {
         baseToken: string
     ) {
         this.id = id;
+        this.address = address;
         this.swapFee = swapFee;
         this.totalShares = totalShares;
         this.tokens = tokens;
@@ -103,11 +107,11 @@ export class ElementPool implements PoolBase {
         let tokenIndexOut: number;
 
         // Check if tokenIn is the pool token itself (BPT)
-        if (tokenIn == this.id) {
+        if (tokenIn == this.address) {
             pairType = PairTypes.BptToToken;
             balanceIn = this.totalShares;
             decimalsIn = '18'; // Not used but has to be defined
-        } else if (tokenOut == this.id) {
+        } else if (tokenOut == this.address) {
             pairType = PairTypes.TokenToBpt;
             balanceOut = this.totalShares;
             decimalsOut = '18'; // Not used but has to be defined
@@ -144,6 +148,7 @@ export class ElementPool implements PoolBase {
         }
         const poolPairData: ElementPoolPairData = {
             id: this.id,
+            address: this.address,
             poolType: this.poolType,
             pairType: pairType,
             tokenIn: tokenIn,
@@ -199,7 +204,7 @@ export class ElementPool implements PoolBase {
     // Updates the balance of a given token for the pool
     updateTokenBalanceForPool(token: string, newBalance: BigNumber): void {
         // token is BPT
-        if (this.id == token) {
+        if (this.address == token) {
             this.totalShares = newBalance.toString();
         } else {
             // token is underlying in the pool
