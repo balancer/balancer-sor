@@ -782,7 +782,8 @@ export function assertResults(
         wrapperSwapData.returnAmount.toString(),
         v2SwapData.returnAmount
             .times(bnum(10 ** testData.tradeInfo.ReturnAmountDecimals))
-            .toString(),
+            .toString()
+            .split('.')[0],
         `Wrapper should have same amount as helper.`
     );
 

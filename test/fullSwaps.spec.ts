@@ -351,7 +351,7 @@ describe('Tests full swaps against known values', () => {
             tradeInfo,
         };
 
-        const [v1SwapData, v2SwapData] = await compareTest(
+        const [v1SwapData, v2SwapData, wrapperSwapData] = await compareTest(
             name,
             provider,
             testData,
@@ -364,11 +364,10 @@ describe('Tests full swaps against known values', () => {
                 },
             }
         );
-        const total = v2SwapData.returnAmount;
         const swaps = v2SwapData.swaps;
 
         // The expected test results are from previous version
-        assert.equal(total.toString(), '0.100077');
+        assert.equal(wrapperSwapData.returnAmount.toString(), '100077');
         assert.equal(swaps.length, 1);
         assert.equal(
             swaps[0][0].pool,
@@ -409,7 +408,7 @@ describe('Tests full swaps against known values', () => {
             tradeInfo,
         };
 
-        const [v1SwapData, v2SwapData] = await compareTest(
+        const [v1SwapData, v2SwapData, wrapperSwapData] = await compareTest(
             name,
             provider,
             testData,
@@ -426,7 +425,10 @@ describe('Tests full swaps against known values', () => {
         const swaps = v2SwapData.swaps;
 
         // The expected test results are from previous version
-        assert.equal(total.toString(), '0.099922537274909963');
+        assert.equal(
+            wrapperSwapData.returnAmount.toString(),
+            '99922537274909963'
+        );
         assert.equal(swaps.length, 1);
         assert.equal(
             swaps[0][0].pool,

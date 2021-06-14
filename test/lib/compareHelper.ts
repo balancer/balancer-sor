@@ -102,5 +102,5 @@ export async function compareTest(
     if (testSettings.compareResults)
         assertResults(file, testData, v1SwapData, v2SwapData, wrapperSwapData);
 
-    return [v1SwapData, v2SwapData];
+    return [v1SwapData, v2SwapData, wrapperSwapData];
 }

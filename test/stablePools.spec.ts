@@ -465,7 +465,7 @@ describe(`Tests for Stable Pools.`, () => {
             );
 
             // This value is hard coded as sanity check if things unexpectedly change. Taken from V2 test run (with extra fee logic added).
-            expect(swapInfo.returnAmount.toString()).eq('18089530');
+            expect(swapInfo.returnAmount.toString()).eq('18089531');
             expect(swapInfo.swaps.length).eq(2);
             expect(swapInfo.swaps[0].amount.toString()).eq(
                 swapAmt.times(1e18).toString()
