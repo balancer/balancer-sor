@@ -34,7 +34,7 @@ let testFiles = [
     '0x39fbeeaacdffc7186135ad169c0bbdbdddb42901a3c12cac2081af603f52ccda',
     '0x4538a9ba66778343983d39a744e6c337ee497247be50090e8feb18761d275306',
     '0x462bd3a36b8a1fdf64e0d9dcf88d18c1d246b4dfca1704f26f883face2612c18',
-    '0x5fccb4ca1117b8a274bc6e939c63493203e5744cdf04d0045cf2bc08b01f4c18', // This one has the bug
+    '0x5fccb4ca1117b8a274bc6e939c63493203e5744cdf04d0045cf2bc08b01f4c18',
     '0x5fd850f563e180d962bc8e243fbfa27a410e9610faff5f1ecbd2ccdf6599f907',
     '0x6b4011c5e4c17293c0db18fb63e334544107b6451d7e74ce9c88b0b1c07b8fda',
     '0x820b13539ec5117e04380b53c766de9aa604bfb5d751392d3df3d1beff26e30a',
@@ -70,6 +70,7 @@ let testFiles = [
     'stable-and-weighted-gas-price-zero',
     'stable-pools-only-wbtc-to-sbtc-exactIn',
     'stable-pools-only-wbtc-to-sbtc-exactOut',
+    'stable-and-weighted-same-pools', // This has one stable and one weighted pool with same tokens and balances. Stable should be better. i.e. V2 better than V1.
 
     // 07/06/21 - Following cases fail V1 vs V2 check after a bug fix (previously passing) but confirmed as ok by Fernando
     // '20210521-bal-weth-infinite',
