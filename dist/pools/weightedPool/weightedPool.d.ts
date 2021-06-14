@@ -15,6 +15,7 @@ export interface WeightedPoolToken {
 }
 export interface WeightedPoolPairData extends PoolPairBase {
     id: string;
+    address: string;
     poolType: PoolTypes;
     pairType: PairTypes;
     tokenIn: string;
@@ -31,6 +32,7 @@ export declare class WeightedPool implements PoolBase {
     poolType: PoolTypes;
     swapPairType: SwapPairType;
     id: string;
+    address: string;
     swapFee: string;
     totalShares: string;
     tokens: WeightedPoolToken[];
@@ -38,6 +40,7 @@ export declare class WeightedPool implements PoolBase {
     tokensList: string[];
     constructor(
         id: string,
+        address: string,
         swapFee: string,
         totalWeight: string,
         totalShares: string,

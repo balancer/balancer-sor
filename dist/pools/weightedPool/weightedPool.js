@@ -18,9 +18,18 @@ const FixedPointNumber_1 = require('../../math/FixedPointNumber');
 const types_1 = require('../../types');
 const weightedMath_1 = require('./weightedMath');
 class WeightedPool {
-    constructor(id, swapFee, totalWeight, totalShares, tokens, tokensList) {
+    constructor(
+        id,
+        address,
+        swapFee,
+        totalWeight,
+        totalShares,
+        tokens,
+        tokensList
+    ) {
         this.poolType = types_1.PoolTypes.Weighted;
         this.id = id;
+        this.address = address;
         this.swapFee = swapFee;
         this.totalShares = totalShares;
         this.tokens = tokens;
@@ -41,14 +50,14 @@ class WeightedPool {
         let weightIn;
         let weightOut;
         // Check if tokenIn is the pool token itself (BPT)
-        if (tokenIn == this.id) {
+        if (tokenIn == this.address) {
             pairType = types_1.PairTypes.BptToToken;
             if (this.totalShares === undefined)
                 throw 'Pool missing totalShares field';
             balanceIn = this.totalShares;
             decimalsIn = '18'; // Not used but has to be defined
             weightIn = bmath_1.bnum(1); // Not used but has to be defined
-        } else if (tokenOut == this.id) {
+        } else if (tokenOut == this.address) {
             pairType = types_1.PairTypes.TokenToBpt;
             if (this.totalShares === undefined)
                 throw 'Pool missing totalShares field';
@@ -88,6 +97,7 @@ class WeightedPool {
         }
         const poolPairData = {
             id: this.id,
+            address: this.address,
             poolType: this.poolType,
             pairType: pairType,
             tokenIn: tokenIn,
@@ -131,7 +141,7 @@ class WeightedPool {
     // Updates the balance of a given token for the pool
     updateTokenBalanceForPool(token, newBalance) {
         // token is BPT
-        if (this.id == token) {
+        if (this.address == token) {
             this.totalShares = newBalance.toString();
         } else {
             // token is underlying in the pool

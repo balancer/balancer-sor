@@ -51,8 +51,6 @@ function getOnChainBalances(
     provider
 ) {
     return __awaiter(this, void 0, void 0, function*() {
-        // ): Promise<Pool[]> {
-        console.time('getPools');
         if (subgraphPools.pools.length === 0) return subgraphPools;
         const vaultAbi = require('./abi/Vault.json');
         const weightedPoolAbi = require('./pools/weightedPool/weightedPoolAbi.json');
@@ -144,13 +142,7 @@ function getOnChainBalances(
                         .scale(bmath_1.bnum(onChainResult.weights[i]), -18)
                         .toString();
             });
-            if (subgraphPool.poolType === 'Stable') {
-                subgraphPool.amp = bmath_1
-                    .scale(bmath_1.bnum(onChainResult.amp), -18)
-                    .toString();
-            }
         });
-        console.timeEnd('getPools');
         return subgraphPools;
     });
 }

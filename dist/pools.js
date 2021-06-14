@@ -100,6 +100,7 @@ function filterPoolsOfInterest(
         if (pool.poolType === 'Weighted')
             newPool = new weightedPool_1.WeightedPool(
                 pool.id,
+                pool.address,
                 pool.swapFee,
                 pool.totalWeight,
                 pool.totalShares,
@@ -109,6 +110,7 @@ function filterPoolsOfInterest(
         else if (pool.poolType === 'Stable')
             newPool = new stablePool_1.StablePool(
                 pool.id,
+                pool.address,
                 pool.amp,
                 pool.swapFee,
                 pool.totalShares,
@@ -118,6 +120,7 @@ function filterPoolsOfInterest(
         else if (pool.poolType === 'Element') {
             newPool = new elementPool_1.ElementPool(
                 pool.id,
+                pool.address,
                 pool.swapFee,
                 pool.totalShares,
                 pool.tokens,
@@ -133,7 +136,7 @@ function filterPoolsOfInterest(
         let tokenListSet = new Set(pool.tokensList);
         // Depending on env file, we add the BPT as well as
         // we can join/exit as part of the multihop
-        if (config_1.ALLOW_ADD_REMOVE) tokenListSet.add(pool.id);
+        if (config_1.ALLOW_ADD_REMOVE) tokenListSet.add(pool.address);
         disabledTokens.forEach(token => tokenListSet.delete(token.address));
         // This is a direct pool as has both tokenIn and tokenOut
         if (
@@ -222,7 +225,7 @@ function filterHopPools(tokenIn, tokenOut, hopTokens, poolsOfInterest) {
             let tokenListSet = new Set(pool.tokensList);
             // Depending on env file, we add the BPT as well as
             // we can join/exit as part of the multihop
-            if (config_1.ALLOW_ADD_REMOVE) tokenListSet.add(pool.id);
+            if (config_1.ALLOW_ADD_REMOVE) tokenListSet.add(pool.address);
             // MAKE THIS A FLAG IN FILTER?
             // If pool doesn't have  hopTokens[i] then ignore
             if (!tokenListSet.has(hopTokens[i])) continue;

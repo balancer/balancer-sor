@@ -14,6 +14,7 @@ export interface ElementPoolToken {
 }
 export interface ElementPoolPairData extends PoolPairBase {
     id: string;
+    address: string;
     poolType: PoolTypes;
     pairType: PairTypes;
     tokenIn: string;
@@ -34,6 +35,7 @@ export declare class ElementPool implements PoolBase {
     poolType: PoolTypes;
     swapPairType: SwapPairType;
     id: string;
+    address: string;
     swapFee: string;
     totalShares: string;
     tokens: ElementPoolToken[];
@@ -45,6 +47,7 @@ export declare class ElementPool implements PoolBase {
     currentBlockTimestamp: number;
     constructor(
         id: string,
+        address: string,
         swapFee: string,
         totalShares: string,
         tokens: ElementPoolToken[],

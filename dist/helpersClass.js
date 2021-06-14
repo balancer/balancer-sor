@@ -152,7 +152,7 @@ function getOutputAmountSwap(pool, poolPairData, swapType, amount) {
             return pool._exactTokenInForTokenOut(poolPairData, amount);
         } else if (pairType === types_1.PairTypes.TokenToBpt) {
             return pool._exactTokenInForBPTOut(poolPairData, amount);
-        } else if (pairType == types_1.PairTypes.BptToToken) {
+        } else if (pairType === types_1.PairTypes.BptToToken) {
             return pool._exactBPTInForTokenOut(poolPairData, amount);
         }
     } else {
@@ -398,8 +398,11 @@ function EVMgetOutputAmountSwap(pool, poolPairData, swapType, amount) {
             return bmath_1.bnum('Infinity');
     }
     if (swapType === types_1.SwapTypes.SwapExactIn) {
-        // TODO we will be able to remove pooltype check once all EVM maths is available
-        if (pool.poolType === types_1.PoolTypes.Weighted) {
+        // TODO we will be able to remove pooltype check once Element EVM maths is available
+        if (
+            pool.poolType === types_1.PoolTypes.Weighted ||
+            pool.poolType === types_1.PoolTypes.Stable
+        ) {
             if (pairType === types_1.PairTypes.TokenToToken) {
                 returnAmount = pool._evmoutGivenIn(poolPairData, amount);
                 // TODO: scaling down may not be necessary since we have to
@@ -422,14 +425,6 @@ function EVMgetOutputAmountSwap(pool, poolPairData, swapType, amount) {
                 // scale it up anyways for the swap info later?
                 returnAmount = bmath_1.scale(returnAmount, -decimalsOut);
             }
-        } else if (pool.poolType === types_1.PoolTypes.Stable) {
-            // TODO this will just be part of above once maths available
-            returnAmount = getOutputAmountSwap(
-                pool,
-                poolPairData,
-                swapType,
-                amount
-            );
         } else if (pool.poolType === types_1.PoolTypes.Element) {
             // TODO this will just be part of above once maths available
             returnAmount = getOutputAmountSwap(
@@ -440,8 +435,11 @@ function EVMgetOutputAmountSwap(pool, poolPairData, swapType, amount) {
             );
         }
     } else {
-        // TODO we will be able to remove pooltype check once all EVM maths is available
-        if (pool.poolType === types_1.PoolTypes.Weighted) {
+        // TODO we will be able to remove pooltype check once Element EVM maths is available
+        if (
+            pool.poolType === types_1.PoolTypes.Weighted ||
+            pool.poolType === types_1.PoolTypes.Stable
+        ) {
             if (pairType === types_1.PairTypes.TokenToToken) {
                 returnAmount = pool._evminGivenOut(poolPairData, amount);
                 // TODO: scaling down may not be necessary since we have to
@@ -464,14 +462,6 @@ function EVMgetOutputAmountSwap(pool, poolPairData, swapType, amount) {
                 // scale it up anyways for the swap info later?
                 returnAmount = bmath_1.scale(returnAmount, -18); // BPT is always 18 decimals
             }
-        } else if (pool.poolType === types_1.PoolTypes.Stable) {
-            // TODO this will just be part of above once maths available
-            returnAmount = getOutputAmountSwap(
-                pool,
-                poolPairData,
-                swapType,
-                amount
-            );
         } else if (pool.poolType === types_1.PoolTypes.Element) {
             // TODO this will just be part of above once maths available
             returnAmount = getOutputAmountSwap(
@@ -579,10 +569,18 @@ function formatSwaps(
                 .plus(dust)
                 .toString();
         swapInfo.swapAmount = swapAmountScaled;
-        swapInfo.returnAmount = bmath_1.scale(returnAmount, tokenOutDecimals);
-        swapInfo.returnAmountConsideringFees = bmath_1.scale(
-            returnAmountConsideringFees,
-            tokenOutDecimals
+        // Using this split to remove any decimals
+        swapInfo.returnAmount = bmath_1.bnum(
+            bmath_1
+                .scale(returnAmount, tokenOutDecimals)
+                .toString()
+                .split('.')[0]
+        );
+        swapInfo.returnAmountConsideringFees = bmath_1.bnum(
+            bmath_1
+                .scale(returnAmountConsideringFees, tokenOutDecimals)
+                .toString()
+                .split('.')[0]
         );
         swapInfo.swaps = swapsV2;
     } else {
@@ -635,10 +633,18 @@ function formatSwaps(
                 .plus(dust)
                 .toString();
         swapInfo.swapAmount = swapAmountScaled;
-        swapInfo.returnAmount = bmath_1.scale(returnAmount, tokenInDecimals);
-        swapInfo.returnAmountConsideringFees = bmath_1.scale(
-            returnAmountConsideringFees,
-            tokenInDecimals
+        // Using this split to remove any decimals
+        swapInfo.returnAmount = bmath_1.bnum(
+            bmath_1
+                .scale(returnAmount, tokenInDecimals)
+                .toString()
+                .split('.')[0]
+        );
+        swapInfo.returnAmountConsideringFees = bmath_1.bnum(
+            bmath_1
+                .scale(returnAmountConsideringFees, tokenInDecimals)
+                .toString()
+                .split('.')[0]
         );
         swapInfo.swaps = swapsV2;
     }

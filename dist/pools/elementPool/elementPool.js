@@ -7,6 +7,7 @@ const elementMath_1 = require('./elementMath');
 class ElementPool {
     constructor(
         id,
+        address,
         swapFee,
         totalShares,
         tokens,
@@ -18,6 +19,7 @@ class ElementPool {
     ) {
         this.poolType = types_1.PoolTypes.Element;
         this.id = id;
+        this.address = address;
         this.swapFee = swapFee;
         this.totalShares = totalShares;
         this.tokens = tokens;
@@ -45,11 +47,11 @@ class ElementPool {
         let tokenIndexIn;
         let tokenIndexOut;
         // Check if tokenIn is the pool token itself (BPT)
-        if (tokenIn == this.id) {
+        if (tokenIn == this.address) {
             pairType = types_1.PairTypes.BptToToken;
             balanceIn = this.totalShares;
             decimalsIn = '18'; // Not used but has to be defined
-        } else if (tokenOut == this.id) {
+        } else if (tokenOut == this.address) {
             pairType = types_1.PairTypes.TokenToBpt;
             balanceOut = this.totalShares;
             decimalsOut = '18'; // Not used but has to be defined
@@ -90,6 +92,7 @@ class ElementPool {
         }
         const poolPairData = {
             id: this.id,
+            address: this.address,
             poolType: this.poolType,
             pairType: pairType,
             tokenIn: tokenIn,
@@ -143,7 +146,7 @@ class ElementPool {
     // Updates the balance of a given token for the pool
     updateTokenBalanceForPool(token, newBalance) {
         // token is BPT
-        if (this.id == token) {
+        if (this.address == token) {
             this.totalShares = newBalance.toString();
         } else {
             // token is underlying in the pool
