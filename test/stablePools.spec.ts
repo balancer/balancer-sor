@@ -293,7 +293,7 @@ describe(`Tests for Stable Pools.`, () => {
 
                 // This value is hard coded as sanity check if things unexpectedly change. Taken from isolated run of calcBptOutGivenExactTokensIn.
                 expect(swapInfo.returnAmount.toString()).eq(
-                    '0.304749044227756947',
+                    '304749044227756947',
                     `.env ALLOW_ADD_REMOVE must be true for BPT swaps`
                 );
             });
@@ -303,7 +303,7 @@ describe(`Tests for Stable Pools.`, () => {
                 const tokenIn = BPT;
                 const tokenOut = USDT;
                 const swapType = SwapTypes.SwapExactIn;
-                const swapAmt: BigNumber = bnum('3.7');
+                const swapAmt: BigNumber = bnum('1.77');
 
                 const sor = new SOR(
                     provider,
@@ -324,7 +324,7 @@ describe(`Tests for Stable Pools.`, () => {
 
                 // This value is hard coded as sanity check if things unexpectedly change. Taken from isolated run of calcTokenOutGivenExactBptIn.
                 expect(swapInfo.returnAmount.toString()).eq(
-                    '10.26896515265958154',
+                    '5771787227226018318',
                     `.env ALLOW_ADD_REMOVE must be true for BPT swaps`
                 );
             });
@@ -355,7 +355,7 @@ describe(`Tests for Stable Pools.`, () => {
 
                 // This value is hard coded as sanity check if things unexpectedly change. Taken from isolated run of calcTokenInGivenExactBptOut.
                 expect(swapInfo.returnAmount.toString()).eq(
-                    '4.254344791006178555',
+                    '4254344791006178555',
                     `.env ALLOW_ADD_REMOVE must be true for BPT swaps`
                 );
             });
@@ -386,7 +386,7 @@ describe(`Tests for Stable Pools.`, () => {
 
                 // This value is hard coded as sanity check if things unexpectedly change. Taken from isolated run of calcBptInGivenExactTokensOut.
                 expect(swapInfo.returnAmount.toString()).eq(
-                    '0.753783887870341458',
+                    '753783887870341458',
                     `.env ALLOW_ADD_REMOVE must be true for BPT swaps`
                 );
             });

@@ -186,7 +186,7 @@ export function getOutputAmountSwap(
             return pool._exactTokenInForTokenOut(poolPairData, amount);
         } else if (pairType === PairTypes.TokenToBpt) {
             return pool._exactTokenInForBPTOut(poolPairData, amount);
-        } else if (pairType == PairTypes.BptToToken) {
+        } else if (pairType === PairTypes.BptToToken) {
             return pool._exactBPTInForTokenOut(poolPairData, amount);
         }
     } else {

@@ -438,8 +438,7 @@ export class StablePool implements PoolBase {
             bptTotalSupplyScaled,
             swapFeeScaled
         );
-        // Then scale back to get normalised value
-        return scale(result, -18);
+        return result;
     }
 
     _evmexactBPTInForTokenOut(
@@ -465,8 +464,7 @@ export class StablePool implements PoolBase {
             bptTotalSupply,
             swapFeeScaled
         );
-        // Then scale back to get normalised value
-        return scale(result, -18);
+        return result;
     }
 
     _evmtokenInForExactBPTOut(
@@ -493,8 +491,7 @@ export class StablePool implements PoolBase {
             swapFeeScaled
         );
 
-        // Then scale back to get normalised value
-        return scale(result, -18);
+        return result;
     }
 
     _evmbptInForExactTokenOut(
@@ -524,7 +521,6 @@ export class StablePool implements PoolBase {
             swapFeeScaled
         );
 
-        // Then scale back to get normalised value
-        return scale(result, -18);
+        return result;
     }
 }
