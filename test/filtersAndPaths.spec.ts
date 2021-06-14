@@ -7,7 +7,6 @@ import {
     NewPath,
     SwapTypes,
 } from '../src/types';
-import { ALLOW_ADD_REMOVE } from '../src/config';
 import { filterPoolsOfInterest, filterHopPools } from '../src/pools';
 import { calculatePathLimits, smartOrderRouter } from '../src/sorClass';
 import BigNumber from 'bignumber.js';
@@ -208,10 +207,7 @@ describe('Tests pools filtering and path processing', () => {
                 PoolTypes.Weighted
             );
         }
-
-        if (ALLOW_ADD_REMOVE) assert.equal(hopTokens.length, 2);
-        else assert.equal(hopTokens.length, 1);
-
+        assert.equal(hopTokens.length, 1);
         assert.equal(noHopIn, 2); // 1 has 0 balances
         assert.equal(noHopOut, 1); // 1 has 0 balances
         assert.equal(noDirect, 3); // 1 has 0 balances

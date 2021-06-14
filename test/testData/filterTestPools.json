@@ -46,7 +46,7 @@
             ],
             "totalWeight": "50",
             "poolType": "Weighted",
-            "address": "0x0"
+            "address": "0x0481d726c3d25250a8963221945ed93b8a5315a9"
         },
         {
             "id": "0x07d13ed39ee291c1506675ff42f9b2b6b50e2d3e",
@@ -130,7 +130,7 @@
             ],
             "totalWeight": "50",
             "poolType": "Weighted",
-            "address": "0x0"
+            "address": "0x07d13ed39ee291c1506675ff42f9b2b6b50e2d3e"
         },
         {
             "id": "0x09574f862d32794b8636cfb9c98e6597be049c4b",
@@ -160,7 +160,7 @@
             ],
             "totalWeight": "50",
             "poolType": "Weighted",
-            "address": "0x0"
+            "address": "0x09574f862d32794b8636cfb9c98e6597be049c4b"
         },
         {
             "id": "0x10fd0adaf5de39ddd81165d770367fde8883157d",
@@ -190,7 +190,7 @@
             ],
             "totalWeight": "50",
             "poolType": "Weighted",
-            "address": "0x0"
+            "address": "0x10fd0adaf5de39ddd81165d770367fde8883157d"
         },
         {
             "id": "0x12d6b6e24fdd9849abd42afd8f5775d36084a828",
@@ -229,7 +229,7 @@
             ],
             "totalWeight": "50",
             "poolType": "Weighted",
-            "address": "0x0"
+            "address": "0x12d6b6e24fdd9849abd42afd8f5775d36084a828"
         },
         {
             "id": "0x165a50bc092f6870dc111c349bae5fc35147ac86",
@@ -259,7 +259,7 @@
             ],
             "totalWeight": "10",
             "poolType": "Weighted",
-            "address": "0x0"
+            "address": "0x165a50bc092f6870dc111c349bae5fc35147ac86"
         },
         {
             "id": "0x247ff2b322df7439b78898375be7cdadca11cf17",
@@ -298,7 +298,7 @@
             ],
             "totalWeight": "20",
             "poolType": "Weighted",
-            "address": "0x0"
+            "address": "0x247ff2b322df7439b78898375be7cdadca11cf17"
         },
         {
             "id": "0x254d519110d215fb657c621afc7d4b76ce2c0265",
@@ -328,7 +328,7 @@
             ],
             "totalWeight": "50",
             "poolType": "Weighted",
-            "address": "0x0"
+            "address": "0x254d519110d215fb657c621afc7d4b76ce2c0265"
         },
         {
             "id": "0x29f55de880d4dcae40ba3e63f16407a31b4d44ee",
@@ -385,7 +385,7 @@
             ],
             "totalWeight": "20",
             "poolType": "Weighted",
-            "address": "0x0"
+            "address": "0x29f55de880d4dcae40ba3e63f16407a31b4d44ee"
         },
         {
             "id": "0x2dbd24322757d2e28de4230b1ca5b88e49a76979",
@@ -460,7 +460,7 @@
             ],
             "totalWeight": "50",
             "poolType": "Weighted",
-            "address": "0x0"
+            "address": "0x2dbd24322757d2e28de4230b1ca5b88e49a76979"
         },
         {
             "id": "0x57755f7dec33320bca83159c26e93751bfd30fbe",
@@ -490,7 +490,7 @@
             ],
             "totalWeight": "10",
             "poolType": "Weighted",
-            "address": "0x0"
+            "address": "0x57755f7dec33320bca83159c26e93751bfd30fbe"
         },
         {
             "id": "0x75286e183d923a5f52f52be205e358c5c9101b09",
@@ -529,7 +529,7 @@
             ],
             "totalWeight": "50",
             "poolType": "Weighted",
-            "address": "0x0"
+            "address": "0x75286e183d923a5f52f52be205e358c5c9101b09"
         }
     ],
     "stableOnly": [
@@ -565,7 +565,7 @@
             ],
             "balanceBpt": "785224145.723155205181003818",
             "poolType": "Stable",
-            "address": "0x0"
+            "address": "0x6c3f90f043a72fa612cbac8115ee7e52bde6e490"
         },
         {
             "id": "0x3b3ac5386837dc563660fb6a0937dfaa5924333b",
@@ -606,7 +606,7 @@
             ],
             "balanceBpt": "78350279.810168052058997162",
             "poolType": "Stable",
-            "address": "0x0"
+            "address": "0x3b3ac5386837dc563660fb6a0937dfaa5924333b"
         }
     ],
     "pathTestDirectAndMulti": [
@@ -656,7 +656,7 @@
             ],
             "totalWeight": "40",
             "poolType": "Weighted",
-            "address": "0x0"
+            "address": "0x0481d726c3d25250a8963221945ed93b8a5315a9"
         },
         {
             "id": "0x07d13ed39ee291c1506675ff42f9b2b6b50e2d3e",
@@ -695,7 +695,7 @@
             ],
             "totalWeight": "30",
             "poolType": "Weighted",
-            "address": "0x0"
+            "address": "0x07d13ed39ee291c1506675ff42f9b2b6b50e2d3e"
         }
     ],
     "pathTestPoolTwoMultiHops": [
@@ -736,7 +736,7 @@
             ],
             "totalWeight": "30",
             "poolType": "Weighted",
-            "address": "0x0"
+            "address": "0x0481d726c3d25250a8963221945ed93b8a5315a9"
         },
         {
             "id": "0x07d13ed39ee291c1506675ff42f9b2b6b50e2d3e",
@@ -775,7 +775,7 @@
             ],
             "totalWeight": "30",
             "poolType": "Weighted",
-            "address": "0x0"
+            "address": "0x07d13ed39ee291c1506675ff42f9b2b6b50e2d3e"
         }
     ]
 }
