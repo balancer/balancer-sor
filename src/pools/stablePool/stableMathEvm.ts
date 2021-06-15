@@ -111,7 +111,8 @@ export function calculateAnalyticalInvariantForTwoTokens(
 }
 
 // Compared to V2 implementation this has the swap fee added.
-export function calcOutGivenIn(
+// export function calcOutGivenIn(
+export function _exactTokenInForTokenOut(
     fpBalances: BigNumberish[],
     amplificationParameter: BigNumberish,
     tokenIndexIn: number,
@@ -141,7 +142,8 @@ export function calcOutGivenIn(
 }
 
 // Compared to V2 implementation this has the swap fee added.
-export function calcInGivenOut(
+// export function calcInGivenOut(
+export function _tokenInForExactTokenOut(
     fpBalances: BigNumberish[],
     amplificationParameter: BigNumberish,
     tokenIndexIn: number,
@@ -173,7 +175,8 @@ export function calcInGivenOut(
     return new BigNumber(amtWithFee.toString());
 }
 
-export function calcBptOutGivenExactTokensIn(
+// export function calcBptOutGivenExactTokensIn(
+export function exactTokensInForBPTOut(
     fpBalances: BigNumberish[],
     amplificationParameter: BigNumberish,
     fpAmountsIn: BigNumberish[],
@@ -242,7 +245,8 @@ export function calcBptOutGivenExactTokensIn(
     }
 }
 
-export function calcTokenInGivenExactBptOut(
+// export function calcTokenInGivenExactBptOut(
+export function _tokenInForExactBPTOut(
     tokenIndex: number,
     fpBalances: BigNumberish[],
     amplificationParameter: BigNumberish,
@@ -293,7 +297,8 @@ export function calcTokenInGivenExactBptOut(
     return fp(bptOut);
 }
 
-export function calcBptInGivenExactTokensOut(
+// export function calcBptInGivenExactTokensOut(
+export function _bptInForExactTokensOut(
     fpBalances: BigNumber[],
     amplificationParameter: BigNumberish,
     fpAmountsOut: BigNumber[],
@@ -363,7 +368,8 @@ export function calcBptInGivenExactTokensOut(
     return fp(fromFp(fpBptTotalSupply).mul(invariantRatioComplement));
 }
 
-export function calcTokenOutGivenExactBptIn(
+// export function calcTokenOutGivenExactBptIn(
+export function _exactBPTInForTokenOut(
     tokenIndex: number,
     fpBalances: BigNumberish[],
     amplificationParameter: BigNumberish,
@@ -415,7 +421,8 @@ export function calcTokenOutGivenExactBptIn(
     return new BigNumber(fp(tokenOut).toString());
 }
 
-export function calcTokensOutGivenExactBptIn(
+// export function calcTokensOutGivenExactBptIn(
+export function _exactBPTInForTokensOut(
     fpBalances: BigNumberish[],
     fpBptAmountIn: BigNumberish,
     fpBptTotalSupply: BigNumberish

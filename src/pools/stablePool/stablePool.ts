@@ -356,7 +356,7 @@ export class StablePool implements PoolBase {
         const amtScaled = scale(amount, 18);
         const swapFeeScaled = scale(poolPairData.swapFee, 18);
 
-        const result = stableSolidity.calcOutGivenIn(
+        const result = stableSolidity._exactTokenInForTokenOut(
             balancesScaled,
             poolPairData.amp,
             poolPairData.tokenIndexIn,
@@ -391,7 +391,7 @@ export class StablePool implements PoolBase {
         const amtScaled = scale(amount, 18);
         const swapFeeScaled = scale(poolPairData.swapFee, 18);
 
-        const result = stableSolidity.calcInGivenOut(
+        const result = stableSolidity._tokenInForExactTokenOut(
             balancesScaled,
             poolPairData.amp,
             poolPairData.tokenIndexIn,
@@ -431,7 +431,7 @@ export class StablePool implements PoolBase {
         const bptTotalSupplyScaled = scale(poolPairData.balanceOut, 18);
         const swapFeeScaled = scale(poolPairData.swapFee, 18);
 
-        const result = stableSolidity.calcBptOutGivenExactTokensIn(
+        const result = stableSolidity.exactTokensInForBPTOut(
             balancesScaled,
             poolPairData.amp,
             amountsIn,
@@ -456,7 +456,7 @@ export class StablePool implements PoolBase {
         const bptTotalSupply = scale(poolPairData.balanceIn, 18);
         const swapFeeScaled = scale(poolPairData.swapFee, 18);
 
-        const result = stableSolidity.calcTokenOutGivenExactBptIn(
+        const result = stableSolidity._exactBPTInForTokenOut(
             poolPairData.tokenIndexOut,
             balancesScaled,
             poolPairData.amp,
@@ -482,7 +482,7 @@ export class StablePool implements PoolBase {
         const bptTotalSupply = scale(poolPairData.balanceOut, 18);
         const swapFeeScaled = scale(poolPairData.swapFee, 18);
 
-        const result = stableSolidity.calcTokenInGivenExactBptOut(
+        const result = stableSolidity._tokenInForExactBPTOut(
             poolPairData.tokenIndexIn,
             balancesScaled,
             poolPairData.amp,
@@ -513,7 +513,7 @@ export class StablePool implements PoolBase {
         const bptTotalSupply = scale(poolPairData.balanceIn, 18);
         const swapFeeScaled = scale(poolPairData.swapFee, 18);
 
-        const result = stableSolidity.calcBptInGivenExactTokensOut(
+        const result = stableSolidity._bptInForExactTokensOut(
             balancesScaled,
             poolPairData.amp,
             amountsOut,
