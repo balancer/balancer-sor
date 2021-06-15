@@ -5,7 +5,7 @@ Uses implementation from V2 core: https://github.com/balancer-labs/balancer-v2-m
 Changed from Ethers BigNumber to use BigNumber.js
 */
 const bmath_1 = require('../../bmath');
-const bignumber_1 = require('../../utils/bignumber');
+const FixedPointNumber_1 = require('../../math/FixedPointNumber');
 const numbers_1 = require('./numbers');
 function calculateInvariant(fpRawBalances, amplificationParameter) {
     return calculateApproxInvariant(fpRawBalances, amplificationParameter);
@@ -106,22 +106,26 @@ function _exactTokenInForTokenOut(
     fpTokenAmountIn,
     swapFee
 ) {
-    const sf = bmath_1.bnum(1e18).minus(swapFee);
+    const fpBalancesStr = fpBalances.map(b => b.toString());
+    const amplificationParameterStr = amplificationParameter.toString();
+    const fpTokenAmountInStr = fpTokenAmountIn.toString();
+    const swapFeeStr = swapFee.toString();
+    const sf = bmath_1.bnum(1e18).minus(swapFeeStr);
     const amtWithFee = numbers_1
-        .fromFp(fpTokenAmountIn)
+        .fromFp(fpTokenAmountInStr)
         .times(numbers_1.fromFp(sf));
     const invariant = numbers_1.fromFp(
-        calculateInvariant(fpBalances, amplificationParameter)
+        calculateInvariant(fpBalancesStr, amplificationParameterStr)
     );
-    const balances = fpBalances.map(numbers_1.fromFp);
+    const balances = fpBalancesStr.map(numbers_1.fromFp);
     balances[tokenIndexIn] = balances[tokenIndexIn].add(amtWithFee);
     const finalBalanceOut = _getTokenBalanceGivenInvariantAndAllOtherBalances(
         balances,
-        numbers_1.decimal(amplificationParameter),
+        numbers_1.decimal(amplificationParameterStr),
         invariant,
         tokenIndexOut
     );
-    return new bignumber_1.BigNumber(
+    return new FixedPointNumber_1.FixedPointNumber(
         numbers_1.toFp(balances[tokenIndexOut].sub(finalBalanceOut)).toString()
     );
 }
@@ -153,11 +157,11 @@ function _tokenInForExactTokenOut(
     const amtWithFee = numbers_1
         .toFp(finalBalanceIn.sub(balances[tokenIndexIn]))
         .div(numbers_1.fromFp(sf));
-    return new bignumber_1.BigNumber(amtWithFee.toString());
+    return new FixedPointNumber_1.FixedPointNumber(amtWithFee.toString());
 }
 exports._tokenInForExactTokenOut = _tokenInForExactTokenOut;
 // export function calcBptOutGivenExactTokensIn(
-function exactTokensInForBPTOut(
+function _exactTokensInForBPTOut(
     fpBalances,
     amplificationParameter,
     fpAmountsIn,
@@ -216,14 +220,16 @@ function exactTokensInForBPTOut(
     );
     const invariantRatio = newInvariant.div(currentInvariant);
     if (invariantRatio.gt(1)) {
-        return numbers_1.fp(
-            numbers_1.fromFp(fpBptTotalSupply).mul(invariantRatio.sub(1))
+        return new FixedPointNumber_1.FixedPointNumber(
+            numbers_1.fp(
+                numbers_1.fromFp(fpBptTotalSupply).mul(invariantRatio.sub(1))
+            )
         );
     } else {
-        return new bignumber_1.BigNumber(0);
+        return new FixedPointNumber_1.FixedPointNumber(0);
     }
 }
-exports.exactTokensInForBPTOut = exactTokensInForBPTOut;
+exports._exactTokensInForBPTOut = _exactTokensInForBPTOut;
 // export function calcTokenInGivenExactBptOut(
 function _tokenInForExactBPTOut(
     tokenIndex,
@@ -270,7 +276,7 @@ function _tokenInForExactBPTOut(
             numbers_1.decimal(1).sub(numbers_1.fromFp(fpSwapFeePercentage))
         )
     );
-    return numbers_1.fp(bptOut);
+    return new FixedPointNumber_1.FixedPointNumber(numbers_1.fp(bptOut));
 }
 exports._tokenInForExactBPTOut = _tokenInForExactBPTOut;
 // export function calcBptInGivenExactTokensOut(
@@ -337,8 +343,10 @@ function _bptInForExactTokensOut(
     const invariantRatioComplement = invariantRatio.lt(1)
         ? numbers_1.decimal(1).sub(invariantRatio)
         : numbers_1.decimal(0);
-    return numbers_1.fp(
-        numbers_1.fromFp(fpBptTotalSupply).mul(invariantRatioComplement)
+    return new FixedPointNumber_1.FixedPointNumber(
+        numbers_1.fp(
+            numbers_1.fromFp(fpBptTotalSupply).mul(invariantRatioComplement)
+        )
     );
 }
 exports._bptInForExactTokensOut = _bptInForExactTokensOut;
@@ -390,7 +398,9 @@ function _exactBPTInForTokenOut(
             numbers_1.decimal(1).sub(numbers_1.fromFp(fpSwapFeePercentage))
         )
     );
-    return new bignumber_1.BigNumber(numbers_1.fp(tokenOut).toString());
+    return new FixedPointNumber_1.FixedPointNumber(
+        numbers_1.fp(tokenOut).toString()
+    );
 }
 exports._exactBPTInForTokenOut = _exactBPTInForTokenOut;
 // export function calcTokensOutGivenExactBptIn(
@@ -400,7 +410,10 @@ function _exactBPTInForTokensOut(fpBalances, fpBptAmountIn, fpBptTotalSupply) {
         .fromFp(fpBptAmountIn)
         .div(numbers_1.fromFp(fpBptTotalSupply));
     const amountsOut = balances.map(balance => balance.mul(bptRatio));
-    return amountsOut.map(numbers_1.fp);
+    const result = amountsOut.map(
+        amt => new FixedPointNumber_1.FixedPointNumber(numbers_1.fp(amt))
+    );
+    return result;
 }
 exports._exactBPTInForTokensOut = _exactBPTInForTokensOut;
 function calculateOneTokenSwapFeeAmount(

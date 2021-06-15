@@ -1,5 +1,6 @@
 import { Decimal } from 'decimal.js';
 import { BigNumber } from '../../utils/bignumber';
+import { FixedPointNumber as BigNumberFp } from '../../math/FixedPointNumber';
 import { BigNumberish } from './numbers';
 export declare function calculateInvariant(
     fpRawBalances: BigNumberish[],
@@ -14,56 +15,56 @@ export declare function calculateAnalyticalInvariantForTwoTokens(
     amplificationParameter: BigNumberish
 ): BigNumber;
 export declare function _exactTokenInForTokenOut(
-    fpBalances: BigNumberish[],
-    amplificationParameter: BigNumberish,
+    fpBalances: BigNumberFp[],
+    amplificationParameter: BigNumberFp,
     tokenIndexIn: number,
     tokenIndexOut: number,
-    fpTokenAmountIn: BigNumberish,
-    swapFee: BigNumberish
-): BigNumber;
+    fpTokenAmountIn: BigNumberFp,
+    swapFee: BigNumberFp
+): BigNumberFp;
 export declare function _tokenInForExactTokenOut(
-    fpBalances: BigNumberish[],
-    amplificationParameter: BigNumberish,
+    fpBalances: BigNumberFp[],
+    amplificationParameter: BigNumberFp,
     tokenIndexIn: number,
     tokenIndexOut: number,
-    fpTokenAmountOut: BigNumberish,
-    swapFee: BigNumberish
-): BigNumber;
-export declare function exactTokensInForBPTOut(
-    fpBalances: BigNumberish[],
-    amplificationParameter: BigNumberish,
-    fpAmountsIn: BigNumberish[],
-    fpBptTotalSupply: BigNumberish,
-    fpSwapFeePercentage: BigNumberish
-): BigNumber;
+    fpTokenAmountOut: BigNumberFp,
+    swapFee: BigNumberFp
+): BigNumberFp;
+export declare function _exactTokensInForBPTOut(
+    fpBalances: BigNumberFp[],
+    amplificationParameter: BigNumberFp,
+    fpAmountsIn: BigNumberFp[],
+    fpBptTotalSupply: BigNumberFp,
+    fpSwapFeePercentage: BigNumberFp
+): BigNumberFp;
 export declare function _tokenInForExactBPTOut(
     tokenIndex: number,
-    fpBalances: BigNumberish[],
-    amplificationParameter: BigNumberish,
-    fpBptAmountOut: BigNumberish,
-    fpBptTotalSupply: BigNumberish,
-    fpSwapFeePercentage: BigNumberish
-): BigNumber;
+    fpBalances: BigNumberFp[],
+    amplificationParameter: BigNumberFp,
+    fpBptAmountOut: BigNumberFp,
+    fpBptTotalSupply: BigNumberFp,
+    fpSwapFeePercentage: BigNumberFp
+): BigNumberFp;
 export declare function _bptInForExactTokensOut(
-    fpBalances: BigNumber[],
-    amplificationParameter: BigNumberish,
-    fpAmountsOut: BigNumber[],
-    fpBptTotalSupply: BigNumber,
-    fpSwapFeePercentage: BigNumber
-): BigNumber;
+    fpBalances: BigNumberFp[],
+    amplificationParameter: BigNumberFp,
+    fpAmountsOut: BigNumberFp[],
+    fpBptTotalSupply: BigNumberFp,
+    fpSwapFeePercentage: BigNumberFp
+): BigNumberFp;
 export declare function _exactBPTInForTokenOut(
     tokenIndex: number,
-    fpBalances: BigNumberish[],
-    amplificationParameter: BigNumberish,
-    fpBptAmountIn: BigNumberish,
-    fpBptTotalSupply: BigNumberish,
-    fpSwapFeePercentage: BigNumberish
-): BigNumber;
+    fpBalances: BigNumberFp[],
+    amplificationParameter: BigNumberFp,
+    fpBptAmountIn: BigNumberFp,
+    fpBptTotalSupply: BigNumberFp,
+    fpSwapFeePercentage: BigNumberFp
+): BigNumberFp;
 export declare function _exactBPTInForTokensOut(
-    fpBalances: BigNumberish[],
-    fpBptAmountIn: BigNumberish,
-    fpBptTotalSupply: BigNumberish
-): BigNumber[];
+    fpBalances: BigNumberFp[],
+    fpBptAmountIn: BigNumberFp,
+    fpBptTotalSupply: BigNumberFp
+): BigNumberFp[];
 export declare function calculateOneTokenSwapFeeAmount(
     fpBalances: BigNumberish[],
     amplificationParameter: BigNumberish,
