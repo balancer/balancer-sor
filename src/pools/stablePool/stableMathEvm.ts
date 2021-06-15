@@ -5,6 +5,7 @@ Changed from Ethers BigNumber to use BigNumber.js
 import { bnum } from '../../bmath';
 import { Decimal } from 'decimal.js';
 import { BigNumber } from '../../utils/bignumber';
+import { FixedPointNumber as BigNumberFp } from '../../math/FixedPointNumber';
 
 import { BigNumberish, decimal, bn, fp, fromFp, toFp } from './numbers';
 
@@ -113,30 +114,35 @@ export function calculateAnalyticalInvariantForTwoTokens(
 // Compared to V2 implementation this has the swap fee added.
 // export function calcOutGivenIn(
 export function _exactTokenInForTokenOut(
-    fpBalances: BigNumberish[],
-    amplificationParameter: BigNumberish,
+    fpBalances: BigNumberFp[],
+    amplificationParameter: BigNumberFp,
     tokenIndexIn: number,
     tokenIndexOut: number,
-    fpTokenAmountIn: BigNumberish,
-    swapFee: BigNumberish
-): BigNumber {
-    const sf = bnum(1e18).minus(swapFee);
-    const amtWithFee = fromFp(fpTokenAmountIn).times(fromFp(sf));
+    fpTokenAmountIn: BigNumberFp,
+    swapFee: BigNumberFp
+): BigNumberFp {
+    const fpBalancesStr = fpBalances.map(b => b.toString());
+    const amplificationParameterStr = amplificationParameter.toString();
+    const fpTokenAmountInStr = fpTokenAmountIn.toString();
+    const swapFeeStr = swapFee.toString();
+
+    const sf = bnum(1e18).minus(swapFeeStr);
+    const amtWithFee = fromFp(fpTokenAmountInStr).times(fromFp(sf));
     const invariant = fromFp(
-        calculateInvariant(fpBalances, amplificationParameter)
+        calculateInvariant(fpBalancesStr, amplificationParameterStr)
     );
 
-    const balances = fpBalances.map(fromFp);
+    const balances = fpBalancesStr.map(fromFp);
     balances[tokenIndexIn] = balances[tokenIndexIn].add(amtWithFee);
 
     const finalBalanceOut = _getTokenBalanceGivenInvariantAndAllOtherBalances(
         balances,
-        decimal(amplificationParameter),
+        decimal(amplificationParameterStr),
         invariant,
         tokenIndexOut
     );
 
-    return new BigNumber(
+    return new BigNumberFp(
         toFp(balances[tokenIndexOut].sub(finalBalanceOut)).toString()
     );
 }
@@ -144,13 +150,13 @@ export function _exactTokenInForTokenOut(
 // Compared to V2 implementation this has the swap fee added.
 // export function calcInGivenOut(
 export function _tokenInForExactTokenOut(
-    fpBalances: BigNumberish[],
-    amplificationParameter: BigNumberish,
+    fpBalances: BigNumberFp[],
+    amplificationParameter: BigNumberFp,
     tokenIndexIn: number,
     tokenIndexOut: number,
-    fpTokenAmountOut: BigNumberish,
-    swapFee: BigNumberish
-): BigNumber {
+    fpTokenAmountOut: BigNumberFp,
+    swapFee: BigNumberFp
+): BigNumberFp {
     const invariant = fromFp(
         calculateInvariant(fpBalances, amplificationParameter)
     );
@@ -172,17 +178,17 @@ export function _tokenInForExactTokenOut(
         fromFp(sf)
     );
 
-    return new BigNumber(amtWithFee.toString());
+    return new BigNumberFp(amtWithFee.toString());
 }
 
 // export function calcBptOutGivenExactTokensIn(
-export function exactTokensInForBPTOut(
-    fpBalances: BigNumberish[],
-    amplificationParameter: BigNumberish,
-    fpAmountsIn: BigNumberish[],
-    fpBptTotalSupply: BigNumberish,
-    fpSwapFeePercentage: BigNumberish
-): BigNumber {
+export function _exactTokensInForBPTOut(
+    fpBalances: BigNumberFp[],
+    amplificationParameter: BigNumberFp,
+    fpAmountsIn: BigNumberFp[],
+    fpBptTotalSupply: BigNumberFp,
+    fpSwapFeePercentage: BigNumberFp
+): BigNumberFp {
     // Get current invariant
     const currentInvariant = fromFp(
         calculateInvariant(fpBalances, amplificationParameter)
@@ -239,21 +245,23 @@ export function exactTokensInForBPTOut(
     const invariantRatio = newInvariant.div(currentInvariant);
 
     if (invariantRatio.gt(1)) {
-        return fp(fromFp(fpBptTotalSupply).mul(invariantRatio.sub(1)));
+        return new BigNumberFp(
+            fp(fromFp(fpBptTotalSupply).mul(invariantRatio.sub(1)))
+        );
     } else {
-        return new BigNumber(0);
+        return new BigNumberFp(0);
     }
 }
 
 // export function calcTokenInGivenExactBptOut(
 export function _tokenInForExactBPTOut(
     tokenIndex: number,
-    fpBalances: BigNumberish[],
-    amplificationParameter: BigNumberish,
-    fpBptAmountOut: BigNumberish,
-    fpBptTotalSupply: BigNumberish,
-    fpSwapFeePercentage: BigNumberish
-): BigNumber {
+    fpBalances: BigNumberFp[],
+    amplificationParameter: BigNumberFp,
+    fpBptAmountOut: BigNumberFp,
+    fpBptTotalSupply: BigNumberFp,
+    fpSwapFeePercentage: BigNumberFp
+): BigNumberFp {
     // Get current invariant
     const fpCurrentInvariant = bn(
         calculateInvariant(fpBalances, amplificationParameter)
@@ -294,17 +302,17 @@ export function _tokenInForExactBPTOut(
         taxableAmount.div(decimal(1).sub(fromFp(fpSwapFeePercentage)))
     );
 
-    return fp(bptOut);
+    return new BigNumberFp(fp(bptOut));
 }
 
 // export function calcBptInGivenExactTokensOut(
 export function _bptInForExactTokensOut(
-    fpBalances: BigNumber[],
-    amplificationParameter: BigNumberish,
-    fpAmountsOut: BigNumber[],
-    fpBptTotalSupply: BigNumber,
-    fpSwapFeePercentage: BigNumber
-): BigNumber {
+    fpBalances: BigNumberFp[],
+    amplificationParameter: BigNumberFp,
+    fpAmountsOut: BigNumberFp[],
+    fpBptTotalSupply: BigNumberFp,
+    fpSwapFeePercentage: BigNumberFp
+): BigNumberFp {
     // Get current invariant
     const currentInvariant = fromFp(
         calculateInvariant(fpBalances, amplificationParameter)
@@ -365,18 +373,20 @@ export function _bptInForExactTokensOut(
     const invariantRatioComplement = invariantRatio.lt(1)
         ? decimal(1).sub(invariantRatio)
         : decimal(0);
-    return fp(fromFp(fpBptTotalSupply).mul(invariantRatioComplement));
+    return new BigNumberFp(
+        fp(fromFp(fpBptTotalSupply).mul(invariantRatioComplement))
+    );
 }
 
 // export function calcTokenOutGivenExactBptIn(
 export function _exactBPTInForTokenOut(
     tokenIndex: number,
-    fpBalances: BigNumberish[],
-    amplificationParameter: BigNumberish,
-    fpBptAmountIn: BigNumberish,
-    fpBptTotalSupply: BigNumberish,
-    fpSwapFeePercentage: BigNumberish
-): BigNumber {
+    fpBalances: BigNumberFp[],
+    amplificationParameter: BigNumberFp,
+    fpBptAmountIn: BigNumberFp,
+    fpBptTotalSupply: BigNumberFp,
+    fpSwapFeePercentage: BigNumberFp
+): BigNumberFp {
     // Get current invariant
     const fpCurrentInvariant = bn(
         calculateInvariant(fpBalances, amplificationParameter)
@@ -418,19 +428,20 @@ export function _exactBPTInForTokenOut(
     const tokenOut = nonTaxableAmount.add(
         taxableAmount.mul(decimal(1).sub(fromFp(fpSwapFeePercentage)))
     );
-    return new BigNumber(fp(tokenOut).toString());
+    return new BigNumberFp(fp(tokenOut).toString());
 }
 
 // export function calcTokensOutGivenExactBptIn(
 export function _exactBPTInForTokensOut(
-    fpBalances: BigNumberish[],
-    fpBptAmountIn: BigNumberish,
-    fpBptTotalSupply: BigNumberish
-): BigNumber[] {
+    fpBalances: BigNumberFp[],
+    fpBptAmountIn: BigNumberFp,
+    fpBptTotalSupply: BigNumberFp
+): BigNumberFp[] {
     const balances = fpBalances.map(fromFp);
     const bptRatio = fromFp(fpBptAmountIn).div(fromFp(fpBptTotalSupply));
     const amountsOut = balances.map(balance => balance.mul(bptRatio));
-    return amountsOut.map(fp);
+    const result = amountsOut.map(amt => new BigNumberFp(fp(amt)));
+    return result;
 }
 
 export function calculateOneTokenSwapFeeAmount(

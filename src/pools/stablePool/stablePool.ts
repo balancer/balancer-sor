@@ -9,6 +9,8 @@ import {
 } from '../../types';
 import { getAddress } from '@ethersproject/address';
 import { bnum, scale } from '../../bmath';
+import { FixedPointNumber } from '../../math/FixedPointNumber';
+import { fnum } from '../../math/lib/fixedPoint';
 import * as stableSolidity from './stableMathEvm';
 import {
     _invariant,
@@ -351,18 +353,18 @@ export class StablePool implements PoolBase {
         // i.e. 1USDC => 1e18 not 1e6
         // Amp is non-scaled so can be used directly from SG
         const balancesScaled = poolPairData.allBalances.map(bal =>
-            scale(bal, 18)
+            fnum(scale(bal, 18))
         );
         const amtScaled = scale(amount, 18);
         const swapFeeScaled = scale(poolPairData.swapFee, 18);
 
         const result = stableSolidity._exactTokenInForTokenOut(
             balancesScaled,
-            poolPairData.amp,
+            fnum(poolPairData.amp),
             poolPairData.tokenIndexIn,
             poolPairData.tokenIndexOut,
-            amtScaled,
-            swapFeeScaled
+            fnum(amtScaled),
+            fnum(swapFeeScaled)
         );
 
         // const norm = scale(result, -18);
@@ -386,18 +388,18 @@ export class StablePool implements PoolBase {
         // i.e. 1USDC => 1e18 not 1e6
         // Amp is non-scaled so can be used directly from SG
         const balancesScaled = poolPairData.allBalances.map(bal =>
-            scale(bal, 18)
+            fnum(scale(bal, 18))
         );
         const amtScaled = scale(amount, 18);
         const swapFeeScaled = scale(poolPairData.swapFee, 18);
 
         const result = stableSolidity._tokenInForExactTokenOut(
             balancesScaled,
-            poolPairData.amp,
+            fnum(poolPairData.amp),
             poolPairData.tokenIndexIn,
             poolPairData.tokenIndexOut,
-            amtScaled,
-            swapFeeScaled
+            fnum(amtScaled),
+            fnum(swapFeeScaled)
         );
 
         // const norm = scale(result, -18);
@@ -421,22 +423,22 @@ export class StablePool implements PoolBase {
         // i.e. 1USDC => 1e18 not 1e6
         // Amp is non-scaled so can be used directly from SG
         const balancesScaled = poolPairData.allBalances.map(bal =>
-            scale(bal, 18)
+            fnum(scale(bal, 18))
         );
         // amountsIn must have same length as balances. Only need value for token in.
         const amountsIn = poolPairData.allBalances.map((bal, i) => {
-            if (i === poolPairData.tokenIndexIn) return scale(amount, 18);
-            else return bnum(0);
+            if (i === poolPairData.tokenIndexIn) return fnum(scale(amount, 18));
+            else return fnum(0);
         });
         const bptTotalSupplyScaled = scale(poolPairData.balanceOut, 18);
         const swapFeeScaled = scale(poolPairData.swapFee, 18);
 
-        const result = stableSolidity.exactTokensInForBPTOut(
+        const result = stableSolidity._exactTokensInForBPTOut(
             balancesScaled,
-            poolPairData.amp,
+            fnum(poolPairData.amp),
             amountsIn,
-            bptTotalSupplyScaled,
-            swapFeeScaled
+            fnum(bptTotalSupplyScaled),
+            fnum(swapFeeScaled)
         );
         return result;
     }
@@ -450,7 +452,7 @@ export class StablePool implements PoolBase {
         // i.e. 1USDC => 1e18 not 1e6
         // Amp is non-scaled so can be used directly from SG
         const balancesScaled = poolPairData.allBalances.map(bal =>
-            scale(bal, 18)
+            fnum(scale(bal, 18))
         );
         const bptAmountInScaled = scale(amount, 18);
         const bptTotalSupply = scale(poolPairData.balanceIn, 18);
@@ -459,10 +461,10 @@ export class StablePool implements PoolBase {
         const result = stableSolidity._exactBPTInForTokenOut(
             poolPairData.tokenIndexOut,
             balancesScaled,
-            poolPairData.amp,
-            bptAmountInScaled,
-            bptTotalSupply,
-            swapFeeScaled
+            fnum(poolPairData.amp),
+            fnum(bptAmountInScaled),
+            fnum(bptTotalSupply),
+            fnum(swapFeeScaled)
         );
         return result;
     }
@@ -476,7 +478,7 @@ export class StablePool implements PoolBase {
         // i.e. 1USDC => 1e18 not 1e6
         // Amp is non-scaled so can be used directly from SG
         const balancesScaled = poolPairData.allBalances.map(bal =>
-            scale(bal, 18)
+            fnum(scale(bal, 18))
         );
         const bptAmountOutScaled = scale(amount, 18);
         const bptTotalSupply = scale(poolPairData.balanceOut, 18);
@@ -485,10 +487,10 @@ export class StablePool implements PoolBase {
         const result = stableSolidity._tokenInForExactBPTOut(
             poolPairData.tokenIndexIn,
             balancesScaled,
-            poolPairData.amp,
-            bptAmountOutScaled,
-            bptTotalSupply,
-            swapFeeScaled
+            fnum(poolPairData.amp),
+            fnum(bptAmountOutScaled),
+            fnum(bptTotalSupply),
+            fnum(swapFeeScaled)
         );
 
         return result;
@@ -503,22 +505,23 @@ export class StablePool implements PoolBase {
         // i.e. 1USDC => 1e18 not 1e6
         // Amp is non-scaled so can be used directly from SG
         const balancesScaled = poolPairData.allBalances.map(bal =>
-            scale(bal, 18)
+            fnum(scale(bal, 18))
         );
         // amountsOut must have same length as balances. Only need value for token out.
         const amountsOut = poolPairData.allBalances.map((bal, i) => {
-            if (i === poolPairData.tokenIndexOut) return scale(amount, 18);
-            else return bnum(0);
+            if (i === poolPairData.tokenIndexOut)
+                return fnum(scale(amount, 18));
+            else return fnum(0);
         });
         const bptTotalSupply = scale(poolPairData.balanceIn, 18);
         const swapFeeScaled = scale(poolPairData.swapFee, 18);
 
         const result = stableSolidity._bptInForExactTokensOut(
             balancesScaled,
-            poolPairData.amp,
+            fnum(poolPairData.amp),
             amountsOut,
-            bptTotalSupply,
-            swapFeeScaled
+            fnum(bptTotalSupply),
+            fnum(swapFeeScaled)
         );
 
         return result;
