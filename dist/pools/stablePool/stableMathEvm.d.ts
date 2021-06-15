@@ -13,7 +13,7 @@ export declare function calculateAnalyticalInvariantForTwoTokens(
     fpRawBalances: BigNumberish[],
     amplificationParameter: BigNumberish
 ): BigNumber;
-export declare function calcOutGivenIn(
+export declare function _exactTokenInForTokenOut(
     fpBalances: BigNumberish[],
     amplificationParameter: BigNumberish,
     tokenIndexIn: number,
@@ -21,7 +21,7 @@ export declare function calcOutGivenIn(
     fpTokenAmountIn: BigNumberish,
     swapFee: BigNumberish
 ): BigNumber;
-export declare function calcInGivenOut(
+export declare function _tokenInForExactTokenOut(
     fpBalances: BigNumberish[],
     amplificationParameter: BigNumberish,
     tokenIndexIn: number,
@@ -29,14 +29,14 @@ export declare function calcInGivenOut(
     fpTokenAmountOut: BigNumberish,
     swapFee: BigNumberish
 ): BigNumber;
-export declare function calcBptOutGivenExactTokensIn(
+export declare function exactTokensInForBPTOut(
     fpBalances: BigNumberish[],
     amplificationParameter: BigNumberish,
     fpAmountsIn: BigNumberish[],
     fpBptTotalSupply: BigNumberish,
     fpSwapFeePercentage: BigNumberish
 ): BigNumber;
-export declare function calcTokenInGivenExactBptOut(
+export declare function _tokenInForExactBPTOut(
     tokenIndex: number,
     fpBalances: BigNumberish[],
     amplificationParameter: BigNumberish,
@@ -44,14 +44,14 @@ export declare function calcTokenInGivenExactBptOut(
     fpBptTotalSupply: BigNumberish,
     fpSwapFeePercentage: BigNumberish
 ): BigNumber;
-export declare function calcBptInGivenExactTokensOut(
+export declare function _bptInForExactTokensOut(
     fpBalances: BigNumber[],
     amplificationParameter: BigNumberish,
     fpAmountsOut: BigNumber[],
     fpBptTotalSupply: BigNumber,
     fpSwapFeePercentage: BigNumber
 ): BigNumber;
-export declare function calcTokenOutGivenExactBptIn(
+export declare function _exactBPTInForTokenOut(
     tokenIndex: number,
     fpBalances: BigNumberish[],
     amplificationParameter: BigNumberish,
@@ -59,7 +59,7 @@ export declare function calcTokenOutGivenExactBptIn(
     fpBptTotalSupply: BigNumberish,
     fpSwapFeePercentage: BigNumberish
 ): BigNumber;
-export declare function calcTokensOutGivenExactBptIn(
+export declare function _exactBPTInForTokensOut(
     fpBalances: BigNumberish[],
     fpBptAmountIn: BigNumberish,
     fpBptTotalSupply: BigNumberish

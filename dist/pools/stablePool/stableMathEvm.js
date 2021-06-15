@@ -97,7 +97,8 @@ function calculateAnalyticalInvariantForTwoTokens(
 }
 exports.calculateAnalyticalInvariantForTwoTokens = calculateAnalyticalInvariantForTwoTokens;
 // Compared to V2 implementation this has the swap fee added.
-function calcOutGivenIn(
+// export function calcOutGivenIn(
+function _exactTokenInForTokenOut(
     fpBalances,
     amplificationParameter,
     tokenIndexIn,
@@ -124,9 +125,10 @@ function calcOutGivenIn(
         numbers_1.toFp(balances[tokenIndexOut].sub(finalBalanceOut)).toString()
     );
 }
-exports.calcOutGivenIn = calcOutGivenIn;
+exports._exactTokenInForTokenOut = _exactTokenInForTokenOut;
 // Compared to V2 implementation this has the swap fee added.
-function calcInGivenOut(
+// export function calcInGivenOut(
+function _tokenInForExactTokenOut(
     fpBalances,
     amplificationParameter,
     tokenIndexIn,
@@ -153,8 +155,9 @@ function calcInGivenOut(
         .div(numbers_1.fromFp(sf));
     return new bignumber_1.BigNumber(amtWithFee.toString());
 }
-exports.calcInGivenOut = calcInGivenOut;
-function calcBptOutGivenExactTokensIn(
+exports._tokenInForExactTokenOut = _tokenInForExactTokenOut;
+// export function calcBptOutGivenExactTokensIn(
+function exactTokensInForBPTOut(
     fpBalances,
     amplificationParameter,
     fpAmountsIn,
@@ -220,8 +223,9 @@ function calcBptOutGivenExactTokensIn(
         return new bignumber_1.BigNumber(0);
     }
 }
-exports.calcBptOutGivenExactTokensIn = calcBptOutGivenExactTokensIn;
-function calcTokenInGivenExactBptOut(
+exports.exactTokensInForBPTOut = exactTokensInForBPTOut;
+// export function calcTokenInGivenExactBptOut(
+function _tokenInForExactBPTOut(
     tokenIndex,
     fpBalances,
     amplificationParameter,
@@ -268,8 +272,9 @@ function calcTokenInGivenExactBptOut(
     );
     return numbers_1.fp(bptOut);
 }
-exports.calcTokenInGivenExactBptOut = calcTokenInGivenExactBptOut;
-function calcBptInGivenExactTokensOut(
+exports._tokenInForExactBPTOut = _tokenInForExactBPTOut;
+// export function calcBptInGivenExactTokensOut(
+function _bptInForExactTokensOut(
     fpBalances,
     amplificationParameter,
     fpAmountsOut,
@@ -336,8 +341,9 @@ function calcBptInGivenExactTokensOut(
         numbers_1.fromFp(fpBptTotalSupply).mul(invariantRatioComplement)
     );
 }
-exports.calcBptInGivenExactTokensOut = calcBptInGivenExactTokensOut;
-function calcTokenOutGivenExactBptIn(
+exports._bptInForExactTokensOut = _bptInForExactTokensOut;
+// export function calcTokenOutGivenExactBptIn(
+function _exactBPTInForTokenOut(
     tokenIndex,
     fpBalances,
     amplificationParameter,
@@ -386,12 +392,9 @@ function calcTokenOutGivenExactBptIn(
     );
     return new bignumber_1.BigNumber(numbers_1.fp(tokenOut).toString());
 }
-exports.calcTokenOutGivenExactBptIn = calcTokenOutGivenExactBptIn;
-function calcTokensOutGivenExactBptIn(
-    fpBalances,
-    fpBptAmountIn,
-    fpBptTotalSupply
-) {
+exports._exactBPTInForTokenOut = _exactBPTInForTokenOut;
+// export function calcTokensOutGivenExactBptIn(
+function _exactBPTInForTokensOut(fpBalances, fpBptAmountIn, fpBptTotalSupply) {
     const balances = fpBalances.map(numbers_1.fromFp);
     const bptRatio = numbers_1
         .fromFp(fpBptAmountIn)
@@ -399,7 +402,7 @@ function calcTokensOutGivenExactBptIn(
     const amountsOut = balances.map(balance => balance.mul(bptRatio));
     return amountsOut.map(numbers_1.fp);
 }
-exports.calcTokensOutGivenExactBptIn = calcTokensOutGivenExactBptIn;
+exports._exactBPTInForTokensOut = _exactBPTInForTokensOut;
 function calculateOneTokenSwapFeeAmount(
     fpBalances,
     amplificationParameter,

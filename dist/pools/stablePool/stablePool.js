@@ -229,7 +229,7 @@ class StablePool {
         );
         const amtScaled = bmath_1.scale(amount, 18);
         const swapFeeScaled = bmath_1.scale(poolPairData.swapFee, 18);
-        const result = stableSolidity.calcOutGivenIn(
+        const result = stableSolidity._exactTokenInForTokenOut(
             balancesScaled,
             poolPairData.amp,
             poolPairData.tokenIndexIn,
@@ -258,7 +258,7 @@ class StablePool {
         );
         const amtScaled = bmath_1.scale(amount, 18);
         const swapFeeScaled = bmath_1.scale(poolPairData.swapFee, 18);
-        const result = stableSolidity.calcInGivenOut(
+        const result = stableSolidity._tokenInForExactTokenOut(
             balancesScaled,
             poolPairData.amp,
             poolPairData.tokenIndexIn,
@@ -293,7 +293,7 @@ class StablePool {
         });
         const bptTotalSupplyScaled = bmath_1.scale(poolPairData.balanceOut, 18);
         const swapFeeScaled = bmath_1.scale(poolPairData.swapFee, 18);
-        const result = stableSolidity.calcBptOutGivenExactTokensIn(
+        const result = stableSolidity.exactTokensInForBPTOut(
             balancesScaled,
             poolPairData.amp,
             amountsIn,
@@ -313,7 +313,7 @@ class StablePool {
         const bptAmountInScaled = bmath_1.scale(amount, 18);
         const bptTotalSupply = bmath_1.scale(poolPairData.balanceIn, 18);
         const swapFeeScaled = bmath_1.scale(poolPairData.swapFee, 18);
-        const result = stableSolidity.calcTokenOutGivenExactBptIn(
+        const result = stableSolidity._exactBPTInForTokenOut(
             poolPairData.tokenIndexOut,
             balancesScaled,
             poolPairData.amp,
@@ -334,7 +334,7 @@ class StablePool {
         const bptAmountOutScaled = bmath_1.scale(amount, 18);
         const bptTotalSupply = bmath_1.scale(poolPairData.balanceOut, 18);
         const swapFeeScaled = bmath_1.scale(poolPairData.swapFee, 18);
-        const result = stableSolidity.calcTokenInGivenExactBptOut(
+        const result = stableSolidity._tokenInForExactBPTOut(
             poolPairData.tokenIndexIn,
             balancesScaled,
             poolPairData.amp,
@@ -360,7 +360,7 @@ class StablePool {
         });
         const bptTotalSupply = bmath_1.scale(poolPairData.balanceIn, 18);
         const swapFeeScaled = bmath_1.scale(poolPairData.swapFee, 18);
-        const result = stableSolidity.calcBptInGivenExactTokensOut(
+        const result = stableSolidity._bptInForExactTokensOut(
             balancesScaled,
             poolPairData.amp,
             amountsOut,
