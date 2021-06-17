@@ -64,8 +64,6 @@ export function filterPoolsOfInterest(
         }
         let newPool: WeightedPool | StablePool | ElementPool;
 
-        // TODO - Update for new Schema
-        // if (typeof pool.amp === 'undefined' || pool.amp === '0')
         if (pool.poolType === 'Weighted')
             newPool = new WeightedPool(
                 pool.id,

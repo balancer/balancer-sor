@@ -1,6 +1,9 @@
 /*
 Uses implementation from V2 core: https://github.com/balancer-labs/balancer-v2-monorepo/blob/master/pvt/helpers/src/models/pools/stable/math.ts
-Changed from Ethers BigNumber to use BigNumber.js
+Changed from Ethers BigNumber to use BigNumber.js.
+Note - 
+Inputs to function need to be upscaled to 18 decimals.
+Output will also be 1e18 fixed point and needs downscaled appropriately.
 */
 import { bnum } from '../../bmath';
 import { Decimal } from 'decimal.js';
@@ -121,23 +124,18 @@ export function _exactTokenInForTokenOut(
     fpTokenAmountIn: BigNumberFp,
     swapFee: BigNumberFp
 ): BigNumberFp {
-    const fpBalancesStr = fpBalances.map(b => b.toString());
-    const amplificationParameterStr = amplificationParameter.toString();
-    const fpTokenAmountInStr = fpTokenAmountIn.toString();
-    const swapFeeStr = swapFee.toString();
-
-    const sf = bnum(1e18).minus(swapFeeStr);
-    const amtWithFee = fromFp(fpTokenAmountInStr).times(fromFp(sf));
+    const sf = bnum(1e18).minus(swapFee);
+    const amtWithFee = fromFp(fpTokenAmountIn).times(fromFp(sf));
     const invariant = fromFp(
-        calculateInvariant(fpBalancesStr, amplificationParameterStr)
+        calculateInvariant(fpBalances, amplificationParameter)
     );
 
-    const balances = fpBalancesStr.map(fromFp);
+    const balances = fpBalances.map(fromFp);
     balances[tokenIndexIn] = balances[tokenIndexIn].add(amtWithFee);
 
     const finalBalanceOut = _getTokenBalanceGivenInvariantAndAllOtherBalances(
         balances,
-        decimal(amplificationParameterStr),
+        decimal(amplificationParameter),
         invariant,
         tokenIndexOut
     );
