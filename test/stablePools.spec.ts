@@ -16,6 +16,7 @@ import {
     StablePool,
     StablePoolPairData,
 } from '../src/pools/stablePool/stablePool';
+import { BPTForTokensZeroPriceImpact } from '../src/frontendHelpers/stableHelpers';
 
 const gasPrice = bnum('30000000000');
 const maxPools = 4;
@@ -485,6 +486,44 @@ describe(`Tests for Stable Pools.`, () => {
             expect(swapInfo.tokenAddresses[swapInfo.swaps[1].assetOutIndex]).eq(
                 USDC
             );
+        });
+    });
+
+    context('stable helpers', () => {
+        it('should test BPTForTokensZeroPriceImpact', () => {
+            const allBalances = [bnum(1000), bnum(1000), bnum(1000)];
+            const amp = bnum(500);
+            const amounts = [bnum(1), bnum(0), bnum(0)];
+            const bptTotalSupply = bnum(3000);
+            const decimals = [1, 1, 1];
+
+            const bptAmt = BPTForTokensZeroPriceImpact(
+                allBalances,
+                decimals,
+                amounts, // This has to have the same lenght as allBalances
+                bptTotalSupply,
+                amp
+            );
+
+            console.log(bptAmt.toString());
+        });
+
+        it('should test BPTForTokensZeroPriceImpact', () => {
+            const allBalances = [bnum(1000), bnum(1000), bnum(1000)];
+            const amp = bnum(500);
+            const amounts = [bnum(1), bnum(1), bnum(1)];
+            const bptTotalSupply = bnum(3000);
+            const decimals = [1, 1, 1];
+
+            const bptAmt = BPTForTokensZeroPriceImpact(
+                allBalances,
+                decimals,
+                amounts, // This has to have the same lenght as allBalances
+                bptTotalSupply,
+                amp
+            );
+
+            console.log(bptAmt.toString());
         });
     });
 });

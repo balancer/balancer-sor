@@ -24,10 +24,10 @@ export function BPTForTokensZeroPriceImpact(
     // if there were no price impact, i.e. using the spot price of tokenIn/BPT
 
     // We need to scale down allBalances
-    let allBalancesDownScaled;
+    let allBalancesDownScaled = [];
     for (let i = 0; i < allBalances.length; i++) {
-        allBalancesDownScaled[i] = allBalances[i].times(
-            new BigNumber(10).pow(-decimals[i])
+        allBalancesDownScaled.push(
+            allBalances[i].times(new BigNumber(10).pow(-decimals[i]))
         );
     }
 
