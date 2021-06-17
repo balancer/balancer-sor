@@ -494,7 +494,7 @@ describe(`Tests for Stable Pools.`, () => {
             const allBalances = [bnum(1000), bnum(1000), bnum(1000)];
             const amp = bnum(500);
             const amounts = [bnum(1), bnum(0), bnum(0)];
-            const bptTotalSupply = bnum(3000);
+            const bptTotalSupply = bnum(3000e18);
             const decimals = [1, 1, 1];
 
             const bptAmt = BPTForTokensZeroPriceImpact(
@@ -512,7 +512,7 @@ describe(`Tests for Stable Pools.`, () => {
             const allBalances = [bnum(1000), bnum(1000), bnum(1000)];
             const amp = bnum(500);
             const amounts = [bnum(1), bnum(1), bnum(1)];
-            const bptTotalSupply = bnum(3000);
+            const bptTotalSupply = bnum(3000e18);
             const decimals = [1, 1, 1];
 
             const bptAmt = BPTForTokensZeroPriceImpact(
