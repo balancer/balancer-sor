@@ -12,6 +12,7 @@ import { JsonRpcProvider } from '@ethersproject/providers';
 import { SOR, SubGraphPoolsBase, SwapInfo, SwapTypes } from '../src';
 import { bnum } from '../src/bmath';
 import { calcRelativeDiffBn } from './lib/testHelpers';
+import { PoolFilter } from '../src/types';
 
 import testTrades from './testData/elementPools/testTrades.json';
 
@@ -110,7 +111,10 @@ describe(`Tests against Element generated test trade file.`, () => {
                 tokenOut,
                 swapType,
                 swapAmt,
-                0
+                {
+                    poolTypeFilter: PoolFilter.All,
+                    timestamp: 0,
+                }
             );
 
             const amountNormalised = bnum(trade.output.amount_out).times(

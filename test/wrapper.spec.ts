@@ -4,10 +4,10 @@ import { JsonRpcProvider } from '@ethersproject/providers';
 import { assert, expect } from 'chai';
 import { SOR, ZERO_ADDRESS } from '../src';
 import {
-    SubgraphPoolBase,
     SubGraphPoolsBase,
     SwapInfo,
     SwapTypes,
+    PoolFilter,
 } from '../src/types';
 import { bnum } from '../src/bmath';
 import { BigNumber } from '../src/utils/bignumber';
@@ -197,7 +197,11 @@ describe(`Tests for wrapper class.`, () => {
             tokenIn,
             tokenOut,
             swapType,
-            swapAmt
+            swapAmt,
+            {
+                poolTypeFilter: PoolFilter.All,
+                timestamp: 0,
+            }
         );
 
         assert.isAbove(swapInfo.returnAmount.toNumber(), 0);
@@ -209,6 +213,82 @@ describe(`Tests for wrapper class.`, () => {
             swapAmt.times(bnum(10 ** 18)).toString(),
             `Wrapper should have same amount as helper.`
         );
+    });
+
+    it(`should filter correctly - has trades`, async () => {
+        const poolsFromFile: SubGraphPoolsBase = require('./testData/testPools/subgraphPoolsSmallWithTrade.json');
+        const tokenIn = '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2';
+        const tokenOut = '0x6b175474e89094c44da98b954eedeac495271d0f';
+        const swapType = SwapTypes.SwapExactIn;
+        const swapAmt: BigNumber = bnum('0.1');
+
+        const sor = new SOR(
+            provider,
+            gasPrice,
+            maxPools,
+            chainId,
+            poolsFromFile
+        );
+
+        const result: boolean = await sor.fetchPools(false);
+        assert.isTrue(result);
+
+        const swapInfo: SwapInfo = await sor.getSwaps(
+            tokenIn,
+            tokenOut,
+            swapType,
+            swapAmt,
+            {
+                poolTypeFilter: PoolFilter.Weighted,
+                timestamp: 0,
+            }
+        );
+
+        assert.isAbove(swapInfo.returnAmount.toNumber(), 0);
+        assert.isAbove(bnum(swapInfo.swaps[0].amount).toNumber(), 0);
+        assert.equal(tokenIn, swapInfo.tokenIn);
+        assert.equal(tokenOut, swapInfo.tokenOut);
+        assert.equal(
+            swapInfo.swapAmount.toString(),
+            swapAmt.times(bnum(10 ** 18)).toString(),
+            `Wrapper should have same amount as helper.`
+        );
+    });
+
+    it(`should filter correctly - no pools`, async () => {
+        const poolsFromFile: SubGraphPoolsBase = require('./testData/testPools/subgraphPoolsSmallWithTrade.json');
+        const tokenIn = '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2';
+        const tokenOut = '0x6b175474e89094c44da98b954eedeac495271d0f';
+        const swapType = SwapTypes.SwapExactIn;
+        const swapAmt: BigNumber = bnum('0.1');
+
+        const sor = new SOR(
+            provider,
+            gasPrice,
+            maxPools,
+            chainId,
+            poolsFromFile
+        );
+
+        const result: boolean = await sor.fetchPools(false);
+        assert.isTrue(result);
+
+        const swapInfo: SwapInfo = await sor.getSwaps(
+            tokenIn,
+            tokenOut,
+            swapType,
+            swapAmt,
+            {
+                poolTypeFilter: PoolFilter.Stable,
+                timestamp: 0,
+            }
+        );
+
+        assert.equal(swapInfo.returnAmount.toNumber(), 0);
+        assert.equal(swapInfo.swaps.length, 0);
+        assert.equal(swapInfo.tokenIn, '');
+        assert.equal(swapInfo.tokenOut, '');
+        assert.equal(swapInfo.swapAmount.toString(), '0');
     });
 
     it(`should have a valid swap for Eth wrapping`, async () => {
@@ -572,7 +652,10 @@ describe(`Tests for wrapper class.`, () => {
             sor.processedDataCache[`${tokenIn}${tokenOut}${swapType}1`];
         expect(cacheOne).to.be.undefined;
 
-        swapInfo = await sor.getSwaps(tokenIn, tokenOut, swapType, swapAmt, 1);
+        swapInfo = await sor.getSwaps(tokenIn, tokenOut, swapType, swapAmt, {
+            poolTypeFilter: PoolFilter.All,
+            timestamp: 1,
+        });
 
         let cacheZeroRepeat =
             sor.processedDataCache[`${tokenIn}${tokenOut}${swapType}0`];

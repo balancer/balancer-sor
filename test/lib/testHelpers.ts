@@ -14,6 +14,7 @@ import {
     NewPath,
     SwapTypes,
     SwapInfo,
+    PoolFilter,
 } from '../../src/types';
 import customMultiAbi from '../abi/customMulticall.json';
 import { SubGraphPools as SubGraphPoolsV1 } from '@balancer-labs/sor/dist/types';
@@ -1185,7 +1186,8 @@ export async function getWrapperSwap(
         tokenIn,
         tokenOut,
         swapTypeCorrect,
-        swapAmountNormalised
+        swapAmountNormalised,
+        { timestamp: 0, poolTypeFilter: PoolFilter.All }
     );
 
     return swapInfo;

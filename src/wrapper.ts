@@ -16,8 +16,9 @@ import {
     SwapTypes,
     NewPath,
     PoolDictionary,
-    SubgraphPoolBase,
     SubGraphPoolsBase,
+    SwapOptions,
+    PoolFilter,
 } from './types';
 import { ZERO_ADDRESS } from './index';
 
@@ -219,7 +220,10 @@ export class SOR {
         tokenOut: string,
         swapType: SwapTypes,
         swapAmt: BigNumber,
-        timestamp: number = 0
+        swapOptions: SwapOptions = {
+            poolTypeFilter: PoolFilter.All,
+            timestamp: 0,
+        }
     ): Promise<SwapInfo> {
         let swapInfo: SwapInfo = {
             tokenAddresses: [],
@@ -249,16 +253,22 @@ export class SOR {
         }
 
         if (this.finishedFetchingOnChain) {
+            let pools = JSON.parse(JSON.stringify(this.onChainBalanceCache));
+            if (!(swapOptions.poolTypeFilter === PoolFilter.All))
+                pools.pools = pools.pools.filter(
+                    p => p.poolType === swapOptions.poolTypeFilter
+                );
+
             // All Pools with OnChain Balances is already fetched so use that
             swapInfo = await this.processSwaps(
                 tokenIn,
                 tokenOut,
                 swapType,
                 swapAmt,
-                this.onChainBalanceCache,
+                pools,
                 wrapOptions,
                 true,
-                timestamp
+                swapOptions.timestamp
             );
         }
 
