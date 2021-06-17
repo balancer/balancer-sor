@@ -95,8 +95,6 @@ function filterPoolsOfInterest(
             return;
         }
         let newPool;
-        // TODO - Update for new Schema
-        // if (typeof pool.amp === 'undefined' || pool.amp === '0')
         if (pool.poolType === 'Weighted')
             newPool = new weightedPool_1.WeightedPool(
                 pool.id,

@@ -2,7 +2,10 @@
 Object.defineProperty(exports, '__esModule', { value: true });
 /*
 Uses implementation from V2 core: https://github.com/balancer-labs/balancer-v2-monorepo/blob/master/pvt/helpers/src/models/pools/stable/math.ts
-Changed from Ethers BigNumber to use BigNumber.js
+Changed from Ethers BigNumber to use BigNumber.js.
+Note -
+Inputs to function need to be upscaled to 18 decimals.
+Output will also be 1e18 fixed point and needs downscaled appropriately.
 */
 const bmath_1 = require('../../bmath');
 const FixedPointNumber_1 = require('../../math/FixedPointNumber');
@@ -106,22 +109,18 @@ function _exactTokenInForTokenOut(
     fpTokenAmountIn,
     swapFee
 ) {
-    const fpBalancesStr = fpBalances.map(b => b.toString());
-    const amplificationParameterStr = amplificationParameter.toString();
-    const fpTokenAmountInStr = fpTokenAmountIn.toString();
-    const swapFeeStr = swapFee.toString();
-    const sf = bmath_1.bnum(1e18).minus(swapFeeStr);
+    const sf = bmath_1.bnum(1e18).minus(swapFee);
     const amtWithFee = numbers_1
-        .fromFp(fpTokenAmountInStr)
+        .fromFp(fpTokenAmountIn)
         .times(numbers_1.fromFp(sf));
     const invariant = numbers_1.fromFp(
-        calculateInvariant(fpBalancesStr, amplificationParameterStr)
+        calculateInvariant(fpBalances, amplificationParameter)
     );
-    const balances = fpBalancesStr.map(numbers_1.fromFp);
+    const balances = fpBalances.map(numbers_1.fromFp);
     balances[tokenIndexIn] = balances[tokenIndexIn].add(amtWithFee);
     const finalBalanceOut = _getTokenBalanceGivenInvariantAndAllOtherBalances(
         balances,
-        numbers_1.decimal(amplificationParameterStr),
+        numbers_1.decimal(amplificationParameter),
         invariant,
         tokenIndexOut
     );
