@@ -561,5 +561,41 @@ describe(`Tests for Stable Pools.`, () => {
 
             console.log(bptAmt.toString());
         });
+
+        it('should test BPTForTokensZeroPriceImpact for single token add + uneven pool', () => {
+            const allBalances = [bnum(2000e18), bnum(1000e18), bnum(1000e18)];
+            const amp = bnum(500);
+            const amounts = [bnum(1e18), bnum(0), bnum(0)];
+            const bptTotalSupply = bnum(4000e18);
+            const decimals = [18, 18, 18];
+
+            const bptAmt = BPTForTokensZeroPriceImpact(
+                allBalances,
+                decimals,
+                amounts, // This has to have the same lenght as allBalances
+                bptTotalSupply,
+                amp
+            );
+
+            console.log(bptAmt.toString());
+        });
+
+        it('should test BPTForTokensZeroPriceImpact for single token add + VERY uneven pool', () => {
+            const allBalances = [bnum(2000e18), bnum(100e18), bnum(100e18)];
+            const amp = bnum(500);
+            const amounts = [bnum(1e18), bnum(0), bnum(0)];
+            const bptTotalSupply = bnum(2200e18);
+            const decimals = [18, 18, 18];
+
+            const bptAmt = BPTForTokensZeroPriceImpact(
+                allBalances,
+                decimals,
+                amounts, // This has to have the same lenght as allBalances
+                bptTotalSupply,
+                amp
+            );
+
+            console.log(bptAmt.toString());
+        });
     });
 });
