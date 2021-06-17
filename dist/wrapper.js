@@ -212,7 +212,16 @@ class SOR {
             return onChainPools;
         });
     }
-    getSwaps(tokenIn, tokenOut, swapType, swapAmt, timestamp = 0) {
+    getSwaps(
+        tokenIn,
+        tokenOut,
+        swapType,
+        swapAmt,
+        swapOptions = {
+            poolTypeFilter: types_1.PoolFilter.All,
+            timestamp: 0,
+        }
+    ) {
         return __awaiter(this, void 0, void 0, function*() {
             let swapInfo = {
                 tokenAddresses: [],
@@ -238,16 +247,23 @@ class SOR {
                 wrapOptions.isEthSwap = true;
             }
             if (this.finishedFetchingOnChain) {
+                let pools = JSON.parse(
+                    JSON.stringify(this.onChainBalanceCache)
+                );
+                if (!(swapOptions.poolTypeFilter === types_1.PoolFilter.All))
+                    pools.pools = pools.pools.filter(
+                        p => p.poolType === swapOptions.poolTypeFilter
+                    );
                 // All Pools with OnChain Balances is already fetched so use that
                 swapInfo = yield this.processSwaps(
                     tokenIn,
                     tokenOut,
                     swapType,
                     swapAmt,
-                    this.onChainBalanceCache,
+                    pools,
                     wrapOptions,
                     true,
-                    timestamp
+                    swapOptions.timestamp
                 );
             }
             return swapInfo;

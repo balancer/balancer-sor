@@ -101,6 +101,15 @@ export interface NewPath {
     pools: PoolBase[];
     filterEffectivePrice?: BigNumber;
 }
+export declare enum PoolFilter {
+    All = 'All',
+    Weighted = 'Weighted',
+    Stable = 'Stable',
+}
+export interface SwapOptions {
+    timestamp: number;
+    poolTypeFilter: PoolFilter;
+}
 export interface PoolBase {
     poolType: PoolTypes;
     swapPairType: SwapPairType;
