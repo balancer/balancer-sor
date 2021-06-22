@@ -623,5 +623,31 @@ describe(`Tests for Stable Pools.`, () => {
 
         expect(bptAmt.toString()).eq('997264026089703420');
     });
+
+    // it('gareth bug case 2', () => {
+    //     const allBalances = [
+    //         bnum('999996728554597709758831249'),
+    //         bnum('1000005155543154'),
+    //         bnum('1000000822928777'),
+    //     ];
+    //     const amp = bnum(2000);
+    //     const amounts = [
+    //         bnum('9654961595845215917881'),
+    //         bnum('9655042958'),
+    //         bnum('9655001127'),
+    //     ];
+    //     const bptTotalSupply = bnum('2999263268368702307690295440');
+    //     const decimals = [18, 6, 6];
+
+    //     const bptAmt = BPTForTokensZeroPriceImpact(
+    //         allBalances,
+    //         decimals,
+    //         amounts, // This has to have the same lenght as allBalances
+    //         bptTotalSupply,
+    //         amp
+    //     );
+
+    //     expect(bptAmt.toString()).eq('997264026089703420');
+    // });
     // });
 });
