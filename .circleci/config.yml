@@ -1,0 +1,28 @@
+version: 2
+jobs:
+    build:
+        docker:
+            - image: cimg/node:14.16.1
+        working_directory: ~/balancer
+        steps:
+            - checkout
+            - restore_cache:
+                  keys:
+                      - dependency-cache-{{ checksum "package.json" }}
+            - run:
+                  name: Install Dependencies
+                  command: yarn install --quiet
+            - save_cache:
+                  key: dependency-cache-{{ checksum "package.json" }}
+                  paths:
+                      - node_modules
+            - save_cache:
+                  key: balancer-{{ .Environment.CIRCLE_SHA1 }}
+                  paths:
+                      - ~/balancer
+            - run:
+                  name: Run tests
+                  command: yarn test
+            - run:
+                  name: Coveralls coverage
+                  command: yarn coverage
