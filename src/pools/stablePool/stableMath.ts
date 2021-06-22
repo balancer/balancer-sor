@@ -483,25 +483,32 @@ export function _exactBPTInForTokenOut(amount, poolPairData): BigNumber {
 //////////////////////
 
 export function _derivative(func: Function, amount, poolPairData): BigNumber {
-    // If amount is zero we have to change it to a small value otherwise the calculation
-    // below won't work as delta will also be 0 and we'll have 0/0
-    if (amount.lt(INFINITESIMAL)) amount = INFINITESIMAL;
-    let x = amount;
-    let delta = x.times(0.0001);
+    let initialAmount = amount; // initialAmount is an auxiliary variable as amount will be iterated on
+    // If amount is zero or close to zero we have define delta as a small amount higher than zero to avoid a 0/0 error
+    let delta;
+    if (amount.lt(INFINITESIMAL)) {
+        delta = INFINITESIMAL;
+    } else {
+        delta = initialAmount;
+    }
     let prevDerivative = bnum(0);
     let derivative = bnum(0);
     let y = func(amount, poolPairData);
     for (let i = 0; i < 255; i++) {
-        amount = x.plus(delta);
+        amount = initialAmount.plus(delta);
         let yDelta = func(amount, poolPairData);
         derivative = yDelta.minus(y).div(delta);
         // Break if precision reached
         if (
+            // derivative
+            //     .div(prevDerivative)
+            //     .minus(bnum(1))
+            //     .abs()
+            //     .lt(bnum(0.01)) // Variation of less than 1% means convergence
             derivative
-                .div(prevDerivative)
-                .minus(bnum(1))
+                .minus(prevDerivative)
                 .abs()
-                .lt(bnum(0.01)) // Variation of less than 1% means convergence
+                .lte(bnum(0.0001).times(prevDerivative)) // Variation of less than 0.01% means convergence
         )
             break;
         prevDerivative = derivative;
