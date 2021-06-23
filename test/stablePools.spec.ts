@@ -505,7 +505,7 @@ describe(`Tests for Stable Pools.`, () => {
                 amp
             );
 
-            expect(bptAmt.toString()).eq('999980000399992000');
+            expect(bptAmt.toString()).eq('1000000000000000000');
         });
 
         it('should test BPTForTokensZeroPriceImpact for 1% single token add', () => {
@@ -523,7 +523,7 @@ describe(`Tests for Stable Pools.`, () => {
                 amp
             );
 
-            expect(bptAmt.toString()).eq('9999800003999920001');
+            expect(bptAmt.toString()).eq('10000000000000000000');
         });
 
         it('should test BPTForTokensZeroPriceImpact for 10% single token add', () => {
@@ -541,7 +541,7 @@ describe(`Tests for Stable Pools.`, () => {
                 amp
             );
 
-            expect(bptAmt.toString()).eq('99998000039999200015');
+            expect(bptAmt.toString()).eq('100000000000000000000');
         });
 
         it('should test BPTForTokensZeroPriceImpact for proportional add', () => {
@@ -559,7 +559,7 @@ describe(`Tests for Stable Pools.`, () => {
                 amp
             );
 
-            expect(bptAmt.toString()).eq('2999940001199976000');
+            expect(bptAmt.toString()).eq('3000000000000000000');
         });
 
         it('should test BPTForTokensZeroPriceImpact for single token add + uneven pool', () => {
@@ -577,7 +577,7 @@ describe(`Tests for Stable Pools.`, () => {
                 amp
             );
 
-            expect(bptAmt.toString()).eq('999912227704652085');
+            expect(bptAmt.toString()).eq('999912236433875472');
         });
 
         it('should test BPTForTokensZeroPriceImpact for single token add + VERY uneven pool', () => {
@@ -595,7 +595,7 @@ describe(`Tests for Stable Pools.`, () => {
                 amp
             );
 
-            expect(bptAmt.toString()).eq('997264026089703420');
+            expect(bptAmt.toString()).eq('997252048236528015');
         });
 
         it('Derivative Bug Case', () => {
@@ -621,7 +621,7 @@ describe(`Tests for Stable Pools.`, () => {
                 amp
             );
 
-            expect(bptAmt.toString()).eq('997264026089703420');
+            expect(bptAmt.toString()).eq('28957866405645758969955');
         });
     });
 });
