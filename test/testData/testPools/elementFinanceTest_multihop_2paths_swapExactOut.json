@@ -37,7 +37,8 @@
                 "0x0000000000000000000000000000000000000001",
                 "0x6b175474e89094c44da98b954eedeac495271d0f"
             ],
-            "totalWeight": "10"
+            "totalWeight": "10",
+            "address": "0xelementPool1"
         },
         {
             "id": "0xelementPool2",
@@ -66,7 +67,8 @@
                 "0x0000000000000000000000000000000000000001",
                 "0x6b175474e89094c44da98b954eedeac495271d0f"
             ],
-            "totalWeight": "10"
+            "totalWeight": "10",
+            "address": "0xelementPool2"
         },
         {
             "id": "0xelementPool3",
@@ -95,7 +97,8 @@
                 "0x0000000000000000000000000000000000000001",
                 "0x6b175474e89094c44da98b954eedeac495271d0f"
             ],
-            "totalWeight": "10"
+            "totalWeight": "10",
+            "address": "0xelementPool3"
         },
         {
             "id": "0xelementPool4",
@@ -124,7 +127,8 @@
                 "0x0000000000000000000000000000000000000001",
                 "0x6b175474e89094c44da98b954eedeac495271d0f"
             ],
-            "totalWeight": "10"
+            "totalWeight": "10",
+            "address": "0xelementPool4"
         },
         {
             "id": "0x6c3F90f043a72FA612cbac8115EE7e52BDe6E490",
@@ -158,7 +162,8 @@
             ],
             "totalWeight": "0",
             "totalShares": "785224145.723155205181003818",
-            "poolType": "Stable"
+            "poolType": "Stable",
+            "address": "0x6c3F90f043a72FA612cbac8115EE7e52BDe6E490"
         },
         {
             "id": "0x3B3Ac5386837Dc563660FB6a0937DFAa5924333B",
@@ -199,7 +204,8 @@
             "totalWeight": "0",
             "balanceBpt": "78350279.810168052058997162",
             "totalShares": "78350279.810168052058997162",
-            "poolType": "Stable"
+            "poolType": "Stable",
+            "address": "0x3B3Ac5386837Dc563660FB6a0937DFAa5924333B"
         },
         {
             "id": "0x845838DF265Dcd2c412A1Dc9e959c7d08537f8a2",
@@ -226,7 +232,8 @@
             "totalWeight": "0",
             "balanceBpt": "130257219.433128260878947018",
             "totalShares": "130257219.433128260878947018",
-            "poolType": "Stable"
+            "poolType": "Stable",
+            "address": "0x845838DF265Dcd2c412A1Dc9e959c7d08537f8a2"
         },
         {
             "id": "0xD2967f45c4f384DEEa880F807Be904762a3DeA07",
@@ -253,7 +260,8 @@
             "totalWeight": "0",
             "balanceBpt": "176767260.573887543004237546",
             "totalShares": "176767260.573887543004237546",
-            "poolType": "Stable"
+            "poolType": "Stable",
+            "address": "0xD2967f45c4f384DEEa880F807Be904762a3DeA07"
         },
         {
             "id": "0xb19059ebb43466C323583928285a49f558E572Fd",
@@ -280,7 +288,8 @@
             "totalWeight": "0",
             "balanceBpt": "6241.09089955559171898",
             "totalShares": "6241.09089955559171898",
-            "poolType": "Stable"
+            "poolType": "Stable",
+            "address": "0xb19059ebb43466C323583928285a49f558E572Fd"
         },
         {
             "id": "0x5B5CFE992AdAC0C9D48E05854B2d91C73a003858",
@@ -307,7 +316,8 @@
             "totalWeight": "0",
             "balanceBpt": "3060150.794777194169980587",
             "totalShares": "3060150.794777194169980587",
-            "poolType": "Stable"
+            "poolType": "Stable",
+            "address": "0x5B5CFE992AdAC0C9D48E05854B2d91C73a003858"
         },
         {
             "id": "0x6D65b498cb23deAba52db31c93Da9BFFb340FB8F",
@@ -334,7 +344,8 @@
             "totalWeight": "0",
             "balanceBpt": "47597.652790040337801526",
             "totalShares": "47597.652790040337801526",
-            "poolType": "Stable"
+            "poolType": "Stable",
+            "address": "0x6D65b498cb23deAba52db31c93Da9BFFb340FB8F"
         },
         {
             "id": "0x1AEf73d49Dedc4b1778d0706583995958Dc862e6",
@@ -361,7 +372,8 @@
             "totalWeight": "0",
             "balanceBpt": "10317675.188246770072279668",
             "totalShares": "10317675.188246770072279668",
-            "poolType": "Stable"
+            "poolType": "Stable",
+            "address": "0x1AEf73d49Dedc4b1778d0706583995958Dc862e6"
         },
         {
             "id": "0xD905e2eaeBe188fc92179b6350807D8bd91Db0D8",
@@ -402,7 +414,8 @@
             "totalWeight": "0",
             "balanceBpt": "6701166.455045313562297391",
             "totalShares": "6701166.455045313562297391",
-            "poolType": "Stable"
+            "poolType": "Stable",
+            "address": "0xD905e2eaeBe188fc92179b6350807D8bd91Db0D8"
         },
         {
             "id": "0x49849C98ae39Fff122806C06791Fa73784FB3675",
@@ -429,7 +442,8 @@
             "totalWeight": "0",
             "balanceBpt": "9145.740856515896674181",
             "totalShares": "9145.740856515896674181",
-            "poolType": "Stable"
+            "poolType": "Stable",
+            "address": "0x49849C98ae39Fff122806C06791Fa73784FB3675"
         },
         {
             "id": "0xC2Ee6b0334C261ED60C72f6054450b61B8f18E35",
@@ -456,7 +470,8 @@
             "totalWeight": "0",
             "balanceBpt": "403145.272586437806747404",
             "totalShares": "403145.272586437806747404",
-            "poolType": "Stable"
+            "poolType": "Stable",
+            "address": "0xC2Ee6b0334C261ED60C72f6054450b61B8f18E35"
         },
         {
             "id": "0x075b1bb99792c9E1041bA13afEf80C91a1e70fB3",
@@ -490,7 +505,8 @@
             "totalWeight": "0",
             "balanceBpt": "8344.732986077874727564",
             "totalShares": "8344.732986077874727564",
-            "poolType": "Stable"
+            "poolType": "Stable",
+            "address": "0x075b1bb99792c9E1041bA13afEf80C91a1e70fB3"
         },
         {
             "id": "0xC25a3A3b969415c80451098fa907EC722572917F",
@@ -531,7 +547,8 @@
             "totalWeight": "0",
             "balanceBpt": "189544577.082200885106933188",
             "totalShares": "189544577.082200885106933188",
-            "poolType": "Stable"
+            "poolType": "Stable",
+            "address": "0xC25a3A3b969415c80451098fa907EC722572917F"
         },
         {
             "id": "0x64eda51d3Ad40D56b9dFc5554E06F94e1Dd786Fd",
@@ -558,7 +575,8 @@
             "totalWeight": "0",
             "balanceBpt": "3463.289652651412422971",
             "totalShares": "3463.289652651412422971",
-            "poolType": "Stable"
+            "poolType": "Stable",
+            "address": "0x64eda51d3Ad40D56b9dFc5554E06F94e1Dd786Fd"
         },
         {
             "id": "0x97E2768e8E73511cA874545DC5Ff8067eB19B787",
@@ -585,7 +603,8 @@
             "totalWeight": "0",
             "balanceBpt": "566979.928037020244630497",
             "totalShares": "566979.928037020244630497",
-            "poolType": "Stable"
+            "poolType": "Stable",
+            "address": "0x97E2768e8E73511cA874545DC5Ff8067eB19B787"
         },
         {
             "id": "0x4f3E8F405CF5aFC05D68142F3783bDfE13811522",
@@ -612,7 +631,8 @@
             "totalWeight": "0",
             "balanceBpt": "247114809.283632322750889394",
             "totalShares": "247114809.283632322750889394",
-            "poolType": "Stable"
+            "poolType": "Stable",
+            "address": "0x4f3E8F405CF5aFC05D68142F3783bDfE13811522"
         },
         {
             "id": "0x9fC689CCaDa600B6DF723D9E47D84d76664a1F23",
@@ -646,7 +666,8 @@
             "totalWeight": "0",
             "balanceBpt": "776330.924270778577797086",
             "totalShares": "776330.924270778577797086",
-            "poolType": "Stable"
+            "poolType": "Stable",
+            "address": "0x9fC689CCaDa600B6DF723D9E47D84d76664a1F23"
         },
         {
             "id": "0xdF5e0e81Dff6FAF3A7e52BA697820c5e32D806A8",
@@ -687,7 +708,8 @@
             "totalWeight": "0",
             "balanceBpt": "95890268.100961763004689059",
             "totalShares": "95890268.100961763004689059",
-            "poolType": "Stable"
+            "poolType": "Stable",
+            "address": "0xdF5e0e81Dff6FAF3A7e52BA697820c5e32D806A8"
         },
         {
             "id": "0x3a664Ab939FD8482048609f652f9a0B0677337B9",
@@ -714,7 +736,8 @@
             "totalWeight": "0",
             "balanceBpt": "9382236.417093337368789253",
             "totalShares": "9382236.417093337368789253",
-            "poolType": "Stable"
+            "poolType": "Stable",
+            "address": "0x3a664Ab939FD8482048609f652f9a0B0677337B9"
         },
         {
             "id": "0x410e3E86ef427e30B9235497143881f717d93c2A",
@@ -741,7 +764,8 @@
             "totalWeight": "0",
             "balanceBpt": "566.442406434323042121",
             "totalShares": "566.442406434323042121",
-            "poolType": "Stable"
+            "poolType": "Stable",
+            "address": "0x410e3E86ef427e30B9235497143881f717d93c2A"
         },
         {
             "id": "0x2fE94ea3d5d4a175184081439753DE15AeF9d614",
@@ -768,7 +792,8 @@
             "totalWeight": "0",
             "balanceBpt": "651.849882964119308775",
             "totalShares": "651.849882964119308775",
-            "poolType": "Stable"
+            "poolType": "Stable",
+            "address": "0x2fE94ea3d5d4a175184081439753DE15AeF9d614"
         },
         {
             "id": "0xDE5331AC4B3630f94853Ff322B66407e0D6331E8",
@@ -795,7 +820,8 @@
             "totalWeight": "0",
             "balanceBpt": "328.10509538677717503",
             "totalShares": "328.10509538677717503",
-            "poolType": "Stable"
+            "poolType": "Stable",
+            "address": "0xDE5331AC4B3630f94853Ff322B66407e0D6331E8"
         },
         {
             "id": "0x94e131324b6054c0D789b190b2dAC504e4361b53",
@@ -822,7 +848,8 @@
             "totalWeight": "0",
             "balanceBpt": "70709685.449203738865903436",
             "totalShares": "70709685.449203738865903436",
-            "poolType": "Stable"
+            "poolType": "Stable",
+            "address": "0x94e131324b6054c0D789b190b2dAC504e4361b53"
         },
         {
             "id": "0x194eBd173F6cDacE046C53eACcE9B953F28411d1",
@@ -849,7 +876,8 @@
             "totalWeight": "0",
             "balanceBpt": "49525452.059504973052698928",
             "totalShares": "49525452.059504973052698928",
-            "poolType": "Stable"
+            "poolType": "Stable",
+            "address": "0x194eBd173F6cDacE046C53eACcE9B953F28411d1"
         },
         {
             "id": "0xA3D87FffcE63B53E0d54fAa1cc983B7eB0b74A9c",
@@ -876,7 +904,8 @@
             "totalWeight": "0",
             "balanceBpt": "200883.643998455915842631",
             "totalShares": "200883.643998455915842631",
-            "poolType": "Stable"
+            "poolType": "Stable",
+            "address": "0xA3D87FffcE63B53E0d54fAa1cc983B7eB0b74A9c"
         },
         {
             "id": "0x06325440D014e39736583c165C2963BA99fAf14E",
@@ -903,7 +932,8 @@
             "totalWeight": "0",
             "balanceBpt": "195462.394762603394589742",
             "totalShares": "195462.394762603394589742",
-            "poolType": "Stable"
+            "poolType": "Stable",
+            "address": "0x06325440D014e39736583c165C2963BA99fAf14E"
         },
         {
             "id": "0xaA17A236F2bAdc98DDc0Cf999AbB47D47Fc0A6Cf",
@@ -930,7 +960,8 @@
             "totalWeight": "0",
             "balanceBpt": "9205.363867781904897357",
             "totalShares": "9205.363867781904897357",
-            "poolType": "Stable"
+            "poolType": "Stable",
+            "address": "0xaA17A236F2bAdc98DDc0Cf999AbB47D47Fc0A6Cf"
         },
         {
             "id": "0x5282a4eF67D9C33135340fB3289cc1711c13638C",
@@ -964,7 +995,8 @@
             "totalWeight": "0",
             "balanceBpt": "4485645.299464193750509996",
             "totalShares": "4485645.299464193750509996",
-            "poolType": "Stable"
+            "poolType": "Stable",
+            "address": "0x5282a4eF67D9C33135340fB3289cc1711c13638C"
         },
         {
             "id": "0xcee60cFa923170e4f8204AE08B4fA6A3F5656F3a",
@@ -991,7 +1023,8 @@
             "totalWeight": "0",
             "balanceBpt": "2696237.243629509472920807",
             "totalShares": "2696237.243629509472920807",
-            "poolType": "Stable"
+            "poolType": "Stable",
+            "address": "0xcee60cFa923170e4f8204AE08B4fA6A3F5656F3a"
         },
         {
             "id": "0x003a70265a3662342010823bea15dc84c6f7ed54",
@@ -1017,7 +1050,8 @@
             "totalWeight": "10",
             "balanceBpt": "109.245301622095530318",
             "totalShares": "109.245301622095530318",
-            "poolType": "Weighted"
+            "poolType": "Weighted",
+            "address": "0x003a70265a3662342010823bea15dc84c6f7ed54"
         },
         {
             "id": "0x004e74ff81239c8f2ec0e2815defb970f3754d86",
@@ -1043,7 +1077,8 @@
             "totalWeight": "50",
             "balanceBpt": "101.499613804463187895",
             "totalShares": "101.499613804463187895",
-            "poolType": "Weighted"
+            "poolType": "Weighted",
+            "address": "0x004e74ff81239c8f2ec0e2815defb970f3754d86"
         },
         {
             "id": "0x0077732357ac0f29e26ea629b79ab3b266ddb796",
@@ -1069,7 +1104,8 @@
             "totalWeight": "50",
             "balanceBpt": "100",
             "totalShares": "100",
-            "poolType": "Weighted"
+            "poolType": "Weighted",
+            "address": "0x0077732357ac0f29e26ea629b79ab3b266ddb796"
         },
         {
             "id": "0x0092b2d25d76d84d27b999fe93d5e1c70511cd2b",
@@ -1095,7 +1131,8 @@
             "totalWeight": "50",
             "balanceBpt": "101",
             "totalShares": "101",
-            "poolType": "Weighted"
+            "poolType": "Weighted",
+            "address": "0x0092b2d25d76d84d27b999fe93d5e1c70511cd2b"
         },
         {
             "id": "0x00e5a66d31768318a7cae45dd7a0ef8288d7288d",
@@ -1142,7 +1179,8 @@
             "totalWeight": "50",
             "balanceBpt": "2117.6031754747915309",
             "totalShares": "2117.6031754747915309",
-            "poolType": "Weighted"
+            "poolType": "Weighted",
+            "address": "0x00e5a66d31768318a7cae45dd7a0ef8288d7288d"
         }
     ]
 }

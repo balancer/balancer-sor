@@ -128,6 +128,7 @@ export interface PoolBase {
     poolType: PoolTypes;
     swapPairType: SwapPairType;
     id: string;
+    address: string;
     tokensList: string[];
     parsePoolPairData: (tokenIn: string, tokenOut: string) => PoolPairBase;
     getNormalizedLiquidity: (poolPairData: PoolPairBase) => BigNumber;

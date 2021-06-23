@@ -207,7 +207,6 @@ describe('Tests pools filtering and path processing', () => {
                 PoolTypes.Weighted
             );
         }
-
         assert.equal(hopTokens.length, 1);
         assert.equal(noHopIn, 2); // 1 has 0 balances
         assert.equal(noHopOut, 1); // 1 has 0 balances

@@ -27,7 +27,8 @@
             ],
             "totalWeight": "50",
             "totalShares": "100",
-            "poolType": "Weighted"
+            "poolType": "Weighted",
+            "address": "0x94c9dc354c27da349ac3944d568af73488ced65e"
         },
         {
             "id": "0x072f057ff96028f8a21a2dc5b04e3cb9585704d7",
@@ -92,7 +93,8 @@
             ],
             "totalWeight": "50",
             "totalShares": "100",
-            "poolType": "Weighted"
+            "poolType": "Weighted",
+            "address": "0x072f057ff96028f8a21a2dc5b04e3cb9585704d7"
         },
         {
             "id": "0xd2f574637898526fcddfb3d487cc73c957fa0268",
@@ -121,7 +123,8 @@
             ],
             "totalWeight": "50",
             "totalShares": "100",
-            "poolType": "Weighted"
+            "poolType": "Weighted",
+            "address": "0xd2f574637898526fcddfb3d487cc73c957fa0268"
         }
     ]
 }

@@ -37,7 +37,8 @@
                 "0x0000000000000000000000000000000000000001",
                 "0x6b175474e89094c44da98b954eedeac495271d0f"
             ],
-            "totalWeight": "10"
+            "totalWeight": "10",
+            "address": "0xelementPool1"
         },
         {
             "id": "0xelementPool2",
@@ -66,7 +67,8 @@
                 "0x0000000000000000000000000000000000000001",
                 "0x6b175474e89094c44da98b954eedeac495271d0f"
             ],
-            "totalWeight": "10"
+            "totalWeight": "10",
+            "address": "0xelementPool2"
         },
         {
             "id": "0xelementPool3",
@@ -95,7 +97,8 @@
                 "0x0000000000000000000000000000000000000001",
                 "0x6b175474e89094c44da98b954eedeac495271d0f"
             ],
-            "totalWeight": "10"
+            "totalWeight": "10",
+            "address": "0xelementPool3"
         },
         {
             "id": "0xelementPool4",
@@ -124,7 +127,8 @@
                 "0x0000000000000000000000000000000000000001",
                 "0x6b175474e89094c44da98b954eedeac495271d0f"
             ],
-            "totalWeight": "10"
+            "totalWeight": "10",
+            "address": "0xelementPool4"
         }
     ]
 }

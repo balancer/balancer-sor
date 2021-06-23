@@ -11,8 +11,6 @@ export async function getOnChainBalances(
     vaultAddress: string,
     provider: BaseProvider
 ): Promise<SubGraphPoolsBase> {
-    // ): Promise<Pool[]> {
-    console.time('getPools');
     if (subgraphPools.pools.length === 0) return subgraphPools;
 
     const vaultAbi = require('./abi/Vault.json');
@@ -94,12 +92,6 @@ export async function getOnChainBalances(
                     -18
                 ).toString();
         });
-
-        if (subgraphPool.poolType === 'Stable') {
-            subgraphPool.amp = scale(bnum(onChainResult.amp), -18).toString();
-        }
     });
-
-    console.timeEnd('getPools');
     return subgraphPools;
 }

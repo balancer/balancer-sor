@@ -14,6 +14,7 @@ export interface StablePoolToken {
 }
 export interface StablePoolPairData extends PoolPairBase {
     id: string;
+    address: string;
     poolType: PoolTypes;
     pairType: PairTypes;
     tokenIn: string;
@@ -33,6 +34,7 @@ export declare class StablePool implements PoolBase {
     poolType: PoolTypes;
     swapPairType: SwapPairType;
     id: string;
+    address: string;
     amp: string;
     swapFee: string;
     totalShares: string;
@@ -40,6 +42,7 @@ export declare class StablePool implements PoolBase {
     tokensList: string[];
     constructor(
         id: string,
+        address: string,
         amp: string,
         swapFee: string,
         totalShares: string,
@@ -126,28 +129,28 @@ export declare class StablePool implements PoolBase {
         poolPairData: StablePoolPairData,
         amount: BigNumber
     ): BigNumber;
-    _evmoutGivenIn: (
+    _evmoutGivenIn(
         poolPairData: StablePoolPairData,
         amount: BigNumber
-    ) => BigNumber;
-    _evmexactTokenInForBPTOut: (
+    ): BigNumber;
+    _evminGivenOut(
         poolPairData: StablePoolPairData,
         amount: BigNumber
-    ) => BigNumber;
-    _evmexactBPTInForTokenOut: (
+    ): BigNumber;
+    _evmexactTokenInForBPTOut(
         poolPairData: StablePoolPairData,
         amount: BigNumber
-    ) => BigNumber;
-    _evminGivenOut: (
+    ): BigNumber;
+    _evmexactBPTInForTokenOut(
         poolPairData: StablePoolPairData,
         amount: BigNumber
-    ) => BigNumber;
-    _evmtokenInForExactBPTOut: (
+    ): BigNumber;
+    _evmtokenInForExactBPTOut(
         poolPairData: StablePoolPairData,
         amount: BigNumber
-    ) => BigNumber;
-    _evmbptInForExactTokenOut: (
+    ): BigNumber;
+    _evmbptInForExactTokenOut(
         poolPairData: StablePoolPairData,
         amount: BigNumber
-    ) => BigNumber;
+    ): BigNumber;
 }

@@ -1,0 +1,64 @@
+{
+    "pools": [
+        {
+            "id": "0xebfed10e11dc08fcda1af1fda146945e8710f22e00000000000000000000007f",
+            "poolType": "Stable",
+            "address": "0xebFEd10e11dC08FCda1aF1FDA146945E8710F22E",
+            "swapFee": "0.0015",
+            "amp": "2000",
+            "totalWeight": "0",
+            "tokens": [
+                {
+                    "address": "0x04df6e4121c27713ed22341e7c7df330f56f289b",
+                    "balance": "1022.532485168762580535",
+                    "decimals": "18",
+                    "symbol": "DAI"
+                },
+                {
+                    "address": "0xc2569dd7d0fd715b054fbf16e75b001e5c0c1115",
+                    "balance": "977.501572",
+                    "decimals": "6",
+                    "symbol": "USDC"
+                },
+                {
+                    "address": "0xcc08220af469192c53295fdd34cfb8df29aa17ab",
+                    "balance": "1000",
+                    "decimals": "6",
+                    "symbol": "USDT"
+                }
+            ],
+            "tokensList": [
+                "0x04df6e4121c27713ed22341e7c7df330f56f289b",
+                "0xc2569dd7d0fd715b054fbf16e75b001e5c0c1115",
+                "0xcc08220af469192c53295fdd34cfb8df29aa17ab"
+            ],
+            "totalShares": 100
+        },
+        {
+            "id": "0x119a129203a3882b85ca77c954af86ebfae16bdd0000000000000000000000a0",
+            "poolType": "Stable",
+            "address": "0x119a129203a3882b85ca77c954af86ebfae16bdd",
+            "swapFee": "0.003",
+            "amp": "200",
+            "tokens": [
+                {
+                    "address": "0x22ee6c3b011facc530dd01fe94c58919344d6db5",
+                    "balance": "985.95",
+                    "decimals": 2,
+                    "symbol": "GUSD"
+                },
+                {
+                    "address": "0xc2569dd7d0fd715b054fbf16e75b001e5c0c1115",
+                    "balance": "1014.111068",
+                    "decimals": 6,
+                    "symbol": "USDC"
+                }
+            ],
+            "tokensList": [
+                "0x22ee6c3b011facc530dd01fe94c58919344d6db5",
+                "0xc2569dd7d0fd715b054fbf16e75b001e5c0c1115"
+            ],
+            "totalShares": 100
+        }
+    ]
+}

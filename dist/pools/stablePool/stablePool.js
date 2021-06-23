@@ -1,13 +1,27 @@
 'use strict';
+var __importStar =
+    (this && this.__importStar) ||
+    function(mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null)
+            for (var k in mod)
+                if (Object.hasOwnProperty.call(mod, k)) result[k] = mod[k];
+        result['default'] = mod;
+        return result;
+    };
 Object.defineProperty(exports, '__esModule', { value: true });
 const types_1 = require('../../types');
 const address_1 = require('@ethersproject/address');
 const bmath_1 = require('../../bmath');
+const fixedPoint_1 = require('../../math/lib/fixedPoint');
+const stableSolidity = __importStar(require('./stableMathEvm'));
 const stableMath_1 = require('./stableMath');
 class StablePool {
-    constructor(id, amp, swapFee, totalShares, tokens, tokensList) {
+    constructor(id, address, amp, swapFee, totalShares, tokens, tokensList) {
         this.poolType = types_1.PoolTypes.Stable;
         this.id = id;
+        this.address = address;
         this.amp = amp;
         this.swapFee = swapFee;
         this.totalShares = totalShares;
@@ -28,18 +42,18 @@ class StablePool {
         let tokenIndexIn;
         let tokenIndexOut;
         // Check if tokenIn is the pool token itself (BPT)
-        if (tokenIn == this.id) {
+        if (tokenIn === this.address) {
             pairType = types_1.PairTypes.BptToToken;
             balanceIn = this.totalShares;
             decimalsIn = '18'; // Not used but has to be defined
-        } else if (tokenOut == this.id) {
+        } else if (tokenOut === this.address) {
             pairType = types_1.PairTypes.TokenToBpt;
             balanceOut = this.totalShares;
             decimalsOut = '18'; // Not used but has to be defined
         } else {
             pairType = types_1.PairTypes.TokenToToken;
         }
-        if (pairType != types_1.PairTypes.BptToToken) {
+        if (pairType !== types_1.PairTypes.BptToToken) {
             tokenIndexIn = this.tokens.findIndex(
                 t =>
                     address_1.getAddress(t.address) ===
@@ -50,7 +64,7 @@ class StablePool {
             balanceIn = tI.balance;
             decimalsIn = tI.decimals;
         }
-        if (pairType != types_1.PairTypes.TokenToBpt) {
+        if (pairType !== types_1.PairTypes.TokenToBpt) {
             tokenIndexOut = this.tokens.findIndex(
                 t =>
                     address_1.getAddress(t.address) ===
@@ -69,6 +83,7 @@ class StablePool {
         let inv = stableMath_1._invariant(bmath_1.bnum(this.amp), allBalances);
         const poolPairData = {
             id: this.id,
+            address: this.address,
             poolType: this.poolType,
             pairType: pairType,
             tokenIn: tokenIn,
@@ -105,7 +120,7 @@ class StablePool {
     // Updates the balance of a given token for the pool
     updateTokenBalanceForPool(token, newBalance) {
         // token is BPT
-        if (this.id == token) {
+        if (this.address == token) {
             this.totalShares = newBalance.toString();
         } else {
             // token is underlying in the pool
@@ -202,6 +217,158 @@ class StablePool {
             amount,
             poolPairData
         );
+    }
+    _evmoutGivenIn(poolPairData, amount) {
+        // TO DO - Tidy this by adding scaled allBalances to poolPairData?
+        // Taken directly from V2 repo.
+        // We don't have access to all token decimals info to scale allBalances correctly
+        // so manually normalise everything to 18 decimals and scale back after
+        // i.e. 1USDC => 1e18 not 1e6
+        // Amp is non-scaled so can be used directly from SG
+        const balancesScaled = poolPairData.allBalances.map(bal =>
+            fixedPoint_1.fnum(bmath_1.scale(bal, 18))
+        );
+        const amtScaled = bmath_1.scale(amount, 18);
+        const swapFeeScaled = bmath_1.scale(poolPairData.swapFee, 18);
+        const result = stableSolidity._exactTokenInForTokenOut(
+            balancesScaled,
+            fixedPoint_1.fnum(poolPairData.amp),
+            poolPairData.tokenIndexIn,
+            poolPairData.tokenIndexOut,
+            fixedPoint_1.fnum(amtScaled),
+            fixedPoint_1.fnum(swapFeeScaled)
+        );
+        // const norm = scale(result, -18);
+        // return scale(norm, poolPairData.decimalsOut);
+        // Scaling to correct decimals and removing any extra non-integer
+        // const scaledResult = scale(result, -18 + poolPairData.decimalsOut)
+        //     .toString()
+        //     .split('.')[0];
+        // return new BigNumber(scaledResult);
+        return bmath_1.scale(result, -18 + poolPairData.decimalsOut);
+    }
+    _evminGivenOut(poolPairData, amount) {
+        // TO DO - Tidy this by adding scaled allBalances to poolPairData?
+        // Taken directly from V2 repo.
+        // We don't have access to all token decimals info to scale allBalances correctly
+        // so manually normalise everything to 18 decimals and scale back after
+        // i.e. 1USDC => 1e18 not 1e6
+        // Amp is non-scaled so can be used directly from SG
+        const balancesScaled = poolPairData.allBalances.map(bal =>
+            fixedPoint_1.fnum(bmath_1.scale(bal, 18))
+        );
+        const amtScaled = bmath_1.scale(amount, 18);
+        const swapFeeScaled = bmath_1.scale(poolPairData.swapFee, 18);
+        const result = stableSolidity._tokenInForExactTokenOut(
+            balancesScaled,
+            fixedPoint_1.fnum(poolPairData.amp),
+            poolPairData.tokenIndexIn,
+            poolPairData.tokenIndexOut,
+            fixedPoint_1.fnum(amtScaled),
+            fixedPoint_1.fnum(swapFeeScaled)
+        );
+        // const norm = scale(result, -18);
+        // return scale(norm, poolPairData.decimalsOut);
+        // Scaling to correct decimals and removing any extra non-integer
+        // const scaledResult = scale(result, -18 + poolPairData.decimalsIn)
+        //     .toString()
+        //     .split('.')[0];
+        // return new BigNumber(scaledResult);
+        return bmath_1.scale(result, -18 + poolPairData.decimalsIn);
+    }
+    _evmexactTokenInForBPTOut(poolPairData, amount) {
+        // TO DO - Tidy this by adding scaled allBalances to poolPairData?
+        // Taken directly from V2 repo.
+        // We don't have access to all token decimals info to scale allBalances correctly
+        // so manually normalise everything to 18 decimals and scale back after
+        // i.e. 1USDC => 1e18 not 1e6
+        // Amp is non-scaled so can be used directly from SG
+        const balancesScaled = poolPairData.allBalances.map(bal =>
+            fixedPoint_1.fnum(bmath_1.scale(bal, 18))
+        );
+        // amountsIn must have same length as balances. Only need value for token in.
+        const amountsIn = poolPairData.allBalances.map((bal, i) => {
+            if (i === poolPairData.tokenIndexIn)
+                return fixedPoint_1.fnum(bmath_1.scale(amount, 18));
+            else return fixedPoint_1.fnum(0);
+        });
+        const bptTotalSupplyScaled = bmath_1.scale(poolPairData.balanceOut, 18);
+        const swapFeeScaled = bmath_1.scale(poolPairData.swapFee, 18);
+        const result = stableSolidity._exactTokensInForBPTOut(
+            balancesScaled,
+            fixedPoint_1.fnum(poolPairData.amp),
+            amountsIn,
+            fixedPoint_1.fnum(bptTotalSupplyScaled),
+            fixedPoint_1.fnum(swapFeeScaled)
+        );
+        return result;
+    }
+    _evmexactBPTInForTokenOut(poolPairData, amount) {
+        // TO DO - Tidy this?
+        // Taken directly from V2 repo and requires normalised scaled balances
+        // i.e. 1USDC => 1e18 not 1e6
+        // Amp is non-scaled so can be used directly from SG
+        const balancesScaled = poolPairData.allBalances.map(bal =>
+            fixedPoint_1.fnum(bmath_1.scale(bal, 18))
+        );
+        const bptAmountInScaled = bmath_1.scale(amount, 18);
+        const bptTotalSupply = bmath_1.scale(poolPairData.balanceIn, 18);
+        const swapFeeScaled = bmath_1.scale(poolPairData.swapFee, 18);
+        const result = stableSolidity._exactBPTInForTokenOut(
+            poolPairData.tokenIndexOut,
+            balancesScaled,
+            fixedPoint_1.fnum(poolPairData.amp),
+            fixedPoint_1.fnum(bptAmountInScaled),
+            fixedPoint_1.fnum(bptTotalSupply),
+            fixedPoint_1.fnum(swapFeeScaled)
+        );
+        return result;
+    }
+    _evmtokenInForExactBPTOut(poolPairData, amount) {
+        // TO DO - Tidy this?
+        // Taken directly from V2 repo and requires normalised scaled balances
+        // i.e. 1USDC => 1e18 not 1e6
+        // Amp is non-scaled so can be used directly from SG
+        const balancesScaled = poolPairData.allBalances.map(bal =>
+            fixedPoint_1.fnum(bmath_1.scale(bal, 18))
+        );
+        const bptAmountOutScaled = bmath_1.scale(amount, 18);
+        const bptTotalSupply = bmath_1.scale(poolPairData.balanceOut, 18);
+        const swapFeeScaled = bmath_1.scale(poolPairData.swapFee, 18);
+        const result = stableSolidity._tokenInForExactBPTOut(
+            poolPairData.tokenIndexIn,
+            balancesScaled,
+            fixedPoint_1.fnum(poolPairData.amp),
+            fixedPoint_1.fnum(bptAmountOutScaled),
+            fixedPoint_1.fnum(bptTotalSupply),
+            fixedPoint_1.fnum(swapFeeScaled)
+        );
+        return result;
+    }
+    _evmbptInForExactTokenOut(poolPairData, amount) {
+        // TO DO - Tidy this?
+        // Taken directly from V2 repo and requires normalised scaled balances
+        // i.e. 1USDC => 1e18 not 1e6
+        // Amp is non-scaled so can be used directly from SG
+        const balancesScaled = poolPairData.allBalances.map(bal =>
+            fixedPoint_1.fnum(bmath_1.scale(bal, 18))
+        );
+        // amountsOut must have same length as balances. Only need value for token out.
+        const amountsOut = poolPairData.allBalances.map((bal, i) => {
+            if (i === poolPairData.tokenIndexOut)
+                return fixedPoint_1.fnum(bmath_1.scale(amount, 18));
+            else return fixedPoint_1.fnum(0);
+        });
+        const bptTotalSupply = bmath_1.scale(poolPairData.balanceIn, 18);
+        const swapFeeScaled = bmath_1.scale(poolPairData.swapFee, 18);
+        const result = stableSolidity._bptInForExactTokensOut(
+            balancesScaled,
+            fixedPoint_1.fnum(poolPairData.amp),
+            amountsOut,
+            fixedPoint_1.fnum(bptTotalSupply),
+            fixedPoint_1.fnum(swapFeeScaled)
+        );
+        return result;
     }
 }
 exports.StablePool = StablePool;
