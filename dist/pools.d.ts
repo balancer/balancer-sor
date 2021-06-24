@@ -1,13 +1,9 @@
 import {
     DisabledOptions,
     SubgraphPoolBase,
-    SubGraphPoolsBase,
     PoolDictionary,
     NewPath,
 } from './types';
-export declare function getPoolsFromUrl(
-    URL: string
-): Promise<SubGraphPoolsBase>;
 export declare function filterPoolsOfInterest(
     allPools: SubgraphPoolBase[],
     tokenIn: string,

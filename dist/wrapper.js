@@ -40,6 +40,7 @@ const bmath_1 = require('./bmath');
 const costToken_1 = require('./costToken');
 const multicall_1 = require('./multicall');
 const pools_1 = require('./pools');
+const subgraph_1 = require('./subgraph');
 const sorClass_1 = require('./sorClass');
 const helpersClass_1 = require('./helpersClass');
 const types_1 = require('./types');
@@ -152,7 +153,7 @@ class SOR {
                 } else {
                     // Retrieve from URL if set otherwise use data passed in constructor
                     if (this.isUsingPoolsUrl)
-                        subgraphPools = yield pools_1.getPoolsFromUrl(
+                        subgraphPools = yield subgraph_1.fetchSubgraphPools(
                             this.poolsUrl
                         );
                     else subgraphPools = this.subgraphPools;

@@ -3,11 +3,8 @@ import { BigNumber } from './utils/bignumber';
 import { bnum } from './bmath';
 import { getCostOutputToken } from './costToken';
 import { getOnChainBalances } from './multicall';
-import {
-    filterPoolsOfInterest,
-    filterHopPools,
-    getPoolsFromUrl,
-} from './pools';
+import { filterPoolsOfInterest, filterHopPools } from './pools';
+import { fetchSubgraphPools } from './subgraph';
 import { calculatePathLimits, smartOrderRouter } from './sorClass';
 import { formatSwaps } from './helpersClass';
 import {
@@ -148,7 +145,7 @@ export class SOR {
             } else {
                 // Retrieve from URL if set otherwise use data passed in constructor
                 if (this.isUsingPoolsUrl)
-                    subgraphPools = await getPoolsFromUrl(this.poolsUrl);
+                    subgraphPools = await fetchSubgraphPools(this.poolsUrl);
                 else subgraphPools = this.subgraphPools;
             }
 

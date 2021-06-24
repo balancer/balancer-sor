@@ -17,12 +17,6 @@ import { bnum } from './bmath';
 
 import disabledTokensDefault from './disabled-tokens.json';
 
-export async function getPoolsFromUrl(URL: string): Promise<SubGraphPoolsBase> {
-    const result = await fetch(URL);
-    const allPools = result.json();
-    return allPools;
-}
-
 /*
 The main purpose of this function is to:
 - filter to  allPools to pools that have:
