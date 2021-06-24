@@ -2,47 +2,11 @@
 
 Examples and some non-deterministic testing helpers.
 
-### swapExactInEthIn.ts
+### swapExample.ts
 
-Run: `$ ts-node ./test/testScripts/swapExactInEthIn.ts`
+Run: `$ ts-node ./test/testScripts/swapExample.ts`
 
-Example showing how to use SOR and Vault to execute an ExactIn, Eth to token swap.
-
-### swapExactInEthOut.ts
-
-Run: `$ ts-node ./test/testScripts/swapExactInEthOut.ts`
-
-Example showing how to use SOR and Vault to execute an ExactIn, token to Eth swap.
-
-### swapExactInIpfs.ts
-
-Run: `$ ts-node ./test/testScripts/swapExactInIpfs.ts`
-
-Example showing how to use SOR and Vault to execute an ExactIn, token to token swap using Pools data retrieved from an IPFS URL.
-
-### swapExactInSubgraph.ts
-
-Run: `$ ts-node ./test/testScripts/swapExactInSubgraph.ts`
-
-Example showing how to use SOR and Vault to execute an ExactIn, token to token swap using Pools data retrieved from Subgraph.
-
-### swapExactOutEthIn.ts
-
-Run: `$ ts-node ./test/testScripts/swapExactOutEthIn.ts`
-
-Example showing how to use SOR and Vault to execute an ExactOut, Eth to token swap.
-
-### swapExactOutEthOut.ts
-
-Run: `$ ts-node ./test/testScripts/swapExactOutEthOut.ts`
-
-Example showing how to use SOR and Vault to execute an ExactOut, token to Eth swap.
-
-### swapExactOutIpfs.ts
-
-Run: `$ ts-node ./test/testScripts/swapExactOutIpfs.ts`
-
-Example showing how to use SOR and Vault to execute an ExactOut, token to token swap using Pools data retrieved from an IPFS URL.
+Example showing how to use SOR and Vault to execute swaps. Can configure different swap types and pool sources as well as use Mainnet or Kovan.
 
 ### v1-v2-compareRandom.ts
 
