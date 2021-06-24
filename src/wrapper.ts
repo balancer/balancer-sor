@@ -42,7 +42,7 @@ export class SOR {
     maxPools: number;
     chainId: number;
     // avg Balancer swap cost. Can be updated manually if required.
-    swapCost: BigNumber = new BigNumber('100000');
+    swapCost: BigNumber;
     isUsingPoolsUrl: Boolean;
     poolsUrl: string;
     subgraphPools: SubGraphPoolsBase;
@@ -58,6 +58,7 @@ export class SOR {
         maxPools: number,
         chainId: number,
         poolsSource: string | SubGraphPoolsBase,
+        swapCost: BigNumber = new BigNumber('100000'),
         disabledOptions: DisabledOptions = {
             isOverRide: false,
             disabledTokens: [],
@@ -67,6 +68,7 @@ export class SOR {
         this.gasPrice = gasPrice;
         this.maxPools = maxPools;
         this.chainId = chainId;
+        this.swapCost = swapCost;
         // The pools source can be a URL (e.g. pools from Subgraph) or a data set of pools
         if (typeof poolsSource === 'string') {
             this.isUsingPoolsUrl = true;
