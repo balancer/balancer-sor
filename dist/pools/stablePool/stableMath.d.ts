@@ -69,6 +69,12 @@ export declare function _derivative(
     amount: any,
     poolPairData: any
 ): BigNumber;
+export declare function _spotPriceNoFee(
+    amp: any,
+    balances: any,
+    tokenIndexIn: any,
+    tokenIndexOut: any
+): BigNumber;
 export declare function _spotPriceAfterSwapExactTokenInForTokenOut(
     amount: any,
     poolPairData: any
@@ -76,6 +82,12 @@ export declare function _spotPriceAfterSwapExactTokenInForTokenOut(
 export declare function _spotPriceAfterSwapTokenInForExactTokenOut(
     amount: any,
     poolPairData: any
+): BigNumber;
+export declare function _spotBPTPriceNoFee(
+    amp: any,
+    balances: any,
+    bptTotalSupply: any,
+    tokenIndexIn: any
 ): BigNumber;
 export declare function _spotPriceAfterSwapExactTokenInForBPTOut(
     amount: any,
@@ -92,6 +104,12 @@ export declare function _spotPriceAfterSwapExactBPTInForTokenOut(
 export declare function _spotPriceAfterSwapBPTInForExactTokenOut(
     amount: any,
     poolPairData: any
+): BigNumber;
+export declare function _derivativeSpotPriceNoFee(
+    amp: any,
+    balances: any,
+    tokenIndexIn: any,
+    tokenIndexOut: any
 ): BigNumber;
 export declare function _derivativeSpotPriceAfterSwapExactTokenInForTokenOut(
     amount: any,
