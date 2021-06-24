@@ -89,7 +89,7 @@ describe(`Tests for wrapper class.`, () => {
         const fetchSuccess = await sor.fetchPools();
         assert.isFalse(fetchSuccess);
         assert.isFalse(sor.finishedFetchingOnChain);
-    });
+    }).timeout(100000);
 
     it(`fetchPools should fetch with NO scaling`, async () => {
         const poolsFromFile: SubGraphPoolsBase = require('./testData/testPools/subgraphPoolsSmallWithTrade.json');
