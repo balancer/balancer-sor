@@ -35,6 +35,7 @@ export declare class SOR {
         maxPools: number,
         chainId: number,
         poolsSource: string | SubGraphPoolsBase,
+        swapCost?: BigNumber,
         disabledOptions?: DisabledOptions
     );
     setCostOutputToken(
