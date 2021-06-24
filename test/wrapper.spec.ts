@@ -83,13 +83,14 @@ describe(`Tests for wrapper class.`, () => {
         assert.equal(cost.toString(), sor.tokenCost[WETHADDR]);
     });
 
-    it(`Should return false for fetchPools error`, async () => {
-        const failUrl = ``;
-        const sor = new SOR(provider, gasPrice, maxPools, chainId, failUrl);
-        const fetchSuccess = await sor.fetchPools();
-        assert.isFalse(fetchSuccess);
-        assert.isFalse(sor.finishedFetchingOnChain);
-    }).timeout(100000);
+    // Valid test but outputs large error
+    // it(`Should return false for fetchPools error`, async () => {
+    //     const failUrl = ``;
+    //     const sor = new SOR(provider, gasPrice, maxPools, chainId, failUrl);
+    //     const fetchSuccess = await sor.fetchPools();
+    //     assert.isFalse(fetchSuccess);
+    //     assert.isFalse(sor.finishedFetchingOnChain);
+    // }).timeout(100000);
 
     it(`fetchPools should fetch with NO scaling`, async () => {
         const poolsFromFile: SubGraphPoolsBase = require('./testData/testPools/subgraphPoolsSmallWithTrade.json');
