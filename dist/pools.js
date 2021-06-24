@@ -1,39 +1,4 @@
 'use strict';
-var __awaiter =
-    (this && this.__awaiter) ||
-    function(thisArg, _arguments, P, generator) {
-        function adopt(value) {
-            return value instanceof P
-                ? value
-                : new P(function(resolve) {
-                      resolve(value);
-                  });
-        }
-        return new (P || (P = Promise))(function(resolve, reject) {
-            function fulfilled(value) {
-                try {
-                    step(generator.next(value));
-                } catch (e) {
-                    reject(e);
-                }
-            }
-            function rejected(value) {
-                try {
-                    step(generator['throw'](value));
-                } catch (e) {
-                    reject(e);
-                }
-            }
-            function step(result) {
-                result.done
-                    ? resolve(result.value)
-                    : adopt(result.value).then(fulfilled, rejected);
-            }
-            step(
-                (generator = generator.apply(thisArg, _arguments || [])).next()
-            );
-        });
-    };
 var __importDefault =
     (this && this.__importDefault) ||
     function(mod) {
@@ -41,7 +6,6 @@ var __importDefault =
     };
 Object.defineProperty(exports, '__esModule', { value: true });
 const config_1 = require('./config');
-const isomorphic_fetch_1 = __importDefault(require('isomorphic-fetch'));
 const types_1 = require('./types');
 const weightedPool_1 = require('./pools/weightedPool/weightedPool');
 const stablePool_1 = require('./pools/stablePool/stablePool');
@@ -50,14 +14,6 @@ const bmath_1 = require('./bmath');
 const disabled_tokens_json_1 = __importDefault(
     require('./disabled-tokens.json')
 );
-function getPoolsFromUrl(URL) {
-    return __awaiter(this, void 0, void 0, function*() {
-        const result = yield isomorphic_fetch_1.default(URL);
-        const allPools = result.json();
-        return allPools;
-    });
-}
-exports.getPoolsFromUrl = getPoolsFromUrl;
 /*
 The main purpose of this function is to:
 - filter to  allPools to pools that have:
