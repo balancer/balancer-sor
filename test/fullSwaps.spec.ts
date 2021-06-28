@@ -48,6 +48,7 @@ describe('Tests full swaps against known values', () => {
         const tokenIn = WETH;
         const tokenOut = ANT;
         const costOutputToken = new BigNumber(0);
+        const swapCost = new BigNumber('100000');
 
         const swapInfo = await getV2Swap(
             provider,
@@ -59,6 +60,7 @@ describe('Tests full swaps against known values', () => {
             swapAmount,
             gasPrice,
             18,
+            swapCost,
             {
                 isOverRide: false,
                 disabledTokens: [],
@@ -84,6 +86,7 @@ describe('Tests full swaps against known values', () => {
         const tokenIn = WETH;
         const tokenOut = ANT;
         const costOutputToken = new BigNumber(0);
+        const swapCost = new BigNumber('100000');
 
         const swapInfo = await getV2Swap(
             provider,
@@ -95,6 +98,7 @@ describe('Tests full swaps against known values', () => {
             swapAmount,
             gasPrice,
             18,
+            swapCost,
             {
                 isOverRide: false,
                 disabledTokens: [],
@@ -178,6 +182,7 @@ describe('Tests full swaps against known values', () => {
         const swapType = 'swapExactIn';
         const noPools = 4;
         const swapAmt = new BigNumber('100000000000000000');
+        const swapCost = new BigNumber('100000');
 
         const disabledOptions: DisabledOptions = {
             isOverRide: true,
@@ -219,6 +224,7 @@ describe('Tests full swaps against known values', () => {
             amountNormalised,
             testData.tradeInfo.GasPrice,
             testData.tradeInfo.ReturnAmountDecimals,
+            swapCost,
             disabledOptions,
             testSettings.costOutputTokenOveride
         );

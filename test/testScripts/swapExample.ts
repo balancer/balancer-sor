@@ -21,12 +21,14 @@ export enum Network {
     MAINNET = 1,
     GOERLI = 5,
     KOVAN = 42,
+    POLYGON = 137,
 }
 
 export const PROVIDER_URLS = {
     [Network.MAINNET]: `https://mainnet.infura.io/v3/${process.env.INFURA}`,
     [Network.GOERLI]: `https://goerli.infura.io/v3/${process.env.INFURA}`,
     [Network.KOVAN]: `https://kovan.infura.io/v3/${process.env.INFURA}`,
+    [Network.POLYGON]: `https://rpc-mainnet.matic.network`,
 };
 
 export const SUBGRAPH_URLS = {
@@ -36,6 +38,8 @@ export const SUBGRAPH_URLS = {
         'https://api.thegraph.com/subgraphs/name/johngrantuk/balancer',
     [Network.KOVAN]:
         'https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-kovan-v2',
+    [Network.POLYGON]:
+        'https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-polygon-v2',
 };
 
 export const ADDRESSES = {
@@ -100,6 +104,38 @@ export const ADDRESSES = {
         },
         DAI: {
             address: '0x04DF6e4121c27713ED22341E7c7Df330F56f289B',
+            decimals: 18,
+            symbol: 'DAI',
+        },
+    },
+    [Network.POLYGON]: {
+        MATIC: {
+            address: ZERO_ADDRESS,
+            decimals: 18,
+            symbol: 'MATIC',
+        },
+        BAL: {
+            address: '0x9a71012b13ca4d3d0cdc72a177df3ef03b0e76a3',
+            decimals: 18,
+            symbol: 'BAL',
+        },
+        USDC: {
+            address: '0x2791bca1f2de4661ed88a30c99a7a9449aa84174',
+            decimals: 6,
+            symbol: 'USDC',
+        },
+        WBTC: {
+            address: '0x1bfd67037b42cf73acf2047067bd4f2c47d9bfd6',
+            decimals: 8,
+            symbol: 'WBTC',
+        },
+        WETH: {
+            address: '0x7ceb23fd6bc0add59e62ac25578270cff1b9f619',
+            decimals: 18,
+            symbol: 'WETH',
+        },
+        DAI: {
+            address: '0x8f3cf7ad23cd3cadbd9735aff958023239c6a063',
             decimals: 18,
             symbol: 'DAI',
         },
@@ -169,6 +205,7 @@ async function getSwap(
     console.log(`Cost to swap: ${cost.toString()}`);
     console.log(`Swaps:`);
     console.log(swapInfo.swaps);
+    console.log(swapInfo.tokenAddresses);
 
     return swapInfo;
 }
@@ -241,7 +278,10 @@ async function makeTrade(
             } else if (
                 token.toLowerCase() === swapInfo.tokenOut.toLowerCase()
             ) {
-                limits[i] = swapInfo.returnAmount.times(-0.99).toString();
+                limits[i] = swapInfo.returnAmount
+                    .times(-0.99)
+                    .toString()
+                    .split('.')[0];
             } else {
                 limits[i] = '0';
             }
@@ -253,7 +293,10 @@ async function makeTrade(
             } else if (
                 token.toLowerCase() === swapInfo.tokenOut.toLowerCase()
             ) {
-                limits[i] = swapInfo.swapAmount.times(-0.99).toString();
+                limits[i] = swapInfo.swapAmount
+                    .times(-0.99)
+                    .toString()
+                    .split('.')[0];
             } else {
                 limits[i] = '0';
             }
@@ -261,14 +304,15 @@ async function makeTrade(
     }
     const deadline = MaxUint256;
 
-    // console.log(funds);
-    // console.log(swapInfo.tokenAddresses);
-    // console.log(limits);
+    console.log(funds);
+    console.log(swapInfo.tokenAddresses);
+    console.log(limits);
 
     console.log('Swapping...');
+
     let overRides = {};
-    overRides['gasLimit'] = '200000';
-    overRides['gasPrice'] = '20000000000';
+    // overRides['gasLimit'] = '200000';
+    // overRides['gasPrice'] = '20000000000';
     // ETH in swaps must send ETH value
     if (swapInfo.tokenIn === ZERO_ADDRESS) {
         overRides['value'] = swapInfo.swapAmount.toString();
@@ -297,11 +341,11 @@ async function simpleSwap() {
     // const poolsSource = require('../testData/testPools/gusdBug.json');
     // Update pools list with most recent onchain balances
     const queryOnChain = true;
-    const tokenIn = ADDRESSES[networkId].ETH;
-    const tokenOut = ADDRESSES[networkId].DAI;
+    const tokenIn = ADDRESSES[networkId].WETH;
+    const tokenOut = ADDRESSES[networkId].USDC;
     const swapType = SwapTypes.SwapExactIn;
-    const swapAmount = new BigNumber(0.001); // In normalized format, i.e. 1USDC = 1
-    const executeTrade = true;
+    const swapAmount = new BigNumber(0.01); // In normalized format, i.e. 1USDC = 1
+    const executeTrade = false;
 
     const provider = new JsonRpcProvider(PROVIDER_URLS[networkId]);
 

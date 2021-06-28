@@ -36,6 +36,8 @@ export async function compareTest(
         bnum(10 ** testData.tradeInfo.SwapAmountDecimals)
     );
 
+    const swapCost = new BigNumber('100000'); // A pool swap costs approx 100000 gas
+
     // V2 first to debug faster
     // Uses costOutputToken returned from above.
     const v2SwapData = await getV2Swap(
@@ -48,6 +50,7 @@ export async function compareTest(
         amountNormalised,
         testData.tradeInfo.GasPrice,
         testData.tradeInfo.ReturnAmountDecimals,
+        swapCost,
         disabledOptions,
         testSettings.costOutputTokenOveride
     );
@@ -85,6 +88,7 @@ export async function compareTest(
         v2SwapData.costOutputToken,
         testData.tradeInfo.GasPrice,
         provider,
+        swapCost,
         disabledOptions
     );
 
