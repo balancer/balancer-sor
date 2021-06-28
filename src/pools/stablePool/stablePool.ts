@@ -202,7 +202,10 @@ export class StablePool implements PoolBase {
         poolPairData: StablePoolPairData,
         amount: BigNumber
     ): BigNumber {
-        return _exactTokenInForTokenOut(amount, poolPairData);
+        return _exactTokenInForTokenOut(amount, poolPairData).dp(
+            poolPairData.decimalsOut,
+            1
+        );
     }
 
     _exactTokenInForBPTOut(
@@ -223,7 +226,10 @@ export class StablePool implements PoolBase {
         poolPairData: StablePoolPairData,
         amount: BigNumber
     ): BigNumber {
-        return _tokenInForExactTokenOut(amount, poolPairData);
+        return _tokenInForExactTokenOut(amount, poolPairData).dp(
+            poolPairData.decimalsIn,
+            1
+        );
     }
 
     _tokenInForExactBPTOut(
