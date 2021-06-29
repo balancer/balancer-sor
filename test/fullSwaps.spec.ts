@@ -845,10 +845,11 @@ describe('Tests full swaps against known values', () => {
         assert.equal(v2SwapData.swaps.length, 0, 'Should have 0 swaps.');
     });
 
-    it('Test for swap with 2 decimal token', async () => {
+    it('Test for swap with 2 decimal token - route available', async () => {
         /*
         This was a path that was previously causing issues because of GUSD having 2 decimals.
-        Before fix the wrapper would return swaps even when return amount was 0.
+        Before fix the wrapper would return a swap amount of 0 because it was routing a small amount via GUSD that was < two decimals.
+        After fix the SOR should consider an alternative viable route with swap amount > 0.
         */
         const allPools = require('./testData/testPools/gusdBug.json');
         const amountOut = new BigNumber(10000000000000000);
