@@ -202,6 +202,9 @@ export class StablePool implements PoolBase {
         poolPairData: StablePoolPairData,
         amount: BigNumber
     ): BigNumber {
+        // Using BigNumber.js decimalPlaces (dp), allows us to consider token decimal accuracy correctly,
+        // i.e. when using token with 2decimals 0.002 should be returned as 0
+        // Uses ROUND_DOWN mode (1)
         return _exactTokenInForTokenOut(amount, poolPairData).dp(
             poolPairData.decimalsOut,
             1
@@ -226,9 +229,12 @@ export class StablePool implements PoolBase {
         poolPairData: StablePoolPairData,
         amount: BigNumber
     ): BigNumber {
+        // Using BigNumber.js decimalPlaces (dp), allows us to consider token decimal accuracy correctly,
+        // i.e. when using token with 2decimals 0.002 should be returned as 0
+        // Uses ROUND_UP mode (0)
         return _tokenInForExactTokenOut(amount, poolPairData).dp(
             poolPairData.decimalsIn,
-            1
+            0
         );
     }
 
