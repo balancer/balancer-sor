@@ -411,6 +411,11 @@ exports.smartOrderRouter = (
             swapType,
             bmath_1.bnum(0)
         );
+    else {
+        swaps = [];
+        marketSp = bmath_1.bnum(0);
+        bestTotalReturnConsideringFees = bmath_1.bnum(0);
+    }
     return [swaps, bestTotalReturn, marketSp, bestTotalReturnConsideringFees];
 };
 //  For a given list of swapAmounts, gets list of pools with best effective price for these amounts
