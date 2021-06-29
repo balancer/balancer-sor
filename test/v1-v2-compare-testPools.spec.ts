@@ -9,7 +9,8 @@ const provider = new JsonRpcProvider(
 
 // This must be updated with pools of interest (see ./test/testData/testPools)
 let testFiles = [
-    // 'gusdBug',
+    'gusdBug',
+    'gusdBugSinglePath',
     '25178485-blockKovan', // UI-506, WETH to WBTC Bug
     // 'stable-and-weighted-token-btp-test',
     // Added pools 'stable-and-weighted-token-btp-test' to element pools

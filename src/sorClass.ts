@@ -438,6 +438,11 @@ export const smartOrderRouter = (
             swapType,
             bnum(0)
         );
+    else {
+        swaps = [];
+        marketSp = bnum(0);
+        bestTotalReturnConsideringFees = bnum(0);
+    }
 
     return [swaps, bestTotalReturn, marketSp, bestTotalReturnConsideringFees];
 };
