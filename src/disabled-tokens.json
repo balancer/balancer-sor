@@ -7,6 +7,10 @@
         {
             "address": "0x7afebbb46fdb47ed17b22ed075cde2447694fb9e",
             "symbol": "OCEAN2"
+        },
+        {
+            "address": "0x0ba45a8b5d5575935b8158a88c631e9f9c95a2e5",
+            "symbol": "TRB"
         }
     ]
 }
