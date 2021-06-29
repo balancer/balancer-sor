@@ -124,6 +124,17 @@ export interface NewPath {
     filterEffectivePrice?: BigNumber; // TODO: This is just used for filtering, maybe there is a better way to filter?
 }
 
+export enum PoolFilter {
+    All = 'All',
+    Weighted = 'Weighted',
+    Stable = 'Stable',
+}
+
+export interface SwapOptions {
+    timestamp: number;
+    poolTypeFilter: PoolFilter;
+}
+
 export interface PoolBase {
     poolType: PoolTypes;
     swapPairType: SwapPairType;

@@ -23,3 +23,9 @@ var PairTypes;
     PairTypes[(PairTypes['TokenToBpt'] = 1)] = 'TokenToBpt';
     PairTypes[(PairTypes['TokenToToken'] = 2)] = 'TokenToToken';
 })((PairTypes = exports.PairTypes || (exports.PairTypes = {})));
+var PoolFilter;
+(function(PoolFilter) {
+    PoolFilter['All'] = 'All';
+    PoolFilter['Weighted'] = 'Weighted';
+    PoolFilter['Stable'] = 'Stable';
+})((PoolFilter = exports.PoolFilter || (exports.PoolFilter = {})));

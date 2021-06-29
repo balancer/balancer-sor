@@ -8,6 +8,7 @@ import {
     SwapTypes,
     PoolTypes,
     PairTypes,
+    PoolFilter,
 } from '../src/types';
 import { bnum } from '../src/bmath';
 import { BigNumber } from '../src/utils/bignumber';
@@ -190,7 +191,10 @@ describe(`Tests for Element Pools.`, () => {
             tokenOut,
             swapType,
             swapAmt,
-            poolsFromFile.pools[0].expiryTime - 22 // This is the value for currentBlockTimestamp
+            {
+                poolTypeFilter: PoolFilter.All,
+                timestamp: poolsFromFile.pools[0].expiryTime - 22, // This is the value for currentBlockTimestamp
+            }
         );
 
         // TO DO - Confirm that behaviour is correct for timestamp
@@ -220,7 +224,10 @@ describe(`Tests for Element Pools.`, () => {
             tokenOut,
             swapType,
             swapAmt,
-            poolsFromFile.pools[0].expiryTime + 22 // This is the value for currentBlockTimestamp
+            {
+                poolTypeFilter: PoolFilter.All,
+                timestamp: poolsFromFile.pools[0].expiryTime + 22, // This is the value for currentBlockTimestamp
+            }
         );
 
         // TO DO - Confirm that behaviour is correct for timestamp
@@ -250,7 +257,10 @@ describe(`Tests for Element Pools.`, () => {
             tokenOut,
             swapType,
             swapAmt,
-            poolsFromFile.pools[0].expiryTime - 22 // This is the value for currentBlockTimestamp
+            {
+                poolTypeFilter: PoolFilter.All,
+                timestamp: poolsFromFile.pools[0].expiryTime - 22, // This is the value for currentBlockTimestamp
+            }
         );
 
         // TO DO - Confirm that behaviour is correct for timestamp
@@ -280,7 +290,10 @@ describe(`Tests for Element Pools.`, () => {
             tokenOut,
             swapType,
             swapAmt,
-            poolsFromFile.pools[0].expiryTime + 22 // This is the value for currentBlockTimestamp
+            {
+                poolTypeFilter: PoolFilter.All,
+                timestamp: poolsFromFile.pools[0].expiryTime + 22, // This is the value for currentBlockTimestamp
+            }
         );
 
         // TO DO - Confirm that behaviour is correct for timestamp
