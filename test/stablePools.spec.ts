@@ -577,7 +577,7 @@ describe(`Tests for Stable Pools.`, () => {
                 amp
             );
 
-            expect(bptAmt.toString()).eq('999912236433875472');
+            expect(bptAmt.toString()).eq('999912236433875470');
         });
 
         it('should test BPTForTokensZeroPriceImpact for single token add + VERY uneven pool', () => {
@@ -595,7 +595,7 @@ describe(`Tests for Stable Pools.`, () => {
                 amp
             );
 
-            expect(bptAmt.toString()).eq('997252048236528015');
+            expect(bptAmt.toString()).eq('997252048236528013');
         });
 
         it('Derivative Bug Case', () => {
@@ -621,7 +621,7 @@ describe(`Tests for Stable Pools.`, () => {
                 amp
             );
 
-            expect(bptAmt.toString()).eq('28957866405645758969955');
+            expect(bptAmt.toString()).eq('28957866405645758931354');
         });
     });
 });
