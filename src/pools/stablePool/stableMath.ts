@@ -474,130 +474,45 @@ export function _exactBPTInForTokenOut(amount, poolPairData): BigNumber {
 ////  These functions have been added exclusively for the SORv2
 //////////////////////
 
-export function _derivative(func: Function, amount, poolPairData): BigNumber {
-    let initialAmount = amount; // initialAmount is an auxiliary variable as amount will be iterated on
-    // If amount is zero or close to zero we have define delta as a small amount higher than zero to avoid a 0/0 error
-    let delta;
-    if (amount.lt(INFINITESIMAL)) {
-        delta = INFINITESIMAL;
-    } else {
-        delta = initialAmount;
-    }
-    let prevDerivative = bnum(0);
-    let derivative = bnum(0);
-    let y = func(amount, poolPairData);
-    for (let i = 0; i < 255; i++) {
-        amount = initialAmount.plus(delta);
-        let yDelta = func(amount, poolPairData);
-        derivative = yDelta.minus(y).div(delta);
-        // Break if precision reached
-        if (
-            // derivative
-            //     .div(prevDerivative)
-            //     .minus(bnum(1))
-            //     .abs()
-            //     .lt(bnum(0.01)) // Variation of less than 1% means convergence
-            derivative
-                .minus(prevDerivative)
-                .abs()
-                .lte(bnum(0.0001).times(prevDerivative)) // Variation of less than 0.01% means convergence
-        )
-            break;
-        prevDerivative = derivative;
-        delta = delta.div(bnum(2));
-    }
-    return derivative;
-}
-
-/////////
-/// SpotPriceAfterSwap
-/////////
-
-export function _spotPriceNoFee(
-    amp,
-    balances,
-    tokenIndexIn,
-    tokenIndexOut
-): BigNumber {
+export function _poolDerivatives(amp, balances, tokenIndexIn, tokenIndexOut, 
+                                 is_first_derivative, wrt_out): BigNumber{
     let totalCoins = balances.length;
     let D = _invariant(amp, balances);
     let S = bnum(0);
     for (let i = 0; i < totalCoins; i++) {
-        if (i != tokenIndexIn && i != tokenIndexOut) {
+        if ((i != tokenIndexIn) && (i != tokenIndexOut)) {
             S = S.plus(balances[i]);
         }
     }
     let x = balances[tokenIndexIn];
     let y = balances[tokenIndexOut];
     let a = amp.times(totalCoins ** totalCoins); // = ampTimesNpowN
-    let b = S.minus(D)
-        .times(a)
-        .plus(D);
-    let twoaxy = bnum(2)
-        .times(a)
-        .times(x)
-        .times(y);
+    let b = S.minus(D).times(a).plus(D);
+    let twoaxy = bnum(2).times(a).times(x).times(y);
     let partial_x = twoaxy.plus(a.times(y).times(y)).plus(b.times(y));
     let partial_y = twoaxy.plus(a.times(x).times(x)).plus(b.times(x));
-    let ans = partial_y.div(partial_x);
+    let ans;
+    if (is_first_derivative) {
+        ans = partial_x.div(partial_y);
+    } else {
+        let partial_xx = bnum(2).times(a).times(y);
+        let partial_yy = bnum(2).times(a).times(x);
+        let partial_xy = partial_xx.plus(partial_yy).plus(b);    
+        let numerator;
+        numerator = bnum(2).times(partial_x).times(partial_y).times(partial_xy).minus(
+            partial_xx.times(partial_y.pow(2)) ).minus(
+            partial_yy.times(partial_x.pow(2)) );
+        let denominator = partial_x.pow(2).times(partial_y);
+        ans = numerator.div(denominator)
+        if (wrt_out) {
+            ans = ans.times(partial_y).div(partial_x);
+        }
+    }
     return ans;
 }
 
-// PairType = 'token->token'
-// SwapType = 'swapExactIn'
-export function _spotPriceAfterSwapExactTokenInForTokenOut(
-    amount,
-    poolPairData
-): BigNumber {
-    let {
-        amp,
-        allBalances,
-        tokenIndexIn,
-        tokenIndexOut,
-        swapFee,
-    } = poolPairData;
-    let balances = [...allBalances];
-    balances[tokenIndexIn] = balances[tokenIndexIn].plus(
-        amount.times(bnum(1).minus(swapFee))
-    );
-    balances[tokenIndexOut] = balances[tokenIndexOut].minus(
-        _exactTokenInForTokenOut(amount, poolPairData)
-    );
-    return _spotPriceNoFee(amp, balances, tokenIndexIn, tokenIndexOut).times(
-        bnum(1).minus(swapFee)
-    );
-}
-
-// PairType = 'token->token'
-// SwapType = 'swapExactOut'
-export function _spotPriceAfterSwapTokenInForExactTokenOut(
-    amount,
-    poolPairData
-): BigNumber {
-    let {
-        amp,
-        allBalances,
-        tokenIndexIn,
-        tokenIndexOut,
-        swapFee,
-    } = poolPairData;
-    let balances = [...allBalances];
-    let _in = _tokenInForExactTokenOut(amount, poolPairData).times(
-        bnum(1).minus(swapFee)
-    );
-    balances[tokenIndexIn] = balances[tokenIndexIn].plus(_in);
-    balances[tokenIndexOut] = balances[tokenIndexOut].minus(amount);
-    return _spotPriceNoFee(amp, balances, tokenIndexIn, tokenIndexOut).times(
-        bnum(1).minus(swapFee)
-    );
-}
-
-export function _spotBPTPriceNoFee(
-    amp,
-    balances,
-    bptTotalSupply,
-    tokenIndexIn
-): BigNumber {
+export function _poolDerivativesBPT(amp, balances, bptSupply, tokenIndexIn, 
+                                    is_first_derivative, is_BPT_out, wrt_out): BigNumber{
     let totalCoins = balances.length;
     let D = _invariant(amp, balances);
     let S = bnum(0);
@@ -612,17 +527,83 @@ export function _spotBPTPriceNoFee(
     let alpha = amp.times(totalCoins ** totalCoins); // = ampTimesNpowN
     let beta = alpha.times(S);
     let gamma = bnum(1).minus(alpha);
-    let partial_x = bnum(2)
-        .times(alpha)
-        .times(x)
-        .plus(beta)
-        .plus(gamma.times(D));
-    let partial_D = D_P.times(totalCoins + 1).minus(gamma.times(x));
-    let ans = partial_D
-        .div(partial_x)
-        .times(D)
-        .div(bptTotalSupply);
+    let partial_x = bnum(2).times(alpha).times(x).plus(beta).plus(gamma.times(D));
+    let minus_partial_D = D_P.times(totalCoins + 1).minus(gamma.times(x));
+    let partial_D = bnum(0).minus(minus_partial_D);
+    let ans;
+    if (is_first_derivative) {
+        ans = partial_x.div(minus_partial_D).times(bptSupply).div(D);
+    } else {
+        let partial_xx = bnum(2).times(alpha);
+        let partial_xD = gamma;
+        let n_times_nplusone = totalCoins * (totalCoins + 1);
+        let partial_DD = bnum(0).minus( D_P.times(n_times_nplusone).div(D) );
+        if (is_BPT_out) {
+            let term1 = partial_xx.times(partial_D).div( partial_x.pow(2) );
+            let term2 = bnum(2).times(partial_xD).div(partial_x);
+            let term3 = partial_DD.div(partial_D);
+            ans = (term1.minus(term2).plus(term3)).times(D).div(bptSupply)
+            if (wrt_out) {
+                let D_prime = bnum(0).minus( partial_x.div(partial_D) ); 
+                ans = ans.div( D_prime ).times(D).div(bptSupply);
+            }
+        } else {
+            ans = bnum(2).times(partial_xD).div(partial_D).minus(
+                partial_DD.times(partial_x).div(partial_D.pow(2)) ).minus(
+                partial_xx.div(partial_x) );
+            if (wrt_out) {
+                ans = ans.times(partial_x).div(minus_partial_D).times(bptSupply).div(D);    
+            }
+        }        
+    }
     return ans;
+}
+
+
+/////////
+/// SpotPriceAfterSwap
+/////////
+
+// PairType = 'token->token'
+// SwapType = 'swapExactIn'
+export function _spotPriceAfterSwapExactTokenInForTokenOut(
+    amount, 
+    poolPairData
+): BigNumber{
+    let {amp, allBalances, tokenIndexIn, tokenIndexOut, swapFee} = poolPairData;
+    let balances = [...allBalances];
+    balances[tokenIndexIn] = balances[tokenIndexIn].plus(amount.times(bnum(1).minus(swapFee)));
+    balances[tokenIndexOut] = balances[tokenIndexOut].minus(_exactTokenInForTokenOut(amount, poolPairData));
+    let ans = _poolDerivatives(amp, balances, tokenIndexIn, tokenIndexOut, true, false);
+    ans = bnum(1).div( ans.times(bnum(1).minus(swapFee)) );
+    return ans; 
+}
+
+// PairType = 'token->token'
+// SwapType = 'swapExactOut'
+export function _spotPriceAfterSwapTokenInForExactTokenOut(
+    amount,
+    poolPairData
+): BigNumber {
+    let {amp, allBalances, tokenIndexIn, tokenIndexOut, swapFee} = poolPairData;
+    let balances = [...allBalances];
+    let _in = _tokenInForExactTokenOut(amount, poolPairData).times(bnum(1).minus(swapFee));
+    balances[tokenIndexIn] = balances[tokenIndexIn].plus(_in);
+    balances[tokenIndexOut] = balances[tokenIndexOut].minus(amount);
+    let ans = _poolDerivatives(amp, balances, tokenIndexIn, tokenIndexOut, true, true);
+    ans = bnum(1).div( ans.times(bnum(1).minus(swapFee)) );
+    return ans; 
+}
+
+function _feeFactor( balances, tokenIndex, swapFee): BigNumber
+{
+    let sumBalances = bnum(0);
+    for (let i = 0; i < balances.length; i++) {
+        sumBalances = sumBalances.plus(balances[i]);
+    }
+    let currentWeight = balances[tokenIndex].div(sumBalances);
+    let tokenBalancePercentageExcess = bnum(1).minus(currentWeight);
+    return bnum(1).minus(tokenBalancePercentageExcess.times(swapFee));
 }
 
 // PairType = 'token->BPT'
@@ -633,24 +614,13 @@ export function _spotPriceAfterSwapExactTokenInForBPTOut(
 ): BigNumber {
     let { amp, allBalances, balanceOut, tokenIndexIn, swapFee } = poolPairData;
     let balances = [...allBalances];
-
-    // Computation of feeFactor
-    let sumBalances = bnum(0);
-    for (let i = 0; i < balances.length; i++) {
-        sumBalances = sumBalances.plus(balances[i]);
-    }
-    let currentWeight = balances[tokenIndexIn].div(sumBalances);
-    let tokenBalancePercentageExcess = bnum(1).minus(currentWeight);
-    let feeFactor = bnum(1).minus(tokenBalancePercentageExcess.times(swapFee));
-    //
-    balances[tokenIndexIn] = balances[tokenIndexIn].plus(
-        amount.times(feeFactor)
-    );
-    balanceOut = balanceOut.plus(_exactTokenInForBPTOut(amount, poolPairData));
-    let ans = _spotBPTPriceNoFee(amp, balances, balanceOut, tokenIndexIn).times(
-        feeFactor
-    );
-    return ans;
+    let feeFactor = _feeFactor(balances, tokenIndexIn, swapFee);
+    balances[tokenIndexIn] = balances[tokenIndexIn].plus(amount.times(feeFactor));
+    balanceOut = balanceOut.plus( _exactTokenInForBPTOut(amount, poolPairData) );
+    let ans = _poolDerivativesBPT(amp, balances, balanceOut, tokenIndexIn, 
+                                  true, true, false);
+    ans = bnum(1).div(ans.times(feeFactor));
+    return( ans );
 }
 
 // PairType = 'token->BPT'
@@ -662,21 +632,13 @@ export function _spotPriceAfterSwapTokenInForExactBPTOut(
     let { amp, allBalances, balanceOut, tokenIndexIn, swapFee } = poolPairData;
     let balances = [...allBalances];
     let _in = _tokenInForExactBPTOut(amount, poolPairData);
-    // Computation of feeFactor
-    let sumBalances = bnum(0);
-    for (let i = 0; i < balances.length; i++) {
-        sumBalances = sumBalances.plus(balances[i]);
-    }
-    let currentWeight = balances[tokenIndexIn].div(sumBalances);
-    let tokenBalancePercentageExcess = bnum(1).minus(currentWeight);
-    let feeFactor = bnum(1).minus(tokenBalancePercentageExcess.times(swapFee));
-    //
+    let feeFactor = _feeFactor(balances, tokenIndexIn, swapFee);
     balances[tokenIndexIn] = balances[tokenIndexIn].plus(_in.times(feeFactor));
-    balanceOut = balanceOut.plus(amount);
-    let ans = _spotBPTPriceNoFee(amp, balances, balanceOut, tokenIndexIn).times(
-        feeFactor
-    );
-    return ans;
+    balanceOut = balanceOut.plus( amount );
+    let ans = _poolDerivativesBPT(amp, balances, balanceOut, tokenIndexIn,
+                                  true, true, true);
+    ans = bnum(1).div(ans.times(feeFactor));
+    return( ans );
 }
 
 // PairType = 'BPT->token'
@@ -688,24 +650,12 @@ export function _spotPriceAfterSwapExactBPTInForTokenOut(
     let { amp, allBalances, balanceIn, tokenIndexOut, swapFee } = poolPairData;
     let balances = [...allBalances];
     let _out = _exactBPTInForTokenOut(amount, poolPairData);
-    // Computation of feeFactor
-    let sumBalances = bnum(0);
-    for (let i = 0; i < balances.length; i++) {
-        sumBalances = sumBalances.plus(balances[i]);
-    }
-    let currentWeight = balances[tokenIndexOut].div(sumBalances);
-    let tokenBalancePercentageExcess = bnum(1).minus(currentWeight);
-    let feeFactor = bnum(1).minus(tokenBalancePercentageExcess.times(swapFee));
-    //
-    balances[tokenIndexOut] = balances[tokenIndexOut].minus(
-        _out.times(feeFactor)
-    );
-    balanceIn = balanceIn.minus(amount);
-    let ans = _spotBPTPriceNoFee(amp, balances, balanceIn, tokenIndexOut).times(
-        feeFactor
-    );
-    ans = bnum(1).div(ans);
-    return ans;
+    let feeFactor = _feeFactor(balances, tokenIndexOut, swapFee);
+    balances[tokenIndexOut] = balances[tokenIndexOut].minus(_out.div(feeFactor));
+    balanceIn = balanceIn.minus( amount );
+    let ans = _poolDerivativesBPT(amp, balances, balanceIn, tokenIndexOut,
+                                  true, false, false).div(feeFactor);
+    return( ans );
 }
 
 // PairType = 'BPT->token'
@@ -716,72 +666,18 @@ export function _spotPriceAfterSwapBPTInForExactTokenOut(
 ): BigNumber {
     let { amp, allBalances, balanceIn, tokenIndexOut, swapFee } = poolPairData;
     let balances = [...allBalances];
-    // Computation of feeFactor
-    let sumBalances = bnum(0);
-    for (let i = 0; i < balances.length; i++) {
-        sumBalances = sumBalances.plus(balances[i]);
-    }
-    let currentWeight = balances[tokenIndexOut].div(sumBalances);
-    let tokenBalancePercentageExcess = bnum(1).minus(currentWeight);
-    let feeFactor = bnum(1).minus(tokenBalancePercentageExcess.times(swapFee));
-    //
-    balances[tokenIndexOut] = balances[tokenIndexOut].minus(
-        amount.times(feeFactor)
-    );
-    balanceIn = balanceIn.minus(_BPTInForExactTokenOut(amount, poolPairData));
-    let ans = _spotBPTPriceNoFee(amp, balances, balanceIn, tokenIndexOut).times(
-        feeFactor
-    );
-    ans = bnum(1).div(ans);
-    return ans;
+    let feeFactor = _feeFactor(balances, tokenIndexOut, swapFee);
+    balances[tokenIndexOut] = balances[tokenIndexOut].minus(amount.div(feeFactor));
+    balanceIn = balanceIn.minus( _BPTInForExactTokenOut(amount, poolPairData) );
+    let ans = _poolDerivativesBPT(amp, balances, balanceIn, tokenIndexOut,
+                                  true, false, true).div(feeFactor);
+    return( ans );
 }
 
 /////////
 ///  Derivatives of spotPriceAfterSwap
 /////////
 
-export function _derivativeSpotPriceNoFee(
-    amp,
-    balances,
-    tokenIndexIn,
-    tokenIndexOut
-): BigNumber {
-    let totalCoins = balances.length;
-    let D = _invariant(amp, balances);
-    let S = bnum(0);
-    for (let i = 0; i < totalCoins; i++) {
-        if (i != tokenIndexIn && i != tokenIndexOut) {
-            S = S.plus(balances[i]);
-        }
-    }
-    let x = balances[tokenIndexIn];
-    let y = balances[tokenIndexOut];
-    let a = amp.times(totalCoins ** totalCoins); // = ampTimesNpowN
-    let b = S.minus(D)
-        .times(a)
-        .plus(D);
-    let twoaxy = bnum(2)
-        .times(a)
-        .times(x)
-        .times(y);
-    let partial_x = twoaxy.plus(a.times(y).times(y)).plus(b.times(y));
-    let partial_y = twoaxy.plus(a.times(x).times(x)).plus(b.times(x));
-    let partial_xx = bnum(2)
-        .times(a)
-        .times(y);
-    let partial_xy = partial_xx
-        .plus(
-            bnum(2)
-                .times(a)
-                .times(x)
-        )
-        .plus(b);
-    let numerator = partial_xy
-        .times(partial_x)
-        .minus(partial_xx.times(partial_y));
-    let denominator = partial_x.times(partial_x);
-    return numerator.div(denominator);
-}
 
 // PairType = 'token->token'
 // SwapType = 'swapExactIn'
@@ -789,29 +685,11 @@ export function _derivativeSpotPriceAfterSwapExactTokenInForTokenOut(
     amount,
     poolPairData
 ): BigNumber {
-    let {
-        amp,
-        allBalances,
-        tokenIndexIn,
-        tokenIndexOut,
-        swapFee,
-    } = poolPairData;
+    let {amp, allBalances, tokenIndexIn, tokenIndexOut, swapFee} = poolPairData;
     let balances = [...allBalances];
-    balances[tokenIndexIn] = balances[tokenIndexIn].plus(
-        amount.times(bnum(1).minus(swapFee))
-    );
-    balances[tokenIndexOut] = balances[tokenIndexOut].minus(
-        _exactTokenInForTokenOut(amount, poolPairData)
-    );
-    let feeFactorSquared = bnum(1)
-        .minus(swapFee)
-        .pow(2);
-    return _derivativeSpotPriceNoFee(
-        amp,
-        balances,
-        tokenIndexIn,
-        tokenIndexOut
-    ).times(feeFactorSquared);
+    balances[tokenIndexIn] = balances[tokenIndexIn].plus(amount.times(bnum(1).minus(swapFee)));
+    balances[tokenIndexOut] = balances[tokenIndexOut].minus(_exactTokenInForTokenOut(amount, poolPairData));
+    return(_poolDerivatives(amp, balances, tokenIndexIn, tokenIndexOut, false, false));
 }
 
 // PairType = 'token->token'
@@ -820,11 +698,13 @@ export function _derivativeSpotPriceAfterSwapTokenInForExactTokenOut(
     amount,
     poolPairData
 ): BigNumber {
-    return _derivative(
-        _spotPriceAfterSwapTokenInForExactTokenOut,
-        amount,
-        poolPairData
-    );
+    let {amp, allBalances, tokenIndexIn, tokenIndexOut, swapFee} = poolPairData;
+    let balances = [...allBalances];
+    let _in = _tokenInForExactTokenOut(amount, poolPairData).times(bnum(1).minus(swapFee));
+    balances[tokenIndexIn] = balances[tokenIndexIn].plus(_in);
+    balances[tokenIndexOut] = balances[tokenIndexOut].minus(amount);
+    let feeFactor = bnum(1).minus(swapFee);
+    return(_poolDerivatives(amp, balances, tokenIndexIn, tokenIndexOut, false, true).div(feeFactor) );
 }
 
 // PairType = 'token->BPT'
@@ -833,11 +713,13 @@ export function _derivativeSpotPriceAfterSwapExactTokenInForBPTOut(
     amount,
     poolPairData
 ): BigNumber {
-    return _derivative(
-        _spotPriceAfterSwapExactTokenInForBPTOut,
-        amount,
-        poolPairData
-    );
+    let { amp, allBalances, balanceOut, tokenIndexIn, swapFee } = poolPairData;
+    let balances = [...allBalances];
+    let feeFactor = _feeFactor(balances, tokenIndexIn, swapFee);
+    balances[tokenIndexIn] = balances[tokenIndexIn].plus(amount.times(feeFactor));
+    balanceOut = balanceOut.plus( _exactTokenInForBPTOut(amount, poolPairData) );
+    let ans = _poolDerivativesBPT(amp, balances, balanceOut, tokenIndexIn, false, true, false);
+    return( ans );
 }
 
 // PairType = 'token->BPT'
@@ -846,11 +728,13 @@ export function _derivativeSpotPriceAfterSwapTokenInForExactBPTOut(
     amount,
     poolPairData
 ): BigNumber {
-    return _derivative(
-        _spotPriceAfterSwapTokenInForExactBPTOut,
-        amount,
-        poolPairData
-    );
+    let { amp, allBalances, balanceOut, tokenIndexIn, swapFee } = poolPairData;
+    let balances = [...allBalances];
+    let _in = _tokenInForExactBPTOut(amount, poolPairData);
+    let feeFactor = _feeFactor(balances, tokenIndexIn, swapFee);
+    balances[tokenIndexIn] = balances[tokenIndexIn].plus(_in.times(feeFactor));
+    balanceOut = balanceOut.plus( amount ); 
+    return( _poolDerivativesBPT(amp, balances, balanceOut, tokenIndexIn, false, true, true).div(feeFactor));
 }
 
 // PairType = 'BPT->token'
@@ -859,12 +743,16 @@ export function _derivativeSpotPriceAfterSwapExactBPTInForTokenOut(
     amount,
     poolPairData
 ): BigNumber {
-    return _derivative(
-        _spotPriceAfterSwapExactBPTInForTokenOut,
-        amount,
-        poolPairData
-    );
+    let { amp, allBalances, balanceIn, tokenIndexOut, swapFee } = poolPairData;
+    let balances = [...allBalances];
+    let _out = _exactBPTInForTokenOut(amount, poolPairData);
+    let feeFactor = _feeFactor(balances, tokenIndexOut, swapFee);
+    balances[tokenIndexOut] = balances[tokenIndexOut].minus(_out.div(feeFactor));
+    balanceIn = balanceIn.minus( amount );
+    let ans = _poolDerivativesBPT(amp, balances, balanceIn, tokenIndexOut, false, false, false);
+    return( ans.div(feeFactor) );
 }
+
 
 // PairType = 'BPT->token'
 // SwapType = 'swapExactOut'
@@ -872,9 +760,12 @@ export function _derivativeSpotPriceAfterSwapBPTInForExactTokenOut(
     amount,
     poolPairData
 ): BigNumber {
-    return _derivative(
-        _spotPriceAfterSwapBPTInForExactTokenOut,
-        amount,
-        poolPairData
-    );
+    let { amp, allBalances, balanceIn, tokenIndexOut, swapFee } = poolPairData;
+    let balances = [...allBalances];
+    let _in = _BPTInForExactTokenOut(amount, poolPairData);
+    let feeFactor = _feeFactor(balances, tokenIndexOut, swapFee);
+    balances[tokenIndexOut] = balances[tokenIndexOut].minus( amount.div(feeFactor) );
+    balanceIn = balanceIn.minus( _in );
+    let ans = _poolDerivativesBPT(amp, balances, balanceIn, tokenIndexOut, false, false, true);
+    return( ans.div(feeFactor.pow(2)) );
 }
