@@ -202,11 +202,17 @@ export class WeightedPool implements PoolBase {
         }
     }
 
+    // Using BigNumber.js decimalPlaces (dp), allows us to consider token decimal accuracy correctly,
+    // i.e. when using token with 2decimals 0.002 should be returned as 0
+    // Uses ROUND_DOWN mode (1)
     _exactTokenInForTokenOut(
         poolPairData: WeightedPoolPairData,
         amount: BigNumber
     ): BigNumber {
-        return _exactTokenInForTokenOut(amount, poolPairData);
+        return _exactTokenInForTokenOut(amount, poolPairData).dp(
+            poolPairData.decimalsOut,
+            1
+        );
     }
 
     _exactTokenInForBPTOut(
@@ -223,11 +229,17 @@ export class WeightedPool implements PoolBase {
         return _exactBPTInForTokenOut(amount, poolPairData);
     }
 
+    // Using BigNumber.js decimalPlaces (dp), allows us to consider token decimal accuracy correctly,
+    // i.e. when using token with 2decimals 0.002 should be returned as 0
+    // Uses ROUND_UP mode (0)
     _tokenInForExactTokenOut(
         poolPairData: WeightedPoolPairData,
         amount: BigNumber
     ): BigNumber {
-        return _tokenInForExactTokenOut(amount, poolPairData);
+        return _tokenInForExactTokenOut(amount, poolPairData).dp(
+            poolPairData.decimalsIn,
+            0
+        );
     }
 
     _tokenInForExactBPTOut(

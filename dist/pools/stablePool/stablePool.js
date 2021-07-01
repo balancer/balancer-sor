@@ -129,7 +129,12 @@ class StablePool {
         }
     }
     _exactTokenInForTokenOut(poolPairData, amount) {
-        return stableMath_1._exactTokenInForTokenOut(amount, poolPairData);
+        // Using BigNumber.js decimalPlaces (dp), allows us to consider token decimal accuracy correctly,
+        // i.e. when using token with 2decimals 0.002 should be returned as 0
+        // Uses ROUND_DOWN mode (1)
+        return stableMath_1
+            ._exactTokenInForTokenOut(amount, poolPairData)
+            .dp(poolPairData.decimalsOut, 1);
     }
     _exactTokenInForBPTOut(poolPairData, amount) {
         return stableMath_1._exactTokenInForBPTOut(amount, poolPairData);
@@ -138,7 +143,12 @@ class StablePool {
         return stableMath_1._exactBPTInForTokenOut(amount, poolPairData);
     }
     _tokenInForExactTokenOut(poolPairData, amount) {
-        return stableMath_1._tokenInForExactTokenOut(amount, poolPairData);
+        // Using BigNumber.js decimalPlaces (dp), allows us to consider token decimal accuracy correctly,
+        // i.e. when using token with 2decimals 0.002 should be returned as 0
+        // Uses ROUND_UP mode (0)
+        return stableMath_1
+            ._tokenInForExactTokenOut(amount, poolPairData)
+            .dp(poolPairData.decimalsIn, 0);
     }
     _tokenInForExactBPTOut(poolPairData, amount) {
         return stableMath_1._tokenInForExactBPTOut(amount, poolPairData);

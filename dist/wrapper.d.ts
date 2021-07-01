@@ -5,6 +5,7 @@ import {
     DisabledOptions,
     SwapTypes,
     SubGraphPoolsBase,
+    SwapOptions,
 } from './types';
 export declare class SOR {
     MULTIADDR: {
@@ -53,7 +54,7 @@ export declare class SOR {
         tokenOut: string,
         swapType: SwapTypes,
         swapAmt: BigNumber,
-        timestamp?: number
+        swapOptions?: SwapOptions
     ): Promise<SwapInfo>;
     processSwaps(
         tokenIn: string,

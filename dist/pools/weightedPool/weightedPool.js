@@ -149,8 +149,13 @@ class WeightedPool {
             T.balance = newBalance.toString();
         }
     }
+    // Using BigNumber.js decimalPlaces (dp), allows us to consider token decimal accuracy correctly,
+    // i.e. when using token with 2decimals 0.002 should be returned as 0
+    // Uses ROUND_DOWN mode (1)
     _exactTokenInForTokenOut(poolPairData, amount) {
-        return weightedMath_1._exactTokenInForTokenOut(amount, poolPairData);
+        return weightedMath_1
+            ._exactTokenInForTokenOut(amount, poolPairData)
+            .dp(poolPairData.decimalsOut, 1);
     }
     _exactTokenInForBPTOut(poolPairData, amount) {
         return weightedMath_1._exactTokenInForBPTOut(amount, poolPairData);
@@ -158,8 +163,13 @@ class WeightedPool {
     _exactBPTInForTokenOut(poolPairData, amount) {
         return weightedMath_1._exactBPTInForTokenOut(amount, poolPairData);
     }
+    // Using BigNumber.js decimalPlaces (dp), allows us to consider token decimal accuracy correctly,
+    // i.e. when using token with 2decimals 0.002 should be returned as 0
+    // Uses ROUND_UP mode (0)
     _tokenInForExactTokenOut(poolPairData, amount) {
-        return weightedMath_1._tokenInForExactTokenOut(amount, poolPairData);
+        return weightedMath_1
+            ._tokenInForExactTokenOut(amount, poolPairData)
+            .dp(poolPairData.decimalsIn, 0);
     }
     _tokenInForExactBPTOut(poolPairData, amount) {
         return weightedMath_1._tokenInForExactBPTOut(amount, poolPairData);

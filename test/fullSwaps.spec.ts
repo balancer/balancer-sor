@@ -232,7 +232,7 @@ describe('Tests full swaps against known values', () => {
         const total = v2SwapData.returnAmount;
         const swaps = v2SwapData.swaps;
         // The expected test results are from previous version
-        assert.equal(total.toString(), '0.100753');
+        assert.equal(total.toString(), '0.100754');
         assert.equal(swaps.length, 2);
         assert.equal(
             swaps[0][0].pool,
@@ -240,20 +240,14 @@ describe('Tests full swaps against known values', () => {
         );
         assert.equal(swaps[0][0].tokenIn, DAI);
         assert.equal(swaps[0][0].tokenOut, USDC);
-        assert.equal(
-            swaps[0][0].swapAmount,
-            '0.0898837681429279943294092423005817'
-        );
+        assert.equal(swaps[0][0].swapAmount, '0.089882277269017451');
         assert.equal(
             swaps[1][0].pool,
             '0x57755f7dec33320bca83159c26e93751bfd30fbe'
         );
         assert.equal(swaps[1][0].tokenIn, DAI);
         assert.equal(swaps[1][0].tokenOut, USDC);
-        assert.equal(
-            swaps[1][0].swapAmount,
-            '0.0101162318570720056705907576994183'
-        );
+        assert.equal(swaps[1][0].swapAmount, '0.010117722730982549');
         // assert.equal(marketSp.toString(), '0.9924950453298881'); // TODO Different method to V1 so find diff result 0.9925374301712606
     }).timeout(10000);
 
@@ -515,20 +509,14 @@ describe('Tests full swaps against known values', () => {
         );
         assert.equal(swaps[0][0].tokenIn, DAI);
         assert.equal(swaps[0][0].tokenOut, USDC);
-        assert.equal(
-            swaps[0][0].swapAmount,
-            '0.6922565054733662840722693839594802'
-        );
+        assert.equal(swaps[0][0].swapAmount, '0.692168081518784406');
         assert.equal(
             swaps[1][0].pool,
             '0x57755f7dec33320bca83159c26e93751bfd30fbe'
         );
         assert.equal(swaps[1][0].tokenIn, DAI);
         assert.equal(swaps[1][0].tokenOut, USDC);
-        assert.equal(
-            swaps[1][0].swapAmount,
-            '0.0777434945266337159277306160405198'
-        );
+        assert.equal(swaps[1][0].swapAmount, '0.077831918481215594');
     }).timeout(10000);
 
     it('should full swap stable & weighted swapExactOut', async () => {
@@ -797,4 +785,123 @@ describe('Tests full swaps against known values', () => {
         );
         assert.equal(v2SwapData.swaps.length, 1, 'Should have 1 multiswap.');
     }).timeout(10000);
+
+    it('Test for swap with 2 decimal token - small amount with no valid swap', async () => {
+        /*
+        This was a path that was previously causing issues because of GUSD having 2 decimals.
+        Before fix the wrapper would return swaps even when return amount was 0.
+        */
+        const allPools = require('./testData/testPools/gusdBugSinglePath.json');
+        const amountOut = new BigNumber(10000000000000000);
+        const swapType = 'swapExactIn';
+        const noPools = 4;
+        const tokenIn = '0x04df6e4121c27713ed22341e7c7df330f56f289b';
+        const tokenOut = '0xdfcea9088c8a88a76ff74892c1457c17dfeef9c1';
+
+        const tradeInfo = {
+            SwapType: swapType,
+            TokenIn: tokenIn,
+            TokenOut: tokenOut,
+            NoPools: noPools,
+            SwapAmount: amountOut,
+            GasPrice: gasPrice,
+            SwapAmountDecimals: 18,
+            ReturnAmountDecimals: 18,
+        };
+
+        const testData = {
+            pools: JSON.parse(JSON.stringify(allPools.pools)),
+            tradeInfo,
+        };
+
+        // This test has rounding differences between V1 and V2 maths that cause it to fail but has been checked by Fernando
+        const [v1SwapData, v2SwapData] = await compareTest(
+            `subgraphPoolsDecimalsTest`,
+            provider,
+            testData,
+            {
+                isOverRide: false,
+                disabledTokens: [],
+            },
+            {
+                compareResults: false,
+                costOutputTokenOveride: {
+                    isOverRide: true,
+                    overRideCost: new BigNumber(0),
+                },
+            }
+        );
+        // These test should highlight any changes in maths that may unexpectedly change result
+        assert.equal(
+            v1SwapData.returnAmount.toString(),
+            '0',
+            'V1 sanity check.'
+        );
+        assert.equal(
+            v2SwapData.returnAmount.toString(),
+            '0',
+            'V2 sanity check.'
+        );
+        assert.equal(v2SwapData.swaps.length, 0, 'Should have 0 swaps.');
+    });
+
+    it('Test for swap with 2 decimal token - route available', async () => {
+        /*
+        This was a path that was previously causing issues because of GUSD having 2 decimals.
+        Before fix the wrapper would return a swap amount of 0 because it was routing a small amount via GUSD that was < two decimals.
+        After fix the SOR should consider an alternative viable route with swap amount > 0.
+        */
+        const allPools = require('./testData/testPools/gusdBug.json');
+        const amountOut = new BigNumber(10000000000000000);
+        const swapType = 'swapExactIn';
+        const noPools = 4;
+        const tokenIn = '0x04df6e4121c27713ed22341e7c7df330f56f289b';
+        const tokenOut = '0xdfcea9088c8a88a76ff74892c1457c17dfeef9c1';
+
+        const tradeInfo = {
+            SwapType: swapType,
+            TokenIn: tokenIn,
+            TokenOut: tokenOut,
+            NoPools: noPools,
+            SwapAmount: amountOut,
+            GasPrice: gasPrice,
+            SwapAmountDecimals: 18,
+            ReturnAmountDecimals: 18,
+        };
+
+        const testData = {
+            pools: JSON.parse(JSON.stringify(allPools.pools)),
+            tradeInfo,
+        };
+
+        // This test has rounding differences between V1 and V2 maths that cause it to fail but has been checked by Fernando
+        const [v1SwapData, v2SwapData] = await compareTest(
+            `subgraphPoolsDecimalsTest`,
+            provider,
+            testData,
+            {
+                isOverRide: false,
+                disabledTokens: [],
+            },
+            {
+                compareResults: false,
+                costOutputTokenOveride: {
+                    isOverRide: true,
+                    overRideCost: new BigNumber(0),
+                },
+            }
+        );
+        // These test should highlight any changes in maths that may unexpectedly change result
+        assert.equal(
+            v1SwapData.returnAmount.toString(),
+            '0.000000268916379797',
+            'V1 sanity check.'
+        );
+        assert.equal(
+            v2SwapData.returnAmount.toString(),
+            '0.000000268916321535',
+            'V2 sanity check.'
+        );
+        assert.equal(v2SwapData.swaps.length, 1, 'Should have 1 swap.');
+    });
 });
