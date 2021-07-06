@@ -30,6 +30,7 @@ const USDC = '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48';
 const DAI = '0x6b175474e89094c44da98b954eedeac495271d0f';
 const USDT = '0xdac17f958d2ee523a2206206994597c13d831ec7';
 const BPT = '0xebfed10e11dc08fcda1af1fda146945e8710f22e';
+const RANDOM = '0x1456688345527be1f37e9e627da0837d6f08c925';
 
 // npx mocha -r ts-node/register test/stablePools.spec.ts
 describe(`Tests for Stable Pools.`, () => {
@@ -294,9 +295,15 @@ describe(`Tests for Stable Pools.`, () => {
 
                 // This value is hard coded as sanity check if things unexpectedly change. Taken from isolated run of calcBptOutGivenExactTokensIn.
                 expect(swapInfo.returnAmount.toString()).eq(
-                    '304749044227756947',
-                    `.env ALLOW_ADD_REMOVE must be true for BPT swaps`
+                    '304749044227756947'
                 );
+                expect(swapInfo.swaps.length).eq(1);
+                expect(
+                    swapInfo.tokenAddresses[swapInfo.swaps[0].assetInIndex]
+                ).eq(tokenIn);
+                expect(
+                    swapInfo.tokenAddresses[swapInfo.swaps[0].assetOutIndex]
+                ).eq(tokenOut);
             });
 
             it(`Full Swap - swapExactIn, BPT > Token`, async () => {
@@ -325,9 +332,15 @@ describe(`Tests for Stable Pools.`, () => {
 
                 // This value is hard coded as sanity check if things unexpectedly change. Taken from isolated run of calcTokenOutGivenExactBptIn.
                 expect(swapInfo.returnAmount.toString()).eq(
-                    '5771787227226018318',
-                    `.env ALLOW_ADD_REMOVE must be true for BPT swaps`
+                    '5771787227226018318'
                 );
+                expect(swapInfo.swaps.length).eq(1);
+                expect(
+                    swapInfo.tokenAddresses[swapInfo.swaps[0].assetInIndex]
+                ).eq(tokenIn);
+                expect(
+                    swapInfo.tokenAddresses[swapInfo.swaps[0].assetOutIndex]
+                ).eq(tokenOut);
             });
 
             it(`Full Swap - swapExactOut, Token > BPT`, async () => {
@@ -356,9 +369,15 @@ describe(`Tests for Stable Pools.`, () => {
 
                 // This value is hard coded as sanity check if things unexpectedly change. Taken from isolated run of calcTokenInGivenExactBptOut.
                 expect(swapInfo.returnAmount.toString()).eq(
-                    '4254344791006178555',
-                    `.env ALLOW_ADD_REMOVE must be true for BPT swaps`
+                    '4254344791006178555'
                 );
+                expect(swapInfo.swaps.length).eq(1);
+                expect(
+                    swapInfo.tokenAddresses[swapInfo.swaps[0].assetInIndex]
+                ).eq(tokenIn);
+                expect(
+                    swapInfo.tokenAddresses[swapInfo.swaps[0].assetOutIndex]
+                ).eq(tokenOut);
             });
 
             it(`Full Swap - swapExactOut, BPT > Token`, async () => {
@@ -387,9 +406,15 @@ describe(`Tests for Stable Pools.`, () => {
 
                 // This value is hard coded as sanity check if things unexpectedly change. Taken from isolated run of calcBptInGivenExactTokensOut.
                 expect(swapInfo.returnAmount.toString()).eq(
-                    '753783887870341458',
-                    `.env ALLOW_ADD_REMOVE must be true for BPT swaps`
+                    '753783887870341458'
                 );
+                expect(swapInfo.swaps.length).eq(1);
+                expect(
+                    swapInfo.tokenAddresses[swapInfo.swaps[0].assetInIndex]
+                ).eq(tokenIn);
+                expect(
+                    swapInfo.tokenAddresses[swapInfo.swaps[0].assetOutIndex]
+                ).eq(tokenOut);
             });
         }
     });
@@ -624,4 +649,216 @@ describe(`Tests for Stable Pools.`, () => {
             expect(bptAmt.toString()).eq('28957866405645758931354');
         });
     });
+
+    if (ALLOW_ADD_REMOVE) {
+        context('stable meta swap', () => {
+            it('should return swap via meta pool Exit Swap, SwapExactIn', async () => {
+                const poolsFromFile: SubGraphPoolsBase = require('./testData/stablePools/metaPool.json');
+                const tokenIn = RANDOM;
+                const tokenOut = USDC;
+                const swapType = SwapTypes.SwapExactIn;
+                const swapAmt: BigNumber = bnum('0.01');
+
+                const sor = new SOR(
+                    provider,
+                    gasPrice,
+                    maxPools,
+                    chainId,
+                    poolsFromFile
+                );
+
+                const fetchSuccess = await sor.fetchPools(false);
+
+                let swapInfo: SwapInfo = await sor.getSwaps(
+                    tokenIn,
+                    tokenOut,
+                    swapType,
+                    swapAmt
+                );
+
+                // TO DO - Need to return in correct format for Relayer
+                // Should return TokenIn > BPT > Exit > TokenOut
+                expect(swapInfo.swaps.length).eq(2);
+                expect(swapInfo.swaps[0].amount.toString()).eq(
+                    swapAmt.times(1e18).toString()
+                );
+                expect(swapInfo.swaps[0].poolId).eq(poolsFromFile.pools[1].id);
+                expect(
+                    swapInfo.tokenAddresses[swapInfo.swaps[0].assetInIndex]
+                ).eq(tokenIn);
+                expect(
+                    swapInfo.tokenAddresses[swapInfo.swaps[0].assetOutIndex]
+                ).eq(poolsFromFile.pools[0].address);
+
+                expect(swapInfo.swaps[1].amount.toString()).eq('0');
+                expect(swapInfo.swaps[1].poolId).eq(poolsFromFile.pools[0].id);
+                expect(
+                    swapInfo.tokenAddresses[swapInfo.swaps[1].assetInIndex]
+                ).eq(poolsFromFile.pools[0].address);
+                expect(
+                    swapInfo.tokenAddresses[swapInfo.swaps[1].assetOutIndex]
+                ).eq(tokenOut);
+                // TO DO - Confirm amount via maths
+                expect(swapInfo.returnAmount.toString()).eq('3297085977115718');
+            });
+
+            it('should return swap via meta pool Join Pool, SwapExactIn', async () => {
+                const poolsFromFile: SubGraphPoolsBase = require('./testData/stablePools/metaPool.json');
+                const tokenIn = USDC;
+                const tokenOut = RANDOM;
+                const swapType = SwapTypes.SwapExactIn;
+                const swapAmt: BigNumber = bnum('0.01');
+
+                const sor = new SOR(
+                    provider,
+                    gasPrice,
+                    maxPools,
+                    chainId,
+                    poolsFromFile
+                );
+
+                const fetchSuccess = await sor.fetchPools(false);
+
+                let swapInfo: SwapInfo = await sor.getSwaps(
+                    tokenIn,
+                    tokenOut,
+                    swapType,
+                    swapAmt
+                );
+
+                // TO DO - Need to return in correct format for Relayer
+                // Should return TokenIn > Join > BPT > TokenOut
+                expect(swapInfo.swaps.length).eq(2);
+                expect(swapInfo.swaps[0].amount.toString()).eq(
+                    swapAmt.times(1e6).toString()
+                );
+                expect(swapInfo.swaps[0].poolId).eq(poolsFromFile.pools[0].id);
+                expect(
+                    swapInfo.tokenAddresses[swapInfo.swaps[0].assetInIndex]
+                ).eq(tokenIn);
+                expect(
+                    swapInfo.tokenAddresses[swapInfo.swaps[0].assetOutIndex]
+                ).eq(poolsFromFile.pools[0].address);
+
+                expect(swapInfo.swaps[1].amount.toString()).eq('0');
+                expect(swapInfo.swaps[1].poolId).eq(poolsFromFile.pools[1].id);
+                expect(
+                    swapInfo.tokenAddresses[swapInfo.swaps[1].assetInIndex]
+                ).eq(poolsFromFile.pools[0].address);
+                expect(
+                    swapInfo.tokenAddresses[swapInfo.swaps[1].assetOutIndex]
+                ).eq(tokenOut);
+                // TO DO - Confirm amount via maths
+                expect(swapInfo.returnAmount.toString()).eq(
+                    '30273658333771288'
+                );
+            });
+
+            it('should return swap via meta pool Exit Swap, SwapExactOut', async () => {
+                const poolsFromFile: SubGraphPoolsBase = require('./testData/stablePools/metaPool.json');
+                const tokenIn = RANDOM;
+                const tokenOut = USDC;
+                const swapType = SwapTypes.SwapExactOut;
+                const swapAmt: BigNumber = bnum('0.01');
+
+                const sor = new SOR(
+                    provider,
+                    gasPrice,
+                    maxPools,
+                    chainId,
+                    poolsFromFile
+                );
+
+                const fetchSuccess = await sor.fetchPools(false);
+
+                let swapInfo: SwapInfo = await sor.getSwaps(
+                    tokenIn,
+                    tokenOut,
+                    swapType,
+                    swapAmt
+                );
+
+                // TO DO - Need to return in correct format for Relayer
+                // Should return TokenIn > BPT > Exit > TokenOut
+                expect(swapInfo.swaps.length).eq(2);
+                expect(swapInfo.swaps[0].amount.toString()).eq(
+                    swapAmt.times(1e6).toString()
+                );
+                expect(swapInfo.swaps[0].poolId).eq(poolsFromFile.pools[0].id);
+                expect(
+                    swapInfo.tokenAddresses[swapInfo.swaps[0].assetInIndex]
+                ).eq(poolsFromFile.pools[0].address);
+                expect(
+                    swapInfo.tokenAddresses[swapInfo.swaps[0].assetOutIndex]
+                ).eq(tokenOut);
+
+                expect(swapInfo.swaps[1].amount.toString()).eq('0');
+                expect(swapInfo.swaps[1].poolId).eq(poolsFromFile.pools[1].id);
+                expect(
+                    swapInfo.tokenAddresses[swapInfo.swaps[1].assetInIndex]
+                ).eq(tokenIn);
+                expect(
+                    swapInfo.tokenAddresses[swapInfo.swaps[1].assetOutIndex]
+                ).eq(poolsFromFile.pools[0].address);
+                // TO DO - Confirm amount via maths
+                expect(swapInfo.returnAmount.toString()).eq(
+                    '30332443686831978'
+                );
+            });
+
+            it('should return swap via meta pool Join Pool, SwapExactOut', async () => {
+                const poolsFromFile: SubGraphPoolsBase = require('./testData/stablePools/metaPool.json');
+                const tokenIn = USDC;
+                const tokenOut = RANDOM;
+                const swapType = SwapTypes.SwapExactOut;
+                const swapAmt: BigNumber = bnum('0.01');
+
+                const sor = new SOR(
+                    provider,
+                    gasPrice,
+                    maxPools,
+                    chainId,
+                    poolsFromFile
+                );
+
+                const fetchSuccess = await sor.fetchPools(false);
+
+                let swapInfo: SwapInfo = await sor.getSwaps(
+                    tokenIn,
+                    tokenOut,
+                    swapType,
+                    swapAmt
+                );
+
+                console.log(`Return amt:`);
+                console.log(swapInfo.returnAmount.toString());
+                console.log(swapInfo.swaps);
+                console.log(swapInfo.tokenAddresses);
+                // TO DO - Need to return in correct format for Relayer
+                // Should return TokenIn > Join > BPT > TokenOut
+                expect(swapInfo.swaps.length).eq(2);
+                expect(swapInfo.swaps[0].amount.toString()).eq(
+                    swapAmt.times(1e18).toString()
+                );
+                expect(swapInfo.swaps[0].poolId).eq(poolsFromFile.pools[1].id);
+                expect(
+                    swapInfo.tokenAddresses[swapInfo.swaps[0].assetInIndex]
+                ).eq(poolsFromFile.pools[0].address);
+                expect(
+                    swapInfo.tokenAddresses[swapInfo.swaps[0].assetOutIndex]
+                ).eq(tokenOut);
+
+                expect(swapInfo.swaps[1].amount.toString()).eq('0');
+                expect(swapInfo.swaps[1].poolId).eq(poolsFromFile.pools[0].id);
+                expect(
+                    swapInfo.tokenAddresses[swapInfo.swaps[1].assetInIndex]
+                ).eq(tokenIn);
+                expect(
+                    swapInfo.tokenAddresses[swapInfo.swaps[1].assetOutIndex]
+                ).eq(poolsFromFile.pools[0].address);
+                // TO DO - Confirm amount via maths
+                expect(swapInfo.returnAmount.toString()).eq('3302916544738673');
+            });
+        });
+    }
 });
