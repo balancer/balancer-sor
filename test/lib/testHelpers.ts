@@ -1,6 +1,7 @@
 import { JsonRpcProvider } from '@ethersproject/providers';
 import { BigNumber } from 'bignumber.js';
 import * as sorv1 from '@balancer-labs/sor';
+import { BigNumber as v1BigNumber } from 'v1bignumber.js';
 import * as sorv2 from '../../src';
 import {
     SubGraphPoolsBase,
@@ -424,9 +425,9 @@ export async function getV1Swap(
         pools,
         paths,
         SwapType,
-        SwapAmount,
+        new v1BigNumber(SwapAmount),
         MaxNoPools,
-        costOutputToken,
+        new v1BigNumber(costOutputToken),
         epsOfInterest
     );
 
