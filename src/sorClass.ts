@@ -14,11 +14,11 @@ import {
 import { MaxUint256 } from '@ethersproject/constants';
 
 // TODO get max price from slippage tolerance given by user options
-export const MAX_UINT = MaxUint256;
+export const MAX_UINT = MaxUint256.toString();
 
 const minAmountOut = 0;
-const maxAmountIn = MAX_UINT;
-const maxPrice = MAX_UINT;
+const maxAmountIn: string = MAX_UINT;
+const maxPrice: string = MAX_UINT;
 
 export function calculatePathLimits(
     paths: NewPath[],
@@ -315,8 +315,8 @@ export const smartOrderRouter = (
                 limitReturnAmount:
                     swapType === SwapTypes.SwapExactIn
                         ? minAmountOut.toString()
-                        : maxAmountIn.toString(),
-                maxPrice: maxPrice.toString(),
+                        : maxAmountIn,
+                maxPrice: maxPrice,
                 tokenInDecimals: path.poolPairData[0].decimalsIn.toString(),
                 tokenOutDecimals: path.poolPairData[0].decimalsOut.toString(),
             };
@@ -381,8 +381,8 @@ export const smartOrderRouter = (
                 limitReturnAmount:
                     swapType === SwapTypes.SwapExactIn
                         ? minAmountOut.toString()
-                        : maxAmountIn.toString(),
-                maxPrice: maxPrice.toString(),
+                        : maxAmountIn,
+                maxPrice: maxPrice,
                 tokenInDecimals: path.poolPairData[0].decimalsIn.toString(),
                 tokenOutDecimals: path.poolPairData[0].decimalsOut.toString(),
             };
@@ -396,8 +396,8 @@ export const smartOrderRouter = (
                 limitReturnAmount:
                     swapType === SwapTypes.SwapExactIn
                         ? minAmountOut.toString()
-                        : maxAmountIn.toString(),
-                maxPrice: maxPrice.toString(),
+                        : maxAmountIn,
+                maxPrice: maxPrice,
                 tokenInDecimals: path.poolPairData[1].decimalsIn.toString(),
                 tokenOutDecimals: path.poolPairData[1].decimalsOut.toString(),
             };

@@ -1,6 +1,6 @@
 import { BigNumber } from './utils/bignumber';
 import { SwapTypes, NewPath, PoolDictionary, Swap } from './types';
-export declare const MAX_UINT: import('@ethersproject/bignumber').BigNumber;
+export declare const MAX_UINT: string;
 export declare function calculatePathLimits(
     paths: NewPath[],
     swapType: SwapTypes

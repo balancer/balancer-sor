@@ -7,7 +7,7 @@ const types_1 = require('./types');
 const helpersClass_1 = require('./helpersClass');
 const constants_1 = require('@ethersproject/constants');
 // TODO get max price from slippage tolerance given by user options
-exports.MAX_UINT = constants_1.MaxUint256;
+exports.MAX_UINT = constants_1.MaxUint256.toString();
 const minAmountOut = 0;
 const maxAmountIn = exports.MAX_UINT;
 const maxPrice = exports.MAX_UINT;
@@ -289,8 +289,8 @@ exports.smartOrderRouter = (
                 limitReturnAmount:
                     swapType === types_1.SwapTypes.SwapExactIn
                         ? minAmountOut.toString()
-                        : maxAmountIn.toString(),
-                maxPrice: maxPrice.toString(),
+                        : maxAmountIn,
+                maxPrice: maxPrice,
                 tokenInDecimals: path.poolPairData[0].decimalsIn.toString(),
                 tokenOutDecimals: path.poolPairData[0].decimalsOut.toString(),
             };
@@ -351,8 +351,8 @@ exports.smartOrderRouter = (
                 limitReturnAmount:
                     swapType === types_1.SwapTypes.SwapExactIn
                         ? minAmountOut.toString()
-                        : maxAmountIn.toString(),
-                maxPrice: maxPrice.toString(),
+                        : maxAmountIn,
+                maxPrice: maxPrice,
                 tokenInDecimals: path.poolPairData[0].decimalsIn.toString(),
                 tokenOutDecimals: path.poolPairData[0].decimalsOut.toString(),
             };
@@ -365,8 +365,8 @@ exports.smartOrderRouter = (
                 limitReturnAmount:
                     swapType === types_1.SwapTypes.SwapExactIn
                         ? minAmountOut.toString()
-                        : maxAmountIn.toString(),
-                maxPrice: maxPrice.toString(),
+                        : maxAmountIn,
+                maxPrice: maxPrice,
                 tokenInDecimals: path.poolPairData[1].decimalsIn.toString(),
                 tokenOutDecimals: path.poolPairData[1].decimalsOut.toString(),
             };
