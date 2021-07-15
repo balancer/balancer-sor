@@ -13,9 +13,7 @@ var __importStar =
 Object.defineProperty(exports, '__esModule', { value: true });
 const address_1 = require('@ethersproject/address');
 const bmath_1 = require('../../bmath');
-const weightedSolidity = __importStar(require('./weightedMathEvm'));
 const SDK = __importStar(require('@georgeroman/balancer-v2-pools'));
-const FixedPointNumber_1 = require('../../math/FixedPointNumber');
 const types_1 = require('../../types');
 const weightedMath_1 = require('./weightedMath');
 class WeightedPool {
@@ -29,13 +27,15 @@ class WeightedPool {
         tokensList
     ) {
         this.poolType = types_1.PoolTypes.Weighted;
+        this.MAX_IN_RATIO = bmath_1.bnum(0.3);
+        this.MAX_OUT_RATIO = bmath_1.bnum(0.3);
         this.id = id;
         this.address = address;
-        this.swapFee = swapFee;
+        this.swapFee = bmath_1.bnum(swapFee);
         this.totalShares = totalShares;
         this.tokens = tokens;
         this.tokensList = tokensList;
-        this.totalWeight = totalWeight;
+        this.totalWeight = bmath_1.bnum(totalWeight);
     }
     setTypeForSwap(type) {
         this.swapPairType = type;
@@ -57,14 +57,14 @@ class WeightedPool {
                 throw 'Pool missing totalShares field';
             balanceIn = this.totalShares;
             decimalsIn = '18'; // Not used but has to be defined
-            weightIn = bmath_1.bnum(1); // Not used but has to be defined
+            weightIn = bmath_1.ONE; // Not used but has to be defined
         } else if (tokenOut == this.address) {
             pairType = types_1.PairTypes.TokenToBpt;
             if (this.totalShares === undefined)
                 throw 'Pool missing totalShares field';
             balanceOut = this.totalShares;
             decimalsOut = '18'; // Not used but has to be defined
-            weightOut = bmath_1.bnum(1); // Not used but has to be defined
+            weightOut = bmath_1.ONE; // Not used but has to be defined
         } else {
             pairType = types_1.PairTypes.TokenToToken;
         }
@@ -78,9 +78,7 @@ class WeightedPool {
             tI = this.tokens[tokenIndexIn];
             balanceIn = tI.balance;
             decimalsIn = tI.decimals;
-            weightIn = bmath_1
-                .bnum(tI.weight)
-                .div(bmath_1.bnum(this.totalWeight));
+            weightIn = bmath_1.bnum(tI.weight).div(this.totalWeight);
         }
         if (pairType != types_1.PairTypes.TokenToBpt) {
             let tokenIndexOut = this.tokens.findIndex(
@@ -92,9 +90,7 @@ class WeightedPool {
             tO = this.tokens[tokenIndexOut];
             balanceOut = tO.balance;
             decimalsOut = tO.decimals;
-            weightOut = bmath_1
-                .bnum(tO.weight)
-                .div(bmath_1.bnum(this.totalWeight));
+            weightOut = bmath_1.bnum(tO.weight).div(this.totalWeight);
         }
         const poolPairData = {
             id: this.id,
@@ -109,7 +105,7 @@ class WeightedPool {
             balanceOut: bmath_1.bnum(balanceOut),
             weightIn: weightIn,
             weightOut: weightOut,
-            swapFee: bmath_1.bnum(this.swapFee),
+            swapFee: this.swapFee,
         };
         return poolPairData;
     }
@@ -126,17 +122,15 @@ class WeightedPool {
             return poolPairData.balanceOut; // Liquidity in tokenOut is totalShares
         } else if (poolPairData.pairType == types_1.PairTypes.BptToToken) {
             return poolPairData.balanceOut.div(
-                bmath_1.bnum(1).plus(poolPairData.weightOut)
+                bmath_1.ONE.plus(poolPairData.weightOut)
             ); // Liquidity in tokenOut is Bo/wo
         }
     }
     getLimitAmountSwap(poolPairData, swapType) {
-        const MAX_IN_RATIO = bmath_1.bnum(0.3);
-        const MAX_OUT_RATIO = bmath_1.bnum(0.3);
         if (swapType === types_1.SwapTypes.SwapExactIn) {
-            return poolPairData.balanceIn.times(MAX_IN_RATIO);
+            return poolPairData.balanceIn.times(this.MAX_IN_RATIO);
         } else {
-            return poolPairData.balanceOut.times(MAX_OUT_RATIO);
+            return poolPairData.balanceOut.times(this.MAX_OUT_RATIO);
         }
     }
     // Updates the balance of a given token for the pool
@@ -264,45 +258,27 @@ class WeightedPool {
                 bmath_1.scale(amount, poolPairData.decimalsIn),
                 bmath_1.scale(poolPairData.swapFee, 18)
             );
-            return amt;
+            // return normalised amount
+            return bmath_1.scale(amt, -poolPairData.decimalsOut);
         } catch (err) {
-            return bmath_1.bnum(0);
+            return bmath_1.ZERO;
         }
     }
     _evmexactTokenInForBPTOut(poolPairData, amount) {
-        // TO DO
-        // try{
-        //     // balance: BigNumber, normalizedWeight: BigNumber, bptAmountOut: BigNumber, bptTotalSupply: BigNumber, swapFee: BigNumber
-        //     const amt = SDK.WeightedMath._calcTokenInGivenExactBptOut(
-        //         scale(poolPairData.balanceIn, poolPairData.decimalsIn),
-        //         scale(poolPairData.weightIn, 18),
-        //         scale(amount, poolPairData.decimalsIn),
-        //         scale(poolPairData.balanceOut, 18), // BPT is always 18 decimals
-        //         scale(poolPairData.swapFee, 18)
-        //     );
-        //     SDK.WeightedMath._calcBptOutGivenExactTokensIn
-        //     return amt;
-        // }catch(err){
-        //     return bnum(0);
-        // }
-        const amt = weightedSolidity._exactTokenInForBPTOut(
-            new FixedPointNumber_1.FixedPointNumber(
-                bmath_1.scale(poolPairData.balanceIn, poolPairData.decimalsIn)
-            ),
-            new FixedPointNumber_1.FixedPointNumber(
-                bmath_1.scale(poolPairData.weightIn, 18)
-            ),
-            new FixedPointNumber_1.FixedPointNumber(
-                bmath_1.scale(amount, poolPairData.decimalsIn)
-            ),
-            new FixedPointNumber_1.FixedPointNumber(
-                bmath_1.scale(poolPairData.balanceOut, 18)
-            ), // BPT is always 18 decimals
-            new FixedPointNumber_1.FixedPointNumber(
+        try {
+            // balance: BigNumber, normalizedWeight: BigNumber, amountIn: BigNumber, bptTotalSupply: BigNumber, swapFee: BigNumber
+            const amt = SDK.WeightedMath._calcBptOutGivenExactTokenIn(
+                bmath_1.scale(poolPairData.balanceIn, poolPairData.decimalsIn),
+                bmath_1.scale(poolPairData.weightIn, 18),
+                bmath_1.scale(amount, poolPairData.decimalsIn),
+                bmath_1.scale(poolPairData.balanceOut, 18), // BPT is always 18 decimals
                 bmath_1.scale(poolPairData.swapFee, 18)
-            )
-        );
-        return bmath_1.bnum(amt.toString());
+            );
+            // return normalised amount
+            return bmath_1.scale(amt, -18); // BPT is always 18 decimals
+        } catch (err) {
+            return bmath_1.ZERO;
+        }
     }
     _evmexactBPTInForTokenOut(poolPairData, amount) {
         try {
@@ -317,9 +293,10 @@ class WeightedPool {
                 bmath_1.scale(poolPairData.balanceIn, 18), // BPT is always 18 decimals
                 bmath_1.scale(poolPairData.swapFee, 18)
             );
-            return amt;
+            // return normalised amount
+            return bmath_1.scale(amt, -poolPairData.decimalsOut);
         } catch (err) {
-            return bmath_1.bnum(0);
+            return bmath_1.ZERO;
         }
     }
     _evminGivenOut(poolPairData, amount) {
@@ -336,9 +313,10 @@ class WeightedPool {
                 bmath_1.scale(amount, poolPairData.decimalsOut),
                 bmath_1.scale(poolPairData.swapFee, 18)
             );
-            return amt;
+            // return normalised amount
+            return bmath_1.scale(amt, -poolPairData.decimalsIn);
         } catch (err) {
-            return bmath_1.bnum(0);
+            return bmath_1.ZERO;
         }
     }
     _evmtokenInForExactBPTOut(poolPairData, amount) {
@@ -351,31 +329,30 @@ class WeightedPool {
                 bmath_1.scale(poolPairData.balanceOut, 18), // BPT is always 18 decimals
                 bmath_1.scale(poolPairData.swapFee, 18)
             );
-            return amt;
+            // return normalised amount
+            return bmath_1.scale(amt, -poolPairData.decimalsIn);
         } catch (err) {
-            return bmath_1.bnum(0);
+            return bmath_1.ZERO;
         }
     }
     _evmbptInForExactTokenOut(poolPairData, amount) {
-        // TO DO - THis needs replaced too
-        const amt = weightedSolidity._bptInForExactTokenOut(
-            new FixedPointNumber_1.FixedPointNumber(
-                bmath_1.scale(poolPairData.balanceOut, poolPairData.decimalsOut)
-            ),
-            new FixedPointNumber_1.FixedPointNumber(
-                bmath_1.scale(poolPairData.weightOut, 18)
-            ),
-            new FixedPointNumber_1.FixedPointNumber(
-                bmath_1.scale(amount, poolPairData.decimalsOut)
-            ),
-            new FixedPointNumber_1.FixedPointNumber(
-                bmath_1.scale(poolPairData.balanceIn, 18)
-            ), // BPT is always 18 decimals
-            new FixedPointNumber_1.FixedPointNumber(
+        try {
+            // poolPair balances are normalised so must be scaled before use
+            const amt = SDK.WeightedMath._calcBptInGivenExactTokenOut(
+                bmath_1.scale(
+                    poolPairData.balanceOut,
+                    poolPairData.decimalsOut
+                ),
+                bmath_1.scale(poolPairData.weightOut, 18),
+                bmath_1.scale(amount, poolPairData.decimalsOut),
+                bmath_1.scale(poolPairData.balanceIn, 18), // BPT is always 18 decimals
                 bmath_1.scale(poolPairData.swapFee, 18)
-            )
-        );
-        return bmath_1.bnum(amt.toString());
+            );
+            // return normalised amount
+            return bmath_1.scale(amt, -18); // BPT always 18 decimals
+        } catch (err) {
+            return bmath_1.ZERO;
+        }
     }
 }
 exports.WeightedPool = WeightedPool;

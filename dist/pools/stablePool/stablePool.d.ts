@@ -22,9 +22,11 @@ export interface StablePoolPairData extends PoolPairBase {
     balanceIn: BigNumber;
     balanceOut: BigNumber;
     swapFee: BigNumber;
+    swapFeeScaled: BigNumber;
     decimalsIn: number;
     decimalsOut: number;
     allBalances: BigNumber[];
+    allBalancesScaled: BigNumber[];
     invariant: BigNumber;
     amp: BigNumber;
     tokenIndexIn: number;
@@ -35,11 +37,16 @@ export declare class StablePool implements PoolBase {
     swapPairType: SwapPairType;
     id: string;
     address: string;
-    amp: string;
-    swapFee: string;
+    amp: BigNumber;
+    swapFee: BigNumber;
+    swapFeeScaled: BigNumber;
     totalShares: string;
     tokens: StablePoolToken[];
     tokensList: string[];
+    AMP_PRECISION: BigNumber;
+    MAX_IN_RATIO: BigNumber;
+    MAX_OUT_RATIO: BigNumber;
+    ampAdjusted: BigNumber;
     constructor(
         id: string,
         address: string,

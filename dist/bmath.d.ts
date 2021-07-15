@@ -1,4 +1,7 @@
 import { BigNumber } from './utils/bignumber';
+export declare const ZERO: BigNumber;
+export declare const ONE: BigNumber;
+export declare const INFINITY: BigNumber;
 export declare const BONE: BigNumber;
 export declare const TWOBONE: BigNumber;
 export declare function scale(

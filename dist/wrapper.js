@@ -230,12 +230,12 @@ class SOR {
             let swapInfo = {
                 tokenAddresses: [],
                 swaps: [],
-                swapAmount: bmath_1.bnum(0),
+                swapAmount: bmath_1.ZERO,
                 tokenIn: '',
                 tokenOut: '',
-                returnAmount: bmath_1.bnum(0),
-                returnAmountConsideringFees: bmath_1.bnum(0),
-                marketSp: bmath_1.bnum(0),
+                returnAmount: bmath_1.ZERO,
+                returnAmountConsideringFees: bmath_1.ZERO,
+                marketSp: bmath_1.ZERO,
             };
             // The Subgraph returns tokens in lower case format so we must match this
             tokenIn = tokenIn.toLowerCase();
@@ -289,12 +289,12 @@ class SOR {
             let swapInfo = {
                 tokenAddresses: [],
                 swaps: [],
-                swapAmount: bmath_1.bnum(0),
+                swapAmount: bmath_1.ZERO,
                 tokenIn: '',
                 tokenOut: '',
-                returnAmount: bmath_1.bnum(0),
-                returnAmountConsideringFees: bmath_1.bnum(0),
-                marketSp: bmath_1.bnum(0),
+                returnAmount: bmath_1.ZERO,
+                returnAmountConsideringFees: bmath_1.ZERO,
+                marketSp: bmath_1.ZERO,
             };
             if (onChainPools.pools.length === 0) return swapInfo;
             let pools, paths, marketSp;

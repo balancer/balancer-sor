@@ -160,9 +160,9 @@ function filterHopPools(tokenIn, tokenOut, hopTokens, poolsOfInterest) {
         }
     }
     for (let i = 0; i < hopTokens.length; i++) {
-        let highestNormalizedLiquidityFirst = bmath_1.bnum(0); // Aux variable to find pool with most liquidity for pair (tokenIn -> hopToken)
+        let highestNormalizedLiquidityFirst = bmath_1.ZERO; // Aux variable to find pool with most liquidity for pair (tokenIn -> hopToken)
         let highestNormalizedLiquidityFirstPoolId; // Aux variable to find pool with most liquidity for pair (tokenIn -> hopToken)
-        let highestNormalizedLiquiditySecond = bmath_1.bnum(0); // Aux variable to find pool with most liquidity for pair (hopToken -> tokenOut)
+        let highestNormalizedLiquiditySecond = bmath_1.ZERO; // Aux variable to find pool with most liquidity for pair (hopToken -> tokenOut)
         let highestNormalizedLiquiditySecondPoolId; // Aux variable to find pool with most liquidity for pair (hopToken -> tokenOut)
         for (let id in poolsOfInterest) {
             const pool = poolsOfInterest[id];
@@ -253,7 +253,7 @@ function createDirectPath(pool, tokenIn, tokenOut) {
     const path = {
         id: pool.id,
         swaps: [swap],
-        limitAmount: bmath_1.bnum(0),
+        limitAmount: bmath_1.ZERO,
         poolPairData: [poolPairData],
         pools: [pool],
     };
@@ -286,7 +286,7 @@ function createMultihopPath(
     const path = {
         id: firstPool.id + secondPool.id,
         swaps: [swap1, swap2],
-        limitAmount: bmath_1.bnum(0),
+        limitAmount: bmath_1.ZERO,
         poolPairData: [poolPairDataFirst, poolPairDataSecond],
         pools: [firstPool, secondPool],
     };

@@ -33,11 +33,13 @@ export declare class WeightedPool implements PoolBase {
     swapPairType: SwapPairType;
     id: string;
     address: string;
-    swapFee: string;
+    swapFee: BigNumber;
     totalShares: string;
     tokens: WeightedPoolToken[];
-    totalWeight: string;
+    totalWeight: BigNumber;
     tokensList: string[];
+    MAX_IN_RATIO: BigNumber;
+    MAX_OUT_RATIO: BigNumber;
     constructor(
         id: string,
         address: string,

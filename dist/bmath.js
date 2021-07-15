@@ -1,6 +1,9 @@
 'use strict';
 Object.defineProperty(exports, '__esModule', { value: true });
 const bignumber_1 = require('./utils/bignumber');
+exports.ZERO = bnum(0);
+exports.ONE = bnum(1);
+exports.INFINITY = bnum('Infinity');
 exports.BONE = new bignumber_1.BigNumber(10).pow(18);
 exports.TWOBONE = exports.BONE.times(new bignumber_1.BigNumber(2));
 const BPOW_PRECISION = exports.BONE.idiv(new bignumber_1.BigNumber(10).pow(10));
