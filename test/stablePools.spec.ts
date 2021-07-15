@@ -292,10 +292,8 @@ describe(`Tests for Stable Pools.`, () => {
                     swapType,
                     swapAmt
                 );
-
-                // This value is hard coded as sanity check if things unexpectedly change. Taken from isolated run of calcBptOutGivenExactTokensIn.
                 expect(swapInfo.returnAmount.toString()).eq(
-                    '304749044227756947'
+                    '304749153137929290'
                 );
                 expect(swapInfo.swaps.length).eq(1);
                 expect(
@@ -332,7 +330,7 @@ describe(`Tests for Stable Pools.`, () => {
 
                 // This value is hard coded as sanity check if things unexpectedly change. Taken from isolated run of calcTokenOutGivenExactBptIn.
                 expect(swapInfo.returnAmount.toString()).eq(
-                    '5771787227226018318'
+                    '5771787531005060248'
                 );
                 expect(swapInfo.swaps.length).eq(1);
                 expect(
@@ -369,7 +367,7 @@ describe(`Tests for Stable Pools.`, () => {
 
                 // This value is hard coded as sanity check if things unexpectedly change. Taken from isolated run of calcTokenInGivenExactBptOut.
                 expect(swapInfo.returnAmount.toString()).eq(
-                    '4254344791006178555'
+                    '4254344348859189305'
                 );
                 expect(swapInfo.swaps.length).eq(1);
                 expect(
@@ -404,9 +402,8 @@ describe(`Tests for Stable Pools.`, () => {
                     swapAmt
                 );
 
-                // This value is hard coded as sanity check if things unexpectedly change. Taken from isolated run of calcBptInGivenExactTokensOut.
                 expect(swapInfo.returnAmount.toString()).eq(
-                    '753783887870341458'
+                    '753789411555982650'
                 );
                 expect(swapInfo.swaps.length).eq(1);
                 expect(
@@ -699,7 +696,7 @@ describe(`Tests for Stable Pools.`, () => {
                     swapInfo.tokenAddresses[swapInfo.swaps[1].assetOutIndex]
                 ).eq(tokenOut);
                 // TO DO - Confirm amount via maths
-                expect(swapInfo.returnAmount.toString()).eq('3297085977115718');
+                expect(swapInfo.returnAmount.toString()).eq('3297470532679408');
             });
 
             it('should return swap via meta pool Join Pool, SwapExactIn', async () => {
@@ -750,7 +747,7 @@ describe(`Tests for Stable Pools.`, () => {
                 ).eq(tokenOut);
                 // TO DO - Confirm amount via maths
                 expect(swapInfo.returnAmount.toString()).eq(
-                    '30273658333771288'
+                    '30273658255996171'
                 );
             });
 
@@ -802,7 +799,7 @@ describe(`Tests for Stable Pools.`, () => {
                 ).eq(poolsFromFile.pools[0].address);
                 // TO DO - Confirm amount via maths
                 expect(swapInfo.returnAmount.toString()).eq(
-                    '30332443686831978'
+                    '30332443764917747'
                 );
             });
 
@@ -857,7 +854,7 @@ describe(`Tests for Stable Pools.`, () => {
                     swapInfo.tokenAddresses[swapInfo.swaps[1].assetOutIndex]
                 ).eq(poolsFromFile.pools[0].address);
                 // TO DO - Confirm amount via maths
-                expect(swapInfo.returnAmount.toString()).eq('3302916544738673');
+                expect(swapInfo.returnAmount.toString()).eq('3302531692935912');
             });
         });
     }

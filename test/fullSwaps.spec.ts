@@ -424,10 +424,9 @@ describe('Tests full swaps against known values', () => {
         const total = v2SwapData.returnAmount;
         const swaps = v2SwapData.swaps;
 
-        // The expected test results are from previous version
         assert.equal(
             wrapperSwapData.returnAmount.toString(),
-            '99922537274909963'
+            '99922470289305282'
         );
         assert.equal(swaps.length, 1);
         assert.equal(
@@ -567,8 +566,7 @@ describe('Tests full swaps against known values', () => {
         const total = v2SwapData.returnAmount;
         const swaps = v2SwapData.swaps;
 
-        // The expected test results are from previous version
-        assert.equal(total.toString(), '100.601647181085985689');
+        assert.equal(total.toString(), '100.601647114107781663');
         assert.equal(swaps.length, 3);
         assert.equal(
             swaps[0][0].pool,
