@@ -10,7 +10,7 @@ import {
     PoolTypes,
     PairTypes,
 } from '../src/types';
-import { bnum } from '../src/bmath';
+import { bnum, scale } from '../src/bmath';
 import { BigNumber } from '../src/utils/bignumber';
 import {
     StablePool,
@@ -63,12 +63,17 @@ describe(`Tests for Stable Pools.`, () => {
                 balanceIn: bnum(pool.tokens[0].balance),
                 balanceOut: bnum(pool.tokens[1].balance),
                 swapFee: bnum(pool.swapFee),
+                swapFeeScaled: scale(bnum(pool.swapFee), 18),
                 decimalsIn: Number(pool.tokens[0].decimals),
                 decimalsOut: Number(pool.tokens[1].decimals),
                 amp: bnum(pool.amp),
                 allBalances: [
                     bnum(pool.tokens[0].balance),
                     bnum(pool.tokens[1].balance),
+                ],
+                allBalancesScaled: [
+                    scale(bnum(pool.tokens[0].balance), 18),
+                    scale(bnum(pool.tokens[1].balance), 18),
                 ],
                 invariant: bnum(0),
                 tokenIndexIn: 0,
@@ -111,10 +116,12 @@ describe(`Tests for Stable Pools.`, () => {
                 balanceIn: bnum(pool.tokens[0].balance),
                 balanceOut: bnum(pool.tokens[1].balance),
                 swapFee: bnum(pool.swapFee),
+                swapFeeScaled: scale(bnum(pool.swapFee), 18),
                 decimalsIn: Number(pool.tokens[0].decimals),
                 decimalsOut: Number(pool.tokens[1].decimals),
                 amp: bnum(pool.amp),
                 allBalances: [],
+                allBalancesScaled: [],
                 invariant: bnum(0),
                 tokenIndexIn: 0,
                 tokenIndexOut: 1,

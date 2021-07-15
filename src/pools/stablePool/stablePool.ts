@@ -48,9 +48,11 @@ export interface StablePoolPairData extends PoolPairBase {
     balanceIn: BigNumber;
     balanceOut: BigNumber;
     swapFee: BigNumber;
+    swapFeeScaled: BigNumber;
     decimalsIn: number;
     decimalsOut: number;
     allBalances: BigNumber[]; // Only for stable pools
+    allBalancesScaled: BigNumber[]; // Only for stable pools - EVM Maths uses everything in 1e18 upscaled format and this avoids repeated scaling
     invariant: BigNumber; // Only for stable pools
     amp: BigNumber; // Only for stable pools
     tokenIndexIn: number; // Only for stable pools
@@ -64,6 +66,7 @@ export class StablePool implements PoolBase {
     address: string;
     amp: BigNumber;
     swapFee: BigNumber;
+    swapFeeScaled: BigNumber; // EVM Maths uses everything in 1e18 upscaled format and this avoids repeated scaling
     totalShares: string;
     tokens: StablePoolToken[];
     tokensList: string[];
@@ -85,6 +88,7 @@ export class StablePool implements PoolBase {
         this.address = address;
         this.amp = bnum(amp);
         this.swapFee = bnum(swapFee);
+        this.swapFeeScaled = scale(this.swapFee, 18);
         this.totalShares = totalShares;
         this.tokens = tokens;
         this.tokensList = tokensList;
@@ -139,9 +143,12 @@ export class StablePool implements PoolBase {
         }
 
         // Get all token balances
-        let allBalances = [];
+        let allBalances: BigNumber[] = [];
+        let allBalancesScaled: BigNumber[] = [];
         for (let i = 0; i < this.tokens.length; i++) {
-            allBalances.push(bnum(this.tokens[i].balance));
+            const balanceBn = bnum(this.tokens[i].balance);
+            allBalances.push(balanceBn);
+            allBalancesScaled.push(scale(balanceBn, 18));
         }
 
         let inv = _invariant(this.amp, allBalances);
@@ -157,7 +164,9 @@ export class StablePool implements PoolBase {
             balanceOut: bnum(balanceOut),
             invariant: inv,
             swapFee: this.swapFee,
-            allBalances: allBalances,
+            swapFeeScaled: this.swapFeeScaled,
+            allBalances,
+            allBalancesScaled,
             amp: this.amp,
             tokenIndexIn: tokenIndexIn,
             tokenIndexOut: tokenIndexOut,
@@ -360,22 +369,17 @@ export class StablePool implements PoolBase {
         amount: BigNumber
     ): BigNumber {
         try {
-            // TO DO - Tidy this by adding scaled allBalances to poolPairData?
             // All values should use 1e18 fixed point
             // i.e. 1USDC => 1e18 not 1e6
-            const balancesScaled = poolPairData.allBalances.map(bal =>
-                scale(bal, 18)
-            );
             const amtScaled = scale(amount, 18);
-            const swapFeeScaled = scale(poolPairData.swapFee, 18);
 
             const amt = SDK.StableMath._calcOutGivenIn(
                 this.ampAdjusted,
-                balancesScaled,
+                poolPairData.allBalancesScaled,
                 poolPairData.tokenIndexIn,
                 poolPairData.tokenIndexOut,
                 amtScaled,
-                swapFeeScaled
+                poolPairData.swapFeeScaled
             );
 
             // return normalised amount
@@ -390,22 +394,17 @@ export class StablePool implements PoolBase {
         amount: BigNumber
     ): BigNumber {
         try {
-            // TO DO - Tidy this by adding scaled allBalances to poolPairData?
             // All values should use 1e18 fixed point
             // i.e. 1USDC => 1e18 not 1e6
-            const balancesScaled = poolPairData.allBalances.map(bal =>
-                scale(bal, 18)
-            );
             const amtScaled = scale(amount, 18);
-            const swapFeeScaled = scale(poolPairData.swapFee, 18);
 
             const amt = SDK.StableMath._calcInGivenOut(
                 this.ampAdjusted,
-                balancesScaled,
+                poolPairData.allBalancesScaled,
                 poolPairData.tokenIndexIn,
                 poolPairData.tokenIndexOut,
                 amtScaled,
-                swapFeeScaled
+                poolPairData.swapFeeScaled
             );
 
             // return normalised amount
@@ -420,14 +419,9 @@ export class StablePool implements PoolBase {
         amount: BigNumber
     ): BigNumber {
         try {
-            // TO DO - Tidy this by adding scaled allBalances to poolPairData?
             // All values should use 1e18 fixed point
             // i.e. 1USDC => 1e18 not 1e6
-            const balancesScaled = poolPairData.allBalances.map(bal =>
-                scale(bal, 18)
-            );
             const bptTotalSupplyScaled = scale(poolPairData.balanceOut, 18);
-            const swapFeeScaled = scale(poolPairData.swapFee, 18);
             // amountsIn must have same length as balances. Only need value for token in.
             const amountsIn = poolPairData.allBalances.map((bal, i) => {
                 if (i === poolPairData.tokenIndexIn) return scale(amount, 18);
@@ -436,10 +430,10 @@ export class StablePool implements PoolBase {
 
             const amt = SDK.StableMath._calcBptOutGivenExactTokensIn(
                 this.ampAdjusted,
-                balancesScaled,
+                poolPairData.allBalancesScaled,
                 amountsIn,
                 bptTotalSupplyScaled,
-                swapFeeScaled
+                poolPairData.swapFeeScaled
             );
 
             // return normalised amount
@@ -454,23 +448,18 @@ export class StablePool implements PoolBase {
         amount: BigNumber
     ): BigNumber {
         try {
-            // TO DO - Tidy this by adding scaled allBalances to poolPairData?
             // All values should use 1e18 fixed point
             // i.e. 1USDC => 1e18 not 1e6
-            const balancesScaled = poolPairData.allBalances.map(bal =>
-                scale(bal, 18)
-            );
             const bptAmountInScaled = scale(amount, 18);
             const bptTotalSupplyScaled = scale(poolPairData.balanceIn, 18);
-            const swapFeeScaled = scale(poolPairData.swapFee, 18);
 
             const amt = SDK.StableMath._calcTokenOutGivenExactBptIn(
                 this.ampAdjusted,
-                balancesScaled,
+                poolPairData.allBalancesScaled,
                 poolPairData.tokenIndexOut,
                 bptAmountInScaled,
                 bptTotalSupplyScaled,
-                swapFeeScaled
+                poolPairData.swapFeeScaled
             );
 
             // return normalised amount
@@ -485,23 +474,18 @@ export class StablePool implements PoolBase {
         amount: BigNumber
     ): BigNumber {
         try {
-            // TO DO - Tidy this by adding scaled allBalances to poolPairData?
             // All values should use 1e18 fixed point
             // i.e. 1USDC => 1e18 not 1e6
-            const balancesScaled = poolPairData.allBalances.map(bal =>
-                scale(bal, 18)
-            );
             const bptAmountOutScaled = scale(amount, 18);
             const bptTotalSupplyScaled = scale(poolPairData.balanceOut, 18);
-            const swapFeeScaled = scale(poolPairData.swapFee, 18);
 
             const amt = SDK.StableMath._calcTokenInGivenExactBptOut(
                 this.ampAdjusted,
-                balancesScaled,
+                poolPairData.allBalancesScaled,
                 poolPairData.tokenIndexIn,
                 bptAmountOutScaled,
                 bptTotalSupplyScaled,
-                swapFeeScaled
+                poolPairData.swapFeeScaled
             );
 
             // return normalised amount
@@ -516,26 +500,21 @@ export class StablePool implements PoolBase {
         amount: BigNumber
     ): BigNumber {
         try {
-            // TO DO - Tidy this by adding scaled allBalances to poolPairData?
             // All values should use 1e18 fixed point
             // i.e. 1USDC => 1e18 not 1e6
-            const balancesScaled = poolPairData.allBalances.map(bal =>
-                scale(bal, 18)
-            );
             // amountsOut must have same length as balances. Only need value for token out.
             const amountsOut = poolPairData.allBalances.map((bal, i) => {
                 if (i === poolPairData.tokenIndexOut) return scale(amount, 18);
                 else return bnum(0);
             });
             const bptTotalSupplyScaled = scale(poolPairData.balanceIn, 18);
-            const swapFeeScaled = scale(poolPairData.swapFee, 18);
 
             const amt = SDK.StableMath._calcBptInGivenExactTokensOut(
                 this.ampAdjusted,
-                balancesScaled,
+                poolPairData.allBalancesScaled,
                 amountsOut,
                 bptTotalSupplyScaled,
-                swapFeeScaled
+                poolPairData.swapFeeScaled
             );
             // return normalised amount
             return scale(amt, -18);
