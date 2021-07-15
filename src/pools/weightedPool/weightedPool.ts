@@ -1,8 +1,7 @@
 import { getAddress } from '@ethersproject/address';
 import { bnum, scale } from '../../bmath';
 import { BigNumber } from '../../utils/bignumber';
-import * as weightedSolidity from './weightedMathEvm';
-import { FixedPointNumber } from '../../math/FixedPointNumber';
+import * as SDK from '@georgeroman/balancer-v2-pools';
 import {
     PoolBase,
     PoolTypes,
@@ -362,107 +361,119 @@ export class WeightedPool implements PoolBase {
         poolPairData: WeightedPoolPairData,
         amount: BigNumber
     ): BigNumber {
-        const amt = weightedSolidity._exactTokenInForTokenOut(
-            new FixedPointNumber(
-                scale(poolPairData.balanceIn, poolPairData.decimalsIn)
-            ),
-            new FixedPointNumber(scale(poolPairData.weightIn, 18)),
-            new FixedPointNumber(
-                scale(poolPairData.balanceOut, poolPairData.decimalsOut)
-            ),
-            new FixedPointNumber(scale(poolPairData.weightOut, 18)),
-            new FixedPointNumber(scale(amount, poolPairData.decimalsIn)),
-            new FixedPointNumber(scale(poolPairData.swapFee, 18))
-        );
+        try {
+            // poolPair balances are normalised so must be scaled before use
+            const amt = SDK.WeightedMath._calcOutGivenIn(
+                scale(poolPairData.balanceIn, poolPairData.decimalsIn),
+                scale(poolPairData.weightIn, 18),
+                scale(poolPairData.balanceOut, poolPairData.decimalsOut),
+                scale(poolPairData.weightOut, 18),
+                scale(amount, poolPairData.decimalsIn),
+                scale(poolPairData.swapFee, 18)
+            );
 
-        return bnum(amt.toString());
+            return amt;
+        } catch (err) {
+            return bnum(0);
+        }
     }
 
     _evmexactTokenInForBPTOut(
         poolPairData: WeightedPoolPairData,
         amount: BigNumber
     ): BigNumber {
-        const amt = weightedSolidity._exactTokenInForBPTOut(
-            new FixedPointNumber(
-                scale(poolPairData.balanceIn, poolPairData.decimalsIn)
-            ),
-            new FixedPointNumber(scale(poolPairData.weightIn, 18)),
-            new FixedPointNumber(scale(amount, poolPairData.decimalsIn)),
-            new FixedPointNumber(scale(poolPairData.balanceOut, 18)), // BPT is always 18 decimals
-            new FixedPointNumber(scale(poolPairData.swapFee, 18))
-        );
-
-        return bnum(amt.toString());
+        try {
+            // balance: BigNumber, normalizedWeight: BigNumber, amountIn: BigNumber, bptTotalSupply: BigNumber, swapFee: BigNumber
+            const amt = SDK.WeightedMath._calcBptOutGivenExactTokenIn(
+                scale(poolPairData.balanceIn, poolPairData.decimalsIn),
+                scale(poolPairData.weightIn, 18),
+                scale(amount, poolPairData.decimalsIn),
+                scale(poolPairData.balanceOut, 18), // BPT is always 18 decimals
+                scale(poolPairData.swapFee, 18)
+            );
+            return amt;
+        } catch (err) {
+            return bnum(0);
+        }
     }
 
     _evmexactBPTInForTokenOut(
         poolPairData: WeightedPoolPairData,
         amount: BigNumber
     ): BigNumber {
-        const amt = weightedSolidity._exactBPTInForTokenOut(
-            new FixedPointNumber(
-                scale(poolPairData.balanceOut, poolPairData.decimalsOut)
-            ),
-            new FixedPointNumber(scale(poolPairData.weightOut, 18)),
-            new FixedPointNumber(scale(amount, 18)), // BPT is always 18 decimals
-            new FixedPointNumber(scale(poolPairData.balanceIn, 18)), // BPT is always 18 decimals
-            new FixedPointNumber(scale(poolPairData.swapFee, 18))
-        );
-
-        return bnum(amt.toString());
+        try {
+            // poolPair balances are normalised so must be scaled before use
+            const amt = SDK.WeightedMath._calcTokenOutGivenExactBptIn(
+                scale(poolPairData.balanceOut, poolPairData.decimalsOut),
+                scale(poolPairData.weightOut, 18),
+                scale(amount, 18), // BPT is always 18 decimals
+                scale(poolPairData.balanceIn, 18), // BPT is always 18 decimals
+                scale(poolPairData.swapFee, 18)
+            );
+            return amt;
+        } catch (err) {
+            return bnum(0);
+        }
     }
 
     _evminGivenOut(
         poolPairData: WeightedPoolPairData,
         amount: BigNumber
     ): BigNumber {
-        const amt = weightedSolidity._tokenInForExactTokenOut(
-            new FixedPointNumber(
-                scale(poolPairData.balanceIn, poolPairData.decimalsIn)
-            ),
-            new FixedPointNumber(scale(poolPairData.weightIn, 18)),
-            new FixedPointNumber(
-                scale(poolPairData.balanceOut, poolPairData.decimalsOut)
-            ),
-            new FixedPointNumber(scale(poolPairData.weightOut, 18)),
-            new FixedPointNumber(scale(amount, poolPairData.decimalsOut)),
-            new FixedPointNumber(scale(poolPairData.swapFee, 18))
-        );
+        try {
+            // poolPair balances are normalised so must be scaled before use
+            const amt = SDK.WeightedMath._calcInGivenOut(
+                scale(poolPairData.balanceIn, poolPairData.decimalsIn),
+                scale(poolPairData.weightIn, 18),
+                scale(poolPairData.balanceOut, poolPairData.decimalsOut),
+                scale(poolPairData.weightOut, 18),
+                scale(amount, poolPairData.decimalsOut),
+                scale(poolPairData.swapFee, 18)
+            );
 
-        return bnum(amt.toString());
+            return amt;
+        } catch (err) {
+            return bnum(0);
+        }
     }
 
     _evmtokenInForExactBPTOut(
         poolPairData: WeightedPoolPairData,
         amount: BigNumber
     ): BigNumber {
-        const amt = weightedSolidity._tokenInForExactBPTOut(
-            new FixedPointNumber(
-                scale(poolPairData.balanceIn, poolPairData.decimalsIn)
-            ),
-            new FixedPointNumber(scale(poolPairData.weightIn, 18)),
-            new FixedPointNumber(scale(amount, 18)),
-            new FixedPointNumber(scale(poolPairData.balanceOut, 18)), // BPT is always 18 decimals
-            new FixedPointNumber(scale(poolPairData.swapFee, 18))
-        );
+        try {
+            // poolPair balances are normalised so must be scaled before use
+            const amt = SDK.WeightedMath._calcTokenInGivenExactBptOut(
+                scale(poolPairData.balanceIn, poolPairData.decimalsIn),
+                scale(poolPairData.weightIn, 18),
+                scale(amount, 18),
+                scale(poolPairData.balanceOut, 18), // BPT is always 18 decimals
+                scale(poolPairData.swapFee, 18)
+            );
 
-        return bnum(amt.toString());
+            return amt;
+        } catch (err) {
+            return bnum(0);
+        }
     }
 
     _evmbptInForExactTokenOut(
         poolPairData: WeightedPoolPairData,
         amount: BigNumber
     ): BigNumber {
-        const amt = weightedSolidity._bptInForExactTokenOut(
-            new FixedPointNumber(
-                scale(poolPairData.balanceOut, poolPairData.decimalsOut)
-            ),
-            new FixedPointNumber(scale(poolPairData.weightOut, 18)),
-            new FixedPointNumber(scale(amount, poolPairData.decimalsOut)),
-            new FixedPointNumber(scale(poolPairData.balanceIn, 18)), // BPT is always 18 decimals
-            new FixedPointNumber(scale(poolPairData.swapFee, 18))
-        );
+        try {
+            // poolPair balances are normalised so must be scaled before use
+            const amt = SDK.WeightedMath._calcBptInGivenExactTokenOut(
+                scale(poolPairData.balanceOut, poolPairData.decimalsOut),
+                scale(poolPairData.weightOut, 18),
+                scale(amount, poolPairData.decimalsOut),
+                scale(poolPairData.balanceIn, 18), // BPT is always 18 decimals
+                scale(poolPairData.swapFee, 18)
+            );
 
-        return bnum(amt.toString());
+            return amt;
+        } catch (err) {
+            return bnum(0);
+        }
     }
 }

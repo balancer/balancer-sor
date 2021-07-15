@@ -37,11 +37,6 @@ import { formatSwaps } from '../../src/helpersClass';
 
 // Just for testing weighted helpers:
 import { BPTForTokensZeroPriceImpact } from '../../src/frontendHelpers/weightedHelpers';
-import {
-    _bptInForExactTokensOut,
-    _exactTokensInForBPTOut,
-} from '../../src/pools/weightedPool/weightedMathEvm';
-import { FixedPointNumber } from '../../src/math/FixedPointNumber';
 
 // These types are used for V1 compare
 interface Profiling {

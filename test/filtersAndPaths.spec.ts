@@ -704,7 +704,7 @@ describe('Tests pools filtering and path processing', () => {
             new BigNumber(0)
         );
 
-        assert.equal(total.toString(), '0.979134514480936');
+        assert.equal(total.toString(), '0.979134514480937');
         assert.equal(swaps.length, 2);
         assert.equal(
             swaps[0][0].pool,
@@ -720,7 +720,7 @@ describe('Tests pools filtering and path processing', () => {
             swaps[0][1].pool,
             '0x07d13ed39ee291c1506675ff42f9b2b6b50e2d3e'
         );
-        assert.equal(swaps[0][1].swapAmount, '0.49475509621737');
+        assert.equal(swaps[0][1].swapAmount, '0.494754097206656');
         assert.equal(
             swaps[0][1].tokenIn,
             '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2'
@@ -740,7 +740,7 @@ describe('Tests pools filtering and path processing', () => {
             swaps[1][1].pool,
             '0x07d13ed39ee291c1506675ff42f9b2b6b50e2d3e'
         );
-        assert.equal(swaps[1][1].swapAmount, '0.494754097206633');
+        assert.equal(swaps[1][1].swapAmount, '0.494755096217348');
         assert.equal(
             swaps[1][1].tokenIn,
             '0x0000000000085d4780b73119b644ae5ecd22b376'

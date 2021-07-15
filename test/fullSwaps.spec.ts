@@ -170,7 +170,7 @@ describe('Tests full swaps against known values', () => {
         );
         assert.equal(
             v2SwapData.returnAmount.toString(),
-            '0.002932407296944381',
+            '0.00293240728089912',
             'V2 sanity check.'
         );
     }).timeout(10000);
@@ -635,7 +635,7 @@ describe('Tests full swaps against known values', () => {
         assert.equal(v2SwapData.swaps.length, 1, 'Should have 1 multiswap.');
         assert.equal(
             v2SwapData.returnAmount.toString(),
-            '0.094899465593600104',
+            '0.094899465593646237',
             'Amount should match previous result.'
         );
     }).timeout(10000);

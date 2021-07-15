@@ -146,7 +146,7 @@ describe(`Tests for Weighted Pools.`, () => {
 
                 // TO DO - Confirm value
                 expect(swapInfo.returnAmount.toString()).eq(
-                    '322801154563568120'
+                    '318211202355717370'
                 );
                 expect(swapInfo.swaps.length).eq(1);
                 expect(
@@ -217,7 +217,7 @@ describe(`Tests for Weighted Pools.`, () => {
                 );
 
                 // This value is hard coded as sanity check if things unexpectedly change. Taken from isolated run of calcTokenInGivenExactBptOut.
-                expect(swapInfo.returnAmount.toString()).eq('4777322');
+                expect(swapInfo.returnAmount.toString()).eq('4777327');
                 expect(swapInfo.swaps.length).eq(1);
                 expect(
                     swapInfo.tokenAddresses[swapInfo.swaps[0].assetInIndex]
@@ -251,9 +251,8 @@ describe(`Tests for Weighted Pools.`, () => {
                     swapAmt
                 );
 
-                // This value is hard coded as sanity check if things unexpectedly change. Taken from isolated run of calcBptInGivenExactTokensOut.
                 expect(swapInfo.returnAmount.toString()).eq(
-                    '890233084369683320'
+                    '890233084373103540'
                 );
                 expect(swapInfo.swaps.length).eq(1);
                 expect(
@@ -323,7 +322,7 @@ describe(`Tests for Weighted Pools.`, () => {
                 const tokenIn = USDC;
                 const tokenOut = RANDOM;
                 const swapType = SwapTypes.SwapExactIn;
-                const swapAmt: BigNumber = bnum('0.01');
+                const swapAmt: BigNumber = bnum('1');
 
                 const sor = new SOR(
                     provider,
@@ -366,7 +365,7 @@ describe(`Tests for Weighted Pools.`, () => {
                 ).eq(tokenOut);
                 // TO DO - Confirm amount via maths
                 expect(swapInfo.returnAmount.toString()).eq(
-                    '30081911611974550'
+                    '2211750490727915400'
                 );
             });
 
@@ -418,7 +417,7 @@ describe(`Tests for Weighted Pools.`, () => {
                 ).eq(poolsFromFile.pools[0].address);
                 // TO DO - Confirm amount via maths
                 expect(swapInfo.returnAmount.toString()).eq(
-                    '30526486044124890'
+                    '30526486044124990'
                 );
             });
 

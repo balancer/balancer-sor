@@ -14,6 +14,7 @@ Object.defineProperty(exports, '__esModule', { value: true });
 const types_1 = require('../../types');
 const address_1 = require('@ethersproject/address');
 const bmath_1 = require('../../bmath');
+const SDK = __importStar(require('@georgeroman/balancer-v2-pools'));
 const fixedPoint_1 = require('../../math/lib/fixedPoint');
 const stableSolidity = __importStar(require('./stableMathEvm'));
 const stableMath_1 = require('./stableMath');
@@ -258,33 +259,50 @@ class StablePool {
         return bmath_1.scale(result, -18 + poolPairData.decimalsOut);
     }
     _evminGivenOut(poolPairData, amount) {
-        // TO DO - Tidy this by adding scaled allBalances to poolPairData?
-        // Taken directly from V2 repo.
-        // We don't have access to all token decimals info to scale allBalances correctly
-        // so manually normalise everything to 18 decimals and scale back after
-        // i.e. 1USDC => 1e18 not 1e6
-        // Amp is non-scaled so can be used directly from SG
-        const balancesScaled = poolPairData.allBalances.map(bal =>
-            fixedPoint_1.fnum(bmath_1.scale(bal, 18))
-        );
-        const amtScaled = bmath_1.scale(amount, 18);
-        const swapFeeScaled = bmath_1.scale(poolPairData.swapFee, 18);
-        const result = stableSolidity._tokenInForExactTokenOut(
-            balancesScaled,
-            fixedPoint_1.fnum(poolPairData.amp),
-            poolPairData.tokenIndexIn,
-            poolPairData.tokenIndexOut,
-            fixedPoint_1.fnum(amtScaled),
-            fixedPoint_1.fnum(swapFeeScaled)
-        );
-        // const norm = scale(result, -18);
-        // return scale(norm, poolPairData.decimalsOut);
-        // Scaling to correct decimals and removing any extra non-integer
-        // const scaledResult = scale(result, -18 + poolPairData.decimalsIn)
-        //     .toString()
-        //     .split('.')[0];
-        // return new BigNumber(scaledResult);
-        return bmath_1.scale(result, -18 + poolPairData.decimalsIn);
+        try {
+            // TO DO - Tidy this by adding scaled allBalances to poolPairData?
+            // We don't have access to all token decimals info to scale allBalances correctly
+            // so manually normalise everything to 18 decimals and scale back after
+            // i.e. 1USDC => 1e18 not 1e6
+            // Amp is non-scaled so can be used directly from SG
+            const balancesScaled = poolPairData.allBalances.map(bal =>
+                fixedPoint_1.fnum(bmath_1.scale(bal, 18))
+            );
+            const amtScaled = bmath_1.scale(amount, 18);
+            const swapFeeScaled = bmath_1.scale(poolPairData.swapFee, 18);
+            const AMP_PRECISION = bmath_1.bnum(1000);
+            const adjAmp = bmath_1.bnum(poolPairData.amp).times(AMP_PRECISION);
+            // poolPair balances are normalised so must be scaled before use
+            const amt = SDK.StableMath._calcInGivenOut(
+                adjAmp, // bnum(poolPairData.amp),
+                balancesScaled,
+                poolPairData.tokenIndexIn,
+                poolPairData.tokenIndexOut,
+                amtScaled,
+                swapFeeScaled
+            );
+            return bmath_1.scale(amt, -18 + poolPairData.decimalsIn);
+        } catch (err) {
+            console.log('ERORRRRRRORORORORORORORORORR');
+            console.log(err.message);
+            return bmath_1.bnum(0);
+        }
+        // const result = stableSolidity._tokenInForExactTokenOut(
+        //     balancesScaled,
+        //     fnum(poolPairData.amp),
+        //     poolPairData.tokenIndexIn,
+        //     poolPairData.tokenIndexOut,
+        //     fnum(amtScaled),
+        //     fnum(swapFeeScaled)
+        // );
+        // // const norm = scale(result, -18);
+        // // return scale(norm, poolPairData.decimalsOut);
+        // // Scaling to correct decimals and removing any extra non-integer
+        // // const scaledResult = scale(result, -18 + poolPairData.decimalsIn)
+        // //     .toString()
+        // //     .split('.')[0];
+        // // return new BigNumber(scaledResult);
+        // return scale(result, -18 + poolPairData.decimalsIn);
     }
     _evmexactTokenInForBPTOut(poolPairData, amount) {
         // TO DO - Tidy this by adding scaled allBalances to poolPairData?
