@@ -47,10 +47,8 @@
         "@ethersproject/contracts": "^5.0.5",
         "@ethersproject/providers": "5.0.12",
         "@ethersproject/solidity": "^5.0.5",
-        "@ethersproject/units": "^5.0.6",
         "@georgeroman/balancer-v2-pools": "^0.0.5",
         "bignumber.js": "^9.0.1",
-        "decimal.js": "^10.2.1",
         "isomorphic-fetch": "^2.2.1"
     }
 }
