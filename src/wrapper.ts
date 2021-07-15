@@ -1,6 +1,6 @@
 import { BaseProvider } from '@ethersproject/providers';
 import { BigNumber } from './utils/bignumber';
-import { bnum } from './bmath';
+import { bnum, ZERO } from './bmath';
 import { getCostOutputToken } from './costToken';
 import { getOnChainBalances } from './multicall';
 import { filterPoolsOfInterest, filterHopPools } from './pools';
@@ -230,12 +230,12 @@ export class SOR {
         let swapInfo: SwapInfo = {
             tokenAddresses: [],
             swaps: [],
-            swapAmount: bnum(0),
+            swapAmount: ZERO,
             tokenIn: '',
             tokenOut: '',
-            returnAmount: bnum(0),
-            returnAmountConsideringFees: bnum(0),
-            marketSp: bnum(0),
+            returnAmount: ZERO,
+            returnAmountConsideringFees: ZERO,
+            marketSp: ZERO,
         };
 
         // The Subgraph returns tokens in lower case format so we must match this
@@ -292,12 +292,12 @@ export class SOR {
         let swapInfo: SwapInfo = {
             tokenAddresses: [],
             swaps: [],
-            swapAmount: bnum(0),
+            swapAmount: ZERO,
             tokenIn: '',
             tokenOut: '',
-            returnAmount: bnum(0),
-            returnAmountConsideringFees: bnum(0),
-            marketSp: bnum(0),
+            returnAmount: ZERO,
+            returnAmountConsideringFees: ZERO,
+            marketSp: ZERO,
         };
 
         if (onChainPools.pools.length === 0) return swapInfo;

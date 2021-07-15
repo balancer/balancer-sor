@@ -11,7 +11,7 @@ import {
     Swap,
     SwapInfo,
 } from './types';
-import { bnum, scale } from './bmath';
+import { bnum, scale, ZERO, INFINITY } from './bmath';
 import { INFINITESIMAL } from './config';
 import { ZERO_ADDRESS } from './index';
 
@@ -60,9 +60,9 @@ export function getOutputAmountSwapForPath(
     // 'swapExactIn' or Inf for swapExactOut
     if (amount.gt(path.limitAmount)) {
         if (swapType === SwapTypes.SwapExactIn) {
-            return bnum(0);
+            return ZERO;
         } else {
-            return bnum(Infinity);
+            return INFINITY;
         }
     }
     let poolPairData = path.poolPairData;
@@ -181,7 +181,7 @@ export function getOutputAmountSwap(
     // TODO: check if necessary to check if amount > limitAmount
     if (swapType === SwapTypes.SwapExactIn) {
         if (poolPairData.balanceIn.isZero()) {
-            return bnum(0);
+            return ZERO;
         } else if (pairType === PairTypes.TokenToToken) {
             return pool._exactTokenInForTokenOut(poolPairData, amount);
         } else if (pairType === PairTypes.TokenToBpt) {
@@ -191,9 +191,9 @@ export function getOutputAmountSwap(
         }
     } else {
         if (poolPairData.balanceOut.isZero()) {
-            return bnum(0);
+            return ZERO;
         } else if (amount.gte(poolPairData.balanceOut)) {
-            return bnum('Infinity');
+            return INFINITY;
         } else if (pairType === PairTypes.TokenToToken) {
             return pool._tokenInForExactTokenOut(poolPairData, amount);
         } else if (pairType === PairTypes.TokenToBpt) {
@@ -216,13 +216,13 @@ export function getSpotPriceAfterSwap(
     // TODO: check if necessary to check if amount > limitAmount
     if (swapType === SwapTypes.SwapExactIn) {
         if (poolPairData.balanceIn.isZero()) {
-            return bnum(0);
+            return ZERO;
         }
     } else {
         if (poolPairData.balanceOut.isZero()) {
-            return bnum(0);
+            return ZERO;
         }
-        if (amount.gte(poolPairData.balanceOut)) return bnum('Infinity');
+        if (amount.gte(poolPairData.balanceOut)) return INFINITY;
     }
     if (swapType === SwapTypes.SwapExactIn) {
         if (pairType === PairTypes.TokenToToken) {
@@ -376,13 +376,13 @@ export function getDerivativeSpotPriceAfterSwap(
     // TODO: check if necessary to check if amount > limitAmount
     if (swapType === SwapTypes.SwapExactIn) {
         if (poolPairData.balanceIn.isZero()) {
-            return bnum(0);
+            return ZERO;
         }
     } else {
         if (poolPairData.balanceOut.isZero()) {
-            return bnum(0);
+            return ZERO;
         }
-        if (amount.gte(poolPairData.balanceOut)) return bnum('Infinity');
+        if (amount.gte(poolPairData.balanceOut)) return INFINITY;
     }
     if (swapType === SwapTypes.SwapExactIn) {
         if (pairType === PairTypes.TokenToToken) {
@@ -435,13 +435,13 @@ export function EVMgetOutputAmountSwap(
 
     if (swapType === SwapTypes.SwapExactIn) {
         if (poolPairData.balanceIn.isZero()) {
-            return bnum(0);
+            return ZERO;
         }
     } else {
         if (poolPairData.balanceOut.isZero()) {
-            return bnum(0);
+            return ZERO;
         }
-        if (amount.gte(poolPairData.balanceOut)) return bnum('Infinity');
+        if (amount.gte(poolPairData.balanceOut)) return INFINITY;
     }
     if (swapType === SwapTypes.SwapExactIn) {
         // TODO we will be able to remove pooltype check once Element EVM maths is available
@@ -532,9 +532,9 @@ export function formatSwaps(
     let swapInfo: SwapInfo = {
         tokenAddresses: [],
         swaps: [],
-        swapAmount: bnum(0),
-        returnAmount: bnum(0),
-        returnAmountConsideringFees: bnum(0),
+        swapAmount: ZERO,
+        returnAmount: ZERO,
+        returnAmountConsideringFees: ZERO,
         tokenIn: '',
         tokenOut: '',
         marketSp: marketSp,
@@ -568,7 +568,7 @@ export function formatSwaps(
     if (swapType === SwapTypes.SwapExactIn) {
         const swapsV2: SwapV2[] = [];
 
-        let totalSwapAmount = bnum(0);
+        let totalSwapAmount = ZERO;
         /*
          * Multihop swaps can be executed by passing an`amountIn` value of zero for a swap.This will cause the amount out
          * of the previous swap to be used as the amount in of the current one.In such a scenario, `tokenIn` must equal the
@@ -625,7 +625,7 @@ export function formatSwaps(
         swapInfo.swaps = swapsV2;
     } else {
         let swapsV2: SwapV2[] = [];
-        let totalSwapAmount = bnum(0);
+        let totalSwapAmount = ZERO;
         /*
         SwapExactOut will have order reversed in V2.
         v1 = [[x, y]], [[a, b]]

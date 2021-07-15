@@ -8,7 +8,7 @@ import {
     SwapTypes,
 } from '../../types';
 import { getAddress } from '@ethersproject/address';
-import { bnum, scale } from '../../bmath';
+import { bnum, scale, ZERO } from '../../bmath';
 import * as SDK from '@georgeroman/balancer-v2-pools';
 import {
     _invariant,
@@ -385,7 +385,7 @@ export class StablePool implements PoolBase {
             // return normalised amount
             return scale(amt, -18);
         } catch (err) {
-            return bnum(0);
+            return ZERO;
         }
     }
 
@@ -410,7 +410,7 @@ export class StablePool implements PoolBase {
             // return normalised amount
             return scale(amt, -18);
         } catch (err) {
-            return bnum(0);
+            return ZERO;
         }
     }
 
@@ -425,7 +425,7 @@ export class StablePool implements PoolBase {
             // amountsIn must have same length as balances. Only need value for token in.
             const amountsIn = poolPairData.allBalances.map((bal, i) => {
                 if (i === poolPairData.tokenIndexIn) return scale(amount, 18);
-                else return bnum(0);
+                else return ZERO;
             });
 
             const amt = SDK.StableMath._calcBptOutGivenExactTokensIn(
@@ -439,7 +439,7 @@ export class StablePool implements PoolBase {
             // return normalised amount
             return scale(amt, -18);
         } catch (err) {
-            return bnum(0);
+            return ZERO;
         }
     }
 
@@ -465,7 +465,7 @@ export class StablePool implements PoolBase {
             // return normalised amount
             return scale(amt, -18);
         } catch (err) {
-            return bnum(0);
+            return ZERO;
         }
     }
 
@@ -491,7 +491,7 @@ export class StablePool implements PoolBase {
             // return normalised amount
             return scale(amt, -18);
         } catch (err) {
-            return bnum(0);
+            return ZERO;
         }
     }
 
@@ -505,7 +505,7 @@ export class StablePool implements PoolBase {
             // amountsOut must have same length as balances. Only need value for token out.
             const amountsOut = poolPairData.allBalances.map((bal, i) => {
                 if (i === poolPairData.tokenIndexOut) return scale(amount, 18);
-                else return bnum(0);
+                else return ZERO;
             });
             const bptTotalSupplyScaled = scale(poolPairData.balanceIn, 18);
 
@@ -519,7 +519,7 @@ export class StablePool implements PoolBase {
             // return normalised amount
             return scale(amt, -18);
         } catch (err) {
-            return bnum(0);
+            return ZERO;
         }
     }
 }

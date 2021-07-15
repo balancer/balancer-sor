@@ -1,5 +1,5 @@
 import { getAddress } from '@ethersproject/address';
-import { bnum, scale } from '../../bmath';
+import { bnum, scale, ZERO, ONE } from '../../bmath';
 import { BigNumber } from '../../utils/bignumber';
 import * as SDK from '@georgeroman/balancer-v2-pools';
 import {
@@ -107,14 +107,14 @@ export class WeightedPool implements PoolBase {
                 throw 'Pool missing totalShares field';
             balanceIn = this.totalShares;
             decimalsIn = '18'; // Not used but has to be defined
-            weightIn = bnum(1); // Not used but has to be defined
+            weightIn = ONE; // Not used but has to be defined
         } else if (tokenOut == this.address) {
             pairType = PairTypes.TokenToBpt;
             if (this.totalShares === undefined)
                 throw 'Pool missing totalShares field';
             balanceOut = this.totalShares;
             decimalsOut = '18'; // Not used but has to be defined
-            weightOut = bnum(1); // Not used but has to be defined
+            weightOut = ONE; // Not used but has to be defined
         } else {
             pairType = PairTypes.TokenToToken;
         }
@@ -172,7 +172,7 @@ export class WeightedPool implements PoolBase {
             return poolPairData.balanceOut; // Liquidity in tokenOut is totalShares
         } else if (poolPairData.pairType == PairTypes.BptToToken) {
             return poolPairData.balanceOut.div(
-                bnum(1).plus(poolPairData.weightOut)
+                ONE.plus(poolPairData.weightOut)
             ); // Liquidity in tokenOut is Bo/wo
         }
     }
@@ -373,7 +373,7 @@ export class WeightedPool implements PoolBase {
             // return normalised amount
             return scale(amt, -poolPairData.decimalsOut);
         } catch (err) {
-            return bnum(0);
+            return ZERO;
         }
     }
 
@@ -393,7 +393,7 @@ export class WeightedPool implements PoolBase {
             // return normalised amount
             return scale(amt, -18); // BPT is always 18 decimals
         } catch (err) {
-            return bnum(0);
+            return ZERO;
         }
     }
 
@@ -413,7 +413,7 @@ export class WeightedPool implements PoolBase {
             // return normalised amount
             return scale(amt, -poolPairData.decimalsOut);
         } catch (err) {
-            return bnum(0);
+            return ZERO;
         }
     }
 
@@ -435,7 +435,7 @@ export class WeightedPool implements PoolBase {
             // return normalised amount
             return scale(amt, -poolPairData.decimalsIn);
         } catch (err) {
-            return bnum(0);
+            return ZERO;
         }
     }
 
@@ -456,7 +456,7 @@ export class WeightedPool implements PoolBase {
             // return normalised amount
             return scale(amt, -poolPairData.decimalsIn);
         } catch (err) {
-            return bnum(0);
+            return ZERO;
         }
     }
 
@@ -477,7 +477,7 @@ export class WeightedPool implements PoolBase {
             // return normalised amount
             return scale(amt, -18); // BPT always 18 decimals
         } catch (err) {
-            return bnum(0);
+            return ZERO;
         }
     }
 }

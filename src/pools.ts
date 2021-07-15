@@ -1,9 +1,7 @@
 import { ALLOW_ADD_REMOVE } from './config';
-import fetch from 'isomorphic-fetch';
 import {
     DisabledOptions,
     SubgraphPoolBase,
-    SubGraphPoolsBase,
     PoolDictionary,
     SwapPairType,
     NewPath,
@@ -13,7 +11,7 @@ import {
 import { WeightedPool } from './pools/weightedPool/weightedPool';
 import { StablePool } from './pools/stablePool/stablePool';
 import { ElementPool } from './pools/elementPool/elementPool';
-import { bnum } from './bmath';
+import { ZERO } from './bmath';
 
 import disabledTokensDefault from './disabled-tokens.json';
 
@@ -178,9 +176,9 @@ export function filterHopPools(
     }
 
     for (let i = 0; i < hopTokens.length; i++) {
-        let highestNormalizedLiquidityFirst = bnum(0); // Aux variable to find pool with most liquidity for pair (tokenIn -> hopToken)
+        let highestNormalizedLiquidityFirst = ZERO; // Aux variable to find pool with most liquidity for pair (tokenIn -> hopToken)
         let highestNormalizedLiquidityFirstPoolId: string; // Aux variable to find pool with most liquidity for pair (tokenIn -> hopToken)
-        let highestNormalizedLiquiditySecond = bnum(0); // Aux variable to find pool with most liquidity for pair (hopToken -> tokenOut)
+        let highestNormalizedLiquiditySecond = ZERO; // Aux variable to find pool with most liquidity for pair (hopToken -> tokenOut)
         let highestNormalizedLiquiditySecondPoolId: string; // Aux variable to find pool with most liquidity for pair (hopToken -> tokenOut)
 
         for (let id in poolsOfInterest) {
@@ -286,7 +284,7 @@ function createDirectPath(
     const path: NewPath = {
         id: pool.id,
         swaps: [swap],
-        limitAmount: bnum(0),
+        limitAmount: ZERO,
         poolPairData: [poolPairData],
         pools: [pool],
     };
@@ -324,7 +322,7 @@ function createMultihopPath(
     const path: NewPath = {
         id: firstPool.id + secondPool.id,
         swaps: [swap1, swap2],
-        limitAmount: bnum(0),
+        limitAmount: ZERO,
         poolPairData: [poolPairDataFirst, poolPairDataSecond],
         pools: [firstPool, secondPool],
     };

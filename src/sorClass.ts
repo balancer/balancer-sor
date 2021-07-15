@@ -1,5 +1,5 @@
 import { INFINITESIMAL, PRICE_ERROR_TOLERANCE } from './config';
-import { bnum } from './bmath';
+import { bnum, ZERO, ONE, INFINITY } from './bmath';
 import { BigNumber } from './utils/bignumber';
 import { SwapTypes, NewPath, PoolDictionary, Swap } from './types';
 import {
@@ -24,7 +24,7 @@ export function calculatePathLimits(
     paths: NewPath[],
     swapType: SwapTypes
 ): [NewPath[], BigNumber] {
-    let maxLiquidityAvailable = bnum(0);
+    let maxLiquidityAvailable = ZERO;
     paths.forEach(path => {
         // Original parsedPoolPairForPath here but this has already been done.
         path.limitAmount = getLimitAmountSwapForPath(path, swapType);
@@ -64,7 +64,7 @@ export function getLimitAmountSwapForPath(
             if (limitOutputAmountSwap1.gt(limitAmountSwap2))
                 if (limitAmountSwap2.isZero())
                     // This means second hop is limiting the path
-                    return bnum(0);
+                    return ZERO;
                 // this is necessary to avoid return NaN
                 else
                     return getOutputAmountSwap(
@@ -121,7 +121,7 @@ export const smartOrderRouter = (
 
     // No paths available or totalSwapAmount == 0, return empty solution
     if (paths.length == 0 || totalSwapAmount.isZero()) {
-        return [[], bnum(0), bnum(0), bnum(0)];
+        return [[], ZERO, ZERO, ZERO];
     }
     // Before we start the main loop, we first check if there is enough liquidity for this totalSwapAmount at all
     let highestLimitAmounts = getHighestLimitAmountsForPaths(paths, maxPools);
@@ -147,7 +147,7 @@ export const smartOrderRouter = (
         break; // No need to keep looping as this number of pools (i) has enough liquidity
     }
     if (initialNumPaths == -1) {
-        return [[], bnum(0), bnum(0), bnum(0)]; // Not enough liquidity, return empty
+        return [[], ZERO, ZERO, ZERO]; // Not enough liquidity, return empty
     }
 
     // First get the optimal totalReturn to trade 'totalSwapAmount' with
@@ -157,7 +157,7 @@ export const smartOrderRouter = (
         totalReturn = 0;
         if (b != initialNumPaths) {
             // We already had a previous iteration and are adding another pool this new iteration
-            // swapAmounts.push(bnum(1)); // Initialize new swapAmount with 1 wei to
+            // swapAmounts.push(ONE); // Initialize new swapAmount with 1 wei to
             // // make sure that it won't be considered as a non viable amount (which would
             // // be the case if it started at 0)
 
@@ -173,7 +173,7 @@ export const smartOrderRouter = (
             // swapAmounts by 1-newSwapAmount/totalSwapAmount.
             swapAmounts.forEach((swapAmount, i) => {
                 swapAmounts[i] = swapAmounts[i].times(
-                    bnum(1).minus(newSwapAmount.div(totalSwapAmount))
+                    ONE.minus(newSwapAmount.div(totalSwapAmount))
                 );
             });
             swapAmounts.push(newSwapAmount);
@@ -270,9 +270,9 @@ export const smartOrderRouter = (
     let totalSwapAmountWithRoundingErrors: BigNumber = new BigNumber(0);
     let dust: BigNumber = new BigNumber(0);
     let lenghtFirstPath;
-    let highestSwapAmt = bnum(0);
+    let highestSwapAmt = ZERO;
     let largestSwapPath: NewPath;
-    bestTotalReturn = bnum(0); // Reset totalReturn as this time it will be
+    bestTotalReturn = ZERO; // Reset totalReturn as this time it will be
     // calculated with the EVM maths so the return is exactly what the user will get
     // after executing the transaction (given there are no front-runners)
     bestPaths.forEach((path, i) => {
@@ -431,17 +431,17 @@ export const smartOrderRouter = (
         }
     }
 
-    let marketSp = bnum(0);
+    let marketSp = ZERO;
     if (!bestTotalReturn.eq(0))
         marketSp = getSpotPriceAfterSwapForPath(
             largestSwapPath,
             swapType,
-            bnum(0)
+            ZERO
         );
     else {
         swaps = [];
-        marketSp = bnum(0);
-        bestTotalReturnConsideringFees = bnum(0);
+        marketSp = ZERO;
+        bestTotalReturnConsideringFees = ZERO;
     }
 
     return [swaps, bestTotalReturn, marketSp, bestTotalReturnConsideringFees];
@@ -474,7 +474,7 @@ function getBestPathIds(
         let swapAmount: BigNumber = sortedSwapAmounts[i];
         // Find path that has best effective price
         let bestPathIndex = -1;
-        let bestEffectivePrice = bnum('Infinity'); // Start with worst price possible
+        let bestEffectivePrice = INFINITY; // Start with worst price possible
         paths.forEach((path, j) => {
             // Do not consider this path if its limit is below swapAmount
             if (path.limitAmount.gte(swapAmount)) {
@@ -484,7 +484,7 @@ function getBestPathIds(
                 // to select other paths that can still be improved on
                 let effectivePrice;
                 if (path.limitAmount.eq(swapAmount)) {
-                    effectivePrice = bnum('Infinity');
+                    effectivePrice = INFINITY;
                 } else {
                     // TODO for optimization: pass already calculated limitAmount as input
                     // to getEffectivePriceSwapForPath()
@@ -533,7 +533,7 @@ function iterateSwapAmounts(
     exceedingAmounts: BigNumber[],
     pathLimitAmounts: BigNumber[]
 ): [BigNumber[], BigNumber[]] {
-    let priceError = bnum(1); // Initialize priceError just so that while starts
+    let priceError = ONE; // Initialize priceError just so that while starts
     let prices = [];
     // // Since this is the beginning of an iteration with a new set of paths, we
     // // set any swapAmounts that were 0 previously to 1 wei or at the limit
@@ -593,8 +593,8 @@ function iterateSwapAmountsApproximation(
     pathLimitAmounts: BigNumber[],
     iterationCount: number
 ): [BigNumber[], BigNumber[], BigNumber[]] {
-    let sumInverseDerivativeSPaSs = bnum(0);
-    let sumSPaSDividedByDerivativeSPaSs = bnum(0);
+    let sumInverseDerivativeSPaSs = ZERO;
+    let sumSPaSDividedByDerivativeSPaSs = ZERO;
     let SPaSs = [];
     let derivativeSPaSs = [];
 
@@ -603,14 +603,14 @@ function iterateSwapAmountsApproximation(
     // within "iterateSwapAmounts()". In this case swapAmounts should be considered viable
     // also if they are on the limit.
     swapAmounts.forEach((swapAmount, i) => {
-        // if (swapAmount.gt(bnum(0)) && exceedingAmounts[i].lt(bnum(0))) {
+        // if (swapAmount.gt(ZERO) && exceedingAmounts[i].lt(ZERO)) {
         if (
             (iterationCount == 0 &&
-                swapAmount.gte(bnum(0)) &&
-                exceedingAmounts[i].lte(bnum(0))) ||
+                swapAmount.gte(ZERO) &&
+                exceedingAmounts[i].lte(ZERO)) ||
             (iterationCount != 0 &&
-                swapAmount.gt(bnum(0)) &&
-                exceedingAmounts[i].lt(bnum(0)))
+                swapAmount.gt(ZERO) &&
+                exceedingAmounts[i].lt(ZERO))
         ) {
             let path = selectedPaths[i];
             let SPaS = getSpotPriceAfterSwapForPath(path, swapType, swapAmount);
@@ -622,7 +622,7 @@ function iterateSwapAmountsApproximation(
             );
             derivativeSPaSs.push(derivative_SPaS);
             sumInverseDerivativeSPaSs = sumInverseDerivativeSPaSs.plus(
-                bnum(1).div(derivative_SPaS)
+                ONE.div(derivative_SPaS)
             );
             sumSPaSDividedByDerivativeSPaSs = sumSPaSDividedByDerivativeSPaSs.plus(
                 SPaS.div(derivative_SPaS)
@@ -648,11 +648,11 @@ function iterateSwapAmountsApproximation(
     swapAmounts.forEach((swapAmount, i) => {
         if (
             (iterationCount == 0 &&
-                swapAmount.gte(bnum(0)) &&
-                exceedingAmounts[i].lte(bnum(0))) ||
+                swapAmount.gte(ZERO) &&
+                exceedingAmounts[i].lte(ZERO)) ||
             (iterationCount != 0 &&
-                swapAmount.gt(bnum(0)) &&
-                exceedingAmounts[i].lt(bnum(0)))
+                swapAmount.gt(ZERO) &&
+                exceedingAmounts[i].lt(ZERO))
         ) {
             let deltaSwapAmount = weighted_average_SPaS
                 .minus(SPaSs[i])
@@ -664,8 +664,8 @@ function iterateSwapAmountsApproximation(
 
     // Make sure no input amount is negative or above the path limit
     while (
-        BigNumber.min.apply(null, swapAmounts).lt(bnum(0)) ||
-        BigNumber.max.apply(null, exceedingAmounts).gt(bnum(0))
+        BigNumber.min.apply(null, swapAmounts).lt(ZERO) ||
+        BigNumber.max.apply(null, exceedingAmounts).gt(ZERO)
     ) {
         [swapAmounts, exceedingAmounts] = redistributeInputAmounts(
             swapAmounts,
@@ -675,18 +675,18 @@ function iterateSwapAmountsApproximation(
     }
 
     let pricesForViableAmounts = []; // Get prices for all non-negative AND below-limit input amounts
-    let swapAmountsSumWithRoundingErrors = bnum(0);
+    let swapAmountsSumWithRoundingErrors = ZERO;
     swapAmounts.forEach((swapAmount, i) => {
         swapAmountsSumWithRoundingErrors = swapAmountsSumWithRoundingErrors.plus(
             swapAmount
         );
         if (
             (iterationCount == 0 &&
-                swapAmount.gte(bnum(0)) &&
-                exceedingAmounts[i].lte(bnum(0))) ||
+                swapAmount.gte(ZERO) &&
+                exceedingAmounts[i].lte(ZERO)) ||
             (iterationCount != 0 &&
-                swapAmount.gt(bnum(0)) &&
-                exceedingAmounts[i].lt(bnum(0)))
+                swapAmount.gt(ZERO) &&
+                exceedingAmounts[i].lt(ZERO))
         )
             pricesForViableAmounts.push(
                 getSpotPriceAfterSwapForPath(
@@ -710,10 +710,10 @@ function iterateSwapAmountsApproximation(
     // would still be >0 and <limit) after adding the error
     // I.d. we need: (swapAmount+error)>0 AND (exceedingAmount+error)<0
     for (let i = 0; i < swapAmounts.length; ++i) {
-        if (swapAmounts[i].gt(bnum(0)) && exceedingAmounts[i].lt(bnum(0))) {
+        if (swapAmounts[i].gt(ZERO) && exceedingAmounts[i].lt(ZERO)) {
             if (
-                swapAmounts[i].plus(roundingError).gt(bnum(0)) &&
-                exceedingAmounts[i].plus(roundingError).lt(bnum(0))
+                swapAmounts[i].plus(roundingError).gt(ZERO) &&
+                exceedingAmounts[i].plus(roundingError).lt(ZERO)
             ) {
                 swapAmounts[i] = swapAmounts[i].plus(roundingError);
                 exceedingAmounts[i] = exceedingAmounts[i].plus(roundingError);
@@ -730,34 +730,34 @@ function redistributeInputAmounts(
     exceedingAmounts: BigNumber[],
     derivativeSPaSs: BigNumber[]
 ): [BigNumber[], BigNumber[]] {
-    let sumInverseDerivativeSPaSsForViableAmounts = bnum(0);
-    let sumInverseDerivativeSPaSsForNegativeAmounts = bnum(0);
-    let sumInverseDerivativeSPaSsForExceedingAmounts = bnum(0);
-    let sumNegativeOrExceedingSwapAmounts = bnum(0);
+    let sumInverseDerivativeSPaSsForViableAmounts = ZERO;
+    let sumInverseDerivativeSPaSsForNegativeAmounts = ZERO;
+    let sumInverseDerivativeSPaSsForExceedingAmounts = ZERO;
+    let sumNegativeOrExceedingSwapAmounts = ZERO;
     swapAmounts.forEach((swapAmount, i) => {
         // Amount is negative
-        if (swapAmount.lte(bnum(0))) {
+        if (swapAmount.lte(ZERO)) {
             sumNegativeOrExceedingSwapAmounts = sumNegativeOrExceedingSwapAmounts.plus(
                 swapAmount
             );
             sumInverseDerivativeSPaSsForNegativeAmounts = sumInverseDerivativeSPaSsForNegativeAmounts.plus(
-                bnum(1).div(derivativeSPaSs[i])
+                ONE.div(derivativeSPaSs[i])
             );
         }
         // Amount is above limit (exceeding > 0)
-        else if (exceedingAmounts[i].gte(bnum(0))) {
+        else if (exceedingAmounts[i].gte(ZERO)) {
             sumNegativeOrExceedingSwapAmounts = sumNegativeOrExceedingSwapAmounts.plus(
                 exceedingAmounts[i]
             );
             sumInverseDerivativeSPaSsForExceedingAmounts = sumInverseDerivativeSPaSsForExceedingAmounts.plus(
-                bnum(1).div(derivativeSPaSs[i])
+                ONE.div(derivativeSPaSs[i])
             );
         }
         // Sum the inverse of the derivative if the swapAmount is viable,
         // i.e. if swapAmount > 0 or swapAmount < limit
         else
             sumInverseDerivativeSPaSsForViableAmounts = sumInverseDerivativeSPaSsForViableAmounts.plus(
-                bnum(1).div(derivativeSPaSs[i])
+                ONE.div(derivativeSPaSs[i])
             );
     });
 
@@ -765,15 +765,15 @@ function redistributeInputAmounts(
     // to non-exceeding pools if sumNegativeOrExceedingSwapAmounts > 0
     // or to non zero swapAmount pools if sumNegativeOrExceedingSwapAmounts < 0
     swapAmounts.forEach((swapAmount, i) => {
-        if (swapAmount.lte(bnum(0))) {
-            swapAmounts[i] = bnum(0);
+        if (swapAmount.lte(ZERO)) {
+            swapAmounts[i] = ZERO;
             exceedingAmounts[i] = exceedingAmounts[i].minus(swapAmount);
-        } else if (exceedingAmounts[i].gte(bnum(0))) {
+        } else if (exceedingAmounts[i].gte(ZERO)) {
             swapAmounts[i] = swapAmounts[i].minus(exceedingAmounts[i]); // This is the same as swapAmounts[i] = pathLimitAmounts[i]
-            exceedingAmounts[i] = bnum(0);
+            exceedingAmounts[i] = ZERO;
         } else {
             let deltaSwapAmount = sumNegativeOrExceedingSwapAmounts
-                .times(bnum(1).div(derivativeSPaSs[i]))
+                .times(ONE.div(derivativeSPaSs[i]))
                 .div(sumInverseDerivativeSPaSsForViableAmounts);
             swapAmounts[i] = swapAmounts[i].plus(deltaSwapAmount);
             exceedingAmounts[i] = exceedingAmounts[i].plus(deltaSwapAmount);
@@ -783,13 +783,13 @@ function redistributeInputAmounts(
     // If there were no viable amounts (i.e all amounts were either negative or above limit)
     // We run this extra loop to redistribute the excess
     if (sumInverseDerivativeSPaSsForViableAmounts.isZero()) {
-        if (sumNegativeOrExceedingSwapAmounts.lt(bnum(0))) {
+        if (sumNegativeOrExceedingSwapAmounts.lt(ZERO)) {
             // This means we need to redistribute to the exceeding amounts that
             // were now set to the limit
             swapAmounts.forEach((swapAmount, i) => {
                 if (exceedingAmounts[i].isZero()) {
                     let deltaSwapAmount = sumNegativeOrExceedingSwapAmounts
-                        .times(bnum(1).div(derivativeSPaSs[i]))
+                        .times(ONE.div(derivativeSPaSs[i]))
                         .div(sumInverseDerivativeSPaSsForExceedingAmounts);
                     swapAmounts[i] = swapAmounts[i].plus(deltaSwapAmount);
                     exceedingAmounts[i] = exceedingAmounts[i].plus(
@@ -803,7 +803,7 @@ function redistributeInputAmounts(
             swapAmounts.forEach((swapAmount, i) => {
                 if (swapAmounts[i].isZero()) {
                     let deltaSwapAmount = sumNegativeOrExceedingSwapAmounts
-                        .times(bnum(1).div(derivativeSPaSs[i]))
+                        .times(ONE.div(derivativeSPaSs[i]))
                         .div(sumInverseDerivativeSPaSsForNegativeAmounts);
                     swapAmounts[i] = swapAmounts[i].plus(deltaSwapAmount);
                     exceedingAmounts[i] = exceedingAmounts[i].plus(

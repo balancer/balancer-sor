@@ -1,5 +1,8 @@
 import { BigNumber } from './utils/bignumber';
 
+export const ZERO = bnum(0);
+export const ONE = bnum(1);
+export const INFINITY = bnum('Infinity');
 export const BONE = new BigNumber(10).pow(18);
 export const TWOBONE = BONE.times(new BigNumber(2));
 const BPOW_PRECISION = BONE.idiv(new BigNumber(10).pow(10));
