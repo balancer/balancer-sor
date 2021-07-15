@@ -44,8 +44,8 @@ describe(`Tests for Weighted Pools.`, () => {
             const newPool = new WeightedPool(
                 pool.id,
                 pool.address,
-                pool.amp,
                 pool.swapFee,
+                pool.totalWeight,
                 pool.totalShares,
                 pool.tokens,
                 pool.tokensList
@@ -54,7 +54,7 @@ describe(`Tests for Weighted Pools.`, () => {
             const poolPairData: WeightedPoolPairData = {
                 id: pool.id,
                 address: pool.address,
-                poolType: PoolTypes.Stable,
+                poolType: PoolTypes.Weighted,
                 pairType: PairTypes.TokenToToken,
                 tokenIn: pool.tokens[0].address,
                 tokenOut: pool.tokens[1].address,
@@ -86,8 +86,8 @@ describe(`Tests for Weighted Pools.`, () => {
             const newPool = new WeightedPool(
                 pool.id,
                 pool.address,
-                pool.amp,
                 pool.swapFee,
+                pool.totalWeight,
                 pool.totalShares,
                 pool.tokens,
                 pool.tokensList
@@ -96,7 +96,7 @@ describe(`Tests for Weighted Pools.`, () => {
             const poolPairData: WeightedPoolPairData = {
                 id: pool.id,
                 address: pool.address,
-                poolType: PoolTypes.Stable,
+                poolType: PoolTypes.Weighted,
                 pairType: PairTypes.TokenToToken,
                 tokenIn: pool.tokens[0].address,
                 tokenOut: pool.tokens[1].address,

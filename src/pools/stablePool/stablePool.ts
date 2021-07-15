@@ -63,11 +63,13 @@ export class StablePool implements PoolBase {
     id: string;
     address: string;
     amp: BigNumber;
-    swapFee: string;
+    swapFee: BigNumber;
     totalShares: string;
     tokens: StablePoolToken[];
     tokensList: string[];
     AMP_PRECISION = bnum(1000);
+    MAX_IN_RATIO = bnum(0.3);
+    MAX_OUT_RATIO = bnum(0.3);
     ampAdjusted: BigNumber;
 
     constructor(
@@ -82,7 +84,7 @@ export class StablePool implements PoolBase {
         this.id = id;
         this.address = address;
         this.amp = bnum(amp);
-        this.swapFee = swapFee;
+        this.swapFee = bnum(swapFee);
         this.totalShares = totalShares;
         this.tokens = tokens;
         this.tokensList = tokensList;
@@ -154,7 +156,7 @@ export class StablePool implements PoolBase {
             balanceIn: bnum(balanceIn),
             balanceOut: bnum(balanceOut),
             invariant: inv,
-            swapFee: bnum(this.swapFee),
+            swapFee: this.swapFee,
             allBalances: allBalances,
             amp: this.amp,
             tokenIndexIn: tokenIndexIn,
@@ -175,15 +177,13 @@ export class StablePool implements PoolBase {
         poolPairData: PoolPairBase,
         swapType: SwapTypes
     ): BigNumber {
-        const MAX_IN_RATIO = bnum(0.3);
-        const MAX_OUT_RATIO = bnum(0.3);
         // We multiply ratios by 10**-18 because we are in normalized space
         // so 0.5 should be 0.5 and not 500000000000000000
         // TODO: update bmath to use everything normalized
         if (swapType === SwapTypes.SwapExactIn) {
-            return poolPairData.balanceIn.times(MAX_IN_RATIO);
+            return poolPairData.balanceIn.times(this.MAX_IN_RATIO);
         } else {
-            return poolPairData.balanceOut.times(MAX_OUT_RATIO);
+            return poolPairData.balanceOut.times(this.MAX_OUT_RATIO);
         }
     }
 

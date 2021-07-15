@@ -59,11 +59,13 @@ export class WeightedPool implements PoolBase {
     swapPairType: SwapPairType;
     id: string;
     address: string;
-    swapFee: string;
+    swapFee: BigNumber;
     totalShares: string;
     tokens: WeightedPoolToken[];
-    totalWeight: string;
+    totalWeight: BigNumber;
     tokensList: string[];
+    MAX_IN_RATIO = bnum(0.3);
+    MAX_OUT_RATIO = bnum(0.3);
 
     constructor(
         id: string,
@@ -76,11 +78,11 @@ export class WeightedPool implements PoolBase {
     ) {
         this.id = id;
         this.address = address;
-        this.swapFee = swapFee;
+        this.swapFee = bnum(swapFee);
         this.totalShares = totalShares;
         this.tokens = tokens;
         this.tokensList = tokensList;
-        this.totalWeight = totalWeight;
+        this.totalWeight = bnum(totalWeight);
     }
 
     setTypeForSwap(type: SwapPairType) {
@@ -125,7 +127,7 @@ export class WeightedPool implements PoolBase {
             tI = this.tokens[tokenIndexIn];
             balanceIn = tI.balance;
             decimalsIn = tI.decimals;
-            weightIn = bnum(tI.weight).div(bnum(this.totalWeight));
+            weightIn = bnum(tI.weight).div(this.totalWeight);
         }
         if (pairType != PairTypes.TokenToBpt) {
             let tokenIndexOut = this.tokens.findIndex(
@@ -135,7 +137,7 @@ export class WeightedPool implements PoolBase {
             tO = this.tokens[tokenIndexOut];
             balanceOut = tO.balance;
             decimalsOut = tO.decimals;
-            weightOut = bnum(tO.weight).div(bnum(this.totalWeight));
+            weightOut = bnum(tO.weight).div(this.totalWeight);
         }
 
         const poolPairData: WeightedPoolPairData = {
@@ -151,7 +153,7 @@ export class WeightedPool implements PoolBase {
             balanceOut: bnum(balanceOut),
             weightIn: weightIn,
             weightOut: weightOut,
-            swapFee: bnum(this.swapFee),
+            swapFee: this.swapFee,
         };
 
         return poolPairData;
@@ -179,13 +181,10 @@ export class WeightedPool implements PoolBase {
         poolPairData: PoolPairBase,
         swapType: SwapTypes
     ): BigNumber {
-        const MAX_IN_RATIO = bnum(0.3);
-        const MAX_OUT_RATIO = bnum(0.3);
-
         if (swapType === SwapTypes.SwapExactIn) {
-            return poolPairData.balanceIn.times(MAX_IN_RATIO);
+            return poolPairData.balanceIn.times(this.MAX_IN_RATIO);
         } else {
-            return poolPairData.balanceOut.times(MAX_OUT_RATIO);
+            return poolPairData.balanceOut.times(this.MAX_OUT_RATIO);
         }
     }
 
