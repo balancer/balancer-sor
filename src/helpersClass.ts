@@ -429,15 +429,7 @@ export function EVMgetOutputAmountSwap(
     swapType: SwapTypes,
     amount: BigNumber
 ): BigNumber {
-    let {
-        pairType,
-        balanceIn,
-        balanceOut,
-        tokenIn,
-        tokenOut,
-        decimalsIn,
-        decimalsOut,
-    } = poolPairData;
+    let { pairType, balanceIn, balanceOut, tokenIn, tokenOut } = poolPairData;
 
     let returnAmount: BigNumber;
 
@@ -457,27 +449,19 @@ export function EVMgetOutputAmountSwap(
             pool.poolType === PoolTypes.Weighted ||
             pool.poolType === PoolTypes.Stable
         ) {
+            // Will accept/return normalised values
             if (pairType === PairTypes.TokenToToken) {
                 returnAmount = pool._evmoutGivenIn(poolPairData, amount);
-                // TODO: scaling down may not be necessary since we have to
-                // scale it up anyways for the swap info later?
-                returnAmount = scale(returnAmount, -decimalsOut);
             } else if (pairType === PairTypes.TokenToBpt) {
                 returnAmount = pool._evmexactTokenInForBPTOut(
                     poolPairData,
                     amount
                 );
-                // TODO: scaling down may not be necessary since we have to
-                // scale it up anyways for the swap info later?
-                returnAmount = scale(returnAmount, -18); // BPT is always 18 decimals
             } else if (pairType === PairTypes.BptToToken) {
                 returnAmount = pool._evmexactBPTInForTokenOut(
                     poolPairData,
                     amount
                 );
-                // TODO: scaling down may not be necessary since we have to
-                // scale it up anyways for the swap info later?
-                returnAmount = scale(returnAmount, -decimalsOut);
             }
         } else if (pool.poolType === PoolTypes.Element) {
             // TODO this will just be part of above once maths available
@@ -496,25 +480,16 @@ export function EVMgetOutputAmountSwap(
         ) {
             if (pairType === PairTypes.TokenToToken) {
                 returnAmount = pool._evminGivenOut(poolPairData, amount);
-                // TODO: scaling down may not be necessary since we have to
-                // scale it up anyways for the swap info later?
-                returnAmount = scale(returnAmount, -decimalsIn);
             } else if (pairType === PairTypes.TokenToBpt) {
                 returnAmount = pool._evmtokenInForExactBPTOut(
                     poolPairData,
                     amount
                 );
-                // TODO: scaling down may not be necessary since we have to
-                // scale it up anyways for the swap info later?
-                returnAmount = scale(returnAmount, -decimalsIn);
             } else if (pairType === PairTypes.BptToToken) {
                 returnAmount = pool._evmbptInForExactTokenOut(
                     poolPairData,
                     amount
                 );
-                // TODO: scaling down may not be necessary since we have to
-                // scale it up anyways for the swap info later?
-                returnAmount = scale(returnAmount, -18); // BPT is always 18 decimals
             }
         } else if (pool.poolType === PoolTypes.Element) {
             // TODO this will just be part of above once maths available

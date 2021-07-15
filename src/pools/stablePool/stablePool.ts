@@ -378,7 +378,8 @@ export class StablePool implements PoolBase {
                 swapFeeScaled
             );
 
-            return scale(amt, -18 + poolPairData.decimalsOut);
+            // return normalised amount
+            return scale(amt, -18);
         } catch (err) {
             return bnum(0);
         }
@@ -407,7 +408,8 @@ export class StablePool implements PoolBase {
                 swapFeeScaled
             );
 
-            return scale(amt, -18 + poolPairData.decimalsIn);
+            // return normalised amount
+            return scale(amt, -18);
         } catch (err) {
             return bnum(0);
         }
@@ -440,7 +442,8 @@ export class StablePool implements PoolBase {
                 swapFeeScaled
             );
 
-            return amt;
+            // return normalised amount
+            return scale(amt, -18);
         } catch (err) {
             return bnum(0);
         }
@@ -470,7 +473,8 @@ export class StablePool implements PoolBase {
                 swapFeeScaled
             );
 
-            return amt;
+            // return normalised amount
+            return scale(amt, -18);
         } catch (err) {
             return bnum(0);
         }
@@ -500,7 +504,8 @@ export class StablePool implements PoolBase {
                 swapFeeScaled
             );
 
-            return amt;
+            // return normalised amount
+            return scale(amt, -18);
         } catch (err) {
             return bnum(0);
         }
@@ -532,8 +537,8 @@ export class StablePool implements PoolBase {
                 bptTotalSupplyScaled,
                 swapFeeScaled
             );
-
-            return amt;
+            // return normalised amount
+            return scale(amt, -18);
         } catch (err) {
             return bnum(0);
         }

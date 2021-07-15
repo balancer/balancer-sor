@@ -370,8 +370,8 @@ export class WeightedPool implements PoolBase {
                 scale(amount, poolPairData.decimalsIn),
                 scale(poolPairData.swapFee, 18)
             );
-
-            return amt;
+            // return normalised amount
+            return scale(amt, -poolPairData.decimalsOut);
         } catch (err) {
             return bnum(0);
         }
@@ -390,7 +390,8 @@ export class WeightedPool implements PoolBase {
                 scale(poolPairData.balanceOut, 18), // BPT is always 18 decimals
                 scale(poolPairData.swapFee, 18)
             );
-            return amt;
+            // return normalised amount
+            return scale(amt, -18); // BPT is always 18 decimals
         } catch (err) {
             return bnum(0);
         }
@@ -409,7 +410,8 @@ export class WeightedPool implements PoolBase {
                 scale(poolPairData.balanceIn, 18), // BPT is always 18 decimals
                 scale(poolPairData.swapFee, 18)
             );
-            return amt;
+            // return normalised amount
+            return scale(amt, -poolPairData.decimalsOut);
         } catch (err) {
             return bnum(0);
         }
@@ -430,7 +432,8 @@ export class WeightedPool implements PoolBase {
                 scale(poolPairData.swapFee, 18)
             );
 
-            return amt;
+            // return normalised amount
+            return scale(amt, -poolPairData.decimalsIn);
         } catch (err) {
             return bnum(0);
         }
@@ -450,7 +453,8 @@ export class WeightedPool implements PoolBase {
                 scale(poolPairData.swapFee, 18)
             );
 
-            return amt;
+            // return normalised amount
+            return scale(amt, -poolPairData.decimalsIn);
         } catch (err) {
             return bnum(0);
         }
@@ -470,7 +474,8 @@ export class WeightedPool implements PoolBase {
                 scale(poolPairData.swapFee, 18)
             );
 
-            return amt;
+            // return normalised amount
+            return scale(amt, -18); // BPT always 18 decimals
         } catch (err) {
             return bnum(0);
         }

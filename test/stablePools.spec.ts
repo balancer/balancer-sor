@@ -328,10 +328,7 @@ describe(`Tests for Stable Pools.`, () => {
                     swapAmt
                 );
 
-                // This value is hard coded as sanity check if things unexpectedly change. Taken from isolated run of calcTokenOutGivenExactBptIn.
-                expect(swapInfo.returnAmount.toString()).eq(
-                    '5771787531005060248'
-                );
+                expect(swapInfo.returnAmount.toString()).eq('5771787');
                 expect(swapInfo.swaps.length).eq(1);
                 expect(
                     swapInfo.tokenAddresses[swapInfo.swaps[0].assetInIndex]
@@ -366,9 +363,7 @@ describe(`Tests for Stable Pools.`, () => {
                 );
 
                 // This value is hard coded as sanity check if things unexpectedly change. Taken from isolated run of calcTokenInGivenExactBptOut.
-                expect(swapInfo.returnAmount.toString()).eq(
-                    '4254344348859189305'
-                );
+                expect(swapInfo.returnAmount.toString()).eq('4254344');
                 expect(swapInfo.swaps.length).eq(1);
                 expect(
                     swapInfo.tokenAddresses[swapInfo.swaps[0].assetInIndex]
@@ -696,7 +691,7 @@ describe(`Tests for Stable Pools.`, () => {
                     swapInfo.tokenAddresses[swapInfo.swaps[1].assetOutIndex]
                 ).eq(tokenOut);
                 // TO DO - Confirm amount via maths
-                expect(swapInfo.returnAmount.toString()).eq('3297470532679408');
+                expect(swapInfo.returnAmount.toString()).eq('3297');
             });
 
             it('should return swap via meta pool Join Pool, SwapExactIn', async () => {
@@ -854,7 +849,7 @@ describe(`Tests for Stable Pools.`, () => {
                     swapInfo.tokenAddresses[swapInfo.swaps[1].assetOutIndex]
                 ).eq(poolsFromFile.pools[0].address);
                 // TO DO - Confirm amount via maths
-                expect(swapInfo.returnAmount.toString()).eq('3302531692935912');
+                expect(swapInfo.returnAmount.toString()).eq('3302');
             });
         });
     }
