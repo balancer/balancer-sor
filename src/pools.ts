@@ -11,6 +11,7 @@ import {
 import { WeightedPool } from './pools/weightedPool/weightedPool';
 import { StablePool } from './pools/stablePool/stablePool';
 import { ElementPool } from './pools/elementPool/elementPool';
+import { MetaStablePool } from './pools/metaStablePool/metaStablePool';
 import { ZERO } from './bmath';
 
 import disabledTokensDefault from './disabled-tokens.json';
@@ -90,6 +91,16 @@ export function filterPoolsOfInterest(
                 pool.baseToken
             );
             newPool.setCurrentBlockTimestamp(currentBlockTimestamp);
+        } else if (pool.poolType === 'MetaStable') {
+            newPool = new MetaStablePool(
+                pool.id,
+                pool.address,
+                pool.amp,
+                pool.swapFee,
+                pool.totalShares,
+                pool.tokens,
+                pool.tokensList
+            );
         } else
             throw `Unknown pool type or type field missing: ${pool.poolType}`;
 

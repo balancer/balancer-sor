@@ -9,6 +9,7 @@ export enum PoolTypes {
     Weighted,
     Stable,
     Element,
+    MetaStable,
 }
 
 export enum SwapPairType {
@@ -77,6 +78,8 @@ export interface SubGraphToken {
     decimals: string | number;
     // Stable & Element field
     weight?: string;
+    // MetaStablePool field
+    exchangeRate?: string;
 }
 
 export interface DisabledOptions {

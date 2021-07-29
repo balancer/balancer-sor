@@ -447,7 +447,8 @@ export function EVMgetOutputAmountSwap(
         // TODO we will be able to remove pooltype check once Element EVM maths is available
         if (
             pool.poolType === PoolTypes.Weighted ||
-            pool.poolType === PoolTypes.Stable
+            pool.poolType === PoolTypes.Stable ||
+            pool.poolType === PoolTypes.MetaStable
         ) {
             // Will accept/return normalised values
             if (pairType === PairTypes.TokenToToken) {
@@ -476,7 +477,8 @@ export function EVMgetOutputAmountSwap(
         // TODO we will be able to remove pooltype check once Element EVM maths is available
         if (
             pool.poolType === PoolTypes.Weighted ||
-            pool.poolType === PoolTypes.Stable
+            pool.poolType === PoolTypes.Stable ||
+            pool.poolType === PoolTypes.MetaStable
         ) {
             if (pairType === PairTypes.TokenToToken) {
                 returnAmount = pool._evminGivenOut(poolPairData, amount);
