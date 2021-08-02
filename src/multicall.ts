@@ -52,7 +52,10 @@ export async function getOnChainBalances(
                 pool.address,
                 'getSwapFeePercentage'
             );
-        } else if (pool.poolType === 'Stable') {
+        } else if (
+            pool.poolType === 'Stable' ||
+            pool.poolType === 'MetaStable'
+        ) {
             multiPool.call(
                 `${pool.id}.amp`,
                 pool.address,

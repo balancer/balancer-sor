@@ -36,7 +36,7 @@ export interface MetaStablePoolToken {
     address: string;
     balance: string;
     decimals: string | number;
-    exchangeRate?: string;
+    priceRate?: string;
 }
 
 export interface MetaStablePoolPairData extends PoolPairBase {
@@ -58,8 +58,8 @@ export interface MetaStablePoolPairData extends PoolPairBase {
     amp: BigNumber; // Only for stable pools
     tokenIndexIn: number; // Only for stable pools
     tokenIndexOut: number; // Only for stable pools
-    tokenInExchangeRate: BigNumber;
-    tokenOutExchangeRate: BigNumber;
+    tokenInPriceRate: BigNumber;
+    tokenOutPriceRate: BigNumber;
 }
 
 export class MetaStablePool implements PoolBase {
@@ -115,8 +115,8 @@ export class MetaStablePool implements PoolBase {
         let decimalsIn: string | number;
         let tokenIndexIn: number;
         let tokenIndexOut: number;
-        let tokenInExchangeRate = bnum(1);
-        let tokenOutExchangeRate = bnum(1);
+        let tokenInPriceRate = bnum(1);
+        let tokenOutPriceRate = bnum(1);
 
         // Check if tokenIn is the pool token itself (BPT)
         if (tokenIn === this.address) {
@@ -138,9 +138,9 @@ export class MetaStablePool implements PoolBase {
             if (tokenIndexIn < 0) throw 'Pool does not contain tokenIn';
             tI = this.tokens[tokenIndexIn];
             // balanceIn = tI.balance;
-            balanceIn = bnum(tI.balance).times(bnum(tI.exchangeRate));
+            balanceIn = bnum(tI.balance).times(bnum(tI.priceRate));
             decimalsIn = tI.decimals;
-            tokenInExchangeRate = bnum(tI.exchangeRate);
+            tokenInPriceRate = bnum(tI.priceRate);
         }
         if (pairType !== PairTypes.TokenToBpt) {
             tokenIndexOut = this.tokens.findIndex(
@@ -149,9 +149,9 @@ export class MetaStablePool implements PoolBase {
             if (tokenIndexOut < 0) throw 'Pool does not contain tokenOut';
             tO = this.tokens[tokenIndexOut];
             // balanceOut = tO.balance;
-            balanceOut = bnum(tO.balance).times(bnum(tO.exchangeRate));
+            balanceOut = bnum(tO.balance).times(bnum(tO.priceRate));
             decimalsOut = tO.decimals;
-            tokenOutExchangeRate = bnum(tO.exchangeRate);
+            tokenOutPriceRate = bnum(tO.priceRate);
         }
 
         // Get all token balances
@@ -160,7 +160,7 @@ export class MetaStablePool implements PoolBase {
         for (let i = 0; i < this.tokens.length; i++) {
             // const balanceBn = bnum(this.tokens[i].balance);
             const balanceBn = bnum(this.tokens[i].balance).times(
-                bnum(this.tokens[i].exchangeRate)
+                bnum(this.tokens[i].priceRate)
             );
             allBalances.push(balanceBn);
             allBalancesScaled.push(scale(balanceBn, 18));
@@ -187,8 +187,8 @@ export class MetaStablePool implements PoolBase {
             tokenIndexOut: tokenIndexOut,
             decimalsIn: Number(decimalsIn),
             decimalsOut: Number(decimalsOut),
-            tokenInExchangeRate,
-            tokenOutExchangeRate,
+            tokenInPriceRate,
+            tokenOutPriceRate,
         };
 
         return poolPairData;
@@ -209,11 +209,11 @@ export class MetaStablePool implements PoolBase {
         // PoolPairData is using balances that have already been exchanged so need to convert back
         if (swapType === SwapTypes.SwapExactIn) {
             return poolPairData.balanceIn
-                .div(poolPairData.tokenInExchangeRate)
+                .div(poolPairData.tokenInPriceRate)
                 .times(this.MAX_IN_RATIO);
         } else {
             return poolPairData.balanceOut
-                .div(poolPairData.tokenOutExchangeRate)
+                .div(poolPairData.tokenOutPriceRate)
                 .times(this.MAX_OUT_RATIO);
         }
     }
@@ -238,10 +238,10 @@ export class MetaStablePool implements PoolBase {
         // i.e. when using token with 2decimals 0.002 should be returned as 0
         // Uses ROUND_DOWN mode (1)
         let amt = _exactTokenInForTokenOut(
-            amount.times(poolPairData.tokenInExchangeRate),
+            amount.times(poolPairData.tokenInPriceRate),
             poolPairData
         ).dp(poolPairData.decimalsOut, 1);
-        return amt.div(poolPairData.tokenOutExchangeRate);
+        return amt.div(poolPairData.tokenOutPriceRate);
     }
 
     _exactTokenInForBPTOut(
@@ -266,11 +266,11 @@ export class MetaStablePool implements PoolBase {
         // i.e. when using token with 2decimals 0.002 should be returned as 0
         // Uses ROUND_UP mode (0)
         let amt = _tokenInForExactTokenOut(
-            amount.times(poolPairData.tokenOutExchangeRate),
+            amount.times(poolPairData.tokenOutPriceRate),
             poolPairData
         ).dp(poolPairData.decimalsIn, 0);
 
-        return amt.div(poolPairData.tokenInExchangeRate);
+        return amt.div(poolPairData.tokenInPriceRate);
     }
 
     _tokenInForExactBPTOut(
@@ -291,7 +291,7 @@ export class MetaStablePool implements PoolBase {
         poolPairData: MetaStablePoolPairData,
         amount: BigNumber
     ): BigNumber {
-        let amountConverted = amount.times(poolPairData.tokenInExchangeRate);
+        let amountConverted = amount.times(poolPairData.tokenInPriceRate);
         let result = _spotPriceAfterSwapExactTokenInForTokenOut(
             amountConverted,
             poolPairData
@@ -317,7 +317,7 @@ export class MetaStablePool implements PoolBase {
         poolPairData: MetaStablePoolPairData,
         amount: BigNumber
     ): BigNumber {
-        let amountConverted = amount.times(poolPairData.tokenOutExchangeRate);
+        let amountConverted = amount.times(poolPairData.tokenOutPriceRate);
         let result = _spotPriceAfterSwapTokenInForExactTokenOut(
             amountConverted,
             poolPairData
@@ -408,7 +408,7 @@ export class MetaStablePool implements PoolBase {
             // i.e. 1USDC => 1e18 not 1e6
             const amtScaled = scale(amount, 18);
             let amountConverted = amtScaled.times(
-                poolPairData.tokenInExchangeRate
+                poolPairData.tokenInPriceRate
             );
 
             const amt = SDK.StableMath._calcOutGivenIn(
@@ -420,7 +420,7 @@ export class MetaStablePool implements PoolBase {
                 poolPairData.swapFeeScaled
             );
             // return normalised amount
-            return scale(amt.div(poolPairData.tokenOutExchangeRate), -18);
+            return scale(amt.div(poolPairData.tokenOutPriceRate), -18);
         } catch (err) {
             return ZERO;
         }
@@ -435,7 +435,7 @@ export class MetaStablePool implements PoolBase {
             // i.e. 1USDC => 1e18 not 1e6
             const amtScaled = scale(amount, 18);
             let amountConverted = amtScaled.times(
-                poolPairData.tokenOutExchangeRate
+                poolPairData.tokenOutPriceRate
             );
 
             const amt = SDK.StableMath._calcInGivenOut(
@@ -448,7 +448,7 @@ export class MetaStablePool implements PoolBase {
             );
 
             // return normalised amount
-            return scale(amt.div(poolPairData.tokenInExchangeRate), -18);
+            return scale(amt.div(poolPairData.tokenInPriceRate), -18);
         } catch (err) {
             return ZERO;
         }

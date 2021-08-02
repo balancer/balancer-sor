@@ -21,14 +21,14 @@
                     "balance": "1000",
                     "decimals": "18",
                     "symbol": "WETH",
-                    "exchangeRate": "1"
+                    "priceRate": "1"
                 },
                 {
                     "address": "0xae7ab96520de3a18e5e111b5eaab095312d7fe84",
                     "balance": "4000",
                     "decimals": "18",
                     "symbol": "stETH",
-                    "exchangeRate": "0.25"
+                    "priceRate": "0.25"
                 }
             ],
             "tokensList": [
@@ -49,14 +49,14 @@
                     "balance": "8000",
                     "decimals": "18",
                     "symbol": "stETH",
-                    "exchangeRate": "0.25"
+                    "priceRate": "0.25"
                 },
                 {
                     "address": "0x42d6622dece394b54999fbd73d108123806f6a18",
                     "balance": "2000",
                     "decimals": "18",
                     "symbol": "randomETH",
-                    "exchangeRate": "1"
+                    "priceRate": "1"
                 }
             ],
             "tokensList": [

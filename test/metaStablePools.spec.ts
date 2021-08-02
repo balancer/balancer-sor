@@ -107,8 +107,8 @@ describe(`Tests for MetaStable Pools.`, () => {
                 invariant: bnum(0),
                 tokenIndexIn: 0,
                 tokenIndexOut: 1,
-                tokenInExchangeRate: bnum(pool.tokens[0].exchangeRate),
-                tokenOutExchangeRate: bnum(pool.tokens[1].exchangeRate),
+                tokenInPriceRate: bnum(pool.tokens[0].priceRate),
+                tokenOutPriceRate: bnum(pool.tokens[1].priceRate),
             };
 
             const limitAmt = newPool.getLimitAmountSwap(poolPairData, swapType);
@@ -158,14 +158,14 @@ describe(`Tests for MetaStable Pools.`, () => {
                 invariant: bnum(0),
                 tokenIndexIn: 0,
                 tokenIndexOut: 1,
-                tokenInExchangeRate: bnum(pool.tokens[0].exchangeRate),
-                tokenOutExchangeRate: bnum(pool.tokens[1].exchangeRate),
+                tokenInPriceRate: bnum(pool.tokens[0].priceRate),
+                tokenOutPriceRate: bnum(pool.tokens[1].priceRate),
             };
 
             const limitAmt = newPool.getLimitAmountSwap(poolPairData, swapType);
             expect(limitAmt.toString()).to.eq(
                 bnum(pool.tokens[1].balance)
-                    .div(bnum(pool.tokens[1].exchangeRate))
+                    .div(bnum(pool.tokens[1].priceRate))
                     .times(MAX_OUT_RATIO)
                     .toString()
             );
@@ -229,9 +229,9 @@ describe(`Tests for MetaStable Pools.`, () => {
                 pools: JSON.parse(JSON.stringify(poolsFromFile.metaStablePool)),
             };
             const tokenIn = WETH;
-            const tokenInExchangeRate = bnum(1);
+            const tokenInPriceRate = bnum(1);
             const tokenOut = stETH;
-            const tokenOutExchangeRate = bnum(0.5);
+            const tokenOutPriceRate = bnum(0.5);
             const swapType = SwapTypes.SwapExactIn;
             const swapAmt: BigNumber = bnum('1'); // Would expect ~ 2 back
 
@@ -254,7 +254,7 @@ describe(`Tests for MetaStable Pools.`, () => {
                 tokenIn,
                 tokenOut,
                 swapType,
-                swapAmt.times(tokenInExchangeRate)
+                swapAmt.times(tokenInPriceRate)
             );
 
             expect(swapInfoStable.tokenAddresses).to.deep.eq(
@@ -264,11 +264,11 @@ describe(`Tests for MetaStable Pools.`, () => {
             expect(swapInfoStable.tokenOut).to.deep.eq(swapInfo.tokenOut);
             // Would expect stable to be half of amounts, i.e. 2stETH = 1ETH
             expect(swapInfoStable.returnAmount.toString()).eq(
-                swapInfo.returnAmount.times(tokenOutExchangeRate).toString()
+                swapInfo.returnAmount.times(tokenOutPriceRate).toString()
             );
             expect(swapInfoStable.returnAmountConsideringFees.toString()).eq(
                 swapInfo.returnAmountConsideringFees
-                    .times(tokenOutExchangeRate)
+                    .times(tokenOutPriceRate)
                     .toString()
             );
             expect(swapInfoStable.swaps.length).eq(swapInfo.swaps.length);
@@ -283,7 +283,7 @@ describe(`Tests for MetaStable Pools.`, () => {
                 expect(swapStable.userData).eq(swapInfo.swaps[i].userData);
                 expect(swapStable.amount).eq(
                     bnum(swapInfo.swaps[i].amount)
-                        .times(tokenInExchangeRate)
+                        .times(tokenInPriceRate)
                         .toString()
                 );
             });
@@ -295,9 +295,9 @@ describe(`Tests for MetaStable Pools.`, () => {
                 pools: JSON.parse(JSON.stringify(poolsFromFile.metaStablePool)),
             };
             const tokenIn = stETH;
-            const tokenInExchangeRate = bnum(0.5);
+            const tokenInPriceRate = bnum(0.5);
             const tokenOut = WETH;
-            const tokenOutExchangeRate = bnum(1);
+            const tokenOutPriceRate = bnum(1);
             const swapType = SwapTypes.SwapExactIn;
             const swapAmt: BigNumber = bnum('2'); // Would expect ~ 1 back
 
@@ -315,13 +315,13 @@ describe(`Tests for MetaStable Pools.`, () => {
             const stablePools: SubGraphPoolsBase = {
                 pools: poolsFromFile.stablePool,
             };
-            // Should be same as a 1/1 stable pool with swapAmt * exchangeRate, i.e swapAmt = 1 in this case
+            // Should be same as a 1/1 stable pool with swapAmt * priceRate, i.e swapAmt = 1 in this case
             const swapInfoStable = await getStableComparrison(
                 stablePools,
                 tokenIn,
                 tokenOut,
                 swapType,
-                swapAmt.times(tokenInExchangeRate)
+                swapAmt.times(tokenInPriceRate)
             );
 
             expect(swapInfoStable.tokenAddresses).to.deep.eq(
@@ -347,7 +347,7 @@ describe(`Tests for MetaStable Pools.`, () => {
                 expect(swapStable.userData).eq(swapInfo.swaps[i].userData);
                 expect(swapStable.amount).eq(
                     bnum(swapInfo.swaps[i].amount)
-                        .times(tokenInExchangeRate)
+                        .times(tokenInPriceRate)
                         .toString()
                 );
             });
@@ -359,9 +359,9 @@ describe(`Tests for MetaStable Pools.`, () => {
                 pools: JSON.parse(JSON.stringify(poolsFromFile.metaStablePool)),
             };
             const tokenIn = WETH;
-            const tokenInExchangeRate = bnum(1);
+            const tokenInPriceRate = bnum(1);
             const tokenOut = stETH;
-            const tokenOutExchangeRate = bnum(0.5);
+            const tokenOutPriceRate = bnum(0.5);
             const swapType = SwapTypes.SwapExactOut;
             const swapAmt: BigNumber = bnum('2'); // Would expect ~ 1 as input
 
@@ -384,7 +384,7 @@ describe(`Tests for MetaStable Pools.`, () => {
                 tokenIn,
                 tokenOut,
                 swapType,
-                swapAmt.times(tokenOutExchangeRate)
+                swapAmt.times(tokenOutPriceRate)
             );
 
             expect(swapInfoStable.tokenAddresses).to.deep.eq(
@@ -410,7 +410,7 @@ describe(`Tests for MetaStable Pools.`, () => {
                 expect(swapStable.userData).eq(swapInfo.swaps[i].userData);
                 expect(swapStable.amount).eq(
                     bnum(swapInfo.swaps[i].amount)
-                        .times(tokenOutExchangeRate)
+                        .times(tokenOutPriceRate)
                         .toString()
                 );
             });
@@ -422,9 +422,9 @@ describe(`Tests for MetaStable Pools.`, () => {
                 pools: JSON.parse(JSON.stringify(poolsFromFile.metaStablePool)),
             };
             const tokenIn = stETH;
-            const tokenInExchangeRate = bnum(0.5);
+            const tokenInPriceRate = bnum(0.5);
             const tokenOut = WETH;
-            const tokenOutExchangeRate = bnum(1);
+            const tokenOutPriceRate = bnum(1);
             const swapType = SwapTypes.SwapExactOut;
             const swapAmt: BigNumber = bnum('2'); // Would expect ~ 4 as input
 
@@ -447,7 +447,7 @@ describe(`Tests for MetaStable Pools.`, () => {
                 tokenIn,
                 tokenOut,
                 swapType,
-                swapAmt.times(tokenOutExchangeRate)
+                swapAmt.times(tokenOutPriceRate)
             );
 
             expect(swapInfoStable.tokenAddresses).to.deep.eq(
@@ -456,11 +456,11 @@ describe(`Tests for MetaStable Pools.`, () => {
             expect(swapInfoStable.tokenIn).to.deep.eq(swapInfo.tokenIn);
             expect(swapInfoStable.tokenOut).to.deep.eq(swapInfo.tokenOut);
             expect(swapInfoStable.returnAmount.toString()).eq(
-                swapInfo.returnAmount.times(tokenInExchangeRate).toString()
+                swapInfo.returnAmount.times(tokenInPriceRate).toString()
             );
             expect(swapInfoStable.returnAmountConsideringFees.toString()).eq(
                 swapInfo.returnAmountConsideringFees
-                    .times(tokenInExchangeRate)
+                    .times(tokenInPriceRate)
                     .toString()
             );
             expect(swapInfoStable.swaps.length).eq(swapInfo.swaps.length);
@@ -475,7 +475,7 @@ describe(`Tests for MetaStable Pools.`, () => {
                 expect(swapStable.userData).eq(swapInfo.swaps[i].userData);
                 expect(swapStable.amount).eq(
                     bnum(swapInfo.swaps[i].amount)
-                        .times(tokenOutExchangeRate)
+                        .times(tokenOutPriceRate)
                         .toString()
                 );
             });
@@ -492,11 +492,11 @@ describe(`Tests for MetaStable Pools.`, () => {
                 ),
             };
             const tokenIn = WETH;
-            const tokenInExchangeRate = bnum(1);
+            const tokenInPriceRate = bnum(1);
             const tokenHop = stETH;
-            const tokenHopExchangeRate = bnum(0.25);
+            const tokenHopPriceRate = bnum(0.25);
             const tokenOut = randomETH;
-            const tokenOutExchangeRate = bnum(1);
+            const tokenOutPriceRate = bnum(1);
             const swapType = SwapTypes.SwapExactIn;
             const swapAmt: BigNumber = bnum('77.723');
 
@@ -520,7 +520,7 @@ describe(`Tests for MetaStable Pools.`, () => {
                 tokenIn,
                 tokenOut,
                 swapType,
-                swapAmt.times(tokenInExchangeRate)
+                swapAmt.times(tokenInPriceRate)
             );
 
             expect(swapInfoStable.tokenAddresses).to.deep.eq(
@@ -534,7 +534,7 @@ describe(`Tests for MetaStable Pools.`, () => {
             );
             expect(swapInfoStable.returnAmountConsideringFees.toString()).eq(
                 swapInfo.returnAmountConsideringFees
-                    .times(tokenOutExchangeRate)
+                    .times(tokenOutPriceRate)
                     .toString()
             );
             expect(swapInfoStable.swaps.length).eq(swapInfo.swaps.length);
@@ -549,7 +549,7 @@ describe(`Tests for MetaStable Pools.`, () => {
                 expect(swapStable.userData).eq(swapInfo.swaps[i].userData);
                 expect(swapStable.amount).eq(
                     bnum(swapInfo.swaps[i].amount)
-                        .times(tokenInExchangeRate)
+                        .times(tokenInPriceRate)
                         .toString()
                 );
             });
@@ -564,11 +564,11 @@ describe(`Tests for MetaStable Pools.`, () => {
                 ),
             };
             const tokenIn = WETH;
-            const tokenInExchangeRate = bnum(1);
+            const tokenInPriceRate = bnum(1);
             const tokenHop = stETH;
-            const tokenHopExchangeRate = bnum(0.25);
+            const tokenHopPriceRate = bnum(0.25);
             const tokenOut = randomETH;
-            const tokenOutExchangeRate = bnum(1);
+            const tokenOutPriceRate = bnum(1);
             const swapType = SwapTypes.SwapExactOut;
             const swapAmt: BigNumber = bnum('77.8');
 
@@ -592,7 +592,7 @@ describe(`Tests for MetaStable Pools.`, () => {
                 tokenIn,
                 tokenOut,
                 swapType,
-                swapAmt.times(tokenInExchangeRate)
+                swapAmt.times(tokenInPriceRate)
             );
 
             expect(swapInfoStable.tokenAddresses).to.deep.eq(
@@ -606,7 +606,7 @@ describe(`Tests for MetaStable Pools.`, () => {
             );
             expect(swapInfoStable.returnAmountConsideringFees.toString()).eq(
                 swapInfo.returnAmountConsideringFees
-                    .times(tokenOutExchangeRate)
+                    .times(tokenOutPriceRate)
                     .toString()
             );
             expect(swapInfoStable.swaps.length).eq(swapInfo.swaps.length);
@@ -621,7 +621,7 @@ describe(`Tests for MetaStable Pools.`, () => {
                 expect(swapStable.userData).eq(swapInfo.swaps[i].userData);
                 expect(swapStable.amount).eq(
                     bnum(swapInfo.swaps[i].amount)
-                        .times(tokenInExchangeRate)
+                        .times(tokenInPriceRate)
                         .toString()
                 );
             });

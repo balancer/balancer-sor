@@ -79,7 +79,7 @@ export interface SubGraphToken {
     // Stable & Element field
     weight?: string;
     // MetaStablePool field
-    exchangeRate?: string;
+    priceRate?: string;
 }
 
 export interface DisabledOptions {
