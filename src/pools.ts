@@ -101,8 +101,12 @@ export function filterPoolsOfInterest(
                 pool.tokens,
                 pool.tokensList
             );
-        } else
-            throw `Unknown pool type or type field missing: ${pool.poolType}`;
+        } else {
+            console.error(
+                `Unknown pool type or type field missing: ${pool.poolType} ${pool.id}`
+            );
+            return;
+        }
 
         let tokenListSet = new Set(pool.tokensList);
         // Depending on env file, we add the BPT as well as
