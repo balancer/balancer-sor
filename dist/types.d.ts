@@ -7,6 +7,7 @@ export declare enum PoolTypes {
     Weighted = 0,
     Stable = 1,
     Element = 2,
+    MetaStable = 3,
 }
 export declare enum SwapPairType {
     Direct = 0,
@@ -61,6 +62,7 @@ export interface SubGraphToken {
     balance: string;
     decimals: string | number;
     weight?: string;
+    priceRate?: string;
 }
 export interface DisabledOptions {
     isOverRide: boolean;

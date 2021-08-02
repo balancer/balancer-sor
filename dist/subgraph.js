@@ -61,6 +61,7 @@ function fetchSubgraphPools(SubgraphUrl = '') {
             balance
             decimals
             weight
+            priceRate
           }
           tokensList
           totalWeight

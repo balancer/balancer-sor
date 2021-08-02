@@ -10,6 +10,7 @@ const types_1 = require('./types');
 const weightedPool_1 = require('./pools/weightedPool/weightedPool');
 const stablePool_1 = require('./pools/stablePool/stablePool');
 const elementPool_1 = require('./pools/elementPool/elementPool');
+const metaStablePool_1 = require('./pools/metaStablePool/metaStablePool');
 const bmath_1 = require('./bmath');
 const disabled_tokens_json_1 = __importDefault(
     require('./disabled-tokens.json')
@@ -85,8 +86,22 @@ function filterPoolsOfInterest(
                 pool.baseToken
             );
             newPool.setCurrentBlockTimestamp(currentBlockTimestamp);
-        } else
-            throw `Unknown pool type or type field missing: ${pool.poolType}`;
+        } else if (pool.poolType === 'MetaStable') {
+            newPool = new metaStablePool_1.MetaStablePool(
+                pool.id,
+                pool.address,
+                pool.amp,
+                pool.swapFee,
+                pool.totalShares,
+                pool.tokens,
+                pool.tokensList
+            );
+        } else {
+            console.error(
+                `Unknown pool type or type field missing: ${pool.poolType} ${pool.id}`
+            );
+            return;
+        }
         let tokenListSet = new Set(pool.tokensList);
         // Depending on env file, we add the BPT as well as
         // we can join/exit as part of the multihop
