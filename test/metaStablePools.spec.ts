@@ -26,12 +26,13 @@ const provider = new JsonRpcProvider(
 
 const BAL = '0xba100000625a3754423978a60c9317c58a424e3d';
 const USDC = '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48';
-const DAI = '0x6b175474e89094c44da98b954eedeac495271d0f';
+const DAI = '0x04df6e4121c27713ed22341e7c7df330f56f289b';
 const USDT = '0xdac17f958d2ee523a2206206994597c13d831ec7';
 const BPT = '0xebfed10e11dc08fcda1af1fda146945e8710f22e';
 const WETH = '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2';
 const stETH = '0xae7ab96520de3a18e5e111b5eaab095312d7fe84';
 const randomETH = '0x42d6622dece394b54999fbd73d108123806f6a18';
+const PTSP = '0x5f304f6cf88dc76b414f301e05adfb5a429e8b67';
 
 async function getStableComparrison(
     stablePools: SubGraphPoolsBase,
@@ -626,6 +627,83 @@ describe(`Tests for MetaStable Pools.`, () => {
                 );
             });
         });
+
+        // This replicates Kovan pool with Convergence issue.
+        // it(`Full Swap - swapExactIn, Token>Token via Stable & Meta Pools`, async () => {
+        //     // With meta token as hop the result in/out should be same as a normal stable pool
+        //     const poolsFromFile = require('./testData/metaStablePools/multihop.json');
+        //     const pools: SubGraphPoolsBase = {
+        //         pools: JSON.parse(
+        //             JSON.stringify(poolsFromFile.metaWithStable2)
+        //         ),
+        //     };
+        //     const tokenIn = DAI;
+        //     const tokenInPriceRate = bnum(1);
+        //     const tokenHop = USDC;
+        //     const tokenHopPriceRate = bnum(1);
+        //     const tokenOut = PTSP;
+        //     const tokenOutPriceRate = bnum('1.00239199558952863');
+        //     const swapType = SwapTypes.SwapExactIn;
+        //     const swapAmt: BigNumber = bnum('1');
+
+        //     const sor = new SOR(provider, gasPrice, maxPools, chainId, pools);
+
+        //     const fetchSuccess = await sor.fetchPools(false);
+
+        //     let swapInfo: SwapInfo = await sor.getSwaps(
+        //         tokenIn,
+        //         tokenOut,
+        //         swapType,
+        //         swapAmt
+        //     );
+
+        //     console.log(swapInfo.returnAmount.toString());
+        //     console.log(swapInfo.returnAmountConsideringFees.toString());
+        //     console.log(swapInfo.swaps);
+
+        //     // const stablePools: SubGraphPoolsBase = {
+        //     //     pools: poolsFromFile.stablePools,
+        //     // };
+        //     // // Same as stable with
+        //     // const swapInfoStable = await getStableComparrison(
+        //     //     stablePools,
+        //     //     tokenIn,
+        //     //     tokenOut,
+        //     //     swapType,
+        //     //     swapAmt.times(tokenInPriceRate)
+        //     // );
+
+        //     // expect(swapInfoStable.tokenAddresses).to.deep.eq(
+        //     //     swapInfo.tokenAddresses
+        //     // );
+        //     // expect(swapInfoStable.tokenIn).to.deep.eq(swapInfo.tokenIn);
+        //     // expect(swapInfoStable.tokenOut).to.deep.eq(swapInfo.tokenOut);
+        //     // // These should match as should
+        //     // expect(swapInfoStable.returnAmount.toString()).eq(
+        //     //     swapInfo.returnAmount.toString()
+        //     // );
+        //     // expect(swapInfoStable.returnAmountConsideringFees.toString()).eq(
+        //     //     swapInfo.returnAmountConsideringFees
+        //     //         .times(tokenOutPriceRate)
+        //     //         .toString()
+        //     // );
+        //     // expect(swapInfoStable.swaps.length).eq(swapInfo.swaps.length);
+        //     // swapInfoStable.swaps.forEach((swapStable, i) => {
+        //     //     expect(swapStable.poolId).eq(swapInfo.swaps[i].poolId);
+        //     //     expect(swapStable.assetInIndex).eq(
+        //     //         swapInfo.swaps[i].assetInIndex
+        //     //     );
+        //     //     expect(swapStable.assetOutIndex).eq(
+        //     //         swapInfo.swaps[i].assetOutIndex
+        //     //     );
+        //     //     expect(swapStable.userData).eq(swapInfo.swaps[i].userData);
+        //     //     expect(swapStable.amount).eq(
+        //     //         bnum(swapInfo.swaps[i].amount)
+        //     //             .times(tokenInPriceRate)
+        //     //             .toString()
+        //     //     );
+        //     // });
+        // });
     });
 
     //     if (ALLOW_ADD_REMOVE) {

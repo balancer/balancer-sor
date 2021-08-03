@@ -385,6 +385,7 @@ export class StablePool implements PoolBase {
             // return normalised amount
             return scale(amt, -18);
         } catch (err) {
+            console.error(`_evmoutGivenIn: ${err.message}`);
             return ZERO;
         }
     }
@@ -410,6 +411,7 @@ export class StablePool implements PoolBase {
             // return normalised amount
             return scale(amt, -18);
         } catch (err) {
+            console.error(`_evminGivenOut: ${err.message}`);
             return ZERO;
         }
     }
@@ -439,6 +441,7 @@ export class StablePool implements PoolBase {
             // return normalised amount
             return scale(amt, -18);
         } catch (err) {
+            console.error(`_evmexactTokenInForBPTOut: ${err.message}`);
             return ZERO;
         }
     }
@@ -465,6 +468,7 @@ export class StablePool implements PoolBase {
             // return normalised amount
             return scale(amt, -18);
         } catch (err) {
+            console.error(`_evmexactBPTInForTokenOut: ${err.message}`);
             return ZERO;
         }
     }
@@ -491,6 +495,7 @@ export class StablePool implements PoolBase {
             // return normalised amount
             return scale(amt, -18);
         } catch (err) {
+            console.error(`_evmtokenInForExactBPTOut: ${err.message}`);
             return ZERO;
         }
     }
@@ -519,6 +524,7 @@ export class StablePool implements PoolBase {
             // return normalised amount
             return scale(amt, -18);
         } catch (err) {
+            console.error(`_evmbptInForExactTokenOut: ${err.message}`);
             return ZERO;
         }
     }

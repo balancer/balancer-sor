@@ -159,9 +159,9 @@ export class MetaStablePool implements PoolBase {
         let allBalancesScaled: BigNumber[] = [];
         for (let i = 0; i < this.tokens.length; i++) {
             // const balanceBn = bnum(this.tokens[i].balance);
-            const balanceBn = bnum(this.tokens[i].balance).times(
-                bnum(this.tokens[i].priceRate)
-            );
+            const balanceBn = bnum(this.tokens[i].balance)
+                .times(bnum(this.tokens[i].priceRate))
+                .dp(Number(this.tokens[i].decimals), 1);
             allBalances.push(balanceBn);
             allBalancesScaled.push(scale(balanceBn, 18));
         }
@@ -422,6 +422,7 @@ export class MetaStablePool implements PoolBase {
             // return normalised amount
             return scale(amt.div(poolPairData.tokenOutPriceRate), -18);
         } catch (err) {
+            console.error(`_evmoutGivenIn: ${err.message}`);
             return ZERO;
         }
     }
@@ -450,6 +451,7 @@ export class MetaStablePool implements PoolBase {
             // return normalised amount
             return scale(amt.div(poolPairData.tokenInPriceRate), -18);
         } catch (err) {
+            console.error(`_evminGivenOut: ${err.message}`);
             return ZERO;
         }
     }
@@ -479,6 +481,7 @@ export class MetaStablePool implements PoolBase {
             // return normalised amount
             return scale(amt, -18);
         } catch (err) {
+            console.error(`_evmexactTokenInForBPTOut: ${err.message}`);
             return ZERO;
         }
     }
@@ -505,6 +508,7 @@ export class MetaStablePool implements PoolBase {
             // return normalised amount
             return scale(amt, -18);
         } catch (err) {
+            console.error(`_evmexactBPTInForTokenOut: ${err.message}`);
             return ZERO;
         }
     }
@@ -531,6 +535,7 @@ export class MetaStablePool implements PoolBase {
             // return normalised amount
             return scale(amt, -18);
         } catch (err) {
+            console.error(`_evmtokenInForExactBPTOut: ${err.message}`);
             return ZERO;
         }
     }
@@ -559,6 +564,7 @@ export class MetaStablePool implements PoolBase {
             // return normalised amount
             return scale(amt, -18);
         } catch (err) {
+            console.error(`_evmbptInForExactTokenOut: ${err.message}`);
             return ZERO;
         }
     }
