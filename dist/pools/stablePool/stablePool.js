@@ -251,6 +251,7 @@ class StablePool {
             // return normalised amount
             return bmath_1.scale(amt, -18);
         } catch (err) {
+            console.error(`_evmoutGivenIn: ${err.message}`);
             return bmath_1.ZERO;
         }
     }
@@ -270,6 +271,7 @@ class StablePool {
             // return normalised amount
             return bmath_1.scale(amt, -18);
         } catch (err) {
+            console.error(`_evminGivenOut: ${err.message}`);
             return bmath_1.ZERO;
         }
     }
@@ -297,6 +299,7 @@ class StablePool {
             // return normalised amount
             return bmath_1.scale(amt, -18);
         } catch (err) {
+            console.error(`_evmexactTokenInForBPTOut: ${err.message}`);
             return bmath_1.ZERO;
         }
     }
@@ -320,6 +323,7 @@ class StablePool {
             // return normalised amount
             return bmath_1.scale(amt, -18);
         } catch (err) {
+            console.error(`_evmexactBPTInForTokenOut: ${err.message}`);
             return bmath_1.ZERO;
         }
     }
@@ -343,6 +347,7 @@ class StablePool {
             // return normalised amount
             return bmath_1.scale(amt, -18);
         } catch (err) {
+            console.error(`_evmtokenInForExactBPTOut: ${err.message}`);
             return bmath_1.ZERO;
         }
     }
@@ -370,6 +375,7 @@ class StablePool {
             // return normalised amount
             return bmath_1.scale(amt, -18);
         } catch (err) {
+            console.error(`_evmbptInForExactTokenOut: ${err.message}`);
             return bmath_1.ZERO;
         }
     }

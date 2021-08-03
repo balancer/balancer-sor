@@ -96,7 +96,8 @@ class MetaStablePool {
             // const balanceBn = bnum(this.tokens[i].balance);
             const balanceBn = bmath_1
                 .bnum(this.tokens[i].balance)
-                .times(bmath_1.bnum(this.tokens[i].priceRate));
+                .times(bmath_1.bnum(this.tokens[i].priceRate))
+                .dp(Number(this.tokens[i].decimals), 1);
             allBalances.push(balanceBn);
             allBalancesScaled.push(bmath_1.scale(balanceBn, 18));
         }
@@ -286,6 +287,7 @@ class MetaStablePool {
             // return normalised amount
             return bmath_1.scale(amt.div(poolPairData.tokenOutPriceRate), -18);
         } catch (err) {
+            console.error(`_evmoutGivenIn: ${err.message}`);
             return bmath_1.ZERO;
         }
     }
@@ -308,6 +310,7 @@ class MetaStablePool {
             // return normalised amount
             return bmath_1.scale(amt.div(poolPairData.tokenInPriceRate), -18);
         } catch (err) {
+            console.error(`_evminGivenOut: ${err.message}`);
             return bmath_1.ZERO;
         }
     }
@@ -335,6 +338,7 @@ class MetaStablePool {
             // return normalised amount
             return bmath_1.scale(amt, -18);
         } catch (err) {
+            console.error(`_evmexactTokenInForBPTOut: ${err.message}`);
             return bmath_1.ZERO;
         }
     }
@@ -358,6 +362,7 @@ class MetaStablePool {
             // return normalised amount
             return bmath_1.scale(amt, -18);
         } catch (err) {
+            console.error(`_evmexactBPTInForTokenOut: ${err.message}`);
             return bmath_1.ZERO;
         }
     }
@@ -381,6 +386,7 @@ class MetaStablePool {
             // return normalised amount
             return bmath_1.scale(amt, -18);
         } catch (err) {
+            console.error(`_evmtokenInForExactBPTOut: ${err.message}`);
             return bmath_1.ZERO;
         }
     }
@@ -408,6 +414,7 @@ class MetaStablePool {
             // return normalised amount
             return bmath_1.scale(amt, -18);
         } catch (err) {
+            console.error(`_evmbptInForExactTokenOut: ${err.message}`);
             return bmath_1.ZERO;
         }
     }
