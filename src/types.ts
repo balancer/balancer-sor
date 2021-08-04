@@ -70,6 +70,9 @@ export interface SubgraphPoolBase {
     unitSeconds?: number;
     principalToken?: string;
     baseToken?: string;
+
+    // LBP specific fields
+    swapEnabled?: boolean;
 }
 
 export interface SubGraphToken {
@@ -131,6 +134,8 @@ export enum PoolFilter {
     All = 'All',
     Weighted = 'Weighted',
     Stable = 'Stable',
+    MetaStable = 'MetaStable',
+    LBP = 'LiquidityBootstrapping',
 }
 
 export interface SwapOptions {

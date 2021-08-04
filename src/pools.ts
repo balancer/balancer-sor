@@ -101,6 +101,20 @@ export function filterPoolsOfInterest(
                 pool.tokens,
                 pool.tokensList
             );
+        } else if (pool.poolType === 'LiquidityBootstrapping') {
+            // If an LBP doesn't have its swaps paused we treat it like a regular Weighted pool.
+            // If it does we just ignore it.
+            if (pool.swapEnabled === true)
+                newPool = new WeightedPool(
+                    pool.id,
+                    pool.address,
+                    pool.swapFee,
+                    pool.totalWeight,
+                    pool.totalShares,
+                    pool.tokens,
+                    pool.tokensList
+                );
+            else return;
         } else {
             console.error(
                 `Unknown pool type or type field missing: ${pool.poolType} ${pool.id}`
