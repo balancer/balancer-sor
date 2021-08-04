@@ -29,4 +29,6 @@ var PoolFilter;
     PoolFilter['All'] = 'All';
     PoolFilter['Weighted'] = 'Weighted';
     PoolFilter['Stable'] = 'Stable';
+    PoolFilter['MetaStable'] = 'MetaStable';
+    PoolFilter['LBP'] = 'LiquidityBootstrapping';
 })((PoolFilter = exports.PoolFilter || (exports.PoolFilter = {})));

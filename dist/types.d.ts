@@ -56,6 +56,7 @@ export interface SubgraphPoolBase {
     unitSeconds?: number;
     principalToken?: string;
     baseToken?: string;
+    swapEnabled?: boolean;
 }
 export interface SubGraphToken {
     address: string;
@@ -107,6 +108,8 @@ export declare enum PoolFilter {
     All = 'All',
     Weighted = 'Weighted',
     Stable = 'Stable',
+    MetaStable = 'MetaStable',
+    LBP = 'LiquidityBootstrapping',
 }
 export interface SwapOptions {
     timestamp: number;
