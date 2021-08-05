@@ -29,6 +29,7 @@ export async function fetchSubgraphPools(SubgraphUrl: string = '') {
           unitSeconds
           principalToken
           baseToken
+          swapEnabled
         }
       }
     `;
