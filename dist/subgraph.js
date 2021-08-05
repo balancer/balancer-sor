@@ -70,6 +70,7 @@ function fetchSubgraphPools(SubgraphUrl = '') {
           unitSeconds
           principalToken
           baseToken
+          swapEnabled
         }
       }
     `;
