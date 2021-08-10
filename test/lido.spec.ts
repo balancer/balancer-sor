@@ -30,7 +30,7 @@ const poolWethDai = Lido.StaticPools.wethDai[chainId];
 const poolLido = Lido.StaticPools.wstEthWeth[chainId];
 
 // This doesn't matter as Lido routes should be static
-const poolsFromFile: SubGraphPoolsBase = require('./testData/weightedPools/metaPool.json');
+const poolsFromFile: SubGraphPoolsBase = require('./testData/lido/staticPools.json');
 
 // npx mocha -r ts-node/register test/lido.spec.ts
 describe(`Tests for Lido USD routes.`, () => {
@@ -50,6 +50,7 @@ describe(`Tests for Lido USD routes.`, () => {
             const swapAmt = bnum('1');
 
             const swapInfo: SwapInfo = await getLidoStaticSwaps(
+                poolsFromFile,
                 chainId,
                 tokenIn,
                 tokenOut,

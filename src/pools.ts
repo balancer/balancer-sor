@@ -15,6 +15,7 @@ import { MetaStablePool } from './pools/metaStablePool/metaStablePool';
 import { ZERO } from './bmath';
 
 import disabledTokensDefault from './disabled-tokens.json';
+import { timeStamp } from 'console';
 
 /*
 The main purpose of this function is to:
@@ -55,72 +56,13 @@ export function filterPoolsOfInterest(
         if (pool.tokensList.length === 0 || pool.tokens[0].balance === '0') {
             return;
         }
-        let newPool: WeightedPool | StablePool | ElementPool;
 
-        if (pool.poolType === 'Weighted')
-            newPool = new WeightedPool(
-                pool.id,
-                pool.address,
-                pool.swapFee,
-                pool.totalWeight,
-                pool.totalShares,
-                pool.tokens,
-                pool.tokensList
-            );
-        else if (pool.poolType === 'Stable')
-            newPool = new StablePool(
-                pool.id,
-                pool.address,
-                pool.amp,
-                pool.swapFee,
-                pool.totalShares,
-                pool.tokens,
-                pool.tokensList
-            );
-        else if (pool.poolType === 'Element') {
-            newPool = new ElementPool(
-                pool.id,
-                pool.address,
-                pool.swapFee,
-                pool.totalShares,
-                pool.tokens,
-                pool.tokensList,
-                pool.expiryTime,
-                pool.unitSeconds,
-                pool.principalToken,
-                pool.baseToken
-            );
-            newPool.setCurrentBlockTimestamp(currentBlockTimestamp);
-        } else if (pool.poolType === 'MetaStable') {
-            newPool = new MetaStablePool(
-                pool.id,
-                pool.address,
-                pool.amp,
-                pool.swapFee,
-                pool.totalShares,
-                pool.tokens,
-                pool.tokensList
-            );
-        } else if (pool.poolType === 'LiquidityBootstrapping') {
-            // If an LBP doesn't have its swaps paused we treat it like a regular Weighted pool.
-            // If it does we just ignore it.
-            if (pool.swapEnabled === true)
-                newPool = new WeightedPool(
-                    pool.id,
-                    pool.address,
-                    pool.swapFee,
-                    pool.totalWeight,
-                    pool.totalShares,
-                    pool.tokens,
-                    pool.tokensList
-                );
-            else return;
-        } else {
-            console.error(
-                `Unknown pool type or type field missing: ${pool.poolType} ${pool.id}`
-            );
-            return;
-        }
+        const newPool:
+            | WeightedPool
+            | StablePool
+            | ElementPool
+            | undefined = parseNewPool(pool, currentBlockTimestamp);
+        if (!newPool) return;
 
         let tokenListSet = new Set(pool.tokensList);
         // Depending on env file, we add the BPT as well as
@@ -172,6 +114,79 @@ export function filterPoolsOfInterest(
     const hopTokens = [...hopTokensSet];
     return [poolsDictionary, hopTokens];
 }
+
+export function parseNewPool(
+    pool: SubgraphPoolBase,
+    currentBlockTimestamp: number = 0
+): WeightedPool | StablePool | ElementPool | undefined {
+    let newPool: WeightedPool | StablePool | ElementPool;
+    if (pool.poolType === 'Weighted')
+        newPool = new WeightedPool(
+            pool.id,
+            pool.address,
+            pool.swapFee,
+            pool.totalWeight,
+            pool.totalShares,
+            pool.tokens,
+            pool.tokensList
+        );
+    else if (pool.poolType === 'Stable')
+        newPool = new StablePool(
+            pool.id,
+            pool.address,
+            pool.amp,
+            pool.swapFee,
+            pool.totalShares,
+            pool.tokens,
+            pool.tokensList
+        );
+    else if (pool.poolType === 'Element') {
+        newPool = new ElementPool(
+            pool.id,
+            pool.address,
+            pool.swapFee,
+            pool.totalShares,
+            pool.tokens,
+            pool.tokensList,
+            pool.expiryTime,
+            pool.unitSeconds,
+            pool.principalToken,
+            pool.baseToken
+        );
+        newPool.setCurrentBlockTimestamp(currentBlockTimestamp);
+    } else if (pool.poolType === 'MetaStable') {
+        newPool = new MetaStablePool(
+            pool.id,
+            pool.address,
+            pool.amp,
+            pool.swapFee,
+            pool.totalShares,
+            pool.tokens,
+            pool.tokensList
+        );
+    } else if (pool.poolType === 'LiquidityBootstrapping') {
+        // If an LBP doesn't have its swaps paused we treat it like a regular Weighted pool.
+        // If it does we just ignore it.
+        if (pool.swapEnabled === true)
+            newPool = new WeightedPool(
+                pool.id,
+                pool.address,
+                pool.swapFee,
+                pool.totalWeight,
+                pool.totalShares,
+                pool.tokens,
+                pool.tokensList
+            );
+        else return undefined;
+    } else {
+        console.error(
+            `Unknown pool type or type field missing: ${pool.poolType} ${pool.id}`
+        );
+        return undefined;
+    }
+    return newPool;
+}
+
 /*
 Find the most liquid pool for each hop (i.e. tokenIn->hopToken & hopToken->tokenOut).
 Creates paths for each pool of interest (multi & direct pools).

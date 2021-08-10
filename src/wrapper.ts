@@ -243,16 +243,6 @@ export class SOR {
         tokenIn = tokenIn.toLowerCase();
         tokenOut = tokenOut.toLowerCase();
 
-        if (isLidoSwap(this.chainId, tokenIn, tokenOut))
-            return await getLidoStaticSwaps(
-                this.chainId,
-                tokenIn,
-                tokenOut,
-                swapType,
-                swapAmt,
-                this.provider
-            );
-
         const WETH = this.WETHADDR[this.chainId].toLowerCase();
         const wrapOptions = { isEthSwap: false, wethAddress: WETH };
 
@@ -270,6 +260,20 @@ export class SOR {
             if (!(swapOptions.poolTypeFilter === PoolFilter.All))
                 pools.pools = pools.pools.filter(
                     p => p.poolType === swapOptions.poolTypeFilter
+                );
+
+            if (
+                !wrapOptions.isEthSwap &&
+                isLidoSwap(this.chainId, tokenIn, tokenOut)
+            )
+                return await getLidoStaticSwaps(
+                    pools,
+                    this.chainId,
+                    tokenIn,
+                    tokenOut,
+                    swapType,
+                    swapAmt,
+                    this.provider
                 );
 
             // All Pools with OnChain Balances is already fetched so use that

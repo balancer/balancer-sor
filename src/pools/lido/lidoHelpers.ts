@@ -1,9 +1,10 @@
 import { BaseProvider } from '@ethersproject/providers';
 import { Contract } from '@ethersproject/contracts';
 import { SwapInfo, SwapTypes, SwapV2 } from '../../types';
+import { parseNewPool } from '../../pools';
 import { ZERO, scale, bnum } from '../../bmath';
 import { BigNumber } from 'utils/bignumber';
-import { ZERO_ADDRESS } from '../../index';
+import { ZERO_ADDRESS, SubGraphPoolsBase } from '../../index';
 
 export const Lido = {
     Networks: [1, 42],
@@ -869,10 +870,61 @@ async function queryBatchSwap(
 }
 
 /*
+Spot Price for path is product of each pools SP for relevant tokens.
+(See helpersClass getSpotPriceAfterSwapForPath)
+*/
+function calculateMarketSp(
+    swapType: SwapTypes,
+    swaps: SwapV2[],
+    assets: string[],
+    pools: SubGraphPoolsBase
+): BigNumber {
+    const spotPrices: BigNumber[] = [];
+    for (let i = 0; i < swaps.length; i++) {
+        const swap = swaps[i];
+
+        // Find matching pool from list so we can use balances, etc
+        const pool = pools.pools.filter(p => p.id === swap.poolId);
+        if (pool.length !== 1) return bnum(0);
+
+        // This will get a specific pool type so we can call parse and spot price functions
+        const newPool = parseNewPool(pool[0]);
+        if (!newPool) return bnum(0);
+
+        // Parses relevant balances, etc
+        const poolPairData: any = newPool.parsePoolPairData(
+            assets[swap.assetInIndex],
+            assets[swap.assetOutIndex]
+        );
+
+        // Calculate current spot price
+        let spotPrice: BigNumber;
+        if (swapType === SwapTypes.SwapExactIn)
+            spotPrice = newPool._spotPriceAfterSwapExactTokenInForTokenOut(
+                poolPairData,
+                ZERO
+            );
+        // Amount = 0 to just get current SP
+        else
+            spotPrice = newPool._spotPriceAfterSwapTokenInForExactTokenOut(
+                poolPairData,
+                ZERO
+            ); // Amount = 0 to just get current SP
+
+        // console.log(`${swap.poolId} ${spotPrice.toString()}`);
+        spotPrices.push(spotPrice);
+    }
+
+    // SP for Path is product of all
+    return spotPrices.reduce((a, b) => a.times(b));
+}
+
+/*
 Used when SOR doesn't support paths with more than one hop.
 Enables swapping of stables <> wstETH via WETH/DAI pool which has good liquidity.
 */
 export async function getLidoStaticSwaps(
+    pools: SubGraphPoolsBase,
     chainId: number,
     tokenIn: string,
     tokenOut: string,
@@ -917,6 +969,14 @@ export async function getLidoStaticSwaps(
 
     if (isWrappingOut) swapInfo.tokenOut = Lido.STETH[chainId];
     else swapInfo.tokenOut = tokenOut;
+
+    // Calculate SP as product of all pool SP in path
+    swapInfo.marketSp = calculateMarketSp(
+        swapType,
+        swapInfo.swaps,
+        swapInfo.tokenAddresses,
+        pools
+    );
 
     // Unlike main SOR here we haven't calculated the return amount for swaps so use query call on Vault to get value.
     swapInfo.returnAmount = await queryBatchSwap(
