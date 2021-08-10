@@ -908,12 +908,12 @@ function queryBatchSwap(swapType, swaps, assets, provider) {
                 assets,
                 funds
             );
+            // negative amounts represent tokens (or ETH) sent by the Vault
             if (swapType === types_1.SwapTypes.SwapExactIn)
                 return bmath_1
                     .bnum(deltas[assets.length - 1].toString())
                     .times(-1);
-            // negative amounts represent tokens (or ETH) sent by the Vault
-            else return bmath_1.bnum(deltas[0].toString()).times(-1);
+            else return bmath_1.bnum(deltas[0].toString());
         } catch (err) {
             console.error(`SOR - queryBatchSwap: ${err.message}`);
             return bmath_1.bnum(0);
