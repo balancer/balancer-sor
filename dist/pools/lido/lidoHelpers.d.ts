@@ -1,6 +1,7 @@
 import { BaseProvider } from '@ethersproject/providers';
 import { SwapInfo, SwapTypes } from '../../types';
 import { BigNumber } from 'utils/bignumber';
+import { SubGraphPoolsBase } from '../../index';
 export declare const Lido: {
     Networks: number[];
     STETH: {
@@ -52,6 +53,7 @@ export declare function isLidoSwap(
     tokenOut: string
 ): boolean;
 export declare function getLidoStaticSwaps(
+    pools: SubGraphPoolsBase,
     chainId: number,
     tokenIn: string,
     tokenOut: string,

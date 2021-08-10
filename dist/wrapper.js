@@ -241,15 +241,6 @@ class SOR {
             // The Subgraph returns tokens in lower case format so we must match this
             tokenIn = tokenIn.toLowerCase();
             tokenOut = tokenOut.toLowerCase();
-            if (lidoHelpers_1.isLidoSwap(this.chainId, tokenIn, tokenOut))
-                return yield lidoHelpers_1.getLidoStaticSwaps(
-                    this.chainId,
-                    tokenIn,
-                    tokenOut,
-                    swapType,
-                    swapAmt,
-                    this.provider
-                );
             const WETH = this.WETHADDR[this.chainId].toLowerCase();
             const wrapOptions = { isEthSwap: false, wethAddress: WETH };
             if (tokenIn === index_1.ZERO_ADDRESS) {
@@ -267,6 +258,19 @@ class SOR {
                 if (!(swapOptions.poolTypeFilter === types_1.PoolFilter.All))
                     pools.pools = pools.pools.filter(
                         p => p.poolType === swapOptions.poolTypeFilter
+                    );
+                if (
+                    !wrapOptions.isEthSwap &&
+                    lidoHelpers_1.isLidoSwap(this.chainId, tokenIn, tokenOut)
+                )
+                    return yield lidoHelpers_1.getLidoStaticSwaps(
+                        pools,
+                        this.chainId,
+                        tokenIn,
+                        tokenOut,
+                        swapType,
+                        swapAmt,
+                        this.provider
                     );
                 // All Pools with OnChain Balances is already fetched so use that
                 swapInfo = yield this.processSwaps(
