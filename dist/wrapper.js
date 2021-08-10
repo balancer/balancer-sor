@@ -44,6 +44,7 @@ const subgraph_1 = require('./subgraph');
 const sorClass_1 = require('./sorClass');
 const helpersClass_1 = require('./helpersClass');
 const types_1 = require('./types');
+const lidoHelpers_1 = require('./pools/lido/lidoHelpers');
 const index_1 = require('./index');
 class SOR {
     constructor(
@@ -240,6 +241,15 @@ class SOR {
             // The Subgraph returns tokens in lower case format so we must match this
             tokenIn = tokenIn.toLowerCase();
             tokenOut = tokenOut.toLowerCase();
+            if (lidoHelpers_1.isLidoSwap(this.chainId, tokenIn, tokenOut))
+                return yield lidoHelpers_1.getLidoStaticSwaps(
+                    this.chainId,
+                    tokenIn,
+                    tokenOut,
+                    swapType,
+                    swapAmt,
+                    this.provider
+                );
             const WETH = this.WETHADDR[this.chainId].toLowerCase();
             const wrapOptions = { isEthSwap: false, wethAddress: WETH };
             if (tokenIn === index_1.ZERO_ADDRESS) {

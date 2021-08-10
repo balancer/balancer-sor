@@ -35,3 +35,4 @@ exports.ZERO_ADDRESS = '0x0000000000000000000000000000000000000000';
 var bmath_1 = require('./bmath');
 exports.scale = bmath_1.scale;
 exports.bnum = bmath_1.bnum;
+__export(require('./pools/lido/lidoHelpers'));
