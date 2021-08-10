@@ -13,3 +13,4 @@ export * from './sorClass';
 export * from './frontendHelpers/weightedHelpers';
 export const ZERO_ADDRESS = '0x0000000000000000000000000000000000000000';
 export { scale, bnum } from './bmath';
+export * from './pools/lido/lidoHelpers';

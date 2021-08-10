@@ -17,6 +17,7 @@ import {
     SwapOptions,
     PoolFilter,
 } from './types';
+import { Lido, getLidoStaticSwaps, isLidoSwap } from './pools/lido/lidoHelpers';
 import { ZERO_ADDRESS } from './index';
 
 export class SOR {
@@ -241,6 +242,16 @@ export class SOR {
         // The Subgraph returns tokens in lower case format so we must match this
         tokenIn = tokenIn.toLowerCase();
         tokenOut = tokenOut.toLowerCase();
+
+        if (isLidoSwap(this.chainId, tokenIn, tokenOut))
+            return await getLidoStaticSwaps(
+                this.chainId,
+                tokenIn,
+                tokenOut,
+                swapType,
+                swapAmt,
+                this.provider
+            );
 
         const WETH = this.WETHADDR[this.chainId].toLowerCase();
         const wrapOptions = { isEthSwap: false, wethAddress: WETH };
