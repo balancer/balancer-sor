@@ -21,6 +21,7 @@ import {
     Lido,
     getLidoStaticSwaps,
     isLidoStableSwap,
+    getRate,
 } from './pools/lido/lidoHelpers';
 import { ZERO_ADDRESS, scale } from './index';
 
@@ -283,32 +284,18 @@ export class SOR {
 
             let swapAmountForSwaps = swapAmt;
             let rate = bnum(1);
-            if (isStethIn || isStethOut) {
-                const lidoPoolIndex = pools.pools.findIndex(
-                    t => t.id === Lido.StaticPools.wstEthWeth[this.chainId]
-                );
-                if (lidoPoolIndex < 0) return swapInfo;
-
-                const wstEthIndex = pools.pools[lidoPoolIndex].tokens.findIndex(
-                    t => Lido.wstETH[this.chainId] === t.address
-                );
-                rate = bnum(
-                    pools.pools[lidoPoolIndex].tokens[wstEthIndex].priceRate
-                );
-
-                // console.log(`!!!!!!! RATE: ${rate.toString()}`);
-            }
+            if (isStethIn || isStethOut)
+                rate = await getRate(this.provider, this.chainId);
 
             if (
                 (isStethIn && swapType === SwapTypes.SwapExactIn) ||
                 (isStethOut && swapType === SwapTypes.SwapExactOut)
             ) {
-                // console.log(`!!!!!!! rating SwapAmt`);
                 swapAmountForSwaps = swapAmt.times(rate);
+                // console.log(`!!!!!!! rating SwapAmt ${swapAmountForSwaps.toString()}`);
             }
 
             if (isLidoStableSwap(this.chainId, tokenIn, tokenOut)) {
-                // console.log(`STABLE STATIC? ${swapAmountForSwaps.toString()}`)
                 swapInfo = await getLidoStaticSwaps(
                     pools,
                     this.chainId,
@@ -339,8 +326,10 @@ export class SOR {
                 (isStethIn && swapType === SwapTypes.SwapExactIn) ||
                 (isStethOut && swapType === SwapTypes.SwapExactOut)
             ) {
-                swapInfo.swapAmount = scale(swapAmt, 18);
-                swapInfo.swapAmountForSwaps = scale(swapAmountForSwaps, 18); // Always 18 because wstETH
+                swapInfo.swapAmount = scale(swapAmt, 18).dp(0);
+                swapInfo.swapAmountForSwaps = scale(swapAmountForSwaps, 18).dp(
+                    0
+                ); // Always 18 because wstETH
             } else {
                 swapInfo.swapAmountForSwaps = swapInfo.swapAmount;
             }

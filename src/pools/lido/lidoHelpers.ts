@@ -5,6 +5,8 @@ import { parseNewPool } from '../../pools';
 import { ZERO, scale, bnum } from '../../bmath';
 import { BigNumber } from 'utils/bignumber';
 import { ZERO_ADDRESS, SubGraphPoolsBase } from '../../index';
+import vaultAbi from '../../abi/Vault.json';
+import wstETHAbi from '../../abi/wstETH.json';
 
 export const Lido = {
     Networks: [1, 42],
@@ -604,7 +606,7 @@ Routes[42][`${Lido.wstETH[42]}${Lido.DAI[42]}0`] = {
 Routes[42][`${Lido.wstETH[42]}${Lido.DAI[42]}1`] = {
     name: 'wstETH/DAI-SwapExactOut',
     tokenInDecimals: 18,
-    tokenOutDecimals: 6,
+    tokenOutDecimals: 18,
     tokenAddresses: [
         Lido.wstETH[42],
         Lido.WETH[42],
@@ -811,7 +813,6 @@ async function queryBatchSwap(
     assets: string[],
     provider: BaseProvider
 ): Promise<BigNumber> {
-    const vaultAbi = require('../../abi/Vault.json');
     const vaultAddr = '0xBA12222222228d8Ba445958a75a0704d566BF2C8';
     const vaultContract = new Contract(vaultAddr, vaultAbi, provider);
     const funds = {
@@ -888,6 +889,20 @@ function calculateMarketSp(
     return spotPrices.reduce((a, b) => a.times(b));
 }
 
+export async function getRate(
+    provider: BaseProvider,
+    chainId: number
+): Promise<BigNumber> {
+    // Call stEthPerToken or tokensPerStETH to get the scaling factors in each direction.
+    const wstETHContract = new Contract(
+        Lido.wstETH[chainId],
+        wstETHAbi,
+        provider
+    );
+    const rate = await wstETHContract.tokensPerStEth();
+    return scale(bnum(rate.toString()), -18);
+}
+
 /*
 Used when SOR doesn't support paths with more than one hop.
 Enables swapping of stables <> wstETH via WETH/DAI pool which has good liquidity.
@@ -929,8 +944,14 @@ export async function getLidoStaticSwaps(
     swapInfo.tokenAddresses = staticRoute.tokenAddresses;
     swapInfo.swaps = staticRoute.swaps;
     if (swapType === SwapTypes.SwapExactIn)
-        swapInfo.swapAmount = scale(swapAmount, staticRoute.tokenInDecimals);
-    else swapInfo.swapAmount = scale(swapAmount, staticRoute.tokenOutDecimals);
+        swapInfo.swapAmount = scale(swapAmount, staticRoute.tokenInDecimals).dp(
+            0
+        );
+    else
+        swapInfo.swapAmount = scale(
+            swapAmount,
+            staticRoute.tokenOutDecimals
+        ).dp(0);
 
     swapInfo.swaps[0].amount = swapInfo.swapAmount.toString();
     if (isWrappingIn) swapInfo.tokenIn = Lido.stETH[chainId];

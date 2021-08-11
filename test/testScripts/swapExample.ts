@@ -456,11 +456,10 @@ async function makeRelayerTrade(
     console.log(limits);
 
     console.log('Swapping...');
-    return;
 
     let overRides = {};
-    overRides['gasLimit'] = '200000';
-    overRides['gasPrice'] = '20000000000';
+    // overRides['gasLimit'] = '450000';
+    // overRides['gasPrice'] = '20000000000';
     // ETH in swaps must send ETH value
     if (swapInfo.tokenIn === ZERO_ADDRESS) {
         overRides['value'] = swapInfo.swapAmount.toString();
@@ -489,10 +488,10 @@ async function simpleSwap() {
     // const poolsSource = require('../testData/testPools/gusdBug.json');
     // Update pools list with most recent onchain balances
     const queryOnChain = true;
-    const tokenIn = ADDRESSES[networkId].USDC;
+    const tokenIn = ADDRESSES[networkId].BAL;
     const tokenOut = ADDRESSES[networkId].STETH;
-    const swapType = SwapTypes.SwapExactOut;
-    const swapAmount = new BigNumber(0.01); // In normalized format, i.e. 1USDC = 1
+    const swapType = SwapTypes.SwapExactIn;
+    const swapAmount = new BigNumber(6.17); // In normalized format, i.e. 1USDC = 1
     const executeTrade = true;
 
     const provider = new JsonRpcProvider(PROVIDER_URLS[networkId]);
