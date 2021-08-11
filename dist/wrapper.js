@@ -283,7 +283,7 @@ class SOR {
                     (isStethIn && swapType === types_1.SwapTypes.SwapExactIn) ||
                     (isStethOut && swapType === types_1.SwapTypes.SwapExactOut)
                 ) {
-                    swapAmountForSwaps = swapAmt.times(rate);
+                    swapAmountForSwaps = swapAmt.times(rate).dp(18);
                     // console.log(`!!!!!!! rating SwapAmt ${swapAmountForSwaps.toString()}`);
                 }
                 if (
