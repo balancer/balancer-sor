@@ -232,7 +232,7 @@ class SOR {
                 tokenAddresses: [],
                 swaps: [],
                 swapAmount: bmath_1.ZERO,
-                swapAmountWithRate: bmath_1.ZERO,
+                swapAmountForSwaps: bmath_1.ZERO,
                 tokenIn: '',
                 tokenOut: '',
                 returnAmount: bmath_1.ZERO,
@@ -256,13 +256,13 @@ class SOR {
             let isStethOut = false;
             let tokenInForSwaps = tokenIn;
             let tokenOutForSwaps = tokenOut;
-            if (tokenIn === lidoHelpers_1.Lido.STETH[this.chainId]) {
+            if (tokenIn === lidoHelpers_1.Lido.stETH[this.chainId]) {
                 isStethIn = true;
-                tokenInForSwaps = lidoHelpers_1.Lido.WSTETHADDR[this.chainId];
+                tokenInForSwaps = lidoHelpers_1.Lido.wstETH[this.chainId];
             }
-            if (tokenOut === lidoHelpers_1.Lido.STETH[this.chainId]) {
+            if (tokenOut === lidoHelpers_1.Lido.stETH[this.chainId]) {
                 isStethOut = true;
-                tokenOutForSwaps = lidoHelpers_1.Lido.WSTETHADDR[this.chainId];
+                tokenOutForSwaps = lidoHelpers_1.Lido.wstETH[this.chainId];
             }
             if (this.finishedFetchingOnChain) {
                 let pools = JSON.parse(
@@ -272,35 +272,19 @@ class SOR {
                     pools.pools = pools.pools.filter(
                         p => p.poolType === swapOptions.poolTypeFilter
                     );
-                let swapAmountWithRate = swapAmt;
+                let swapAmountForSwaps = swapAmt;
                 let rate = bmath_1.bnum(1);
-                if (isStethIn || isStethOut) {
-                    const lidoPoolIndex = pools.pools.findIndex(
-                        t =>
-                            t.id ===
-                            lidoHelpers_1.Lido.StaticPools.wstEthWeth[
-                                this.chainId
-                            ]
+                if (isStethIn || isStethOut)
+                    rate = yield lidoHelpers_1.getRate(
+                        this.provider,
+                        this.chainId
                     );
-                    if (lidoPoolIndex < 0) return swapInfo;
-                    const wstEthIndex = pools.pools[
-                        lidoPoolIndex
-                    ].tokens.findIndex(
-                        t =>
-                            lidoHelpers_1.Lido.WSTETHADDR[this.chainId] ===
-                            t.address
-                    );
-                    rate = bmath_1.bnum(
-                        pools.pools[lidoPoolIndex].tokens[wstEthIndex].priceRate
-                    );
-                    // console.log(`!!!!!!! RATE: ${rate.toString()}`);
-                }
                 if (
                     (isStethIn && swapType === types_1.SwapTypes.SwapExactIn) ||
                     (isStethOut && swapType === types_1.SwapTypes.SwapExactOut)
                 ) {
-                    // console.log(`!!!!!!! rating SwapAmt`);
-                    swapAmountWithRate = swapAmt.times(rate);
+                    swapAmountForSwaps = swapAmt.times(rate);
+                    // console.log(`!!!!!!! rating SwapAmt ${swapAmountForSwaps.toString()}`);
                 }
                 if (
                     lidoHelpers_1.isLidoStableSwap(
@@ -309,14 +293,13 @@ class SOR {
                         tokenOut
                     )
                 ) {
-                    // console.log(`STABLE STATIC? ${swapAmountWithRate.toString()}`)
                     swapInfo = yield lidoHelpers_1.getLidoStaticSwaps(
                         pools,
                         this.chainId,
                         tokenInForSwaps,
                         tokenOutForSwaps,
                         swapType,
-                        swapAmountWithRate,
+                        swapAmountForSwaps,
                         this.provider
                     );
                 } else
@@ -324,7 +307,7 @@ class SOR {
                         tokenInForSwaps,
                         tokenOutForSwaps,
                         swapType,
-                        swapAmountWithRate,
+                        swapAmountForSwaps,
                         pools,
                         wrapOptions,
                         true,
@@ -338,29 +321,30 @@ class SOR {
                     (isStethIn && swapType === types_1.SwapTypes.SwapExactIn) ||
                     (isStethOut && swapType === types_1.SwapTypes.SwapExactOut)
                 ) {
-                    swapInfo.swapAmount = index_1.scale(swapAmt, 18);
-                    swapInfo.swapAmountWithRate = index_1.scale(
-                        swapAmountWithRate,
-                        18
-                    ); // Always 18 because wstETH
+                    swapInfo.swapAmount = index_1.scale(swapAmt, 18).dp(0);
+                    swapInfo.swapAmountForSwaps = index_1
+                        .scale(swapAmountForSwaps, 18)
+                        .dp(0); // Always 18 because wstETH
                 } else {
-                    swapInfo.swapAmountWithRate = swapInfo.swapAmount;
+                    swapInfo.swapAmountForSwaps = swapInfo.swapAmount;
                 }
                 // console.log(`SwapAmount: ${swapInfo.swapAmount.toString()}`);
-                // console.log(`SwapAmountRate: ${swapInfo.swapAmountWithRate.toString()}`);
+                // console.log(`SwapAmountRate: ${swapInfo.swapAmountForSwaps.toString()}`);
+                // SwapExactIn, stETH out, returnAmount is stETH amount out, returnAmountForSwaps is wstETH amount out
+                swapInfo.returnAmountForSwaps = swapInfo.returnAmount;
                 if (
-                    (isStethIn &&
-                        swapType === types_1.SwapTypes.SwapExactOut) ||
-                    (isStethOut && swapType === types_1.SwapTypes.SwapExactIn)
+                    (isStethOut &&
+                        swapType === types_1.SwapTypes.SwapExactIn) ||
+                    (isStethIn && swapType === types_1.SwapTypes.SwapExactOut)
                 ) {
-                    // console.log(`!!!!!!! RATE RETURN AMOUNT: ${swapInfo.returnAmount.toString()}`);
                     swapInfo.returnAmount = swapInfo.returnAmount
                         .div(rate)
                         .dp(0);
-                    // console.log(`!!!!!!! RATE RETURN AMOUNT NEW: ${swapInfo.returnAmount.toString()}`);
                     swapInfo.returnAmountConsideringFees = swapInfo.returnAmountConsideringFees
                         .div(rate)
                         .dp(0);
+                    // console.log(`!!!!!!! returnAmountForSwaps: ${swapInfo.returnAmountForSwaps.toString()}`);
+                    // console.log(`!!!!!!! returnAmount: ${swapInfo.returnAmount.toString()}`);
                 }
             }
             return swapInfo;

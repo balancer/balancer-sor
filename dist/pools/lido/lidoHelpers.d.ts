@@ -4,11 +4,11 @@ import { BigNumber } from 'utils/bignumber';
 import { SubGraphPoolsBase } from '../../index';
 export declare const Lido: {
     Networks: number[];
-    STETH: {
+    stETH: {
         1: string;
         42: string;
     };
-    WSTETHADDR: {
+    wstETH: {
         1: string;
         42: string;
     };
@@ -52,6 +52,10 @@ export declare function isLidoStableSwap(
     tokenIn: string,
     tokenOut: string
 ): boolean;
+export declare function getRate(
+    provider: BaseProvider,
+    chainId: number
+): Promise<BigNumber>;
 export declare function getLidoStaticSwaps(
     pools: SubGraphPoolsBase,
     chainId: number,

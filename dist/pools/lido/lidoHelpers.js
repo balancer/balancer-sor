@@ -34,19 +34,26 @@ var __awaiter =
             );
         });
     };
+var __importDefault =
+    (this && this.__importDefault) ||
+    function(mod) {
+        return mod && mod.__esModule ? mod : { default: mod };
+    };
 Object.defineProperty(exports, '__esModule', { value: true });
 const contracts_1 = require('@ethersproject/contracts');
 const types_1 = require('../../types');
 const pools_1 = require('../../pools');
 const bmath_1 = require('../../bmath');
 const index_1 = require('../../index');
+const Vault_json_1 = __importDefault(require('../../abi/Vault.json'));
+const wstETH_json_1 = __importDefault(require('../../abi/wstETH.json'));
 exports.Lido = {
     Networks: [1, 42],
-    STETH: {
+    stETH: {
         1: '0xae7ab96520de3a18e5e111b5eaab095312d7fe84',
         42: '0x4803bb90d18a1cb7a2187344fe4feb0e07878d05',
     },
-    WSTETHADDR: {
+    wstETH: {
         1: '0x7f39c581f595b53c5cb19bd0b3f8da6c935e2ca0',
         42: '0xa387b91e393cfb9356a460370842bc8dbb2f29af',
     },
@@ -90,14 +97,14 @@ exports.Routes = {
 };
 // MAINNET STATIC ROUTES FOR LIDO <> Stable
 // DAI/wstETH: DAI > WETH > wstETH
-exports.Routes[1][`${exports.Lido.DAI[1]}${exports.Lido.WSTETHADDR[1]}0`] = {
+exports.Routes[1][`${exports.Lido.DAI[1]}${exports.Lido.wstETH[1]}0`] = {
     name: 'DAI/wstETH-SwapExactIn',
     tokenInDecimals: 18,
     tokenOutDecimals: 18,
     tokenAddresses: [
         exports.Lido.DAI[1],
         exports.Lido.WETH[1],
-        exports.Lido.WSTETHADDR[1],
+        exports.Lido.wstETH[1],
     ],
     swaps: [
         {
@@ -117,12 +124,12 @@ exports.Routes[1][`${exports.Lido.DAI[1]}${exports.Lido.WSTETHADDR[1]}0`] = {
     ],
 };
 // wstETH/DAI: wstETH > WETH > DAI
-exports.Routes[1][`${exports.Lido.WSTETHADDR[1]}${exports.Lido.DAI[1]}0`] = {
+exports.Routes[1][`${exports.Lido.wstETH[1]}${exports.Lido.DAI[1]}0`] = {
     name: 'wstETH/DAI-SwapExactIn',
     tokenInDecimals: 18,
     tokenOutDecimals: 18,
     tokenAddresses: [
-        exports.Lido.WSTETHADDR[1],
+        exports.Lido.wstETH[1],
         exports.Lido.WETH[1],
         exports.Lido.DAI[1],
     ],
@@ -144,14 +151,14 @@ exports.Routes[1][`${exports.Lido.WSTETHADDR[1]}${exports.Lido.DAI[1]}0`] = {
     ],
 };
 // DAI/wstETH: DAI > WETH > wstETH
-exports.Routes[1][`${exports.Lido.DAI[1]}${exports.Lido.WSTETHADDR[1]}1`] = {
+exports.Routes[1][`${exports.Lido.DAI[1]}${exports.Lido.wstETH[1]}1`] = {
     name: 'DAI/wstETH-SwapExactOut',
     tokenInDecimals: 18,
     tokenOutDecimals: 18,
     tokenAddresses: [
         exports.Lido.DAI[1],
         exports.Lido.WETH[1],
-        exports.Lido.WSTETHADDR[1],
+        exports.Lido.wstETH[1],
     ],
     swaps: [
         {
@@ -171,12 +178,12 @@ exports.Routes[1][`${exports.Lido.DAI[1]}${exports.Lido.WSTETHADDR[1]}1`] = {
     ],
 };
 // wstETH/DAI: wstETH > WETH > DAI
-exports.Routes[1][`${exports.Lido.WSTETHADDR[1]}${exports.Lido.DAI[1]}1`] = {
+exports.Routes[1][`${exports.Lido.wstETH[1]}${exports.Lido.DAI[1]}1`] = {
     name: 'wstETH/DAI-SwapExactOut',
     tokenInDecimals: 18,
     tokenOutDecimals: 18,
     tokenAddresses: [
-        exports.Lido.WSTETHADDR[1],
+        exports.Lido.wstETH[1],
         exports.Lido.WETH[1],
         exports.Lido.DAI[1],
     ],
@@ -198,7 +205,7 @@ exports.Routes[1][`${exports.Lido.WSTETHADDR[1]}${exports.Lido.DAI[1]}1`] = {
     ],
 };
 // USDC/wstETH: USDC > DAI > WETH > wstETH
-exports.Routes[1][`${exports.Lido.USDC[1]}${exports.Lido.WSTETHADDR[1]}0`] = {
+exports.Routes[1][`${exports.Lido.USDC[1]}${exports.Lido.wstETH[1]}0`] = {
     name: 'USDC/wstETH-SwapExactIn',
     tokenInDecimals: 6,
     tokenOutDecimals: 18,
@@ -206,7 +213,7 @@ exports.Routes[1][`${exports.Lido.USDC[1]}${exports.Lido.WSTETHADDR[1]}0`] = {
         exports.Lido.USDC[1],
         exports.Lido.DAI[1],
         exports.Lido.WETH[1],
-        exports.Lido.WSTETHADDR[1],
+        exports.Lido.wstETH[1],
     ],
     swaps: [
         {
@@ -232,7 +239,7 @@ exports.Routes[1][`${exports.Lido.USDC[1]}${exports.Lido.WSTETHADDR[1]}0`] = {
         },
     ],
 };
-exports.Routes[1][`${exports.Lido.USDC[1]}${exports.Lido.WSTETHADDR[1]}1`] = {
+exports.Routes[1][`${exports.Lido.USDC[1]}${exports.Lido.wstETH[1]}1`] = {
     name: 'USDC/wstETH-SwapExactOut',
     tokenInDecimals: 6,
     tokenOutDecimals: 18,
@@ -240,7 +247,7 @@ exports.Routes[1][`${exports.Lido.USDC[1]}${exports.Lido.WSTETHADDR[1]}1`] = {
         exports.Lido.USDC[1],
         exports.Lido.DAI[1],
         exports.Lido.WETH[1],
-        exports.Lido.WSTETHADDR[1],
+        exports.Lido.wstETH[1],
     ],
     swaps: [
         {
@@ -267,12 +274,12 @@ exports.Routes[1][`${exports.Lido.USDC[1]}${exports.Lido.WSTETHADDR[1]}1`] = {
     ],
 };
 // wstETH/USDC: wstETH > WETH > DAI > USDC
-exports.Routes[1][`${exports.Lido.WSTETHADDR[1]}${exports.Lido.USDC[1]}0`] = {
+exports.Routes[1][`${exports.Lido.wstETH[1]}${exports.Lido.USDC[1]}0`] = {
     name: 'wstETH/USDC-SwapExactIn',
     tokenInDecimals: 18,
     tokenOutDecimals: 6,
     tokenAddresses: [
-        exports.Lido.WSTETHADDR[1],
+        exports.Lido.wstETH[1],
         exports.Lido.WETH[1],
         exports.Lido.DAI[1],
         exports.Lido.USDC[1],
@@ -301,12 +308,12 @@ exports.Routes[1][`${exports.Lido.WSTETHADDR[1]}${exports.Lido.USDC[1]}0`] = {
         },
     ],
 };
-exports.Routes[1][`${exports.Lido.WSTETHADDR[1]}${exports.Lido.USDC[1]}1`] = {
+exports.Routes[1][`${exports.Lido.wstETH[1]}${exports.Lido.USDC[1]}1`] = {
     name: 'wstETH/USDC-SwapExactOut',
     tokenInDecimals: 18,
     tokenOutDecimals: 6,
     tokenAddresses: [
-        exports.Lido.WSTETHADDR[1],
+        exports.Lido.wstETH[1],
         exports.Lido.WETH[1],
         exports.Lido.DAI[1],
         exports.Lido.USDC[1],
@@ -336,7 +343,7 @@ exports.Routes[1][`${exports.Lido.WSTETHADDR[1]}${exports.Lido.USDC[1]}1`] = {
     ],
 };
 // USDT/wstETH: USDT > DAI > WETH > wstETH
-exports.Routes[1][`${exports.Lido.USDT[1]}${exports.Lido.WSTETHADDR[1]}0`] = {
+exports.Routes[1][`${exports.Lido.USDT[1]}${exports.Lido.wstETH[1]}0`] = {
     name: 'USDT/wstETH-SwapExactIn',
     tokenInDecimals: 6,
     tokenOutDecimals: 18,
@@ -344,7 +351,7 @@ exports.Routes[1][`${exports.Lido.USDT[1]}${exports.Lido.WSTETHADDR[1]}0`] = {
         exports.Lido.USDT[1],
         exports.Lido.DAI[1],
         exports.Lido.WETH[1],
-        exports.Lido.WSTETHADDR[1],
+        exports.Lido.wstETH[1],
     ],
     swaps: [
         {
@@ -370,7 +377,7 @@ exports.Routes[1][`${exports.Lido.USDT[1]}${exports.Lido.WSTETHADDR[1]}0`] = {
         },
     ],
 };
-exports.Routes[1][`${exports.Lido.USDT[1]}${exports.Lido.WSTETHADDR[1]}1`] = {
+exports.Routes[1][`${exports.Lido.USDT[1]}${exports.Lido.wstETH[1]}1`] = {
     name: 'USDT/wstETH-SwapExactOut',
     tokenInDecimals: 6,
     tokenOutDecimals: 18,
@@ -378,7 +385,7 @@ exports.Routes[1][`${exports.Lido.USDT[1]}${exports.Lido.WSTETHADDR[1]}1`] = {
         exports.Lido.USDT[1],
         exports.Lido.DAI[1],
         exports.Lido.WETH[1],
-        exports.Lido.WSTETHADDR[1],
+        exports.Lido.wstETH[1],
     ],
     swaps: [
         {
@@ -405,12 +412,12 @@ exports.Routes[1][`${exports.Lido.USDT[1]}${exports.Lido.WSTETHADDR[1]}1`] = {
     ],
 };
 // wstETH/USDT: wstETH > WETH > DAI > USDT
-exports.Routes[1][`${exports.Lido.WSTETHADDR[1]}${exports.Lido.USDT[1]}0`] = {
+exports.Routes[1][`${exports.Lido.wstETH[1]}${exports.Lido.USDT[1]}0`] = {
     name: 'wstETH/USDT-SwapExactIn',
     tokenInDecimals: 18,
     tokenOutDecimals: 6,
     tokenAddresses: [
-        exports.Lido.WSTETHADDR[1],
+        exports.Lido.wstETH[1],
         exports.Lido.WETH[1],
         exports.Lido.DAI[1],
         exports.Lido.USDT[1],
@@ -439,12 +446,12 @@ exports.Routes[1][`${exports.Lido.WSTETHADDR[1]}${exports.Lido.USDT[1]}0`] = {
         },
     ],
 };
-exports.Routes[1][`${exports.Lido.WSTETHADDR[1]}${exports.Lido.USDT[1]}1`] = {
+exports.Routes[1][`${exports.Lido.wstETH[1]}${exports.Lido.USDT[1]}1`] = {
     name: 'wstETH/USDT-SwapExactOut',
     tokenInDecimals: 18,
     tokenOutDecimals: 6,
     tokenAddresses: [
-        exports.Lido.WSTETHADDR[1],
+        exports.Lido.wstETH[1],
         exports.Lido.WETH[1],
         exports.Lido.DAI[1],
         exports.Lido.USDT[1],
@@ -475,16 +482,14 @@ exports.Routes[1][`${exports.Lido.WSTETHADDR[1]}${exports.Lido.USDT[1]}1`] = {
 };
 // KOVAN STATIC ROUTES FOR LIDO <> Stable
 // USDC/wstETH: USDC > WETH > wstETH
-exports.Routes[42][
-    `${exports.Lido.USDC[42]}${exports.Lido.WSTETHADDR[42]}0`
-] = {
+exports.Routes[42][`${exports.Lido.USDC[42]}${exports.Lido.wstETH[42]}0`] = {
     name: 'USDC/wstETH-SwapExactIn',
     tokenInDecimals: 6,
     tokenOutDecimals: 18,
     tokenAddresses: [
         exports.Lido.USDC[42],
         exports.Lido.WETH[42],
-        exports.Lido.WSTETHADDR[42],
+        exports.Lido.wstETH[42],
     ],
     swaps: [
         {
@@ -504,14 +509,12 @@ exports.Routes[42][
     ],
 };
 // wstETH/USDC: wstETH > WETH > USDC
-exports.Routes[42][
-    `${exports.Lido.WSTETHADDR[42]}${exports.Lido.USDC[42]}0`
-] = {
+exports.Routes[42][`${exports.Lido.wstETH[42]}${exports.Lido.USDC[42]}0`] = {
     name: 'wstETH/USDC-SwapExactIn',
     tokenInDecimals: 18,
     tokenOutDecimals: 6,
     tokenAddresses: [
-        exports.Lido.WSTETHADDR[42],
+        exports.Lido.wstETH[42],
         exports.Lido.WETH[42],
         exports.Lido.USDC[42],
     ],
@@ -533,16 +536,14 @@ exports.Routes[42][
     ],
 };
 // USDC/wstETH: USDC > WETH > wstETH
-exports.Routes[42][
-    `${exports.Lido.USDC[42]}${exports.Lido.WSTETHADDR[42]}1`
-] = {
+exports.Routes[42][`${exports.Lido.USDC[42]}${exports.Lido.wstETH[42]}1`] = {
     name: 'USDC/wstETH-SwapExactOut',
     tokenInDecimals: 6,
     tokenOutDecimals: 18,
     tokenAddresses: [
         exports.Lido.USDC[42],
         exports.Lido.WETH[42],
-        exports.Lido.WSTETHADDR[42],
+        exports.Lido.wstETH[42],
     ],
     swaps: [
         {
@@ -562,14 +563,12 @@ exports.Routes[42][
     ],
 };
 // wstETH/USDC: wstETH > WETH > USDC
-exports.Routes[42][
-    `${exports.Lido.WSTETHADDR[42]}${exports.Lido.USDC[42]}1`
-] = {
+exports.Routes[42][`${exports.Lido.wstETH[42]}${exports.Lido.USDC[42]}1`] = {
     name: 'wstETH/USDC-SwapExactOut',
     tokenInDecimals: 18,
     tokenOutDecimals: 6,
     tokenAddresses: [
-        exports.Lido.WSTETHADDR[42],
+        exports.Lido.wstETH[42],
         exports.Lido.WETH[42],
         exports.Lido.USDC[42],
     ],
@@ -591,7 +590,7 @@ exports.Routes[42][
     ],
 };
 // DAI/wstETH: DAI > USDC > WETH > wstETH
-exports.Routes[42][`${exports.Lido.DAI[42]}${exports.Lido.WSTETHADDR[42]}0`] = {
+exports.Routes[42][`${exports.Lido.DAI[42]}${exports.Lido.wstETH[42]}0`] = {
     name: 'DAI/wstETH-SwapExactIn',
     tokenInDecimals: 18,
     tokenOutDecimals: 18,
@@ -599,7 +598,7 @@ exports.Routes[42][`${exports.Lido.DAI[42]}${exports.Lido.WSTETHADDR[42]}0`] = {
         exports.Lido.DAI[42],
         exports.Lido.USDC[42],
         exports.Lido.WETH[42],
-        exports.Lido.WSTETHADDR[42],
+        exports.Lido.wstETH[42],
     ],
     swaps: [
         {
@@ -625,7 +624,7 @@ exports.Routes[42][`${exports.Lido.DAI[42]}${exports.Lido.WSTETHADDR[42]}0`] = {
         },
     ],
 };
-exports.Routes[42][`${exports.Lido.DAI[42]}${exports.Lido.WSTETHADDR[42]}1`] = {
+exports.Routes[42][`${exports.Lido.DAI[42]}${exports.Lido.wstETH[42]}1`] = {
     name: 'DAI/wstETH-SwapExactOut',
     tokenInDecimals: 18,
     tokenOutDecimals: 18,
@@ -633,7 +632,7 @@ exports.Routes[42][`${exports.Lido.DAI[42]}${exports.Lido.WSTETHADDR[42]}1`] = {
         exports.Lido.DAI[42],
         exports.Lido.USDC[42],
         exports.Lido.WETH[42],
-        exports.Lido.WSTETHADDR[42],
+        exports.Lido.wstETH[42],
     ],
     swaps: [
         {
@@ -660,12 +659,12 @@ exports.Routes[42][`${exports.Lido.DAI[42]}${exports.Lido.WSTETHADDR[42]}1`] = {
     ],
 };
 // wstETH/DAI: wstETH > WETH > USDC > DAI
-exports.Routes[42][`${exports.Lido.WSTETHADDR[42]}${exports.Lido.DAI[42]}0`] = {
+exports.Routes[42][`${exports.Lido.wstETH[42]}${exports.Lido.DAI[42]}0`] = {
     name: 'wstETH/DAI-SwapExactIn',
     tokenInDecimals: 18,
     tokenOutDecimals: 18,
     tokenAddresses: [
-        exports.Lido.WSTETHADDR[42],
+        exports.Lido.wstETH[42],
         exports.Lido.WETH[42],
         exports.Lido.USDC[42],
         exports.Lido.DAI[42],
@@ -694,12 +693,12 @@ exports.Routes[42][`${exports.Lido.WSTETHADDR[42]}${exports.Lido.DAI[42]}0`] = {
         },
     ],
 };
-exports.Routes[42][`${exports.Lido.WSTETHADDR[42]}${exports.Lido.DAI[42]}1`] = {
+exports.Routes[42][`${exports.Lido.wstETH[42]}${exports.Lido.DAI[42]}1`] = {
     name: 'wstETH/DAI-SwapExactOut',
     tokenInDecimals: 18,
-    tokenOutDecimals: 6,
+    tokenOutDecimals: 18,
     tokenAddresses: [
-        exports.Lido.WSTETHADDR[42],
+        exports.Lido.wstETH[42],
         exports.Lido.WETH[42],
         exports.Lido.USDC[42],
         exports.Lido.DAI[42],
@@ -729,9 +728,7 @@ exports.Routes[42][`${exports.Lido.WSTETHADDR[42]}${exports.Lido.DAI[42]}1`] = {
     ],
 };
 // USDT/wstETH: USDT > USDC > WETH > wstETH
-exports.Routes[42][
-    `${exports.Lido.USDT[42]}${exports.Lido.WSTETHADDR[42]}0`
-] = {
+exports.Routes[42][`${exports.Lido.USDT[42]}${exports.Lido.wstETH[42]}0`] = {
     name: 'USDT/wstETH-SwapExactIn',
     tokenInDecimals: 6,
     tokenOutDecimals: 18,
@@ -739,7 +736,7 @@ exports.Routes[42][
         exports.Lido.USDT[42],
         exports.Lido.USDC[42],
         exports.Lido.WETH[42],
-        exports.Lido.WSTETHADDR[42],
+        exports.Lido.wstETH[42],
     ],
     swaps: [
         {
@@ -765,9 +762,7 @@ exports.Routes[42][
         },
     ],
 };
-exports.Routes[42][
-    `${exports.Lido.USDT[42]}${exports.Lido.WSTETHADDR[42]}1`
-] = {
+exports.Routes[42][`${exports.Lido.USDT[42]}${exports.Lido.wstETH[42]}1`] = {
     name: 'USDT/wstETH-SwapExactOut',
     tokenInDecimals: 6,
     tokenOutDecimals: 18,
@@ -775,7 +770,7 @@ exports.Routes[42][
         exports.Lido.USDT[42],
         exports.Lido.USDC[42],
         exports.Lido.WETH[42],
-        exports.Lido.WSTETHADDR[42],
+        exports.Lido.wstETH[42],
     ],
     swaps: [
         {
@@ -802,14 +797,12 @@ exports.Routes[42][
     ],
 };
 // wstETH/USDT: wstETH > WETH > USDC > USDT
-exports.Routes[42][
-    `${exports.Lido.WSTETHADDR[42]}${exports.Lido.USDT[42]}0`
-] = {
+exports.Routes[42][`${exports.Lido.wstETH[42]}${exports.Lido.USDT[42]}0`] = {
     name: 'wstETH/USDT-SwapExactIn',
     tokenInDecimals: 18,
     tokenOutDecimals: 6,
     tokenAddresses: [
-        exports.Lido.WSTETHADDR[42],
+        exports.Lido.wstETH[42],
         exports.Lido.WETH[42],
         exports.Lido.USDC[42],
         exports.Lido.USDT[42],
@@ -838,14 +831,12 @@ exports.Routes[42][
         },
     ],
 };
-exports.Routes[42][
-    `${exports.Lido.WSTETHADDR[42]}${exports.Lido.USDT[42]}1`
-] = {
+exports.Routes[42][`${exports.Lido.wstETH[42]}${exports.Lido.USDT[42]}1`] = {
     name: 'wstETH/USDT-SwapExactOut',
     tokenInDecimals: 18,
     tokenOutDecimals: 6,
     tokenAddresses: [
-        exports.Lido.WSTETHADDR[42],
+        exports.Lido.wstETH[42],
         exports.Lido.WETH[42],
         exports.Lido.USDC[42],
         exports.Lido.USDT[42],
@@ -878,30 +869,30 @@ exports.Routes[42][
 function isLidoStableSwap(chainId, tokenIn, tokenOut) {
     if (!exports.Lido.Networks.includes(chainId)) return false;
     if (
-        (tokenIn === exports.Lido.WSTETHADDR[chainId] &&
+        (tokenIn === exports.Lido.wstETH[chainId] &&
             tokenOut === exports.Lido.DAI[chainId]) ||
-        (tokenIn === exports.Lido.WSTETHADDR[chainId] &&
+        (tokenIn === exports.Lido.wstETH[chainId] &&
             tokenOut === exports.Lido.USDC[chainId]) ||
-        (tokenIn === exports.Lido.WSTETHADDR[chainId] &&
+        (tokenIn === exports.Lido.wstETH[chainId] &&
             tokenOut === exports.Lido.USDT[chainId]) ||
         (tokenIn === exports.Lido.DAI[chainId] &&
-            tokenOut === exports.Lido.WSTETHADDR[chainId]) ||
+            tokenOut === exports.Lido.wstETH[chainId]) ||
         (tokenIn === exports.Lido.USDC[chainId] &&
-            tokenOut === exports.Lido.WSTETHADDR[chainId]) ||
+            tokenOut === exports.Lido.wstETH[chainId]) ||
         (tokenIn === exports.Lido.USDT[chainId] &&
-            tokenOut === exports.Lido.WSTETHADDR[chainId]) ||
-        (tokenIn === exports.Lido.STETH[chainId] &&
+            tokenOut === exports.Lido.wstETH[chainId]) ||
+        (tokenIn === exports.Lido.stETH[chainId] &&
             tokenOut === exports.Lido.DAI[chainId]) ||
-        (tokenIn === exports.Lido.STETH[chainId] &&
+        (tokenIn === exports.Lido.stETH[chainId] &&
             tokenOut === exports.Lido.USDC[chainId]) ||
-        (tokenIn === exports.Lido.STETH[chainId] &&
+        (tokenIn === exports.Lido.stETH[chainId] &&
             tokenOut === exports.Lido.USDT[chainId]) ||
         (tokenIn === exports.Lido.DAI[chainId] &&
-            tokenOut === exports.Lido.STETH[chainId]) ||
+            tokenOut === exports.Lido.stETH[chainId]) ||
         (tokenIn === exports.Lido.USDC[chainId] &&
-            tokenOut === exports.Lido.STETH[chainId]) ||
+            tokenOut === exports.Lido.stETH[chainId]) ||
         (tokenIn === exports.Lido.USDT[chainId] &&
-            tokenOut === exports.Lido.STETH[chainId])
+            tokenOut === exports.Lido.stETH[chainId])
     )
         return true;
     else return false;
@@ -910,11 +901,10 @@ exports.isLidoStableSwap = isLidoStableSwap;
 // Uses Vault queryBatchSwap to get return amount for swap
 function queryBatchSwap(swapType, swaps, assets, provider) {
     return __awaiter(this, void 0, void 0, function*() {
-        const vaultAbi = require('../../abi/Vault.json');
         const vaultAddr = '0xBA12222222228d8Ba445958a75a0704d566BF2C8';
         const vaultContract = new contracts_1.Contract(
             vaultAddr,
-            vaultAbi,
+            Vault_json_1.default,
             provider
         );
         const funds = {
@@ -980,6 +970,19 @@ function calculateMarketSp(swapType, swaps, assets, pools) {
     // SP for Path is product of all
     return spotPrices.reduce((a, b) => a.times(b));
 }
+function getRate(provider, chainId) {
+    return __awaiter(this, void 0, void 0, function*() {
+        // Call stEthPerToken or tokensPerStETH to get the scaling factors in each direction.
+        const wstETHContract = new contracts_1.Contract(
+            exports.Lido.wstETH[chainId],
+            wstETH_json_1.default,
+            provider
+        );
+        const rate = yield wstETHContract.tokensPerStEth();
+        return bmath_1.scale(bmath_1.bnum(rate.toString()), -18);
+    });
+}
+exports.getRate = getRate;
 /*
 Used when SOR doesn't support paths with more than one hop.
 Enables swapping of stables <> wstETH via WETH/DAI pool which has good liquidity.
@@ -997,12 +1000,12 @@ function getLidoStaticSwaps(
         // Check for stETH tokens and convert to use wstETH for routing
         let isWrappingIn,
             isWrappingOut = false;
-        if (tokenIn === exports.Lido.STETH[chainId]) {
-            tokenIn = exports.Lido.WSTETHADDR[chainId];
+        if (tokenIn === exports.Lido.stETH[chainId]) {
+            tokenIn = exports.Lido.wstETH[chainId];
             isWrappingIn = true;
         }
-        if (tokenOut === exports.Lido.STETH[chainId]) {
-            tokenOut = exports.Lido.WSTETHADDR[chainId];
+        if (tokenOut === exports.Lido.stETH[chainId]) {
+            tokenOut = exports.Lido.wstETH[chainId];
             isWrappingOut = true;
         }
         let swapInfo = {
@@ -1021,19 +1024,17 @@ function getLidoStaticSwaps(
         swapInfo.tokenAddresses = staticRoute.tokenAddresses;
         swapInfo.swaps = staticRoute.swaps;
         if (swapType === types_1.SwapTypes.SwapExactIn)
-            swapInfo.swapAmount = bmath_1.scale(
-                swapAmount,
-                staticRoute.tokenInDecimals
-            );
+            swapInfo.swapAmount = bmath_1
+                .scale(swapAmount, staticRoute.tokenInDecimals)
+                .dp(0);
         else
-            swapInfo.swapAmount = bmath_1.scale(
-                swapAmount,
-                staticRoute.tokenOutDecimals
-            );
+            swapInfo.swapAmount = bmath_1
+                .scale(swapAmount, staticRoute.tokenOutDecimals)
+                .dp(0);
         swapInfo.swaps[0].amount = swapInfo.swapAmount.toString();
-        if (isWrappingIn) swapInfo.tokenIn = exports.Lido.STETH[chainId];
+        if (isWrappingIn) swapInfo.tokenIn = exports.Lido.stETH[chainId];
         else swapInfo.tokenIn = tokenIn;
-        if (isWrappingOut) swapInfo.tokenOut = exports.Lido.STETH[chainId];
+        if (isWrappingOut) swapInfo.tokenOut = exports.Lido.stETH[chainId];
         else swapInfo.tokenOut = tokenOut;
         // Calculate SP as product of all pool SP in path
         swapInfo.marketSp = calculateMarketSp(
