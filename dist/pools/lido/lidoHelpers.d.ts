@@ -47,7 +47,7 @@ export declare const Routes: {
     1: {};
     42: {};
 };
-export declare function isLidoSwap(
+export declare function isLidoStableSwap(
     chainId: number,
     tokenIn: string,
     tokenOut: string

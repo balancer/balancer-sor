@@ -874,18 +874,39 @@ exports.Routes[42][
         },
     ],
 };
-function isLidoSwap(chainId, tokenIn, tokenOut) {
+// Only want static routes for Lido <> Stable
+function isLidoStableSwap(chainId, tokenIn, tokenOut) {
     if (!exports.Lido.Networks.includes(chainId)) return false;
     if (
-        tokenIn === exports.Lido.WSTETHADDR[chainId] ||
-        tokenOut === exports.Lido.WSTETHADDR[chainId] ||
-        tokenIn === exports.Lido.STETH[chainId] ||
-        tokenOut === exports.Lido.STETH[chainId]
+        (tokenIn === exports.Lido.WSTETHADDR[chainId] &&
+            tokenOut === exports.Lido.DAI[chainId]) ||
+        (tokenIn === exports.Lido.WSTETHADDR[chainId] &&
+            tokenOut === exports.Lido.USDC[chainId]) ||
+        (tokenIn === exports.Lido.WSTETHADDR[chainId] &&
+            tokenOut === exports.Lido.USDT[chainId]) ||
+        (tokenIn === exports.Lido.DAI[chainId] &&
+            tokenOut === exports.Lido.WSTETHADDR[chainId]) ||
+        (tokenIn === exports.Lido.USDC[chainId] &&
+            tokenOut === exports.Lido.WSTETHADDR[chainId]) ||
+        (tokenIn === exports.Lido.USDT[chainId] &&
+            tokenOut === exports.Lido.WSTETHADDR[chainId]) ||
+        (tokenIn === exports.Lido.STETH[chainId] &&
+            tokenOut === exports.Lido.DAI[chainId]) ||
+        (tokenIn === exports.Lido.STETH[chainId] &&
+            tokenOut === exports.Lido.USDC[chainId]) ||
+        (tokenIn === exports.Lido.STETH[chainId] &&
+            tokenOut === exports.Lido.USDT[chainId]) ||
+        (tokenIn === exports.Lido.DAI[chainId] &&
+            tokenOut === exports.Lido.STETH[chainId]) ||
+        (tokenIn === exports.Lido.USDC[chainId] &&
+            tokenOut === exports.Lido.STETH[chainId]) ||
+        (tokenIn === exports.Lido.USDT[chainId] &&
+            tokenOut === exports.Lido.STETH[chainId])
     )
         return true;
     else return false;
 }
-exports.isLidoSwap = isLidoSwap;
+exports.isLidoStableSwap = isLidoStableSwap;
 // Uses Vault queryBatchSwap to get return amount for swap
 function queryBatchSwap(swapType, swaps, assets, provider) {
     return __awaiter(this, void 0, void 0, function*() {
