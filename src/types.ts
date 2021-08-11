@@ -106,6 +106,7 @@ export interface SwapInfo {
     tokenAddresses: string[];
     swaps: SwapV2[];
     swapAmount: BigNumber;
+    swapAmountWithRate?: BigNumber; // Used with stETH/wstETH
     returnAmount: BigNumber;
     returnAmountConsideringFees: BigNumber;
     tokenIn: string;

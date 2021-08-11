@@ -818,7 +818,8 @@ Routes[42][`${Lido.WSTETHADDR[42]}${Lido.USDT[42]}1`] = {
     ],
 };
 
-export function isLidoSwap(
+// Only want static routes for Lido <> Stable
+export function isLidoStableSwap(
     chainId: number,
     tokenIn: string,
     tokenOut: string
@@ -826,10 +827,24 @@ export function isLidoSwap(
     if (!Lido.Networks.includes(chainId)) return false;
 
     if (
-        tokenIn === Lido.WSTETHADDR[chainId] ||
-        tokenOut === Lido.WSTETHADDR[chainId] ||
-        tokenIn === Lido.STETH[chainId] ||
-        tokenOut === Lido.STETH[chainId]
+        (tokenIn === Lido.WSTETHADDR[chainId] &&
+            tokenOut === Lido.DAI[chainId]) ||
+        (tokenIn === Lido.WSTETHADDR[chainId] &&
+            tokenOut === Lido.USDC[chainId]) ||
+        (tokenIn === Lido.WSTETHADDR[chainId] &&
+            tokenOut === Lido.USDT[chainId]) ||
+        (tokenIn === Lido.DAI[chainId] &&
+            tokenOut === Lido.WSTETHADDR[chainId]) ||
+        (tokenIn === Lido.USDC[chainId] &&
+            tokenOut === Lido.WSTETHADDR[chainId]) ||
+        (tokenIn === Lido.USDT[chainId] &&
+            tokenOut === Lido.WSTETHADDR[chainId]) ||
+        (tokenIn === Lido.STETH[chainId] && tokenOut === Lido.DAI[chainId]) ||
+        (tokenIn === Lido.STETH[chainId] && tokenOut === Lido.USDC[chainId]) ||
+        (tokenIn === Lido.STETH[chainId] && tokenOut === Lido.USDT[chainId]) ||
+        (tokenIn === Lido.DAI[chainId] && tokenOut === Lido.STETH[chainId]) ||
+        (tokenIn === Lido.USDC[chainId] && tokenOut === Lido.STETH[chainId]) ||
+        (tokenIn === Lido.USDT[chainId] && tokenOut === Lido.STETH[chainId])
     )
         return true;
     else return false;

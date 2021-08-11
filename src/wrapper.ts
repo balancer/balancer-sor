@@ -17,8 +17,12 @@ import {
     SwapOptions,
     PoolFilter,
 } from './types';
-import { Lido, getLidoStaticSwaps, isLidoSwap } from './pools/lido/lidoHelpers';
-import { ZERO_ADDRESS } from './index';
+import {
+    Lido,
+    getLidoStaticSwaps,
+    isLidoStableSwap,
+} from './pools/lido/lidoHelpers';
+import { ZERO_ADDRESS, scale } from './index';
 
 export class SOR {
     MULTIADDR: { [chainId: number]: string } = {
@@ -232,6 +236,7 @@ export class SOR {
             tokenAddresses: [],
             swaps: [],
             swapAmount: ZERO,
+            swapAmountWithRate: ZERO,
             tokenIn: '',
             tokenOut: '',
             returnAmount: ZERO,
@@ -255,6 +260,20 @@ export class SOR {
             wrapOptions.isEthSwap = true;
         }
 
+        let isStethIn = false;
+        let isStethOut = false;
+        let tokenInForSwaps = tokenIn;
+        let tokenOutForSwaps = tokenOut;
+        if (tokenIn === Lido.STETH[this.chainId]) {
+            isStethIn = true;
+            tokenInForSwaps = Lido.WSTETHADDR[this.chainId];
+        }
+
+        if (tokenOut === Lido.STETH[this.chainId]) {
+            isStethOut = true;
+            tokenOutForSwaps = Lido.WSTETHADDR[this.chainId];
+        }
+
         if (this.finishedFetchingOnChain) {
             let pools = JSON.parse(JSON.stringify(this.onChainBalanceCache));
             if (!(swapOptions.poolTypeFilter === PoolFilter.All))
@@ -262,31 +281,83 @@ export class SOR {
                     p => p.poolType === swapOptions.poolTypeFilter
                 );
 
-            if (
-                !wrapOptions.isEthSwap &&
-                isLidoSwap(this.chainId, tokenIn, tokenOut)
-            )
-                return await getLidoStaticSwaps(
-                    pools,
-                    this.chainId,
-                    tokenIn,
-                    tokenOut,
-                    swapType,
-                    swapAmt,
-                    this.provider
+            let swapAmountWithRate = swapAmt;
+            let rate = bnum(1);
+            if (isStethIn || isStethOut) {
+                const lidoPoolIndex = pools.pools.findIndex(
+                    t => t.id === Lido.StaticPools.wstEthWeth[this.chainId]
+                );
+                if (lidoPoolIndex < 0) return swapInfo;
+
+                const wstEthIndex = pools.pools[lidoPoolIndex].tokens.findIndex(
+                    t => Lido.WSTETHADDR[this.chainId] === t.address
+                );
+                rate = bnum(
+                    pools.pools[lidoPoolIndex].tokens[wstEthIndex].priceRate
                 );
 
-            // All Pools with OnChain Balances is already fetched so use that
-            swapInfo = await this.processSwaps(
-                tokenIn,
-                tokenOut,
-                swapType,
-                swapAmt,
-                pools,
-                wrapOptions,
-                true,
-                swapOptions.timestamp
-            );
+                // console.log(`!!!!!!! RATE: ${rate.toString()}`);
+            }
+
+            if (
+                (isStethIn && swapType === SwapTypes.SwapExactIn) ||
+                (isStethOut && swapType === SwapTypes.SwapExactOut)
+            ) {
+                // console.log(`!!!!!!! rating SwapAmt`);
+                swapAmountWithRate = swapAmt.times(rate);
+            }
+
+            if (isLidoStableSwap(this.chainId, tokenIn, tokenOut)) {
+                // console.log(`STABLE STATIC? ${swapAmountWithRate.toString()}`)
+                swapInfo = await getLidoStaticSwaps(
+                    pools,
+                    this.chainId,
+                    tokenInForSwaps,
+                    tokenOutForSwaps,
+                    swapType,
+                    swapAmountWithRate,
+                    this.provider
+                );
+            } else
+                swapInfo = await this.processSwaps(
+                    tokenInForSwaps,
+                    tokenOutForSwaps,
+                    swapType,
+                    swapAmountWithRate,
+                    pools,
+                    wrapOptions,
+                    true,
+                    swapOptions.timestamp
+                );
+
+            if (isStethIn || isStethOut) {
+                swapInfo.tokenIn = tokenIn;
+                swapInfo.tokenOut = tokenOut;
+            }
+
+            if (
+                (isStethIn && swapType === SwapTypes.SwapExactIn) ||
+                (isStethOut && swapType === SwapTypes.SwapExactOut)
+            ) {
+                swapInfo.swapAmount = scale(swapAmt, 18);
+                swapInfo.swapAmountWithRate = scale(swapAmountWithRate, 18); // Always 18 because wstETH
+            } else {
+                swapInfo.swapAmountWithRate = swapInfo.swapAmount;
+            }
+            // console.log(`SwapAmount: ${swapInfo.swapAmount.toString()}`);
+            // console.log(`SwapAmountRate: ${swapInfo.swapAmountWithRate.toString()}`);
+
+            if (
+                (isStethIn && swapType === SwapTypes.SwapExactOut) ||
+                (isStethOut && swapType === SwapTypes.SwapExactIn)
+            ) {
+                // console.log(`!!!!!!! RATE RETURN AMOUNT: ${swapInfo.returnAmount.toString()}`);
+                swapInfo.returnAmount = swapInfo.returnAmount.div(rate).dp(0);
+                // console.log(`!!!!!!! RATE RETURN AMOUNT NEW: ${swapInfo.returnAmount.toString()}`);
+                swapInfo.returnAmountConsideringFees = swapInfo.returnAmountConsideringFees
+                    .div(rate)
+                    .dp(0);
+            }
         }
 
         return swapInfo;
