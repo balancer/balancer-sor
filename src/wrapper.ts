@@ -264,14 +264,14 @@ export class SOR {
         let isStethOut = false;
         let tokenInForSwaps = tokenIn;
         let tokenOutForSwaps = tokenOut;
-        if (tokenIn === Lido.STETH[this.chainId]) {
+        if (tokenIn === Lido.stETH[this.chainId]) {
             isStethIn = true;
-            tokenInForSwaps = Lido.WSTETHADDR[this.chainId];
+            tokenInForSwaps = Lido.wstETH[this.chainId];
         }
 
-        if (tokenOut === Lido.STETH[this.chainId]) {
+        if (tokenOut === Lido.stETH[this.chainId]) {
             isStethOut = true;
-            tokenOutForSwaps = Lido.WSTETHADDR[this.chainId];
+            tokenOutForSwaps = Lido.wstETH[this.chainId];
         }
 
         if (this.finishedFetchingOnChain) {
@@ -290,7 +290,7 @@ export class SOR {
                 if (lidoPoolIndex < 0) return swapInfo;
 
                 const wstEthIndex = pools.pools[lidoPoolIndex].tokens.findIndex(
-                    t => Lido.WSTETHADDR[this.chainId] === t.address
+                    t => Lido.wstETH[this.chainId] === t.address
                 );
                 rate = bnum(
                     pools.pools[lidoPoolIndex].tokens[wstEthIndex].priceRate

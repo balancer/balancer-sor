@@ -10,7 +10,8 @@ import {
     bnum,
     scale,
     getLidoStaticSwaps,
-    isLidoSwap,
+    isLidoStableSwap,
+    ZERO_ADDRESS,
 } from '../src';
 
 const gasPrice = bnum('30000000000');
@@ -23,13 +24,12 @@ const USDC = Lido.USDC[chainId];
 const DAI = Lido.DAI[chainId];
 const USDT = Lido.USDT[chainId];
 const WETH = Lido.WETH[chainId];
-const STETH = Lido.STETH[chainId];
-const wstETH = Lido.WSTETHADDR[chainId];
+const stETH = Lido.stETH[chainId];
+const wstETH = Lido.wstETH[chainId];
 const poolStaBal = Lido.StaticPools.staBal[chainId];
 const poolWethDai = Lido.StaticPools.wethDai[chainId];
 const poolLido = Lido.StaticPools.wstEthWeth[chainId];
 
-// This doesn't matter as Lido routes should be static
 const poolsFromFile: SubGraphPoolsBase = require('./testData/lido/staticPools.json');
 
 // npx mocha -r ts-node/register test/lido.spec.ts
@@ -67,19 +67,22 @@ describe(`Tests for Lido USD routes.`, () => {
     });
 
     context('Handle stETH as input/output', async () => {
-        it(`Test for Lido Swap`, () => {
-            expect(isLidoSwap(chainId, DAI, USDC)).to.be.false;
-            expect(isLidoSwap(7, DAI, STETH)).to.be.false;
-            expect(isLidoSwap(chainId, DAI, STETH)).to.be.true;
-            expect(isLidoSwap(chainId, STETH, USDC)).to.be.true;
-            expect(isLidoSwap(chainId, STETH, wstETH)).to.be.true;
-            expect(isLidoSwap(chainId, USDT, wstETH)).to.be.true;
-            expect(isLidoSwap(chainId, wstETH, DAI)).to.be.true;
+        it(`Test for Lido Stable Swap`, () => {
+            expect(isLidoStableSwap(chainId, DAI, USDC)).to.be.false;
+            expect(isLidoStableSwap(chainId, stETH, ZERO_ADDRESS)).to.be.false;
+            expect(isLidoStableSwap(chainId, wstETH, ZERO_ADDRESS)).to.be.false;
+            expect(isLidoStableSwap(chainId, stETH, wstETH)).to.be.false;
+            expect(isLidoStableSwap(7, DAI, stETH)).to.be.false;
+            expect(isLidoStableSwap(chainId, DAI, stETH)).to.be.true;
+            expect(isLidoStableSwap(chainId, stETH, USDC)).to.be.true;
+            expect(isLidoStableSwap(chainId, USDT, wstETH)).to.be.true;
+            expect(isLidoStableSwap(chainId, wstETH, DAI)).to.be.true;
         });
 
-        it(`stETH swap should be same as wstETH, stETH In`, async () => {
+        it(`stETH swap should be same as wstETH with priceRate allowance, SwapExactIn, stETH In`, async () => {
             const swapType = SwapTypes.SwapExactIn;
             const swapAmt = bnum('1');
+            const priceRate = bnum('1.5'); // This is price rate of wstETH taken from wstETH/WETH pool
 
             const sor = new SOR(
                 provider,
@@ -92,40 +95,61 @@ describe(`Tests for Lido USD routes.`, () => {
             const fetchSuccess = await sor.fetchPools(false);
 
             const swapInfostEth: SwapInfo = await sor.getSwaps(
-                STETH,
+                stETH,
                 DAI,
                 swapType,
                 swapAmt
             );
+
+            // Not sure why but if we don't make a copy the result gets overwritten by next call.
+            const testSwapInfo = JSON.parse(JSON.stringify(swapInfostEth));
 
             const swapInfowstEth: SwapInfo = await sor.getSwaps(
                 wstETH,
                 DAI,
                 swapType,
-                swapAmt
+                swapAmt.times(priceRate)
             );
 
-            expect(swapInfostEth.tokenAddresses).to.deep.eq(
+            // Swaps for both should be the same
+            expect(testSwapInfo.tokenAddresses).to.deep.eq(
                 swapInfowstEth.tokenAddresses
             );
-            expect(swapInfostEth.swaps).to.deep.eq(swapInfowstEth.swaps);
-            // This is pulled from mainnet so needs valid routes
-            expect(swapInfostEth.returnAmount.toString()).to.eq(
-                swapInfowstEth.returnAmount.toString()
-            );
-            expect(swapInfostEth.returnAmountConsideringFees.toString()).to.eq(
-                swapInfowstEth.returnAmountConsideringFees.toString()
-            );
+            expect(testSwapInfo.swaps).to.deep.eq(swapInfowstEth.swaps);
             // TokenIn/Out should be original
-            expect(swapInfostEth.tokenIn).to.eq(STETH);
-            expect(swapInfostEth.tokenOut).to.eq(DAI);
+            expect(testSwapInfo.tokenIn).to.eq(stETH);
+            expect(testSwapInfo.tokenOut).to.eq(DAI);
             expect(swapInfowstEth.tokenIn).to.eq(wstETH);
             expect(swapInfowstEth.tokenOut).to.eq(DAI);
+            // SwapAmount should be original amount scaled
+            expect(testSwapInfo.swapAmount.toString()).to.eq(
+                scale(swapAmt, 18).toString()
+            );
+            // The swapAmountForSwaps for stETH should be using exchangeRate allowance, i.e. same as wstETH amount
+            expect(testSwapInfo.swapAmountForSwaps.toString()).to.eq(
+                swapInfowstEth.swapAmount.toString()
+            );
+            // These should be same as no rate difference
+            expect(swapInfowstEth.swapAmount.toString()).to.eq(
+                swapInfowstEth.swapAmountForSwaps.toString()
+            );
+            // This is pulled from mainnet so needs valid routes - will be 0 if not
+            expect(testSwapInfo.returnAmount.toString()).to.eq(
+                swapInfowstEth.returnAmount.toString()
+            );
+            expect(testSwapInfo.returnAmountConsideringFees.toString()).to.eq(
+                swapInfowstEth.returnAmountConsideringFees.toString()
+            );
+            // These should be same as no rate difference
+            expect(testSwapInfo.returnAmountForSwaps.toString()).to.eq(
+                testSwapInfo.returnAmount.toString()
+            );
         });
 
-        it(`stETH swap should be same as wstETH, stETH Out`, async () => {
+        it(`stETH swap should be same as wstETH with priceRate allowance, SwapExactIn, stETH Out`, async () => {
             const swapType = SwapTypes.SwapExactIn;
             const swapAmt = bnum('1');
+            const priceRate = bnum('1.5'); // This is price rate of wstETH taken from wstETH/WETH pool
 
             const sor = new SOR(
                 provider,
@@ -139,10 +163,13 @@ describe(`Tests for Lido USD routes.`, () => {
 
             const swapInfostEth: SwapInfo = await sor.getSwaps(
                 USDT,
-                STETH,
+                stETH,
                 swapType,
                 swapAmt
             );
+
+            // Not sure why but if we don't make a copy the result gets overwritten by next call.
+            const testSwapInfo = JSON.parse(JSON.stringify(swapInfostEth));
 
             const swapInfowstEth: SwapInfo = await sor.getSwaps(
                 USDT,
@@ -151,22 +178,175 @@ describe(`Tests for Lido USD routes.`, () => {
                 swapAmt
             );
 
-            expect(swapInfostEth.tokenAddresses).to.deep.eq(
+            // Swaps for both should be same
+            expect(testSwapInfo.tokenAddresses).to.deep.eq(
                 swapInfowstEth.tokenAddresses
             );
-            expect(swapInfostEth.swaps).to.deep.eq(swapInfowstEth.swaps);
-            // This is pulled from mainnet so needs valid routes
-            expect(swapInfostEth.returnAmount.toString()).to.eq(
-                swapInfowstEth.returnAmount.toString()
-            );
-            expect(swapInfostEth.returnAmountConsideringFees.toString()).to.eq(
-                swapInfowstEth.returnAmountConsideringFees.toString()
-            );
+            expect(testSwapInfo.swaps).to.deep.eq(swapInfowstEth.swaps);
             // TokenIn/Out should be original
-            expect(swapInfostEth.tokenIn).to.eq(USDT);
-            expect(swapInfostEth.tokenOut).to.eq(STETH);
+            expect(testSwapInfo.tokenIn).to.eq(USDT);
+            expect(testSwapInfo.tokenOut).to.eq(stETH);
             expect(swapInfowstEth.tokenIn).to.eq(USDT);
             expect(swapInfowstEth.tokenOut).to.eq(wstETH);
+            // SwapAmount should be original amount scaled
+            expect(testSwapInfo.swapAmount.toString()).to.eq(
+                scale(swapAmt, 6).toString()
+            );
+            // These should be same as no rate difference for input token
+            expect(testSwapInfo.swapAmountForSwaps.toString()).to.eq(
+                testSwapInfo.swapAmount.toString()
+            );
+            // These should be same as no rate difference
+            expect(swapInfowstEth.swapAmount.toString()).to.eq(
+                swapInfowstEth.swapAmountForSwaps.toString()
+            );
+            // This is pulled from mainnet so needs valid routes - will be 0 if not
+            // returnAmount for stETH should be using exchangeRate
+            expect(testSwapInfo.returnAmount.toString()).to.eq(
+                swapInfowstEth.returnAmount.times(priceRate).toString()
+            );
+            expect(testSwapInfo.returnAmountConsideringFees.toString()).to.eq(
+                swapInfowstEth.returnAmountConsideringFees
+                    .times(priceRate)
+                    .toString()
+            );
+            // return amounts for swaps should be same
+            expect(testSwapInfo.returnAmountForSwaps.toString()).to.eq(
+                swapInfowstEth.returnAmount.toString()
+            );
+        });
+
+        it(`stETH swap should be same as wstETH with priceRate allowance, SwapExactOut, stETH In`, async () => {
+            const swapType = SwapTypes.SwapExactOut;
+            const swapAmt = bnum('1');
+            const priceRate = bnum('1.5'); // This is price rate of wstETH taken from wstETH/WETH pool
+
+            const sor = new SOR(
+                provider,
+                gasPrice,
+                maxPools,
+                chainId,
+                poolsFromFile
+            );
+
+            const fetchSuccess = await sor.fetchPools(false);
+
+            const swapInfostEth: SwapInfo = await sor.getSwaps(
+                stETH,
+                DAI,
+                swapType,
+                swapAmt
+            );
+
+            // Not sure why but if we don't make a copy the result gets overwritten by next call.
+            const testSwapInfo = JSON.parse(JSON.stringify(swapInfostEth));
+
+            const swapInfowstEth: SwapInfo = await sor.getSwaps(
+                wstETH,
+                DAI,
+                swapType,
+                swapAmt
+            );
+
+            // Swaps for both should be the same
+            expect(testSwapInfo.tokenAddresses).to.deep.eq(
+                swapInfowstEth.tokenAddresses
+            );
+            expect(testSwapInfo.swaps).to.deep.eq(swapInfowstEth.swaps);
+            // TokenIn/Out should be original
+            expect(testSwapInfo.tokenIn).to.eq(stETH);
+            expect(testSwapInfo.tokenOut).to.eq(DAI);
+            expect(swapInfowstEth.tokenIn).to.eq(wstETH);
+            expect(swapInfowstEth.tokenOut).to.eq(DAI);
+            // SwapAmount should be original amount scaled
+            expect(testSwapInfo.swapAmount.toString()).to.eq(
+                scale(swapAmt, 18).toString()
+            );
+            expect(testSwapInfo.swapAmount.toString()).to.eq(
+                swapInfowstEth.swapAmount.toString()
+            );
+            // The swapAmountForSwaps for both should be same as using DAI with no rate difference
+            expect(testSwapInfo.swapAmountForSwaps.toString()).to.eq(
+                testSwapInfo.swapAmount.toString()
+            );
+            // This is pulled from mainnet so needs valid routes - will be 0 if not
+            // returnAmount (amount of input stETH) should be using exchangeRate
+            expect(testSwapInfo.returnAmount.toString()).to.eq(
+                swapInfowstEth.returnAmount.times(priceRate).toString()
+            );
+            expect(testSwapInfo.returnAmountConsideringFees.toString()).to.eq(
+                swapInfowstEth.returnAmountConsideringFees
+                    .times(priceRate)
+                    .toString()
+            );
+        });
+
+        it(`stETH swap should be same as wstETH with priceRate allowance, SwapExactOut, stETH Out`, async () => {
+            const swapType = SwapTypes.SwapExactOut;
+            const swapAmt = bnum('1');
+            const priceRate = bnum('1.5'); // This is price rate of wstETH taken from wstETH/WETH pool
+
+            const sor = new SOR(
+                provider,
+                gasPrice,
+                maxPools,
+                chainId,
+                poolsFromFile
+            );
+
+            const fetchSuccess = await sor.fetchPools(false);
+
+            const swapInfostEth: SwapInfo = await sor.getSwaps(
+                USDT,
+                stETH,
+                swapType,
+                swapAmt
+            );
+
+            // Not sure why but if we don't make a copy the result gets overwritten by next call.
+            const testSwapInfo = JSON.parse(JSON.stringify(swapInfostEth));
+
+            const swapInfowstEth: SwapInfo = await sor.getSwaps(
+                USDT,
+                wstETH,
+                swapType,
+                swapAmt.times(priceRate)
+            );
+
+            // Swaps for both should be same
+            expect(testSwapInfo.tokenAddresses).to.deep.eq(
+                swapInfowstEth.tokenAddresses
+            );
+            expect(testSwapInfo.swaps).to.deep.eq(swapInfowstEth.swaps);
+            // TokenIn/Out should be original
+            expect(testSwapInfo.tokenIn).to.eq(USDT);
+            expect(testSwapInfo.tokenOut).to.eq(stETH);
+            expect(swapInfowstEth.tokenIn).to.eq(USDT);
+            expect(swapInfowstEth.tokenOut).to.eq(wstETH);
+            // SwapAmount should be original amount scaled
+            expect(testSwapInfo.swapAmount.toString()).to.eq(
+                scale(swapAmt, 18).toString()
+            );
+            // The swapAmountForSwaps for stETH should be using exchangeRate allowance, i.e. same as wstETH amount
+            expect(testSwapInfo.swapAmountForSwaps.toString()).to.eq(
+                swapInfowstEth.swapAmount.toString()
+            );
+            // These should be same as no rate difference
+            expect(swapInfowstEth.swapAmount.toString()).to.eq(
+                swapInfowstEth.swapAmountForSwaps.toString()
+            );
+            // This is pulled from mainnet so needs valid routes - will be 0 if not
+            // returnAmount is amount of USDT in so no rate
+            expect(testSwapInfo.returnAmount.toString()).to.eq(
+                swapInfowstEth.returnAmount.toString()
+            );
+            expect(testSwapInfo.returnAmountConsideringFees.toString()).to.eq(
+                swapInfowstEth.returnAmountConsideringFees.toString()
+            );
+            // These should be same as no rate difference
+            expect(testSwapInfo.returnAmountForSwaps.toString()).to.eq(
+                testSwapInfo.returnAmount.toString()
+            );
         });
     });
 
