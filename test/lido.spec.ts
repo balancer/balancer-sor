@@ -13,6 +13,7 @@ import {
     isLidoStableSwap,
     ZERO_ADDRESS,
 } from '../src';
+import { getRate } from '../src/pools/lido/lidoHelpers';
 
 const gasPrice = bnum('30000000000');
 const maxPools = 4;
@@ -82,7 +83,7 @@ describe(`Tests for Lido USD routes.`, () => {
         it(`stETH swap should be same as wstETH with priceRate allowance, SwapExactIn, stETH In`, async () => {
             const swapType = SwapTypes.SwapExactIn;
             const swapAmt = bnum('1');
-            const priceRate = bnum('1.5'); // This is price rate of wstETH taken from wstETH/WETH pool
+            const priceRate = await getRate(provider, chainId);
 
             const sor = new SOR(
                 provider,
@@ -284,7 +285,7 @@ describe(`Tests for Lido USD routes.`, () => {
         it(`stETH swap should be same as wstETH with priceRate allowance, SwapExactOut, stETH Out`, async () => {
             const swapType = SwapTypes.SwapExactOut;
             const swapAmt = bnum('1');
-            const priceRate = bnum('1.5'); // This is price rate of wstETH taken from wstETH/WETH pool
+            const priceRate = await getRate(provider, chainId);
 
             const sor = new SOR(
                 provider,

@@ -606,7 +606,7 @@ export function formatSwaps(
 
         // We need to account for any rounding losses by adding dust to first path
         let swapAmountScaled = scale(swapAmount, tokenInDecimals);
-        let dust = swapAmountScaled.minus(totalSwapAmount);
+        let dust = swapAmountScaled.minus(totalSwapAmount).dp(0, 0);
         if (dust.gt(0))
             swapsV2[0].amount = bnum(swapsV2[0].amount)
                 .plus(dust)
@@ -671,7 +671,7 @@ export function formatSwaps(
 
         // We need to account for any rounding losses by adding dust to first path
         let swapAmountScaled = scale(swapAmount, tokenOutDecimals);
-        let dust = swapAmountScaled.minus(totalSwapAmount);
+        let dust = swapAmountScaled.minus(totalSwapAmount).dp(0, 0);
         if (dust.gt(0))
             swapsV2[0].amount = bnum(swapsV2[0].amount)
                 .plus(dust)

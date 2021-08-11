@@ -438,12 +438,12 @@ async function makeRelayerTrade(
     } else {
         swapInfo.tokenAddresses.forEach((token, i) => {
             if (token.toLowerCase() === tokenIn.toLowerCase()) {
-                limits[i] = swapInfo.returnAmountForSwaps.toString();
-            } else if (token.toLowerCase() === tokenOut.toLowerCase()) {
-                limits[i] = swapInfo.swapAmountForSwaps
-                    .times(-0.99)
+                limits[i] = swapInfo.returnAmountForSwaps
+                    .times(1.05)
                     .toString()
                     .split('.')[0];
+            } else if (token.toLowerCase() === tokenOut.toLowerCase()) {
+                limits[i] = swapInfo.swapAmountForSwaps.times(-1).toString();
             } else {
                 limits[i] = '0';
             }
@@ -488,10 +488,10 @@ async function simpleSwap() {
     // const poolsSource = require('../testData/testPools/gusdBug.json');
     // Update pools list with most recent onchain balances
     const queryOnChain = true;
-    const tokenIn = ADDRESSES[networkId].BAL;
+    const tokenIn = ADDRESSES[networkId].WETH;
     const tokenOut = ADDRESSES[networkId].STETH;
     const swapType = SwapTypes.SwapExactIn;
-    const swapAmount = new BigNumber(6.17); // In normalized format, i.e. 1USDC = 1
+    const swapAmount = new BigNumber(0.000157); // In normalized format, i.e. 1USDC = 1
     const executeTrade = true;
 
     const provider = new JsonRpcProvider(PROVIDER_URLS[networkId]);
