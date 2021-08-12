@@ -317,10 +317,8 @@ export class SOR {
                     swapOptions.timestamp
                 );
 
-            if (isStethIn || isStethOut) {
-                swapInfo.tokenIn = tokenIn;
-                swapInfo.tokenOut = tokenOut;
-            }
+            if (isStethIn) swapInfo.tokenIn = tokenIn;
+            if (isStethOut) swapInfo.tokenOut = tokenOut;
 
             if (
                 (isStethIn && swapType === SwapTypes.SwapExactIn) ||
@@ -331,10 +329,9 @@ export class SOR {
                     0
                 ); // Always 18 because wstETH
             } else {
+                // Should be same when standard tokens
                 swapInfo.swapAmountForSwaps = swapInfo.swapAmount;
             }
-            // console.log(`SwapAmount: ${swapInfo.swapAmount.toString()}`);
-            // console.log(`SwapAmountRate: ${swapInfo.swapAmountForSwaps.toString()}`);
 
             // SwapExactIn, stETH out, returnAmount is stETH amount out, returnAmountForSwaps is wstETH amount out
             swapInfo.returnAmountForSwaps = swapInfo.returnAmount;
@@ -347,8 +344,6 @@ export class SOR {
                 swapInfo.returnAmountConsideringFees = swapInfo.returnAmountConsideringFees
                     .div(rate)
                     .dp(0);
-                // console.log(`!!!!!!! returnAmountForSwaps: ${swapInfo.returnAmountForSwaps.toString()}`);
-                // console.log(`!!!!!!! returnAmount: ${swapInfo.returnAmount.toString()}`);
             }
         }
 

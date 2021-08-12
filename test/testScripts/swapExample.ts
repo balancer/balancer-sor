@@ -439,9 +439,10 @@ async function makeRelayerTrade(
         swapInfo.tokenAddresses.forEach((token, i) => {
             if (token.toLowerCase() === tokenIn.toLowerCase()) {
                 limits[i] = swapInfo.returnAmountForSwaps
-                    .times(1.05)
+                    .times(1.001)
                     .toString()
                     .split('.')[0];
+                // limits[i] = swapInfo.returnAmountForSwaps.toString(); // No buffer
             } else if (token.toLowerCase() === tokenOut.toLowerCase()) {
                 limits[i] = swapInfo.swapAmountForSwaps.times(-1).toString();
             } else {
@@ -462,7 +463,7 @@ async function makeRelayerTrade(
     // overRides['gasPrice'] = '20000000000';
     // ETH in swaps must send ETH value
     if (swapInfo.tokenIn === ZERO_ADDRESS) {
-        overRides['value'] = swapInfo.swapAmount.toString();
+        overRides['value'] = swapInfo.swapAmountForSwaps.toString();
     }
 
     let tx = await relayerContract
@@ -488,10 +489,10 @@ async function simpleSwap() {
     // const poolsSource = require('../testData/testPools/gusdBug.json');
     // Update pools list with most recent onchain balances
     const queryOnChain = true;
-    const tokenIn = ADDRESSES[networkId].WETH;
+    const tokenIn = ADDRESSES[networkId].ETH;
     const tokenOut = ADDRESSES[networkId].STETH;
-    const swapType = SwapTypes.SwapExactIn;
-    const swapAmount = new BigNumber(0.000157); // In normalized format, i.e. 1USDC = 1
+    const swapType = SwapTypes.SwapExactOut;
+    const swapAmount = new BigNumber(0.00019); // In normalized format, i.e. 1USDC = 1
     const executeTrade = true;
 
     const provider = new JsonRpcProvider(PROVIDER_URLS[networkId]);

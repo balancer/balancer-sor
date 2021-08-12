@@ -206,6 +206,10 @@ describe(`Tests for wrapper class.`, () => {
         );
 
         assert.isAbove(swapInfo.returnAmount.toNumber(), 0);
+        assert.equal(
+            swapInfo.returnAmountForSwaps.toString(),
+            swapInfo.returnAmount.toString()
+        );
         assert.isAbove(bnum(swapInfo.swaps[0].amount).toNumber(), 0);
         assert.equal(tokenIn, swapInfo.tokenIn);
         assert.equal(tokenOut, swapInfo.tokenOut);
@@ -213,6 +217,10 @@ describe(`Tests for wrapper class.`, () => {
             swapInfo.swapAmount.toString(),
             swapAmt.times(bnum(10 ** 18)).toString(),
             `Wrapper should have same amount as helper.`
+        );
+        assert.equal(
+            swapInfo.swapAmount.toString(),
+            swapInfo.swapAmountForSwaps.toString()
         );
     });
 
