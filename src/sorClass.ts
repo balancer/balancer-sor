@@ -43,67 +43,49 @@ export function getLimitAmountSwapForPath(
     swapType: SwapTypes
 ): BigNumber {
     let poolPairData = path.poolPairData;
-    if (poolPairData.length == 1) {
-        return path.pools[0].getLimitAmountSwap(poolPairData[0], swapType);
-    } else if (poolPairData.length == 2) {
-        if (swapType === SwapTypes.SwapExactIn) {
-            let limitAmountSwap1 = path.pools[0].getLimitAmountSwap(
-                poolPairData[0],
-                swapType
+    let limit: BigNumber;
+    if (swapType === SwapTypes.SwapExactIn) {
+        for (let i = 0; i < poolPairData.length; i++) {
+            let poolLimit = path.pools[i].getLimitAmountSwap(
+                poolPairData[i],
+                SwapTypes.SwapExactIn
             );
-            let limitAmountSwap2 = path.pools[1].getLimitAmountSwap(
-                poolPairData[1],
-                swapType
-            );
-            let limitOutputAmountSwap1 = getOutputAmountSwap(
-                path.pools[0],
-                path.poolPairData[0],
-                swapType,
-                limitAmountSwap1
-            );
-            if (limitOutputAmountSwap1.gt(limitAmountSwap2))
-                if (limitAmountSwap2.isZero())
-                    // This means second hop is limiting the path
-                    return ZERO;
-                // this is necessary to avoid return NaN
-                else
-                    return getOutputAmountSwap(
-                        path.pools[0],
-                        path.poolPairData[0],
-                        SwapTypes.SwapExactOut,
-                        limitAmountSwap2
-                    );
-            // This means first hop is limiting the path
-            else return limitAmountSwap1;
-        } else {
-            let limitAmountSwap1 = path.pools[0].getLimitAmountSwap(
-                poolPairData[0],
-                swapType
-            );
-            let limitAmountSwap2 = path.pools[1].getLimitAmountSwap(
-                poolPairData[1],
-                swapType
-            );
-            let limitOutputAmountSwap2 = getOutputAmountSwap(
-                path.pools[1],
-                path.poolPairData[1],
-                swapType,
-                limitAmountSwap2
-            );
-            if (limitOutputAmountSwap2.gt(limitAmountSwap1))
-                // This means first hop is limiting the path
-                return getOutputAmountSwap(
-                    path.pools[1],
-                    path.poolPairData[1],
-                    SwapTypes.SwapExactIn,
-                    limitAmountSwap1
+            let pulledPoolLimit = poolLimit;
+            for (let j = i; j > 0; j--) {
+                pulledPoolLimit = getOutputAmountSwap(
+                    path.pools[j - 1],
+                    path.poolPairData[j - 1],
+                    SwapTypes.SwapExactOut,
+                    pulledPoolLimit
                 );
-            // This means second hop is limiting the path
-            else return limitAmountSwap2;
+            }
+            if (pulledPoolLimit.lt(limit) || i === 0) {
+                limit = pulledPoolLimit;         
+            }
         }
+        if (limit.isZero()) return ZERO;
     } else {
-        throw new Error('Path with more than 2 swaps not supported');
+        for (let i = 0; i < poolPairData.length; i++) {
+            let poolLimit = path.pools[i].getLimitAmountSwap(
+                poolPairData[i],
+                SwapTypes.SwapExactOut
+            );
+            let pushedPoolLimit = poolLimit;
+            for (let j = i + 1; j < poolPairData.length; j++) {
+                pushedPoolLimit = getOutputAmountSwap(
+                    path.pools[j],
+                    path.poolPairData[j],
+                    SwapTypes.SwapExactIn,
+                    pushedPoolLimit
+                );
+            }
+            if (pushedPoolLimit.lt(limit) || i === 0) {
+                limit = pushedPoolLimit;         
+            }
+        }
+        if (limit.isZero()) return ZERO;
     }
+    return limit;
 }
 
 export const smartOrderRouter = (

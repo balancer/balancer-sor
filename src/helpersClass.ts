@@ -82,9 +82,7 @@ function getAmounts(
     let pools = path.pools;
     let poolPairData = path.poolPairData;
     let ans = [amount];
-    // In the case SwapExactOut it might be better to have paths in reverse order
-    // We might also use here pools.reverse() and poolPairData.reverse() but 
-    // did not work as expected.
+
     if (swapType === SwapTypes.SwapExactIn) {
         for (let i = 0; i < pools.length; i++){
             ans.push( getOutputAmountSwap(
