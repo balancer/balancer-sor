@@ -788,6 +788,9 @@ export function isLidoStableSwap(
 ): boolean {
     if (!Lido.Networks.includes(chainId)) return false;
 
+    tokenIn = tokenIn.toLowerCase();
+    tokenOut = tokenOut.toLowerCase();
+
     if (
         (tokenIn === Lido.wstETH[chainId] && tokenOut === Lido.DAI[chainId]) ||
         (tokenIn === Lido.wstETH[chainId] && tokenOut === Lido.USDC[chainId]) ||
@@ -834,7 +837,9 @@ async function queryBatchSwap(
             return bnum(deltas[assets.length - 1].toString()).times(-1);
         else return bnum(deltas[0].toString());
     } catch (err) {
-        console.error(`SOR - queryBatchSwap: ${err.message}`);
+        console.error(
+            `SOR - Lido Static Route QueryBatchSwap Error. No swaps.`
+        );
         return bnum(0);
     }
 }
@@ -977,6 +982,12 @@ export async function getLidoStaticSwaps(
         swapInfo.tokenAddresses,
         provider
     );
+
+    if (swapInfo.returnAmount.isZero()) {
+        swapInfo.swaps = [];
+        swapInfo.tokenAddresses = [];
+    }
+
     // Considering fees shouldn't matter as there won't be alternative options on V1
     swapInfo.returnAmountConsideringFees = swapInfo.returnAmount;
     return swapInfo;

@@ -229,6 +229,10 @@ async function makeTrade(
     swapInfo: SwapInfo,
     swapType
 ) {
+    if (!swapInfo.returnAmount.gt(0)) {
+        console.log(`Return Amount is 0. No swaps to exectute.`);
+        return;
+    }
     const wallet = new Wallet(process.env.TRADER_KEY, provider);
 
     if (swapInfo.tokenIn !== ZERO_ADDRESS) {
@@ -353,6 +357,10 @@ async function makeRelayerTrade(
     swapType: SwapTypes,
     chainId: number
 ) {
+    if (!swapInfo.returnAmount.gt(0)) {
+        console.log(`Return Amount is 0. No swaps to exectute.`);
+        return;
+    }
     const wallet = new Wallet(process.env.TRADER_KEY, provider);
 
     if (swapInfo.tokenIn !== ZERO_ADDRESS) {
@@ -491,10 +499,10 @@ async function simpleSwap() {
     // const poolsSource = require('../testData/testPools/gusdBug.json');
     // Update pools list with most recent onchain balances
     const queryOnChain = true;
-    const tokenIn = ADDRESSES[networkId].ETH;
-    const tokenOut = ADDRESSES[networkId].STETH;
+    const tokenIn = ADDRESSES[networkId].STETH;
+    const tokenOut = ADDRESSES[networkId].DAI;
     const swapType = SwapTypes.SwapExactIn;
-    const swapAmount = new BigNumber(0.00019); // In normalized format, i.e. 1USDC = 1
+    const swapAmount = new BigNumber(0.000000019); // In normalized format, i.e. 1USDC = 1
     const executeTrade = true;
 
     const provider = new JsonRpcProvider(PROVIDER_URLS[networkId]);
