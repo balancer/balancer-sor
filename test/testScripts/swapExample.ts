@@ -45,6 +45,9 @@ export const SUBGRAPH_URLS = {
 
 export const ADDRESSES = {
     [Network.MAINNET]: {
+        BatchRelayer: {
+            address: '0xdcdbf71A870cc60C6F9B621E28a7D3Ffd6Dd4965',
+        },
         ETH: {
             address: ZERO_ADDRESS,
             decimals: 18,
@@ -79,7 +82,7 @@ export const ADDRESSES = {
     [Network.KOVAN]: {
         // Visit https://balancer-faucet.on.fleek.co/#/faucet for test tokens
         BatchRelayer: {
-            address: '0x2C606C7D152D745633665F4De17F34c213BCCA2F',
+            address: '0x41B953164995c11C81DA73D212ED8Af25741b7Ac',
         },
         ETH: {
             address: ZERO_ADDRESS,
@@ -467,28 +470,59 @@ async function makeRelayerTrade(
     console.log('Swapping...');
 
     let overRides = {};
-    // overRides['gasLimit'] = '450000';
-    // overRides['gasPrice'] = '20000000000';
+    overRides['gasLimit'] = '450000';
+    overRides['gasPrice'] = '20000000000';
     // ETH in swaps must send ETH value
     if (swapInfo.tokenIn === ZERO_ADDRESS) {
         overRides['value'] = swapInfo.swapAmountForSwaps.toString();
     }
 
-    return;
+    if (swapInfo.swaps.length === 1) {
+        console.log('SINGLE SWAP');
+        const single = {
+            poolId: swapInfo.swaps[0].poolId,
+            kind: swapType,
+            assetIn: swapInfo.tokenAddresses[swapInfo.swaps[0].assetInIndex],
+            assetOut: swapInfo.tokenAddresses[swapInfo.swaps[0].assetOutIndex],
+            amount: swapInfo.swaps[0].amount,
+            userData: swapInfo.swaps[0].userData,
+        };
 
-    let tx = await relayerContract
-        .connect(wallet)
-        .lidoBatchSwap(
-            swapType,
-            swapInfo.swaps,
-            swapInfo.tokenAddresses,
-            funds,
-            limits,
-            deadline,
-            overRides
+        let limit = swapInfo.returnAmountFromSwaps
+            .times(1.01)
+            .dp(0)
+            .toString(); // Max In
+        if (swapType === SwapTypes.SwapExactIn)
+            limit = swapInfo.returnAmountFromSwaps
+                .times(0.99)
+                .dp(0)
+                .toString(); // Min return
+
+        let tx = await relayerContract
+            .connect(wallet)
+            .callStatic.swap(single, funds, limit, deadline, overRides);
+        console.log(tx.toString());
+        console.log(
+            swapInfo.returnAmountFromSwaps
+                .times(1.01)
+                .dp(0)
+                .toString()
         );
-
-    console.log(`tx: ${tx.hash}`);
+    } else {
+        let tx = await relayerContract
+            .connect(wallet)
+            .batchSwap(
+                swapType,
+                swapInfo.swaps,
+                swapInfo.tokenAddresses,
+                funds,
+                limits,
+                deadline,
+                overRides
+            );
+        console.log(`tx:`);
+        console.log(tx);
+    }
 }
 
 async function simpleSwap() {
@@ -499,10 +533,10 @@ async function simpleSwap() {
     // const poolsSource = require('../testData/testPools/gusdBug.json');
     // Update pools list with most recent onchain balances
     const queryOnChain = true;
-    const tokenIn = ADDRESSES[networkId].STETH;
-    const tokenOut = ADDRESSES[networkId].DAI;
-    const swapType = SwapTypes.SwapExactIn;
-    const swapAmount = new BigNumber(0.000000019); // In normalized format, i.e. 1USDC = 1
+    const tokenIn = ADDRESSES[networkId].WETH;
+    const tokenOut = ADDRESSES[networkId].STETH;
+    const swapType = SwapTypes.SwapExactOut;
+    const swapAmount = new BigNumber(0.07); // In normalized format, i.e. 1USDC = 1
     const executeTrade = true;
 
     const provider = new JsonRpcProvider(PROVIDER_URLS[networkId]);
