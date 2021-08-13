@@ -38,7 +38,7 @@ export const Lido = {
         // DAI/USDC/USDT
         staBal: {
             1: '0x06df3b2bbb68adc8b0e302443692037ed9f91b42000000000000000000000063',
-            42: '0x5f304f6cf88dc76b414f301e05adfb5a429e8b670000000000000000000000f4',
+            42: '0x45f78862bd3aa5205e63141fa7f2d35f38eb87c30000000000000000000000fd',
         },
         // WETH/DAI (WETH/USDC on Kovan)
         wethDai: {
