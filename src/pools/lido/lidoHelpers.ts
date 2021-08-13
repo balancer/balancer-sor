@@ -984,8 +984,18 @@ export async function getLidoStaticSwaps(
     );
 
     if (swapInfo.returnAmount.isZero()) {
-        swapInfo.swaps = [];
-        swapInfo.tokenAddresses = [];
+        return {
+            tokenAddresses: [],
+            swaps: [],
+            swapAmount: ZERO,
+            swapAmountForSwaps: ZERO,
+            tokenIn: '',
+            tokenOut: '',
+            returnAmount: ZERO,
+            returnAmountConsideringFees: ZERO,
+            returnAmountFromSwaps: ZERO,
+            marketSp: ZERO,
+        };
     }
 
     // Considering fees shouldn't matter as there won't be alternative options on V1

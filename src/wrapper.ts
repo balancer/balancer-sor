@@ -266,6 +266,8 @@ export class SOR {
                 );
             }
 
+            if (swapInfo.returnAmount.isZero()) return swapInfo;
+
             swapInfo = setWrappedInfo(
                 swapInfo,
                 swapType,
