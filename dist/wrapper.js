@@ -251,6 +251,7 @@ class SOR {
                         swapOptions.timestamp
                     );
                 }
+                if (swapInfo.returnAmount.isZero()) return swapInfo;
                 swapInfo = index_1.setWrappedInfo(
                     swapInfo,
                     swapType,

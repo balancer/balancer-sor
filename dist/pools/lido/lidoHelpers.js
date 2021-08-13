@@ -868,6 +868,8 @@ exports.Routes[42][`${exports.Lido.wstETH[42]}${exports.Lido.USDT[42]}1`] = {
 // Only want static routes for Lido <> Stable
 function isLidoStableSwap(chainId, tokenIn, tokenOut) {
     if (!exports.Lido.Networks.includes(chainId)) return false;
+    tokenIn = tokenIn.toLowerCase();
+    tokenOut = tokenOut.toLowerCase();
     if (
         (tokenIn === exports.Lido.wstETH[chainId] &&
             tokenOut === exports.Lido.DAI[chainId]) ||
@@ -927,7 +929,9 @@ function queryBatchSwap(swapType, swaps, assets, provider) {
                     .times(-1);
             else return bmath_1.bnum(deltas[0].toString());
         } catch (err) {
-            console.error(`SOR - queryBatchSwap: ${err.message}`);
+            console.error(
+                `SOR - Lido Static Route QueryBatchSwap Error. No swaps.`
+            );
             return bmath_1.bnum(0);
         }
     });
@@ -1052,6 +1056,20 @@ function getLidoStaticSwaps(
             swapInfo.tokenAddresses,
             provider
         );
+        if (swapInfo.returnAmount.isZero()) {
+            return {
+                tokenAddresses: [],
+                swaps: [],
+                swapAmount: bmath_1.ZERO,
+                swapAmountForSwaps: bmath_1.ZERO,
+                tokenIn: '',
+                tokenOut: '',
+                returnAmount: bmath_1.ZERO,
+                returnAmountConsideringFees: bmath_1.ZERO,
+                returnAmountFromSwaps: bmath_1.ZERO,
+                marketSp: bmath_1.ZERO,
+            };
+        }
         // Considering fees shouldn't matter as there won't be alternative options on V1
         swapInfo.returnAmountConsideringFees = swapInfo.returnAmount;
         return swapInfo;
