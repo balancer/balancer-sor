@@ -889,7 +889,7 @@ function calculateMarketSp(
     return spotPrices.reduce((a, b) => a.times(b));
 }
 
-export async function getRate(
+export async function getStEthRate(
     provider: BaseProvider,
     chainId: number
 ): Promise<BigNumber> {
@@ -932,10 +932,12 @@ export async function getLidoStaticSwaps(
         tokenAddresses: [],
         swaps: [],
         swapAmount: ZERO,
+        swapAmountForSwaps: ZERO,
         tokenIn: '',
         tokenOut: '',
         returnAmount: ZERO,
         returnAmountConsideringFees: ZERO,
+        returnAmountFromSwaps: ZERO,
         marketSp: ZERO,
     };
     const staticRoute = Routes[chainId][`${tokenIn}${tokenOut}${swapType}`];

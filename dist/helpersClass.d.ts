@@ -8,6 +8,7 @@ import {
     Swap,
     SwapInfo,
 } from './types';
+import { BaseProvider } from '@ethersproject/providers';
 export declare function getHighestLimitAmountsForPaths(
     paths: NewPath[],
     maxPools: number
@@ -65,9 +66,36 @@ export declare function formatSwaps(
     tokenOut: string,
     returnAmount: BigNumber,
     returnAmountConsideringFees: BigNumber,
-    marketSp: BigNumber,
-    wrapOptions?: {
-        isEthSwap: boolean;
-        wethAddress: string;
-    }
+    marketSp: BigNumber
+): SwapInfo;
+export interface WrappedInfo {
+    swapAmountOriginal: BigNumber;
+    swapAmountForSwaps: BigNumber;
+    tokenIn: TokenInfo;
+    tokenOut: TokenInfo;
+}
+export interface TokenInfo {
+    addressOriginal: string;
+    addressForSwaps: string;
+    wrapType: WrapTypes;
+    rate: BigNumber;
+}
+export declare enum WrapTypes {
+    None = 0,
+    ETH = 1,
+    stETH = 2,
+}
+export declare function getWrappedInfo(
+    provider: BaseProvider,
+    swapType: SwapTypes,
+    tokenIn: string,
+    tokenOut: string,
+    chainId: number,
+    swapAmount: BigNumber
+): Promise<WrappedInfo>;
+export declare function setWrappedInfo(
+    swapInfo: SwapInfo,
+    swapType: SwapTypes,
+    wrappedInfo: WrappedInfo,
+    chainId: number
 ): SwapInfo;

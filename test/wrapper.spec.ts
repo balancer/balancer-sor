@@ -207,7 +207,7 @@ describe(`Tests for wrapper class.`, () => {
 
         assert.isAbove(swapInfo.returnAmount.toNumber(), 0);
         assert.equal(
-            swapInfo.returnAmountForSwaps.toString(),
+            swapInfo.returnAmountFromSwaps.toString(),
             swapInfo.returnAmount.toString()
         );
         assert.isAbove(bnum(swapInfo.swaps[0].amount).toNumber(), 0);

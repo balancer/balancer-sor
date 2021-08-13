@@ -427,7 +427,7 @@ async function makeRelayerTrade(
             if (token.toLowerCase() === tokenIn.toLowerCase()) {
                 limits[i] = swapInfo.swapAmountForSwaps.toString();
             } else if (token.toLowerCase() === tokenOut.toLowerCase()) {
-                limits[i] = swapInfo.returnAmountForSwaps
+                limits[i] = swapInfo.returnAmountFromSwaps
                     .times(-0.99)
                     .toString()
                     .split('.')[0];
@@ -438,11 +438,11 @@ async function makeRelayerTrade(
     } else {
         swapInfo.tokenAddresses.forEach((token, i) => {
             if (token.toLowerCase() === tokenIn.toLowerCase()) {
-                limits[i] = swapInfo.returnAmountForSwaps
+                limits[i] = swapInfo.returnAmountFromSwaps
                     .times(1.001)
                     .toString()
                     .split('.')[0];
-                // limits[i] = swapInfo.returnAmountForSwaps.toString(); // No buffer
+                // limits[i] = swapInfo.returnAmountFromSwaps.toString(); // No buffer
             } else if (token.toLowerCase() === tokenOut.toLowerCase()) {
                 limits[i] = swapInfo.swapAmountForSwaps.times(-1).toString();
             } else {
@@ -465,6 +465,8 @@ async function makeRelayerTrade(
     if (swapInfo.tokenIn === ZERO_ADDRESS) {
         overRides['value'] = swapInfo.swapAmountForSwaps.toString();
     }
+
+    return;
 
     let tx = await relayerContract
         .connect(wallet)
@@ -491,7 +493,7 @@ async function simpleSwap() {
     const queryOnChain = true;
     const tokenIn = ADDRESSES[networkId].ETH;
     const tokenOut = ADDRESSES[networkId].STETH;
-    const swapType = SwapTypes.SwapExactOut;
+    const swapType = SwapTypes.SwapExactIn;
     const swapAmount = new BigNumber(0.00019); // In normalized format, i.e. 1USDC = 1
     const executeTrade = true;
 

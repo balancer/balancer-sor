@@ -52,7 +52,7 @@ export declare function isLidoStableSwap(
     tokenIn: string,
     tokenOut: string
 ): boolean;
-export declare function getRate(
+export declare function getStEthRate(
     provider: BaseProvider,
     chainId: number
 ): Promise<BigNumber>;

@@ -6,17 +6,8 @@ import {
     SwapTypes,
     SubGraphPoolsBase,
     SwapOptions,
-} from './types';
+} from './index';
 export declare class SOR {
-    MULTIADDR: {
-        [chainId: number]: string;
-    };
-    VAULTADDR: {
-        [chainId: number]: string;
-    };
-    WETHADDR: {
-        [chainId: number]: string;
-    };
     provider: BaseProvider;
     gasPrice: BigNumber;
     maxPools: number;
@@ -62,7 +53,6 @@ export declare class SOR {
         swapType: SwapTypes,
         swapAmt: BigNumber,
         onChainPools: SubGraphPoolsBase,
-        wrapOptions: any,
         useProcessCache?: boolean,
         currentBlockTimestamp?: number
     ): Promise<SwapInfo>;

@@ -1,9 +1,45 @@
 'use strict';
+var __awaiter =
+    (this && this.__awaiter) ||
+    function(thisArg, _arguments, P, generator) {
+        function adopt(value) {
+            return value instanceof P
+                ? value
+                : new P(function(resolve) {
+                      resolve(value);
+                  });
+        }
+        return new (P || (P = Promise))(function(resolve, reject) {
+            function fulfilled(value) {
+                try {
+                    step(generator.next(value));
+                } catch (e) {
+                    reject(e);
+                }
+            }
+            function rejected(value) {
+                try {
+                    step(generator['throw'](value));
+                } catch (e) {
+                    reject(e);
+                }
+            }
+            function step(result) {
+                result.done
+                    ? resolve(result.value)
+                    : adopt(result.value).then(fulfilled, rejected);
+            }
+            step(
+                (generator = generator.apply(thisArg, _arguments || [])).next()
+            );
+        });
+    };
 Object.defineProperty(exports, '__esModule', { value: true });
 const types_1 = require('./types');
 const bmath_1 = require('./bmath');
 const config_1 = require('./config');
 const index_1 = require('./index');
+const constants_1 = require('./constants');
 function getHighestLimitAmountsForPaths(paths, maxPools) {
     if (paths.length === 0) return [];
     let limitAmounts = [];
@@ -460,11 +496,7 @@ function formatSwaps(
     tokenOut,
     returnAmount,
     returnAmountConsideringFees,
-    marketSp,
-    wrapOptions = {
-        isEthSwap: false,
-        wethAddress: '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2',
-    }
+    marketSp
 ) {
     const tokenAddressesSet = new Set();
     const swaps = JSON.parse(JSON.stringify(swapsOriginal));
@@ -474,8 +506,10 @@ function formatSwaps(
         tokenAddresses: [],
         swaps: [],
         swapAmount: bmath_1.ZERO,
+        swapAmountForSwaps: bmath_1.ZERO,
         returnAmount: bmath_1.ZERO,
         returnAmountConsideringFees: bmath_1.ZERO,
+        returnAmountFromSwaps: bmath_1.ZERO,
         tokenIn: '',
         tokenOut: '',
         marketSp: marketSp,
@@ -483,18 +517,12 @@ function formatSwaps(
     if (swaps.length === 0) {
         return swapInfo;
     }
-    const WETH = wrapOptions.wethAddress.toLowerCase();
     swaps.forEach(sequence => {
         sequence.forEach(swap => {
             if (swap.tokenIn === tokenIn)
                 tokenInDecimals = swap.tokenInDecimals;
             if (swap.tokenOut === tokenOut)
                 tokenOutDecimals = swap.tokenOutDecimals;
-            if (wrapOptions.isEthSwap) {
-                if (swap.tokenIn === WETH) swap.tokenIn = index_1.ZERO_ADDRESS;
-                if (swap.tokenOut === WETH)
-                    swap.tokenOut = index_1.ZERO_ADDRESS;
-            }
             tokenAddressesSet.add(swap.tokenIn);
             tokenAddressesSet.add(swap.tokenOut);
         });
@@ -628,3 +656,139 @@ function formatSwaps(
     return swapInfo;
 }
 exports.formatSwaps = formatSwaps;
+var WrapTypes;
+(function(WrapTypes) {
+    WrapTypes[(WrapTypes['None'] = 0)] = 'None';
+    WrapTypes[(WrapTypes['ETH'] = 1)] = 'ETH';
+    WrapTypes[(WrapTypes['stETH'] = 2)] = 'stETH';
+})((WrapTypes = exports.WrapTypes || (exports.WrapTypes = {})));
+function getWrappedInfo(
+    provider,
+    swapType,
+    tokenIn,
+    tokenOut,
+    chainId,
+    swapAmount
+) {
+    return __awaiter(this, void 0, void 0, function*() {
+        // The Subgraph returns tokens in lower case format so we must match this
+        tokenIn = tokenIn.toLowerCase();
+        tokenOut = tokenOut.toLowerCase();
+        let swapAmountForSwaps = swapAmount;
+        let tokenInForSwaps = tokenIn;
+        let tokenInWrapType = WrapTypes.None;
+        let tokenOutForSwaps = tokenOut;
+        let tokenOutWrapType = WrapTypes.None;
+        let tokenInRate = bmath_1.bnum(1);
+        let tokenOutRate = bmath_1.bnum(1);
+        // Handle ETH wrapping
+        if (tokenIn === index_1.ZERO_ADDRESS) {
+            tokenInForSwaps = constants_1.WETHADDR[chainId].toLowerCase();
+            tokenInWrapType = WrapTypes.ETH;
+        }
+        if (tokenOut === index_1.ZERO_ADDRESS) {
+            tokenOutForSwaps = constants_1.WETHADDR[chainId].toLowerCase();
+            tokenOutWrapType = WrapTypes.ETH;
+        }
+        // Handle stETH wrapping
+        if (tokenIn === index_1.Lido.stETH[chainId]) {
+            tokenInForSwaps = index_1.Lido.wstETH[chainId];
+            tokenInWrapType = WrapTypes.stETH;
+            const rate = yield index_1.getStEthRate(provider, chainId);
+            tokenInRate = rate;
+            if (swapType === types_1.SwapTypes.SwapExactIn)
+                swapAmountForSwaps = swapAmount.times(rate).dp(18);
+        }
+        if (tokenOut === index_1.Lido.stETH[chainId]) {
+            tokenOutForSwaps = index_1.Lido.wstETH[chainId];
+            tokenOutWrapType = WrapTypes.stETH;
+            const rate = yield index_1.getStEthRate(provider, chainId);
+            tokenOutRate = rate;
+            if (swapType === types_1.SwapTypes.SwapExactOut)
+                swapAmountForSwaps = swapAmount.times(rate).dp(18);
+        }
+        return {
+            swapAmountOriginal: swapAmount,
+            swapAmountForSwaps: swapAmountForSwaps,
+            tokenIn: {
+                addressOriginal: tokenIn,
+                addressForSwaps: tokenInForSwaps,
+                wrapType: tokenInWrapType,
+                rate: tokenInRate,
+            },
+            tokenOut: {
+                addressOriginal: tokenOut,
+                addressForSwaps: tokenOutForSwaps,
+                wrapType: tokenOutWrapType,
+                rate: tokenOutRate,
+            },
+        };
+    });
+}
+exports.getWrappedInfo = getWrappedInfo;
+function setWrappedInfo(swapInfo, swapType, wrappedInfo, chainId) {
+    if (swapInfo.swaps.length === 0) return swapInfo;
+    swapInfo.tokenIn = wrappedInfo.tokenIn.addressOriginal;
+    swapInfo.tokenOut = wrappedInfo.tokenOut.addressOriginal;
+    // replace weth with ZERO/ETH in assets for Vault to handle ETH directly
+    if (
+        wrappedInfo.tokenIn.wrapType === WrapTypes.ETH ||
+        wrappedInfo.tokenOut.wrapType === WrapTypes.ETH
+    ) {
+        let wethIndex = -1;
+        swapInfo.tokenAddresses.forEach((addr, i) => {
+            if (
+                addr.toLowerCase() ===
+                constants_1.WETHADDR[chainId].toLowerCase()
+            )
+                wethIndex = i;
+        });
+        if (wethIndex !== -1)
+            swapInfo.tokenAddresses[wethIndex] = index_1.ZERO_ADDRESS;
+    }
+    // Handle stETH swap amount scaling
+    if (
+        (wrappedInfo.tokenIn.wrapType === WrapTypes.stETH &&
+            swapType === types_1.SwapTypes.SwapExactIn) ||
+        (wrappedInfo.tokenOut.wrapType === WrapTypes.stETH &&
+            swapType === types_1.SwapTypes.SwapExactOut)
+    ) {
+        swapInfo.swapAmountForSwaps = bmath_1
+            .scale(wrappedInfo.swapAmountForSwaps, 18)
+            .dp(0); // Always 18 because wstETH
+        swapInfo.swapAmount = bmath_1
+            .scale(wrappedInfo.swapAmountOriginal, 18)
+            .dp(0);
+    } else {
+        // Should be same when standard tokens and swapAmount should already be scaled
+        swapInfo.swapAmountForSwaps = swapInfo.swapAmount;
+    }
+    // Return amount from swaps will only be different if token has an exchangeRate
+    swapInfo.returnAmountFromSwaps = swapInfo.returnAmount;
+    // SwapExactIn, stETH out, returnAmount is stETH amount out, returnAmountForSwaps is wstETH amount out
+    if (
+        swapType === types_1.SwapTypes.SwapExactIn &&
+        wrappedInfo.tokenOut.wrapType === WrapTypes.stETH
+    ) {
+        swapInfo.returnAmount = swapInfo.returnAmount
+            .div(wrappedInfo.tokenOut.rate)
+            .dp(0);
+        swapInfo.returnAmountConsideringFees = swapInfo.returnAmountConsideringFees
+            .div(wrappedInfo.tokenOut.rate)
+            .dp(0);
+    }
+    // SwapExactOut, stETH in, returnAmount us stETH amount in, returnAmountForSwaps is wstETH amount in
+    if (
+        swapType === types_1.SwapTypes.SwapExactOut &&
+        wrappedInfo.tokenIn.wrapType === WrapTypes.stETH
+    ) {
+        swapInfo.returnAmount = swapInfo.returnAmount
+            .div(wrappedInfo.tokenIn.rate)
+            .dp(0);
+        swapInfo.returnAmountConsideringFees = swapInfo.returnAmountConsideringFees
+            .div(wrappedInfo.tokenIn.rate)
+            .dp(0);
+    }
+    return swapInfo;
+}
+exports.setWrappedInfo = setWrappedInfo;

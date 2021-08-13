@@ -970,7 +970,7 @@ function calculateMarketSp(swapType, swaps, assets, pools) {
     // SP for Path is product of all
     return spotPrices.reduce((a, b) => a.times(b));
 }
-function getRate(provider, chainId) {
+function getStEthRate(provider, chainId) {
     return __awaiter(this, void 0, void 0, function*() {
         // Call stEthPerToken or tokensPerStETH to get the scaling factors in each direction.
         const wstETHContract = new contracts_1.Contract(
@@ -982,7 +982,7 @@ function getRate(provider, chainId) {
         return bmath_1.scale(bmath_1.bnum(rate.toString()), -18);
     });
 }
-exports.getRate = getRate;
+exports.getStEthRate = getStEthRate;
 /*
 Used when SOR doesn't support paths with more than one hop.
 Enables swapping of stables <> wstETH via WETH/DAI pool which has good liquidity.
@@ -1012,10 +1012,12 @@ function getLidoStaticSwaps(
             tokenAddresses: [],
             swaps: [],
             swapAmount: bmath_1.ZERO,
+            swapAmountForSwaps: bmath_1.ZERO,
             tokenIn: '',
             tokenOut: '',
             returnAmount: bmath_1.ZERO,
             returnAmountConsideringFees: bmath_1.ZERO,
+            returnAmountFromSwaps: bmath_1.ZERO,
             marketSp: bmath_1.ZERO,
         };
         const staticRoute =

@@ -288,7 +288,7 @@ describe(`Tests for MetaStable Pools.`, () => {
                         .toString()
                 );
             });
-        });
+        }).timeout(10000);
 
         it(`Full Swap - swapExactIn, Token Meta > Token ETH`, async () => {
             const poolsFromFile = require('./testData/metaStablePools/singlePool.json');
@@ -352,7 +352,7 @@ describe(`Tests for MetaStable Pools.`, () => {
                         .toString()
                 );
             });
-        });
+        }).timeout(10000);
 
         it(`Full Swap - swapExactOut, Token ETH >Token Meta`, async () => {
             const poolsFromFile = require('./testData/metaStablePools/singlePool.json');
@@ -415,7 +415,7 @@ describe(`Tests for MetaStable Pools.`, () => {
                         .toString()
                 );
             });
-        });
+        }).timeout(10000);
 
         it(`Full Swap - swapExactOut, Token Meta > Token ETH`, async () => {
             const poolsFromFile = require('./testData/metaStablePools/singlePool.json');
@@ -480,7 +480,7 @@ describe(`Tests for MetaStable Pools.`, () => {
                         .toString()
                 );
             });
-        });
+        }).timeout(10000);
     });
 
     context('multihop', () => {

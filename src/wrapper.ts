@@ -1,12 +1,6 @@
 import { BaseProvider } from '@ethersproject/providers';
 import { BigNumber } from './utils/bignumber';
-import { bnum, ZERO } from './bmath';
-import { getCostOutputToken } from './costToken';
-import { getOnChainBalances } from './multicall';
-import { filterPoolsOfInterest, filterHopPools } from './pools';
-import { fetchSubgraphPools } from './subgraph';
-import { calculatePathLimits, smartOrderRouter } from './sorClass';
-import { formatSwaps } from './helpersClass';
+import { ZERO } from './bmath';
 import {
     SwapInfo,
     DisabledOptions,
@@ -16,37 +10,26 @@ import {
     SubGraphPoolsBase,
     SwapOptions,
     PoolFilter,
-} from './types';
-import {
-    Lido,
+    WETHADDR,
+    VAULTADDR,
+    MULTIADDR,
+    ZERO_ADDRESS,
+    setWrappedInfo,
     getLidoStaticSwaps,
     isLidoStableSwap,
-    getRate,
-} from './pools/lido/lidoHelpers';
-import { ZERO_ADDRESS, scale } from './index';
+    getWrappedInfo,
+    formatSwaps,
+    calculatePathLimits,
+    smartOrderRouter,
+    filterPoolsOfInterest,
+    filterHopPools,
+    fetchSubgraphPools,
+    getOnChainBalances,
+    getCostOutputToken,
+    bnum,
+} from './index';
 
 export class SOR {
-    MULTIADDR: { [chainId: number]: string } = {
-        1: '0xeefba1e63905ef1d7acba5a8513c70307c1ce441',
-        5: '0x3b2A02F22fCbc872AF77674ceD303eb269a46ce3',
-        42: '0x2cc8688C5f75E365aaEEb4ea8D6a480405A48D2A',
-        137: '0xa1B2b503959aedD81512C37e9dce48164ec6a94d',
-    };
-
-    VAULTADDR: { [chainId: number]: string } = {
-        1: '0xBA12222222228d8Ba445958a75a0704d566BF2C8',
-        5: '0x65748E8287Ce4B9E6D83EE853431958851550311',
-        42: '0xBA12222222228d8Ba445958a75a0704d566BF2C8',
-        137: '0xBA12222222228d8Ba445958a75a0704d566BF2C8',
-    };
-
-    WETHADDR: { [chainId: number]: string } = {
-        1: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2',
-        5: '0x9A1000D492d40bfccbc03f413A48F5B6516Ec0Fd',
-        42: '0xdFCeA9088c8A88A76FF74892C1457C17dfeef9C1',
-        137: '0x0d500B1d8E8eF31E21C99d1Db9A6444d3ADf1270', // For Polygon this is actually wrapped MATIC
-    };
-
     provider: BaseProvider;
     gasPrice: BigNumber;
     maxPools: number;
@@ -105,8 +88,7 @@ export class SOR {
             // Handle ETH/WETH cost
             if (
                 tokenOut === ZERO_ADDRESS ||
-                tokenOut.toLowerCase() ===
-                    this.WETHADDR[this.chainId].toLowerCase()
+                tokenOut.toLowerCase() === WETHADDR[this.chainId].toLowerCase()
             ) {
                 this.tokenCost[tokenOut.toLowerCase()] = this.gasPrice
                     .times(this.swapCost)
@@ -212,8 +194,8 @@ export class SOR {
         // This will return in normalized/string format
         const onChainPools: SubGraphPoolsBase = await getOnChainBalances(
             subgraphPools,
-            this.MULTIADDR[this.chainId],
-            this.VAULTADDR[this.chainId],
+            MULTIADDR[this.chainId],
+            VAULTADDR[this.chainId],
             this.provider
         );
 
@@ -242,38 +224,18 @@ export class SOR {
             tokenOut: '',
             returnAmount: ZERO,
             returnAmountConsideringFees: ZERO,
+            returnAmountFromSwaps: ZERO,
             marketSp: ZERO,
         };
 
-        // The Subgraph returns tokens in lower case format so we must match this
-        tokenIn = tokenIn.toLowerCase();
-        tokenOut = tokenOut.toLowerCase();
-
-        const WETH = this.WETHADDR[this.chainId].toLowerCase();
-        const wrapOptions = { isEthSwap: false, wethAddress: WETH };
-
-        if (tokenIn === ZERO_ADDRESS) {
-            tokenIn = WETH;
-            wrapOptions.isEthSwap = true;
-        }
-        if (tokenOut === ZERO_ADDRESS) {
-            tokenOut = WETH;
-            wrapOptions.isEthSwap = true;
-        }
-
-        let isStethIn = false;
-        let isStethOut = false;
-        let tokenInForSwaps = tokenIn;
-        let tokenOutForSwaps = tokenOut;
-        if (tokenIn === Lido.stETH[this.chainId]) {
-            isStethIn = true;
-            tokenInForSwaps = Lido.wstETH[this.chainId];
-        }
-
-        if (tokenOut === Lido.stETH[this.chainId]) {
-            isStethOut = true;
-            tokenOutForSwaps = Lido.wstETH[this.chainId];
-        }
+        const wrappedInfo = await getWrappedInfo(
+            this.provider,
+            swapType,
+            tokenIn,
+            tokenOut,
+            this.chainId,
+            swapAmt
+        );
 
         if (this.finishedFetchingOnChain) {
             let pools = JSON.parse(JSON.stringify(this.onChainBalanceCache));
@@ -282,69 +244,34 @@ export class SOR {
                     p => p.poolType === swapOptions.poolTypeFilter
                 );
 
-            let swapAmountForSwaps = swapAmt;
-            let rate = bnum(1);
-            if (isStethIn || isStethOut)
-                rate = await getRate(this.provider, this.chainId);
-
-            if (
-                (isStethIn && swapType === SwapTypes.SwapExactIn) ||
-                (isStethOut && swapType === SwapTypes.SwapExactOut)
-            ) {
-                swapAmountForSwaps = swapAmt.times(rate).dp(18);
-                // console.log(`!!!!!!! rating SwapAmt ${swapAmountForSwaps.toString()}`);
-            }
-
             if (isLidoStableSwap(this.chainId, tokenIn, tokenOut)) {
                 swapInfo = await getLidoStaticSwaps(
                     pools,
                     this.chainId,
-                    tokenInForSwaps,
-                    tokenOutForSwaps,
+                    wrappedInfo.tokenIn.addressForSwaps,
+                    wrappedInfo.tokenOut.addressForSwaps,
                     swapType,
-                    swapAmountForSwaps,
+                    wrappedInfo.swapAmountForSwaps,
                     this.provider
                 );
-            } else
+            } else {
                 swapInfo = await this.processSwaps(
-                    tokenInForSwaps,
-                    tokenOutForSwaps,
+                    wrappedInfo.tokenIn.addressForSwaps,
+                    wrappedInfo.tokenOut.addressForSwaps,
                     swapType,
-                    swapAmountForSwaps,
+                    wrappedInfo.swapAmountForSwaps,
                     pools,
-                    wrapOptions,
                     true,
                     swapOptions.timestamp
                 );
-
-            if (isStethIn) swapInfo.tokenIn = tokenIn;
-            if (isStethOut) swapInfo.tokenOut = tokenOut;
-
-            if (
-                (isStethIn && swapType === SwapTypes.SwapExactIn) ||
-                (isStethOut && swapType === SwapTypes.SwapExactOut)
-            ) {
-                swapInfo.swapAmount = scale(swapAmt, 18).dp(0);
-                swapInfo.swapAmountForSwaps = scale(swapAmountForSwaps, 18).dp(
-                    0
-                ); // Always 18 because wstETH
-            } else {
-                // Should be same when standard tokens
-                swapInfo.swapAmountForSwaps = swapInfo.swapAmount;
             }
 
-            // SwapExactIn, stETH out, returnAmount is stETH amount out, returnAmountForSwaps is wstETH amount out
-            swapInfo.returnAmountForSwaps = swapInfo.returnAmount;
-
-            if (
-                (isStethOut && swapType === SwapTypes.SwapExactIn) ||
-                (isStethIn && swapType === SwapTypes.SwapExactOut)
-            ) {
-                swapInfo.returnAmount = swapInfo.returnAmount.div(rate).dp(0);
-                swapInfo.returnAmountConsideringFees = swapInfo.returnAmountConsideringFees
-                    .div(rate)
-                    .dp(0);
-            }
+            swapInfo = setWrappedInfo(
+                swapInfo,
+                swapType,
+                wrappedInfo,
+                this.chainId
+            );
         }
 
         return swapInfo;
@@ -358,7 +285,6 @@ export class SOR {
         swapType: SwapTypes,
         swapAmt: BigNumber,
         onChainPools: SubGraphPoolsBase,
-        wrapOptions: any,
         useProcessCache: boolean = true,
         currentBlockTimestamp: number = 0
     ): Promise<SwapInfo> {
@@ -366,15 +292,16 @@ export class SOR {
             tokenAddresses: [],
             swaps: [],
             swapAmount: ZERO,
+            swapAmountForSwaps: ZERO,
             tokenIn: '',
             tokenOut: '',
             returnAmount: ZERO,
             returnAmountConsideringFees: ZERO,
+            returnAmountFromSwaps: ZERO,
             marketSp: ZERO,
         };
 
         if (onChainPools.pools.length === 0) return swapInfo;
-
         let pools: PoolDictionary, paths: NewPath[], marketSp: BigNumber;
 
         // If token pair has been processed before that info can be reused to speed up execution
@@ -461,16 +388,8 @@ export class SOR {
             tokenOut,
             total,
             totalConsideringFees,
-            marketSp,
-            wrapOptions
+            marketSp
         );
-
-        if (wrapOptions.isEthSwap) {
-            if (swapInfo.tokenIn === wrapOptions.wethAddress)
-                swapInfo.tokenIn = ZERO_ADDRESS;
-            if (swapInfo.tokenOut === wrapOptions.wethAddress)
-                swapInfo.tokenOut = ZERO_ADDRESS;
-        }
 
         return swapInfo;
     }

@@ -13,7 +13,7 @@ import {
     isLidoStableSwap,
     ZERO_ADDRESS,
 } from '../src';
-import { getRate } from '../src/pools/lido/lidoHelpers';
+import { getStEthRate } from '../src/pools/lido/lidoHelpers';
 
 const gasPrice = bnum('30000000000');
 const maxPools = 4;
@@ -83,7 +83,7 @@ describe(`Tests for Lido USD routes.`, () => {
         it(`stETH swap should be same as wstETH with priceRate allowance, SwapExactIn, stETH In`, async () => {
             const swapType = SwapTypes.SwapExactIn;
             const swapAmt = bnum('1');
-            const priceRate = await getRate(provider, chainId);
+            const priceRate = await getStEthRate(provider, chainId);
 
             const sor = new SOR(
                 provider,
@@ -142,15 +142,15 @@ describe(`Tests for Lido USD routes.`, () => {
                 swapInfowstEth.returnAmountConsideringFees.toString()
             );
             // These should be same as no rate difference
-            expect(testSwapInfo.returnAmountForSwaps.toString()).to.eq(
+            expect(testSwapInfo.returnAmountFromSwaps.toString()).to.eq(
                 testSwapInfo.returnAmount.toString()
             );
-        });
+        }).timeout(10000);
 
         it(`stETH swap should be same as wstETH with priceRate allowance, SwapExactIn, stETH Out`, async () => {
             const swapType = SwapTypes.SwapExactIn;
             const swapAmt = bnum('1');
-            const priceRate = bnum('1.5'); // This is price rate of wstETH taken from wstETH/WETH pool
+            const priceRate = await getStEthRate(provider, chainId);
 
             const sor = new SOR(
                 provider,
@@ -212,10 +212,10 @@ describe(`Tests for Lido USD routes.`, () => {
                     .toString()
             );
             // return amounts for swaps should be same
-            expect(testSwapInfo.returnAmountForSwaps.toString()).to.eq(
+            expect(testSwapInfo.returnAmountFromSwaps.toString()).to.eq(
                 swapInfowstEth.returnAmount.toString()
             );
-        });
+        }).timeout(10000);
 
         it(`stETH swap should be same as wstETH with priceRate allowance, SwapExactOut, stETH In`, async () => {
             const swapType = SwapTypes.SwapExactOut;
@@ -280,12 +280,12 @@ describe(`Tests for Lido USD routes.`, () => {
                     .times(priceRate)
                     .toString()
             );
-        });
+        }).timeout(10000);
 
         it(`stETH swap should be same as wstETH with priceRate allowance, SwapExactOut, stETH Out`, async () => {
             const swapType = SwapTypes.SwapExactOut;
             const swapAmt = bnum('1');
-            const priceRate = await getRate(provider, chainId);
+            const priceRate = await getStEthRate(provider, chainId);
 
             const sor = new SOR(
                 provider,
@@ -345,11 +345,11 @@ describe(`Tests for Lido USD routes.`, () => {
                 swapInfowstEth.returnAmountConsideringFees.toString()
             );
             // These should be same as no rate difference
-            expect(testSwapInfo.returnAmountForSwaps.toString()).to.eq(
+            expect(testSwapInfo.returnAmountFromSwaps.toString()).to.eq(
                 testSwapInfo.returnAmount.toString()
             );
         });
-    });
+    }).timeout(10000);
 
     context('DAI/wstETH', () => {
         it(`SwapExactIn, DAI>wstETH`, async () => {
@@ -392,7 +392,7 @@ describe(`Tests for Lido USD routes.`, () => {
             // This is pulled from mainnet so needs valid routes
             expect(swapInfo.returnAmount.gt(0)).to.be.true;
             expect(swapInfo.returnAmountConsideringFees.gt(0)).to.be.true;
-        });
+        }).timeout(10000);
 
         it(`SwapExactOut, DAI>wstETH`, async () => {
             const tokenIn = DAI;
@@ -434,7 +434,7 @@ describe(`Tests for Lido USD routes.`, () => {
             // This is pulled from mainnet so needs valid routes
             expect(swapInfo.returnAmount.gt(0)).to.be.true;
             expect(swapInfo.returnAmountConsideringFees.gt(0)).to.be.true;
-        });
+        }).timeout(10000);
 
         it(`SwapExactIn, wstETH>DAI`, async () => {
             const tokenIn = wstETH;
@@ -476,7 +476,7 @@ describe(`Tests for Lido USD routes.`, () => {
             // This is pulled from mainnet so needs valid routes
             expect(swapInfo.returnAmount.gt(0)).to.be.true;
             expect(swapInfo.returnAmountConsideringFees.gt(0)).to.be.true;
-        });
+        }).timeout(10000);
 
         it(`SwapExactIn, wstETH>DAI`, async () => {
             const tokenIn = wstETH;
@@ -519,7 +519,7 @@ describe(`Tests for Lido USD routes.`, () => {
             expect(swapInfo.returnAmount.gt(0)).to.be.true;
             expect(swapInfo.returnAmountConsideringFees.gt(0)).to.be.true;
         });
-    });
+    }).timeout(10000);
 
     context('USDC/wstETH', () => {
         it(`SwapExactIn, USDC>wstETH`, async () => {
@@ -571,7 +571,7 @@ describe(`Tests for Lido USD routes.`, () => {
             // This is pulled from mainnet so needs valid routes
             expect(swapInfo.returnAmount.gt(0)).to.be.true;
             expect(swapInfo.returnAmountConsideringFees.gt(0)).to.be.true;
-        });
+        }).timeout(10000);
 
         it(`SwapExactOut, USDC>wstETH`, async () => {
             const tokenIn = USDC;
@@ -622,7 +622,7 @@ describe(`Tests for Lido USD routes.`, () => {
             // This is pulled from mainnet so needs valid routes
             expect(swapInfo.returnAmount.gt(0)).to.be.true;
             expect(swapInfo.returnAmountConsideringFees.gt(0)).to.be.true;
-        });
+        }).timeout(10000);
 
         it(`SwapExactIn, wstETH>USDC`, async () => {
             const tokenIn = wstETH;
@@ -673,7 +673,7 @@ describe(`Tests for Lido USD routes.`, () => {
             // This is pulled from mainnet so needs valid routes
             expect(swapInfo.returnAmount.gt(0)).to.be.true;
             expect(swapInfo.returnAmountConsideringFees.gt(0)).to.be.true;
-        });
+        }).timeout(10000);
 
         it(`SwapExactOut, wstETH>USDC`, async () => {
             const tokenIn = wstETH;
@@ -724,7 +724,7 @@ describe(`Tests for Lido USD routes.`, () => {
             // This is pulled from mainnet so needs valid routes
             expect(swapInfo.returnAmount.gt(0)).to.be.true;
             expect(swapInfo.returnAmountConsideringFees.gt(0)).to.be.true;
-        });
+        }).timeout(10000);
     });
 
     context('USDT/wstETH', () => {
@@ -777,7 +777,7 @@ describe(`Tests for Lido USD routes.`, () => {
             // This is pulled from mainnet so needs valid routes
             expect(swapInfo.returnAmount.gt(0)).to.be.true;
             expect(swapInfo.returnAmountConsideringFees.gt(0)).to.be.true;
-        });
+        }).timeout(10000);
 
         it(`SwapExactOut, USDT>wstETH`, async () => {
             const tokenIn = USDT;
@@ -828,7 +828,7 @@ describe(`Tests for Lido USD routes.`, () => {
             // This is pulled from mainnet so needs valid routes
             expect(swapInfo.returnAmount.gt(0)).to.be.true;
             expect(swapInfo.returnAmountConsideringFees.gt(0)).to.be.true;
-        });
+        }).timeout(10000);
 
         it(`SwapExactIn, wstETH>USDT`, async () => {
             const tokenIn = wstETH;
@@ -879,7 +879,7 @@ describe(`Tests for Lido USD routes.`, () => {
             // This is pulled from mainnet so needs valid routes
             expect(swapInfo.returnAmount.gt(0)).to.be.true;
             expect(swapInfo.returnAmountConsideringFees.gt(0)).to.be.true;
-        });
+        }).timeout(10000);
 
         it(`SwapExactOut, wstETH>USDT`, async () => {
             const tokenIn = wstETH;
@@ -930,6 +930,6 @@ describe(`Tests for Lido USD routes.`, () => {
             // This is pulled from mainnet so needs valid routes
             expect(swapInfo.returnAmount.gt(0)).to.be.true;
             expect(swapInfo.returnAmountConsideringFees.gt(0)).to.be.true;
-        });
+        }).timeout(10000);
     });
 });

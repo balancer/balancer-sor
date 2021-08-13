@@ -37,14 +37,6 @@ var __awaiter =
 Object.defineProperty(exports, '__esModule', { value: true });
 const bignumber_1 = require('./utils/bignumber');
 const bmath_1 = require('./bmath');
-const costToken_1 = require('./costToken');
-const multicall_1 = require('./multicall');
-const pools_1 = require('./pools');
-const subgraph_1 = require('./subgraph');
-const sorClass_1 = require('./sorClass');
-const helpersClass_1 = require('./helpersClass');
-const types_1 = require('./types');
-const lidoHelpers_1 = require('./pools/lido/lidoHelpers');
 const index_1 = require('./index');
 class SOR {
     constructor(
@@ -59,24 +51,6 @@ class SOR {
             disabledTokens: [],
         }
     ) {
-        this.MULTIADDR = {
-            1: '0xeefba1e63905ef1d7acba5a8513c70307c1ce441',
-            5: '0x3b2A02F22fCbc872AF77674ceD303eb269a46ce3',
-            42: '0x2cc8688C5f75E365aaEEb4ea8D6a480405A48D2A',
-            137: '0xa1B2b503959aedD81512C37e9dce48164ec6a94d',
-        };
-        this.VAULTADDR = {
-            1: '0xBA12222222228d8Ba445958a75a0704d566BF2C8',
-            5: '0x65748E8287Ce4B9E6D83EE853431958851550311',
-            42: '0xBA12222222228d8Ba445958a75a0704d566BF2C8',
-            137: '0xBA12222222228d8Ba445958a75a0704d566BF2C8',
-        };
-        this.WETHADDR = {
-            1: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2',
-            5: '0x9A1000D492d40bfccbc03f413A48F5B6516Ec0Fd',
-            42: '0xdFCeA9088c8A88A76FF74892C1457C17dfeef9C1',
-            137: '0x0d500B1d8E8eF31E21C99d1Db9A6444d3ADf1270',
-        };
         this.tokenCost = {};
         this.onChainBalanceCache = { pools: [] };
         this.processedDataCache = {};
@@ -108,17 +82,17 @@ class SOR {
                 if (
                     tokenOut === index_1.ZERO_ADDRESS ||
                     tokenOut.toLowerCase() ===
-                        this.WETHADDR[this.chainId].toLowerCase()
+                        index_1.WETHADDR[this.chainId].toLowerCase()
                 ) {
                     this.tokenCost[
                         tokenOut.toLowerCase()
                     ] = this.gasPrice
                         .times(this.swapCost)
-                        .div(bmath_1.bnum(Math.pow(10, 18)));
+                        .div(index_1.bnum(Math.pow(10, 18)));
                     return this.tokenCost[tokenOut.toLowerCase()];
                 }
                 // This calculates the cost to make a swap which is used as an input to SOR to allow it to make gas efficient recommendations
-                const costOutputToken = yield costToken_1.getCostOutputToken(
+                const costOutputToken = yield index_1.getCostOutputToken(
                     tokenOut,
                     this.gasPrice,
                     this.swapCost,
@@ -126,7 +100,7 @@ class SOR {
                     this.chainId
                 );
                 this.tokenCost[tokenOut] = costOutputToken.div(
-                    bmath_1.bnum(Math.pow(10, tokenDecimals))
+                    index_1.bnum(Math.pow(10, tokenDecimals))
                 );
                 return this.tokenCost[tokenOut];
             } else {
@@ -157,7 +131,7 @@ class SOR {
                 } else {
                     // Retrieve from URL if set otherwise use data passed in constructor
                     if (this.isUsingPoolsUrl)
-                        subgraphPools = yield subgraph_1.fetchSubgraphPools(
+                        subgraphPools = yield index_1.fetchSubgraphPools(
                             this.poolsUrl
                         );
                     else subgraphPools = this.subgraphPools;
@@ -206,10 +180,10 @@ class SOR {
                 return subgraphPools;
             }
             // This will return in normalized/string format
-            const onChainPools = yield multicall_1.getOnChainBalances(
+            const onChainPools = yield index_1.getOnChainBalances(
                 subgraphPools,
-                this.MULTIADDR[this.chainId],
-                this.VAULTADDR[this.chainId],
+                index_1.MULTIADDR[this.chainId],
+                index_1.VAULTADDR[this.chainId],
                 this.provider
             );
             // Error with multicall
@@ -223,7 +197,7 @@ class SOR {
         swapType,
         swapAmt,
         swapOptions = {
-            poolTypeFilter: types_1.PoolFilter.All,
+            poolTypeFilter: index_1.PoolFilter.All,
             timestamp: 0,
         }
     ) {
@@ -237,110 +211,52 @@ class SOR {
                 tokenOut: '',
                 returnAmount: bmath_1.ZERO,
                 returnAmountConsideringFees: bmath_1.ZERO,
+                returnAmountFromSwaps: bmath_1.ZERO,
                 marketSp: bmath_1.ZERO,
             };
-            // The Subgraph returns tokens in lower case format so we must match this
-            tokenIn = tokenIn.toLowerCase();
-            tokenOut = tokenOut.toLowerCase();
-            const WETH = this.WETHADDR[this.chainId].toLowerCase();
-            const wrapOptions = { isEthSwap: false, wethAddress: WETH };
-            if (tokenIn === index_1.ZERO_ADDRESS) {
-                tokenIn = WETH;
-                wrapOptions.isEthSwap = true;
-            }
-            if (tokenOut === index_1.ZERO_ADDRESS) {
-                tokenOut = WETH;
-                wrapOptions.isEthSwap = true;
-            }
-            let isStethIn = false;
-            let isStethOut = false;
-            let tokenInForSwaps = tokenIn;
-            let tokenOutForSwaps = tokenOut;
-            if (tokenIn === lidoHelpers_1.Lido.stETH[this.chainId]) {
-                isStethIn = true;
-                tokenInForSwaps = lidoHelpers_1.Lido.wstETH[this.chainId];
-            }
-            if (tokenOut === lidoHelpers_1.Lido.stETH[this.chainId]) {
-                isStethOut = true;
-                tokenOutForSwaps = lidoHelpers_1.Lido.wstETH[this.chainId];
-            }
+            const wrappedInfo = yield index_1.getWrappedInfo(
+                this.provider,
+                swapType,
+                tokenIn,
+                tokenOut,
+                this.chainId,
+                swapAmt
+            );
             if (this.finishedFetchingOnChain) {
                 let pools = JSON.parse(
                     JSON.stringify(this.onChainBalanceCache)
                 );
-                if (!(swapOptions.poolTypeFilter === types_1.PoolFilter.All))
+                if (!(swapOptions.poolTypeFilter === index_1.PoolFilter.All))
                     pools.pools = pools.pools.filter(
                         p => p.poolType === swapOptions.poolTypeFilter
                     );
-                let swapAmountForSwaps = swapAmt;
-                let rate = bmath_1.bnum(1);
-                if (isStethIn || isStethOut)
-                    rate = yield lidoHelpers_1.getRate(
-                        this.provider,
-                        this.chainId
-                    );
-                if (
-                    (isStethIn && swapType === types_1.SwapTypes.SwapExactIn) ||
-                    (isStethOut && swapType === types_1.SwapTypes.SwapExactOut)
-                ) {
-                    swapAmountForSwaps = swapAmt.times(rate).dp(18);
-                    // console.log(`!!!!!!! rating SwapAmt ${swapAmountForSwaps.toString()}`);
-                }
-                if (
-                    lidoHelpers_1.isLidoStableSwap(
-                        this.chainId,
-                        tokenIn,
-                        tokenOut
-                    )
-                ) {
-                    swapInfo = yield lidoHelpers_1.getLidoStaticSwaps(
+                if (index_1.isLidoStableSwap(this.chainId, tokenIn, tokenOut)) {
+                    swapInfo = yield index_1.getLidoStaticSwaps(
                         pools,
                         this.chainId,
-                        tokenInForSwaps,
-                        tokenOutForSwaps,
+                        wrappedInfo.tokenIn.addressForSwaps,
+                        wrappedInfo.tokenOut.addressForSwaps,
                         swapType,
-                        swapAmountForSwaps,
+                        wrappedInfo.swapAmountForSwaps,
                         this.provider
                     );
-                } else
+                } else {
                     swapInfo = yield this.processSwaps(
-                        tokenInForSwaps,
-                        tokenOutForSwaps,
+                        wrappedInfo.tokenIn.addressForSwaps,
+                        wrappedInfo.tokenOut.addressForSwaps,
                         swapType,
-                        swapAmountForSwaps,
+                        wrappedInfo.swapAmountForSwaps,
                         pools,
-                        wrapOptions,
                         true,
                         swapOptions.timestamp
                     );
-                if (isStethIn) swapInfo.tokenIn = tokenIn;
-                if (isStethOut) swapInfo.tokenOut = tokenOut;
-                if (
-                    (isStethIn && swapType === types_1.SwapTypes.SwapExactIn) ||
-                    (isStethOut && swapType === types_1.SwapTypes.SwapExactOut)
-                ) {
-                    swapInfo.swapAmount = index_1.scale(swapAmt, 18).dp(0);
-                    swapInfo.swapAmountForSwaps = index_1
-                        .scale(swapAmountForSwaps, 18)
-                        .dp(0); // Always 18 because wstETH
-                } else {
-                    // Should be same when standard tokens
-                    swapInfo.swapAmountForSwaps = swapInfo.swapAmount;
                 }
-                // SwapExactIn, stETH out, returnAmount is stETH amount out, returnAmountForSwaps is wstETH amount out
-                swapInfo.returnAmountForSwaps = swapInfo.returnAmount;
-                if (
-                    (isStethOut &&
-                        swapType === types_1.SwapTypes.SwapExactIn) ||
-                    (isStethIn && swapType === types_1.SwapTypes.SwapExactOut)
-                ) {
-                    swapInfo.returnAmount = swapInfo.returnAmount
-                        .div(rate)
-                        .dp(0);
-                    swapInfo.returnAmountConsideringFees = swapInfo.returnAmountConsideringFees
-                        .div(rate)
-                        .dp(0);
-                }
+                swapInfo = index_1.setWrappedInfo(
+                    swapInfo,
+                    swapType,
+                    wrappedInfo,
+                    this.chainId
+                );
             }
             return swapInfo;
         });
@@ -353,7 +269,6 @@ class SOR {
         swapType,
         swapAmt,
         onChainPools,
-        wrapOptions,
         useProcessCache = true,
         currentBlockTimestamp = 0
     ) {
@@ -362,10 +277,12 @@ class SOR {
                 tokenAddresses: [],
                 swaps: [],
                 swapAmount: bmath_1.ZERO,
+                swapAmountForSwaps: bmath_1.ZERO,
                 tokenIn: '',
                 tokenOut: '',
                 returnAmount: bmath_1.ZERO,
                 returnAmountConsideringFees: bmath_1.ZERO,
+                returnAmountFromSwaps: bmath_1.ZERO,
                 marketSp: bmath_1.ZERO,
             };
             if (onChainPools.pools.length === 0) return swapInfo;
@@ -382,7 +299,7 @@ class SOR {
                 let poolsList = JSON.parse(JSON.stringify(onChainPools));
                 let pathData;
                 let hopTokens;
-                [pools, hopTokens] = pools_1.filterPoolsOfInterest(
+                [pools, hopTokens] = index_1.filterPoolsOfInterest(
                     poolsList.pools,
                     tokenIn,
                     tokenOut,
@@ -390,13 +307,13 @@ class SOR {
                     this.disabledOptions,
                     currentBlockTimestamp
                 );
-                [pools, pathData] = pools_1.filterHopPools(
+                [pools, pathData] = index_1.filterHopPools(
                     tokenIn,
                     tokenOut,
                     hopTokens,
                     pools
                 );
-                [paths] = sorClass_1.calculatePathLimits(pathData, swapType);
+                [paths] = index_1.calculatePathLimits(pathData, swapType);
                 // Update cache if used
                 if (useProcessCache)
                     this.processedDataCache[
@@ -413,7 +330,7 @@ class SOR {
                 marketSp = cache.marketSp;
             }
             let costOutputToken = this.tokenCost[tokenOut];
-            if (swapType === types_1.SwapTypes.SwapExactOut)
+            if (swapType === index_1.SwapTypes.SwapExactOut)
                 costOutputToken = this.tokenCost[tokenIn];
             // Use previously stored value if exists else default to 0
             if (costOutputToken === undefined) {
@@ -428,7 +345,7 @@ class SOR {
                 total,
                 marketSp,
                 totalConsideringFees,
-            ] = sorClass_1.smartOrderRouter(
+            ] = index_1.smartOrderRouter(
                 JSON.parse(JSON.stringify(pools)), // Need to keep original pools for cache
                 paths,
                 swapType,
@@ -440,7 +357,7 @@ class SOR {
                 this.processedDataCache[
                     `${tokenIn}${tokenOut}${swapType}${currentBlockTimestamp}`
                 ].marketSp = marketSp;
-            swapInfo = helpersClass_1.formatSwaps(
+            swapInfo = index_1.formatSwaps(
                 swaps,
                 swapType,
                 swapAmt,
@@ -448,15 +365,8 @@ class SOR {
                 tokenOut,
                 total,
                 totalConsideringFees,
-                marketSp,
-                wrapOptions
+                marketSp
             );
-            if (wrapOptions.isEthSwap) {
-                if (swapInfo.tokenIn === wrapOptions.wethAddress)
-                    swapInfo.tokenIn = index_1.ZERO_ADDRESS;
-                if (swapInfo.tokenOut === wrapOptions.wethAddress)
-                    swapInfo.tokenOut = index_1.ZERO_ADDRESS;
-            }
             return swapInfo;
         });
     }
