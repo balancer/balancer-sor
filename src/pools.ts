@@ -7,6 +7,7 @@ import {
     NewPath,
     Swap,
     PoolBase,
+    PoolPairBase,
 } from './types';
 import { WeightedPool } from './pools/weightedPool/weightedPool';
 import { StablePool } from './pools/stablePool/stablePool';
@@ -172,6 +173,7 @@ export function filterPoolsOfInterest(
     const hopTokens = [...hopTokensSet];
     return [poolsDictionary, hopTokens];
 }
+
 /*
 Find the most liquid pool for each hop (i.e. tokenIn->hopToken & hopToken->tokenOut).
 Creates paths for each pool of interest (multi & direct pools).
@@ -184,16 +186,9 @@ export function filterHopPools(
 ): [PoolDictionary, NewPath[]] {
     const filteredPoolsOfInterest: PoolDictionary = {};
     const paths: NewPath[] = [];
-    let firstPoolLoop = true;
 
-    // No multihop pool but still need to create paths for direct pools
-    if (hopTokens.length === 0) {
-        for (let id in poolsOfInterest) {
-            if (poolsOfInterest[id].swapPairType !== SwapPairType.Direct) {
-                delete poolsOfInterest[id];
-                continue;
-            }
-
+    for (let id in poolsOfInterest) {
+        if (poolsOfInterest[id].swapPairType === SwapPairType.Direct) {
             const path = createDirectPath(
                 poolsOfInterest[id],
                 tokenIn,
@@ -213,17 +208,6 @@ export function filterHopPools(
         for (let id in poolsOfInterest) {
             const pool = poolsOfInterest[id];
 
-            // We don't consider direct pools for the multihop but we do add it's path
-            if (pool.swapPairType === SwapPairType.Direct) {
-                // First loop of all pools we add paths to list
-                if (firstPoolLoop) {
-                    const path = createDirectPath(pool, tokenIn, tokenOut);
-                    paths.push(path);
-                    filteredPoolsOfInterest[id] = pool;
-                }
-                continue;
-            }
-
             let tokenListSet = new Set(pool.tokensList);
             // Depending on env file, we add the BPT as well as
             // we can join/exit as part of the multihop
@@ -237,7 +221,6 @@ export function filterHopPools(
                     tokenIn,
                     hopTokens[i]
                 );
-                // const normalizedLiquidity = pool.getNormalizedLiquidity(tokenIn, hopTokens[i]);
                 const normalizedLiquidity = pool.getNormalizedLiquidity(
                     poolPairData
                 );
@@ -255,7 +238,6 @@ export function filterHopPools(
                     hopTokens[i],
                     tokenOut
                 );
-                // const normalizedLiquidity = pool.getNormalizedLiquidity(hopTokens[i], tokenOut);
                 const normalizedLiquidity = pool.getNormalizedLiquidity(
                     poolPairData
                 );
@@ -274,26 +256,52 @@ export function filterHopPools(
             }
         }
 
-        firstPoolLoop = false;
-
         filteredPoolsOfInterest[highestNormalizedLiquidityFirstPoolId] =
             poolsOfInterest[highestNormalizedLiquidityFirstPoolId];
         filteredPoolsOfInterest[highestNormalizedLiquiditySecondPoolId] =
             poolsOfInterest[highestNormalizedLiquiditySecondPoolId];
-
-        const path = createMultihopPath(
+        const path1 = createDirectPath(
             poolsOfInterest[highestNormalizedLiquidityFirstPoolId],
-            poolsOfInterest[highestNormalizedLiquiditySecondPoolId],
             tokenIn,
-            hopTokens[i],
-            tokenOut
+            hopTokens[i]
         );
-
+        const path2 = createDirectPath(
+            poolsOfInterest[highestNormalizedLiquiditySecondPoolId],
+            hopTokens[i],
+            tokenOut,
+        );
+        const path = composePaths([path1, path2]);
         paths.push(path);
     }
-
     return [filteredPoolsOfInterest, paths];
 }
+
+
+
+// This function will only work correctly if the input is composable
+function composePaths(
+    paths: NewPath[]
+): NewPath {
+    let id: string = "";
+    let swaps: Swap[] = [];
+    let poolPairData: PoolPairBase[] = [];
+    let pools: PoolBase[] = [];
+    for (let path of paths){
+        id += path.id;
+        swaps = swaps.concat(path.swaps);
+        poolPairData = poolPairData.concat(path.poolPairData);
+        pools = pools.concat(path.pools);
+    }
+    const path: NewPath = {
+        id: id,
+        swaps: swaps,
+        poolPairData: poolPairData,
+        limitAmount: ZERO,
+        pools: pools,
+    };
+    return path;
+}
+
 
 function createDirectPath(
     pool: PoolBase,
