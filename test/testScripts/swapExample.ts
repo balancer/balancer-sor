@@ -78,6 +78,16 @@ export const ADDRESSES = {
             decimals: 18,
             symbol: 'DAI',
         },
+        STETH: {
+            address: '0xae7ab96520de3a18e5e111b5eaab095312d7fe84',
+            decimals: 18,
+            symbol: 'STETH',
+        },
+        wSTETH: {
+            address: '0x7f39c581f595b53c5cb19bd0b3f8da6c935e2ca0',
+            decimals: 18,
+            symbol: 'wSTETH',
+        },
     },
     [Network.KOVAN]: {
         // Visit https://balancer-faucet.on.fleek.co/#/faucet for test tokens
@@ -526,18 +536,18 @@ async function makeRelayerTrade(
 }
 
 async function simpleSwap() {
-    // const networkId = Network.MAINNET;
-    const networkId = Network.KOVAN;
+    const networkId = Network.MAINNET;
+    // const networkId = Network.KOVAN;
     // Pools source can be Subgraph URL or pools data set passed directly
     const poolsSource = SUBGRAPH_URLS[networkId];
     // const poolsSource = require('../testData/testPools/gusdBug.json');
     // Update pools list with most recent onchain balances
     const queryOnChain = true;
-    const tokenIn = ADDRESSES[networkId].DAI;
-    const tokenOut = ADDRESSES[networkId].STETH;
-    const swapType = SwapTypes.SwapExactOut;
+    const tokenIn = ADDRESSES[networkId].STETH;
+    const tokenOut = ADDRESSES[networkId].DAI;
+    const swapType = SwapTypes.SwapExactIn;
     const swapAmount = new BigNumber(0.07); // In normalized format, i.e. 1USDC = 1
-    const executeTrade = true;
+    const executeTrade = false;
 
     const provider = new JsonRpcProvider(PROVIDER_URLS[networkId]);
 
