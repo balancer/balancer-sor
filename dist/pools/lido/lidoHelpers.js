@@ -86,7 +86,7 @@ exports.Lido = {
         },
         // WETH/wstETH Lido Pool
         wstEthWeth: {
-            1: 'TODO',
+            1: '0x32296969ef14eb0c6d29669c550d4a0449130230000200000000000000000080',
             42: '0xe08590bde837eb9b2d42aa1196469d6e08fe96ec000200000000000000000101',
         },
     },
