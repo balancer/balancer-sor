@@ -127,15 +127,20 @@ export class SOR {
         TokenOut: string,
         SwapType: string,
         SwapAmt: BigNumber
-    ): Promise<[Swap[][], BigNumber, BigNumber]> {
+    ): Promise<[Swap[][], BigNumber, BigNumber, BigNumber]> {
         // The Subgraph returns tokens in lower case format so we must match this
         TokenIn = TokenIn.toLowerCase();
         TokenOut = TokenOut.toLowerCase();
-        let swaps, total, marketSp;
+        let swaps, total, marketSp, totalConsideringFees;
 
         if (this.isAllFetched) {
             // All Pools with OnChain Balances is already fetched so use that
-            [swaps, total, marketSp] = await this.processSwaps(
+            [
+                swaps,
+                total,
+                marketSp,
+                totalConsideringFees,
+            ] = await this.processSwaps(
                 TokenIn,
                 TokenOut,
                 SwapType,
@@ -145,9 +150,14 @@ export class SOR {
         } else {
             // Haven't retrieved all pools/balances so we use the pools for pairs if previously fetched
             if (!this.poolsForPairsCache[this.createKey(TokenIn, TokenOut)])
-                return [[[]], bnum(0), bnum(0)];
+                return [[[]], bnum(0), bnum(0), bnum(0)];
 
-            [swaps, total, marketSp] = await this.processSwaps(
+            [
+                swaps,
+                total,
+                marketSp,
+                totalConsideringFees,
+            ] = await this.processSwaps(
                 TokenIn,
                 TokenOut,
                 SwapType,
@@ -157,7 +167,7 @@ export class SOR {
             );
         }
 
-        return [swaps, total, marketSp];
+        return [swaps, total, marketSp, totalConsideringFees];
     }
 
     // Will process swap/pools data and return best swaps
@@ -169,8 +179,9 @@ export class SOR {
         SwapAmt: BigNumber,
         OnChainPools: Pools,
         UserProcessCache: boolean = true
-    ): Promise<[Swap[][], BigNumber, BigNumber]> {
-        if (OnChainPools.pools.length === 0) return [[[]], bnum(0), bnum(0)];
+    ): Promise<[Swap[][], BigNumber, BigNumber, BigNumber]> {
+        if (OnChainPools.pools.length === 0)
+            return [[[]], bnum(0), bnum(0), bnum(0)];
 
         let pools: PoolDictionary,
             paths: Path[],
@@ -216,8 +227,11 @@ export class SOR {
             marketSp = cache.marketSp;
         }
 
-        // Use previously stored value if exists else default to 0
-        let costOutputToken = this.tokenCost[TokenOut];
+        let costOutputToken = this.tokenCost[TokenOut.toLowerCase()];
+
+        if (SwapType === 'swapExactOut')
+            costOutputToken = this.tokenCost[TokenIn.toLowerCase()];
+
         if (costOutputToken === undefined) {
             costOutputToken = new BigNumber(0);
         }
@@ -225,8 +239,12 @@ export class SOR {
         // Returns list of swaps
         // swapExactIn - total = total amount swap will return of TokenOut
         // swapExactOut - total = total amount of TokenIn required for swap
-        let swaps, total;
-        [swaps, total] = sor.smartOrderRouterMultiHopEpsOfInterest(
+        let swaps, total, totalConsideringFees;
+        [
+            swaps,
+            total,
+            totalConsideringFees,
+        ] = sor.smartOrderRouterMultiHopEpsOfInterest(
             JSON.parse(JSON.stringify(pools)), // Need to keep original pools for cache
             paths,
             SwapType,
@@ -236,7 +254,7 @@ export class SOR {
             epsOfInterest
         );
 
-        return [swaps, total, marketSp];
+        return [swaps, total, marketSp, totalConsideringFees];
     }
 
     /*
@@ -310,7 +328,7 @@ export class SOR {
             );
 
             // Use previously stored value if exists else default to 0
-            let costOutputToken = this.tokenCost[TokenOut];
+            let costOutputToken = this.tokenCost[TokenOut.toLowerCase()];
             if (costOutputToken === undefined) {
                 costOutputToken = new BigNumber(0);
             }
