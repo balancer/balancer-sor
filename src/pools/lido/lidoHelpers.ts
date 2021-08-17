@@ -3,7 +3,7 @@ import { Contract } from '@ethersproject/contracts';
 import { SwapInfo, SwapTypes, SwapV2 } from '../../types';
 import { parseNewPool } from '../../pools';
 import { ZERO, scale, bnum } from '../../bmath';
-import { BigNumber } from 'utils/bignumber';
+import { BigNumber } from '../../utils/bignumber';
 import { ZERO_ADDRESS, SubGraphPoolsBase } from '../../index';
 import vaultAbi from '../../abi/Vault.json';
 import wstETHAbi from '../../abi/wstETH.json';
@@ -858,6 +858,8 @@ function calculateMarketSp(
     for (let i = 0; i < swaps.length; i++) {
         const swap = swaps[i];
 
+        console.log(swap.poolId);
+
         // Find matching pool from list so we can use balances, etc
         const pool = pools.pools.filter(p => p.id === swap.poolId);
         if (pool.length !== 1) return bnum(0);
@@ -886,6 +888,7 @@ function calculateMarketSp(
                 ZERO
             ); // Amount = 0 to just get current SP
 
+        console.log(spotPrice.toString());
         // console.log(`${swap.poolId} ${spotPrice.toString()}`);
         spotPrices.push(spotPrice);
     }

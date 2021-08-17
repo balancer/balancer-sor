@@ -1,6 +1,6 @@
 import { BaseProvider } from '@ethersproject/providers';
 import { SwapInfo, SwapTypes } from '../../types';
-import { BigNumber } from 'utils/bignumber';
+import { BigNumber } from '../../utils/bignumber';
 import { SubGraphPoolsBase } from '../../index';
 export declare const Lido: {
     Networks: number[];
