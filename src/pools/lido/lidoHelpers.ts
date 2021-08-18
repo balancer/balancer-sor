@@ -858,8 +858,6 @@ function calculateMarketSp(
     for (let i = 0; i < swaps.length; i++) {
         const swap = swaps[i];
 
-        console.log(swap.poolId);
-
         // Find matching pool from list so we can use balances, etc
         const pool = pools.pools.filter(p => p.id === swap.poolId);
         if (pool.length !== 1) return bnum(0);
@@ -888,7 +886,6 @@ function calculateMarketSp(
                 ZERO
             ); // Amount = 0 to just get current SP
 
-        console.log(spotPrice.toString());
         // console.log(`${swap.poolId} ${spotPrice.toString()}`);
         spotPrices.push(spotPrice);
     }
