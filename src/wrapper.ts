@@ -36,13 +36,13 @@ export class SOR {
     chainId: number;
     // avg Balancer swap cost. Can be updated manually if required.
     swapCost: BigNumber;
-    isUsingPoolsUrl: Boolean;
+    isUsingPoolsUrl: boolean;
     poolsUrl: string;
     subgraphPools: SubGraphPoolsBase;
     tokenCost = {};
     onChainBalanceCache: SubGraphPoolsBase = { pools: [] };
     processedDataCache = {};
-    finishedFetchingOnChain: boolean = false;
+    finishedFetchingOnChain = false;
     disabledOptions: DisabledOptions;
 
     constructor(
@@ -122,7 +122,7 @@ export class SOR {
     If pools url was passed in to constructor - uses this to fetch pools source.
     */
     async fetchPools(
-        isOnChain: boolean = true,
+        isOnChain = true,
         poolsData: SubGraphPoolsBase = { pools: [] }
     ): Promise<boolean> {
         try {
@@ -143,7 +143,7 @@ export class SOR {
                 else subgraphPools = this.subgraphPools;
             }
 
-            let previousStringify = JSON.stringify(this.onChainBalanceCache); // Used for compare
+            const previousStringify = JSON.stringify(this.onChainBalanceCache); // Used for compare
 
             // Get latest on-chain balances (returns data in string/normalized format)
             this.onChainBalanceCache = await this.fetchOnChainBalances(
@@ -176,7 +176,7 @@ export class SOR {
     */
     private async fetchOnChainBalances(
         subgraphPools: SubGraphPoolsBase,
-        isOnChain: boolean = true
+        isOnChain = true
     ): Promise<SubGraphPoolsBase> {
         if (subgraphPools.pools.length === 0) {
             console.error('ERROR: No Pools To Fetch.');
@@ -238,7 +238,7 @@ export class SOR {
         );
 
         if (this.finishedFetchingOnChain) {
-            let pools = JSON.parse(JSON.stringify(this.onChainBalanceCache));
+            const pools = JSON.parse(JSON.stringify(this.onChainBalanceCache));
             if (!(swapOptions.poolTypeFilter === PoolFilter.All))
                 pools.pools = pools.pools.filter(
                     p => p.poolType === swapOptions.poolTypeFilter
@@ -287,8 +287,8 @@ export class SOR {
         swapType: SwapTypes,
         swapAmt: BigNumber,
         onChainPools: SubGraphPoolsBase,
-        useProcessCache: boolean = true,
-        currentBlockTimestamp: number = 0
+        useProcessCache = true,
+        currentBlockTimestamp = 0
     ): Promise<SwapInfo> {
         let swapInfo: SwapInfo = {
             tokenAddresses: [],
@@ -307,7 +307,7 @@ export class SOR {
         let pools: PoolDictionary, paths: NewPath[], marketSp: BigNumber;
 
         // If token pair has been processed before that info can be reused to speed up execution
-        let cache = this.processedDataCache[
+        const cache = this.processedDataCache[
             `${tokenIn}${tokenOut}${swapType}${currentBlockTimestamp}`
         ];
 
@@ -317,7 +317,7 @@ export class SOR {
 
             // Always use onChain info
             // Some functions alter pools list directly but we want to keep original so make a copy to work from
-            let poolsList = JSON.parse(JSON.stringify(onChainPools));
+            const poolsList = JSON.parse(JSON.stringify(onChainPools));
             let pathData: NewPath[];
             let hopTokens: string[];
             [pools, hopTokens] = filterPoolsOfInterest(

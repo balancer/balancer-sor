@@ -3,11 +3,16 @@ import { BaseProvider } from '@ethersproject/providers';
 import { Contract } from '@ethersproject/contracts';
 import { Interface } from '@ethersproject/abi';
 
-export async function call(provider, abi: any[], call: any[], options?) {
+export async function call(
+    provider: any,
+    abi: any[],
+    call: any[],
+    options = {}
+): Promise<any> {
     const contract = new Contract(call[0], abi, provider);
     try {
         const params = call[2] || [];
-        return await contract[call[1]](...params, options || {});
+        return await contract[call[1]](...params, options);
     } catch (e) {
         return Promise.reject(e);
     }
@@ -15,11 +20,12 @@ export async function call(provider, abi: any[], call: any[], options?) {
 
 export async function multicall(
     multiAddress: string,
-    provider,
+    provider: any,
     abi: any[],
-    calls: any[],
-    options?
-) {
+    calls: [string, string, any[]][],
+    options = {}
+): Promise<any[]> {
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
     const multicallAbi = require('../abi/Multicall.json');
     const multi = new Contract(multiAddress, multicallAbi, provider);
     const itf = new Interface(abi);
@@ -29,7 +35,7 @@ export async function multicall(
                 call[0].toLowerCase(),
                 itf.encodeFunctionData(call[1], call[2]),
             ]),
-            options || {}
+            options
         );
         return res.map((call, i) =>
             itf.decodeFunctionResult(calls[i][1], call)
@@ -44,22 +50,27 @@ export class Multicaller {
     public provider: BaseProvider;
     public abi: any[];
     public options: any = {};
-    public calls: any[] = [];
+    public calls: [string, string, any][] = [];
     public paths: any[] = [];
 
     constructor(
         multiAddress: string,
         provider: BaseProvider,
         abi: any[],
-        options?
+        options = {}
     ) {
         this.multiAddress = multiAddress;
         this.provider = provider;
         this.abi = abi;
-        this.options = options || {};
+        this.options = options;
     }
 
-    call(path, address, fn, params?): Multicaller {
+    call(
+        path: string,
+        address: string,
+        fn: string,
+        params?: any[]
+    ): Multicaller {
         this.calls.push([address, fn, params]);
         this.paths.push(path);
         return this;

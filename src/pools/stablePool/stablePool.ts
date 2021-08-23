@@ -95,7 +95,7 @@ export class StablePool implements PoolBase {
         this.ampAdjusted = this.amp.times(this.AMP_PRECISION);
     }
 
-    setTypeForSwap(type: SwapPairType) {
+    setTypeForSwap(type: SwapPairType): void {
         this.swapPairType = type;
     }
 
@@ -143,15 +143,15 @@ export class StablePool implements PoolBase {
         }
 
         // Get all token balances
-        let allBalances: BigNumber[] = [];
-        let allBalancesScaled: BigNumber[] = [];
+        const allBalances: BigNumber[] = [];
+        const allBalancesScaled: BigNumber[] = [];
         for (let i = 0; i < this.tokens.length; i++) {
             const balanceBn = bnum(this.tokens[i].balance);
             allBalances.push(balanceBn);
             allBalancesScaled.push(scale(balanceBn, 18));
         }
 
-        let inv = _invariant(this.amp, allBalances);
+        const inv = _invariant(this.amp, allBalances);
 
         const poolPairData: StablePoolPairData = {
             id: this.id,
@@ -177,7 +177,7 @@ export class StablePool implements PoolBase {
         return poolPairData;
     }
 
-    getNormalizedLiquidity(poolPairData: StablePoolPairData) {
+    getNormalizedLiquidity(poolPairData: StablePoolPairData): BigNumber {
         // This is an approximation as the actual normalized liquidity is a lot more complicated to calculate
         return poolPairData.balanceOut.times(poolPairData.amp);
     }

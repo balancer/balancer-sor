@@ -98,7 +98,7 @@ export class MetaStablePool implements PoolBase {
         this.ampAdjusted = this.amp.times(this.AMP_PRECISION);
     }
 
-    setTypeForSwap(type: SwapPairType) {
+    setTypeForSwap(type: SwapPairType): void {
         this.swapPairType = type;
     }
 
@@ -155,8 +155,8 @@ export class MetaStablePool implements PoolBase {
         }
 
         // Get all token balances
-        let allBalances: BigNumber[] = [];
-        let allBalancesScaled: BigNumber[] = [];
+        const allBalances: BigNumber[] = [];
+        const allBalancesScaled: BigNumber[] = [];
         for (let i = 0; i < this.tokens.length; i++) {
             // const balanceBn = bnum(this.tokens[i].balance);
             const balanceBn = bnum(this.tokens[i].balance)
@@ -166,7 +166,7 @@ export class MetaStablePool implements PoolBase {
             allBalancesScaled.push(scale(balanceBn, 18));
         }
 
-        let inv = _invariant(this.amp, allBalances);
+        const inv = _invariant(this.amp, allBalances);
 
         const poolPairData: MetaStablePoolPairData = {
             id: this.id,
@@ -194,7 +194,7 @@ export class MetaStablePool implements PoolBase {
         return poolPairData;
     }
 
-    getNormalizedLiquidity(poolPairData: MetaStablePoolPairData) {
+    getNormalizedLiquidity(poolPairData: MetaStablePoolPairData): BigNumber {
         // This is an approximation as the actual normalized liquidity is a lot more complicated to calculate
         return poolPairData.balanceOut.times(poolPairData.amp);
     }
@@ -237,7 +237,7 @@ export class MetaStablePool implements PoolBase {
         // Using BigNumber.js decimalPlaces (dp), allows us to consider token decimal accuracy correctly,
         // i.e. when using token with 2decimals 0.002 should be returned as 0
         // Uses ROUND_DOWN mode (1)
-        let amt = _exactTokenInForTokenOut(
+        const amt = _exactTokenInForTokenOut(
             amount.times(poolPairData.tokenInPriceRate),
             poolPairData
         ).dp(poolPairData.decimalsOut, 1);
@@ -265,7 +265,7 @@ export class MetaStablePool implements PoolBase {
         // Using BigNumber.js decimalPlaces (dp), allows us to consider token decimal accuracy correctly,
         // i.e. when using token with 2decimals 0.002 should be returned as 0
         // Uses ROUND_UP mode (0)
-        let amt = _tokenInForExactTokenOut(
+        const amt = _tokenInForExactTokenOut(
             amount.times(poolPairData.tokenOutPriceRate),
             poolPairData
         ).dp(poolPairData.decimalsIn, 0);
@@ -291,8 +291,8 @@ export class MetaStablePool implements PoolBase {
         poolPairData: MetaStablePoolPairData,
         amount: BigNumber
     ): BigNumber {
-        let amountConverted = amount.times(poolPairData.tokenInPriceRate);
-        let result = _spotPriceAfterSwapExactTokenInForTokenOut(
+        const amountConverted = amount.times(poolPairData.tokenInPriceRate);
+        const result = _spotPriceAfterSwapExactTokenInForTokenOut(
             amountConverted,
             poolPairData
         );
@@ -317,8 +317,8 @@ export class MetaStablePool implements PoolBase {
         poolPairData: MetaStablePoolPairData,
         amount: BigNumber
     ): BigNumber {
-        let amountConverted = amount.times(poolPairData.tokenOutPriceRate);
-        let result = _spotPriceAfterSwapTokenInForExactTokenOut(
+        const amountConverted = amount.times(poolPairData.tokenOutPriceRate);
+        const result = _spotPriceAfterSwapTokenInForExactTokenOut(
             amountConverted,
             poolPairData
         );
@@ -407,7 +407,7 @@ export class MetaStablePool implements PoolBase {
             // All values should use 1e18 fixed point
             // i.e. 1USDC => 1e18 not 1e6
             const amtScaled = scale(amount, 18);
-            let amountConverted = amtScaled.times(
+            const amountConverted = amtScaled.times(
                 poolPairData.tokenInPriceRate
             );
 
@@ -435,7 +435,7 @@ export class MetaStablePool implements PoolBase {
             // All values should use 1e18 fixed point
             // i.e. 1USDC => 1e18 not 1e6
             const amtScaled = scale(amount, 18);
-            let amountConverted = amtScaled.times(
+            const amountConverted = amtScaled.times(
                 poolPairData.tokenOutPriceRate
             );
 

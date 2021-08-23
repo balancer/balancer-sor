@@ -120,7 +120,7 @@ export class WeightedPool implements PoolBase {
         }
 
         if (pairType != PairTypes.BptToToken) {
-            let tokenIndexIn = this.tokens.findIndex(
+            const tokenIndexIn = this.tokens.findIndex(
                 t => getAddress(t.address) === getAddress(tokenIn)
             );
             if (tokenIndexIn < 0) throw 'Pool does not contain tokenIn';
@@ -130,7 +130,7 @@ export class WeightedPool implements PoolBase {
             weightIn = bnum(tI.weight).div(this.totalWeight);
         }
         if (pairType != PairTypes.TokenToBpt) {
-            let tokenIndexOut = this.tokens.findIndex(
+            const tokenIndexOut = this.tokens.findIndex(
                 t => getAddress(t.address) === getAddress(tokenOut)
             );
             if (tokenIndexOut < 0) throw 'Pool does not contain tokenOut';
