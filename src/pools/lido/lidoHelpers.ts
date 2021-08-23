@@ -6,7 +6,6 @@ import { ZERO, scale, bnum } from '../../bmath';
 import { BigNumber } from '../../utils/bignumber';
 import { ZERO_ADDRESS, SubGraphPoolsBase } from '../../index';
 import vaultAbi from '../../abi/Vault.json';
-import wstETHAbi from '../../abi/wstETH.json';
 
 export const Lido = {
     Networks: [1, 42],
@@ -901,7 +900,7 @@ export async function getStEthRate(
     // Call stEthPerToken or tokensPerStETH to get the scaling factors in each direction.
     const wstETHContract = new Contract(
         Lido.wstETH[chainId],
-        wstETHAbi,
+        ['function tokensPerStEth() external view returns (uint256)'],
         provider
     );
     const rate = await wstETHContract.tokensPerStEth();

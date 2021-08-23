@@ -24,10 +24,14 @@ export async function multicall(
     abi: any[],
     calls: [string, string, any[]][],
     options = {}
-): Promise<any[]> {
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-    const multicallAbi = require('../abi/Multicall.json');
-    const multi = new Contract(multiAddress, multicallAbi, provider);
+) {
+    const multi = new Contract(
+        multiAddress,
+        [
+            'function aggregate(tuple(address target, bytes callData) memory calls) public returns (uint256 blockNumber, bytes[] memory returnData)',
+        ],
+        provider
+    );
     const itf = new Interface(abi);
     try {
         const [, res] = await multi.aggregate(
