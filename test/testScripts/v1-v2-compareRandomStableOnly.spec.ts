@@ -22,7 +22,6 @@ const provider = new JsonRpcProvider(
     `https://mainnet.infura.io/v3/${process.env.INFURA}`
 );
 const gasPrice = new BigNumber('30000000000');
-const chainId = 1;
 
 enum SwapAmt {
     Small,
@@ -34,7 +33,7 @@ enum SwapAmt {
 
 describe('Run Large Amount Of Tests Using Saved Pools Data', async () => {
     // This must be updated with pools of interest (see ./test/testData/testPools)
-    let testFiles = [
+    const testFiles = [
         'stable-and-weighted-token-btp-test',
         'stable-pools-only-wbtc-to-sbtc-exactIn',
         'stable-pools-only-wbtc-to-sbtc-exactOut',

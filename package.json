@@ -9,7 +9,7 @@
         "prepublish": "tsc",
         "test": "nyc mocha -r ts-node/register test/*.spec.ts",
         "coverage": "nyc report --reporter=text-lcov | coveralls",
-        "lint": "eslint ./src --ext .ts --max-warnings 0"
+        "lint": "eslint ./src ./test --ext .ts --max-warnings 0"
     },
     "husky": {
         "hooks": {

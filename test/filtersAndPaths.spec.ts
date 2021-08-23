@@ -48,7 +48,7 @@ describe('Tests pools filtering and path processing', () => {
         let noDirect = 0,
             noHopIn = 0,
             noHopOut = 0;
-        for (let k in poolsOfInterestDictionary) {
+        for (const k in poolsOfInterestDictionary) {
             if (
                 poolsOfInterestDictionary[k].swapPairType ===
                 SwapPairType.Direct
@@ -186,7 +186,7 @@ describe('Tests pools filtering and path processing', () => {
         let noDirect = 0,
             noHopIn = 0,
             noHopOut = 0;
-        for (let k in poolsOfInterestDictionary) {
+        for (const k in poolsOfInterestDictionary) {
             if (
                 poolsOfInterestDictionary[k].swapPairType ===
                 SwapPairType.Direct
@@ -231,7 +231,7 @@ describe('Tests pools filtering and path processing', () => {
         let noDirect = 0,
             noHopIn = 0,
             noHopOut = 0;
-        for (let k in poolsOfInterestDictionary) {
+        for (const k in poolsOfInterestDictionary) {
             if (
                 poolsOfInterestDictionary[k].swapPairType ===
                 SwapPairType.Direct
@@ -262,8 +262,8 @@ describe('Tests pools filtering and path processing', () => {
     it('should filter stable & weighted pools correctly', () => {
         let hopTokens: string[];
         let poolsOfInterestDictionary: PoolDictionary;
-        let weighted: any = testPools.weightedOnly;
-        let allPools: any = testPools.stableOnly.concat(weighted);
+        const weighted: any = testPools.weightedOnly;
+        const allPools: any = testPools.stableOnly.concat(weighted);
 
         [poolsOfInterestDictionary, hopTokens] = filterPoolsOfInterest(
             allPools,
@@ -277,7 +277,7 @@ describe('Tests pools filtering and path processing', () => {
             noHopOut = 0,
             noWeighted = 0,
             noStable = 0;
-        for (let k in poolsOfInterestDictionary) {
+        for (const k in poolsOfInterestDictionary) {
             if (
                 poolsOfInterestDictionary[k].swapPairType ===
                 SwapPairType.Direct
@@ -329,7 +329,7 @@ describe('Tests pools filtering and path processing', () => {
         let noDirect = 0,
             noHopIn = 0,
             noHopOut = 0;
-        for (let k in poolsOfInterestDictionary) {
+        for (const k in poolsOfInterestDictionary) {
             if (
                 poolsOfInterestDictionary[k].swapPairType ===
                 SwapPairType.Direct
@@ -441,7 +441,7 @@ describe('Tests pools filtering and path processing', () => {
             noHopIn = 0,
             noHopOut = 0;
 
-        for (let k in poolsOfInterestDictionary) {
+        for (const k in poolsOfInterestDictionary) {
             if (
                 poolsOfInterestDictionary[k].swapPairType ===
                 SwapPairType.Direct
@@ -605,8 +605,8 @@ describe('Tests pools filtering and path processing', () => {
     it('Test pool class that has direct & multihop paths', async () => {
         const pools = JSON.parse(JSON.stringify(testPools))
             .pathTestDirectAndMulti;
-        let tokenIn = USDC;
-        let tokenOut = DAI;
+        const tokenIn = USDC;
+        const tokenOut = DAI;
         let hopTokens: string[];
         let poolsOfInterestDictionary: PoolDictionary;
         let pathData: NewPath[];
@@ -641,8 +641,8 @@ describe('Tests pools filtering and path processing', () => {
     it('Test pool class that has two multihop paths, swapExactIn', async () => {
         const pools = JSON.parse(JSON.stringify(testPools))
             .pathTestPoolTwoMultiHops;
-        let tokenIn = USDC;
-        let tokenOut = DAI;
+        const tokenIn = USDC;
+        const tokenOut = DAI;
         let hopTokens: string[];
         let poolsOfInterestDictionary: PoolDictionary;
         let pathData: NewPath[];
@@ -751,8 +751,8 @@ describe('Tests pools filtering and path processing', () => {
     it('Test pool class that has two multihop paths, swapExactOut', async () => {
         const pools = JSON.parse(JSON.stringify(testPools))
             .pathTestPoolTwoMultiHops;
-        let tokenIn = USDC;
-        let tokenOut = DAI;
+        const tokenIn = USDC;
+        const tokenOut = DAI;
         let hopTokens: string[];
         let poolsOfInterestDictionary: PoolDictionary;
         let pathData: NewPath[];

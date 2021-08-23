@@ -654,7 +654,7 @@ describe(`Tests for wrapper class.`, () => {
             swapAmt
         );
 
-        let cacheZero =
+        const cacheZero =
             sor.processedDataCache[`${tokenIn}${tokenOut}${swapType}0`];
         expect(cacheZero.paths.length).to.be.gt(0);
         let cacheOne =
@@ -666,7 +666,7 @@ describe(`Tests for wrapper class.`, () => {
             timestamp: 1,
         });
 
-        let cacheZeroRepeat =
+        const cacheZeroRepeat =
             sor.processedDataCache[`${tokenIn}${tokenOut}${swapType}0`];
         expect(cacheZero).to.deep.eq(cacheZeroRepeat);
         cacheOne = sor.processedDataCache[`${tokenIn}${tokenOut}${swapType}1`];

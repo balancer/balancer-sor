@@ -8,7 +8,7 @@ const provider = new JsonRpcProvider(
 );
 
 // This must be updated with pools of interest (see ./test/testData/testPools)
-let testFiles = [
+const testFiles = [
     'gusdBug',
     'gusdBugSinglePath',
     '25178485-blockKovan', // UI-506, WETH to WBTC Bug

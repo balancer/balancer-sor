@@ -8,7 +8,6 @@ import {
 } from './testHelpers';
 import { bnum } from '../../src/bmath';
 import { SwapInfo, DisabledOptions } from '../../src/types';
-import { assert, expect } from 'chai';
 import BigNumber from 'bignumber.js';
 
 export interface TestSettings {
@@ -56,7 +55,7 @@ export async function compareTest(
     );
 
     // Uses scaled costOutputToken returned from above.
-    let v1SwapData = await getV1Swap(
+    const v1SwapData = await getV1Swap(
         provider,
         v2SwapData.costOutputToken.times(
             bnum(10 ** testData.tradeInfo.ReturnAmountDecimals)

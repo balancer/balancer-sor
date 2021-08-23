@@ -265,7 +265,7 @@ async function makeTrade(
             console.log(
                 `Not Enough Allowance: ${allowance.toString()}. Approving vault now...`
             );
-            let txApprove = await tokenInContract
+            const txApprove = await tokenInContract
                 .connect(wallet)
                 .approve(vaultAddr, MaxUint256);
             await txApprove.wait();
@@ -341,7 +341,7 @@ async function makeTrade(
 
     console.log('Swapping...');
 
-    let overRides = {};
+    const overRides = {};
     // overRides['gasLimit'] = '200000';
     // overRides['gasPrice'] = '20000000000';
     // ETH in swaps must send ETH value
@@ -349,7 +349,7 @@ async function makeTrade(
         overRides['value'] = swapInfo.swapAmount.toString();
     }
 
-    let tx = await vaultContract
+    const tx = await vaultContract
         .connect(wallet)
         .batchSwap(
             swapType,
@@ -393,7 +393,7 @@ async function makeRelayerTrade(
             console.log(
                 `Not Enough Allowance: ${allowance.toString()}. Approving vault now...`
             );
-            let txApprove = await tokenInContract
+            const txApprove = await tokenInContract
                 .connect(wallet)
                 .approve(vaultAddr, MaxUint256);
             await txApprove.wait();
@@ -479,7 +479,7 @@ async function makeRelayerTrade(
 
     console.log('Swapping...');
 
-    let overRides = {};
+    const overRides = {};
     overRides['gasLimit'] = '450000';
     overRides['gasPrice'] = '20000000000';
     // ETH in swaps must send ETH value
@@ -508,7 +508,7 @@ async function makeRelayerTrade(
                 .dp(0)
                 .toString(); // Min return
 
-        let tx = await relayerContract
+        const tx = await relayerContract
             .connect(wallet)
             .callStatic.swap(single, funds, limit, deadline, overRides);
         console.log(tx.toString());
@@ -519,7 +519,7 @@ async function makeRelayerTrade(
                 .toString()
         );
     } else {
-        let tx = await relayerContract
+        const tx = await relayerContract
             .connect(wallet)
             .batchSwap(
                 swapType,
