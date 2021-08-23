@@ -6,6 +6,7 @@ import {
     PairTypes,
     PoolPairBase,
     SwapTypes,
+    SubgraphPoolBase,
 } from '../../types';
 import { getAddress } from '@ethersproject/address';
 import { bnum } from '../../bmath';
@@ -62,6 +63,23 @@ export class ElementPool implements PoolBase {
     baseToken: string;
     currentBlockTimestamp: number;
 
+    static fromPool(
+        pool: SubgraphPoolBase
+    ): ElementPool {
+        return new ElementPool(
+            pool.id,
+            pool.address,
+            pool.swapFee,
+            pool.totalShares,
+            pool.tokens,
+            pool.tokensList,
+            pool.expiryTime,
+            pool.unitSeconds,
+            pool.principalToken,
+            pool.baseToken
+        );
+    }
+    
     constructor(
         id: string,
         address: string,

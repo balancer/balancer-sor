@@ -6,6 +6,7 @@ import {
     PairTypes,
     PoolPairBase,
     SwapTypes,
+    SubgraphPoolBase,
 } from '../../types';
 import { getAddress } from '@ethersproject/address';
 import { bnum, scale, ZERO } from '../../bmath';
@@ -75,6 +76,20 @@ export class StablePool implements PoolBase {
     MAX_OUT_RATIO = bnum(0.3);
     ampAdjusted: BigNumber;
 
+    static fromPool(
+        pool: SubgraphPoolBase
+    ): StablePool {
+        return new StablePool(
+            pool.id,
+            pool.address,
+            pool.amp,
+            pool.swapFee,
+            pool.totalShares,
+            pool.tokens,
+            pool.tokensList
+        );
+    }
+    
     constructor(
         id: string,
         address: string,
