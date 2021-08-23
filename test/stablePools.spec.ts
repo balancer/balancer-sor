@@ -153,6 +153,7 @@ describe(`Tests for Stable Pools.`, () => {
             );
 
             const fetchSuccess = await sor.fetchPools(false);
+            expect(fetchSuccess).to.be.true;
 
             const swapInfo: SwapInfo = await sor.getSwaps(
                 tokenIn,
@@ -181,6 +182,7 @@ describe(`Tests for Stable Pools.`, () => {
             );
 
             const fetchSuccess = await sor.fetchPools(false);
+            expect(fetchSuccess).to.be.true;
 
             const swapInfo: SwapInfo = await sor.getSwaps(
                 tokenIn,
@@ -209,6 +211,7 @@ describe(`Tests for Stable Pools.`, () => {
             );
 
             const fetchSuccess = await sor.fetchPools(false);
+            expect(fetchSuccess).to.be.true;
 
             const swapInfo: SwapInfo = await sor.getSwaps(
                 tokenIn,
@@ -250,6 +253,7 @@ describe(`Tests for Stable Pools.`, () => {
             );
 
             const fetchSuccess = await sor.fetchPools(false);
+            expect(fetchSuccess).to.be.true;
 
             const swapInfo: SwapInfo = await sor.getSwaps(
                 tokenIn,
@@ -292,6 +296,9 @@ describe(`Tests for Stable Pools.`, () => {
                 );
 
                 const fetchSuccess = await sor.fetchPools(false);
+                expect(fetchSuccess).to.be.true;
+
+                expect(fetchSuccess).to.be.true;
 
                 const swapInfo: SwapInfo = await sor.getSwaps(
                     tokenIn,
@@ -327,6 +334,9 @@ describe(`Tests for Stable Pools.`, () => {
                 );
 
                 const fetchSuccess = await sor.fetchPools(false);
+                expect(fetchSuccess).to.be.true;
+
+                expect(fetchSuccess).to.be.true;
 
                 const swapInfo: SwapInfo = await sor.getSwaps(
                     tokenIn,
@@ -361,6 +371,7 @@ describe(`Tests for Stable Pools.`, () => {
                 );
 
                 const fetchSuccess = await sor.fetchPools(false);
+                expect(fetchSuccess).to.be.true;
 
                 const swapInfo: SwapInfo = await sor.getSwaps(
                     tokenIn,
@@ -396,6 +407,7 @@ describe(`Tests for Stable Pools.`, () => {
                 );
 
                 const fetchSuccess = await sor.fetchPools(false);
+                expect(fetchSuccess).to.be.true;
 
                 const swapInfo: SwapInfo = await sor.getSwaps(
                     tokenIn,
@@ -435,6 +447,7 @@ describe(`Tests for Stable Pools.`, () => {
             );
 
             const fetchSuccess = await sor.fetchPools(false);
+            expect(fetchSuccess).to.be.true;
 
             const swapInfo: SwapInfo = await sor.getSwaps(
                 tokenIn,
@@ -481,6 +494,7 @@ describe(`Tests for Stable Pools.`, () => {
             );
 
             const fetchSuccess = await sor.fetchPools(false);
+            expect(fetchSuccess).to.be.true;
 
             const swapInfo: SwapInfo = await sor.getSwaps(
                 tokenIn,
@@ -667,6 +681,7 @@ describe(`Tests for Stable Pools.`, () => {
                 );
 
                 const fetchSuccess = await sor.fetchPools(false);
+                expect(fetchSuccess).to.be.true;
 
                 const swapInfo: SwapInfo = await sor.getSwaps(
                     tokenIn,
@@ -717,6 +732,7 @@ describe(`Tests for Stable Pools.`, () => {
                 );
 
                 const fetchSuccess = await sor.fetchPools(false);
+                expect(fetchSuccess).to.be.true;
 
                 const swapInfo: SwapInfo = await sor.getSwaps(
                     tokenIn,
@@ -769,6 +785,7 @@ describe(`Tests for Stable Pools.`, () => {
                 );
 
                 const fetchSuccess = await sor.fetchPools(false);
+                expect(fetchSuccess).to.be.true;
 
                 const swapInfo: SwapInfo = await sor.getSwaps(
                     tokenIn,
@@ -821,6 +838,7 @@ describe(`Tests for Stable Pools.`, () => {
                 );
 
                 const fetchSuccess = await sor.fetchPools(false);
+                expect(fetchSuccess).to.be.true;
 
                 const swapInfo: SwapInfo = await sor.getSwaps(
                     tokenIn,

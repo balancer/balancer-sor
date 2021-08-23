@@ -105,6 +105,7 @@ describe(`Tests against Element generated test trade file.`, () => {
             );
 
             const fetchSuccess = await sor.fetchPools(false);
+            expect(fetchSuccess).to.be.true;
 
             const swapInfo: SwapInfo = await sor.getSwaps(
                 tokenIn,
