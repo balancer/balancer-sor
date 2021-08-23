@@ -188,9 +188,9 @@ export class ElementPool implements PoolBase {
         if (swapType === SwapTypes.SwapExactIn) {
             // "Ai < (Bi**(1-t)+Bo**(1-t))**(1/(1-t))-Bi" must hold in order for
             // base of root to be non-negative
-            let Bi = poolPairData.balanceIn.toNumber();
-            let Bo = poolPairData.balanceOut.toNumber();
-            let t = getTimeTillExpiry(
+            const Bi = poolPairData.balanceIn.toNumber();
+            const Bo = poolPairData.balanceOut.toNumber();
+            const t = getTimeTillExpiry(
                 this.expiryTime,
                 this.currentBlockTimestamp,
                 this.unitSeconds

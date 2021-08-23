@@ -15,7 +15,7 @@ export function getAddress(tokenA: string, tokenB: string): string {
             ? [tokenA, tokenB]
             : [tokenB, tokenA];
 
-    let address = getCreate2Address(
+    const address = getCreate2Address(
         FACTORY_ADDRESS,
         keccak256(
             ['bytes'],
@@ -35,7 +35,11 @@ export async function getOnChainReserves(
 
     const pairContract = new Contract(PairAddr, uniswapV2PairAbi, provider);
 
-    let [reserve0, reserve1, blockTimestamp] = await pairContract.getReserves();
+    const [
+        reserve0,
+        reserve1,
+        blockTimestamp,
+    ] = await pairContract.getReserves();
 
     return [reserve0, reserve1];
 }
@@ -48,8 +52,8 @@ export async function getTokenWeiPrice(
     if (TokenAddr.toLowerCase() === WETH.toLowerCase())
         return new BigNumber(BONE);
 
-    let addr = getAddress(WETH, TokenAddr);
-    let [reserve0, reserve1] = await getOnChainReserves(addr, provider);
+    const addr = getAddress(WETH, TokenAddr);
+    const [reserve0, reserve1] = await getOnChainReserves(addr, provider);
 
     const numerator = new BigNumber(reserve0.toString());
     const denominator = new BigNumber(reserve1.toString());
@@ -76,7 +80,7 @@ export async function getCostOutputToken(
     ChainId: number = undefined
 ): Promise<BigNumber> {
     if (!ChainId) {
-        let network = await Provider.getNetwork();
+        const network = await Provider.getNetwork();
         ChainId = network.chainId;
     }
     // If not mainnet return 0 as UniSwap price unlikely to be correct?
@@ -91,7 +95,7 @@ export async function getCostOutputToken(
         console.log('Error Getting Token Price. Defaulting to 0.');
     }
 
-    let costOutputToken = calculateTotalSwapCost(
+    const costOutputToken = calculateTotalSwapCost(
         tokenPrice,
         SwapGasCost,
         GasPriceWei

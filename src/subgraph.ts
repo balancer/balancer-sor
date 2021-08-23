@@ -5,7 +5,7 @@ const SUBGRAPH_URL =
     'https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-kovan-v2';
 
 // Returns all public pools
-export async function fetchSubgraphPools(SubgraphUrl: string = '') {
+export async function fetchSubgraphPools(SubgraphUrl = '') {
     // can filter for publicSwap too??
     const query = `
       {
