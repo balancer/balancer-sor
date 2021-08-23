@@ -79,9 +79,7 @@ export class MetaStablePool implements PoolBase {
     MAX_OUT_RATIO = bnum(0.3);
     ampAdjusted: BigNumber;
 
-    static fromPool(
-        pool: SubgraphPoolBase
-    ): MetaStablePool {
+    static fromPool(pool: SubgraphPoolBase): MetaStablePool {
         return new MetaStablePool(
             pool.id,
             pool.address,
@@ -90,7 +88,7 @@ export class MetaStablePool implements PoolBase {
             pool.totalShares,
             pool.tokens,
             pool.tokensList
-        )
+        );
     }
 
     constructor(

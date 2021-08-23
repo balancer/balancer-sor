@@ -68,9 +68,7 @@ export class WeightedPool implements PoolBase {
     MAX_IN_RATIO = bnum(0.3);
     MAX_OUT_RATIO = bnum(0.3);
 
-    static fromPool(
-        pool: SubgraphPoolBase
-    ): WeightedPool {
+    static fromPool(pool: SubgraphPoolBase): WeightedPool {
         return new WeightedPool(
             pool.id,
             pool.address,
@@ -81,7 +79,7 @@ export class WeightedPool implements PoolBase {
             pool.tokensList
         );
     }
-    
+
     constructor(
         id: string,
         address: string,

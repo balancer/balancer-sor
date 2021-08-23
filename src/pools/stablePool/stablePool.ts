@@ -76,9 +76,7 @@ export class StablePool implements PoolBase {
     MAX_OUT_RATIO = bnum(0.3);
     ampAdjusted: BigNumber;
 
-    static fromPool(
-        pool: SubgraphPoolBase
-    ): StablePool {
+    static fromPool(pool: SubgraphPoolBase): StablePool {
         return new StablePool(
             pool.id,
             pool.address,
@@ -89,7 +87,7 @@ export class StablePool implements PoolBase {
             pool.tokensList
         );
     }
-    
+
     constructor(
         id: string,
         address: string,

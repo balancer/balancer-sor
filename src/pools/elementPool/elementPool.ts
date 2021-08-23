@@ -63,9 +63,7 @@ export class ElementPool implements PoolBase {
     baseToken: string;
     currentBlockTimestamp: number;
 
-    static fromPool(
-        pool: SubgraphPoolBase
-    ): ElementPool {
+    static fromPool(pool: SubgraphPoolBase): ElementPool {
         return new ElementPool(
             pool.id,
             pool.address,
@@ -79,7 +77,7 @@ export class ElementPool implements PoolBase {
             pool.baseToken
         );
     }
-    
+
     constructor(
         id: string,
         address: string,

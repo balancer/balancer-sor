@@ -119,10 +119,8 @@ export function parseNewPool(
     currentBlockTimestamp = 0
 ): WeightedPool | StablePool | ElementPool | undefined {
     let newPool: WeightedPool | StablePool | ElementPool;
-    if (pool.poolType === 'Weighted')
-        newPool = WeightedPool.fromPool(pool);
-    else if (pool.poolType === 'Stable')
-        newPool = StablePool.fromPool(pool);
+    if (pool.poolType === 'Weighted') newPool = WeightedPool.fromPool(pool);
+    else if (pool.poolType === 'Stable') newPool = StablePool.fromPool(pool);
     else if (pool.poolType === 'Element') {
         newPool = ElementPool.fromPool(pool);
         newPool.setCurrentBlockTimestamp(currentBlockTimestamp);
@@ -131,8 +129,7 @@ export function parseNewPool(
     } else if (pool.poolType === 'LiquidityBootstrapping') {
         // If an LBP doesn't have its swaps paused we treat it like a regular Weighted pool.
         // If it does we just ignore it.
-        if (pool.swapEnabled === true)
-            newPool = WeightedPool.fromPool(pool);
+        if (pool.swapEnabled === true) newPool = WeightedPool.fromPool(pool);
         else return undefined;
     } else {
         console.error(
