@@ -121,62 +121,19 @@ export function parseNewPool(
 ): WeightedPool | StablePool | ElementPool | undefined {
     let newPool: WeightedPool | StablePool | ElementPool;
     if (pool.poolType === 'Weighted')
-        newPool = new WeightedPool(
-            pool.id,
-            pool.address,
-            pool.swapFee,
-            pool.totalWeight,
-            pool.totalShares,
-            pool.tokens,
-            pool.tokensList
-        );
+        newPool = WeightedPool.fromPool(pool);
     else if (pool.poolType === 'Stable')
-        newPool = new StablePool(
-            pool.id,
-            pool.address,
-            pool.amp,
-            pool.swapFee,
-            pool.totalShares,
-            pool.tokens,
-            pool.tokensList
-        );
+        newPool = StablePool.fromPool(pool);
     else if (pool.poolType === 'Element') {
-        newPool = new ElementPool(
-            pool.id,
-            pool.address,
-            pool.swapFee,
-            pool.totalShares,
-            pool.tokens,
-            pool.tokensList,
-            pool.expiryTime,
-            pool.unitSeconds,
-            pool.principalToken,
-            pool.baseToken
-        );
+        newPool = ElementPool.fromPool(pool);
         newPool.setCurrentBlockTimestamp(currentBlockTimestamp);
     } else if (pool.poolType === 'MetaStable') {
-        newPool = new MetaStablePool(
-            pool.id,
-            pool.address,
-            pool.amp,
-            pool.swapFee,
-            pool.totalShares,
-            pool.tokens,
-            pool.tokensList
-        );
+        newPool = MetaStablePool.fromPool(pool);
     } else if (pool.poolType === 'LiquidityBootstrapping') {
         // If an LBP doesn't have its swaps paused we treat it like a regular Weighted pool.
         // If it does we just ignore it.
         if (pool.swapEnabled === true)
-            newPool = new WeightedPool(
-                pool.id,
-                pool.address,
-                pool.swapFee,
-                pool.totalWeight,
-                pool.totalShares,
-                pool.tokens,
-                pool.tokensList
-            );
+            newPool = WeightedPool.fromPool(pool);
         else return undefined;
     } else {
         console.error(

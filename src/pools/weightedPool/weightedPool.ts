@@ -9,6 +9,7 @@ import {
     PairTypes,
     PoolPairBase,
     SwapTypes,
+    SubgraphPoolBase,
 } from '../../types';
 import {
     _exactTokenInForTokenOut,
@@ -67,6 +68,20 @@ export class WeightedPool implements PoolBase {
     MAX_IN_RATIO = bnum(0.3);
     MAX_OUT_RATIO = bnum(0.3);
 
+    static fromPool(
+        pool: SubgraphPoolBase
+    ): WeightedPool {
+        return new WeightedPool(
+            pool.id,
+            pool.address,
+            pool.swapFee,
+            pool.totalWeight,
+            pool.totalShares,
+            pool.tokens,
+            pool.tokensList
+        );
+    }
+    
     constructor(
         id: string,
         address: string,
