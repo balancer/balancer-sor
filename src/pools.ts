@@ -12,7 +12,7 @@ import { WeightedPool } from './pools/weightedPool/weightedPool';
 import { StablePool } from './pools/stablePool/stablePool';
 import { ElementPool } from './pools/elementPool/elementPool';
 import { MetaStablePool } from './pools/metaStablePool/metaStablePool';
-import { ZERO } from './bmath';
+import { ZERO } from './utils/bignumber';
 
 import disabledTokensDefault from './disabled-tokens.json';
 

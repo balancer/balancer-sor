@@ -6,7 +6,7 @@ import { SwapTypes, DisabledOptions } from '../src/types';
 import BigNumber from 'bignumber.js';
 import { getV2Swap } from './lib/testHelpers';
 import { compareTest } from './lib/compareHelper';
-import { bnum } from '../src/bmath';
+import { bnum } from '../src/utils/bignumber';
 
 const gasPrice = new BigNumber('30000000000');
 
@@ -440,9 +440,9 @@ describe('Tests full swaps against known values', () => {
 
     it('should full swap stable & weighted swapExactIn', async () => {
         const name = 'full swap stable & weighted swapExactIn';
-        let testPools = require('./testData/filterTestPools.json');
-        let weighted: any = testPools.weightedOnly;
-        let allPools: any = testPools.stableOnly.concat(weighted);
+        const testPools = require('./testData/filterTestPools.json');
+        const weighted: any = testPools.weightedOnly;
+        const allPools: any = testPools.stableOnly.concat(weighted);
         const tokenIn = DAI;
         const tokenOut = USDC;
         const swapType = 'swapExactIn';
@@ -520,9 +520,9 @@ describe('Tests full swaps against known values', () => {
 
     it('should full swap stable & weighted swapExactOut', async () => {
         const name = 'full swap stable & weighted swapExactOut';
-        let testPools = require('./testData/filterTestPools.json');
-        let weighted: any = testPools.weightedOnly;
-        let allPools: any = testPools.stableOnly.concat(weighted);
+        const testPools = require('./testData/filterTestPools.json');
+        const weighted: any = testPools.weightedOnly;
+        const allPools: any = testPools.stableOnly.concat(weighted);
         const tokenIn = DAI;
         const tokenOut = USDC;
         const swapType = 'swapExactOut';

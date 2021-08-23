@@ -9,7 +9,7 @@ import {
     SubgraphPoolBase,
 } from '../../types';
 import { getAddress } from '@ethersproject/address';
-import { bnum, scale, ZERO } from '../../bmath';
+import { bnum, scale, ZERO } from '../../utils/bignumber';
 import * as SDK from '@georgeroman/balancer-v2-pools';
 import {
     _invariant,

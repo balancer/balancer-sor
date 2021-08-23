@@ -1,6 +1,6 @@
 import { BaseProvider } from '@ethersproject/providers';
 import { BigNumber } from './utils/bignumber';
-import { ZERO } from './bmath';
+import { ZERO } from './utils/bignumber';
 import {
     SwapInfo,
     DisabledOptions,

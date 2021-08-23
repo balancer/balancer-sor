@@ -10,7 +10,7 @@ import {
     PairTypes,
     PoolFilter,
 } from '../src/types';
-import { bnum } from '../src/bmath';
+import { bnum } from '../src/utils/bignumber';
 import { BigNumber } from '../src/utils/bignumber';
 import {
     ElementPool,
@@ -186,7 +186,7 @@ describe(`Tests for Element Pools.`, () => {
 
         const fetchSuccess = await sor.fetchPools(false);
 
-        let swapInfo: SwapInfo = await sor.getSwaps(
+        const swapInfo: SwapInfo = await sor.getSwaps(
             tokenIn,
             tokenOut,
             swapType,
@@ -219,7 +219,7 @@ describe(`Tests for Element Pools.`, () => {
 
         const fetchSuccess = await sor.fetchPools(false);
 
-        let swapInfo: SwapInfo = await sor.getSwaps(
+        const swapInfo: SwapInfo = await sor.getSwaps(
             tokenIn,
             tokenOut,
             swapType,
@@ -252,7 +252,7 @@ describe(`Tests for Element Pools.`, () => {
 
         const fetchSuccess = await sor.fetchPools(false);
 
-        let swapInfo: SwapInfo = await sor.getSwaps(
+        const swapInfo: SwapInfo = await sor.getSwaps(
             tokenIn,
             tokenOut,
             swapType,
@@ -285,7 +285,7 @@ describe(`Tests for Element Pools.`, () => {
 
         const fetchSuccess = await sor.fetchPools(false);
 
-        let swapInfo: SwapInfo = await sor.getSwaps(
+        const swapInfo: SwapInfo = await sor.getSwaps(
             tokenIn,
             tokenOut,
             swapType,

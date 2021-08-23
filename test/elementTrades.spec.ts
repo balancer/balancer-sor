@@ -10,7 +10,7 @@ require('dotenv').config();
 import { expect, assert } from 'chai';
 import { JsonRpcProvider } from '@ethersproject/providers';
 import { SOR, SubGraphPoolsBase, SwapInfo, SwapTypes } from '../src';
-import { bnum } from '../src/bmath';
+import { bnum } from '../src/utils/bignumber';
 import { calcRelativeDiffBn } from './lib/testHelpers';
 import { PoolFilter } from '../src/types';
 
@@ -106,7 +106,7 @@ describe(`Tests against Element generated test trade file.`, () => {
 
             const fetchSuccess = await sor.fetchPools(false);
 
-            let swapInfo: SwapInfo = await sor.getSwaps(
+            const swapInfo: SwapInfo = await sor.getSwaps(
                 tokenIn,
                 tokenOut,
                 swapType,

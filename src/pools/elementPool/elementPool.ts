@@ -9,7 +9,7 @@ import {
     SubgraphPoolBase,
 } from '../../types';
 import { getAddress } from '@ethersproject/address';
-import { bnum } from '../../bmath';
+import { bnum } from '../../utils/bignumber';
 import {
     _exactTokenInForTokenOut,
     _tokenInForExactTokenOut,

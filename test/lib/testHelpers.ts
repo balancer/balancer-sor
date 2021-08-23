@@ -20,7 +20,7 @@ import {
 import customMultiAbi from '../abi/customMulticall.json';
 import { SubGraphPools as SubGraphPoolsV1 } from '@balancer-labs/sor/dist/types';
 import { BaseProvider } from '@ethersproject/providers';
-import { bnum, scale } from '../../src/bmath';
+import { bnum, scale } from '../../src/utils/bignumber';
 import { hashMessage } from '@ethersproject/hash';
 import * as fs from 'fs';
 import { readdir } from 'fs/promises';
@@ -70,9 +70,9 @@ Scales from normalised field values.
 Changes weight field to denormWeight.
 */
 function formatToV1schema(poolsV2: SubGraphPoolsBase): SubgraphPoolsV1 {
-    let weightedPools: SubGraphPoolsBase = { pools: [] };
+    const weightedPools: SubGraphPoolsBase = { pools: [] };
 
-    for (let pool of poolsV2.pools) {
+    for (const pool of poolsV2.pools) {
         // Only check first balance since AFAIK either all balances are zero or none are:
         if (pool.tokens.length != 0)
             if (pool.tokens[0].balance != '0')
@@ -120,16 +120,16 @@ export function filterPoolsAndTokens(
     allPools: SubGraphPoolsBase,
     disabledTokens: DisabledToken[] = []
 ): [Set<unknown>, SubGraphPoolsBase] {
-    let allTokens = [];
+    const allTokens = [];
     let allTokensSet = new Set();
-    let allPoolsNonZeroBalances: SubGraphPoolsBase = { pools: [] };
+    const allPoolsNonZeroBalances: SubGraphPoolsBase = { pools: [] };
 
-    for (let pool of allPools.pools) {
+    for (const pool of allPools.pools) {
         // Build list of non-zero balance pools
         // Only check first balance since AFAIK either all balances are zero or none are:
         if (pool.tokens.length != 0) {
             if (pool.tokens[0].balance != '0') {
-                let tokens = [];
+                const tokens = [];
                 pool.tokensList.forEach(token => {
                     if (
                         !disabledTokens.find(
@@ -391,7 +391,7 @@ export async function getV1Swap(
     // balance of TokenIn (for swapExactIn) and 33.33% of the pool balance of TokenOut (for
     // swapExactOut)
     // 'paths' are ordered by ascending spot price
-    let paths = sorv1.processPaths(pathData, pools, SwapType);
+    const paths = sorv1.processPaths(pathData, pools, SwapType);
 
     const processPathsEnd = performance.now();
     const processEpsOfInterestMultiHopStart = performance.now();
@@ -404,7 +404,7 @@ export async function getV1Swap(
     //   - 'bestPathsIds' a list of the id of the best paths to get to this price and
     //   - 'amounts' a list of how much each path would need to trade to get to that price of
     //     interest
-    let epsOfInterest = sorv1.processEpsOfInterestMultiHop(
+    const epsOfInterest = sorv1.processEpsOfInterestMultiHop(
         paths,
         SwapType,
         MaxNoPools
@@ -658,7 +658,7 @@ export function displayResults(
     MaxPools: number
 ) {
     let symbolIn, symbolOut;
-    let allTokens = WeightedTokens;
+    const allTokens = WeightedTokens;
     Object.assign(allTokens, StableTokens);
     const symbols = Object.keys(allTokens);
     symbols.forEach(symbol => {
@@ -683,7 +683,7 @@ export function displayResults(
     console.log(`Max Pools: ${MaxPools}`);
     console.log(TradeInfo.SwapType);
 
-    let tableData = [];
+    const tableData = [];
     Results.forEach(result => {
         tableData.push({
             SOR: result.title,
@@ -867,13 +867,13 @@ function checkSwapAmountsForDecimals(
 ): void {
     swapInfo.swaps.forEach(swap => {
         if (swapType === SwapTypes.SwapExactIn) {
-            let check = swap.amount.split('.');
+            const check = swap.amount.split('.');
             assert.isTrue(
                 check.length === 1,
                 `Swap Amounts Should Not Have Decimal: ${swap.amount.toString()}`
             );
         } else {
-            let check = swap.amount.split('.');
+            const check = swap.amount.split('.');
             assert.isTrue(
                 check.length === 1,
                 `Swap Amounts Should Not Have Decimal: ${swap.amount.toString()}`
@@ -932,9 +932,9 @@ function totalSwapAmounts(
 
 // Helper to filter pools to contain only Weighted pools
 export function filterToWeightedPoolsOnly(pools: any) {
-    let weightedPools = { pools: [] };
+    const weightedPools = { pools: [] };
 
-    for (let pool of pools.pools) {
+    for (const pool of pools.pools) {
         if (pool.poolType === 'Weighted') weightedPools.pools.push(pool);
         // if (pool.amp === undefined) weightedPools.pools.push(pool);
     }
@@ -957,11 +957,11 @@ async function getAllPoolDataOnChain(
 
     const contract = new Contract(multiAddress, customMultiAbi, provider);
 
-    let addresses = [];
+    const addresses = [];
     let total = 0;
 
     for (let i = 0; i < pools.pools.length; i++) {
-        let pool = pools.pools[i];
+        const pool = pools.pools[i];
 
         addresses.push([pool.id]);
         total++;
@@ -971,15 +971,15 @@ async function getAllPoolDataOnChain(
         });
     }
 
-    let results = await contract.getPoolInfo(addresses, total);
+    const results = await contract.getPoolInfo(addresses, total);
 
     let j = 0;
-    let onChainPools: SubGraphPoolsBase = { pools: [] };
+    const onChainPools: SubGraphPoolsBase = { pools: [] };
 
     for (let i = 0; i < pools.pools.length; i++) {
-        let tokens: SubGraphToken[] = [];
+        const tokens: SubGraphToken[] = [];
 
-        let p: SubgraphPoolBase = {
+        const p: SubgraphPoolBase = {
             address: 'n/a',
             poolType: 'n/a',
             id: pools.pools[i].id,
@@ -993,7 +993,7 @@ async function getAllPoolDataOnChain(
 
         pools.pools[i].tokens.forEach(token => {
             // let bal = bnum(results[j]);
-            let bal = scale(
+            const bal = scale(
                 bnum(results[j]),
                 -Number(token.decimals)
             ).toString();
@@ -1016,7 +1016,7 @@ export function countPoolSwapPairTypes(
     let noDirect = 0,
         noHopIn = 0,
         noHopOut = 0;
-    for (let k in poolsOfInterestDictionary) {
+    for (const k in poolsOfInterestDictionary) {
         if (poolsOfInterestDictionary[k].swapPairType === SwapPairType.Direct)
             noDirect++;
         else if (
