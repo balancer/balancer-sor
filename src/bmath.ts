@@ -25,13 +25,13 @@ export function calcOutGivenIn(
     tokenAmountIn: BigNumber,
     swapFee: BigNumber
 ): BigNumber {
-    let weightRatio = bdiv(tokenWeightIn, tokenWeightOut);
+    const weightRatio = bdiv(tokenWeightIn, tokenWeightOut);
     let adjustedIn = BONE.minus(swapFee);
     adjustedIn = bmul(tokenAmountIn, adjustedIn);
-    let y = bdiv(tokenBalanceIn, tokenBalanceIn.plus(adjustedIn));
-    let foo = bpow(y, weightRatio);
-    let bar = BONE.minus(foo);
-    let tokenAmountOut = bmul(tokenBalanceOut, bar);
+    const y = bdiv(tokenBalanceIn, tokenBalanceIn.plus(adjustedIn));
+    const foo = bpow(y, weightRatio);
+    const bar = BONE.minus(foo);
+    const tokenAmountOut = bmul(tokenBalanceOut, bar);
     return tokenAmountOut;
 }
 
@@ -43,9 +43,9 @@ export function calcInGivenOut(
     tokenAmountOut: BigNumber,
     swapFee: BigNumber
 ) {
-    let weightRatio = bdiv(tokenWeightOut, tokenWeightIn);
-    let diff = tokenBalanceOut.minus(tokenAmountOut);
-    let y = bdiv(tokenBalanceOut, diff);
+    const weightRatio = bdiv(tokenWeightOut, tokenWeightIn);
+    const diff = tokenBalanceOut.minus(tokenAmountOut);
+    const y = bdiv(tokenBalanceOut, diff);
     let foo = bpow(y, weightRatio);
     foo = foo.minus(BONE);
     let tokenAmountIn = BONE.minus(swapFee);
@@ -68,16 +68,16 @@ export function calcSpotPrice(
 }
 
 export function bmul(a: BigNumber, b: BigNumber): BigNumber {
-    let c0 = a.times(b);
-    let c1 = c0.plus(BONE.div(new BigNumber(2)));
-    let c2 = c1.idiv(BONE);
+    const c0 = a.times(b);
+    const c1 = c0.plus(BONE.div(new BigNumber(2)));
+    const c2 = c1.idiv(BONE);
     return c2;
 }
 
 export function bdiv(a: BigNumber, b: BigNumber): BigNumber {
-    let c0 = a.times(BONE);
-    let c1 = c0.plus(b.div(new BigNumber(2)));
-    let c2 = c1.idiv(b);
+    const c0 = a.times(BONE);
+    const c1 = c0.plus(b.div(new BigNumber(2)));
+    const c2 = c1.idiv(b);
     return c2;
 }
 
@@ -94,12 +94,12 @@ export function bsubSign(
     b: BigNumber
 ): { res: BigNumber; bool: boolean } {
     if (a.gte(b)) {
-        let res = a.minus(b);
-        let bool = false;
+        const res = a.minus(b);
+        const bool = false;
         return { res, bool };
     } else {
-        let res = b.minus(a);
-        let bool = true;
+        const res = b.minus(a);
+        const bool = true;
         return { res, bool };
     }
 }
@@ -121,14 +121,14 @@ function bpowi(a: BigNumber, n: BigNumber): BigNumber {
 }
 
 export function bpow(base: BigNumber, exp: BigNumber): BigNumber {
-    let whole = bfloor(exp);
-    let remain = exp.minus(whole);
-    let wholePow = bpowi(base, btoi(whole));
+    const whole = bfloor(exp);
+    const remain = exp.minus(whole);
+    const wholePow = bpowi(base, btoi(whole));
     if (remain.eq(new BigNumber(0))) {
         return wholePow;
     }
 
-    let partialResult = bpowApprox(base, remain, BPOW_PRECISION);
+    const partialResult = bpowApprox(base, remain, BPOW_PRECISION);
     return bmul(wholePow, partialResult);
 }
 
@@ -137,15 +137,15 @@ function bpowApprox(
     exp: BigNumber,
     precision: BigNumber
 ): BigNumber {
-    let a = exp;
-    let { res: x, bool: xneg } = bsubSign(base, BONE);
+    const a = exp;
+    const { res: x, bool: xneg } = bsubSign(base, BONE);
     let term = BONE;
     let sum = term;
     let negative = false;
 
     for (let i = 1; term.gte(precision); i++) {
-        let bigK = new BigNumber(i).times(BONE);
-        let { res: c, bool: cneg } = bsubSign(a, bigK.minus(BONE));
+        const bigK = new BigNumber(i).times(BONE);
+        const { res: c, bool: cneg } = bsubSign(a, bigK.minus(BONE));
         term = bmul(term, bmul(c, x));
         term = bdiv(term, bigK);
         if (term.eq(new BigNumber(0))) break;

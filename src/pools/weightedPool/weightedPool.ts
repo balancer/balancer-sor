@@ -9,6 +9,7 @@ import {
     PairTypes,
     PoolPairBase,
     SwapTypes,
+    SubgraphPoolBase,
 } from '../../types';
 import {
     _exactTokenInForTokenOut,
@@ -67,6 +68,20 @@ export class WeightedPool implements PoolBase {
     MAX_IN_RATIO = bnum(0.3);
     MAX_OUT_RATIO = bnum(0.3);
 
+    static fromPool(
+        pool: SubgraphPoolBase
+    ): WeightedPool {
+        return new WeightedPool(
+            pool.id,
+            pool.address,
+            pool.swapFee,
+            pool.totalWeight,
+            pool.totalShares,
+            pool.tokens,
+            pool.tokensList
+        );
+    }
+    
     constructor(
         id: string,
         address: string,
@@ -120,7 +135,7 @@ export class WeightedPool implements PoolBase {
         }
 
         if (pairType != PairTypes.BptToToken) {
-            let tokenIndexIn = this.tokens.findIndex(
+            const tokenIndexIn = this.tokens.findIndex(
                 t => getAddress(t.address) === getAddress(tokenIn)
             );
             if (tokenIndexIn < 0) throw 'Pool does not contain tokenIn';
@@ -130,7 +145,7 @@ export class WeightedPool implements PoolBase {
             weightIn = bnum(tI.weight).div(this.totalWeight);
         }
         if (pairType != PairTypes.TokenToBpt) {
-            let tokenIndexOut = this.tokens.findIndex(
+            const tokenIndexOut = this.tokens.findIndex(
                 t => getAddress(t.address) === getAddress(tokenOut)
             );
             if (tokenIndexOut < 0) throw 'Pool does not contain tokenOut';

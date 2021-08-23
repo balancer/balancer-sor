@@ -933,7 +933,7 @@ export async function getLidoStaticSwaps(
         isWrappingOut = true;
     }
 
-    let swapInfo: SwapInfo = {
+    const swapInfo: SwapInfo = {
         tokenAddresses: [],
         swaps: [],
         swapAmount: ZERO,

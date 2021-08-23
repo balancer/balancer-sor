@@ -6,6 +6,7 @@ import {
     PairTypes,
     PoolPairBase,
     SwapTypes,
+    SubgraphPoolBase,
 } from '../../types';
 import { getAddress } from '@ethersproject/address';
 import { bnum } from '../../bmath';
@@ -62,6 +63,23 @@ export class ElementPool implements PoolBase {
     baseToken: string;
     currentBlockTimestamp: number;
 
+    static fromPool(
+        pool: SubgraphPoolBase
+    ): ElementPool {
+        return new ElementPool(
+            pool.id,
+            pool.address,
+            pool.swapFee,
+            pool.totalShares,
+            pool.tokens,
+            pool.tokensList,
+            pool.expiryTime,
+            pool.unitSeconds,
+            pool.principalToken,
+            pool.baseToken
+        );
+    }
+    
     constructor(
         id: string,
         address: string,
@@ -87,11 +105,11 @@ export class ElementPool implements PoolBase {
         this.currentBlockTimestamp = 0;
     }
 
-    setCurrentBlockTimestamp(timestamp: number) {
+    setCurrentBlockTimestamp(timestamp: number): void {
         this.currentBlockTimestamp = timestamp;
     }
 
-    setTypeForSwap(type: SwapPairType) {
+    setTypeForSwap(type: SwapPairType): void {
         this.swapPairType = type;
     }
 
@@ -188,9 +206,9 @@ export class ElementPool implements PoolBase {
         if (swapType === SwapTypes.SwapExactIn) {
             // "Ai < (Bi**(1-t)+Bo**(1-t))**(1/(1-t))-Bi" must hold in order for
             // base of root to be non-negative
-            let Bi = poolPairData.balanceIn.toNumber();
-            let Bo = poolPairData.balanceOut.toNumber();
-            let t = getTimeTillExpiry(
+            const Bi = poolPairData.balanceIn.toNumber();
+            const Bo = poolPairData.balanceOut.toNumber();
+            const t = getTimeTillExpiry(
                 this.expiryTime,
                 this.currentBlockTimestamp,
                 this.unitSeconds

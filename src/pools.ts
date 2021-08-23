@@ -15,7 +15,6 @@ import { MetaStablePool } from './pools/metaStablePool/metaStablePool';
 import { ZERO } from './bmath';
 
 import disabledTokensDefault from './disabled-tokens.json';
-import { timeStamp } from 'console';
 
 /*
 The main purpose of this function is to:
@@ -37,7 +36,7 @@ export function filterPoolsOfInterest(
         isOverRide: false,
         disabledTokens: [],
     },
-    currentBlockTimestamp: number = 0
+    currentBlockTimestamp = 0
 ): [PoolDictionary, string[]] {
     const poolsDictionary: PoolDictionary = {};
 
@@ -64,7 +63,7 @@ export function filterPoolsOfInterest(
             | undefined = parseNewPool(pool, currentBlockTimestamp);
         if (!newPool) return;
 
-        let tokenListSet = new Set(pool.tokensList);
+        const tokenListSet = new Set(pool.tokensList);
         // Depending on env file, we add the BPT as well as
         // we can join/exit as part of the multihop
         if (ALLOW_ADD_REMOVE) tokenListSet.add(pool.address);
@@ -84,8 +83,8 @@ export function filterPoolsOfInterest(
         }
 
         if (maxPools > 1) {
-            let containsTokenIn = tokenListSet.has(tokenIn);
-            let containsTokenOut = tokenListSet.has(tokenOut);
+            const containsTokenIn = tokenListSet.has(tokenIn);
+            const containsTokenOut = tokenListSet.has(tokenOut);
 
             if (containsTokenIn && !containsTokenOut) {
                 tokenInPairedTokens = new Set([
@@ -117,66 +116,23 @@ export function filterPoolsOfInterest(
 
 export function parseNewPool(
     pool: SubgraphPoolBase,
-    currentBlockTimestamp: number = 0
+    currentBlockTimestamp = 0
 ): WeightedPool | StablePool | ElementPool | undefined {
     let newPool: WeightedPool | StablePool | ElementPool;
     if (pool.poolType === 'Weighted')
-        newPool = new WeightedPool(
-            pool.id,
-            pool.address,
-            pool.swapFee,
-            pool.totalWeight,
-            pool.totalShares,
-            pool.tokens,
-            pool.tokensList
-        );
+        newPool = WeightedPool.fromPool(pool);
     else if (pool.poolType === 'Stable')
-        newPool = new StablePool(
-            pool.id,
-            pool.address,
-            pool.amp,
-            pool.swapFee,
-            pool.totalShares,
-            pool.tokens,
-            pool.tokensList
-        );
+        newPool = StablePool.fromPool(pool);
     else if (pool.poolType === 'Element') {
-        newPool = new ElementPool(
-            pool.id,
-            pool.address,
-            pool.swapFee,
-            pool.totalShares,
-            pool.tokens,
-            pool.tokensList,
-            pool.expiryTime,
-            pool.unitSeconds,
-            pool.principalToken,
-            pool.baseToken
-        );
+        newPool = ElementPool.fromPool(pool);
         newPool.setCurrentBlockTimestamp(currentBlockTimestamp);
     } else if (pool.poolType === 'MetaStable') {
-        newPool = new MetaStablePool(
-            pool.id,
-            pool.address,
-            pool.amp,
-            pool.swapFee,
-            pool.totalShares,
-            pool.tokens,
-            pool.tokensList
-        );
+        newPool = MetaStablePool.fromPool(pool);
     } else if (pool.poolType === 'LiquidityBootstrapping') {
         // If an LBP doesn't have its swaps paused we treat it like a regular Weighted pool.
         // If it does we just ignore it.
         if (pool.swapEnabled === true)
-            newPool = new WeightedPool(
-                pool.id,
-                pool.address,
-                pool.swapFee,
-                pool.totalWeight,
-                pool.totalShares,
-                pool.tokens,
-                pool.tokensList
-            );
+            newPool = WeightedPool.fromPool(pool);
         else return undefined;
     } else {
         console.error(
@@ -203,7 +159,7 @@ export function filterHopPools(
 
     // No multihop pool but still need to create paths for direct pools
     if (hopTokens.length === 0) {
-        for (let id in poolsOfInterest) {
+        for (const id in poolsOfInterest) {
             if (poolsOfInterest[id].swapPairType !== SwapPairType.Direct) {
                 delete poolsOfInterest[id];
                 continue;
@@ -225,7 +181,7 @@ export function filterHopPools(
         let highestNormalizedLiquiditySecond = ZERO; // Aux variable to find pool with most liquidity for pair (hopToken -> tokenOut)
         let highestNormalizedLiquiditySecondPoolId: string; // Aux variable to find pool with most liquidity for pair (hopToken -> tokenOut)
 
-        for (let id in poolsOfInterest) {
+        for (const id in poolsOfInterest) {
             const pool = poolsOfInterest[id];
 
             // We don't consider direct pools for the multihop but we do add it's path
@@ -239,7 +195,7 @@ export function filterHopPools(
                 continue;
             }
 
-            let tokenListSet = new Set(pool.tokensList);
+            const tokenListSet = new Set(pool.tokensList);
             // Depending on env file, we add the BPT as well as
             // we can join/exit as part of the multihop
             if (ALLOW_ADD_REMOVE) tokenListSet.add(pool.address);
