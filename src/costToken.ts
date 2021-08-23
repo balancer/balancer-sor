@@ -28,13 +28,16 @@ export function getAddress(tokenA: string, tokenB: string): string {
 }
 
 export async function getOnChainReserves(
-    PairAddr: string,
+    pairAddr: string,
     provider: BaseProvider
 ): Promise<[BigNumber, BigNumber]> {
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-    const uniswapV2PairAbi = require('./abi/UniswapV2Pair.json');
-
-    const pairContract = new Contract(PairAddr, uniswapV2PairAbi, provider);
+    const pairContract = new Contract(
+        pairAddr,
+        [
+            'function getReserves() public view returns (uint112 _reserve0, uint112 _reserve1, uint32 _blockTimestampLast)',
+        ],
+        provider
+    );
 
     const [reserve0, reserve1] = await pairContract.getReserves();
 
