@@ -98,7 +98,7 @@ export class MetaStablePool implements PoolBase {
         this.ampAdjusted = this.amp.times(this.AMP_PRECISION);
     }
 
-    setTypeForSwap(type: SwapPairType) {
+    setTypeForSwap(type: SwapPairType): void {
         this.swapPairType = type;
     }
 
@@ -194,7 +194,7 @@ export class MetaStablePool implements PoolBase {
         return poolPairData;
     }
 
-    getNormalizedLiquidity(poolPairData: MetaStablePoolPairData) {
+    getNormalizedLiquidity(poolPairData: MetaStablePoolPairData): BigNumber {
         // This is an approximation as the actual normalized liquidity is a lot more complicated to calculate
         return poolPairData.balanceOut.times(poolPairData.amp);
     }

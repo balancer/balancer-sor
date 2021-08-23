@@ -1,4 +1,4 @@
-import { INFINITESIMAL, PRICE_ERROR_TOLERANCE } from './config';
+import { PRICE_ERROR_TOLERANCE } from './config';
 import { bnum, ZERO, ONE, INFINITY } from './bmath';
 import { BigNumber } from './utils/bignumber';
 import { SwapTypes, NewPath, PoolDictionary, Swap } from './types';
@@ -225,7 +225,7 @@ export const smartOrderRouter = (
 
         // Calculates the number of pools in all the paths to include the gas costs
         let totalNumberOfPools = 0;
-        selectedPaths.forEach((path, i) => {
+        selectedPaths.forEach(path => {
             totalNumberOfPools += path.swaps.length;
         });
 
@@ -330,12 +330,6 @@ export const smartOrderRouter = (
             );
         } else {
             // Multi-hop:
-
-            const swap1 = path.swaps[0];
-            const poolSwap1 = pools[swap1.pool];
-
-            const swap2 = path.swaps[1];
-            const poolSwap2 = pools[swap2.pool];
 
             let amountSwap1, amountSwap2;
             if (swapType === SwapTypes.SwapExactIn) {
@@ -456,7 +450,6 @@ function getBestPathIds(
     swapType: SwapTypes,
     swapAmounts: BigNumber[]
 ): [NewPath[], BigNumber[], BigNumber[], string[]] {
-    let sortedSwapAmounts;
     const bestPathIds = [];
     const selectedPaths = [];
     const selectedPathLimitAmounts = [];
@@ -466,7 +459,7 @@ function getBestPathIds(
     const paths = [...originalPaths]; // Deep copy to avoid changing the original path data
 
     // Sort swapAmounts in descending order without changing original: https://stackoverflow.com/a/42442909
-    sortedSwapAmounts = [...swapAmounts].sort((a, b) => {
+    const sortedSwapAmounts = [...swapAmounts].sort((a, b) => {
         return b.minus(a).toNumber();
     });
 

@@ -95,7 +95,7 @@ export class StablePool implements PoolBase {
         this.ampAdjusted = this.amp.times(this.AMP_PRECISION);
     }
 
-    setTypeForSwap(type: SwapPairType) {
+    setTypeForSwap(type: SwapPairType): void {
         this.swapPairType = type;
     }
 
@@ -177,7 +177,7 @@ export class StablePool implements PoolBase {
         return poolPairData;
     }
 
-    getNormalizedLiquidity(poolPairData: StablePoolPairData) {
+    getNormalizedLiquidity(poolPairData: StablePoolPairData): BigNumber {
         // This is an approximation as the actual normalized liquidity is a lot more complicated to calculate
         return poolPairData.balanceOut.times(poolPairData.amp);
     }

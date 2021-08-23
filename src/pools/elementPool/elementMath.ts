@@ -6,7 +6,7 @@ import { bnum } from '../../bmath';
 export function _exactTokenInForTokenOut(
     amount: BigNumber,
     poolPairData: ElementPoolPairData
-) {
+): BigNumber {
     // The formula below returns some dust (due to rounding errors) but when
     // we input zero the output should be zero
     if (amount.isZero()) return amount;
@@ -37,7 +37,7 @@ export function _exactTokenInForTokenOut(
 export function _tokenInForExactTokenOut(
     amount: BigNumber,
     poolPairData: ElementPoolPairData
-) {
+): BigNumber {
     // The formula below returns some dust (due to rounding errors) but when
     // we input zero the output should be zero
     if (amount.isZero()) return amount;

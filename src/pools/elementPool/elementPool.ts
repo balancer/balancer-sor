@@ -87,11 +87,11 @@ export class ElementPool implements PoolBase {
         this.currentBlockTimestamp = 0;
     }
 
-    setCurrentBlockTimestamp(timestamp: number) {
+    setCurrentBlockTimestamp(timestamp: number): void {
         this.currentBlockTimestamp = timestamp;
     }
 
-    setTypeForSwap(type: SwapPairType) {
+    setTypeForSwap(type: SwapPairType): void {
         this.swapPairType = type;
     }
 

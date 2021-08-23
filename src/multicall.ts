@@ -13,10 +13,12 @@ export async function getOnChainBalances(
 ): Promise<SubGraphPoolsBase> {
     if (subgraphPools.pools.length === 0) return subgraphPools;
 
+    /* eslint-disable @typescript-eslint/no-var-requires */
     const vaultAbi = require('./abi/Vault.json');
     const weightedPoolAbi = require('./pools/weightedPool/weightedPoolAbi.json');
     const stablePoolAbi = require('./pools/stablePool/stablePoolAbi.json');
     const elementPoolAbi = require('./pools/elementPool/ConvergentCurvePool.json');
+    /* eslint-enable @typescript-eslint/no-var-requires */
     const abis = Object.values(
         Object.fromEntries(
             [

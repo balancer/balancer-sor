@@ -284,12 +284,12 @@ export function getDerivativeSpotPriceAfterSwapForPath(
                 swapType,
                 amount
             );
-            const SPaS1 = getSpotPriceAfterSwap(
-                path.pools[0],
-                path.poolPairData[0],
-                swapType,
-                amount
-            );
+            // const SPaS1 = getSpotPriceAfterSwap(
+            //     path.pools[0],
+            //     path.poolPairData[0],
+            //     swapType,
+            //     amount
+            // );
             const SPaS2 = getSpotPriceAfterSwap(
                 path.pools[1],
                 path.poolPairData[1],
@@ -627,7 +627,7 @@ export function formatSwaps(
         v1 = [[x, y]], [[a, b]]
         v2 = [y, x, b, a]
         */
-        swaps.forEach((sequence, sequenceNo) => {
+        swaps.forEach(sequence => {
             if (sequence.length > 2)
                 throw new Error(
                     'Multihop with more than 2 swaps not supported'

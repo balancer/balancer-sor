@@ -1,4 +1,3 @@
-import { INFINITESIMAL } from '../../config';
 import { BigNumber } from '../../utils/bignumber';
 import { bnum, ZERO, ONE } from '../../bmath';
 // All functions are adapted from the solidity ones to be found on:

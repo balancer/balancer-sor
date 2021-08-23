@@ -15,7 +15,6 @@ import { MetaStablePool } from './pools/metaStablePool/metaStablePool';
 import { ZERO } from './bmath';
 
 import disabledTokensDefault from './disabled-tokens.json';
-import { timeStamp } from 'console';
 
 /*
 The main purpose of this function is to:
