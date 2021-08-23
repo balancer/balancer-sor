@@ -1,11 +1,10 @@
 import fetch from 'isomorphic-fetch';
-
-const SUBGRAPH_URL =
-    process.env.SUBGRAPH_URL ||
-    'https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-kovan-v2';
+import { SubGraphPoolsBase } from 'types';
 
 // Returns all public pools
-export async function fetchSubgraphPools(SubgraphUrl = '') {
+export async function fetchSubgraphPools(
+    subgraphUrl: string
+): Promise<SubGraphPoolsBase> {
     // can filter for publicSwap too??
     const query = `
       {
@@ -34,22 +33,17 @@ export async function fetchSubgraphPools(SubgraphUrl = '') {
       }
     `;
 
-    console.log(
-        `fetchSubgraphPools: ${SubgraphUrl === '' ? SUBGRAPH_URL : SubgraphUrl}`
-    );
-    const response = await fetch(
-        SubgraphUrl === '' ? SUBGRAPH_URL : SubgraphUrl,
-        {
-            method: 'POST',
-            headers: {
-                Accept: 'application/json',
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                query,
-            }),
-        }
-    );
+    console.log(`fetchSubgraphPools: ${subgraphUrl}`);
+    const response = await fetch(subgraphUrl, {
+        method: 'POST',
+        headers: {
+            Accept: 'application/json',
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            query,
+        }),
+    });
 
     const { data } = await response.json();
 
