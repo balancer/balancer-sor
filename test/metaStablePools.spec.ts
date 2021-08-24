@@ -1,5 +1,4 @@
 require('dotenv').config();
-import { ALLOW_ADD_REMOVE } from '../src/config';
 import { expect } from 'chai';
 import { JsonRpcProvider } from '@ethersproject/providers';
 import { SOR } from '../src';
@@ -25,13 +24,13 @@ const provider = new JsonRpcProvider(
 
 const BAL = '0xba100000625a3754423978a60c9317c58a424e3d';
 const USDC = '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48';
-const DAI = '0x04df6e4121c27713ed22341e7c7df330f56f289b';
-const USDT = '0xdac17f958d2ee523a2206206994597c13d831ec7';
-const BPT = '0xebfed10e11dc08fcda1af1fda146945e8710f22e';
+// const DAI = '0x04df6e4121c27713ed22341e7c7df330f56f289b';
+// const USDT = '0xdac17f958d2ee523a2206206994597c13d831ec7';
+// const BPT = '0xebfed10e11dc08fcda1af1fda146945e8710f22e';
 const WETH = '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2';
 const stETH = '0xae7ab96520de3a18e5e111b5eaab095312d7fe84';
 const randomETH = '0x42d6622dece394b54999fbd73d108123806f6a18';
-const PTSP = '0x5f304f6cf88dc76b414f301e05adfb5a429e8b67';
+// const PTSP = '0x5f304f6cf88dc76b414f301e05adfb5a429e8b67';
 
 async function getStableComparrison(
     stablePools: SubGraphPoolsBase,
@@ -49,7 +48,7 @@ async function getStableComparrison(
     );
     await sorStable.fetchPools(false);
 
-    let swapInfoStable: SwapInfo = await sorStable.getSwaps(
+    const swapInfoStable: SwapInfo = await sorStable.getSwaps(
         tokenIn,
         tokenOut,
         swapType,
@@ -186,8 +185,9 @@ describe(`Tests for MetaStable Pools.`, () => {
             const sor = new SOR(provider, gasPrice, maxPools, chainId, pools);
 
             const fetchSuccess = await sor.fetchPools(false);
+            expect(fetchSuccess).to.be.true;
 
-            let swapInfo: SwapInfo = await sor.getSwaps(
+            const swapInfo: SwapInfo = await sor.getSwaps(
                 tokenIn,
                 tokenOut,
                 swapType,
@@ -211,8 +211,9 @@ describe(`Tests for MetaStable Pools.`, () => {
             const sor = new SOR(provider, gasPrice, maxPools, chainId, pools);
 
             const fetchSuccess = await sor.fetchPools(false);
+            expect(fetchSuccess).to.be.true;
 
-            let swapInfo: SwapInfo = await sor.getSwaps(
+            const swapInfo: SwapInfo = await sor.getSwaps(
                 tokenIn,
                 tokenOut,
                 swapType,
@@ -238,8 +239,9 @@ describe(`Tests for MetaStable Pools.`, () => {
             const sor = new SOR(provider, gasPrice, maxPools, chainId, pools);
 
             const fetchSuccess = await sor.fetchPools(false);
+            expect(fetchSuccess).to.be.true;
 
-            let swapInfo: SwapInfo = await sor.getSwaps(
+            const swapInfo: SwapInfo = await sor.getSwaps(
                 tokenIn,
                 tokenOut,
                 swapType,
@@ -304,8 +306,9 @@ describe(`Tests for MetaStable Pools.`, () => {
             const sor = new SOR(provider, gasPrice, maxPools, chainId, pools);
 
             const fetchSuccess = await sor.fetchPools(false);
+            expect(fetchSuccess).to.be.true;
 
-            let swapInfo: SwapInfo = await sor.getSwaps(
+            const swapInfo: SwapInfo = await sor.getSwaps(
                 tokenIn,
                 tokenOut,
                 swapType,
@@ -368,8 +371,9 @@ describe(`Tests for MetaStable Pools.`, () => {
             const sor = new SOR(provider, gasPrice, maxPools, chainId, pools);
 
             const fetchSuccess = await sor.fetchPools(false);
+            expect(fetchSuccess).to.be.true;
 
-            let swapInfo: SwapInfo = await sor.getSwaps(
+            const swapInfo: SwapInfo = await sor.getSwaps(
                 tokenIn,
                 tokenOut,
                 swapType,
@@ -431,8 +435,9 @@ describe(`Tests for MetaStable Pools.`, () => {
             const sor = new SOR(provider, gasPrice, maxPools, chainId, pools);
 
             const fetchSuccess = await sor.fetchPools(false);
+            expect(fetchSuccess).to.be.true;
 
-            let swapInfo: SwapInfo = await sor.getSwaps(
+            const swapInfo: SwapInfo = await sor.getSwaps(
                 tokenIn,
                 tokenOut,
                 swapType,
@@ -503,8 +508,9 @@ describe(`Tests for MetaStable Pools.`, () => {
             const sor = new SOR(provider, gasPrice, maxPools, chainId, pools);
 
             const fetchSuccess = await sor.fetchPools(false);
+            expect(fetchSuccess).to.be.true;
 
-            let swapInfo: SwapInfo = await sor.getSwaps(
+            const swapInfo: SwapInfo = await sor.getSwaps(
                 tokenIn,
                 tokenOut,
                 swapType,
@@ -575,8 +581,9 @@ describe(`Tests for MetaStable Pools.`, () => {
             const sor = new SOR(provider, gasPrice, maxPools, chainId, pools);
 
             const fetchSuccess = await sor.fetchPools(false);
+            expect(fetchSuccess).to.be.true;
 
-            let swapInfo: SwapInfo = await sor.getSwaps(
+            const swapInfo: SwapInfo = await sor.getSwaps(
                 tokenIn,
                 tokenOut,
                 swapType,
@@ -648,6 +655,7 @@ describe(`Tests for MetaStable Pools.`, () => {
         //     const sor = new SOR(provider, gasPrice, maxPools, chainId, pools);
 
         //     const fetchSuccess = await sor.fetchPools(false);
+        //     expect(fetchSuccess).to.be.true;
 
         //     let swapInfo: SwapInfo = await sor.getSwaps(
         //         tokenIn,
@@ -722,6 +730,7 @@ describe(`Tests for MetaStable Pools.`, () => {
     //             );
 
     //             const fetchSuccess = await sor.fetchPools(false);
+    //             expect(fetchSuccess).to.be.true;
 
     //             let swapInfo: SwapInfo = await sor.getSwaps(
     //                 tokenIn,
@@ -757,6 +766,7 @@ describe(`Tests for MetaStable Pools.`, () => {
     //             );
 
     //             const fetchSuccess = await sor.fetchPools(false);
+    //             expect(fetchSuccess).to.be.true;
 
     //             let swapInfo: SwapInfo = await sor.getSwaps(
     //                 tokenIn,
@@ -791,6 +801,7 @@ describe(`Tests for MetaStable Pools.`, () => {
     //             );
 
     //             const fetchSuccess = await sor.fetchPools(false);
+    //             expect(fetchSuccess).to.be.true;
 
     //             let swapInfo: SwapInfo = await sor.getSwaps(
     //                 tokenIn,
@@ -826,6 +837,7 @@ describe(`Tests for MetaStable Pools.`, () => {
     //             );
 
     //             const fetchSuccess = await sor.fetchPools(false);
+    //             expect(fetchSuccess).to.be.true;
 
     //             let swapInfo: SwapInfo = await sor.getSwaps(
     //                 tokenIn,

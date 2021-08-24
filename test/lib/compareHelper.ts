@@ -8,7 +8,6 @@ import {
 } from './testHelpers';
 import { bnum } from '../../src/utils/bignumber';
 import { SwapInfo, DisabledOptions } from '../../src/types';
-import { assert, expect } from 'chai';
 import BigNumber from 'bignumber.js';
 
 export interface TestSettings {

@@ -101,7 +101,8 @@ describe(`Tests for wrapper class.`, () => {
             poolsFromFile
         );
         const fetchSuccess = await sor.fetchPools(false);
-        assert.isTrue(fetchSuccess);
+        expect(fetchSuccess).to.be.true;
+
         assert.isTrue(sor.finishedFetchingOnChain);
         assert.equal(
             poolsFromFile.pools[1].tokens[1].balance,
