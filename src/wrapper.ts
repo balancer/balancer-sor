@@ -28,7 +28,21 @@ import {
     getCostOutputToken,
     bnum,
     Swap,
+    filterPoolsByType,
 } from './index';
+
+const EMPTY_SWAPINFO: SwapInfo = {
+    tokenAddresses: [],
+    swaps: [],
+    swapAmount: ZERO,
+    swapAmountForSwaps: ZERO,
+    tokenIn: '',
+    tokenOut: '',
+    returnAmount: ZERO,
+    returnAmountConsideringFees: ZERO,
+    returnAmountFromSwaps: ZERO,
+    marketSp: ZERO,
+};
 
 export class SOR {
     provider: BaseProvider;
@@ -224,18 +238,16 @@ export class SOR {
             timestamp: 0,
         }
     ): Promise<SwapInfo> {
-        let swapInfo: SwapInfo = {
-            tokenAddresses: [],
-            swaps: [],
-            swapAmount: ZERO,
-            swapAmountForSwaps: ZERO,
-            tokenIn: '',
-            tokenOut: '',
-            returnAmount: ZERO,
-            returnAmountConsideringFees: ZERO,
-            returnAmountFromSwaps: ZERO,
-            marketSp: ZERO,
-        };
+        if (!this.finishedFetchingOnChain) return EMPTY_SWAPINFO;
+
+        const pools: SubGraphPoolsBase = JSON.parse(
+            JSON.stringify(this.onChainBalanceCache)
+        );
+
+        pools.pools = filterPoolsByType(
+            pools.pools,
+            swapOptions.poolTypeFilter
+        );
 
         const wrappedInfo = await getWrappedInfo(
             this.provider,
@@ -246,44 +258,37 @@ export class SOR {
             swapAmt
         );
 
-        if (this.finishedFetchingOnChain) {
-            const pools = JSON.parse(JSON.stringify(this.onChainBalanceCache));
-            if (!(swapOptions.poolTypeFilter === PoolFilter.All))
-                pools.pools = pools.pools.filter(
-                    p => p.poolType === swapOptions.poolTypeFilter
-                );
-
-            if (isLidoStableSwap(this.chainId, tokenIn, tokenOut)) {
-                swapInfo = await getLidoStaticSwaps(
-                    pools,
-                    this.chainId,
-                    wrappedInfo.tokenIn.addressForSwaps,
-                    wrappedInfo.tokenOut.addressForSwaps,
-                    swapType,
-                    wrappedInfo.swapAmountForSwaps,
-                    this.provider
-                );
-            } else {
-                swapInfo = await this.processSwaps(
-                    wrappedInfo.tokenIn.addressForSwaps,
-                    wrappedInfo.tokenOut.addressForSwaps,
-                    swapType,
-                    wrappedInfo.swapAmountForSwaps,
-                    pools,
-                    true,
-                    swapOptions.timestamp
-                );
-            }
-
-            if (swapInfo.returnAmount.isZero()) return swapInfo;
-
-            swapInfo = setWrappedInfo(
-                swapInfo,
+        let swapInfo: SwapInfo;
+        if (isLidoStableSwap(this.chainId, tokenIn, tokenOut)) {
+            swapInfo = await getLidoStaticSwaps(
+                pools,
+                this.chainId,
+                wrappedInfo.tokenIn.addressForSwaps,
+                wrappedInfo.tokenOut.addressForSwaps,
                 swapType,
-                wrappedInfo,
-                this.chainId
+                wrappedInfo.swapAmountForSwaps,
+                this.provider
+            );
+        } else {
+            swapInfo = await this.processSwaps(
+                wrappedInfo.tokenIn.addressForSwaps,
+                wrappedInfo.tokenOut.addressForSwaps,
+                swapType,
+                wrappedInfo.swapAmountForSwaps,
+                pools,
+                true,
+                swapOptions.timestamp
             );
         }
+
+        if (swapInfo.returnAmount.isZero()) return swapInfo;
+
+        swapInfo = setWrappedInfo(
+            swapInfo,
+            swapType,
+            wrappedInfo,
+            this.chainId
+        );
 
         return swapInfo;
     }
@@ -299,21 +304,7 @@ export class SOR {
         useProcessCache = true,
         currentBlockTimestamp = 0
     ): Promise<SwapInfo> {
-        if (onChainPools.pools.length === 0) {
-            // null SwapInfo
-            return {
-                tokenAddresses: [],
-                swaps: [],
-                swapAmount: ZERO,
-                swapAmountForSwaps: ZERO,
-                tokenIn: '',
-                tokenOut: '',
-                returnAmount: ZERO,
-                returnAmountConsideringFees: ZERO,
-                returnAmountFromSwaps: ZERO,
-                marketSp: ZERO,
-            };
-        }
+        if (onChainPools.pools.length === 0) return EMPTY_SWAPINFO;
 
         const { pools, paths } = this.getCandidatePaths(
             tokenIn,

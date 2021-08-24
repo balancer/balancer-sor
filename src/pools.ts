@@ -7,6 +7,7 @@ import {
     NewPath,
     Swap,
     PoolBase,
+    PoolFilter,
 } from './types';
 import { WeightedPool } from './pools/weightedPool/weightedPool';
 import { StablePool } from './pools/stablePool/stablePool';
@@ -15,6 +16,14 @@ import { MetaStablePool } from './pools/metaStablePool/metaStablePool';
 import { ZERO } from './utils/bignumber';
 
 import disabledTokensDefault from './disabled-tokens.json';
+
+export const filterPoolsByType = (
+    pools: SubgraphPoolBase[],
+    poolTypeFilter: PoolFilter
+): SubgraphPoolBase[] => {
+    if (poolTypeFilter === PoolFilter.All) return pools;
+    return pools.filter(p => p.poolType === poolTypeFilter);
+};
 
 /*
 The main purpose of this function is to:
