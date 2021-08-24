@@ -103,17 +103,16 @@ export function setWrappedInfo(
     swapInfo.tokenIn = wrappedInfo.tokenIn.addressOriginal;
     swapInfo.tokenOut = wrappedInfo.tokenOut.addressOriginal;
 
-    // replace weth with ZERO/ETH in assets for Vault to handle ETH directly
     if (
         wrappedInfo.tokenIn.wrapType === WrapTypes.ETH ||
         wrappedInfo.tokenOut.wrapType === WrapTypes.ETH
     ) {
-        let wethIndex = -1;
-        swapInfo.tokenAddresses.forEach((addr, i) => {
-            if (addr.toLowerCase() === WETHADDR[chainId].toLowerCase())
-                wethIndex = i;
-        });
-        if (wethIndex !== -1) swapInfo.tokenAddresses[wethIndex] = ZERO_ADDRESS;
+        // replace weth with ZERO/ETH in assets for Vault to handle ETH directly
+        swapInfo.tokenAddresses = swapInfo.tokenAddresses.map(addr =>
+            addr.toLowerCase() === WETHADDR[chainId].toLowerCase()
+                ? ZERO_ADDRESS
+                : addr
+        );
     }
 
     // Handle stETH swap amount scaling
