@@ -25,7 +25,7 @@ import {
 import { calculatePathLimits, smartOrderRouter } from './router';
 import { getWrappedInfo, setWrappedInfo } from './wrapInfo';
 import { formatSwaps } from './formatSwaps';
-import { PoolFetcher } from './poolFetching/poolFetcher';
+import { PoolCacher } from './poolCaching';
 
 const EMPTY_SWAPINFO: SwapInfo = {
     tokenAddresses: [],
@@ -54,7 +54,7 @@ export class SOR {
     > = {};
     disabledOptions: DisabledOptions;
 
-    private poolFetcher: PoolFetcher;
+    private poolCacher: PoolCacher;
 
     constructor(
         provider: BaseProvider,
@@ -68,7 +68,7 @@ export class SOR {
             disabledTokens: [],
         }
     ) {
-        this.poolFetcher = new PoolFetcher(
+        this.poolCacher = new PoolCacher(
             provider,
             chainId,
             typeof poolsSource === 'string' ? poolsSource : poolsSource.pools
@@ -82,11 +82,11 @@ export class SOR {
     }
 
     get poolsCache(): SubgraphPoolBase[] {
-        return this.poolFetcher.getPools();
+        return this.poolCacher.getPools();
     }
 
     get finishedFetchingOnChain(): boolean {
-        return this.poolFetcher.finishedFetchingOnChain;
+        return this.poolCacher.finishedFetchingOnChain;
     }
 
     getCostOutputToken(outputToken: string): BigNumber {
@@ -146,7 +146,7 @@ export class SOR {
         isOnChain = true,
         poolsData: SubGraphPoolsBase = { pools: [] }
     ): Promise<boolean> {
-        return this.poolFetcher.fetchPools(isOnChain, poolsData.pools);
+        return this.poolCacher.fetchPools(isOnChain, poolsData.pools);
     }
 
     async getSwaps(
@@ -162,7 +162,7 @@ export class SOR {
         if (!this.finishedFetchingOnChain) return EMPTY_SWAPINFO;
 
         const pools: SubgraphPoolBase[] = JSON.parse(
-            JSON.stringify(this.poolFetcher.getPools())
+            JSON.stringify(this.poolCacher.getPools())
         );
 
         const filteredPools = filterPoolsByType(

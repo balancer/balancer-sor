@@ -4,7 +4,7 @@ import { SubgraphPoolBase, SubGraphPoolsBase } from '../types';
 import { getOnChainBalances } from './multicall';
 import { fetchSubgraphPools } from './subgraph';
 
-export class PoolFetcher {
+export class PoolCacher {
     private provider: BaseProvider;
     private chainId: number;
     private isUsingPoolsUrl: boolean;
