@@ -32,8 +32,8 @@ import { Contract } from '@ethersproject/contracts';
 import WeightedTokens from '../testData/eligibleTokens.json';
 import StableTokens from '../testData/stableTokens.json';
 import { filterPoolsOfInterest, filterHopPools } from '../../src/pools';
-import { calculatePathLimits, smartOrderRouter } from '../../src/sorClass';
-import { formatSwaps } from '../../src/helpersClass';
+import { calculatePathLimits, smartOrderRouter } from '../../src/router';
+import { formatSwaps } from '../../src/formatSwaps';
 
 // Just for testing weighted helpers:
 import { BPTForTokensZeroPriceImpact } from '../../src/frontendHelpers/weightedHelpers';

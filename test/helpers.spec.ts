@@ -2,11 +2,8 @@ import { assert, expect } from 'chai';
 import { SwapInfo, SwapTypes, SwapV2 } from '../src/types';
 import { BigNumber } from '../src/utils/bignumber';
 import { JsonRpcProvider } from '@ethersproject/providers';
-import {
-    formatSwaps,
-    getWrappedInfo,
-    setWrappedInfo,
-} from '../src/helpersClass';
+import { formatSwaps } from '../src/formatSwaps';
+import { getWrappedInfo, setWrappedInfo } from '../src/wrapInfo';
 import { ZERO_ADDRESS, bnum, WETHADDR, Lido, scale } from '../src';
 import testSwaps from './testData/swapsForFormatting.json';
 
