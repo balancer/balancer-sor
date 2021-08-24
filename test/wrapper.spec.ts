@@ -32,24 +32,6 @@ describe(`Tests for wrapper class.`, () => {
         assert.equal(swapCost.toString(), sor.swapCost.toString());
     });
 
-    // it(`Should set pools source to URL`, () => {
-    //     const sor = new SOR(provider, gasPrice, maxPools, chainId, poolsUrl);
-    //     assert.isTrue(sor.isUsingPoolsUrl);
-    //     assert.equal(poolsUrl, sor.poolsUrl);
-    // });
-
-    it(`Should set pools source to pools passed`, () => {
-        const poolsFromFile: SubGraphPoolsBase = require('./testData/testPools/subgraphPoolsSmallWithTrade.json');
-        const sor = new SOR(
-            provider,
-            gasPrice,
-            maxPools,
-            chainId,
-            poolsFromFile
-        );
-        expect(sor.poolsCache).to.deep.eq(poolsFromFile.pools);
-    });
-
     it(`Should manually set costOutputToken`, () => {
         const tokenOut = `0xba100000625a3754423978a60c9317c58a424e3d`;
         const manualCost = new BigNumber('700000000000');
@@ -87,63 +69,6 @@ describe(`Tests for wrapper class.`, () => {
         );
     });
 
-    // Valid test but outputs large error
-    // it(`Should return false for fetchPools error`, async () => {
-    //     const failUrl = ``;
-    //     const sor = new SOR(provider, gasPrice, maxPools, chainId, failUrl);
-    //     const fetchSuccess = await sor.fetchPools();
-    //     assert.isFalse(fetchSuccess);
-    //     assert.isFalse(sor.finishedFetchingOnChain);
-    // }).timeout(100000);
-
-    it(`fetchPools should fetch with NO scaling`, async () => {
-        const poolsFromFile: SubGraphPoolsBase = require('./testData/testPools/subgraphPoolsSmallWithTrade.json');
-        const sor = new SOR(
-            provider,
-            gasPrice,
-            maxPools,
-            chainId,
-            poolsFromFile
-        );
-        const fetchSuccess = await sor.fetchPools(false);
-        expect(fetchSuccess).to.be.true;
-
-        assert.isTrue(sor.finishedFetchingOnChain);
-        assert.equal(
-            poolsFromFile.pools[1].tokens[1].balance,
-            sor.poolsCache[1].tokens[1].balance
-        );
-    });
-
-    it(`fetchPools with pools passed as input should overwrite pools`, async () => {
-        const poolsFromFile: SubGraphPoolsBase = require('./testData/testPools/subgraphPoolsSmallWithTrade.json');
-        const sor = new SOR(
-            provider,
-            gasPrice,
-            maxPools,
-            chainId,
-            JSON.parse(JSON.stringify(poolsFromFile))
-        );
-
-        const testPools = require('./testData/filterTestPools.json');
-        const newPools: SubGraphPoolsBase = { pools: testPools.stableOnly };
-
-        // First fetch uses data passed as constructor
-        let fetchSuccess = await sor.fetchPools(false);
-        assert.isTrue(fetchSuccess);
-        assert.isTrue(sor.finishedFetchingOnChain);
-        expect(poolsFromFile).not.deep.equal(newPools);
-        expect(poolsFromFile.pools).deep.equal(sor.poolsCache);
-
-        // Second fetch uses newPools passed
-        fetchSuccess = await sor.fetchPools(false, newPools);
-        assert.isTrue(fetchSuccess);
-        assert.isTrue(sor.finishedFetchingOnChain);
-        expect(poolsFromFile).not.deep.equal(newPools);
-        expect(poolsFromFile.pools).not.deep.equal(sor.poolsCache);
-        expect(newPools.pools).deep.equal(sor.poolsCache);
-    });
-
     it(`Should return no swaps when pools not retrieved.`, async () => {
         const tokenIn = '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2';
         const tokenOut = '0x6b175474e89094c44da98b954eedeac495271d0f';
@@ -158,22 +83,6 @@ describe(`Tests for wrapper class.`, () => {
         );
 
         assert.equal(swaps.swapAmount.toString(), '0');
-    });
-
-    it(`fetchPools should work with no onChain Balances`, async () => {
-        const poolsFromFile: SubGraphPoolsBase = require('./testData/testPools/subgraphPoolsSmallWithTrade.json');
-        const sor = new SOR(
-            provider,
-            gasPrice,
-            maxPools,
-            chainId,
-            poolsFromFile
-        );
-
-        const result: boolean = await sor.fetchPools(false);
-        assert.isTrue(result);
-        assert.isTrue(sor.finishedFetchingOnChain);
-        assert.isAbove(sor.poolsCache.length, 0);
     });
 
     it(`should have a valid swap`, async () => {

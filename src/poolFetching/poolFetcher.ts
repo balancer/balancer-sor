@@ -33,6 +33,10 @@ export class PoolFetcher {
         return this.pools;
     }
 
+    isConnectedToSubgraph(): boolean {
+        return !!this.poolsUrl;
+    }
+
     /*
      * Saves updated pools data to internal onChainBalanceCache.
      * If isOnChain is true will retrieve all required onChain data. (false is advised to only be used for testing)
