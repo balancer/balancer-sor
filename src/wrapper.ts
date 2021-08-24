@@ -40,7 +40,7 @@ export class SOR {
     isUsingPoolsUrl: boolean;
     poolsUrl: string;
     subgraphPools: SubGraphPoolsBase;
-    tokenCost = {};
+    private tokenCost: Record<string, BigNumber> = {};
     onChainBalanceCache: SubGraphPoolsBase = { pools: [] };
     processedDataCache: Record<
         string,
@@ -75,6 +75,11 @@ export class SOR {
             this.subgraphPools = poolsSource;
         }
         this.disabledOptions = disabledOptions;
+    }
+
+    getCostOutputToken(outputToken: string): BigNumber {
+        // Use previously stored value if exists else default to 0
+        return this.tokenCost[outputToken.toLowerCase()] ?? ZERO;
     }
 
     /*
@@ -295,6 +300,7 @@ export class SOR {
         currentBlockTimestamp = 0
     ): Promise<SwapInfo> {
         if (onChainPools.pools.length === 0) {
+            // null SwapInfo
             return {
                 tokenAddresses: [],
                 swaps: [],
@@ -318,15 +324,9 @@ export class SOR {
             currentBlockTimestamp
         );
 
-        let costOutputToken = this.tokenCost[tokenOut];
-
-        if (swapType === SwapTypes.SwapExactOut)
-            costOutputToken = this.tokenCost[tokenIn];
-
-        // Use previously stored value if exists else default to 0
-        if (costOutputToken === undefined) {
-            costOutputToken = new BigNumber(0);
-        }
+        const costOutputToken = this.getCostOutputToken(
+            swapType === SwapTypes.SwapExactIn ? tokenOut : tokenIn
+        );
 
         // Returns list of swaps
         const [

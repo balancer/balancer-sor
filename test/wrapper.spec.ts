@@ -56,7 +56,7 @@ describe(`Tests for wrapper class.`, () => {
         const manualCost = new BigNumber('700000000000');
         const sor = new SOR(provider, gasPrice, maxPools, chainId, poolsUrl);
         sor.setCostOutputToken(tokenOut, 18, manualCost);
-        assert.equal(manualCost, sor.tokenCost[tokenOut]);
+        assert.equal(manualCost, sor.getCostOutputToken(tokenOut));
     });
 
     it(`Should return correct costOutputToken for ZERO & WETH addresses`, async () => {
@@ -70,7 +70,10 @@ describe(`Tests for wrapper class.`, () => {
                 .div(bnum(10 ** 18))
                 .toString()
         );
-        assert.equal(cost.toString(), sor.tokenCost[tokenOut]);
+        assert.equal(
+            cost.toString(),
+            sor.getCostOutputToken(tokenOut).toString()
+        );
         cost = await sor.setCostOutputToken(WETHADDR, 18);
         assert.equal(
             cost.toString(),
@@ -79,7 +82,10 @@ describe(`Tests for wrapper class.`, () => {
                 .div(bnum(10 ** 18))
                 .toString()
         );
-        assert.equal(cost.toString(), sor.tokenCost[WETHADDR]);
+        assert.equal(
+            cost.toString(),
+            sor.getCostOutputToken(WETHADDR).toString()
+        );
     });
 
     // Valid test but outputs large error
