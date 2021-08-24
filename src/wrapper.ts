@@ -10,14 +10,10 @@ import {
     SubGraphPoolsBase,
     SwapOptions,
     PoolFilter,
-    WETHADDR,
-    ZERO_ADDRESS,
     getLidoStaticSwaps,
     isLidoStableSwap,
     filterPoolsOfInterest,
     filterHopPools,
-    getCostOutputToken,
-    bnum,
     Swap,
     filterPoolsByType,
     SubgraphPoolBase,
@@ -26,6 +22,7 @@ import { calculatePathLimits, smartOrderRouter } from './router';
 import { getWrappedInfo, setWrappedInfo } from './wrapInfo';
 import { formatSwaps } from './formatSwaps';
 import { PoolCacher } from './poolCaching';
+import { SwapCostCalculator } from './swapCostCalculator';
 
 const EMPTY_SWAPINFO: SwapInfo = {
     tokenAddresses: [],
@@ -47,12 +44,15 @@ export class SOR {
     chainId: number;
     // avg Balancer swap cost. Can be updated manually if required.
     swapCost: BigNumber;
-    private tokenCost: Record<string, BigNumber> = {};
+    isUsingPoolsUrl: boolean;
+    poolsUrl: string;
+    subgraphPools: SubGraphPoolsBase;
     processedDataCache: Record<
         string,
         { pools: PoolDictionary; paths: NewPath[] }
     > = {};
     disabledOptions: DisabledOptions;
+    swapCostCalculator: SwapCostCalculator;
 
     private poolCacher: PoolCacher;
 
@@ -79,19 +79,19 @@ export class SOR {
         this.chainId = chainId;
         this.swapCost = swapCost;
         this.disabledOptions = disabledOptions;
+        this.swapCostCalculator = new SwapCostCalculator(chainId);
     }
 
-    get poolsCache(): SubgraphPoolBase[] {
-        return this.poolCacher.getPools();
-    }
-
-    get finishedFetchingOnChain(): boolean {
-        return this.poolCacher.finishedFetchingOnChain;
-    }
-
-    getCostOutputToken(outputToken: string): BigNumber {
-        // Use previously stored value if exists else default to 0
-        return this.tokenCost[outputToken.toLowerCase()] ?? ZERO;
+    async getCostOutputToken(
+        outputToken: string,
+        tokenDecimals = 18
+    ): Promise<BigNumber> {
+        return this.swapCostCalculator.convertGasCostToToken(
+            outputToken,
+            tokenDecimals,
+            this.gasPrice,
+            this.swapCost
+        );
     }
 
     /*
@@ -103,36 +103,18 @@ export class SOR {
         tokenDecimals: number,
         cost: BigNumber = null
     ): Promise<BigNumber> {
-        tokenOut = tokenOut.toLowerCase();
-
-        if (cost === null) {
-            // Handle ETH/WETH cost
-            if (
-                tokenOut === ZERO_ADDRESS ||
-                tokenOut.toLowerCase() === WETHADDR[this.chainId].toLowerCase()
-            ) {
-                this.tokenCost[tokenOut.toLowerCase()] = this.gasPrice
-                    .times(this.swapCost)
-                    .div(bnum(10 ** 18));
-                return this.tokenCost[tokenOut.toLowerCase()];
-            }
-            // This calculates the cost to make a swap which is used as an input to SOR to allow it to make gas efficient recommendations
-            const costOutputToken = await getCostOutputToken(
-                this.chainId,
+        if (cost !== null) {
+            this.swapCostCalculator.setSwapCostOverride(
                 tokenOut,
-                tokenDecimals,
-                this.gasPrice,
-                this.swapCost
+                cost.toString()
             );
-
-            this.tokenCost[tokenOut] = costOutputToken.div(
-                bnum(10 ** tokenDecimals)
-            );
-            return this.tokenCost[tokenOut];
-        } else {
-            this.tokenCost[tokenOut] = cost;
-            return cost;
         }
+        return this.swapCostCalculator.convertGasCostToToken(
+            tokenOut,
+            tokenDecimals,
+            this.gasPrice,
+            this.swapCost
+        );
     }
 
     /*
@@ -159,7 +141,7 @@ export class SOR {
             timestamp: 0,
         }
     ): Promise<SwapInfo> {
-        if (!this.finishedFetchingOnChain) return EMPTY_SWAPINFO;
+        if (!this.poolCacher.finishedFetchingOnChain) return EMPTY_SWAPINFO;
 
         const pools: SubgraphPoolBase[] = JSON.parse(
             JSON.stringify(this.poolCacher.getPools())
@@ -236,7 +218,7 @@ export class SOR {
             currentBlockTimestamp
         );
 
-        const costOutputToken = this.getCostOutputToken(
+        const costOutputToken = await this.getCostOutputToken(
             swapType === SwapTypes.SwapExactIn ? tokenOut : tokenIn
         );
 

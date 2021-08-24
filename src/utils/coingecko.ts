@@ -21,7 +21,14 @@ const getNativeAssetId = (chainId: string | number): string => {
     return mapping[chainId.toString()] || 'eth';
 };
 
-export async function convertTokenToNative(
+/**
+ * @dev Assumes that the native asset has 18 decimals
+ * @param chainId - the chain id on which the token is deployed
+ * @param tokenAddress - the address of the token contract
+ * @param tokenDecimals - the number of decimals places which the token is divisible by
+ * @returns the price of 1 ETH in terms of the token base units
+ */
+export async function getTokenPriceInNativeAsset(
     chainId: number,
     tokenAddress: string,
     tokenDecimals: number
@@ -42,10 +49,5 @@ export async function convertTokenToNative(
 
     const ethPerToken = data[tokenAddress.toLowerCase()][nativeAssetId];
 
-    // Coingecko returns price of token in terms of ETH
-    // We want the price of 1 ETH in terms of the token
-    const priceInNativeToken = BONE.div(
-        scale(bnum(ethPerToken), 18 - tokenDecimals)
-    ).toString();
-    return priceInNativeToken;
+    return scale(bnum(ethPerToken), 18 - tokenDecimals).toString();
 }

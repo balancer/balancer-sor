@@ -32,43 +32,6 @@ describe(`Tests for wrapper class.`, () => {
         assert.equal(swapCost.toString(), sor.swapCost.toString());
     });
 
-    it(`Should manually set costOutputToken`, () => {
-        const tokenOut = `0xba100000625a3754423978a60c9317c58a424e3d`;
-        const manualCost = new BigNumber('700000000000');
-        const sor = new SOR(provider, gasPrice, maxPools, chainId, poolsUrl);
-        sor.setCostOutputToken(tokenOut, 18, manualCost);
-        assert.equal(manualCost, sor.getCostOutputToken(tokenOut));
-    });
-
-    it(`Should return correct costOutputToken for ZERO & WETH addresses`, async () => {
-        const tokenOut = ZERO_ADDRESS;
-        const sor = new SOR(provider, gasPrice, maxPools, chainId, poolsUrl);
-        let cost = await sor.setCostOutputToken(tokenOut, 18);
-        assert.equal(
-            cost.toString(),
-            gasPrice
-                .times(sor.swapCost)
-                .div(bnum(10 ** 18))
-                .toString()
-        );
-        assert.equal(
-            cost.toString(),
-            sor.getCostOutputToken(tokenOut).toString()
-        );
-        cost = await sor.setCostOutputToken(WETHADDR, 18);
-        assert.equal(
-            cost.toString(),
-            gasPrice
-                .times(sor.swapCost)
-                .div(bnum(10 ** 18))
-                .toString()
-        );
-        assert.equal(
-            cost.toString(),
-            sor.getCostOutputToken(WETHADDR).toString()
-        );
-    });
-
     it(`Should return no swaps when pools not retrieved.`, async () => {
         const tokenIn = '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2';
         const tokenOut = '0x6b175474e89094c44da98b954eedeac495271d0f';

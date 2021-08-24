@@ -2,7 +2,10 @@
 import { expect } from 'chai';
 import { JsonRpcProvider } from '@ethersproject/providers';
 import { BigNumber, scale } from '../src/utils/bignumber';
-import { calculateTotalSwapCost, getCostOutputToken } from '../src/costToken';
+import {
+    calculateTotalSwapCost,
+    SwapCostCalculator,
+} from '../src/swapCostCalculator';
 
 const DAI = '0x6B175474E89094C44Da98b954EedeAC495271d0F';
 const WETH = '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2';
@@ -44,8 +47,7 @@ describe('Test costOutputToken', () => {
         const swapGasCost = new BigNumber(100000);
 
         const costExpected = new BigNumber(0);
-        const cost = await getCostOutputToken(
-            1,
+        const cost = await new SwapCostCalculator(1).convertGasCostToToken(
             '0x0',
             18,
             gasPriceWei,
@@ -56,14 +58,10 @@ describe('Test costOutputToken', () => {
     });
 
     it('Example of full call with DAI & 30GWEI Gas Price', async () => {
-        const provider = new JsonRpcProvider(
-            `https://mainnet.infura.io/v3/${process.env.INFURA}`
-        );
         const gasPriceWei = new BigNumber(30000000000);
         const swapGasCost = new BigNumber(100000);
 
-        const cost = await getCostOutputToken(
-            1,
+        const cost = await new SwapCostCalculator(1).convertGasCostToToken(
             DAI,
             18,
             gasPriceWei,
@@ -77,8 +75,7 @@ describe('Test costOutputToken', () => {
         const gasPriceWei = new BigNumber(30000000000);
         const swapGasCost = new BigNumber(100000);
 
-        const cost = await getCostOutputToken(
-            1,
+        const cost = await new SwapCostCalculator(1).convertGasCostToToken(
             USDC,
             6,
             gasPriceWei,
@@ -93,8 +90,7 @@ describe('Test costOutputToken', () => {
         const swapGasCost = new BigNumber(100000);
         const MKR = '0x9f8F72aA9304c8B593d555F12eF6589cC3A579A2';
 
-        const cost = await getCostOutputToken(
-            1,
+        const cost = await new SwapCostCalculator(1).convertGasCostToToken(
             MKR,
             18,
             gasPriceWei,
@@ -108,8 +104,7 @@ describe('Test costOutputToken', () => {
         const gasPriceWei = new BigNumber(30000000000);
         const swapGasCost = new BigNumber(100000);
 
-        const cost = await getCostOutputToken(
-            1,
+        const cost = await new SwapCostCalculator(1).convertGasCostToToken(
             WETH,
             18,
             gasPriceWei,
