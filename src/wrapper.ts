@@ -11,23 +11,21 @@ import {
     SwapOptions,
     PoolFilter,
     WETHADDR,
-    VAULTADDR,
-    MULTIADDR,
     ZERO_ADDRESS,
     getLidoStaticSwaps,
     isLidoStableSwap,
     filterPoolsOfInterest,
     filterHopPools,
-    fetchSubgraphPools,
-    getOnChainBalances,
     getCostOutputToken,
     bnum,
     Swap,
     filterPoolsByType,
+    SubgraphPoolBase,
 } from './index';
 import { calculatePathLimits, smartOrderRouter } from './router';
 import { getWrappedInfo, setWrappedInfo } from './wrapInfo';
 import { formatSwaps } from './formatSwaps';
+import { PoolFetcher } from './poolFetching/poolFetcher';
 
 const EMPTY_SWAPINFO: SwapInfo = {
     tokenAddresses: [],
@@ -49,17 +47,14 @@ export class SOR {
     chainId: number;
     // avg Balancer swap cost. Can be updated manually if required.
     swapCost: BigNumber;
-    isUsingPoolsUrl: boolean;
-    poolsUrl: string;
-    subgraphPools: SubGraphPoolsBase;
     private tokenCost: Record<string, BigNumber> = {};
-    onChainBalanceCache: SubGraphPoolsBase = { pools: [] };
     processedDataCache: Record<
         string,
         { pools: PoolDictionary; paths: NewPath[] }
     > = {};
-    finishedFetchingOnChain = false;
     disabledOptions: DisabledOptions;
+
+    private poolFetcher: PoolFetcher;
 
     constructor(
         provider: BaseProvider,
@@ -73,20 +68,25 @@ export class SOR {
             disabledTokens: [],
         }
     ) {
+        this.poolFetcher = new PoolFetcher(
+            provider,
+            chainId,
+            typeof poolsSource === 'string' ? poolsSource : poolsSource.pools
+        );
         this.provider = provider;
         this.gasPrice = gasPrice;
         this.maxPools = maxPools;
         this.chainId = chainId;
         this.swapCost = swapCost;
-        // The pools source can be a URL (e.g. pools from Subgraph) or a data set of pools
-        if (typeof poolsSource === 'string') {
-            this.isUsingPoolsUrl = true;
-            this.poolsUrl = poolsSource;
-        } else {
-            this.isUsingPoolsUrl = false;
-            this.subgraphPools = poolsSource;
-        }
         this.disabledOptions = disabledOptions;
+    }
+
+    get poolsCache(): SubgraphPoolBase[] {
+        return this.poolFetcher.getPools();
+    }
+
+    get finishedFetchingOnChain(): boolean {
+        return this.poolFetcher.finishedFetchingOnChain;
     }
 
     getCostOutputToken(outputToken: string): BigNumber {
@@ -146,84 +146,7 @@ export class SOR {
         isOnChain = true,
         poolsData: SubGraphPoolsBase = { pools: [] }
     ): Promise<boolean> {
-        try {
-            // If poolsData has been passed to function these pools should be used
-            const isExternalPoolData =
-                poolsData.pools.length > 0 ? true : false;
-
-            let subgraphPools: SubGraphPoolsBase;
-
-            if (isExternalPoolData) {
-                subgraphPools = JSON.parse(JSON.stringify(poolsData));
-                // Store as latest pools data
-                if (!this.isUsingPoolsUrl) this.subgraphPools = subgraphPools;
-            } else {
-                // Retrieve from URL if set otherwise use data passed in constructor
-                if (this.isUsingPoolsUrl)
-                    subgraphPools = await fetchSubgraphPools(this.poolsUrl);
-                else subgraphPools = this.subgraphPools;
-            }
-
-            const previousStringify = JSON.stringify(this.onChainBalanceCache); // Used for compare
-
-            // Get latest on-chain balances (returns data in string/normalized format)
-            this.onChainBalanceCache = await this.fetchOnChainBalances(
-                subgraphPools,
-                isOnChain
-            );
-
-            // If new pools are different from previous then any previous processed data is out of date so clear
-            if (
-                previousStringify !== JSON.stringify(this.onChainBalanceCache)
-            ) {
-                this.processedDataCache = {};
-            }
-
-            this.finishedFetchingOnChain = true;
-
-            return true;
-        } catch (err) {
-            // On error clear all caches and return false so user knows to try again.
-            this.finishedFetchingOnChain = false;
-            this.onChainBalanceCache = { pools: [] };
-            this.processedDataCache = {};
-            console.error(`Error: fetchPools(): ${err.message}`);
-            return false;
-        }
-    }
-
-    /*
-    Uses multicall contract to fetch all onchain balances for pools.
-    */
-    private async fetchOnChainBalances(
-        subgraphPools: SubGraphPoolsBase,
-        isOnChain = true
-    ): Promise<SubGraphPoolsBase> {
-        if (subgraphPools.pools.length === 0) {
-            console.error('ERROR: No Pools To Fetch.');
-            return { pools: [] };
-        }
-
-        // Allows for testing
-        if (!isOnChain) {
-            console.log(
-                `!!!!!!! WARNING - Not Using Real OnChain Balances !!!!!!`
-            );
-            return subgraphPools;
-        }
-
-        // This will return in normalized/string format
-        const onChainPools: SubGraphPoolsBase = await getOnChainBalances(
-            subgraphPools,
-            MULTIADDR[this.chainId],
-            VAULTADDR[this.chainId],
-            this.provider
-        );
-
-        // Error with multicall
-        if (!onChainPools) return { pools: [] };
-
-        return onChainPools;
+        return this.poolFetcher.fetchPools(isOnChain, poolsData.pools);
     }
 
     async getSwaps(
@@ -238,12 +161,12 @@ export class SOR {
     ): Promise<SwapInfo> {
         if (!this.finishedFetchingOnChain) return EMPTY_SWAPINFO;
 
-        const pools: SubGraphPoolsBase = JSON.parse(
-            JSON.stringify(this.onChainBalanceCache)
+        const pools: SubgraphPoolBase[] = JSON.parse(
+            JSON.stringify(this.poolFetcher.getPools())
         );
 
-        pools.pools = filterPoolsByType(
-            pools.pools,
+        const filteredPools = filterPoolsByType(
+            pools,
             swapOptions.poolTypeFilter
         );
 
@@ -259,7 +182,7 @@ export class SOR {
         let swapInfo: SwapInfo;
         if (isLidoStableSwap(this.chainId, tokenIn, tokenOut)) {
             swapInfo = await getLidoStaticSwaps(
-                pools,
+                { pools: filteredPools },
                 this.chainId,
                 wrappedInfo.tokenIn.addressForSwaps,
                 wrappedInfo.tokenOut.addressForSwaps,
@@ -273,7 +196,7 @@ export class SOR {
                 wrappedInfo.tokenOut.addressForSwaps,
                 swapType,
                 wrappedInfo.swapAmountForSwaps,
-                pools,
+                { pools: filteredPools },
                 true,
                 swapOptions.timestamp
             );

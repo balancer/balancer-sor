@@ -32,11 +32,11 @@ describe(`Tests for wrapper class.`, () => {
         assert.equal(swapCost.toString(), sor.swapCost.toString());
     });
 
-    it(`Should set pools source to URL`, () => {
-        const sor = new SOR(provider, gasPrice, maxPools, chainId, poolsUrl);
-        assert.isTrue(sor.isUsingPoolsUrl);
-        assert.equal(poolsUrl, sor.poolsUrl);
-    });
+    // it(`Should set pools source to URL`, () => {
+    //     const sor = new SOR(provider, gasPrice, maxPools, chainId, poolsUrl);
+    //     assert.isTrue(sor.isUsingPoolsUrl);
+    //     assert.equal(poolsUrl, sor.poolsUrl);
+    // });
 
     it(`Should set pools source to pools passed`, () => {
         const poolsFromFile: SubGraphPoolsBase = require('./testData/testPools/subgraphPoolsSmallWithTrade.json');
@@ -47,8 +47,7 @@ describe(`Tests for wrapper class.`, () => {
             chainId,
             poolsFromFile
         );
-        assert.isFalse(sor.isUsingPoolsUrl);
-        expect(sor.subgraphPools).to.deep.eq(poolsFromFile);
+        expect(sor.poolsCache).to.deep.eq(poolsFromFile.pools);
     });
 
     it(`Should manually set costOutputToken`, () => {
@@ -112,7 +111,7 @@ describe(`Tests for wrapper class.`, () => {
         assert.isTrue(sor.finishedFetchingOnChain);
         assert.equal(
             poolsFromFile.pools[1].tokens[1].balance,
-            sor.onChainBalanceCache.pools[1].tokens[1].balance
+            sor.poolsCache[1].tokens[1].balance
         );
     });
 
@@ -129,25 +128,20 @@ describe(`Tests for wrapper class.`, () => {
         const testPools = require('./testData/filterTestPools.json');
         const newPools: SubGraphPoolsBase = { pools: testPools.stableOnly };
 
-        // Initial cache should be empty
-        expect(poolsFromFile).not.deep.equal(newPools);
-        expect(newPools).not.deep.equal(sor.onChainBalanceCache);
-        expect({ pools: [] }).deep.equal(sor.onChainBalanceCache);
-
         // First fetch uses data passed as constructor
         let fetchSuccess = await sor.fetchPools(false);
         assert.isTrue(fetchSuccess);
         assert.isTrue(sor.finishedFetchingOnChain);
         expect(poolsFromFile).not.deep.equal(newPools);
-        expect(poolsFromFile).deep.equal(sor.onChainBalanceCache);
+        expect(poolsFromFile.pools).deep.equal(sor.poolsCache);
 
         // Second fetch uses newPools passed
         fetchSuccess = await sor.fetchPools(false, newPools);
         assert.isTrue(fetchSuccess);
         assert.isTrue(sor.finishedFetchingOnChain);
         expect(poolsFromFile).not.deep.equal(newPools);
-        expect(poolsFromFile).not.deep.equal(sor.onChainBalanceCache);
-        expect(newPools).deep.equal(sor.onChainBalanceCache);
+        expect(poolsFromFile.pools).not.deep.equal(sor.poolsCache);
+        expect(newPools.pools).deep.equal(sor.poolsCache);
     });
 
     it(`Should return no swaps when pools not retrieved.`, async () => {
@@ -179,7 +173,7 @@ describe(`Tests for wrapper class.`, () => {
         const result: boolean = await sor.fetchPools(false);
         assert.isTrue(result);
         assert.isTrue(sor.finishedFetchingOnChain);
-        assert.isAbove(sor.onChainBalanceCache.pools.length, 0);
+        assert.isAbove(sor.poolsCache.length, 0);
     });
 
     it(`should have a valid swap`, async () => {

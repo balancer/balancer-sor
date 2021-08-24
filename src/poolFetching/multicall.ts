@@ -1,7 +1,7 @@
 import { BaseProvider } from '@ethersproject/providers';
-import { SubGraphPoolsBase } from './types';
-import { scale, bnum } from './utils/bignumber';
-import { Multicaller } from './utils/multicaller';
+import { SubGraphPoolsBase } from '../types';
+import { scale, bnum } from '../utils/bignumber';
+import { Multicaller } from '../utils/multicaller';
 import _ from 'lodash';
 
 // Load pools data with multicalls
