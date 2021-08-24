@@ -2,6 +2,80 @@ import { BigNumber } from './utils/bignumber';
 import { SwapTypes, SwapV2, Swap, SwapInfo } from './types';
 import { bnum, scale, ZERO } from './utils/bignumber';
 
+/**
+ * @returns an array of deduplicated token addresses used in the provided swaps
+ */
+const getTokenAddresses = (swaps: Swap[][]): string[] => {
+    const tokenAddressesSet: Set<string> = new Set(
+        swaps.flatMap(sequence =>
+            sequence.flatMap((swap): [string, string] => [
+                swap.tokenIn,
+                swap.tokenOut,
+            ])
+        )
+    );
+
+    return [...tokenAddressesSet];
+};
+
+const getTotalSwapAmount = (swaps: SwapV2[]) => {
+    return swaps.reduce((acc, { amount }) => acc.plus(amount), ZERO);
+};
+
+/**
+ * Formats a sequence of swaps to the format expected by the Balance Vault.
+ * @dev Intermediate swaps' amounts are replaced with the sentinel value of zero
+ *      and exact output sequences are reversed.
+ * @param swapKind - a SwapTypes enum for whether the swap has an exact input or exact output
+ * @param sequence - a sequence of swaps which form a path from the input token to the output token
+ * @param tokenAddresses - an array of all the token address which are involved in the batchSwap
+ * @returns
+ */
+const formatSequence = (
+    swapKind: SwapTypes,
+    sequence: Swap[],
+    tokenAddresses: string[]
+): SwapV2[] => {
+    if (swapKind === SwapTypes.SwapExactOut) {
+        // GIVEN_OUT sequences must be passed to the vault in reverse order.
+        // After reversing the sequence we can treat them almost equivalently to GIVEN_IN sequences
+        sequence = sequence.reverse();
+    }
+
+    return sequence.map((swap, i) => {
+        // Multihop swaps can be executed by passing an `amountIn` value of zero for a swap. This will cause the amount out
+        // of the previous swap to be used as the amount in of the current one. In such a scenario, `tokenIn` must equal the
+        // previous swap's `tokenOut`.
+        let amountScaled = '0';
+
+        // First swap needs to be given a value so we inject this from SOR solution
+        if (i === 0) {
+            // If it's a GIVEN_IN swap then swapAmount is in terms of tokenIn
+            // and vice versa for GIVEN_OUT
+            const scalingFactor =
+                swapKind === SwapTypes.SwapExactIn
+                    ? swap.tokenInDecimals
+                    : swap.tokenOutDecimals;
+
+            amountScaled = scale(bnum(swap.swapAmount), scalingFactor)
+                .decimalPlaces(0, 1)
+                .toString();
+        }
+
+        const inIndex = tokenAddresses.indexOf(swap.tokenIn);
+        const outIndex = tokenAddresses.indexOf(swap.tokenOut);
+        const swapV2: SwapV2 = {
+            poolId: swap.pool,
+            assetInIndex: inIndex,
+            assetOutIndex: outIndex,
+            amount: amountScaled,
+            userData: '0x',
+        };
+
+        return swapV2;
+    });
+};
+
 export function formatSwaps(
     swapsOriginal: Swap[][],
     swapType: SwapTypes,
@@ -12,8 +86,6 @@ export function formatSwaps(
     returnAmountConsideringFees: BigNumber,
     marketSp: BigNumber
 ): SwapInfo {
-    const tokenAddressesSet: Set<string> = new Set();
-
     const swaps: Swap[][] = JSON.parse(JSON.stringify(swapsOriginal));
 
     let tokenInDecimals: number;
@@ -43,51 +115,17 @@ export function formatSwaps(
 
             if (swap.tokenOut === tokenOut)
                 tokenOutDecimals = swap.tokenOutDecimals;
-
-            tokenAddressesSet.add(swap.tokenIn);
-            tokenAddressesSet.add(swap.tokenOut);
         });
     });
 
-    const tokenArray = [...tokenAddressesSet];
+    const tokenArray = getTokenAddresses(swaps);
+
+    const swapsV2: SwapV2[] = swaps.flatMap(sequence =>
+        formatSequence(swapType, sequence, tokenArray)
+    );
+    const totalSwapAmount = getTotalSwapAmount(swapsV2).toString();
 
     if (swapType === SwapTypes.SwapExactIn) {
-        const swapsV2: SwapV2[] = [];
-
-        let totalSwapAmount = ZERO;
-        /*
-         * Multihop swaps can be executed by passing an`amountIn` value of zero for a swap.This will cause the amount out
-         * of the previous swap to be used as the amount in of the current one.In such a scenario, `tokenIn` must equal the
-         * previous swap's `tokenOut`.
-         * */
-        swaps.forEach(sequence => {
-            sequence.forEach((swap, i) => {
-                let amountScaled = '0'; // amount will be 0 for second swap in multihop swap
-                if (i == 0) {
-                    // First swap so should have a value for both single and multihop
-                    amountScaled = scale(
-                        bnum(swap.swapAmount),
-                        swap.tokenInDecimals
-                    )
-                        .decimalPlaces(0, 1)
-                        .toString();
-                    totalSwapAmount = totalSwapAmount.plus(amountScaled);
-                }
-
-                const inIndex = tokenArray.indexOf(swap.tokenIn);
-                const outIndex = tokenArray.indexOf(swap.tokenOut);
-                const swapV2: SwapV2 = {
-                    poolId: swap.pool,
-                    assetInIndex: inIndex,
-                    assetOutIndex: outIndex,
-                    amount: amountScaled,
-                    userData: '0x',
-                };
-
-                swapsV2.push(swapV2);
-            });
-        });
-
         // We need to account for any rounding losses by adding dust to first path
         const swapAmountScaled = scale(swapAmount, tokenInDecimals);
         const dust = swapAmountScaled.minus(totalSwapAmount).dp(0, 0);
@@ -110,49 +148,6 @@ export function formatSwaps(
         );
         swapInfo.swaps = swapsV2;
     } else {
-        let swapsV2: SwapV2[] = [];
-        let totalSwapAmount = ZERO;
-        /*
-        SwapExactOut will have order reversed in V2.
-        v1 = [[x, y]], [[a, b]]
-        v2 = [y, x, b, a]
-        */
-        swaps.forEach(sequence => {
-            if (sequence.length > 2)
-                throw new Error(
-                    'Multihop with more than 2 swaps not supported'
-                );
-
-            const sequenceSwaps = [];
-            sequence.forEach((swap, i) => {
-                const inIndex = tokenArray.indexOf(swap.tokenIn);
-                const outIndex = tokenArray.indexOf(swap.tokenOut);
-                const swapV2: SwapV2 = {
-                    poolId: swap.pool,
-                    assetInIndex: inIndex,
-                    assetOutIndex: outIndex,
-                    amount: '0', // For a multihop the first swap in sequence should be last in order and have amt = 0
-                    userData: '0x',
-                };
-
-                if (i == 0 && sequence.length > 1) {
-                    sequenceSwaps[1] = swapV2; // Make the swap the last in V2 order for the sequence
-                } else {
-                    const amountScaled = scale(
-                        bnum(swap.swapAmount),
-                        swap.tokenOutDecimals
-                    )
-                        .decimalPlaces(0, 1)
-                        .toString();
-                    totalSwapAmount = totalSwapAmount.plus(amountScaled);
-                    swapV2.amount = amountScaled; // Make the swap the first in V2 order for the sequence with the value
-                    sequenceSwaps[0] = swapV2;
-                }
-            });
-
-            swapsV2 = swapsV2.concat(sequenceSwaps);
-        });
-
         // We need to account for any rounding losses by adding dust to first path
         const swapAmountScaled = scale(swapAmount, tokenOutDecimals);
         const dust = swapAmountScaled.minus(totalSwapAmount).dp(0, 0);
