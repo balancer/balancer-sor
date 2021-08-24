@@ -9,8 +9,7 @@ import {
     SwapTypes,
     PoolFilter,
 } from '../src/types';
-import { bnum } from '../src/bmath';
-import { BigNumber } from '../src/utils/bignumber';
+import { BigNumber, bnum } from '../src/utils/bignumber';
 
 const WETHADDR = '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2';
 

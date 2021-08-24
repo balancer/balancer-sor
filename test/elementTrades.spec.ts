@@ -10,7 +10,7 @@ require('dotenv').config();
 import { expect, assert } from 'chai';
 import { JsonRpcProvider } from '@ethersproject/providers';
 import { SOR, SubGraphPoolsBase, SwapInfo, SwapTypes } from '../src';
-import { bnum } from '../src/bmath';
+import { bnum } from '../src/utils/bignumber';
 import { calcRelativeDiffBn } from './lib/testHelpers';
 import { PoolFilter } from '../src/types';
 

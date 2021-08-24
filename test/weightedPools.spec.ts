@@ -10,8 +10,7 @@ import {
     PoolTypes,
     PairTypes,
 } from '../src/types';
-import { bnum } from '../src/bmath';
-import { BigNumber } from '../src/utils/bignumber';
+import { BigNumber, bnum } from '../src/utils/bignumber';
 import {
     WeightedPool,
     WeightedPoolPairData,

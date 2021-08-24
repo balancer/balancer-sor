@@ -20,7 +20,7 @@ import {
 import customMultiAbi from '../abi/customMulticall.json';
 import { SubGraphPools as SubGraphPoolsV1 } from '@balancer-labs/sor/dist/types';
 import { BaseProvider } from '@ethersproject/providers';
-import { bnum, scale } from '../../src/bmath';
+import { bnum, scale } from '../../src/utils/bignumber';
 import { hashMessage } from '@ethersproject/hash';
 import * as fs from 'fs';
 import { readdir } from 'fs/promises';

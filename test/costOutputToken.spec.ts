@@ -3,7 +3,7 @@ require('dotenv').config();
 import { expect } from 'chai';
 import { JsonRpcProvider } from '@ethersproject/providers';
 import { BigNumber } from '../src/utils/bignumber';
-import { scale } from '../src/bmath';
+import { scale } from '../src/utils/bignumber';
 import { calculateTotalSwapCost, getAddress } from '../src/costToken';
 const sor = require('../src');
 

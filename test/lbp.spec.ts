@@ -2,9 +2,14 @@ require('dotenv').config();
 import { expect } from 'chai';
 import { JsonRpcProvider } from '@ethersproject/providers';
 import { SOR } from '../src';
-import { SubGraphPoolsBase, SwapInfo, SwapTypes } from '../src/types';
-import { bnum } from '../src/bmath';
-import { BigNumber } from '../src/utils/bignumber';
+import {
+    SubGraphPoolsBase,
+    SwapInfo,
+    SwapTypes,
+    PoolTypes,
+    PairTypes,
+} from '../src/types';
+import { BigNumber, bnum, scale } from '../src/utils/bignumber';
 
 const gasPrice = bnum('30000000000');
 const maxPools = 4;

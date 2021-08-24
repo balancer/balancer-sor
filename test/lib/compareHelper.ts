@@ -6,7 +6,7 @@ import {
     getV2Swap,
     getWrapperSwap,
 } from './testHelpers';
-import { bnum } from '../../src/bmath';
+import { bnum } from '../../src/utils/bignumber';
 import { SwapInfo, DisabledOptions } from '../../src/types';
 import BigNumber from 'bignumber.js';
 

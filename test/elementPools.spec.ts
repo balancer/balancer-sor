@@ -10,7 +10,7 @@ import {
     PairTypes,
     PoolFilter,
 } from '../src/types';
-import { bnum } from '../src/bmath';
+import { bnum } from '../src/utils/bignumber';
 import { BigNumber } from '../src/utils/bignumber';
 import {
     ElementPool,
