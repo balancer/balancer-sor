@@ -11,7 +11,7 @@ import {
     Swap,
     SwapInfo,
 } from './types';
-import { bnum, scale, ZERO, INFINITY } from './bmath';
+import { bnum, scale, ZERO, INFINITY } from './utils/bignumber';
 import { INFINITESIMAL } from './config';
 import { ZERO_ADDRESS, Lido, getStEthRate } from './index';
 import { WETHADDR } from './constants';

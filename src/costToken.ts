@@ -3,7 +3,7 @@ import { Contract } from '@ethersproject/contracts';
 import { BaseProvider } from '@ethersproject/providers';
 import { keccak256, pack } from '@ethersproject/solidity';
 import { BigNumber } from './utils/bignumber';
-import { BONE } from './bmath';
+import { BONE } from './utils/bignumber';
 
 const FACTORY_ADDRESS = '0x5C69bEe701ef814a2B6a3EDD4B1652CB9cc5aA6f';
 const INIT_CODE_HASH =

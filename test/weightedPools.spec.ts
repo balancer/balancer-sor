@@ -10,8 +10,7 @@ import {
     PoolTypes,
     PairTypes,
 } from '../src/types';
-import { bnum } from '../src/bmath';
-import { BigNumber } from '../src/utils/bignumber';
+import { BigNumber, bnum } from '../src/utils/bignumber';
 import {
     WeightedPool,
     WeightedPoolPairData,
@@ -137,7 +136,7 @@ describe(`Tests for Weighted Pools.`, () => {
 
                 const fetchSuccess = await sor.fetchPools(false);
 
-                let swapInfo: SwapInfo = await sor.getSwaps(
+                const swapInfo: SwapInfo = await sor.getSwaps(
                     tokenIn,
                     tokenOut,
                     swapType,
@@ -174,7 +173,7 @@ describe(`Tests for Weighted Pools.`, () => {
 
                 const fetchSuccess = await sor.fetchPools(false);
 
-                let swapInfo: SwapInfo = await sor.getSwaps(
+                const swapInfo: SwapInfo = await sor.getSwaps(
                     tokenIn,
                     tokenOut,
                     swapType,
@@ -209,7 +208,7 @@ describe(`Tests for Weighted Pools.`, () => {
 
                 const fetchSuccess = await sor.fetchPools(false);
 
-                let swapInfo: SwapInfo = await sor.getSwaps(
+                const swapInfo: SwapInfo = await sor.getSwaps(
                     tokenIn,
                     tokenOut,
                     swapType,
@@ -244,7 +243,7 @@ describe(`Tests for Weighted Pools.`, () => {
 
                 const fetchSuccess = await sor.fetchPools(false);
 
-                let swapInfo: SwapInfo = await sor.getSwaps(
+                const swapInfo: SwapInfo = await sor.getSwaps(
                     tokenIn,
                     tokenOut,
                     swapType,
@@ -284,7 +283,7 @@ describe(`Tests for Weighted Pools.`, () => {
 
                 const fetchSuccess = await sor.fetchPools(false);
 
-                let swapInfo: SwapInfo = await sor.getSwaps(
+                const swapInfo: SwapInfo = await sor.getSwaps(
                     tokenIn,
                     tokenOut,
                     swapType,
@@ -334,7 +333,7 @@ describe(`Tests for Weighted Pools.`, () => {
 
                 const fetchSuccess = await sor.fetchPools(false);
 
-                let swapInfo: SwapInfo = await sor.getSwaps(
+                const swapInfo: SwapInfo = await sor.getSwaps(
                     tokenIn,
                     tokenOut,
                     swapType,
@@ -386,7 +385,7 @@ describe(`Tests for Weighted Pools.`, () => {
 
                 const fetchSuccess = await sor.fetchPools(false);
 
-                let swapInfo: SwapInfo = await sor.getSwaps(
+                const swapInfo: SwapInfo = await sor.getSwaps(
                     tokenIn,
                     tokenOut,
                     swapType,
@@ -438,7 +437,7 @@ describe(`Tests for Weighted Pools.`, () => {
 
                 const fetchSuccess = await sor.fetchPools(false);
 
-                let swapInfo: SwapInfo = await sor.getSwaps(
+                const swapInfo: SwapInfo = await sor.getSwaps(
                     tokenIn,
                     tokenOut,
                     swapType,

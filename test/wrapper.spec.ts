@@ -9,8 +9,7 @@ import {
     SwapTypes,
     PoolFilter,
 } from '../src/types';
-import { bnum } from '../src/bmath';
-import { BigNumber } from '../src/utils/bignumber';
+import { BigNumber, bnum } from '../src/utils/bignumber';
 
 const WETHADDR = '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2';
 
@@ -654,7 +653,7 @@ describe(`Tests for wrapper class.`, () => {
             swapAmt
         );
 
-        let cacheZero =
+        const cacheZero =
             sor.processedDataCache[`${tokenIn}${tokenOut}${swapType}0`];
         expect(cacheZero.paths.length).to.be.gt(0);
         let cacheOne =
@@ -666,7 +665,7 @@ describe(`Tests for wrapper class.`, () => {
             timestamp: 1,
         });
 
-        let cacheZeroRepeat =
+        const cacheZeroRepeat =
             sor.processedDataCache[`${tokenIn}${tokenOut}${swapType}0`];
         expect(cacheZero).to.deep.eq(cacheZeroRepeat);
         cacheOne = sor.processedDataCache[`${tokenIn}${tokenOut}${swapType}1`];

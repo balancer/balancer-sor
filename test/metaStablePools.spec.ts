@@ -10,8 +10,7 @@ import {
     PoolTypes,
     PairTypes,
 } from '../src/types';
-import { bnum, scale } from '../src/bmath';
-import { BigNumber } from '../src/utils/bignumber';
+import { BigNumber, bnum, scale } from '../src/utils/bignumber';
 import {
     MetaStablePool,
     MetaStablePoolPairData,

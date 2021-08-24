@@ -2,7 +2,7 @@ import { BaseProvider } from '@ethersproject/providers';
 import { Contract } from '@ethersproject/contracts';
 import { SwapInfo, SwapTypes, SwapV2 } from '../../types';
 import { parseNewPool } from '../../pools';
-import { ZERO, scale, bnum } from '../../bmath';
+import { ZERO, scale, bnum } from '../../utils/bignumber';
 import { BigNumber } from '../../utils/bignumber';
 import { ZERO_ADDRESS, SubGraphPoolsBase } from '../../index';
 import vaultAbi from '../../abi/Vault.json';

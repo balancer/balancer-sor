@@ -9,8 +9,7 @@ import {
     PoolTypes,
     PairTypes,
 } from '../src/types';
-import { bnum, scale } from '../src/bmath';
-import { BigNumber } from '../src/utils/bignumber';
+import { BigNumber, bnum, scale } from '../src/utils/bignumber';
 
 const gasPrice = bnum('30000000000');
 const maxPools = 4;
@@ -51,7 +50,7 @@ describe(`Tests for LBP Pools.`, () => {
 
             const fetchSuccess = await sor.fetchPools(false);
 
-            let swapInfo: SwapInfo = await sor.getSwaps(
+            const swapInfo: SwapInfo = await sor.getSwaps(
                 tokenIn,
                 tokenOut,
                 swapType,
@@ -82,7 +81,7 @@ describe(`Tests for LBP Pools.`, () => {
 
             const fetchSuccess = await sor.fetchPools(false);
 
-            let swapInfo: SwapInfo = await sor.getSwaps(
+            const swapInfo: SwapInfo = await sor.getSwaps(
                 tokenIn,
                 tokenOut,
                 swapType,

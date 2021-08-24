@@ -10,8 +10,7 @@ import {
     PoolTypes,
     PairTypes,
 } from '../src/types';
-import { bnum, scale } from '../src/bmath';
-import { BigNumber } from '../src/utils/bignumber';
+import { BigNumber, bnum, scale } from '../src/utils/bignumber';
 import {
     StablePool,
     StablePoolPairData,
@@ -154,7 +153,7 @@ describe(`Tests for Stable Pools.`, () => {
 
             const fetchSuccess = await sor.fetchPools(false);
 
-            let swapInfo: SwapInfo = await sor.getSwaps(
+            const swapInfo: SwapInfo = await sor.getSwaps(
                 tokenIn,
                 tokenOut,
                 swapType,
@@ -182,7 +181,7 @@ describe(`Tests for Stable Pools.`, () => {
 
             const fetchSuccess = await sor.fetchPools(false);
 
-            let swapInfo: SwapInfo = await sor.getSwaps(
+            const swapInfo: SwapInfo = await sor.getSwaps(
                 tokenIn,
                 tokenOut,
                 swapType,
@@ -210,7 +209,7 @@ describe(`Tests for Stable Pools.`, () => {
 
             const fetchSuccess = await sor.fetchPools(false);
 
-            let swapInfo: SwapInfo = await sor.getSwaps(
+            const swapInfo: SwapInfo = await sor.getSwaps(
                 tokenIn,
                 tokenOut,
                 swapType,
@@ -251,7 +250,7 @@ describe(`Tests for Stable Pools.`, () => {
 
             const fetchSuccess = await sor.fetchPools(false);
 
-            let swapInfo: SwapInfo = await sor.getSwaps(
+            const swapInfo: SwapInfo = await sor.getSwaps(
                 tokenIn,
                 tokenOut,
                 swapType,
@@ -293,7 +292,7 @@ describe(`Tests for Stable Pools.`, () => {
 
                 const fetchSuccess = await sor.fetchPools(false);
 
-                let swapInfo: SwapInfo = await sor.getSwaps(
+                const swapInfo: SwapInfo = await sor.getSwaps(
                     tokenIn,
                     tokenOut,
                     swapType,
@@ -328,7 +327,7 @@ describe(`Tests for Stable Pools.`, () => {
 
                 const fetchSuccess = await sor.fetchPools(false);
 
-                let swapInfo: SwapInfo = await sor.getSwaps(
+                const swapInfo: SwapInfo = await sor.getSwaps(
                     tokenIn,
                     tokenOut,
                     swapType,
@@ -362,7 +361,7 @@ describe(`Tests for Stable Pools.`, () => {
 
                 const fetchSuccess = await sor.fetchPools(false);
 
-                let swapInfo: SwapInfo = await sor.getSwaps(
+                const swapInfo: SwapInfo = await sor.getSwaps(
                     tokenIn,
                     tokenOut,
                     swapType,
@@ -397,7 +396,7 @@ describe(`Tests for Stable Pools.`, () => {
 
                 const fetchSuccess = await sor.fetchPools(false);
 
-                let swapInfo: SwapInfo = await sor.getSwaps(
+                const swapInfo: SwapInfo = await sor.getSwaps(
                     tokenIn,
                     tokenOut,
                     swapType,
@@ -436,7 +435,7 @@ describe(`Tests for Stable Pools.`, () => {
 
             const fetchSuccess = await sor.fetchPools(false);
 
-            let swapInfo: SwapInfo = await sor.getSwaps(
+            const swapInfo: SwapInfo = await sor.getSwaps(
                 tokenIn,
                 tokenOut,
                 swapType,
@@ -482,7 +481,7 @@ describe(`Tests for Stable Pools.`, () => {
 
             const fetchSuccess = await sor.fetchPools(false);
 
-            let swapInfo: SwapInfo = await sor.getSwaps(
+            const swapInfo: SwapInfo = await sor.getSwaps(
                 tokenIn,
                 tokenOut,
                 swapType,
@@ -668,7 +667,7 @@ describe(`Tests for Stable Pools.`, () => {
 
                 const fetchSuccess = await sor.fetchPools(false);
 
-                let swapInfo: SwapInfo = await sor.getSwaps(
+                const swapInfo: SwapInfo = await sor.getSwaps(
                     tokenIn,
                     tokenOut,
                     swapType,
@@ -718,7 +717,7 @@ describe(`Tests for Stable Pools.`, () => {
 
                 const fetchSuccess = await sor.fetchPools(false);
 
-                let swapInfo: SwapInfo = await sor.getSwaps(
+                const swapInfo: SwapInfo = await sor.getSwaps(
                     tokenIn,
                     tokenOut,
                     swapType,
@@ -770,7 +769,7 @@ describe(`Tests for Stable Pools.`, () => {
 
                 const fetchSuccess = await sor.fetchPools(false);
 
-                let swapInfo: SwapInfo = await sor.getSwaps(
+                const swapInfo: SwapInfo = await sor.getSwaps(
                     tokenIn,
                     tokenOut,
                     swapType,
@@ -822,7 +821,7 @@ describe(`Tests for Stable Pools.`, () => {
 
                 const fetchSuccess = await sor.fetchPools(false);
 
-                let swapInfo: SwapInfo = await sor.getSwaps(
+                const swapInfo: SwapInfo = await sor.getSwaps(
                     tokenIn,
                     tokenOut,
                     swapType,
