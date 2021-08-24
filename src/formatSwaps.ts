@@ -18,6 +18,10 @@ const getTokenAddresses = (swaps: Swap[][]): string[] => {
     return [...tokenAddressesSet];
 };
 
+/**
+ * @dev Assumes that intermediate swaps have been properly formatted using the zero sentinel value
+ * @returns the total amount of tokens used in the described batchSwap
+ */
 const getTotalSwapAmount = (swaps: SwapV2[]) => {
     return swaps.reduce((acc, { amount }) => acc.plus(amount), ZERO);
 };
@@ -64,15 +68,13 @@ const formatSequence = (
 
         const inIndex = tokenAddresses.indexOf(swap.tokenIn);
         const outIndex = tokenAddresses.indexOf(swap.tokenOut);
-        const swapV2: SwapV2 = {
+        return {
             poolId: swap.pool,
             assetInIndex: inIndex,
             assetOutIndex: outIndex,
             amount: amountScaled,
             userData: '0x',
         };
-
-        return swapV2;
     });
 };
 
@@ -87,9 +89,6 @@ export function formatSwaps(
     marketSp: BigNumber
 ): SwapInfo {
     const swaps: Swap[][] = JSON.parse(JSON.stringify(swapsOriginal));
-
-    let tokenInDecimals: number;
-    let tokenOutDecimals: number;
 
     const swapInfo: SwapInfo = {
         tokenAddresses: [],
@@ -108,69 +107,41 @@ export function formatSwaps(
         return swapInfo;
     }
 
-    swaps.forEach(sequence => {
-        sequence.forEach(swap => {
-            if (swap.tokenIn === tokenIn)
-                tokenInDecimals = swap.tokenInDecimals;
-
-            if (swap.tokenOut === tokenOut)
-                tokenOutDecimals = swap.tokenOutDecimals;
-        });
-    });
+    const { tokenInDecimals } = swaps[0].find(swap => swap.tokenIn === tokenIn);
+    const { tokenOutDecimals } = swaps[0].find(
+        swap => swap.tokenOut === tokenOut
+    );
 
     const tokenArray = getTokenAddresses(swaps);
-
     const swapsV2: SwapV2[] = swaps.flatMap(sequence =>
         formatSequence(swapType, sequence, tokenArray)
     );
-    const totalSwapAmount = getTotalSwapAmount(swapsV2).toString();
 
-    if (swapType === SwapTypes.SwapExactIn) {
-        // We need to account for any rounding losses by adding dust to first path
-        const swapAmountScaled = scale(swapAmount, tokenInDecimals);
-        const dust = swapAmountScaled.minus(totalSwapAmount).dp(0, 0);
-        if (dust.gt(0))
-            swapsV2[0].amount = bnum(swapsV2[0].amount)
-                .plus(dust)
-                .toString();
+    const [inputDecimals, returnDecimals] =
+        swapType === SwapTypes.SwapExactIn
+            ? [tokenInDecimals, tokenOutDecimals]
+            : [tokenOutDecimals, tokenInDecimals];
 
-        swapInfo.swapAmount = swapAmountScaled;
-        // Using this split to remove any decimals
-        swapInfo.returnAmount = bnum(
-            scale(returnAmount, tokenOutDecimals)
-                .toString()
-                .split('.')[0]
-        );
-        swapInfo.returnAmountConsideringFees = bnum(
-            scale(returnAmountConsideringFees, tokenOutDecimals)
-                .toString()
-                .split('.')[0]
-        );
-        swapInfo.swaps = swapsV2;
-    } else {
-        // We need to account for any rounding losses by adding dust to first path
-        const swapAmountScaled = scale(swapAmount, tokenOutDecimals);
-        const dust = swapAmountScaled.minus(totalSwapAmount).dp(0, 0);
-        if (dust.gt(0))
-            swapsV2[0].amount = bnum(swapsV2[0].amount)
-                .plus(dust)
-                .toString();
+    swapInfo.swapAmount = scale(swapAmount, inputDecimals);
+    swapInfo.returnAmount = scale(returnAmount, returnDecimals).dp(
+        0,
+        BigNumber.ROUND_FLOOR
+    );
+    swapInfo.returnAmountConsideringFees = scale(
+        returnAmountConsideringFees,
+        returnDecimals
+    ).dp(0, BigNumber.ROUND_FLOOR);
 
-        swapInfo.swapAmount = swapAmountScaled;
-        // Using this split to remove any decimals
-        swapInfo.returnAmount = bnum(
-            scale(returnAmount, tokenInDecimals)
-                .toString()
-                .split('.')[0]
-        );
-        swapInfo.returnAmountConsideringFees = bnum(
-            scale(returnAmountConsideringFees, tokenInDecimals)
-                .toString()
-                .split('.')[0]
-        );
-        swapInfo.swaps = swapsV2;
-    }
+    // We need to account for any rounding losses by adding dust to first path
+    const dust = swapInfo.swapAmount
+        .minus(getTotalSwapAmount(swapsV2))
+        .dp(0, 0);
+    if (dust.gt(0))
+        swapsV2[0].amount = bnum(swapsV2[0].amount)
+            .plus(dust)
+            .toString();
 
+    swapInfo.swaps = swapsV2;
     swapInfo.tokenAddresses = tokenArray;
     swapInfo.tokenIn = tokenIn;
     swapInfo.tokenOut = tokenOut;
