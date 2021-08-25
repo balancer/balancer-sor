@@ -52,9 +52,9 @@ export class SOR {
         { pools: PoolDictionary; paths: NewPath[] }
     > = {};
     disabledOptions: DisabledOptions;
-    swapCostCalculator: SwapCostCalculator;
 
     private poolCacher: PoolCacher;
+    private swapCostCalculator: SwapCostCalculator;
 
     constructor(
         provider: BaseProvider,
