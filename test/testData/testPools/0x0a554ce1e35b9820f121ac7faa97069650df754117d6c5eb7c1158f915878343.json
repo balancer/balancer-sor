@@ -4,7 +4,7 @@
         "TokenIn": "0x2260fac5e5542a773aa44fbcfedf7c193bc2c599",
         "TokenOut": "0x7fc66500c84a76ad7e9c93437bfc5ac33e2ddae9",
         "NoPools": 1,
-        "SwapAmount": "54920009.88384473",
+        "SwapAmount": "54920009",
         "GasPrice": "30000000000",
         "SwapAmountDecimals": "8",
         "ReturnAmountDecimals": "18"
@@ -40136,5 +40136,32 @@
             "poolType": "Weighted",
             "address": "0xfff2a5f81d14729408201341df42af29f3b30458"
         }
-    ]
+    ],
+    "v1Result": {
+        "title": "v1",
+        "swaps": [
+            [
+                {
+                    "pool": "0x49ff149d649769033d43783e7456f626862cd160",
+                    "tokenIn": "0x2260fac5e5542a773aa44fbcfedf7c193bc2c599",
+                    "tokenOut": "0x7fc66500c84a76ad7e9c93437bfc5ac33e2ddae9",
+                    "swapAmount": "54920009",
+                    "limitReturnAmount": "0",
+                    "maxPrice": "115792089237316195423570985008687907853269984665640564039457584007913129639935"
+                }
+            ]
+        ],
+        "returnAmount": "75508786797944666515",
+        "timeData": {
+            "fullSwap": 79.09311401844025,
+            "costOutputToken": 0.0005559921264648438,
+            "filterPools": 0.6353859901428223,
+            "sortPools": 1.2047510147094727,
+            "parsePool": 0.1441640853881836,
+            "processPaths": 1.6054859161376953,
+            "processEps": 0.43969500064849854,
+            "filter": "N/A",
+            "sor": 1.6787539720535278
+        }
+    }
 }

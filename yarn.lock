@@ -147,20 +147,6 @@
     lodash "^4.17.13"
     to-fast-properties "^2.0.0"
 
-"@balancer-labs/sor@^1.0.0":
-  version "1.0.0"
-  resolved "https://registry.yarnpkg.com/@balancer-labs/sor/-/sor-1.0.0.tgz#6a07857dbcbd2252fcc95b6ce521d7b8f8719990"
-  integrity sha512-EF4RvwCHGIa3gqRKMBlrq19FS4X+4g3NAJkJf9k21oIUp1XAhdV3/aMlAoJ25OigafCjPFEHn7wOHrtZNKHc3A==
-  dependencies:
-    "@ethersproject/address" "^5.0.5"
-    "@ethersproject/constants" "^5.0.5"
-    "@ethersproject/contracts" "^5.0.5"
-    "@ethersproject/providers" "5.0.12"
-    "@ethersproject/solidity" "^5.0.5"
-    "@ethersproject/units" "^5.0.6"
-    bignumber.js "^9.0.0"
-    isomorphic-fetch "^2.2.1"
-
 "@balancer-labs/v2-deployments@^1.0.0":
   version "1.1.1"
   resolved "https://registry.yarnpkg.com/@balancer-labs/v2-deployments/-/v2-deployments-1.1.1.tgz#bd9c3267f3e068eb04b72e90bead7af91c3c6904"
@@ -758,15 +744,6 @@
     "@ethersproject/constants" "^5.4.0"
     "@ethersproject/logger" "^5.4.0"
 
-"@ethersproject/units@^5.0.6":
-  version "5.0.6"
-  resolved "https://registry.yarnpkg.com/@ethersproject/units/-/units-5.0.6.tgz#e1169ecffb7e8d5eab84e1481a4e35df19045708"
-  integrity sha512-tsJuy4mipppdmooukRfhXt8fGx9nxvfvG6Xdy0RDm7LzHsjghjwQ69m2bCpId6SDSR1Uq1cQ9irPiUBSyWolUA==
-  dependencies:
-    "@ethersproject/bignumber" "^5.0.7"
-    "@ethersproject/constants" "^5.0.4"
-    "@ethersproject/logger" "^5.0.5"
-
 "@ethersproject/wallet@5.4.0":
   version "5.4.0"
   resolved "https://registry.yarnpkg.com/@ethersproject/wallet/-/wallet-5.4.0.tgz#fa5b59830b42e9be56eadd45a16a2e0933ad9353"
@@ -1211,11 +1188,6 @@ bech32@1.1.4:
   version "1.1.4"
   resolved "https://registry.yarnpkg.com/bech32/-/bech32-1.1.4.tgz#e38c9f37bf179b8eb16ae3a772b40c356d4832e9"
   integrity sha512-s0IrSOzLlbvX7yp4WBfPITzpAU8sqQcpsmwXDiKwrG4r491vwCO/XpejasRNl0piBMe/DvP4Tz0mIS/X1DPJBQ==
-
-bignumber.js@^9.0.0, "v1bignumber.js@npm:bignumber.js@9.0.0":
-  version "9.0.0"
-  resolved "https://registry.yarnpkg.com/bignumber.js/-/bignumber.js-9.0.0.tgz#805880f84a329b5eac6e7cb6f8274b6d82bdf075"
-  integrity sha512-t/OYhhJ2SD+YGBQcjY8GzzDHEk9f3nerxjtfa6tlMXfe7frs/WozhvCNoGvpM0P3bNf3Gq5ZRMlGr5f3r4/N8A==
 
 bignumber.js@^9.0.1:
   version "9.0.1"
@@ -3606,6 +3578,11 @@ uuid@^3.3.2, uuid@^3.3.3:
   version "3.4.0"
   resolved "https://registry.yarnpkg.com/uuid/-/uuid-3.4.0.tgz#b23e4358afa8a202fe7a100af1f5f883f02007ee"
   integrity sha512-HjSDRw6gZE5JMggctHBcjVak08+KEVhSIiDzFnT9S9aegmp85S/bReBVTb4QTFaRNptJ9kuYaNhnbNEOkbKb/A==
+
+"v1bignumber.js@npm:bignumber.js@9.0.0":
+  version "9.0.0"
+  resolved "https://registry.yarnpkg.com/bignumber.js/-/bignumber.js-9.0.0.tgz#805880f84a329b5eac6e7cb6f8274b6d82bdf075"
+  integrity sha512-t/OYhhJ2SD+YGBQcjY8GzzDHEk9f3nerxjtfa6tlMXfe7frs/WozhvCNoGvpM0P3bNf3Gq5ZRMlGr5f3r4/N8A==
 
 v8-compile-cache@^2.0.3:
   version "2.3.0"

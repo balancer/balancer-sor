@@ -41032,5 +41032,21 @@
             "poolType": "Weighted",
             "address": "0xfff2a5f81d14729408201341df42af29f3b30458"
         }
-    ]
+    ],
+    "v1Result": {
+        "title": "v1",
+        "swaps": [],
+        "returnAmount": "0",
+        "timeData": {
+            "fullSwap": 146.17805004119873,
+            "costOutputToken": 0.0004709959030151367,
+            "filterPools": 4.596324920654297,
+            "sortPools": 40.1176860332489,
+            "parsePool": 0.9627029895782471,
+            "processPaths": 5.986950993537903,
+            "processEps": 1.3689770698547363,
+            "filter": "N/A",
+            "sor": 0.23462402820587158
+        }
+    }
 }
