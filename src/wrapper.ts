@@ -54,7 +54,7 @@ export class SOR {
     disabledOptions: DisabledOptions;
 
     private poolCacher: PoolCacher;
-    private swapCostCalculator: SwapCostCalculator;
+    swapCostCalculator: SwapCostCalculator;
 
     constructor(
         provider: BaseProvider,
@@ -88,29 +88,6 @@ export class SOR {
     ): Promise<BigNumber> {
         return this.swapCostCalculator.convertGasCostToToken(
             outputToken,
-            tokenDecimals,
-            this.gasPrice,
-            this.swapCost
-        );
-    }
-
-    /*
-    Find and cache cost of token.
-    If cost is passed then it manually sets the value.
-    */
-    async setCostOutputToken(
-        tokenOut: string,
-        tokenDecimals: number,
-        cost: BigNumber = null
-    ): Promise<BigNumber> {
-        if (cost !== null) {
-            this.swapCostCalculator.setSwapCostOverride(
-                tokenOut,
-                cost.toString()
-            );
-        }
-        return this.swapCostCalculator.convertGasCostToToken(
-            tokenOut,
             tokenDecimals,
             this.gasPrice,
             this.swapCost

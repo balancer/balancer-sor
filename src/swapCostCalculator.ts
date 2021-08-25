@@ -18,14 +18,12 @@ export class SwapCostCalculator {
     private tokenPriceCache: Record<string, string> = {
         ZERO_ADDRESS: BONE.toString(),
     };
-    private swapCostOverride: Record<string, string> = {};
 
     private initializeCache(): void {
         this.tokenPriceCache = {
             ZERO_ADDRESS: BONE.toString(),
             [WETHADDR[this.chainId].toLowerCase()]: BONE.toString(),
         };
-        this.swapCostOverride = {};
     }
 
     constructor(chainId: number) {
@@ -83,14 +81,6 @@ export class SwapCostCalculator {
     }
 
     /**
-     * We only include this function as a hack as the tests expect to be able to set the swap fee directly
-     * @deprecated Use `setNativeAssetPriceInToken`
-     */
-    setSwapCostOverride(tokenAddress: string, swapCost: string): void {
-        this.swapCostOverride[tokenAddress.toLowerCase()] = swapCost;
-    }
-
-    /**
      * Calculate the cost of spending a certain amount of gas in terms of a token.
      * This allows us to determine whether an increased amount of tokens gained
      * is worth spending this extra gas (e.g. by including an extra pool in a swap)
@@ -106,9 +96,6 @@ export class SwapCostCalculator {
         gasPriceWei: BigNumber,
         swapGasCost: BigNumber
     ): Promise<BigNumber> {
-        if (this.swapCostOverride[tokenAddress.toLowerCase()]) {
-            return bnum(this.swapCostOverride[tokenAddress.toLowerCase()]);
-        }
         return calculateTotalSwapCost(
             await this.getNativeAssetPriceInToken(tokenAddress, tokenDecimals),
             swapGasCost,
