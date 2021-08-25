@@ -1,7 +1,7 @@
-import { PRICE_ERROR_TOLERANCE } from './config';
-import { bnum, ZERO, ONE, INFINITY } from './utils/bignumber';
-import { BigNumber } from './utils/bignumber';
-import { SwapTypes, NewPath, PoolDictionary, Swap } from './types';
+import { PRICE_ERROR_TOLERANCE } from '../config';
+import { bnum, ZERO, ONE, INFINITY } from '../utils/bignumber';
+import { BigNumber } from '../utils/bignumber';
+import { SwapTypes, NewPath, PoolDictionary, Swap } from '../types';
 import {
     getHighestLimitAmountsForPaths,
     getEffectivePriceSwapForPath,
