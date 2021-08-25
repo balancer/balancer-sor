@@ -1,10 +1,13 @@
 import { JsonRpcProvider } from '@ethersproject/providers';
+import { performance } from 'perf_hooks';
 import {
     getV1Swap,
     displayResults,
     assertResults,
-    getV2Swap,
-    getWrapperSwap,
+    getFullSwap,
+    TestData,
+    V1SwapData,
+    Result,
 } from './testHelpers';
 import { bnum } from '../../src/utils/bignumber';
 import { SwapInfo, DisabledOptions } from '../../src/types';
@@ -19,9 +22,9 @@ export interface TestSettings {
 }
 
 export async function compareTest(
-    file: string,
+    testName: string,
     provider: JsonRpcProvider,
-    testData: any,
+    testData: TestData,
     disabledOptions: DisabledOptions = {
         isOverRide: false,
         disabledTokens: [],
@@ -30,44 +33,24 @@ export async function compareTest(
         compareResults: true,
         costOutputTokenOveride: { isOverRide: true, overRideCost: bnum(0) },
     }
-) {
+): Promise<[V1SwapData, SwapInfo]> {
     const amountNormalised = testData.tradeInfo.SwapAmount.div(
         bnum(10 ** testData.tradeInfo.SwapAmountDecimals)
     );
 
     const swapCost = new BigNumber('100000'); // A pool swap costs approx 100000 gas
-
-    // V2 first to debug faster
-    // Uses costOutputToken returned from above.
-    const v2SwapData = await getV2Swap(
-        provider,
-        JSON.parse(JSON.stringify(testData)),
-        testData.tradeInfo.TokenIn,
-        testData.tradeInfo.TokenOut,
-        testData.tradeInfo.NoPools,
-        testData.tradeInfo.SwapType,
-        amountNormalised,
-        testData.tradeInfo.GasPrice,
-        testData.tradeInfo.ReturnAmountDecimals,
-        swapCost,
-        disabledOptions,
-        testSettings.costOutputTokenOveride
-    );
+    const costOutputToken = bnum(0);
 
     // Uses scaled costOutputToken returned from above.
     const v1SwapData = await getV1Swap(
-        provider,
-        v2SwapData.costOutputToken.times(
-            bnum(10 ** testData.tradeInfo.ReturnAmountDecimals)
-        ),
+        costOutputToken,
         testData.tradeInfo.NoPools,
-        1,
         JSON.parse(JSON.stringify(testData)),
         testData.tradeInfo.SwapType,
         testData.tradeInfo.TokenIn,
         testData.tradeInfo.TokenOut,
+        testData.tradeInfo.ReturnAmountDecimals,
         testData.tradeInfo.SwapAmount,
-        { onChainBalances: false },
         disabledOptions
     );
     // Normalize returnAmount
@@ -75,35 +58,39 @@ export async function compareTest(
         bnum(10 ** testData.tradeInfo.ReturnAmountDecimals)
     );
 
-    const wrapperSwapData: SwapInfo = await getWrapperSwap(
+    const fullSwapStart = performance.now();
+    const swapInfo: SwapInfo = await getFullSwap(
         JSON.parse(JSON.stringify(testData)),
         testData.tradeInfo.TokenIn,
         testData.tradeInfo.TokenOut,
-        testData.tradeInfo.TokenInDecimals,
-        testData.tradeInfo.TokenOutDecimals,
+        testData.tradeInfo.ReturnAmountDecimals,
         testData.tradeInfo.NoPools,
         testData.tradeInfo.SwapType,
         amountNormalised,
-        v2SwapData.costOutputToken,
+        costOutputToken,
         testData.tradeInfo.GasPrice,
         provider,
         swapCost,
         disabledOptions
     );
+    const fullSwapEnd = performance.now();
+    const fullResult: Result = {
+        title: 'Full Swap',
+        timeData: { fullSwap: fullSwapEnd - fullSwapStart },
+        returnAmount: swapInfo.returnAmount,
+        swaps: swapInfo.swaps,
+    };
 
     displayResults(
-        `${file}.json`,
+        `${testName}`,
         testData.tradeInfo,
-        [v1SwapData, v2SwapData],
+        [v1SwapData, fullResult],
         true,
         testData.tradeInfo.NoPools
     );
 
-    // console.log(`--------- WRAPPER SWAPS:`);
-    // console.log(wrapperSwapData.swaps);
-
     if (testSettings.compareResults)
-        assertResults(file, testData, v1SwapData, v2SwapData, wrapperSwapData);
+        assertResults(testName, testData, v1SwapData, swapInfo);
 
-    return [v1SwapData, v2SwapData, wrapperSwapData];
+    return [v1SwapData, swapInfo];
 }

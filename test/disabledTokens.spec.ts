@@ -1,6 +1,5 @@
 // Tests Multihop SOR with token filtering vs static subgraphPoolsLarge.json file.
 // npx mocha -r ts-node/register test/disabledTokens.spec.ts
-require('dotenv').config();
 import { JsonRpcProvider } from '@ethersproject/providers';
 import { assert } from 'chai';
 import { DisabledOptions } from '../src/types';
@@ -104,12 +103,12 @@ describe('Tests Multihop SOR with token filtering vs static subgraphPoolsLarge.j
         // These test should highlight any changes in maths that may unexpectedly change result
         assert.equal(
             v1SwapData.returnAmount.toString(),
-            '0.976143999926789198',
+            '976143999926789198',
             'V1 Sanity check.'
         );
         assert.equal(
             v2SwapData.returnAmount.toString(),
-            '0.975967262149024675',
+            '975967262149024675',
             'V2 Sanity check.'
         );
     }).timeout(10000);
@@ -212,12 +211,12 @@ describe('Tests Multihop SOR with token filtering vs static subgraphPoolsLarge.j
         // These test should highlight any changes in maths that may unexpectedly change result
         assert.equal(
             v1SwapData.returnAmount.toString(),
-            '10.24439019279202427',
+            '10244390192792024270',
             'V1 sanity check.'
         );
         assert.equal(
             v2SwapData.returnAmount.toString(),
-            '10.244571254420443005',
+            '10244571254420443005',
             'V2 sanity check.'
         );
     }).timeout(10000);

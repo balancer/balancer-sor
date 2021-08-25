@@ -1,4 +1,3 @@
-require('dotenv').config();
 import { JsonRpcProvider } from '@ethersproject/providers';
 import { loadTestFile } from './lib/testHelpers';
 import { compareTest } from './lib/compareHelper';
