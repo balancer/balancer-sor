@@ -1,7 +1,7 @@
 import { BaseProvider } from '@ethersproject/providers';
 import { MULTIADDR, VAULTADDR } from '../constants';
 import { SubgraphPoolBase, SubGraphPoolsBase } from '../types';
-import { getOnChainBalances } from './multicall';
+import { getOnChainBalances } from './onchainData';
 import { fetchSubgraphPools } from './subgraph';
 
 export class PoolCacher {

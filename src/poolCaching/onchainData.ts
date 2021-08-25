@@ -4,7 +4,6 @@ import { scale, bnum } from '../utils/bignumber';
 import { Multicaller } from '../utils/multicaller';
 import _ from 'lodash';
 
-// Load pools data with multicalls
 export async function getOnChainBalances(
     subgraphPools: SubGraphPoolsBase,
     multiAddress: string,
@@ -14,12 +13,15 @@ export async function getOnChainBalances(
     if (subgraphPools.pools.length === 0) return subgraphPools;
 
     /* eslint-disable @typescript-eslint/no-var-requires */
-    const vaultAbi = require('./abi/Vault.json');
-    const weightedPoolAbi = require('./pools/weightedPool/weightedPoolAbi.json');
-    const stablePoolAbi = require('./pools/stablePool/stablePoolAbi.json');
-    const elementPoolAbi = require('./pools/elementPool/ConvergentCurvePool.json');
+    const vaultAbi = require('../abi/Vault.json');
+    const weightedPoolAbi = require('../pools/weightedPool/weightedPoolAbi.json');
+    const stablePoolAbi = require('../pools/stablePool/stablePoolAbi.json');
+    const elementPoolAbi = require('../pools/elementPool/ConvergentCurvePool.json');
     /* eslint-enable @typescript-eslint/no-var-requires */
+
+    // TODO: decide whether we want to trim these ABIs down to the relevant functions
     const abis = Object.values(
+        // Remove duplicate entries using their names
         Object.fromEntries(
             [
                 ...vaultAbi,
@@ -41,18 +43,18 @@ export async function getOnChainBalances(
             subgraphPools.pools.splice(i, 1);
 
         _.set(pools, `${pool.id}.id`, pool.id);
+
         multiPool.call(`${pool.id}.poolTokens`, vaultAddress, 'getPoolTokens', [
             pool.id,
         ]);
-
         multiPool.call(`${pool.id}.totalSupply`, pool.address, 'totalSupply');
+
         // TO DO - Make this part of class to make more flexible?
         if (pool.poolType === 'Weighted') {
             multiPool.call(
                 `${pool.id}.weights`,
                 pool.address,
-                'getNormalizedWeights',
-                []
+                'getNormalizedWeights'
             );
             multiPool.call(
                 `${pool.id}.swapFee`,
