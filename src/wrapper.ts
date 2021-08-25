@@ -14,13 +14,8 @@ import {
     VAULTADDR,
     MULTIADDR,
     ZERO_ADDRESS,
-    setWrappedInfo,
     getLidoStaticSwaps,
     isLidoStableSwap,
-    getWrappedInfo,
-    formatSwaps,
-    calculatePathLimits,
-    smartOrderRouter,
     filterPoolsOfInterest,
     filterHopPools,
     fetchSubgraphPools,
@@ -30,6 +25,9 @@ import {
     Swap,
     filterPoolsByType,
 } from './index';
+import { calculatePathLimits, smartOrderRouter } from './router';
+import { getWrappedInfo, setWrappedInfo } from './wrapInfo';
+import { formatSwaps } from './formatSwaps';
 
 const EMPTY_SWAPINFO: SwapInfo = {
     tokenAddresses: [],
