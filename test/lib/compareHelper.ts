@@ -53,10 +53,6 @@ export async function compareTest(
         testData.tradeInfo.SwapAmount,
         disabledOptions
     );
-    // Normalize returnAmount
-    v1SwapData.returnAmount = v1SwapData.returnAmount.div(
-        bnum(10 ** testData.tradeInfo.ReturnAmountDecimals)
-    );
 
     const fullSwapStart = performance.now();
     const swapInfo: SwapInfo = await getFullSwap(

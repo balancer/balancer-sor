@@ -317,12 +317,6 @@ export async function getV1Swap(
         new v1BigNumber(costOutputToken),
         epsOfInterest
     );
-
-    const returnAmountScaled = scale(
-        bnum(returnAmount.toString()),
-        returnAmountDecimals
-    );
-
     const smartOrderRouterMultiHopEpsOfInterestEnd = performance.now();
     const fullSwapEnd = performance.now();
 
@@ -347,7 +341,7 @@ export async function getV1Swap(
     return {
         title: 'v1',
         swaps: swapsV2,
-        returnAmount: returnAmountScaled,
+        returnAmount: bnum(returnAmount.toString()),
         timeData,
     };
 }
