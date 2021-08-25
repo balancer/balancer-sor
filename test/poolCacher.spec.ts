@@ -1,4 +1,3 @@
-// npx mocha -r ts-node/register test/wrapper.spec.ts
 require('dotenv').config();
 import { JsonRpcProvider } from '@ethersproject/providers';
 import { expect } from 'chai';
@@ -11,7 +10,7 @@ const provider = new JsonRpcProvider(
 const chainId = 1;
 const poolsUrl = `https://ipfs.fleek.co/ipns/balancer-team-bucket.storage.fleek.co/balancer-exchange/pools`;
 
-describe(`Tests for PoolCacher class.`, () => {
+describe('PoolCacher', () => {
     describe('constructor', () => {
         it(`should correctly report whether it is connected to a subgraph`, () => {
             const connectedPoolCache = new PoolCacher(
