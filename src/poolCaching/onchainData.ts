@@ -1,16 +1,16 @@
 import { BaseProvider } from '@ethersproject/providers';
-import { SubGraphPoolsBase } from '../types';
+import { SubgraphPoolBase } from '../types';
 import { scale, bnum } from '../utils/bignumber';
 import { Multicaller } from '../utils/multicaller';
 import _ from 'lodash';
 
 export async function getOnChainBalances(
-    subgraphPools: SubGraphPoolsBase,
+    subgraphPools: SubgraphPoolBase[],
     multiAddress: string,
     vaultAddress: string,
     provider: BaseProvider
-): Promise<SubGraphPoolsBase> {
-    if (subgraphPools.pools.length === 0) return subgraphPools;
+): Promise<SubgraphPoolBase[]> {
+    if (subgraphPools.length === 0) return subgraphPools;
 
     /* eslint-disable @typescript-eslint/no-var-requires */
     const vaultAbi = require('../abi/Vault.json');
@@ -34,13 +34,13 @@ export async function getOnChainBalances(
 
     const multiPool = new Multicaller(multiAddress, provider, abis);
 
-    subgraphPools.pools.forEach((pool, i) => {
+    subgraphPools.forEach((pool, i) => {
         // TO DO - This is a temp filter
         if (
             pool.id ===
             '0x6b15a01b5d46a5321b627bd7deef1af57bc629070000000000000000000000d4'
         )
-            subgraphPools.pools.splice(i, 1);
+            subgraphPools.splice(i, 1);
 
         _.set(pools, `${pool.id}.id`, pool.id);
 

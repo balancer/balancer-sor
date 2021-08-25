@@ -1,6 +1,6 @@
 import { BaseProvider } from '@ethersproject/providers';
 import { MULTIADDR, VAULTADDR } from '../constants';
-import { SubgraphPoolBase, SubGraphPoolsBase } from '../types';
+import { SubgraphPoolBase } from '../types';
 import { getOnChainBalances } from './onchainData';
 import { fetchSubgraphPools } from './subgraph';
 
@@ -61,9 +61,10 @@ export class PoolCacher {
             } else {
                 // Retrieve from URL if set otherwise use data passed in constructor
                 if (this.isUsingPoolsUrl) {
-                    const { pools } = await fetchSubgraphPools(this.poolsUrl);
-                    subgraphPools = pools;
-                } else subgraphPools = this.pools;
+                    subgraphPools = await fetchSubgraphPools(this.poolsUrl);
+                } else {
+                    subgraphPools = this.pools;
+                }
             }
 
             // Get latest on-chain balances (returns data in string/normalized format)
@@ -105,16 +106,13 @@ export class PoolCacher {
         }
 
         // This will return in normalized/string format
-        const onChainPools: SubGraphPoolsBase = await getOnChainBalances(
-            { pools: subgraphPools },
+        const onChainPools = await getOnChainBalances(
+            subgraphPools,
             MULTIADDR[this.chainId],
             VAULTADDR[this.chainId],
             this.provider
         );
 
-        // Error with multicall
-        if (!onChainPools) return [];
-
-        return onChainPools.pools;
+        return onChainPools;
     }
 }
