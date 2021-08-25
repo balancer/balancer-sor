@@ -541,5 +541,32 @@
             "poolType": "Weighted",
             "address": "0x75286e183d923a5f52f52be205e358c5c9101b09"
         }
-    ]
+    ],
+    "v1Result": {
+        "title": "v1",
+        "swaps": [
+            [
+                {
+                    "pool": "0x29f55de880d4dcae40ba3e63f16407a31b4d44ee",
+                    "tokenIn": "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
+                    "tokenOut": "0x6b175474e89094c44da98b954eedeac495271d0f",
+                    "swapAmount": "10000000000000000",
+                    "limitReturnAmount": "0",
+                    "maxPrice": "115792089237316195423570985008687907853269984665640564039457584007913129639935"
+                }
+            ]
+        ],
+        "returnAmount": "2021590622912442507",
+        "timeData": {
+            "fullSwap": 5.842898011207581,
+            "costOutputToken": 0.0005179643630981445,
+            "filterPools": 0.055400967597961426,
+            "sortPools": 0.409229040145874,
+            "parsePool": 0.14892899990081787,
+            "processPaths": 1.2368900775909424,
+            "processEps": 1.2227870225906372,
+            "filter": "N/A",
+            "sor": 1.889578938484192
+        }
+    }
 }

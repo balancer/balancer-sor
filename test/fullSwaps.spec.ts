@@ -1,12 +1,10 @@
 // npx mocha -r ts-node/register test/fullSwaps.spec.ts
-require('dotenv').config();
 import { JsonRpcProvider } from '@ethersproject/providers';
 import { assert } from 'chai';
 import { SwapTypes, DisabledOptions } from '../src/types';
 import BigNumber from 'bignumber.js';
 import { compareTest } from './lib/compareHelper';
-import { getFullSwap } from './lib/testHelpers';
-import { bnum } from '../src/utils/bignumber';
+import { getFullSwap, ResultParsed } from './lib/testHelpers';
 
 const gasPrice = new BigNumber('30000000000');
 
@@ -133,10 +131,11 @@ describe('Tests full swaps against known values', () => {
         const testData = {
             pools: JSON.parse(JSON.stringify(subgraphPoolsLarge.pools)),
             tradeInfo,
+            v1Result: {} as ResultParsed,
         };
 
         // This test has rounding differences between V1 and V2 maths that cause it to fail but has been checked by Fernando
-        const [v1SwapData, swapInfo] = await compareTest(
+        const [, swapInfo] = await compareTest(
             name,
             provider,
             testData,
@@ -151,11 +150,6 @@ describe('Tests full swaps against known values', () => {
         );
 
         // These test should highlight any changes in maths that may unexpectedly change result
-        assert.equal(
-            v1SwapData.returnAmount.toString(),
-            '2932410291658511',
-            'V1 sanity check.'
-        );
         assert.equal(
             swapInfo.returnAmount.toString(),
             '2932407280899120',
@@ -252,9 +246,10 @@ describe('Tests full swaps against known values', () => {
         const testData = {
             pools: JSON.parse(JSON.stringify(testPools.weightedOnly)),
             tradeInfo,
+            v1Result: {} as ResultParsed,
         };
 
-        const [v1SwapData, swapInfo] = await compareTest(
+        const [, swapInfo] = await compareTest(
             name,
             provider,
             testData,
@@ -327,9 +322,10 @@ describe('Tests full swaps against known values', () => {
         const testData = {
             pools: JSON.parse(JSON.stringify(testPools.stableOnly)),
             tradeInfo,
+            v1Result: {} as ResultParsed,
         };
 
-        const [v1SwapData, swapInfo] = await compareTest(
+        const [, swapInfo] = await compareTest(
             name,
             provider,
             testData,
@@ -388,9 +384,10 @@ describe('Tests full swaps against known values', () => {
         const testData = {
             pools: JSON.parse(JSON.stringify(testPools.stableOnly)),
             tradeInfo,
+            v1Result: {} as ResultParsed,
         };
 
-        const [v1SwapData, swapInfo] = await compareTest(
+        const [, swapInfo] = await compareTest(
             name,
             provider,
             testData,
@@ -450,10 +447,11 @@ describe('Tests full swaps against known values', () => {
         const testData = {
             pools: JSON.parse(JSON.stringify(allPools)),
             tradeInfo,
+            v1Result: {} as ResultParsed,
         };
 
         // This test has rounding differences between V1 and V2 maths that cause it to fail but has been checked by Fernando
-        const [v1SwapData, swapInfo] = await compareTest(
+        const [, swapInfo] = await compareTest(
             name,
             provider,
             testData,
@@ -468,11 +466,6 @@ describe('Tests full swaps against known values', () => {
         );
 
         // These test should highlight any changes in maths that may unexpectedly change result
-        assert.equal(
-            v1SwapData.returnAmount.toString(),
-            '775695',
-            'V1 sanity check.'
-        );
         assert.equal(
             swapInfo.returnAmount.toString(),
             '775694',
@@ -540,9 +533,10 @@ describe('Tests full swaps against known values', () => {
         const testData = {
             pools: JSON.parse(JSON.stringify(allPools)),
             tradeInfo,
+            v1Result: {} as ResultParsed,
         };
 
-        const [v1SwapData, swapInfo] = await compareTest(
+        const [, swapInfo] = await compareTest(
             name,
             provider,
             testData,
@@ -621,9 +615,10 @@ describe('Tests full swaps against known values', () => {
         const testData = {
             pools: JSON.parse(JSON.stringify(allPools.pools)),
             tradeInfo,
+            v1Result: {} as ResultParsed,
         };
 
-        const [v1SwapData, swapInfo] = await compareTest(
+        const [, swapInfo] = await compareTest(
             `WBTC>MKR2, swapExactIn`,
             provider,
             testData
@@ -659,9 +654,10 @@ describe('Tests full swaps against known values', () => {
         const testData = {
             pools: JSON.parse(JSON.stringify(allPools.pools)),
             tradeInfo,
+            v1Result: {} as ResultParsed,
         };
 
-        const [v1SwapData, swapInfo] = await compareTest(
+        const [, swapInfo] = await compareTest(
             `USDC>yUSD, swapExactIn`,
             provider,
             testData
@@ -697,10 +693,11 @@ describe('Tests full swaps against known values', () => {
         const testData = {
             pools: JSON.parse(JSON.stringify(allPools.pools)),
             tradeInfo,
+            v1Result: {} as ResultParsed,
         };
 
         // This test has rounding differences between V1 and V2 maths that cause it to fail but has been checked by Fernando
-        const [v1SwapData, swapInfo] = await compareTest(
+        const [, swapInfo] = await compareTest(
             `WBTC>MKR2, swapExactOut`,
             provider,
             testData,
@@ -718,11 +715,6 @@ describe('Tests full swaps against known values', () => {
         );
 
         // These test should highlight any changes in maths that may unexpectedly change result
-        assert.equal(
-            v1SwapData.returnAmount.toString(),
-            '702',
-            'V1 sanity check.'
-        );
         assert.equal(
             swapInfo.returnAmount.toString(),
             '703',
@@ -753,10 +745,11 @@ describe('Tests full swaps against known values', () => {
         const testData = {
             pools: JSON.parse(JSON.stringify(allPools.pools)),
             tradeInfo,
+            v1Result: {} as ResultParsed,
         };
 
         // This test has rounding differences between V1 and V2 maths that cause it to fail but has been checked by Fernando
-        const [v1SwapData, swapInfo] = await compareTest(
+        const [, swapInfo] = await compareTest(
             `subgraphPoolsDecimalsTest`,
             provider,
             testData,
@@ -773,11 +766,6 @@ describe('Tests full swaps against known values', () => {
             }
         );
         // These test should highlight any changes in maths that may unexpectedly change result
-        assert.equal(
-            v1SwapData.returnAmount.toString(),
-            '10393',
-            'V1 sanity check.'
-        );
         assert.equal(
             swapInfo.returnAmount.toString(),
             '10394',
@@ -812,10 +800,11 @@ describe('Tests full swaps against known values', () => {
         const testData = {
             pools: JSON.parse(JSON.stringify(allPools.pools)),
             tradeInfo,
+            v1Result: {} as ResultParsed,
         };
 
         // This test has rounding differences between V1 and V2 maths that cause it to fail but has been checked by Fernando
-        const [v1SwapData, swapInfo] = await compareTest(
+        const [, swapInfo] = await compareTest(
             `subgraphPoolsDecimalsTest`,
             provider,
             testData,
@@ -832,11 +821,6 @@ describe('Tests full swaps against known values', () => {
             }
         );
         // These test should highlight any changes in maths that may unexpectedly change result
-        assert.equal(
-            v1SwapData.returnAmount.toString(),
-            '0',
-            'V1 sanity check.'
-        );
         assert.equal(swapInfo.returnAmount.toString(), '0', 'V2 sanity check.');
         assert.equal(swapInfo.swaps.length, 0, 'Should have 0 swaps.');
     });
@@ -868,10 +852,11 @@ describe('Tests full swaps against known values', () => {
         const testData = {
             pools: JSON.parse(JSON.stringify(allPools.pools)),
             tradeInfo,
+            v1Result: {} as ResultParsed,
         };
 
         // This test has rounding differences between V1 and V2 maths that cause it to fail but has been checked by Fernando
-        const [v1SwapData, swapInfo] = await compareTest(
+        const [, swapInfo] = await compareTest(
             `subgraphPoolsDecimalsTest`,
             provider,
             testData,
@@ -888,11 +873,6 @@ describe('Tests full swaps against known values', () => {
             }
         );
         // These test should highlight any changes in maths that may unexpectedly change result
-        assert.equal(
-            v1SwapData.returnAmount.toString(),
-            '268916379797',
-            'V1 sanity check.'
-        );
         assert.equal(
             swapInfo.returnAmount.toString(),
             '268916321535',

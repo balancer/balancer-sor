@@ -1,13 +1,12 @@
 import { JsonRpcProvider } from '@ethersproject/providers';
 import { performance } from 'perf_hooks';
 import {
-    getV1Swap,
     displayResults,
     assertResults,
     getFullSwap,
     TestData,
-    V1SwapData,
     Result,
+    parseV1Result,
 } from './testHelpers';
 import { bnum } from '../../src/utils/bignumber';
 import { SwapInfo, DisabledOptions } from '../../src/types';
@@ -33,27 +32,13 @@ export async function compareTest(
         compareResults: true,
         costOutputTokenOveride: { isOverRide: true, overRideCost: bnum(0) },
     }
-): Promise<[V1SwapData, SwapInfo]> {
+): Promise<[Result, SwapInfo]> {
     const amountNormalised = testData.tradeInfo.SwapAmount.div(
         bnum(10 ** testData.tradeInfo.SwapAmountDecimals)
     );
 
-    const swapCost = new BigNumber('100000'); // A pool swap costs approx 100000 gas
+    const swapCost = bnum('100000'); // A pool swap costs approx 100000 gas
     const costOutputToken = bnum(0);
-
-    // Uses scaled costOutputToken returned from above.
-    const v1SwapData = await getV1Swap(
-        costOutputToken,
-        testData.tradeInfo.NoPools,
-        JSON.parse(JSON.stringify(testData)),
-        testData.tradeInfo.SwapType,
-        testData.tradeInfo.TokenIn,
-        testData.tradeInfo.TokenOut,
-        testData.tradeInfo.ReturnAmountDecimals,
-        testData.tradeInfo.SwapAmount,
-        disabledOptions
-    );
-
     const fullSwapStart = performance.now();
     const swapInfo: SwapInfo = await getFullSwap(
         JSON.parse(JSON.stringify(testData)),
@@ -76,6 +61,9 @@ export async function compareTest(
         returnAmount: swapInfo.returnAmount,
         swaps: swapInfo.swaps,
     };
+
+    const v1SwapData = parseV1Result(testData.v1Result);
+    v1SwapData.returnAmount = bnum(v1SwapData.returnAmount);
 
     displayResults(
         `${testName}`,

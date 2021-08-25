@@ -4,7 +4,11 @@ import { JsonRpcProvider } from '@ethersproject/providers';
 import { assert } from 'chai';
 import { DisabledOptions } from '../src/types';
 import { BigNumber } from '../src/utils/bignumber';
-import { filterPoolsAndTokens } from './lib/testHelpers';
+import {
+    filterPoolsAndTokens,
+    TestData,
+    ResultParsed,
+} from './lib/testHelpers';
 import { compareTest } from './lib/compareHelper';
 import allPools from './testData/testPools/subgraphPoolsLarge.json';
 import disabledTokens from './testData/disabled-tokens.json';
@@ -80,13 +84,14 @@ describe('Tests Multihop SOR with token filtering vs static subgraphPoolsLarge.j
             ReturnAmountDecimals: 18,
         };
 
-        const testData = {
+        const testData: TestData = {
             pools: allPools.pools,
             tradeInfo,
+            v1Result: {} as ResultParsed,
         };
 
         // This test has rounding differences between V1 and V2 maths that cause it to fail but has been checked by Fernando
-        const [v1SwapData, v2SwapData] = await compareTest(
+        const [, v2SwapData] = await compareTest(
             name,
             provider,
             testData,
@@ -101,11 +106,6 @@ describe('Tests Multihop SOR with token filtering vs static subgraphPoolsLarge.j
         );
 
         // These test should highlight any changes in maths that may unexpectedly change result
-        assert.equal(
-            v1SwapData.returnAmount.toString(),
-            '976143999926789198',
-            'V1 Sanity check.'
-        );
         assert.equal(
             v2SwapData.returnAmount.toString(),
             '975967262149024675',
@@ -140,6 +140,7 @@ describe('Tests Multihop SOR with token filtering vs static subgraphPoolsLarge.j
         const testData = {
             pools: allPools.pools,
             tradeInfo,
+            v1Result: {} as ResultParsed,
         };
 
         const [v1SwapData, v2SwapData] = await compareTest(
@@ -192,10 +193,11 @@ describe('Tests Multihop SOR with token filtering vs static subgraphPoolsLarge.j
         const testData = {
             pools: allPools.pools,
             tradeInfo,
+            v1Result: {} as ResultParsed,
         };
 
         // This test has rounding differences between V1 and V2 maths that cause it to fail but has been checked by Fernando
-        const [v1SwapData, v2SwapData] = await compareTest(
+        const [, v2SwapData] = await compareTest(
             name,
             provider,
             testData,
@@ -209,11 +211,6 @@ describe('Tests Multihop SOR with token filtering vs static subgraphPoolsLarge.j
             }
         );
         // These test should highlight any changes in maths that may unexpectedly change result
-        assert.equal(
-            v1SwapData.returnAmount.toString(),
-            '10244390192792024270',
-            'V1 sanity check.'
-        );
         assert.equal(
             v2SwapData.returnAmount.toString(),
             '10244571254420443005',

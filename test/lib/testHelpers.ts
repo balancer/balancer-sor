@@ -1,7 +1,5 @@
 import { JsonRpcProvider } from '@ethersproject/providers';
 import { BigNumber } from 'bignumber.js';
-import * as sorv1 from '@balancer-labs/sor';
-import { BigNumber as v1BigNumber } from 'v1bignumber.js';
 import * as sorv2 from '../../src';
 import {
     SubGraphPoolsBase,
@@ -16,34 +14,13 @@ import {
     PoolFilter,
     SwapV2,
 } from '../../src/types';
-import { bnum, scale } from '../../src/utils/bignumber';
+import { bnum } from '../../src/utils/bignumber';
 import * as fs from 'fs';
-import { performance } from 'perf_hooks';
 import { assert } from 'chai';
 import { getAddress } from '@ethersproject/address';
 // Mainnet reference tokens with addresses & decimals
 import WeightedTokens from '../testData/eligibleTokens.json';
 import StableTokens from '../testData/stableTokens.json';
-
-interface SubgraphPoolsV1 {
-    pools: SubGraphPoolV1[];
-}
-
-export interface SubGraphPoolV1 {
-    id: string;
-    swapFee: string;
-    totalWeight: string;
-    totalShares: string;
-    tokens: SubGraphTokenV1[];
-    tokensList: string[];
-}
-
-export interface SubGraphTokenV1 {
-    address: string;
-    balance: string;
-    decimals: string;
-    denormWeight: string;
-}
 
 export interface TradeInfo {
     SwapType: string;
@@ -59,13 +36,7 @@ export interface TradeInfo {
 export interface TestData {
     pools: SubgraphPoolBase[];
     tradeInfo: TradeInfo;
-}
-
-export interface V1SwapData {
-    title: string;
-    swaps: Swap[][];
-    returnAmount: BigNumber;
-    timeData: TimeData;
+    v1Result: ResultParsed;
 }
 
 export interface Result {
@@ -79,56 +50,11 @@ interface TimeData {
     fullSwap: number;
 }
 
-/*
-Helper to format V2 pools to V1 pool format.
-Only weighted pools with balance.
-Scales from normalised field values.
-Changes weight field to denormWeight.
-*/
-function formatToV1schema(poolsV2: SubGraphPoolsBase): SubgraphPoolsV1 {
-    const weightedPools: SubGraphPoolsBase = { pools: [] };
-
-    for (const pool of poolsV2.pools) {
-        // Only check first balance since AFAIK either all balances are zero or none are:
-        if (pool.tokens.length != 0)
-            if (pool.tokens[0].balance != '0')
-                if (pool.poolType !== 'Stable' && pool.poolType !== 'Element')
-                    weightedPools.pools.push(pool); // Do not include element pools
-    }
-    const poolsv1: SubGraphPoolV1[] = [];
-
-    for (let i = 0; i < weightedPools.pools.length; i++) {
-        const v1Pool: SubGraphPoolV1 = formatToV1Pool(weightedPools.pools[i]);
-        poolsv1.push(v1Pool);
-    }
-
-    return { pools: poolsv1 };
-}
-
-function formatToV1Pool(pool: SubgraphPoolBase): SubGraphPoolV1 {
-    const v1tokens: SubGraphTokenV1[] = [];
-    pool.tokens.forEach(token => {
-        v1tokens.push({
-            address: token.address,
-            balance: scale(
-                bnum(token.balance),
-                Number(token.decimals)
-            ).toString(),
-            decimals: token.decimals.toString(),
-            denormWeight: scale(bnum(token.weight), 18).toString(),
-        });
-    });
-
-    const v1Pool: SubGraphPoolV1 = {
-        id: pool.id,
-        swapFee: scale(bnum(pool.swapFee), 18).toString(),
-        totalWeight: scale(bnum(pool.totalWeight), 18).toString(),
-        totalShares: pool.totalShares,
-        tokensList: pool.tokensList,
-        tokens: v1tokens,
-    };
-
-    return v1Pool;
+export interface ResultParsed {
+    title: string;
+    timeData: TimeData;
+    returnAmount: string;
+    swaps: Swap[][];
 }
 
 // Filters for only pools with balance and returns token list too.
@@ -172,178 +98,6 @@ export function filterPoolsAndTokens(
     );
 
     return [allTokensSet, allPoolsNonZeroBalances];
-}
-
-export async function getV1Swap(
-    costOutputToken: BigNumber,
-    MaxNoPools: number,
-    AllSubgraphPools: SubGraphPoolsBase,
-    SwapType: string,
-    TokenIn: string,
-    TokenOut: string,
-    returnAmountDecimals: number,
-    SwapAmount: BigNumber,
-    disabledOptions: DisabledOptions = { isOverRide: false, disabledTokens: [] }
-): Promise<V1SwapData> {
-    TokenIn = TokenIn.toLowerCase();
-    TokenOut = TokenOut.toLowerCase();
-
-    // V1 will always ONLY use Weighted Pools
-    const weightedPools = filterToWeightedPoolsOnly(AllSubgraphPools);
-    if (weightedPools.pools.length === 0)
-        return {
-            title: 'v1',
-            swaps: [],
-            returnAmount: bnum(0),
-            timeData: { fullSwap: 0 },
-        };
-
-    const fullSwapStart = performance.now();
-    // costOutputToken should be the same as V2 as that's what we compare to.
-    const getCostOutputTokenStart = performance.now();
-    // // This calculates the cost in output token (output token is TokenOut for swapExactIn and
-    // // TokenIn for a swapExactOut) for each additional pool added to the final SOR swap result.
-    // // This is used as an input to SOR to allow it to make gas efficient recommendations, i.e.
-    // // if it costs 5 DAI to add another pool to the SOR solution and that only generates 1 more DAI,
-    // // then SOR should not add that pool (if gas costs were zero that pool would be added)
-    // // Notice that outputToken is TokenOut if SwapType == 'swapExactIn' and TokenIn if SwapType == 'swapExactOut'
-    // let costOutputToken: BigNumber;
-    // if (SwapType === 'swapExactIn')
-    //     costOutputToken = await sorv1.getCostOutputToken(
-    //         TokenOut,
-    //         GasPrice,
-    //         swapCost,
-    //         Provider
-    //     );
-    // else
-    //     costOutputToken = await sorv1.getCostOutputToken(
-    //         TokenIn,
-    //         GasPrice,
-    //         swapCost,
-    //         Provider
-    //     );
-
-    const getCostOutputTokenEnd = performance.now();
-
-    // Helper - Filters for only pools with balance and converts to wei/bnum format.
-    const poolsWithOnChainBalances: any = formatToV1schema(
-        JSON.parse(JSON.stringify(weightedPools))
-    );
-
-    const filterPoolsStart = performance.now();
-
-    const [
-        directPools,
-        hopTokens,
-        poolsTokenIn,
-        poolsTokenOut,
-    ] = sorv1.filterPools(
-        poolsWithOnChainBalances.pools, // AllSubgraphPoolsCorrect.pools,
-        TokenIn,
-        TokenOut,
-        MaxNoPools,
-        disabledOptions
-    );
-    const filterPoolsEnd = performance.now();
-    const sortPoolsMostLiquidStart = performance.now();
-
-    // For each hopToken, find the most liquid pool for the first and the second hops
-    const [
-        mostLiquidPoolsFirstHop,
-        mostLiquidPoolsSecondHop,
-    ] = sorv1.sortPoolsMostLiquid(
-        TokenIn,
-        TokenOut,
-        hopTokens,
-        poolsTokenIn,
-        poolsTokenOut
-    );
-
-    const sortPoolsMostLiquidEnd = performance.now();
-    const parsePoolDataStart = performance.now();
-
-    // Finds the possible paths to make the swap, each path can be a direct swap
-    // or a multihop composed of 2 swaps
-    const [pools, pathData] = sorv1.parsePoolData(
-        directPools,
-        TokenIn,
-        TokenOut,
-        mostLiquidPoolsFirstHop,
-        mostLiquidPoolsSecondHop,
-        hopTokens
-    );
-
-    console.log(`****** V1 Paths: ${pathData.length}`);
-    const parsePoolDataEnd = performance.now();
-    const processPathsStart = performance.now();
-
-    // For each path, find its spot price, slippage and limit amount
-    // The spot price of a multihop is simply the multiplication of the spot prices of each
-    // of the swaps. The slippage of a multihop is a bit more complicated (out of scope for here)
-    // The limit amount is due to the fact that Balancer protocol limits a trade to 50% of the pool
-    // balance of TokenIn (for swapExactIn) and 33.33% of the pool balance of TokenOut (for
-    // swapExactOut)
-    // 'paths' are ordered by ascending spot price
-    const paths = sorv1.processPaths(pathData, pools, SwapType);
-
-    const processPathsEnd = performance.now();
-    const processEpsOfInterestMultiHopStart = performance.now();
-
-    // epsOfInterest stores a list of all relevant prices: these are either
-    // 1) Spot prices of a path
-    // 2) Prices where paths cross, meaning they would move to the same spot price after trade
-    //    for the same amount traded.
-    // For each price of interest we have:
-    //   - 'bestPathsIds' a list of the id of the best paths to get to this price and
-    //   - 'amounts' a list of how much each path would need to trade to get to that price of
-    //     interest
-    const epsOfInterest = sorv1.processEpsOfInterestMultiHop(
-        paths,
-        SwapType,
-        MaxNoPools
-    );
-
-    const processEpsOfInterestMultiHopEnd = performance.now();
-    const smartOrderRouterMultiHopEpsOfInterestStart = performance.now();
-
-    // Returns 'swaps' which is the optimal list of swaps to make and
-    // 'swapAmount' which is the total amount of TokenOut (eg. DAI) will be returned
-    const [swaps, returnAmount] = sorv1.smartOrderRouterMultiHopEpsOfInterest(
-        pools,
-        paths,
-        SwapType,
-        new v1BigNumber(SwapAmount),
-        MaxNoPools,
-        new v1BigNumber(costOutputToken),
-        epsOfInterest
-    );
-    const smartOrderRouterMultiHopEpsOfInterestEnd = performance.now();
-    const fullSwapEnd = performance.now();
-
-    const timeData = {
-        fullSwap: fullSwapEnd - fullSwapStart,
-        costOutputToken: getCostOutputTokenEnd - getCostOutputTokenStart,
-        // 'getAllPoolDataOnChain': getAllPoolDataOnChainEnd - getAllPoolDataOnChainStart,
-        filterPools: filterPoolsEnd - filterPoolsStart,
-        sortPools: sortPoolsMostLiquidEnd - sortPoolsMostLiquidStart,
-        parsePool: parsePoolDataEnd - parsePoolDataStart,
-        processPaths: processPathsEnd - processPathsStart,
-        processEps:
-            processEpsOfInterestMultiHopEnd - processEpsOfInterestMultiHopStart,
-        filter: 'N/A',
-        sor:
-            smartOrderRouterMultiHopEpsOfInterestEnd -
-            smartOrderRouterMultiHopEpsOfInterestStart,
-    };
-
-    const swapsV2 = swaps as Swap[][];
-
-    return {
-        title: 'v1',
-        swaps: swapsV2,
-        returnAmount: bnum(returnAmount.toString()),
-        timeData,
-    };
 }
 
 export function loadTestFile(File: string): TestData {
@@ -411,7 +165,7 @@ export function displayResults(
 export function assertResults(
     testName: string,
     testData: TestData,
-    v1SwapData: V1SwapData,
+    v1SwapData: Result,
     swapInfo: SwapInfo
 ): void {
     let swapTypeCorrect = SwapTypes.SwapExactIn;
@@ -432,7 +186,7 @@ Test that current result is within V1 result.
 function testReturnAmountAgainstV1(
     testName: string,
     swapType: SwapTypes,
-    v1SwapData: V1SwapData,
+    v1SwapData: Result,
     swapInfo: SwapInfo
 ): void {
     const relDiffBn = calcRelativeDiffBn(
@@ -548,18 +302,6 @@ function getTotalSwapAmount(
     return total;
 }
 
-// Helper to filter pools to contain only Weighted pools
-export function filterToWeightedPoolsOnly(
-    pools: SubGraphPoolsBase
-): SubGraphPoolsBase {
-    const weightedPools = { pools: [] };
-
-    for (const pool of pools.pools) {
-        if (pool.poolType === 'Weighted') weightedPools.pools.push(pool);
-    }
-    return weightedPools;
-}
-
 export function calcRelativeDiffBn(
     expected: BigNumber,
     actual: BigNumber
@@ -645,4 +387,22 @@ export async function getFullSwap(
     );
 
     return swapInfo;
+}
+
+export function parseV1Result(v1ResultParsed: ResultParsed): Result {
+    if (!v1ResultParsed.returnAmount) {
+        return {
+            title: 'N/A',
+            timeData: { fullSwap: 0 },
+            returnAmount: bnum(0),
+            swaps: [] as SwapV2[],
+        };
+    }
+
+    return {
+        title: v1ResultParsed.title,
+        timeData: v1ResultParsed.timeData,
+        returnAmount: bnum(v1ResultParsed.returnAmount),
+        swaps: v1ResultParsed.swaps,
+    };
 }
