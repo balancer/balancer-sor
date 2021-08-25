@@ -79,7 +79,7 @@ export async function getOnChainBalances(
         }
     });
 
-    const pools: Record<
+    const pools = (await multiPool.execute()) as Record<
         string,
         {
             amp?: string;
@@ -90,7 +90,7 @@ export async function getOnChainBalances(
                 balances: string[];
             };
         }
-    > = await multiPool.execute();
+    >;
 
     Object.entries(pools).forEach(([poolId, onchainData]) => {
         try {
