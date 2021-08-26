@@ -44,9 +44,6 @@ export class SOR {
     chainId: number;
     // avg Balancer swap cost. Can be updated manually if required.
     swapCost: BigNumber;
-    isUsingPoolsUrl: boolean;
-    poolsUrl: string;
-    subgraphPools: SubGraphPoolsBase;
     processedDataCache: Record<
         string,
         { pools: PoolDictionary; paths: NewPath[] }
