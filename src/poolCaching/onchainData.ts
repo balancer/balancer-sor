@@ -42,8 +42,6 @@ export async function getOnChainBalances(
         )
             subgraphPools.splice(i, 1);
 
-        _.set(pools, `${pool.id}.id`, pool.id);
-
         multiPool.call(`${pool.id}.poolTokens`, vaultAddress, 'getPoolTokens', [
             pool.id,
         ]);

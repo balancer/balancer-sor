@@ -50,7 +50,9 @@ export class Multicaller {
     private async executeMulticall(): Promise<Result[]> {
         const multi = new Contract(
             this.multiAddress,
-            'function aggregate(tuple(address target, bytes callData) memory calls) public returns (uint256 blockNumber, bytes[] memory returnData)',
+            [
+                'function aggregate(tuple[](address target, bytes callData) memory calls) public view returns (uint256 blockNumber, bytes[] memory returnData)',
+            ],
             this.provider
         );
 
