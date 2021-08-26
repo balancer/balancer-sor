@@ -20,7 +20,6 @@ const gasPrice = new BigNumber('30000000000');
 const maxPools = 4;
 const chainId = 1;
 const poolsUrl = `https://ipfs.fleek.co/ipns/balancer-team-bucket.storage.fleek.co/balancer-exchange/pools`;
-const swapCost = new BigNumber('100000');
 
 describe(`Tests for wrapper class.`, () => {
     it(`Should set constructor variables`, () => {
@@ -29,7 +28,6 @@ describe(`Tests for wrapper class.`, () => {
         assert.equal(gasPrice, sor.gasPrice);
         assert.equal(maxPools, sor.maxPools);
         assert.equal(maxPools, sor.maxPools);
-        assert.equal(swapCost.toString(), sor.swapCost.toString());
     });
 
     it(`Should return no swaps when pools not retrieved.`, async () => {

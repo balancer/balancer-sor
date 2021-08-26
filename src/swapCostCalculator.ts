@@ -16,6 +16,8 @@ export function calculateTotalSwapCost(
 export class SwapCostCalculator {
     private chainId: number;
     private tokenPriceCache: Record<string, string>;
+    // Average gas cost of interacting with a pool. Can be updated manually if required.
+    swapCost: BigNumber;
 
     private initializeCache(): void {
         this.tokenPriceCache = {
@@ -24,8 +26,12 @@ export class SwapCostCalculator {
         };
     }
 
-    constructor(chainId: number) {
+    constructor(
+        chainId: number,
+        swapCost: BigNumber = new BigNumber('100000')
+    ) {
         this.chainId = chainId;
+        this.swapCost = swapCost;
         this.initializeCache();
     }
 
@@ -90,12 +96,11 @@ export class SwapCostCalculator {
     async convertGasCostToToken(
         tokenAddress: string,
         tokenDecimals: number,
-        gasPriceWei: BigNumber,
-        swapGasCost: BigNumber
+        gasPriceWei: BigNumber
     ): Promise<BigNumber> {
         return calculateTotalSwapCost(
             await this.getNativeAssetPriceInToken(tokenAddress, tokenDecimals),
-            swapGasCost,
+            this.swapCost,
             gasPriceWei
         );
     }
