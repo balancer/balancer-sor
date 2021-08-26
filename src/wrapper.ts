@@ -1,7 +1,14 @@
 import { BaseProvider } from '@ethersproject/providers';
 import { BigNumber } from './utils/bignumber';
-import { ZERO } from './utils/bignumber';
 import { EMPTY_SWAPINFO } from './constants';
+import { smartOrderRouter } from './router';
+import { getWrappedInfo, setWrappedInfo } from './wrapInfo';
+import { formatSwaps } from './formatSwaps';
+import { PoolCacher } from './poolCaching';
+import { RouteProposer } from './routeProposal';
+import { filterPoolsByType } from './routeProposal/filtering';
+import { SwapCostCalculator } from './swapCost';
+import { getLidoStaticSwaps, isLidoStableSwap } from './pools/lido/lidoHelpers';
 import {
     SwapInfo,
     DisabledOptions,
@@ -10,20 +17,10 @@ import {
     PoolDictionary,
     SwapOptions,
     PoolFilter,
-    getLidoStaticSwaps,
-    isLidoStableSwap,
     Swap,
-    filterPoolsByType,
     SubgraphPoolBase,
     SubGraphPoolsBase,
-} from './index';
-import { smartOrderRouter } from './router';
-import { getWrappedInfo, setWrappedInfo } from './wrapInfo';
-import { formatSwaps } from './formatSwaps';
-import { PoolCacher } from './poolCaching';
-import { RouteProposer } from './routeProposal';
-import { SwapCostCalculator } from './swapCost';
-
+} from './types';
 
 export class SOR {
     provider: BaseProvider;
