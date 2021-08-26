@@ -57,7 +57,7 @@ export class RouteProposer {
         // Some functions alter pools list directly but we want to keep original so make a copy to work from
         const poolsList = JSON.parse(JSON.stringify(pools));
 
-        const [pools2, hopTokens] = filterPoolsOfInterest(
+        const [poolsDict, hopTokens] = filterPoolsOfInterest(
             poolsList,
             tokenIn,
             tokenOut,
@@ -65,11 +65,11 @@ export class RouteProposer {
             this.disabledOptions,
             currentBlockTimestamp
         );
-        const [filteredPools, pathData] = filterHopPools(
+        const [filteredPoolsDict, pathData] = filterHopPools(
             tokenIn,
             tokenOut,
             hopTokens,
-            pools2
+            poolsDict
         );
         const [paths] = calculatePathLimits(pathData, swapType);
 
@@ -78,11 +78,11 @@ export class RouteProposer {
             this.processedDataCache[
                 `${tokenIn}${tokenOut}${swapType}${currentBlockTimestamp}`
             ] = {
-                pools: filteredPools,
+                pools: filteredPoolsDict,
                 paths: paths,
             };
         }
 
-        return { pools: filteredPools, paths };
+        return { pools: filteredPoolsDict, paths };
     }
 }
