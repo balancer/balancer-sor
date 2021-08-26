@@ -12,16 +12,15 @@ import {
     PoolFilter,
     getLidoStaticSwaps,
     isLidoStableSwap,
-    filterPoolsOfInterest,
-    filterHopPools,
     Swap,
     filterPoolsByType,
     SubgraphPoolBase,
 } from './index';
-import { calculatePathLimits, smartOrderRouter } from './router';
+import { smartOrderRouter } from './router';
 import { getWrappedInfo, setWrappedInfo } from './wrapInfo';
 import { formatSwaps } from './formatSwaps';
 import { PoolCacher } from './poolCaching';
+import { RouteProposer } from './routeProposer';
 import { SwapCostCalculator } from './swapCost';
 
 const EMPTY_SWAPINFO: SwapInfo = {
@@ -40,15 +39,11 @@ const EMPTY_SWAPINFO: SwapInfo = {
 export class SOR {
     provider: BaseProvider;
     gasPrice: BigNumber;
-    maxPools: number;
     chainId: number;
-    processedDataCache: Record<
-        string,
-        { pools: PoolDictionary; paths: NewPath[] }
-    > = {};
     disabledOptions: DisabledOptions;
 
     poolCacher: PoolCacher;
+    private routeProposer: RouteProposer;
     swapCostCalculator: SwapCostCalculator;
 
     constructor(
@@ -68,9 +63,9 @@ export class SOR {
             chainId,
             typeof poolsSource === 'string' ? poolsSource : poolsSource.pools
         );
+        this.routeProposer = new RouteProposer(maxPools, disabledOptions);
         this.provider = provider;
         this.gasPrice = gasPrice;
-        this.maxPools = maxPools;
         this.chainId = chainId;
         this.disabledOptions = disabledOptions;
         this.swapCostCalculator = new SwapCostCalculator(chainId, swapCost);
@@ -85,6 +80,13 @@ export class SOR {
             tokenDecimals,
             this.gasPrice
         );
+    }
+
+    get processedDataCache(): Record<
+        string,
+        { pools: PoolDictionary; paths: NewPath[] }
+    > {
+        return this.routeProposer.processedDataCache;
     }
 
     /*
@@ -148,7 +150,7 @@ export class SOR {
                 wrappedInfo.tokenOut.addressForSwaps,
                 swapType,
                 wrappedInfo.swapAmountForSwaps,
-                { pools: filteredPools },
+                filteredPools,
                 true,
                 swapOptions.timestamp
             );
@@ -173,17 +175,20 @@ export class SOR {
         tokenOut: string,
         swapType: SwapTypes,
         swapAmt: BigNumber,
-        onChainPools: SubGraphPoolsBase,
+        pools: SubgraphPoolBase[],
         useProcessCache = true,
         currentBlockTimestamp = 0
     ): Promise<SwapInfo> {
-        if (onChainPools.pools.length === 0) return EMPTY_SWAPINFO;
+        if (pools.length === 0) return EMPTY_SWAPINFO;
 
-        const { pools, paths } = this.getCandidatePaths(
+        const {
+            pools: poolsOfInterest,
+            paths,
+        } = this.routeProposer.getCandidatePaths(
             tokenIn,
             tokenOut,
             swapType,
-            onChainPools,
+            pools,
             useProcessCache,
             currentBlockTimestamp
         );
@@ -199,7 +204,7 @@ export class SOR {
             marketSp,
             totalConsideringFees,
         ] = this.getOptimalPaths(
-            pools,
+            poolsOfInterest,
             paths,
             swapAmt,
             swapType,
@@ -221,65 +226,6 @@ export class SOR {
     }
 
     /**
-     * Given a list of pools and a desired input/output, returns a set of possible paths to route through
-     */
-    private getCandidatePaths(
-        tokenIn: string,
-        tokenOut: string,
-        swapType: SwapTypes,
-        onChainPools: SubGraphPoolsBase,
-        useProcessCache = true,
-        currentBlockTimestamp = 0
-    ): { pools: PoolDictionary; paths: NewPath[] } {
-        if (onChainPools.pools.length === 0) return { pools: {}, paths: [] };
-
-        // If token pair has been processed before that info can be reused to speed up execution
-        const cache = this.processedDataCache[
-            `${tokenIn}${tokenOut}${swapType}${currentBlockTimestamp}`
-        ];
-
-        // useProcessCache can be false to force fresh processing of paths/prices
-        if (useProcessCache && !!cache) {
-            // Using pre-processed data from cache
-            return {
-                pools: cache.pools,
-                paths: cache.paths,
-            };
-        }
-
-        // Some functions alter pools list directly but we want to keep original so make a copy to work from
-        const poolsList = JSON.parse(JSON.stringify(onChainPools));
-
-        const [pools, hopTokens] = filterPoolsOfInterest(
-            poolsList.pools,
-            tokenIn,
-            tokenOut,
-            this.maxPools,
-            this.disabledOptions,
-            currentBlockTimestamp
-        );
-        const [filteredPools, pathData] = filterHopPools(
-            tokenIn,
-            tokenOut,
-            hopTokens,
-            pools
-        );
-        const [paths] = calculatePathLimits(pathData, swapType);
-
-        // Update cache if used
-        if (useProcessCache) {
-            this.processedDataCache[
-                `${tokenIn}${tokenOut}${swapType}${currentBlockTimestamp}`
-            ] = {
-                pools: filteredPools,
-                paths: paths,
-            };
-        }
-
-        return { pools: filteredPools, paths };
-    }
-
-    /**
      * Find optimal routes for trade from given candidate paths
      */
     private getOptimalPaths(
@@ -296,7 +242,7 @@ export class SOR {
             paths,
             swapType,
             swapAmount,
-            this.maxPools,
+            this.routeProposer.maxPools,
             costOutputToken
         );
     }
