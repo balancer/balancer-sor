@@ -5,7 +5,7 @@ import { parseNewPool } from '../index';
 import { ZERO, scale, bnum, BigNumber } from '../../utils/bignumber';
 import { ZERO_ADDRESS } from '../../index';
 import vaultAbi from '../../abi/Vault.json';
-import { EMPTY_SWAPINFO } from 'constants';
+import { EMPTY_SWAPINFO } from '../../constants';
 
 export const Lido = {
     Networks: [1, 42],

@@ -1,6 +1,6 @@
 import { BigNumber, ZERO } from '../utils/bignumber';
 import { SwapTypes, NewPath } from '../types';
-import { getOutputAmountSwap } from './filtering';
+import { getOutputAmountSwap } from '../pools';
 
 export function calculatePathLimits(
     paths: NewPath[],

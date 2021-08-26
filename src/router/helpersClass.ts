@@ -1,5 +1,5 @@
 import { BigNumber, ZERO, INFINITY } from '../utils/bignumber';
-import { getOutputAmountSwap } from '../routeProposal/filtering';
+import { getOutputAmountSwap } from '../pools';
 import { INFINITESIMAL } from '../config';
 import {
     NewPath,
