@@ -1,6 +1,7 @@
 import { BaseProvider } from '@ethersproject/providers';
 import { BigNumber } from './utils/bignumber';
 import { ZERO } from './utils/bignumber';
+import { EMPTY_SWAPINFO } from './constants';
 import {
     SwapInfo,
     DisabledOptions,
@@ -23,18 +24,6 @@ import { PoolCacher } from './poolCaching';
 import { RouteProposer } from './routeProposal';
 import { SwapCostCalculator } from './swapCost';
 
-const EMPTY_SWAPINFO: SwapInfo = {
-    tokenAddresses: [],
-    swaps: [],
-    swapAmount: ZERO,
-    swapAmountForSwaps: ZERO,
-    tokenIn: '',
-    tokenOut: '',
-    returnAmount: ZERO,
-    returnAmountConsideringFees: ZERO,
-    returnAmountFromSwaps: ZERO,
-    marketSp: ZERO,
-};
 
 export class SOR {
     provider: BaseProvider;

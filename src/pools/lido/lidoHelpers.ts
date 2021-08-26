@@ -5,6 +5,7 @@ import { parseNewPool } from '../index';
 import { ZERO, scale, bnum, BigNumber } from '../../utils/bignumber';
 import { ZERO_ADDRESS } from '../../index';
 import vaultAbi from '../../abi/Vault.json';
+import { EMPTY_SWAPINFO } from 'constants';
 
 export const Lido = {
     Networks: [1, 42],
@@ -931,18 +932,7 @@ export async function getLidoStaticSwaps(
         isWrappingOut = true;
     }
 
-    const swapInfo: SwapInfo = {
-        tokenAddresses: [],
-        swaps: [],
-        swapAmount: ZERO,
-        swapAmountForSwaps: ZERO,
-        tokenIn: '',
-        tokenOut: '',
-        returnAmount: ZERO,
-        returnAmountConsideringFees: ZERO,
-        returnAmountFromSwaps: ZERO,
-        marketSp: ZERO,
-    };
+    const swapInfo: SwapInfo = EMPTY_SWAPINFO;
     const staticRoute = Routes[chainId][`${tokenIn}${tokenOut}${swapType}`];
     if (!staticRoute) return swapInfo;
 
@@ -982,18 +972,7 @@ export async function getLidoStaticSwaps(
     );
 
     if (swapInfo.returnAmount.isZero()) {
-        return {
-            tokenAddresses: [],
-            swaps: [],
-            swapAmount: ZERO,
-            swapAmountForSwaps: ZERO,
-            tokenIn: '',
-            tokenOut: '',
-            returnAmount: ZERO,
-            returnAmountConsideringFees: ZERO,
-            returnAmountFromSwaps: ZERO,
-            marketSp: ZERO,
-        };
+        return EMPTY_SWAPINFO;
     }
 
     // Considering fees shouldn't matter as there won't be alternative options on V1

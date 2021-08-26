@@ -1,3 +1,6 @@
+import { ZERO } from './utils/bignumber';
+import { SwapInfo } from './types';
+
 export const WETHADDR: { [chainId: number]: string } = {
     1: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2',
     5: '0x9A1000D492d40bfccbc03f413A48F5B6516Ec0Fd',
@@ -17,4 +20,17 @@ export const VAULTADDR: { [chainId: number]: string } = {
     5: '0x65748E8287Ce4B9E6D83EE853431958851550311',
     42: '0xBA12222222228d8Ba445958a75a0704d566BF2C8',
     137: '0xBA12222222228d8Ba445958a75a0704d566BF2C8',
+};
+
+export const EMPTY_SWAPINFO: SwapInfo = {
+    tokenAddresses: [],
+    swaps: [],
+    swapAmount: ZERO,
+    swapAmountForSwaps: ZERO,
+    tokenIn: '',
+    tokenOut: '',
+    returnAmount: ZERO,
+    returnAmountConsideringFees: ZERO,
+    returnAmountFromSwaps: ZERO,
+    marketSp: ZERO,
 };
