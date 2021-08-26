@@ -15,9 +15,7 @@ export function calculateTotalSwapCost(
 
 export class SwapCostCalculator {
     private chainId: number;
-    private tokenPriceCache: Record<string, string> = {
-        ZERO_ADDRESS: BONE.toString(),
-    };
+    private tokenPriceCache: Record<string, string>;
 
     private initializeCache(): void {
         this.tokenPriceCache = {
@@ -31,15 +29,18 @@ export class SwapCostCalculator {
         this.initializeCache();
     }
 
+    /**
+     * Sets the chain ID to be used when querying asset prices
+     * @param chainId - the chain ID of the chain to switch to
+     */
     setChainId(chainId: number): void {
         this.chainId = chainId;
         this.initializeCache();
     }
 
     /**
-     * @param tokenAddress
-     * @param tokenDecimals
-     * @returns
+     * @param tokenAddress - the address of the token for which to express the native asset in terms of
+     * @param tokenPrice - the price of the native asset in terms of the provided token
      */
     async getNativeAssetPriceInToken(
         tokenAddress: string,
@@ -74,8 +75,8 @@ export class SwapCostCalculator {
     }
 
     /**
-     * @param tokenAddress
-     * @param tokenPrice
+     * @param tokenAddress - the address of the token for which to express the native asset in terms of
+     * @param tokenPrice - the price of the native asset in terms of the provided token
      */
     setNativeAssetPriceInToken(tokenAddress: string, tokenPrice: string): void {
         this.tokenPriceCache[tokenAddress.toLowerCase()] = tokenPrice;
@@ -85,11 +86,6 @@ export class SwapCostCalculator {
      * Calculate the cost of spending a certain amount of gas in terms of a token.
      * This allows us to determine whether an increased amount of tokens gained
      * is worth spending this extra gas (e.g. by including an extra pool in a swap)
-     * @param tokenAddress
-     * @param tokenDecimals
-     * @param gasPriceWei
-     * @param swapGasCost
-     * @returns
      */
     async convertGasCostToToken(
         tokenAddress: string,
