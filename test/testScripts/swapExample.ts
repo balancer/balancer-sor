@@ -192,17 +192,13 @@ async function getSwap(
     const sor = new SOR(provider, gasPrice, maxNoPools, networkId, poolsSource);
 
     // This calculates the cost to make a swap which is used as an input to sor to allow it to make gas efficient recommendations.
-    // Can be set once and will be used for further swap calculations.
-    // Defaults to 0 if not called or can be set manually using: await sor.setCostOutputToken(tokenOut, manualPriceBn)
     // Note - tokenOut for SwapExactIn, tokenIn for SwapExactOut
-    let cost: BigNumber;
-    if (swapType === SwapTypes.SwapExactOut)
-        cost = await sor.setCostOutputToken(tokenIn.address, tokenIn.decimals);
-    else
-        cost = await sor.setCostOutputToken(
-            tokenOut.address,
-            tokenOut.decimals
-        );
+    const outputToken =
+        swapType === SwapTypes.SwapExactOut ? tokenIn : tokenOut;
+    const cost = await sor.getCostOfSwapInToken(
+        outputToken.address,
+        outputToken.decimals
+    );
 
     // Will get onChain data for pools list
     await sor.fetchPools(queryOnChain);

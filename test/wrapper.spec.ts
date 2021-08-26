@@ -20,7 +20,6 @@ const gasPrice = new BigNumber('30000000000');
 const maxPools = 4;
 const chainId = 1;
 const poolsUrl = `https://ipfs.fleek.co/ipns/balancer-team-bucket.storage.fleek.co/balancer-exchange/pools`;
-const swapCost = new BigNumber('100000');
 
 describe(`Tests for wrapper class.`, () => {
     it(`Should set constructor variables`, () => {
@@ -29,44 +28,6 @@ describe(`Tests for wrapper class.`, () => {
         assert.equal(gasPrice, sor.gasPrice);
         assert.equal(maxPools, sor.maxPools);
         assert.equal(maxPools, sor.maxPools);
-        assert.equal(swapCost.toString(), sor.swapCost.toString());
-    });
-
-    it(`Should manually set costOutputToken`, () => {
-        const tokenOut = `0xba100000625a3754423978a60c9317c58a424e3d`;
-        const manualCost = new BigNumber('700000000000');
-        const sor = new SOR(provider, gasPrice, maxPools, chainId, poolsUrl);
-        sor.setCostOutputToken(tokenOut, 18, manualCost);
-        assert.equal(manualCost, sor.getCostOutputToken(tokenOut));
-    });
-
-    it(`Should return correct costOutputToken for ZERO & WETH addresses`, async () => {
-        const tokenOut = ZERO_ADDRESS;
-        const sor = new SOR(provider, gasPrice, maxPools, chainId, poolsUrl);
-        let cost = await sor.setCostOutputToken(tokenOut, 18);
-        assert.equal(
-            cost.toString(),
-            gasPrice
-                .times(sor.swapCost)
-                .div(bnum(10 ** 18))
-                .toString()
-        );
-        assert.equal(
-            cost.toString(),
-            sor.getCostOutputToken(tokenOut).toString()
-        );
-        cost = await sor.setCostOutputToken(WETHADDR, 18);
-        assert.equal(
-            cost.toString(),
-            gasPrice
-                .times(sor.swapCost)
-                .div(bnum(10 ** 18))
-                .toString()
-        );
-        assert.equal(
-            cost.toString(),
-            sor.getCostOutputToken(WETHADDR).toString()
-        );
     });
 
     it(`Should return no swaps when pools not retrieved.`, async () => {

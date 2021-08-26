@@ -14,7 +14,7 @@ import {
     PoolFilter,
     SwapV2,
 } from '../../src/types';
-import { bnum } from '../../src/utils/bignumber';
+import { bnum, BONE } from '../../src/utils/bignumber';
 import * as fs from 'fs';
 import { assert } from 'chai';
 import { getAddress } from '@ethersproject/address';
@@ -360,18 +360,23 @@ export async function getFullSwap(
 
     let swapTypeCorrect = SwapTypes.SwapExactIn;
 
+    // We're wanting to set the value of costOutputToken so we calculate
+    // a native asset price which will give the desired value
+    const effectiveNativeAssetPrice = costOutputToken
+        .div(gasPrice)
+        .div(swapCost)
+        .div(BONE)
+        .toString();
     if (swapType === 'swapExactIn')
-        await sor.setCostOutputToken(
+        await sor.swapCostCalculator.setNativeAssetPriceInToken(
             tokenOut,
-            returnAmountDecimals,
-            costOutputToken
+            effectiveNativeAssetPrice
         );
     else {
         swapTypeCorrect = SwapTypes.SwapExactOut;
-        await sor.setCostOutputToken(
+        await sor.swapCostCalculator.setNativeAssetPriceInToken(
             tokenIn,
-            returnAmountDecimals,
-            costOutputToken
+            effectiveNativeAssetPrice
         );
     }
 
