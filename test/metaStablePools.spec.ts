@@ -3,11 +3,11 @@ import { expect } from 'chai';
 import { JsonRpcProvider } from '@ethersproject/providers';
 import { SOR } from '../src';
 import {
-    SubGraphPoolsBase,
     SwapInfo,
     SwapTypes,
     PoolTypes,
     PairTypes,
+    SubgraphPoolBase,
 } from '../src/types';
 import { BigNumber, bnum, scale } from '../src/utils/bignumber';
 import {
@@ -33,7 +33,7 @@ const randomETH = '0x42d6622dece394b54999fbd73d108123806f6a18';
 // const PTSP = '0x5f304f6cf88dc76b414f301e05adfb5a429e8b67';
 
 async function getStableComparrison(
-    stablePools: SubGraphPoolsBase,
+    stablePools: SubgraphPoolBase[],
     tokenIn: string,
     tokenOut: string,
     swapType: SwapTypes,
@@ -172,9 +172,9 @@ describe(`Tests for MetaStable Pools.`, () => {
     context('direct pool', () => {
         it(`Full Swap - swapExactIn No Route`, async () => {
             const poolsFromFile = require('./testData/metaStablePools/singlePool.json');
-            const pools: SubGraphPoolsBase = {
-                pools: JSON.parse(JSON.stringify(poolsFromFile.metaStablePool)),
-            };
+            const pools: SubgraphPoolBase[] = JSON.parse(
+                JSON.stringify(poolsFromFile.metaStablePool)
+            );
             const tokenIn = BAL;
             const tokenOut = USDC;
             const swapType = SwapTypes.SwapExactIn;
@@ -199,9 +199,9 @@ describe(`Tests for MetaStable Pools.`, () => {
 
         it(`Full Swap - swapExactOut No Route`, async () => {
             const poolsFromFile = require('./testData/metaStablePools/singlePool.json');
-            const pools: SubGraphPoolsBase = {
-                pools: JSON.parse(JSON.stringify(poolsFromFile.metaStablePool)),
-            };
+            const pools: SubgraphPoolBase[] = JSON.parse(
+                JSON.stringify(poolsFromFile.metaStablePool)
+            );
             const tokenIn = BAL;
             const tokenOut = USDC;
             const swapType = SwapTypes.SwapExactOut;
@@ -226,9 +226,9 @@ describe(`Tests for MetaStable Pools.`, () => {
 
         it(`Full Swap - swapExactIn, Token ETH >Token Meta`, async () => {
             const poolsFromFile = require('./testData/metaStablePools/singlePool.json');
-            const pools: SubGraphPoolsBase = {
-                pools: JSON.parse(JSON.stringify(poolsFromFile.metaStablePool)),
-            };
+            const pools: SubgraphPoolBase[] = JSON.parse(
+                JSON.stringify(poolsFromFile.metaStablePool)
+            );
             const tokenIn = WETH;
             const tokenInPriceRate = bnum(1);
             const tokenOut = stETH;
@@ -249,9 +249,8 @@ describe(`Tests for MetaStable Pools.`, () => {
                 { gasPrice, maxPools }
             );
 
-            const stablePools: SubGraphPoolsBase = {
-                pools: poolsFromFile.stablePool,
-            };
+            const stablePools: SubgraphPoolBase[] = poolsFromFile.stablePool;
+
             const swapInfoStable = await getStableComparrison(
                 stablePools,
                 tokenIn,
@@ -294,9 +293,9 @@ describe(`Tests for MetaStable Pools.`, () => {
 
         it(`Full Swap - swapExactIn, Token Meta > Token ETH`, async () => {
             const poolsFromFile = require('./testData/metaStablePools/singlePool.json');
-            const pools: SubGraphPoolsBase = {
-                pools: JSON.parse(JSON.stringify(poolsFromFile.metaStablePool)),
-            };
+            const pools: SubgraphPoolBase[] = JSON.parse(
+                JSON.stringify(poolsFromFile.metaStablePool)
+            );
             const tokenIn = stETH;
             const tokenInPriceRate = bnum(0.5);
             const tokenOut = WETH;
@@ -317,9 +316,8 @@ describe(`Tests for MetaStable Pools.`, () => {
                 { gasPrice, maxPools }
             );
 
-            const stablePools: SubGraphPoolsBase = {
-                pools: poolsFromFile.stablePool,
-            };
+            const stablePools: SubgraphPoolBase[] = poolsFromFile.stablePool;
+
             // Should be same as a 1/1 stable pool with swapAmt * priceRate, i.e swapAmt = 1 in this case
             const swapInfoStable = await getStableComparrison(
                 stablePools,
@@ -360,9 +358,9 @@ describe(`Tests for MetaStable Pools.`, () => {
 
         it(`Full Swap - swapExactOut, Token ETH >Token Meta`, async () => {
             const poolsFromFile = require('./testData/metaStablePools/singlePool.json');
-            const pools: SubGraphPoolsBase = {
-                pools: JSON.parse(JSON.stringify(poolsFromFile.metaStablePool)),
-            };
+            const pools: SubgraphPoolBase[] = JSON.parse(
+                JSON.stringify(poolsFromFile.metaStablePool)
+            );
             const tokenIn = WETH;
             const tokenInPriceRate = bnum(1);
             const tokenOut = stETH;
@@ -383,9 +381,8 @@ describe(`Tests for MetaStable Pools.`, () => {
                 { gasPrice, maxPools }
             );
 
-            const stablePools: SubGraphPoolsBase = {
-                pools: poolsFromFile.stablePool,
-            };
+            const stablePools: SubgraphPoolBase[] = poolsFromFile.stablePool;
+
             const swapInfoStable = await getStableComparrison(
                 stablePools,
                 tokenIn,
@@ -425,9 +422,9 @@ describe(`Tests for MetaStable Pools.`, () => {
 
         it(`Full Swap - swapExactOut, Token Meta > Token ETH`, async () => {
             const poolsFromFile = require('./testData/metaStablePools/singlePool.json');
-            const pools: SubGraphPoolsBase = {
-                pools: JSON.parse(JSON.stringify(poolsFromFile.metaStablePool)),
-            };
+            const pools: SubgraphPoolBase[] = JSON.parse(
+                JSON.stringify(poolsFromFile.metaStablePool)
+            );
             const tokenIn = stETH;
             const tokenInPriceRate = bnum(0.5);
             const tokenOut = WETH;
@@ -448,9 +445,8 @@ describe(`Tests for MetaStable Pools.`, () => {
                 { gasPrice, maxPools }
             );
 
-            const stablePools: SubGraphPoolsBase = {
-                pools: poolsFromFile.stablePool,
-            };
+            const stablePools: SubgraphPoolBase[] = poolsFromFile.stablePool;
+
             const swapInfoStable = await getStableComparrison(
                 stablePools,
                 tokenIn,
@@ -495,11 +491,9 @@ describe(`Tests for MetaStable Pools.`, () => {
         it(`Full Swap - swapExactIn, Token>Token`, async () => {
             // With meta token as hop the result in/out should be same as a normal stable pool
             const poolsFromFile = require('./testData/metaStablePools/multihop.json');
-            const pools: SubGraphPoolsBase = {
-                pools: JSON.parse(
-                    JSON.stringify(poolsFromFile.metaStablePools)
-                ),
-            };
+            const pools: SubgraphPoolBase[] = JSON.parse(
+                JSON.stringify(poolsFromFile.metaStablePools)
+            );
             const tokenIn = WETH;
             const tokenInPriceRate = bnum(1);
             const tokenHop = stETH;
@@ -522,9 +516,7 @@ describe(`Tests for MetaStable Pools.`, () => {
                 { gasPrice, maxPools }
             );
 
-            const stablePools: SubGraphPoolsBase = {
-                pools: poolsFromFile.stablePools,
-            };
+            const stablePools: SubgraphPoolBase[] = poolsFromFile.stablePools;
             // Same as stable with
             const swapInfoStable = await getStableComparrison(
                 stablePools,
@@ -569,11 +561,9 @@ describe(`Tests for MetaStable Pools.`, () => {
         it(`Full Swap - swapExactOut, Token>Token`, async () => {
             // With meta token as hop the result in/out should be same as a normal stable pool
             const poolsFromFile = require('./testData/metaStablePools/multihop.json');
-            const pools: SubGraphPoolsBase = {
-                pools: JSON.parse(
-                    JSON.stringify(poolsFromFile.metaStablePools)
-                ),
-            };
+            const pools: SubgraphPoolBase[] = JSON.parse(
+                JSON.stringify(poolsFromFile.metaStablePools)
+            );
             const tokenIn = WETH;
             const tokenInPriceRate = bnum(1);
             const tokenHop = stETH;
@@ -596,9 +586,8 @@ describe(`Tests for MetaStable Pools.`, () => {
                 { gasPrice, maxPools }
             );
 
-            const stablePools: SubGraphPoolsBase = {
-                pools: poolsFromFile.stablePools,
-            };
+            const stablePools: SubgraphPoolBase[] = poolsFromFile.stablePools;
+
             // Same as stable with
             const swapInfoStable = await getStableComparrison(
                 stablePools,

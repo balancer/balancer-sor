@@ -54,10 +54,6 @@ export interface Swap {
     tokenOutDecimals: number;
 }
 
-export interface SubGraphPoolsBase {
-    pools: SubgraphPoolBase[];
-}
-
 export interface SubgraphPoolBase {
     id: string;
     address: string;

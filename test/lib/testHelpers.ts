@@ -2,7 +2,6 @@ import { JsonRpcProvider } from '@ethersproject/providers';
 import { BigNumber } from 'bignumber.js';
 import * as sorv2 from '../../src';
 import {
-    SubGraphPoolsBase,
     SubgraphPoolBase,
     Swap,
     PoolDictionary,
@@ -15,7 +14,6 @@ import {
 import { bnum, BONE } from '../../src/utils/bignumber';
 import * as fs from 'fs';
 import { assert } from 'chai';
-import { getAddress } from '@ethersproject/address';
 // Mainnet reference tokens with addresses & decimals
 import WeightedTokens from '../testData/eligibleTokens.json';
 import StableTokens from '../testData/stableTokens.json';
@@ -57,13 +55,13 @@ export interface ResultParsed {
 
 // Filters for only pools with balance and returns token list too.
 export function filterPoolsAndTokens(
-    allPools: SubGraphPoolsBase
-): [Set<unknown>, SubGraphPoolsBase] {
+    allPools: SubgraphPoolBase[]
+): [Set<unknown>, SubgraphPoolBase[]] {
     const allTokens = [];
     let allTokensSet = new Set();
-    const allPoolsNonZeroBalances: SubGraphPoolsBase = { pools: [] };
+    const allPoolsNonZeroBalances: SubgraphPoolBase[] = [];
 
-    for (const pool of allPools.pools) {
+    for (const pool of allPools) {
         // Build list of non-zero balance pools
         // Only check first balance since AFAIK either all balances are zero or none are:
         if (pool.tokens.length != 0) {
@@ -77,7 +75,7 @@ export function filterPoolsAndTokens(
                     allTokens.push(tokens.sort()); // Will add without duplicate
                 }
 
-                allPoolsNonZeroBalances.pools.push(pool);
+                allPoolsNonZeroBalances.push(pool);
             }
         }
     }
@@ -326,7 +324,7 @@ export function countPoolSwapPairTypes(
 }
 
 export async function getFullSwap(
-    pools: SubGraphPoolsBase,
+    pools: SubgraphPoolBase[],
     tokenIn: string,
     tokenOut: string,
     returnAmountDecimals: number,

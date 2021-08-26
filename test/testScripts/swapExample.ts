@@ -9,10 +9,10 @@ import {
     SOR,
     SwapInfo,
     SwapTypes,
-    SubGraphPoolsBase,
     ZERO_ADDRESS,
     scale,
     bnum,
+    SubgraphPoolBase,
 } from '../../src';
 import vaultArtifact from '../../src/abi/Vault.json';
 import relayerAbi from '../abi/BatchRelayer.json';
@@ -175,7 +175,7 @@ const vaultAddr = '0xBA12222222228d8Ba445958a75a0704d566BF2C8';
 async function getSwap(
     provider: JsonRpcProvider,
     networkId,
-    poolsSource: string | SubGraphPoolsBase,
+    poolsSource: string | SubgraphPoolBase[],
     queryOnChain: boolean,
     tokenIn,
     tokenOut,

@@ -37,7 +37,7 @@ export async function compareTest(
     const costOutputToken = bnum(0);
     const fullSwapStart = performance.now();
     const swapInfo: SwapInfo = await getFullSwap(
-        JSON.parse(JSON.stringify(testData)),
+        JSON.parse(JSON.stringify(testData.pools)),
         testData.tradeInfo.TokenIn,
         testData.tradeInfo.TokenOut,
         testData.tradeInfo.ReturnAmountDecimals,

@@ -4,11 +4,11 @@ import { expect } from 'chai';
 import { JsonRpcProvider } from '@ethersproject/providers';
 import { SOR } from '../src';
 import {
-    SubGraphPoolsBase,
     SwapInfo,
     SwapTypes,
     PoolTypes,
     PairTypes,
+    SubgraphPoolBase,
 } from '../src/types';
 import { BigNumber, bnum } from '../src/utils/bignumber';
 import {
@@ -33,7 +33,9 @@ const RANDOM = '0x1456688345527be1f37e9e627da0837d6f08c925';
 describe(`Tests for Weighted Pools.`, () => {
     context('limit amounts', () => {
         it(`tests getLimitAmountSwap SwapExactIn`, async () => {
-            const poolsFromFile: SubGraphPoolsBase = require('./testData/weightedPools/singlePool.json');
+            const poolsFromFile: {
+                pools: SubgraphPoolBase[];
+            } = require('./testData/weightedPools/singlePool.json');
             const pool = poolsFromFile.pools[0];
             const swapType = SwapTypes.SwapExactIn;
 
@@ -75,7 +77,9 @@ describe(`Tests for Weighted Pools.`, () => {
         });
 
         it(`tests getLimitAmountSwap SwapExactOut`, async () => {
-            const poolsFromFile: SubGraphPoolsBase = require('./testData/weightedPools/singlePool.json');
+            const poolsFromFile: {
+                pools: SubgraphPoolBase[];
+            } = require('./testData/weightedPools/singlePool.json');
             const pool = poolsFromFile.pools[0];
             const swapType = SwapTypes.SwapExactOut;
 
@@ -120,13 +124,16 @@ describe(`Tests for Weighted Pools.`, () => {
     context('direct pool - BPT Swaps', () => {
         if (ALLOW_ADD_REMOVE) {
             it(`Full Swap - swapExactIn, Token > BPT`, async () => {
-                const poolsFromFile: SubGraphPoolsBase = require('./testData/weightedPools/singlePool.json');
+                const poolsFromFile: {
+                    pools: SubgraphPoolBase[];
+                } = require('./testData/weightedPools/singlePool.json');
+                const pools = poolsFromFile.pools;
                 const tokenIn = DAI;
                 const tokenOut = BPT;
                 const swapType = SwapTypes.SwapExactIn;
                 const swapAmt: BigNumber = bnum('1');
 
-                const sor = new SOR(provider, chainId, poolsFromFile);
+                const sor = new SOR(provider, chainId, pools);
 
                 const fetchSuccess = await sor.fetchPools(false);
                 expect(fetchSuccess).to.be.true;
@@ -153,13 +160,16 @@ describe(`Tests for Weighted Pools.`, () => {
             });
 
             it(`Full Swap - swapExactIn, BPT > Token`, async () => {
-                const poolsFromFile: SubGraphPoolsBase = require('./testData/weightedPools/singlePool.json');
+                const poolsFromFile: {
+                    pools: SubgraphPoolBase[];
+                } = require('./testData/weightedPools/singlePool.json');
+                const pools = poolsFromFile.pools;
                 const tokenIn = BPT;
                 const tokenOut = USDT;
                 const swapType = SwapTypes.SwapExactIn;
                 const swapAmt: BigNumber = bnum('1.77');
 
-                const sor = new SOR(provider, chainId, poolsFromFile);
+                const sor = new SOR(provider, chainId, pools);
 
                 const fetchSuccess = await sor.fetchPools(false);
                 expect(fetchSuccess).to.be.true;
@@ -184,13 +194,16 @@ describe(`Tests for Weighted Pools.`, () => {
             });
 
             it(`Full Swap - swapExactOut, Token > BPT`, async () => {
-                const poolsFromFile: SubGraphPoolsBase = require('./testData/weightedPools/singlePool.json');
+                const poolsFromFile: {
+                    pools: SubgraphPoolBase[];
+                } = require('./testData/weightedPools/singlePool.json');
+                const pools = poolsFromFile.pools;
                 const tokenIn = USDC;
                 const tokenOut = BPT;
                 const swapType = SwapTypes.SwapExactOut;
                 const swapAmt: BigNumber = bnum('1.276');
 
-                const sor = new SOR(provider, chainId, poolsFromFile);
+                const sor = new SOR(provider, chainId, pools);
 
                 const fetchSuccess = await sor.fetchPools(false);
                 expect(fetchSuccess).to.be.true;
@@ -215,13 +228,16 @@ describe(`Tests for Weighted Pools.`, () => {
             });
 
             it(`Full Swap - swapExactOut, BPT > Token`, async () => {
-                const poolsFromFile: SubGraphPoolsBase = require('./testData/weightedPools/singlePool.json');
+                const poolsFromFile: {
+                    pools: SubgraphPoolBase[];
+                } = require('./testData/weightedPools/singlePool.json');
+                const pools = poolsFromFile.pools;
                 const tokenIn = BPT;
                 const tokenOut = DAI;
                 const swapType = SwapTypes.SwapExactOut;
                 const swapAmt: BigNumber = bnum('2.44');
 
-                const sor = new SOR(provider, chainId, poolsFromFile);
+                const sor = new SOR(provider, chainId, pools);
 
                 const fetchSuccess = await sor.fetchPools(false);
                 expect(fetchSuccess).to.be.true;
@@ -251,13 +267,16 @@ describe(`Tests for Weighted Pools.`, () => {
     if (ALLOW_ADD_REMOVE) {
         context('stable meta swap', () => {
             it('should return swap via meta pool Exit Swap, SwapExactIn', async () => {
-                const poolsFromFile: SubGraphPoolsBase = require('./testData/weightedPools/metaPool.json');
+                const poolsFromFile: {
+                    pools: SubgraphPoolBase[];
+                } = require('./testData/weightedPools/metaPool.json');
+                const pools = poolsFromFile.pools;
                 const tokenIn = RANDOM;
                 const tokenOut = USDC;
                 const swapType = SwapTypes.SwapExactIn;
                 const swapAmt: BigNumber = bnum('0.01');
 
-                const sor = new SOR(provider, chainId, poolsFromFile);
+                const sor = new SOR(provider, chainId, pools);
 
                 const fetchSuccess = await sor.fetchPools(false);
                 expect(fetchSuccess).to.be.true;
@@ -299,13 +318,16 @@ describe(`Tests for Weighted Pools.`, () => {
             });
 
             it('should return swap via meta pool Join Pool, SwapExactIn', async () => {
-                const poolsFromFile: SubGraphPoolsBase = require('./testData/weightedPools/metaPool.json');
+                const poolsFromFile: {
+                    pools: SubgraphPoolBase[];
+                } = require('./testData/weightedPools/metaPool.json');
+                const pools = poolsFromFile.pools;
                 const tokenIn = USDC;
                 const tokenOut = RANDOM;
                 const swapType = SwapTypes.SwapExactIn;
                 const swapAmt: BigNumber = bnum('1');
 
-                const sor = new SOR(provider, chainId, poolsFromFile);
+                const sor = new SOR(provider, chainId, pools);
 
                 const fetchSuccess = await sor.fetchPools(false);
                 expect(fetchSuccess).to.be.true;
@@ -347,13 +369,16 @@ describe(`Tests for Weighted Pools.`, () => {
             });
 
             it('should return swap via meta pool Exit Swap, SwapExactOut', async () => {
-                const poolsFromFile: SubGraphPoolsBase = require('./testData/weightedPools/metaPool.json');
+                const poolsFromFile: {
+                    pools: SubgraphPoolBase[];
+                } = require('./testData/weightedPools/metaPool.json');
+                const pools = poolsFromFile.pools;
                 const tokenIn = RANDOM;
                 const tokenOut = USDC;
                 const swapType = SwapTypes.SwapExactOut;
                 const swapAmt: BigNumber = bnum('0.01');
 
-                const sor = new SOR(provider, chainId, poolsFromFile);
+                const sor = new SOR(provider, chainId, pools);
 
                 const fetchSuccess = await sor.fetchPools(false);
                 expect(fetchSuccess).to.be.true;
@@ -395,13 +420,16 @@ describe(`Tests for Weighted Pools.`, () => {
             });
 
             it('should return swap via meta pool Join Pool, SwapExactOut', async () => {
-                const poolsFromFile: SubGraphPoolsBase = require('./testData/weightedPools/metaPool.json');
+                const poolsFromFile: {
+                    pools: SubgraphPoolBase[];
+                } = require('./testData/weightedPools/metaPool.json');
+                const pools = poolsFromFile.pools;
                 const tokenIn = USDC;
                 const tokenOut = RANDOM;
                 const swapType = SwapTypes.SwapExactOut;
                 const swapAmt: BigNumber = bnum('0.01');
 
-                const sor = new SOR(provider, chainId, poolsFromFile);
+                const sor = new SOR(provider, chainId, pools);
 
                 const fetchSuccess = await sor.fetchPools(false);
                 expect(fetchSuccess).to.be.true;

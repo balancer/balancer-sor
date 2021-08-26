@@ -4,10 +4,10 @@ import { JsonRpcProvider } from '@ethersproject/providers';
 import { assert, expect } from 'chai';
 import { SOR, ZERO_ADDRESS } from '../src';
 import {
-    SubGraphPoolsBase,
     SwapInfo,
     SwapTypes,
     PoolFilter,
+    SubgraphPoolBase,
 } from '../src/types';
 import { BigNumber, bnum } from '../src/utils/bignumber';
 
@@ -45,13 +45,16 @@ describe(`Tests for wrapper class.`, () => {
     });
 
     it(`should have a valid swap`, async () => {
-        const poolsFromFile: SubGraphPoolsBase = require('./testData/testPools/subgraphPoolsSmallWithTrade.json');
+        const poolsFromFile: {
+            pools: SubgraphPoolBase[];
+        } = require('./testData/testPools/subgraphPoolsSmallWithTrade.json');
+        const pools = poolsFromFile.pools;
         const tokenIn = '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2';
         const tokenOut = '0x6b175474e89094c44da98b954eedeac495271d0f';
         const swapType = SwapTypes.SwapExactIn;
         const swapAmt: BigNumber = bnum('0.1');
 
-        const sor = new SOR(provider, chainId, poolsFromFile);
+        const sor = new SOR(provider, chainId, pools);
 
         const result: boolean = await sor.fetchPools(false);
         assert.isTrue(result);
@@ -89,13 +92,17 @@ describe(`Tests for wrapper class.`, () => {
     });
 
     it(`should filter correctly - has trades`, async () => {
-        const poolsFromFile: SubGraphPoolsBase = require('./testData/testPools/subgraphPoolsSmallWithTrade.json');
+        const poolsFromFile: {
+            pools: SubgraphPoolBase[];
+        } = require('./testData/testPools/subgraphPoolsSmallWithTrade.json');
+        const pools = poolsFromFile.pools;
+
         const tokenIn = '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2';
         const tokenOut = '0x6b175474e89094c44da98b954eedeac495271d0f';
         const swapType = SwapTypes.SwapExactIn;
         const swapAmt: BigNumber = bnum('0.1');
 
-        const sor = new SOR(provider, chainId, poolsFromFile);
+        const sor = new SOR(provider, chainId, pools);
 
         const result: boolean = await sor.fetchPools(false);
         assert.isTrue(result);
@@ -125,13 +132,17 @@ describe(`Tests for wrapper class.`, () => {
     });
 
     it(`should filter correctly - no pools`, async () => {
-        const poolsFromFile: SubGraphPoolsBase = require('./testData/testPools/subgraphPoolsSmallWithTrade.json');
+        const poolsFromFile: {
+            pools: SubgraphPoolBase[];
+        } = require('./testData/testPools/subgraphPoolsSmallWithTrade.json');
+        const pools = poolsFromFile.pools;
+
         const tokenIn = '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2';
         const tokenOut = '0x6b175474e89094c44da98b954eedeac495271d0f';
         const swapType = SwapTypes.SwapExactIn;
         const swapAmt: BigNumber = bnum('0.1');
 
-        const sor = new SOR(provider, chainId, poolsFromFile);
+        const sor = new SOR(provider, chainId, pools);
 
         const result: boolean = await sor.fetchPools(false);
         assert.isTrue(result);
@@ -157,13 +168,17 @@ describe(`Tests for wrapper class.`, () => {
     });
 
     it(`should have a valid swap for Eth wrapping`, async () => {
-        const poolsFromFile: SubGraphPoolsBase = require('./testData/testPools/subgraphPoolsSmallWithTrade.json');
+        const poolsFromFile: {
+            pools: SubgraphPoolBase[];
+        } = require('./testData/testPools/subgraphPoolsSmallWithTrade.json');
+        const pools = poolsFromFile.pools;
+
         const tokenIn = ZERO_ADDRESS;
         const tokenOut = '0x6b175474e89094c44da98b954eedeac495271d0f';
         const swapType = SwapTypes.SwapExactIn;
         const swapAmt: BigNumber = bnum('0.1');
 
-        const sor = new SOR(provider, chainId, poolsFromFile);
+        const sor = new SOR(provider, chainId, pools);
 
         const result: boolean = await sor.fetchPools(false);
         assert.isTrue(result);
@@ -195,14 +210,18 @@ describe(`Tests for wrapper class.`, () => {
     });
 
     it(`compare weth/eth swaps, SwapExactIn, Weth In`, async () => {
-        const poolsFromFile: SubGraphPoolsBase = require('./testData/testPools/subgraphPoolsSmallWithTrade.json');
+        const poolsFromFile: {
+            pools: SubgraphPoolBase[];
+        } = require('./testData/testPools/subgraphPoolsSmallWithTrade.json');
+        const pools = poolsFromFile.pools;
+
         const tokenInWeth = WETHADDR;
         const tokenInEth = ZERO_ADDRESS;
         const tokenOut = '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48';
         const swapType = SwapTypes.SwapExactIn;
         const swapAmt: BigNumber = bnum('0.1');
 
-        const sor = new SOR(provider, chainId, poolsFromFile);
+        const sor = new SOR(provider, chainId, pools);
 
         let result: boolean = await sor.fetchPools(false);
         assert.isTrue(result);
@@ -263,14 +282,18 @@ describe(`Tests for wrapper class.`, () => {
     });
 
     it(`compare weth/eth swaps, SwapExactIn, Weth Out`, async () => {
-        const poolsFromFile: SubGraphPoolsBase = require('./testData/testPools/subgraphPoolsSmallWithTrade.json');
+        const poolsFromFile: {
+            pools: SubgraphPoolBase[];
+        } = require('./testData/testPools/subgraphPoolsSmallWithTrade.json');
+        const pools = poolsFromFile.pools;
+
         const tokenIn = '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48';
         const tokenOutWeth = WETHADDR;
         const tokenOutEth = ZERO_ADDRESS;
         const swapType = SwapTypes.SwapExactIn;
         const swapAmt: BigNumber = bnum('0.1');
 
-        const sor = new SOR(provider, chainId, poolsFromFile);
+        const sor = new SOR(provider, chainId, pools);
 
         let result: boolean = await sor.fetchPools(false);
         assert.isTrue(result);
@@ -323,14 +346,17 @@ describe(`Tests for wrapper class.`, () => {
     });
 
     it(`compare weth/eth swaps, SwapExactOut, Weth In`, async () => {
-        const poolsFromFile: SubGraphPoolsBase = require('./testData/testPools/subgraphPoolsSmallWithTrade.json');
+        const poolsFromFile: {
+            pools: SubgraphPoolBase[];
+        } = require('./testData/testPools/subgraphPoolsSmallWithTrade.json');
+        const pools = poolsFromFile.pools;
         const tokenInWeth = WETHADDR;
         const tokenInEth = ZERO_ADDRESS;
         const tokenOut = '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48';
         const swapType = SwapTypes.SwapExactOut;
         const swapAmt: BigNumber = bnum('0.1');
 
-        const sor = new SOR(provider, chainId, poolsFromFile);
+        const sor = new SOR(provider, chainId, pools);
 
         let result: boolean = await sor.fetchPools(false);
         assert.isTrue(result);
@@ -391,14 +417,17 @@ describe(`Tests for wrapper class.`, () => {
     });
 
     it(`compare weth/eth swaps, SwapExactOut, Weth Out`, async () => {
-        const poolsFromFile: SubGraphPoolsBase = require('./testData/testPools/subgraphPoolsSmallWithTrade.json');
+        const poolsFromFile: {
+            pools: SubgraphPoolBase[];
+        } = require('./testData/testPools/subgraphPoolsSmallWithTrade.json');
+        const pools = poolsFromFile.pools;
         const tokenIn = '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48';
         const tokenOutWeth = WETHADDR;
         const tokenOutEth = ZERO_ADDRESS;
         const swapType = SwapTypes.SwapExactOut;
         const swapAmt: BigNumber = bnum('0.1');
 
-        const sor = new SOR(provider, chainId, poolsFromFile);
+        const sor = new SOR(provider, chainId, pools);
 
         let result: boolean = await sor.fetchPools(false);
         assert.isTrue(result);
@@ -465,13 +494,16 @@ describe(`Tests for wrapper class.`, () => {
     });
 
     it(`Should save cached data correctly`, async () => {
-        const poolsFromFile: SubGraphPoolsBase = require('./testData/testPools/subgraphPoolsSmallWithTrade.json');
+        const poolsFromFile: {
+            pools: SubgraphPoolBase[];
+        } = require('./testData/testPools/subgraphPoolsSmallWithTrade.json');
+        const pools = poolsFromFile.pools;
         const tokenIn = '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2';
         const tokenOut = '0x6b175474e89094c44da98b954eedeac495271d0f';
         const swapType = SwapTypes.SwapExactIn;
         const swapAmt: BigNumber = bnum('0.1');
 
-        const sor = new SOR(provider, chainId, poolsFromFile);
+        const sor = new SOR(provider, chainId, pools);
 
         const result: boolean = await sor.fetchPools(false);
         assert.isTrue(result);

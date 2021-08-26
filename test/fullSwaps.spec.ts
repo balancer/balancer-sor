@@ -49,7 +49,7 @@ describe('Tests full swaps against known values', () => {
         const costOutputToken = new BigNumber('0');
 
         const swapInfo = await getFullSwap(
-            JSON.parse(JSON.stringify(subgraphPoolsLarge)),
+            JSON.parse(JSON.stringify(subgraphPoolsLarge.pools)),
             tokenIn,
             tokenOut,
             returnAmountDecimals,
@@ -81,7 +81,7 @@ describe('Tests full swaps against known values', () => {
         const costOutputToken = new BigNumber('0');
 
         const swapInfo = await getFullSwap(
-            JSON.parse(JSON.stringify(subgraphPoolsLarge)),
+            JSON.parse(JSON.stringify(subgraphPoolsLarge.pools)),
             tokenIn,
             tokenOut,
             returnAmountDecimals,
@@ -156,7 +156,7 @@ describe('Tests full swaps against known values', () => {
         const costOutputToken = new BigNumber('0');
 
         const swapInfo = await getFullSwap(
-            { pools: JSON.parse(JSON.stringify(testPools.weightedOnly)) },
+            JSON.parse(JSON.stringify(testPools.weightedOnly)),
             tokenIn,
             tokenOut,
             returnAmountDecimals,

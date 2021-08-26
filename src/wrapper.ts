@@ -17,7 +17,6 @@ import {
     PoolFilter,
     Swap,
     SubgraphPoolBase,
-    SubGraphPoolsBase,
     SwapOptions,
 } from './types';
 
@@ -40,13 +39,9 @@ export class SOR {
     constructor(
         provider: BaseProvider,
         chainId: number,
-        poolsSource: string | SubGraphPoolsBase
+        poolsSource: string | SubgraphPoolBase[]
     ) {
-        this.poolCacher = new PoolCacher(
-            provider,
-            chainId,
-            typeof poolsSource === 'string' ? poolsSource : poolsSource.pools
-        );
+        this.poolCacher = new PoolCacher(provider, chainId, poolsSource);
         this.routeProposer = new RouteProposer();
         this.swapCostCalculator = new SwapCostCalculator(chainId);
         this.provider = provider;
@@ -81,9 +76,9 @@ export class SOR {
     */
     async fetchPools(
         isOnChain = true,
-        poolsData: SubGraphPoolsBase = { pools: [] }
+        poolsData: SubgraphPoolBase[] = []
     ): Promise<boolean> {
-        return this.poolCacher.fetchPools(isOnChain, poolsData.pools);
+        return this.poolCacher.fetchPools(isOnChain, poolsData);
     }
 
     async getSwaps(
@@ -120,7 +115,7 @@ export class SOR {
         let swapInfo: SwapInfo;
         if (isLidoStableSwap(this.chainId, tokenIn, tokenOut)) {
             swapInfo = await getLidoStaticSwaps(
-                { pools: filteredPools },
+                filteredPools,
                 this.chainId,
                 wrappedInfo.tokenIn.addressForSwaps,
                 wrappedInfo.tokenOut.addressForSwaps,
