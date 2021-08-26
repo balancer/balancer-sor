@@ -76,7 +76,7 @@ export class SOR {
         this.swapCostCalculator = new SwapCostCalculator(chainId, swapCost);
     }
 
-    async getCostOutputToken(
+    async getCostOfSwapInToken(
         outputToken: string,
         tokenDecimals = 18
     ): Promise<BigNumber> {
@@ -188,7 +188,7 @@ export class SOR {
             currentBlockTimestamp
         );
 
-        const costOutputToken = await this.getCostOutputToken(
+        const costOutputToken = await this.getCostOfSwapInToken(
             swapType === SwapTypes.SwapExactIn ? tokenOut : tokenIn
         );
 

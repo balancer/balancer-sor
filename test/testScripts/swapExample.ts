@@ -195,7 +195,7 @@ async function getSwap(
     // Note - tokenOut for SwapExactIn, tokenIn for SwapExactOut
     const outputToken =
         swapType === SwapTypes.SwapExactOut ? tokenIn : tokenOut;
-    const cost = await sor.getCostOutputToken(
+    const cost = await sor.getCostOfSwapInToken(
         outputToken.address,
         outputToken.decimals
     );
