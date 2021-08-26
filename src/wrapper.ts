@@ -48,7 +48,7 @@ export class SOR {
     > = {};
     disabledOptions: DisabledOptions;
 
-    private poolCacher: PoolCacher;
+    poolCacher: PoolCacher;
     swapCostCalculator: SwapCostCalculator;
 
     constructor(
