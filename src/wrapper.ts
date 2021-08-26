@@ -20,7 +20,7 @@ import { smartOrderRouter } from './router';
 import { getWrappedInfo, setWrappedInfo } from './wrapInfo';
 import { formatSwaps } from './formatSwaps';
 import { PoolCacher } from './poolCaching';
-import { RouteProposer } from './routeProposer';
+import { RouteProposer } from './routeProposal';
 import { SwapCostCalculator } from './swapCost';
 
 const EMPTY_SWAPINFO: SwapInfo = {

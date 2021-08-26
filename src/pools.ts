@@ -8,12 +8,15 @@ import {
     Swap,
     PoolBase,
     PoolFilter,
+    SwapTypes,
+    PoolPairBase,
+    PairTypes,
 } from './types';
 import { WeightedPool } from './pools/weightedPool/weightedPool';
 import { StablePool } from './pools/stablePool/stablePool';
 import { ElementPool } from './pools/elementPool/elementPool';
 import { MetaStablePool } from './pools/metaStablePool/metaStablePool';
-import { ZERO } from './utils/bignumber';
+import { BigNumber, INFINITY, ZERO } from './utils/bignumber';
 
 import disabledTokensDefault from './disabled-tokens.json';
 
@@ -147,6 +150,41 @@ export function parseNewPool(
         return undefined;
     }
     return newPool;
+}
+
+// TODO: Add cases for pairType = [BTP->token, token->BTP] and poolType = [weighted, stable]
+export function getOutputAmountSwap(
+    pool: PoolBase,
+    poolPairData: PoolPairBase,
+    swapType: SwapTypes,
+    amount: BigNumber
+): BigNumber {
+    const pairType = poolPairData.pairType;
+
+    // TODO: check if necessary to check if amount > limitAmount
+    if (swapType === SwapTypes.SwapExactIn) {
+        if (poolPairData.balanceIn.isZero()) {
+            return ZERO;
+        } else if (pairType === PairTypes.TokenToToken) {
+            return pool._exactTokenInForTokenOut(poolPairData, amount);
+        } else if (pairType === PairTypes.TokenToBpt) {
+            return pool._exactTokenInForBPTOut(poolPairData, amount);
+        } else if (pairType === PairTypes.BptToToken) {
+            return pool._exactBPTInForTokenOut(poolPairData, amount);
+        }
+    } else {
+        if (poolPairData.balanceOut.isZero()) {
+            return ZERO;
+        } else if (amount.gte(poolPairData.balanceOut)) {
+            return INFINITY;
+        } else if (pairType === PairTypes.TokenToToken) {
+            return pool._tokenInForExactTokenOut(poolPairData, amount);
+        } else if (pairType === PairTypes.TokenToBpt) {
+            return pool._tokenInForExactBPTOut(poolPairData, amount);
+        } else if (pairType === PairTypes.BptToToken) {
+            return pool._BPTInForExactTokenOut(poolPairData, amount);
+        }
+    }
 }
 
 /*

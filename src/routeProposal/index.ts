@@ -1,12 +1,12 @@
-import { filterPoolsOfInterest, filterHopPools } from './pools';
-import { calculatePathLimits } from './router';
+import { filterPoolsOfInterest, filterHopPools } from '../pools';
+import { calculatePathLimits } from './pathLimits';
 import {
     DisabledOptions,
     SwapTypes,
     NewPath,
     PoolDictionary,
     SubgraphPoolBase,
-} from './types';
+} from '../types';
 
 export class RouteProposer {
     maxPools: number;
