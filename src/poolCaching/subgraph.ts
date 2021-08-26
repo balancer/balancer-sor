@@ -1,10 +1,10 @@
 import fetch from 'isomorphic-fetch';
-import { SubGraphPoolsBase } from 'types';
+import { SubgraphPoolBase } from '../types';
 
 // Returns all public pools
 export async function fetchSubgraphPools(
     subgraphUrl: string
-): Promise<SubGraphPoolsBase> {
+): Promise<SubgraphPoolBase[]> {
     // can filter for publicSwap too??
     const query = `
       {
@@ -47,5 +47,5 @@ export async function fetchSubgraphPools(
 
     const { data } = await response.json();
 
-    return { pools: data.pools };
+    return data.pools ?? [];
 }

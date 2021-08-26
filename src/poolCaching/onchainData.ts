@@ -1,25 +1,27 @@
 import { BaseProvider } from '@ethersproject/providers';
-import { SubGraphPoolsBase } from './types';
-import { scale, bnum } from './utils/bignumber';
-import { Multicaller } from './utils/multicaller';
+import { SubgraphPoolBase } from '../types';
+import { scale, bnum } from '../utils/bignumber';
+import { Multicaller } from '../utils/multicaller';
 import _ from 'lodash';
 
-// Load pools data with multicalls
 export async function getOnChainBalances(
-    subgraphPools: SubGraphPoolsBase,
+    subgraphPools: SubgraphPoolBase[],
     multiAddress: string,
     vaultAddress: string,
     provider: BaseProvider
-): Promise<SubGraphPoolsBase> {
-    if (subgraphPools.pools.length === 0) return subgraphPools;
+): Promise<SubgraphPoolBase[]> {
+    if (subgraphPools.length === 0) return subgraphPools;
 
     /* eslint-disable @typescript-eslint/no-var-requires */
-    const vaultAbi = require('./abi/Vault.json');
-    const weightedPoolAbi = require('./pools/weightedPool/weightedPoolAbi.json');
-    const stablePoolAbi = require('./pools/stablePool/stablePoolAbi.json');
-    const elementPoolAbi = require('./pools/elementPool/ConvergentCurvePool.json');
+    const vaultAbi = require('../abi/Vault.json');
+    const weightedPoolAbi = require('../pools/weightedPool/weightedPoolAbi.json');
+    const stablePoolAbi = require('../pools/stablePool/stablePoolAbi.json');
+    const elementPoolAbi = require('../pools/elementPool/ConvergentCurvePool.json');
     /* eslint-enable @typescript-eslint/no-var-requires */
+
+    // TODO: decide whether we want to trim these ABIs down to the relevant functions
     const abis = Object.values(
+        // Remove duplicate entries using their names
         Object.fromEntries(
             [
                 ...vaultAbi,
@@ -32,29 +34,25 @@ export async function getOnChainBalances(
 
     const multiPool = new Multicaller(multiAddress, provider, abis);
 
-    let pools = {};
-
-    subgraphPools.pools.forEach((pool, i) => {
+    subgraphPools.forEach((pool, i) => {
         // TO DO - This is a temp filter
         if (
             pool.id ===
             '0x6b15a01b5d46a5321b627bd7deef1af57bc629070000000000000000000000d4'
         )
-            subgraphPools.pools.splice(i, 1);
+            subgraphPools.splice(i, 1);
 
-        _.set(pools, `${pool.id}.id`, pool.id);
         multiPool.call(`${pool.id}.poolTokens`, vaultAddress, 'getPoolTokens', [
             pool.id,
         ]);
-
         multiPool.call(`${pool.id}.totalSupply`, pool.address, 'totalSupply');
+
         // TO DO - Make this part of class to make more flexible?
         if (pool.poolType === 'Weighted') {
             multiPool.call(
                 `${pool.id}.weights`,
                 pool.address,
-                'getNormalizedWeights',
-                []
+                'getNormalizedWeights'
             );
             multiPool.call(
                 `${pool.id}.swapFee`,
@@ -81,33 +79,39 @@ export async function getOnChainBalances(
         }
     });
 
-    pools = await multiPool.execute(pools);
+    const pools = (await multiPool.execute()) as Record<
+        string,
+        {
+            amp?: string;
+            swapFee?: string;
+            weights?: string[];
+            poolTokens: {
+                tokens: string[];
+                balances: string[];
+            };
+        }
+    >;
 
-    subgraphPools.pools.forEach(subgraphPool => {
-        const onChainResult = pools[subgraphPool.id];
-
+    Object.entries(pools).forEach(([poolId, onchainData]) => {
         try {
-            subgraphPool.swapFee = scale(
-                bnum(onChainResult.swapFee),
+            const { poolTokens, swapFee, weights } = onchainData;
+
+            subgraphPools[poolId].swapFee = scale(
+                bnum(swapFee),
                 -18
             ).toString();
-            onChainResult.poolTokens.tokens.forEach((token, i) => {
-                const tokenAddress = onChainResult.poolTokens.tokens[i]
-                    .toString()
-                    .toLowerCase();
-                const T = subgraphPool.tokens.find(
-                    t => t.address === tokenAddress
+
+            poolTokens.tokens.forEach((token, i) => {
+                const T = subgraphPools[poolId].tokens.find(
+                    t => t.address === token.toLowerCase()
                 );
-                const balance = scale(
-                    bnum(onChainResult.poolTokens.balances[i]),
+                T.balance = scale(
+                    bnum(poolTokens.balances[i]),
                     -Number(T.decimals)
                 ).toString();
-                T.balance = balance;
-                if (subgraphPool.poolType === 'Weighted')
-                    T.weight = scale(
-                        bnum(onChainResult.weights[i]),
-                        -18
-                    ).toString();
+                if (subgraphPools[poolId].poolType === 'Weighted') {
+                    T.weight = scale(bnum(weights[i]), -18).toString();
+                }
             });
         } catch (err) {
             // Likely an unsupported pool type
@@ -116,5 +120,6 @@ export async function getOnChainBalances(
             // console.log(onChainResult);
         }
     });
+
     return subgraphPools;
 }

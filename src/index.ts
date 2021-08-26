@@ -1,6 +1,6 @@
 export * from './constants';
-export { fetchSubgraphPools } from './subgraph';
-export { getOnChainBalances } from './multicall';
+export { fetchSubgraphPools } from './poolCaching/subgraph';
+export { getOnChainBalances } from './poolCaching/onchainData';
 export { getCostOutputToken } from './costToken';
 export { SOR } from './wrapper';
 export * from './config';
