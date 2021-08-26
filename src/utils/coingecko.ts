@@ -15,7 +15,9 @@ const getNativeAssetId = (chainId: string | number): string => {
     const mapping = {
         '1': 'eth',
         '42': 'eth',
-        '137': '', // CoinGecko does not provide prices in terms of MATIC
+        // CoinGecko does not provide prices in terms of MATIC
+        // TODO: convert through ETH as intermediary
+        '137': '',
     };
 
     return mapping[chainId.toString()] || 'eth';
