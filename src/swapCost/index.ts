@@ -1,6 +1,6 @@
-import { WETHADDR } from './constants';
-import { BigNumber, bnum, BONE, ZERO } from './utils/bignumber';
-import { getTokenPriceInNativeAsset } from './utils/coingecko';
+import { WETHADDR } from '../constants';
+import { BigNumber, bnum, BONE, ZERO } from '../utils/bignumber';
+import { getTokenPriceInNativeAsset } from './coingecko';
 
 export function calculateTotalSwapCost(
     tokenPrice: BigNumber,

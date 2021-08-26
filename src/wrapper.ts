@@ -22,7 +22,7 @@ import { calculatePathLimits, smartOrderRouter } from './router';
 import { getWrappedInfo, setWrappedInfo } from './wrapInfo';
 import { formatSwaps } from './formatSwaps';
 import { PoolCacher } from './poolCaching';
-import { SwapCostCalculator } from './swapCostCalculator';
+import { SwapCostCalculator } from './swapCost';
 
 const EMPTY_SWAPINFO: SwapInfo = {
     tokenAddresses: [],

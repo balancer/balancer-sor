@@ -4,7 +4,7 @@ import { BigNumber, scale } from '../src/utils/bignumber';
 import {
     calculateTotalSwapCost,
     SwapCostCalculator,
-} from '../src/swapCostCalculator';
+} from '../src/swapCost';
 
 describe('calculateTotalSwapCost', () => {
     it('should return correct total swap cost', async () => {
