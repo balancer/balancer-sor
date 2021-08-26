@@ -1,4 +1,4 @@
-import { filterPoolsOfInterest, filterHopPools } from '../pools';
+import { filterPoolsOfInterest, filterHopPools } from './filtering';
 import { calculatePathLimits } from './pathLimits';
 import {
     DisabledOptions,

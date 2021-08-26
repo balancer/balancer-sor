@@ -1,4 +1,4 @@
-import { ALLOW_ADD_REMOVE } from './config';
+import { ALLOW_ADD_REMOVE } from '../config';
 import {
     DisabledOptions,
     SubgraphPoolBase,
@@ -8,17 +8,15 @@ import {
     Swap,
     PoolBase,
     PoolFilter,
-    SwapTypes,
-    PoolPairBase,
-    PairTypes,
-} from './types';
-import { WeightedPool } from './pools/weightedPool/weightedPool';
-import { StablePool } from './pools/stablePool/stablePool';
-import { ElementPool } from './pools/elementPool/elementPool';
-import { MetaStablePool } from './pools/metaStablePool/metaStablePool';
-import { BigNumber, INFINITY, ZERO } from './utils/bignumber';
+} from '../types';
+import { WeightedPool } from '../pools/weightedPool/weightedPool';
+import { StablePool } from '../pools/stablePool/stablePool';
+import { ElementPool } from '../pools/elementPool/elementPool';
+import { MetaStablePool } from '../pools/metaStablePool/metaStablePool';
+import { ZERO } from '../utils/bignumber';
 
 import disabledTokensDefault from './disabled-tokens.json';
+import { parseNewPool } from '../pools';
 
 export const filterPoolsByType = (
     pools: SubgraphPoolBase[],
@@ -71,6 +69,7 @@ export function filterPoolsOfInterest(
         const newPool:
             | WeightedPool
             | StablePool
+            | MetaStablePool
             | ElementPool
             | undefined = parseNewPool(pool, currentBlockTimestamp);
         if (!newPool) return;
@@ -124,67 +123,6 @@ export function filterPoolsOfInterest(
     // Transform set into Array
     const hopTokens = [...hopTokensSet];
     return [poolsDictionary, hopTokens];
-}
-
-export function parseNewPool(
-    pool: SubgraphPoolBase,
-    currentBlockTimestamp = 0
-): WeightedPool | StablePool | ElementPool | undefined {
-    let newPool: WeightedPool | StablePool | ElementPool;
-    if (pool.poolType === 'Weighted') newPool = WeightedPool.fromPool(pool);
-    else if (pool.poolType === 'Stable') newPool = StablePool.fromPool(pool);
-    else if (pool.poolType === 'Element') {
-        newPool = ElementPool.fromPool(pool);
-        newPool.setCurrentBlockTimestamp(currentBlockTimestamp);
-    } else if (pool.poolType === 'MetaStable') {
-        newPool = MetaStablePool.fromPool(pool);
-    } else if (pool.poolType === 'LiquidityBootstrapping') {
-        // If an LBP doesn't have its swaps paused we treat it like a regular Weighted pool.
-        // If it does we just ignore it.
-        if (pool.swapEnabled === true) newPool = WeightedPool.fromPool(pool);
-        else return undefined;
-    } else {
-        console.error(
-            `Unknown pool type or type field missing: ${pool.poolType} ${pool.id}`
-        );
-        return undefined;
-    }
-    return newPool;
-}
-
-// TODO: Add cases for pairType = [BTP->token, token->BTP] and poolType = [weighted, stable]
-export function getOutputAmountSwap(
-    pool: PoolBase,
-    poolPairData: PoolPairBase,
-    swapType: SwapTypes,
-    amount: BigNumber
-): BigNumber {
-    const pairType = poolPairData.pairType;
-
-    // TODO: check if necessary to check if amount > limitAmount
-    if (swapType === SwapTypes.SwapExactIn) {
-        if (poolPairData.balanceIn.isZero()) {
-            return ZERO;
-        } else if (pairType === PairTypes.TokenToToken) {
-            return pool._exactTokenInForTokenOut(poolPairData, amount);
-        } else if (pairType === PairTypes.TokenToBpt) {
-            return pool._exactTokenInForBPTOut(poolPairData, amount);
-        } else if (pairType === PairTypes.BptToToken) {
-            return pool._exactBPTInForTokenOut(poolPairData, amount);
-        }
-    } else {
-        if (poolPairData.balanceOut.isZero()) {
-            return ZERO;
-        } else if (amount.gte(poolPairData.balanceOut)) {
-            return INFINITY;
-        } else if (pairType === PairTypes.TokenToToken) {
-            return pool._tokenInForExactTokenOut(poolPairData, amount);
-        } else if (pairType === PairTypes.TokenToBpt) {
-            return pool._tokenInForExactBPTOut(poolPairData, amount);
-        } else if (pairType === PairTypes.BptToToken) {
-            return pool._BPTInForExactTokenOut(poolPairData, amount);
-        }
-    }
 }
 
 /*

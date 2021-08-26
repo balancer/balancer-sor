@@ -7,7 +7,6 @@ import {
     SwapTypes,
     NewPath,
     PoolDictionary,
-    SubGraphPoolsBase,
     SwapOptions,
     PoolFilter,
     getLidoStaticSwaps,
@@ -15,6 +14,7 @@ import {
     Swap,
     filterPoolsByType,
     SubgraphPoolBase,
+    SubGraphPoolsBase,
 } from './index';
 import { smartOrderRouter } from './router';
 import { getWrappedInfo, setWrappedInfo } from './wrapInfo';
