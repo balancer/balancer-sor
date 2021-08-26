@@ -60,12 +60,13 @@ export class SwapCostCalculator {
 
             // Coingecko returns price of token in terms of ETH
             // We want the price of 1 ETH in terms of the token
-            const ethPriceInToken = BONE.div(bnum(tokenPrice))
-                .dp(0)
-                .toString();
+            const ethPriceInToken = BONE.div(bnum(tokenPrice)).dp(0);
 
-            this.tokenPriceCache[tokenAddress.toLowerCase()] = ethPriceInToken;
-            return bnum(ethPriceInToken);
+            this.setNativeAssetPriceInToken(
+                tokenAddress,
+                ethPriceInToken.toString()
+            );
+            return ethPriceInToken;
         } catch (err) {
             console.log('Error Getting Token Price. Defaulting to 0.');
             return ZERO;
