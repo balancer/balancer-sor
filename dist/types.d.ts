@@ -1,23 +1,23 @@
 import { BigNumber } from './utils/bignumber';
 export declare enum SwapTypes {
     SwapExactIn = 0,
-    SwapExactOut = 1,
+    SwapExactOut = 1
 }
 export declare enum PoolTypes {
     Weighted = 0,
     Stable = 1,
     Element = 2,
-    MetaStable = 3,
+    MetaStable = 3
 }
 export declare enum SwapPairType {
     Direct = 0,
     HopIn = 1,
-    HopOut = 2,
+    HopOut = 2
 }
 export declare enum PairTypes {
     BptToToken = 0,
     TokenToBpt = 1,
-    TokenToToken = 2,
+    TokenToToken = 2
 }
 export interface PoolPairBase {
     balanceIn: BigNumber;
@@ -107,11 +107,11 @@ export interface NewPath {
     filterEffectivePrice?: BigNumber;
 }
 export declare enum PoolFilter {
-    All = 'All',
-    Weighted = 'Weighted',
-    Stable = 'Stable',
-    MetaStable = 'MetaStable',
-    LBP = 'LiquidityBootstrapping',
+    All = "All",
+    Weighted = "Weighted",
+    Stable = "Stable",
+    MetaStable = "MetaStable",
+    LBP = "LiquidityBootstrapping"
 }
 export interface SwapOptions {
     timestamp: number;
@@ -125,107 +125,32 @@ export interface PoolBase {
     tokensList: string[];
     parsePoolPairData: (tokenIn: string, tokenOut: string) => PoolPairBase;
     getNormalizedLiquidity: (poolPairData: PoolPairBase) => BigNumber;
-    getLimitAmountSwap: (
-        poolPairData: PoolPairBase,
-        swapType: SwapTypes
-    ) => BigNumber;
+    getLimitAmountSwap: (poolPairData: PoolPairBase, swapType: SwapTypes) => BigNumber;
     updateTokenBalanceForPool: (token: string, newBalance: BigNumber) => void;
-    _exactTokenInForTokenOut: (
-        poolPairData: PoolPairBase,
-        amount: BigNumber
-    ) => BigNumber;
-    _exactTokenInForBPTOut: (
-        poolPairData: PoolPairBase,
-        amount: BigNumber
-    ) => BigNumber;
-    _exactBPTInForTokenOut: (
-        poolPairData: PoolPairBase,
-        amount: BigNumber
-    ) => BigNumber;
-    _tokenInForExactTokenOut: (
-        poolPairData: PoolPairBase,
-        amount: BigNumber
-    ) => BigNumber;
-    _tokenInForExactBPTOut: (
-        poolPairData: PoolPairBase,
-        amount: BigNumber
-    ) => BigNumber;
-    _BPTInForExactTokenOut: (
-        poolPairData: PoolPairBase,
-        amount: BigNumber
-    ) => BigNumber;
-    _spotPriceAfterSwapExactTokenInForTokenOut: (
-        poolPairData: PoolPairBase,
-        amount: BigNumber
-    ) => BigNumber;
-    _spotPriceAfterSwapExactTokenInForBPTOut: (
-        poolPairData: PoolPairBase,
-        amount: BigNumber
-    ) => BigNumber;
-    _spotPriceAfterSwapExactBPTInForTokenOut: (
-        poolPairData: PoolPairBase,
-        amount: BigNumber
-    ) => BigNumber;
-    _spotPriceAfterSwapTokenInForExactTokenOut: (
-        poolPairData: PoolPairBase,
-        amount: BigNumber
-    ) => BigNumber;
-    _spotPriceAfterSwapTokenInForExactBPTOut: (
-        poolPairData: PoolPairBase,
-        amount: BigNumber
-    ) => BigNumber;
-    _spotPriceAfterSwapBPTInForExactTokenOut: (
-        poolPairData: PoolPairBase,
-        amount: BigNumber
-    ) => BigNumber;
-    _derivativeSpotPriceAfterSwapExactTokenInForTokenOut: (
-        poolPairData: PoolPairBase,
-        amount: BigNumber
-    ) => BigNumber;
-    _derivativeSpotPriceAfterSwapExactTokenInForBPTOut: (
-        poolPairData: PoolPairBase,
-        amount: BigNumber
-    ) => BigNumber;
-    _derivativeSpotPriceAfterSwapExactBPTInForTokenOut: (
-        poolPairData: PoolPairBase,
-        amount: BigNumber
-    ) => BigNumber;
-    _derivativeSpotPriceAfterSwapTokenInForExactTokenOut: (
-        poolPairData: PoolPairBase,
-        amount: BigNumber
-    ) => BigNumber;
-    _derivativeSpotPriceAfterSwapTokenInForExactBPTOut: (
-        poolPairData: PoolPairBase,
-        amount: BigNumber
-    ) => BigNumber;
-    _derivativeSpotPriceAfterSwapBPTInForExactTokenOut: (
-        poolPairData: PoolPairBase,
-        amount: BigNumber
-    ) => BigNumber;
-    _evmoutGivenIn: (
-        poolPairData: PoolPairBase,
-        amount: BigNumber
-    ) => BigNumber;
-    _evmexactTokenInForBPTOut: (
-        poolPairData: PoolPairBase,
-        amount: BigNumber
-    ) => BigNumber;
-    _evmexactBPTInForTokenOut: (
-        poolPairData: PoolPairBase,
-        amount: BigNumber
-    ) => BigNumber;
-    _evminGivenOut: (
-        poolPairData: PoolPairBase,
-        amount: BigNumber
-    ) => BigNumber;
-    _evmtokenInForExactBPTOut: (
-        poolPairData: PoolPairBase,
-        amount: BigNumber
-    ) => BigNumber;
-    _evmbptInForExactTokenOut: (
-        poolPairData: PoolPairBase,
-        amount: BigNumber
-    ) => BigNumber;
+    _exactTokenInForTokenOut: (poolPairData: PoolPairBase, amount: BigNumber) => BigNumber;
+    _exactTokenInForBPTOut: (poolPairData: PoolPairBase, amount: BigNumber) => BigNumber;
+    _exactBPTInForTokenOut: (poolPairData: PoolPairBase, amount: BigNumber) => BigNumber;
+    _tokenInForExactTokenOut: (poolPairData: PoolPairBase, amount: BigNumber) => BigNumber;
+    _tokenInForExactBPTOut: (poolPairData: PoolPairBase, amount: BigNumber) => BigNumber;
+    _BPTInForExactTokenOut: (poolPairData: PoolPairBase, amount: BigNumber) => BigNumber;
+    _spotPriceAfterSwapExactTokenInForTokenOut: (poolPairData: PoolPairBase, amount: BigNumber) => BigNumber;
+    _spotPriceAfterSwapExactTokenInForBPTOut: (poolPairData: PoolPairBase, amount: BigNumber) => BigNumber;
+    _spotPriceAfterSwapExactBPTInForTokenOut: (poolPairData: PoolPairBase, amount: BigNumber) => BigNumber;
+    _spotPriceAfterSwapTokenInForExactTokenOut: (poolPairData: PoolPairBase, amount: BigNumber) => BigNumber;
+    _spotPriceAfterSwapTokenInForExactBPTOut: (poolPairData: PoolPairBase, amount: BigNumber) => BigNumber;
+    _spotPriceAfterSwapBPTInForExactTokenOut: (poolPairData: PoolPairBase, amount: BigNumber) => BigNumber;
+    _derivativeSpotPriceAfterSwapExactTokenInForTokenOut: (poolPairData: PoolPairBase, amount: BigNumber) => BigNumber;
+    _derivativeSpotPriceAfterSwapExactTokenInForBPTOut: (poolPairData: PoolPairBase, amount: BigNumber) => BigNumber;
+    _derivativeSpotPriceAfterSwapExactBPTInForTokenOut: (poolPairData: PoolPairBase, amount: BigNumber) => BigNumber;
+    _derivativeSpotPriceAfterSwapTokenInForExactTokenOut: (poolPairData: PoolPairBase, amount: BigNumber) => BigNumber;
+    _derivativeSpotPriceAfterSwapTokenInForExactBPTOut: (poolPairData: PoolPairBase, amount: BigNumber) => BigNumber;
+    _derivativeSpotPriceAfterSwapBPTInForExactTokenOut: (poolPairData: PoolPairBase, amount: BigNumber) => BigNumber;
+    _evmoutGivenIn: (poolPairData: PoolPairBase, amount: BigNumber) => BigNumber;
+    _evmexactTokenInForBPTOut: (poolPairData: PoolPairBase, amount: BigNumber) => BigNumber;
+    _evmexactBPTInForTokenOut: (poolPairData: PoolPairBase, amount: BigNumber) => BigNumber;
+    _evminGivenOut: (poolPairData: PoolPairBase, amount: BigNumber) => BigNumber;
+    _evmtokenInForExactBPTOut: (poolPairData: PoolPairBase, amount: BigNumber) => BigNumber;
+    _evmbptInForExactTokenOut: (poolPairData: PoolPairBase, amount: BigNumber) => BigNumber;
 }
 export interface WeightedPool extends PoolBase {
     totalWeight: string;
