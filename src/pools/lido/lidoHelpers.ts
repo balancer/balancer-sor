@@ -932,7 +932,7 @@ export async function getLidoStaticSwaps(
         isWrappingOut = true;
     }
 
-    const swapInfo: SwapInfo = EMPTY_SWAPINFO;
+    const swapInfo: SwapInfo = { ...EMPTY_SWAPINFO };
     const staticRoute = Routes[chainId][`${tokenIn}${tokenOut}${swapType}`];
     if (!staticRoute) return swapInfo;
 
