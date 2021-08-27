@@ -1,5 +1,6 @@
 require('dotenv').config();
 import { expect } from 'chai';
+import { AddressZero } from '@ethersproject/constants';
 import { JsonRpcProvider } from '@ethersproject/providers';
 import {
     SOR,
@@ -10,7 +11,6 @@ import {
     scale,
     getLidoStaticSwaps,
     isLidoStableSwap,
-    ZERO_ADDRESS,
     SubgraphPoolBase,
 } from '../src';
 import { getStEthRate } from '../src/pools/lido/lidoHelpers';
@@ -74,8 +74,8 @@ describe(`Tests for Lido USD routes.`, () => {
     context('Handle stETH as input/output', async () => {
         it(`Test for Lido Stable Swap`, () => {
             expect(isLidoStableSwap(chainId, DAI, USDC)).to.be.false;
-            expect(isLidoStableSwap(chainId, stETH, ZERO_ADDRESS)).to.be.false;
-            expect(isLidoStableSwap(chainId, wstETH, ZERO_ADDRESS)).to.be.false;
+            expect(isLidoStableSwap(chainId, stETH, AddressZero)).to.be.false;
+            expect(isLidoStableSwap(chainId, wstETH, AddressZero)).to.be.false;
             expect(isLidoStableSwap(chainId, stETH, wstETH)).to.be.false;
             expect(isLidoStableSwap(7, DAI, stETH)).to.be.false;
             expect(isLidoStableSwap(chainId, DAI, stETH)).to.be.true;

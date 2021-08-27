@@ -47,7 +47,7 @@ export async function compareTest(
         costOutputToken,
         testData.tradeInfo.GasPrice,
         provider,
-        swapGas,
+        swapGas
     );
     const fullSwapEnd = performance.now();
     const fullResult: Result = {

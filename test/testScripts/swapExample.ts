@@ -4,12 +4,11 @@ import { BigNumber } from 'bignumber.js';
 import { JsonRpcProvider } from '@ethersproject/providers';
 import { Wallet } from '@ethersproject/wallet';
 import { Contract } from '@ethersproject/contracts';
-import { MaxUint256 } from '@ethersproject/constants';
+import { AddressZero, MaxUint256 } from '@ethersproject/constants';
 import {
     SOR,
     SwapInfo,
     SwapTypes,
-    ZERO_ADDRESS,
     scale,
     bnum,
     SubgraphPoolBase,
@@ -49,7 +48,7 @@ export const ADDRESSES = {
             address: '0xdcdbf71A870cc60C6F9B621E28a7D3Ffd6Dd4965',
         },
         ETH: {
-            address: ZERO_ADDRESS,
+            address: AddressZero,
             decimals: 18,
             symbol: 'ETH',
         },
@@ -95,7 +94,7 @@ export const ADDRESSES = {
             address: '0x41B953164995c11C81DA73D212ED8Af25741b7Ac',
         },
         ETH: {
-            address: ZERO_ADDRESS,
+            address: AddressZero,
             decimals: 18,
             symbol: 'ETH',
         },
@@ -137,7 +136,7 @@ export const ADDRESSES = {
     },
     [Network.POLYGON]: {
         MATIC: {
-            address: ZERO_ADDRESS,
+            address: AddressZero,
             decimals: 18,
             symbol: 'MATIC',
         },
@@ -245,7 +244,7 @@ async function makeTrade(
     }
     const wallet = new Wallet(process.env.TRADER_KEY, provider);
 
-    if (swapInfo.tokenIn !== ZERO_ADDRESS) {
+    if (swapInfo.tokenIn !== AddressZero) {
         // Vault needs approval for swapping non ETH
         console.log('Checking vault allowance...');
         const tokenInContract = new Contract(
@@ -342,7 +341,7 @@ async function makeTrade(
     // overRides['gasLimit'] = '200000';
     // overRides['gasPrice'] = '20000000000';
     // ETH in swaps must send ETH value
-    if (swapInfo.tokenIn === ZERO_ADDRESS) {
+    if (swapInfo.tokenIn === AddressZero) {
         overRides['value'] = swapInfo.swapAmount.toString();
     }
 
@@ -373,7 +372,7 @@ async function makeRelayerTrade(
     }
     const wallet = new Wallet(process.env.TRADER_KEY, provider);
 
-    if (swapInfo.tokenIn !== ZERO_ADDRESS) {
+    if (swapInfo.tokenIn !== AddressZero) {
         // Vault needs approval for swapping non ETH
         console.log('Checking vault allowance...');
         const tokenInContract = new Contract(
@@ -480,7 +479,7 @@ async function makeRelayerTrade(
     overRides['gasLimit'] = '450000';
     overRides['gasPrice'] = '20000000000';
     // ETH in swaps must send ETH value
-    if (swapInfo.tokenIn === ZERO_ADDRESS) {
+    if (swapInfo.tokenIn === AddressZero) {
         overRides['value'] = swapInfo.swapAmountForSwaps.toString();
     }
 

@@ -6,6 +6,5 @@ export * from './config';
 export * from './types';
 export * from './routeProposal/filtering';
 export * from './frontendHelpers/weightedHelpers';
-export const ZERO_ADDRESS = '0x0000000000000000000000000000000000000000';
 export { scale, bnum } from './utils/bignumber';
 export * from './pools/lido/lidoHelpers';

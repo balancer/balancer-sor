@@ -1,8 +1,9 @@
 // npx mocha -r ts-node/register test/wrapper.spec.ts
 require('dotenv').config();
+import { AddressZero } from '@ethersproject/constants';
 import { JsonRpcProvider } from '@ethersproject/providers';
 import { assert, expect } from 'chai';
-import { SOR, ZERO_ADDRESS } from '../src';
+import { SOR } from '../src';
 import {
     SwapInfo,
     SwapTypes,
@@ -173,7 +174,7 @@ describe(`Tests for wrapper class.`, () => {
         } = require('./testData/testPools/subgraphPoolsSmallWithTrade.json');
         const pools = poolsFromFile.pools;
 
-        const tokenIn = ZERO_ADDRESS;
+        const tokenIn = AddressZero;
         const tokenOut = '0x6b175474e89094c44da98b954eedeac495271d0f';
         const swapType = SwapTypes.SwapExactIn;
         const swapAmt: BigNumber = bnum('0.1');
@@ -192,7 +193,7 @@ describe(`Tests for wrapper class.`, () => {
         );
 
         const expectedTokenAddresses = [
-            ZERO_ADDRESS,
+            AddressZero,
             '0x6b175474e89094c44da98b954eedeac495271d0f',
             '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48',
         ];
@@ -216,7 +217,7 @@ describe(`Tests for wrapper class.`, () => {
         const pools = poolsFromFile.pools;
 
         const tokenInWeth = WETHADDR;
-        const tokenInEth = ZERO_ADDRESS;
+        const tokenInEth = AddressZero;
         const tokenOut = '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48';
         const swapType = SwapTypes.SwapExactIn;
         const swapAmt: BigNumber = bnum('0.1');
@@ -289,7 +290,7 @@ describe(`Tests for wrapper class.`, () => {
 
         const tokenIn = '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48';
         const tokenOutWeth = WETHADDR;
-        const tokenOutEth = ZERO_ADDRESS;
+        const tokenOutEth = AddressZero;
         const swapType = SwapTypes.SwapExactIn;
         const swapAmt: BigNumber = bnum('0.1');
 
@@ -306,7 +307,7 @@ describe(`Tests for wrapper class.`, () => {
             { gasPrice, maxPools }
         );
 
-        const expectedTokenAddressesEth = [tokenIn, ZERO_ADDRESS];
+        const expectedTokenAddressesEth = [tokenIn, AddressZero];
 
         expect(expectedTokenAddressesEth).to.deep.eq(
             swapInfoEth.tokenAddresses
@@ -351,7 +352,7 @@ describe(`Tests for wrapper class.`, () => {
         } = require('./testData/testPools/subgraphPoolsSmallWithTrade.json');
         const pools = poolsFromFile.pools;
         const tokenInWeth = WETHADDR;
-        const tokenInEth = ZERO_ADDRESS;
+        const tokenInEth = AddressZero;
         const tokenOut = '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48';
         const swapType = SwapTypes.SwapExactOut;
         const swapAmt: BigNumber = bnum('0.1');
@@ -423,7 +424,7 @@ describe(`Tests for wrapper class.`, () => {
         const pools = poolsFromFile.pools;
         const tokenIn = '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48';
         const tokenOutWeth = WETHADDR;
-        const tokenOutEth = ZERO_ADDRESS;
+        const tokenOutEth = AddressZero;
         const swapType = SwapTypes.SwapExactOut;
         const swapAmt: BigNumber = bnum('0.1');
 
@@ -443,7 +444,7 @@ describe(`Tests for wrapper class.`, () => {
         const expectedTokenAddressesEth = [
             tokenIn,
             '0x6b175474e89094c44da98b954eedeac495271d0f',
-            ZERO_ADDRESS,
+            AddressZero,
         ];
 
         expect(expectedTokenAddressesEth).to.deep.eq(

@@ -19,7 +19,7 @@ export class SwapCostCalculator {
 
     private initializeCache(): void {
         this.tokenPriceCache = {
-            ZERO_ADDRESS: BONE.toString(),
+            AddressZero: BONE.toString(),
             [WETHADDR[this.chainId].toLowerCase()]: BONE.toString(),
         };
     }

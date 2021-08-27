@@ -1,10 +1,12 @@
 import { assert, expect } from 'chai';
-import { SwapInfo, SwapTypes, SwapV2 } from '../src/types';
-import { BigNumber } from '../src/utils/bignumber';
+import { AddressZero } from '@ethersproject/constants';
 import { JsonRpcProvider } from '@ethersproject/providers';
+
 import { formatSwaps } from '../src/formatSwaps';
 import { getWrappedInfo, setWrappedInfo } from '../src/wrapInfo';
-import { ZERO_ADDRESS, bnum, WETHADDR, Lido, scale } from '../src';
+import { bnum, WETHADDR, Lido, scale } from '../src';
+import { SwapInfo, SwapTypes, SwapV2 } from '../src/types';
+import { BigNumber } from '../src/utils/bignumber';
 import testSwaps from './testData/swapsForFormatting.json';
 
 const marketSp: BigNumber = new BigNumber(7);
@@ -1208,7 +1210,7 @@ describe(`Tests for Helpers.`, () => {
         // });
 
         // it(`Should handle ETH token in`, async () => {
-        //     const tokenIn = ZERO_ADDRESS;
+        //     const tokenIn = AddressZero;
         //     const tokenOut = BAL;
         //     const chainId = 1;
         //     const swapAmount = bnum('7.7');
@@ -1228,7 +1230,7 @@ describe(`Tests for Helpers.`, () => {
 
         // it(`Should handle ETH token out`, async () => {
         //     const tokenIn = BAL;
-        //     const tokenOut = ZERO_ADDRESS;
+        //     const tokenOut = AddressZero;
         //     const chainId = 1;
         //     const swapAmount = bnum('7.7');
         //     const wrappedInfo = await getWrappedInfo(provider, SwapTypes.SwapExactIn, tokenIn, tokenOut, chainId, swapAmount);
@@ -1356,7 +1358,7 @@ describe(`Tests for Helpers.`, () => {
         it(`setWrappedInfo, ETH In, SwapExactIn`, async () => {
             const chainId = 1;
             const swapType = SwapTypes.SwapExactIn;
-            const tokenIn = ZERO_ADDRESS;
+            const tokenIn = AddressZero;
             const tokenOut = BAL;
             const swapAmount = bnum(7.7);
             const returnAmount = bnum(1.67);
@@ -1399,7 +1401,7 @@ describe(`Tests for Helpers.`, () => {
             );
 
             expect(swapInfoUpdated.tokenAddresses).to.deep.eq([
-                ZERO_ADDRESS,
+                AddressZero,
                 BAL,
             ]);
             expect(swapInfoUpdated.swapAmount.toString()).to.eq(
@@ -1422,7 +1424,7 @@ describe(`Tests for Helpers.`, () => {
         it(`setWrappedInfo, ETH In, SwapExactOut`, async () => {
             const chainId = 1;
             const swapType = SwapTypes.SwapExactOut;
-            const tokenIn = ZERO_ADDRESS;
+            const tokenIn = AddressZero;
             const tokenOut = BAL;
             const swapAmount = bnum(7.7);
             const returnAmount = bnum(1.67);
@@ -1465,7 +1467,7 @@ describe(`Tests for Helpers.`, () => {
             );
 
             expect(swapInfoUpdated.tokenAddresses).to.deep.eq([
-                ZERO_ADDRESS,
+                AddressZero,
                 BAL,
             ]);
             expect(swapInfoUpdated.swapAmount.toString()).to.eq(
@@ -1489,7 +1491,7 @@ describe(`Tests for Helpers.`, () => {
             const chainId = 1;
             const swapType = SwapTypes.SwapExactIn;
             const tokenIn = BAL;
-            const tokenOut = ZERO_ADDRESS;
+            const tokenOut = AddressZero;
             const swapAmount = bnum(7.7);
             const returnAmount = bnum(1.67);
 
@@ -1532,7 +1534,7 @@ describe(`Tests for Helpers.`, () => {
 
             expect(swapInfoUpdated.tokenAddresses).to.deep.eq([
                 BAL,
-                ZERO_ADDRESS,
+                AddressZero,
             ]);
             expect(swapInfoUpdated.swapAmount.toString()).to.eq(
                 swapAmount.toString()
@@ -1555,7 +1557,7 @@ describe(`Tests for Helpers.`, () => {
             const chainId = 1;
             const swapType = SwapTypes.SwapExactOut;
             const tokenIn = BAL;
-            const tokenOut = ZERO_ADDRESS;
+            const tokenOut = AddressZero;
             const swapAmount = bnum(7.7);
             const returnAmount = bnum(1.67);
 
@@ -1598,7 +1600,7 @@ describe(`Tests for Helpers.`, () => {
 
             expect(swapInfoUpdated.tokenAddresses).to.deep.eq([
                 BAL,
-                ZERO_ADDRESS,
+                AddressZero,
             ]);
             expect(swapInfoUpdated.swapAmount.toString()).to.eq(
                 swapAmount.toString()
@@ -1901,7 +1903,7 @@ describe(`Tests for Helpers.`, () => {
             const chainId = 1;
             const swapType = SwapTypes.SwapExactIn;
             const tokenIn = Lido.stETH[chainId];
-            const tokenOut = ZERO_ADDRESS;
+            const tokenOut = AddressZero;
             const swapAmount = bnum(7.7);
             const returnAmount = bnum(1.67);
 
@@ -1944,7 +1946,7 @@ describe(`Tests for Helpers.`, () => {
 
             expect(swapInfoUpdated.tokenAddresses).to.deep.eq([
                 Lido.wstETH[chainId],
-                ZERO_ADDRESS,
+                AddressZero,
             ]);
             expect(swapInfoUpdated.swapAmount.toString()).to.eq(
                 scale(swapAmount, 18).toString()

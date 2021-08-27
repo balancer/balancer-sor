@@ -1,10 +1,9 @@
 import { BaseProvider } from '@ethersproject/providers';
+import { AddressZero } from '@ethersproject/constants';
 import { Contract } from '@ethersproject/contracts';
 import { SubgraphPoolBase, SwapInfo, SwapTypes, SwapV2 } from '../../types';
 import { parseNewPool } from '../../pools';
-import { ZERO, scale, bnum } from '../../utils/bignumber';
-import { BigNumber } from '../../utils/bignumber';
-import { ZERO_ADDRESS } from '../../index';
+import { BigNumber, ZERO, scale, bnum } from '../../utils/bignumber';
 import vaultAbi from '../../abi/Vault.json';
 import { EMPTY_SWAPINFO } from '../../constants';
 
@@ -819,8 +818,8 @@ async function queryBatchSwap(
     const vaultAddr = '0xBA12222222228d8Ba445958a75a0704d566BF2C8';
     const vaultContract = new Contract(vaultAddr, vaultAbi, provider);
     const funds = {
-        sender: ZERO_ADDRESS,
-        recipient: ZERO_ADDRESS,
+        sender: AddressZero,
+        recipient: AddressZero,
         fromInternalBalance: false,
         toInternalBalance: false,
     };
@@ -973,7 +972,7 @@ export async function getLidoStaticSwaps(
     );
 
     if (swapInfo.returnAmount.isZero()) {
-        return {...EMPTY_SWAPINFO};
+        return { ...EMPTY_SWAPINFO };
     }
 
     // Considering fees shouldn't matter as there won't be alternative options on V1
