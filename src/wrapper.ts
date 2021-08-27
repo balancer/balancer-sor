@@ -12,13 +12,11 @@ import {
     PoolFilter,
     getLidoStaticSwaps,
     isLidoStableSwap,
-    filterPoolsOfInterest,
-    filterHopPools,
     Swap,
     filterPoolsByType,
     SubgraphPoolBase,
 } from './index';
-import { calculatePathLimits, smartOrderRouter } from './router';
+import { calculatePathLimits, smartOrderRouter, createPaths } from './router';
 import { getWrappedInfo, setWrappedInfo } from './wrapInfo';
 import { formatSwaps } from './formatSwaps';
 import { PoolCacher } from './poolCaching';
@@ -250,7 +248,7 @@ export class SOR {
         // Some functions alter pools list directly but we want to keep original so make a copy to work from
         const poolsList = JSON.parse(JSON.stringify(onChainPools));
 
-        const [pools, hopTokens] = filterPoolsOfInterest(
+        const [mostLiquidPools, pathData] = createPaths(
             poolsList.pools,
             tokenIn,
             tokenOut,
@@ -258,12 +256,7 @@ export class SOR {
             this.disabledOptions,
             currentBlockTimestamp
         );
-        const [filteredPools, pathData] = filterHopPools(
-            tokenIn,
-            tokenOut,
-            hopTokens,
-            pools
-        );
+
         const [paths] = calculatePathLimits(pathData, swapType);
 
         // Update cache if used
@@ -271,12 +264,12 @@ export class SOR {
             this.processedDataCache[
                 `${tokenIn}${tokenOut}${swapType}${currentBlockTimestamp}`
             ] = {
-                pools: filteredPools,
+                pools: mostLiquidPools,
                 paths: paths,
             };
         }
 
-        return { pools: filteredPools, paths };
+        return { pools: mostLiquidPools, paths };
     }
 
     /**
