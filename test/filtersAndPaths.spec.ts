@@ -7,8 +7,12 @@ import {
     NewPath,
     SwapTypes,
 } from '../src/types';
-import { filterPoolsOfInterest, filterHopPools } from '../src/pools';
-import { calculatePathLimits, smartOrderRouter } from '../src/router';
+import {
+    filterPoolsOfInterest,
+    filterHopPools,
+} from '../src/routeProposal/filtering';
+import { calculatePathLimits } from '../src/routeProposal/pathLimits';
+import { smartOrderRouter } from '../src/router';
 import BigNumber from 'bignumber.js';
 import { countPoolSwapPairTypes } from './lib/testHelpers';
 

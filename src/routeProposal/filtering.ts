@@ -1,4 +1,4 @@
-import { ALLOW_ADD_REMOVE } from './config';
+import { ALLOW_ADD_REMOVE } from '../config';
 import {
     DisabledOptions,
     SubgraphPoolBase,
@@ -8,14 +8,15 @@ import {
     Swap,
     PoolBase,
     PoolFilter,
-} from './types';
-import { WeightedPool } from './pools/weightedPool/weightedPool';
-import { StablePool } from './pools/stablePool/stablePool';
-import { ElementPool } from './pools/elementPool/elementPool';
-import { MetaStablePool } from './pools/metaStablePool/metaStablePool';
-import { ZERO } from './utils/bignumber';
+} from '../types';
+import { WeightedPool } from '../pools/weightedPool/weightedPool';
+import { StablePool } from '../pools/stablePool/stablePool';
+import { ElementPool } from '../pools/elementPool/elementPool';
+import { MetaStablePool } from '../pools/metaStablePool/metaStablePool';
+import { ZERO } from '../utils/bignumber';
 
 import disabledTokensDefault from './disabled-tokens.json';
+import { parseNewPool } from '../pools';
 
 export const filterPoolsByType = (
     pools: SubgraphPoolBase[],
@@ -68,6 +69,7 @@ export function filterPoolsOfInterest(
         const newPool:
             | WeightedPool
             | StablePool
+            | MetaStablePool
             | ElementPool
             | undefined = parseNewPool(pool, currentBlockTimestamp);
         if (!newPool) return;
@@ -121,32 +123,6 @@ export function filterPoolsOfInterest(
     // Transform set into Array
     const hopTokens = [...hopTokensSet];
     return [poolsDictionary, hopTokens];
-}
-
-export function parseNewPool(
-    pool: SubgraphPoolBase,
-    currentBlockTimestamp = 0
-): WeightedPool | StablePool | ElementPool | undefined {
-    let newPool: WeightedPool | StablePool | ElementPool;
-    if (pool.poolType === 'Weighted') newPool = WeightedPool.fromPool(pool);
-    else if (pool.poolType === 'Stable') newPool = StablePool.fromPool(pool);
-    else if (pool.poolType === 'Element') {
-        newPool = ElementPool.fromPool(pool);
-        newPool.setCurrentBlockTimestamp(currentBlockTimestamp);
-    } else if (pool.poolType === 'MetaStable') {
-        newPool = MetaStablePool.fromPool(pool);
-    } else if (pool.poolType === 'LiquidityBootstrapping') {
-        // If an LBP doesn't have its swaps paused we treat it like a regular Weighted pool.
-        // If it does we just ignore it.
-        if (pool.swapEnabled === true) newPool = WeightedPool.fromPool(pool);
-        else return undefined;
-    } else {
-        console.error(
-            `Unknown pool type or type field missing: ${pool.poolType} ${pool.id}`
-        );
-        return undefined;
-    }
-    return newPool;
 }
 
 /*

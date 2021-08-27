@@ -1,6 +1,6 @@
-import { BigNumber } from './utils/bignumber';
+import { BigNumber, bnum, scale, ZERO } from './utils/bignumber';
+import { EMPTY_SWAPINFO } from './constants';
 import { SwapTypes, SwapV2, Swap, SwapInfo } from './types';
-import { bnum, scale, ZERO } from './utils/bignumber';
 
 /**
  * @returns an array of deduplicated token addresses used in the provided swaps
@@ -91,15 +91,7 @@ export function formatSwaps(
     const swaps: Swap[][] = JSON.parse(JSON.stringify(swapsOriginal));
 
     const swapInfo: SwapInfo = {
-        tokenAddresses: [],
-        swaps: [],
-        swapAmount: ZERO,
-        swapAmountForSwaps: ZERO,
-        returnAmount: ZERO,
-        returnAmountConsideringFees: ZERO,
-        returnAmountFromSwaps: ZERO,
-        tokenIn: '',
-        tokenOut: '',
+        ...EMPTY_SWAPINFO,
         marketSp: marketSp,
     };
 

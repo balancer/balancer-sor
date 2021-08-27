@@ -26,8 +26,6 @@ describe(`Tests for wrapper class.`, () => {
         const sor = new SOR(provider, gasPrice, maxPools, chainId, poolsUrl);
         assert.equal(provider, sor.provider);
         assert.equal(gasPrice, sor.gasPrice);
-        assert.equal(maxPools, sor.maxPools);
-        assert.equal(maxPools, sor.maxPools);
     });
 
     it(`Should return no swaps when pools not retrieved.`, async () => {

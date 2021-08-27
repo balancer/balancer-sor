@@ -1,1 +1,1 @@
-export { calculatePathLimits, smartOrderRouter } from './sorClass';
+export { smartOrderRouter } from './sorClass';

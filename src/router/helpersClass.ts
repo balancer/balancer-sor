@@ -1,4 +1,6 @@
-import { BigNumber } from '../utils/bignumber';
+import { BigNumber, ZERO, INFINITY } from '../utils/bignumber';
+import { getOutputAmountSwap } from '../pools';
+import { INFINITESIMAL } from '../config';
 import {
     NewPath,
     PoolDictionary,
@@ -8,8 +10,6 @@ import {
     PoolPairBase,
     PoolTypes,
 } from '../types';
-import { ZERO, INFINITY } from '../utils/bignumber';
-import { INFINITESIMAL } from '../config';
 
 export function getHighestLimitAmountsForPaths(
     paths: NewPath[],
@@ -162,41 +162,6 @@ export function getSpotPriceAfterSwapForPath(
         }
     } else {
         throw new Error('Path with more than 2 swaps not supported');
-    }
-}
-
-// TODO: Add cases for pairType = [BTP->token, token->BTP] and poolType = [weighted, stable]
-export function getOutputAmountSwap(
-    pool: PoolBase,
-    poolPairData: PoolPairBase,
-    swapType: SwapTypes,
-    amount: BigNumber
-): BigNumber {
-    const pairType = poolPairData.pairType;
-
-    // TODO: check if necessary to check if amount > limitAmount
-    if (swapType === SwapTypes.SwapExactIn) {
-        if (poolPairData.balanceIn.isZero()) {
-            return ZERO;
-        } else if (pairType === PairTypes.TokenToToken) {
-            return pool._exactTokenInForTokenOut(poolPairData, amount);
-        } else if (pairType === PairTypes.TokenToBpt) {
-            return pool._exactTokenInForBPTOut(poolPairData, amount);
-        } else if (pairType === PairTypes.BptToToken) {
-            return pool._exactBPTInForTokenOut(poolPairData, amount);
-        }
-    } else {
-        if (poolPairData.balanceOut.isZero()) {
-            return ZERO;
-        } else if (amount.gte(poolPairData.balanceOut)) {
-            return INFINITY;
-        } else if (pairType === PairTypes.TokenToToken) {
-            return pool._tokenInForExactTokenOut(poolPairData, amount);
-        } else if (pairType === PairTypes.TokenToBpt) {
-            return pool._tokenInForExactBPTOut(poolPairData, amount);
-        } else if (pairType === PairTypes.BptToToken) {
-            return pool._BPTInForExactTokenOut(poolPairData, amount);
-        }
     }
 }
 
