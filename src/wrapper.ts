@@ -99,7 +99,7 @@ export class SOR {
             timestamp: 0,
         }
     ): Promise<SwapInfo> {
-        if (!this.poolCacher.finishedFetchingOnChain) return EMPTY_SWAPINFO;
+        if (!this.poolCacher.finishedFetchingOnChain) return {...EMPTY_SWAPINFO};
 
         const pools: SubgraphPoolBase[] = JSON.parse(
             JSON.stringify(this.poolCacher.getPools())
@@ -165,7 +165,7 @@ export class SOR {
         useProcessCache = true,
         currentBlockTimestamp = 0
     ): Promise<SwapInfo> {
-        if (pools.length === 0) return EMPTY_SWAPINFO;
+        if (pools.length === 0) return {...EMPTY_SWAPINFO};
 
         const {
             pools: poolsOfInterest,

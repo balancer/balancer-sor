@@ -972,7 +972,7 @@ export async function getLidoStaticSwaps(
     );
 
     if (swapInfo.returnAmount.isZero()) {
-        return EMPTY_SWAPINFO;
+        return {...EMPTY_SWAPINFO};
     }
 
     // Considering fees shouldn't matter as there won't be alternative options on V1
