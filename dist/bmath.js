@@ -1,6 +1,6 @@
-'use strict';
-Object.defineProperty(exports, '__esModule', { value: true });
-const bignumber_1 = require('./utils/bignumber');
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const bignumber_1 = require("./utils/bignumber");
 exports.ZERO = bnum(0);
 exports.ONE = bnum(1);
 exports.INFINITY = bnum('Infinity');
@@ -17,14 +17,7 @@ function bnum(val) {
     return new bignumber_1.BigNumber(val.toString());
 }
 exports.bnum = bnum;
-function calcOutGivenIn(
-    tokenBalanceIn,
-    tokenWeightIn,
-    tokenBalanceOut,
-    tokenWeightOut,
-    tokenAmountIn,
-    swapFee
-) {
+function calcOutGivenIn(tokenBalanceIn, tokenWeightIn, tokenBalanceOut, tokenWeightOut, tokenAmountIn, swapFee) {
     let weightRatio = bdiv(tokenWeightIn, tokenWeightOut);
     let adjustedIn = exports.BONE.minus(swapFee);
     adjustedIn = bmul(tokenAmountIn, adjustedIn);
@@ -35,14 +28,7 @@ function calcOutGivenIn(
     return tokenAmountOut;
 }
 exports.calcOutGivenIn = calcOutGivenIn;
-function calcInGivenOut(
-    tokenBalanceIn,
-    tokenWeightIn,
-    tokenBalanceOut,
-    tokenWeightOut,
-    tokenAmountOut,
-    swapFee
-) {
+function calcInGivenOut(tokenBalanceIn, tokenWeightIn, tokenBalanceOut, tokenWeightOut, tokenAmountOut, swapFee) {
     let weightRatio = bdiv(tokenWeightOut, tokenWeightIn);
     let diff = tokenBalanceOut.minus(tokenAmountOut);
     let y = bdiv(tokenBalanceOut, diff);
@@ -53,13 +39,7 @@ function calcInGivenOut(
     return tokenAmountIn;
 }
 exports.calcInGivenOut = calcInGivenOut;
-function calcSpotPrice(
-    tokenBalanceIn,
-    tokenWeightIn,
-    tokenBalanceOut,
-    tokenWeightOut,
-    swapFee
-) {
+function calcSpotPrice(tokenBalanceIn, tokenWeightIn, tokenBalanceOut, tokenWeightOut, swapFee) {
     const numer = bdiv(tokenBalanceIn, tokenWeightIn);
     const denom = bdiv(tokenBalanceOut, tokenWeightOut);
     const ratio = bdiv(numer, denom);
@@ -94,7 +74,8 @@ function bsubSign(a, b) {
         let res = a.minus(b);
         let bool = false;
         return { res, bool };
-    } else {
+    }
+    else {
         let res = b.minus(a);
         let bool = true;
         return { res, bool };
@@ -102,22 +83,10 @@ function bsubSign(a, b) {
 }
 exports.bsubSign = bsubSign;
 function bpowi(a, n) {
-    let z = !n
-        .modulo(new bignumber_1.BigNumber(2))
-        .eq(new bignumber_1.BigNumber(0))
-        ? a
-        : exports.BONE;
-    for (
-        n = n.idiv(new bignumber_1.BigNumber(2));
-        !n.eq(new bignumber_1.BigNumber(0));
-        n = n.idiv(new bignumber_1.BigNumber(2))
-    ) {
+    let z = !n.modulo(new bignumber_1.BigNumber(2)).eq(new bignumber_1.BigNumber(0)) ? a : exports.BONE;
+    for (n = n.idiv(new bignumber_1.BigNumber(2)); !n.eq(new bignumber_1.BigNumber(0)); n = n.idiv(new bignumber_1.BigNumber(2))) {
         a = bmul(a, a);
-        if (
-            !n
-                .modulo(new bignumber_1.BigNumber(2))
-                .eq(new bignumber_1.BigNumber(0))
-        ) {
+        if (!n.modulo(new bignumber_1.BigNumber(2)).eq(new bignumber_1.BigNumber(0))) {
             z = bmul(z, a);
         }
     }
@@ -145,12 +114,16 @@ function bpowApprox(base, exp, precision) {
         let { res: c, bool: cneg } = bsubSign(a, bigK.minus(exports.BONE));
         term = bmul(term, bmul(c, x));
         term = bdiv(term, bigK);
-        if (term.eq(new bignumber_1.BigNumber(0))) break;
-        if (xneg) negative = !negative;
-        if (cneg) negative = !negative;
+        if (term.eq(new bignumber_1.BigNumber(0)))
+            break;
+        if (xneg)
+            negative = !negative;
+        if (cneg)
+            negative = !negative;
         if (negative) {
             sum = sum.minus(term);
-        } else {
+        }
+        else {
             sum = sum.plus(term);
         }
     }

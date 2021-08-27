@@ -1,11 +1,12 @@
-'use strict';
-Object.defineProperty(exports, '__esModule', { value: true });
-const bignumber_1 = require('./utils/bignumber');
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const bignumber_1 = require("./utils/bignumber");
 let allowAddRemove = process.env.ALLOW_ADD_REMOVE || false;
 if (typeof allowAddRemove === 'string') {
     if (allowAddRemove === 'true' || allowAddRemove === 'True')
         allowAddRemove = true;
-    else allowAddRemove = false;
+    else
+        allowAddRemove = false;
 }
 exports.ALLOW_ADD_REMOVE = allowAddRemove;
 // priceErrorTolerance is how close we expect prices after swap to be in SOR

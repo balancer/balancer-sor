@@ -7,10 +7,8 @@ import { BigNumber } from '../../utils/bignumber';
     // P = product of balances    (n+1) * D + ( A * n^n − 1)* (n^n * P / D^(n−1))                //
     // n = number of tokens                                                                      //
     **********************************************************************************************/
-export declare function _invariant(
-    amp: BigNumber, // amp
-    balances: BigNumber[]
-): BigNumber;
+export declare function _invariant(amp: BigNumber, // amp
+balances: BigNumber[]): BigNumber;
 /**********************************************************************************************
     // outGivenIn token x for y - polynomial equation to solve                                   //
     // ay = amount out to calculate                                                              //
@@ -22,10 +20,7 @@ export declare function _invariant(
     // S = sum of final balances but y                                                           //
     // P = product of final balances but y                                                       //
     **********************************************************************************************/
-export declare function _exactTokenInForTokenOut(
-    amount: any,
-    poolPairData: any
-): BigNumber;
+export declare function _exactTokenInForTokenOut(amount: any, poolPairData: any): BigNumber;
 /**********************************************************************************************
     // inGivenOut token x for y - polynomial equation to solve                                   //
     // ax = amount in to calculate                                                               //
@@ -37,95 +32,23 @@ export declare function _exactTokenInForTokenOut(
     // S = sum of final balances but x                                                           //
     // P = product of final balances but x                                                       //
     **********************************************************************************************/
-export declare function _tokenInForExactTokenOut(
-    amount: any,
-    poolPairData: any
-): BigNumber;
-export declare function _solveAnalyticalBalance(
-    sum: BigNumber,
-    inv: BigNumber,
-    amp: BigNumber,
-    n_pow_n: BigNumber,
-    p: BigNumber
-): BigNumber;
-export declare function _exactTokenInForBPTOut(
-    amount: any,
-    poolPairData: any
-): BigNumber;
-export declare function _tokenInForExactBPTOut(
-    amount: any,
-    poolPairData: any
-): BigNumber;
-export declare function _BPTInForExactTokenOut(
-    amount: any,
-    poolPairData: any
-): BigNumber;
-export declare function _exactBPTInForTokenOut(
-    amount: any,
-    poolPairData: any
-): BigNumber;
-export declare function _poolDerivatives(
-    amp: any,
-    balances: any,
-    tokenIndexIn: any,
-    tokenIndexOut: any,
-    is_first_derivative: any,
-    wrt_out: any
-): BigNumber;
-export declare function _poolDerivativesBPT(
-    amp: any,
-    balances: any,
-    bptSupply: any,
-    tokenIndexIn: any,
-    is_first_derivative: any,
-    is_BPT_out: any,
-    wrt_out: any
-): BigNumber;
-export declare function _spotPriceAfterSwapExactTokenInForTokenOut(
-    amount: any,
-    poolPairData: any
-): BigNumber;
-export declare function _spotPriceAfterSwapTokenInForExactTokenOut(
-    amount: any,
-    poolPairData: any
-): BigNumber;
-export declare function _spotPriceAfterSwapExactTokenInForBPTOut(
-    amount: any,
-    poolPairData: any
-): BigNumber;
-export declare function _spotPriceAfterSwapTokenInForExactBPTOut(
-    amount: any,
-    poolPairData: any
-): BigNumber;
-export declare function _spotPriceAfterSwapExactBPTInForTokenOut(
-    amount: any,
-    poolPairData: any
-): BigNumber;
-export declare function _spotPriceAfterSwapBPTInForExactTokenOut(
-    amount: any,
-    poolPairData: any
-): BigNumber;
-export declare function _derivativeSpotPriceAfterSwapExactTokenInForTokenOut(
-    amount: any,
-    poolPairData: any
-): BigNumber;
-export declare function _derivativeSpotPriceAfterSwapTokenInForExactTokenOut(
-    amount: any,
-    poolPairData: any
-): BigNumber;
-export declare function _derivativeSpotPriceAfterSwapExactTokenInForBPTOut(
-    amount: any,
-    poolPairData: any
-): BigNumber;
-export declare function _derivativeSpotPriceAfterSwapTokenInForExactBPTOut(
-    amount: any,
-    poolPairData: any
-): BigNumber;
-export declare function _derivativeSpotPriceAfterSwapExactBPTInForTokenOut(
-    amount: any,
-    poolPairData: any
-): BigNumber;
-export declare function _derivativeSpotPriceAfterSwapBPTInForExactTokenOut(
-    amount: any,
-    poolPairData: any
-): BigNumber;
+export declare function _tokenInForExactTokenOut(amount: any, poolPairData: any): BigNumber;
+export declare function _solveAnalyticalBalance(sum: BigNumber, inv: BigNumber, amp: BigNumber, n_pow_n: BigNumber, p: BigNumber): BigNumber;
+export declare function _exactTokenInForBPTOut(amount: any, poolPairData: any): BigNumber;
+export declare function _tokenInForExactBPTOut(amount: any, poolPairData: any): BigNumber;
+export declare function _BPTInForExactTokenOut(amount: any, poolPairData: any): BigNumber;
+export declare function _exactBPTInForTokenOut(amount: any, poolPairData: any): BigNumber;
+export declare function _poolDerivatives(amp: any, balances: any, tokenIndexIn: any, tokenIndexOut: any, is_first_derivative: any, wrt_out: any): BigNumber;
+export declare function _poolDerivativesBPT(amp: any, balances: any, bptSupply: any, tokenIndexIn: any, is_first_derivative: any, is_BPT_out: any, wrt_out: any): BigNumber;
+export declare function _spotPriceAfterSwapExactTokenInForTokenOut(amount: any, poolPairData: any): BigNumber;
+export declare function _spotPriceAfterSwapTokenInForExactTokenOut(amount: any, poolPairData: any): BigNumber;
+export declare function _spotPriceAfterSwapExactTokenInForBPTOut(amount: any, poolPairData: any): BigNumber;
+export declare function _spotPriceAfterSwapTokenInForExactBPTOut(amount: any, poolPairData: any): BigNumber;
+export declare function _spotPriceAfterSwapExactBPTInForTokenOut(amount: any, poolPairData: any): BigNumber;
+export declare function _spotPriceAfterSwapBPTInForExactTokenOut(amount: any, poolPairData: any): BigNumber;
+export declare function _derivativeSpotPriceAfterSwapExactTokenInForTokenOut(amount: any, poolPairData: any): BigNumber;
+export declare function _derivativeSpotPriceAfterSwapTokenInForExactTokenOut(amount: any, poolPairData: any): BigNumber;
+export declare function _derivativeSpotPriceAfterSwapExactTokenInForBPTOut(amount: any, poolPairData: any): BigNumber;
+export declare function _derivativeSpotPriceAfterSwapTokenInForExactBPTOut(amount: any, poolPairData: any): BigNumber;
+export declare function _derivativeSpotPriceAfterSwapExactBPTInForTokenOut(amount: any, poolPairData: any): BigNumber;
+export declare function _derivativeSpotPriceAfterSwapBPTInForExactTokenOut(amount: any, poolPairData: any): BigNumber;

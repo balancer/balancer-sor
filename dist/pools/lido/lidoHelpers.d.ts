@@ -47,21 +47,6 @@ export declare const Routes: {
     1: {};
     42: {};
 };
-export declare function isLidoStableSwap(
-    chainId: number,
-    tokenIn: string,
-    tokenOut: string
-): boolean;
-export declare function getStEthRate(
-    provider: BaseProvider,
-    chainId: number
-): Promise<BigNumber>;
-export declare function getLidoStaticSwaps(
-    pools: SubGraphPoolsBase,
-    chainId: number,
-    tokenIn: string,
-    tokenOut: string,
-    swapType: SwapTypes,
-    swapAmount: BigNumber,
-    provider: BaseProvider
-): Promise<SwapInfo>;
+export declare function isLidoStableSwap(chainId: number, tokenIn: string, tokenOut: string): boolean;
+export declare function getStEthRate(provider: BaseProvider, chainId: number): Promise<BigNumber>;
+export declare function getLidoStaticSwaps(pools: SubGraphPoolsBase, chainId: number, tokenIn: string, tokenOut: string, swapType: SwapTypes, swapAmount: BigNumber, provider: BaseProvider): Promise<SwapInfo>;
