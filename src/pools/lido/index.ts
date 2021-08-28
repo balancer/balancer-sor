@@ -1,6 +1,7 @@
 import { BaseProvider } from '@ethersproject/providers';
 import { AddressZero } from '@ethersproject/constants';
 import { Contract } from '@ethersproject/contracts';
+import cloneDeep from 'lodash.clonedeep';
 import { SubgraphPoolBase, SwapInfo, SwapTypes, SwapV2 } from '../../types';
 import { parseNewPool } from '../../pools';
 import { BigNumber, ZERO, scale, bnum } from '../../utils/bignumber';
@@ -932,7 +933,7 @@ export async function getLidoStaticSwaps(
         isWrappingOut = true;
     }
 
-    const swapInfo: SwapInfo = { ...EMPTY_SWAPINFO };
+    const swapInfo: SwapInfo = cloneDeep(EMPTY_SWAPINFO);
     const staticRoute = Routes[chainId][`${tokenIn}${tokenOut}${swapType}`];
     if (!staticRoute) return swapInfo;
 

@@ -54,6 +54,7 @@
         "@ethersproject/solidity": "^5.0.5",
         "@georgeroman/balancer-v2-pools": "^0.0.5",
         "bignumber.js": "^9.0.1",
-        "isomorphic-fetch": "^2.2.1"
+        "isomorphic-fetch": "^2.2.1",
+        "lodash.clonedeep": "^4.5.0"
     }
 }

@@ -1,5 +1,6 @@
 // npx mocha -r ts-node/register test/fullSwaps.spec.ts
 import { JsonRpcProvider } from '@ethersproject/providers';
+import cloneDeep from 'lodash.clonedeep';
 import { assert } from 'chai';
 import { SwapTypes } from '../src/types';
 import BigNumber from 'bignumber.js';
@@ -49,7 +50,7 @@ describe('Tests full swaps against known values', () => {
         const costOutputToken = new BigNumber('0');
 
         const swapInfo = await getFullSwap(
-            JSON.parse(JSON.stringify(subgraphPoolsLarge.pools)),
+            cloneDeep(subgraphPoolsLarge.pools),
             tokenIn,
             tokenOut,
             returnAmountDecimals,
@@ -81,7 +82,7 @@ describe('Tests full swaps against known values', () => {
         const costOutputToken = new BigNumber('0');
 
         const swapInfo = await getFullSwap(
-            JSON.parse(JSON.stringify(subgraphPoolsLarge.pools)),
+            cloneDeep(subgraphPoolsLarge.pools),
             tokenIn,
             tokenOut,
             returnAmountDecimals,
@@ -123,7 +124,7 @@ describe('Tests full swaps against known values', () => {
         };
 
         const testData = {
-            pools: JSON.parse(JSON.stringify(subgraphPoolsLarge.pools)),
+            pools: cloneDeep(subgraphPoolsLarge.pools),
             tradeInfo,
             v1Result: {} as ResultParsed,
         };
@@ -156,7 +157,7 @@ describe('Tests full swaps against known values', () => {
         const costOutputToken = new BigNumber('0');
 
         const swapInfo = await getFullSwap(
-            JSON.parse(JSON.stringify(testPools.weightedOnly)),
+            cloneDeep(testPools.weightedOnly),
             tokenIn,
             tokenOut,
             returnAmountDecimals,
@@ -221,7 +222,7 @@ describe('Tests full swaps against known values', () => {
         };
 
         const testData = {
-            pools: JSON.parse(JSON.stringify(testPools.weightedOnly)),
+            pools: cloneDeep(testPools.weightedOnly),
             tradeInfo,
             v1Result: {} as ResultParsed,
         };
@@ -286,7 +287,7 @@ describe('Tests full swaps against known values', () => {
         };
 
         const testData = {
-            pools: JSON.parse(JSON.stringify(testPools.stableOnly)),
+            pools: cloneDeep(testPools.stableOnly),
             tradeInfo,
             v1Result: {} as ResultParsed,
         };
@@ -337,7 +338,7 @@ describe('Tests full swaps against known values', () => {
         };
 
         const testData = {
-            pools: JSON.parse(JSON.stringify(testPools.stableOnly)),
+            pools: cloneDeep(testPools.stableOnly),
             tradeInfo,
             v1Result: {} as ResultParsed,
         };
@@ -389,7 +390,7 @@ describe('Tests full swaps against known values', () => {
         };
 
         const testData = {
-            pools: JSON.parse(JSON.stringify(allPools)),
+            pools: cloneDeep(allPools),
             tradeInfo,
             v1Result: {} as ResultParsed,
         };
@@ -464,7 +465,7 @@ describe('Tests full swaps against known values', () => {
         };
 
         const testData = {
-            pools: JSON.parse(JSON.stringify(allPools)),
+            pools: cloneDeep(allPools),
             tradeInfo,
             v1Result: {} as ResultParsed,
         };
@@ -540,7 +541,7 @@ describe('Tests full swaps against known values', () => {
         };
 
         const testData = {
-            pools: JSON.parse(JSON.stringify(allPools.pools)),
+            pools: cloneDeep(allPools.pools),
             tradeInfo,
             v1Result: {} as ResultParsed,
         };
@@ -579,7 +580,7 @@ describe('Tests full swaps against known values', () => {
         };
 
         const testData = {
-            pools: JSON.parse(JSON.stringify(allPools.pools)),
+            pools: cloneDeep(allPools.pools),
             tradeInfo,
             v1Result: {} as ResultParsed,
         };
@@ -618,7 +619,7 @@ describe('Tests full swaps against known values', () => {
         };
 
         const testData = {
-            pools: JSON.parse(JSON.stringify(allPools.pools)),
+            pools: cloneDeep(allPools.pools),
             tradeInfo,
             v1Result: {} as ResultParsed,
         };
@@ -666,7 +667,7 @@ describe('Tests full swaps against known values', () => {
         };
 
         const testData = {
-            pools: JSON.parse(JSON.stringify(allPools.pools)),
+            pools: cloneDeep(allPools.pools),
             tradeInfo,
             v1Result: {} as ResultParsed,
         };
@@ -717,7 +718,7 @@ describe('Tests full swaps against known values', () => {
         };
 
         const testData = {
-            pools: JSON.parse(JSON.stringify(allPools.pools)),
+            pools: cloneDeep(allPools.pools),
             tradeInfo,
             v1Result: {} as ResultParsed,
         };
@@ -765,7 +766,7 @@ describe('Tests full swaps against known values', () => {
         };
 
         const testData = {
-            pools: JSON.parse(JSON.stringify(allPools.pools)),
+            pools: cloneDeep(allPools.pools),
             tradeInfo,
             v1Result: {} as ResultParsed,
         };

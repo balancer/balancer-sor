@@ -1,5 +1,6 @@
 require('dotenv').config();
 import { expect } from 'chai';
+import cloneDeep from 'lodash.clonedeep';
 import { AddressZero } from '@ethersproject/constants';
 import { JsonRpcProvider } from '@ethersproject/providers';
 import {
@@ -103,7 +104,7 @@ describe(`Tests for Lido USD routes.`, () => {
             );
 
             // Not sure why but if we don't make a copy the result gets overwritten by next call.
-            const testSwapInfo = JSON.parse(JSON.stringify(swapInfostEth));
+            const testSwapInfo = cloneDeep(swapInfostEth);
 
             const swapInfowstEth: SwapInfo = await sor.getSwaps(
                 wstETH,
@@ -169,7 +170,7 @@ describe(`Tests for Lido USD routes.`, () => {
             );
 
             // Not sure why but if we don't make a copy the result gets overwritten by next call.
-            const testSwapInfo = JSON.parse(JSON.stringify(swapInfostEth));
+            const testSwapInfo = cloneDeep(swapInfostEth);
 
             const swapInfowstEth: SwapInfo = await sor.getSwaps(
                 USDT,
@@ -236,7 +237,7 @@ describe(`Tests for Lido USD routes.`, () => {
             );
 
             // Not sure why but if we don't make a copy the result gets overwritten by next call.
-            const testSwapInfo = JSON.parse(JSON.stringify(swapInfostEth));
+            const testSwapInfo = cloneDeep(swapInfostEth);
 
             const swapInfowstEth: SwapInfo = await sor.getSwaps(
                 wstETH,
@@ -304,7 +305,7 @@ describe(`Tests for Lido USD routes.`, () => {
             );
 
             // Not sure why but if we don't make a copy the result gets overwritten by next call.
-            const testSwapInfo = JSON.parse(JSON.stringify(swapInfostEth));
+            const testSwapInfo = cloneDeep(swapInfostEth);
 
             const swapInfowstEth: SwapInfo = await sor.getSwaps(
                 USDT,

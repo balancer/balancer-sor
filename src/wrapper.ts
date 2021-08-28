@@ -1,4 +1,5 @@
 import { BaseProvider } from '@ethersproject/providers';
+import cloneDeep from 'lodash.clonedeep';
 import { BigNumber, ZERO } from './utils/bignumber';
 import { smartOrderRouter } from './router';
 import { getWrappedInfo, setWrappedInfo } from './wrapInfo';
@@ -77,7 +78,7 @@ export class SOR {
         swapOptions?: Partial<SwapOptions>
     ): Promise<SwapInfo> {
         if (!this.poolCacher.finishedFetchingOnChain)
-            return { ...EMPTY_SWAPINFO };
+            return cloneDeep(EMPTY_SWAPINFO);
 
         // Set any unset options to their defaults
         const options: SwapOptions = {
@@ -85,9 +86,7 @@ export class SOR {
             ...swapOptions,
         };
 
-        const pools: SubgraphPoolBase[] = JSON.parse(
-            JSON.stringify(this.poolCacher.getPools())
-        );
+        const pools: SubgraphPoolBase[] = this.poolCacher.getPools();
 
         const filteredPools = filterPoolsByType(pools, options.poolTypeFilter);
 
@@ -156,7 +155,7 @@ export class SOR {
         pools: SubgraphPoolBase[],
         swapOptions: SwapOptions
     ): Promise<SwapInfo> {
-        if (pools.length === 0) return { ...EMPTY_SWAPINFO };
+        if (pools.length === 0) return cloneDeep(EMPTY_SWAPINFO);
 
         const { pools: poolsOfInterest, paths } =
             this.routeProposer.getCandidatePaths(
@@ -230,7 +229,7 @@ export class SOR {
         // swapExactIn - total = total amount swap will return of tokenOut
         // swapExactOut - total = total amount of tokenIn required for swap
         return smartOrderRouter(
-            JSON.parse(JSON.stringify(pools)), // Need to keep original pools for cache
+            cloneDeep(pools),
             paths,
             swapType,
             swapAmount,

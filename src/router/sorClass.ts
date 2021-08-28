@@ -1,3 +1,4 @@
+import cloneDeep from 'lodash.clonedeep';
 import { PRICE_ERROR_TOLERANCE } from '../config';
 import { bnum, ZERO, ONE, INFINITY } from '../utils/bignumber';
 import { BigNumber } from '../utils/bignumber';
@@ -365,9 +366,7 @@ function getBestPathIds(
     const selectedPaths = [];
     const selectedPathLimitAmounts = [];
     const selectedPathExceedingAmounts = [];
-    // TODO find out which deep copy way is better: JSON.parse breaks bignumbers!!
-    // let paths = JSON.parse(JSON.stringify(originalPaths)); // Deep copy to avoid changing the original path data
-    const paths = [...originalPaths]; // Deep copy to avoid changing the original path data
+    const paths = cloneDeep(originalPaths); // Deep copy to avoid changing the original path data
 
     // Sort swapAmounts in descending order without changing original: https://stackoverflow.com/a/42442909
     const sortedSwapAmounts = [...swapAmounts].sort((a, b) => {

@@ -1,5 +1,6 @@
 // npx mocha -r ts-node/register test/filtersAndPaths.spec.ts
 import { assert } from 'chai';
+import cloneDeep from 'lodash.clonedeep';
 import {
     PoolDictionary,
     SwapPairType,
@@ -603,9 +604,7 @@ describe('Tests pools filtering and path processing', () => {
     });
 
     it('Test pool class that has direct & multihop paths', async () => {
-        const pools = JSON.parse(
-            JSON.stringify(testPools)
-        ).pathTestDirectAndMulti;
+        const pools = cloneDeep(testPools).pathTestDirectAndMulti;
         const tokenIn = USDC;
         const tokenOut = DAI;
         let hopTokens: string[];
@@ -640,9 +639,7 @@ describe('Tests pools filtering and path processing', () => {
     });
 
     it('Test pool class that has two multihop paths, swapExactIn', async () => {
-        const pools = JSON.parse(
-            JSON.stringify(testPools)
-        ).pathTestPoolTwoMultiHops;
+        const pools = cloneDeep(testPools).pathTestPoolTwoMultiHops;
         const tokenIn = USDC;
         const tokenOut = DAI;
         let hopTokens: string[];
@@ -698,7 +695,7 @@ describe('Tests pools filtering and path processing', () => {
 
         let swaps: any, total: BigNumber, marketSp: BigNumber;
         [swaps, total, marketSp] = smartOrderRouter(
-            JSON.parse(JSON.stringify(poolsOfInterestDictionary)), // Need to keep original pools for cache
+            cloneDeep(poolsOfInterestDictionary), // Need to keep original pools for cache
             paths,
             SwapTypes.SwapExactIn,
             new BigNumber(1),
@@ -751,9 +748,7 @@ describe('Tests pools filtering and path processing', () => {
     });
 
     it('Test pool class that has two multihop paths, swapExactOut', async () => {
-        const pools = JSON.parse(
-            JSON.stringify(testPools)
-        ).pathTestPoolTwoMultiHops;
+        const pools = cloneDeep(testPools).pathTestPoolTwoMultiHops;
         const tokenIn = USDC;
         const tokenOut = DAI;
         let hopTokens: string[];
@@ -809,7 +804,7 @@ describe('Tests pools filtering and path processing', () => {
 
         let swaps: any, total: BigNumber, marketSp: BigNumber;
         [swaps, total, marketSp] = smartOrderRouter(
-            JSON.parse(JSON.stringify(poolsOfInterestDictionary)), // Need to keep original pools for cache
+            cloneDeep(poolsOfInterestDictionary), // Need to keep original pools for cache
             paths,
             SwapTypes.SwapExactOut,
             new BigNumber(1),
