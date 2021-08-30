@@ -176,13 +176,7 @@ describe(`Tests for Element Pools.`, () => {
         const swapType = SwapTypes.SwapExactIn;
         const swapAmt: BigNumber = bnum('0.1');
 
-        const sor = new SOR(
-            provider,
-            gasPrice,
-            maxPools,
-            chainId,
-            poolsFromFile
-        );
+        const sor = new SOR(provider, chainId, poolsFromFile);
 
         const fetchSuccess = await sor.fetchPools(false);
         expect(fetchSuccess).to.be.true;
@@ -193,6 +187,8 @@ describe(`Tests for Element Pools.`, () => {
             swapType,
             swapAmt,
             {
+                gasPrice,
+                maxPools,
                 poolTypeFilter: PoolFilter.All,
                 timestamp: poolsFromFile.pools[0].expiryTime - 22, // This is the value for currentBlockTimestamp
             }
@@ -210,13 +206,7 @@ describe(`Tests for Element Pools.`, () => {
         const swapType = SwapTypes.SwapExactIn;
         const swapAmt: BigNumber = bnum('0.1');
 
-        const sor = new SOR(
-            provider,
-            gasPrice,
-            maxPools,
-            chainId,
-            poolsFromFile
-        );
+        const sor = new SOR(provider, chainId, poolsFromFile);
 
         const fetchSuccess = await sor.fetchPools(false);
         expect(fetchSuccess).to.be.true;
@@ -227,6 +217,8 @@ describe(`Tests for Element Pools.`, () => {
             swapType,
             swapAmt,
             {
+                gasPrice,
+                maxPools,
                 poolTypeFilter: PoolFilter.All,
                 timestamp: poolsFromFile.pools[0].expiryTime + 22, // This is the value for currentBlockTimestamp
             }
@@ -244,13 +236,7 @@ describe(`Tests for Element Pools.`, () => {
         const swapType = SwapTypes.SwapExactOut;
         const swapAmt: BigNumber = bnum('777');
 
-        const sor = new SOR(
-            provider,
-            gasPrice,
-            maxPools,
-            chainId,
-            poolsFromFile
-        );
+        const sor = new SOR(provider, chainId, poolsFromFile);
 
         const fetchSuccess = await sor.fetchPools(false);
         expect(fetchSuccess).to.be.true;
@@ -261,6 +247,8 @@ describe(`Tests for Element Pools.`, () => {
             swapType,
             swapAmt,
             {
+                gasPrice,
+                maxPools,
                 poolTypeFilter: PoolFilter.All,
                 timestamp: poolsFromFile.pools[0].expiryTime - 22, // This is the value for currentBlockTimestamp
             }
@@ -278,13 +266,7 @@ describe(`Tests for Element Pools.`, () => {
         const swapType = SwapTypes.SwapExactOut;
         const swapAmt: BigNumber = bnum('777');
 
-        const sor = new SOR(
-            provider,
-            gasPrice,
-            maxPools,
-            chainId,
-            poolsFromFile
-        );
+        const sor = new SOR(provider, chainId, poolsFromFile);
 
         const fetchSuccess = await sor.fetchPools(false);
         expect(fetchSuccess).to.be.true;
@@ -295,6 +277,8 @@ describe(`Tests for Element Pools.`, () => {
             swapType,
             swapAmt,
             {
+                gasPrice,
+                maxPools,
                 poolTypeFilter: PoolFilter.All,
                 timestamp: poolsFromFile.pools[0].expiryTime + 22, // This is the value for currentBlockTimestamp
             }

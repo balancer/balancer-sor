@@ -9,7 +9,6 @@ import {
 } from '../types';
 
 export class RouteProposer {
-    maxPools: number;
     processedDataCache: Record<
         string,
         { pools: PoolDictionary; paths: NewPath[] }
@@ -17,13 +16,11 @@ export class RouteProposer {
     disabledOptions: DisabledOptions;
 
     constructor(
-        maxPools: number,
         disabledOptions: DisabledOptions = {
             isOverRide: false,
             disabledTokens: [],
         }
     ) {
-        this.maxPools = maxPools;
         this.disabledOptions = disabledOptions;
     }
 
@@ -35,6 +32,7 @@ export class RouteProposer {
         tokenOut: string,
         swapType: SwapTypes,
         pools: SubgraphPoolBase[],
+        maxPools: number,
         useProcessCache = true,
         currentBlockTimestamp = 0
     ): { pools: PoolDictionary; paths: NewPath[] } {
@@ -61,7 +59,7 @@ export class RouteProposer {
             poolsList,
             tokenIn,
             tokenOut,
-            this.maxPools,
+            maxPools,
             this.disabledOptions,
             currentBlockTimestamp
         );

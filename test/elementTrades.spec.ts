@@ -96,13 +96,7 @@ describe(`Tests against Element generated test trade file.`, () => {
                     : '0x0000000000000000000000000000000000000001';
             const swapAmt = bnum(trade.input.amount_in);
 
-            const sor = new SOR(
-                provider,
-                gasPrice,
-                maxPools,
-                chainId,
-                poolsFromFile
-            );
+            const sor = new SOR(provider, chainId, poolsFromFile);
 
             const fetchSuccess = await sor.fetchPools(false);
             expect(fetchSuccess).to.be.true;
@@ -113,6 +107,8 @@ describe(`Tests against Element generated test trade file.`, () => {
                 swapType,
                 swapAmt,
                 {
+                    gasPrice,
+                    maxPools,
                     poolTypeFilter: PoolFilter.All,
                     timestamp: 0,
                 }

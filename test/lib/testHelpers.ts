@@ -350,8 +350,6 @@ export async function getFullSwap(
 ): Promise<SwapInfo> {
     const sor = new sorv2.SOR(
         provider,
-        gasPrice,
-        maxPools,
         1,
         JSON.parse(JSON.stringify(pools)),
         swapCost,
@@ -388,7 +386,7 @@ export async function getFullSwap(
         tokenOut,
         swapTypeCorrect,
         swapAmountNormalised,
-        { timestamp: 0, poolTypeFilter: PoolFilter.All }
+        { gasPrice, maxPools, timestamp: 0, poolTypeFilter: PoolFilter.All }
     );
 
     return swapInfo;

@@ -23,9 +23,8 @@ const poolsUrl = `https://ipfs.fleek.co/ipns/balancer-team-bucket.storage.fleek.
 
 describe(`Tests for wrapper class.`, () => {
     it(`Should set constructor variables`, () => {
-        const sor = new SOR(provider, gasPrice, maxPools, chainId, poolsUrl);
+        const sor = new SOR(provider, chainId, poolsUrl);
         assert.equal(provider, sor.provider);
-        assert.equal(gasPrice, sor.gasPrice);
     });
 
     it(`Should return no swaps when pools not retrieved.`, async () => {
@@ -33,12 +32,13 @@ describe(`Tests for wrapper class.`, () => {
         const tokenOut = '0x6b175474e89094c44da98b954eedeac495271d0f';
         const swapType = SwapTypes.SwapExactIn;
         const swapAmt: BigNumber = bnum(0);
-        const sor = new SOR(provider, gasPrice, maxPools, chainId, poolsUrl);
+        const sor = new SOR(provider, chainId, poolsUrl);
         const swaps: SwapInfo = await sor.getSwaps(
             tokenIn,
             tokenOut,
             swapType,
-            swapAmt
+            swapAmt,
+            { gasPrice, maxPools }
         );
 
         assert.equal(swaps.swapAmount.toString(), '0');
@@ -51,13 +51,7 @@ describe(`Tests for wrapper class.`, () => {
         const swapType = SwapTypes.SwapExactIn;
         const swapAmt: BigNumber = bnum('0.1');
 
-        const sor = new SOR(
-            provider,
-            gasPrice,
-            maxPools,
-            chainId,
-            poolsFromFile
-        );
+        const sor = new SOR(provider, chainId, poolsFromFile);
 
         const result: boolean = await sor.fetchPools(false);
         assert.isTrue(result);
@@ -68,6 +62,8 @@ describe(`Tests for wrapper class.`, () => {
             swapType,
             swapAmt,
             {
+                gasPrice,
+                maxPools,
                 poolTypeFilter: PoolFilter.All,
                 timestamp: 0,
             }
@@ -99,13 +95,7 @@ describe(`Tests for wrapper class.`, () => {
         const swapType = SwapTypes.SwapExactIn;
         const swapAmt: BigNumber = bnum('0.1');
 
-        const sor = new SOR(
-            provider,
-            gasPrice,
-            maxPools,
-            chainId,
-            poolsFromFile
-        );
+        const sor = new SOR(provider, chainId, poolsFromFile);
 
         const result: boolean = await sor.fetchPools(false);
         assert.isTrue(result);
@@ -116,6 +106,8 @@ describe(`Tests for wrapper class.`, () => {
             swapType,
             swapAmt,
             {
+                gasPrice,
+                maxPools,
                 poolTypeFilter: PoolFilter.Weighted,
                 timestamp: 0,
             }
@@ -139,13 +131,7 @@ describe(`Tests for wrapper class.`, () => {
         const swapType = SwapTypes.SwapExactIn;
         const swapAmt: BigNumber = bnum('0.1');
 
-        const sor = new SOR(
-            provider,
-            gasPrice,
-            maxPools,
-            chainId,
-            poolsFromFile
-        );
+        const sor = new SOR(provider, chainId, poolsFromFile);
 
         const result: boolean = await sor.fetchPools(false);
         assert.isTrue(result);
@@ -156,6 +142,8 @@ describe(`Tests for wrapper class.`, () => {
             swapType,
             swapAmt,
             {
+                gasPrice,
+                maxPools,
                 poolTypeFilter: PoolFilter.Stable,
                 timestamp: 0,
             }
@@ -175,13 +163,7 @@ describe(`Tests for wrapper class.`, () => {
         const swapType = SwapTypes.SwapExactIn;
         const swapAmt: BigNumber = bnum('0.1');
 
-        const sor = new SOR(
-            provider,
-            gasPrice,
-            maxPools,
-            chainId,
-            poolsFromFile
-        );
+        const sor = new SOR(provider, chainId, poolsFromFile);
 
         const result: boolean = await sor.fetchPools(false);
         assert.isTrue(result);
@@ -190,7 +172,8 @@ describe(`Tests for wrapper class.`, () => {
             tokenIn,
             tokenOut,
             swapType,
-            swapAmt
+            swapAmt,
+            { gasPrice, maxPools }
         );
 
         const expectedTokenAddresses = [
@@ -219,13 +202,7 @@ describe(`Tests for wrapper class.`, () => {
         const swapType = SwapTypes.SwapExactIn;
         const swapAmt: BigNumber = bnum('0.1');
 
-        const sor = new SOR(
-            provider,
-            gasPrice,
-            maxPools,
-            chainId,
-            poolsFromFile
-        );
+        const sor = new SOR(provider, chainId, poolsFromFile);
 
         let result: boolean = await sor.fetchPools(false);
         assert.isTrue(result);
@@ -234,7 +211,8 @@ describe(`Tests for wrapper class.`, () => {
             tokenInEth,
             tokenOut,
             swapType,
-            swapAmt
+            swapAmt,
+            { gasPrice, maxPools }
         );
 
         const expectedTokenAddressesEth = [
@@ -254,7 +232,8 @@ describe(`Tests for wrapper class.`, () => {
             tokenInWeth,
             tokenOut,
             swapType,
-            swapAmt
+            swapAmt,
+            { gasPrice, maxPools }
         );
 
         const expectedTokenAddressesWeth = [
@@ -291,13 +270,7 @@ describe(`Tests for wrapper class.`, () => {
         const swapType = SwapTypes.SwapExactIn;
         const swapAmt: BigNumber = bnum('0.1');
 
-        const sor = new SOR(
-            provider,
-            gasPrice,
-            maxPools,
-            chainId,
-            poolsFromFile
-        );
+        const sor = new SOR(provider, chainId, poolsFromFile);
 
         let result: boolean = await sor.fetchPools(false);
         assert.isTrue(result);
@@ -306,7 +279,8 @@ describe(`Tests for wrapper class.`, () => {
             tokenIn,
             tokenOutEth,
             swapType,
-            swapAmt
+            swapAmt,
+            { gasPrice, maxPools }
         );
 
         const expectedTokenAddressesEth = [tokenIn, ZERO_ADDRESS];
@@ -322,7 +296,8 @@ describe(`Tests for wrapper class.`, () => {
             tokenIn,
             tokenOutWeth,
             swapType,
-            swapAmt
+            swapAmt,
+            { gasPrice, maxPools }
         );
 
         const expectedTokenAddressesWeth = [tokenIn, WETHADDR];
@@ -355,13 +330,7 @@ describe(`Tests for wrapper class.`, () => {
         const swapType = SwapTypes.SwapExactOut;
         const swapAmt: BigNumber = bnum('0.1');
 
-        const sor = new SOR(
-            provider,
-            gasPrice,
-            maxPools,
-            chainId,
-            poolsFromFile
-        );
+        const sor = new SOR(provider, chainId, poolsFromFile);
 
         let result: boolean = await sor.fetchPools(false);
         assert.isTrue(result);
@@ -370,7 +339,8 @@ describe(`Tests for wrapper class.`, () => {
             tokenInEth,
             tokenOut,
             swapType,
-            swapAmt
+            swapAmt,
+            { gasPrice, maxPools }
         );
 
         const expectedTokenAddressesEth = [
@@ -390,7 +360,8 @@ describe(`Tests for wrapper class.`, () => {
             tokenInWeth,
             tokenOut,
             swapType,
-            swapAmt
+            swapAmt,
+            { gasPrice, maxPools }
         );
 
         const expectedTokenAddressesWeth = [
@@ -427,13 +398,7 @@ describe(`Tests for wrapper class.`, () => {
         const swapType = SwapTypes.SwapExactOut;
         const swapAmt: BigNumber = bnum('0.1');
 
-        const sor = new SOR(
-            provider,
-            gasPrice,
-            maxPools,
-            chainId,
-            poolsFromFile
-        );
+        const sor = new SOR(provider, chainId, poolsFromFile);
 
         let result: boolean = await sor.fetchPools(false);
         assert.isTrue(result);
@@ -442,7 +407,8 @@ describe(`Tests for wrapper class.`, () => {
             tokenIn,
             tokenOutEth,
             swapType,
-            swapAmt
+            swapAmt,
+            { gasPrice, maxPools }
         );
 
         const expectedTokenAddressesEth = [
@@ -462,7 +428,8 @@ describe(`Tests for wrapper class.`, () => {
             tokenIn,
             tokenOutWeth,
             swapType,
-            swapAmt
+            swapAmt,
+            { gasPrice, maxPools }
         );
 
         const expectedTokenAddressesWeth = [
@@ -492,7 +459,7 @@ describe(`Tests for wrapper class.`, () => {
     });
 
     it(`Should have no cached process data before a swap is called`, () => {
-        const sor = new SOR(provider, gasPrice, maxPools, chainId, poolsUrl);
+        const sor = new SOR(provider, chainId, poolsUrl);
         const cache = sor.processedDataCache;
         expect(cache).to.deep.eq({});
     });
@@ -504,13 +471,7 @@ describe(`Tests for wrapper class.`, () => {
         const swapType = SwapTypes.SwapExactIn;
         const swapAmt: BigNumber = bnum('0.1');
 
-        const sor = new SOR(
-            provider,
-            gasPrice,
-            maxPools,
-            chainId,
-            poolsFromFile
-        );
+        const sor = new SOR(provider, chainId, poolsFromFile);
 
         const result: boolean = await sor.fetchPools(false);
         assert.isTrue(result);
@@ -519,7 +480,8 @@ describe(`Tests for wrapper class.`, () => {
             tokenIn,
             tokenOut,
             swapType,
-            swapAmt
+            swapAmt,
+            { gasPrice, maxPools, timestamp: 0 }
         );
 
         const cacheZero =

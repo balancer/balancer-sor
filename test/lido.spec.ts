@@ -85,13 +85,7 @@ describe(`Tests for Lido USD routes.`, () => {
             const swapAmt = bnum('1');
             const priceRate = await getStEthRate(provider, chainId);
 
-            const sor = new SOR(
-                provider,
-                gasPrice,
-                maxPools,
-                chainId,
-                poolsFromFile
-            );
+            const sor = new SOR(provider, chainId, poolsFromFile);
 
             const fetchSuccess = await sor.fetchPools(false);
             expect(fetchSuccess).to.be.true;
@@ -100,7 +94,11 @@ describe(`Tests for Lido USD routes.`, () => {
                 stETH,
                 DAI,
                 swapType,
-                swapAmt
+                swapAmt,
+                {
+                    gasPrice,
+                    maxPools,
+                }
             );
 
             // Not sure why but if we don't make a copy the result gets overwritten by next call.
@@ -110,7 +108,11 @@ describe(`Tests for Lido USD routes.`, () => {
                 wstETH,
                 DAI,
                 swapType,
-                swapAmt.times(priceRate)
+                swapAmt.times(priceRate),
+                {
+                    gasPrice,
+                    maxPools,
+                }
             );
 
             // Swaps for both should be the same
@@ -153,13 +155,7 @@ describe(`Tests for Lido USD routes.`, () => {
             const swapAmt = bnum('1');
             const priceRate = await getStEthRate(provider, chainId);
 
-            const sor = new SOR(
-                provider,
-                gasPrice,
-                maxPools,
-                chainId,
-                poolsFromFile
-            );
+            const sor = new SOR(provider, chainId, poolsFromFile);
 
             const fetchSuccess = await sor.fetchPools(false);
             expect(fetchSuccess).to.be.true;
@@ -168,7 +164,8 @@ describe(`Tests for Lido USD routes.`, () => {
                 USDT,
                 stETH,
                 swapType,
-                swapAmt
+                swapAmt,
+                { gasPrice, maxPools }
             );
 
             // Not sure why but if we don't make a copy the result gets overwritten by next call.
@@ -178,7 +175,8 @@ describe(`Tests for Lido USD routes.`, () => {
                 USDT,
                 wstETH,
                 swapType,
-                swapAmt
+                swapAmt,
+                { gasPrice, maxPools }
             );
 
             // Swaps for both should be same
@@ -228,13 +226,7 @@ describe(`Tests for Lido USD routes.`, () => {
             const swapAmt = bnum('1');
             const priceRate = await getStEthRate(provider, chainId);
 
-            const sor = new SOR(
-                provider,
-                gasPrice,
-                maxPools,
-                chainId,
-                poolsFromFile
-            );
+            const sor = new SOR(provider, chainId, poolsFromFile);
 
             const fetchSuccess = await sor.fetchPools(false);
             expect(fetchSuccess).to.be.true;
@@ -243,7 +235,8 @@ describe(`Tests for Lido USD routes.`, () => {
                 stETH,
                 DAI,
                 swapType,
-                swapAmt
+                swapAmt,
+                { gasPrice, maxPools }
             );
 
             // Not sure why but if we don't make a copy the result gets overwritten by next call.
@@ -253,7 +246,11 @@ describe(`Tests for Lido USD routes.`, () => {
                 wstETH,
                 DAI,
                 swapType,
-                swapAmt
+                swapAmt,
+                {
+                    gasPrice,
+                    maxPools,
+                }
             );
 
             // Swaps for both should be the same
@@ -298,13 +295,7 @@ describe(`Tests for Lido USD routes.`, () => {
             const swapAmt = bnum('1');
             const priceRate = await getStEthRate(provider, chainId);
 
-            const sor = new SOR(
-                provider,
-                gasPrice,
-                maxPools,
-                chainId,
-                poolsFromFile
-            );
+            const sor = new SOR(provider, chainId, poolsFromFile);
 
             const fetchSuccess = await sor.fetchPools(false);
             expect(fetchSuccess).to.be.true;
@@ -313,7 +304,11 @@ describe(`Tests for Lido USD routes.`, () => {
                 USDT,
                 stETH,
                 swapType,
-                swapAmt
+                swapAmt,
+                {
+                    gasPrice,
+                    maxPools,
+                }
             );
 
             // Not sure why but if we don't make a copy the result gets overwritten by next call.
@@ -323,7 +318,8 @@ describe(`Tests for Lido USD routes.`, () => {
                 USDT,
                 wstETH,
                 swapType,
-                swapAmt.times(priceRate)
+                swapAmt.times(priceRate),
+                { gasPrice, maxPools }
             );
 
             // Swaps for both should be same
@@ -370,13 +366,7 @@ describe(`Tests for Lido USD routes.`, () => {
             const swapType = SwapTypes.SwapExactIn;
             const swapAmt = bnum('1');
 
-            const sor = new SOR(
-                provider,
-                gasPrice,
-                maxPools,
-                chainId,
-                poolsFromFile
-            );
+            const sor = new SOR(provider, chainId, poolsFromFile);
 
             const fetchSuccess = await sor.fetchPools(false);
             expect(fetchSuccess).to.be.true;
@@ -385,7 +375,8 @@ describe(`Tests for Lido USD routes.`, () => {
                 tokenIn,
                 tokenOut,
                 swapType,
-                swapAmt
+                swapAmt,
+                { gasPrice, maxPools }
             );
 
             expect(swapInfo.tokenAddresses).to.deep.eq([DAI, WETH, wstETH]);
@@ -413,13 +404,7 @@ describe(`Tests for Lido USD routes.`, () => {
             const swapType = SwapTypes.SwapExactOut;
             const swapAmt = bnum('1');
 
-            const sor = new SOR(
-                provider,
-                gasPrice,
-                maxPools,
-                chainId,
-                poolsFromFile
-            );
+            const sor = new SOR(provider, chainId, poolsFromFile);
 
             const fetchSuccess = await sor.fetchPools(false);
             expect(fetchSuccess).to.be.true;
@@ -428,7 +413,11 @@ describe(`Tests for Lido USD routes.`, () => {
                 tokenIn,
                 tokenOut,
                 swapType,
-                swapAmt
+                swapAmt,
+                {
+                    gasPrice,
+                    maxPools,
+                }
             );
 
             expect(swapInfo.tokenAddresses).to.deep.eq([DAI, WETH, wstETH]);
@@ -456,13 +445,7 @@ describe(`Tests for Lido USD routes.`, () => {
             const swapType = SwapTypes.SwapExactIn;
             const swapAmt = bnum('1');
 
-            const sor = new SOR(
-                provider,
-                gasPrice,
-                maxPools,
-                chainId,
-                poolsFromFile
-            );
+            const sor = new SOR(provider, chainId, poolsFromFile);
 
             const fetchSuccess = await sor.fetchPools(false);
             expect(fetchSuccess).to.be.true;
@@ -471,7 +454,8 @@ describe(`Tests for Lido USD routes.`, () => {
                 tokenIn,
                 tokenOut,
                 swapType,
-                swapAmt
+                swapAmt,
+                { gasPrice, maxPools }
             );
 
             expect(swapInfo.tokenAddresses).to.deep.eq([wstETH, WETH, DAI]);
@@ -499,13 +483,7 @@ describe(`Tests for Lido USD routes.`, () => {
             const swapType = SwapTypes.SwapExactOut;
             const swapAmt = bnum('1');
 
-            const sor = new SOR(
-                provider,
-                gasPrice,
-                maxPools,
-                chainId,
-                poolsFromFile
-            );
+            const sor = new SOR(provider, chainId, poolsFromFile);
 
             const fetchSuccess = await sor.fetchPools(false);
             expect(fetchSuccess).to.be.true;
@@ -514,7 +492,8 @@ describe(`Tests for Lido USD routes.`, () => {
                 tokenIn,
                 tokenOut,
                 swapType,
-                swapAmt
+                swapAmt,
+                { gasPrice, maxPools }
             );
 
             expect(swapInfo.tokenAddresses).to.deep.eq([wstETH, WETH, DAI]);
@@ -544,13 +523,7 @@ describe(`Tests for Lido USD routes.`, () => {
             const swapType = SwapTypes.SwapExactIn;
             const swapAmt = bnum('1');
 
-            const sor = new SOR(
-                provider,
-                gasPrice,
-                maxPools,
-                chainId,
-                poolsFromFile
-            );
+            const sor = new SOR(provider, chainId, poolsFromFile);
 
             const fetchSuccess = await sor.fetchPools(false);
             expect(fetchSuccess).to.be.true;
@@ -559,7 +532,8 @@ describe(`Tests for Lido USD routes.`, () => {
                 tokenIn,
                 tokenOut,
                 swapType,
-                swapAmt
+                swapAmt,
+                { gasPrice, maxPools }
             );
 
             expect(swapInfo.tokenAddresses).to.deep.eq([
@@ -596,13 +570,7 @@ describe(`Tests for Lido USD routes.`, () => {
             const swapType = SwapTypes.SwapExactOut;
             const swapAmt = bnum('1');
 
-            const sor = new SOR(
-                provider,
-                gasPrice,
-                maxPools,
-                chainId,
-                poolsFromFile
-            );
+            const sor = new SOR(provider, chainId, poolsFromFile);
 
             const fetchSuccess = await sor.fetchPools(false);
             expect(fetchSuccess).to.be.true;
@@ -611,7 +579,8 @@ describe(`Tests for Lido USD routes.`, () => {
                 tokenIn,
                 tokenOut,
                 swapType,
-                swapAmt
+                swapAmt,
+                { gasPrice, maxPools }
             );
 
             expect(swapInfo.tokenAddresses).to.deep.eq([
@@ -648,13 +617,7 @@ describe(`Tests for Lido USD routes.`, () => {
             const swapType = SwapTypes.SwapExactIn;
             const swapAmt = bnum('1');
 
-            const sor = new SOR(
-                provider,
-                gasPrice,
-                maxPools,
-                chainId,
-                poolsFromFile
-            );
+            const sor = new SOR(provider, chainId, poolsFromFile);
 
             const fetchSuccess = await sor.fetchPools(false);
             expect(fetchSuccess).to.be.true;
@@ -663,7 +626,8 @@ describe(`Tests for Lido USD routes.`, () => {
                 tokenIn,
                 tokenOut,
                 swapType,
-                swapAmt
+                swapAmt,
+                { gasPrice, maxPools }
             );
 
             expect(swapInfo.tokenAddresses).to.deep.eq([
@@ -700,13 +664,7 @@ describe(`Tests for Lido USD routes.`, () => {
             const swapType = SwapTypes.SwapExactOut;
             const swapAmt = bnum('1');
 
-            const sor = new SOR(
-                provider,
-                gasPrice,
-                maxPools,
-                chainId,
-                poolsFromFile
-            );
+            const sor = new SOR(provider, chainId, poolsFromFile);
 
             const fetchSuccess = await sor.fetchPools(false);
             expect(fetchSuccess).to.be.true;
@@ -715,7 +673,8 @@ describe(`Tests for Lido USD routes.`, () => {
                 tokenIn,
                 tokenOut,
                 swapType,
-                swapAmt
+                swapAmt,
+                { gasPrice, maxPools }
             );
 
             expect(swapInfo.tokenAddresses).to.deep.eq([
@@ -754,13 +713,7 @@ describe(`Tests for Lido USD routes.`, () => {
             const swapType = SwapTypes.SwapExactIn;
             const swapAmt = bnum('1');
 
-            const sor = new SOR(
-                provider,
-                gasPrice,
-                maxPools,
-                chainId,
-                poolsFromFile
-            );
+            const sor = new SOR(provider, chainId, poolsFromFile);
 
             const fetchSuccess = await sor.fetchPools(false);
             expect(fetchSuccess).to.be.true;
@@ -769,7 +722,8 @@ describe(`Tests for Lido USD routes.`, () => {
                 tokenIn,
                 tokenOut,
                 swapType,
-                swapAmt
+                swapAmt,
+                { gasPrice, maxPools }
             );
 
             expect(swapInfo.tokenAddresses).to.deep.eq([
@@ -806,13 +760,7 @@ describe(`Tests for Lido USD routes.`, () => {
             const swapType = SwapTypes.SwapExactOut;
             const swapAmt = bnum('1');
 
-            const sor = new SOR(
-                provider,
-                gasPrice,
-                maxPools,
-                chainId,
-                poolsFromFile
-            );
+            const sor = new SOR(provider, chainId, poolsFromFile);
 
             const fetchSuccess = await sor.fetchPools(false);
             expect(fetchSuccess).to.be.true;
@@ -821,7 +769,8 @@ describe(`Tests for Lido USD routes.`, () => {
                 tokenIn,
                 tokenOut,
                 swapType,
-                swapAmt
+                swapAmt,
+                { gasPrice, maxPools }
             );
 
             expect(swapInfo.tokenAddresses).to.deep.eq([
@@ -858,13 +807,7 @@ describe(`Tests for Lido USD routes.`, () => {
             const swapType = SwapTypes.SwapExactIn;
             const swapAmt = bnum('1');
 
-            const sor = new SOR(
-                provider,
-                gasPrice,
-                maxPools,
-                chainId,
-                poolsFromFile
-            );
+            const sor = new SOR(provider, chainId, poolsFromFile);
 
             const fetchSuccess = await sor.fetchPools(false);
             expect(fetchSuccess).to.be.true;
@@ -873,7 +816,8 @@ describe(`Tests for Lido USD routes.`, () => {
                 tokenIn,
                 tokenOut,
                 swapType,
-                swapAmt
+                swapAmt,
+                { gasPrice, maxPools }
             );
 
             expect(swapInfo.tokenAddresses).to.deep.eq([
@@ -910,13 +854,7 @@ describe(`Tests for Lido USD routes.`, () => {
             const swapType = SwapTypes.SwapExactOut;
             const swapAmt = bnum('1');
 
-            const sor = new SOR(
-                provider,
-                gasPrice,
-                maxPools,
-                chainId,
-                poolsFromFile
-            );
+            const sor = new SOR(provider, chainId, poolsFromFile);
 
             const fetchSuccess = await sor.fetchPools(false);
             expect(fetchSuccess).to.be.true;
@@ -925,7 +863,11 @@ describe(`Tests for Lido USD routes.`, () => {
                 tokenIn,
                 tokenOut,
                 swapType,
-                swapAmt
+                swapAmt,
+                {
+                    gasPrice,
+                    maxPools,
+                }
             );
 
             expect(swapInfo.tokenAddresses).to.deep.eq([

@@ -126,13 +126,7 @@ describe(`Tests for Weighted Pools.`, () => {
                 const swapType = SwapTypes.SwapExactIn;
                 const swapAmt: BigNumber = bnum('1');
 
-                const sor = new SOR(
-                    provider,
-                    gasPrice,
-                    maxPools,
-                    chainId,
-                    poolsFromFile
-                );
+                const sor = new SOR(provider, chainId, poolsFromFile);
 
                 const fetchSuccess = await sor.fetchPools(false);
                 expect(fetchSuccess).to.be.true;
@@ -141,7 +135,8 @@ describe(`Tests for Weighted Pools.`, () => {
                     tokenIn,
                     tokenOut,
                     swapType,
-                    swapAmt
+                    swapAmt,
+                    { gasPrice, maxPools }
                 );
 
                 // TO DO - Confirm value
@@ -164,13 +159,7 @@ describe(`Tests for Weighted Pools.`, () => {
                 const swapType = SwapTypes.SwapExactIn;
                 const swapAmt: BigNumber = bnum('1.77');
 
-                const sor = new SOR(
-                    provider,
-                    gasPrice,
-                    maxPools,
-                    chainId,
-                    poolsFromFile
-                );
+                const sor = new SOR(provider, chainId, poolsFromFile);
 
                 const fetchSuccess = await sor.fetchPools(false);
                 expect(fetchSuccess).to.be.true;
@@ -179,7 +168,8 @@ describe(`Tests for Weighted Pools.`, () => {
                     tokenIn,
                     tokenOut,
                     swapType,
-                    swapAmt
+                    swapAmt,
+                    { gasPrice, maxPools }
                 );
 
                 // This value is hard coded as sanity check if things unexpectedly change. Taken from isolated run of calcTokenOutGivenExactBptIn.
@@ -200,13 +190,7 @@ describe(`Tests for Weighted Pools.`, () => {
                 const swapType = SwapTypes.SwapExactOut;
                 const swapAmt: BigNumber = bnum('1.276');
 
-                const sor = new SOR(
-                    provider,
-                    gasPrice,
-                    maxPools,
-                    chainId,
-                    poolsFromFile
-                );
+                const sor = new SOR(provider, chainId, poolsFromFile);
 
                 const fetchSuccess = await sor.fetchPools(false);
                 expect(fetchSuccess).to.be.true;
@@ -215,7 +199,8 @@ describe(`Tests for Weighted Pools.`, () => {
                     tokenIn,
                     tokenOut,
                     swapType,
-                    swapAmt
+                    swapAmt,
+                    { gasPrice, maxPools }
                 );
 
                 // This value is hard coded as sanity check if things unexpectedly change. Taken from isolated run of calcTokenInGivenExactBptOut.
@@ -236,13 +221,7 @@ describe(`Tests for Weighted Pools.`, () => {
                 const swapType = SwapTypes.SwapExactOut;
                 const swapAmt: BigNumber = bnum('2.44');
 
-                const sor = new SOR(
-                    provider,
-                    gasPrice,
-                    maxPools,
-                    chainId,
-                    poolsFromFile
-                );
+                const sor = new SOR(provider, chainId, poolsFromFile);
 
                 const fetchSuccess = await sor.fetchPools(false);
                 expect(fetchSuccess).to.be.true;
@@ -251,7 +230,8 @@ describe(`Tests for Weighted Pools.`, () => {
                     tokenIn,
                     tokenOut,
                     swapType,
-                    swapAmt
+                    swapAmt,
+                    { gasPrice, maxPools }
                 );
 
                 expect(swapInfo.returnAmount.toString()).eq(
@@ -277,13 +257,7 @@ describe(`Tests for Weighted Pools.`, () => {
                 const swapType = SwapTypes.SwapExactIn;
                 const swapAmt: BigNumber = bnum('0.01');
 
-                const sor = new SOR(
-                    provider,
-                    gasPrice,
-                    maxPools,
-                    chainId,
-                    poolsFromFile
-                );
+                const sor = new SOR(provider, chainId, poolsFromFile);
 
                 const fetchSuccess = await sor.fetchPools(false);
                 expect(fetchSuccess).to.be.true;
@@ -294,7 +268,8 @@ describe(`Tests for Weighted Pools.`, () => {
                     tokenIn,
                     tokenOut,
                     swapType,
-                    swapAmt
+                    swapAmt,
+                    { gasPrice, maxPools }
                 );
 
                 // TO DO - Need to return in correct format for Relayer
@@ -330,13 +305,7 @@ describe(`Tests for Weighted Pools.`, () => {
                 const swapType = SwapTypes.SwapExactIn;
                 const swapAmt: BigNumber = bnum('1');
 
-                const sor = new SOR(
-                    provider,
-                    gasPrice,
-                    maxPools,
-                    chainId,
-                    poolsFromFile
-                );
+                const sor = new SOR(provider, chainId, poolsFromFile);
 
                 const fetchSuccess = await sor.fetchPools(false);
                 expect(fetchSuccess).to.be.true;
@@ -345,7 +314,8 @@ describe(`Tests for Weighted Pools.`, () => {
                     tokenIn,
                     tokenOut,
                     swapType,
-                    swapAmt
+                    swapAmt,
+                    { gasPrice, maxPools }
                 );
 
                 // TO DO - Need to return in correct format for Relayer
@@ -383,13 +353,7 @@ describe(`Tests for Weighted Pools.`, () => {
                 const swapType = SwapTypes.SwapExactOut;
                 const swapAmt: BigNumber = bnum('0.01');
 
-                const sor = new SOR(
-                    provider,
-                    gasPrice,
-                    maxPools,
-                    chainId,
-                    poolsFromFile
-                );
+                const sor = new SOR(provider, chainId, poolsFromFile);
 
                 const fetchSuccess = await sor.fetchPools(false);
                 expect(fetchSuccess).to.be.true;
@@ -398,7 +362,8 @@ describe(`Tests for Weighted Pools.`, () => {
                     tokenIn,
                     tokenOut,
                     swapType,
-                    swapAmt
+                    swapAmt,
+                    { gasPrice, maxPools }
                 );
 
                 // TO DO - Need to return in correct format for Relayer
@@ -436,13 +401,7 @@ describe(`Tests for Weighted Pools.`, () => {
                 const swapType = SwapTypes.SwapExactOut;
                 const swapAmt: BigNumber = bnum('0.01');
 
-                const sor = new SOR(
-                    provider,
-                    gasPrice,
-                    maxPools,
-                    chainId,
-                    poolsFromFile
-                );
+                const sor = new SOR(provider, chainId, poolsFromFile);
 
                 const fetchSuccess = await sor.fetchPools(false);
                 expect(fetchSuccess).to.be.true;
@@ -451,7 +410,8 @@ describe(`Tests for Weighted Pools.`, () => {
                     tokenIn,
                     tokenOut,
                     swapType,
-                    swapAmt
+                    swapAmt,
+                    { gasPrice, maxPools }
                 );
 
                 // TO DO - Need to return in correct format for Relayer

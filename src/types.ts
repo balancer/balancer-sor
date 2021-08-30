@@ -140,11 +140,6 @@ export enum PoolFilter {
     LBP = 'LiquidityBootstrapping',
 }
 
-export interface SwapOptions {
-    timestamp: number;
-    poolTypeFilter: PoolFilter;
-}
-
 export interface PoolBase {
     poolType: PoolTypes;
     swapPairType: SwapPairType;

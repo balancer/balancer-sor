@@ -182,14 +182,16 @@ async function getSwap(
     swapType: SwapTypes,
     swapAmount: BigNumber
 ): Promise<SwapInfo> {
+    const sor = new SOR(provider, networkId, poolsSource);
+
+    // Will get onChain data for pools list
+    await sor.fetchPools(queryOnChain);
+
     // gasPrice is used by SOR as a factor to determine how many pools to swap against.
     // i.e. higher cost means more costly to trade against lots of different pools.
-    // Can be changed in future using sor.gasPrice = newPrice
     const gasPrice = new BigNumber('40000000000');
     // This determines the max no of pools the SOR will use to swap.
-    const maxNoPools = 4;
-
-    const sor = new SOR(provider, gasPrice, maxNoPools, networkId, poolsSource);
+    const maxPools = 4;
 
     // This calculates the cost to make a swap which is used as an input to sor to allow it to make gas efficient recommendations.
     // Note - tokenOut for SwapExactIn, tokenIn for SwapExactOut
@@ -197,17 +199,16 @@ async function getSwap(
         swapType === SwapTypes.SwapExactOut ? tokenIn : tokenOut;
     const cost = await sor.getCostOfSwapInToken(
         outputToken.address,
-        outputToken.decimals
+        outputToken.decimals,
+        gasPrice
     );
-
-    // Will get onChain data for pools list
-    await sor.fetchPools(queryOnChain);
 
     const swapInfo: SwapInfo = await sor.getSwaps(
         tokenIn.address,
         tokenOut.address,
         swapType,
-        swapAmount
+        swapAmount,
+        { gasPrice, maxPools }
     );
 
     const amtInScaled =

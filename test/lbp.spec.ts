@@ -2,14 +2,8 @@ require('dotenv').config();
 import { expect } from 'chai';
 import { JsonRpcProvider } from '@ethersproject/providers';
 import { SOR } from '../src';
-import {
-    SubGraphPoolsBase,
-    SwapInfo,
-    SwapTypes,
-    PoolTypes,
-    PairTypes,
-} from '../src/types';
-import { BigNumber, bnum, scale } from '../src/utils/bignumber';
+import { SubGraphPoolsBase, SwapInfo, SwapTypes } from '../src/types';
+import { BigNumber, bnum } from '../src/utils/bignumber';
 
 const gasPrice = bnum('30000000000');
 const maxPools = 4;
@@ -40,13 +34,7 @@ describe(`Tests for LBP Pools.`, () => {
             const swapType = SwapTypes.SwapExactIn;
             const swapAmt: BigNumber = bnum('1');
 
-            const sor = new SOR(
-                provider,
-                gasPrice,
-                maxPools,
-                chainId,
-                poolsFromFile
-            );
+            const sor = new SOR(provider, chainId, poolsFromFile);
 
             const fetchSuccess = await sor.fetchPools(false);
             expect(fetchSuccess).to.be.true;
@@ -55,7 +43,8 @@ describe(`Tests for LBP Pools.`, () => {
                 tokenIn,
                 tokenOut,
                 swapType,
-                swapAmt
+                swapAmt,
+                { gasPrice, maxPools }
             );
 
             expect(poolsFromFile.pools[0].swapEnabled).to.be.true;
@@ -72,13 +61,7 @@ describe(`Tests for LBP Pools.`, () => {
             const swapType = SwapTypes.SwapExactIn;
             const swapAmt: BigNumber = bnum('1');
 
-            const sor = new SOR(
-                provider,
-                gasPrice,
-                maxPools,
-                chainId,
-                poolsFromFile
-            );
+            const sor = new SOR(provider, chainId, poolsFromFile);
 
             const fetchSuccess = await sor.fetchPools(false);
             expect(fetchSuccess).to.be.true;
@@ -87,7 +70,8 @@ describe(`Tests for LBP Pools.`, () => {
                 tokenIn,
                 tokenOut,
                 swapType,
-                swapAmt
+                swapAmt,
+                { gasPrice, maxPools }
             );
 
             expect(poolsFromFile.pools[0].swapEnabled).to.be.false;
