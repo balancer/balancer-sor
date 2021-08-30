@@ -21,16 +21,13 @@ import {
 } from './types';
 
 export class SOR {
-    provider: BaseProvider;
-    chainId: number;
-
     poolCacher: PoolCacher;
     private routeProposer: RouteProposer;
     swapCostCalculator: SwapCostCalculator;
 
     private readonly defaultSwapOptions: SwapOptions = {
         gasPrice: new BigNumber('50e9'),
-        swapGas: new BigNumber("35000"),
+        swapGas: new BigNumber('35000'),
         poolTypeFilter: PoolFilter.All,
         maxPools: 4,
         timestamp: Math.floor(Date.now() / 1000),
@@ -38,19 +35,17 @@ export class SOR {
     };
 
     constructor(
-        provider: BaseProvider,
-        chainId: number,
+        public provider: BaseProvider,
+        public chainId: number,
         poolsSource: string | SubgraphPoolBase[]
     ) {
         this.poolCacher = new PoolCacher(provider, chainId, poolsSource);
         this.routeProposer = new RouteProposer();
         this.swapCostCalculator = new SwapCostCalculator(provider, chainId);
-        this.provider = provider;
-        this.chainId = chainId;
     }
 
     getPools(): SubgraphPoolBase[] {
-        return this.poolCacher.getPools()
+        return this.poolCacher.getPools();
     }
 
     /*
@@ -62,7 +57,7 @@ export class SOR {
     */
     async fetchPools(
         poolsData: SubgraphPoolBase[] = [],
-        isOnChain = true,
+        isOnChain = true
     ): Promise<boolean> {
         return this.poolCacher.fetchPools(poolsData, isOnChain);
     }
@@ -170,7 +165,7 @@ export class SOR {
         const costOutputToken = await this.getCostOfSwapInToken(
             swapType === SwapTypes.SwapExactIn ? tokenOut : tokenIn,
             swapOptions.gasPrice,
-            swapOptions.swapGas,
+            swapOptions.swapGas
         );
 
         // Returns list of swaps

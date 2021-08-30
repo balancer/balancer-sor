@@ -16,8 +16,6 @@ export function calculateTotalSwapCost(
 }
 
 export class SwapCostCalculator {
-    private provider: BaseProvider;
-    private chainId: number;
     private tokenDecimalsCache: Record<string, number>;
     private tokenPriceCache: Record<string, string>;
 
@@ -29,9 +27,7 @@ export class SwapCostCalculator {
         this.tokenDecimalsCache = {};
     }
 
-    constructor(provider: BaseProvider, chainId: number) {
-        this.provider = provider;
-        this.chainId = chainId;
+    constructor(private provider: BaseProvider, private chainId: number) {
         this.initializeCache();
     }
 

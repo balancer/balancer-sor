@@ -9,10 +9,7 @@ import {
 } from '../types';
 
 export class RouteProposer {
-    cache: Record<
-        string,
-        { pools: PoolDictionary; paths: NewPath[] }
-    > = {};
+    cache: Record<string, { pools: PoolDictionary; paths: NewPath[] }> = {};
 
     /**
      * Given a list of pools and a desired input/output, returns a set of possible paths to route through
