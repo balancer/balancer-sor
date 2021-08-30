@@ -49,17 +49,8 @@ export class SOR {
         this.chainId = chainId;
     }
 
-    async getCostOfSwapInToken(
-        outputToken: string,
-        gasPrice: BigNumber,
-        swapGas?: BigNumber
-    ): Promise<BigNumber> {
-        if (gasPrice.isZero()) return ZERO;
-        return this.swapCostCalculator.convertGasCostToToken(
-            outputToken,
-            gasPrice,
-            swapGas
-        );
+    getPools(): SubgraphPoolBase[] {
+        return this.poolCacher.getPools()
     }
 
     /*
@@ -139,6 +130,19 @@ export class SOR {
         );
 
         return swapInfo;
+    }
+
+    async getCostOfSwapInToken(
+        outputToken: string,
+        gasPrice: BigNumber,
+        swapGas?: BigNumber
+    ): Promise<BigNumber> {
+        if (gasPrice.isZero()) return ZERO;
+        return this.swapCostCalculator.convertGasCostToToken(
+            outputToken,
+            gasPrice,
+            swapGas
+        );
     }
 
     // Will process swap/pools data and return best swaps
