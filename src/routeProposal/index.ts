@@ -1,28 +1,12 @@
 import { filterPoolsOfInterest, filterHopPools } from './filtering';
 import { calculatePathLimits } from './pathLimits';
-import {
-    DisabledOptions,
-    SwapTypes,
-    NewPath,
-    PoolDictionary,
-    SubgraphPoolBase,
-} from '../types';
+import { SwapTypes, NewPath, PoolDictionary, SubgraphPoolBase } from '../types';
 
 export class RouteProposer {
     processedDataCache: Record<
         string,
         { pools: PoolDictionary; paths: NewPath[] }
     > = {};
-    disabledOptions: DisabledOptions;
-
-    constructor(
-        disabledOptions: DisabledOptions = {
-            isOverRide: false,
-            disabledTokens: [],
-        }
-    ) {
-        this.disabledOptions = disabledOptions;
-    }
 
     /**
      * Given a list of pools and a desired input/output, returns a set of possible paths to route through
@@ -60,7 +44,6 @@ export class RouteProposer {
             tokenIn,
             tokenOut,
             maxPools,
-            this.disabledOptions,
             currentBlockTimestamp
         );
         const [filteredPoolsDict, pathData] = filterHopPools(

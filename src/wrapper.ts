@@ -11,7 +11,6 @@ import { SwapCostCalculator } from './swapCost';
 import { getLidoStaticSwaps, isLidoStableSwap } from './pools/lido/lidoHelpers';
 import {
     SwapInfo,
-    DisabledOptions,
     SwapTypes,
     NewPath,
     PoolDictionary,
@@ -31,7 +30,6 @@ export interface SwapOptions {
 export class SOR {
     provider: BaseProvider;
     chainId: number;
-    disabledOptions: DisabledOptions;
 
     poolCacher: PoolCacher;
     private routeProposer: RouteProposer;
@@ -47,22 +45,17 @@ export class SOR {
     constructor(
         provider: BaseProvider,
         chainId: number,
-        poolsSource: string | SubGraphPoolsBase,
-        disabledOptions: DisabledOptions = {
-            isOverRide: false,
-            disabledTokens: [],
-        }
+        poolsSource: string | SubGraphPoolsBase
     ) {
         this.poolCacher = new PoolCacher(
             provider,
             chainId,
             typeof poolsSource === 'string' ? poolsSource : poolsSource.pools
         );
-        this.routeProposer = new RouteProposer(disabledOptions);
+        this.routeProposer = new RouteProposer();
         this.swapCostCalculator = new SwapCostCalculator(chainId);
         this.provider = provider;
         this.chainId = chainId;
-        this.disabledOptions = disabledOptions;
     }
 
     async getCostOfSwapInToken(
@@ -102,7 +95,7 @@ export class SOR {
         tokenIn: string,
         tokenOut: string,
         swapType: SwapTypes,
-        swapAmt: BigNumber,
+        swapAmount: BigNumber,
         swapOptions?: Partial<SwapOptions>
     ): Promise<SwapInfo> {
         if (!this.poolCacher.finishedFetchingOnChain)
@@ -126,7 +119,7 @@ export class SOR {
             tokenIn,
             tokenOut,
             this.chainId,
-            swapAmt
+            swapAmount
         );
 
         let swapInfo: SwapInfo;
@@ -170,7 +163,7 @@ export class SOR {
         tokenIn: string,
         tokenOut: string,
         swapType: SwapTypes,
-        swapAmt: BigNumber,
+        swapAmount: BigNumber,
         pools: SubgraphPoolBase[],
         useProcessCache = true,
         swapOptions: SwapOptions
@@ -206,7 +199,7 @@ export class SOR {
         ] = this.getOptimalPaths(
             poolsOfInterest,
             paths,
-            swapAmt,
+            swapAmount,
             swapType,
             costOutputToken,
             swapOptions.maxPools
@@ -215,7 +208,7 @@ export class SOR {
         const swapInfo = formatSwaps(
             swaps,
             swapType,
-            swapAmt,
+            swapAmount,
             tokenIn,
             tokenOut,
             total,

@@ -85,15 +85,6 @@ export interface SubGraphToken {
     priceRate?: string;
 }
 
-export interface DisabledOptions {
-    isOverRide: boolean;
-    disabledTokens: DisabledToken[];
-}
-export interface DisabledToken {
-    address: string;
-    symbol: string;
-}
-
 export interface SwapV2 {
     poolId: string;
     assetInIndex: number;

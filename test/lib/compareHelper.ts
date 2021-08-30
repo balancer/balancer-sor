@@ -9,7 +9,7 @@ import {
     parseV1Result,
 } from './testHelpers';
 import { bnum } from '../../src/utils/bignumber';
-import { SwapInfo, DisabledOptions } from '../../src/types';
+import { SwapInfo } from '../../src/types';
 import BigNumber from 'bignumber.js';
 
 export interface TestSettings {
@@ -24,10 +24,6 @@ export async function compareTest(
     testName: string,
     provider: JsonRpcProvider,
     testData: TestData,
-    disabledOptions: DisabledOptions = {
-        isOverRide: false,
-        disabledTokens: [],
-    },
     testSettings: TestSettings = {
         compareResults: true,
         costOutputTokenOveride: { isOverRide: true, overRideCost: bnum(0) },
@@ -52,7 +48,6 @@ export async function compareTest(
         testData.tradeInfo.GasPrice,
         provider,
         swapGas,
-        disabledOptions
     );
     const fullSwapEnd = performance.now();
     const fullResult: Result = {

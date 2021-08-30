@@ -5,8 +5,6 @@ import {
     SubGraphPoolsBase,
     SubgraphPoolBase,
     Swap,
-    DisabledToken,
-    DisabledOptions,
     PoolDictionary,
     SwapPairType,
     SwapTypes,
@@ -59,8 +57,7 @@ export interface ResultParsed {
 
 // Filters for only pools with balance and returns token list too.
 export function filterPoolsAndTokens(
-    allPools: SubGraphPoolsBase,
-    disabledTokens: DisabledToken[] = []
+    allPools: SubGraphPoolsBase
 ): [Set<unknown>, SubGraphPoolsBase] {
     const allTokens = [];
     let allTokensSet = new Set();
@@ -73,13 +70,7 @@ export function filterPoolsAndTokens(
             if (pool.tokens[0].balance != '0') {
                 const tokens = [];
                 pool.tokensList.forEach(token => {
-                    if (
-                        !disabledTokens.find(
-                            t => getAddress(t.address) === getAddress(token)
-                        )
-                    ) {
-                        tokens.push(token);
-                    }
+                    tokens.push(token);
                 });
 
                 if (tokens.length > 1) {
@@ -345,15 +336,9 @@ export async function getFullSwap(
     costOutputToken: BigNumber,
     gasPrice: BigNumber,
     provider: JsonRpcProvider,
-    swapGas: BigNumber = new BigNumber('100000'),
-    disabledOptions: DisabledOptions = { isOverRide: false, disabledTokens: [] }
+    swapGas: BigNumber = new BigNumber('100000')
 ): Promise<SwapInfo> {
-    const sor = new sorv2.SOR(
-        provider,
-        1,
-        JSON.parse(JSON.stringify(pools)),
-        disabledOptions
-    );
+    const sor = new sorv2.SOR(provider, 1, JSON.parse(JSON.stringify(pools)));
 
     let swapTypeCorrect = SwapTypes.SwapExactIn;
 
