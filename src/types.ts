@@ -26,6 +26,7 @@ export enum PairTypes {
 
 export interface SwapOptions {
     gasPrice: BigNumber;
+    swapGas: BigNumber;
     timestamp: number;
     maxPools: number;
     poolTypeFilter: PoolFilter;

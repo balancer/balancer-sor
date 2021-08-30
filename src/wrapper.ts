@@ -30,6 +30,7 @@ export class SOR {
 
     private readonly defaultSwapOptions: SwapOptions = {
         gasPrice: new BigNumber('50e9'),
+        swapGas: new BigNumber("35000"),
         poolTypeFilter: PoolFilter.All,
         maxPools: 4,
         timestamp: Math.floor(Date.now() / 1000),
@@ -50,12 +51,14 @@ export class SOR {
 
     async getCostOfSwapInToken(
         outputToken: string,
-        gasPrice: BigNumber
+        gasPrice: BigNumber,
+        swapGas?: BigNumber
     ): Promise<BigNumber> {
         if (gasPrice.isZero()) return ZERO;
         return this.swapCostCalculator.convertGasCostToToken(
             outputToken,
-            gasPrice
+            gasPrice,
+            swapGas
         );
     }
 
@@ -162,7 +165,8 @@ export class SOR {
 
         const costOutputToken = await this.getCostOfSwapInToken(
             swapType === SwapTypes.SwapExactIn ? tokenOut : tokenIn,
-            swapOptions.gasPrice
+            swapOptions.gasPrice,
+            swapOptions.swapGas,
         );
 
         // Returns list of swaps
