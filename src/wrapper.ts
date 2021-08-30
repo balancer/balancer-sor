@@ -59,13 +59,6 @@ export class SOR {
         );
     }
 
-    get processedDataCache(): Record<
-        string,
-        { pools: PoolDictionary; paths: NewPath[] }
-    > {
-        return this.routeProposer.processedDataCache;
-    }
-
     /*
     Saves updated pools data to internal onChainBalanceCache.
     If isOnChain is true will retrieve all required onChain data. (false is advised to only be used for testing)

@@ -9,7 +9,7 @@ import {
 } from '../types';
 
 export class RouteProposer {
-    processedDataCache: Record<
+    cache: Record<
         string,
         { pools: PoolDictionary; paths: NewPath[] }
     > = {};
@@ -27,7 +27,7 @@ export class RouteProposer {
         if (pools.length === 0) return { pools: {}, paths: [] };
 
         // If token pair has been processed before that info can be reused to speed up execution
-        const cache = this.processedDataCache[
+        const cache = this.cache[
             `${tokenIn}${tokenOut}${swapType}${swapOptions.timestamp}`
         ];
 
@@ -58,7 +58,7 @@ export class RouteProposer {
         );
         const [paths] = calculatePathLimits(pathData, swapType);
 
-        this.processedDataCache[
+        this.cache[
             `${tokenIn}${tokenOut}${swapType}${swapOptions.timestamp}`
         ] = {
             pools: filteredPoolsDict,
