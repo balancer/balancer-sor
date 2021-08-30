@@ -70,10 +70,10 @@ export class SOR {
     If pools url was passed in to constructor - uses this to fetch pools source.
     */
     async fetchPools(
+        poolsData: SubgraphPoolBase[] = [],
         isOnChain = true,
-        poolsData: SubgraphPoolBase[] = []
     ): Promise<boolean> {
-        return this.poolCacher.fetchPools(isOnChain, poolsData);
+        return this.poolCacher.fetchPools(poolsData, isOnChain);
     }
 
     async getSwaps(

@@ -99,7 +99,7 @@ describe(`Tests against Element generated test trade file.`, () => {
             sor.swapCostCalculator.setTokenDecimals(tokenIn, 18);
             sor.swapCostCalculator.setTokenDecimals(tokenOut, 18);
 
-            const fetchSuccess = await sor.fetchPools(false);
+            const fetchSuccess = await sor.fetchPools([], false);
             expect(fetchSuccess).to.be.true;
 
             const swapInfo: SwapInfo = await sor.getSwaps(

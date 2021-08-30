@@ -58,7 +58,7 @@ describe('PoolCacher', () => {
                 chainId,
                 poolsFromFile.pools
             );
-            const fetchSuccess = await poolCache.fetchPools(false);
+            const fetchSuccess = await poolCache.fetchPools([], false);
             expect(fetchSuccess).to.be.true;
 
             expect(poolCache.finishedFetchingOnChain).to.be.true;
@@ -83,14 +83,14 @@ describe('PoolCacher', () => {
             } = { pools: testPools.stableOnly };
 
             // First fetch uses data passed as constructor
-            let fetchSuccess = await poolCache.fetchPools(false);
+            let fetchSuccess = await poolCache.fetchPools([], false);
             expect(fetchSuccess).to.be.true;
             expect(poolCache.finishedFetchingOnChain).to.be.true;
             expect(poolsFromFile).not.deep.equal(newPools);
             expect(poolsFromFile.pools).deep.equal(poolCache.getPools());
 
             // Second fetch uses newPools passed
-            fetchSuccess = await poolCache.fetchPools(false, newPools.pools);
+            fetchSuccess = await poolCache.fetchPools(newPools.pools, false);
             expect(fetchSuccess).to.be.true;
             expect(poolCache.finishedFetchingOnChain).to.be.true;
             expect(newPools).to.not.deep.equal(poolsFromFile);
@@ -109,7 +109,7 @@ describe('PoolCacher', () => {
                 poolsFromFile.pools
             );
 
-            const result: boolean = await poolCache.fetchPools(false);
+            const result: boolean = await poolCache.fetchPools([], false);
             expect(result).to.be.true;
             expect(poolCache.finishedFetchingOnChain).to.be.true;
             expect(poolCache.getPools().length).to.be.gt(0);

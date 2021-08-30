@@ -135,7 +135,7 @@ describe(`Tests for Weighted Pools.`, () => {
 
                 const sor = new SOR(provider, chainId, pools);
 
-                const fetchSuccess = await sor.fetchPools(false);
+                const fetchSuccess = await sor.fetchPools([], false);
                 expect(fetchSuccess).to.be.true;
 
                 const swapInfo: SwapInfo = await sor.getSwaps(
@@ -171,7 +171,7 @@ describe(`Tests for Weighted Pools.`, () => {
 
                 const sor = new SOR(provider, chainId, pools);
 
-                const fetchSuccess = await sor.fetchPools(false);
+                const fetchSuccess = await sor.fetchPools([], false);
                 expect(fetchSuccess).to.be.true;
 
                 const swapInfo: SwapInfo = await sor.getSwaps(
@@ -205,7 +205,7 @@ describe(`Tests for Weighted Pools.`, () => {
 
                 const sor = new SOR(provider, chainId, pools);
 
-                const fetchSuccess = await sor.fetchPools(false);
+                const fetchSuccess = await sor.fetchPools([], false);
                 expect(fetchSuccess).to.be.true;
 
                 const swapInfo: SwapInfo = await sor.getSwaps(
@@ -239,7 +239,7 @@ describe(`Tests for Weighted Pools.`, () => {
 
                 const sor = new SOR(provider, chainId, pools);
 
-                const fetchSuccess = await sor.fetchPools(false);
+                const fetchSuccess = await sor.fetchPools([], false);
                 expect(fetchSuccess).to.be.true;
 
                 const swapInfo: SwapInfo = await sor.getSwaps(
@@ -278,7 +278,7 @@ describe(`Tests for Weighted Pools.`, () => {
 
                 const sor = new SOR(provider, chainId, pools);
 
-                const fetchSuccess = await sor.fetchPools(false);
+                const fetchSuccess = await sor.fetchPools([], false);
                 expect(fetchSuccess).to.be.true;
 
                 expect(fetchSuccess).to.be.true;
@@ -329,7 +329,7 @@ describe(`Tests for Weighted Pools.`, () => {
 
                 const sor = new SOR(provider, chainId, pools);
 
-                const fetchSuccess = await sor.fetchPools(false);
+                const fetchSuccess = await sor.fetchPools([], false);
                 expect(fetchSuccess).to.be.true;
 
                 const swapInfo: SwapInfo = await sor.getSwaps(
@@ -380,7 +380,7 @@ describe(`Tests for Weighted Pools.`, () => {
 
                 const sor = new SOR(provider, chainId, pools);
 
-                const fetchSuccess = await sor.fetchPools(false);
+                const fetchSuccess = await sor.fetchPools([], false);
                 expect(fetchSuccess).to.be.true;
 
                 const swapInfo: SwapInfo = await sor.getSwaps(
@@ -431,7 +431,7 @@ describe(`Tests for Weighted Pools.`, () => {
 
                 const sor = new SOR(provider, chainId, pools);
 
-                const fetchSuccess = await sor.fetchPools(false);
+                const fetchSuccess = await sor.fetchPools([], false);
                 expect(fetchSuccess).to.be.true;
 
                 const swapInfo: SwapInfo = await sor.getSwaps(

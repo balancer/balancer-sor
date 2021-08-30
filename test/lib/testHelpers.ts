@@ -364,7 +364,7 @@ export async function getFullSwap(
         );
     }
 
-    const isFetched = await sor.fetchPools(false);
+    const isFetched = await sor.fetchPools([], false);
     assert(isFetched, 'Pools should be fetched in wrapper');
 
     const swapInfo: SwapInfo = await sor.getSwaps(

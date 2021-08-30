@@ -42,8 +42,8 @@ export class PoolCacher {
      * If pools url was passed in to constructor - uses this to fetch pools source.
      */
     async fetchPools(
-        isOnChain = true,
-        poolsData: SubgraphPoolBase[] = []
+        poolsData: SubgraphPoolBase[] = [],
+        isOnChain = true
     ): Promise<boolean> {
         try {
             let newPools: SubgraphPoolBase[];

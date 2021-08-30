@@ -57,7 +57,7 @@ describe(`Tests for wrapper class.`, () => {
 
         const sor = new SOR(provider, chainId, pools);
 
-        const result: boolean = await sor.fetchPools(false);
+        const result: boolean = await sor.fetchPools([],false);
         assert.isTrue(result);
 
         const swapInfo: SwapInfo = await sor.getSwaps(
@@ -105,7 +105,7 @@ describe(`Tests for wrapper class.`, () => {
 
         const sor = new SOR(provider, chainId, pools);
 
-        const result: boolean = await sor.fetchPools(false);
+        const result: boolean = await sor.fetchPools([],false);
         assert.isTrue(result);
 
         const swapInfo: SwapInfo = await sor.getSwaps(
@@ -145,7 +145,7 @@ describe(`Tests for wrapper class.`, () => {
 
         const sor = new SOR(provider, chainId, pools);
 
-        const result: boolean = await sor.fetchPools(false);
+        const result: boolean = await sor.fetchPools([],false);
         assert.isTrue(result);
 
         const swapInfo: SwapInfo = await sor.getSwaps(
@@ -181,7 +181,7 @@ describe(`Tests for wrapper class.`, () => {
 
         const sor = new SOR(provider, chainId, pools);
 
-        const result: boolean = await sor.fetchPools(false);
+        const result: boolean = await sor.fetchPools([],false);
         assert.isTrue(result);
 
         const swapInfo: SwapInfo = await sor.getSwaps(
@@ -224,7 +224,7 @@ describe(`Tests for wrapper class.`, () => {
 
         const sor = new SOR(provider, chainId, pools);
 
-        let result: boolean = await sor.fetchPools(false);
+        let result: boolean = await sor.fetchPools([],false);
         assert.isTrue(result);
 
         const swapInfoEth: SwapInfo = await sor.getSwaps(
@@ -245,7 +245,7 @@ describe(`Tests for wrapper class.`, () => {
             swapInfoEth.tokenAddresses
         );
 
-        result = await sor.fetchPools(false);
+        result = await sor.fetchPools([],false);
         assert.isTrue(result);
 
         const swapInfo: SwapInfo = await sor.getSwaps(
@@ -296,7 +296,7 @@ describe(`Tests for wrapper class.`, () => {
 
         const sor = new SOR(provider, chainId, pools);
 
-        let result: boolean = await sor.fetchPools(false);
+        let result: boolean = await sor.fetchPools([],false);
         assert.isTrue(result);
 
         const swapInfoEth: SwapInfo = await sor.getSwaps(
@@ -313,7 +313,7 @@ describe(`Tests for wrapper class.`, () => {
             swapInfoEth.tokenAddresses
         );
 
-        result = await sor.fetchPools(false);
+        result = await sor.fetchPools([],false);
         assert.isTrue(result);
 
         const swapInfo: SwapInfo = await sor.getSwaps(
@@ -359,7 +359,7 @@ describe(`Tests for wrapper class.`, () => {
 
         const sor = new SOR(provider, chainId, pools);
 
-        let result: boolean = await sor.fetchPools(false);
+        let result: boolean = await sor.fetchPools([],false);
         assert.isTrue(result);
 
         const swapInfoEth: SwapInfo = await sor.getSwaps(
@@ -380,7 +380,7 @@ describe(`Tests for wrapper class.`, () => {
             swapInfoEth.tokenAddresses
         );
 
-        result = await sor.fetchPools(false);
+        result = await sor.fetchPools([],false);
         assert.isTrue(result);
 
         const swapInfo: SwapInfo = await sor.getSwaps(
@@ -430,7 +430,7 @@ describe(`Tests for wrapper class.`, () => {
 
         const sor = new SOR(provider, chainId, pools);
 
-        let result: boolean = await sor.fetchPools(false);
+        let result: boolean = await sor.fetchPools([],false);
         assert.isTrue(result);
 
         const swapInfoEth: SwapInfo = await sor.getSwaps(
@@ -451,7 +451,7 @@ describe(`Tests for wrapper class.`, () => {
             swapInfoEth.tokenAddresses
         );
 
-        result = await sor.fetchPools(false);
+        result = await sor.fetchPools([],false);
         assert.isTrue(result);
 
         const swapInfo: SwapInfo = await sor.getSwaps(
