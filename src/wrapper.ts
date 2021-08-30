@@ -29,10 +29,10 @@ export class SOR {
     swapCostCalculator: SwapCostCalculator;
 
     private readonly defaultSwapOptions: SwapOptions = {
-        gasPrice: new BigNumber('5e9'),
+        gasPrice: new BigNumber('50e9'),
         poolTypeFilter: PoolFilter.All,
         maxPools: 4,
-        timestamp: Date.now() / 1000,
+        timestamp: Math.floor(Date.now() / 1000),
         forceRefresh: false,
     };
 
