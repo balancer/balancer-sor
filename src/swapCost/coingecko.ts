@@ -32,8 +32,7 @@ const getNativeAssetId = (chainId: string | number): string => {
  */
 export async function getTokenPriceInNativeAsset(
     chainId: number,
-    tokenAddress: string,
-    tokenDecimals: number
+    tokenAddress: string
 ): Promise<string> {
     const platformId = getPlatformId(chainId);
     const nativeAssetId = getNativeAssetId(chainId);
@@ -49,7 +48,8 @@ export async function getTokenPriceInNativeAsset(
 
     const data = await response.json();
 
-    const ethPerToken = data[tokenAddress.toLowerCase()][nativeAssetId];
+    if (data[tokenAddress.toLowerCase()][nativeAssetId] === undefined)
+        throw Error('No price returned from Coingecko');
 
-    return scale(bnum(ethPerToken), 18 - tokenDecimals).toString();
+    return data[tokenAddress.toLowerCase()][nativeAssetId];
 }

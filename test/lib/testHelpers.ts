@@ -340,6 +340,10 @@ export async function getFullSwap(
 
     let swapTypeCorrect = SwapTypes.SwapExactIn;
 
+    sor.swapCostCalculator.setTokenDecimals(
+        swapType === 'swapExactIn' ? tokenOut : tokenIn,
+        returnAmountDecimals
+    );
     // We're wanting to set the value of costOutputToken so we calculate
     // a native asset price which will give the desired value
     const effectiveNativeAssetPrice = costOutputToken

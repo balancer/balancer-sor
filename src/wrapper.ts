@@ -1,5 +1,5 @@
 import { BaseProvider } from '@ethersproject/providers';
-import { BigNumber } from './utils/bignumber';
+import { BigNumber, ZERO } from './utils/bignumber';
 import { EMPTY_SWAPINFO } from './constants';
 import { smartOrderRouter } from './router';
 import { getWrappedInfo, setWrappedInfo } from './wrapInfo';
@@ -43,19 +43,18 @@ export class SOR {
     ) {
         this.poolCacher = new PoolCacher(provider, chainId, poolsSource);
         this.routeProposer = new RouteProposer();
-        this.swapCostCalculator = new SwapCostCalculator(chainId);
+        this.swapCostCalculator = new SwapCostCalculator(provider, chainId);
         this.provider = provider;
         this.chainId = chainId;
     }
 
     async getCostOfSwapInToken(
         outputToken: string,
-        tokenDecimals: number,
         gasPrice: BigNumber
     ): Promise<BigNumber> {
+        if (gasPrice.isZero()) return ZERO;
         return this.swapCostCalculator.convertGasCostToToken(
             outputToken,
-            tokenDecimals,
             gasPrice
         );
     }
@@ -168,10 +167,8 @@ export class SOR {
             swapOptions
         );
 
-        const tokenDecimals = 18;
         const costOutputToken = await this.getCostOfSwapInToken(
             swapType === SwapTypes.SwapExactIn ? tokenOut : tokenIn,
-            tokenDecimals,
             swapOptions.gasPrice
         );
 
