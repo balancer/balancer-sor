@@ -24,6 +24,14 @@ export enum PairTypes {
     TokenToToken,
 }
 
+export interface SwapOptions {
+    gasPrice: BigNumber;
+    timestamp: number;
+    maxPools: number;
+    poolTypeFilter: PoolFilter;
+    forceRefresh: boolean;
+}
+
 export interface PoolPairBase {
     balanceIn: BigNumber;
     balanceOut: BigNumber;

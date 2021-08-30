@@ -18,14 +18,8 @@ import {
     Swap,
     SubgraphPoolBase,
     SubGraphPoolsBase,
+    SwapOptions,
 } from './types';
-
-export interface SwapOptions {
-    gasPrice: BigNumber;
-    timestamp: number;
-    maxPools: number;
-    poolTypeFilter: PoolFilter;
-}
 
 export class SOR {
     provider: BaseProvider;
@@ -40,6 +34,7 @@ export class SOR {
         poolTypeFilter: PoolFilter.All,
         maxPools: 4,
         timestamp: Date.now() / 1000,
+        forceRefresh: false,
     };
 
     constructor(
@@ -140,7 +135,6 @@ export class SOR {
                 swapType,
                 wrappedInfo.swapAmountForSwaps,
                 filteredPools,
-                true,
                 options
             );
         }
@@ -158,14 +152,12 @@ export class SOR {
     }
 
     // Will process swap/pools data and return best swaps
-    // useProcessCache can be false to force fresh processing of paths/prices
     private async processSwaps(
         tokenIn: string,
         tokenOut: string,
         swapType: SwapTypes,
         swapAmount: BigNumber,
         pools: SubgraphPoolBase[],
-        useProcessCache = true,
         swapOptions: SwapOptions
     ): Promise<SwapInfo> {
         if (pools.length === 0) return { ...EMPTY_SWAPINFO };
@@ -178,9 +170,7 @@ export class SOR {
             tokenOut,
             swapType,
             pools,
-            swapOptions.maxPools,
-            useProcessCache,
-            swapOptions.timestamp
+            swapOptions
         );
 
         const tokenDecimals = 18;
