@@ -46,7 +46,7 @@ describe('Tests full swaps against known values', () => {
         const returnAmountDecimals = 18;
         const maxPools = 4;
         const swapAmount = new BigNumber('1');
-        const swapCost = new BigNumber('100000');
+        const swapGas = new BigNumber('100000');
         const costOutputToken = new BigNumber('0');
 
         const swapInfo = await getFullSwap(
@@ -60,7 +60,7 @@ describe('Tests full swaps against known values', () => {
             costOutputToken,
             gasPrice,
             provider,
-            swapCost
+            swapGas
         );
 
         assert.equal(swapInfo.swaps.length, 0, 'Should have 0 swaps.');
@@ -78,7 +78,7 @@ describe('Tests full swaps against known values', () => {
         const returnAmountDecimals = 18;
         const maxPools = 4;
         const swapAmount = new BigNumber('1');
-        const swapCost = new BigNumber('100000');
+        const swapGas = new BigNumber('100000');
         const costOutputToken = new BigNumber('0');
 
         const swapInfo = await getFullSwap(
@@ -92,7 +92,7 @@ describe('Tests full swaps against known values', () => {
             costOutputToken,
             gasPrice,
             provider,
-            swapCost
+            swapGas
         );
 
         assert.equal(swapInfo.swaps.length, 0, 'Should have 0 swaps.');
@@ -164,7 +164,7 @@ describe('Tests full swaps against known values', () => {
         const returnAmountDecimals = 6;
         const maxPools = 4;
         const swapAmt = new BigNumber('0.1');
-        const swapCost = new BigNumber('100000');
+        const swapGas = new BigNumber('100000');
         const costOutputToken = new BigNumber('0');
 
         const disabledOptions: DisabledOptions = {
@@ -183,7 +183,7 @@ describe('Tests full swaps against known values', () => {
             costOutputToken,
             gasPrice,
             provider,
-            swapCost,
+            swapGas,
             disabledOptions
         );
 

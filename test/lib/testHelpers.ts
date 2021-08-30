@@ -345,14 +345,13 @@ export async function getFullSwap(
     costOutputToken: BigNumber,
     gasPrice: BigNumber,
     provider: JsonRpcProvider,
-    swapCost: BigNumber = new BigNumber('100000'),
+    swapGas: BigNumber = new BigNumber('100000'),
     disabledOptions: DisabledOptions = { isOverRide: false, disabledTokens: [] }
 ): Promise<SwapInfo> {
     const sor = new sorv2.SOR(
         provider,
         1,
         JSON.parse(JSON.stringify(pools)),
-        swapCost,
         disabledOptions
     );
 
@@ -362,7 +361,7 @@ export async function getFullSwap(
     // a native asset price which will give the desired value
     const effectiveNativeAssetPrice = costOutputToken
         .div(gasPrice)
-        .div(swapCost)
+        .div(swapGas)
         .div(BONE)
         .toString();
     if (swapType === 'swapExactIn')

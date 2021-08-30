@@ -37,7 +37,7 @@ export async function compareTest(
         bnum(10 ** testData.tradeInfo.SwapAmountDecimals)
     );
 
-    const swapCost = bnum('100000'); // A pool swap costs approx 100000 gas
+    const swapGas = bnum('100000'); // A pool swap costs approx 100000 gas
     const costOutputToken = bnum(0);
     const fullSwapStart = performance.now();
     const swapInfo: SwapInfo = await getFullSwap(
@@ -51,7 +51,7 @@ export async function compareTest(
         costOutputToken,
         testData.tradeInfo.GasPrice,
         provider,
-        swapCost,
+        swapGas,
         disabledOptions
     );
     const fullSwapEnd = performance.now();

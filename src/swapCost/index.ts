@@ -4,11 +4,11 @@ import { getTokenPriceInNativeAsset } from './coingecko';
 
 export function calculateTotalSwapCost(
     tokenPrice: BigNumber,
-    swapCost: BigNumber,
+    swapGas: BigNumber,
     gasPriceWei: BigNumber
 ): BigNumber {
     return gasPriceWei
-        .times(swapCost)
+        .times(swapGas)
         .times(tokenPrice)
         .div(BONE);
 }
@@ -16,8 +16,6 @@ export function calculateTotalSwapCost(
 export class SwapCostCalculator {
     private chainId: number;
     private tokenPriceCache: Record<string, string>;
-    // Average gas cost of interacting with a pool. Can be updated manually if required.
-    swapCost: BigNumber;
 
     private initializeCache(): void {
         this.tokenPriceCache = {
@@ -26,12 +24,8 @@ export class SwapCostCalculator {
         };
     }
 
-    constructor(
-        chainId: number,
-        swapCost: BigNumber = new BigNumber('100000')
-    ) {
+    constructor(chainId: number) {
         this.chainId = chainId;
-        this.swapCost = swapCost;
         this.initializeCache();
     }
 
@@ -96,11 +90,12 @@ export class SwapCostCalculator {
     async convertGasCostToToken(
         tokenAddress: string,
         tokenDecimals: number,
-        gasPriceWei: BigNumber
+        gasPriceWei: BigNumber,
+        swapGas: BigNumber = new BigNumber('35000')
     ): Promise<BigNumber> {
         return calculateTotalSwapCost(
             await this.getNativeAssetPriceInToken(tokenAddress, tokenDecimals),
-            this.swapCost,
+            swapGas,
             gasPriceWei
         );
     }

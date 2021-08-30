@@ -48,7 +48,6 @@ export class SOR {
         provider: BaseProvider,
         chainId: number,
         poolsSource: string | SubGraphPoolsBase,
-        swapCost?: BigNumber,
         disabledOptions: DisabledOptions = {
             isOverRide: false,
             disabledTokens: [],
@@ -60,10 +59,10 @@ export class SOR {
             typeof poolsSource === 'string' ? poolsSource : poolsSource.pools
         );
         this.routeProposer = new RouteProposer(disabledOptions);
+        this.swapCostCalculator = new SwapCostCalculator(chainId);
         this.provider = provider;
         this.chainId = chainId;
         this.disabledOptions = disabledOptions;
-        this.swapCostCalculator = new SwapCostCalculator(chainId, swapCost);
     }
 
     async getCostOfSwapInToken(
