@@ -2,11 +2,8 @@ import { JsonRpcProvider } from '@ethersproject/providers';
 import { BigNumber } from 'bignumber.js';
 import * as sorv2 from '../../src';
 import {
-    SubGraphPoolsBase,
     SubgraphPoolBase,
     Swap,
-    DisabledToken,
-    DisabledOptions,
     PoolDictionary,
     SwapPairType,
     SwapTypes,
@@ -17,7 +14,6 @@ import {
 import { bnum, BONE } from '../../src/utils/bignumber';
 import * as fs from 'fs';
 import { assert } from 'chai';
-import { getAddress } from '@ethersproject/address';
 // Mainnet reference tokens with addresses & decimals
 import WeightedTokens from '../testData/eligibleTokens.json';
 import StableTokens from '../testData/stableTokens.json';
@@ -59,34 +55,27 @@ export interface ResultParsed {
 
 // Filters for only pools with balance and returns token list too.
 export function filterPoolsAndTokens(
-    allPools: SubGraphPoolsBase,
-    disabledTokens: DisabledToken[] = []
-): [Set<unknown>, SubGraphPoolsBase] {
+    allPools: SubgraphPoolBase[]
+): [Set<unknown>, SubgraphPoolBase[]] {
     const allTokens = [];
     let allTokensSet = new Set();
-    const allPoolsNonZeroBalances: SubGraphPoolsBase = { pools: [] };
+    const allPoolsNonZeroBalances: SubgraphPoolBase[] = [];
 
-    for (const pool of allPools.pools) {
+    for (const pool of allPools) {
         // Build list of non-zero balance pools
         // Only check first balance since AFAIK either all balances are zero or none are:
         if (pool.tokens.length != 0) {
             if (pool.tokens[0].balance != '0') {
                 const tokens = [];
                 pool.tokensList.forEach(token => {
-                    if (
-                        !disabledTokens.find(
-                            t => getAddress(t.address) === getAddress(token)
-                        )
-                    ) {
-                        tokens.push(token);
-                    }
+                    tokens.push(token);
                 });
 
                 if (tokens.length > 1) {
                     allTokens.push(tokens.sort()); // Will add without duplicate
                 }
 
-                allPoolsNonZeroBalances.pools.push(pool);
+                allPoolsNonZeroBalances.push(pool);
             }
         }
     }
@@ -335,7 +324,7 @@ export function countPoolSwapPairTypes(
 }
 
 export async function getFullSwap(
-    pools: SubGraphPoolsBase,
+    pools: SubgraphPoolBase[],
     tokenIn: string,
     tokenOut: string,
     returnAmountDecimals: number,
@@ -345,26 +334,26 @@ export async function getFullSwap(
     costOutputToken: BigNumber,
     gasPrice: BigNumber,
     provider: JsonRpcProvider,
-    swapCost: BigNumber = new BigNumber('100000'),
-    disabledOptions: DisabledOptions = { isOverRide: false, disabledTokens: [] }
+    swapGas: BigNumber = new BigNumber('100000')
 ): Promise<SwapInfo> {
     const sor = new sorv2.SOR(
         provider,
-        gasPrice,
-        maxPools,
         1,
-        JSON.parse(JSON.stringify(pools)),
-        swapCost,
-        disabledOptions
+        null,
+        JSON.parse(JSON.stringify(pools))
     );
 
     let swapTypeCorrect = SwapTypes.SwapExactIn;
 
+    sor.swapCostCalculator.setTokenDecimals(
+        swapType === 'swapExactIn' ? tokenOut : tokenIn,
+        returnAmountDecimals
+    );
     // We're wanting to set the value of costOutputToken so we calculate
     // a native asset price which will give the desired value
     const effectiveNativeAssetPrice = costOutputToken
         .div(gasPrice)
-        .div(swapCost)
+        .div(swapGas)
         .div(BONE)
         .toString();
     if (swapType === 'swapExactIn')
@@ -380,7 +369,7 @@ export async function getFullSwap(
         );
     }
 
-    const isFetched = await sor.fetchPools(false);
+    const isFetched = await sor.fetchPools([], false);
     assert(isFetched, 'Pools should be fetched in wrapper');
 
     const swapInfo: SwapInfo = await sor.getSwaps(
@@ -388,7 +377,7 @@ export async function getFullSwap(
         tokenOut,
         swapTypeCorrect,
         swapAmountNormalised,
-        { timestamp: 0, poolTypeFilter: PoolFilter.All }
+        { gasPrice, maxPools, timestamp: 0, poolTypeFilter: PoolFilter.All }
     );
 
     return swapInfo;

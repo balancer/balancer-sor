@@ -2,14 +2,8 @@ require('dotenv').config();
 import { expect } from 'chai';
 import { JsonRpcProvider } from '@ethersproject/providers';
 import { SOR } from '../src';
-import {
-    SubGraphPoolsBase,
-    SwapInfo,
-    SwapTypes,
-    PoolTypes,
-    PairTypes,
-} from '../src/types';
-import { BigNumber, bnum, scale } from '../src/utils/bignumber';
+import { SwapInfo, SwapTypes, SubgraphPoolBase } from '../src/types';
+import { BigNumber, bnum } from '../src/utils/bignumber';
 
 const gasPrice = bnum('30000000000');
 const maxPools = 4;
@@ -34,28 +28,27 @@ describe(`Tests for LBP Pools.`, () => {
     */
     context('lbp pool', () => {
         it(`Full Swap - swapExactIn, Swaps not paused so should have route`, async () => {
-            const poolsFromFile: SubGraphPoolsBase = require('./testData/lbpPools/singlePool.json');
+            const poolsFromFile: {
+                pools: SubgraphPoolBase[];
+            } = require('./testData/lbpPools/singlePool.json');
+            const pools = poolsFromFile.pools;
+
             const tokenIn = DAI;
             const tokenOut = USDC;
             const swapType = SwapTypes.SwapExactIn;
             const swapAmt: BigNumber = bnum('1');
 
-            const sor = new SOR(
-                provider,
-                gasPrice,
-                maxPools,
-                chainId,
-                poolsFromFile
-            );
+            const sor = new SOR(provider, chainId, null, pools);
 
-            const fetchSuccess = await sor.fetchPools(false);
+            const fetchSuccess = await sor.fetchPools([], false);
             expect(fetchSuccess).to.be.true;
 
             const swapInfo: SwapInfo = await sor.getSwaps(
                 tokenIn,
                 tokenOut,
                 swapType,
-                swapAmt
+                swapAmt,
+                { gasPrice, maxPools }
             );
 
             expect(poolsFromFile.pools[0].swapEnabled).to.be.true;
@@ -64,30 +57,28 @@ describe(`Tests for LBP Pools.`, () => {
         });
 
         it(`Full Swap - swapExactIn, Swaps paused so should have no route`, async () => {
-            const poolsFromFile: SubGraphPoolsBase = require('./testData/lbpPools/singlePool.json');
+            const poolsFromFile: {
+                pools: SubgraphPoolBase[];
+            } = require('./testData/lbpPools/singlePool.json');
+            const pools = poolsFromFile.pools;
             // Set paused to true
-            poolsFromFile.pools[0].swapEnabled = false;
+            pools[0].swapEnabled = false;
             const tokenIn = DAI;
             const tokenOut = USDC;
             const swapType = SwapTypes.SwapExactIn;
             const swapAmt: BigNumber = bnum('1');
 
-            const sor = new SOR(
-                provider,
-                gasPrice,
-                maxPools,
-                chainId,
-                poolsFromFile
-            );
+            const sor = new SOR(provider, chainId, null, pools);
 
-            const fetchSuccess = await sor.fetchPools(false);
+            const fetchSuccess = await sor.fetchPools([], false);
             expect(fetchSuccess).to.be.true;
 
             const swapInfo: SwapInfo = await sor.getSwaps(
                 tokenIn,
                 tokenOut,
                 swapType,
-                swapAmt
+                swapAmt,
+                { gasPrice, maxPools }
             );
 
             expect(poolsFromFile.pools[0].swapEnabled).to.be.false;

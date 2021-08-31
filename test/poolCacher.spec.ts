@@ -2,7 +2,7 @@ require('dotenv').config();
 import { JsonRpcProvider } from '@ethersproject/providers';
 import { expect } from 'chai';
 import { PoolCacher } from '../src/poolCaching';
-import { SubGraphPoolsBase } from '../src/types';
+import { SubgraphPoolBase } from '../src/types';
 
 const provider = new JsonRpcProvider(
     `https://mainnet.infura.io/v3/${process.env.INFURA}`
@@ -20,17 +20,21 @@ describe('PoolCacher', () => {
             );
             expect(connectedPoolCache.isConnectedToSubgraph()).to.be.true;
 
-            const disconnectedpoolCache = new PoolCacher(provider, chainId, []);
+            const disconnectedpoolCache = new PoolCacher(
+                provider,
+                chainId,
+                null,
+                []
+            );
             expect(disconnectedpoolCache.isConnectedToSubgraph()).to.be.false;
         });
 
         it(`should set pools source to pools passed`, () => {
-            const poolsFromFile: SubGraphPoolsBase = require('./testData/testPools/subgraphPoolsSmallWithTrade.json');
-            const poolCache = new PoolCacher(
-                provider,
-                chainId,
-                poolsFromFile.pools
-            );
+            const poolsFromFile: {
+                pools: SubgraphPoolBase[];
+            } = require('./testData/testPools/subgraphPoolsSmallWithTrade.json');
+            const pools = poolsFromFile.pools;
+            const poolCache = new PoolCacher(provider, chainId, null, pools);
 
             expect(poolCache.getPools()).to.deep.eq(poolsFromFile.pools);
         });
@@ -46,13 +50,13 @@ describe('PoolCacher', () => {
         }).timeout(100000);
 
         it(`should fetch with NO scaling`, async () => {
-            const poolsFromFile: SubGraphPoolsBase = require('./testData/testPools/subgraphPoolsSmallWithTrade.json');
-            const poolCache = new PoolCacher(
-                provider,
-                chainId,
-                poolsFromFile.pools
-            );
-            const fetchSuccess = await poolCache.fetchPools(false);
+            const poolsFromFile: {
+                pools: SubgraphPoolBase[];
+            } = require('./testData/testPools/subgraphPoolsSmallWithTrade.json');
+            const pools = poolsFromFile.pools;
+            const poolCache = new PoolCacher(provider, chainId, null, pools);
+
+            const fetchSuccess = await poolCache.fetchPools([], false);
             expect(fetchSuccess).to.be.true;
 
             expect(poolCache.finishedFetchingOnChain).to.be.true;
@@ -62,25 +66,26 @@ describe('PoolCacher', () => {
         });
 
         it(`should overwrite pools passed as input`, async () => {
-            const poolsFromFile: SubGraphPoolsBase = require('./testData/testPools/subgraphPoolsSmallWithTrade.json');
-            const poolCache = new PoolCacher(
-                provider,
-                chainId,
-                poolsFromFile.pools
-            );
+            const poolsFromFile: {
+                pools: SubgraphPoolBase[];
+            } = require('./testData/testPools/subgraphPoolsSmallWithTrade.json');
+            const pools = poolsFromFile.pools;
+            const poolCache = new PoolCacher(provider, chainId, null, pools);
 
             const testPools = require('./testData/filterTestPools.json');
-            const newPools: SubGraphPoolsBase = { pools: testPools.stableOnly };
+            const newPools: {
+                pools: SubgraphPoolBase[];
+            } = { pools: testPools.stableOnly };
 
             // First fetch uses data passed as constructor
-            let fetchSuccess = await poolCache.fetchPools(false);
+            let fetchSuccess = await poolCache.fetchPools([], false);
             expect(fetchSuccess).to.be.true;
             expect(poolCache.finishedFetchingOnChain).to.be.true;
             expect(poolsFromFile).not.deep.equal(newPools);
             expect(poolsFromFile.pools).deep.equal(poolCache.getPools());
 
             // Second fetch uses newPools passed
-            fetchSuccess = await poolCache.fetchPools(false, newPools.pools);
+            fetchSuccess = await poolCache.fetchPools(newPools.pools, false);
             expect(fetchSuccess).to.be.true;
             expect(poolCache.finishedFetchingOnChain).to.be.true;
             expect(newPools).to.not.deep.equal(poolsFromFile);
@@ -89,14 +94,13 @@ describe('PoolCacher', () => {
         });
 
         it(`should work with no onChain Balances`, async () => {
-            const poolsFromFile: SubGraphPoolsBase = require('./testData/testPools/subgraphPoolsSmallWithTrade.json');
-            const poolCache = new PoolCacher(
-                provider,
-                chainId,
-                poolsFromFile.pools
-            );
+            const poolsFromFile: {
+                pools: SubgraphPoolBase[];
+            } = require('./testData/testPools/subgraphPoolsSmallWithTrade.json');
+            const pools = poolsFromFile.pools;
+            const poolCache = new PoolCacher(provider, chainId, null, pools);
 
-            const result: boolean = await poolCache.fetchPools(false);
+            const result: boolean = await poolCache.fetchPools([], false);
             expect(result).to.be.true;
             expect(poolCache.finishedFetchingOnChain).to.be.true;
             expect(poolCache.getPools().length).to.be.gt(0);

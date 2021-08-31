@@ -1,9 +1,9 @@
 import { BaseProvider } from '@ethersproject/providers';
+import { AddressZero } from '@ethersproject/constants';
 import { Contract } from '@ethersproject/contracts';
-import { SwapInfo, SwapTypes, SwapV2, SubGraphPoolsBase } from '../../types';
-import { parseNewPool } from '../index';
-import { ZERO, scale, bnum, BigNumber } from '../../utils/bignumber';
-import { ZERO_ADDRESS } from '../../index';
+import { SubgraphPoolBase, SwapInfo, SwapTypes, SwapV2 } from '../../types';
+import { parseNewPool } from '../../pools';
+import { BigNumber, ZERO, scale, bnum } from '../../utils/bignumber';
 import vaultAbi from '../../abi/Vault.json';
 import { EMPTY_SWAPINFO } from '../../constants';
 
@@ -818,8 +818,8 @@ async function queryBatchSwap(
     const vaultAddr = '0xBA12222222228d8Ba445958a75a0704d566BF2C8';
     const vaultContract = new Contract(vaultAddr, vaultAbi, provider);
     const funds = {
-        sender: ZERO_ADDRESS,
-        recipient: ZERO_ADDRESS,
+        sender: AddressZero,
+        recipient: AddressZero,
         fromInternalBalance: false,
         toInternalBalance: false,
     };
@@ -851,14 +851,14 @@ function calculateMarketSp(
     swapType: SwapTypes,
     swaps: SwapV2[],
     assets: string[],
-    pools: SubGraphPoolsBase
+    pools: SubgraphPoolBase[]
 ): BigNumber {
     const spotPrices: BigNumber[] = [];
     for (let i = 0; i < swaps.length; i++) {
         const swap = swaps[i];
 
         // Find matching pool from list so we can use balances, etc
-        const pool = pools.pools.filter(p => p.id === swap.poolId);
+        const pool = pools.filter(p => p.id === swap.poolId);
         if (pool.length !== 1) return bnum(0);
 
         // This will get a specific pool type so we can call parse and spot price functions
@@ -912,7 +912,7 @@ Used when SOR doesn't support paths with more than one hop.
 Enables swapping of stables <> wstETH via WETH/DAI pool which has good liquidity.
 */
 export async function getLidoStaticSwaps(
-    pools: SubGraphPoolsBase,
+    pools: SubgraphPoolBase[],
     chainId: number,
     tokenIn: string,
     tokenOut: string,
@@ -972,7 +972,7 @@ export async function getLidoStaticSwaps(
     );
 
     if (swapInfo.returnAmount.isZero()) {
-        return {...EMPTY_SWAPINFO};
+        return { ...EMPTY_SWAPINFO };
     }
 
     // Considering fees shouldn't matter as there won't be alternative options on V1

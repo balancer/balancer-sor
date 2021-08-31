@@ -1,6 +1,5 @@
 import { ALLOW_ADD_REMOVE } from '../config';
 import {
-    DisabledOptions,
     SubgraphPoolBase,
     PoolDictionary,
     SwapPairType,
@@ -15,7 +14,6 @@ import { ElementPool } from '../pools/elementPool/elementPool';
 import { MetaStablePool } from '../pools/metaStablePool/metaStablePool';
 import { ZERO } from '../utils/bignumber';
 
-import disabledTokensDefault from './disabled-tokens.json';
 import { parseNewPool } from '../pools';
 
 export const filterPoolsByType = (
@@ -42,10 +40,6 @@ export function filterPoolsOfInterest(
     tokenIn: string,
     tokenOut: string,
     maxPools: number,
-    disabledOptions: DisabledOptions = {
-        isOverRide: false,
-        disabledTokens: [],
-    },
     currentBlockTimestamp = 0
 ): [PoolDictionary, string[]] {
     const poolsDictionary: PoolDictionary = {};
@@ -56,10 +50,6 @@ export function filterPoolsOfInterest(
     // tokens that are in pools that already contain tokenOut (in which case multi-hop is not necessary)
     let tokenInPairedTokens: Set<string> = new Set();
     let tokenOutPairedTokens: Set<string> = new Set();
-
-    let disabledTokens = disabledTokensDefault.tokens;
-    if (disabledOptions.isOverRide)
-        disabledTokens = disabledOptions.disabledTokens;
 
     allPools.forEach(pool => {
         if (pool.tokensList.length === 0 || pool.tokens[0].balance === '0') {
@@ -79,7 +69,6 @@ export function filterPoolsOfInterest(
         // we can join/exit as part of the multihop
         if (ALLOW_ADD_REMOVE) tokenListSet.add(pool.address);
 
-        disabledTokens.forEach(token => tokenListSet.delete(token.address));
         // This is a direct pool as has both tokenIn and tokenOut
         if (
             (tokenListSet.has(tokenIn) && tokenListSet.has(tokenOut)) ||

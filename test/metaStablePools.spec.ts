@@ -3,11 +3,11 @@ import { expect } from 'chai';
 import { JsonRpcProvider } from '@ethersproject/providers';
 import { SOR } from '../src';
 import {
-    SubGraphPoolsBase,
     SwapInfo,
     SwapTypes,
     PoolTypes,
     PairTypes,
+    SubgraphPoolBase,
 } from '../src/types';
 import { BigNumber, bnum, scale } from '../src/utils/bignumber';
 import {
@@ -33,26 +33,24 @@ const randomETH = '0x42d6622dece394b54999fbd73d108123806f6a18';
 // const PTSP = '0x5f304f6cf88dc76b414f301e05adfb5a429e8b67';
 
 async function getStableComparrison(
-    stablePools: SubGraphPoolsBase,
+    stablePools: SubgraphPoolBase[],
     tokenIn: string,
     tokenOut: string,
     swapType: SwapTypes,
     swapAmt: BigNumber
 ): Promise<SwapInfo> {
-    const sorStable = new SOR(
-        provider,
-        gasPrice,
-        maxPools,
-        chainId,
-        stablePools
-    );
-    await sorStable.fetchPools(false);
+    const sorStable = new SOR(provider, chainId, null, stablePools);
+    await sorStable.fetchPools([], false);
 
     const swapInfoStable: SwapInfo = await sorStable.getSwaps(
         tokenIn,
         tokenOut,
         swapType,
-        swapAmt
+        swapAmt,
+        {
+            gasPrice,
+            maxPools,
+        }
     );
 
     return swapInfoStable;
@@ -174,24 +172,25 @@ describe(`Tests for MetaStable Pools.`, () => {
     context('direct pool', () => {
         it(`Full Swap - swapExactIn No Route`, async () => {
             const poolsFromFile = require('./testData/metaStablePools/singlePool.json');
-            const pools: SubGraphPoolsBase = {
-                pools: JSON.parse(JSON.stringify(poolsFromFile.metaStablePool)),
-            };
+            const pools: SubgraphPoolBase[] = JSON.parse(
+                JSON.stringify(poolsFromFile.metaStablePool)
+            );
             const tokenIn = BAL;
             const tokenOut = USDC;
             const swapType = SwapTypes.SwapExactIn;
             const swapAmt: BigNumber = bnum('1');
 
-            const sor = new SOR(provider, gasPrice, maxPools, chainId, pools);
+            const sor = new SOR(provider, chainId, null, pools);
 
-            const fetchSuccess = await sor.fetchPools(false);
+            const fetchSuccess = await sor.fetchPools([], false);
             expect(fetchSuccess).to.be.true;
 
             const swapInfo: SwapInfo = await sor.getSwaps(
                 tokenIn,
                 tokenOut,
                 swapType,
-                swapAmt
+                swapAmt,
+                { gasPrice, maxPools }
             );
 
             expect(swapInfo.returnAmount.toString()).eq('0');
@@ -200,24 +199,25 @@ describe(`Tests for MetaStable Pools.`, () => {
 
         it(`Full Swap - swapExactOut No Route`, async () => {
             const poolsFromFile = require('./testData/metaStablePools/singlePool.json');
-            const pools: SubGraphPoolsBase = {
-                pools: JSON.parse(JSON.stringify(poolsFromFile.metaStablePool)),
-            };
+            const pools: SubgraphPoolBase[] = JSON.parse(
+                JSON.stringify(poolsFromFile.metaStablePool)
+            );
             const tokenIn = BAL;
             const tokenOut = USDC;
             const swapType = SwapTypes.SwapExactOut;
             const swapAmt: BigNumber = bnum('1');
 
-            const sor = new SOR(provider, gasPrice, maxPools, chainId, pools);
+            const sor = new SOR(provider, chainId, null, pools);
 
-            const fetchSuccess = await sor.fetchPools(false);
+            const fetchSuccess = await sor.fetchPools([], false);
             expect(fetchSuccess).to.be.true;
 
             const swapInfo: SwapInfo = await sor.getSwaps(
                 tokenIn,
                 tokenOut,
                 swapType,
-                swapAmt
+                swapAmt,
+                { gasPrice, maxPools }
             );
 
             expect(swapInfo.returnAmount.toString()).eq('0');
@@ -226,9 +226,9 @@ describe(`Tests for MetaStable Pools.`, () => {
 
         it(`Full Swap - swapExactIn, Token ETH >Token Meta`, async () => {
             const poolsFromFile = require('./testData/metaStablePools/singlePool.json');
-            const pools: SubGraphPoolsBase = {
-                pools: JSON.parse(JSON.stringify(poolsFromFile.metaStablePool)),
-            };
+            const pools: SubgraphPoolBase[] = JSON.parse(
+                JSON.stringify(poolsFromFile.metaStablePool)
+            );
             const tokenIn = WETH;
             const tokenInPriceRate = bnum(1);
             const tokenOut = stETH;
@@ -236,21 +236,21 @@ describe(`Tests for MetaStable Pools.`, () => {
             const swapType = SwapTypes.SwapExactIn;
             const swapAmt: BigNumber = bnum('1'); // Would expect ~ 2 back
 
-            const sor = new SOR(provider, gasPrice, maxPools, chainId, pools);
+            const sor = new SOR(provider, chainId, null, pools);
 
-            const fetchSuccess = await sor.fetchPools(false);
+            const fetchSuccess = await sor.fetchPools([], false);
             expect(fetchSuccess).to.be.true;
 
             const swapInfo: SwapInfo = await sor.getSwaps(
                 tokenIn,
                 tokenOut,
                 swapType,
-                swapAmt
+                swapAmt,
+                { gasPrice, maxPools }
             );
 
-            const stablePools: SubGraphPoolsBase = {
-                pools: poolsFromFile.stablePool,
-            };
+            const stablePools: SubgraphPoolBase[] = poolsFromFile.stablePool;
+
             const swapInfoStable = await getStableComparrison(
                 stablePools,
                 tokenIn,
@@ -293,9 +293,9 @@ describe(`Tests for MetaStable Pools.`, () => {
 
         it(`Full Swap - swapExactIn, Token Meta > Token ETH`, async () => {
             const poolsFromFile = require('./testData/metaStablePools/singlePool.json');
-            const pools: SubGraphPoolsBase = {
-                pools: JSON.parse(JSON.stringify(poolsFromFile.metaStablePool)),
-            };
+            const pools: SubgraphPoolBase[] = JSON.parse(
+                JSON.stringify(poolsFromFile.metaStablePool)
+            );
             const tokenIn = stETH;
             const tokenInPriceRate = bnum(0.5);
             const tokenOut = WETH;
@@ -303,21 +303,21 @@ describe(`Tests for MetaStable Pools.`, () => {
             const swapType = SwapTypes.SwapExactIn;
             const swapAmt: BigNumber = bnum('2'); // Would expect ~ 1 back
 
-            const sor = new SOR(provider, gasPrice, maxPools, chainId, pools);
+            const sor = new SOR(provider, chainId, null, pools);
 
-            const fetchSuccess = await sor.fetchPools(false);
+            const fetchSuccess = await sor.fetchPools([], false);
             expect(fetchSuccess).to.be.true;
 
             const swapInfo: SwapInfo = await sor.getSwaps(
                 tokenIn,
                 tokenOut,
                 swapType,
-                swapAmt
+                swapAmt,
+                { gasPrice, maxPools }
             );
 
-            const stablePools: SubGraphPoolsBase = {
-                pools: poolsFromFile.stablePool,
-            };
+            const stablePools: SubgraphPoolBase[] = poolsFromFile.stablePool;
+
             // Should be same as a 1/1 stable pool with swapAmt * priceRate, i.e swapAmt = 1 in this case
             const swapInfoStable = await getStableComparrison(
                 stablePools,
@@ -358,9 +358,9 @@ describe(`Tests for MetaStable Pools.`, () => {
 
         it(`Full Swap - swapExactOut, Token ETH >Token Meta`, async () => {
             const poolsFromFile = require('./testData/metaStablePools/singlePool.json');
-            const pools: SubGraphPoolsBase = {
-                pools: JSON.parse(JSON.stringify(poolsFromFile.metaStablePool)),
-            };
+            const pools: SubgraphPoolBase[] = JSON.parse(
+                JSON.stringify(poolsFromFile.metaStablePool)
+            );
             const tokenIn = WETH;
             const tokenInPriceRate = bnum(1);
             const tokenOut = stETH;
@@ -368,21 +368,21 @@ describe(`Tests for MetaStable Pools.`, () => {
             const swapType = SwapTypes.SwapExactOut;
             const swapAmt: BigNumber = bnum('2'); // Would expect ~ 1 as input
 
-            const sor = new SOR(provider, gasPrice, maxPools, chainId, pools);
+            const sor = new SOR(provider, chainId, null, pools);
 
-            const fetchSuccess = await sor.fetchPools(false);
+            const fetchSuccess = await sor.fetchPools([], false);
             expect(fetchSuccess).to.be.true;
 
             const swapInfo: SwapInfo = await sor.getSwaps(
                 tokenIn,
                 tokenOut,
                 swapType,
-                swapAmt
+                swapAmt,
+                { gasPrice, maxPools }
             );
 
-            const stablePools: SubGraphPoolsBase = {
-                pools: poolsFromFile.stablePool,
-            };
+            const stablePools: SubgraphPoolBase[] = poolsFromFile.stablePool;
+
             const swapInfoStable = await getStableComparrison(
                 stablePools,
                 tokenIn,
@@ -422,9 +422,9 @@ describe(`Tests for MetaStable Pools.`, () => {
 
         it(`Full Swap - swapExactOut, Token Meta > Token ETH`, async () => {
             const poolsFromFile = require('./testData/metaStablePools/singlePool.json');
-            const pools: SubGraphPoolsBase = {
-                pools: JSON.parse(JSON.stringify(poolsFromFile.metaStablePool)),
-            };
+            const pools: SubgraphPoolBase[] = JSON.parse(
+                JSON.stringify(poolsFromFile.metaStablePool)
+            );
             const tokenIn = stETH;
             const tokenInPriceRate = bnum(0.5);
             const tokenOut = WETH;
@@ -432,21 +432,21 @@ describe(`Tests for MetaStable Pools.`, () => {
             const swapType = SwapTypes.SwapExactOut;
             const swapAmt: BigNumber = bnum('2'); // Would expect ~ 4 as input
 
-            const sor = new SOR(provider, gasPrice, maxPools, chainId, pools);
+            const sor = new SOR(provider, chainId, null, pools);
 
-            const fetchSuccess = await sor.fetchPools(false);
+            const fetchSuccess = await sor.fetchPools([], false);
             expect(fetchSuccess).to.be.true;
 
             const swapInfo: SwapInfo = await sor.getSwaps(
                 tokenIn,
                 tokenOut,
                 swapType,
-                swapAmt
+                swapAmt,
+                { gasPrice, maxPools }
             );
 
-            const stablePools: SubGraphPoolsBase = {
-                pools: poolsFromFile.stablePool,
-            };
+            const stablePools: SubgraphPoolBase[] = poolsFromFile.stablePool;
+
             const swapInfoStable = await getStableComparrison(
                 stablePools,
                 tokenIn,
@@ -491,11 +491,9 @@ describe(`Tests for MetaStable Pools.`, () => {
         it(`Full Swap - swapExactIn, Token>Token`, async () => {
             // With meta token as hop the result in/out should be same as a normal stable pool
             const poolsFromFile = require('./testData/metaStablePools/multihop.json');
-            const pools: SubGraphPoolsBase = {
-                pools: JSON.parse(
-                    JSON.stringify(poolsFromFile.metaStablePools)
-                ),
-            };
+            const pools: SubgraphPoolBase[] = JSON.parse(
+                JSON.stringify(poolsFromFile.metaStablePools)
+            );
             const tokenIn = WETH;
             const tokenInPriceRate = bnum(1);
             const tokenHop = stETH;
@@ -505,21 +503,20 @@ describe(`Tests for MetaStable Pools.`, () => {
             const swapType = SwapTypes.SwapExactIn;
             const swapAmt: BigNumber = bnum('77.723');
 
-            const sor = new SOR(provider, gasPrice, maxPools, chainId, pools);
+            const sor = new SOR(provider, chainId, null, pools);
 
-            const fetchSuccess = await sor.fetchPools(false);
+            const fetchSuccess = await sor.fetchPools([], false);
             expect(fetchSuccess).to.be.true;
 
             const swapInfo: SwapInfo = await sor.getSwaps(
                 tokenIn,
                 tokenOut,
                 swapType,
-                swapAmt
+                swapAmt,
+                { gasPrice, maxPools }
             );
 
-            const stablePools: SubGraphPoolsBase = {
-                pools: poolsFromFile.stablePools,
-            };
+            const stablePools: SubgraphPoolBase[] = poolsFromFile.stablePools;
             // Same as stable with
             const swapInfoStable = await getStableComparrison(
                 stablePools,
@@ -564,11 +561,9 @@ describe(`Tests for MetaStable Pools.`, () => {
         it(`Full Swap - swapExactOut, Token>Token`, async () => {
             // With meta token as hop the result in/out should be same as a normal stable pool
             const poolsFromFile = require('./testData/metaStablePools/multihop.json');
-            const pools: SubGraphPoolsBase = {
-                pools: JSON.parse(
-                    JSON.stringify(poolsFromFile.metaStablePools)
-                ),
-            };
+            const pools: SubgraphPoolBase[] = JSON.parse(
+                JSON.stringify(poolsFromFile.metaStablePools)
+            );
             const tokenIn = WETH;
             const tokenInPriceRate = bnum(1);
             const tokenHop = stETH;
@@ -578,21 +573,21 @@ describe(`Tests for MetaStable Pools.`, () => {
             const swapType = SwapTypes.SwapExactOut;
             const swapAmt: BigNumber = bnum('77.8');
 
-            const sor = new SOR(provider, gasPrice, maxPools, chainId, pools);
+            const sor = new SOR(provider, chainId, null, pools);
 
-            const fetchSuccess = await sor.fetchPools(false);
+            const fetchSuccess = await sor.fetchPools([], false);
             expect(fetchSuccess).to.be.true;
 
             const swapInfo: SwapInfo = await sor.getSwaps(
                 tokenIn,
                 tokenOut,
                 swapType,
-                swapAmt
+                swapAmt,
+                { gasPrice, maxPools }
             );
 
-            const stablePools: SubGraphPoolsBase = {
-                pools: poolsFromFile.stablePools,
-            };
+            const stablePools: SubgraphPoolBase[] = poolsFromFile.stablePools;
+
             // Same as stable with
             const swapInfoStable = await getStableComparrison(
                 stablePools,
@@ -654,7 +649,7 @@ describe(`Tests for MetaStable Pools.`, () => {
 
         //     const sor = new SOR(provider, gasPrice, maxPools, chainId, pools);
 
-        //     const fetchSuccess = await sor.fetchPools(false);
+        //     const fetchSuccess = await sor.fetchPools([],false);
         //     expect(fetchSuccess).to.be.true;
 
         //     let swapInfo: SwapInfo = await sor.getSwaps(
@@ -729,7 +724,7 @@ describe(`Tests for MetaStable Pools.`, () => {
     //                 poolsFromFile
     //             );
 
-    //             const fetchSuccess = await sor.fetchPools(false);
+    //             const fetchSuccess = await sor.fetchPools([],false);
     //             expect(fetchSuccess).to.be.true;
 
     //             let swapInfo: SwapInfo = await sor.getSwaps(
@@ -765,7 +760,7 @@ describe(`Tests for MetaStable Pools.`, () => {
     //                 poolsFromFile
     //             );
 
-    //             const fetchSuccess = await sor.fetchPools(false);
+    //             const fetchSuccess = await sor.fetchPools([],false);
     //             expect(fetchSuccess).to.be.true;
 
     //             let swapInfo: SwapInfo = await sor.getSwaps(
@@ -800,7 +795,7 @@ describe(`Tests for MetaStable Pools.`, () => {
     //                 poolsFromFile
     //             );
 
-    //             const fetchSuccess = await sor.fetchPools(false);
+    //             const fetchSuccess = await sor.fetchPools([],false);
     //             expect(fetchSuccess).to.be.true;
 
     //             let swapInfo: SwapInfo = await sor.getSwaps(
@@ -836,7 +831,7 @@ describe(`Tests for MetaStable Pools.`, () => {
     //                 poolsFromFile
     //             );
 
-    //             const fetchSuccess = await sor.fetchPools(false);
+    //             const fetchSuccess = await sor.fetchPools([],false);
     //             expect(fetchSuccess).to.be.true;
 
     //             let swapInfo: SwapInfo = await sor.getSwaps(

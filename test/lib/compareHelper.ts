@@ -9,7 +9,7 @@ import {
     parseV1Result,
 } from './testHelpers';
 import { bnum } from '../../src/utils/bignumber';
-import { SwapInfo, DisabledOptions } from '../../src/types';
+import { SwapInfo } from '../../src/types';
 import BigNumber from 'bignumber.js';
 
 export interface TestSettings {
@@ -24,10 +24,6 @@ export async function compareTest(
     testName: string,
     provider: JsonRpcProvider,
     testData: TestData,
-    disabledOptions: DisabledOptions = {
-        isOverRide: false,
-        disabledTokens: [],
-    },
     testSettings: TestSettings = {
         compareResults: true,
         costOutputTokenOveride: { isOverRide: true, overRideCost: bnum(0) },
@@ -37,11 +33,11 @@ export async function compareTest(
         bnum(10 ** testData.tradeInfo.SwapAmountDecimals)
     );
 
-    const swapCost = bnum('100000'); // A pool swap costs approx 100000 gas
+    const swapGas = bnum('100000'); // A pool swap costs approx 100000 gas
     const costOutputToken = bnum(0);
     const fullSwapStart = performance.now();
     const swapInfo: SwapInfo = await getFullSwap(
-        JSON.parse(JSON.stringify(testData)),
+        JSON.parse(JSON.stringify(testData.pools)),
         testData.tradeInfo.TokenIn,
         testData.tradeInfo.TokenOut,
         testData.tradeInfo.ReturnAmountDecimals,
@@ -51,8 +47,7 @@ export async function compareTest(
         costOutputToken,
         testData.tradeInfo.GasPrice,
         provider,
-        swapCost,
-        disabledOptions
+        swapGas
     );
     const fullSwapEnd = performance.now();
     const fullResult: Result = {

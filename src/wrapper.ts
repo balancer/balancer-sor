@@ -1,5 +1,5 @@
 import { BaseProvider } from '@ethersproject/providers';
-import { BigNumber } from './utils/bignumber';
+import { BigNumber, ZERO } from './utils/bignumber';
 import { EMPTY_SWAPINFO } from './constants';
 import { smartOrderRouter } from './router';
 import { getWrappedInfo, setWrappedInfo } from './wrapInfo';
@@ -8,71 +8,50 @@ import { PoolCacher } from './poolCaching';
 import { RouteProposer } from './routeProposal';
 import { filterPoolsByType } from './routeProposal/filtering';
 import { SwapCostCalculator } from './swapCost';
-import { getLidoStaticSwaps, isLidoStableSwap } from './pools/lido/lidoHelpers';
+import { getLidoStaticSwaps, isLidoStableSwap } from './pools/lido';
 import {
     SwapInfo,
-    DisabledOptions,
     SwapTypes,
     NewPath,
     PoolDictionary,
-    SwapOptions,
     PoolFilter,
     Swap,
     SubgraphPoolBase,
-    SubGraphPoolsBase,
+    SwapOptions,
 } from './types';
 
 export class SOR {
-    provider: BaseProvider;
-    gasPrice: BigNumber;
-    chainId: number;
-    disabledOptions: DisabledOptions;
-
     poolCacher: PoolCacher;
     private routeProposer: RouteProposer;
     swapCostCalculator: SwapCostCalculator;
 
+    private readonly defaultSwapOptions: SwapOptions = {
+        gasPrice: new BigNumber('50e9'),
+        swapGas: new BigNumber('35000'),
+        poolTypeFilter: PoolFilter.All,
+        maxPools: 4,
+        timestamp: Math.floor(Date.now() / 1000),
+        forceRefresh: false,
+    };
+
     constructor(
-        provider: BaseProvider,
-        gasPrice: BigNumber,
-        maxPools: number,
-        chainId: number,
-        poolsSource: string | SubGraphPoolsBase,
-        swapCost?: BigNumber,
-        disabledOptions: DisabledOptions = {
-            isOverRide: false,
-            disabledTokens: [],
-        }
+        public provider: BaseProvider,
+        public chainId: number,
+        poolsSource: string | null,
+        initialPools: SubgraphPoolBase[] = []
     ) {
         this.poolCacher = new PoolCacher(
             provider,
             chainId,
-            typeof poolsSource === 'string' ? poolsSource : poolsSource.pools
+            poolsSource,
+            initialPools
         );
-        this.routeProposer = new RouteProposer(maxPools, disabledOptions);
-        this.provider = provider;
-        this.gasPrice = gasPrice;
-        this.chainId = chainId;
-        this.disabledOptions = disabledOptions;
-        this.swapCostCalculator = new SwapCostCalculator(chainId, swapCost);
+        this.routeProposer = new RouteProposer();
+        this.swapCostCalculator = new SwapCostCalculator(provider, chainId);
     }
 
-    async getCostOfSwapInToken(
-        outputToken: string,
-        tokenDecimals = 18
-    ): Promise<BigNumber> {
-        return this.swapCostCalculator.convertGasCostToToken(
-            outputToken,
-            tokenDecimals,
-            this.gasPrice
-        );
-    }
-
-    get processedDataCache(): Record<
-        string,
-        { pools: PoolDictionary; paths: NewPath[] }
-    > {
-        return this.routeProposer.processedDataCache;
+    getPools(): SubgraphPoolBase[] {
+        return this.poolCacher.getPools();
     }
 
     /*
@@ -83,32 +62,33 @@ export class SOR {
     If pools url was passed in to constructor - uses this to fetch pools source.
     */
     async fetchPools(
-        isOnChain = true,
-        poolsData: SubGraphPoolsBase = { pools: [] }
+        poolsData: SubgraphPoolBase[] = [],
+        isOnChain = true
     ): Promise<boolean> {
-        return this.poolCacher.fetchPools(isOnChain, poolsData.pools);
+        return this.poolCacher.fetchPools(poolsData, isOnChain);
     }
 
     async getSwaps(
         tokenIn: string,
         tokenOut: string,
         swapType: SwapTypes,
-        swapAmt: BigNumber,
-        swapOptions: SwapOptions = {
-            poolTypeFilter: PoolFilter.All,
-            timestamp: 0,
-        }
+        swapAmount: BigNumber,
+        swapOptions?: Partial<SwapOptions>
     ): Promise<SwapInfo> {
-        if (!this.poolCacher.finishedFetchingOnChain) return {...EMPTY_SWAPINFO};
+        if (!this.poolCacher.finishedFetchingOnChain)
+            return { ...EMPTY_SWAPINFO };
+
+        // Set any unset options to their defaults
+        const options: SwapOptions = {
+            ...this.defaultSwapOptions,
+            ...swapOptions,
+        };
 
         const pools: SubgraphPoolBase[] = JSON.parse(
             JSON.stringify(this.poolCacher.getPools())
         );
 
-        const filteredPools = filterPoolsByType(
-            pools,
-            swapOptions.poolTypeFilter
-        );
+        const filteredPools = filterPoolsByType(pools, options.poolTypeFilter);
 
         const wrappedInfo = await getWrappedInfo(
             this.provider,
@@ -116,13 +96,13 @@ export class SOR {
             tokenIn,
             tokenOut,
             this.chainId,
-            swapAmt
+            swapAmount
         );
 
         let swapInfo: SwapInfo;
         if (isLidoStableSwap(this.chainId, tokenIn, tokenOut)) {
             swapInfo = await getLidoStaticSwaps(
-                { pools: filteredPools },
+                filteredPools,
                 this.chainId,
                 wrappedInfo.tokenIn.addressForSwaps,
                 wrappedInfo.tokenOut.addressForSwaps,
@@ -137,8 +117,7 @@ export class SOR {
                 swapType,
                 wrappedInfo.swapAmountForSwaps,
                 filteredPools,
-                true,
-                swapOptions.timestamp
+                options
             );
         }
 
@@ -154,18 +133,29 @@ export class SOR {
         return swapInfo;
     }
 
+    async getCostOfSwapInToken(
+        outputToken: string,
+        gasPrice: BigNumber,
+        swapGas?: BigNumber
+    ): Promise<BigNumber> {
+        if (gasPrice.isZero()) return ZERO;
+        return this.swapCostCalculator.convertGasCostToToken(
+            outputToken,
+            gasPrice,
+            swapGas
+        );
+    }
+
     // Will process swap/pools data and return best swaps
-    // useProcessCache can be false to force fresh processing of paths/prices
-    async processSwaps(
+    private async processSwaps(
         tokenIn: string,
         tokenOut: string,
         swapType: SwapTypes,
-        swapAmt: BigNumber,
+        swapAmount: BigNumber,
         pools: SubgraphPoolBase[],
-        useProcessCache = true,
-        currentBlockTimestamp = 0
+        swapOptions: SwapOptions
     ): Promise<SwapInfo> {
-        if (pools.length === 0) return {...EMPTY_SWAPINFO};
+        if (pools.length === 0) return { ...EMPTY_SWAPINFO };
 
         const {
             pools: poolsOfInterest,
@@ -175,12 +165,31 @@ export class SOR {
             tokenOut,
             swapType,
             pools,
-            useProcessCache,
-            currentBlockTimestamp
+            swapOptions
         );
 
+        if (paths.length == 0) return { ...EMPTY_SWAPINFO };
+
+        // Path is guaranteed to contain both tokenIn and tokenOut
+        paths[0].swaps.forEach(swap => {
+            // Inject token decimals to avoid having to query onchain
+            if (swap.tokenIn === tokenIn) {
+                this.swapCostCalculator.setTokenDecimals(
+                    tokenIn,
+                    swap.tokenInDecimals
+                );
+            }
+            if (swap.tokenOut === tokenOut) {
+                this.swapCostCalculator.setTokenDecimals(
+                    tokenOut,
+                    swap.tokenOutDecimals
+                );
+            }
+        });
         const costOutputToken = await this.getCostOfSwapInToken(
-            swapType === SwapTypes.SwapExactIn ? tokenOut : tokenIn
+            swapType === SwapTypes.SwapExactIn ? tokenOut : tokenIn,
+            swapOptions.gasPrice,
+            swapOptions.swapGas
         );
 
         // Returns list of swaps
@@ -192,15 +201,16 @@ export class SOR {
         ] = this.getOptimalPaths(
             poolsOfInterest,
             paths,
-            swapAmt,
+            swapAmount,
             swapType,
-            costOutputToken
+            costOutputToken,
+            swapOptions.maxPools
         );
 
         const swapInfo = formatSwaps(
             swaps,
             swapType,
-            swapAmt,
+            swapAmount,
             tokenIn,
             tokenOut,
             total,
@@ -219,7 +229,8 @@ export class SOR {
         paths: NewPath[],
         swapAmount: BigNumber,
         swapType: SwapTypes,
-        costOutputToken: BigNumber
+        costOutputToken: BigNumber,
+        maxPools: number
     ): [Swap[][], BigNumber, BigNumber, BigNumber] {
         // swapExactIn - total = total amount swap will return of tokenOut
         // swapExactOut - total = total amount of tokenIn required for swap
@@ -228,7 +239,7 @@ export class SOR {
             paths,
             swapType,
             swapAmount,
-            this.routeProposer.maxPools,
+            maxPools,
             costOutputToken
         );
     }

@@ -1,9 +1,10 @@
-import { BigNumber } from './utils/bignumber';
-import { SwapTypes, SwapInfo } from './types';
-import { bnum, scale } from './utils/bignumber';
-import { ZERO_ADDRESS, Lido, getStEthRate } from './index';
-import { WETHADDR } from './constants';
 import { BaseProvider } from '@ethersproject/providers';
+import { AddressZero } from '@ethersproject/constants';
+
+import { Lido, getStEthRate } from './pools/lido';
+import { BigNumber, bnum, scale } from './utils/bignumber';
+import { WETHADDR } from './constants';
+import { SwapTypes, SwapInfo } from './types';
 
 export interface WrappedInfo {
     swapAmountOriginal: BigNumber;
@@ -47,11 +48,11 @@ export async function getWrappedInfo(
     let tokenOutRate = bnum(1);
 
     // Handle ETH wrapping
-    if (tokenIn === ZERO_ADDRESS) {
+    if (tokenIn === AddressZero) {
         tokenInForSwaps = WETHADDR[chainId].toLowerCase();
         tokenInWrapType = WrapTypes.ETH;
     }
-    if (tokenOut === ZERO_ADDRESS) {
+    if (tokenOut === AddressZero) {
         tokenOutForSwaps = WETHADDR[chainId].toLowerCase();
         tokenOutWrapType = WrapTypes.ETH;
     }
@@ -110,7 +111,7 @@ export function setWrappedInfo(
         // replace weth with ZERO/ETH in assets for Vault to handle ETH directly
         swapInfo.tokenAddresses = swapInfo.tokenAddresses.map(addr =>
             addr.toLowerCase() === WETHADDR[chainId].toLowerCase()
-                ? ZERO_ADDRESS
+                ? AddressZero
                 : addr
         );
     }

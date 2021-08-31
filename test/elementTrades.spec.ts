@@ -9,10 +9,10 @@ https://github.com/element-fi/elf-contracts/blob/main/scripts/load-sim-data.sh
 require('dotenv').config();
 import { expect, assert } from 'chai';
 import { JsonRpcProvider } from '@ethersproject/providers';
-import { SOR, SubGraphPoolsBase, SwapInfo, SwapTypes } from '../src';
+import { SOR, SwapInfo, SwapTypes } from '../src';
 import { bnum } from '../src/utils/bignumber';
 import { calcRelativeDiffBn } from './lib/testHelpers';
-import { PoolFilter } from '../src/types';
+import { PoolFilter, SubgraphPoolBase } from '../src/types';
 
 import testTrades from './testData/elementPools/testTrades.json';
 
@@ -47,40 +47,38 @@ describe(`Tests against Element generated test trade file.`, () => {
 
         it(description, async () => {
             // Parse trade info to pool format
-            const poolsFromFile: SubGraphPoolsBase = {
-                pools: [
-                    {
-                        id: 'n/a',
-                        address: 'n/a',
-                        poolType: 'Element',
-                        swapFee: testTrades.init.percent_fee.toString(),
-                        totalShares: trade.input.total_supply.toString(),
-                        unitSeconds: 1,
-                        expiryTime: trade.input.time,
-                        principalToken:
-                            '0x0000000000000000000000000000000000000001',
-                        baseToken: '0x000000000000000000000000000000000000000b',
-                        tokens: [
-                            {
-                                address:
-                                    '0x0000000000000000000000000000000000000001',
-                                balance: trade.input.y_reserves.toString(),
-                                decimals: 18,
-                            },
-                            {
-                                address:
-                                    '0x000000000000000000000000000000000000000b',
-                                balance: trade.input.x_reserves.toString(),
-                                decimals: 18,
-                            },
-                        ],
-                        tokensList: [
-                            '0x0000000000000000000000000000000000000001',
-                            '0x000000000000000000000000000000000000000b',
-                        ],
-                    },
-                ],
-            };
+            const poolsFromFile: SubgraphPoolBase[] = [
+                {
+                    id: 'n/a',
+                    address: 'n/a',
+                    poolType: 'Element',
+                    swapFee: testTrades.init.percent_fee.toString(),
+                    totalShares: trade.input.total_supply.toString(),
+                    unitSeconds: 1,
+                    expiryTime: trade.input.time,
+                    principalToken:
+                        '0x0000000000000000000000000000000000000001',
+                    baseToken: '0x000000000000000000000000000000000000000b',
+                    tokens: [
+                        {
+                            address:
+                                '0x0000000000000000000000000000000000000001',
+                            balance: trade.input.y_reserves.toString(),
+                            decimals: 18,
+                        },
+                        {
+                            address:
+                                '0x000000000000000000000000000000000000000b',
+                            balance: trade.input.x_reserves.toString(),
+                            decimals: 18,
+                        },
+                    ],
+                    tokensList: [
+                        '0x0000000000000000000000000000000000000001',
+                        '0x000000000000000000000000000000000000000b',
+                    ],
+                },
+            ];
 
             const swapType =
                 trade.input.direction === 'out'
@@ -96,15 +94,12 @@ describe(`Tests against Element generated test trade file.`, () => {
                     : '0x0000000000000000000000000000000000000001';
             const swapAmt = bnum(trade.input.amount_in);
 
-            const sor = new SOR(
-                provider,
-                gasPrice,
-                maxPools,
-                chainId,
-                poolsFromFile
-            );
+            const sor = new SOR(provider, chainId, null, poolsFromFile);
+            // Both tokens use 18 decimals
+            sor.swapCostCalculator.setTokenDecimals(tokenIn, 18);
+            sor.swapCostCalculator.setTokenDecimals(tokenOut, 18);
 
-            const fetchSuccess = await sor.fetchPools(false);
+            const fetchSuccess = await sor.fetchPools([], false);
             expect(fetchSuccess).to.be.true;
 
             const swapInfo: SwapInfo = await sor.getSwaps(
@@ -113,6 +108,8 @@ describe(`Tests against Element generated test trade file.`, () => {
                 swapType,
                 swapAmt,
                 {
+                    gasPrice,
+                    maxPools,
                     poolTypeFilter: PoolFilter.All,
                     timestamp: 0,
                 }

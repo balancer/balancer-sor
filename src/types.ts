@@ -24,6 +24,15 @@ export enum PairTypes {
     TokenToToken,
 }
 
+export interface SwapOptions {
+    gasPrice: BigNumber;
+    swapGas: BigNumber;
+    timestamp: number;
+    maxPools: number;
+    poolTypeFilter: PoolFilter;
+    forceRefresh: boolean;
+}
+
 export interface PoolPairBase {
     balanceIn: BigNumber;
     balanceOut: BigNumber;
@@ -44,10 +53,6 @@ export interface Swap {
     maxPrice?: string;
     tokenInDecimals: number;
     tokenOutDecimals: number;
-}
-
-export interface SubGraphPoolsBase {
-    pools: SubgraphPoolBase[];
 }
 
 export interface SubgraphPoolBase {
@@ -83,15 +88,6 @@ export interface SubGraphToken {
     weight?: string;
     // MetaStablePool field
     priceRate?: string;
-}
-
-export interface DisabledOptions {
-    isOverRide: boolean;
-    disabledTokens: DisabledToken[];
-}
-export interface DisabledToken {
-    address: string;
-    symbol: string;
 }
 
 export interface SwapV2 {
@@ -138,11 +134,6 @@ export enum PoolFilter {
     Stable = 'Stable',
     MetaStable = 'MetaStable',
     LBP = 'LiquidityBootstrapping',
-}
-
-export interface SwapOptions {
-    timestamp: number;
-    poolTypeFilter: PoolFilter;
 }
 
 export interface PoolBase {

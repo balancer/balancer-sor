@@ -1,7 +1,7 @@
 import { filterPoolsOfInterest, filterHopPools } from './filtering';
 import { calculatePathLimits } from './pathLimits';
 import {
-    DisabledOptions,
+    SwapOptions,
     SwapTypes,
     NewPath,
     PoolDictionary,
@@ -9,23 +9,7 @@ import {
 } from '../types';
 
 export class RouteProposer {
-    maxPools: number;
-    processedDataCache: Record<
-        string,
-        { pools: PoolDictionary; paths: NewPath[] }
-    > = {};
-    disabledOptions: DisabledOptions;
-
-    constructor(
-        maxPools: number,
-        disabledOptions: DisabledOptions = {
-            isOverRide: false,
-            disabledTokens: [],
-        }
-    ) {
-        this.maxPools = maxPools;
-        this.disabledOptions = disabledOptions;
-    }
+    cache: Record<string, { pools: PoolDictionary; paths: NewPath[] }> = {};
 
     /**
      * Given a list of pools and a desired input/output, returns a set of possible paths to route through
@@ -35,18 +19,17 @@ export class RouteProposer {
         tokenOut: string,
         swapType: SwapTypes,
         pools: SubgraphPoolBase[],
-        useProcessCache = true,
-        currentBlockTimestamp = 0
+        swapOptions: SwapOptions
     ): { pools: PoolDictionary; paths: NewPath[] } {
         if (pools.length === 0) return { pools: {}, paths: [] };
 
         // If token pair has been processed before that info can be reused to speed up execution
-        const cache = this.processedDataCache[
-            `${tokenIn}${tokenOut}${swapType}${currentBlockTimestamp}`
+        const cache = this.cache[
+            `${tokenIn}${tokenOut}${swapType}${swapOptions.timestamp}`
         ];
 
-        // useProcessCache can be false to force fresh processing of paths/prices
-        if (useProcessCache && !!cache) {
+        // forceRefresh can be set to force fresh processing of paths/prices
+        if (!swapOptions.forceRefresh && !!cache) {
             // Using pre-processed data from cache
             return {
                 pools: cache.pools,
@@ -61,9 +44,8 @@ export class RouteProposer {
             poolsList,
             tokenIn,
             tokenOut,
-            this.maxPools,
-            this.disabledOptions,
-            currentBlockTimestamp
+            swapOptions.maxPools,
+            swapOptions.timestamp
         );
         const [filteredPoolsDict, pathData] = filterHopPools(
             tokenIn,
@@ -73,15 +55,12 @@ export class RouteProposer {
         );
         const [paths] = calculatePathLimits(pathData, swapType);
 
-        // Update cache if used
-        if (useProcessCache) {
-            this.processedDataCache[
-                `${tokenIn}${tokenOut}${swapType}${currentBlockTimestamp}`
-            ] = {
-                pools: filteredPoolsDict,
-                paths: paths,
-            };
-        }
+        this.cache[
+            `${tokenIn}${tokenOut}${swapType}${swapOptions.timestamp}`
+        ] = {
+            pools: filteredPoolsDict,
+            paths: paths,
+        };
 
         return { pools: filteredPoolsDict, paths };
     }

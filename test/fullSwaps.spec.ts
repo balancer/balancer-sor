@@ -1,7 +1,7 @@
 // npx mocha -r ts-node/register test/fullSwaps.spec.ts
 import { JsonRpcProvider } from '@ethersproject/providers';
 import { assert } from 'chai';
-import { SwapTypes, DisabledOptions } from '../src/types';
+import { SwapTypes } from '../src/types';
 import BigNumber from 'bignumber.js';
 import { compareTest } from './lib/compareHelper';
 import { getFullSwap, ResultParsed } from './lib/testHelpers';
@@ -10,7 +10,6 @@ const gasPrice = new BigNumber('30000000000');
 
 import subgraphPoolsLarge from './testData/testPools/subgraphPoolsLarge.json';
 import testPools from './testData/filterTestPools.json';
-import disabledTokens from './testData/disabled-tokens.json';
 
 const WETH = '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2'; // WETH lower case
 const DAI = '0x6B175474E89094C44Da98b954EedeAC495271d0F'.toLowerCase();
@@ -46,11 +45,11 @@ describe('Tests full swaps against known values', () => {
         const returnAmountDecimals = 18;
         const maxPools = 4;
         const swapAmount = new BigNumber('1');
-        const swapCost = new BigNumber('100000');
+        const swapGas = new BigNumber('100000');
         const costOutputToken = new BigNumber('0');
 
         const swapInfo = await getFullSwap(
-            JSON.parse(JSON.stringify(subgraphPoolsLarge)),
+            JSON.parse(JSON.stringify(subgraphPoolsLarge.pools)),
             tokenIn,
             tokenOut,
             returnAmountDecimals,
@@ -60,7 +59,7 @@ describe('Tests full swaps against known values', () => {
             costOutputToken,
             gasPrice,
             provider,
-            swapCost
+            swapGas
         );
 
         assert.equal(swapInfo.swaps.length, 0, 'Should have 0 swaps.');
@@ -78,11 +77,11 @@ describe('Tests full swaps against known values', () => {
         const returnAmountDecimals = 18;
         const maxPools = 4;
         const swapAmount = new BigNumber('1');
-        const swapCost = new BigNumber('100000');
+        const swapGas = new BigNumber('100000');
         const costOutputToken = new BigNumber('0');
 
         const swapInfo = await getFullSwap(
-            JSON.parse(JSON.stringify(subgraphPoolsLarge)),
+            JSON.parse(JSON.stringify(subgraphPoolsLarge.pools)),
             tokenIn,
             tokenOut,
             returnAmountDecimals,
@@ -92,7 +91,7 @@ describe('Tests full swaps against known values', () => {
             costOutputToken,
             gasPrice,
             provider,
-            swapCost
+            swapGas
         );
 
         assert.equal(swapInfo.swaps.length, 0, 'Should have 0 swaps.');
@@ -112,11 +111,6 @@ describe('Tests full swaps against known values', () => {
         const tokenIn = USDC;
         const tokenOut = MKR;
 
-        const disabledOptions: DisabledOptions = {
-            isOverRide: true,
-            disabledTokens: disabledTokens.tokens,
-        };
-
         const tradeInfo = {
             SwapType: swapType,
             TokenIn: tokenIn,
@@ -135,19 +129,13 @@ describe('Tests full swaps against known values', () => {
         };
 
         // This test has rounding differences between V1 and V2 maths that cause it to fail but has been checked by Fernando
-        const [, swapInfo] = await compareTest(
-            name,
-            provider,
-            testData,
-            disabledOptions,
-            {
-                compareResults: false,
-                costOutputTokenOveride: {
-                    isOverRide: true,
-                    overRideCost: new BigNumber(0),
-                },
-            }
-        );
+        const [, swapInfo] = await compareTest(name, provider, testData, {
+            compareResults: false,
+            costOutputTokenOveride: {
+                isOverRide: true,
+                overRideCost: new BigNumber(0),
+            },
+        });
 
         // These test should highlight any changes in maths that may unexpectedly change result
         assert.equal(
@@ -164,16 +152,11 @@ describe('Tests full swaps against known values', () => {
         const returnAmountDecimals = 6;
         const maxPools = 4;
         const swapAmt = new BigNumber('0.1');
-        const swapCost = new BigNumber('100000');
+        const swapGas = new BigNumber('100000');
         const costOutputToken = new BigNumber('0');
 
-        const disabledOptions: DisabledOptions = {
-            isOverRide: true,
-            disabledTokens: disabledTokens.tokens,
-        };
-
         const swapInfo = await getFullSwap(
-            { pools: JSON.parse(JSON.stringify(testPools.weightedOnly)) },
+            JSON.parse(JSON.stringify(testPools.weightedOnly)),
             tokenIn,
             tokenOut,
             returnAmountDecimals,
@@ -183,8 +166,7 @@ describe('Tests full swaps against known values', () => {
             costOutputToken,
             gasPrice,
             provider,
-            swapCost,
-            disabledOptions
+            swapGas
         );
 
         // const swaps = swapInfo.swaps;
@@ -227,11 +209,6 @@ describe('Tests full swaps against known values', () => {
         const noPools = 4;
         const swapAmt = new BigNumber('100000');
 
-        const disabledOptions: DisabledOptions = {
-            isOverRide: true,
-            disabledTokens: disabledTokens.tokens,
-        };
-
         const tradeInfo = {
             SwapType: swapType,
             TokenIn: tokenIn,
@@ -249,19 +226,13 @@ describe('Tests full swaps against known values', () => {
             v1Result: {} as ResultParsed,
         };
 
-        const [, swapInfo] = await compareTest(
-            name,
-            provider,
-            testData,
-            disabledOptions,
-            {
-                compareResults: true,
-                costOutputTokenOveride: {
-                    isOverRide: true,
-                    overRideCost: new BigNumber(0),
-                },
-            }
-        );
+        const [, swapInfo] = await compareTest(name, provider, testData, {
+            compareResults: true,
+            costOutputTokenOveride: {
+                isOverRide: true,
+                overRideCost: new BigNumber(0),
+            },
+        });
 
         // The expected test results are from previous version
         assert.equal(swapInfo.returnAmount.toString(), '99251606996029317');
@@ -303,11 +274,6 @@ describe('Tests full swaps against known values', () => {
         const noPools = 4;
         const swapAmt = new BigNumber('100000000000000000');
 
-        const disabledOptions: DisabledOptions = {
-            isOverRide: true,
-            disabledTokens: disabledTokens.tokens,
-        };
-
         const tradeInfo = {
             SwapType: swapType,
             TokenIn: tokenIn,
@@ -325,19 +291,13 @@ describe('Tests full swaps against known values', () => {
             v1Result: {} as ResultParsed,
         };
 
-        const [, swapInfo] = await compareTest(
-            name,
-            provider,
-            testData,
-            disabledOptions,
-            {
-                compareResults: true,
-                costOutputTokenOveride: {
-                    isOverRide: true,
-                    overRideCost: new BigNumber(0),
-                },
-            }
-        );
+        const [, swapInfo] = await compareTest(name, provider, testData, {
+            compareResults: true,
+            costOutputTokenOveride: {
+                isOverRide: true,
+                overRideCost: new BigNumber(0),
+            },
+        });
         // The expected test results are from previous version
         assert.equal(swapInfo.returnAmount.toString(), '100077');
         assert.equal(swapInfo.swaps.length, 1);
@@ -365,11 +325,6 @@ describe('Tests full swaps against known values', () => {
         const noPools = 4;
         const swapAmt = new BigNumber('100000');
 
-        const disabledOptions: DisabledOptions = {
-            isOverRide: true,
-            disabledTokens: disabledTokens.tokens,
-        };
-
         const tradeInfo = {
             SwapType: swapType,
             TokenIn: tokenIn,
@@ -387,19 +342,13 @@ describe('Tests full swaps against known values', () => {
             v1Result: {} as ResultParsed,
         };
 
-        const [, swapInfo] = await compareTest(
-            name,
-            provider,
-            testData,
-            disabledOptions,
-            {
-                compareResults: true,
-                costOutputTokenOveride: {
-                    isOverRide: true,
-                    overRideCost: new BigNumber(0),
-                },
-            }
-        );
+        const [, swapInfo] = await compareTest(name, provider, testData, {
+            compareResults: true,
+            costOutputTokenOveride: {
+                isOverRide: true,
+                overRideCost: new BigNumber(0),
+            },
+        });
         assert.equal(swapInfo.returnAmount.toString(), '99922470289305282');
         assert.equal(swapInfo.swaps.length, 1);
         assert.equal(
@@ -428,11 +377,6 @@ describe('Tests full swaps against known values', () => {
         const noPools = 4;
         const swapAmt = new BigNumber('770000000000000000');
 
-        const disabledOptions: DisabledOptions = {
-            isOverRide: true,
-            disabledTokens: disabledTokens.tokens,
-        };
-
         const tradeInfo = {
             SwapType: swapType,
             TokenIn: tokenIn,
@@ -451,19 +395,13 @@ describe('Tests full swaps against known values', () => {
         };
 
         // This test has rounding differences between V1 and V2 maths that cause it to fail but has been checked by Fernando
-        const [, swapInfo] = await compareTest(
-            name,
-            provider,
-            testData,
-            disabledOptions,
-            {
-                compareResults: false,
-                costOutputTokenOveride: {
-                    isOverRide: true,
-                    overRideCost: new BigNumber(0),
-                },
-            }
-        );
+        const [, swapInfo] = await compareTest(name, provider, testData, {
+            compareResults: false,
+            costOutputTokenOveride: {
+                isOverRide: true,
+                overRideCost: new BigNumber(0),
+            },
+        });
 
         // These test should highlight any changes in maths that may unexpectedly change result
         assert.equal(
@@ -514,11 +452,6 @@ describe('Tests full swaps against known values', () => {
         const noPools = 4;
         const swapAmt = new BigNumber('100732100');
 
-        const disabledOptions: DisabledOptions = {
-            isOverRide: true,
-            disabledTokens: disabledTokens.tokens,
-        };
-
         const tradeInfo = {
             SwapType: swapType,
             TokenIn: tokenIn,
@@ -536,19 +469,13 @@ describe('Tests full swaps against known values', () => {
             v1Result: {} as ResultParsed,
         };
 
-        const [, swapInfo] = await compareTest(
-            name,
-            provider,
-            testData,
-            disabledOptions,
-            {
-                compareResults: true,
-                costOutputTokenOveride: {
-                    isOverRide: true,
-                    overRideCost: new BigNumber(0),
-                },
-            }
-        );
+        const [, swapInfo] = await compareTest(name, provider, testData, {
+            compareResults: true,
+            costOutputTokenOveride: {
+                isOverRide: true,
+                overRideCost: new BigNumber(0),
+            },
+        });
 
         assert.equal(swapInfo.returnAmount.toString(), '100601647114107781663');
         assert.equal(swapInfo.swaps.length, 3);
@@ -702,10 +629,6 @@ describe('Tests full swaps against known values', () => {
             provider,
             testData,
             {
-                isOverRide: false,
-                disabledTokens: [],
-            },
-            {
                 compareResults: false,
                 costOutputTokenOveride: {
                     isOverRide: true,
@@ -753,10 +676,6 @@ describe('Tests full swaps against known values', () => {
             `subgraphPoolsDecimalsTest`,
             provider,
             testData,
-            {
-                isOverRide: false,
-                disabledTokens: [],
-            },
             {
                 compareResults: false,
                 costOutputTokenOveride: {
@@ -809,10 +728,6 @@ describe('Tests full swaps against known values', () => {
             provider,
             testData,
             {
-                isOverRide: false,
-                disabledTokens: [],
-            },
-            {
                 compareResults: false,
                 costOutputTokenOveride: {
                     isOverRide: true,
@@ -860,10 +775,6 @@ describe('Tests full swaps against known values', () => {
             `subgraphPoolsDecimalsTest`,
             provider,
             testData,
-            {
-                isOverRide: false,
-                disabledTokens: [],
-            },
             {
                 compareResults: false,
                 costOutputTokenOveride: {

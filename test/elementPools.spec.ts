@@ -3,12 +3,12 @@ import { expect } from 'chai';
 import { JsonRpcProvider } from '@ethersproject/providers';
 import { SOR } from '../src';
 import {
-    SubGraphPoolsBase,
     SwapInfo,
     SwapTypes,
     PoolTypes,
     PairTypes,
     PoolFilter,
+    SubgraphPoolBase,
 } from '../src/types';
 import { bnum } from '../src/utils/bignumber';
 import { BigNumber } from '../src/utils/bignumber';
@@ -27,7 +27,9 @@ const provider = new JsonRpcProvider(
 // npx mocha -r ts-node/register test/elementPools.spec.ts
 describe(`Tests for Element Pools.`, () => {
     it(`tests getLimitAmountSwap SwapExactOut`, async () => {
-        const poolsFromFile: SubGraphPoolsBase = require('./testData/elementPools/elementFinanceTest1.json');
+        const poolsFromFile: {
+            pools: SubgraphPoolBase[];
+        } = require('./testData/elementPools/elementFinanceTest1.json');
         const pool = poolsFromFile.pools[0];
         const swapType = SwapTypes.SwapExactOut;
 
@@ -76,7 +78,9 @@ describe(`Tests for Element Pools.`, () => {
     });
 
     it(`tests getLimitAmountSwap SwapExactIn, within expiry`, async () => {
-        const poolsFromFile: SubGraphPoolsBase = require('./testData/elementPools/elementFinanceTest1.json');
+        const poolsFromFile: {
+            pools: SubgraphPoolBase[];
+        } = require('./testData/elementPools/elementFinanceTest1.json');
         const pool = poolsFromFile.pools[0];
         const swapType = SwapTypes.SwapExactIn;
 
@@ -123,7 +127,9 @@ describe(`Tests for Element Pools.`, () => {
     });
 
     it(`tests getLimitAmountSwap SwapExactIn, outwith expiry`, async () => {
-        const poolsFromFile: SubGraphPoolsBase = require('./testData/elementPools/elementFinanceTest1.json');
+        const poolsFromFile: {
+            pools: SubgraphPoolBase[];
+        } = require('./testData/elementPools/elementFinanceTest1.json');
         const pool = poolsFromFile.pools[0];
         const swapType = SwapTypes.SwapExactIn;
 
@@ -170,21 +176,18 @@ describe(`Tests for Element Pools.`, () => {
     });
 
     it(`Full Swap - swapExactIn Direct Pool, Within Expiry`, async () => {
-        const poolsFromFile: SubGraphPoolsBase = require('./testData/elementPools/elementFinanceTest1.json');
+        const poolsFromFile: {
+            pools: SubgraphPoolBase[];
+        } = require('./testData/elementPools/elementFinanceTest1.json');
+        const pools = poolsFromFile.pools;
         const tokenIn = '0x0000000000000000000000000000000000000001';
         const tokenOut = '0x000000000000000000000000000000000000000b';
         const swapType = SwapTypes.SwapExactIn;
         const swapAmt: BigNumber = bnum('0.1');
 
-        const sor = new SOR(
-            provider,
-            gasPrice,
-            maxPools,
-            chainId,
-            poolsFromFile
-        );
+        const sor = new SOR(provider, chainId, null, pools);
 
-        const fetchSuccess = await sor.fetchPools(false);
+        const fetchSuccess = await sor.fetchPools([], false);
         expect(fetchSuccess).to.be.true;
 
         const swapInfo: SwapInfo = await sor.getSwaps(
@@ -193,8 +196,10 @@ describe(`Tests for Element Pools.`, () => {
             swapType,
             swapAmt,
             {
+                gasPrice,
+                maxPools,
                 poolTypeFilter: PoolFilter.All,
-                timestamp: poolsFromFile.pools[0].expiryTime - 22, // This is the value for currentBlockTimestamp
+                timestamp: pools[0].expiryTime - 22, // This is the value for currentBlockTimestamp
             }
         );
 
@@ -204,21 +209,18 @@ describe(`Tests for Element Pools.`, () => {
     });
 
     it(`Full Swap - swapExactIn Direct Pool, Outwith Expiry`, async () => {
-        const poolsFromFile: SubGraphPoolsBase = require('./testData/elementPools/elementFinanceTest1.json');
+        const poolsFromFile: {
+            pools: SubgraphPoolBase[];
+        } = require('./testData/elementPools/elementFinanceTest1.json');
+        const pools = poolsFromFile.pools;
         const tokenIn = '0x0000000000000000000000000000000000000001';
         const tokenOut = '0x000000000000000000000000000000000000000b';
         const swapType = SwapTypes.SwapExactIn;
         const swapAmt: BigNumber = bnum('0.1');
 
-        const sor = new SOR(
-            provider,
-            gasPrice,
-            maxPools,
-            chainId,
-            poolsFromFile
-        );
+        const sor = new SOR(provider, chainId, null, pools);
 
-        const fetchSuccess = await sor.fetchPools(false);
+        const fetchSuccess = await sor.fetchPools([], false);
         expect(fetchSuccess).to.be.true;
 
         const swapInfo: SwapInfo = await sor.getSwaps(
@@ -227,6 +229,8 @@ describe(`Tests for Element Pools.`, () => {
             swapType,
             swapAmt,
             {
+                gasPrice,
+                maxPools,
                 poolTypeFilter: PoolFilter.All,
                 timestamp: poolsFromFile.pools[0].expiryTime + 22, // This is the value for currentBlockTimestamp
             }
@@ -238,21 +242,18 @@ describe(`Tests for Element Pools.`, () => {
     });
 
     it(`Full Swap - swapExactOut Direct Pool, Within Expiry`, async () => {
-        const poolsFromFile: SubGraphPoolsBase = require('./testData/elementPools/elementFinanceTest1.json');
+        const poolsFromFile: {
+            pools: SubgraphPoolBase[];
+        } = require('./testData/elementPools/elementFinanceTest1.json');
+        const pools = poolsFromFile.pools;
         const tokenIn = '0x0000000000000000000000000000000000000001';
         const tokenOut = '0x000000000000000000000000000000000000000b';
         const swapType = SwapTypes.SwapExactOut;
         const swapAmt: BigNumber = bnum('777');
 
-        const sor = new SOR(
-            provider,
-            gasPrice,
-            maxPools,
-            chainId,
-            poolsFromFile
-        );
+        const sor = new SOR(provider, chainId, null, pools);
 
-        const fetchSuccess = await sor.fetchPools(false);
+        const fetchSuccess = await sor.fetchPools([], false);
         expect(fetchSuccess).to.be.true;
 
         const swapInfo: SwapInfo = await sor.getSwaps(
@@ -261,8 +262,10 @@ describe(`Tests for Element Pools.`, () => {
             swapType,
             swapAmt,
             {
+                gasPrice,
+                maxPools,
                 poolTypeFilter: PoolFilter.All,
-                timestamp: poolsFromFile.pools[0].expiryTime - 22, // This is the value for currentBlockTimestamp
+                timestamp: pools[0].expiryTime - 22, // This is the value for currentBlockTimestamp
             }
         );
 
@@ -272,21 +275,18 @@ describe(`Tests for Element Pools.`, () => {
     });
 
     it(`Full Swap - swapExactOut Direct Pool, Outwith Expiry`, async () => {
-        const poolsFromFile: SubGraphPoolsBase = require('./testData/elementPools/elementFinanceTest1.json');
+        const poolsFromFile: {
+            pools: SubgraphPoolBase[];
+        } = require('./testData/elementPools/elementFinanceTest1.json');
+        const pools = poolsFromFile.pools;
         const tokenIn = '0x0000000000000000000000000000000000000001';
         const tokenOut = '0x000000000000000000000000000000000000000b';
         const swapType = SwapTypes.SwapExactOut;
         const swapAmt: BigNumber = bnum('777');
 
-        const sor = new SOR(
-            provider,
-            gasPrice,
-            maxPools,
-            chainId,
-            poolsFromFile
-        );
+        const sor = new SOR(provider, chainId, null, pools);
 
-        const fetchSuccess = await sor.fetchPools(false);
+        const fetchSuccess = await sor.fetchPools([], false);
         expect(fetchSuccess).to.be.true;
 
         const swapInfo: SwapInfo = await sor.getSwaps(
@@ -295,8 +295,10 @@ describe(`Tests for Element Pools.`, () => {
             swapType,
             swapAmt,
             {
+                gasPrice,
+                maxPools,
                 poolTypeFilter: PoolFilter.All,
-                timestamp: poolsFromFile.pools[0].expiryTime + 22, // This is the value for currentBlockTimestamp
+                timestamp: pools[0].expiryTime + 22, // This is the value for currentBlockTimestamp
             }
         );
 

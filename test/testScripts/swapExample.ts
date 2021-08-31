@@ -4,15 +4,14 @@ import { BigNumber } from 'bignumber.js';
 import { JsonRpcProvider } from '@ethersproject/providers';
 import { Wallet } from '@ethersproject/wallet';
 import { Contract } from '@ethersproject/contracts';
-import { MaxUint256 } from '@ethersproject/constants';
+import { AddressZero, MaxUint256 } from '@ethersproject/constants';
 import {
     SOR,
     SwapInfo,
     SwapTypes,
-    SubGraphPoolsBase,
-    ZERO_ADDRESS,
     scale,
     bnum,
+    SubgraphPoolBase,
 } from '../../src';
 import vaultArtifact from '../../src/abi/Vault.json';
 import relayerAbi from '../abi/BatchRelayer.json';
@@ -49,7 +48,7 @@ export const ADDRESSES = {
             address: '0xdcdbf71A870cc60C6F9B621E28a7D3Ffd6Dd4965',
         },
         ETH: {
-            address: ZERO_ADDRESS,
+            address: AddressZero,
             decimals: 18,
             symbol: 'ETH',
         },
@@ -95,7 +94,7 @@ export const ADDRESSES = {
             address: '0x41B953164995c11C81DA73D212ED8Af25741b7Ac',
         },
         ETH: {
-            address: ZERO_ADDRESS,
+            address: AddressZero,
             decimals: 18,
             symbol: 'ETH',
         },
@@ -137,7 +136,7 @@ export const ADDRESSES = {
     },
     [Network.POLYGON]: {
         MATIC: {
-            address: ZERO_ADDRESS,
+            address: AddressZero,
             decimals: 18,
             symbol: 'MATIC',
         },
@@ -175,21 +174,23 @@ const vaultAddr = '0xBA12222222228d8Ba445958a75a0704d566BF2C8';
 async function getSwap(
     provider: JsonRpcProvider,
     networkId,
-    poolsSource: string | SubGraphPoolsBase,
+    poolsSource: string | SubgraphPoolBase[],
     queryOnChain: boolean,
     tokenIn,
     tokenOut,
     swapType: SwapTypes,
     swapAmount: BigNumber
 ): Promise<SwapInfo> {
+    const sor = new SOR(provider, networkId, poolsSource);
+
+    // Will get onChain data for pools list
+    await sor.fetchPools(queryOnChain);
+
     // gasPrice is used by SOR as a factor to determine how many pools to swap against.
     // i.e. higher cost means more costly to trade against lots of different pools.
-    // Can be changed in future using sor.gasPrice = newPrice
     const gasPrice = new BigNumber('40000000000');
     // This determines the max no of pools the SOR will use to swap.
-    const maxNoPools = 4;
-
-    const sor = new SOR(provider, gasPrice, maxNoPools, networkId, poolsSource);
+    const maxPools = 4;
 
     // This calculates the cost to make a swap which is used as an input to sor to allow it to make gas efficient recommendations.
     // Note - tokenOut for SwapExactIn, tokenIn for SwapExactOut
@@ -197,17 +198,16 @@ async function getSwap(
         swapType === SwapTypes.SwapExactOut ? tokenIn : tokenOut;
     const cost = await sor.getCostOfSwapInToken(
         outputToken.address,
-        outputToken.decimals
+        outputToken.decimals,
+        gasPrice
     );
-
-    // Will get onChain data for pools list
-    await sor.fetchPools(queryOnChain);
 
     const swapInfo: SwapInfo = await sor.getSwaps(
         tokenIn.address,
         tokenOut.address,
         swapType,
-        swapAmount
+        swapAmount,
+        { gasPrice, maxPools }
     );
 
     const amtInScaled =
@@ -244,7 +244,7 @@ async function makeTrade(
     }
     const wallet = new Wallet(process.env.TRADER_KEY, provider);
 
-    if (swapInfo.tokenIn !== ZERO_ADDRESS) {
+    if (swapInfo.tokenIn !== AddressZero) {
         // Vault needs approval for swapping non ETH
         console.log('Checking vault allowance...');
         const tokenInContract = new Contract(
@@ -341,7 +341,7 @@ async function makeTrade(
     // overRides['gasLimit'] = '200000';
     // overRides['gasPrice'] = '20000000000';
     // ETH in swaps must send ETH value
-    if (swapInfo.tokenIn === ZERO_ADDRESS) {
+    if (swapInfo.tokenIn === AddressZero) {
         overRides['value'] = swapInfo.swapAmount.toString();
     }
 
@@ -372,7 +372,7 @@ async function makeRelayerTrade(
     }
     const wallet = new Wallet(process.env.TRADER_KEY, provider);
 
-    if (swapInfo.tokenIn !== ZERO_ADDRESS) {
+    if (swapInfo.tokenIn !== AddressZero) {
         // Vault needs approval for swapping non ETH
         console.log('Checking vault allowance...');
         const tokenInContract = new Contract(
@@ -479,7 +479,7 @@ async function makeRelayerTrade(
     overRides['gasLimit'] = '450000';
     overRides['gasPrice'] = '20000000000';
     // ETH in swaps must send ETH value
-    if (swapInfo.tokenIn === ZERO_ADDRESS) {
+    if (swapInfo.tokenIn === AddressZero) {
         overRides['value'] = swapInfo.swapAmountForSwaps.toString();
     }
 

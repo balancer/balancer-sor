@@ -89,11 +89,7 @@ describe('Tests pools filtering and path processing', () => {
             subgraphPoolsLarge.pools,
             WETH,
             DAI,
-            4,
-            {
-                isOverRide: true,
-                disabledTokens: [],
-            }
+            4
         );
 
         [poolsOfInterestDictionary, pathData] = filterHopPools(

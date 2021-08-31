@@ -5,28 +5,16 @@ import { getOnChainBalances } from './onchainData';
 import { fetchSubgraphPools } from './subgraph';
 
 export class PoolCacher {
-    private provider: BaseProvider;
-    private chainId: number;
-    private isUsingPoolsUrl: boolean;
-    private poolsUrl: string;
     private pools: SubgraphPoolBase[] = [];
     finishedFetchingOnChain = false;
 
     constructor(
-        provider: BaseProvider,
-        chainId: number,
-        poolsSource: string | SubgraphPoolBase[]
+        private provider: BaseProvider,
+        private chainId: number,
+        private poolsUrl: string | null = null,
+        initialPools: SubgraphPoolBase[] = []
     ) {
-        this.provider = provider;
-        this.chainId = chainId;
-        // The pools source can be a URL (e.g. pools from Subgraph) or a data set of pools
-        if (typeof poolsSource === 'string') {
-            this.isUsingPoolsUrl = true;
-            this.poolsUrl = poolsSource;
-        } else {
-            this.isUsingPoolsUrl = false;
-            this.pools = poolsSource;
-        }
+        this.pools = initialPools;
     }
 
     getPools(): SubgraphPoolBase[] {
@@ -34,7 +22,7 @@ export class PoolCacher {
     }
 
     isConnectedToSubgraph(): boolean {
-        return !!this.poolsUrl;
+        return this.poolsUrl !== null;
     }
 
     /*
@@ -45,33 +33,26 @@ export class PoolCacher {
      * If pools url was passed in to constructor - uses this to fetch pools source.
      */
     async fetchPools(
-        isOnChain = true,
-        poolsData: SubgraphPoolBase[] = []
+        poolsData: SubgraphPoolBase[] = [],
+        isOnChain = true
     ): Promise<boolean> {
         try {
+            let newPools: SubgraphPoolBase[];
+
             // If poolsData has been passed to function these pools should be used
-            const isExternalPoolData = poolsData.length > 0 ? true : false;
-
-            let subgraphPools: SubgraphPoolBase[];
-
-            if (isExternalPoolData) {
-                subgraphPools = JSON.parse(JSON.stringify(poolsData));
-                // Store as latest pools data
-                if (!this.isUsingPoolsUrl) this.pools = subgraphPools;
+            if (poolsData.length > 0) {
+                newPools = JSON.parse(JSON.stringify(poolsData));
             } else {
                 // Retrieve from URL if set otherwise use data passed in constructor
-                if (this.isUsingPoolsUrl) {
-                    subgraphPools = await fetchSubgraphPools(this.poolsUrl);
+                if (this.isConnectedToSubgraph()) {
+                    newPools = await fetchSubgraphPools(this.poolsUrl);
                 } else {
-                    subgraphPools = this.pools;
+                    newPools = this.pools;
                 }
             }
 
             // Get latest on-chain balances (returns data in string/normalized format)
-            this.pools = await this.fetchOnChainBalances(
-                subgraphPools,
-                isOnChain
-            );
+            this.pools = await this.fetchOnChainBalances(newPools, isOnChain);
 
             this.finishedFetchingOnChain = true;
 
