@@ -1,5 +1,4 @@
 import fetch from 'isomorphic-fetch';
-import { bnum, scale } from '../utils/bignumber';
 
 const getPlatformId = (chainId: string | number): string => {
     const mapping = {
