@@ -162,6 +162,24 @@ export class SOR {
             swapOptions
         );
 
+        if (paths.length == 0) return { ...EMPTY_SWAPINFO };
+
+        // Path is guaranteed to contain both tokenIn and tokenOut
+        paths[0].swaps.forEach(swap => {
+            // Inject token decimals to avoid having to query onchain
+            if (swap.tokenIn === tokenIn) {
+                this.swapCostCalculator.setTokenDecimals(
+                    tokenIn,
+                    swap.tokenInDecimals
+                );
+            }
+            if (swap.tokenOut === tokenOut) {
+                this.swapCostCalculator.setTokenDecimals(
+                    tokenOut,
+                    swap.tokenOutDecimals
+                );
+            }
+        });
         const costOutputToken = await this.getCostOfSwapInToken(
             swapType === SwapTypes.SwapExactIn ? tokenOut : tokenIn,
             swapOptions.gasPrice,
