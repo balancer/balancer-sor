@@ -1,7 +1,7 @@
 import { BaseProvider } from '@ethersproject/providers';
 import { AddressZero } from '@ethersproject/constants';
 
-import { Lido, getStEthRate } from './index';
+import { Lido, getStEthRate } from './pools/lido';
 import { BigNumber, bnum, scale } from './utils/bignumber';
 import { WETHADDR } from './constants';
 import { SwapTypes, SwapInfo } from './types';

@@ -8,7 +8,7 @@ import { PoolCacher } from './poolCaching';
 import { RouteProposer } from './routeProposal';
 import { filterPoolsByType } from './routeProposal/filtering';
 import { SwapCostCalculator } from './swapCost';
-import { getLidoStaticSwaps, isLidoStableSwap } from './pools/lido/lidoHelpers';
+import { getLidoStaticSwaps, isLidoStableSwap } from './pools/lido';
 import {
     SwapInfo,
     SwapTypes,

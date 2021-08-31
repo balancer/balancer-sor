@@ -4,7 +4,9 @@ import { JsonRpcProvider } from '@ethersproject/providers';
 
 import { formatSwaps } from '../src/formatSwaps';
 import { getWrappedInfo, setWrappedInfo } from '../src/wrapInfo';
-import { bnum, WETHADDR, Lido, scale } from '../src';
+import { bnum, scale } from '../src';
+import { WETHADDR } from '../src/constants';
+import { Lido } from '../src/pools/lido';
 import { SwapInfo, SwapTypes, SwapV2 } from '../src/types';
 import { BigNumber } from '../src/utils/bignumber';
 import testSwaps from './testData/swapsForFormatting.json';

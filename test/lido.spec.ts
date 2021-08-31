@@ -4,16 +4,14 @@ import { AddressZero } from '@ethersproject/constants';
 import { JsonRpcProvider } from '@ethersproject/providers';
 import {
     SOR,
-    Lido,
     SwapInfo,
     SwapTypes,
     bnum,
     scale,
-    getLidoStaticSwaps,
-    isLidoStableSwap,
     SubgraphPoolBase,
 } from '../src';
-import { getStEthRate } from '../src/pools/lido/lidoHelpers';
+import { Lido, getLidoStaticSwaps, isLidoStableSwap } from '../src/pools/lido';
+import { getStEthRate } from '../src/pools/lido';
 
 const gasPrice = bnum('30000000000');
 const maxPools = 4;
