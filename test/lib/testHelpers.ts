@@ -336,7 +336,12 @@ export async function getFullSwap(
     provider: JsonRpcProvider,
     swapGas: BigNumber = new BigNumber('100000')
 ): Promise<SwapInfo> {
-    const sor = new sorv2.SOR(provider, 1, JSON.parse(JSON.stringify(pools)));
+    const sor = new sorv2.SOR(
+        provider,
+        1,
+        null,
+        JSON.parse(JSON.stringify(pools))
+    );
 
     let swapTypeCorrect = SwapTypes.SwapExactIn;
 

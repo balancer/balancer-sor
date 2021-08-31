@@ -55,7 +55,7 @@ describe(`Tests for wrapper class.`, () => {
         const swapType = SwapTypes.SwapExactIn;
         const swapAmt: BigNumber = bnum('0.1');
 
-        const sor = new SOR(provider, chainId, pools);
+        const sor = new SOR(provider, chainId, null, pools);
 
         const result: boolean = await sor.fetchPools([], false);
         assert.isTrue(result);
@@ -103,7 +103,7 @@ describe(`Tests for wrapper class.`, () => {
         const swapType = SwapTypes.SwapExactIn;
         const swapAmt: BigNumber = bnum('0.1');
 
-        const sor = new SOR(provider, chainId, pools);
+        const sor = new SOR(provider, chainId, null, pools);
 
         const result: boolean = await sor.fetchPools([], false);
         assert.isTrue(result);
@@ -143,7 +143,7 @@ describe(`Tests for wrapper class.`, () => {
         const swapType = SwapTypes.SwapExactIn;
         const swapAmt: BigNumber = bnum('0.1');
 
-        const sor = new SOR(provider, chainId, pools);
+        const sor = new SOR(provider, chainId, null, pools);
 
         const result: boolean = await sor.fetchPools([], false);
         assert.isTrue(result);
@@ -179,7 +179,7 @@ describe(`Tests for wrapper class.`, () => {
         const swapType = SwapTypes.SwapExactIn;
         const swapAmt: BigNumber = bnum('0.1');
 
-        const sor = new SOR(provider, chainId, pools);
+        const sor = new SOR(provider, chainId, null, pools);
 
         const result: boolean = await sor.fetchPools([], false);
         assert.isTrue(result);
@@ -222,7 +222,7 @@ describe(`Tests for wrapper class.`, () => {
         const swapType = SwapTypes.SwapExactIn;
         const swapAmt: BigNumber = bnum('0.1');
 
-        const sor = new SOR(provider, chainId, pools);
+        const sor = new SOR(provider, chainId, null, pools);
 
         let result: boolean = await sor.fetchPools([], false);
         assert.isTrue(result);
@@ -294,7 +294,7 @@ describe(`Tests for wrapper class.`, () => {
         const swapType = SwapTypes.SwapExactIn;
         const swapAmt: BigNumber = bnum('0.1');
 
-        const sor = new SOR(provider, chainId, pools);
+        const sor = new SOR(provider, chainId, null, pools);
 
         let result: boolean = await sor.fetchPools([], false);
         assert.isTrue(result);
@@ -357,7 +357,7 @@ describe(`Tests for wrapper class.`, () => {
         const swapType = SwapTypes.SwapExactOut;
         const swapAmt: BigNumber = bnum('0.1');
 
-        const sor = new SOR(provider, chainId, pools);
+        const sor = new SOR(provider, chainId, null, pools);
 
         let result: boolean = await sor.fetchPools([], false);
         assert.isTrue(result);
@@ -428,7 +428,7 @@ describe(`Tests for wrapper class.`, () => {
         const swapType = SwapTypes.SwapExactOut;
         const swapAmt: BigNumber = bnum('0.1');
 
-        const sor = new SOR(provider, chainId, pools);
+        const sor = new SOR(provider, chainId, null, pools);
 
         let result: boolean = await sor.fetchPools([], false);
         assert.isTrue(result);

@@ -38,7 +38,7 @@ describe(`Tests for LBP Pools.`, () => {
             const swapType = SwapTypes.SwapExactIn;
             const swapAmt: BigNumber = bnum('1');
 
-            const sor = new SOR(provider, chainId, pools);
+            const sor = new SOR(provider, chainId, null, pools);
 
             const fetchSuccess = await sor.fetchPools([], false);
             expect(fetchSuccess).to.be.true;
@@ -68,7 +68,7 @@ describe(`Tests for LBP Pools.`, () => {
             const swapType = SwapTypes.SwapExactIn;
             const swapAmt: BigNumber = bnum('1');
 
-            const sor = new SOR(provider, chainId, pools);
+            const sor = new SOR(provider, chainId, null, pools);
 
             const fetchSuccess = await sor.fetchPools([], false);
             expect(fetchSuccess).to.be.true;

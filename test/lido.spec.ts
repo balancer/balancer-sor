@@ -87,7 +87,7 @@ describe(`Tests for Lido USD routes.`, () => {
             const swapAmt = bnum('1');
             const priceRate = await getStEthRate(provider, chainId);
 
-            const sor = new SOR(provider, chainId, pools);
+            const sor = new SOR(provider, chainId, null, pools);
             const fetchSuccess = await sor.fetchPools([], false);
             expect(fetchSuccess).to.be.true;
 
@@ -156,7 +156,7 @@ describe(`Tests for Lido USD routes.`, () => {
             const swapAmt = bnum('1');
             const priceRate = await getStEthRate(provider, chainId);
 
-            const sor = new SOR(provider, chainId, pools);
+            const sor = new SOR(provider, chainId, null, pools);
             const fetchSuccess = await sor.fetchPools([], false);
             expect(fetchSuccess).to.be.true;
 
@@ -226,7 +226,7 @@ describe(`Tests for Lido USD routes.`, () => {
             const swapAmt = bnum('1');
             const priceRate = await getStEthRate(provider, chainId);
 
-            const sor = new SOR(provider, chainId, pools);
+            const sor = new SOR(provider, chainId, null, pools);
             const fetchSuccess = await sor.fetchPools([], false);
             expect(fetchSuccess).to.be.true;
 
@@ -294,7 +294,7 @@ describe(`Tests for Lido USD routes.`, () => {
             const swapAmt = bnum('1');
             const priceRate = await getStEthRate(provider, chainId);
 
-            const sor = new SOR(provider, chainId, pools);
+            const sor = new SOR(provider, chainId, null, pools);
             const fetchSuccess = await sor.fetchPools([], false);
             expect(fetchSuccess).to.be.true;
 
@@ -364,7 +364,7 @@ describe(`Tests for Lido USD routes.`, () => {
             const swapType = SwapTypes.SwapExactIn;
             const swapAmt = bnum('1');
 
-            const sor = new SOR(provider, chainId, pools);
+            const sor = new SOR(provider, chainId, null, pools);
             const fetchSuccess = await sor.fetchPools([], false);
             expect(fetchSuccess).to.be.true;
 
@@ -401,7 +401,7 @@ describe(`Tests for Lido USD routes.`, () => {
             const swapType = SwapTypes.SwapExactOut;
             const swapAmt = bnum('1');
 
-            const sor = new SOR(provider, chainId, pools);
+            const sor = new SOR(provider, chainId, null, pools);
             const fetchSuccess = await sor.fetchPools([], false);
             expect(fetchSuccess).to.be.true;
 
@@ -441,7 +441,7 @@ describe(`Tests for Lido USD routes.`, () => {
             const swapType = SwapTypes.SwapExactIn;
             const swapAmt = bnum('1');
 
-            const sor = new SOR(provider, chainId, pools);
+            const sor = new SOR(provider, chainId, null, pools);
             const fetchSuccess = await sor.fetchPools([], false);
             expect(fetchSuccess).to.be.true;
 
@@ -478,7 +478,7 @@ describe(`Tests for Lido USD routes.`, () => {
             const swapType = SwapTypes.SwapExactOut;
             const swapAmt = bnum('1');
 
-            const sor = new SOR(provider, chainId, pools);
+            const sor = new SOR(provider, chainId, null, pools);
             const fetchSuccess = await sor.fetchPools([], false);
             expect(fetchSuccess).to.be.true;
 
@@ -517,7 +517,7 @@ describe(`Tests for Lido USD routes.`, () => {
             const swapType = SwapTypes.SwapExactIn;
             const swapAmt = bnum('1');
 
-            const sor = new SOR(provider, chainId, pools);
+            const sor = new SOR(provider, chainId, null, pools);
             const fetchSuccess = await sor.fetchPools([], false);
             expect(fetchSuccess).to.be.true;
 
@@ -563,7 +563,7 @@ describe(`Tests for Lido USD routes.`, () => {
             const swapType = SwapTypes.SwapExactOut;
             const swapAmt = bnum('1');
 
-            const sor = new SOR(provider, chainId, pools);
+            const sor = new SOR(provider, chainId, null, pools);
             const fetchSuccess = await sor.fetchPools([], false);
             expect(fetchSuccess).to.be.true;
 
@@ -609,7 +609,7 @@ describe(`Tests for Lido USD routes.`, () => {
             const swapType = SwapTypes.SwapExactIn;
             const swapAmt = bnum('1');
 
-            const sor = new SOR(provider, chainId, pools);
+            const sor = new SOR(provider, chainId, null, pools);
             const fetchSuccess = await sor.fetchPools([], false);
             expect(fetchSuccess).to.be.true;
 
@@ -655,7 +655,7 @@ describe(`Tests for Lido USD routes.`, () => {
             const swapType = SwapTypes.SwapExactOut;
             const swapAmt = bnum('1');
 
-            const sor = new SOR(provider, chainId, pools);
+            const sor = new SOR(provider, chainId, null, pools);
             const fetchSuccess = await sor.fetchPools([], false);
             expect(fetchSuccess).to.be.true;
 
@@ -703,7 +703,7 @@ describe(`Tests for Lido USD routes.`, () => {
             const swapType = SwapTypes.SwapExactIn;
             const swapAmt = bnum('1');
 
-            const sor = new SOR(provider, chainId, pools);
+            const sor = new SOR(provider, chainId, null, pools);
             const fetchSuccess = await sor.fetchPools([], false);
             expect(fetchSuccess).to.be.true;
 
@@ -749,7 +749,7 @@ describe(`Tests for Lido USD routes.`, () => {
             const swapType = SwapTypes.SwapExactOut;
             const swapAmt = bnum('1');
 
-            const sor = new SOR(provider, chainId, pools);
+            const sor = new SOR(provider, chainId, null, pools);
             const fetchSuccess = await sor.fetchPools([], false);
             expect(fetchSuccess).to.be.true;
 
@@ -795,7 +795,7 @@ describe(`Tests for Lido USD routes.`, () => {
             const swapType = SwapTypes.SwapExactIn;
             const swapAmt = bnum('1');
 
-            const sor = new SOR(provider, chainId, pools);
+            const sor = new SOR(provider, chainId, null, pools);
 
             const fetchSuccess = await sor.fetchPools([], false);
             expect(fetchSuccess).to.be.true;
@@ -842,7 +842,7 @@ describe(`Tests for Lido USD routes.`, () => {
             const swapType = SwapTypes.SwapExactOut;
             const swapAmt = bnum('1');
 
-            const sor = new SOR(provider, chainId, pools);
+            const sor = new SOR(provider, chainId, null, pools);
             const fetchSuccess = await sor.fetchPools([], false);
             expect(fetchSuccess).to.be.true;
 

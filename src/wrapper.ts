@@ -37,9 +37,15 @@ export class SOR {
     constructor(
         public provider: BaseProvider,
         public chainId: number,
-        poolsSource: string | SubgraphPoolBase[]
+        poolsSource: string | null,
+        initialPools: SubgraphPoolBase[] = []
     ) {
-        this.poolCacher = new PoolCacher(provider, chainId, poolsSource);
+        this.poolCacher = new PoolCacher(
+            provider,
+            chainId,
+            poolsSource,
+            initialPools
+        );
         this.routeProposer = new RouteProposer();
         this.swapCostCalculator = new SwapCostCalculator(provider, chainId);
     }

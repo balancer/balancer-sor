@@ -150,7 +150,7 @@ describe(`Tests for Stable Pools.`, () => {
             const swapType = SwapTypes.SwapExactIn;
             const swapAmt: BigNumber = bnum('1');
 
-            const sor = new SOR(provider, chainId, pools);
+            const sor = new SOR(provider, chainId, null, pools);
             const fetchSuccess = await sor.fetchPools([], false);
             expect(fetchSuccess).to.be.true;
 
@@ -176,7 +176,7 @@ describe(`Tests for Stable Pools.`, () => {
             const swapType = SwapTypes.SwapExactOut;
             const swapAmt: BigNumber = bnum('1');
 
-            const sor = new SOR(provider, chainId, pools);
+            const sor = new SOR(provider, chainId, null, pools);
             const fetchSuccess = await sor.fetchPools([], false);
             expect(fetchSuccess).to.be.true;
 
@@ -202,7 +202,7 @@ describe(`Tests for Stable Pools.`, () => {
             const swapType = SwapTypes.SwapExactIn;
             const swapAmt: BigNumber = bnum('1');
 
-            const sor = new SOR(provider, chainId, pools);
+            const sor = new SOR(provider, chainId, null, pools);
             const fetchSuccess = await sor.fetchPools([], false);
             expect(fetchSuccess).to.be.true;
 
@@ -241,7 +241,7 @@ describe(`Tests for Stable Pools.`, () => {
             const swapType = SwapTypes.SwapExactOut;
             const swapAmt: BigNumber = bnum('1');
 
-            const sor = new SOR(provider, chainId, pools);
+            const sor = new SOR(provider, chainId, null, pools);
             const fetchSuccess = await sor.fetchPools([], false);
             expect(fetchSuccess).to.be.true;
 
@@ -281,7 +281,7 @@ describe(`Tests for Stable Pools.`, () => {
                 const swapType = SwapTypes.SwapExactIn;
                 const swapAmt: BigNumber = bnum('1');
 
-                const sor = new SOR(provider, chainId, pools);
+                const sor = new SOR(provider, chainId, null, pools);
 
                 const fetchSuccess = await sor.fetchPools([], false);
                 expect(fetchSuccess).to.be.true;
@@ -317,7 +317,7 @@ describe(`Tests for Stable Pools.`, () => {
                 const swapType = SwapTypes.SwapExactIn;
                 const swapAmt: BigNumber = bnum('1.77');
 
-                const sor = new SOR(provider, chainId, pools);
+                const sor = new SOR(provider, chainId, null, pools);
 
                 const fetchSuccess = await sor.fetchPools([], false);
                 expect(fetchSuccess).to.be.true;
@@ -352,7 +352,7 @@ describe(`Tests for Stable Pools.`, () => {
                 const swapType = SwapTypes.SwapExactOut;
                 const swapAmt: BigNumber = bnum('1.276');
 
-                const sor = new SOR(provider, chainId, pools);
+                const sor = new SOR(provider, chainId, null, pools);
 
                 const fetchSuccess = await sor.fetchPools([], false);
                 expect(fetchSuccess).to.be.true;
@@ -386,12 +386,7 @@ describe(`Tests for Stable Pools.`, () => {
                 const swapType = SwapTypes.SwapExactOut;
                 const swapAmt: BigNumber = bnum('2.44');
 
-                const sor = new SOR(
-                    provider,
-
-                    chainId,
-                    pools
-                );
+                const sor = new SOR(provider, chainId, null, pools);
 
                 const fetchSuccess = await sor.fetchPools([], false);
                 expect(fetchSuccess).to.be.true;
@@ -429,7 +424,7 @@ describe(`Tests for Stable Pools.`, () => {
             const swapType = SwapTypes.SwapExactIn;
             const swapAmt: BigNumber = bnum('23.45');
 
-            const sor = new SOR(provider, chainId, pools);
+            const sor = new SOR(provider, chainId, null, pools);
             const fetchSuccess = await sor.fetchPools([], false);
             expect(fetchSuccess).to.be.true;
 
@@ -473,7 +468,7 @@ describe(`Tests for Stable Pools.`, () => {
             const swapType = SwapTypes.SwapExactOut;
             const swapAmt: BigNumber = bnum('17.77');
 
-            const sor = new SOR(provider, chainId, pools);
+            const sor = new SOR(provider, chainId, null, pools);
             const fetchSuccess = await sor.fetchPools([], false);
             expect(fetchSuccess).to.be.true;
 
@@ -657,7 +652,7 @@ describe(`Tests for Stable Pools.`, () => {
                 const swapType = SwapTypes.SwapExactIn;
                 const swapAmt: BigNumber = bnum('0.01');
 
-                const sor = new SOR(provider, chainId, pools);
+                const sor = new SOR(provider, chainId, null, pools);
 
                 const fetchSuccess = await sor.fetchPools([], false);
                 expect(fetchSuccess).to.be.true;
@@ -706,7 +701,7 @@ describe(`Tests for Stable Pools.`, () => {
                 const swapType = SwapTypes.SwapExactIn;
                 const swapAmt: BigNumber = bnum('0.01');
 
-                const sor = new SOR(provider, chainId, pools);
+                const sor = new SOR(provider, chainId, null, pools);
 
                 const fetchSuccess = await sor.fetchPools([], false);
                 expect(fetchSuccess).to.be.true;
@@ -757,7 +752,7 @@ describe(`Tests for Stable Pools.`, () => {
                 const swapType = SwapTypes.SwapExactOut;
                 const swapAmt: BigNumber = bnum('0.01');
 
-                const sor = new SOR(provider, chainId, pools);
+                const sor = new SOR(provider, chainId, null, pools);
 
                 const fetchSuccess = await sor.fetchPools([], false);
                 expect(fetchSuccess).to.be.true;
@@ -808,7 +803,7 @@ describe(`Tests for Stable Pools.`, () => {
                 const swapType = SwapTypes.SwapExactOut;
                 const swapAmt: BigNumber = bnum('0.01');
 
-                const sor = new SOR(provider, chainId, pools);
+                const sor = new SOR(provider, chainId, null, pools);
 
                 const fetchSuccess = await sor.fetchPools([], false);
                 expect(fetchSuccess).to.be.true;

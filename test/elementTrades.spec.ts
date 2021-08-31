@@ -94,7 +94,7 @@ describe(`Tests against Element generated test trade file.`, () => {
                     : '0x0000000000000000000000000000000000000001';
             const swapAmt = bnum(trade.input.amount_in);
 
-            const sor = new SOR(provider, chainId, poolsFromFile);
+            const sor = new SOR(provider, chainId, null, poolsFromFile);
             // Both tokens use 18 decimals
             sor.swapCostCalculator.setTokenDecimals(tokenIn, 18);
             sor.swapCostCalculator.setTokenDecimals(tokenOut, 18);

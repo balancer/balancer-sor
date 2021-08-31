@@ -39,7 +39,7 @@ async function getStableComparrison(
     swapType: SwapTypes,
     swapAmt: BigNumber
 ): Promise<SwapInfo> {
-    const sorStable = new SOR(provider, chainId, stablePools);
+    const sorStable = new SOR(provider, chainId, null, stablePools);
     await sorStable.fetchPools([], false);
 
     const swapInfoStable: SwapInfo = await sorStable.getSwaps(
@@ -180,7 +180,7 @@ describe(`Tests for MetaStable Pools.`, () => {
             const swapType = SwapTypes.SwapExactIn;
             const swapAmt: BigNumber = bnum('1');
 
-            const sor = new SOR(provider, chainId, pools);
+            const sor = new SOR(provider, chainId, null, pools);
 
             const fetchSuccess = await sor.fetchPools([], false);
             expect(fetchSuccess).to.be.true;
@@ -207,7 +207,7 @@ describe(`Tests for MetaStable Pools.`, () => {
             const swapType = SwapTypes.SwapExactOut;
             const swapAmt: BigNumber = bnum('1');
 
-            const sor = new SOR(provider, chainId, pools);
+            const sor = new SOR(provider, chainId, null, pools);
 
             const fetchSuccess = await sor.fetchPools([], false);
             expect(fetchSuccess).to.be.true;
@@ -236,7 +236,7 @@ describe(`Tests for MetaStable Pools.`, () => {
             const swapType = SwapTypes.SwapExactIn;
             const swapAmt: BigNumber = bnum('1'); // Would expect ~ 2 back
 
-            const sor = new SOR(provider, chainId, pools);
+            const sor = new SOR(provider, chainId, null, pools);
 
             const fetchSuccess = await sor.fetchPools([], false);
             expect(fetchSuccess).to.be.true;
@@ -303,7 +303,7 @@ describe(`Tests for MetaStable Pools.`, () => {
             const swapType = SwapTypes.SwapExactIn;
             const swapAmt: BigNumber = bnum('2'); // Would expect ~ 1 back
 
-            const sor = new SOR(provider, chainId, pools);
+            const sor = new SOR(provider, chainId, null, pools);
 
             const fetchSuccess = await sor.fetchPools([], false);
             expect(fetchSuccess).to.be.true;
@@ -368,7 +368,7 @@ describe(`Tests for MetaStable Pools.`, () => {
             const swapType = SwapTypes.SwapExactOut;
             const swapAmt: BigNumber = bnum('2'); // Would expect ~ 1 as input
 
-            const sor = new SOR(provider, chainId, pools);
+            const sor = new SOR(provider, chainId, null, pools);
 
             const fetchSuccess = await sor.fetchPools([], false);
             expect(fetchSuccess).to.be.true;
@@ -432,7 +432,7 @@ describe(`Tests for MetaStable Pools.`, () => {
             const swapType = SwapTypes.SwapExactOut;
             const swapAmt: BigNumber = bnum('2'); // Would expect ~ 4 as input
 
-            const sor = new SOR(provider, chainId, pools);
+            const sor = new SOR(provider, chainId, null, pools);
 
             const fetchSuccess = await sor.fetchPools([], false);
             expect(fetchSuccess).to.be.true;
@@ -503,7 +503,7 @@ describe(`Tests for MetaStable Pools.`, () => {
             const swapType = SwapTypes.SwapExactIn;
             const swapAmt: BigNumber = bnum('77.723');
 
-            const sor = new SOR(provider, chainId, pools);
+            const sor = new SOR(provider, chainId, null, pools);
 
             const fetchSuccess = await sor.fetchPools([], false);
             expect(fetchSuccess).to.be.true;
@@ -573,7 +573,7 @@ describe(`Tests for MetaStable Pools.`, () => {
             const swapType = SwapTypes.SwapExactOut;
             const swapAmt: BigNumber = bnum('77.8');
 
-            const sor = new SOR(provider, chainId, pools);
+            const sor = new SOR(provider, chainId, null, pools);
 
             const fetchSuccess = await sor.fetchPools([], false);
             expect(fetchSuccess).to.be.true;

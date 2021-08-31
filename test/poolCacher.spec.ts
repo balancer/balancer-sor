@@ -20,7 +20,12 @@ describe('PoolCacher', () => {
             );
             expect(connectedPoolCache.isConnectedToSubgraph()).to.be.true;
 
-            const disconnectedpoolCache = new PoolCacher(provider, chainId, []);
+            const disconnectedpoolCache = new PoolCacher(
+                provider,
+                chainId,
+                null,
+                []
+            );
             expect(disconnectedpoolCache.isConnectedToSubgraph()).to.be.false;
         });
 
@@ -29,11 +34,7 @@ describe('PoolCacher', () => {
                 pools: SubgraphPoolBase[];
             } = require('./testData/testPools/subgraphPoolsSmallWithTrade.json');
             const pools = poolsFromFile.pools;
-            const poolCache = new PoolCacher(
-                provider,
-                chainId,
-                poolsFromFile.pools
-            );
+            const poolCache = new PoolCacher(provider, chainId, null, pools);
 
             expect(poolCache.getPools()).to.deep.eq(poolsFromFile.pools);
         });
@@ -53,11 +54,8 @@ describe('PoolCacher', () => {
                 pools: SubgraphPoolBase[];
             } = require('./testData/testPools/subgraphPoolsSmallWithTrade.json');
             const pools = poolsFromFile.pools;
-            const poolCache = new PoolCacher(
-                provider,
-                chainId,
-                poolsFromFile.pools
-            );
+            const poolCache = new PoolCacher(provider, chainId, null, pools);
+
             const fetchSuccess = await poolCache.fetchPools([], false);
             expect(fetchSuccess).to.be.true;
 
@@ -71,11 +69,8 @@ describe('PoolCacher', () => {
             const poolsFromFile: {
                 pools: SubgraphPoolBase[];
             } = require('./testData/testPools/subgraphPoolsSmallWithTrade.json');
-            const poolCache = new PoolCacher(
-                provider,
-                chainId,
-                poolsFromFile.pools
-            );
+            const pools = poolsFromFile.pools;
+            const poolCache = new PoolCacher(provider, chainId, null, pools);
 
             const testPools = require('./testData/filterTestPools.json');
             const newPools: {
@@ -103,11 +98,7 @@ describe('PoolCacher', () => {
                 pools: SubgraphPoolBase[];
             } = require('./testData/testPools/subgraphPoolsSmallWithTrade.json');
             const pools = poolsFromFile.pools;
-            const poolCache = new PoolCacher(
-                provider,
-                chainId,
-                poolsFromFile.pools
-            );
+            const poolCache = new PoolCacher(provider, chainId, null, pools);
 
             const result: boolean = await poolCache.fetchPools([], false);
             expect(result).to.be.true;

@@ -5,21 +5,16 @@ import { getOnChainBalances } from './onchainData';
 import { fetchSubgraphPools } from './subgraph';
 
 export class PoolCacher {
-    private poolsUrl: string | null = null;
     private pools: SubgraphPoolBase[] = [];
     finishedFetchingOnChain = false;
 
     constructor(
         private provider: BaseProvider,
         private chainId: number,
-        poolsSource: string | SubgraphPoolBase[]
+        private poolsUrl: string | null = null,
+        initialPools: SubgraphPoolBase[] = []
     ) {
-        // The pools source can be a URL (e.g. pools from Subgraph) or a data set of pools
-        if (typeof poolsSource === 'string') {
-            this.poolsUrl = poolsSource;
-        } else {
-            this.pools = poolsSource;
-        }
+        this.pools = initialPools;
     }
 
     getPools(): SubgraphPoolBase[] {
