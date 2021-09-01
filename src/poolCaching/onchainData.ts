@@ -3,7 +3,6 @@ import { SubgraphPoolBase } from '../types';
 import { isSameAddress } from '../utils';
 import { scale, bnum } from '../utils/bignumber';
 import { Multicaller } from '../utils/multicaller';
-import _ from 'lodash';
 
 export async function getOnChainBalances(
     subgraphPools: SubgraphPoolBase[],
