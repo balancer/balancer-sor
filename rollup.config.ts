@@ -14,6 +14,7 @@ const external = [
     '@ethersproject/contracts',
     '@ethersproject/providers',
     'isomorphic-fetch',
+    'bignumber.js',
 ];
 
 export default [
