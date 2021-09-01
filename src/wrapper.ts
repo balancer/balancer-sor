@@ -1,6 +1,5 @@
 import { BaseProvider } from '@ethersproject/providers';
 import { BigNumber, ZERO } from './utils/bignumber';
-import { EMPTY_SWAPINFO } from './constants';
 import { smartOrderRouter } from './router';
 import { getWrappedInfo, setWrappedInfo } from './wrapInfo';
 import { formatSwaps } from './formatSwaps';
@@ -9,6 +8,8 @@ import { RouteProposer } from './routeProposal';
 import { filterPoolsByType } from './routeProposal/filtering';
 import { SwapCostCalculator } from './swapCost';
 import { getLidoStaticSwaps, isLidoStableSwap } from './pools/lido';
+import { isSameAddress } from './utils';
+import { EMPTY_SWAPINFO } from './constants';
 import {
     SwapInfo,
     SwapTypes,
@@ -171,13 +172,13 @@ export class SOR {
         // Path is guaranteed to contain both tokenIn and tokenOut
         paths[0].swaps.forEach((swap) => {
             // Inject token decimals to avoid having to query onchain
-            if (swap.tokenIn === tokenIn) {
+            if (isSameAddress(swap.tokenIn, tokenIn)) {
                 this.swapCostCalculator.setTokenDecimals(
                     tokenIn,
                     swap.tokenInDecimals
                 );
             }
-            if (swap.tokenOut === tokenOut) {
+            if (isSameAddress(swap.tokenOut, tokenOut)) {
                 this.swapCostCalculator.setTokenDecimals(
                     tokenOut,
                     swap.tokenOutDecimals

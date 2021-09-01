@@ -5,6 +5,7 @@ import { Lido, getStEthRate } from './pools/lido';
 import { BigNumber, bnum, scale } from './utils/bignumber';
 import { WETHADDR } from './constants';
 import { SwapTypes, SwapInfo } from './types';
+import { isSameAddress } from './utils';
 
 export interface WrappedInfo {
     swapAmountOriginal: BigNumber;
@@ -110,9 +111,7 @@ export function setWrappedInfo(
     ) {
         // replace weth with ZERO/ETH in assets for Vault to handle ETH directly
         swapInfo.tokenAddresses = swapInfo.tokenAddresses.map((addr) =>
-            addr.toLowerCase() === WETHADDR[chainId].toLowerCase()
-                ? AddressZero
-                : addr
+            isSameAddress(addr, WETHADDR[chainId]) ? AddressZero : addr
         );
     }
 

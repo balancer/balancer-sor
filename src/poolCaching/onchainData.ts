@@ -1,5 +1,6 @@
 import { BaseProvider } from '@ethersproject/providers';
 import { SubgraphPoolBase } from '../types';
+import { isSameAddress } from '../utils';
 import { scale, bnum } from '../utils/bignumber';
 import { Multicaller } from '../utils/multicaller';
 import _ from 'lodash';
@@ -102,8 +103,8 @@ export async function getOnChainBalances(
             ).toString();
 
             poolTokens.tokens.forEach((token, i) => {
-                const T = subgraphPools[poolId].tokens.find(
-                    (t) => t.address === token.toLowerCase()
+                const T = subgraphPools[poolId].tokens.find((t) =>
+                    isSameAddress(t.address, token)
                 );
                 T.balance = scale(
                     bnum(poolTokens.balances[i]),
