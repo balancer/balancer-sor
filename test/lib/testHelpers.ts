@@ -67,7 +67,7 @@ export function filterPoolsAndTokens(
         if (pool.tokens.length != 0) {
             if (pool.tokens[0].balance != '0') {
                 const tokens = [];
-                pool.tokensList.forEach(token => {
+                pool.tokensList.forEach((token) => {
                     tokens.push(token);
                 });
 
@@ -81,7 +81,7 @@ export function filterPoolsAndTokens(
     }
 
     allTokensSet = new Set(
-        Array.from(new Set(allTokens.map(a => JSON.stringify(a))), json =>
+        Array.from(new Set(allTokens.map((a) => JSON.stringify(a))), (json) =>
             JSON.parse(json)
         )
     );
@@ -112,7 +112,7 @@ export function displayResults(
     const allTokens = WeightedTokens;
     Object.assign(allTokens, StableTokens);
     const symbols = Object.keys(allTokens);
-    symbols.forEach(symbol => {
+    symbols.forEach((symbol) => {
         if (
             allTokens[symbol].address.toLowerCase() ===
             TradeInfo.TokenIn.toLowerCase()
@@ -133,7 +133,7 @@ export function displayResults(
     console.log(TradeInfo.SwapType);
 
     const tableData = [];
-    Results.forEach(result => {
+    Results.forEach((result) => {
         tableData.push({
             SOR: result.title,
             'Full SOR Time': result.timeData.fullSwap,
@@ -144,7 +144,7 @@ export function displayResults(
     console.table(tableData);
 
     if (Verbose) {
-        Results.forEach(result => {
+        Results.forEach((result) => {
             console.log(`${result.title} Swaps: `);
             console.log(result.swaps);
         });
@@ -254,7 +254,7 @@ function testSwapAmountsForDecimals(
     swapType: SwapTypes,
     swapInfo: SwapInfo
 ): void {
-    swapInfo.swaps.forEach(swap => {
+    swapInfo.swaps.forEach((swap) => {
         if (swapType === SwapTypes.SwapExactIn) {
             const check = swap.amount.split('.');
             assert.isTrue(
@@ -280,7 +280,7 @@ function getTotalSwapAmount(
     const inIndex = swapInfo.tokenAddresses.indexOf(swapInfo.tokenIn);
     const outIndex = swapInfo.tokenAddresses.indexOf(swapInfo.tokenOut);
 
-    swapInfo.swaps.forEach(swap => {
+    swapInfo.swaps.forEach((swap) => {
         if (swapType === SwapTypes.SwapExactIn) {
             if (swap.assetInIndex === inIndex) total = total.plus(swap.amount);
         } else {
@@ -295,10 +295,7 @@ export function calcRelativeDiffBn(
     expected: BigNumber,
     actual: BigNumber
 ): BigNumber {
-    return expected
-        .minus(actual)
-        .div(expected)
-        .abs();
+    return expected.minus(actual).div(expected).abs();
 }
 
 export function countPoolSwapPairTypes(

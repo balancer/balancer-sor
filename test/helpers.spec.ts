@@ -1747,10 +1747,7 @@ describe(`Tests for Helpers.`, () => {
             );
             // Return amount is in stETH so needs conversion
             expect(swapInfoUpdated.returnAmount.toString()).to.eq(
-                returnAmount
-                    .div(wrappedInfo.tokenIn.rate)
-                    .dp(0)
-                    .toString()
+                returnAmount.div(wrappedInfo.tokenIn.rate).dp(0).toString()
             );
             // Return amount from swaps is original return amount
             expect(swapInfoUpdated.returnAmountFromSwaps.toString()).to.eq(
@@ -1818,10 +1815,7 @@ describe(`Tests for Helpers.`, () => {
             );
             // Return amount is stETH so from swaps will be converted
             expect(swapInfoUpdated.returnAmount.toString()).to.eq(
-                returnAmount
-                    .div(wrappedInfo.tokenOut.rate)
-                    .dp(0)
-                    .toString()
+                returnAmount.div(wrappedInfo.tokenOut.rate).dp(0).toString()
             );
             // Return amount from swaps is original return amount
             expect(swapInfoUpdated.returnAmountFromSwaps.toString()).to.eq(

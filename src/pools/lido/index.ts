@@ -858,7 +858,7 @@ function calculateMarketSp(
         const swap = swaps[i];
 
         // Find matching pool from list so we can use balances, etc
-        const pool = pools.filter(p => p.id === swap.poolId);
+        const pool = pools.filter((p) => p.id === swap.poolId);
         if (pool.length !== 1) return bnum(0);
 
         // This will get a specific pool type so we can call parse and spot price functions

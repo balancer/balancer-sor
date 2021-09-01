@@ -40,7 +40,7 @@ interface TradeData {
 }
 
 describe(`Tests against Element generated test trade file.`, () => {
-    testTrades.trades.forEach(function(trade: TradeData) {
+    testTrades.trades.forEach(function (trade: TradeData) {
         const description = `correctly trades ${trade.input.amount_in.toString()} ${
             trade.input.token_in
         } for ${trade.input.token_out}. direction: ${trade.input.direction}`;

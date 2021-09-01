@@ -603,8 +603,9 @@ describe('Tests pools filtering and path processing', () => {
     });
 
     it('Test pool class that has direct & multihop paths', async () => {
-        const pools = JSON.parse(JSON.stringify(testPools))
-            .pathTestDirectAndMulti;
+        const pools = JSON.parse(
+            JSON.stringify(testPools)
+        ).pathTestDirectAndMulti;
         const tokenIn = USDC;
         const tokenOut = DAI;
         let hopTokens: string[];
@@ -639,8 +640,9 @@ describe('Tests pools filtering and path processing', () => {
     });
 
     it('Test pool class that has two multihop paths, swapExactIn', async () => {
-        const pools = JSON.parse(JSON.stringify(testPools))
-            .pathTestPoolTwoMultiHops;
+        const pools = JSON.parse(
+            JSON.stringify(testPools)
+        ).pathTestPoolTwoMultiHops;
         const tokenIn = USDC;
         const tokenOut = DAI;
         let hopTokens: string[];
@@ -749,8 +751,9 @@ describe('Tests pools filtering and path processing', () => {
     });
 
     it('Test pool class that has two multihop paths, swapExactOut', async () => {
-        const pools = JSON.parse(JSON.stringify(testPools))
-            .pathTestPoolTwoMultiHops;
+        const pools = JSON.parse(
+            JSON.stringify(testPools)
+        ).pathTestPoolTwoMultiHops;
         const tokenIn = USDC;
         const tokenOut = DAI;
         let hopTokens: string[];

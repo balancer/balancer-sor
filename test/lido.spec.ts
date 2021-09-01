@@ -204,10 +204,7 @@ describe(`Tests for Lido USD routes.`, () => {
             // This is pulled from mainnet so needs valid routes - will be 0 if not
             // returnAmount for stETH should be using exchangeRate
             expect(testSwapInfo.returnAmount.toString()).to.eq(
-                swapInfowstEth.returnAmount
-                    .div(priceRate)
-                    .dp(0)
-                    .toString()
+                swapInfowstEth.returnAmount.div(priceRate).dp(0).toString()
             );
             expect(testSwapInfo.returnAmountConsideringFees.toString()).to.eq(
                 swapInfowstEth.returnAmountConsideringFees
@@ -276,10 +273,7 @@ describe(`Tests for Lido USD routes.`, () => {
             // This is pulled from mainnet so needs valid routes - will be 0 if not
             // returnAmount (amount of input stETH) should be using exchangeRate
             expect(testSwapInfo.returnAmount.toString()).to.eq(
-                swapInfowstEth.returnAmount
-                    .div(priceRate)
-                    .dp(0)
-                    .toString()
+                swapInfowstEth.returnAmount.div(priceRate).dp(0).toString()
             );
             expect(testSwapInfo.returnAmountConsideringFees.toString()).to.eq(
                 swapInfowstEth.returnAmountConsideringFees

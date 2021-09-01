@@ -71,9 +71,7 @@ describe(`Tests for Element Pools.`, () => {
 
         const limitAmt = newPool.getLimitAmountSwap(poolPairData, swapType);
         expect(limitAmt.toString()).to.eq(
-            bnum(pool.tokens[1].balance)
-                .times(MAX_OUT_RATIO)
-                .toString()
+            bnum(pool.tokens[1].balance).times(MAX_OUT_RATIO).toString()
         );
     });
 

@@ -9,10 +9,7 @@ export function calculateTotalSwapCost(
     swapGas: BigNumber,
     gasPriceWei: BigNumber
 ): BigNumber {
-    return gasPriceWei
-        .times(swapGas)
-        .times(tokenPrice)
-        .div(BONE);
+    return gasPriceWei.times(swapGas).times(tokenPrice).div(BONE);
 }
 
 export class SwapCostCalculator {
@@ -46,9 +43,8 @@ export class SwapCostCalculator {
      */
     async getNativeAssetPriceInToken(tokenAddress: string): Promise<BigNumber> {
         // Check if we have token price cached
-        const cachedTokenPrice = this.tokenPriceCache[
-            tokenAddress.toLowerCase()
-        ];
+        const cachedTokenPrice =
+            this.tokenPriceCache[tokenAddress.toLowerCase()];
         if (cachedTokenPrice) return bnum(cachedTokenPrice);
 
         try {

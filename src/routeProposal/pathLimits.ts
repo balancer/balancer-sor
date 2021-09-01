@@ -7,7 +7,7 @@ export function calculatePathLimits(
     swapType: SwapTypes
 ): [NewPath[], BigNumber] {
     let maxLiquidityAvailable = ZERO;
-    paths.forEach(path => {
+    paths.forEach((path) => {
         // Original parsedPoolPairForPath here but this has already been done.
         path.limitAmount = getLimitAmountSwapForPath(path, swapType);
         if (path.limitAmount.isNaN()) throw 'path.limitAmount.isNaN';

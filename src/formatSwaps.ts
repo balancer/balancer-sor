@@ -7,7 +7,7 @@ import { SwapTypes, SwapV2, Swap, SwapInfo } from './types';
  */
 const getTokenAddresses = (swaps: Swap[][]): string[] => {
     const tokenAddressesSet: Set<string> = new Set(
-        swaps.flatMap(sequence =>
+        swaps.flatMap((sequence) =>
             sequence.flatMap((swap): [string, string] => [
                 swap.tokenIn,
                 swap.tokenOut,
@@ -99,13 +99,15 @@ export function formatSwaps(
         return swapInfo;
     }
 
-    const { tokenInDecimals } = swaps[0].find(swap => swap.tokenIn === tokenIn);
+    const { tokenInDecimals } = swaps[0].find(
+        (swap) => swap.tokenIn === tokenIn
+    );
     const { tokenOutDecimals } = swaps[0].find(
-        swap => swap.tokenOut === tokenOut
+        (swap) => swap.tokenOut === tokenOut
     );
 
     const tokenArray = getTokenAddresses(swaps);
-    const swapsV2: SwapV2[] = swaps.flatMap(sequence =>
+    const swapsV2: SwapV2[] = swaps.flatMap((sequence) =>
         formatSequence(swapType, sequence, tokenArray)
     );
 
@@ -129,9 +131,7 @@ export function formatSwaps(
         .minus(getTotalSwapAmount(swapsV2))
         .dp(0, 0);
     if (dust.gt(0))
-        swapsV2[0].amount = bnum(swapsV2[0].amount)
-            .plus(dust)
-            .toString();
+        swapsV2[0].amount = bnum(swapsV2[0].amount).plus(dust).toString();
 
     swapInfo.swaps = swapsV2;
     swapInfo.tokenAddresses = tokenArray;

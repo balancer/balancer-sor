@@ -109,7 +109,7 @@ export function setWrappedInfo(
         wrappedInfo.tokenOut.wrapType === WrapTypes.ETH
     ) {
         // replace weth with ZERO/ETH in assets for Vault to handle ETH directly
-        swapInfo.tokenAddresses = swapInfo.tokenAddresses.map(addr =>
+        swapInfo.tokenAddresses = swapInfo.tokenAddresses.map((addr) =>
             addr.toLowerCase() === WETHADDR[chainId].toLowerCase()
                 ? AddressZero
                 : addr
@@ -144,9 +144,10 @@ export function setWrappedInfo(
         swapInfo.returnAmount = swapInfo.returnAmount
             .div(wrappedInfo.tokenOut.rate)
             .dp(0);
-        swapInfo.returnAmountConsideringFees = swapInfo.returnAmountConsideringFees
-            .div(wrappedInfo.tokenOut.rate)
-            .dp(0);
+        swapInfo.returnAmountConsideringFees =
+            swapInfo.returnAmountConsideringFees
+                .div(wrappedInfo.tokenOut.rate)
+                .dp(0);
     }
 
     // SwapExactOut, stETH in, returnAmount us stETH amount in, returnAmountForSwaps is wstETH amount in
@@ -157,9 +158,10 @@ export function setWrappedInfo(
         swapInfo.returnAmount = swapInfo.returnAmount
             .div(wrappedInfo.tokenIn.rate)
             .dp(0);
-        swapInfo.returnAmountConsideringFees = swapInfo.returnAmountConsideringFees
-            .div(wrappedInfo.tokenIn.rate)
-            .dp(0);
+        swapInfo.returnAmountConsideringFees =
+            swapInfo.returnAmountConsideringFees
+                .div(wrappedInfo.tokenIn.rate)
+                .dp(0);
     }
     return swapInfo;
 }

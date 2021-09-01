@@ -494,25 +494,16 @@ async function makeRelayerTrade(
             userData: swapInfo.swaps[0].userData,
         };
 
-        let limit = swapInfo.returnAmountFromSwaps
-            .times(1.01)
-            .dp(0)
-            .toString(); // Max In
+        let limit = swapInfo.returnAmountFromSwaps.times(1.01).dp(0).toString(); // Max In
         if (swapType === SwapTypes.SwapExactIn)
-            limit = swapInfo.returnAmountFromSwaps
-                .times(0.99)
-                .dp(0)
-                .toString(); // Min return
+            limit = swapInfo.returnAmountFromSwaps.times(0.99).dp(0).toString(); // Min return
 
         const tx = await relayerContract
             .connect(wallet)
             .callStatic.swap(single, funds, limit, deadline, overRides);
         console.log(tx.toString());
         console.log(
-            swapInfo.returnAmountFromSwaps
-                .times(1.01)
-                .dp(0)
-                .toString()
+            swapInfo.returnAmountFromSwaps.times(1.01).dp(0).toString()
         );
     } else {
         const tx = await relayerContract

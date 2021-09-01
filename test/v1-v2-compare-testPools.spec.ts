@@ -200,6 +200,6 @@ async function loopTests(file) {
     }).timeout(10000);
 }
 
-testFiles.forEach(file => {
+testFiles.forEach((file) => {
     loopTests(file);
 });

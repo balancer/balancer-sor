@@ -28,7 +28,7 @@ export async function getOnChainBalances(
                 ...weightedPoolAbi,
                 ...stablePoolAbi,
                 ...elementPoolAbi,
-            ].map(row => [row.name, row])
+            ].map((row) => [row.name, row])
         )
     );
 
@@ -103,7 +103,7 @@ export async function getOnChainBalances(
 
             poolTokens.tokens.forEach((token, i) => {
                 const T = subgraphPools[poolId].tokens.find(
-                    t => t.address === token.toLowerCase()
+                    (t) => t.address === token.toLowerCase()
                 );
                 T.balance = scale(
                     bnum(poolTokens.balances[i]),

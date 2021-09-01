@@ -54,9 +54,8 @@ export const smartOrderRouter = (
         //  Since the sum of the first i highest limits will be less than totalSwapAmount, we remove the difference to the last swapAmount
         //  so we are sure that the sum of swapAmounts will be equal to totalSwapAmount
         const difference = sumHighestLimitAmounts.minus(totalSwapAmount);
-        swapAmounts[swapAmounts.length - 1] = swapAmounts[
-            swapAmounts.length - 1
-        ].minus(difference);
+        swapAmounts[swapAmounts.length - 1] =
+            swapAmounts[swapAmounts.length - 1].minus(difference);
         break; // No need to keep looping as this number of pools (i) has enough liquidity
     }
     if (initialNumPaths == -1) {
@@ -138,7 +137,7 @@ export const smartOrderRouter = (
 
         // Calculates the number of pools in all the paths to include the gas costs
         let totalNumberOfPools = 0;
-        selectedPaths.forEach(path => {
+        selectedPaths.forEach((path) => {
             totalNumberOfPools += path.swaps.length;
         });
 
@@ -197,9 +196,8 @@ export const smartOrderRouter = (
             highestSwapAmt = swapAmount;
             largestSwapPath = path;
         }
-        totalSwapAmountWithRoundingErrors = totalSwapAmountWithRoundingErrors.plus(
-            swapAmount
-        );
+        totalSwapAmountWithRoundingErrors =
+            totalSwapAmountWithRoundingErrors.plus(swapAmount);
 
         // // TODO: remove. To debug only!
         /*
@@ -466,20 +464,17 @@ function iterateSwapAmounts(
     // }
     let iterationCount = 0;
     while (priceError.isGreaterThan(PRICE_ERROR_TOLERANCE)) {
-        [
-            prices,
-            swapAmounts,
-            exceedingAmounts,
-        ] = iterateSwapAmountsApproximation(
-            pools,
-            selectedPaths,
-            swapType,
-            totalSwapAmount,
-            swapAmounts,
-            exceedingAmounts,
-            pathLimitAmounts,
-            iterationCount
-        );
+        [prices, swapAmounts, exceedingAmounts] =
+            iterateSwapAmountsApproximation(
+                pools,
+                selectedPaths,
+                swapType,
+                totalSwapAmount,
+                swapAmounts,
+                exceedingAmounts,
+                pathLimitAmounts,
+                iterationCount
+            );
         const maxPrice = BigNumber.max.apply(null, prices);
         const minPrice = BigNumber.min.apply(null, prices);
         priceError = maxPrice.minus(minPrice).div(minPrice);
@@ -534,9 +529,8 @@ function iterateSwapAmountsApproximation(
             sumInverseDerivativeSPaSs = sumInverseDerivativeSPaSs.plus(
                 ONE.div(derivative_SPaS)
             );
-            sumSPaSDividedByDerivativeSPaSs = sumSPaSDividedByDerivativeSPaSs.plus(
-                SPaS.div(derivative_SPaS)
-            );
+            sumSPaSDividedByDerivativeSPaSs =
+                sumSPaSDividedByDerivativeSPaSs.plus(SPaS.div(derivative_SPaS));
         } else {
             // This swapAmount is not viable but we push to keep list length consistent
             derivativeSPaSs.push(bnum('NaN'));
@@ -587,9 +581,8 @@ function iterateSwapAmountsApproximation(
     const pricesForViableAmounts = []; // Get prices for all non-negative AND below-limit input amounts
     let swapAmountsSumWithRoundingErrors = ZERO;
     swapAmounts.forEach((swapAmount, i) => {
-        swapAmountsSumWithRoundingErrors = swapAmountsSumWithRoundingErrors.plus(
-            swapAmount
-        );
+        swapAmountsSumWithRoundingErrors =
+            swapAmountsSumWithRoundingErrors.plus(swapAmount);
         if (
             (iterationCount == 0 &&
                 swapAmount.gte(ZERO) &&
@@ -649,28 +642,29 @@ function redistributeInputAmounts(
     swapAmounts.forEach((swapAmount, i) => {
         // Amount is negative
         if (swapAmount.lte(ZERO)) {
-            sumNegativeOrExceedingSwapAmounts = sumNegativeOrExceedingSwapAmounts.plus(
-                swapAmount
-            );
-            sumInverseDerivativeSPaSsForNegativeAmounts = sumInverseDerivativeSPaSsForNegativeAmounts.plus(
-                ONE.div(derivativeSPaSs[i])
-            );
+            sumNegativeOrExceedingSwapAmounts =
+                sumNegativeOrExceedingSwapAmounts.plus(swapAmount);
+            sumInverseDerivativeSPaSsForNegativeAmounts =
+                sumInverseDerivativeSPaSsForNegativeAmounts.plus(
+                    ONE.div(derivativeSPaSs[i])
+                );
         }
         // Amount is above limit (exceeding > 0)
         else if (exceedingAmounts[i].gte(ZERO)) {
-            sumNegativeOrExceedingSwapAmounts = sumNegativeOrExceedingSwapAmounts.plus(
-                exceedingAmounts[i]
-            );
-            sumInverseDerivativeSPaSsForExceedingAmounts = sumInverseDerivativeSPaSsForExceedingAmounts.plus(
-                ONE.div(derivativeSPaSs[i])
-            );
+            sumNegativeOrExceedingSwapAmounts =
+                sumNegativeOrExceedingSwapAmounts.plus(exceedingAmounts[i]);
+            sumInverseDerivativeSPaSsForExceedingAmounts =
+                sumInverseDerivativeSPaSsForExceedingAmounts.plus(
+                    ONE.div(derivativeSPaSs[i])
+                );
         }
         // Sum the inverse of the derivative if the swapAmount is viable,
         // i.e. if swapAmount > 0 or swapAmount < limit
         else
-            sumInverseDerivativeSPaSsForViableAmounts = sumInverseDerivativeSPaSsForViableAmounts.plus(
-                ONE.div(derivativeSPaSs[i])
-            );
+            sumInverseDerivativeSPaSsForViableAmounts =
+                sumInverseDerivativeSPaSsForViableAmounts.plus(
+                    ONE.div(derivativeSPaSs[i])
+                );
     });
 
     // Now redestribute sumNegativeOrExceedingSwapAmounts
@@ -704,9 +698,8 @@ function redistributeInputAmounts(
                         .times(ONE.div(derivativeSPaSs[i]))
                         .div(sumInverseDerivativeSPaSsForExceedingAmounts);
                     swapAmounts[i] = swapAmounts[i].plus(deltaSwapAmount);
-                    exceedingAmounts[i] = exceedingAmounts[i].plus(
-                        deltaSwapAmount
-                    );
+                    exceedingAmounts[i] =
+                        exceedingAmounts[i].plus(deltaSwapAmount);
                 }
             });
         } else {
@@ -718,9 +711,8 @@ function redistributeInputAmounts(
                         .times(ONE.div(derivativeSPaSs[i]))
                         .div(sumInverseDerivativeSPaSsForNegativeAmounts);
                     swapAmounts[i] = swapAmounts[i].plus(deltaSwapAmount);
-                    exceedingAmounts[i] = exceedingAmounts[i].plus(
-                        deltaSwapAmount
-                    );
+                    exceedingAmounts[i] =
+                        exceedingAmounts[i].plus(deltaSwapAmount);
                 }
             });
         }

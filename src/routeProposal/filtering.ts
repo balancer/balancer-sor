@@ -21,7 +21,7 @@ export const filterPoolsByType = (
     poolTypeFilter: PoolFilter
 ): SubgraphPoolBase[] => {
     if (poolTypeFilter === PoolFilter.All) return pools;
-    return pools.filter(p => p.poolType === poolTypeFilter);
+    return pools.filter((p) => p.poolType === poolTypeFilter);
 };
 
 /*
@@ -51,7 +51,7 @@ export function filterPoolsOfInterest(
     let tokenInPairedTokens: Set<string> = new Set();
     let tokenOutPairedTokens: Set<string> = new Set();
 
-    allPools.forEach(pool => {
+    allPools.forEach((pool) => {
         if (pool.tokensList.length === 0 || pool.tokens[0].balance === '0') {
             return;
         }
@@ -105,7 +105,7 @@ export function filterPoolsOfInterest(
     });
 
     // We find the intersection of the two previous sets so we can trade tokenIn for tokenOut with 1 multi-hop
-    const hopTokensSet = [...tokenInPairedTokens].filter(x =>
+    const hopTokensSet = [...tokenInPairedTokens].filter((x) =>
         tokenOutPairedTokens.has(x)
     );
 
@@ -180,9 +180,8 @@ export function filterHopPools(
                     hopTokens[i]
                 );
                 // const normalizedLiquidity = pool.getNormalizedLiquidity(tokenIn, hopTokens[i]);
-                const normalizedLiquidity = pool.getNormalizedLiquidity(
-                    poolPairData
-                );
+                const normalizedLiquidity =
+                    pool.getNormalizedLiquidity(poolPairData);
                 // Cannot be strictly greater otherwise highestNormalizedLiquidityPoolId = 0 if hopTokens[i] balance is 0 in this pool.
                 if (
                     normalizedLiquidity.isGreaterThanOrEqualTo(
@@ -198,9 +197,8 @@ export function filterHopPools(
                     tokenOut
                 );
                 // const normalizedLiquidity = pool.getNormalizedLiquidity(hopTokens[i], tokenOut);
-                const normalizedLiquidity = pool.getNormalizedLiquidity(
-                    poolPairData
-                );
+                const normalizedLiquidity =
+                    pool.getNormalizedLiquidity(poolPairData);
                 // Cannot be strictly greater otherwise highestNormalizedLiquidityPoolId = 0 if hopTokens[i] balance is 0 in this pool.
                 if (
                     normalizedLiquidity.isGreaterThanOrEqualTo(

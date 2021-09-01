@@ -157,21 +157,19 @@ export class SOR {
     ): Promise<SwapInfo> {
         if (pools.length === 0) return { ...EMPTY_SWAPINFO };
 
-        const {
-            pools: poolsOfInterest,
-            paths,
-        } = this.routeProposer.getCandidatePaths(
-            tokenIn,
-            tokenOut,
-            swapType,
-            pools,
-            swapOptions
-        );
+        const { pools: poolsOfInterest, paths } =
+            this.routeProposer.getCandidatePaths(
+                tokenIn,
+                tokenOut,
+                swapType,
+                pools,
+                swapOptions
+            );
 
         if (paths.length == 0) return { ...EMPTY_SWAPINFO };
 
         // Path is guaranteed to contain both tokenIn and tokenOut
-        paths[0].swaps.forEach(swap => {
+        paths[0].swaps.forEach((swap) => {
             // Inject token decimals to avoid having to query onchain
             if (swap.tokenIn === tokenIn) {
                 this.swapCostCalculator.setTokenDecimals(
@@ -193,19 +191,15 @@ export class SOR {
         );
 
         // Returns list of swaps
-        const [
-            swaps,
-            total,
-            marketSp,
-            totalConsideringFees,
-        ] = this.getOptimalPaths(
-            poolsOfInterest,
-            paths,
-            swapAmount,
-            swapType,
-            costOutputToken,
-            swapOptions.maxPools
-        );
+        const [swaps, total, marketSp, totalConsideringFees] =
+            this.getOptimalPaths(
+                poolsOfInterest,
+                paths,
+                swapAmount,
+                swapType,
+                costOutputToken,
+                swapOptions.maxPools
+            );
 
         const swapInfo = formatSwaps(
             swaps,

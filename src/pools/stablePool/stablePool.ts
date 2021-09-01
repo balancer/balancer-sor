@@ -138,7 +138,7 @@ export class StablePool implements PoolBase {
 
         if (pairType !== PairTypes.BptToToken) {
             tokenIndexIn = this.tokens.findIndex(
-                t => getAddress(t.address) === getAddress(tokenIn)
+                (t) => getAddress(t.address) === getAddress(tokenIn)
             );
             if (tokenIndexIn < 0) throw 'Pool does not contain tokenIn';
             tI = this.tokens[tokenIndexIn];
@@ -147,7 +147,7 @@ export class StablePool implements PoolBase {
         }
         if (pairType !== PairTypes.TokenToBpt) {
             tokenIndexOut = this.tokens.findIndex(
-                t => getAddress(t.address) === getAddress(tokenOut)
+                (t) => getAddress(t.address) === getAddress(tokenOut)
             );
             if (tokenIndexOut < 0) throw 'Pool does not contain tokenOut';
             tO = this.tokens[tokenIndexOut];
@@ -216,7 +216,7 @@ export class StablePool implements PoolBase {
             this.totalShares = newBalance.toString();
         } else {
             // token is underlying in the pool
-            const T = this.tokens.find(t => t.address === token);
+            const T = this.tokens.find((t) => t.address === token);
             T.balance = newBalance.toString();
         }
     }
