@@ -4,6 +4,12 @@ import { isSameAddress } from '../utils';
 import { scale, bnum } from '../utils/bignumber';
 import { Multicaller } from '../utils/multicaller';
 
+// TODO: decide whether we want to trim these ABIs down to the relevant functions
+import vaultAbi from '../abi/Vault.json';
+import weightedPoolAbi from '../pools/weightedPool/weightedPoolAbi.json';
+import stablePoolAbi from '../pools/stablePool/stablePoolAbi.json';
+import elementPoolAbi from '../pools/elementPool/ConvergentCurvePool.json';
+
 export async function getOnChainBalances(
     subgraphPools: SubgraphPoolBase[],
     multiAddress: string,
@@ -12,14 +18,6 @@ export async function getOnChainBalances(
 ): Promise<SubgraphPoolBase[]> {
     if (subgraphPools.length === 0) return subgraphPools;
 
-    /* eslint-disable @typescript-eslint/no-var-requires */
-    const vaultAbi = require('../abi/Vault.json');
-    const weightedPoolAbi = require('../pools/weightedPool/weightedPoolAbi.json');
-    const stablePoolAbi = require('../pools/stablePool/stablePoolAbi.json');
-    const elementPoolAbi = require('../pools/elementPool/ConvergentCurvePool.json');
-    /* eslint-enable @typescript-eslint/no-var-requires */
-
-    // TODO: decide whether we want to trim these ABIs down to the relevant functions
     const abis = Object.values(
         // Remove duplicate entries using their names
         Object.fromEntries(
