@@ -1,3 +1,4 @@
+import cloneDeep from 'lodash.clonedeep';
 import { BigNumber, bnum, scale, ZERO } from './utils/bignumber';
 import { EMPTY_SWAPINFO } from './constants';
 import { SwapTypes, SwapV2, Swap, SwapInfo } from './types';
@@ -88,7 +89,7 @@ export function formatSwaps(
     returnAmountConsideringFees: BigNumber,
     marketSp: BigNumber
 ): SwapInfo {
-    const swaps: Swap[][] = JSON.parse(JSON.stringify(swapsOriginal));
+    const swaps: Swap[][] = cloneDeep(swapsOriginal);
 
     const swapInfo: SwapInfo = {
         ...EMPTY_SWAPINFO,

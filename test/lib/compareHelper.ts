@@ -1,4 +1,5 @@
 import { JsonRpcProvider } from '@ethersproject/providers';
+import cloneDeep from 'lodash.clonedeep';
 import { performance } from 'perf_hooks';
 import {
     displayResults,
@@ -37,7 +38,7 @@ export async function compareTest(
     const costOutputToken = bnum(0);
     const fullSwapStart = performance.now();
     const swapInfo: SwapInfo = await getFullSwap(
-        JSON.parse(JSON.stringify(testData.pools)),
+        cloneDeep(testData.pools),
         testData.tradeInfo.TokenIn,
         testData.tradeInfo.TokenOut,
         testData.tradeInfo.ReturnAmountDecimals,

@@ -1,6 +1,6 @@
 {
     "compilerOptions": {
-        "module": "commonjs",
+        "module": "esnext",
         "target": "es6",
         "declaration": true,
         "lib": ["es2019", "es2018.promise"],
@@ -8,6 +8,7 @@
         "noImplicitAny": false,
         "baseUrl": "src",
         "esModuleInterop": true,
+        "moduleResolution": "node",
         "resolveJsonModule": true,
         "experimentalDecorators": true,
         "strictNullChecks": false
@@ -15,7 +16,6 @@
     "include": [
         "src",
         "src/abi/*.json",
-        "src/disabled-tokens.json",
         "src/pools/stablePool/stablePoolAbi.json",
         "src/pools/weightedPool/weightedPoolAbi.json",
         "src/pools/elementPool/ConvergentCurvePool.json"

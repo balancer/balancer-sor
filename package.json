@@ -3,11 +3,12 @@
     "version": "1.1.0",
     "license": "GPL-3.0-only",
     "main": "dist/index.js",
+    "module": "dist/index.esm.js",
     "types": "dist/index.d.ts",
     "scripts": {
-        "build": "tsc",
-        "prepublish": "tsc",
-        "test": "nyc mocha -r ts-node/register test/*.spec.ts",
+        "build": "rollup -c",
+        "prepack": "yarn build",
+        "test": "TS_NODE_PROJECT='tsconfig.testing.json' nyc mocha -r ts-node/register test/*.spec.ts",
         "coverage": "nyc report --reporter=text-lcov | coveralls",
         "lint": "eslint ./src ./test --ext .ts --max-warnings 0"
     },
@@ -25,6 +26,10 @@
     ],
     "devDependencies": {
         "@ethersproject/wallet": "^5.0.7",
+        "@rollup/plugin-commonjs": "^20.0.0",
+        "@rollup/plugin-json": "^4.1.0",
+        "@rollup/plugin-node-resolve": "^13.0.4",
+        "@rollup/plugin-typescript": "^8.2.5",
         "@types/chai": "^4.2.10",
         "@types/mocha": "^7.0.2",
         "@types/node": "^14.0.20",
@@ -37,23 +42,25 @@
         "eslint-plugin-mocha-no-only": "^1.1.1",
         "eslint-plugin-prettier": "^3.4.1",
         "husky": "^4.2.1",
-        "mocha": "^7.1.0",
+        "mocha": "8.2.1",
         "nyc": "^15.0.0",
         "perf_hooks": "^0.0.1",
-        "prettier": "^1.19.1",
+        "prettier": "^2.3.2",
         "pretty-quick": "^2.0.1",
-        "ts-node": "^8.6.2",
-        "typescript": "^3.8.3",
-        "v1bignumber.js": "npm:bignumber.js@9.0.0"
+        "rollup": "^2.56.3",
+        "rollup-plugin-dts": "^4.0.0",
+        "ts-node": "^10.0.0",
+        "typescript": "^4.3.5"
     },
     "dependencies": {
         "@ethersproject/address": "^5.0.5",
         "@ethersproject/constants": "^5.0.5",
         "@ethersproject/contracts": "^5.0.5",
         "@ethersproject/providers": "5.0.12",
-        "@ethersproject/solidity": "^5.0.5",
         "@georgeroman/balancer-v2-pools": "^0.0.5",
         "bignumber.js": "^9.0.1",
-        "isomorphic-fetch": "^2.2.1"
+        "isomorphic-fetch": "^2.2.1",
+        "lodash.clonedeep": "^4.5.0",
+        "lodash.set": "^4.3.2"
     }
 }

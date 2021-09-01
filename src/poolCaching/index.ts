@@ -1,4 +1,5 @@
 import { BaseProvider } from '@ethersproject/providers';
+import cloneDeep from 'lodash.clonedeep';
 import { MULTIADDR, VAULTADDR } from '../constants';
 import { SubgraphPoolBase } from '../types';
 import { getOnChainBalances } from './onchainData';
@@ -18,7 +19,7 @@ export class PoolCacher {
     }
 
     getPools(): SubgraphPoolBase[] {
-        return this.pools;
+        return cloneDeep(this.pools);
     }
 
     isConnectedToSubgraph(): boolean {
@@ -41,7 +42,7 @@ export class PoolCacher {
 
             // If poolsData has been passed to function these pools should be used
             if (poolsData.length > 0) {
-                newPools = JSON.parse(JSON.stringify(poolsData));
+                newPools = cloneDeep(poolsData);
             } else {
                 // Retrieve from URL if set otherwise use data passed in constructor
                 if (this.isConnectedToSubgraph()) {

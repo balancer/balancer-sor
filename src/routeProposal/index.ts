@@ -1,3 +1,4 @@
+import cloneDeep from 'lodash.clonedeep';
 import { filterPoolsOfInterest, filterHopPools } from './filtering';
 import { calculatePathLimits } from './pathLimits';
 import {
@@ -39,7 +40,7 @@ export class RouteProposer {
         }
 
         // Some functions alter pools list directly but we want to keep original so make a copy to work from
-        const poolsList = JSON.parse(JSON.stringify(pools));
+        const poolsList = cloneDeep(pools);
 
         const [poolsDict, hopTokens] = filterPoolsOfInterest(
             poolsList,

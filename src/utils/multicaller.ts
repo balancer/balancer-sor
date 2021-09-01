@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import set from 'lodash.set';
 import { Fragment, JsonFragment, Interface, Result } from '@ethersproject/abi';
 import { Contract } from '@ethersproject/contracts';
 import { BaseProvider } from '@ethersproject/providers';
@@ -40,7 +40,7 @@ export class Multicaller {
         const obj = from;
         const results = await this.executeMulticall();
         results.forEach((result, i) =>
-            _.set(obj, this.paths[i], result.length > 1 ? result : result[0])
+            set(obj, this.paths[i], result.length > 1 ? result : result[0])
         );
         this.calls = [];
         this.paths = [];

@@ -1,5 +1,6 @@
 import { JsonRpcProvider } from '@ethersproject/providers';
 import { BigNumber } from 'bignumber.js';
+import cloneDeep from 'lodash.clonedeep';
 import * as sorv2 from '../../src';
 import {
     SubgraphPoolBase,
@@ -333,12 +334,7 @@ export async function getFullSwap(
     provider: JsonRpcProvider,
     swapGas: BigNumber = new BigNumber('100000')
 ): Promise<SwapInfo> {
-    const sor = new sorv2.SOR(
-        provider,
-        1,
-        null,
-        JSON.parse(JSON.stringify(pools))
-    );
+    const sor = new sorv2.SOR(provider, 1, null, cloneDeep(pools));
 
     let swapTypeCorrect = SwapTypes.SwapExactIn;
 
