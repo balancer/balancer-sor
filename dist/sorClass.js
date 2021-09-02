@@ -28,67 +28,49 @@ function calculatePathLimits(paths, swapType) {
 exports.calculatePathLimits = calculatePathLimits;
 function getLimitAmountSwapForPath(path, swapType) {
     let poolPairData = path.poolPairData;
-    if (poolPairData.length == 1) {
-        return path.pools[0].getLimitAmountSwap(poolPairData[0], swapType);
-    } else if (poolPairData.length == 2) {
-        if (swapType === types_1.SwapTypes.SwapExactIn) {
-            let limitAmountSwap1 = path.pools[0].getLimitAmountSwap(
-                poolPairData[0],
-                swapType
+    let limit;
+    if (swapType === types_1.SwapTypes.SwapExactIn) {
+        for (let i = 0; i < poolPairData.length; i++) {
+            let poolLimit = path.pools[i].getLimitAmountSwap(
+                poolPairData[i],
+                types_1.SwapTypes.SwapExactIn
             );
-            let limitAmountSwap2 = path.pools[1].getLimitAmountSwap(
-                poolPairData[1],
-                swapType
-            );
-            let limitOutputAmountSwap1 = helpersClass_1.getOutputAmountSwap(
-                path.pools[0],
-                path.poolPairData[0],
-                swapType,
-                limitAmountSwap1
-            );
-            if (limitOutputAmountSwap1.gt(limitAmountSwap2))
-                if (limitAmountSwap2.isZero())
-                    // This means second hop is limiting the path
-                    return bmath_1.ZERO;
-                // this is necessary to avoid return NaN
-                else
-                    return helpersClass_1.getOutputAmountSwap(
-                        path.pools[0],
-                        path.poolPairData[0],
-                        types_1.SwapTypes.SwapExactOut,
-                        limitAmountSwap2
-                    );
-            // This means first hop is limiting the path
-            else return limitAmountSwap1;
-        } else {
-            let limitAmountSwap1 = path.pools[0].getLimitAmountSwap(
-                poolPairData[0],
-                swapType
-            );
-            let limitAmountSwap2 = path.pools[1].getLimitAmountSwap(
-                poolPairData[1],
-                swapType
-            );
-            let limitOutputAmountSwap2 = helpersClass_1.getOutputAmountSwap(
-                path.pools[1],
-                path.poolPairData[1],
-                swapType,
-                limitAmountSwap2
-            );
-            if (limitOutputAmountSwap2.gt(limitAmountSwap1))
-                // This means first hop is limiting the path
-                return helpersClass_1.getOutputAmountSwap(
-                    path.pools[1],
-                    path.poolPairData[1],
-                    types_1.SwapTypes.SwapExactIn,
-                    limitAmountSwap1
+            let pulledPoolLimit = poolLimit;
+            for (let j = i; j > 0; j--) {
+                pulledPoolLimit = helpersClass_1.getOutputAmountSwap(
+                    path.pools[j - 1],
+                    path.poolPairData[j - 1],
+                    types_1.SwapTypes.SwapExactOut,
+                    pulledPoolLimit
                 );
-            // This means second hop is limiting the path
-            else return limitAmountSwap2;
+            }
+            if (pulledPoolLimit.lt(limit) || i === 0) {
+                limit = pulledPoolLimit;
+            }
         }
+        if (limit.isZero()) return bmath_1.ZERO;
     } else {
-        throw new Error('Path with more than 2 swaps not supported');
+        for (let i = 0; i < poolPairData.length; i++) {
+            let poolLimit = path.pools[i].getLimitAmountSwap(
+                poolPairData[i],
+                types_1.SwapTypes.SwapExactOut
+            );
+            let pushedPoolLimit = poolLimit;
+            for (let j = i + 1; j < poolPairData.length; j++) {
+                pushedPoolLimit = helpersClass_1.getOutputAmountSwap(
+                    path.pools[j],
+                    path.poolPairData[j],
+                    types_1.SwapTypes.SwapExactIn,
+                    pushedPoolLimit
+                );
+            }
+            if (pushedPoolLimit.lt(limit) || i === 0) {
+                limit = pushedPoolLimit;
+            }
+        }
+        if (limit.isZero()) return bmath_1.ZERO;
     }
+    return limit;
 }
 exports.getLimitAmountSwapForPath = getLimitAmountSwapForPath;
 exports.smartOrderRouter = (
@@ -254,6 +236,10 @@ exports.smartOrderRouter = (
     bestTotalReturn = bmath_1.ZERO; // Reset totalReturn as this time it will be
     // calculated with the EVM maths so the return is exactly what the user will get
     // after executing the transaction (given there are no front-runners)
+    console.log('Number of paths: ', bestPaths.length);
+    for (let i = 0; i < bestPaths.length; i++) {
+        console.log('Length of path', i, ':', bestPaths[i].pools.length);
+    }
     bestPaths.forEach((path, i) => {
         let swapAmount = bestSwapAmounts[i];
         // 0 swap amounts can occur due to rounding errors but we don't want to pass those on so filter out
@@ -278,101 +264,65 @@ exports.smartOrderRouter = (
         if (i == 0)
             // Store lenght of first path to add dust to correct rounding error at the end
             lenghtFirstPath = path.swaps.length;
+        let pathSwaps = [];
+        let amounts = [];
         let returnAmount;
-        if (poolPairData.length == 1) {
-            // Direct trade: add swap from only pool
-            let swap = {
-                pool: path.swaps[0].pool,
-                tokenIn: path.swaps[0].tokenIn,
-                tokenOut: path.swaps[0].tokenOut,
-                swapAmount: swapAmount.toString(),
-                limitReturnAmount:
-                    swapType === types_1.SwapTypes.SwapExactIn
-                        ? minAmountOut.toString()
-                        : maxAmountIn,
-                maxPrice: maxPrice,
-                tokenInDecimals: path.poolPairData[0].decimalsIn.toString(),
-                tokenOutDecimals: path.poolPairData[0].decimalsOut.toString(),
-            };
-            swaps.push([swap]);
-            // Call EVMgetOutputAmountSwap to guarantee pool state is updated
-            returnAmount = helpersClass_1.EVMgetOutputAmountSwap(
-                path.pools[0],
-                poolPairData[0],
-                swapType,
-                swapAmount
-            );
-        } else {
-            // Multi-hop:
-            let swap1 = path.swaps[0];
-            let poolSwap1 = pools[swap1.pool];
-            let swap2 = path.swaps[1];
-            let poolSwap2 = pools[swap2.pool];
-            let amountSwap1, amountSwap2;
-            if (swapType === types_1.SwapTypes.SwapExactIn) {
-                amountSwap1 = swapAmount;
-                amountSwap2 = helpersClass_1.EVMgetOutputAmountSwap(
-                    path.pools[0],
-                    poolPairData[0],
-                    swapType,
-                    swapAmount
+        let n = poolPairData.length;
+        amounts.push(swapAmount);
+        if (swapType === types_1.SwapTypes.SwapExactIn) {
+            for (let i = 0; i < n; i++) {
+                amounts.push(
+                    helpersClass_1.EVMgetOutputAmountSwap(
+                        path.pools[i],
+                        poolPairData[i],
+                        types_1.SwapTypes.SwapExactIn,
+                        amounts[amounts.length - 1]
+                    )
                 );
-                // Call EVMgetOutputAmountSwap to update the pool state
-                // for the second hop as well (the first was updated above)
-                returnAmount = helpersClass_1.EVMgetOutputAmountSwap(
-                    path.pools[1],
-                    poolPairData[1],
-                    swapType,
-                    amountSwap2
-                );
-            } else {
-                amountSwap1 = helpersClass_1.EVMgetOutputAmountSwap(
-                    path.pools[1],
-                    poolPairData[1],
-                    swapType,
-                    swapAmount
-                );
-                amountSwap2 = swapAmount;
-                // Call EVMgetOutputAmountSwap to update the pool state
-                // for the second hop as well (the first was updated above)
-                returnAmount = helpersClass_1.EVMgetOutputAmountSwap(
-                    path.pools[0],
-                    poolPairData[0],
-                    swapType,
-                    amountSwap1
-                );
+                let swap = {
+                    pool: path.swaps[i].pool,
+                    tokenIn: path.swaps[i].tokenIn,
+                    tokenOut: path.swaps[i].tokenOut,
+                    swapAmount: amounts[i].toString(),
+                    limitReturnAmount: minAmountOut.toString(),
+                    maxPrice: maxPrice,
+                    tokenInDecimals: path.poolPairData[i].decimalsIn.toString(),
+                    tokenOutDecimals: path.poolPairData[
+                        i
+                    ].decimalsOut.toString(),
+                };
+                pathSwaps.push(swap);
             }
-            // Add swap from first pool
-            let swap1hop = {
-                pool: path.swaps[0].pool,
-                tokenIn: path.swaps[0].tokenIn,
-                tokenOut: path.swaps[0].tokenOut,
-                swapAmount: amountSwap1.toString(),
-                limitReturnAmount:
-                    swapType === types_1.SwapTypes.SwapExactIn
-                        ? minAmountOut.toString()
-                        : maxAmountIn,
-                maxPrice: maxPrice,
-                tokenInDecimals: path.poolPairData[0].decimalsIn.toString(),
-                tokenOutDecimals: path.poolPairData[0].decimalsOut.toString(),
-            };
-            // Add swap from second pool
-            let swap2hop = {
-                pool: path.swaps[1].pool,
-                tokenIn: path.swaps[1].tokenIn,
-                tokenOut: path.swaps[1].tokenOut,
-                swapAmount: amountSwap2.toString(),
-                limitReturnAmount:
-                    swapType === types_1.SwapTypes.SwapExactIn
-                        ? minAmountOut.toString()
-                        : maxAmountIn,
-                maxPrice: maxPrice,
-                tokenInDecimals: path.poolPairData[1].decimalsIn.toString(),
-                tokenOutDecimals: path.poolPairData[1].decimalsOut.toString(),
-            };
-            swaps.push([swap1hop, swap2hop]);
+            returnAmount = amounts[n];
+        } else {
+            for (let i = 0; i < n; i++) {
+                amounts.unshift(
+                    helpersClass_1.EVMgetOutputAmountSwap(
+                        path.pools[n - 1 - i],
+                        poolPairData[n - 1 - i],
+                        types_1.SwapTypes.SwapExactOut,
+                        amounts[0]
+                    )
+                );
+                let swap = {
+                    pool: path.swaps[n - 1 - i].pool,
+                    tokenIn: path.swaps[n - 1 - i].tokenIn,
+                    tokenOut: path.swaps[n - 1 - i].tokenOut,
+                    swapAmount: amounts[1].toString(),
+                    limitReturnAmount: maxAmountIn,
+                    maxPrice: maxPrice,
+                    tokenInDecimals: path.poolPairData[
+                        n - 1 - i
+                    ].decimalsIn.toString(),
+                    tokenOutDecimals: path.poolPairData[
+                        n - 1 - i
+                    ].decimalsOut.toString(),
+                };
+                pathSwaps.unshift(swap);
+            }
+            returnAmount = amounts[0];
         }
-        // Update bestTotalReturn with EVM return
+        swaps.push(pathSwaps);
         bestTotalReturn = bestTotalReturn.plus(returnAmount);
     });
     // Since the individual swapAmounts for each path are integers, the sum of all swapAmounts

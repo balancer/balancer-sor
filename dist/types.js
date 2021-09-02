@@ -11,6 +11,7 @@ var PoolTypes;
     PoolTypes[(PoolTypes['Stable'] = 1)] = 'Stable';
     PoolTypes[(PoolTypes['Element'] = 2)] = 'Element';
     PoolTypes[(PoolTypes['MetaStable'] = 3)] = 'MetaStable';
+    PoolTypes[(PoolTypes['Linear'] = 4)] = 'Linear';
 })((PoolTypes = exports.PoolTypes || (exports.PoolTypes = {})));
 var SwapPairType;
 (function(SwapPairType) {

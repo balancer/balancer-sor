@@ -8,6 +8,7 @@ export declare enum PoolTypes {
     Stable = 1,
     Element = 2,
     MetaStable = 3,
+    Linear = 4,
 }
 export declare enum SwapPairType {
     Direct = 0,
@@ -57,6 +58,9 @@ export interface SubgraphPoolBase {
     principalToken?: string;
     baseToken?: string;
     swapEnabled?: boolean;
+    rate?: string;
+    target1?: string;
+    target2?: string;
 }
 export interface SubGraphToken {
     address: string;

@@ -3,7 +3,11 @@ import { BigNumber } from './utils/bignumber';
 import { bnum, ZERO } from './bmath';
 import { getCostOutputToken } from './costToken';
 import { getOnChainBalances } from './multicall';
-import { filterPoolsOfInterest, filterHopPools } from './pools';
+import {
+    filterPoolsOfInterest,
+    filterHopPools,
+    getPathsUsingLinearPools,
+} from './pools';
 import { fetchSubgraphPools } from './subgraph';
 import { calculatePathLimits, smartOrderRouter } from './sorClass';
 import { formatSwaps } from './helpersClass';
@@ -324,15 +328,26 @@ export class SOR {
                 tokenOut,
                 this.maxPools,
                 this.disabledOptions,
-                currentBlockTimestamp
+                currentBlockTimestamp,
+                this.chainId
             );
 
             [pools, pathData] = filterHopPools(
                 tokenIn,
                 tokenOut,
                 hopTokens,
+                pools,
+                this.chainId
+            );
+
+            let pathsUsingLinear: NewPath[] = [];
+            pathsUsingLinear = getPathsUsingLinearPools(
+                tokenIn,
+                tokenOut,
+                this.chainId,
                 pools
             );
+            pathData = pathData.concat(pathsUsingLinear);
 
             [paths] = calculatePathLimits(pathData, swapType);
 

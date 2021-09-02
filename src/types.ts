@@ -10,6 +10,7 @@ export enum PoolTypes {
     Stable,
     Element,
     MetaStable,
+    Linear,
 }
 
 export enum SwapPairType {
@@ -73,6 +74,12 @@ export interface SubgraphPoolBase {
 
     // LBP specific fields
     swapEnabled?: boolean;
+
+    // Linear specific fields
+    wrappedIndex?: number;
+    rate?: string;
+    target1?: string;
+    target2?: string;
 }
 
 export interface SubGraphToken {

@@ -14,6 +14,7 @@ import {
 import { bnum, scale, ZERO, INFINITY } from './bmath';
 import { INFINITESIMAL } from './config';
 import { ZERO_ADDRESS } from './index';
+import { assert } from 'console';
 
 export function getHighestLimitAmountsForPaths(
     paths: NewPath[],
@@ -84,23 +85,27 @@ function getAmounts(
     let ans = [amount];
 
     if (swapType === SwapTypes.SwapExactIn) {
-        for (let i = 0; i < pools.length; i++){
-            ans.push( getOutputAmountSwap(
-                pools[i],
-                poolPairData[i],
-                swapType,
-                ans[ans.length - 1]
-            ) );
+        for (let i = 0; i < pools.length; i++) {
+            ans.push(
+                getOutputAmountSwap(
+                    pools[i],
+                    poolPairData[i],
+                    swapType,
+                    ans[ans.length - 1]
+                )
+            );
         }
     } else {
         let n = pools.length;
-        for (let i = 0; i < pools.length; i++){
-            ans.unshift( getOutputAmountSwap(
-                pools[n - 1 - i],
-                poolPairData[n - 1 - i],
-                swapType,
-                ans[0]
-            ) );
+        for (let i = 0; i < pools.length; i++) {
+            ans.unshift(
+                getOutputAmountSwap(
+                    pools[n - 1 - i],
+                    poolPairData[n - 1 - i],
+                    swapType,
+                    ans[0]
+                )
+            );
         }
     }
     return ans;
@@ -117,13 +122,40 @@ function getProdsSpotPrices(
     let n = pools.length;
     let oneIfExactOut = 0;
     if (swapType === SwapTypes.SwapExactOut) oneIfExactOut = 1;
-    for (let i = 0; i < pools.length; i++){
-        ans.unshift( getSpotPriceAfterSwap(
-            pools[n - 1 - i],
-            poolPairData[n - 1 - i],
-            swapType,
-            amounts[n - 1 - i + oneIfExactOut]
-        ).times( ans[0] ) );
+    for (let i = 0; i < pools.length; i++) {
+        ans.unshift(
+            getSpotPriceAfterSwap(
+                pools[n - 1 - i],
+                poolPairData[n - 1 - i],
+                swapType,
+                amounts[n - 1 - i + oneIfExactOut]
+            ).times(ans[0])
+        );
+    }
+    return ans;
+}
+
+function getProdsFirstSpotPrices(
+    path: NewPath,
+    swapType: SwapTypes,
+    amounts: BigNumber[]
+): BigNumber[] {
+    assert(
+        swapType == SwapTypes.SwapExactOut,
+        'this is only used for SwapExactOut'
+    );
+    let pools = path.pools;
+    let poolPairData = path.poolPairData;
+    let ans = [bnum(1)];
+    for (let i = 0; i < pools.length; i++) {
+        ans.push(
+            getSpotPriceAfterSwap(
+                pools[i],
+                poolPairData[i],
+                swapType,
+                amounts[i + 1]
+            ).times(ans[ans.length - 1])
+        );
     }
     return ans;
 }
@@ -253,6 +285,11 @@ export function getDerivativeSpotPriceAfterSwapForPath(
             ans = ans.plus(newTerm);
         }
     } else {
+        let prodsFirstSpotPrices = getProdsFirstSpotPrices(
+            path,
+            swapType,
+            amounts
+        );
         for (let i = 0; i < n; i++) {
             let newTerm = getDerivativeSpotPriceAfterSwap(
                 pools[i],
@@ -260,14 +297,12 @@ export function getDerivativeSpotPriceAfterSwapForPath(
                 swapType,
                 amounts[i + 1]
             ).times(prodsSpotPrices[i + 1]);
-            let thisSpotPrice = getSpotPriceAfterSwap(
-                pools[i], 
-                poolPairData[i],
-                swapType, 
-                amounts[i + 1]);
-            newTerm = newTerm.div(thisSpotPrice).times(prodsSpotPrices[0]);
-// This gives a slightly different result than previous code, because of precision
-// in the last division. The exact previous result can be obtained but it would be less efficient
+            newTerm = newTerm
+                .times(prodsSpotPrices[i + 1])
+                .times(prodsFirstSpotPrices[i]);
+            // The following option is more efficient but returns less precision due to the division
+            /*          let thisSpotPrice = getSpotPriceAfterSwap(pools[i], poolPairData[i], swapType, amounts[i + 1]);
+            newTerm = newTerm.div(thisSpotPrice).times(prodsSpotPrices[0]);*/
             ans = ans.plus(newTerm);
         }
     }

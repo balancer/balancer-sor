@@ -316,7 +316,8 @@ class SOR {
                     tokenOut,
                     this.maxPools,
                     this.disabledOptions,
-                    currentBlockTimestamp
+                    currentBlockTimestamp,
+                    this.chainId
                 );
                 [pools, pathData] = pools_1.filterHopPools(
                     tokenIn,
@@ -324,6 +325,14 @@ class SOR {
                     hopTokens,
                     pools
                 );
+                let pathsUsingLinear = [];
+                [pools, pathsUsingLinear] = pools_1.addPathsUsingLinearPools(
+                    tokenIn,
+                    tokenOut,
+                    this.chainId,
+                    pools
+                );
+                pathData = pathData.concat(pathsUsingLinear);
                 [paths] = sorClass_1.calculatePathLimits(pathData, swapType);
                 // Update cache if used
                 if (useProcessCache)
