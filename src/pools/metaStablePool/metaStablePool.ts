@@ -80,6 +80,7 @@ export class MetaStablePool implements PoolBase {
     ampAdjusted: BigNumber;
 
     static fromPool(pool: SubgraphPoolBase): MetaStablePool {
+        if (!pool.amp) throw new Error('MetaStablePool missing amp factor');
         return new MetaStablePool(
             pool.id,
             pool.address,

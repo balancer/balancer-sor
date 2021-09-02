@@ -77,6 +77,7 @@ export class StablePool implements PoolBase {
     ampAdjusted: BigNumber;
 
     static fromPool(pool: SubgraphPoolBase): StablePool {
+        if (!pool.amp) throw new Error('StablePool missing amp factor');
         return new StablePool(
             pool.id,
             pool.address,

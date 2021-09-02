@@ -69,6 +69,8 @@ export class WeightedPool implements PoolBase {
     MAX_OUT_RATIO = bnum(0.3);
 
     static fromPool(pool: SubgraphPoolBase): WeightedPool {
+        if (!pool.totalWeight)
+            throw new Error('WeightedPool missing totalWeight');
         return new WeightedPool(
             pool.id,
             pool.address,
