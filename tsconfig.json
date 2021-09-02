@@ -5,13 +5,13 @@
         "declaration": true,
         "lib": ["es2019", "es2018.promise"],
         "outDir": "./dist/",
-        "noImplicitAny": false,
         "baseUrl": "src",
         "esModuleInterop": true,
         "moduleResolution": "node",
         "resolveJsonModule": true,
         "experimentalDecorators": true,
-        "strictNullChecks": false
+        // "strict": true,
+        "strictFunctionTypes": false
     },
     "include": [
         "src",
