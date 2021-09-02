@@ -1,5 +1,6 @@
 import { BigNumber } from '../utils/bignumber';
 import * as stableMath from '../pools/stablePool/stableMath';
+import { StablePoolPairData } from 'pools/stablePool/stablePool';
 
 /////////
 /// UI Helpers
@@ -34,13 +35,13 @@ export function BPTForTokensZeroPriceImpact(
     for (let i = 0; i < allBalances.length; i++) {
         // We need to scale down amounts
         amounts[i] = amounts[i].times(new BigNumber(10).pow(-decimals[i]));
-        const poolPairData = {
+        const poolPairData: StablePoolPairData = {
             amp: amp,
             allBalances: allBalancesDownScaled,
             tokenIndexIn: i,
             balanceOut: bptTotalSupply.times(new BigNumber(10).pow(-18)),
             swapFee: zero,
-        };
+        } as StablePoolPairData;
         const BPTPrice = stableMath._spotPriceAfterSwapTokenInForExactBPTOut(
             zero,
             poolPairData
