@@ -88,8 +88,12 @@ function filterPoolsOfInterest(allPools, tokenIn, tokenOut, maxPools, disabledOp
 }
 exports.filterPoolsOfInterest = filterPoolsOfInterest;
 function parseNewPool(pool, currentBlockTimestamp = 0) {
+    // We're not interested in any pools which don't allow swapping
+    // (Explicit check for false as many of the tests omit this flag)
+    if (pool.swapEnabled === false)
+        return undefined;
     let newPool;
-    if (pool.poolType === 'Weighted')
+    if (pool.poolType === 'Weighted' || pool.poolType === 'LiquidityBootstrapping' || pool.poolType === 'Investment')
         newPool = new weightedPool_1.WeightedPool(pool.id, pool.address, pool.swapFee, pool.totalWeight, pool.totalShares, pool.tokens, pool.tokensList);
     else if (pool.poolType === 'Stable')
         newPool = new stablePool_1.StablePool(pool.id, pool.address, pool.amp, pool.swapFee, pool.totalShares, pool.tokens, pool.tokensList);
@@ -99,14 +103,6 @@ function parseNewPool(pool, currentBlockTimestamp = 0) {
     }
     else if (pool.poolType === 'MetaStable') {
         newPool = new metaStablePool_1.MetaStablePool(pool.id, pool.address, pool.amp, pool.swapFee, pool.totalShares, pool.tokens, pool.tokensList);
-    }
-    else if (pool.poolType === 'LiquidityBootstrapping') {
-        // If an LBP doesn't have its swaps paused we treat it like a regular Weighted pool.
-        // If it does we just ignore it.
-        if (pool.swapEnabled === true)
-            newPool = new weightedPool_1.WeightedPool(pool.id, pool.address, pool.swapFee, pool.totalWeight, pool.totalShares, pool.tokens, pool.tokensList);
-        else
-            return undefined;
     }
     else {
         console.error(`Unknown pool type or type field missing: ${pool.poolType} ${pool.id}`);
