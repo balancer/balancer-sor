@@ -47,7 +47,7 @@ export async function getOnChainBalances(
 
         multiPool.call(`${pool.id}.totalSupply`, pool.address, 'totalSupply');
         // TO DO - Make this part of class to make more flexible?
-        if (pool.poolType === 'Weighted') {
+        if (pool.poolType === 'Weighted' || pool.poolType === 'LiquidityBootstrapping' || pool.poolType === 'Investment') {
             multiPool.call(
                 `${pool.id}.weights`,
                 pool.address,

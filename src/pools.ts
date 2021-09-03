@@ -119,8 +119,12 @@ export function parseNewPool(
     pool: SubgraphPoolBase,
     currentBlockTimestamp: number = 0
 ): WeightedPool | StablePool | ElementPool | undefined {
+    // We're not interested in any pools which don't allow swapping
+    // (Explicit check for false as many of the tests omit this flag)
+    if (pool.swapEnabled === false) return undefined;
+
     let newPool: WeightedPool | StablePool | ElementPool;
-    if (pool.poolType === 'Weighted')
+    if (pool.poolType === 'Weighted' || pool.poolType === 'LiquidityBootstrapping' ||  pool.poolType === 'Investment')
         newPool = new WeightedPool(
             pool.id,
             pool.address,
@@ -164,20 +168,6 @@ export function parseNewPool(
             pool.tokens,
             pool.tokensList
         );
-    } else if (pool.poolType === 'LiquidityBootstrapping') {
-        // If an LBP doesn't have its swaps paused we treat it like a regular Weighted pool.
-        // If it does we just ignore it.
-        if (pool.swapEnabled === true)
-            newPool = new WeightedPool(
-                pool.id,
-                pool.address,
-                pool.swapFee,
-                pool.totalWeight,
-                pool.totalShares,
-                pool.tokens,
-                pool.tokensList
-            );
-        else return undefined;
     } else {
         console.error(
             `Unknown pool type or type field missing: ${pool.poolType} ${pool.id}`
