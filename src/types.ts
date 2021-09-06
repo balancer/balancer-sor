@@ -77,7 +77,6 @@ export interface SubgraphPoolBase {
 
     // Linear specific fields
     wrappedIndex?: number;
-    rate?: string;
     target1?: string;
     target2?: string;
 }
@@ -88,7 +87,7 @@ export interface SubGraphToken {
     decimals: string | number;
     // Stable & Element field
     weight?: string;
-    // MetaStablePool field
+    // MetaStablePool & Linear field
     priceRate?: string;
 }
 
@@ -122,6 +121,10 @@ export interface SwapInfo {
 
 export interface PoolDictionary {
     [poolId: string]: PoolBase;
+}
+
+export interface PoolDictionaryByMain {
+    [mainToken: string]: PoolBase;
 }
 
 export interface PoolPairDictionary {

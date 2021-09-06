@@ -35,6 +35,7 @@ export interface LinearPoolToken {
     address: string;
     balance: string;
     decimals: string | number;
+    priceRate?: string;
 }
 
 export interface LinearPoolPairData extends PoolPairBase {
@@ -66,7 +67,6 @@ export class LinearPool implements PoolBase {
     tokensList: string[];
 
     wrappedIndex: number;
-    rate: BigNumber;
     target1: BigNumber;
     target2: BigNumber;
     MAX_IN_RATIO = bnum(0.3); // ?
@@ -80,7 +80,6 @@ export class LinearPool implements PoolBase {
         tokens: LinearPoolToken[],
         tokensList: string[],
         wrappedIndex: number,
-        rate: string,
         target1: string,
         target2: string
     ) {
@@ -91,7 +90,7 @@ export class LinearPool implements PoolBase {
         this.tokens = tokens;
         this.tokensList = tokensList;
         this.wrappedIndex = wrappedIndex;
-        this.rate = bnum(rate);
+        // rate is now inside wrapped token info
         this.target1 = bnum(target1);
         this.target2 = bnum(target2);
     }
@@ -158,7 +157,7 @@ export class LinearPool implements PoolBase {
             balanceOut: balanceOut,
             swapFee: this.swapFee,
             wrappedBalance: bnum(this.tokens[this.wrappedIndex].balance),
-            rate: this.rate,
+            rate: bnum(this.tokens[this.wrappedIndex].priceRate),
             target1: this.target1,
             target2: this.target2,
         };
@@ -353,6 +352,7 @@ export class LinearPool implements PoolBase {
         poolPairData: LinearPoolPairData,
         amount: BigNumber
     ): BigNumber {
+        console.log('_evmoutGivenIn at linearPool.ts');
         try {
             // poolPair balances are normalised so must be scaled before use
             const amt = SDK.WeightedMath._calcOutGivenIn(
@@ -374,6 +374,7 @@ export class LinearPool implements PoolBase {
         poolPairData: LinearPoolPairData,
         amount: BigNumber
     ): BigNumber {
+        console.log('_evmexactTokenInForBPTOut at linearPool.ts');
         try {
             // balance: BigNumber, normalizedWeight: BigNumber, amountIn: BigNumber, bptTotalSupply: BigNumber, swapFee: BigNumber
             const amt = SDK.WeightedMath._calcBptOutGivenExactTokenIn(
@@ -394,6 +395,7 @@ export class LinearPool implements PoolBase {
         poolPairData: LinearPoolPairData,
         amount: BigNumber
     ): BigNumber {
+        console.log('_evmexactBPTInForTokenOut at linearPool.ts');
         try {
             // poolPair balances are normalised so must be scaled before use
             const amt = SDK.WeightedMath._calcTokenOutGivenExactBptIn(

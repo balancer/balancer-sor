@@ -20,8 +20,10 @@ import {
     SubGraphPoolsBase,
     SwapOptions,
     PoolFilter,
+    PoolDictionaryByMain,
 } from './types';
 import { ZERO_ADDRESS } from './index';
+import { MetaStablePool } from 'pools/metaStablePool/metaStablePool';
 
 export class SOR {
     MULTIADDR: { [chainId: number]: string } = {
@@ -322,7 +324,8 @@ export class SOR {
             let poolsList = JSON.parse(JSON.stringify(onChainPools));
             let pathData: NewPath[];
             let hopTokens: string[];
-            [pools, hopTokens] = filterPoolsOfInterest(
+            let linearPoolsInfo: [PoolDictionaryByMain, MetaStablePool];
+            [pools, hopTokens, linearPoolsInfo] = filterPoolsOfInterest(
                 poolsList.pools,
                 tokenIn,
                 tokenOut,
@@ -336,15 +339,13 @@ export class SOR {
                 tokenIn,
                 tokenOut,
                 hopTokens,
-                pools,
-                this.chainId
+                pools
             );
 
-            let pathsUsingLinear: NewPath[] = [];
-            pathsUsingLinear = getPathsUsingLinearPools(
+            let pathsUsingLinear = getPathsUsingLinearPools(
                 tokenIn,
                 tokenOut,
-                this.chainId,
+                linearPoolsInfo,
                 pools
             );
             pathData = pathData.concat(pathsUsingLinear);

@@ -403,9 +403,14 @@ export class MetaStablePool implements PoolBase {
         poolPairData: MetaStablePoolPairData,
         amount: BigNumber
     ): BigNumber {
+        console.log('SDK call at metaStablePool.ts');
         try {
             // All values should use 1e18 fixed point
             // i.e. 1USDC => 1e18 not 1e6
+            console.log(
+                'amount at _evmoutGivenIn metaStablePool.ts: ',
+                amount.toString()
+            );
             const amtScaled = scale(amount, 18);
             let amountConverted = amtScaled.times(
                 poolPairData.tokenInPriceRate

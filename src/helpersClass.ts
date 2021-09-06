@@ -393,7 +393,8 @@ export function EVMgetOutputAmountSwap(
         if (
             pool.poolType === PoolTypes.Weighted ||
             pool.poolType === PoolTypes.Stable ||
-            pool.poolType === PoolTypes.MetaStable
+            pool.poolType === PoolTypes.MetaStable ||
+            pool.poolType === PoolTypes.Linear
         ) {
             // Will accept/return normalised values
             if (pairType === PairTypes.TokenToToken) {
@@ -423,7 +424,8 @@ export function EVMgetOutputAmountSwap(
         if (
             pool.poolType === PoolTypes.Weighted ||
             pool.poolType === PoolTypes.Stable ||
-            pool.poolType === PoolTypes.MetaStable
+            pool.poolType === PoolTypes.MetaStable ||
+            pool.poolType === PoolTypes.Linear
         ) {
             if (pairType === PairTypes.TokenToToken) {
                 returnAmount = pool._evminGivenOut(poolPairData, amount);

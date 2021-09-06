@@ -60,7 +60,7 @@ export function getLimitAmountSwapForPath(
                 );
             }
             if (pulledPoolLimit.lt(limit) || i === 0) {
-                limit = pulledPoolLimit;         
+                limit = pulledPoolLimit;
             }
         }
         if (limit.isZero()) return ZERO;
@@ -80,7 +80,7 @@ export function getLimitAmountSwapForPath(
                 );
             }
             if (pushedPoolLimit.lt(limit) || i === 0) {
-                limit = pushedPoolLimit;         
+                limit = pushedPoolLimit;
             }
         }
         if (limit.isZero()) return ZERO;
@@ -136,6 +136,7 @@ export const smartOrderRouter = (
     // one path only (b=1). Then increase the number of pools as long as
     // improvementCondition is true (see more information below)
     for (let b = initialNumPaths; b <= paths.length; b++) {
+        console.log('starting search with ', b, 'paths');
         totalReturn = 0;
         if (b != initialNumPaths) {
             // We already had a previous iteration and are adding another pool this new iteration
@@ -247,6 +248,10 @@ export const smartOrderRouter = (
         if (totalNumberOfPools >= maxPools) break;
     }
 
+    console.log(
+        'bestTotalReturnConsideringFees:',
+        bestTotalReturnConsideringFees.toString()
+    );
     //// Prepare swap data from paths
     let swaps: Swap[][] = [];
     let totalSwapAmountWithRoundingErrors: BigNumber = new BigNumber(0);
@@ -258,9 +263,13 @@ export const smartOrderRouter = (
     // calculated with the EVM maths so the return is exactly what the user will get
     // after executing the transaction (given there are no front-runners)
 
-    console.log("Number of paths: ", bestPaths.length );
-    for (let i = 0; i < bestPaths.length; i++){
-        console.log("Length of path", i,":", bestPaths[i].pools.length );
+    console.log('\nPaths and swap amounts have been chosen now');
+    console.log('Number of paths: ', bestPaths.length);
+    for (let i = 0; i < bestPaths.length; i++) {
+        console.log('Length of path', i, ':', bestPaths[i].pools.length);
+        for (let bestPath of bestPaths) {
+            console.log('pool address', i, ':', bestPath.pools[0].address);
+        }
     }
 
     bestPaths.forEach((path, i) => {
@@ -297,13 +306,16 @@ export const smartOrderRouter = (
         let n = poolPairData.length;
         amounts.push(swapAmount);
         if (swapType === SwapTypes.SwapExactIn) {
-            for (let i = 0; i < n; i++){
-                amounts.push( EVMgetOutputAmountSwap(
-                    path.pools[i],
-                    poolPairData[i],
-                    SwapTypes.SwapExactIn,
-                    amounts[amounts.length - 1]
-                ) );
+            for (let i = 0; i < n; i++) {
+                amounts.push(
+                    EVMgetOutputAmountSwap(
+                        path.pools[i],
+                        poolPairData[i],
+                        SwapTypes.SwapExactIn,
+                        amounts[amounts.length - 1]
+                    )
+                );
+                console.log('i: ', i, 'amounts: ', amounts.toString());
                 let swap: Swap = {
                     pool: path.swaps[i].pool,
                     tokenIn: path.swaps[i].tokenIn,
@@ -312,19 +324,25 @@ export const smartOrderRouter = (
                     limitReturnAmount: minAmountOut.toString(),
                     maxPrice: maxPrice,
                     tokenInDecimals: path.poolPairData[i].decimalsIn.toString(),
-                    tokenOutDecimals: path.poolPairData[i].decimalsOut.toString(),
-                }
+                    tokenOutDecimals: path.poolPairData[
+                        i
+                    ].decimalsOut.toString(),
+                };
+                console.log('swap: ', swap);
                 pathSwaps.push(swap);
             }
             returnAmount = amounts[n];
+            console.log('returnAmount: ', returnAmount.toString());
         } else {
-            for (let i = 0; i < n; i++){
-                amounts.unshift( EVMgetOutputAmountSwap(
-                    path.pools[n - 1 - i],
-                    poolPairData[n - 1 - i],
-                    SwapTypes.SwapExactOut,
-                    amounts[0]
-                ) );
+            for (let i = 0; i < n; i++) {
+                amounts.unshift(
+                    EVMgetOutputAmountSwap(
+                        path.pools[n - 1 - i],
+                        poolPairData[n - 1 - i],
+                        SwapTypes.SwapExactOut,
+                        amounts[0]
+                    )
+                );
                 let swap: Swap = {
                     pool: path.swaps[n - 1 - i].pool,
                     tokenIn: path.swaps[n - 1 - i].tokenIn,
@@ -332,8 +350,12 @@ export const smartOrderRouter = (
                     swapAmount: amounts[1].toString(),
                     limitReturnAmount: maxAmountIn,
                     maxPrice: maxPrice,
-                    tokenInDecimals: path.poolPairData[n - 1 - i].decimalsIn.toString(),
-                    tokenOutDecimals: path.poolPairData[n - 1 - i].decimalsOut.toString(),
+                    tokenInDecimals: path.poolPairData[
+                        n - 1 - i
+                    ].decimalsIn.toString(),
+                    tokenOutDecimals: path.poolPairData[
+                        n - 1 - i
+                    ].decimalsOut.toString(),
                 };
                 pathSwaps.unshift(swap);
             }
@@ -412,6 +434,11 @@ function getBestPathIds(
         let bestPathIndex = -1;
         let bestEffectivePrice = INFINITY; // Start with worst price possible
         paths.forEach((path, j) => {
+            if (path.poolPairData.length > 2) {
+                console.log('Path length: ', path.poolPairData.length);
+                console.log('path.limitAmount:', path.limitAmount.toString());
+            }
+
             // Do not consider this path if its limit is below swapAmount
             if (path.limitAmount.gte(swapAmount)) {
                 // Calculate effective price of this path for this swapAmount
@@ -430,6 +457,12 @@ function getBestPathIds(
                         swapType,
                         swapAmount
                     );
+                    if (path.poolPairData.length > 2) {
+                        console.log(
+                            'effective price:',
+                            effectivePrice.toString()
+                        );
+                    }
                 }
                 if (effectivePrice.lte(bestEffectivePrice)) {
                     bestEffectivePrice = effectivePrice;
