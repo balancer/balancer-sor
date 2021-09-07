@@ -4,7 +4,6 @@ import { bnum, ZERO, ONE, INFINITY } from '../utils/bignumber';
 import { BigNumber } from '../utils/bignumber';
 import { SwapTypes, NewPath, PoolDictionary, Swap } from '../types';
 import {
-    getHighestLimitAmountsForPaths,
     getEffectivePriceSwapForPath,
     getSpotPriceAfterSwapForPath,
     getDerivativeSpotPriceAfterSwapForPath,
@@ -20,79 +19,7 @@ const minAmountOut = 0;
 const maxAmountIn: string = MAX_UINT;
 const maxPrice: string = MAX_UINT;
 
-export const smartOrderRouter = (
-    pools: PoolDictionary,
-    paths: NewPath[],
-    swapType: SwapTypes,
-    totalSwapAmount: BigNumber,
-    maxPools: number,
-    costReturnToken: BigNumber
-): [Swap[][], BigNumber, BigNumber, BigNumber] => {
-    // No paths available or totalSwapAmount == 0, return empty solution
-    if (paths.length == 0 || totalSwapAmount.isZero()) {
-        return [[], ZERO, ZERO, ZERO];
-    }
-
-    // Before we start the main loop, we first check if there is enough liquidity for this totalSwapAmount
-    const highestLimitAmounts = getHighestLimitAmountsForPaths(paths, maxPools);
-    const sumLimitAmounts = highestLimitAmounts.reduce(
-        (r: BigNumber[], pathLimit: BigNumber) => {
-            r.push(pathLimit.plus(r[r.length - 1] || ZERO));
-            return r;
-        },
-        []
-    );
-
-    // If the cumulative limit across all paths is lower than totalSwapAmount then no solution is possible
-    if (totalSwapAmount.gt(sumLimitAmounts[sumLimitAmounts.length - 1])) {
-        return [[], ZERO, ZERO, ZERO]; // Not enough liquidity, return empty
-    }
-
-    // We use the highest limits to define the initial number of pools considered and the initial guess for swapAmounts.
-    const initialNumPaths =
-        sumLimitAmounts.findIndex((cumulativeLimit) =>
-            // If below is true, it means we have enough liquidity
-            totalSwapAmount.lte(cumulativeLimit)
-        ) + 1;
-
-    const initialSwapAmounts: BigNumber[] = highestLimitAmounts.slice(
-        0,
-        initialNumPaths
-    );
-
-    //  Since the sum of the first i highest limits will be less than totalSwapAmount, we remove the difference to the last swapAmount
-    //  so we are sure that the sum of swapAmounts will be equal to totalSwapAmount
-    const difference =
-        sumLimitAmounts[initialNumPaths - 1].minus(totalSwapAmount);
-    initialSwapAmounts[initialSwapAmounts.length - 1] =
-        initialSwapAmounts[initialSwapAmounts.length - 1].minus(difference);
-
-    const [bestPaths, bestSwapAmounts, bestTotalReturnConsideringFees] =
-        optimizeSwapAmounts(
-            pools,
-            paths,
-            swapType,
-            totalSwapAmount,
-            initialSwapAmounts,
-            highestLimitAmounts,
-            initialNumPaths,
-            maxPools,
-            costReturnToken
-        );
-
-    const [swaps, bestTotalReturn, marketSp] = formatSwaps(
-        bestPaths,
-        swapType,
-        totalSwapAmount,
-        bestSwapAmounts
-    );
-
-    if (bestTotalReturn.eq(0)) return [[], ZERO, ZERO, ZERO];
-
-    return [swaps, bestTotalReturn, marketSp, bestTotalReturnConsideringFees];
-};
-
-const optimizeSwapAmounts = (
+export const optimizeSwapAmounts = (
     pools: PoolDictionary,
     paths: NewPath[],
     swapType: SwapTypes,
@@ -230,7 +157,7 @@ const optimizeSwapAmounts = (
     return [bestPaths, bestSwapAmounts, bestTotalReturnConsideringFees];
 };
 
-const formatSwaps = (
+export const formatSwaps = (
     bestPaths: NewPath[],
     swapType: SwapTypes,
     totalSwapAmount: BigNumber,
@@ -238,8 +165,6 @@ const formatSwaps = (
 ): [Swap[][], BigNumber, BigNumber] => {
     //// Prepare swap data from paths
     const swaps: Swap[][] = [];
-    let totalSwapAmountWithRoundingErrors = ZERO;
-    let lengthFirstPath: number;
     let highestSwapAmt = ZERO;
     let largestSwapPath: NewPath;
     let bestTotalReturn = ZERO; // Reset totalReturn as this time it will be
@@ -252,8 +177,6 @@ const formatSwaps = (
             highestSwapAmt = swapAmount;
             largestSwapPath = path;
         }
-        totalSwapAmountWithRoundingErrors =
-            totalSwapAmountWithRoundingErrors.plus(swapAmount);
 
         // // TODO: remove. To debug only!
         /*
@@ -264,10 +187,6 @@ const formatSwaps = (
             getSpotPriceAfterSwapForPath(path, swapType, swapAmount).toNumber()
         );
             */
-
-        if (i == 0)
-            // Store length of first path to add dust to correct rounding error at the end
-            lengthFirstPath = path.swaps.length;
 
         let returnAmount: BigNumber;
 
@@ -371,23 +290,24 @@ const formatSwaps = (
     // might not be exactly equal to the totalSwapAmount the user requested. We need to correct that rounding error
     // and we do that by adding the rounding error to the first path.
     if (swaps.length > 0) {
+        const totalSwapAmountWithRoundingErrors = bestSwapAmounts.reduce(
+            (a, b) => a.plus(b),
+            ZERO
+        );
         const dust = totalSwapAmount.minus(totalSwapAmountWithRoundingErrors);
         if (swapType === SwapTypes.SwapExactIn) {
+            // As swap is ExactIn, add dust to input pool
             swaps[0][0].swapAmount = bnum(swaps[0][0].swapAmount)
                 .plus(dust)
-                .toString(); // Add dust to first swapExactIn
+                .toString();
         } else {
-            if (lengthFirstPath == 1)
-                // First path is a direct path (only one pool)
-                swaps[0][0].swapAmount = bnum(swaps[0][0].swapAmount)
-                    .plus(dust)
-                    .toString();
-            // Add dust to first swapExactOut
-            // First path is a multihop path (two pools)
-            else
-                swaps[0][1].swapAmount = bnum(swaps[0][1].swapAmount)
-                    .plus(dust)
-                    .toString(); // Add dust to second swapExactOut
+            // As swap is ExactOut, add dust to output pool
+            const firstPathLastPoolIndex = bestPaths[0].swaps.length - 1;
+            swaps[0][firstPathLastPoolIndex].swapAmount = bnum(
+                swaps[0][firstPathLastPoolIndex].swapAmount
+            )
+                .plus(dust)
+                .toString();
         }
     }
 
