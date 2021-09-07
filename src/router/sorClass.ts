@@ -28,11 +28,6 @@ export const smartOrderRouter = (
     maxPools: number,
     costReturnToken: BigNumber
 ): [Swap[][], BigNumber, BigNumber, BigNumber] => {
-    let bestTotalReturn: BigNumber = new BigNumber(0);
-    let bestTotalReturnConsideringFees: BigNumber = new BigNumber(0);
-    let totalReturn, totalReturnConsideringFees;
-    let bestSwapAmounts, bestPaths, swapAmounts;
-
     // No paths available or totalSwapAmount == 0, return empty solution
     if (paths.length == 0 || totalSwapAmount.isZero()) {
         return [[], ZERO, ZERO, ZERO];
@@ -44,6 +39,7 @@ export const smartOrderRouter = (
     //  highest_limit is lower than totalSwapAmount, then we should obviously not waste time trying to calculate the SOR suggestion for 1 pool,
     //  Same for 2, 3 pools etc.
     let initialNumPaths = -1; // Initializing
+    let swapAmounts: BigNumber[] = [];
     for (let i = 0; i < maxPools; i++) {
         const sumHighestLimitAmounts = highestLimitAmounts
             .slice(0, i + 1)
@@ -66,8 +62,14 @@ export const smartOrderRouter = (
     // First get the optimal totalReturn to trade 'totalSwapAmount' with
     // one path only (b=1). Then increase the number of pools as long as
     // improvementCondition is true (see more information below)
+    let totalReturn = ZERO;
+    let totalReturnConsideringFees = ZERO;
+    let bestTotalReturn = ZERO;
+    let bestTotalReturnConsideringFees = ZERO;
+    let bestSwapAmounts: BigNumber[] = [];
+    let bestPaths: NewPath[] = [];
     for (let b = initialNumPaths; b <= paths.length; b++) {
-        totalReturn = 0;
+        totalReturn = ZERO;
         if (b != initialNumPaths) {
             // We already had a previous iteration and are adding another pool this new iteration
             // swapAmounts.push(ONE); // Initialize new swapAmount with 1 wei to
@@ -95,7 +97,7 @@ export const smartOrderRouter = (
         //  iterate until we converge to the best pools for a given totalSwapAmount
         //  first initialize variables
         const historyOfSortedPathIds = [];
-        let selectedPaths;
+        let selectedPaths: NewPath[];
         let [
             newSelectedPaths,
             exceedingAmounts,
@@ -182,7 +184,7 @@ export const smartOrderRouter = (
     let swaps: Swap[][] = [];
     let totalSwapAmountWithRoundingErrors: BigNumber = new BigNumber(0);
     let dust: BigNumber = new BigNumber(0);
-    let lenghtFirstPath;
+    let lengthFirstPath: number;
     let highestSwapAmt = ZERO;
     let largestSwapPath: NewPath;
     bestTotalReturn = ZERO; // Reset totalReturn as this time it will be
@@ -213,7 +215,7 @@ export const smartOrderRouter = (
 
         if (i == 0)
             // Store lenght of first path to add dust to correct rounding error at the end
-            lenghtFirstPath = path.swaps.length;
+            lengthFirstPath = path.swaps.length;
 
         let returnAmount;
 
@@ -229,8 +231,8 @@ export const smartOrderRouter = (
                         ? minAmountOut.toString()
                         : maxAmountIn,
                 maxPrice: maxPrice,
-                tokenInDecimals: path.poolPairData[0].decimalsIn.toString(),
-                tokenOutDecimals: path.poolPairData[0].decimalsOut.toString(),
+                tokenInDecimals: path.poolPairData[0].decimalsIn,
+                tokenOutDecimals: path.poolPairData[0].decimalsOut,
             };
             swaps.push([swap]);
             // Call EVMgetOutputAmountSwap to guarantee pool state is updated
@@ -289,8 +291,8 @@ export const smartOrderRouter = (
                         ? minAmountOut.toString()
                         : maxAmountIn,
                 maxPrice: maxPrice,
-                tokenInDecimals: path.poolPairData[0].decimalsIn.toString(),
-                tokenOutDecimals: path.poolPairData[0].decimalsOut.toString(),
+                tokenInDecimals: path.poolPairData[0].decimalsIn,
+                tokenOutDecimals: path.poolPairData[0].decimalsOut,
             };
 
             // Add swap from second pool
@@ -304,8 +306,8 @@ export const smartOrderRouter = (
                         ? minAmountOut.toString()
                         : maxAmountIn,
                 maxPrice: maxPrice,
-                tokenInDecimals: path.poolPairData[1].decimalsIn.toString(),
-                tokenOutDecimals: path.poolPairData[1].decimalsOut.toString(),
+                tokenInDecimals: path.poolPairData[1].decimalsIn,
+                tokenOutDecimals: path.poolPairData[1].decimalsOut,
             };
             swaps.push([swap1hop, swap2hop]);
         }
@@ -323,7 +325,7 @@ export const smartOrderRouter = (
                 .plus(dust)
                 .toString(); // Add dust to first swapExactIn
         } else {
-            if (lenghtFirstPath == 1)
+            if (lengthFirstPath == 1)
                 // First path is a direct path (only one pool)
                 swaps[0][0].swapAmount = new BigNumber(swaps[0][0].swapAmount)
                     .plus(dust)
