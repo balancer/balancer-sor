@@ -231,7 +231,8 @@ export class ElementPool implements PoolBase {
 
     _exactTokenInForTokenOut(
         poolPairData: ElementPoolPairData,
-        amount: BigNumber
+        amount: BigNumber,
+        exact: boolean
     ): BigNumber {
         poolPairData.currentBlockTimestamp = this.currentBlockTimestamp;
         return _exactTokenInForTokenOut(amount, poolPairData);
@@ -239,7 +240,8 @@ export class ElementPool implements PoolBase {
 
     _exactTokenInForBPTOut(
         poolPairData: ElementPoolPairData,
-        amount: BigNumber
+        amount: BigNumber,
+        exact: boolean
     ): BigNumber {
         throw 'Element pool does not support SOR add/remove liquidity';
         return bnum(-1);
@@ -247,7 +249,8 @@ export class ElementPool implements PoolBase {
 
     _exactBPTInForTokenOut(
         poolPairData: ElementPoolPairData,
-        amount: BigNumber
+        amount: BigNumber,
+        exact: boolean
     ): BigNumber {
         throw 'Element pool does not support SOR add/remove liquidity';
         return bnum(-1);
@@ -255,7 +258,8 @@ export class ElementPool implements PoolBase {
 
     _tokenInForExactTokenOut(
         poolPairData: ElementPoolPairData,
-        amount: BigNumber
+        amount: BigNumber,
+        exact: boolean
     ): BigNumber {
         poolPairData.currentBlockTimestamp = this.currentBlockTimestamp;
         return _tokenInForExactTokenOut(amount, poolPairData);
@@ -263,7 +267,8 @@ export class ElementPool implements PoolBase {
 
     _tokenInForExactBPTOut(
         poolPairData: ElementPoolPairData,
-        amount: BigNumber
+        amount: BigNumber,
+        exact: boolean
     ): BigNumber {
         throw 'Element pool does not support SOR add/remove liquidity';
         return bnum(-1);
@@ -271,7 +276,8 @@ export class ElementPool implements PoolBase {
 
     _BPTInForExactTokenOut(
         poolPairData: ElementPoolPairData,
-        amount: BigNumber
+        amount: BigNumber,
+        exact: boolean
     ): BigNumber {
         throw 'Element pool does not support SOR add/remove liquidity';
         return bnum(-1);
@@ -378,30 +384,4 @@ export class ElementPool implements PoolBase {
         throw 'Element pool does not support SOR add/remove liquidity';
         return bnum(-1);
     }
-
-    // TODO - These need updated with real maths
-    _evmoutGivenIn: (
-        poolPairData: ElementPoolPairData,
-        amount: BigNumber
-    ) => BigNumber;
-    _evmexactTokenInForBPTOut: (
-        poolPairData: ElementPoolPairData,
-        amount: BigNumber
-    ) => BigNumber;
-    _evmexactBPTInForTokenOut: (
-        poolPairData: ElementPoolPairData,
-        amount: BigNumber
-    ) => BigNumber;
-    _evminGivenOut: (
-        poolPairData: ElementPoolPairData,
-        amount: BigNumber
-    ) => BigNumber;
-    _evmtokenInForExactBPTOut: (
-        poolPairData: ElementPoolPairData,
-        amount: BigNumber
-    ) => BigNumber;
-    _evmbptInForExactTokenOut: (
-        poolPairData: ElementPoolPairData,
-        amount: BigNumber
-    ) => BigNumber;
 }

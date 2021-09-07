@@ -151,27 +151,33 @@ export interface PoolBase {
     updateTokenBalanceForPool: (token: string, newBalance: BigNumber) => void;
     _exactTokenInForTokenOut: (
         poolPairData: PoolPairBase,
-        amount: BigNumber
+        amount: BigNumber,
+        exact: boolean
     ) => BigNumber;
     _exactTokenInForBPTOut: (
         poolPairData: PoolPairBase,
-        amount: BigNumber
+        amount: BigNumber,
+        exact: boolean
     ) => BigNumber;
     _exactBPTInForTokenOut: (
         poolPairData: PoolPairBase,
-        amount: BigNumber
+        amount: BigNumber,
+        exact: boolean
     ) => BigNumber;
     _tokenInForExactTokenOut: (
         poolPairData: PoolPairBase,
-        amount: BigNumber
+        amount: BigNumber,
+        exact: boolean
     ) => BigNumber;
     _tokenInForExactBPTOut: (
         poolPairData: PoolPairBase,
-        amount: BigNumber
+        amount: BigNumber,
+        exact: boolean
     ) => BigNumber;
     _BPTInForExactTokenOut: (
         poolPairData: PoolPairBase,
-        amount: BigNumber
+        amount: BigNumber,
+        exact: boolean
     ) => BigNumber;
     _spotPriceAfterSwapExactTokenInForTokenOut: (
         poolPairData: PoolPairBase,
@@ -218,30 +224,6 @@ export interface PoolBase {
         amount: BigNumber
     ) => BigNumber;
     _derivativeSpotPriceAfterSwapBPTInForExactTokenOut: (
-        poolPairData: PoolPairBase,
-        amount: BigNumber
-    ) => BigNumber;
-    _evmoutGivenIn: (
-        poolPairData: PoolPairBase,
-        amount: BigNumber
-    ) => BigNumber;
-    _evmexactTokenInForBPTOut: (
-        poolPairData: PoolPairBase,
-        amount: BigNumber
-    ) => BigNumber;
-    _evmexactBPTInForTokenOut: (
-        poolPairData: PoolPairBase,
-        amount: BigNumber
-    ) => BigNumber;
-    _evminGivenOut: (
-        poolPairData: PoolPairBase,
-        amount: BigNumber
-    ) => BigNumber;
-    _evmtokenInForExactBPTOut: (
-        poolPairData: PoolPairBase,
-        amount: BigNumber
-    ) => BigNumber;
-    _evmbptInForExactTokenOut: (
         poolPairData: PoolPairBase,
         amount: BigNumber
     ) => BigNumber;

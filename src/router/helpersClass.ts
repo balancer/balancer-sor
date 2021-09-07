@@ -413,16 +413,22 @@ export function EVMgetOutputAmountSwap(
         ) {
             // Will accept/return normalised values
             if (pairType === PairTypes.TokenToToken) {
-                returnAmount = pool._evmoutGivenIn(poolPairData, amount);
-            } else if (pairType === PairTypes.TokenToBpt) {
-                returnAmount = pool._evmexactTokenInForBPTOut(
+                returnAmount = pool._exactTokenInForTokenOut(
                     poolPairData,
-                    amount
+                    amount,
+                    true
+                );
+            } else if (pairType === PairTypes.TokenToBpt) {
+                returnAmount = pool._exactTokenInForBPTOut(
+                    poolPairData,
+                    amount,
+                    true
                 );
             } else if (pairType === PairTypes.BptToToken) {
-                returnAmount = pool._evmexactBPTInForTokenOut(
+                returnAmount = pool._exactBPTInForTokenOut(
                     poolPairData,
-                    amount
+                    amount,
+                    true
                 );
             }
         } else if (pool.poolType === PoolTypes.Element) {
@@ -442,16 +448,22 @@ export function EVMgetOutputAmountSwap(
             pool.poolType === PoolTypes.MetaStable
         ) {
             if (pairType === PairTypes.TokenToToken) {
-                returnAmount = pool._evminGivenOut(poolPairData, amount);
-            } else if (pairType === PairTypes.TokenToBpt) {
-                returnAmount = pool._evmtokenInForExactBPTOut(
+                returnAmount = pool._tokenInForExactTokenOut(
                     poolPairData,
-                    amount
+                    amount,
+                    true
+                );
+            } else if (pairType === PairTypes.TokenToBpt) {
+                returnAmount = pool._tokenInForExactBPTOut(
+                    poolPairData,
+                    amount,
+                    true
                 );
             } else if (pairType === PairTypes.BptToToken) {
-                returnAmount = pool._evmbptInForExactTokenOut(
+                returnAmount = pool._BPTInForExactTokenOut(
                     poolPairData,
-                    amount
+                    amount,
+                    true
                 );
             }
         } else if (pool.poolType === PoolTypes.Element) {
