@@ -32,32 +32,40 @@ export const smartOrderRouter = (
     if (paths.length == 0 || totalSwapAmount.isZero()) {
         return [[], ZERO, ZERO, ZERO];
     }
+
     // Before we start the main loop, we first check if there is enough liquidity for this totalSwapAmount at all
     const highestLimitAmounts = getHighestLimitAmountsForPaths(paths, maxPools);
+    const sumLimitAmounts = highestLimitAmounts.reduce(
+        (r: BigNumber[], pathLimit: BigNumber) => {
+            r.push(pathLimit.plus(r[r.length - 1] || ZERO));
+            return r;
+        },
+        []
+    );
 
-    //  We use the highest limits to define the initial number of pools considered and the initial guess for swapAmounts. If the
-    //  highest_limit is lower than totalSwapAmount, then we should obviously not waste time trying to calculate the SOR suggestion for 1 pool,
-    //  Same for 2, 3 pools etc.
-    let initialNumPaths = -1; // Initializing
-    let swapAmounts: BigNumber[] = [];
-    for (let i = 0; i < maxPools; i++) {
-        const sumHighestLimitAmounts = highestLimitAmounts
-            .slice(0, i + 1)
-            .reduce((a, b) => a.plus(b));
-        if (totalSwapAmount.gt(sumHighestLimitAmounts)) continue; // the i initial pools are not enough to get to totalSwapAmount, continue
-        //  If above is false, it means we have enough liquidity with first i pools
-        initialNumPaths = i + 1;
-        swapAmounts = highestLimitAmounts.slice(0, initialNumPaths);
-        //  Since the sum of the first i highest limits will be less than totalSwapAmount, we remove the difference to the last swapAmount
-        //  so we are sure that the sum of swapAmounts will be equal to totalSwapAmount
-        const difference = sumHighestLimitAmounts.minus(totalSwapAmount);
-        swapAmounts[swapAmounts.length - 1] =
-            swapAmounts[swapAmounts.length - 1].minus(difference);
-        break; // No need to keep looping as this number of pools (i) has enough liquidity
-    }
-    if (initialNumPaths == -1) {
+    // If the cumulative limit across all paths is lower than totalSwapAmount then no solution is possible
+    if (totalSwapAmount.gt(sumLimitAmounts[sumLimitAmounts.length - 1])) {
         return [[], ZERO, ZERO, ZERO]; // Not enough liquidity, return empty
     }
+
+    // We use the highest limits to define the initial number of pools considered and the initial guess for swapAmounts.
+    const initialNumPaths =
+        sumLimitAmounts.findIndex((cumulativeLimit) =>
+            // If below is true, it means we have enough liquidity
+            totalSwapAmount.lte(cumulativeLimit)
+        ) + 1;
+
+    let swapAmounts: BigNumber[] = highestLimitAmounts.slice(
+        0,
+        initialNumPaths
+    );
+
+    //  Since the sum of the first i highest limits will be less than totalSwapAmount, we remove the difference to the last swapAmount
+    //  so we are sure that the sum of swapAmounts will be equal to totalSwapAmount
+    const difference =
+        sumLimitAmounts[initialNumPaths - 1].minus(totalSwapAmount);
+    swapAmounts[swapAmounts.length - 1] =
+        swapAmounts[swapAmounts.length - 1].minus(difference);
 
     // First get the optimal totalReturn to trade 'totalSwapAmount' with
     // one path only (b=1). Then increase the number of pools as long as
