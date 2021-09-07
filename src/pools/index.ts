@@ -51,11 +51,11 @@ export function getOutputAmountSwap(
         if (poolPairData.balanceIn.isZero()) {
             return ZERO;
         } else if (pairType === PairTypes.TokenToToken) {
-            return pool._exactTokenInForTokenOut(poolPairData, amount);
+            return pool._exactTokenInForTokenOut(poolPairData, amount, false);
         } else if (pairType === PairTypes.TokenToBpt) {
-            return pool._exactTokenInForBPTOut(poolPairData, amount);
+            return pool._exactTokenInForBPTOut(poolPairData, amount, false);
         } else if (pairType === PairTypes.BptToToken) {
-            return pool._exactBPTInForTokenOut(poolPairData, amount);
+            return pool._exactBPTInForTokenOut(poolPairData, amount, false);
         }
     } else {
         if (poolPairData.balanceOut.isZero()) {
@@ -63,11 +63,11 @@ export function getOutputAmountSwap(
         } else if (amount.gte(poolPairData.balanceOut)) {
             return INFINITY;
         } else if (pairType === PairTypes.TokenToToken) {
-            return pool._tokenInForExactTokenOut(poolPairData, amount);
+            return pool._tokenInForExactTokenOut(poolPairData, amount, false);
         } else if (pairType === PairTypes.TokenToBpt) {
-            return pool._tokenInForExactBPTOut(poolPairData, amount);
+            return pool._tokenInForExactBPTOut(poolPairData, amount, false);
         } else if (pairType === PairTypes.BptToToken) {
-            return pool._BPTInForExactTokenOut(poolPairData, amount);
+            return pool._BPTInForExactTokenOut(poolPairData, amount, false);
         }
     }
 }

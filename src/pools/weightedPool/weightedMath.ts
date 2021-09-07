@@ -1,5 +1,6 @@
 import { BigNumber } from '../../utils/bignumber';
 import { bnum } from '../../utils/bignumber';
+import { WeightedPoolPairData } from './weightedPool';
 // All functions came from https://www.wolframcloud.com/obj/fernando.martinel/Published/SOR_equations_published.nb
 
 /////////
@@ -8,7 +9,10 @@ import { bnum } from '../../utils/bignumber';
 
 // PairType = 'token->token'
 // SwapType = 'swapExactIn'
-export function _exactTokenInForTokenOut(amount, poolPairData): BigNumber {
+export function _exactTokenInForTokenOut(
+    amount: BigNumber,
+    poolPairData: WeightedPoolPairData
+): BigNumber {
     const Bi = poolPairData.balanceIn.toNumber();
     const Bo = poolPairData.balanceOut.toNumber();
     const wi = poolPairData.weightIn.toNumber();
@@ -29,7 +33,10 @@ export function _exactTokenInForTokenOut(amount, poolPairData): BigNumber {
 
 // PairType = 'token->token'
 // SwapType = 'swapExactOut'
-export function _tokenInForExactTokenOut(amount, poolPairData): BigNumber {
+export function _tokenInForExactTokenOut(
+    amount: BigNumber,
+    poolPairData: WeightedPoolPairData
+): BigNumber {
     const Bi = poolPairData.balanceIn.toNumber();
     const Bo = poolPairData.balanceOut.toNumber();
     const wi = poolPairData.weightIn.toNumber();
@@ -47,7 +54,10 @@ export function _tokenInForExactTokenOut(amount, poolPairData): BigNumber {
 
 // PairType = 'token->BPT'
 // SwapType = 'swapExactIn'
-export function _exactTokenInForBPTOut(amount, poolPairData): BigNumber {
+export function _exactTokenInForBPTOut(
+    amount: BigNumber,
+    poolPairData: WeightedPoolPairData
+): BigNumber {
     const Bi = poolPairData.balanceIn.toNumber();
     const Bbpt = poolPairData.balanceOut.toNumber();
     const wi = poolPairData.weightIn.toNumber();
@@ -58,7 +68,10 @@ export function _exactTokenInForBPTOut(amount, poolPairData): BigNumber {
 
 // PairType = 'token->BPT'
 // SwapType = 'swapExactOut'
-export function _tokenInForExactBPTOut(amount, poolPairData): BigNumber {
+export function _tokenInForExactBPTOut(
+    amount: BigNumber,
+    poolPairData: WeightedPoolPairData
+): BigNumber {
     const Bi = poolPairData.balanceIn.toNumber();
     const Bbpt = poolPairData.balanceOut.toNumber();
     const wi = poolPairData.weightIn.toNumber();
@@ -71,7 +84,10 @@ export function _tokenInForExactBPTOut(amount, poolPairData): BigNumber {
 
 // PairType = 'BPT->token'
 // SwapType = 'swapExactIn'
-export function _BPTInForExactTokenOut(amount, poolPairData): BigNumber {
+export function _BPTInForExactTokenOut(
+    amount: BigNumber,
+    poolPairData: WeightedPoolPairData
+): BigNumber {
     const Bbpt = poolPairData.balanceIn.toNumber();
     const Bo = poolPairData.balanceOut.toNumber();
     const wo = poolPairData.weightOut.toNumber();
@@ -84,7 +100,10 @@ export function _BPTInForExactTokenOut(amount, poolPairData): BigNumber {
 
 // PairType = 'BPT->token'
 // SwapType = 'swapExactOut'
-export function _exactBPTInForTokenOut(amount, poolPairData): BigNumber {
+export function _exactBPTInForTokenOut(
+    amount: BigNumber,
+    poolPairData: WeightedPoolPairData
+): BigNumber {
     const Bbpt = poolPairData.balanceIn.toNumber();
     const Bo = poolPairData.balanceOut.toNumber();
     const wo = poolPairData.weightOut.toNumber();
@@ -100,8 +119,8 @@ export function _exactBPTInForTokenOut(amount, poolPairData): BigNumber {
 // PairType = 'token->token'
 // SwapType = 'swapExactIn'
 export function _spotPriceAfterSwapExactTokenInForTokenOut(
-    amount,
-    poolPairData
+    amount: BigNumber,
+    poolPairData: WeightedPoolPairData
 ): BigNumber {
     const Bi = poolPairData.balanceIn.toNumber();
     const Bo = poolPairData.balanceOut.toNumber();
@@ -120,8 +139,8 @@ export function _spotPriceAfterSwapExactTokenInForTokenOut(
 // PairType = 'token->token'
 // SwapType = 'swapExactOut'
 export function _spotPriceAfterSwapTokenInForExactTokenOut(
-    amount,
-    poolPairData
+    amount: BigNumber,
+    poolPairData: WeightedPoolPairData
 ): BigNumber {
     const Bi = poolPairData.balanceIn.toNumber();
     const Bo = poolPairData.balanceOut.toNumber();
@@ -140,8 +159,8 @@ export function _spotPriceAfterSwapTokenInForExactTokenOut(
 // PairType = 'token->BPT'
 // SwapType = 'swapExactIn'
 export function _spotPriceAfterSwapExactTokenInForBPTOut(
-    amount,
-    poolPairData
+    amount: BigNumber,
+    poolPairData: WeightedPoolPairData
 ): BigNumber {
     const Bi = poolPairData.balanceIn.toNumber();
     const Bbpt = poolPairData.balanceOut.toNumber();
@@ -157,8 +176,8 @@ export function _spotPriceAfterSwapExactTokenInForBPTOut(
 // PairType = 'token->BPT'
 // SwapType = 'swapExactOut'
 export function _spotPriceAfterSwapTokenInForExactBPTOut(
-    amount,
-    poolPairData
+    amount: BigNumber,
+    poolPairData: WeightedPoolPairData
 ): BigNumber {
     const Bi = poolPairData.balanceIn.toNumber();
     const Bbpt = poolPairData.balanceOut.toNumber();
@@ -174,8 +193,8 @@ export function _spotPriceAfterSwapTokenInForExactBPTOut(
 // PairType = 'BPT->token'
 // SwapType = 'swapExactIn'
 export function _spotPriceAfterSwapExactBPTInForTokenOut(
-    amount,
-    poolPairData
+    amount: BigNumber,
+    poolPairData: WeightedPoolPairData
 ): BigNumber {
     const Bbpt = poolPairData.balanceIn.toNumber();
     const Bo = poolPairData.balanceOut.toNumber();
@@ -194,8 +213,8 @@ export function _spotPriceAfterSwapExactBPTInForTokenOut(
 // PairType = 'BPT->token'
 // SwapType = 'swapExactOut'
 export function _spotPriceAfterSwapBPTInForExactTokenOut(
-    amount,
-    poolPairData
+    amount: BigNumber,
+    poolPairData: WeightedPoolPairData
 ): BigNumber {
     const Bbpt = poolPairData.balanceIn.toNumber();
     const Bo = poolPairData.balanceOut.toNumber();
@@ -218,8 +237,8 @@ export function _spotPriceAfterSwapBPTInForExactTokenOut(
 // PairType = 'token->token'
 // SwapType = 'swapExactIn'
 export function _derivativeSpotPriceAfterSwapExactTokenInForTokenOut(
-    amount,
-    poolPairData
+    amount: BigNumber,
+    poolPairData: WeightedPoolPairData
 ): BigNumber {
     const Bi = poolPairData.balanceIn.toNumber();
     const Bo = poolPairData.balanceOut.toNumber();
@@ -233,8 +252,8 @@ export function _derivativeSpotPriceAfterSwapExactTokenInForTokenOut(
 // PairType = 'token->token'
 // SwapType = 'swapExactOut'
 export function _derivativeSpotPriceAfterSwapTokenInForExactTokenOut(
-    amount,
-    poolPairData
+    amount: BigNumber,
+    poolPairData: WeightedPoolPairData
 ): BigNumber {
     const Bi = poolPairData.balanceIn.toNumber();
     const Bo = poolPairData.balanceOut.toNumber();
@@ -253,8 +272,8 @@ export function _derivativeSpotPriceAfterSwapTokenInForExactTokenOut(
 // PairType = 'token->BPT'
 // SwapType = 'swapExactIn'
 export function _derivativeSpotPriceAfterSwapExactTokenInForBPTOut(
-    amount,
-    poolPairData
+    amount: BigNumber,
+    poolPairData: WeightedPoolPairData
 ): BigNumber {
     const Bi = poolPairData.balanceIn.toNumber();
     const Bbpt = poolPairData.balanceOut.toNumber();
@@ -269,8 +288,8 @@ export function _derivativeSpotPriceAfterSwapExactTokenInForBPTOut(
 // PairType = 'token->BPT'
 // SwapType = 'swapExactOut'
 export function _derivativeSpotPriceAfterSwapTokenInForExactBPTOut(
-    amount,
-    poolPairData
+    amount: BigNumber,
+    poolPairData: WeightedPoolPairData
 ): BigNumber {
     const Bi = poolPairData.balanceIn.toNumber();
     const Bbpt = poolPairData.balanceOut.toNumber();
@@ -288,8 +307,8 @@ export function _derivativeSpotPriceAfterSwapTokenInForExactBPTOut(
 // PairType = 'BPT->token'
 // SwapType = 'swapExactIn'
 export function _derivativeSpotPriceAfterSwapExactBPTInForTokenOut(
-    amount,
-    poolPairData
+    amount: BigNumber,
+    poolPairData: WeightedPoolPairData
 ): BigNumber {
     const Bbpt = poolPairData.balanceIn.toNumber();
     const Bo = poolPairData.balanceOut.toNumber();
@@ -307,8 +326,8 @@ export function _derivativeSpotPriceAfterSwapExactBPTInForTokenOut(
 // PairType = 'BPT->token'
 // SwapType = 'swapExactOut'
 export function _derivativeSpotPriceAfterSwapBPTInForExactTokenOut(
-    amount,
-    poolPairData
+    amount: BigNumber,
+    poolPairData: WeightedPoolPairData
 ): BigNumber {
     const Bbpt = poolPairData.balanceIn.toNumber();
     const Bo = poolPairData.balanceOut.toNumber();
