@@ -220,6 +220,13 @@ const optimizeSwapAmounts = (
         // Stop if max number of pools has been reached
         if (totalNumberOfPools >= maxPools) break;
     }
+
+    // 0 swap amounts can occur due to rounding errors but we don't want to pass those on so filter out
+    bestPaths = bestPaths.filter((_, i) => !bestSwapAmounts[i].isZero());
+    bestSwapAmounts = bestSwapAmounts.filter(
+        (swapAmount) => !swapAmount.isZero()
+    );
+
     return [bestPaths, bestSwapAmounts, bestTotalReturnConsideringFees];
 };
 
@@ -240,8 +247,6 @@ const formatSwaps = (
     // after executing the transaction (given there are no front-runners)
     bestPaths.forEach((path, i) => {
         const swapAmount = bestSwapAmounts[i];
-        // 0 swap amounts can occur due to rounding errors but we don't want to pass those on so filter out
-        if (swapAmount.isZero()) return;
 
         if (swapAmount.gt(highestSwapAmt)) {
             highestSwapAmt = swapAmount;
