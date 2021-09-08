@@ -3,13 +3,7 @@ import { StablePool } from './stablePool/stablePool';
 import { ElementPool } from './elementPool/elementPool';
 import { MetaStablePool } from './metaStablePool/metaStablePool';
 import { BigNumber, INFINITY, ZERO } from '../utils/bignumber';
-import {
-    SubgraphPoolBase,
-    PoolBase,
-    SwapTypes,
-    PoolPairBase,
-    PairTypes,
-} from '../types';
+import { SubgraphPoolBase, PoolBase, SwapTypes, PoolPairBase } from '../types';
 
 export function parseNewPool(
     pool: SubgraphPoolBase,
@@ -49,30 +43,20 @@ export function getOutputAmountSwap(
     swapType: SwapTypes,
     amount: BigNumber
 ): BigNumber {
-    const pairType = poolPairData.pairType;
-
     // TODO: check if necessary to check if amount > limitAmount
     if (swapType === SwapTypes.SwapExactIn) {
         if (poolPairData.balanceIn.isZero()) {
             return ZERO;
-        } else if (pairType === PairTypes.TokenToToken) {
+        } else {
             return pool._exactTokenInForTokenOut(poolPairData, amount, false);
-        } else if (pairType === PairTypes.TokenToBpt) {
-            return pool._exactTokenInForBPTOut(poolPairData, amount, false);
-        } else if (pairType === PairTypes.BptToToken) {
-            return pool._exactBPTInForTokenOut(poolPairData, amount, false);
         }
     } else {
         if (poolPairData.balanceOut.isZero()) {
             return ZERO;
         } else if (amount.gte(poolPairData.balanceOut)) {
             return INFINITY;
-        } else if (pairType === PairTypes.TokenToToken) {
+        } else {
             return pool._tokenInForExactTokenOut(poolPairData, amount, false);
-        } else if (pairType === PairTypes.TokenToBpt) {
-            return pool._tokenInForExactBPTOut(poolPairData, amount, false);
-        } else if (pairType === PairTypes.BptToToken) {
-            return pool._BPTInForExactTokenOut(poolPairData, amount, false);
         }
     }
 }

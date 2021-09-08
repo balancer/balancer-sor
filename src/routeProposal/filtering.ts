@@ -1,4 +1,3 @@
-import { ALLOW_ADD_REMOVE } from '../config';
 import {
     SubgraphPoolBase,
     PoolDictionary,
@@ -65,9 +64,6 @@ export function filterPoolsOfInterest(
         if (!newPool) return;
 
         const tokenListSet = new Set(pool.tokensList);
-        // Depending on env file, we add the BPT as well as
-        // we can join/exit as part of the multihop
-        if (ALLOW_ADD_REMOVE) tokenListSet.add(pool.address);
 
         // This is a direct pool as has both tokenIn and tokenOut
         if (
@@ -167,11 +163,8 @@ export function filterHopPools(
             }
 
             const tokenListSet = new Set(pool.tokensList);
-            // Depending on env file, we add the BPT as well as
-            // we can join/exit as part of the multihop
-            if (ALLOW_ADD_REMOVE) tokenListSet.add(pool.address);
-            // MAKE THIS A FLAG IN FILTER?
-            // If pool doesn't have  hopTokens[i] then ignore
+
+            // If pool doesn't have hopTokens[i] then ignore
             if (!tokenListSet.has(hopTokens[i])) continue;
 
             if (pool.swapPairType === SwapPairType.HopIn) {
