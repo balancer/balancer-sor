@@ -7,6 +7,7 @@ import { BigNumber, bnum } from '../src/utils/bignumber';
 import {
     WeightedPool,
     WeightedPoolPairData,
+    WeightedPoolToken,
 } from '../src/pools/weightedPool/weightedPool';
 
 const gasPrice = bnum('30000000000');
@@ -41,7 +42,7 @@ describe(`Tests for Weighted Pools.`, () => {
                 pool.swapFee,
                 pool.totalWeight,
                 pool.totalShares,
-                pool.tokens,
+                pool.tokens as WeightedPoolToken[],
                 pool.tokensList
             );
 
@@ -82,7 +83,7 @@ describe(`Tests for Weighted Pools.`, () => {
                 pool.swapFee,
                 pool.totalWeight,
                 pool.totalShares,
-                pool.tokens,
+                pool.tokens as WeightedPoolToken[],
                 pool.tokensList
             );
 

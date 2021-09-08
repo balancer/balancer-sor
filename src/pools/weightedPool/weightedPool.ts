@@ -20,7 +20,7 @@ import {
     _derivativeSpotPriceAfterSwapTokenInForExactTokenOut,
 } from './weightedMath';
 
-type WeightedPoolToken = Pick<
+export type WeightedPoolToken = Pick<
     Required<SubgraphToken>,
     'address' | 'balance' | 'decimals' | 'weight'
 >;

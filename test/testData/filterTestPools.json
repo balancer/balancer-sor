@@ -10,6 +10,7 @@
                     "balance": "0",
                     "decimals": 18,
                     "weight": "12.5",
+                    "priceRate": "1",
                     "id": "0x0481d726c3d25250a8963221945ed93b8a5315a9-0x0000000000085d4780b73119b644ae5ecd22b376",
                     "symbol": "TUSD"
                 },
@@ -18,6 +19,7 @@
                     "balance": "0",
                     "decimals": 18,
                     "weight": "12.5",
+                    "priceRate": "1",
                     "id": "0x0481d726c3d25250a8963221945ed93b8a5315a9-0x6b175474e89094c44da98b954eedeac495271d0f",
                     "symbol": "DAI"
                 },
@@ -26,6 +28,7 @@
                     "balance": "0",
                     "decimals": 6,
                     "weight": "12.5",
+                    "priceRate": "1",
                     "id": "0x0481d726c3d25250a8963221945ed93b8a5315a9-0x9cb2f26a23b8d89973f08c957c4d7cdf75cd341c",
                     "symbol": "DZAR"
                 },
@@ -34,6 +37,7 @@
                     "balance": "0",
                     "decimals": 6,
                     "weight": "12.5",
+                    "priceRate": "1",
                     "id": "0x0481d726c3d25250a8963221945ed93b8a5315a9-0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
                     "symbol": "USDC"
                 }
@@ -58,6 +62,7 @@
                     "balance": "0.04348298",
                     "decimals": 8,
                     "weight": "10",
+                    "priceRate": "1",
                     "id": "0x07d13ed39ee291c1506675ff42f9b2b6b50e2d3e-0x2260fac5e5542a773aa44fbcfedf7c193bc2c599",
                     "symbol": "WBTC"
                 },
@@ -66,6 +71,7 @@
                     "balance": "25.197461401226657195",
                     "decimals": 18,
                     "weight": "2.5",
+                    "priceRate": "1",
                     "id": "0x07d13ed39ee291c1506675ff42f9b2b6b50e2d3e-0x514910771af9ca656af840dff83e8264ecf986ca",
                     "symbol": "LINK"
                 },
@@ -74,6 +80,7 @@
                     "balance": "9548.45375841",
                     "decimals": 8,
                     "weight": "5",
+                    "priceRate": "1",
                     "id": "0x07d13ed39ee291c1506675ff42f9b2b6b50e2d3e-0x5d3a536e4d6dbd6114cc1ead35777bab948e3643",
                     "symbol": "cDAI"
                 },
@@ -82,6 +89,7 @@
                     "balance": "0.292613733117296227",
                     "decimals": 18,
                     "weight": "2.5",
+                    "priceRate": "1",
                     "id": "0x07d13ed39ee291c1506675ff42f9b2b6b50e2d3e-0x9f8f72aa9304c8b593d555f12ef6589cc3a579a2",
                     "symbol": "MKR"
                 },
@@ -90,6 +98,7 @@
                     "balance": "1467.388467898486830904",
                     "decimals": 18,
                     "weight": "1.5",
+                    "priceRate": "1",
                     "id": "0x07d13ed39ee291c1506675ff42f9b2b6b50e2d3e-0xbbbbca6a901c926f240b89eacb641d8aec7aeafd",
                     "symbol": "LRC"
                 },
@@ -98,6 +107,7 @@
                     "balance": "103.786015755319428771",
                     "decimals": 18,
                     "weight": "2",
+                    "priceRate": "1",
                     "id": "0x07d13ed39ee291c1506675ff42f9b2b6b50e2d3e-0xc011a73ee8576fb46f5e1c5751ca3b9fe0af2a6f",
                     "symbol": "SNX"
                 },
@@ -106,6 +116,7 @@
                     "balance": "4.914910622268686988",
                     "decimals": 18,
                     "weight": "25",
+                    "priceRate": "1",
                     "id": "0x07d13ed39ee291c1506675ff42f9b2b6b50e2d3e-0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
                     "symbol": "WETH"
                 },
@@ -114,6 +125,7 @@
                     "balance": "85.692607860702857064",
                     "decimals": 18,
                     "weight": "1.5",
+                    "priceRate": "1",
                     "id": "0x07d13ed39ee291c1506675ff42f9b2b6b50e2d3e-0xdd974d5c2e2928dea5f71b9825b8b646686bd200",
                     "symbol": "KNC"
                 }
@@ -142,6 +154,7 @@
                     "balance": "214.493636767039993106",
                     "decimals": 18,
                     "weight": "40",
+                    "priceRate": "1",
                     "id": "0x09574f862d32794b8636cfb9c98e6597be049c4b-0xb4efd85c19999d84251304bda99e90b92300bd93",
                     "symbol": "RPL"
                 },
@@ -150,6 +163,7 @@
                     "balance": "0.623961701439066309",
                     "decimals": 18,
                     "weight": "10",
+                    "priceRate": "1",
                     "id": "0x09574f862d32794b8636cfb9c98e6597be049c4b-0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
                     "symbol": "WETH"
                 }
@@ -172,6 +186,7 @@
                     "balance": "0",
                     "decimals": 8,
                     "weight": "25",
+                    "priceRate": "1",
                     "id": "0x10fd0adaf5de39ddd81165d770367fde8883157d-0x2260fac5e5542a773aa44fbcfedf7c193bc2c599",
                     "symbol": "WBTC"
                 },
@@ -180,6 +195,7 @@
                     "balance": "0",
                     "decimals": 18,
                     "weight": "25",
+                    "priceRate": "1",
                     "id": "0x10fd0adaf5de39ddd81165d770367fde8883157d-0xcf8f9555d55ce45a3a33a81d6ef99a2a2e71dee2",
                     "symbol": "CBIX7"
                 }
@@ -202,6 +218,7 @@
                     "balance": "0.108984",
                     "decimals": 6,
                     "weight": "20",
+                    "priceRate": "1",
                     "id": "0x12d6b6e24fdd9849abd42afd8f5775d36084a828-0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
                     "symbol": "USDC"
                 },
@@ -210,6 +227,7 @@
                     "balance": "0.00054434209240766",
                     "decimals": 18,
                     "weight": "20",
+                    "priceRate": "1",
                     "id": "0x12d6b6e24fdd9849abd42afd8f5775d36084a828-0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
                     "symbol": "WETH"
                 },
@@ -218,6 +236,7 @@
                     "balance": "439.921699598818736873",
                     "decimals": 18,
                     "weight": "10",
+                    "priceRate": "1",
                     "id": "0x12d6b6e24fdd9849abd42afd8f5775d36084a828-0xea5f88e54d982cbb0c441cde4e79bc305e5b43bc",
                     "symbol": "PARETO"
                 }
@@ -241,6 +260,7 @@
                     "balance": "12.274777029505746542",
                     "decimals": 18,
                     "weight": "4",
+                    "priceRate": "1",
                     "id": "0x165a50bc092f6870dc111c349bae5fc35147ac86-0x6b175474e89094c44da98b954eedeac495271d0f",
                     "symbol": "DAI"
                 },
@@ -249,6 +269,7 @@
                     "balance": "0.092270379282110205",
                     "decimals": 18,
                     "weight": "6",
+                    "priceRate": "1",
                     "id": "0x165a50bc092f6870dc111c349bae5fc35147ac86-0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
                     "symbol": "WETH"
                 }
@@ -271,6 +292,7 @@
                     "balance": "0",
                     "decimals": 18,
                     "weight": "5",
+                    "priceRate": "1",
                     "id": "0x247ff2b322df7439b78898375be7cdadca11cf17-0x6b175474e89094c44da98b954eedeac495271d0f",
                     "symbol": "DAI"
                 },
@@ -279,6 +301,7 @@
                     "balance": "0",
                     "decimals": 18,
                     "weight": "10",
+                    "priceRate": "1",
                     "id": "0x247ff2b322df7439b78898375be7cdadca11cf17-0x9f8f72aa9304c8b593d555f12ef6589cc3a579a2",
                     "symbol": "MKR"
                 },
@@ -287,6 +310,7 @@
                     "balance": "0",
                     "decimals": 18,
                     "weight": "5",
+                    "priceRate": "1",
                     "id": "0x247ff2b322df7439b78898375be7cdadca11cf17-0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
                     "symbol": "WETH"
                 }
@@ -310,6 +334,7 @@
                     "balance": "0",
                     "decimals": 6,
                     "weight": "25",
+                    "priceRate": "1",
                     "id": "0x254d519110d215fb657c621afc7d4b76ce2c0265-0x9cb2f26a23b8d89973f08c957c4d7cdf75cd341c",
                     "symbol": "DZAR"
                 },
@@ -318,6 +343,7 @@
                     "balance": "0",
                     "decimals": 6,
                     "weight": "25",
+                    "priceRate": "1",
                     "id": "0x254d519110d215fb657c621afc7d4b76ce2c0265-0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
                     "symbol": "USDC"
                 }
@@ -340,6 +366,7 @@
                     "balance": "3770.43125992004586995",
                     "decimals": 18,
                     "weight": "3",
+                    "priceRate": "1",
                     "id": "0x29f55de880d4dcae40ba3e63f16407a31b4d44ee-0x0d8775f648430679a709e98d2b0cb6250d2887ef",
                     "symbol": "BAT"
                 },
@@ -348,6 +375,7 @@
                     "balance": "61.315369304551821243",
                     "decimals": 18,
                     "weight": "3",
+                    "priceRate": "1",
                     "id": "0x29f55de880d4dcae40ba3e63f16407a31b4d44ee-0x1985365e9f78359a9b6ad760e32412f4a445e862",
                     "symbol": "REP"
                 },
@@ -356,6 +384,7 @@
                     "balance": "753.477429351494249055",
                     "decimals": 18,
                     "weight": "3",
+                    "priceRate": "1",
                     "id": "0x29f55de880d4dcae40ba3e63f16407a31b4d44ee-0x6b175474e89094c44da98b954eedeac495271d0f",
                     "symbol": "DAI"
                 },
@@ -364,6 +393,7 @@
                     "balance": "9.84136604517337888",
                     "decimals": 18,
                     "weight": "8",
+                    "priceRate": "1",
                     "id": "0x29f55de880d4dcae40ba3e63f16407a31b4d44ee-0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
                     "symbol": "WETH"
                 },
@@ -372,6 +402,7 @@
                     "balance": "2398.822030356552354618",
                     "decimals": 18,
                     "weight": "3",
+                    "priceRate": "1",
                     "id": "0x29f55de880d4dcae40ba3e63f16407a31b4d44ee-0xe41d2489571d322189246dafa5ebde1f4699f498",
                     "symbol": "ZRX"
                 }
@@ -397,6 +428,7 @@
                     "balance": "0.00421777",
                     "decimals": 8,
                     "weight": "7.5",
+                    "priceRate": "1",
                     "id": "0x2dbd24322757d2e28de4230b1ca5b88e49a76979-0x2260fac5e5542a773aa44fbcfedf7c193bc2c599",
                     "symbol": "WBTC"
                 },
@@ -405,6 +437,7 @@
                     "balance": "0.559861212",
                     "decimals": 9,
                     "weight": "6.25",
+                    "priceRate": "1",
                     "id": "0x2dbd24322757d2e28de4230b1ca5b88e49a76979-0x4f3afec4e5a3f2a6a1a411def7d7dfe50ee057bf",
                     "symbol": "DGX"
                 },
@@ -413,6 +446,7 @@
                     "balance": "9.88417866675729769",
                     "decimals": 18,
                     "weight": "7.5",
+                    "priceRate": "1",
                     "id": "0x2dbd24322757d2e28de4230b1ca5b88e49a76979-0x514910771af9ca656af840dff83e8264ecf986ca",
                     "symbol": "LINK"
                 },
@@ -421,6 +455,7 @@
                     "balance": "31.985554772389188202",
                     "decimals": 18,
                     "weight": "6.25",
+                    "priceRate": "1",
                     "id": "0x2dbd24322757d2e28de4230b1ca5b88e49a76979-0x6b175474e89094c44da98b954eedeac495271d0f",
                     "symbol": "DAI"
                 },
@@ -429,6 +464,7 @@
                     "balance": "617.869915",
                     "decimals": 6,
                     "weight": "6.25",
+                    "priceRate": "1",
                     "id": "0x2dbd24322757d2e28de4230b1ca5b88e49a76979-0x9cb2f26a23b8d89973f08c957c4d7cdf75cd341c",
                     "symbol": "DZAR"
                 },
@@ -437,6 +473,7 @@
                     "balance": "31.486417",
                     "decimals": 6,
                     "weight": "6.25",
+                    "priceRate": "1",
                     "id": "0x2dbd24322757d2e28de4230b1ca5b88e49a76979-0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
                     "symbol": "USDC"
                 },
@@ -445,6 +482,7 @@
                     "balance": "0.254679416597299275",
                     "decimals": 18,
                     "weight": "10",
+                    "priceRate": "1",
                     "id": "0x2dbd24322757d2e28de4230b1ca5b88e49a76979-0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
                     "symbol": "WETH"
                 }
@@ -472,6 +510,7 @@
                     "balance": "472.446035241861225027",
                     "decimals": 18,
                     "weight": "5",
+                    "priceRate": "1",
                     "id": "0x57755f7dec33320bca83159c26e93751bfd30fbe-0x6b175474e89094c44da98b954eedeac495271d0f",
                     "symbol": "DAI"
                 },
@@ -480,6 +519,7 @@
                     "balance": "476.256712",
                     "decimals": 6,
                     "weight": "5",
+                    "priceRate": "1",
                     "id": "0x57755f7dec33320bca83159c26e93751bfd30fbe-0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
                     "symbol": "USDC"
                 }
@@ -502,6 +542,7 @@
                     "balance": "1.73524128823293917",
                     "decimals": 18,
                     "weight": "32.5",
+                    "priceRate": "1",
                     "id": "0x75286e183d923a5f52f52be205e358c5c9101b09-0x0327112423f3a68efdf1fcf402f6c5cb9f7c33fd",
                     "symbol": "BTC++"
                 },
@@ -510,6 +551,7 @@
                     "balance": "4897.835568845398319661",
                     "decimals": 18,
                     "weight": "10",
+                    "priceRate": "1",
                     "id": "0x75286e183d923a5f52f52be205e358c5c9101b09-0x6b175474e89094c44da98b954eedeac495271d0f",
                     "symbol": "DAI"
                 },
@@ -518,6 +560,7 @@
                     "balance": "3711.91823",
                     "decimals": 6,
                     "weight": "7.5",
+                    "priceRate": "1",
                     "id": "0x75286e183d923a5f52f52be205e358c5c9101b09-0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
                     "symbol": "USDC"
                 }
@@ -542,20 +585,23 @@
                 {
                     "address": "0x6b175474e89094c44da98b954eedeac495271d0f",
                     "balance": "150082162.017801073617152519",
-                    "decimals": "18",
-                    "weight": "0"
+                    "decimals": 18,
+                    "weight": "0",
+                    "priceRate": "1"
                 },
                 {
                     "address": "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
                     "balance": "255110295.97792",
-                    "decimals": "6",
-                    "weight": "0"
+                    "decimals": 6,
+                    "weight": "0",
+                    "priceRate": "1"
                 },
                 {
                     "address": "0xdac17f958d2ee523a2206206994597c13d831ec7",
                     "balance": "286806114.776785",
-                    "decimals": "6",
-                    "weight": "0"
+                    "decimals": 6,
+                    "weight": "0",
+                    "priceRate": "1"
                 }
             ],
             "tokensList": [
@@ -576,26 +622,30 @@
                 {
                     "address": "0xc2cb1040220768554cf699b0d863a3cd4324ce32",
                     "balance": "28305713.038511823169249109",
-                    "decimals": "18",
-                    "weight": "0"
+                    "decimals": 18,
+                    "weight": "0",
+                    "priceRate": "1"
                 },
                 {
                     "address": "0x26ea744e5b887e5205727f55dfbe8685e3b21951",
                     "balance": "41917162.823508",
-                    "decimals": "6",
-                    "weight": "0"
+                    "decimals": 6,
+                    "weight": "0",
+                    "priceRate": "1"
                 },
                 {
                     "address": "0xe6354ed5bc4b393a5aad09f21c46e101e692d447",
                     "balance": "47853558.63846",
-                    "decimals": "6",
-                    "weight": "0"
+                    "decimals": 6,
+                    "weight": "0",
+                    "priceRate": "1"
                 },
                 {
                     "address": "0x04bc0ab673d88ae9dbc9da2380cb6b79c4bca9ae",
                     "balance": "39196676.813907828185016584",
-                    "decimals": "18",
-                    "weight": "0"
+                    "decimals": 18,
+                    "weight": "0",
+                    "priceRate": "1"
                 }
             ],
             "tokensList": [
@@ -620,6 +670,7 @@
                     "balance": "1000",
                     "decimals": 6,
                     "weight": "10",
+                    "priceRate": "1",
                     "id": "0x0481d726c3d25250a8963221945ed93b8a5315a9-0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
                     "symbol": "USDC"
                 },
@@ -628,6 +679,7 @@
                     "balance": "0.001",
                     "decimals": 18,
                     "weight": "10",
+                    "priceRate": "1",
                     "id": "0x0481d726c3d25250a8963221945ed93b8a5315a9-0x6b175474e89094c44da98b954eedeac495271d0f",
                     "symbol": "DAI"
                 },
@@ -636,6 +688,7 @@
                     "balance": "1000",
                     "decimals": 18,
                     "weight": "10",
+                    "priceRate": "1",
                     "id": "0x0481d726c3d25250a8963221945ed93b8a5315a9-0x0000000000085d4780b73119b644ae5ecd22b376",
                     "symbol": "TUSD"
                 },
@@ -644,6 +697,7 @@
                     "balance": "1000",
                     "decimals": 18,
                     "weight": "10",
+                    "priceRate": "1",
                     "id": "0x0481d726c3d25250a8963221945ed93b8a5315a9-0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
                     "symbol": "WETH"
                 }
@@ -668,6 +722,7 @@
                     "balance": "1000",
                     "decimals": 18,
                     "weight": "10",
+                    "priceRate": "1",
                     "id": "0x07d13ed39ee291c1506675ff42f9b2b6b50e2d3e-0x6b175474e89094c44da98b954eedeac495271d0f",
                     "symbol": "DAI"
                 },
@@ -676,6 +731,7 @@
                     "balance": "1000",
                     "decimals": 18,
                     "weight": "10",
+                    "priceRate": "1",
                     "id": "0x07d13ed39ee291c1506675ff42f9b2b6b50e2d3e-0x0000000000085d4780b73119b644ae5ecd22b376",
                     "symbol": "TUSD"
                 },
@@ -684,6 +740,7 @@
                     "balance": "1000",
                     "decimals": 18,
                     "weight": "10",
+                    "priceRate": "1",
                     "id": "0x07d13ed39ee291c1506675ff42f9b2b6b50e2d3e-0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
                     "symbol": "WETH"
                 }
@@ -709,6 +766,7 @@
                     "balance": "1000",
                     "decimals": 6,
                     "weight": "10",
+                    "priceRate": "1",
                     "id": "0x0481d726c3d25250a8963221945ed93b8a5315a9-0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
                     "symbol": "USDC"
                 },
@@ -717,6 +775,7 @@
                     "balance": "1000",
                     "decimals": 18,
                     "weight": "10",
+                    "priceRate": "1",
                     "id": "0x0481d726c3d25250a8963221945ed93b8a5315a9-0x0000000000085d4780b73119b644ae5ecd22b376",
                     "symbol": "TUSD"
                 },
@@ -725,6 +784,7 @@
                     "balance": "1000",
                     "decimals": 18,
                     "weight": "10",
+                    "priceRate": "1",
                     "id": "0x0481d726c3d25250a8963221945ed93b8a5315a9-0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
                     "symbol": "WETH"
                 }
@@ -748,6 +808,7 @@
                     "balance": "1000",
                     "decimals": 18,
                     "weight": "10",
+                    "priceRate": "1",
                     "id": "0x07d13ed39ee291c1506675ff42f9b2b6b50e2d3e-0x6b175474e89094c44da98b954eedeac495271d0f",
                     "symbol": "DAI"
                 },
@@ -756,6 +817,7 @@
                     "balance": "1000",
                     "decimals": 18,
                     "weight": "10",
+                    "priceRate": "1",
                     "id": "0x07d13ed39ee291c1506675ff42f9b2b6b50e2d3e-0x0000000000085d4780b73119b644ae5ecd22b376",
                     "symbol": "TUSD"
                 },
@@ -764,6 +826,7 @@
                     "balance": "1000",
                     "decimals": 18,
                     "weight": "10",
+                    "priceRate": "1",
                     "id": "0x07d13ed39ee291c1506675ff42f9b2b6b50e2d3e-0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
                     "symbol": "WETH"
                 }
