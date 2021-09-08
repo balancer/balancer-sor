@@ -9,6 +9,7 @@ import {
     PoolPairBase,
     SwapTypes,
     SubgraphPoolBase,
+    SubgraphToken,
 } from '../../types';
 import {
     _exactTokenInForTokenOut,
@@ -19,12 +20,10 @@ import {
     _derivativeSpotPriceAfterSwapTokenInForExactTokenOut,
 } from './weightedMath';
 
-export interface WeightedPoolToken {
-    address: string;
-    balance: string;
-    decimals: string | number;
-    weight?: string;
-}
+type WeightedPoolToken = Pick<
+    Required<SubgraphToken>,
+    'address' | 'balance' | 'decimals' | 'weight'
+>;
 
 export interface WeightedPoolPairData extends PoolPairBase {
     id: string;
@@ -63,7 +62,7 @@ export class WeightedPool implements PoolBase {
             pool.swapFee,
             pool.totalWeight,
             pool.totalShares,
-            pool.tokens,
+            pool.tokens as WeightedPoolToken[],
             pool.tokensList
         );
     }

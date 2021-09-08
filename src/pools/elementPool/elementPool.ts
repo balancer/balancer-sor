@@ -6,6 +6,7 @@ import {
     PoolPairBase,
     SwapTypes,
     SubgraphPoolBase,
+    SubgraphToken,
 } from '../../types';
 import { getAddress } from '@ethersproject/address';
 import { bnum } from '../../utils/bignumber';
@@ -19,11 +20,7 @@ import {
     getTimeTillExpiry,
 } from './elementMath';
 
-export interface ElementPoolToken {
-    address: string;
-    balance: string;
-    decimals: string | number;
-}
+type ElementPoolToken = Pick<SubgraphToken, 'address' | 'balance' | 'decimals'>;
 
 export interface ElementPoolPairData extends PoolPairBase {
     id: string;

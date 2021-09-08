@@ -54,7 +54,7 @@ export interface SubgraphPoolBase {
     poolType: string;
     swapFee: string;
     totalShares: string;
-    tokens: SubGraphToken[];
+    tokens: SubgraphToken[];
     tokensList: string[];
 
     // Weighted & Element field
@@ -73,14 +73,13 @@ export interface SubgraphPoolBase {
     swapEnabled?: boolean;
 }
 
-export interface SubGraphToken {
+export interface SubgraphToken {
     address: string;
     balance: string;
-    decimals: string | number;
-    // Stable & Element field
+    decimals: number;
+    priceRate: string;
+    // WeightedPool field
     weight?: string;
-    // MetaStablePool field
-    priceRate?: string;
 }
 
 export interface SwapV2 {

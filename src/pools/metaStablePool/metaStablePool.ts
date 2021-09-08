@@ -6,6 +6,7 @@ import {
     PoolPairBase,
     SwapTypes,
     SubgraphPoolBase,
+    SubgraphToken,
 } from '../../types';
 import { getAddress } from '@ethersproject/address';
 import { bnum, scale, ZERO } from '../../utils/bignumber';
@@ -18,12 +19,10 @@ import {
     _derivativeSpotPriceAfterSwapTokenInForExactTokenOut,
 } from './metaStableMath';
 
-export interface MetaStablePoolToken {
-    address: string;
-    balance: string;
-    decimals: string | number;
-    priceRate?: string;
-}
+type MetaStablePoolToken = Pick<
+    SubgraphToken,
+    'address' | 'balance' | 'decimals' | 'priceRate'
+>;
 
 export interface MetaStablePoolPairData extends PoolPairBase {
     id: string;
