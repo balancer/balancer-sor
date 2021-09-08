@@ -13,7 +13,7 @@ import {
     filterHopPools,
 } from '../src/routeProposal/filtering';
 import { calculatePathLimits } from '../src/routeProposal/pathLimits';
-import { smartOrderRouter } from '../src/router';
+import { getBestPaths } from '../src/router';
 import BigNumber from 'bignumber.js';
 import { countPoolSwapPairTypes } from './lib/testHelpers';
 
@@ -694,7 +694,7 @@ describe('Tests pools filtering and path processing', () => {
         assert.equal(paths[1].limitAmount.toString(), '300');
 
         let swaps: any, total: BigNumber, marketSp: BigNumber;
-        [swaps, total, marketSp] = smartOrderRouter(
+        [swaps, total, marketSp] = getBestPaths(
             cloneDeep(poolsOfInterestDictionary), // Need to keep original pools for cache
             paths,
             SwapTypes.SwapExactIn,
@@ -803,7 +803,7 @@ describe('Tests pools filtering and path processing', () => {
         assert.equal(paths[1].limitAmount.toString(), '228.98997686969935');
 
         let swaps: any, total: BigNumber, marketSp: BigNumber;
-        [swaps, total, marketSp] = smartOrderRouter(
+        [swaps, total, marketSp] = getBestPaths(
             cloneDeep(poolsOfInterestDictionary), // Need to keep original pools for cache
             paths,
             SwapTypes.SwapExactOut,

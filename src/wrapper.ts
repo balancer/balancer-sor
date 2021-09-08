@@ -1,7 +1,7 @@
 import { BaseProvider } from '@ethersproject/providers';
 import cloneDeep from 'lodash.clonedeep';
 import { BigNumber, ZERO } from './utils/bignumber';
-import { smartOrderRouter } from './router';
+import { getBestPaths } from './router';
 import { getWrappedInfo, setWrappedInfo } from './wrapInfo';
 import { formatSwaps } from './formatSwaps';
 import { PoolCacher } from './poolCaching';
@@ -192,7 +192,7 @@ export class SOR {
 
         // Returns list of swaps
         const [swaps, total, marketSp, totalConsideringFees] =
-            this.getOptimalPaths(
+            this.getBestPaths(
                 poolsOfInterest,
                 paths,
                 swapAmount,
@@ -218,7 +218,7 @@ export class SOR {
     /**
      * Find optimal routes for trade from given candidate paths
      */
-    private getOptimalPaths(
+    private getBestPaths(
         pools: PoolDictionary,
         paths: NewPath[],
         swapAmount: BigNumber,
@@ -228,7 +228,7 @@ export class SOR {
     ): [Swap[][], BigNumber, BigNumber, BigNumber] {
         // swapExactIn - total = total amount swap will return of tokenOut
         // swapExactOut - total = total amount of tokenIn required for swap
-        return smartOrderRouter(
+        return getBestPaths(
             cloneDeep(pools),
             paths,
             swapType,
