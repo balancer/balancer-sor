@@ -26,20 +26,10 @@ export type WeightedPoolToken = Pick<
     'address' | 'balance' | 'decimals' | 'weight'
 >;
 
-export interface WeightedPoolPairData extends PoolPairBase {
-    id: string;
-    address: string;
-    poolType: PoolTypes;
-    tokenIn: string;
-    tokenOut: string;
-    balanceIn: BigNumber;
-    balanceOut: BigNumber;
-    weightIn: BigNumber; // Weights are only defined for weighted pools
-    weightOut: BigNumber; // Weights are only defined for weighted pools
-    swapFee: BigNumber;
-    decimalsIn: number;
-    decimalsOut: number;
-}
+export type WeightedPoolPairData = PoolPairBase & {
+    weightIn: BigNumber;
+    weightOut: BigNumber;
+};
 
 export class WeightedPool implements PoolBase {
     poolType: PoolTypes = PoolTypes.Weighted;

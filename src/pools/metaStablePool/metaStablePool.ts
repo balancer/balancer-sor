@@ -3,7 +3,6 @@ import {
     PoolBase,
     PoolTypes,
     SwapPairType,
-    PoolPairBase,
     SwapTypes,
     SubgraphPoolBase,
     SubgraphToken,
@@ -18,33 +17,17 @@ import {
     _derivativeSpotPriceAfterSwapExactTokenInForTokenOut,
     _derivativeSpotPriceAfterSwapTokenInForExactTokenOut,
 } from './metaStableMath';
+import { StablePoolPairData } from 'pools/stablePool/stablePool';
 
 type MetaStablePoolToken = Pick<
     SubgraphToken,
     'address' | 'balance' | 'decimals' | 'priceRate'
 >;
 
-export interface MetaStablePoolPairData extends PoolPairBase {
-    id: string;
-    address: string;
-    poolType: PoolTypes;
-    tokenIn: string;
-    tokenOut: string;
-    balanceIn: BigNumber;
-    balanceOut: BigNumber;
-    swapFee: BigNumber;
-    swapFeeScaled: BigNumber;
-    decimalsIn: number;
-    decimalsOut: number;
-    allBalances: BigNumber[]; // Only for stable pools
-    allBalancesScaled: BigNumber[]; // Only for stable pools - EVM Maths uses everything in 1e18 upscaled format and this avoids repeated scaling
-    invariant: BigNumber; // Only for stable pools
-    amp: BigNumber; // Only for stable pools
-    tokenIndexIn: number; // Only for stable pools
-    tokenIndexOut: number; // Only for stable pools
+export type MetaStablePoolPairData = StablePoolPairData & {
     tokenInPriceRate: BigNumber;
     tokenOutPriceRate: BigNumber;
-}
+};
 
 export class MetaStablePool implements PoolBase {
     poolType: PoolTypes = PoolTypes.MetaStable;

@@ -31,15 +31,18 @@ export interface SwapOptions {
     forceRefresh: boolean;
 }
 
-export interface PoolPairBase {
-    balanceIn: BigNumber;
-    balanceOut: BigNumber;
+export type PoolPairBase = {
+    id: string;
+    address: string;
     poolType: PoolTypes;
+    swapFee: BigNumber;
     tokenIn: string;
     tokenOut: string;
     decimalsIn: number;
     decimalsOut: number;
-}
+    balanceIn: BigNumber;
+    balanceOut: BigNumber;
+};
 
 export interface Swap {
     pool: string;

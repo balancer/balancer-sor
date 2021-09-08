@@ -22,25 +22,14 @@ import {
 
 type ElementPoolToken = Pick<SubgraphToken, 'address' | 'balance' | 'decimals'>;
 
-export interface ElementPoolPairData extends PoolPairBase {
-    id: string;
-    address: string;
-    poolType: PoolTypes;
-    tokenIn: string;
-    tokenOut: string;
-    balanceIn: BigNumber;
-    balanceOut: BigNumber;
-    swapFee: BigNumber;
-    decimalsIn: number;
-    decimalsOut: number;
-    // Element specific fields
+export type ElementPoolPairData = PoolPairBase & {
     totalShares: BigNumber;
     expiryTime: number;
     unitSeconds: number;
     principalToken: string;
     baseToken: string;
     currentBlockTimestamp: number;
-}
+};
 
 export class ElementPool implements PoolBase {
     poolType: PoolTypes = PoolTypes.Element;
