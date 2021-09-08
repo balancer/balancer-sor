@@ -8,7 +8,6 @@ import {
     PoolBase,
     SwapTypes,
     PoolPairBase,
-    PairTypes,
 } from '../types';
 
 export function parseNewPool(
@@ -44,30 +43,20 @@ export function getOutputAmountSwap(
     swapType: SwapTypes,
     amount: BigNumber
 ): BigNumber {
-    const pairType = poolPairData.pairType;
-
     // TODO: check if necessary to check if amount > limitAmount
     if (swapType === SwapTypes.SwapExactIn) {
         if (poolPairData.balanceIn.isZero()) {
             return ZERO;
-        } else if (pairType === PairTypes.TokenToToken) {
+        } else {
             return pool._exactTokenInForTokenOut(poolPairData, amount, false);
-        } else if (pairType === PairTypes.TokenToBpt) {
-            return pool._exactTokenInForBPTOut(poolPairData, amount, false);
-        } else if (pairType === PairTypes.BptToToken) {
-            return pool._exactBPTInForTokenOut(poolPairData, amount, false);
         }
     } else {
         if (poolPairData.balanceOut.isZero()) {
             return ZERO;
         } else if (amount.gte(poolPairData.balanceOut)) {
             return INFINITY;
-        } else if (pairType === PairTypes.TokenToToken) {
+        } else {
             return pool._tokenInForExactTokenOut(poolPairData, amount, false);
-        } else if (pairType === PairTypes.TokenToBpt) {
-            return pool._tokenInForExactBPTOut(poolPairData, amount, false);
-        } else if (pairType === PairTypes.BptToToken) {
-            return pool._BPTInForExactTokenOut(poolPairData, amount, false);
         }
     }
 }

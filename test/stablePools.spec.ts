@@ -7,7 +7,6 @@ import {
     SwapInfo,
     SwapTypes,
     PoolTypes,
-    PairTypes,
     SubgraphPoolBase,
 } from '../src/types';
 import { BigNumber, bnum, scale } from '../src/utils/bignumber';
@@ -58,7 +57,6 @@ describe(`Tests for Stable Pools.`, () => {
                 id: pool.id,
                 address: pool.address,
                 poolType: PoolTypes.Stable,
-                pairType: PairTypes.TokenToToken,
                 tokenIn: pool.tokens[0].address,
                 tokenOut: pool.tokens[1].address,
                 balanceIn: bnum(pool.tokens[0].balance),
@@ -111,7 +109,6 @@ describe(`Tests for Stable Pools.`, () => {
                 id: pool.id,
                 address: pool.address,
                 poolType: PoolTypes.Stable,
-                pairType: PairTypes.TokenToToken,
                 tokenIn: pool.tokens[0].address,
                 tokenOut: pool.tokens[1].address,
                 balanceIn: bnum(pool.tokens[0].balance),

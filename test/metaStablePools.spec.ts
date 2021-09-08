@@ -3,13 +3,7 @@ import { expect } from 'chai';
 import cloneDeep from 'lodash.clonedeep';
 import { JsonRpcProvider } from '@ethersproject/providers';
 import { SOR } from '../src';
-import {
-    SwapInfo,
-    SwapTypes,
-    PoolTypes,
-    PairTypes,
-    SubgraphPoolBase,
-} from '../src/types';
+import { SwapInfo, SwapTypes, PoolTypes, SubgraphPoolBase } from '../src/types';
 import { BigNumber, bnum, scale } from '../src/utils/bignumber';
 import {
     MetaStablePool,
@@ -82,7 +76,6 @@ describe(`Tests for MetaStable Pools.`, () => {
                 id: pool.id,
                 address: pool.address,
                 poolType: PoolTypes.Stable,
-                pairType: PairTypes.TokenToToken,
                 tokenIn: pool.tokens[0].address,
                 tokenOut: pool.tokens[1].address,
                 balanceIn: bnum(pool.tokens[0].balance),
@@ -135,7 +128,6 @@ describe(`Tests for MetaStable Pools.`, () => {
                 id: pool.id,
                 address: pool.address,
                 poolType: PoolTypes.Stable,
-                pairType: PairTypes.TokenToToken,
                 tokenIn: pool.tokens[0].address,
                 tokenOut: pool.tokens[1].address,
                 balanceIn: bnum(pool.tokens[0].balance),

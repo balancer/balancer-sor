@@ -3,13 +3,7 @@ import { ALLOW_ADD_REMOVE } from '../src/config';
 import { expect } from 'chai';
 import { JsonRpcProvider } from '@ethersproject/providers';
 import { SOR } from '../src';
-import {
-    SwapInfo,
-    SwapTypes,
-    PoolTypes,
-    PairTypes,
-    SubgraphPoolBase,
-} from '../src/types';
+import { SwapInfo, SwapTypes, PoolTypes, SubgraphPoolBase } from '../src/types';
 import { BigNumber, bnum } from '../src/utils/bignumber';
 import {
     WeightedPool,
@@ -56,7 +50,6 @@ describe(`Tests for Weighted Pools.`, () => {
                 id: pool.id,
                 address: pool.address,
                 poolType: PoolTypes.Weighted,
-                pairType: PairTypes.TokenToToken,
                 tokenIn: pool.tokens[0].address,
                 tokenOut: pool.tokens[1].address,
                 balanceIn: bnum(pool.tokens[0].balance),
@@ -98,7 +91,6 @@ describe(`Tests for Weighted Pools.`, () => {
                 id: pool.id,
                 address: pool.address,
                 poolType: PoolTypes.Weighted,
-                pairType: PairTypes.TokenToToken,
                 tokenIn: pool.tokens[0].address,
                 tokenOut: pool.tokens[1].address,
                 balanceIn: bnum(pool.tokens[0].balance),
