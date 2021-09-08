@@ -35,18 +35,7 @@ describe(`Tests for Element Pools.`, () => {
         // Max out uses standard V2 limits
         const MAX_OUT_RATIO = bnum(0.3);
 
-        const newPool = new ElementPool(
-            pool.id,
-            pool.address,
-            pool.swapFee,
-            pool.totalShares,
-            pool.tokens,
-            pool.tokensList,
-            pool.expiryTime,
-            pool.unitSeconds,
-            pool.principalToken,
-            pool.baseToken
-        );
+        const newPool = ElementPool.fromPool(pool);
 
         const poolPairData: ElementPoolPairData = {
             id: pool.id,
@@ -60,10 +49,10 @@ describe(`Tests for Element Pools.`, () => {
             decimalsIn: Number(pool.tokens[0].decimals),
             decimalsOut: Number(pool.tokens[1].decimals),
             totalShares: bnum(pool.totalShares),
-            expiryTime: pool.expiryTime,
-            unitSeconds: pool.unitSeconds,
-            principalToken: pool.principalToken,
-            baseToken: pool.baseToken,
+            expiryTime: pool.expiryTime as number,
+            unitSeconds: pool.unitSeconds as number,
+            principalToken: pool.principalToken as string,
+            baseToken: pool.baseToken as string,
             currentBlockTimestamp: 0,
         };
 
@@ -80,19 +69,9 @@ describe(`Tests for Element Pools.`, () => {
         const pool = poolsFromFile.pools[0];
         const swapType = SwapTypes.SwapExactIn;
 
-        const newPool = new ElementPool(
-            pool.id,
-            pool.address,
-            pool.swapFee,
-            pool.totalShares,
-            pool.tokens,
-            pool.tokensList,
-            Number(pool.expiryTime),
-            Number(pool.unitSeconds),
-            pool.principalToken,
-            pool.baseToken
-        );
+        const newPool = ElementPool.fromPool(pool);
 
+        if (!pool.expiryTime) throw Error('Invalid pool data');
         // Needs to be called to update the currentBlockTimestamp
         newPool.setCurrentBlockTimestamp(pool.expiryTime - 10);
 
@@ -108,10 +87,10 @@ describe(`Tests for Element Pools.`, () => {
             decimalsIn: Number(pool.tokens[0].decimals),
             decimalsOut: Number(pool.tokens[1].decimals),
             totalShares: bnum(pool.totalShares),
-            expiryTime: pool.expiryTime,
-            unitSeconds: pool.unitSeconds,
-            principalToken: pool.principalToken,
-            baseToken: pool.baseToken,
+            expiryTime: pool.expiryTime as number,
+            unitSeconds: pool.unitSeconds as number,
+            principalToken: pool.principalToken as string,
+            baseToken: pool.baseToken as string,
             currentBlockTimestamp: 0, // This will be updated to use value set above in the function getLimitAmountSwap
         };
 
@@ -128,19 +107,9 @@ describe(`Tests for Element Pools.`, () => {
         const pool = poolsFromFile.pools[0];
         const swapType = SwapTypes.SwapExactIn;
 
-        const newPool = new ElementPool(
-            pool.id,
-            pool.address,
-            pool.swapFee,
-            pool.totalShares,
-            pool.tokens,
-            pool.tokensList,
-            Number(pool.expiryTime),
-            Number(pool.unitSeconds),
-            pool.principalToken,
-            pool.baseToken
-        );
+        const newPool = ElementPool.fromPool(pool);
 
+        if (!pool.expiryTime) throw Error('Invalid pool data');
         // Needs to be called to update the currentBlockTimestamp
         newPool.setCurrentBlockTimestamp(pool.expiryTime + 1);
 
@@ -156,10 +125,10 @@ describe(`Tests for Element Pools.`, () => {
             decimalsIn: Number(pool.tokens[0].decimals),
             decimalsOut: Number(pool.tokens[1].decimals),
             totalShares: bnum(pool.totalShares),
-            expiryTime: pool.expiryTime,
-            unitSeconds: pool.unitSeconds,
-            principalToken: pool.principalToken,
-            baseToken: pool.baseToken,
+            expiryTime: pool.expiryTime as number,
+            unitSeconds: pool.unitSeconds as number,
+            principalToken: pool.principalToken as string,
+            baseToken: pool.baseToken as string,
             currentBlockTimestamp: 0, // This will be updated to use value set above in the function getLimitAmountSwap
         };
 
@@ -184,6 +153,7 @@ describe(`Tests for Element Pools.`, () => {
         const fetchSuccess = await sor.fetchPools([], false);
         expect(fetchSuccess).to.be.true;
 
+        if (!pools[0].expiryTime) throw Error('Invalid pool data');
         const swapInfo: SwapInfo = await sor.getSwaps(
             tokenIn,
             tokenOut,
@@ -217,6 +187,7 @@ describe(`Tests for Element Pools.`, () => {
         const fetchSuccess = await sor.fetchPools([], false);
         expect(fetchSuccess).to.be.true;
 
+        if (!pools[0].expiryTime) throw Error('Invalid pool data');
         const swapInfo: SwapInfo = await sor.getSwaps(
             tokenIn,
             tokenOut,
@@ -226,7 +197,7 @@ describe(`Tests for Element Pools.`, () => {
                 gasPrice,
                 maxPools,
                 poolTypeFilter: PoolFilter.All,
-                timestamp: poolsFromFile.pools[0].expiryTime + 22, // This is the value for currentBlockTimestamp
+                timestamp: pools[0].expiryTime + 22, // This is the value for currentBlockTimestamp
             }
         );
 
@@ -250,6 +221,7 @@ describe(`Tests for Element Pools.`, () => {
         const fetchSuccess = await sor.fetchPools([], false);
         expect(fetchSuccess).to.be.true;
 
+        if (!pools[0].expiryTime) throw Error('Invalid pool data');
         const swapInfo: SwapInfo = await sor.getSwaps(
             tokenIn,
             tokenOut,
@@ -283,6 +255,7 @@ describe(`Tests for Element Pools.`, () => {
         const fetchSuccess = await sor.fetchPools([], false);
         expect(fetchSuccess).to.be.true;
 
+        if (!pools[0].expiryTime) throw Error('Invalid pool data');
         const swapInfo: SwapInfo = await sor.getSwaps(
             tokenIn,
             tokenOut,

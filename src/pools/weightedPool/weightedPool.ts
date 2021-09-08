@@ -1,5 +1,5 @@
 import { getAddress } from '@ethersproject/address';
-import { bnum, scale, ZERO, ONE } from '../../utils/bignumber';
+import { bnum, scale, ZERO } from '../../utils/bignumber';
 import { BigNumber } from '../../utils/bignumber';
 import * as SDK from '@georgeroman/balancer-v2-pools';
 import {
@@ -10,6 +10,7 @@ import {
     SwapTypes,
     SubgraphPoolBase,
     SubgraphToken,
+    NoNullableField,
 } from '../../types';
 import {
     _exactTokenInForTokenOut,
@@ -21,7 +22,7 @@ import {
 } from './weightedMath';
 
 export type WeightedPoolToken = Pick<
-    Required<SubgraphToken>,
+    NoNullableField<SubgraphToken>,
     'address' | 'balance' | 'decimals' | 'weight'
 >;
 
@@ -85,7 +86,7 @@ export class WeightedPool implements PoolBase {
         this.totalWeight = bnum(totalWeight);
     }
 
-    setTypeForSwap(type: SwapPairType) {
+    setTypeForSwap(type: SwapPairType): void {
         this.swapPairType = type;
     }
 
@@ -130,7 +131,7 @@ export class WeightedPool implements PoolBase {
     // inverse of the slippage. It is proportional to the token balances in the
     // pool but also depends on the shape of the invariant curve.
     // As a standard, we define normalized liquidity in tokenOut
-    getNormalizedLiquidity(poolPairData: WeightedPoolPairData) {
+    getNormalizedLiquidity(poolPairData: WeightedPoolPairData): BigNumber {
         return poolPairData.balanceOut
             .times(poolPairData.weightIn)
             .div(poolPairData.weightIn.plus(poolPairData.weightOut));
@@ -155,6 +156,7 @@ export class WeightedPool implements PoolBase {
         } else {
             // token is underlying in the pool
             const T = this.tokens.find((t) => t.address === token);
+            if (!T) throw Error('Pool does not contain this token');
             T.balance = newBalance.toString();
         }
     }

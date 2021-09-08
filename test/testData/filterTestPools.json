@@ -586,21 +586,21 @@
                     "address": "0x6b175474e89094c44da98b954eedeac495271d0f",
                     "balance": "150082162.017801073617152519",
                     "decimals": 18,
-                    "weight": "0",
+                    "weight": null,
                     "priceRate": "1"
                 },
                 {
                     "address": "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
                     "balance": "255110295.97792",
                     "decimals": 6,
-                    "weight": "0",
+                    "weight": null,
                     "priceRate": "1"
                 },
                 {
                     "address": "0xdac17f958d2ee523a2206206994597c13d831ec7",
                     "balance": "286806114.776785",
                     "decimals": 6,
-                    "weight": "0",
+                    "weight": null,
                     "priceRate": "1"
                 }
             ],
@@ -623,28 +623,28 @@
                     "address": "0xc2cb1040220768554cf699b0d863a3cd4324ce32",
                     "balance": "28305713.038511823169249109",
                     "decimals": 18,
-                    "weight": "0",
+                    "weight": null,
                     "priceRate": "1"
                 },
                 {
                     "address": "0x26ea744e5b887e5205727f55dfbe8685e3b21951",
                     "balance": "41917162.823508",
                     "decimals": 6,
-                    "weight": "0",
+                    "weight": null,
                     "priceRate": "1"
                 },
                 {
                     "address": "0xe6354ed5bc4b393a5aad09f21c46e101e692d447",
                     "balance": "47853558.63846",
                     "decimals": 6,
-                    "weight": "0",
+                    "weight": null,
                     "priceRate": "1"
                 },
                 {
                     "address": "0x04bc0ab673d88ae9dbc9da2380cb6b79c4bca9ae",
                     "balance": "39196676.813907828185016584",
                     "decimals": 18,
-                    "weight": "0",
+                    "weight": null,
                     "priceRate": "1"
                 }
             ],

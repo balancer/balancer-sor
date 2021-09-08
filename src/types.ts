@@ -1,5 +1,9 @@
 import { BigNumber } from './utils/bignumber';
 
+export type NoNullableField<T> = {
+    [P in keyof T]: NonNullable<T[P]>;
+};
+
 export enum SwapTypes {
     SwapExactIn,
     SwapExactOut,
@@ -73,14 +77,14 @@ export interface SubgraphPoolBase {
     swapEnabled?: boolean;
 }
 
-export interface SubgraphToken {
+export type SubgraphToken = {
     address: string;
     balance: string;
     decimals: number;
     priceRate: string;
     // WeightedPool field
-    weight?: string;
-}
+    weight: string | null;
+};
 
 export interface SwapV2 {
     poolId: string;

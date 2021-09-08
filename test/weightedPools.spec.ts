@@ -36,15 +36,7 @@ describe(`Tests for Weighted Pools.`, () => {
             // Max out uses standard V2 limits
             const MAX_OUT_RATIO = bnum(0.3);
 
-            const newPool = new WeightedPool(
-                pool.id,
-                pool.address,
-                pool.swapFee,
-                pool.totalWeight,
-                pool.totalShares,
-                pool.tokens as WeightedPoolToken[],
-                pool.tokensList
-            );
+            const newPool = WeightedPool.fromPool(pool);
 
             const poolPairData: WeightedPoolPairData = {
                 id: pool.id,
@@ -57,8 +49,8 @@ describe(`Tests for Weighted Pools.`, () => {
                 swapFee: bnum(pool.swapFee),
                 decimalsIn: Number(pool.tokens[0].decimals),
                 decimalsOut: Number(pool.tokens[1].decimals),
-                weightIn: bnum(pool.tokens[0].weight),
-                weightOut: bnum(pool.tokens[1].weight),
+                weightIn: bnum(pool.tokens[0].weight as string),
+                weightOut: bnum(pool.tokens[1].weight as string),
             };
 
             const limitAmt = newPool.getLimitAmountSwap(poolPairData, swapType);
@@ -77,15 +69,7 @@ describe(`Tests for Weighted Pools.`, () => {
             // Max out uses standard V2 limits
             const MAX_OUT_RATIO = bnum(0.3);
 
-            const newPool = new WeightedPool(
-                pool.id,
-                pool.address,
-                pool.swapFee,
-                pool.totalWeight,
-                pool.totalShares,
-                pool.tokens as WeightedPoolToken[],
-                pool.tokensList
-            );
+            const newPool = WeightedPool.fromPool(pool);
 
             const poolPairData: WeightedPoolPairData = {
                 id: pool.id,
@@ -98,8 +82,8 @@ describe(`Tests for Weighted Pools.`, () => {
                 swapFee: bnum(pool.swapFee),
                 decimalsIn: Number(pool.tokens[0].decimals),
                 decimalsOut: Number(pool.tokens[1].decimals),
-                weightIn: bnum(pool.tokens[0].weight),
-                weightOut: bnum(pool.tokens[1].weight),
+                weightIn: bnum(pool.tokens[0].weight as string),
+                weightOut: bnum(pool.tokens[1].weight as string),
             };
 
             const limitAmt = newPool.getLimitAmountSwap(poolPairData, swapType);

@@ -19,19 +19,19 @@
                     "address": "0x6b175474e89094c44da98b954eedeac495271d0f",
                     "balance": "185227360.25436262246474558",
                     "decimals": 18,
-                    "weight": "0"
+                    "weight": null
                 },
                 {
                     "address": "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
                     "balance": "265953765.068324",
                     "decimals": 6,
-                    "weight": "0"
+                    "weight": null
                 },
                 {
                     "address": "0xdAC17F958D2ee523a2206206994597C13D831ec7",
                     "balance": "247741004.192076",
                     "decimals": 6,
-                    "weight": "0"
+                    "weight": null
                 }
             ],
             "tokensList": [
@@ -54,25 +54,25 @@
                     "address": "0xC2cB1040220768554cf699b0d863A3cd4324ce32",
                     "balance": "27734480.446638165127865285",
                     "decimals": 18,
-                    "weight": "0"
+                    "weight": null
                 },
                 {
                     "address": "0x26EA744E5B887E5205727f55dFBE8685e3b21951",
                     "balance": "39198836.344557",
                     "decimals": 6,
-                    "weight": "0"
+                    "weight": null
                 },
                 {
                     "address": "0xE6354ed5bC4b393a5Aad09f21c46E101e692d447",
                     "balance": "39147834.03919",
                     "decimals": 6,
-                    "weight": "0"
+                    "weight": null
                 },
                 {
                     "address": "0x04bC0Ab673d88aE9dbC9DA2380cB6B79C4BCa9aE",
                     "balance": "38140433.771774372342011607",
                     "decimals": 18,
-                    "weight": "0"
+                    "weight": null
                 }
             ],
             "tokensList": [
@@ -96,13 +96,13 @@
                     "address": "0x5d3a536E4D6DbD6114cc1Ead35777bAB948E3643",
                     "balance": "2961186138.48568566",
                     "decimals": 8,
-                    "weight": "0"
+                    "weight": null
                 },
                 {
                     "address": "0x39AA39c021dfbaE8faC545936693aC917d5E7563",
                     "balance": "3826818847.76597292",
                     "decimals": 8,
-                    "weight": "0"
+                    "weight": null
                 }
             ],
             "tokensList": [
@@ -124,13 +124,13 @@
                     "address": "0x056Fd409E1d7A124BD7017459dFEa2F387b6d5Cd",
                     "balance": "103352020.5",
                     "decimals": 2,
-                    "weight": "0"
+                    "weight": null
                 },
                 {
                     "address": "0x6c3F90f043a72FA612cbac8115EE7e52BDe6E490",
                     "balance": "84427206.483675489238339004",
                     "decimals": 18,
-                    "weight": "0"
+                    "weight": null
                 }
             ],
             "tokensList": [
@@ -152,13 +152,13 @@
                     "address": "0x0316EB71485b0Ab14103307bf65a021042c6d380",
                     "balance": "3086.15656144557059685",
                     "decimals": 18,
-                    "weight": "0"
+                    "weight": null
                 },
                 {
                     "address": "0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599",
                     "balance": "3041.5595098",
                     "decimals": 8,
-                    "weight": "0"
+                    "weight": null
                 }
             ],
             "tokensList": [
@@ -180,13 +180,13 @@
                     "address": "0xdF574c24545E5FfEcb9a659c229253D4111d87e1",
                     "balance": "940492.11175952",
                     "decimals": 8,
-                    "weight": "0"
+                    "weight": null
                 },
                 {
                     "address": "0x6c3F90f043a72FA612cbac8115EE7e52BDe6E490",
                     "balance": "960130.219886386237528684",
                     "decimals": 18,
-                    "weight": "0"
+                    "weight": null
                 }
             ],
             "tokensList": [
@@ -208,13 +208,13 @@
                     "address": "0x0E2EC54fC0B509F445631Bf4b91AB8168230C752",
                     "balance": "22539.335137729931263554",
                     "decimals": 18,
-                    "weight": "0"
+                    "weight": null
                 },
                 {
                     "address": "0x6c3F90f043a72FA612cbac8115EE7e52BDe6E490",
                     "balance": "24911.849484924224056756",
                     "decimals": 18,
-                    "weight": "0"
+                    "weight": null
                 }
             ],
             "tokensList": [
@@ -236,13 +236,13 @@
                     "address": "0xe2f2a5C287993345a840Db3B0845fbC70f5935a5",
                     "balance": "6319938.486449404610908319",
                     "decimals": 18,
-                    "weight": "0"
+                    "weight": null
                 },
                 {
                     "address": "0x6c3F90f043a72FA612cbac8115EE7e52BDe6E490",
                     "balance": "4237533.721071551646274416",
                     "decimals": 18,
-                    "weight": "0"
+                    "weight": null
                 }
             ],
             "tokensList": [
@@ -264,25 +264,25 @@
                     "address": "0x99d1Fa417f94dcD62BfE781a1213c092a47041Bc",
                     "balance": "1067964.934249153462643798",
                     "decimals": 18,
-                    "weight": "0"
+                    "weight": null
                 },
                 {
                     "address": "0x9777d7E2b60bB01759D0E2f8be2095df444cb07E",
                     "balance": "1206335.889564",
                     "decimals": 6,
-                    "weight": "0"
+                    "weight": null
                 },
                 {
                     "address": "0x1bE5d71F2dA660BFdee8012dDc58D024448A0A59",
                     "balance": "1240810.065862",
                     "decimals": 6,
-                    "weight": "0"
+                    "weight": null
                 },
                 {
                     "address": "0x8E870D67F660D95d5be530380D0eC0bd388289E1",
                     "balance": "1247681.84723139318670298",
                     "decimals": 18,
-                    "weight": "0"
+                    "weight": null
                 }
             ],
             "tokensList": [
@@ -306,13 +306,13 @@
                     "address": "0xEB4C2781e4ebA804CE9a9803C67d0893436bB27D",
                     "balance": "8438.70078263",
                     "decimals": 8,
-                    "weight": "0"
+                    "weight": null
                 },
                 {
                     "address": "0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599",
                     "balance": "6296.79849603",
                     "decimals": 8,
-                    "weight": "0"
+                    "weight": null
                 }
             ],
             "tokensList": [
@@ -334,13 +334,13 @@
                     "address": "0x196f4727526eA7FB1e17b2071B3d8eAA38486988",
                     "balance": "188664.13605931169538985",
                     "decimals": 18,
-                    "weight": "0"
+                    "weight": null
                 },
                 {
                     "address": "0x6c3F90f043a72FA612cbac8115EE7e52BDe6E490",
                     "balance": "232520.573146388096422829",
                     "decimals": 18,
-                    "weight": "0"
+                    "weight": null
                 }
             ],
             "tokensList": [
@@ -362,19 +362,19 @@
                     "address": "0xEB4C2781e4ebA804CE9a9803C67d0893436bB27D",
                     "balance": "4873.57602419",
                     "decimals": 8,
-                    "weight": "0"
+                    "weight": null
                 },
                 {
                     "address": "0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599",
                     "balance": "4378.74013389",
                     "decimals": 8,
-                    "weight": "0"
+                    "weight": null
                 },
                 {
                     "address": "0xfE18be6b3Bd88A2D2A7f928d00292E7a9963CfC6",
                     "balance": "2593.343896301815052661",
                     "decimals": 18,
-                    "weight": "0"
+                    "weight": null
                 }
             ],
             "tokensList": [
@@ -397,25 +397,25 @@
                     "address": "0x6B175474E89094C44Da98b954EedeAC495271d0F",
                     "balance": "43228932.272188926409835749",
                     "decimals": 18,
-                    "weight": "0"
+                    "weight": null
                 },
                 {
                     "address": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
                     "balance": "46081651.762974",
                     "decimals": 6,
-                    "weight": "0"
+                    "weight": null
                 },
                 {
                     "address": "0xdAC17F958D2ee523a2206206994597C13D831ec7",
                     "balance": "45787311.431512",
                     "decimals": 6,
-                    "weight": "0"
+                    "weight": null
                 },
                 {
                     "address": "0x57Ab1ec28D129707052df4dF418D58a2D46d5f51",
                     "balance": "21325202.450756051516550693",
                     "decimals": 18,
-                    "weight": "0"
+                    "weight": null
                 }
             ],
             "tokensList": [
@@ -439,13 +439,13 @@
                     "address": "0x8dAEBADE922dF735c38C80C7eBD708Af50815fAa",
                     "balance": "1171.76084899369018212",
                     "decimals": 18,
-                    "weight": "0"
+                    "weight": null
                 },
                 {
                     "address": "0x075b1bb99792c9E1041bA13afEf80C91a1e70fB3",
                     "balance": "3150.476893648380983407",
                     "decimals": 18,
-                    "weight": "0"
+                    "weight": null
                 }
             ],
             "tokensList": [
@@ -467,13 +467,13 @@
                     "address": "0x1c48f86ae57291F7686349F12601910BD8D470bb",
                     "balance": "619988.17526590929263206",
                     "decimals": 18,
-                    "weight": "0"
+                    "weight": null
                 },
                 {
                     "address": "0x6c3F90f043a72FA612cbac8115EE7e52BDe6E490",
                     "balance": "864248.22523637039968063",
                     "decimals": 18,
-                    "weight": "0"
+                    "weight": null
                 }
             ],
             "tokensList": [
@@ -495,13 +495,13 @@
                     "address": "0x674C6Ad92Fd080e4004b2312b45f796a192D27a0",
                     "balance": "124587973.715299269134499193",
                     "decimals": 18,
-                    "weight": "0"
+                    "weight": null
                 },
                 {
                     "address": "0x6c3F90f043a72FA612cbac8115EE7e52BDe6E490",
                     "balance": "118852172.761799604648560584",
                     "decimals": 18,
-                    "weight": "0"
+                    "weight": null
                 }
             ],
             "tokensList": [
@@ -523,19 +523,19 @@
                     "address": "0x5d3a536E4D6DbD6114cc1Ead35777bAB948E3643",
                     "balance": "3119527.66200624",
                     "decimals": 8,
-                    "weight": "0"
+                    "weight": null
                 },
                 {
                     "address": "0x39AA39c021dfbaE8faC545936693aC917d5E7563",
                     "balance": "6625586.00878963",
                     "decimals": 8,
-                    "weight": "0"
+                    "weight": null
                 },
                 {
                     "address": "0xdAC17F958D2ee523a2206206994597C13D831ec7",
                     "balance": "319752.644516",
                     "decimals": 6,
-                    "weight": "0"
+                    "weight": null
                 }
             ],
             "tokensList": [
@@ -558,25 +558,25 @@
                     "address": "0x16de59092dAE5CcF4A1E6439D611fd0653f0Bd01",
                     "balance": "20087107.884263259614021524",
                     "decimals": 18,
-                    "weight": "0"
+                    "weight": null
                 },
                 {
                     "address": "0xd6aD7a6750A7593E092a9B218d66C0A814a3436e",
                     "balance": "32533037.003814",
                     "decimals": 6,
-                    "weight": "0"
+                    "weight": null
                 },
                 {
                     "address": "0x83f798e925BcD4017Eb265844FDDAbb448f1707D",
                     "balance": "35369172.033612",
                     "decimals": 6,
-                    "weight": "0"
+                    "weight": null
                 },
                 {
                     "address": "0x73a052500105205d34Daf004eAb301916DA8190f",
                     "balance": "32737320.41072457233569364",
                     "decimals": 18,
-                    "weight": "0"
+                    "weight": null
                 }
             ],
             "tokensList": [
@@ -600,13 +600,13 @@
                     "address": "0x5BC25f649fc4e26069dDF4cF4010F9f706c23831",
                     "balance": "5232475.918542125502795914",
                     "decimals": 18,
-                    "weight": "0"
+                    "weight": null
                 },
                 {
                     "address": "0x6c3F90f043a72FA612cbac8115EE7e52BDe6E490",
                     "balance": "4539986.11359897990151962",
                     "decimals": 18,
-                    "weight": "0"
+                    "weight": null
                 }
             ],
             "tokensList": [
@@ -628,13 +628,13 @@
                     "address": "0x9BE89D2a4cd102D8Fecc6BF9dA793be995C22541",
                     "balance": "1010.48854685",
                     "decimals": 8,
-                    "weight": "0"
+                    "weight": null
                 },
                 {
                     "address": "0x075b1bb99792c9E1041bA13afEf80C91a1e70fB3",
                     "balance": "585.258142743967941902",
                     "decimals": 18,
-                    "weight": "0"
+                    "weight": null
                 }
             ],
             "tokensList": [
@@ -656,13 +656,13 @@
                     "address": "0x8064d9Ae6cDf087b1bcd5BDf3531bD5d8C537a68",
                     "balance": "311.623217849559528062",
                     "decimals": 18,
-                    "weight": "0"
+                    "weight": null
                 },
                 {
                     "address": "0x075b1bb99792c9E1041bA13afEf80C91a1e70fB3",
                     "balance": "178.900887615003574596",
                     "decimals": 18,
-                    "weight": "0"
+                    "weight": null
                 }
             ],
             "tokensList": [
@@ -684,13 +684,13 @@
                     "address": "0x5228a22e72ccC52d415EcFd199F99D0665E7733b",
                     "balance": "183.795639492647424191",
                     "decimals": 18,
-                    "weight": "0"
+                    "weight": null
                 },
                 {
                     "address": "0x075b1bb99792c9E1041bA13afEf80C91a1e70fB3",
                     "balance": "133.438833489712065313",
                     "decimals": 18,
-                    "weight": "0"
+                    "weight": null
                 }
             ],
             "tokensList": [
@@ -712,13 +712,13 @@
                     "address": "0xa47c8bf37f92aBed4A126BDA807A7b7498661acD",
                     "balance": "33291187.269925552063900615",
                     "decimals": 18,
-                    "weight": "0"
+                    "weight": null
                 },
                 {
                     "address": "0x6c3F90f043a72FA612cbac8115EE7e52BDe6E490",
                     "balance": "37864247.479477119770007922",
                     "decimals": 18,
-                    "weight": "0"
+                    "weight": null
                 }
             ],
             "tokensList": [
@@ -740,13 +740,13 @@
                     "address": "0xdB25f211AB05b1c97D595516F45794528a807ad8",
                     "balance": "29551648.9",
                     "decimals": 2,
-                    "weight": "0"
+                    "weight": null
                 },
                 {
                     "address": "0xD71eCFF9342A5Ced620049e616c5035F1dB98620",
                     "balance": "28202601.535295309348655641",
                     "decimals": 18,
-                    "weight": "0"
+                    "weight": null
                 }
             ],
             "tokensList": [
@@ -768,13 +768,13 @@
                     "address": "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE",
                     "balance": "95478.447951924926496003",
                     "decimals": 18,
-                    "weight": "0"
+                    "weight": null
                 },
                 {
                     "address": "0x5e74C9036fb86BD7eCdcb084a0673EFc32eA31cb",
                     "balance": "48219.514569637147623812",
                     "decimals": 18,
-                    "weight": "0"
+                    "weight": null
                 }
             ],
             "tokensList": [
@@ -796,13 +796,13 @@
                     "address": "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE",
                     "balance": "114099.768049277590582593",
                     "decimals": 18,
-                    "weight": "0"
+                    "weight": null
                 },
                 {
                     "address": "0xae7ab96520DE3A18E5e111B5EaAb095312D7fE84",
                     "balance": "130085.277897346803384537",
                     "decimals": 18,
-                    "weight": "0"
+                    "weight": null
                 }
             ],
             "tokensList": [
@@ -824,13 +824,13 @@
                     "address": "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE",
                     "balance": "6033.389502315042961422",
                     "decimals": 18,
-                    "weight": "0"
+                    "weight": null
                 },
                 {
                     "address": "0xE95A203B1a91a908F9B9CE46459d101078c2c3cb",
                     "balance": "7820.356899745578017835",
                     "decimals": 18,
-                    "weight": "0"
+                    "weight": null
                 }
             ],
             "tokensList": [
@@ -852,19 +852,19 @@
                     "address": "0x8e595470Ed749b85C6F7669de83EAe304C2ec68F",
                     "balance": "274396223.43997567",
                     "decimals": 8,
-                    "weight": "0"
+                    "weight": null
                 },
                 {
                     "address": "0x76Eb2FE28b36B3ee97F3Adae0C69606eeDB2A37c",
                     "balance": "383421132.24014159",
                     "decimals": 8,
-                    "weight": "0"
+                    "weight": null
                 },
                 {
                     "address": "0x48759F220ED983dB51fA7A8C0D2AAb8f3ce4166a",
                     "balance": "455248678.52457231",
                     "decimals": 8,
-                    "weight": "0"
+                    "weight": null
                 }
             ],
             "tokensList": [
@@ -887,13 +887,13 @@
                     "address": "0x514910771AF9Ca656af840dff83E8264EcF986CA",
                     "balance": "257697.982033186869191286",
                     "decimals": 18,
-                    "weight": "0"
+                    "weight": null
                 },
                 {
                     "address": "0xbBC455cb4F1B9e4bFC4B73970d360c8f032EfEE6",
                     "balance": "59896.837931390487407218",
                     "decimals": 18,
-                    "weight": "0"
+                    "weight": null
                 }
             ],
             "tokensList": [

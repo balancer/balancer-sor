@@ -66,6 +66,7 @@ describe(`Tests against Element generated test trade file.`, () => {
                             balance: trade.input.y_reserves.toString(),
                             priceRate: '1',
                             decimals: 18,
+                            weight: null,
                         },
                         {
                             address:
@@ -73,6 +74,7 @@ describe(`Tests against Element generated test trade file.`, () => {
                             balance: trade.input.x_reserves.toString(),
                             priceRate: '1',
                             decimals: 18,
+                            weight: null,
                         },
                     ],
                     tokensList: [

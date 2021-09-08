@@ -172,6 +172,7 @@ export class StablePool implements PoolBase {
         } else {
             // token is underlying in the pool
             const T = this.tokens.find((t) => t.address === token);
+            if (!T) throw Error('Pool does not contain this token');
             T.balance = newBalance.toString();
         }
     }
