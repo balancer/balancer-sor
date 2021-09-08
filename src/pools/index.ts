@@ -3,12 +3,7 @@ import { StablePool } from './stablePool/stablePool';
 import { ElementPool } from './elementPool/elementPool';
 import { MetaStablePool } from './metaStablePool/metaStablePool';
 import { BigNumber, INFINITY, ZERO } from '../utils/bignumber';
-import {
-    SubgraphPoolBase,
-    PoolBase,
-    SwapTypes,
-    PoolPairBase,
-} from '../types';
+import { SubgraphPoolBase, PoolBase, SwapTypes, PoolPairBase } from '../types';
 
 export function parseNewPool(
     pool: SubgraphPoolBase,
