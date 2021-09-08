@@ -52,6 +52,23 @@ export function _tokenInForExactTokenOut(
     // ).div(bnum(1).minus(f));
 }
 
+// PairType = 'token->BPT'
+// SwapType = 'swapExactOut'
+export function _spotPriceAfterSwapTokenInForExactBPTOut(
+    amount: BigNumber,
+    poolPairData: WeightedPoolPairData
+): BigNumber {
+    const Bi = poolPairData.balanceIn.toNumber();
+    const Bbpt = poolPairData.balanceOut.toNumber();
+    const wi = poolPairData.weightIn.toNumber();
+    const Aobpt = amount.toNumber();
+    const f = poolPairData.swapFee.toNumber();
+    return bnum(
+        (((Aobpt + Bbpt) / Bbpt) ** (1 / wi) * Bi) /
+            ((Aobpt + Bbpt) * (1 + f * (-1 + wi)) * wi)
+    );
+}
+
 /////////
 /// SpotPriceAfterSwap
 /////////

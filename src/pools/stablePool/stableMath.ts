@@ -197,6 +197,62 @@ export function _tokenInForExactTokenOut(
     return y.minus(balances[tokenIndexIn]).div(ONE.minus(swapFee));
 }
 
+/* 
+Flow of calculations:
+amountBPTOut -> newInvariant -> (amountInProportional, amountInAfterFee) ->
+amountInPercentageExcess -> amountIn
+*/
+export function _tokenInForExactBPTOut(
+    amount: BigNumber,
+    poolPairData: StablePoolPairData
+): BigNumber {
+    // The formula below returns some dust (due to rounding errors) but when
+    // we input zero the output should be zero
+    if (amount.isZero()) return amount;
+    const { amp, allBalances, balanceOut, tokenIndexIn, swapFee } =
+        poolPairData;
+    const balances = [...allBalances];
+    const bptAmountOut = amount;
+
+    /**********************************************************************************************
+    // TODO description                            //
+    **********************************************************************************************/
+
+    // Get current invariant
+    const currentInvariant = _invariant(amp, balances);
+    // Calculate new invariant
+    const newInvariant = balanceOut
+        .plus(bptAmountOut)
+        .div(balanceOut)
+        .times(currentInvariant);
+
+    // First calculate the sum of all token balances which will be used to calculate
+    // the current weight of token
+    let sumBalances = ZERO;
+    for (let i = 0; i < balances.length; i++) {
+        sumBalances = sumBalances.plus(balances[i]);
+    }
+
+    // get amountInAfterFee
+    const newBalanceTokenIndex =
+        _getTokenBalanceGivenInvariantAndAllOtherBalances(
+            amp,
+            balances,
+            newInvariant,
+            tokenIndexIn
+        );
+    const amountInAfterFee = newBalanceTokenIndex.minus(balances[tokenIndexIn]);
+
+    // Get tokenBalancePercentageExcess
+    const currentWeight = balances[tokenIndexIn].div(sumBalances);
+    const tokenBalancePercentageExcess = ONE.minus(currentWeight);
+
+    // return amountIn
+    return amountInAfterFee.div(
+        ONE.minus(tokenBalancePercentageExcess.times(swapFee))
+    );
+}
+
 //This function calculates the balance of a given token (tokenIndex)
 // given all the other balances and the invariant
 function _getTokenBalanceGivenInvariantAndAllOtherBalances(
@@ -312,6 +368,71 @@ export function _poolDerivatives(
 /// SpotPriceAfterSwap
 /////////
 
+export function _poolDerivativesBPT(
+    amp: BigNumber,
+    balances: BigNumber[],
+    bptSupply: BigNumber,
+    tokenIndexIn: number,
+    is_first_derivative: boolean,
+    is_BPT_out: boolean,
+    wrt_out: boolean
+): BigNumber {
+    const totalCoins = balances.length;
+    const D = _invariant(amp, balances);
+    let S = ZERO;
+    let D_P = D.div(totalCoins);
+    for (let i = 0; i < totalCoins; i++) {
+        if (i != tokenIndexIn) {
+            S = S.plus(balances[i]);
+            D_P = D_P.times(D).div(balances[i].times(totalCoins));
+        }
+    }
+    const x = balances[tokenIndexIn];
+    const alpha = amp.times(totalCoins ** totalCoins); // = ampTimesNpowN
+    const beta = alpha.times(S);
+    const gamma = ONE.minus(alpha);
+    const partial_x = bnum(2)
+        .times(alpha)
+        .times(x)
+        .plus(beta)
+        .plus(gamma.times(D));
+    const minus_partial_D = D_P.times(totalCoins + 1).minus(gamma.times(x));
+    const partial_D = ZERO.minus(minus_partial_D);
+    let ans;
+    if (is_first_derivative) {
+        ans = partial_x.div(minus_partial_D).times(bptSupply).div(D);
+    } else {
+        const partial_xx = bnum(2).times(alpha);
+        const partial_xD = gamma;
+        const n_times_nplusone = totalCoins * (totalCoins + 1);
+        const partial_DD = ZERO.minus(D_P.times(n_times_nplusone).div(D));
+        if (is_BPT_out) {
+            const term1 = partial_xx.times(partial_D).div(partial_x.pow(2));
+            const term2 = bnum(2).times(partial_xD).div(partial_x);
+            const term3 = partial_DD.div(partial_D);
+            ans = term1.minus(term2).plus(term3).times(D).div(bptSupply);
+            if (wrt_out) {
+                const D_prime = ZERO.minus(partial_x.div(partial_D));
+                ans = ans.div(D_prime).times(D).div(bptSupply);
+            }
+        } else {
+            ans = bnum(2)
+                .times(partial_xD)
+                .div(partial_D)
+                .minus(partial_DD.times(partial_x).div(partial_D.pow(2)))
+                .minus(partial_xx.div(partial_x));
+            if (wrt_out) {
+                ans = ans
+                    .times(partial_x)
+                    .div(minus_partial_D)
+                    .times(bptSupply)
+                    .div(D);
+            }
+        }
+    }
+    return ans;
+}
+
 // PairType = 'token->token'
 // SwapType = 'swapExactIn'
 export function _spotPriceAfterSwapExactTokenInForTokenOut(
@@ -377,6 +498,31 @@ function _feeFactor(
     const currentWeight = balances[tokenIndex].div(sumBalances);
     const tokenBalancePercentageExcess = ONE.minus(currentWeight);
     return ONE.minus(tokenBalancePercentageExcess.times(swapFee));
+}
+
+// PairType = 'token->BPT'
+// SwapType = 'swapExactOut'
+export function _spotPriceAfterSwapTokenInForExactBPTOut(
+    amount: BigNumber,
+    poolPairData: StablePoolPairData
+): BigNumber {
+    const { amp, allBalances, balanceOut, tokenIndexIn, swapFee } =
+        poolPairData;
+    const balances = [...allBalances];
+    const _in = _tokenInForExactBPTOut(amount, poolPairData);
+    const feeFactor = _feeFactor(balances, tokenIndexIn, swapFee);
+    balances[tokenIndexIn] = balances[tokenIndexIn].plus(_in.times(feeFactor));
+    let ans = _poolDerivativesBPT(
+        amp,
+        balances,
+        balanceOut.plus(amount),
+        tokenIndexIn,
+        true,
+        true,
+        true
+    );
+    ans = ONE.div(ans.times(feeFactor));
+    return ans;
 }
 
 /////////
