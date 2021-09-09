@@ -23,24 +23,6 @@ Liquidity aggregators are free to use the SOR npm package or create their own or
 
 [Read More](https://docs.balancer.finance/protocol/sor)
 
-## Environment Variables
-
-Optional config values can be set in the .env file:
-
-ALLOW_ADD_REMOVE: true/false - we add the BPT address as well as we can join/exit as part of the multihop. Defaults false.
-
-PRICE_ERROR_TOLERANCE - how close we expect prices after swap to be in SOR suggested paths. Defaults 0.00001.
-
-INFINITESIMAL - Infinitesimal is an amount that's used to initialize swap amounts so they are not zero or the path's limit. Defaults 0.000001.
-
-Example:
-
-```
-ALLOW_ADD_REMOVE=true
-PRICE_ERROR_TOLERANCE=0.00001
-INFINITESIMAL=0.000001
-```
-
 ## Overview Of Use And Example
 
 There are two types of swap available:
@@ -51,7 +33,7 @@ or
 
 The SOR will return totalReturn/totalInput as well as a list swaps to achieve the total. Swaps can be through direct pools, i.e. A > POOL1 > B, or via a multihop pool, i.e. A > POOL1 > C > POOL2 > B. The swaps are returned in a format that can be directly to the Vault to execute the trade.
 
-The example files in: [./testScripts](test/testScripts/), demonstrates full examples with comments.
+The example file `swapExample.ts` in: [./testScripts](test/testScripts/), demonstrates full examples with comments.
 
 To Run:
 
@@ -59,4 +41,19 @@ Create a .env file in root dir with your infura provider key: `INFURA=your_key`
 
 Install dependencies: `$ yarn install`
 
-Run example: `$ ts-node ./test/testScripts/swapExactInSubgraph.ts`
+Run example: `$ ts-node ./test/testScripts/swapExample.ts`
+
+## Environment Variables
+
+Optional config values can be set in the .env file:
+
+PRICE_ERROR_TOLERANCE - how close we expect prices after swap to be in SOR suggested paths. Defaults 0.00001.
+
+INFINITESIMAL - Infinitesimal is an amount that's used to initialize swap amounts so they are not zero or the path's limit. Defaults 0.000001.
+
+Example:
+
+```
+PRICE_ERROR_TOLERANCE=0.00001
+INFINITESIMAL=0.000001
+```

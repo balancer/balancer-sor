@@ -1,5 +1,5 @@
 import { getAddress } from '@ethersproject/address';
-import { bnum, scale, ZERO, ONE } from '../../bmath';
+import { bnum, scale, ZERO } from '../../utils/bignumber';
 import { BigNumber } from '../../utils/bignumber';
 import * as SDK from '@georgeroman/balancer-v2-pools';
 import {
@@ -9,6 +9,7 @@ import {
     PairTypes,
     PoolPairBase,
     SwapTypes,
+    SubgraphPoolBase,
 } from '../../types';
 import {
     _exactTokenInForTokenOut,
@@ -72,6 +73,20 @@ export class LinearPool implements PoolBase {
     MAX_IN_RATIO = bnum(0.3); // ?
     MAX_OUT_RATIO = bnum(0.3); // ?
 
+    static fromPool(pool: SubgraphPoolBase): LinearPool {
+        return new LinearPool(
+            pool.id,
+            pool.address,
+            pool.swapFee,
+            pool.totalShares,
+            pool.tokens,
+            pool.tokensList,
+            pool.wrappedIndex,
+            pool.target1,
+            pool.target2
+        );
+    }
+
     constructor(
         id: string,
         address: string,
@@ -127,7 +142,7 @@ export class LinearPool implements PoolBase {
 
         if (pairType != PairTypes.BptToToken) {
             let tokenIndexIn = this.tokens.findIndex(
-                t => getAddress(t.address) === getAddress(tokenIn)
+                (t) => getAddress(t.address) === getAddress(tokenIn)
             );
             if (tokenIndexIn < 0) throw 'Pool does not contain tokenIn';
             tI = this.tokens[tokenIndexIn];
@@ -136,7 +151,7 @@ export class LinearPool implements PoolBase {
         }
         if (pairType != PairTypes.TokenToBpt) {
             let tokenIndexOut = this.tokens.findIndex(
-                t => getAddress(t.address) === getAddress(tokenOut)
+                (t) => getAddress(t.address) === getAddress(tokenOut)
             );
             if (tokenIndexOut < 0) throw 'Pool does not contain tokenOut';
             tO = this.tokens[tokenIndexOut];
@@ -187,7 +202,7 @@ export class LinearPool implements PoolBase {
             this.totalShares = newBalance;
         } else {
             // token is underlying in the pool
-            const T = this.tokens.find(t => t.address === token);
+            const T = this.tokens.find((t) => t.address === token);
             T.balance = newBalance.toString();
         }
     }

@@ -6771,5 +6771,62 @@
             "totalWeight": "0",
             "unitSeconds": null
         }
-    ]
+    ],
+    "v1Result": {
+        "title": "v1",
+        "swaps": [
+            [
+                {
+                    "pool": "0x702605f43471183158938c1a3e5f5a359d7b31ba000100000000000000000070",
+                    "tokenIn": "0x04df6e4121c27713ed22341e7c7df330f56f289b",
+                    "tokenOut": "0xdfcea9088c8a88a76ff74892c1457c17dfeef9c1",
+                    "swapAmount": "9999999871016750",
+                    "limitReturnAmount": "0",
+                    "maxPrice": "115792089237316195423570985008687907853269984665640564039457584007913129639935"
+                }
+            ],
+            [
+                {
+                    "pool": "0x62d3ceab68db0bf20f4c7f1438dbc8acec73f23700010000000000000000007b",
+                    "tokenIn": "0x04df6e4121c27713ed22341e7c7df330f56f289b",
+                    "tokenOut": "0xdfcea9088c8a88a76ff74892c1457c17dfeef9c1",
+                    "swapAmount": "42996250",
+                    "limitReturnAmount": "0",
+                    "maxPrice": "115792089237316195423570985008687907853269984665640564039457584007913129639935"
+                }
+            ],
+            [
+                {
+                    "pool": "0xe0b5a96004c2155c377949a74e9d483bbc77fdb700010000000000000000008f",
+                    "tokenIn": "0x04df6e4121c27713ed22341e7c7df330f56f289b",
+                    "tokenOut": "0xdfcea9088c8a88a76ff74892c1457c17dfeef9c1",
+                    "swapAmount": "42993500",
+                    "limitReturnAmount": "0",
+                    "maxPrice": "115792089237316195423570985008687907853269984665640564039457584007913129639935"
+                }
+            ],
+            [
+                {
+                    "pool": "0x8e9d636bbe6939bd0f52849afc02c0c66f6a360300010000000000000000008e",
+                    "tokenIn": "0x04df6e4121c27713ed22341e7c7df330f56f289b",
+                    "tokenOut": "0xdfcea9088c8a88a76ff74892c1457c17dfeef9c1",
+                    "swapAmount": "42993500",
+                    "limitReturnAmount": "0",
+                    "maxPrice": "115792089237316195423570985008687907853269984665640564039457584007913129639935"
+                }
+            ]
+        ],
+        "returnAmount": "268916379797",
+        "timeData": {
+            "fullSwap": 54.98353600502014,
+            "costOutputToken": 0.0011210441589355469,
+            "filterPools": 0.41797196865081787,
+            "sortPools": 0.08467400074005127,
+            "parsePool": 0.21482396125793457,
+            "processPaths": 18.51784896850586,
+            "processEps": 4.79761004447937,
+            "filter": "N/A",
+            "sor": 19.02872598171234
+        }
+    }
 }

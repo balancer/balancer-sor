@@ -40,5 +40,11 @@
             "totalWeight": "10",
             "address": "0xelementPool4"
         }
-    ]
+    ],
+    "v1Result": {
+        "title": "v1",
+        "swaps": [],
+        "returnAmount": "0",
+        "timeData": { "fullSwap": 0 }
+    }
 }

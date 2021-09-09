@@ -1,5 +1,6 @@
 import { BigNumber } from '../../utils/bignumber';
-import { bnum } from '../../bmath';
+import { bnum } from '../../utils/bignumber';
+
 import { LinearPoolPairData } from './linearPool';
 
 /////////
@@ -368,13 +369,7 @@ function toNominal(amount: BigNumber, params: BigNumber[]): BigNumber {
     const fee = params[0];
     const target1 = params[2];
     const target2 = params[3];
-    if (
-        amount.lt(
-            bnum(1)
-                .minus(fee)
-                .times(target1)
-        )
-    ) {
+    if (amount.lt(bnum(1).minus(fee).times(target1))) {
         return amount.div(bnum(1).minus(fee));
     } else if (amount.lt(target2.minus(fee.times(target1)))) {
         return amount.plus(fee.times(target1));

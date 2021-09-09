@@ -934,5 +934,11 @@
             "poolType": "Stable",
             "address": "0x7eb40e450b9655f4b3cc4259bcc731c63ff55ae6"
         }
-    ]
+    ],
+    "v1Result": {
+        "title": "v1",
+        "swaps": [],
+        "returnAmount": "0",
+        "timeData": { "fullSwap": 0 }
+    }
 }

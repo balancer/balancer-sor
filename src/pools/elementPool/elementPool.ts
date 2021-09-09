@@ -6,9 +6,10 @@ import {
     PairTypes,
     PoolPairBase,
     SwapTypes,
+    SubgraphPoolBase,
 } from '../../types';
 import { getAddress } from '@ethersproject/address';
-import { bnum } from '../../bmath';
+import { bnum } from '../../utils/bignumber';
 import {
     _exactTokenInForTokenOut,
     _tokenInForExactTokenOut,
@@ -62,6 +63,21 @@ export class ElementPool implements PoolBase {
     baseToken: string;
     currentBlockTimestamp: number;
 
+    static fromPool(pool: SubgraphPoolBase): ElementPool {
+        return new ElementPool(
+            pool.id,
+            pool.address,
+            pool.swapFee,
+            pool.totalShares,
+            pool.tokens,
+            pool.tokensList,
+            pool.expiryTime,
+            pool.unitSeconds,
+            pool.principalToken,
+            pool.baseToken
+        );
+    }
+
     constructor(
         id: string,
         address: string,
@@ -87,11 +103,11 @@ export class ElementPool implements PoolBase {
         this.currentBlockTimestamp = 0;
     }
 
-    setCurrentBlockTimestamp(timestamp: number) {
+    setCurrentBlockTimestamp(timestamp: number): void {
         this.currentBlockTimestamp = timestamp;
     }
 
-    setTypeForSwap(type: SwapPairType) {
+    setTypeForSwap(type: SwapPairType): void {
         this.swapPairType = type;
     }
 
@@ -121,7 +137,7 @@ export class ElementPool implements PoolBase {
 
         if (pairType != PairTypes.BptToToken) {
             tokenIndexIn = this.tokens.findIndex(
-                t => getAddress(t.address) === getAddress(tokenIn)
+                (t) => getAddress(t.address) === getAddress(tokenIn)
             );
             if (tokenIndexIn < 0) throw 'Pool does not contain tokenIn';
             tI = this.tokens[tokenIndexIn];
@@ -130,7 +146,7 @@ export class ElementPool implements PoolBase {
         }
         if (pairType != PairTypes.TokenToBpt) {
             tokenIndexOut = this.tokens.findIndex(
-                t => getAddress(t.address) === getAddress(tokenOut)
+                (t) => getAddress(t.address) === getAddress(tokenOut)
             );
             if (tokenIndexOut < 0) throw 'Pool does not contain tokenOut';
             tO = this.tokens[tokenIndexOut];
@@ -188,9 +204,9 @@ export class ElementPool implements PoolBase {
         if (swapType === SwapTypes.SwapExactIn) {
             // "Ai < (Bi**(1-t)+Bo**(1-t))**(1/(1-t))-Bi" must hold in order for
             // base of root to be non-negative
-            let Bi = poolPairData.balanceIn.toNumber();
-            let Bo = poolPairData.balanceOut.toNumber();
-            let t = getTimeTillExpiry(
+            const Bi = poolPairData.balanceIn.toNumber();
+            const Bo = poolPairData.balanceOut.toNumber();
+            const t = getTimeTillExpiry(
                 this.expiryTime,
                 this.currentBlockTimestamp,
                 this.unitSeconds
@@ -208,14 +224,15 @@ export class ElementPool implements PoolBase {
             this.totalShares = newBalance.toString();
         } else {
             // token is underlying in the pool
-            const T = this.tokens.find(t => t.address === token);
+            const T = this.tokens.find((t) => t.address === token);
             T.balance = newBalance.toString();
         }
     }
 
     _exactTokenInForTokenOut(
         poolPairData: ElementPoolPairData,
-        amount: BigNumber
+        amount: BigNumber,
+        exact: boolean
     ): BigNumber {
         poolPairData.currentBlockTimestamp = this.currentBlockTimestamp;
         return _exactTokenInForTokenOut(amount, poolPairData);
@@ -223,7 +240,8 @@ export class ElementPool implements PoolBase {
 
     _exactTokenInForBPTOut(
         poolPairData: ElementPoolPairData,
-        amount: BigNumber
+        amount: BigNumber,
+        exact: boolean
     ): BigNumber {
         throw 'Element pool does not support SOR add/remove liquidity';
         return bnum(-1);
@@ -231,7 +249,8 @@ export class ElementPool implements PoolBase {
 
     _exactBPTInForTokenOut(
         poolPairData: ElementPoolPairData,
-        amount: BigNumber
+        amount: BigNumber,
+        exact: boolean
     ): BigNumber {
         throw 'Element pool does not support SOR add/remove liquidity';
         return bnum(-1);
@@ -239,7 +258,8 @@ export class ElementPool implements PoolBase {
 
     _tokenInForExactTokenOut(
         poolPairData: ElementPoolPairData,
-        amount: BigNumber
+        amount: BigNumber,
+        exact: boolean
     ): BigNumber {
         poolPairData.currentBlockTimestamp = this.currentBlockTimestamp;
         return _tokenInForExactTokenOut(amount, poolPairData);
@@ -247,7 +267,8 @@ export class ElementPool implements PoolBase {
 
     _tokenInForExactBPTOut(
         poolPairData: ElementPoolPairData,
-        amount: BigNumber
+        amount: BigNumber,
+        exact: boolean
     ): BigNumber {
         throw 'Element pool does not support SOR add/remove liquidity';
         return bnum(-1);
@@ -255,7 +276,8 @@ export class ElementPool implements PoolBase {
 
     _BPTInForExactTokenOut(
         poolPairData: ElementPoolPairData,
-        amount: BigNumber
+        amount: BigNumber,
+        exact: boolean
     ): BigNumber {
         throw 'Element pool does not support SOR add/remove liquidity';
         return bnum(-1);
@@ -362,30 +384,4 @@ export class ElementPool implements PoolBase {
         throw 'Element pool does not support SOR add/remove liquidity';
         return bnum(-1);
     }
-
-    // TODO - These need updated with real maths
-    _evmoutGivenIn: (
-        poolPairData: ElementPoolPairData,
-        amount: BigNumber
-    ) => BigNumber;
-    _evmexactTokenInForBPTOut: (
-        poolPairData: ElementPoolPairData,
-        amount: BigNumber
-    ) => BigNumber;
-    _evmexactBPTInForTokenOut: (
-        poolPairData: ElementPoolPairData,
-        amount: BigNumber
-    ) => BigNumber;
-    _evminGivenOut: (
-        poolPairData: ElementPoolPairData,
-        amount: BigNumber
-    ) => BigNumber;
-    _evmtokenInForExactBPTOut: (
-        poolPairData: ElementPoolPairData,
-        amount: BigNumber
-    ) => BigNumber;
-    _evmbptInForExactTokenOut: (
-        poolPairData: ElementPoolPairData,
-        amount: BigNumber
-    ) => BigNumber;
 }

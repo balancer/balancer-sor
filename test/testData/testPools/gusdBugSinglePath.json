@@ -100,5 +100,21 @@
             "totalWeight": "1",
             "unitSeconds": null
         }
-    ]
+    ],
+    "v1Result": {
+        "title": "v1",
+        "swaps": [],
+        "returnAmount": "0",
+        "timeData": {
+            "fullSwap": 0.37354302406311035,
+            "costOutputToken": 0.0007779598236083984,
+            "filterPools": 0.026635050773620605,
+            "sortPools": 0.004045963287353516,
+            "parsePool": 0.09807300567626953,
+            "processPaths": 0.0027559995651245117,
+            "processEps": 0.0029420852661132812,
+            "filter": "N/A",
+            "sor": 0.08017098903656006
+        }
+    }
 }

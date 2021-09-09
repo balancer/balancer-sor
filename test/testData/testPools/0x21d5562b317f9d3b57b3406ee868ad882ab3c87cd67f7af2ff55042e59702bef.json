@@ -40162,5 +40162,50 @@
             "poolType": "Weighted",
             "address": "0xfff2a5f81d14729408201341df42af29f3b30458"
         }
-    ]
+    ],
+    "v1Result": {
+        "title": "v1",
+        "swaps": [
+            [
+                {
+                    "pool": "0xe78e458cbc9a57dc831e66c9187b0324b4e8304b",
+                    "tokenIn": "0xba100000625a3754423978a60c9317c58a424e3d",
+                    "tokenOut": "0xc00e94cb662c3520282e6f5717214004a7f26888",
+                    "swapAmount": "481534952576087482",
+                    "limitReturnAmount": "0",
+                    "maxPrice": "115792089237316195423570985008687907853269984665640564039457584007913129639935"
+                },
+                {
+                    "pool": "0x1811a719a05d20b6447ca556a54f00f9c14578be",
+                    "tokenIn": "0xc00e94cb662c3520282e6f5717214004a7f26888",
+                    "tokenOut": "0x2260fac5e5542a773aa44fbcfedf7c193bc2c599",
+                    "swapAmount": "51325037089192320",
+                    "limitReturnAmount": "0",
+                    "maxPrice": "115792089237316195423570985008687907853269984665640564039457584007913129639935"
+                }
+            ],
+            [
+                {
+                    "pool": "0x7f8ec02007ea664b3cac5694f8f57ad020a921db",
+                    "tokenIn": "0xba100000625a3754423978a60c9317c58a424e3d",
+                    "tokenOut": "0x2260fac5e5542a773aa44fbcfedf7c193bc2c599",
+                    "swapAmount": "344083506487952818",
+                    "limitReturnAmount": "0",
+                    "maxPrice": "115792089237316195423570985008687907853269984665640564039457584007913129639935"
+                }
+            ]
+        ],
+        "returnAmount": "83329",
+        "timeData": {
+            "fullSwap": 194.1997890472412,
+            "costOutputToken": 0.0005199909210205078,
+            "filterPools": 1.6971811056137085,
+            "sortPools": 68.5497339963913,
+            "parsePool": 0.16859495639801025,
+            "processPaths": 19.133884072303772,
+            "processEps": 37.104645013809204,
+            "filter": "N/A",
+            "sor": 6.87246298789978
+        }
+    }
 }

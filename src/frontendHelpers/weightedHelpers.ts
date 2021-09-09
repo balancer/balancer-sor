@@ -1,5 +1,6 @@
 import { BigNumber } from '../utils/bignumber';
 import * as weightedMath from '../pools/weightedPool/weightedMath';
+import { WeightedPoolPairData } from 'pools/weightedPool/weightedPool';
 
 /////////
 /// UI Helpers
@@ -16,20 +17,20 @@ export function BPTForTokensZeroPriceImpact(
     amounts: BigNumber[],
     bptTotalSupply: BigNumber
 ): BigNumber {
-    let zero = new BigNumber(0);
+    const zero = new BigNumber(0);
     let amountBPTOut = new BigNumber(0);
     // Calculate the amount of BPT adding this liquidity would result in
     // if there were no price impact, i.e. using the spot price of tokenIn/BPT
     for (let i = 0; i < balances.length; i++) {
         // We need to scale down all the balances and amounts
         amounts[i] = amounts[i].times(new BigNumber(10).pow(-decimals[i]));
-        let poolPairData = {
+        const poolPairData: WeightedPoolPairData = {
             balanceIn: balances[i].times(new BigNumber(10).pow(-decimals[i])),
             balanceOut: bptTotalSupply.times(new BigNumber(10).pow(-18)),
             weightIn: normalizedWeights[i].times(new BigNumber(10).pow(-18)),
             swapFee: zero,
-        };
-        let BPTPrice = weightedMath._spotPriceAfterSwapTokenInForExactBPTOut(
+        } as WeightedPoolPairData;
+        const BPTPrice = weightedMath._spotPriceAfterSwapTokenInForExactBPTOut(
             zero,
             poolPairData
         );

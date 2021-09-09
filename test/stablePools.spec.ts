@@ -4,14 +4,13 @@ import { expect } from 'chai';
 import { JsonRpcProvider } from '@ethersproject/providers';
 import { SOR } from '../src';
 import {
-    SubGraphPoolsBase,
     SwapInfo,
     SwapTypes,
     PoolTypes,
     PairTypes,
+    SubgraphPoolBase,
 } from '../src/types';
-import { bnum, scale } from '../src/bmath';
-import { BigNumber } from '../src/utils/bignumber';
+import { BigNumber, bnum, scale } from '../src/utils/bignumber';
 import {
     StablePool,
     StablePoolPairData,
@@ -36,7 +35,9 @@ const RANDOM = '0x1456688345527be1f37e9e627da0837d6f08c925';
 describe(`Tests for Stable Pools.`, () => {
     context('limit amounts', () => {
         it(`tests getLimitAmountSwap SwapExactIn`, async () => {
-            const poolsFromFile: SubGraphPoolsBase = require('./testData/stablePools/singlePool.json');
+            const poolsFromFile: {
+                pools: SubgraphPoolBase[];
+            } = require('./testData/stablePools/singlePool.json');
             const pool = poolsFromFile.pools[0];
             const swapType = SwapTypes.SwapExactIn;
 
@@ -82,14 +83,14 @@ describe(`Tests for Stable Pools.`, () => {
 
             const limitAmt = newPool.getLimitAmountSwap(poolPairData, swapType);
             expect(limitAmt.toString()).to.eq(
-                bnum(pool.tokens[0].balance)
-                    .times(MAX_OUT_RATIO)
-                    .toString()
+                bnum(pool.tokens[0].balance).times(MAX_OUT_RATIO).toString()
             );
         });
 
         it(`tests getLimitAmountSwap SwapExactOut`, async () => {
-            const poolsFromFile: SubGraphPoolsBase = require('./testData/stablePools/singlePool.json');
+            const poolsFromFile: {
+                pools: SubgraphPoolBase[];
+            } = require('./testData/stablePools/singlePool.json');
             const pool = poolsFromFile.pools[0];
             const swapType = SwapTypes.SwapExactOut;
 
@@ -129,36 +130,32 @@ describe(`Tests for Stable Pools.`, () => {
 
             const limitAmt = newPool.getLimitAmountSwap(poolPairData, swapType);
             expect(limitAmt.toString()).to.eq(
-                bnum(pool.tokens[1].balance)
-                    .times(MAX_OUT_RATIO)
-                    .toString()
+                bnum(pool.tokens[1].balance).times(MAX_OUT_RATIO).toString()
             );
         });
     });
 
     context('direct pool', () => {
         it(`Full Swap - swapExactIn No Route`, async () => {
-            const poolsFromFile: SubGraphPoolsBase = require('./testData/stablePools/singlePool.json');
+            const poolsFromFile: {
+                pools: SubgraphPoolBase[];
+            } = require('./testData/stablePools/singlePool.json');
+            const pools = poolsFromFile.pools;
             const tokenIn = BAL;
             const tokenOut = USDC;
             const swapType = SwapTypes.SwapExactIn;
             const swapAmt: BigNumber = bnum('1');
 
-            const sor = new SOR(
-                provider,
-                gasPrice,
-                maxPools,
-                chainId,
-                poolsFromFile
-            );
+            const sor = new SOR(provider, chainId, null, pools);
+            const fetchSuccess = await sor.fetchPools([], false);
+            expect(fetchSuccess).to.be.true;
 
-            const fetchSuccess = await sor.fetchPools(false);
-
-            let swapInfo: SwapInfo = await sor.getSwaps(
+            const swapInfo: SwapInfo = await sor.getSwaps(
                 tokenIn,
                 tokenOut,
                 swapType,
-                swapAmt
+                swapAmt,
+                { gasPrice, maxPools }
             );
 
             expect(swapInfo.returnAmount.toString()).eq('0');
@@ -166,27 +163,25 @@ describe(`Tests for Stable Pools.`, () => {
         });
 
         it(`Full Swap - swapExactOut No Route`, async () => {
-            const poolsFromFile: SubGraphPoolsBase = require('./testData/stablePools/singlePool.json');
+            const poolsFromFile: {
+                pools: SubgraphPoolBase[];
+            } = require('./testData/stablePools/singlePool.json');
+            const pools = poolsFromFile.pools;
             const tokenIn = BAL;
             const tokenOut = USDC;
             const swapType = SwapTypes.SwapExactOut;
             const swapAmt: BigNumber = bnum('1');
 
-            const sor = new SOR(
-                provider,
-                gasPrice,
-                maxPools,
-                chainId,
-                poolsFromFile
-            );
+            const sor = new SOR(provider, chainId, null, pools);
+            const fetchSuccess = await sor.fetchPools([], false);
+            expect(fetchSuccess).to.be.true;
 
-            const fetchSuccess = await sor.fetchPools(false);
-
-            let swapInfo: SwapInfo = await sor.getSwaps(
+            const swapInfo: SwapInfo = await sor.getSwaps(
                 tokenIn,
                 tokenOut,
                 swapType,
-                swapAmt
+                swapAmt,
+                { gasPrice, maxPools }
             );
 
             expect(swapInfo.returnAmount.toString()).eq('0');
@@ -194,27 +189,25 @@ describe(`Tests for Stable Pools.`, () => {
         });
 
         it(`Full Swap - swapExactIn, Token>Token`, async () => {
-            const poolsFromFile: SubGraphPoolsBase = require('./testData/stablePools/singlePool.json');
+            const poolsFromFile: {
+                pools: SubgraphPoolBase[];
+            } = require('./testData/stablePools/singlePool.json');
+            const pools = poolsFromFile.pools;
             const tokenIn = DAI;
             const tokenOut = USDC;
             const swapType = SwapTypes.SwapExactIn;
             const swapAmt: BigNumber = bnum('1');
 
-            const sor = new SOR(
-                provider,
-                gasPrice,
-                maxPools,
-                chainId,
-                poolsFromFile
-            );
+            const sor = new SOR(provider, chainId, null, pools);
+            const fetchSuccess = await sor.fetchPools([], false);
+            expect(fetchSuccess).to.be.true;
 
-            const fetchSuccess = await sor.fetchPools(false);
-
-            let swapInfo: SwapInfo = await sor.getSwaps(
+            const swapInfo: SwapInfo = await sor.getSwaps(
                 tokenIn,
                 tokenOut,
                 swapType,
-                swapAmt
+                swapAmt,
+                { gasPrice, maxPools }
             );
 
             console.log(`Return amt:`);
@@ -235,33 +228,31 @@ describe(`Tests for Stable Pools.`, () => {
         });
 
         it(`Full Swap - swapExactOut, Token>Token`, async () => {
-            const poolsFromFile: SubGraphPoolsBase = require('./testData/stablePools/singlePool.json');
+            const poolsFromFile: {
+                pools: SubgraphPoolBase[];
+            } = require('./testData/stablePools/singlePool.json');
+            const pools = poolsFromFile.pools;
             const tokenIn = USDC;
             const tokenOut = USDT;
             const swapType = SwapTypes.SwapExactOut;
             const swapAmt: BigNumber = bnum('1');
 
-            const sor = new SOR(
-                provider,
-                gasPrice,
-                maxPools,
-                chainId,
-                poolsFromFile
-            );
+            const sor = new SOR(provider, chainId, null, pools);
+            const fetchSuccess = await sor.fetchPools([], false);
+            expect(fetchSuccess).to.be.true;
 
-            const fetchSuccess = await sor.fetchPools(false);
-
-            let swapInfo: SwapInfo = await sor.getSwaps(
+            const swapInfo: SwapInfo = await sor.getSwaps(
                 tokenIn,
                 tokenOut,
                 swapType,
-                swapAmt
+                swapAmt,
+                { gasPrice, maxPools }
             );
 
             console.log(`Return amt:`);
             console.log(swapInfo.returnAmount.toString());
             // This value is hard coded as sanity check if things unexpectedly change. Taken from V2 test run (with extra fee logic added).
-            expect(swapInfo.returnAmount.toString()).eq('1000400');
+            expect(swapInfo.returnAmount.toString()).eq('1000401');
             expect(swapInfo.swaps.length).eq(1);
             expect(swapInfo.swaps[0].amount.toString()).eq(
                 swapAmt.times(1e6).toString()
@@ -277,27 +268,28 @@ describe(`Tests for Stable Pools.`, () => {
 
         if (ALLOW_ADD_REMOVE) {
             it(`Full Swap - swapExactIn, Token > BPT`, async () => {
-                const poolsFromFile: SubGraphPoolsBase = require('./testData/stablePools/singlePool.json');
+                const poolsFromFile: {
+                    pools: SubgraphPoolBase[];
+                } = require('./testData/stablePools/singlePool.json');
+                const pools = poolsFromFile.pools;
                 const tokenIn = DAI;
                 const tokenOut = BPT;
                 const swapType = SwapTypes.SwapExactIn;
                 const swapAmt: BigNumber = bnum('1');
 
-                const sor = new SOR(
-                    provider,
-                    gasPrice,
-                    maxPools,
-                    chainId,
-                    poolsFromFile
-                );
+                const sor = new SOR(provider, chainId, null, pools);
 
-                const fetchSuccess = await sor.fetchPools(false);
+                const fetchSuccess = await sor.fetchPools([], false);
+                expect(fetchSuccess).to.be.true;
 
-                let swapInfo: SwapInfo = await sor.getSwaps(
+                expect(fetchSuccess).to.be.true;
+
+                const swapInfo: SwapInfo = await sor.getSwaps(
                     tokenIn,
                     tokenOut,
                     swapType,
-                    swapAmt
+                    swapAmt,
+                    { gasPrice, maxPools }
                 );
                 expect(swapInfo.returnAmount.toString()).eq(
                     '304749153137929290'
@@ -312,27 +304,28 @@ describe(`Tests for Stable Pools.`, () => {
             });
 
             it(`Full Swap - swapExactIn, BPT > Token`, async () => {
-                const poolsFromFile: SubGraphPoolsBase = require('./testData/stablePools/singlePool.json');
+                const poolsFromFile: {
+                    pools: SubgraphPoolBase[];
+                } = require('./testData/stablePools/singlePool.json');
+                const pools = poolsFromFile.pools;
                 const tokenIn = BPT;
                 const tokenOut = USDT;
                 const swapType = SwapTypes.SwapExactIn;
                 const swapAmt: BigNumber = bnum('1.77');
 
-                const sor = new SOR(
-                    provider,
-                    gasPrice,
-                    maxPools,
-                    chainId,
-                    poolsFromFile
-                );
+                const sor = new SOR(provider, chainId, null, pools);
 
-                const fetchSuccess = await sor.fetchPools(false);
+                const fetchSuccess = await sor.fetchPools([], false);
+                expect(fetchSuccess).to.be.true;
 
-                let swapInfo: SwapInfo = await sor.getSwaps(
+                expect(fetchSuccess).to.be.true;
+
+                const swapInfo: SwapInfo = await sor.getSwaps(
                     tokenIn,
                     tokenOut,
                     swapType,
-                    swapAmt
+                    swapAmt,
+                    { gasPrice, maxPools }
                 );
 
                 expect(swapInfo.returnAmount.toString()).eq('5771787');
@@ -346,27 +339,26 @@ describe(`Tests for Stable Pools.`, () => {
             });
 
             it(`Full Swap - swapExactOut, Token > BPT`, async () => {
-                const poolsFromFile: SubGraphPoolsBase = require('./testData/stablePools/singlePool.json');
+                const poolsFromFile: {
+                    pools: SubgraphPoolBase[];
+                } = require('./testData/stablePools/singlePool.json');
+                const pools = poolsFromFile.pools;
                 const tokenIn = USDC;
                 const tokenOut = BPT;
                 const swapType = SwapTypes.SwapExactOut;
                 const swapAmt: BigNumber = bnum('1.276');
 
-                const sor = new SOR(
-                    provider,
-                    gasPrice,
-                    maxPools,
-                    chainId,
-                    poolsFromFile
-                );
+                const sor = new SOR(provider, chainId, null, pools);
 
-                const fetchSuccess = await sor.fetchPools(false);
+                const fetchSuccess = await sor.fetchPools([], false);
+                expect(fetchSuccess).to.be.true;
 
-                let swapInfo: SwapInfo = await sor.getSwaps(
+                const swapInfo: SwapInfo = await sor.getSwaps(
                     tokenIn,
                     tokenOut,
                     swapType,
-                    swapAmt
+                    swapAmt,
+                    { gasPrice, maxPools }
                 );
 
                 // This value is hard coded as sanity check if things unexpectedly change. Taken from isolated run of calcTokenInGivenExactBptOut.
@@ -381,27 +373,26 @@ describe(`Tests for Stable Pools.`, () => {
             });
 
             it(`Full Swap - swapExactOut, BPT > Token`, async () => {
-                const poolsFromFile: SubGraphPoolsBase = require('./testData/stablePools/singlePool.json');
+                const poolsFromFile: {
+                    pools: SubgraphPoolBase[];
+                } = require('./testData/stablePools/singlePool.json');
+                const pools = poolsFromFile.pools;
                 const tokenIn = BPT;
                 const tokenOut = DAI;
                 const swapType = SwapTypes.SwapExactOut;
                 const swapAmt: BigNumber = bnum('2.44');
 
-                const sor = new SOR(
-                    provider,
-                    gasPrice,
-                    maxPools,
-                    chainId,
-                    poolsFromFile
-                );
+                const sor = new SOR(provider, chainId, null, pools);
 
-                const fetchSuccess = await sor.fetchPools(false);
+                const fetchSuccess = await sor.fetchPools([], false);
+                expect(fetchSuccess).to.be.true;
 
-                let swapInfo: SwapInfo = await sor.getSwaps(
+                const swapInfo: SwapInfo = await sor.getSwaps(
                     tokenIn,
                     tokenOut,
                     swapType,
-                    swapAmt
+                    swapAmt,
+                    { gasPrice, maxPools }
                 );
 
                 expect(swapInfo.returnAmount.toString()).eq(
@@ -420,27 +411,25 @@ describe(`Tests for Stable Pools.`, () => {
 
     context('multihop', () => {
         it(`Full Swap - swapExactIn, Token>Token`, async () => {
-            const poolsFromFile: SubGraphPoolsBase = require('./testData/stablePools/multihop.json');
+            const poolsFromFile: {
+                pools: SubgraphPoolBase[];
+            } = require('./testData/stablePools/multihop.json');
+            const pools = poolsFromFile.pools;
             const tokenIn = DAI;
             const tokenOut = USDT;
             const swapType = SwapTypes.SwapExactIn;
             const swapAmt: BigNumber = bnum('23.45');
 
-            const sor = new SOR(
-                provider,
-                gasPrice,
-                maxPools,
-                chainId,
-                poolsFromFile
-            );
+            const sor = new SOR(provider, chainId, null, pools);
+            const fetchSuccess = await sor.fetchPools([], false);
+            expect(fetchSuccess).to.be.true;
 
-            const fetchSuccess = await sor.fetchPools(false);
-
-            let swapInfo: SwapInfo = await sor.getSwaps(
+            const swapInfo: SwapInfo = await sor.getSwaps(
                 tokenIn,
                 tokenOut,
                 swapType,
-                swapAmt
+                swapAmt,
+                { gasPrice, maxPools }
             );
             // This value is hard coded as sanity check if things unexpectedly change. Taken from V2 test run (with extra fee logic added).
             expect(swapInfo.returnAmount.toString()).eq('23533631');
@@ -466,31 +455,29 @@ describe(`Tests for Stable Pools.`, () => {
         });
 
         it(`Full Swap - swapExactOut, Token>Token`, async () => {
-            const poolsFromFile: SubGraphPoolsBase = require('./testData/stablePools/multihop.json');
+            const poolsFromFile: {
+                pools: SubgraphPoolBase[];
+            } = require('./testData/stablePools/multihop.json');
+            const pools = poolsFromFile.pools;
             const tokenIn = USDT;
             const tokenOut = DAI;
             const swapType = SwapTypes.SwapExactOut;
             const swapAmt: BigNumber = bnum('17.77');
 
-            const sor = new SOR(
-                provider,
-                gasPrice,
-                maxPools,
-                chainId,
-                poolsFromFile
-            );
+            const sor = new SOR(provider, chainId, null, pools);
+            const fetchSuccess = await sor.fetchPools([], false);
+            expect(fetchSuccess).to.be.true;
 
-            const fetchSuccess = await sor.fetchPools(false);
-
-            let swapInfo: SwapInfo = await sor.getSwaps(
+            const swapInfo: SwapInfo = await sor.getSwaps(
                 tokenIn,
                 tokenOut,
                 swapType,
-                swapAmt
+                swapAmt,
+                { gasPrice, maxPools }
             );
 
             // This value is hard coded as sanity check if things unexpectedly change. Taken from V2 test run (with extra fee logic added).
-            expect(swapInfo.returnAmount.toString()).eq('18089531');
+            expect(swapInfo.returnAmount.toString()).eq('18089532');
             expect(swapInfo.swaps.length).eq(2);
             expect(swapInfo.swaps[0].amount.toString()).eq(
                 swapAmt.times(1e18).toString()
@@ -652,27 +639,26 @@ describe(`Tests for Stable Pools.`, () => {
     if (ALLOW_ADD_REMOVE) {
         context('stable meta swap', () => {
             it('should return swap via meta pool Exit Swap, SwapExactIn', async () => {
-                const poolsFromFile: SubGraphPoolsBase = require('./testData/stablePools/metaPool.json');
+                const poolsFromFile: {
+                    pools: SubgraphPoolBase[];
+                } = require('./testData/stablePools/metaPool.json');
+                const pools = poolsFromFile.pools;
                 const tokenIn = RANDOM;
                 const tokenOut = USDC;
                 const swapType = SwapTypes.SwapExactIn;
                 const swapAmt: BigNumber = bnum('0.01');
 
-                const sor = new SOR(
-                    provider,
-                    gasPrice,
-                    maxPools,
-                    chainId,
-                    poolsFromFile
-                );
+                const sor = new SOR(provider, chainId, null, pools);
 
-                const fetchSuccess = await sor.fetchPools(false);
+                const fetchSuccess = await sor.fetchPools([], false);
+                expect(fetchSuccess).to.be.true;
 
-                let swapInfo: SwapInfo = await sor.getSwaps(
+                const swapInfo: SwapInfo = await sor.getSwaps(
                     tokenIn,
                     tokenOut,
                     swapType,
-                    swapAmt
+                    swapAmt,
+                    { gasPrice, maxPools }
                 );
 
                 // TO DO - Need to return in correct format for Relayer
@@ -702,27 +688,26 @@ describe(`Tests for Stable Pools.`, () => {
             });
 
             it('should return swap via meta pool Join Pool, SwapExactIn', async () => {
-                const poolsFromFile: SubGraphPoolsBase = require('./testData/stablePools/metaPool.json');
+                const poolsFromFile: {
+                    pools: SubgraphPoolBase[];
+                } = require('./testData/stablePools/metaPool.json');
+                const pools = poolsFromFile.pools;
                 const tokenIn = USDC;
                 const tokenOut = RANDOM;
                 const swapType = SwapTypes.SwapExactIn;
                 const swapAmt: BigNumber = bnum('0.01');
 
-                const sor = new SOR(
-                    provider,
-                    gasPrice,
-                    maxPools,
-                    chainId,
-                    poolsFromFile
-                );
+                const sor = new SOR(provider, chainId, null, pools);
 
-                const fetchSuccess = await sor.fetchPools(false);
+                const fetchSuccess = await sor.fetchPools([], false);
+                expect(fetchSuccess).to.be.true;
 
-                let swapInfo: SwapInfo = await sor.getSwaps(
+                const swapInfo: SwapInfo = await sor.getSwaps(
                     tokenIn,
                     tokenOut,
                     swapType,
-                    swapAmt
+                    swapAmt,
+                    { gasPrice, maxPools }
                 );
 
                 // TO DO - Need to return in correct format for Relayer
@@ -754,27 +739,26 @@ describe(`Tests for Stable Pools.`, () => {
             });
 
             it('should return swap via meta pool Exit Swap, SwapExactOut', async () => {
-                const poolsFromFile: SubGraphPoolsBase = require('./testData/stablePools/metaPool.json');
+                const poolsFromFile: {
+                    pools: SubgraphPoolBase[];
+                } = require('./testData/stablePools/metaPool.json');
+                const pools = poolsFromFile.pools;
                 const tokenIn = RANDOM;
                 const tokenOut = USDC;
                 const swapType = SwapTypes.SwapExactOut;
                 const swapAmt: BigNumber = bnum('0.01');
 
-                const sor = new SOR(
-                    provider,
-                    gasPrice,
-                    maxPools,
-                    chainId,
-                    poolsFromFile
-                );
+                const sor = new SOR(provider, chainId, null, pools);
 
-                const fetchSuccess = await sor.fetchPools(false);
+                const fetchSuccess = await sor.fetchPools([], false);
+                expect(fetchSuccess).to.be.true;
 
-                let swapInfo: SwapInfo = await sor.getSwaps(
+                const swapInfo: SwapInfo = await sor.getSwaps(
                     tokenIn,
                     tokenOut,
                     swapType,
-                    swapAmt
+                    swapAmt,
+                    { gasPrice, maxPools }
                 );
 
                 // TO DO - Need to return in correct format for Relayer
@@ -806,27 +790,26 @@ describe(`Tests for Stable Pools.`, () => {
             });
 
             it('should return swap via meta pool Join Pool, SwapExactOut', async () => {
-                const poolsFromFile: SubGraphPoolsBase = require('./testData/stablePools/metaPool.json');
+                const poolsFromFile: {
+                    pools: SubgraphPoolBase[];
+                } = require('./testData/stablePools/metaPool.json');
+                const pools = poolsFromFile.pools;
                 const tokenIn = USDC;
                 const tokenOut = RANDOM;
                 const swapType = SwapTypes.SwapExactOut;
                 const swapAmt: BigNumber = bnum('0.01');
 
-                const sor = new SOR(
-                    provider,
-                    gasPrice,
-                    maxPools,
-                    chainId,
-                    poolsFromFile
-                );
+                const sor = new SOR(provider, chainId, null, pools);
 
-                const fetchSuccess = await sor.fetchPools(false);
+                const fetchSuccess = await sor.fetchPools([], false);
+                expect(fetchSuccess).to.be.true;
 
-                let swapInfo: SwapInfo = await sor.getSwaps(
+                const swapInfo: SwapInfo = await sor.getSwaps(
                     tokenIn,
                     tokenOut,
                     swapType,
-                    swapAmt
+                    swapAmt,
+                    { gasPrice, maxPools }
                 );
 
                 console.log(`Return amt:`);

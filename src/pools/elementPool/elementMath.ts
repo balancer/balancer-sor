@@ -1,24 +1,24 @@
 import { BigNumber } from '../../utils/bignumber';
 import { ElementPoolPairData } from './elementPool';
-import { bnum } from '../../bmath';
+import { bnum } from '../../utils/bignumber';
 
 // calc_out_given_in (swap)
 export function _exactTokenInForTokenOut(
     amount: BigNumber,
     poolPairData: ElementPoolPairData
-) {
+): BigNumber {
     // The formula below returns some dust (due to rounding errors) but when
     // we input zero the output should be zero
     if (amount.isZero()) return amount;
-    let f = poolPairData.swapFee.toNumber();
-    let Bi = poolPairData.balanceIn.toNumber();
-    let Bo = poolPairData.balanceOut.toNumber();
-    let t = getTimeTillExpiry(
+    const f = poolPairData.swapFee.toNumber();
+    const Bi = poolPairData.balanceIn.toNumber();
+    const Bo = poolPairData.balanceOut.toNumber();
+    const t = getTimeTillExpiry(
         poolPairData.expiryTime,
         poolPairData.currentBlockTimestamp,
         poolPairData.unitSeconds
     );
-    let Ai = amount.toNumber();
+    const Ai = amount.toNumber();
     return bnum(
         Bo -
             (Bi ** (1 - t) - (Ai + Bi) ** (1 - t) + Bo ** (1 - t)) **
@@ -37,19 +37,19 @@ export function _exactTokenInForTokenOut(
 export function _tokenInForExactTokenOut(
     amount: BigNumber,
     poolPairData: ElementPoolPairData
-) {
+): BigNumber {
     // The formula below returns some dust (due to rounding errors) but when
     // we input zero the output should be zero
     if (amount.isZero()) return amount;
-    let f = poolPairData.swapFee.toNumber();
-    let Bi = poolPairData.balanceIn.toNumber();
-    let Bo = poolPairData.balanceOut.toNumber();
-    let t = getTimeTillExpiry(
+    const f = poolPairData.swapFee.toNumber();
+    const Bi = poolPairData.balanceIn.toNumber();
+    const Bo = poolPairData.balanceOut.toNumber();
+    const t = getTimeTillExpiry(
         poolPairData.expiryTime,
         poolPairData.currentBlockTimestamp,
         poolPairData.unitSeconds
     );
-    let Ao = amount.toNumber();
+    const Ao = amount.toNumber();
     return bnum(
         -Bi +
             (Bi ** (1 - t) + Bo ** (1 - t) - (-Ao + Bo) ** (1 - t)) **
@@ -74,15 +74,15 @@ export function _spotPriceAfterSwapExactTokenInForTokenOut(
     amount: BigNumber,
     poolPairData: ElementPoolPairData
 ): BigNumber {
-    let f = poolPairData.swapFee.toNumber();
-    let Bi = poolPairData.balanceIn.toNumber();
-    let Bo = poolPairData.balanceOut.toNumber();
-    let t = getTimeTillExpiry(
+    const f = poolPairData.swapFee.toNumber();
+    const Bi = poolPairData.balanceIn.toNumber();
+    const Bo = poolPairData.balanceOut.toNumber();
+    const t = getTimeTillExpiry(
         poolPairData.expiryTime,
         poolPairData.currentBlockTimestamp,
         poolPairData.unitSeconds
     );
-    let Ai = amount.toNumber();
+    const Ai = amount.toNumber();
     return bnum(
         1 /
             ((Bi ** (1 - t) - (Ai + Bi) ** (1 - t) + Bo ** (1 - t)) **
@@ -106,15 +106,15 @@ export function _spotPriceAfterSwapTokenInForExactTokenOut(
     amount: BigNumber,
     poolPairData: ElementPoolPairData
 ): BigNumber {
-    let f = poolPairData.swapFee.toNumber();
-    let Bi = poolPairData.balanceIn.toNumber();
-    let Bo = poolPairData.balanceOut.toNumber();
-    let t = getTimeTillExpiry(
+    const f = poolPairData.swapFee.toNumber();
+    const Bi = poolPairData.balanceIn.toNumber();
+    const Bo = poolPairData.balanceOut.toNumber();
+    const t = getTimeTillExpiry(
         poolPairData.expiryTime,
         poolPairData.currentBlockTimestamp,
         poolPairData.unitSeconds
     );
-    let Ao = amount.toNumber();
+    const Ao = amount.toNumber();
     return bnum(
         (Bi ** (1 - t) + Bo ** (1 - t) - (-Ao + Bo) ** (1 - t)) **
             (-1 + 1 / (1 - t)) /
@@ -139,15 +139,15 @@ export function _derivativeSpotPriceAfterSwapExactTokenInForTokenOut(
     amount: BigNumber,
     poolPairData: ElementPoolPairData
 ): BigNumber {
-    let f = poolPairData.swapFee.toNumber();
-    let Bi = poolPairData.balanceIn.toNumber();
-    let Bo = poolPairData.balanceOut.toNumber();
-    let t = getTimeTillExpiry(
+    const f = poolPairData.swapFee.toNumber();
+    const Bi = poolPairData.balanceIn.toNumber();
+    const Bo = poolPairData.balanceOut.toNumber();
+    const t = getTimeTillExpiry(
         poolPairData.expiryTime,
         poolPairData.currentBlockTimestamp,
         poolPairData.unitSeconds
     );
-    let Ai = amount.toNumber();
+    const Ai = amount.toNumber();
     return bnum(
         -(
             (-(
@@ -200,15 +200,15 @@ export function _derivativeSpotPriceAfterSwapTokenInForExactTokenOut(
     amount: BigNumber,
     poolPairData: ElementPoolPairData
 ): BigNumber {
-    let f = poolPairData.swapFee.toNumber();
-    let Bi = poolPairData.balanceIn.toNumber();
-    let Bo = poolPairData.balanceOut.toNumber();
-    let t = getTimeTillExpiry(
+    const f = poolPairData.swapFee.toNumber();
+    const Bi = poolPairData.balanceIn.toNumber();
+    const Bo = poolPairData.balanceOut.toNumber();
+    const t = getTimeTillExpiry(
         poolPairData.expiryTime,
         poolPairData.currentBlockTimestamp,
         poolPairData.unitSeconds
     );
-    let Ao = amount.toNumber();
+    const Ao = amount.toNumber();
     return bnum(
         ((Bi ** (1 - t) + Bo ** (1 - t) - (-Ao + Bo) ** (1 - t)) **
             (-2 + 1 / (1 - t)) *
