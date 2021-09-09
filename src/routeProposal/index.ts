@@ -24,7 +24,8 @@ export class RouteProposer {
         tokenOut: string,
         swapType: SwapTypes,
         pools: SubgraphPoolBase[],
-        swapOptions: SwapOptions
+        swapOptions: SwapOptions,
+        chainId: number
     ): { pools: PoolDictionary; paths: NewPath[] } {
         if (pools.length === 0) return { pools: {}, paths: [] };
 
@@ -51,6 +52,7 @@ export class RouteProposer {
             tokenIn,
             tokenOut,
             swapOptions.maxPools,
+            chainId,
             swapOptions.timestamp
         );
 

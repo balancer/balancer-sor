@@ -13,6 +13,7 @@ import {
 } from '../src/routeProposal/filtering';
 import { calculatePathLimits } from '../src/routeProposal/pathLimits';
 import BigNumber from 'bignumber.js';
+import { formatSwaps } from '../src/formatSwaps';
 
 import subgraphPoolsLargeLinear from './testData/subgraphPoolsLargeLinear.json';
 import { MetaStablePool } from '../src/pools/metaStablePool/metaStablePool';
@@ -30,6 +31,7 @@ describe('Linear pools tests', () => {
         const swapType = SwapTypes.SwapExactIn;
         // Opción que va: DAI - USDC - 100
         const swapAmount = new BigNumber(0.1);
+        const chainId = 1;
 
         // let paths: NewPath[], marketSp: BigNumber;
         const maxPools = 10; //
@@ -40,7 +42,8 @@ describe('Linear pools tests', () => {
             subgraphPoolsLargeLinear.pools,
             tokenIn,
             tokenOut,
-            maxPools
+            maxPools,
+            chainId
         );
         let pathData: NewPath[];
 
@@ -67,5 +70,19 @@ describe('Linear pools tests', () => {
             bnum(10) // costReturnToken
         );
         console.log(swaps);
+
+        const swapInfo = formatSwaps(
+            swaps,
+            swapType,
+            swapAmount,
+            tokenIn,
+            tokenOut,
+            total,
+            totalConsideringFees,
+            marketSp
+        );
+
+        console.log(swapInfo.swaps);
+        console.log(swapInfo.tokenAddresses);
     });
 });

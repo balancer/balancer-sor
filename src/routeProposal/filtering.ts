@@ -45,6 +45,7 @@ export function filterPoolsOfInterest(
     tokenIn: string,
     tokenOut: string,
     maxPools: number,
+    chainId: number,
     currentBlockTimestamp = 0
 ): [PoolDictionary, string[], [PoolDictionaryByMain, MetaStablePool]] {
     const poolsDictionary: PoolDictionary = {};
@@ -73,8 +74,7 @@ export function filterPoolsOfInterest(
             | undefined = parseNewPool(pool, currentBlockTimestamp);
         if (!newPool) return;
 
-        // TO DO - Add chainId !!!
-        if (newPool.address === MULTIMETASTABLEPOOL[1].address) {
+        if (newPool.address === MULTIMETASTABLEPOOL[chainId].address) {
             multiMetaStablePool = newPool as MetaStablePool;
         }
 
