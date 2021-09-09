@@ -1,12 +1,5 @@
 import { BigNumber } from './utils/bignumber';
 
-let allowAddRemove: string | boolean = process.env.ALLOW_ADD_REMOVE || false;
-if (typeof allowAddRemove === 'string') {
-    if (allowAddRemove === 'true' || allowAddRemove === 'True')
-        allowAddRemove = true;
-    else allowAddRemove = false;
-}
-export const ALLOW_ADD_REMOVE: boolean = allowAddRemove;
 // priceErrorTolerance is how close we expect prices after swap to be in SOR
 // suggested paths
 const priceErrorTolerance: string =
