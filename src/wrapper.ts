@@ -163,7 +163,8 @@ export class SOR {
                 tokenOut,
                 swapType,
                 pools,
-                swapOptions
+                swapOptions,
+                this.chainId
             );
 
         if (paths.length == 0) return { ...EMPTY_SWAPINFO };

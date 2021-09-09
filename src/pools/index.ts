@@ -2,6 +2,7 @@ import { WeightedPool } from './weightedPool/weightedPool';
 import { StablePool } from './stablePool/stablePool';
 import { ElementPool } from './elementPool/elementPool';
 import { MetaStablePool } from './metaStablePool/metaStablePool';
+import { LinearPool } from './linearPool/linearPool';
 import { BigNumber, INFINITY, ZERO } from '../utils/bignumber';
 import {
     SubgraphPoolBase,
@@ -14,8 +15,8 @@ import {
 export function parseNewPool(
     pool: SubgraphPoolBase,
     currentBlockTimestamp = 0
-): WeightedPool | StablePool | ElementPool | undefined {
-    let newPool: WeightedPool | StablePool | ElementPool;
+): WeightedPool | StablePool | ElementPool | LinearPool | undefined {
+    let newPool: WeightedPool | StablePool | ElementPool | LinearPool;
     if (pool.poolType === 'Weighted') newPool = WeightedPool.fromPool(pool);
     else if (pool.poolType === 'Stable') newPool = StablePool.fromPool(pool);
     else if (pool.poolType === 'Element') {
@@ -28,7 +29,8 @@ export function parseNewPool(
         // If it does we just ignore it.
         if (pool.swapEnabled === true) newPool = WeightedPool.fromPool(pool);
         else return undefined;
-    } else {
+    } else if (pool.poolType === 'Linear') newPool = LinearPool.fromPool(pool);
+    else {
         console.error(
             `Unknown pool type or type field missing: ${pool.poolType} ${pool.id}`
         );

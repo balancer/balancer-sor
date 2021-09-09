@@ -8,6 +8,7 @@ import { SwapTypes, SubgraphPoolBase, SwapOptions } from '../src/types';
 
 const gasPrice = new BigNumber('30000000000');
 const maxPools = 4;
+const chainId = 1;
 
 describe(`RouteProposer.`, () => {
     it(`should have no cached process data on creation`, () => {
@@ -31,7 +32,8 @@ describe(`RouteProposer.`, () => {
             tokenOut,
             swapType,
             pools,
-            { gasPrice, maxPools, timestamp: 0 } as SwapOptions
+            { gasPrice, maxPools, timestamp: 0 } as SwapOptions,
+            chainId
         );
 
         const cacheZero =
@@ -45,7 +47,8 @@ describe(`RouteProposer.`, () => {
             tokenOut,
             swapType,
             pools,
-            { gasPrice, maxPools, timestamp: 1 } as SwapOptions
+            { gasPrice, maxPools, timestamp: 1 } as SwapOptions,
+            chainId
         );
 
         const cacheZeroRepeat =

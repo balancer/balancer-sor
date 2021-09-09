@@ -1,4 +1,4 @@
-import { BigNumber, ZERO, INFINITY } from '../utils/bignumber';
+import { BigNumber, ZERO, INFINITY, bnum } from '../utils/bignumber';
 import { getOutputAmountSwap } from '../pools';
 import { INFINITESIMAL } from '../config';
 import {
@@ -50,8 +50,6 @@ export function getOutputAmountSwapForPath(
     swapType: SwapTypes,
     amount: BigNumber
 ): BigNumber {
-    const pools = path.pools;
-
     // First of all check if the amount is above limit, if so, return 0 for
     // 'swapExactIn' or Inf for swapExactOut
     if (amount.gt(path.limitAmount)) {
@@ -61,47 +59,98 @@ export function getOutputAmountSwapForPath(
             return INFINITY;
         }
     }
+
+    const amounts = getAmounts(path, swapType, amount);
+    if (swapType === SwapTypes.SwapExactIn) {
+        return amounts[amounts.length - 1];
+    } else {
+        return amounts[0];
+    }
+}
+
+function getAmounts(
+    path: NewPath,
+    swapType: SwapTypes,
+    amount: BigNumber
+): BigNumber[] {
+    const pools = path.pools;
     const poolPairData = path.poolPairData;
-    if (poolPairData.length == 1) {
-        return getOutputAmountSwap(
-            pools[0],
-            path.poolPairData[0],
-            swapType,
-            amount
-        );
-    } else if (poolPairData.length == 2) {
-        if (swapType === SwapTypes.SwapExactIn) {
-            // The outputAmount is number of tokenOut we receive from the second poolPairData
-            const outputAmountSwap1 = getOutputAmountSwap(
-                pools[0],
-                path.poolPairData[0],
-                swapType,
-                amount
-            );
-            return getOutputAmountSwap(
-                pools[1],
-                path.poolPairData[1],
-                swapType,
-                outputAmountSwap1
-            );
-        } else {
-            // The outputAmount is number of tokenIn we send to the first poolPairData
-            const outputAmountSwap2 = getOutputAmountSwap(
-                pools[1],
-                path.poolPairData[1],
-                swapType,
-                amount
-            );
-            return getOutputAmountSwap(
-                pools[0],
-                path.poolPairData[0],
-                swapType,
-                outputAmountSwap2
+    const ans = [amount];
+
+    if (swapType === SwapTypes.SwapExactIn) {
+        for (let i = 0; i < pools.length; i++) {
+            ans.push(
+                getOutputAmountSwap(
+                    pools[i],
+                    poolPairData[i],
+                    swapType,
+                    ans[ans.length - 1]
+                )
             );
         }
     } else {
-        throw new Error('Path with more than 2 swaps not supported');
+        const n = pools.length;
+        for (let i = 0; i < pools.length; i++) {
+            ans.unshift(
+                getOutputAmountSwap(
+                    pools[n - 1 - i],
+                    poolPairData[n - 1 - i],
+                    swapType,
+                    ans[0]
+                )
+            );
+        }
     }
+    return ans;
+}
+
+function getProdsSpotPrices(
+    path: NewPath,
+    swapType: SwapTypes,
+    amounts: BigNumber[]
+): BigNumber[] {
+    const pools = path.pools;
+    const poolPairData = path.poolPairData;
+    const ans = [bnum(1)];
+    const n = pools.length;
+    let oneIfExactOut = 0;
+    if (swapType === SwapTypes.SwapExactOut) oneIfExactOut = 1;
+    for (let i = 0; i < pools.length; i++) {
+        ans.unshift(
+            getSpotPriceAfterSwap(
+                pools[n - 1 - i],
+                poolPairData[n - 1 - i],
+                swapType,
+                amounts[n - 1 - i + oneIfExactOut]
+            ).times(ans[0])
+        );
+    }
+    return ans;
+}
+
+function getProdsFirstSpotPrices(
+    path: NewPath,
+    swapType: SwapTypes,
+    amounts: BigNumber[]
+): BigNumber[] {
+    if (swapType !== SwapTypes.SwapExactOut)
+        // Throw error?
+        return [bnum(0)];
+
+    const pools = path.pools;
+    const poolPairData = path.poolPairData;
+    const ans = [bnum(1)];
+    for (let i = 0; i < pools.length; i++) {
+        ans.push(
+            getSpotPriceAfterSwap(
+                pools[i],
+                poolPairData[i],
+                swapType,
+                amounts[i + 1]
+            ).times(ans[ans.length - 1])
+        );
+    }
+    return ans;
 }
 
 export function getSpotPriceAfterSwapForPath(
@@ -109,60 +158,9 @@ export function getSpotPriceAfterSwapForPath(
     swapType: SwapTypes,
     amount: BigNumber
 ): BigNumber {
-    const pools = path.pools;
-    const poolPairData = path.poolPairData;
-    if (poolPairData.length == 1) {
-        return getSpotPriceAfterSwap(
-            pools[0],
-            path.poolPairData[0],
-            swapType,
-            amount
-        );
-    } else if (poolPairData.length == 2) {
-        if (swapType === SwapTypes.SwapExactIn) {
-            const outputAmountSwap1 = getOutputAmountSwap(
-                pools[0],
-                path.poolPairData[0],
-                swapType,
-                amount
-            );
-            const spotPriceAfterSwap1 = getSpotPriceAfterSwap(
-                pools[0],
-                path.poolPairData[0],
-                swapType,
-                amount
-            );
-            const spotPriceAfterSwap2 = getSpotPriceAfterSwap(
-                pools[1],
-                path.poolPairData[1],
-                swapType,
-                outputAmountSwap1
-            );
-            return spotPriceAfterSwap1.times(spotPriceAfterSwap2);
-        } else {
-            const outputAmountSwap2 = getOutputAmountSwap(
-                pools[1],
-                path.poolPairData[1],
-                swapType,
-                amount
-            );
-            const spotPriceAfterSwap1 = getSpotPriceAfterSwap(
-                pools[0],
-                path.poolPairData[0],
-                swapType,
-                outputAmountSwap2
-            );
-            const spotPriceAfterSwap2 = getSpotPriceAfterSwap(
-                pools[1],
-                path.poolPairData[1],
-                swapType,
-                amount
-            );
-            return spotPriceAfterSwap1.times(spotPriceAfterSwap2);
-        }
-    } else {
-        throw new Error('Path with more than 2 swaps not supported');
-    }
+    const amounts = getAmounts(path, swapType, amount);
+    const prodsSpotPrices = getProdsSpotPrices(path, swapType, amounts);
+    return prodsSpotPrices[0];
 }
 
 // TODO: Add cases for pairType = [BTP->token, token->BTP] and poolType = [weighted, stable]
@@ -228,104 +226,48 @@ export function getDerivativeSpotPriceAfterSwapForPath(
     amount: BigNumber
 ): BigNumber {
     const poolPairData = path.poolPairData;
-    if (poolPairData.length == 1) {
-        return getDerivativeSpotPriceAfterSwap(
-            path.pools[0],
-            path.poolPairData[0],
-            swapType,
-            amount
-        );
-    } else if (poolPairData.length == 2) {
-        if (swapType === SwapTypes.SwapExactIn) {
-            const outputAmountSwap1 = getOutputAmountSwap(
-                path.pools[0],
-                path.poolPairData[0],
+    const pools = path.pools;
+    const n = pools.length;
+
+    const amounts = getAmounts(path, swapType, amount);
+    const prodsSpotPrices = getProdsSpotPrices(path, swapType, amounts);
+    let ans = bnum(0);
+    if (swapType === SwapTypes.SwapExactIn) {
+        for (let i = 0; i < n; i++) {
+            const newTerm = getDerivativeSpotPriceAfterSwap(
+                pools[i],
+                poolPairData[i],
                 swapType,
-                amount
-            );
-            // const SPaS1 = getSpotPriceAfterSwap(
-            //     path.pools[0],
-            //     path.poolPairData[0],
-            //     swapType,
-            //     amount
-            // );
-            const SPaS2 = getSpotPriceAfterSwap(
-                path.pools[1],
-                path.poolPairData[1],
-                swapType,
-                outputAmountSwap1
-            );
-            const dSPaS1 = getDerivativeSpotPriceAfterSwap(
-                path.pools[0],
-                path.poolPairData[0],
-                swapType,
-                amount
-            );
-            const dSPaS2 = getDerivativeSpotPriceAfterSwap(
-                path.pools[1],
-                path.poolPairData[1],
-                swapType,
-                outputAmountSwap1
-            );
-            // Using the rule of the derivative of the multiplication: d[f(x)*g(x)] = d[f(x)]*g(x) + f(x)*d[g(x)]
-            // where SPaS1 is SpotPriceAfterSwap of pool 1 and OA1 is OutputAmount of pool 1. We then have:
-            // d[SPaS1(x) * SPaS2(OA1(x))] = d[SPaS1(x)] * SPaS2(OA1(x)) + SPaS1(x) * d[SPaS2(OA1(x))]
-            // Let's expand the term d[SPaS2(OA1(x))] which is trickier:
-            // d[SPaS2(OA1(x))] at x0 = d[SPaS2(x)] at OA1(x0) * d[OA1(x)] at x0,
-            // Since d[OA1(x)] = 1/SPaS1(x) we then have:
-            // d[SPaS2(OA1(x))] = d[SPaS2(x)] * 1/SPaS1(x). Which leads us to:
-            // d[SPaS1(x) * SPaS2(OA1(x))] = d[SPaS1(x)] * SPaS2(OA1(x)) + d[SPaS2(OA1(x))]
-            // return dSPaS1 * SPaS2 + dSPaS2
-            return dSPaS1.times(SPaS2).plus(dSPaS2);
-        } else {
-            const outputAmountSwap2 = getOutputAmountSwap(
-                path.pools[1],
-                path.poolPairData[1],
-                swapType,
-                amount
-            );
-            const SPaS1 = getSpotPriceAfterSwap(
-                path.pools[0],
-                path.poolPairData[0],
-                swapType,
-                outputAmountSwap2
-            );
-            const SPaS2 = getSpotPriceAfterSwap(
-                path.pools[1],
-                path.poolPairData[1],
-                swapType,
-                amount
-            );
-            const dSPaS1 = getDerivativeSpotPriceAfterSwap(
-                path.pools[0],
-                path.poolPairData[0],
-                swapType,
-                outputAmountSwap2
-            );
-            const dSPaS2 = getDerivativeSpotPriceAfterSwap(
-                path.pools[1],
-                path.poolPairData[1],
-                swapType,
-                amount
-            );
-            // For swapExactOut we the outputToken is the amount of tokenIn necessary to buy a given amount of tokenOut
-            // Using the rule of the derivative of the multiplication: d[f(x)*g(x)] = d[f(x)]*g(x) + f(x)*d[g(x)]
-            // where SPaS1 is SpotPriceAfterSwap of pool 1 and OA2 is OutputAmount of pool 2. We then have:
-            // d[SPaS1(OA2(x)) * SPaS2(x)] = d[SPaS1(OA2(x))] * SPaS2(x) + SPaS1(OA2(x)) * d[SPaS2(x)]
-            // Let's expand the term d[SPaS1(OA2(x))] which is trickier:
-            // d[SPaS1(OA2(x))] at x0 = d[SPaS1(x)] at OA2(x0) * d[OA2(x)] at x0,
-            // Since d[OA2(x)] = SPaS2(x) we then have:
-            // d[SPaS1(OA2(x))] = d[SPaS1(x)] * SPaS2(x). Which leads us to:
-            // d[SPaS1(OA2(x)) * SPaS2(x)] = d[SPaS1(x)] * SPaS2(x) * SPaS2(x) + SPaS1(OA2(x)) * d[SPaS2(x)]
-            // return dSPaS2 * SPaS1 + dSPaS1 * SPaS2 * SPaS2
-            return dSPaS2.times(SPaS1).plus(SPaS2.times(SPaS2).times(dSPaS1));
+                amounts[i]
+            ).times(prodsSpotPrices[i + 1]);
+            ans = ans.plus(newTerm);
         }
     } else {
-        throw new Error('Path with more than 2 swaps not supported');
+        const prodsFirstSpotPrices = getProdsFirstSpotPrices(
+            path,
+            swapType,
+            amounts
+        );
+        for (let i = 0; i < n; i++) {
+            let newTerm = getDerivativeSpotPriceAfterSwap(
+                pools[i],
+                poolPairData[i],
+                swapType,
+                amounts[i + 1]
+            ).times(prodsSpotPrices[i + 1]);
+            newTerm = newTerm
+                .times(prodsSpotPrices[i + 1])
+                .times(prodsFirstSpotPrices[i]);
+            // The following option is more efficient but returns less precision due to the division
+            /*          let thisSpotPrice = getSpotPriceAfterSwap(pools[i], poolPairData[i], swapType, amounts[i + 1]);
+            newTerm = newTerm.div(thisSpotPrice).times(prodsSpotPrices[0]);*/
+            ans = ans.plus(newTerm);
+        }
     }
+    return ans;
 }
 
-// TODO: Add cases for pairType = [BTP->token, token->BTP] and poolType = [weighted, stable]
+// TODO: Add cases for pairType = [BPT->token, token->BPT] and poolType = [weighted, stable]
 export function getDerivativeSpotPriceAfterSwap(
     pool: PoolBase,
     poolPairData: PoolPairBase,
@@ -409,7 +351,8 @@ export function EVMgetOutputAmountSwap(
         if (
             pool.poolType === PoolTypes.Weighted ||
             pool.poolType === PoolTypes.Stable ||
-            pool.poolType === PoolTypes.MetaStable
+            pool.poolType === PoolTypes.MetaStable ||
+            pool.poolType === PoolTypes.Linear
         ) {
             // Will accept/return normalised values
             if (pairType === PairTypes.TokenToToken) {
@@ -445,7 +388,8 @@ export function EVMgetOutputAmountSwap(
         if (
             pool.poolType === PoolTypes.Weighted ||
             pool.poolType === PoolTypes.Stable ||
-            pool.poolType === PoolTypes.MetaStable
+            pool.poolType === PoolTypes.MetaStable ||
+            pool.poolType === PoolTypes.Linear
         ) {
             if (pairType === PairTypes.TokenToToken) {
                 returnAmount = pool._tokenInForExactTokenOut(

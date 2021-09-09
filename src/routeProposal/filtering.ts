@@ -2,17 +2,22 @@ import { ALLOW_ADD_REMOVE } from '../config';
 import {
     SubgraphPoolBase,
     PoolDictionary,
+    PoolDictionaryByMain,
     SwapPairType,
     NewPath,
     Swap,
     PoolBase,
     PoolFilter,
+    PoolTypes,
+    PoolPairBase,
 } from '../types';
 import { WeightedPool } from '../pools/weightedPool/weightedPool';
 import { StablePool } from '../pools/stablePool/stablePool';
 import { ElementPool } from '../pools/elementPool/elementPool';
 import { MetaStablePool } from '../pools/metaStablePool/metaStablePool';
+import { LinearPool } from '../pools/linearPool/linearPool';
 import { ZERO } from '../utils/bignumber';
+import { MULTIMETASTABLEPOOL } from '../addresses';
 
 import { parseNewPool } from '../pools';
 
@@ -40,8 +45,9 @@ export function filterPoolsOfInterest(
     tokenIn: string,
     tokenOut: string,
     maxPools: number,
+    chainId: number,
     currentBlockTimestamp = 0
-): [PoolDictionary, string[]] {
+): [PoolDictionary, string[], [PoolDictionaryByMain, MetaStablePool]] {
     const poolsDictionary: PoolDictionary = {};
 
     // If pool contains token add all its tokens to direct list
@@ -50,6 +56,9 @@ export function filterPoolsOfInterest(
     // tokens that are in pools that already contain tokenOut (in which case multi-hop is not necessary)
     let tokenInPairedTokens: Set<string> = new Set();
     let tokenOutPairedTokens: Set<string> = new Set();
+
+    const linearPoolsDictByMain: PoolDictionaryByMain = {};
+    let multiMetaStablePool: MetaStablePool;
 
     allPools.forEach((pool) => {
         if (pool.tokensList.length === 0 || pool.tokens[0].balance === '0') {
@@ -61,8 +70,16 @@ export function filterPoolsOfInterest(
             | StablePool
             | MetaStablePool
             | ElementPool
+            | LinearPool
             | undefined = parseNewPool(pool, currentBlockTimestamp);
         if (!newPool) return;
+
+        if (newPool.address === MULTIMETASTABLEPOOL[chainId].address) {
+            multiMetaStablePool = newPool as MetaStablePool;
+        }
+
+        if (newPool.poolType === PoolTypes.Linear)
+            linearPoolsDictByMain[pool.tokens[0].address] = newPool;
 
         const tokenListSet = new Set(pool.tokensList);
         // Depending on env file, we add the BPT as well as
@@ -111,7 +128,11 @@ export function filterPoolsOfInterest(
 
     // Transform set into Array
     const hopTokens = [...hopTokensSet];
-    return [poolsDictionary, hopTokens];
+    const linearPoolsInfo: [PoolDictionaryByMain, MetaStablePool] = [
+        linearPoolsDictByMain,
+        multiMetaStablePool,
+    ];
+    return [poolsDictionary, hopTokens, linearPoolsInfo];
 }
 
 /*
@@ -235,6 +256,150 @@ export function filterHopPools(
     return [filteredPoolsOfInterest, paths];
 }
 
+export function getPathsUsingLinearPools(
+    tokenIn: string,
+    tokenOut: string,
+    linearPoolsInfo: [PoolDictionaryByMain, MetaStablePool],
+    pools: PoolDictionary
+): NewPath[] {
+    const pathsUsingLinear: NewPath[] = [];
+    const linearPoolsDictByMain = linearPoolsInfo[0];
+    const multiMetaStablePool = linearPoolsInfo[1];
+    // if multiMetaStablePool is undefined, return.
+    const linearPoolIn = linearPoolsDictByMain[tokenIn];
+    const linearPoolOut = linearPoolsDictByMain[tokenOut];
+
+    // If neither of tokenIn and tokenOut have linear pools, return an empty array.
+    if (!linearPoolIn && !linearPoolOut) {
+        return pathsUsingLinear;
+    }
+
+    // If both tokenIn and tokenOut are stable coins, return linear-multistable-linear path
+    if (linearPoolIn && linearPoolOut) {
+        console.log('tokenIn and tokenOut both have linear pools');
+        const linearPathway = makeLinearPathway(
+            tokenIn,
+            tokenOut,
+            linearPoolIn,
+            linearPoolOut,
+            multiMetaStablePool
+        );
+        pathsUsingLinear.push(linearPathway);
+    }
+    // If just one of tokenIn and tokenOut is stable, return linear-multistable-linear
+    // composed with highest liquidity pool at the other end.
+    if (linearPoolIn && !linearPoolOut) {
+        console.log('tokenIn has linear pool, tokenOut has not');
+        for (const stableHopToken in linearPoolsDictByMain) {
+            if (stableHopToken == tokenIn) continue;
+            const linearPathway = makeLinearPathway(
+                tokenIn,
+                stableHopToken,
+                linearPoolIn,
+                linearPoolsDictByMain[stableHopToken],
+                multiMetaStablePool
+            );
+            const lastPoolId = getHighestLiquidityPool(
+                stableHopToken,
+                tokenOut,
+                SwapPairType.HopOut,
+                pools
+            );
+            const lastPool = pools[lastPoolId];
+            const pathEnd = createDirectPath(
+                lastPool,
+                stableHopToken,
+                tokenOut
+            );
+            pathsUsingLinear.push(composePaths([linearPathway, pathEnd]));
+        }
+    }
+    if (!linearPoolIn && linearPoolOut) {
+        console.log('tokenIn has not linear pool, tokenOut has');
+        for (const stableHopToken in linearPoolsDictByMain) {
+            if (stableHopToken == tokenOut) continue;
+            const linearPathway = makeLinearPathway(
+                stableHopToken,
+                tokenOut,
+                linearPoolsDictByMain[stableHopToken],
+                linearPoolOut,
+                multiMetaStablePool
+            );
+            const firstPoolId = getHighestLiquidityPool(
+                tokenIn,
+                stableHopToken,
+                SwapPairType.HopIn,
+                pools
+            );
+            const firstPool = pools[firstPoolId];
+            const pathStart = createDirectPath(
+                firstPool,
+                tokenIn,
+                stableHopToken
+            );
+            pathsUsingLinear.push(composePaths([pathStart, linearPathway]));
+        }
+    }
+    return pathsUsingLinear;
+}
+
+function getHighestLiquidityPool(
+    tokenIn: string,
+    tokenOut: string,
+    swapPairType: SwapPairType,
+    poolsOfInterest: PoolDictionary
+): string {
+    let highestNormalizedLiquidity = ZERO;
+    let highestNormalizedLiquidityPoolId: string;
+    for (const id in poolsOfInterest) {
+        const pool = poolsOfInterest[id];
+        if (swapPairType != pool.swapPairType) continue;
+        const tokenListSet = new Set(pool.tokensList);
+        // Depending on env file, we add the BPT as well as
+        // we can join/exit as part of the multihop
+        if (ALLOW_ADD_REMOVE) tokenListSet.add(pool.address);
+        // MAKE THIS A FLAG IN FILTER?
+        // If pool doesn't have tokenIn or tokenOut then ignore
+
+        if (!tokenListSet.has(tokenIn) || !tokenListSet.has(tokenOut)) continue;
+        const poolPairData = pool.parsePoolPairData(tokenIn, tokenOut);
+        const normalizedLiquidity = pool.getNormalizedLiquidity(poolPairData);
+        // Cannot be strictly greater otherwise highestNormalizedLiquidityPoolId = 0 if hopTokens[i] balance is 0 in this pool.
+        if (
+            normalizedLiquidity.isGreaterThanOrEqualTo(
+                highestNormalizedLiquidity
+            )
+        ) {
+            highestNormalizedLiquidity = normalizedLiquidity;
+            highestNormalizedLiquidityPoolId = id;
+        }
+    }
+    return highestNormalizedLiquidityPoolId;
+}
+
+// This function will only work correctly if the input is composable
+// i.e. each path's token out = next path's token in
+function composePaths(paths: NewPath[]): NewPath {
+    let id = '';
+    let swaps: Swap[] = [];
+    let poolPairData: PoolPairBase[] = [];
+    let pools: PoolBase[] = [];
+    for (const path of paths) {
+        id += path.id;
+        swaps = swaps.concat(path.swaps);
+        poolPairData = poolPairData.concat(path.poolPairData);
+        pools = pools.concat(path.pools);
+    }
+    const path: NewPath = {
+        id: id,
+        swaps: swaps,
+        poolPairData: poolPairData,
+        limitAmount: ZERO,
+        pools: pools,
+    };
+    return path;
+}
+
 function createDirectPath(
     pool: PoolBase,
     tokenIn: string,
@@ -259,6 +424,37 @@ function createDirectPath(
     };
 
     return path;
+}
+
+function makeLinearPathway(
+    tokenIn: string,
+    tokenOut: string,
+    linearPoolIn: PoolBase,
+    linearPoolOut: PoolBase,
+    multiMetaStablePool: MetaStablePool
+): NewPath {
+    const linearPoolInBPT = linearPoolIn.address;
+    const linearPoolInPath = createDirectPath(
+        linearPoolIn,
+        tokenIn,
+        linearPoolInBPT
+    );
+    const linearPoolOutBPT = linearPoolOut.address;
+    const linearPoolOutPath = createDirectPath(
+        linearPoolOut,
+        linearPoolOutBPT,
+        tokenOut
+    );
+    const multiStablePoolPath = createDirectPath(
+        multiMetaStablePool,
+        linearPoolInBPT,
+        linearPoolOutBPT
+    );
+    return composePaths([
+        linearPoolInPath,
+        multiStablePoolPath,
+        linearPoolOutPath,
+    ]);
 }
 
 function createMultihopPath(

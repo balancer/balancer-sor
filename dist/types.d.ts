@@ -1,39 +1,25 @@
 import { BigNumber } from './utils/bignumber';
-
-export enum SwapTypes {
-    SwapExactIn,
-    SwapExactOut,
+export declare enum SwapTypes {
+    SwapExactIn = 0,
+    SwapExactOut = 1,
 }
-
-export enum PoolTypes {
-    Weighted,
-    Stable,
-    Element,
-    MetaStable,
-    Linear,
+export declare enum PoolTypes {
+    Weighted = 0,
+    Stable = 1,
+    Element = 2,
+    MetaStable = 3,
+    Linear = 4,
 }
-
-export enum SwapPairType {
-    Direct,
-    HopIn,
-    HopOut,
+export declare enum SwapPairType {
+    Direct = 0,
+    HopIn = 1,
+    HopOut = 2,
 }
-
-export enum PairTypes {
-    BptToToken,
-    TokenToBpt,
-    TokenToToken,
+export declare enum PairTypes {
+    BptToToken = 0,
+    TokenToBpt = 1,
+    TokenToToken = 2,
 }
-
-export interface SwapOptions {
-    gasPrice: BigNumber;
-    swapGas: BigNumber;
-    timestamp: number;
-    maxPools: number;
-    poolTypeFilter: PoolFilter;
-    forceRefresh: boolean;
-}
-
 export interface PoolPairBase {
     balanceIn: BigNumber;
     balanceOut: BigNumber;
@@ -44,7 +30,6 @@ export interface PoolPairBase {
     decimalsIn: number;
     decimalsOut: number;
 }
-
 export interface Swap {
     pool: string;
     tokenIn: string;
@@ -55,7 +40,9 @@ export interface Swap {
     tokenInDecimals: number;
     tokenOutDecimals: number;
 }
-
+export interface SubGraphPoolsBase {
+    pools: SubgraphPoolBase[];
+}
 export interface SubgraphPoolBase {
     id: string;
     address: string;
@@ -64,38 +51,32 @@ export interface SubgraphPoolBase {
     totalShares: string;
     tokens: SubGraphToken[];
     tokensList: string[];
-
-    // Weighted & Element field
     totalWeight?: string;
-
-    // Stable specific fields
     amp?: string;
-
-    // Element specific fields
     expiryTime?: number;
     unitSeconds?: number;
     principalToken?: string;
     baseToken?: string;
-
-    // LBP specific fields
     swapEnabled?: boolean;
-
-    // Linear specific fields
-    wrappedIndex?: number;
+    rate?: string;
     target1?: string;
     target2?: string;
 }
-
 export interface SubGraphToken {
     address: string;
     balance: string;
     decimals: string | number;
-    // Stable & Element field
     weight?: string;
-    // MetaStablePool & Linear field
     priceRate?: string;
 }
-
+export interface DisabledOptions {
+    isOverRide: boolean;
+    disabledTokens: DisabledToken[];
+}
+export interface DisabledToken {
+    address: string;
+    symbol: string;
+}
 export interface SwapV2 {
     poolId: string;
     assetInIndex: number;
@@ -103,49 +84,41 @@ export interface SwapV2 {
     amount: string;
     userData: string;
 }
-
 export interface SwapInfo {
     tokenAddresses: string[];
     swaps: SwapV2[];
     swapAmount: BigNumber;
-    swapAmountForSwaps?: BigNumber; // Used with stETH/wstETH
     returnAmount: BigNumber;
-    returnAmountFromSwaps?: BigNumber; // Used with stETH/wstETH
     returnAmountConsideringFees: BigNumber;
     tokenIn: string;
     tokenOut: string;
     marketSp: BigNumber;
 }
-
 export interface PoolDictionary {
     [poolId: string]: PoolBase;
 }
-
-export interface PoolDictionaryByMain {
-    [mainToken: string]: PoolBase;
-}
-
 export interface PoolPairDictionary {
     [tokenInOut: string]: PoolPairBase;
 }
-
 export interface NewPath {
-    id: string; // pool address if direct path, contactenation of pool addresses if multihop
+    id: string;
     swaps: Swap[];
     poolPairData: PoolPairBase[];
     limitAmount: BigNumber;
     pools: PoolBase[];
-    filterEffectivePrice?: BigNumber; // TODO: This is just used for filtering, maybe there is a better way to filter?
+    filterEffectivePrice?: BigNumber;
 }
-
-export enum PoolFilter {
+export declare enum PoolFilter {
     All = 'All',
     Weighted = 'Weighted',
     Stable = 'Stable',
     MetaStable = 'MetaStable',
     LBP = 'LiquidityBootstrapping',
 }
-
+export interface SwapOptions {
+    timestamp: number;
+    poolTypeFilter: PoolFilter;
+}
 export interface PoolBase {
     poolType: PoolTypes;
     swapPairType: SwapPairType;
@@ -161,33 +134,27 @@ export interface PoolBase {
     updateTokenBalanceForPool: (token: string, newBalance: BigNumber) => void;
     _exactTokenInForTokenOut: (
         poolPairData: PoolPairBase,
-        amount: BigNumber,
-        exact: boolean
+        amount: BigNumber
     ) => BigNumber;
     _exactTokenInForBPTOut: (
         poolPairData: PoolPairBase,
-        amount: BigNumber,
-        exact: boolean
+        amount: BigNumber
     ) => BigNumber;
     _exactBPTInForTokenOut: (
         poolPairData: PoolPairBase,
-        amount: BigNumber,
-        exact: boolean
+        amount: BigNumber
     ) => BigNumber;
     _tokenInForExactTokenOut: (
         poolPairData: PoolPairBase,
-        amount: BigNumber,
-        exact: boolean
+        amount: BigNumber
     ) => BigNumber;
     _tokenInForExactBPTOut: (
         poolPairData: PoolPairBase,
-        amount: BigNumber,
-        exact: boolean
+        amount: BigNumber
     ) => BigNumber;
     _BPTInForExactTokenOut: (
         poolPairData: PoolPairBase,
-        amount: BigNumber,
-        exact: boolean
+        amount: BigNumber
     ) => BigNumber;
     _spotPriceAfterSwapExactTokenInForTokenOut: (
         poolPairData: PoolPairBase,
@@ -237,8 +204,31 @@ export interface PoolBase {
         poolPairData: PoolPairBase,
         amount: BigNumber
     ) => BigNumber;
+    _evmoutGivenIn: (
+        poolPairData: PoolPairBase,
+        amount: BigNumber
+    ) => BigNumber;
+    _evmexactTokenInForBPTOut: (
+        poolPairData: PoolPairBase,
+        amount: BigNumber
+    ) => BigNumber;
+    _evmexactBPTInForTokenOut: (
+        poolPairData: PoolPairBase,
+        amount: BigNumber
+    ) => BigNumber;
+    _evminGivenOut: (
+        poolPairData: PoolPairBase,
+        amount: BigNumber
+    ) => BigNumber;
+    _evmtokenInForExactBPTOut: (
+        poolPairData: PoolPairBase,
+        amount: BigNumber
+    ) => BigNumber;
+    _evmbptInForExactTokenOut: (
+        poolPairData: PoolPairBase,
+        amount: BigNumber
+    ) => BigNumber;
 }
-
 export interface WeightedPool extends PoolBase {
     totalWeight: string;
 }
