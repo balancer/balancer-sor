@@ -186,6 +186,9 @@ export const formatSwaps = (
         }
     }
 
+    console.log(`!!!!!!! bestSwapAmounts`);
+    console.log(JSON.stringify(bestSwapAmounts));
+
     bestPaths.forEach((path, i) => {
         const swapAmount = bestSwapAmounts[i];
 
@@ -202,103 +205,64 @@ export const formatSwaps = (
         console.log(
             getSpotPriceAfterSwapForPath(path, swapType, swapAmount).toNumber()
         );
-            */
-
+        */
+        const poolPairData = path.poolPairData;
+        const pathSwaps: Swap[] = [];
+        const amounts = [];
         let returnAmount: BigNumber;
-
-        if (path.poolPairData.length == 1) {
-            // Direct trade: add swap from only pool
-            const swap: Swap = {
-                pool: path.swaps[0].pool,
-                tokenIn: path.swaps[0].tokenIn,
-                tokenOut: path.swaps[0].tokenOut,
-                swapAmount: swapAmount.toString(),
-                limitReturnAmount:
-                    swapType === SwapTypes.SwapExactIn
-                        ? minAmountOut.toString()
-                        : maxAmountIn,
-                maxPrice: maxPrice,
-                tokenInDecimals: path.poolPairData[0].decimalsIn,
-                tokenOutDecimals: path.poolPairData[0].decimalsOut,
-            };
-            swaps.push([swap]);
-            // Call EVMgetOutputAmountSwap to guarantee pool state is updated
-            returnAmount = EVMgetOutputAmountSwap(
-                path.pools[0],
-                path.poolPairData[0],
-                swapType,
-                swapAmount
-            );
-        } else {
-            // Multi-hop:
-
-            let amountSwap1, amountSwap2;
-            if (swapType === SwapTypes.SwapExactIn) {
-                amountSwap1 = swapAmount;
-                amountSwap2 = EVMgetOutputAmountSwap(
-                    path.pools[0],
-                    path.poolPairData[0],
-                    swapType,
-                    swapAmount
+        const n = poolPairData.length;
+        amounts.push(swapAmount);
+        if (swapType === SwapTypes.SwapExactIn) {
+            for (let i = 0; i < n; i++) {
+                amounts.push(
+                    EVMgetOutputAmountSwap(
+                        path.pools[i],
+                        poolPairData[i],
+                        SwapTypes.SwapExactIn,
+                        amounts[amounts.length - 1]
+                    )
                 );
-                // Call EVMgetOutputAmountSwap to update the pool state
-                // for the second hop as well (the first was updated above)
-                returnAmount = EVMgetOutputAmountSwap(
-                    path.pools[1],
-                    path.poolPairData[1],
-                    swapType,
-                    amountSwap2
-                );
-            } else {
-                amountSwap1 = EVMgetOutputAmountSwap(
-                    path.pools[1],
-                    path.poolPairData[1],
-                    swapType,
-                    swapAmount
-                );
-                amountSwap2 = swapAmount;
-                // Call EVMgetOutputAmountSwap to update the pool state
-                // for the second hop as well (the first was updated above)
-                returnAmount = EVMgetOutputAmountSwap(
-                    path.pools[0],
-                    path.poolPairData[0],
-                    swapType,
-                    amountSwap1
-                );
+                console.log('i: ', i, 'amounts: ', amounts.toString());
+                const swap: Swap = {
+                    pool: path.swaps[i].pool,
+                    tokenIn: path.swaps[i].tokenIn,
+                    tokenOut: path.swaps[i].tokenOut,
+                    swapAmount: amounts[i].toString(),
+                    limitReturnAmount: minAmountOut.toString(),
+                    maxPrice: maxPrice,
+                    tokenInDecimals: path.poolPairData[i].decimalsIn,
+                    tokenOutDecimals: path.poolPairData[i].decimalsOut,
+                };
+                console.log('swap: ', swap);
+                pathSwaps.push(swap);
             }
-
-            // Add swap from first pool
-            const swap1hop: Swap = {
-                pool: path.swaps[0].pool,
-                tokenIn: path.swaps[0].tokenIn,
-                tokenOut: path.swaps[0].tokenOut,
-                swapAmount: amountSwap1.toString(),
-                limitReturnAmount:
-                    swapType === SwapTypes.SwapExactIn
-                        ? minAmountOut.toString()
-                        : maxAmountIn,
-                maxPrice: maxPrice,
-                tokenInDecimals: path.poolPairData[0].decimalsIn,
-                tokenOutDecimals: path.poolPairData[0].decimalsOut,
-            };
-
-            // Add swap from second pool
-            const swap2hop: Swap = {
-                pool: path.swaps[1].pool,
-                tokenIn: path.swaps[1].tokenIn,
-                tokenOut: path.swaps[1].tokenOut,
-                swapAmount: amountSwap2.toString(),
-                limitReturnAmount:
-                    swapType === SwapTypes.SwapExactIn
-                        ? minAmountOut.toString()
-                        : maxAmountIn,
-                maxPrice: maxPrice,
-                tokenInDecimals: path.poolPairData[1].decimalsIn,
-                tokenOutDecimals: path.poolPairData[1].decimalsOut,
-            };
-            swaps.push([swap1hop, swap2hop]);
+            returnAmount = amounts[n];
+            console.log('returnAmount: ', returnAmount.toString());
+        } else {
+            for (let i = 0; i < n; i++) {
+                amounts.unshift(
+                    EVMgetOutputAmountSwap(
+                        path.pools[n - 1 - i],
+                        poolPairData[n - 1 - i],
+                        SwapTypes.SwapExactOut,
+                        amounts[0]
+                    )
+                );
+                const swap: Swap = {
+                    pool: path.swaps[n - 1 - i].pool,
+                    tokenIn: path.swaps[n - 1 - i].tokenIn,
+                    tokenOut: path.swaps[n - 1 - i].tokenOut,
+                    swapAmount: amounts[1].toString(),
+                    limitReturnAmount: maxAmountIn,
+                    maxPrice: maxPrice,
+                    tokenInDecimals: path.poolPairData[n - 1 - i].decimalsIn,
+                    tokenOutDecimals: path.poolPairData[n - 1 - i].decimalsOut,
+                };
+                pathSwaps.unshift(swap);
+            }
+            returnAmount = amounts[0];
         }
-        // Update bestTotalReturn with EVM return
+        swaps.push(pathSwaps);
         bestTotalReturn = bestTotalReturn.plus(returnAmount);
     });
 
