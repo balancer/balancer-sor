@@ -44,7 +44,7 @@ export function filterPoolsOfInterest(
     tokenIn: string,
     tokenOut: string,
     maxPools: number,
-    chainId: number,
+    chainId: number = 1,
     currentBlockTimestamp = 0
 ): [PoolDictionary, string[], [PoolDictionaryByMain, MetaStablePool]] {
     const poolsDictionary: PoolDictionary = {};
@@ -242,7 +242,6 @@ export function filterHopPools(
             hopTokens[i],
             tokenOut
         );
-
         paths.push(path);
     }
 
@@ -299,12 +298,14 @@ export function getPathsUsingLinearPools(
                 pools
             );
             const lastPool = pools[lastPoolId];
-            const pathEnd = createDirectPath(
-                lastPool,
-                stableHopToken,
-                tokenOut
-            );
-            pathsUsingLinear.push(composePaths([linearPathway, pathEnd]));
+            if (lastPool) {
+                const pathEnd = createDirectPath(
+                    lastPool,
+                    stableHopToken,
+                    tokenOut
+                );
+                pathsUsingLinear.push(composePaths([linearPathway, pathEnd]));
+            }
         }
     }
     if (!linearPoolIn && linearPoolOut) {
@@ -325,12 +326,14 @@ export function getPathsUsingLinearPools(
                 pools
             );
             const firstPool = pools[firstPoolId];
-            const pathStart = createDirectPath(
-                firstPool,
-                tokenIn,
-                stableHopToken
-            );
-            pathsUsingLinear.push(composePaths([pathStart, linearPathway]));
+            if (firstPool) {
+                const pathStart = createDirectPath(
+                    firstPool,
+                    tokenIn,
+                    stableHopToken
+                );
+                pathsUsingLinear.push(composePaths([pathStart, linearPathway]));
+            }
         }
     }
     return pathsUsingLinear;

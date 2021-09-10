@@ -189,10 +189,25 @@ export class LinearPool implements PoolBase {
         poolPairData: PoolPairBase,
         swapType: SwapTypes
     ): BigNumber {
+        let linearPoolPairData = this.parsePoolPairData(
+            poolPairData.tokenIn,
+            poolPairData.tokenOut
+        );
         if (swapType === SwapTypes.SwapExactIn) {
-            return poolPairData.balanceIn.times(this.MAX_IN_RATIO);
-        } else {
-            return poolPairData.balanceOut.times(this.MAX_OUT_RATIO);
+            if (linearPoolPairData.pairType === PairTypes.TokenToBpt)
+                return poolPairData.balanceIn.times(this.MAX_IN_RATIO);
+            else if (linearPoolPairData.pairType === PairTypes.BptToToken) {
+                return _BPTInForExactTokenOut(
+                    poolPairData.balanceOut,
+                    linearPoolPairData
+                ).times(0.99);
+            }
+        } else if (swapType === SwapTypes.SwapExactOut) {
+            if (linearPoolPairData.pairType === PairTypes.TokenToBpt) {
+                return poolPairData.balanceOut.times(this.MAX_IN_RATIO);
+            } else if (linearPoolPairData.pairType === PairTypes.BptToToken) {
+                return poolPairData.balanceOut.times(0.99);
+            }
         }
     }
 
