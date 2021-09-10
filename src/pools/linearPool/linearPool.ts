@@ -6,7 +6,6 @@ import {
     PoolBase,
     PoolTypes,
     SwapPairType,
-    PairTypes,
     PoolPairBase,
     SwapTypes,
     SubgraphPoolBase,
@@ -31,6 +30,12 @@ import {
     _derivativeSpotPriceAfterSwapTokenInForExactBPTOut,
     _derivativeSpotPriceAfterSwapBPTInForExactTokenOut,
 } from './linearMath';
+
+enum PairTypes {
+    BptToToken,
+    TokenToBpt,
+    TokenToToken,
+}
 
 export interface LinearPoolToken {
     address: string;
@@ -116,8 +121,6 @@ export class LinearPool implements PoolBase {
 
     parsePoolPairData(tokenIn: string, tokenOut: string): LinearPoolPairData {
         let pairType: PairTypes;
-        let tI: LinearPoolToken;
-        let tO: LinearPoolToken;
         let balanceIn: BigNumber;
         let balanceOut: BigNumber;
         let decimalsOut: string | number;
@@ -140,24 +143,22 @@ export class LinearPool implements PoolBase {
             pairType = PairTypes.TokenToToken;
         }
 
-        if (pairType != PairTypes.BptToToken) {
-            let tokenIndexIn = this.tokens.findIndex(
-                (t) => getAddress(t.address) === getAddress(tokenIn)
-            );
-            if (tokenIndexIn < 0) throw 'Pool does not contain tokenIn';
-            tI = this.tokens[tokenIndexIn];
-            balanceIn = bnum(tI.balance);
-            decimalsIn = tI.decimals;
-        }
-        if (pairType != PairTypes.TokenToBpt) {
-            let tokenIndexOut = this.tokens.findIndex(
-                (t) => getAddress(t.address) === getAddress(tokenOut)
-            );
-            if (tokenIndexOut < 0) throw 'Pool does not contain tokenOut';
-            tO = this.tokens[tokenIndexOut];
-            balanceOut = bnum(tO.balance);
-            decimalsOut = tO.decimals;
-        }
+        const tokenIndexIn = this.tokens.findIndex(
+            (t) => getAddress(t.address) === getAddress(tokenIn)
+        );
+        if (tokenIndexIn < 0) throw 'Pool does not contain tokenIn';
+        const tI: LinearPoolToken = this.tokens[tokenIndexIn];
+        balanceIn = bnum(tI.balance);
+        decimalsIn = tI.decimals;
+
+        const tokenIndexOut = this.tokens.findIndex(
+            (t) => getAddress(t.address) === getAddress(tokenOut)
+        );
+        if (tokenIndexOut < 0) throw 'Pool does not contain tokenOut';
+        const tO: LinearPoolToken = this.tokens[tokenIndexOut];
+        balanceOut = bnum(tO.balance);
+        decimalsOut = tO.decimals;
+        //}
 
         const poolPairData: LinearPoolPairData = {
             id: this.id,
@@ -216,29 +217,39 @@ export class LinearPool implements PoolBase {
         exact: boolean
     ): BigNumber {
         console.log(`linearPool _exactTokenInForTokenOut`);
-        // if (exact) {
-        //     console.log('_evmoutGivenIn at linearPool.ts');
-        //     try {
-        //         // TO DO - Replace with correct SDK maths
-        //         // poolPair balances are normalised so must be scaled before use
-        //         const amt = SDK.WeightedMath._calcOutGivenIn(
-        //             scale(poolPairData.balanceIn, poolPairData.decimalsIn),
-        //             bnum(1),
-        //             scale(poolPairData.balanceOut, poolPairData.decimalsOut),
-        //             bnum(1),
-        //             scale(amount, poolPairData.decimalsIn),
-        //             scale(poolPairData.swapFee, 18)
-        //         );
-        //         // return normalised amount
-        //         return scale(amt, -poolPairData.decimalsOut);
-        //     } catch (err) {
-        //         return ZERO;
-        //     }
-        // }
-        return _exactTokenInForTokenOut(amount, poolPairData).dp(
-            poolPairData.decimalsOut,
-            1
-        );
+
+        if (poolPairData.pairType === PairTypes.TokenToBpt) {
+            console.log('TokenToBpt pair');
+            return this._exactTokenInForBPTOut(poolPairData, amount, exact);
+        } else if (poolPairData.pairType === PairTypes.BptToToken) {
+            console.log('BptToToken pair');
+            return this._exactBPTInForTokenOut(poolPairData, amount, exact);
+        } else {
+            console.log('Token pair');
+            // if (exact) {
+            //     console.log('_evmoutGivenIn at linearPool.ts');
+            //     try {
+            //         // TO DO - Replace with correct SDK maths
+            //         // poolPair balances are normalised so must be scaled before use
+            //         const amt = SDK.WeightedMath._calcOutGivenIn(
+            //             scale(poolPairData.balanceIn, poolPairData.decimalsIn),
+            //             bnum(1),
+            //             scale(poolPairData.balanceOut, poolPairData.decimalsOut),
+            //             bnum(1),
+            //             scale(amount, poolPairData.decimalsIn),
+            //             scale(poolPairData.swapFee, 18)
+            //         );
+            //         // return normalised amount
+            //         return scale(amt, -poolPairData.decimalsOut);
+            //     } catch (err) {
+            //         return ZERO;
+            //     }
+            // }
+            return _exactTokenInForTokenOut(amount, poolPairData).dp(
+                poolPairData.decimalsOut,
+                1
+            );
+        }
     }
 
     _exactTokenInForBPTOut(
@@ -302,29 +313,39 @@ export class LinearPool implements PoolBase {
         exact: boolean
     ): BigNumber {
         console.log(`linearPool _tokenInForExactTokenOut`);
-        // if (exact) {
-        //     try {
-        //         // TO DO - Replace with correct SDK maths
-        //         // poolPair balances are normalised so must be scaled before use
-        //         const amt = SDK.WeightedMath._calcInGivenOut(
-        //             scale(poolPairData.balanceIn, poolPairData.decimalsIn),
-        //             bnum(1),
-        //             scale(poolPairData.balanceOut, poolPairData.decimalsOut),
-        //             bnum(1),
-        //             scale(amount, poolPairData.decimalsOut),
-        //             scale(poolPairData.swapFee, 18)
-        //         );
 
-        //         // return normalised amount
-        //         return scale(amt, -poolPairData.decimalsIn);
-        //     } catch (err) {
-        //         return ZERO;
-        //     }
-        // }
-        return _tokenInForExactTokenOut(amount, poolPairData).dp(
-            poolPairData.decimalsIn,
-            0
-        );
+        if (poolPairData.pairType === PairTypes.TokenToBpt) {
+            console.log('TokenToBpt pair');
+            return this._tokenInForExactBPTOut(poolPairData, amount, exact);
+        } else if (poolPairData.pairType === PairTypes.BptToToken) {
+            console.log('BptToToken pair');
+            return this._BPTInForExactTokenOut(poolPairData, amount, exact);
+        } else {
+            console.log('Token pair');
+            // if (exact) {
+            //     try {
+            //         // TO DO - Replace with correct SDK maths
+            //         // poolPair balances are normalised so must be scaled before use
+            //         const amt = SDK.WeightedMath._calcInGivenOut(
+            //             scale(poolPairData.balanceIn, poolPairData.decimalsIn),
+            //             bnum(1),
+            //             scale(poolPairData.balanceOut, poolPairData.decimalsOut),
+            //             bnum(1),
+            //             scale(amount, poolPairData.decimalsOut),
+            //             scale(poolPairData.swapFee, 18)
+            //         );
+
+            //         // return normalised amount
+            //         return scale(amt, -poolPairData.decimalsIn);
+            //     } catch (err) {
+            //         return ZERO;
+            //     }
+            // }
+            return _tokenInForExactTokenOut(amount, poolPairData).dp(
+                poolPairData.decimalsIn,
+                0
+            );
+        }
     }
 
     _tokenInForExactBPTOut(
@@ -383,7 +404,21 @@ export class LinearPool implements PoolBase {
         poolPairData: LinearPoolPairData,
         amount: BigNumber
     ): BigNumber {
-        return _spotPriceAfterSwapExactTokenInForTokenOut(amount, poolPairData);
+        if (poolPairData.pairType === PairTypes.TokenToBpt) {
+            return this._spotPriceAfterSwapExactTokenInForBPTOut(
+                poolPairData,
+                amount
+            );
+        } else if (poolPairData.pairType === PairTypes.BptToToken) {
+            return this._spotPriceAfterSwapExactBPTInForTokenOut(
+                poolPairData,
+                amount
+            );
+        } else
+            return _spotPriceAfterSwapExactTokenInForTokenOut(
+                amount,
+                poolPairData
+            );
     }
 
     _spotPriceAfterSwapExactTokenInForBPTOut(
@@ -404,7 +439,21 @@ export class LinearPool implements PoolBase {
         poolPairData: LinearPoolPairData,
         amount: BigNumber
     ): BigNumber {
-        return _spotPriceAfterSwapTokenInForExactTokenOut(amount, poolPairData);
+        if (poolPairData.pairType === PairTypes.TokenToBpt) {
+            return this._spotPriceAfterSwapTokenInForExactBPTOut(
+                poolPairData,
+                amount
+            );
+        } else if (poolPairData.pairType === PairTypes.BptToToken) {
+            return this._spotPriceAfterSwapBPTInForExactTokenOut(
+                poolPairData,
+                amount
+            );
+        } else
+            return _spotPriceAfterSwapTokenInForExactTokenOut(
+                amount,
+                poolPairData
+            );
     }
 
     _spotPriceAfterSwapTokenInForExactBPTOut(
@@ -425,10 +474,21 @@ export class LinearPool implements PoolBase {
         poolPairData: LinearPoolPairData,
         amount: BigNumber
     ): BigNumber {
-        return _derivativeSpotPriceAfterSwapExactTokenInForTokenOut(
-            amount,
-            poolPairData
-        );
+        if (poolPairData.pairType === PairTypes.TokenToBpt) {
+            return this._derivativeSpotPriceAfterSwapExactTokenInForBPTOut(
+                poolPairData,
+                amount
+            );
+        } else if (poolPairData.pairType === PairTypes.BptToToken) {
+            return this._derivativeSpotPriceAfterSwapExactBPTInForTokenOut(
+                poolPairData,
+                amount
+            );
+        } else
+            return _derivativeSpotPriceAfterSwapExactTokenInForTokenOut(
+                amount,
+                poolPairData
+            );
     }
 
     _derivativeSpotPriceAfterSwapExactTokenInForBPTOut(
@@ -455,10 +515,21 @@ export class LinearPool implements PoolBase {
         poolPairData: LinearPoolPairData,
         amount: BigNumber
     ): BigNumber {
-        return _derivativeSpotPriceAfterSwapTokenInForExactTokenOut(
-            amount,
-            poolPairData
-        );
+        if (poolPairData.pairType === PairTypes.TokenToBpt) {
+            return this._derivativeSpotPriceAfterSwapTokenInForExactBPTOut(
+                poolPairData,
+                amount
+            );
+        } else if (poolPairData.pairType === PairTypes.BptToToken) {
+            return this._derivativeSpotPriceAfterSwapBPTInForExactTokenOut(
+                poolPairData,
+                amount
+            );
+        } else
+            return _derivativeSpotPriceAfterSwapTokenInForExactTokenOut(
+                amount,
+                poolPairData
+            );
     }
 
     _derivativeSpotPriceAfterSwapTokenInForExactBPTOut(
