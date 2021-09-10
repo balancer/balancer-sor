@@ -3,13 +3,7 @@ import { expect } from 'chai';
 import cloneDeep from 'lodash.clonedeep';
 import { JsonRpcProvider } from '@ethersproject/providers';
 import { SOR } from '../src';
-import {
-    SwapInfo,
-    SwapTypes,
-    PoolTypes,
-    PairTypes,
-    SubgraphPoolBase,
-} from '../src/types';
+import { SwapInfo, SwapTypes, PoolTypes, SubgraphPoolBase } from '../src/types';
 import { BigNumber, bnum, scale } from '../src/utils/bignumber';
 import {
     MetaStablePool,
@@ -82,7 +76,6 @@ describe(`Tests for MetaStable Pools.`, () => {
                 id: pool.id,
                 address: pool.address,
                 poolType: PoolTypes.Stable,
-                pairType: PairTypes.TokenToToken,
                 tokenIn: pool.tokens[0].address,
                 tokenOut: pool.tokens[1].address,
                 balanceIn: bnum(pool.tokens[0].balance),
@@ -135,7 +128,6 @@ describe(`Tests for MetaStable Pools.`, () => {
                 id: pool.id,
                 address: pool.address,
                 poolType: PoolTypes.Stable,
-                pairType: PairTypes.TokenToToken,
                 tokenIn: pool.tokens[0].address,
                 tokenOut: pool.tokens[1].address,
                 balanceIn: bnum(pool.tokens[0].balance),
@@ -702,150 +694,4 @@ describe(`Tests for MetaStable Pools.`, () => {
         //     // });
         // });
     });
-
-    //     if (ALLOW_ADD_REMOVE) {
-    //         it(`Full Swap - swapExactIn, Token > BPT`, async () => {
-    //             const poolsFromFile = require('./testData/metaStablePools/singlePool.json');
-    //             const tokenIn = DAI;
-    //             const tokenOut = BPT;
-    //             const swapType = SwapTypes.SwapExactIn;
-    //             const swapAmt: BigNumber = bnum('1');
-
-    //             const sor = new SOR(
-    //                 provider,
-    //                 gasPrice,
-    //                 maxPools,
-    //                 chainId,
-    //                 poolsFromFile
-    //             );
-
-    //             const fetchSuccess = await sor.fetchPools([],false);
-    //             expect(fetchSuccess).to.be.true;
-
-    //             let swapInfo: SwapInfo = await sor.getSwaps(
-    //                 tokenIn,
-    //                 tokenOut,
-    //                 swapType,
-    //                 swapAmt
-    //             );
-    //             expect(swapInfo.returnAmount.toString()).eq(
-    //                 '304749153137929290'
-    //             );
-    //             expect(swapInfo.swaps.length).eq(1);
-    //             expect(
-    //                 swapInfo.tokenAddresses[swapInfo.swaps[0].assetInIndex]
-    //             ).eq(tokenIn);
-    //             expect(
-    //                 swapInfo.tokenAddresses[swapInfo.swaps[0].assetOutIndex]
-    //             ).eq(tokenOut);
-    //         });
-
-    //         it(`Full Swap - swapExactIn, BPT > Token`, async () => {
-    //             const poolsFromFile = require('./testData/metaStablePools/singlePool.json');
-    //             const tokenIn = BPT;
-    //             const tokenOut = USDT;
-    //             const swapType = SwapTypes.SwapExactIn;
-    //             const swapAmt: BigNumber = bnum('1.77');
-
-    //             const sor = new SOR(
-    //                 provider,
-    //                 gasPrice,
-    //                 maxPools,
-    //                 chainId,
-    //                 poolsFromFile
-    //             );
-
-    //             const fetchSuccess = await sor.fetchPools([],false);
-    //             expect(fetchSuccess).to.be.true;
-
-    //             let swapInfo: SwapInfo = await sor.getSwaps(
-    //                 tokenIn,
-    //                 tokenOut,
-    //                 swapType,
-    //                 swapAmt
-    //             );
-
-    //             expect(swapInfo.returnAmount.toString()).eq('5771787');
-    //             expect(swapInfo.swaps.length).eq(1);
-    //             expect(
-    //                 swapInfo.tokenAddresses[swapInfo.swaps[0].assetInIndex]
-    //             ).eq(tokenIn);
-    //             expect(
-    //                 swapInfo.tokenAddresses[swapInfo.swaps[0].assetOutIndex]
-    //             ).eq(tokenOut);
-    //         });
-
-    //         it(`Full Swap - swapExactOut, Token > BPT`, async () => {
-    //             const poolsFromFile = require('./testData/metaStablePools/singlePool.json');
-    //             const tokenIn = USDC;
-    //             const tokenOut = BPT;
-    //             const swapType = SwapTypes.SwapExactOut;
-    //             const swapAmt: BigNumber = bnum('1.276');
-
-    //             const sor = new SOR(
-    //                 provider,
-    //                 gasPrice,
-    //                 maxPools,
-    //                 chainId,
-    //                 poolsFromFile
-    //             );
-
-    //             const fetchSuccess = await sor.fetchPools([],false);
-    //             expect(fetchSuccess).to.be.true;
-
-    //             let swapInfo: SwapInfo = await sor.getSwaps(
-    //                 tokenIn,
-    //                 tokenOut,
-    //                 swapType,
-    //                 swapAmt
-    //             );
-
-    //             // This value is hard coded as sanity check if things unexpectedly change. Taken from isolated run of calcTokenInGivenExactBptOut.
-    //             expect(swapInfo.returnAmount.toString()).eq('4254344');
-    //             expect(swapInfo.swaps.length).eq(1);
-    //             expect(
-    //                 swapInfo.tokenAddresses[swapInfo.swaps[0].assetInIndex]
-    //             ).eq(tokenIn);
-    //             expect(
-    //                 swapInfo.tokenAddresses[swapInfo.swaps[0].assetOutIndex]
-    //             ).eq(tokenOut);
-    //         });
-
-    //         it(`Full Swap - swapExactOut, BPT > Token`, async () => {
-    //             const poolsFromFile = require('./testData/metaStablePools/singlePool.json');
-    //             const tokenIn = BPT;
-    //             const tokenOut = DAI;
-    //             const swapType = SwapTypes.SwapExactOut;
-    //             const swapAmt: BigNumber = bnum('2.44');
-
-    //             const sor = new SOR(
-    //                 provider,
-    //                 gasPrice,
-    //                 maxPools,
-    //                 chainId,
-    //                 poolsFromFile
-    //             );
-
-    //             const fetchSuccess = await sor.fetchPools([],false);
-    //             expect(fetchSuccess).to.be.true;
-
-    //             let swapInfo: SwapInfo = await sor.getSwaps(
-    //                 tokenIn,
-    //                 tokenOut,
-    //                 swapType,
-    //                 swapAmt
-    //             );
-
-    //             expect(swapInfo.returnAmount.toString()).eq(
-    //                 '753789411555982650'
-    //             );
-    //             expect(swapInfo.swaps.length).eq(1);
-    //             expect(
-    //                 swapInfo.tokenAddresses[swapInfo.swaps[0].assetInIndex]
-    //             ).eq(tokenIn);
-    //             expect(
-    //                 swapInfo.tokenAddresses[swapInfo.swaps[0].assetOutIndex]
-    //             ).eq(tokenOut);
-    //         });
-    //     }
 });

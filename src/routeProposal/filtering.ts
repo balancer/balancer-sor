@@ -1,4 +1,3 @@
-import { ALLOW_ADD_REMOVE } from '../config';
 import {
     SubgraphPoolBase,
     PoolDictionary,
@@ -82,9 +81,6 @@ export function filterPoolsOfInterest(
             linearPoolsDictByMain[pool.tokens[0].address] = newPool;
 
         const tokenListSet = new Set(pool.tokensList);
-        // Depending on env file, we add the BPT as well as
-        // we can join/exit as part of the multihop
-        if (ALLOW_ADD_REMOVE) tokenListSet.add(pool.address);
 
         // This is a direct pool as has both tokenIn and tokenOut
         if (
@@ -188,11 +184,8 @@ export function filterHopPools(
             }
 
             const tokenListSet = new Set(pool.tokensList);
-            // Depending on env file, we add the BPT as well as
-            // we can join/exit as part of the multihop
-            if (ALLOW_ADD_REMOVE) tokenListSet.add(pool.address);
-            // MAKE THIS A FLAG IN FILTER?
-            // If pool doesn't have  hopTokens[i] then ignore
+
+            // If pool doesn't have hopTokens[i] then ignore
             if (!tokenListSet.has(hopTokens[i])) continue;
 
             if (pool.swapPairType === SwapPairType.HopIn) {
@@ -355,10 +348,7 @@ function getHighestLiquidityPool(
         const pool = poolsOfInterest[id];
         if (swapPairType != pool.swapPairType) continue;
         const tokenListSet = new Set(pool.tokensList);
-        // Depending on env file, we add the BPT as well as
-        // we can join/exit as part of the multihop
-        if (ALLOW_ADD_REMOVE) tokenListSet.add(pool.address);
-        // MAKE THIS A FLAG IN FILTER?
+
         // If pool doesn't have tokenIn or tokenOut then ignore
 
         if (!tokenListSet.has(tokenIn) || !tokenListSet.has(tokenOut)) continue;
