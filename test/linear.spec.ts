@@ -5,6 +5,7 @@ import {
     NewPath,
     SwapTypes,
     PoolDictionaryByMain,
+    PoolBase,
 } from '../src/types';
 import {
     filterPoolsOfInterest,
@@ -41,7 +42,6 @@ const USDT = {
 
 describe('linear pools tests', () => {
     it('basic swap case', async () => {
-        console.log('first: ');
         runSOR(
             DAI,
             USDC,
@@ -51,53 +51,20 @@ describe('linear pools tests', () => {
         );
         console.log('second: ');
         runSOR(
-            WETH,
-            USDC,
-            SwapTypes.SwapExactIn,
-            new BigNumber(2500),
-            smallLinear
-        );
-        console.log('third: ');
-        runSOR(
             DAI,
             USDC,
             SwapTypes.SwapExactIn,
             new BigNumber(2500),
             singleLinear
         );
-    });
-
-    it('check linear pools and multi-metastable are added', async () => {
-        let [pools, linearPoolsInfo, paths] = getPaths(
-            DAI.address,
-            USDC.address,
+        console.log('third: ');
+        runSOR(
+            WETH,
+            USDC,
             SwapTypes.SwapExactIn,
-            smallLinear.pools,
-            10
+            new BigNumber(10),
+            smallLinear
         );
-        let linearPoolsDictByMain = linearPoolsInfo[0];
-        let multiMetaStablePool = linearPoolsInfo[1];
-        let DAILinearPool = linearPoolsDictByMain[DAI.address];
-        let USDCLinearPool = linearPoolsDictByMain[USDC.address];
-        let USDTLinearPool = linearPoolsDictByMain[USDT.address];
-        assert(DAILinearPool, 'DAI linear pool is absent');
-        assert(USDCLinearPool, 'USDC linear pool is absent');
-        assert(USDTLinearPool, 'USDT linear pool is absent');
-        assert(multiMetaStablePool, 'multi-metastable pool is absent');
-        let pathsUsingLinear = getPathsUsingLinearPools(
-            DAI.address,
-            USDC.address,
-            linearPoolsInfo,
-            pools
-        );
-        assert.equal(
-            pathsUsingLinear.length,
-            1,
-            'exactly 1 path using linear pools expected'
-        );
-        assert.equal(pathsUsingLinear[0].pools[0], DAILinearPool);
-        assert.equal(pathsUsingLinear[0].pools[1], multiMetaStablePool);
-        assert.equal(pathsUsingLinear[0].pools[2], USDCLinearPool);
     });
 });
 
@@ -110,21 +77,23 @@ describe('Some more linear pools tests', () => {
             smallLinear.pools,
             10
         );
-
-        let linearPoolsDictByMain = linearPoolsInfo[0];
-        let multiMetaStablePool = linearPoolsInfo[1];
-        assert(multiMetaStablePool, 'multi-metastable pool is absent');
-        let pathsUsingLinear = getPathsUsingLinearPools(
-            USDT.address,
+        assert.equal(paths.length, 2);
+        [pools, linearPoolsInfo, paths] = getPaths(
+            DAI.address,
+            USDC.address,
+            SwapTypes.SwapExactIn,
+            smallLinear.pools,
+            10
+        );
+        assert.equal(paths.length, 3);
+        [pools, linearPoolsInfo, paths] = getPaths(
             WETH.address,
-            linearPoolsInfo,
-            pools
+            DAI.address,
+            SwapTypes.SwapExactIn,
+            smallLinear.pools,
+            10
         );
-        assert.equal(
-            pathsUsingLinear.length,
-            2,
-            'exactly 2 paths using linear pools expected'
-        );
+        assert.equal(paths.length, 3);
     });
 });
 
@@ -171,7 +140,7 @@ function runSOR(
         maxPools,
         bnum(0.01)
     );
-    console.log(swaps);
+    console.log('swaps: ', swaps);
     /*
     const swapInfo = formatSwaps(
         swaps,
@@ -193,29 +162,36 @@ function getPaths(
     swapType: SwapTypes,
     pools,
     maxPools
-) {
+): [PoolDictionary, [PoolDictionaryByMain, MetaStablePool], NewPath[]] {
     let paths: NewPath[];
     let hopTokens: string[];
     let linearPoolsInfo: [PoolDictionaryByMain, MetaStablePool];
-    [pools, hopTokens, linearPoolsInfo] = filterPoolsOfInterest(
+    let poolsDict: PoolDictionary;
+    [poolsDict, hopTokens, linearPoolsInfo] = filterPoolsOfInterest(
         cloneDeep(pools),
         tokenIn,
         tokenOut,
         maxPools
     );
     let pathData: NewPath[] = [];
-    //    console.log("prefilter pools: ", pools);
 
-    //    [pools, pathData] = filterHopPools(tokenIn, tokenOut, hopTokens, pools);
+    let filteredPoolsDict: PoolDictionary;
+    [filteredPoolsDict, pathData] = filterHopPools(
+        tokenIn,
+        tokenOut,
+        hopTokens,
+        poolsDict
+    );
 
-    //    console.log("postfilter pools: ", pools);
-    let pathsUsingLinear = getPathsUsingLinearPools(
+    let pathsUsingLinear: NewPath[];
+    [filteredPoolsDict, pathsUsingLinear] = getPathsUsingLinearPools(
         tokenIn,
         tokenOut,
         linearPoolsInfo,
-        pools
+        poolsDict,
+        filteredPoolsDict
     );
     pathData = pathData.concat(pathsUsingLinear);
     [paths] = calculatePathLimits(pathData, swapType);
-    return [pools, linearPoolsInfo, paths];
+    return [filteredPoolsDict, linearPoolsInfo, paths];
 }

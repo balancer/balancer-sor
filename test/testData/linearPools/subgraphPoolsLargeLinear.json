@@ -2577,7 +2577,7 @@
             "address": "0xf218fe414c6b1c6b42e79b7690f1509a634baad0"
         },
         {
-            "id": "linear1id",
+            "id": "linearUSDC",
             "publicSwap": true,
             "swapFee": "0.01",
             "tokens": [
@@ -2585,14 +2585,14 @@
                     "address": "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
                     "balance": "1500000000.000000",
                     "decimals": 6,
-                    "id": "linear1id-0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+                    "id": "linearUSDC-0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
                     "symbol": "USDC"
                 },
                 {
                     "address": "0x9ba00d6856a4edf4665bca2c2309936572473b7e",
                     "balance": "1500000000.000000",
                     "decimals": 6,
-                    "id": "linear1id-0x9ba00d6856a4edf4665bca2c2309936572473b7e",
+                    "id": "linearUSDC-0x9ba00d6856a4edf4665bca2c2309936572473b7e",
                     "symbol": "aUSDC",
                     "priceRate": "1.1"
                 },
@@ -2600,7 +2600,7 @@
                     "address": "0x0000000000000000000000000000000000000001",
                     "balance": "2000.000000",
                     "decimals": 6,
-                    "id": "linear1id-0x0000000000000000000000000000000000000001",
+                    "id": "linearUSDC-0x0000000000000000000000000000000000000001",
                     "symbol": "bUSDC"
                 }
             ],
@@ -2617,7 +2617,7 @@
             "target2": "1500.000000"
         },
         {
-            "id": "linear2id",
+            "id": "linearDAI",
             "publicSwap": true,
             "swapFee": "0.01",
             "tokens": [
@@ -2625,14 +2625,14 @@
                     "address": "0x6b175474e89094c44da98b954eedeac495271d0f",
                     "balance": "1500000000.123456789123456789",
                     "decimals": 18,
-                    "id": "linear2id-0x6b175474e89094c44da98b954eedeac495271d0f",
+                    "id": "linearDAI-0x6b175474e89094c44da98b954eedeac495271d0f",
                     "symbol": "DAI"
                 },
                 {
                     "address": "0xfc1e690f61efd961294b3e1ce3313fbd8aa4f85d",
                     "balance": "1500000000.123456789123456789",
                     "decimals": 18,
-                    "id": "linear2id-0xfc1e690f61efd961294b3e1ce3313fbd8aa4f85d",
+                    "id": "linearDAI-0xfc1e690f61efd961294b3e1ce3313fbd8aa4f85d",
                     "symbol": "aDAI",
                     "priceRate": "1.1"
                 },
@@ -2640,7 +2640,7 @@
                     "address": "0x0000000000000000000000000000000000000002",
                     "balance": "2000.000000000000000000",
                     "decimals": 18,
-                    "id": "linear2id-0x0000000000000000000000000000000000000002",
+                    "id": "linearDAI-0x0000000000000000000000000000000000000002",
                     "symbol": "bDAI"
                 }
             ],

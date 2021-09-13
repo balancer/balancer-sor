@@ -181,8 +181,8 @@ export const formatSwaps = (
     console.log('Number of paths: ', bestPaths.length);
     for (let i = 0; i < bestPaths.length; i++) {
         console.log('Length of path', i, ':', bestPaths[i].pools.length);
-        for (let bestPath of bestPaths) {
-            console.log('pool address', i, ':', bestPath.pools[0].address);
+        for (let j = 0; j < bestPaths[i].pools.length; j++) {
+            console.log('pool address:', bestPaths[i].pools[j].address);
         }
     }
 
@@ -222,7 +222,6 @@ export const formatSwaps = (
                         amounts[amounts.length - 1]
                     )
                 );
-                console.log('i: ', i, 'amounts: ', amounts.toString());
                 const swap: Swap = {
                     pool: path.swaps[i].pool,
                     tokenIn: path.swaps[i].tokenIn,
@@ -233,10 +232,10 @@ export const formatSwaps = (
                     tokenInDecimals: path.poolPairData[i].decimalsIn,
                     tokenOutDecimals: path.poolPairData[i].decimalsOut,
                 };
-                console.log('swap: ', swap);
                 pathSwaps.push(swap);
             }
             returnAmount = amounts[n];
+            console.log('i: ', i, 'amounts: ', amounts.toString());
             console.log('returnAmount: ', returnAmount.toString());
         } else {
             for (let i = 0; i < n; i++) {
@@ -328,11 +327,6 @@ function getBestPathIds(
         let bestPathIndex = -1;
         let bestEffectivePrice = INFINITY; // Start with worst price possible
         paths.forEach((path, j) => {
-            if (path.poolPairData.length > 2) {
-                console.log('Path length: ', path.poolPairData.length);
-                console.log('path.limitAmount:', path.limitAmount.toString());
-            }
-
             // Do not consider this path if its limit is below swapAmount
             if (path.limitAmount.gte(swapAmount)) {
                 // Calculate effective price of this path for this swapAmount
@@ -351,12 +345,6 @@ function getBestPathIds(
                         swapType,
                         swapAmount
                     );
-                    if (path.poolPairData.length > 2) {
-                        console.log(
-                            'effective price:',
-                            effectivePrice.toString()
-                        );
-                    }
                 }
                 if (effectivePrice.lte(bestEffectivePrice)) {
                     bestEffectivePrice = effectivePrice;

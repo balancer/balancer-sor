@@ -65,10 +65,12 @@ export class RouteProposer {
             poolsDict
         );
 
-        let pathsUsingLinear = getPathsUsingLinearPools(
+        let pathsUsingLinear: NewPath[];
+        [filteredPoolsDict, pathsUsingLinear] = getPathsUsingLinearPools(
             tokenIn,
             tokenOut,
             linearPoolsInfo,
+            poolsDict,
             filteredPoolsDict
         );
         pathData = pathData.concat(pathsUsingLinear);
