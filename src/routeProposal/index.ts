@@ -1,5 +1,9 @@
 import cloneDeep from 'lodash.clonedeep';
-import { filterPoolsOfInterest, filterHopPools } from './filtering';
+import {
+    filterPoolsOfInterest,
+    filterHopPools,
+    getPathsUsingStaBalPools,
+} from './filtering';
 import { calculatePathLimits } from './pathLimits';
 import {
     SwapOptions,
@@ -20,7 +24,8 @@ export class RouteProposer {
         tokenOut: string,
         swapType: SwapTypes,
         pools: SubgraphPoolBase[],
-        swapOptions: SwapOptions
+        swapOptions: SwapOptions,
+        chainId: number
     ): { pools: PoolDictionary; paths: NewPath[] } {
         if (pools.length === 0) return { pools: {}, paths: [] };
 
@@ -42,19 +47,33 @@ export class RouteProposer {
         // Some functions alter pools list directly but we want to keep original so make a copy to work from
         const poolsList = cloneDeep(pools);
 
-        const [poolsDict, hopTokens] = filterPoolsOfInterest(
-            poolsList,
-            tokenIn,
-            tokenOut,
-            swapOptions.maxPools,
-            swapOptions.timestamp
-        );
-        const [filteredPoolsDict, pathData] = filterHopPools(
+        const [poolsDict, hopTokens, usdcConnectingPool] =
+            filterPoolsOfInterest(
+                poolsList,
+                tokenIn,
+                tokenOut,
+                swapOptions.maxPools,
+                chainId,
+                swapOptions.timestamp
+            );
+        let pathData: NewPath[];
+        let filteredPoolsDict: PoolDictionary;
+        [filteredPoolsDict, pathData] = filterHopPools(
             tokenIn,
             tokenOut,
             hopTokens,
             poolsDict
         );
+
+        const pathsUsingStaBal: NewPath[] = getPathsUsingStaBalPools(
+            tokenIn,
+            tokenOut,
+            poolsDict,
+            usdcConnectingPool,
+            chainId
+        );
+        pathData = pathData.concat(pathsUsingStaBal);
+
         const [paths] = calculatePathLimits(pathData, swapType);
 
         this.cache[`${tokenIn}${tokenOut}${swapType}${swapOptions.timestamp}`] =

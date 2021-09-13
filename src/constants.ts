@@ -25,6 +25,67 @@ export const VAULTADDR: { [chainId: number]: string } = {
     42161: '0xBA12222222228d8Ba445958a75a0704d566BF2C8',
 };
 
+// Currently only used for Polygon
+// ID of USDC Connecting Pool & USDC token address
+export const USDCCONNECTINGPOOL: {
+    [chainId: number]: { id: string; usdc: string };
+} = {
+    1: {
+        id: 'N/A',
+        usdc: 'N/A',
+    },
+    5: {
+        id: 'N/A',
+        usdc: 'N/A',
+    },
+    42: {
+        id: 'N/A',
+        usdc: 'N/A',
+    },
+    137: {
+        id: 'TODO',
+        usdc: 'TODO',
+    },
+    42161: {
+        id: 'N/A',
+        usdc: 'N/A',
+    },
+    99: {
+        id: 'usdcConnecting',
+        usdc: '0x2791bca1f2de4661ed88a30c99a7a9449aa84174',
+    },
+};
+
+// Currently only used for Polygon
+// Address of staBAL3 pool
+export const STABALADDR: { [chainId: number]: string } = {
+    1: 'N/A',
+    5: 'N/A',
+    42: 'N/A',
+    137: 'TODO',
+    42161: 'N/A',
+    99: '0x0000000000000000000000000000000000000001',
+};
+
+// Currently only used for Polygon
+// Mapping of staBAL paired tokens to the pool ID: tokenAddress/poolID
+export const STABALPOOLS: { [chainId: number]: { [token: string]: string } } = {
+    1: {},
+    5: {},
+    42: {},
+    137: {}, // TO DO
+    42161: {},
+    99: {
+        '0x0000000000085d4780B73119b644AE5ecd22b376': 'staBalPair1',
+        '0x0000000000000000000000000000000000000002': 'staBalPair2',
+    },
+};
+
+export interface StaBalPairPool {
+    id: string;
+    tokens: string[];
+}
+
 export const EMPTY_SWAPINFO: SwapInfo = {
     tokenAddresses: [],
     swaps: [],
