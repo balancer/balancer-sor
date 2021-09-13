@@ -16,11 +16,13 @@ export async function fetchSubgraphPools(SubgraphUrl: string = '') {
           swapFee
           totalShares
           tokens {
-            address
             balance
-            decimals
             weight
             priceRate
+            token {
+              decimals
+              address
+            }
           }
           tokensList
           totalWeight

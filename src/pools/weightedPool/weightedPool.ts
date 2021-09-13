@@ -32,10 +32,12 @@ import {
 } from './weightedMath';
 
 export interface WeightedPoolToken {
-    address: string;
     balance: string;
-    decimals: string | number;
     weight?: string;
+    token: {
+        decimals: number;
+        address: string;
+    }
 }
 
 export interface WeightedPoolPairData extends PoolPairBase {
@@ -121,22 +123,22 @@ export class WeightedPool implements PoolBase {
 
         if (pairType != PairTypes.BptToToken) {
             let tokenIndexIn = this.tokens.findIndex(
-                t => getAddress(t.address) === getAddress(tokenIn)
+                t => getAddress(t.token.address) === getAddress(tokenIn)
             );
             if (tokenIndexIn < 0) throw 'Pool does not contain tokenIn';
             tI = this.tokens[tokenIndexIn];
             balanceIn = tI.balance;
-            decimalsIn = tI.decimals;
+            decimalsIn = tI.token.decimals;
             weightIn = bnum(tI.weight).div(this.totalWeight);
         }
         if (pairType != PairTypes.TokenToBpt) {
             let tokenIndexOut = this.tokens.findIndex(
-                t => getAddress(t.address) === getAddress(tokenOut)
+                t => getAddress(t.token.address) === getAddress(tokenOut)
             );
             if (tokenIndexOut < 0) throw 'Pool does not contain tokenOut';
             tO = this.tokens[tokenIndexOut];
             balanceOut = tO.balance;
-            decimalsOut = tO.decimals;
+            decimalsOut = tO.token.decimals;
             weightOut = bnum(tO.weight).div(this.totalWeight);
         }
 
@@ -195,7 +197,7 @@ export class WeightedPool implements PoolBase {
             this.totalShares = newBalance.toString();
         } else {
             // token is underlying in the pool
-            const T = this.tokens.find(t => t.address === token);
+            const T = this.tokens.find(t => t.token.address === token);
             T.balance = newBalance.toString();
         }
     }

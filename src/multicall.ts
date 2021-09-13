@@ -94,11 +94,11 @@ export async function getOnChainBalances(
                     .toString()
                     .toLowerCase();
                 const T = subgraphPool.tokens.find(
-                    t => t.address === tokenAddress
+                    t => t.token.address === tokenAddress
                 );
                 const balance = scale(
                     bnum(onChainResult.poolTokens.balances[i]),
-                    -Number(T.decimals)
+                    -Number(T.token.decimals)
                 ).toString();
                 T.balance = balance;
                 if (subgraphPool.poolType === 'Weighted')

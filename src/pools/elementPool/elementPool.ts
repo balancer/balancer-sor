@@ -20,9 +20,11 @@ import {
 } from './elementMath';
 
 export interface ElementPoolToken {
-    address: string;
     balance: string;
-    decimals: string | number;
+    token: {
+        address: string;
+        decimals: number;
+    }
 }
 
 export interface ElementPoolPairData extends PoolPairBase {
@@ -121,21 +123,21 @@ export class ElementPool implements PoolBase {
 
         if (pairType != PairTypes.BptToToken) {
             tokenIndexIn = this.tokens.findIndex(
-                t => getAddress(t.address) === getAddress(tokenIn)
+                t => getAddress(t.token.address) === getAddress(tokenIn)
             );
             if (tokenIndexIn < 0) throw 'Pool does not contain tokenIn';
             tI = this.tokens[tokenIndexIn];
             balanceIn = tI.balance;
-            decimalsIn = tI.decimals;
+            decimalsIn = tI.token.decimals;
         }
         if (pairType != PairTypes.TokenToBpt) {
             tokenIndexOut = this.tokens.findIndex(
-                t => getAddress(t.address) === getAddress(tokenOut)
+                t => getAddress(t.token.address) === getAddress(tokenOut)
             );
             if (tokenIndexOut < 0) throw 'Pool does not contain tokenOut';
             tO = this.tokens[tokenIndexOut];
             balanceOut = tO.balance;
-            decimalsOut = tO.decimals;
+            decimalsOut = tO.token.decimals;
         }
 
         // We already add the virtual LP shares to the right balance
@@ -208,7 +210,7 @@ export class ElementPool implements PoolBase {
             this.totalShares = newBalance.toString();
         } else {
             // token is underlying in the pool
-            const T = this.tokens.find(t => t.address === token);
+            const T = this.tokens.find(t => t.token.address === token);
             T.balance = newBalance.toString();
         }
     }

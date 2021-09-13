@@ -9,7 +9,7 @@ import {
     Swap,
     DisabledToken,
     DisabledOptions,
-    SubGraphToken,
+    SubGraphPoolToken,
     PoolDictionary,
     SwapPairType,
     NewPath,
@@ -91,15 +91,15 @@ function formatToV1schema(poolsV2: SubGraphPoolsBase): SubgraphPoolsV1 {
 
 function formatToV1Pool(pool: SubgraphPoolBase): SubGraphPoolV1 {
     const v1tokens: SubGraphTokenV1[] = [];
-    pool.tokens.forEach(token => {
+    pool.tokens.forEach(poolToken => {
         v1tokens.push({
-            address: token.address,
+            address: poolToken.token.address,
             balance: scale(
-                bnum(token.balance),
-                Number(token.decimals)
+                bnum(poolToken.balance),
+                Number(poolToken.token.decimals)
             ).toString(),
-            decimals: token.decimals.toString(),
-            denormWeight: scale(bnum(token.weight), 18).toString(),
+            decimals: poolToken.token.decimals.toString(),
+            denormWeight: scale(bnum(poolToken.weight), 18).toString(),
         });
     });
 
@@ -965,8 +965,8 @@ async function getAllPoolDataOnChain(
 
         addresses.push([pool.id]);
         total++;
-        pool.tokens.forEach(token => {
-            addresses[i].push(token.address);
+        pool.tokens.forEach(poolToken => {
+            addresses[i].push(poolToken.token.address);
             total++;
         });
     }
@@ -977,7 +977,7 @@ async function getAllPoolDataOnChain(
     let onChainPools: SubGraphPoolsBase = { pools: [] };
 
     for (let i = 0; i < pools.pools.length; i++) {
-        let tokens: SubGraphToken[] = [];
+        let tokens: SubGraphPoolToken[] = [];
 
         let p: SubgraphPoolBase = {
             address: 'n/a',
@@ -991,18 +991,20 @@ async function getAllPoolDataOnChain(
             totalShares: pools.pools[i].totalShares,
         };
 
-        pools.pools[i].tokens.forEach(token => {
+        pools.pools[i].tokens.forEach(poolToken => {
             // let bal = bnum(results[j]);
             let bal = scale(
                 bnum(results[j]),
-                -Number(token.decimals)
+                -Number(poolToken.token.decimals)
             ).toString();
             j++;
             p.tokens.push({
-                address: token.address,
+                token: {
+                    address: poolToken.token.address,
+                    decimals: poolToken.token.decimals,
+                },
                 balance: bal,
-                decimals: token.decimals,
-                weight: token.weight,
+                weight: poolToken.weight,
             });
         });
         onChainPools.pools.push(p);

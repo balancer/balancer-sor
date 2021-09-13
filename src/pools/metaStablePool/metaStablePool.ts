@@ -33,10 +33,12 @@ import {
 } from './metaStableMath';
 
 export interface MetaStablePoolToken {
-    address: string;
-    balance: string;
-    decimals: string | number;
     priceRate?: string;
+    balance: string;
+    token: {
+        decimals: number;
+        address: string;
+    }
 }
 
 export interface MetaStablePoolPairData extends PoolPairBase {
@@ -133,24 +135,24 @@ export class MetaStablePool implements PoolBase {
 
         if (pairType !== PairTypes.BptToToken) {
             tokenIndexIn = this.tokens.findIndex(
-                t => getAddress(t.address) === getAddress(tokenIn)
+                t => getAddress(t.token.address) === getAddress(tokenIn)
             );
             if (tokenIndexIn < 0) throw 'Pool does not contain tokenIn';
             tI = this.tokens[tokenIndexIn];
             // balanceIn = tI.balance;
             balanceIn = bnum(tI.balance).times(bnum(tI.priceRate));
-            decimalsIn = tI.decimals;
+            decimalsIn = tI.token.decimals;
             tokenInPriceRate = bnum(tI.priceRate);
         }
         if (pairType !== PairTypes.TokenToBpt) {
             tokenIndexOut = this.tokens.findIndex(
-                t => getAddress(t.address) === getAddress(tokenOut)
+                t => getAddress(t.token.address) === getAddress(tokenOut)
             );
             if (tokenIndexOut < 0) throw 'Pool does not contain tokenOut';
             tO = this.tokens[tokenIndexOut];
             // balanceOut = tO.balance;
             balanceOut = bnum(tO.balance).times(bnum(tO.priceRate));
-            decimalsOut = tO.decimals;
+            decimalsOut = tO.token.decimals;
             tokenOutPriceRate = bnum(tO.priceRate);
         }
 
@@ -161,7 +163,7 @@ export class MetaStablePool implements PoolBase {
             // const balanceBn = bnum(this.tokens[i].balance);
             const balanceBn = bnum(this.tokens[i].balance)
                 .times(bnum(this.tokens[i].priceRate))
-                .dp(Number(this.tokens[i].decimals), 1);
+                .dp(Number(this.tokens[i].token.decimals), 1);
             allBalances.push(balanceBn);
             allBalancesScaled.push(scale(balanceBn, 18));
         }
@@ -225,7 +227,7 @@ export class MetaStablePool implements PoolBase {
             this.totalShares = newBalance.toString();
         } else {
             // token is underlying in the pool
-            const T = this.tokens.find(t => t.address === token);
+            const T = this.tokens.find(t => t.token.address === token);
             T.balance = newBalance.toString();
         }
     }
