@@ -2,7 +2,12 @@
 require('dotenv').config();
 import { expect } from 'chai';
 import cloneDeep from 'lodash.clonedeep';
-import { NewPath, PoolDictionary, SwapPairType } from '../src/types';
+import {
+    NewPath,
+    PoolDictionary,
+    SubgraphPoolBase,
+    SwapPairType,
+} from '../src/types';
 import { StablePool } from '../src/pools/stablePool/stablePool';
 import {
     filterPoolsOfInterest,
@@ -22,22 +27,26 @@ describe(`staBalPaths.`, () => {
         const tokenIn = '0x0000000000085d4780B73119b644AE5ecd22b376';
         const tokenOut = '0x9a71012b13ca4d3d0cdc72a177df3ef03b0e76a3'; // BAL
 
+        const testPools: any = cloneDeep(staBalPools.pools);
+
         const [pools, hopTokens, usdcConnectingPool] = filterPoolsOfInterest(
-            cloneDeep(staBalPools.pools),
+            testPools,
             tokenIn,
             tokenOut,
             maxPools,
             1
         );
-        expect(usdcConnectingPool).to.be.undefined;
+        expect(usdcConnectingPool).to.be.empty;
     });
 
     it(`should return USDC connecting pool`, () => {
         const tokenIn = '0x0000000000085d4780B73119b644AE5ecd22b376';
         const tokenOut = '0x9a71012b13ca4d3d0cdc72a177df3ef03b0e76a3'; // BAL
 
+        const testPools: any = cloneDeep(staBalPools.pools);
+
         const [pools, hopTokens, usdcConnectingPool] = filterPoolsOfInterest(
-            cloneDeep(staBalPools.pools),
+            testPools,
             tokenIn,
             tokenOut,
             maxPools,
@@ -51,8 +60,10 @@ describe(`staBalPaths.`, () => {
         const tokenOut = '0x9a71012b13ca4d3d0cdc72a177df3ef03b0e76a3'; // BAL
         const chainId = 99; // Test chain
 
+        const testPools: any = cloneDeep(staBalPools.pools);
+
         const [pools, hopTokens, usdcConnectingPool] = filterPoolsOfInterest(
-            cloneDeep(staBalPools.pools),
+            testPools,
             tokenIn,
             tokenOut,
             maxPools,
@@ -105,8 +116,10 @@ describe(`staBalPaths.`, () => {
         const tokenOut = '0x9a71012b13ca4d3d0cdc72a177df3ef03b0e76a3'; // BAL
         const chainId = 99; // Test chain
 
+        const testPools: any = cloneDeep(staBalPools.pools);
+
         const [pools, hopTokens, usdcConnectingPool] = filterPoolsOfInterest(
-            cloneDeep(staBalPools.pools),
+            testPools,
             tokenIn,
             tokenOut,
             maxPools,
@@ -129,8 +142,10 @@ describe(`staBalPaths.`, () => {
         const tokenOut = '0x0000000000085d4780B73119b644AE5ecd22b376';
         const chainId = 99; // Test chain
 
+        const testPools: any = cloneDeep(staBalPools.pools);
+
         const [pools, hopTokens, usdcConnectingPool] = filterPoolsOfInterest(
-            cloneDeep(staBalPools.pools),
+            testPools,
             tokenIn,
             tokenOut,
             maxPools,
@@ -152,8 +167,10 @@ describe(`staBalPaths.`, () => {
         const tokenIn = '0x0d500b1d8e8ef31e21c99d1db9a6444d3adf1270';
         const tokenOut = '0x7ceb23fd6bc0add59e62ac25578270cff1b9f619';
 
+        const testPools: any = cloneDeep(staBalPools.pools);
+
         const [pools, hopTokens, usdcConnectingPool] = filterPoolsOfInterest(
-            cloneDeep(staBalPools.pools),
+            testPools,
             tokenIn,
             tokenOut,
             maxPools,
@@ -177,8 +194,10 @@ describe(`staBalPaths.`, () => {
         const tokenIn = '0x0000000000085d4780B73119b644AE5ecd22b376'; // TUSD
         const tokenOut = '0x9a71012b13ca4d3d0cdc72a177df3ef03b0e76a3'; // BAL
 
+        const testPools: any = cloneDeep(staBalPools.pools);
+
         const [pools, hopTokens, usdcConnectingPool] = filterPoolsOfInterest(
-            cloneDeep(staBalPools.pools),
+            testPools,
             tokenIn,
             tokenOut,
             maxPools,
@@ -218,8 +237,10 @@ describe(`staBalPaths.`, () => {
         const tokenIn = '0x9a71012b13ca4d3d0cdc72a177df3ef03b0e76a3'; // BAL
         const tokenOut = '0x0000000000085d4780B73119b644AE5ecd22b376'; // TUSD
 
+        const testPools: any = cloneDeep(staBalPools.pools);
+
         const [pools, hopTokens, usdcConnectingPool] = filterPoolsOfInterest(
-            cloneDeep(staBalPools.pools),
+            testPools,
             tokenIn,
             tokenOut,
             maxPools,
@@ -264,8 +285,10 @@ describe(`staBalPaths.`, () => {
         let pools: PoolDictionary;
         let hopTokens: string[];
         let usdcConnectingPool: StablePool;
+        const testPools: any = cloneDeep(staBalPools.pools);
+
         [pools, hopTokens, usdcConnectingPool] = filterPoolsOfInterest(
-            cloneDeep(staBalPools.pools),
+            testPools,
             tokenIn,
             tokenOut,
             maxPools,

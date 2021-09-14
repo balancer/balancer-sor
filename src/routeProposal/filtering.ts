@@ -54,7 +54,7 @@ export function filterPoolsOfInterest(
     let tokenOutPairedTokens: Set<string> = new Set();
 
     // This will be the USDC/staBAL Connecting pool used in Polygon
-    let usdcConnectingPool: StablePool;
+    let usdcConnectingPool: StablePool = {} as StablePool;
 
     allPools.forEach((pool) => {
         if (pool.tokensList.length === 0 || pool.tokens[0].balance === '0') {
@@ -313,7 +313,7 @@ export function getHighestLiquidityPool(
     poolsOfInterest: PoolDictionary
 ): string {
     let highestNormalizedLiquidity = ZERO;
-    let highestNormalizedLiquidityPoolId: string;
+    let highestNormalizedLiquidityPoolId = '';
     for (const id in poolsOfInterest) {
         const pool = poolsOfInterest[id];
         if (swapPairType != pool.swapPairType) continue;
