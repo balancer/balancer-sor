@@ -442,7 +442,7 @@ async function makeRelayerTrade(
     if (swapType === SwapTypes.SwapExactIn) {
         swapInfo.tokenAddresses.forEach((token, i) => {
             if (token.toLowerCase() === tokenIn.toLowerCase()) {
-                limits[i] = swapInfo.swapAmountForSwaps.toString();
+                limits[i] = swapInfo.swapAmountForSwaps?.toString();
             } else if (token.toLowerCase() === tokenOut.toLowerCase()) {
                 limits[i] = swapInfo.returnAmountFromSwaps
                     .times(-0.99)
@@ -459,7 +459,7 @@ async function makeRelayerTrade(
                     .times(1.001)
                     .toString()
                     .split('.')[0];
-                // limits[i] = swapInfo.returnAmountFromSwaps.toString(); // No buffer
+                // limits[i] = swapInfo.returnAmountFromSwaps?.toString(); // No buffer
             } else if (token.toLowerCase() === tokenOut.toLowerCase()) {
                 limits[i] = swapInfo.swapAmountForSwaps.times(-1).toString();
             } else {
@@ -480,7 +480,7 @@ async function makeRelayerTrade(
     overRides['gasPrice'] = '20000000000';
     // ETH in swaps must send ETH value
     if (swapInfo.tokenIn === AddressZero) {
-        overRides['value'] = swapInfo.swapAmountForSwaps.toString();
+        overRides['value'] = swapInfo.swapAmountForSwaps?.toString();
     }
 
     if (swapInfo.swaps.length === 1) {

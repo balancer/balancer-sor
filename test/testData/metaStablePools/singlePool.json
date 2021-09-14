@@ -19,14 +19,14 @@
                 {
                     "address": "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
                     "balance": "10",
-                    "decimals": "18",
+                    "decimals": 18,
                     "symbol": "WETH",
                     "priceRate": "1"
                 },
                 {
                     "address": "0xae7ab96520de3a18e5e111b5eaab095312d7fe84",
                     "balance": "20",
-                    "decimals": "18",
+                    "decimals": 18,
                     "symbol": "stETH",
                     "priceRate": "0.5"
                 }
@@ -49,13 +49,13 @@
                 {
                     "address": "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
                     "balance": "10",
-                    "decimals": "18",
+                    "decimals": 18,
                     "symbol": "WETH"
                 },
                 {
                     "address": "0xae7ab96520de3a18e5e111b5eaab095312d7fe84",
                     "balance": "10",
-                    "decimals": "18",
+                    "decimals": 18,
                     "symbol": "stETH"
                 }
             ],
