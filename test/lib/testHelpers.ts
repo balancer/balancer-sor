@@ -58,7 +58,7 @@ export interface ResultParsed {
 export function filterPoolsAndTokens(
     allPools: SubgraphPoolBase[]
 ): [Set<unknown>, SubgraphPoolBase[]] {
-    const allTokens = [];
+    const allTokens: string[][] = [];
     let allTokensSet = new Set();
     const allPoolsNonZeroBalances: SubgraphPoolBase[] = [];
 
@@ -67,7 +67,7 @@ export function filterPoolsAndTokens(
         // Only check first balance since AFAIK either all balances are zero or none are:
         if (pool.tokens.length != 0) {
             if (pool.tokens[0].balance != '0') {
-                const tokens = [];
+                const tokens: string[] = [];
                 pool.tokensList.forEach((token) => {
                     tokens.push(token);
                 });
@@ -133,7 +133,11 @@ export function displayResults(
     console.log(`Max Pools: ${MaxPools}`);
     console.log(TradeInfo.SwapType);
 
-    const tableData = [];
+    const tableData: {
+        SOR: string;
+        'Full SOR Time': number;
+        'Return Amt': string;
+    }[] = [];
     Results.forEach((result) => {
         tableData.push({
             SOR: result.title,

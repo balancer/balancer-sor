@@ -132,12 +132,12 @@ describe(`Tests for Lido USD routes.`, () => {
                 scale(swapAmt, 18).toString()
             );
             // The swapAmountForSwaps for stETH should be using exchangeRate allowance, i.e. same as wstETH amount
-            expect(testSwapInfo.swapAmountForSwaps.toString()).to.eq(
+            expect(testSwapInfo.swapAmountForSwaps?.toString()).to.eq(
                 swapInfowstEth.swapAmount.toString()
             );
             // These should be same as no rate difference
             expect(swapInfowstEth.swapAmount.toString()).to.eq(
-                swapInfowstEth.swapAmountForSwaps.toString()
+                swapInfowstEth.swapAmountForSwaps?.toString()
             );
             // This is pulled from mainnet so needs valid routes - will be 0 if not
             expect(testSwapInfo.returnAmount.toString()).to.eq(
@@ -147,7 +147,7 @@ describe(`Tests for Lido USD routes.`, () => {
                 swapInfowstEth.returnAmountConsideringFees.toString()
             );
             // These should be same as no rate difference
-            expect(testSwapInfo.returnAmountFromSwaps.toString()).to.eq(
+            expect(testSwapInfo.returnAmountFromSwaps?.toString()).to.eq(
                 testSwapInfo.returnAmount.toString()
             );
         }).timeout(100000);
@@ -195,12 +195,12 @@ describe(`Tests for Lido USD routes.`, () => {
                 scale(swapAmt, 6).toString()
             );
             // These should be same as no rate difference for input token
-            expect(testSwapInfo.swapAmountForSwaps.toString()).to.eq(
+            expect(testSwapInfo.swapAmountForSwaps?.toString()).to.eq(
                 testSwapInfo.swapAmount.toString()
             );
             // These should be same as no rate difference
             expect(swapInfowstEth.swapAmount.toString()).to.eq(
-                swapInfowstEth.swapAmountForSwaps.toString()
+                swapInfowstEth.swapAmountForSwaps?.toString()
             );
             // This is pulled from mainnet so needs valid routes - will be 0 if not
             // returnAmount for stETH should be using exchangeRate
@@ -214,7 +214,7 @@ describe(`Tests for Lido USD routes.`, () => {
                     .toString()
             );
             // return amounts for swaps should be same
-            expect(testSwapInfo.returnAmountFromSwaps.toString()).to.eq(
+            expect(testSwapInfo.returnAmountFromSwaps?.toString()).to.eq(
                 swapInfowstEth.returnAmount.toString()
             );
         }).timeout(100000);
@@ -268,7 +268,7 @@ describe(`Tests for Lido USD routes.`, () => {
                 swapInfowstEth.swapAmount.toString()
             );
             // The swapAmountForSwaps for both should be same as using DAI with no rate difference
-            expect(testSwapInfo.swapAmountForSwaps.toString()).to.eq(
+            expect(testSwapInfo.swapAmountForSwaps?.toString()).to.eq(
                 testSwapInfo.swapAmount.toString()
             );
             // This is pulled from mainnet so needs valid routes - will be 0 if not
@@ -330,12 +330,12 @@ describe(`Tests for Lido USD routes.`, () => {
                 scale(swapAmt, 18).toString()
             );
             // The swapAmountForSwaps for stETH should be using exchangeRate allowance, i.e. same as wstETH amount
-            expect(testSwapInfo.swapAmountForSwaps.toString()).to.eq(
+            expect(testSwapInfo.swapAmountForSwaps?.toString()).to.eq(
                 swapInfowstEth.swapAmount.toString()
             );
             // These should be same as no rate difference
             expect(swapInfowstEth.swapAmount.toString()).to.eq(
-                swapInfowstEth.swapAmountForSwaps.toString()
+                swapInfowstEth.swapAmountForSwaps?.toString()
             );
             // This is pulled from mainnet so needs valid routes - will be 0 if not
             // returnAmount is amount of USDT in so no rate
@@ -346,7 +346,7 @@ describe(`Tests for Lido USD routes.`, () => {
                 swapInfowstEth.returnAmountConsideringFees.toString()
             );
             // These should be same as no rate difference
-            expect(testSwapInfo.returnAmountFromSwaps.toString()).to.eq(
+            expect(testSwapInfo.returnAmountFromSwaps?.toString()).to.eq(
                 testSwapInfo.returnAmount.toString()
             );
         }).timeout(100000);
