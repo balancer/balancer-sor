@@ -267,23 +267,23 @@ export class LinearPool implements PoolBase {
         amount: BigNumber,
         exact: boolean
     ): BigNumber {
-        if (exact) {
-            try {
-                // TO DO - Replace with correct SDK maths
-                // balance: BigNumber, normalizedWeight: BigNumber, amountIn: BigNumber, bptTotalSupply: BigNumber, swapFee: BigNumber
-                const amt = SDK.LinearMath._calcBptOutGivenExactTokenIn(
-                    scale(poolPairData.balanceIn, poolPairData.decimalsIn),
-                    bnum(1),
-                    scale(amount, poolPairData.decimalsIn),
-                    scale(poolPairData.balanceOut, 18), // BPT is always 18 decimals
-                    scale(poolPairData.swapFee, 18)
-                );
-                // return normalised amount
-                return scale(amt, -18); // BPT is always 18 decimals
-            } catch (err) {
-                return ZERO;
-            }
-        }
+        // if (exact) {
+        //     try {
+        //         // TO DO - Replace with correct SDK maths
+        //         // balance: BigNumber, normalizedWeight: BigNumber, amountIn: BigNumber, bptTotalSupply: BigNumber, swapFee: BigNumber
+        //         const amt = SDK.LinearMath._calcBptOutGivenExactTokenIn(
+        //             scale(poolPairData.balanceIn, poolPairData.decimalsIn),
+        //             bnum(1),
+        //             scale(amount, poolPairData.decimalsIn),
+        //             scale(poolPairData.balanceOut, 18), // BPT is always 18 decimals
+        //             scale(poolPairData.swapFee, 18)
+        //         );
+        //         // return normalised amount
+        //         return scale(amt, -18); // BPT is always 18 decimals
+        //     } catch (err) {
+        //         return ZERO;
+        //     }
+        // }
         return _exactTokenInForBPTOut(amount, poolPairData);
     }
 
