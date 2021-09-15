@@ -72,7 +72,10 @@ export class RouteProposer {
             usdcConnectingPool,
             chainId
         );
-        pathData = pathData.concat(pathUsingStaBal);
+
+        // If pathUsingStaBal is not empty add as canditate
+        if (Object.keys(pathUsingStaBal).length !== 0)
+            pathData = pathData.concat(pathUsingStaBal);
 
         const [paths] = calculatePathLimits(pathData, swapType);
 

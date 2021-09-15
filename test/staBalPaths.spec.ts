@@ -16,7 +16,7 @@ import {
     getHighestLiquidityPool,
     filterHopPools,
 } from '../src/routeProposal/filtering';
-import { STABALADDR, STABALPOOLS, USDCCONNECTINGPOOL } from '../src/constants';
+import { STABALADDR, USDCCONNECTINGPOOL } from '../src/constants';
 import staBalPools from './testData/staBal/staBalPools.json';
 
 const maxPools = 4;
@@ -70,7 +70,7 @@ describe(`staBalPaths.`, () => {
             chainId
         );
 
-        const staBalPoolIdIn = STABALPOOLS[chainId][tokenIn];
+        const staBalPoolIdIn = 'staBalPair1';
         const staBalPoolIn = pools[staBalPoolIdIn];
         const hopTokenStaBal = STABALADDR[chainId];
 
@@ -262,7 +262,7 @@ describe(`staBalPaths.`, () => {
             chainId
         );
 
-        const staBalPoolIdIn = STABALPOOLS[chainId][tokenIn];
+        const staBalPoolIdIn = 'staBalPair1';
         const hopTokenStaBal = STABALADDR[chainId];
 
         expect(pathUsingStaBal.swaps[0].pool).to.eq(staBalPoolIdIn);
@@ -306,7 +306,7 @@ describe(`staBalPaths.`, () => {
             chainId
         );
 
-        const staBalPoolId = STABALPOOLS[chainId][tokenOut];
+        const staBalPoolId = 'staBalPair1';
         const hopTokenStaBal = STABALADDR[chainId];
 
         expect(pathUsingStaBal.swaps[0].pool).to.eq('balPool');

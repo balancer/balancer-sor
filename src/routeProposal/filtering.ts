@@ -13,7 +13,7 @@ import { StablePool } from '../pools/stablePool/stablePool';
 import { ElementPool } from '../pools/elementPool/elementPool';
 import { MetaStablePool } from '../pools/metaStablePool/metaStablePool';
 import { ZERO } from '../utils/bignumber';
-import { STABALPOOLS, USDCCONNECTINGPOOL, STABALADDR } from '../constants';
+import { USDCCONNECTINGPOOL, STABALADDR } from '../constants';
 
 import { parseNewPool } from '../pools';
 
@@ -374,10 +374,23 @@ export function getPathUsingStaBalPools(
     usdcConnectingPool: StablePool,
     chainId: number
 ): NewPath {
-    const staBalPoolIdIn = STABALPOOLS[chainId][tokenIn];
-    const staBalPoolIdOut = STABALPOOLS[chainId][tokenOut];
     // staBal BPT token is the hop token between token and USDC connecting pool
     const hopTokenStaBal = STABALADDR[chainId];
+
+    // Finds the best staBAL Pool with tokenIn/staBal3Bpt or returns '' if doesn't exist
+    const staBalPoolIdIn = getHighestLiquidityPool(
+        tokenIn,
+        hopTokenStaBal,
+        SwapPairType.HopIn,
+        pools
+    );
+    // Finds the best staBAL Pool with tokenOut/staBal3Bpt or returns '' if doesn't exist
+    const staBalPoolIdOut = getHighestLiquidityPool(
+        hopTokenStaBal,
+        tokenOut,
+        SwapPairType.HopOut,
+        pools
+    );
 
     // Path must start or finish with a staBAL Pool
     if (!staBalPoolIdIn && !staBalPoolIdOut) return {} as NewPath;

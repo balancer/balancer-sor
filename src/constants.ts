@@ -67,20 +67,6 @@ export const STABALADDR: { [chainId: number]: string } = {
     99: '0x0000000000000000000000000000000000000001',
 };
 
-// Currently only used for Polygon
-// Mapping of staBAL paired tokens to the pool ID: tokenAddress/poolID
-export const STABALPOOLS: { [chainId: number]: { [token: string]: string } } = {
-    1: {},
-    5: {},
-    42: {},
-    137: {}, // TO DO
-    42161: {},
-    99: {
-        '0x0000000000085d4780B73119b644AE5ecd22b376': 'staBalPair1',
-        '0x0000000000000000000000000000000000000002': 'staBalPair2',
-    },
-};
-
 export interface StaBalPairPool {
     id: string;
     tokens: string[];
