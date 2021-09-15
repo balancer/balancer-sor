@@ -19,12 +19,12 @@
                 {
                     "address": "0x6b175474e89094c44da98b954eedeac495271d0f",
                     "balance": "777",
-                    "decimals": "18"
+                    "decimals": 18
                 },
                 {
                     "address": "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
                     "balance": "1234",
-                    "decimals": "6"
+                    "decimals": 6
                 }
             ],
             "tokensList": [
@@ -43,12 +43,12 @@
                 {
                     "address": "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
                     "balance": "1110",
-                    "decimals": "6"
+                    "decimals": 6
                 },
                 {
                     "address": "0xdac17f958d2ee523a2206206994597c13d831ec7",
                     "balance": "777",
-                    "decimals": "6"
+                    "decimals": 6
                 }
             ],
             "tokensList": [

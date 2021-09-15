@@ -1206,7 +1206,7 @@ describe(`Tests for Helpers.`, () => {
         //     expect(wrappedInfo.tokenOut.addressOriginal).to.eq(tokenOut.toLowerCase());
         //     expect(wrappedInfo.tokenOut.addressForSwaps).to.eq(tokenOut.toLowerCase());
         //     expect(wrappedInfo.swapAmountOriginal.toString()).to.eq(swapAmount.toString());
-        //     expect(wrappedInfo.swapAmountForSwaps.toString()).to.eq(swapAmount.toString());
+        //     expect(wrappedInfo.swapAmountForSwaps?.toString()).to.eq(swapAmount.toString());
         //     expect(wrappedInfo.tokenIn.rate.toString()).to.eq('1');
         //     expect(wrappedInfo.tokenOut.rate.toString()).to.eq('1');
         // });
@@ -1225,7 +1225,7 @@ describe(`Tests for Helpers.`, () => {
         //     expect(wrappedInfo.tokenOut.addressOriginal).to.eq(tokenOut.toLowerCase());
         //     expect(wrappedInfo.tokenOut.addressForSwaps).to.eq(tokenOut.toLowerCase());
         //     expect(wrappedInfo.swapAmountOriginal.toString()).to.eq(swapAmount.toString());
-        //     expect(wrappedInfo.swapAmountForSwaps.toString()).to.eq(swapAmount.toString());
+        //     expect(wrappedInfo.swapAmountForSwaps?.toString()).to.eq(swapAmount.toString());
         //     expect(wrappedInfo.tokenIn.rate.toString()).to.eq('1');
         //     expect(wrappedInfo.tokenOut.rate.toString()).to.eq('1');
         // });
@@ -1244,7 +1244,7 @@ describe(`Tests for Helpers.`, () => {
         //     expect(wrappedInfo.tokenOut.addressOriginal).to.eq(tokenOut.toLowerCase());
         //     expect(wrappedInfo.tokenOut.addressForSwaps).to.eq(WETHADDR[chainId].toLowerCase());
         //     expect(wrappedInfo.swapAmountOriginal.toString()).to.eq(swapAmount.toString());
-        //     expect(wrappedInfo.swapAmountForSwaps.toString()).to.eq(swapAmount.toString());
+        //     expect(wrappedInfo.swapAmountForSwaps?.toString()).to.eq(swapAmount.toString());
         //     expect(wrappedInfo.tokenIn.rate.toString()).to.eq('1');
         //     expect(wrappedInfo.tokenOut.rate.toString()).to.eq('1');
         // });
@@ -1264,7 +1264,7 @@ describe(`Tests for Helpers.`, () => {
         //     expect(wrappedInfo.tokenOut.addressForSwaps).to.eq(tokenOut.toLowerCase());
         //     expect(wrappedInfo.swapAmountOriginal.toString()).to.eq(swapAmount.toString());
         //     const rate = await getStEthRate(provider, chainId);
-        //     expect(wrappedInfo.swapAmountForSwaps.toString()).to.eq(swapAmount.times(rate).dp(18).toString());
+        //     expect(wrappedInfo.swapAmountForSwaps?.toString()).to.eq(swapAmount.times(rate).dp(18).toString());
         //     expect(wrappedInfo.tokenIn.rate.toString()).to.eq(rate.toString());
         //     expect(wrappedInfo.tokenOut.rate.toString()).to.eq('1');
         // });
@@ -1283,7 +1283,7 @@ describe(`Tests for Helpers.`, () => {
         //     expect(wrappedInfo.tokenOut.addressOriginal).to.eq(tokenOut.toLowerCase());
         //     expect(wrappedInfo.tokenOut.addressForSwaps).to.eq(tokenOut.toLowerCase());
         //     expect(wrappedInfo.swapAmountOriginal.toString()).to.eq(swapAmount.toString());
-        //     expect(wrappedInfo.swapAmountForSwaps.toString()).to.eq(swapAmount.toString());
+        //     expect(wrappedInfo.swapAmountForSwaps?.toString()).to.eq(swapAmount.toString());
         //     const rate = await getStEthRate(provider, chainId);
         //     expect(wrappedInfo.tokenIn.rate.toString()).to.eq(rate.toString());
         //     expect(wrappedInfo.tokenOut.rate.toString()).to.eq('1');
@@ -1304,7 +1304,7 @@ describe(`Tests for Helpers.`, () => {
         //     expect(wrappedInfo.tokenOut.addressForSwaps).to.eq(Lido.wstETH[chainId]);
         //     expect(wrappedInfo.swapAmountOriginal.toString()).to.eq(swapAmount.toString());
         //     const rate = await getStEthRate(provider, chainId);
-        //     expect(wrappedInfo.swapAmountForSwaps.toString()).to.eq(swapAmount.toString());
+        //     expect(wrappedInfo.swapAmountForSwaps?.toString()).to.eq(swapAmount.toString());
         //     expect(wrappedInfo.tokenIn.rate.toString()).to.eq('1');
         //     expect(wrappedInfo.tokenOut.rate.toString()).to.eq(rate.toString());
         // });
@@ -1324,7 +1324,7 @@ describe(`Tests for Helpers.`, () => {
         //     expect(wrappedInfo.tokenOut.addressForSwaps).to.eq(Lido.wstETH[chainId]);
         //     expect(wrappedInfo.swapAmountOriginal.toString()).to.eq(swapAmount.toString());
         //     const rate = await getStEthRate(provider, chainId);
-        //     expect(wrappedInfo.swapAmountForSwaps.toString()).to.eq(swapAmount.times(rate).dp(18).toString());
+        //     expect(wrappedInfo.swapAmountForSwaps?.toString()).to.eq(swapAmount.times(rate).dp(18).toString());
         //     expect(wrappedInfo.tokenIn.rate.toString()).to.eq('1');
         //     expect(wrappedInfo.tokenOut.rate.toString()).to.eq(rate.toString());
         // });
@@ -1409,14 +1409,14 @@ describe(`Tests for Helpers.`, () => {
             expect(swapInfoUpdated.swapAmount.toString()).to.eq(
                 swapAmount.toString()
             );
-            expect(swapInfoUpdated.swapAmountForSwaps.toString()).to.eq(
+            expect(swapInfoUpdated.swapAmountForSwaps?.toString()).to.eq(
                 swapAmount.toString()
             );
             expect(swapInfoUpdated.returnAmount.toString()).to.eq(
                 returnAmount.toString()
             );
             // Return amount from swaps will only be different if token has an exchangeRate
-            expect(swapInfoUpdated.returnAmountFromSwaps.toString()).to.eq(
+            expect(swapInfoUpdated.returnAmountFromSwaps?.toString()).to.eq(
                 returnAmount.toString()
             );
             expect(swapInfoUpdated.tokenIn).to.eq(tokenIn);
@@ -1475,14 +1475,14 @@ describe(`Tests for Helpers.`, () => {
             expect(swapInfoUpdated.swapAmount.toString()).to.eq(
                 swapAmount.toString()
             );
-            expect(swapInfoUpdated.swapAmountForSwaps.toString()).to.eq(
+            expect(swapInfoUpdated.swapAmountForSwaps?.toString()).to.eq(
                 swapAmount.toString()
             );
             expect(swapInfoUpdated.returnAmount.toString()).to.eq(
                 returnAmount.toString()
             );
             // Return amount from swaps will only be different if token has an exchangeRate
-            expect(swapInfoUpdated.returnAmountFromSwaps.toString()).to.eq(
+            expect(swapInfoUpdated.returnAmountFromSwaps?.toString()).to.eq(
                 returnAmount.toString()
             );
             expect(swapInfoUpdated.tokenIn).to.eq(tokenIn);
@@ -1541,14 +1541,14 @@ describe(`Tests for Helpers.`, () => {
             expect(swapInfoUpdated.swapAmount.toString()).to.eq(
                 swapAmount.toString()
             );
-            expect(swapInfoUpdated.swapAmountForSwaps.toString()).to.eq(
+            expect(swapInfoUpdated.swapAmountForSwaps?.toString()).to.eq(
                 swapAmount.toString()
             );
             expect(swapInfoUpdated.returnAmount.toString()).to.eq(
                 returnAmount.toString()
             );
             // Return amount from swaps will only be different if token has an exchangeRate
-            expect(swapInfoUpdated.returnAmountFromSwaps.toString()).to.eq(
+            expect(swapInfoUpdated.returnAmountFromSwaps?.toString()).to.eq(
                 returnAmount.toString()
             );
             expect(swapInfoUpdated.tokenIn).to.eq(tokenIn);
@@ -1607,14 +1607,14 @@ describe(`Tests for Helpers.`, () => {
             expect(swapInfoUpdated.swapAmount.toString()).to.eq(
                 swapAmount.toString()
             );
-            expect(swapInfoUpdated.swapAmountForSwaps.toString()).to.eq(
+            expect(swapInfoUpdated.swapAmountForSwaps?.toString()).to.eq(
                 swapAmount.toString()
             );
             expect(swapInfoUpdated.returnAmount.toString()).to.eq(
                 returnAmount.toString()
             );
             // Return amount from swaps will only be different if token has an exchangeRate
-            expect(swapInfoUpdated.returnAmountFromSwaps.toString()).to.eq(
+            expect(swapInfoUpdated.returnAmountFromSwaps?.toString()).to.eq(
                 returnAmount.toString()
             );
             expect(swapInfoUpdated.tokenIn).to.eq(tokenIn);
@@ -1674,7 +1674,7 @@ describe(`Tests for Helpers.`, () => {
                 scale(swapAmount, 18).toString()
             );
             // This should be equivalent amount of wstETH in for swaps
-            expect(swapInfoUpdated.swapAmountForSwaps.toString()).to.eq(
+            expect(swapInfoUpdated.swapAmountForSwaps?.toString()).to.eq(
                 scale(wrappedInfo.swapAmountForSwaps, 18).toString()
             );
             // Return amount is in BAL so no conversion
@@ -1682,7 +1682,7 @@ describe(`Tests for Helpers.`, () => {
                 returnAmount.toString()
             );
             // Return amount from swaps will only be different if token has an exchangeRate
-            expect(swapInfoUpdated.returnAmountFromSwaps.toString()).to.eq(
+            expect(swapInfoUpdated.returnAmountFromSwaps?.toString()).to.eq(
                 returnAmount.toString()
             );
             expect(swapInfoUpdated.tokenIn).to.eq(tokenIn);
@@ -1742,7 +1742,7 @@ describe(`Tests for Helpers.`, () => {
                 swapAmount.toString()
             );
             // BAL is out so should be same
-            expect(swapInfoUpdated.swapAmountForSwaps.toString()).to.eq(
+            expect(swapInfoUpdated.swapAmountForSwaps?.toString()).to.eq(
                 swapInfoUpdated.swapAmount.toString()
             );
             // Return amount is in stETH so needs conversion
@@ -1750,7 +1750,7 @@ describe(`Tests for Helpers.`, () => {
                 returnAmount.div(wrappedInfo.tokenIn.rate).dp(0).toString()
             );
             // Return amount from swaps is original return amount
-            expect(swapInfoUpdated.returnAmountFromSwaps.toString()).to.eq(
+            expect(swapInfoUpdated.returnAmountFromSwaps?.toString()).to.eq(
                 returnAmount.toString()
             );
             expect(swapInfoUpdated.tokenIn).to.eq(tokenIn);
@@ -1810,7 +1810,7 @@ describe(`Tests for Helpers.`, () => {
                 swapAmount.toString()
             );
             // This should equal swap amount as BAL in
-            expect(swapInfoUpdated.swapAmountForSwaps.toString()).to.eq(
+            expect(swapInfoUpdated.swapAmountForSwaps?.toString()).to.eq(
                 swapAmount.toString()
             );
             // Return amount is stETH so from swaps will be converted
@@ -1818,7 +1818,7 @@ describe(`Tests for Helpers.`, () => {
                 returnAmount.div(wrappedInfo.tokenOut.rate).dp(0).toString()
             );
             // Return amount from swaps is original return amount
-            expect(swapInfoUpdated.returnAmountFromSwaps.toString()).to.eq(
+            expect(swapInfoUpdated.returnAmountFromSwaps?.toString()).to.eq(
                 returnAmount.toString()
             );
             expect(swapInfoUpdated.tokenIn).to.eq(tokenIn);
@@ -1878,7 +1878,7 @@ describe(`Tests for Helpers.`, () => {
                 scale(swapAmount, 18).toString()
             );
             // stETH in so should be exchanged to wstETH
-            expect(swapInfoUpdated.swapAmountForSwaps.toString()).to.eq(
+            expect(swapInfoUpdated.swapAmountForSwaps?.toString()).to.eq(
                 scale(swapAmount.times(wrappedInfo.tokenOut.rate), 18)
                     .dp(0)
                     .toString()
@@ -1888,7 +1888,7 @@ describe(`Tests for Helpers.`, () => {
                 returnAmount.toString()
             );
             // Return amount from swaps is original return amount
-            expect(swapInfoUpdated.returnAmountFromSwaps.toString()).to.eq(
+            expect(swapInfoUpdated.returnAmountFromSwaps?.toString()).to.eq(
                 returnAmount.toString()
             );
             expect(swapInfoUpdated.tokenIn).to.eq(tokenIn);
@@ -1948,7 +1948,7 @@ describe(`Tests for Helpers.`, () => {
                 scale(swapAmount, 18).toString()
             );
             // This should be equivalent amount of wstETH in for swaps
-            expect(swapInfoUpdated.swapAmountForSwaps.toString()).to.eq(
+            expect(swapInfoUpdated.swapAmountForSwaps?.toString()).to.eq(
                 scale(wrappedInfo.swapAmountForSwaps, 18).toString()
             );
             // Return amount is in ETH so no conversion
@@ -1956,7 +1956,7 @@ describe(`Tests for Helpers.`, () => {
                 returnAmount.toString()
             );
             // Return amount from swaps will only be different if token has an exchangeRate
-            expect(swapInfoUpdated.returnAmountFromSwaps.toString()).to.eq(
+            expect(swapInfoUpdated.returnAmountFromSwaps?.toString()).to.eq(
                 returnAmount.toString()
             );
             expect(swapInfoUpdated.tokenIn).to.eq(tokenIn);

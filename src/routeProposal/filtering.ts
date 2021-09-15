@@ -58,7 +58,7 @@ export function filterPoolsOfInterest(
     let tokenOutPairedTokens: Set<string> = new Set();
 
     const linearPoolsDictByMain: PoolDictionaryByMain = {};
-    let multiMetaStablePool: MetaStablePool;
+    let multiMetaStablePool: MetaStablePool = {} as MetaStablePool;
 
     allPools.forEach((pool) => {
         if (pool.tokensList.length === 0 || pool.tokens[0].balance === '0') {
@@ -166,9 +166,9 @@ export function filterHopPools(
 
     for (let i = 0; i < hopTokens.length; i++) {
         let highestNormalizedLiquidityFirst = ZERO; // Aux variable to find pool with most liquidity for pair (tokenIn -> hopToken)
-        let highestNormalizedLiquidityFirstPoolId: string; // Aux variable to find pool with most liquidity for pair (tokenIn -> hopToken)
+        let highestNormalizedLiquidityFirstPoolId: string | undefined; // Aux variable to find pool with most liquidity for pair (tokenIn -> hopToken)
         let highestNormalizedLiquiditySecond = ZERO; // Aux variable to find pool with most liquidity for pair (hopToken -> tokenOut)
-        let highestNormalizedLiquiditySecondPoolId: string; // Aux variable to find pool with most liquidity for pair (hopToken -> tokenOut)
+        let highestNormalizedLiquiditySecondPoolId: string | undefined; // Aux variable to find pool with most liquidity for pair (hopToken -> tokenOut)
 
         for (const id in poolsOfInterest) {
             const pool = poolsOfInterest[id];
@@ -360,7 +360,7 @@ function getHighestLiquidityPool(
     poolsOfInterest: PoolDictionary
 ): string {
     let highestNormalizedLiquidity = ZERO;
-    let highestNormalizedLiquidityPoolId: string;
+    let highestNormalizedLiquidityPoolId = '';
     for (const id in poolsOfInterest) {
         const pool = poolsOfInterest[id];
         if (swapPairType != pool.swapPairType) continue;

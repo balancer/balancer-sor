@@ -41,7 +41,7 @@ export interface LinearPoolToken {
     address: string;
     balance: string;
     decimals: string | number;
-    priceRate?: string;
+    priceRate: string;
 }
 
 export interface LinearPoolPairData extends PoolPairBase {
@@ -79,6 +79,10 @@ export class LinearPool implements PoolBase {
     MAX_OUT_RATIO = bnum(0.3); // ?
 
     static fromPool(pool: SubgraphPoolBase): LinearPool {
+        if (!pool.wrappedIndex)
+            throw new Error('LinearPool missing wrappedIndex');
+        if (!pool.target1) throw new Error('LinearPool missing target1');
+        if (!pool.target2) throw new Error('LinearPool missing target2');
         return new LinearPool(
             pool.id,
             pool.address,
@@ -189,7 +193,7 @@ export class LinearPool implements PoolBase {
         poolPairData: PoolPairBase,
         swapType: SwapTypes
     ): BigNumber {
-        let linearPoolPairData = this.parsePoolPairData(
+        const linearPoolPairData = this.parsePoolPairData(
             poolPairData.tokenIn,
             poolPairData.tokenOut
         );
@@ -201,13 +205,13 @@ export class LinearPool implements PoolBase {
                     poolPairData.balanceOut,
                     linearPoolPairData
                 ).times(0.99);
-            }
-        } else if (swapType === SwapTypes.SwapExactOut) {
+            } else throw Error('LinearPool does not support TokenToToken');
+        } else {
             if (linearPoolPairData.pairType === PairTypes.TokenToBpt) {
                 return poolPairData.balanceOut.times(this.MAX_IN_RATIO);
             } else if (linearPoolPairData.pairType === PairTypes.BptToToken) {
                 return poolPairData.balanceOut.times(0.99);
-            }
+            } else throw Error('LinearPool does not support TokenToToken');
         }
     }
 
@@ -219,6 +223,7 @@ export class LinearPool implements PoolBase {
         } else {
             // token is underlying in the pool
             const T = this.tokens.find((t) => t.address === token);
+            if (!T) throw Error('Pool does not contain this token');
             T.balance = newBalance.toString();
         }
     }

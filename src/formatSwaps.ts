@@ -62,7 +62,7 @@ const formatSequence = (
                     ? swap.tokenInDecimals
                     : swap.tokenOutDecimals;
 
-            amountScaled = scale(bnum(swap.swapAmount), scalingFactor)
+            amountScaled = scale(bnum(swap.swapAmount as string), scalingFactor)
                 .decimalPlaces(0, 1)
                 .toString();
         }
@@ -102,10 +102,10 @@ export function formatSwaps(
 
     const { tokenInDecimals } = swaps[0].find(
         (swap) => swap.tokenIn === tokenIn
-    );
+    ) as Swap;
     const { tokenOutDecimals } = swaps[0].find(
         (swap) => swap.tokenOut === tokenOut
-    );
+    ) as Swap;
 
     const tokenArray = getTokenAddresses(swaps);
     const swapsV2: SwapV2[] = swaps.flatMap((sequence) =>

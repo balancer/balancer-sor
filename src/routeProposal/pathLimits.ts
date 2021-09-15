@@ -25,7 +25,7 @@ export function getLimitAmountSwapForPath(
     swapType: SwapTypes
 ): BigNumber {
     const poolPairData = path.poolPairData;
-    let limit: BigNumber;
+    let limit: BigNumber = ZERO;
     if (swapType === SwapTypes.SwapExactIn) {
         for (let i = 0; i < poolPairData.length; i++) {
             const poolLimit = path.pools[i].getLimitAmountSwap(
