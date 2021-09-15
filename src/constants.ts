@@ -67,11 +67,6 @@ export const STABALADDR: { [chainId: number]: string } = {
     99: '0x0000000000000000000000000000000000000001',
 };
 
-export interface StaBalPairPool {
-    id: string;
-    tokens: string[];
-}
-
 export const EMPTY_SWAPINFO: SwapInfo = {
     tokenAddresses: [],
     swaps: [],
