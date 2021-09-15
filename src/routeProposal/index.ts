@@ -47,7 +47,7 @@ export class RouteProposer {
         // Some functions alter pools list directly but we want to keep original so make a copy to work from
         const poolsList = cloneDeep(pools);
 
-        const [poolsDict, hopTokens, usdcConnectingPool] =
+        const [poolsFilteredDict, hopTokens, poolsAllDict] =
             filterPoolsOfInterest(
                 poolsList,
                 tokenIn,
@@ -56,20 +56,21 @@ export class RouteProposer {
                 chainId,
                 swapOptions.timestamp
             );
+
         let pathData: NewPath[];
-        let filteredPoolsDict: PoolDictionary;
-        [filteredPoolsDict, pathData] = filterHopPools(
+        let poolsMostLiquidDict: PoolDictionary;
+        [poolsMostLiquidDict, pathData] = filterHopPools(
             tokenIn,
             tokenOut,
             hopTokens,
-            poolsDict
+            poolsFilteredDict
         );
 
         const pathUsingStaBal: NewPath = getPathUsingStaBalPools(
             tokenIn,
             tokenOut,
-            poolsDict,
-            usdcConnectingPool,
+            poolsAllDict,
+            poolsFilteredDict,
             chainId
         );
 
@@ -81,10 +82,10 @@ export class RouteProposer {
 
         this.cache[`${tokenIn}${tokenOut}${swapType}${swapOptions.timestamp}`] =
             {
-                pools: filteredPoolsDict,
+                pools: poolsMostLiquidDict,
                 paths: paths,
             };
 
-        return { pools: filteredPoolsDict, paths };
+        return { pools: poolsMostLiquidDict, paths };
     }
 }

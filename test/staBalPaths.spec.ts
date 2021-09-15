@@ -29,30 +29,23 @@ describe(`staBalPaths.`, () => {
 
         const testPools: any = cloneDeep(staBalPools.pools);
 
-        const [pools, hopTokens, usdcConnectingPool] = filterPoolsOfInterest(
+        const [poolsFiltered, , poolsAll] = filterPoolsOfInterest(
             testPools,
             tokenIn,
             tokenOut,
             maxPools,
             1
         );
-        expect(usdcConnectingPool).to.be.empty;
-    });
 
-    it(`should return USDC connecting pool`, () => {
-        const tokenIn = '0x0000000000085d4780B73119b644AE5ecd22b376';
-        const tokenOut = '0x9a71012b13ca4d3d0cdc72a177df3ef03b0e76a3'; // BAL
-
-        const testPools: any = cloneDeep(staBalPools.pools);
-
-        const [pools, hopTokens, usdcConnectingPool] = filterPoolsOfInterest(
-            testPools,
+        const pathUsingStaBal: NewPath = getPathUsingStaBalPools(
             tokenIn,
             tokenOut,
-            maxPools,
-            chainId
+            poolsAll,
+            poolsFiltered,
+            1
         );
-        expect(usdcConnectingPool.id).to.be.eq(USDCCONNECTINGPOOL[chainId].id);
+
+        expect(pathUsingStaBal).to.be.empty;
     });
 
     it(`should create a valid multihop path`, () => {
@@ -62,7 +55,7 @@ describe(`staBalPaths.`, () => {
 
         const testPools: any = cloneDeep(staBalPools.pools);
 
-        const [pools, hopTokens, usdcConnectingPool] = filterPoolsOfInterest(
+        const [poolsFiltered, , poolsAll] = filterPoolsOfInterest(
             testPools,
             tokenIn,
             tokenOut,
@@ -71,8 +64,11 @@ describe(`staBalPaths.`, () => {
         );
 
         const staBalPoolIdIn = 'staBalPair1';
-        const staBalPoolIn = pools[staBalPoolIdIn];
+        const staBalPoolIn = poolsFiltered[staBalPoolIdIn];
         const hopTokenStaBal = STABALADDR[chainId];
+        const usdcConnectingPool: StablePool = poolsAll[
+            USDCCONNECTINGPOOL[chainId].id
+        ] as StablePool;
 
         const multihopPath = createMultihopPath(
             staBalPoolIn,
@@ -118,7 +114,7 @@ describe(`staBalPaths.`, () => {
 
         const testPools: any = cloneDeep(staBalPools.pools);
 
-        const [pools, hopTokens, usdcConnectingPool] = filterPoolsOfInterest(
+        const [pools] = filterPoolsOfInterest(
             testPools,
             tokenIn,
             tokenOut,
@@ -144,7 +140,7 @@ describe(`staBalPaths.`, () => {
 
         const testPools: any = cloneDeep(staBalPools.pools);
 
-        const [pools, hopTokens, usdcConnectingPool] = filterPoolsOfInterest(
+        const [pools] = filterPoolsOfInterest(
             testPools,
             tokenIn,
             tokenOut,
@@ -169,7 +165,7 @@ describe(`staBalPaths.`, () => {
 
         const testPools: any = cloneDeep(staBalPools.pools);
 
-        const [pools, hopTokens, usdcConnectingPool] = filterPoolsOfInterest(
+        const [poolsFiltered, , poolsAll] = filterPoolsOfInterest(
             testPools,
             tokenIn,
             tokenOut,
@@ -180,8 +176,8 @@ describe(`staBalPaths.`, () => {
         const pathUsingStaBal: NewPath = getPathUsingStaBalPools(
             tokenIn,
             tokenOut,
-            pools,
-            usdcConnectingPool,
+            poolsAll,
+            poolsFiltered,
             chainId
         );
 
@@ -194,7 +190,7 @@ describe(`staBalPaths.`, () => {
 
         const testPools: any = cloneDeep(staBalPools.pools);
 
-        const [pools, hopTokens, usdcConnectingPool] = filterPoolsOfInterest(
+        const [poolsFiltered, , poolsAll] = filterPoolsOfInterest(
             testPools,
             tokenIn,
             tokenOut,
@@ -205,8 +201,8 @@ describe(`staBalPaths.`, () => {
         const pathUsingStaBal: NewPath = getPathUsingStaBalPools(
             tokenIn,
             tokenOut,
-            pools,
-            usdcConnectingPool,
+            poolsAll,
+            poolsFiltered,
             chainId
         );
 
@@ -219,7 +215,7 @@ describe(`staBalPaths.`, () => {
 
         const testPools: any = cloneDeep(staBalPools.pools);
 
-        const [pools, hopTokens, usdcConnectingPool] = filterPoolsOfInterest(
+        const [poolsFiltered, , poolsAll] = filterPoolsOfInterest(
             testPools,
             tokenIn,
             tokenOut,
@@ -230,8 +226,8 @@ describe(`staBalPaths.`, () => {
         const pathUsingStaBal: NewPath = getPathUsingStaBalPools(
             tokenIn,
             tokenOut,
-            pools,
-            usdcConnectingPool,
+            poolsAll,
+            poolsFiltered,
             chainId
         );
 
@@ -246,7 +242,7 @@ describe(`staBalPaths.`, () => {
 
         const testPools: any = cloneDeep(staBalPools.pools);
 
-        const [pools, hopTokens, usdcConnectingPool] = filterPoolsOfInterest(
+        const [poolsFiltered, , poolsAll] = filterPoolsOfInterest(
             testPools,
             tokenIn,
             tokenOut,
@@ -257,8 +253,8 @@ describe(`staBalPaths.`, () => {
         const pathUsingStaBal: NewPath = getPathUsingStaBalPools(
             tokenIn,
             tokenOut,
-            pools,
-            usdcConnectingPool,
+            poolsAll,
+            poolsFiltered,
             chainId
         );
 
@@ -290,7 +286,7 @@ describe(`staBalPaths.`, () => {
 
         const testPools: any = cloneDeep(staBalPools.pools);
 
-        const [pools, hopTokens, usdcConnectingPool] = filterPoolsOfInterest(
+        const [poolsFiltered, , poolsAll] = filterPoolsOfInterest(
             testPools,
             tokenIn,
             tokenOut,
@@ -301,8 +297,8 @@ describe(`staBalPaths.`, () => {
         const pathUsingStaBal: NewPath = getPathUsingStaBalPools(
             tokenIn,
             tokenOut,
-            pools,
-            usdcConnectingPool,
+            poolsAll,
+            poolsFiltered,
             chainId
         );
 
@@ -332,12 +328,12 @@ describe(`staBalPaths.`, () => {
         const tokenIn = '0x0000000000000000000000000000000000000002';
         const tokenOut = '0x0000000000085d4780B73119b644AE5ecd22b376';
 
-        let pools: PoolDictionary;
+        let poolsFiltered: PoolDictionary;
         let hopTokens: string[];
-        let usdcConnectingPool: StablePool;
+        let poolsAll: PoolDictionary;
         const testPools: any = cloneDeep(staBalPools.pools);
 
-        [pools, hopTokens, usdcConnectingPool] = filterPoolsOfInterest(
+        [poolsFiltered, hopTokens, poolsAll] = filterPoolsOfInterest(
             testPools,
             tokenIn,
             tokenOut,
@@ -348,21 +344,22 @@ describe(`staBalPaths.`, () => {
         const pathUsingStaBal: NewPath = getPathUsingStaBalPools(
             tokenIn,
             tokenOut,
-            pools,
-            usdcConnectingPool,
+            poolsAll,
+            poolsFiltered,
             chainId
         );
 
-        const [filteredPoolsDict, pathData] = filterHopPools(
+        const [, pathData] = filterHopPools(
             tokenIn,
             tokenOut,
             hopTokens,
-            pools
+            poolsFiltered
         );
 
         const hopTokenStaBal = STABALADDR[chainId];
 
         // We expect no specific staBalPaths as the path already exists as multihop
+        expect(pathUsingStaBal).to.be.empty;
         expect(pathData.length).to.eq(1);
         expect(pathData[0].swaps.length).to.eq(2);
         expect(pathData[0].swaps[0].pool).to.eq('staBalPair2');

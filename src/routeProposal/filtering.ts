@@ -35,6 +35,7 @@ The main purpose of this function is to:
 As we're looping all here, it also does a number of other things to avoid unnecessary loops later:
 - parsePoolPairData for Direct pools
 - store token decimals for future use
+- We also create and return a pools dictionary that includes all pools which is useful for future pool filtering
 */
 export function filterPoolsOfInterest(
     allPools: SubgraphPoolBase[],
@@ -43,8 +44,11 @@ export function filterPoolsOfInterest(
     maxPools: number,
     chainId: number,
     currentBlockTimestamp = 0
-): [PoolDictionary, string[], StablePool] {
-    const poolsDictionary: PoolDictionary = {};
+): [PoolDictionary, string[], PoolDictionary] {
+    // This will include all pools
+    const poolsAllDictionary: PoolDictionary = {};
+    // This will include pools with tokenIn and/or tokenOut only
+    const poolsFilteredDictionary: PoolDictionary = {};
 
     // If pool contains token add all its tokens to direct list
     // Multi-hop trades: we find the best pools that connect tokenIn and tokenOut through a multi-hop (intermediate) token
@@ -52,9 +56,6 @@ export function filterPoolsOfInterest(
     // tokens that are in pools that already contain tokenOut (in which case multi-hop is not necessary)
     let tokenInPairedTokens: Set<string> = new Set();
     let tokenOutPairedTokens: Set<string> = new Set();
-
-    // This will be the USDC/staBAL Connecting pool used in Polygon
-    let usdcConnectingPool: StablePool = {} as StablePool;
 
     allPools.forEach((pool) => {
         if (pool.tokensList.length === 0 || pool.tokens[0].balance === '0') {
@@ -69,9 +70,8 @@ export function filterPoolsOfInterest(
             | undefined = parseNewPool(pool, currentBlockTimestamp);
         if (!newPool) return;
 
-        if (newPool.id === USDCCONNECTINGPOOL[chainId].id) {
-            usdcConnectingPool = newPool as StablePool;
-        }
+        // Add all pools to this dictionary
+        poolsAllDictionary[pool.id] = newPool;
 
         const tokenListSet = new Set(pool.tokensList);
 
@@ -84,7 +84,7 @@ export function filterPoolsOfInterest(
             newPool.setTypeForSwap(SwapPairType.Direct);
             // parsePoolPairData for Direct pools as it avoids having to loop later
             newPool.parsePoolPairData(tokenIn, tokenOut);
-            poolsDictionary[pool.id] = newPool;
+            poolsFilteredDictionary[pool.id] = newPool;
             return;
         }
 
@@ -98,14 +98,14 @@ export function filterPoolsOfInterest(
                     ...tokenListSet,
                 ]);
                 newPool.setTypeForSwap(SwapPairType.HopIn);
-                poolsDictionary[pool.id] = newPool;
+                poolsFilteredDictionary[pool.id] = newPool;
             } else if (!containsTokenIn && containsTokenOut) {
                 tokenOutPairedTokens = new Set([
                     ...tokenOutPairedTokens,
                     ...tokenListSet,
                 ]);
                 newPool.setTypeForSwap(SwapPairType.HopOut);
-                poolsDictionary[pool.id] = newPool;
+                poolsFilteredDictionary[pool.id] = newPool;
             }
         }
     });
@@ -117,7 +117,7 @@ export function filterPoolsOfInterest(
 
     // Transform set into Array
     const hopTokens = [...hopTokensSet];
-    return [poolsDictionary, hopTokens, usdcConnectingPool];
+    return [poolsFilteredDictionary, hopTokens, poolsAllDictionary];
 }
 
 /*
@@ -370,10 +370,17 @@ TUSD>[TUSDstaBALPool]>staBAL3>[ConnectingPool]>USDC>[BalWeightedPool]>BAL
 export function getPathUsingStaBalPools(
     tokenIn: string,
     tokenOut: string,
-    pools: PoolDictionary,
-    usdcConnectingPool: StablePool,
+    poolsAll: PoolDictionary,
+    poolsFiltered: PoolDictionary,
     chainId: number
 ): NewPath {
+    // This will be the USDC/staBAL Connecting pool used in Polygon
+    const usdcConnectingPool: StablePool = poolsAll[
+        USDCCONNECTINGPOOL[chainId].id
+    ] as StablePool;
+
+    if (!usdcConnectingPool) return {} as NewPath;
+
     // staBal BPT token is the hop token between token and USDC connecting pool
     const hopTokenStaBal = STABALADDR[chainId];
 
@@ -382,14 +389,14 @@ export function getPathUsingStaBalPools(
         tokenIn,
         hopTokenStaBal,
         SwapPairType.HopIn,
-        pools
+        poolsFiltered
     );
     // Finds the best staBAL Pool with tokenOut/staBal3Bpt or returns '' if doesn't exist
     const staBalPoolIdOut = getHighestLiquidityPool(
         hopTokenStaBal,
         tokenOut,
         SwapPairType.HopOut,
-        pools
+        poolsFiltered
     );
 
     // Path must start or finish with a staBAL Pool
@@ -402,7 +409,7 @@ export function getPathUsingStaBalPools(
         // Last part of path is single hop through USDC/tokenOut highest liquidity pool
         // i.e. tokenIn>[staBalPair1]>staBAL>[usdcConnecting]>USDC>[HighLiqPool]>tokenOut
 
-        const staBalPoolIn = pools[staBalPoolIdIn];
+        const staBalPoolIn = poolsFiltered[staBalPoolIdIn];
 
         // tokenIn > [staBalPool] > staBal > [UsdcConnectingPool] > USDC
         const staBalPath = createMultihopPath(
@@ -418,12 +425,12 @@ export function getPathUsingStaBalPools(
             USDCCONNECTINGPOOL[chainId].usdc,
             tokenOut,
             SwapPairType.HopOut,
-            pools
+            poolsFiltered
         );
         // No USDC>tokenOut pool so return empty path
         if (mostLiquidLastPool === '') return {} as NewPath;
         else {
-            const lastPool = pools[mostLiquidLastPool];
+            const lastPool = poolsFiltered[mostLiquidLastPool];
             const pathEnd = createDirectPath(
                 lastPool,
                 USDCCONNECTINGPOOL[chainId].usdc,
@@ -436,19 +443,19 @@ export function getPathUsingStaBalPools(
         // First part of path is single hop through tokenIn/USDC highest liquidity pool
         // Last part of path is multihop through USDC Connecting Pools and staBalPool
         // i.e. i.e. tokenIn>[HighLiqPool]>USDC>[usdcConnecting]>staBAL>[staBalPair1]>tokenOut
-        const staBalPoolIn = pools[staBalPoolIdOut];
+        const staBalPoolIn = poolsFiltered[staBalPoolIdOut];
 
         // Hop in as it is tokenIn > USDC
         const mostLiquidFirstPool = getHighestLiquidityPool(
             tokenIn,
             USDCCONNECTINGPOOL[chainId].usdc,
             SwapPairType.HopIn,
-            pools
+            poolsFiltered
         );
         // No tokenIn>USDC pool so return empty path
         if (mostLiquidFirstPool === '') return {} as NewPath;
 
-        const firstPool = pools[mostLiquidFirstPool];
+        const firstPool = poolsFiltered[mostLiquidFirstPool];
 
         // USDC > [UsdcConnectingPool] > staBal > [staBalPool] > tokenOut
         const staBalPath = createMultihopPath(
