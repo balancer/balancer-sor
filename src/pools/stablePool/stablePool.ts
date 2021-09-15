@@ -6,6 +6,7 @@ import {
     PoolPairBase,
     SwapTypes,
     SubgraphPoolBase,
+    SubgraphToken,
 } from '../../types';
 import { getAddress } from '@ethersproject/address';
 import { bnum, scale, ZERO } from '../../utils/bignumber';
@@ -18,31 +19,17 @@ import {
     _derivativeSpotPriceAfterSwapTokenInForExactTokenOut,
 } from './stableMath';
 
-export interface StablePoolToken {
-    address: string;
-    balance: string;
-    decimals: string | number;
-}
+type StablePoolToken = Pick<SubgraphToken, 'address' | 'balance' | 'decimals'>;
 
-export interface StablePoolPairData extends PoolPairBase {
-    id: string;
-    address: string;
-    poolType: PoolTypes;
-    tokenIn: string;
-    tokenOut: string;
-    balanceIn: BigNumber;
-    balanceOut: BigNumber;
-    swapFee: BigNumber;
-    swapFeeScaled: BigNumber;
-    decimalsIn: number;
-    decimalsOut: number;
-    allBalances: BigNumber[]; // Only for stable pools
-    allBalancesScaled: BigNumber[]; // Only for stable pools - EVM Maths uses everything in 1e18 upscaled format and this avoids repeated scaling
-    invariant: BigNumber; // Only for stable pools
-    amp: BigNumber; // Only for stable pools
-    tokenIndexIn: number; // Only for stable pools
-    tokenIndexOut: number; // Only for stable pools
-}
+export type StablePoolPairData = PoolPairBase & {
+    swapFeeScaled: BigNumber; // EVM Maths uses everything in 1e18 upscaled format and this avoids repeated scaling
+    allBalances: BigNumber[];
+    allBalancesScaled: BigNumber[]; // EVM Maths uses everything in 1e18 upscaled format and this avoids repeated scaling
+    invariant: BigNumber;
+    amp: BigNumber;
+    tokenIndexIn: number;
+    tokenIndexOut: number;
+};
 
 export class StablePool implements PoolBase {
     poolType: PoolTypes = PoolTypes.Stable;
@@ -175,6 +162,7 @@ export class StablePool implements PoolBase {
         } else {
             // token is underlying in the pool
             const T = this.tokens.find((t) => t.address === token);
+            if (!T) throw Error('Pool does not contain this token');
             T.balance = newBalance.toString();
         }
     }

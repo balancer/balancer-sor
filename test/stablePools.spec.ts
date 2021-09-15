@@ -37,15 +37,7 @@ describe(`Tests for Stable Pools.`, () => {
             // Max out uses standard V2 limits
             const MAX_OUT_RATIO = bnum(0.3);
 
-            const newPool = new StablePool(
-                pool.id,
-                pool.address,
-                pool.amp,
-                pool.swapFee,
-                pool.totalShares,
-                pool.tokens,
-                pool.tokensList
-            );
+            const newPool = StablePool.fromPool(pool);
 
             const poolPairData: StablePoolPairData = {
                 id: pool.id,
@@ -59,7 +51,7 @@ describe(`Tests for Stable Pools.`, () => {
                 swapFeeScaled: scale(bnum(pool.swapFee), 18),
                 decimalsIn: Number(pool.tokens[0].decimals),
                 decimalsOut: Number(pool.tokens[1].decimals),
-                amp: bnum(pool.amp),
+                amp: bnum(pool.amp as string),
                 allBalances: [
                     bnum(pool.tokens[0].balance),
                     bnum(pool.tokens[1].balance),
@@ -89,15 +81,7 @@ describe(`Tests for Stable Pools.`, () => {
             // Max out uses standard V2 limits
             const MAX_OUT_RATIO = bnum(0.3);
 
-            const newPool = new StablePool(
-                pool.id,
-                pool.address,
-                pool.amp,
-                pool.swapFee,
-                pool.totalShares,
-                pool.tokens,
-                pool.tokensList
-            );
+            const newPool = StablePool.fromPool(pool);
 
             const poolPairData: StablePoolPairData = {
                 id: pool.id,
@@ -111,7 +95,7 @@ describe(`Tests for Stable Pools.`, () => {
                 swapFeeScaled: scale(bnum(pool.swapFee), 18),
                 decimalsIn: Number(pool.tokens[0].decimals),
                 decimalsOut: Number(pool.tokens[1].decimals),
-                amp: bnum(pool.amp),
+                amp: bnum(pool.amp as string),
                 allBalances: [],
                 allBalancesScaled: [],
                 invariant: bnum(0),

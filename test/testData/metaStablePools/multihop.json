@@ -19,14 +19,14 @@
                 {
                     "address": "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
                     "balance": "1000",
-                    "decimals": "18",
+                    "decimals": 18,
                     "symbol": "WETH",
                     "priceRate": "1"
                 },
                 {
                     "address": "0xae7ab96520de3a18e5e111b5eaab095312d7fe84",
                     "balance": "4000",
-                    "decimals": "18",
+                    "decimals": 18,
                     "symbol": "stETH",
                     "priceRate": "0.25"
                 }
@@ -47,14 +47,14 @@
                 {
                     "address": "0xae7ab96520de3a18e5e111b5eaab095312d7fe84",
                     "balance": "8000",
-                    "decimals": "18",
+                    "decimals": 18,
                     "symbol": "stETH",
                     "priceRate": "0.25"
                 },
                 {
                     "address": "0x42d6622dece394b54999fbd73d108123806f6a18",
                     "balance": "2000",
-                    "decimals": "18",
+                    "decimals": 18,
                     "symbol": "randomETH",
                     "priceRate": "1"
                 }
@@ -77,13 +77,13 @@
                 {
                     "address": "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
                     "balance": "1000",
-                    "decimals": "18",
+                    "decimals": 18,
                     "symbol": "WETH"
                 },
                 {
                     "address": "0xae7ab96520de3a18e5e111b5eaab095312d7fe84",
                     "balance": "1000",
-                    "decimals": "18",
+                    "decimals": 18,
                     "symbol": "stETH"
                 }
             ],
@@ -103,13 +103,13 @@
                 {
                     "address": "0xae7ab96520de3a18e5e111b5eaab095312d7fe84",
                     "balance": "2000",
-                    "decimals": "18",
+                    "decimals": 18,
                     "symbol": "stETH"
                 },
                 {
                     "address": "0x42d6622dece394b54999fbd73d108123806f6a18",
                     "balance": "2000",
-                    "decimals": "18",
+                    "decimals": 18,
                     "symbol": "randomETH"
                 }
             ],

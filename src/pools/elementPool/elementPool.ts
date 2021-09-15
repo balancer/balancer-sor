@@ -6,6 +6,7 @@ import {
     PoolPairBase,
     SwapTypes,
     SubgraphPoolBase,
+    SubgraphToken,
 } from '../../types';
 import { getAddress } from '@ethersproject/address';
 import { bnum } from '../../utils/bignumber';
@@ -19,31 +20,16 @@ import {
     getTimeTillExpiry,
 } from './elementMath';
 
-export interface ElementPoolToken {
-    address: string;
-    balance: string;
-    decimals: string | number;
-}
+type ElementPoolToken = Pick<SubgraphToken, 'address' | 'balance' | 'decimals'>;
 
-export interface ElementPoolPairData extends PoolPairBase {
-    id: string;
-    address: string;
-    poolType: PoolTypes;
-    tokenIn: string;
-    tokenOut: string;
-    balanceIn: BigNumber;
-    balanceOut: BigNumber;
-    swapFee: BigNumber;
-    decimalsIn: number;
-    decimalsOut: number;
-    // Element specific fields
+export type ElementPoolPairData = PoolPairBase & {
     totalShares: BigNumber;
     expiryTime: number;
     unitSeconds: number;
     principalToken: string;
     baseToken: string;
     currentBlockTimestamp: number;
-}
+};
 
 export class ElementPool implements PoolBase {
     poolType: PoolTypes = PoolTypes.Element;
@@ -62,6 +48,14 @@ export class ElementPool implements PoolBase {
     currentBlockTimestamp: number;
 
     static fromPool(pool: SubgraphPoolBase): ElementPool {
+        if (!pool.expiryTime) throw new Error('ElementPool missing expiryTime');
+        if (!pool.unitSeconds)
+            throw new Error('ElementPool missing unitSeconds');
+        if (!pool.principalToken)
+            throw new Error('ElementPool missing principalToken');
+
+        if (!pool.baseToken) throw new Error('ElementPool missing baseToken');
+
         return new ElementPool(
             pool.id,
             pool.address,
@@ -196,6 +190,7 @@ export class ElementPool implements PoolBase {
         } else {
             // token is underlying in the pool
             const T = this.tokens.find((t) => t.address === token);
+            if (!T) throw Error('Pool does not contain this token');
             T.balance = newBalance.toString();
         }
     }

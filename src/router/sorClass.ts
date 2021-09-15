@@ -66,8 +66,8 @@ export const optimizeSwapAmounts = (
 
         //  iterate until we converge to the best pools for a given totalSwapAmount
         //  first initialize variables
-        const historyOfSortedPathIds = [];
-        let selectedPaths: NewPath[];
+        const historyOfSortedPathIds: string[] = [];
+        let selectedPaths: NewPath[] = [];
         let [
             newSelectedPaths,
             exceedingAmounts,
@@ -170,8 +170,8 @@ export const formatSwaps = (
 ): [Swap[][], BigNumber, BigNumber] => {
     //// Prepare swap data from paths
     const swaps: Swap[][] = [];
-    let highestSwapAmt = ZERO;
-    let largestSwapPath: NewPath;
+    let highestSwapAmt = bestSwapAmounts[0];
+    let largestSwapPath: NewPath = bestPaths[0];
     let bestTotalReturn = ZERO; // Reset totalReturn as this time it will be
     // calculated with the EVM maths so the return is exactly what the user will get
     // after executing the transaction (given there are no front-runners)
@@ -208,7 +208,7 @@ export const formatSwaps = (
         */
         const poolPairData = path.poolPairData;
         const pathSwaps: Swap[] = [];
-        const amounts = [];
+        const amounts: BigNumber[] = [];
         let returnAmount: BigNumber;
         const n = poolPairData.length;
         amounts.push(swapAmount);
@@ -276,14 +276,14 @@ export const formatSwaps = (
         const dust = totalSwapAmount.minus(totalSwapAmountWithRoundingErrors);
         if (swapType === SwapTypes.SwapExactIn) {
             // As swap is ExactIn, add dust to input pool
-            swaps[0][0].swapAmount = bnum(swaps[0][0].swapAmount)
+            swaps[0][0].swapAmount = bnum(swaps[0][0].swapAmount as string)
                 .plus(dust)
                 .toString();
         } else {
             // As swap is ExactOut, add dust to output pool
             const firstPathLastPoolIndex = bestPaths[0].swaps.length - 1;
             swaps[0][firstPathLastPoolIndex].swapAmount = bnum(
-                swaps[0][firstPathLastPoolIndex].swapAmount
+                swaps[0][firstPathLastPoolIndex].swapAmount as string
             )
                 .plus(dust)
                 .toString();
@@ -310,10 +310,10 @@ function getBestPathIds(
     swapType: SwapTypes,
     swapAmounts: BigNumber[]
 ): [NewPath[], BigNumber[], BigNumber[], string[]] {
-    const bestPathIds = [];
-    const selectedPaths = [];
-    const selectedPathLimitAmounts = [];
-    const selectedPathExceedingAmounts = [];
+    const bestPathIds: string[] = [];
+    const selectedPaths: NewPath[] = [];
+    const selectedPathLimitAmounts: BigNumber[] = [];
+    const selectedPathExceedingAmounts: BigNumber[] = [];
     const paths = cloneDeep(originalPaths); // Deep copy to avoid changing the original path data
 
     // Sort swapAmounts in descending order without changing original: https://stackoverflow.com/a/42442909
@@ -385,7 +385,7 @@ function iterateSwapAmounts(
     pathLimitAmounts: BigNumber[]
 ): [BigNumber[], BigNumber[]] {
     let priceError = ONE; // Initialize priceError just so that while starts
-    let prices = [];
+    let prices: BigNumber[] = [];
     // // Since this is the beginning of an iteration with a new set of paths, we
     // // set any swapAmounts that were 0 previously to 1 wei or at the limit
     // // to limit minus 1 wei just so that they
@@ -443,8 +443,8 @@ function iterateSwapAmountsApproximation(
 ): [BigNumber[], BigNumber[], BigNumber[]] {
     let sumInverseDerivativeSPaSs = ZERO;
     let sumSPaSDividedByDerivativeSPaSs = ZERO;
-    const SPaSs = [];
-    const derivativeSPaSs = [];
+    const SPaSs: BigNumber[] = [];
+    const derivativeSPaSs: BigNumber[] = [];
 
     // We only iterate on the swapAmounts that are viable (i.e. no negative or > than path limit)
     // OR if this is the first time "iterateSwapAmountsApproximation" is called
@@ -525,7 +525,7 @@ function iterateSwapAmountsApproximation(
         );
     }
 
-    const pricesForViableAmounts = []; // Get prices for all non-negative AND below-limit input amounts
+    const pricesForViableAmounts: BigNumber[] = []; // Get prices for all non-negative AND below-limit input amounts
     let swapAmountsSumWithRoundingErrors = ZERO;
     swapAmounts.forEach((swapAmount, i) => {
         swapAmountsSumWithRoundingErrors =

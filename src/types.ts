@@ -1,5 +1,9 @@
 import { BigNumber } from './utils/bignumber';
 
+export type NoNullableField<T> = {
+    [P in keyof T]: NonNullable<T[P]>;
+};
+
 export enum SwapTypes {
     SwapExactIn,
     SwapExactOut,
@@ -28,15 +32,18 @@ export interface SwapOptions {
     forceRefresh: boolean;
 }
 
-export interface PoolPairBase {
-    balanceIn: BigNumber;
-    balanceOut: BigNumber;
+export type PoolPairBase = {
+    id: string;
+    address: string;
     poolType: PoolTypes;
+    swapFee: BigNumber;
     tokenIn: string;
     tokenOut: string;
     decimalsIn: number;
     decimalsOut: number;
-}
+    balanceIn: BigNumber;
+    balanceOut: BigNumber;
+};
 
 export interface Swap {
     pool: string;
@@ -55,7 +62,7 @@ export interface SubgraphPoolBase {
     poolType: string;
     swapFee: string;
     totalShares: string;
-    tokens: SubGraphToken[];
+    tokens: SubgraphToken[];
     tokensList: string[];
 
     // Weighted & Element field
@@ -79,15 +86,14 @@ export interface SubgraphPoolBase {
     target2?: string;
 }
 
-export interface SubGraphToken {
+export type SubgraphToken = {
     address: string;
     balance: string;
-    decimals: string | number;
-    // Stable & Element field
-    weight?: string;
-    // MetaStablePool & Linear field
-    priceRate?: string;
-}
+    decimals: number;
+    priceRate: string;
+    // WeightedPool field
+    weight: string | null;
+};
 
 export interface SwapV2 {
     poolId: string;

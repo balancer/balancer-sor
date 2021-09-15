@@ -45,7 +45,7 @@ export class PoolCacher {
                 newPools = cloneDeep(poolsData);
             } else {
                 // Retrieve from URL if set otherwise use data passed in constructor
-                if (this.isConnectedToSubgraph()) {
+                if (this.poolsUrl !== null) {
                     newPools = await fetchSubgraphPools(this.poolsUrl);
                 } else {
                     newPools = this.pools;

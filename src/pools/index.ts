@@ -72,4 +72,5 @@ export function getOutputAmountSwap(
             return pool._tokenInForExactTokenOut(poolPairData, amount, false);
         }
     }
+    throw Error('Unsupported swap');
 }

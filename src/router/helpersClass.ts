@@ -15,7 +15,7 @@ export function getHighestLimitAmountsForPaths(
     maxPools: number
 ): BigNumber[] {
     if (paths.length === 0) return [];
-    const limitAmounts = [];
+    const limitAmounts: BigNumber[] = [];
     for (let i = 0; i < maxPools; i++) {
         if (i < paths.length) {
             const limitAmount = paths[i].limitAmount;
@@ -191,6 +191,7 @@ export function getSpotPriceAfterSwap(
             amount
         );
     }
+    throw Error('Unsupported swap');
 }
 
 export function getDerivativeSpotPriceAfterSwapForPath(
@@ -269,6 +270,7 @@ export function getDerivativeSpotPriceAfterSwap(
             amount
         );
     }
+    throw Error('Unsupported swap');
 }
 
 // We need do pass 'pools' here because this function has to update the pools state
@@ -315,6 +317,8 @@ export function EVMgetOutputAmountSwap(
                 swapType,
                 amount
             );
+        } else {
+            throw Error('Unsupported swap');
         }
     } else {
         // TODO we will be able to remove pooltype check once Element EVM maths is available
@@ -337,6 +341,8 @@ export function EVMgetOutputAmountSwap(
                 swapType,
                 amount
             );
+        } else {
+            throw Error('Unsupported swap');
         }
     }
     // Update balances of tokenIn and tokenOut
