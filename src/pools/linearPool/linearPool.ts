@@ -32,6 +32,8 @@ import {
     _derivativeSpotPriceAfterSwapBPTInForExactTokenOut,
 } from './linearMath';
 
+const FPPRECISION = 18;
+
 enum PairTypes {
     BptToToken,
     TokenToBpt,
@@ -46,6 +48,7 @@ type LinearPoolToken = Pick<
 export type LinearPoolPairData = PoolPairBase & {
     pairType: PairTypes;
     wrappedBalance: BigNumber;
+    wrappedDecimals: number;
     rate: BigNumber;
     target1: BigNumber;
     target2: BigNumber;
@@ -166,6 +169,7 @@ export class LinearPool implements PoolBase {
             balanceOut: balanceOut,
             swapFee: this.swapFee,
             wrappedBalance: bnum(this.tokens[this.wrappedIndex].balance),
+            wrappedDecimals: +this.tokens[this.wrappedIndex].decimals,
             rate: bnum(this.tokens[this.wrappedIndex].priceRate),
             target1: this.target1,
             target2: this.target2,
@@ -217,9 +221,6 @@ export class LinearPool implements PoolBase {
         }
     }
 
-    // Using BigNumber.js decimalPlaces (dp), allows us to consider token decimal accuracy correctly,
-    // i.e. when using token with 2decimals 0.002 should be returned as 0
-    // Uses ROUND_DOWN mode (1)
     _exactTokenInForTokenOut(
         poolPairData: LinearPoolPairData,
         amount: BigNumber,
@@ -229,31 +230,7 @@ export class LinearPool implements PoolBase {
             return this._exactTokenInForBPTOut(poolPairData, amount, exact);
         } else if (poolPairData.pairType === PairTypes.BptToToken) {
             return this._exactBPTInForTokenOut(poolPairData, amount, exact);
-        } else {
-            // if (exact) {
-            //     console.log('_evmoutGivenIn at linearPool.ts');
-            //     try {
-            //         // TO DO - Replace with correct SDK maths
-            //         // poolPair balances are normalised so must be scaled before use
-            //         const amt = SDK.WeightedMath._calcOutGivenIn(
-            //             scale(poolPairData.balanceIn, poolPairData.decimalsIn),
-            //             bnum(1),
-            //             scale(poolPairData.balanceOut, poolPairData.decimalsOut),
-            //             bnum(1),
-            //             scale(amount, poolPairData.decimalsIn),
-            //             scale(poolPairData.swapFee, 18)
-            //         );
-            //         // return normalised amount
-            //         return scale(amt, -poolPairData.decimalsOut);
-            //     } catch (err) {
-            //         return ZERO;
-            //     }
-            // }
-            return _exactTokenInForTokenOut(amount, poolPairData).dp(
-                poolPairData.decimalsOut,
-                1
-            );
-        }
+        } else throw Error('LinearPool does not support TokenToToken');
     }
 
     _exactTokenInForBPTOut(
@@ -261,54 +238,84 @@ export class LinearPool implements PoolBase {
         amount: BigNumber,
         exact: boolean
     ): BigNumber {
-        // if (exact) {
-        //     try {
-        //         // TO DO - Replace with correct SDK maths
-        //         // balance: BigNumber, normalizedWeight: BigNumber, amountIn: BigNumber, bptTotalSupply: BigNumber, swapFee: BigNumber
-        //         const amt = SDK.LinearMath._calcBptOutGivenExactTokenIn(
-        //             scale(poolPairData.balanceIn, poolPairData.decimalsIn),
-        //             bnum(1),
-        //             scale(amount, poolPairData.decimalsIn),
-        //             scale(poolPairData.balanceOut, 18), // BPT is always 18 decimals
-        //             scale(poolPairData.swapFee, 18)
-        //         );
-        //         // return normalised amount
-        //         return scale(amt, -18); // BPT is always 18 decimals
-        //     } catch (err) {
-        //         return ZERO;
-        //     }
-        // }
-        return _exactTokenInForBPTOut(amount, poolPairData);
+        if (exact) {
+            try {
+                // poolPair balances are normalised so must be scaled before use
+                // in = main
+                // out = BPT
+                const amt = SDK.LinearMath._calcBptOutPerMainIn(
+                    scale(amount, poolPairData.decimalsIn),
+                    scale(poolPairData.balanceIn, poolPairData.decimalsIn),
+                    scale(
+                        poolPairData.wrappedBalance,
+                        poolPairData.wrappedDecimals
+                    ),
+                    scale(poolPairData.balanceOut, poolPairData.decimalsOut),
+                    {
+                        fee: scale(poolPairData.swapFee, FPPRECISION),
+                        rate: scale(poolPairData.rate, FPPRECISION),
+                        lowerTarget: scale(
+                            poolPairData.target1,
+                            poolPairData.decimalsIn
+                        ),
+                        upperTarget: scale(
+                            poolPairData.target2,
+                            poolPairData.decimalsIn
+                        ),
+                    }
+                );
+                // return normalised amount
+                return scale(amt, -poolPairData.decimalsOut);
+            } catch (err) {
+                return ZERO;
+            }
+        } else {
+            return _exactTokenInForBPTOut(amount, poolPairData);
+        }
     }
 
+    // bug alert: exact and "not exact" differ more than they should
     _exactBPTInForTokenOut(
         poolPairData: LinearPoolPairData,
         amount: BigNumber,
         exact: boolean
     ): BigNumber {
-        // if (exact) {
-        //     try {
-        //         // TO DO - Replace with correct SDK maths
-        //         // poolPair balances are normalised so must be scaled before use
-        //         const amt = SDK.WeightedMath._calcTokenOutGivenExactBptIn(
-        //             scale(poolPairData.balanceOut, poolPairData.decimalsOut),
-        //             bnum(1),
-        //             scale(amount, 18), // BPT is always 18 decimals
-        //             scale(poolPairData.balanceIn, 18), // BPT is always 18 decimals
-        //             scale(poolPairData.swapFee, 18)
-        //         );
-        //         // return normalised amount
-        //         return scale(amt, -poolPairData.decimalsOut);
-        //     } catch (err) {
-        //         return ZERO;
-        //     }
-        // }
-        return _exactBPTInForTokenOut(amount, poolPairData);
+        if (exact) {
+            try {
+                // poolPair balances are normalised so must be scaled before use
+                // in = BPT
+                // out = main
+                const amt = SDK.LinearMath._calcMainOutPerBptIn(
+                    scale(amount, poolPairData.decimalsIn),
+                    scale(poolPairData.balanceOut, poolPairData.decimalsOut),
+                    scale(
+                        poolPairData.wrappedBalance,
+                        poolPairData.wrappedDecimals
+                    ),
+                    scale(poolPairData.balanceIn, poolPairData.decimalsIn),
+                    {
+                        fee: scale(poolPairData.swapFee, FPPRECISION),
+                        rate: scale(poolPairData.rate, FPPRECISION),
+                        lowerTarget: scale(
+                            poolPairData.target1,
+                            poolPairData.decimalsOut
+                        ),
+                        upperTarget: scale(
+                            poolPairData.target2,
+                            poolPairData.decimalsOut
+                        ),
+                    }
+                );
+                // return normalised amount
+                return scale(amt, -poolPairData.decimalsOut);
+            } catch (err) {
+                return ZERO;
+            }
+        } else {
+            return _exactBPTInForTokenOut(amount, poolPairData);
+        }
     }
 
-    // Using BigNumber.js decimalPlaces (dp), allows us to consider token decimal accuracy correctly,
-    // i.e. when using token with 2decimals 0.002 should be returned as 0
-    // Uses ROUND_UP mode (0)
     _tokenInForExactTokenOut(
         poolPairData: LinearPoolPairData,
         amount: BigNumber,
@@ -318,31 +325,7 @@ export class LinearPool implements PoolBase {
             return this._tokenInForExactBPTOut(poolPairData, amount, exact);
         } else if (poolPairData.pairType === PairTypes.BptToToken) {
             return this._BPTInForExactTokenOut(poolPairData, amount, exact);
-        } else {
-            // if (exact) {
-            //     try {
-            //         // TO DO - Replace with correct SDK maths
-            //         // poolPair balances are normalised so must be scaled before use
-            //         const amt = SDK.WeightedMath._calcInGivenOut(
-            //             scale(poolPairData.balanceIn, poolPairData.decimalsIn),
-            //             bnum(1),
-            //             scale(poolPairData.balanceOut, poolPairData.decimalsOut),
-            //             bnum(1),
-            //             scale(amount, poolPairData.decimalsOut),
-            //             scale(poolPairData.swapFee, 18)
-            //         );
-
-            //         // return normalised amount
-            //         return scale(amt, -poolPairData.decimalsIn);
-            //     } catch (err) {
-            //         return ZERO;
-            //     }
-            // }
-            return _tokenInForExactTokenOut(amount, poolPairData).dp(
-                poolPairData.decimalsIn,
-                0
-            );
-        }
+        } else throw Error('LinearPool does not support TokenToToken');
     }
 
     _tokenInForExactBPTOut(
@@ -352,16 +335,30 @@ export class LinearPool implements PoolBase {
     ): BigNumber {
         if (exact) {
             try {
-                // TO DO - Replace with correct SDK maths
                 // poolPair balances are normalised so must be scaled before use
-                const amt = SDK.WeightedMath._calcTokenInGivenExactBptOut(
+                // in = main
+                // out = BPT
+                const amt = SDK.LinearMath._calcMainInPerBptOut(
+                    scale(amount, poolPairData.decimalsOut),
                     scale(poolPairData.balanceIn, poolPairData.decimalsIn),
-                    bnum(1),
-                    scale(amount, 18),
-                    scale(poolPairData.balanceOut, 18), // BPT is always 18 decimals
-                    scale(poolPairData.swapFee, 18)
+                    scale(
+                        poolPairData.wrappedBalance,
+                        poolPairData.wrappedDecimals
+                    ),
+                    scale(poolPairData.balanceOut, poolPairData.decimalsOut),
+                    {
+                        fee: scale(poolPairData.swapFee, FPPRECISION),
+                        rate: scale(poolPairData.rate, FPPRECISION),
+                        lowerTarget: scale(
+                            poolPairData.target1,
+                            poolPairData.decimalsIn
+                        ),
+                        upperTarget: scale(
+                            poolPairData.target2,
+                            poolPairData.decimalsIn
+                        ),
+                    }
                 );
-
                 // return normalised amount
                 return scale(amt, -poolPairData.decimalsIn);
             } catch (err) {
@@ -371,6 +368,7 @@ export class LinearPool implements PoolBase {
         return _tokenInForExactBPTOut(amount, poolPairData);
     }
 
+    // bug alert: exact and "not exact" differ more than they should
     _BPTInForExactTokenOut(
         poolPairData: LinearPoolPairData,
         amount: BigNumber,
@@ -378,18 +376,32 @@ export class LinearPool implements PoolBase {
     ): BigNumber {
         if (exact) {
             try {
-                // TO DO - Replace with correct SDK maths
                 // poolPair balances are normalised so must be scaled before use
-                const amt = SDK.WeightedMath._calcBptInGivenExactTokenOut(
-                    scale(poolPairData.balanceOut, poolPairData.decimalsOut),
-                    bnum(1),
+                // in = BPT
+                // out = main
+                const amt = SDK.LinearMath._calcBptInPerMainOut(
                     scale(amount, poolPairData.decimalsOut),
-                    scale(poolPairData.balanceIn, 18), // BPT is always 18 decimals
-                    scale(poolPairData.swapFee, 18)
+                    scale(poolPairData.balanceOut, poolPairData.decimalsOut),
+                    scale(
+                        poolPairData.wrappedBalance,
+                        poolPairData.wrappedDecimals
+                    ),
+                    scale(poolPairData.balanceIn, poolPairData.decimalsIn),
+                    {
+                        fee: scale(poolPairData.swapFee, FPPRECISION),
+                        rate: scale(poolPairData.rate, FPPRECISION),
+                        lowerTarget: scale(
+                            poolPairData.target1,
+                            poolPairData.decimalsOut
+                        ),
+                        upperTarget: scale(
+                            poolPairData.target2,
+                            poolPairData.decimalsOut
+                        ),
+                    }
                 );
-
                 // return normalised amount
-                return scale(amt, -18); // BPT always 18 decimals
+                return scale(amt, -poolPairData.decimalsIn);
             } catch (err) {
                 return ZERO;
             }

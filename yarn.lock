@@ -154,11 +154,6 @@
     lodash "^4.17.13"
     to-fast-properties "^2.0.0"
 
-"@balancer-labs/v2-deployments@^1.0.0":
-  version "1.1.1"
-  resolved "https://registry.yarnpkg.com/@balancer-labs/v2-deployments/-/v2-deployments-1.1.1.tgz#bd9c3267f3e068eb04b72e90bead7af91c3c6904"
-  integrity sha512-emB/xHCM/njxpReZQx2BqzHXwrWF+iIwn/hSwnSOxp+P6GH0rOaboio6/+Aapj7f9tCCjqRspetX//9TumX82Q==
-
 "@eslint/eslintrc@^0.4.3":
   version "0.4.3"
   resolved "https://registry.yarnpkg.com/@eslint/eslintrc/-/eslintrc-0.4.3.tgz#9e42981ef035beb3dd49add17acb96e8ff6f394c"
@@ -826,12 +821,11 @@
     "@ethersproject/properties" "^5.0.3"
     "@ethersproject/strings" "^5.0.4"
 
-"@georgeroman/balancer-v2-pools@^0.0.5":
-  version "0.0.5"
-  resolved "https://registry.yarnpkg.com/@georgeroman/balancer-v2-pools/-/balancer-v2-pools-0.0.5.tgz#e1a42be638803122196fd1a13b9fbed624f54549"
-  integrity sha512-fx+QmDJ80+E4RoaBfmnKFaOlRLM/FSbzksaTrqXM+0EeWX5Zu99SO03pjTIBDsBifq2WfHBcCU5CW5ulGF/kkg==
+"@georgeroman/balancer-v2-pools@^0.0.6":
+  version "0.0.6"
+  resolved "https://registry.yarnpkg.com/@georgeroman/balancer-v2-pools/-/balancer-v2-pools-0.0.6.tgz#411fb60eed355020295f4d29950cf3b8e39a5823"
+  integrity sha512-Tlz5BdruGCysWO75/ISyWsirt2RUWWbqE/18Cr+ZKIXZmMN+vN7iEK+CKWjU7To+cdOL+vHSx5TdUxVHhb1+4A==
   dependencies:
-    "@balancer-labs/v2-deployments" "^1.0.0"
     bignumber.js "^9.0.1"
     ethers "^5.2.0"
     graphql "^15.5.0"

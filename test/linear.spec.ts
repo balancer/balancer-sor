@@ -65,6 +65,14 @@ describe('linear pools tests', () => {
             new BigNumber(10),
             smallLinear
         );
+        console.log('fourth: ');
+        runSOR(
+            WETH,
+            USDC,
+            SwapTypes.SwapExactOut,
+            new BigNumber(10),
+            smallLinear
+        );
     });
 });
 

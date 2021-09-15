@@ -188,7 +188,7 @@
                 {
                     "address": "0x71fc860f7d3a592a4a98740e39db31d25db65ae8",
                     "balance": "100000",
-                    "decimals": 18,
+                    "decimals": 6,
                     "id": "linearUSDT-0x71fc860f7d3a592a4a98740e39db31d25db65ae8",
                     "symbol": "aUSDT",
                     "priceRate": "1.1"
@@ -196,7 +196,7 @@
                 {
                     "address": "0x0000000000000000000000000000000000000003",
                     "balance": "200000",
-                    "decimals": 18,
+                    "decimals": 6,
                     "id": "linearUSDT-0x0000000000000000000000000000000000000003",
                     "symbol": "bUSDT"
                 }

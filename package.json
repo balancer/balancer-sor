@@ -58,7 +58,7 @@
         "@ethersproject/constants": "^5.0.5",
         "@ethersproject/contracts": "^5.0.5",
         "@ethersproject/providers": "5.0.12",
-        "@georgeroman/balancer-v2-pools": "^0.0.5",
+        "@georgeroman/balancer-v2-pools": "^0.0.6",
         "bignumber.js": "^9.0.1",
         "isomorphic-fetch": "^2.2.1",
         "lodash.clonedeep": "^4.5.0",
