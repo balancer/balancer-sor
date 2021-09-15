@@ -9,6 +9,7 @@ import {
     PoolPairBase,
     SwapTypes,
     SubgraphPoolBase,
+    SubgraphToken,
 } from '../../types';
 import {
     _exactTokenInForTokenOut,
@@ -37,30 +38,18 @@ enum PairTypes {
     TokenToToken,
 }
 
-export interface LinearPoolToken {
-    address: string;
-    balance: string;
-    decimals: string | number;
-    priceRate: string;
-}
+type LinearPoolToken = Pick<
+    SubgraphToken,
+    'address' | 'balance' | 'decimals' | 'priceRate'
+>;
 
-export interface LinearPoolPairData extends PoolPairBase {
-    id: string;
-    address: string;
-    poolType: PoolTypes;
+export type LinearPoolPairData = PoolPairBase & {
     pairType: PairTypes;
-    tokenIn: string;
-    tokenOut: string;
-    balanceIn: BigNumber;
-    balanceOut: BigNumber;
-    swapFee: BigNumber;
-    decimalsIn: number;
-    decimalsOut: number;
     wrappedBalance: BigNumber;
     rate: BigNumber;
     target1: BigNumber;
     target2: BigNumber;
-}
+};
 
 export class LinearPool implements PoolBase {
     poolType: PoolTypes = PoolTypes.Linear;
@@ -119,7 +108,7 @@ export class LinearPool implements PoolBase {
         this.target2 = bnum(target2);
     }
 
-    setTypeForSwap(type: SwapPairType) {
+    setTypeForSwap(type: SwapPairType): void {
         this.swapPairType = type;
     }
 
@@ -185,7 +174,7 @@ export class LinearPool implements PoolBase {
         return poolPairData;
     }
 
-    getNormalizedLiquidity(poolPairData: LinearPoolPairData) {
+    getNormalizedLiquidity(poolPairData: LinearPoolPairData): BigNumber {
         return bnum(0);
     }
 
