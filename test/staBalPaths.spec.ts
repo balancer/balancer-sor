@@ -11,7 +11,7 @@ import {
 import { StablePool } from '../src/pools/stablePool/stablePool';
 import {
     filterPoolsOfInterest,
-    getPathsUsingStaBalPools,
+    getPathUsingStaBalPools,
     createMultihopPath,
     getHighestLiquidityPool,
     filterHopPools,
@@ -177,7 +177,7 @@ describe(`staBalPaths.`, () => {
             chainId
         );
 
-        const pathsUsingStaBal: NewPath[] = getPathsUsingStaBalPools(
+        const pathUsingStaBal: NewPath = getPathUsingStaBalPools(
             tokenIn,
             tokenOut,
             pools,
@@ -185,7 +185,57 @@ describe(`staBalPaths.`, () => {
             chainId
         );
 
-        expect(pathsUsingStaBal.length).to.eq(0);
+        expect(pathUsingStaBal).to.be.empty;
+    });
+
+    it(`TokenIn has no USDC pool, expect no route`, () => {
+        const tokenIn = '0x9f8f72aa9304c8b593d555f12ef6589cc3a579a2'; // Token With No USDC Pair
+        const tokenOut = '0x0000000000085d4780B73119b644AE5ecd22b376'; // TUSD
+
+        const testPools: any = cloneDeep(staBalPools.pools);
+
+        const [pools, hopTokens, usdcConnectingPool] = filterPoolsOfInterest(
+            testPools,
+            tokenIn,
+            tokenOut,
+            maxPools,
+            chainId
+        );
+
+        const pathUsingStaBal: NewPath = getPathUsingStaBalPools(
+            tokenIn,
+            tokenOut,
+            pools,
+            usdcConnectingPool,
+            chainId
+        );
+
+        expect(pathUsingStaBal).to.be.empty;
+    });
+
+    it(`TokenOut has no USDC pool, expect no route`, () => {
+        const tokenIn = '0x0000000000085d4780B73119b644AE5ecd22b376'; // TUSD
+        const tokenOut = '0x9f8f72aa9304c8b593d555f12ef6589cc3a579a2'; // Token With No USDC Pair
+
+        const testPools: any = cloneDeep(staBalPools.pools);
+
+        const [pools, hopTokens, usdcConnectingPool] = filterPoolsOfInterest(
+            testPools,
+            tokenIn,
+            tokenOut,
+            maxPools,
+            chainId
+        );
+
+        const pathUsingStaBal: NewPath = getPathUsingStaBalPools(
+            tokenIn,
+            tokenOut,
+            pools,
+            usdcConnectingPool,
+            chainId
+        );
+
+        expect(pathUsingStaBal).to.be.empty;
     });
 
     it(`staBal Paired Token In`, () => {
@@ -204,7 +254,7 @@ describe(`staBalPaths.`, () => {
             chainId
         );
 
-        const pathsUsingStaBal: NewPath[] = getPathsUsingStaBalPools(
+        const pathUsingStaBal: NewPath = getPathUsingStaBalPools(
             tokenIn,
             tokenOut,
             pools,
@@ -215,25 +265,26 @@ describe(`staBalPaths.`, () => {
         const staBalPoolIdIn = STABALPOOLS[chainId][tokenIn];
         const hopTokenStaBal = STABALADDR[chainId];
 
-        expect(pathsUsingStaBal.length).to.eq(1);
-        expect(pathsUsingStaBal[0].swaps[0].pool).to.eq(staBalPoolIdIn);
-        expect(pathsUsingStaBal[0].swaps[0].tokenIn).to.eq(tokenIn);
-        expect(pathsUsingStaBal[0].swaps[0].tokenOut).to.eq(hopTokenStaBal);
-        expect(pathsUsingStaBal[0].swaps[1].pool).to.eq(
+        expect(pathUsingStaBal.swaps[0].pool).to.eq(staBalPoolIdIn);
+        expect(pathUsingStaBal.swaps[0].tokenIn).to.eq(tokenIn);
+        expect(pathUsingStaBal.swaps[0].tokenOut).to.eq(hopTokenStaBal);
+        expect(pathUsingStaBal.swaps[1].pool).to.eq(
             USDCCONNECTINGPOOL[chainId].id
         );
-        expect(pathsUsingStaBal[0].swaps[1].tokenIn).to.eq(hopTokenStaBal);
-        expect(pathsUsingStaBal[0].swaps[1].tokenOut).to.eq(
+        expect(pathUsingStaBal.swaps[1].tokenIn).to.eq(hopTokenStaBal);
+        expect(pathUsingStaBal.swaps[1].tokenOut).to.eq(
             USDCCONNECTINGPOOL[chainId].usdc
         );
-        expect(pathsUsingStaBal[0].swaps[2].pool).to.eq('balPool');
-        expect(pathsUsingStaBal[0].swaps[2].tokenIn).to.eq(
+        expect(pathUsingStaBal.swaps[2].pool).to.eq('balPool');
+        expect(pathUsingStaBal.swaps[2].tokenIn).to.eq(
             USDCCONNECTINGPOOL[chainId].usdc
         );
-        expect(pathsUsingStaBal[0].swaps[2].tokenOut).to.eq(tokenOut);
+        expect(pathUsingStaBal.swaps[2].tokenOut).to.eq(tokenOut);
     });
 
     it(`staBal Paired Token Out`, () => {
+        // staBal Pair Token Out
+        // i.e. BAL>[balPool]>USDC>[usdcConnecting]>staBAL>[staBalPair1]>TUSD
         const tokenIn = '0x9a71012b13ca4d3d0cdc72a177df3ef03b0e76a3'; // BAL
         const tokenOut = '0x0000000000085d4780B73119b644AE5ecd22b376'; // TUSD
 
@@ -247,7 +298,7 @@ describe(`staBalPaths.`, () => {
             chainId
         );
 
-        const pathsUsingStaBal: NewPath[] = getPathsUsingStaBalPools(
+        const pathUsingStaBal: NewPath = getPathUsingStaBalPools(
             tokenIn,
             tokenOut,
             pools,
@@ -258,22 +309,21 @@ describe(`staBalPaths.`, () => {
         const staBalPoolId = STABALPOOLS[chainId][tokenOut];
         const hopTokenStaBal = STABALADDR[chainId];
 
-        expect(pathsUsingStaBal.length).to.eq(1);
-        expect(pathsUsingStaBal[0].swaps[0].pool).to.eq('balPool');
-        expect(pathsUsingStaBal[0].swaps[0].tokenIn).to.eq(tokenIn);
-        expect(pathsUsingStaBal[0].swaps[0].tokenOut).to.eq(
+        expect(pathUsingStaBal.swaps[0].pool).to.eq('balPool');
+        expect(pathUsingStaBal.swaps[0].tokenIn).to.eq(tokenIn);
+        expect(pathUsingStaBal.swaps[0].tokenOut).to.eq(
             USDCCONNECTINGPOOL[chainId].usdc
         );
-        expect(pathsUsingStaBal[0].swaps[1].pool).to.eq(
+        expect(pathUsingStaBal.swaps[1].pool).to.eq(
             USDCCONNECTINGPOOL[chainId].id
         );
-        expect(pathsUsingStaBal[0].swaps[1].tokenIn).to.eq(
+        expect(pathUsingStaBal.swaps[1].tokenIn).to.eq(
             USDCCONNECTINGPOOL[chainId].usdc
         );
-        expect(pathsUsingStaBal[0].swaps[1].tokenOut).to.eq(hopTokenStaBal);
-        expect(pathsUsingStaBal[0].swaps[2].pool).to.eq(staBalPoolId);
-        expect(pathsUsingStaBal[0].swaps[2].tokenIn).to.eq(hopTokenStaBal);
-        expect(pathsUsingStaBal[0].swaps[2].tokenOut).to.eq(tokenOut);
+        expect(pathUsingStaBal.swaps[1].tokenOut).to.eq(hopTokenStaBal);
+        expect(pathUsingStaBal.swaps[2].pool).to.eq(staBalPoolId);
+        expect(pathUsingStaBal.swaps[2].tokenIn).to.eq(hopTokenStaBal);
+        expect(pathUsingStaBal.swaps[2].tokenOut).to.eq(tokenOut);
     });
 
     it(`staBal Paired Token In & Out`, () => {
@@ -295,7 +345,7 @@ describe(`staBalPaths.`, () => {
             chainId
         );
 
-        const pathsUsingStaBal: NewPath[] = getPathsUsingStaBalPools(
+        const pathUsingStaBal: NewPath = getPathUsingStaBalPools(
             tokenIn,
             tokenOut,
             pools,
@@ -313,7 +363,6 @@ describe(`staBalPaths.`, () => {
         const hopTokenStaBal = STABALADDR[chainId];
 
         // We expect no specific staBalPaths as the path already exists as multihop
-        expect(pathsUsingStaBal.length).to.eq(0);
         expect(pathData.length).to.eq(1);
         expect(pathData[0].swaps.length).to.eq(2);
         expect(pathData[0].swaps[0].pool).to.eq('staBalPair2');

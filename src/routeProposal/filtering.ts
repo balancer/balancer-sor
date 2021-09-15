@@ -360,28 +360,35 @@ function composePaths(paths: NewPath[]): NewPath {
     return path;
 }
 
-export function getPathsUsingStaBalPools(
+/*
+The staBAL3 pool (STABALADDR) is the main stable pool that holds DAI/USDC/USDT and has the staBAL3 BPT.
+staBAL Pools are metastable pools that contain a project token, i.e. TUSD, paired with staBAL3 BPT.
+USDC connecting pool (USDCCONNECTINGPOOL) is a metastable pool containing USDC and staBAL3 BPT.
+This setup should enable paths between the new project metastable pools and other liquidity. I.e. TUSD > BAL, which would look like:
+TUSD>[TUSDstaBALPool]>staBAL3>[ConnectingPool]>USDC>[BalWeightedPool]>BAL
+*/
+export function getPathUsingStaBalPools(
     tokenIn: string,
     tokenOut: string,
     pools: PoolDictionary,
     usdcConnectingPool: StablePool,
     chainId: number
-): NewPath[] {
-    const pathsUsingStaBalPools: NewPath[] = [];
+): NewPath {
     const staBalPoolIdIn = STABALPOOLS[chainId][tokenIn];
     const staBalPoolIdOut = STABALPOOLS[chainId][tokenOut];
+    // staBal BPT token is the hop token between token and USDC connecting pool
+    const hopTokenStaBal = STABALADDR[chainId];
 
-    if (!staBalPoolIdIn && !staBalPoolIdOut) return pathsUsingStaBalPools;
+    // Path must start or finish with a staBAL Pool
+    if (!staBalPoolIdIn && !staBalPoolIdOut) return {} as NewPath;
+    else if (staBalPoolIdIn && staBalPoolIdOut) {
+        // This case should be handled by existing multihop algorithm because it is tokenIn>[staBalPoolIn]>staBal>[staBalPoolOut]>tokenOut
+        return {} as NewPath;
+    } else if (staBalPoolIdIn && !staBalPoolIdOut) {
+        // First part of path is multihop through staBalPool and USDC Connecting Pools
+        // Last part of path is single hop through USDC/tokenOut highest liquidity pool
+        // i.e. tokenIn>[staBalPair1]>staBAL>[usdcConnecting]>USDC>[HighLiqPool]>tokenOut
 
-    // This case should be handled by existing multihop algorithm
-    if (staBalPoolIdIn && staBalPoolIdOut) {
-        return pathsUsingStaBalPools;
-    }
-
-    // If just one of tokenIn and tokenOut is a staBalPool token, return linear-multistable-linear
-    // composed with highest liquidity pool at the other end.
-    if (staBalPoolIdIn && !staBalPoolIdOut) {
-        const hopTokenStaBal = STABALADDR[chainId];
         const staBalPoolIn = pools[staBalPoolIdIn];
 
         // tokenIn > [staBalPool] > staBal > [UsdcConnectingPool] > USDC
@@ -400,19 +407,22 @@ export function getPathsUsingStaBalPools(
             SwapPairType.HopOut,
             pools
         );
-        const lastPool = pools[mostLiquidLastPool];
-        if (lastPool) {
+        // No USDC>tokenOut pool so return empty path
+        if (mostLiquidLastPool === '') return {} as NewPath;
+        else {
+            const lastPool = pools[mostLiquidLastPool];
             const pathEnd = createDirectPath(
                 lastPool,
                 USDCCONNECTINGPOOL[chainId].usdc,
                 tokenOut
             );
 
-            pathsUsingStaBalPools.push(composePaths([staBalPath, pathEnd]));
+            return composePaths([staBalPath, pathEnd]);
         }
-    }
-    if (!staBalPoolIdIn && staBalPoolIdOut) {
-        const hopTokenStaBal = STABALADDR[chainId];
+    } else {
+        // First part of path is single hop through tokenIn/USDC highest liquidity pool
+        // Last part of path is multihop through USDC Connecting Pools and staBalPool
+        // i.e. i.e. tokenIn>[HighLiqPool]>USDC>[usdcConnecting]>staBAL>[staBalPair1]>tokenOut
         const staBalPoolIn = pools[staBalPoolIdOut];
 
         // Hop in as it is tokenIn > USDC
@@ -422,6 +432,9 @@ export function getPathsUsingStaBalPools(
             SwapPairType.HopIn,
             pools
         );
+        // No tokenIn>USDC pool so return empty path
+        if (mostLiquidFirstPool === '') return {} as NewPath;
+
         const firstPool = pools[mostLiquidFirstPool];
 
         // USDC > [UsdcConnectingPool] > staBal > [staBalPool] > tokenOut
@@ -433,16 +446,12 @@ export function getPathsUsingStaBalPools(
             tokenOut
         );
 
-        if (firstPool) {
-            const pathStart = createDirectPath(
-                firstPool,
-                tokenIn,
-                USDCCONNECTINGPOOL[chainId].usdc
-            );
+        const pathStart = createDirectPath(
+            firstPool,
+            tokenIn,
+            USDCCONNECTINGPOOL[chainId].usdc
+        );
 
-            pathsUsingStaBalPools.push(composePaths([pathStart, staBalPath]));
-        }
+        return composePaths([pathStart, staBalPath]);
     }
-
-    return pathsUsingStaBalPools;
 }

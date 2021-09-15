@@ -2,7 +2,7 @@ import cloneDeep from 'lodash.clonedeep';
 import {
     filterPoolsOfInterest,
     filterHopPools,
-    getPathsUsingStaBalPools,
+    getPathUsingStaBalPools,
 } from './filtering';
 import { calculatePathLimits } from './pathLimits';
 import {
@@ -65,14 +65,14 @@ export class RouteProposer {
             poolsDict
         );
 
-        const pathsUsingStaBal: NewPath[] = getPathsUsingStaBalPools(
+        const pathUsingStaBal: NewPath = getPathUsingStaBalPools(
             tokenIn,
             tokenOut,
             poolsDict,
             usdcConnectingPool,
             chainId
         );
-        pathData = pathData.concat(pathsUsingStaBal);
+        pathData = pathData.concat(pathUsingStaBal);
 
         const [paths] = calculatePathLimits(pathData, swapType);
 
