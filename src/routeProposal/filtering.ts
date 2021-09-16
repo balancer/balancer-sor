@@ -19,7 +19,6 @@ import { ZERO } from '../utils/bignumber';
 import { MULTIMETASTABLEPOOL } from '../addresses';
 
 import { parseNewPool } from '../pools';
-import { privateEncrypt } from 'crypto';
 
 export const filterPoolsByType = (
     pools: SubgraphPoolBase[],
@@ -45,7 +44,7 @@ export function filterPoolsOfInterest(
     tokenIn: string,
     tokenOut: string,
     maxPools: number,
-    chainId: number = 1,
+    chainId = 1,
     currentBlockTimestamp = 0
 ): [PoolDictionary, string[], [PoolDictionaryByMain, MetaStablePool]] {
     const poolsDictionary: PoolDictionary = {};

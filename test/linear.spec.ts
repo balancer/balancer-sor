@@ -1,11 +1,12 @@
-import { assert } from 'chai';
+// TS_NODE_PROJECT='tsconfig.testing.json' npx mocha -r ts-node/register test/linear.spec.ts
+import { assert, expect } from 'chai';
 import cloneDeep from 'lodash.clonedeep';
 import {
     PoolDictionary,
     NewPath,
     SwapTypes,
     PoolDictionaryByMain,
-    PoolBase,
+    PoolPairBase,
 } from '../src/types';
 import {
     filterPoolsOfInterest,
@@ -40,70 +41,426 @@ const USDT = {
     address: '0xdac17f958d2ee523a2206206994597c13d831ec7',
 }; // USDT precision = 6
 
-describe('linear pools tests', () => {
-    it('basic swap case', async () => {
-        runSOR(
-            DAI,
-            USDC,
-            SwapTypes.SwapExactIn,
-            new BigNumber(2500),
-            subgraphPoolsLargeLinear
+describe('linear pool tests', () => {
+    context('with no LinearPools', () => {
+        it('getPathsUsingLinearPool return empty paths', () => {
+            const tokenIn = DAI.address;
+            const tokenOut = USDC.address;
+            const maxPools = 4;
+
+            const testPools: any = cloneDeep(singleLinear.pools);
+
+            const [poolsDict, , linearPoolsInfo] = filterPoolsOfInterest(
+                testPools,
+                tokenIn,
+                tokenOut,
+                maxPools
+            );
+
+            // Set LinearPools dict to empty
+            linearPoolsInfo[0] = {};
+
+            const [, pathsUsingLinear] = getPathsUsingLinearPools(
+                tokenIn,
+                tokenOut,
+                linearPoolsInfo,
+                poolsDict,
+                poolsDict
+            );
+
+            expect(pathsUsingLinear).to.be.empty;
+        });
+    });
+
+    context('with no joining MetaStablePool', () => {
+        it('getPathsUsingLinearPool return empty paths', () => {
+            const tokenIn = DAI.address;
+            const tokenOut = USDC.address;
+            const maxPools = 4;
+
+            const testPools: any = cloneDeep(singleLinear.pools);
+
+            const [poolsDict, , linearPoolsInfo] = filterPoolsOfInterest(
+                testPools,
+                tokenIn,
+                tokenOut,
+                maxPools
+            );
+
+            // Set MetaStablePool to empty
+            linearPoolsInfo[1] = {} as MetaStablePool;
+
+            const [, pathsUsingLinear] = getPathsUsingLinearPools(
+                tokenIn,
+                tokenOut,
+                linearPoolsInfo,
+                poolsDict,
+                poolsDict
+            );
+
+            expect(pathsUsingLinear).to.be.empty;
+        });
+    });
+
+    context('Considering Linear Paths Only', () => {
+        context('getPathsUsingLinearPools - stable pair', () => {
+            it('should return 1 valid linear path', async () => {
+                const tokenIn = DAI.address;
+                const tokenOut = USDC.address;
+                const maxPools = 10;
+                const testPools: any = cloneDeep(smallLinear.pools);
+
+                const [poolsDict, , linearPoolsInfo] = filterPoolsOfInterest(
+                    testPools,
+                    tokenIn,
+                    tokenOut,
+                    maxPools
+                );
+
+                const [, pathsUsingLinear] = getPathsUsingLinearPools(
+                    tokenIn,
+                    tokenOut,
+                    linearPoolsInfo,
+                    poolsDict,
+                    poolsDict
+                );
+
+                assert.equal(pathsUsingLinear.length, 1);
+                checkPath(
+                    ['linearDAI', 'multiid', 'linearUSDC'],
+                    poolsDict,
+                    pathsUsingLinear[0],
+                    tokenIn,
+                    tokenOut
+                );
+            });
+        });
+
+        context(
+            'getPathsUsingLinearPools - non-stable pair with one linear pathways',
+            () => {
+                it('should return 1 valid linear paths', async () => {
+                    const tokenIn = WETH.address;
+                    const tokenOut = DAI.address;
+                    const maxPools = 10;
+                    const testPools: any = cloneDeep(smallLinear.pools);
+
+                    const [poolsDict, , linearPoolsInfo] =
+                        filterPoolsOfInterest(
+                            testPools,
+                            tokenIn,
+                            tokenOut,
+                            maxPools
+                        );
+
+                    const [, pathsUsingLinear] = getPathsUsingLinearPools(
+                        tokenIn,
+                        tokenOut,
+                        linearPoolsInfo,
+                        poolsDict,
+                        poolsDict
+                    );
+
+                    assert.equal(pathsUsingLinear.length, 1);
+                    checkPath(
+                        [
+                            'weightedUsdcWeth',
+                            'linearUSDC',
+                            'multiid',
+                            'linearDAI',
+                        ],
+                        poolsDict,
+                        pathsUsingLinear[0],
+                        tokenIn,
+                        tokenOut
+                    );
+                });
+            }
         );
-        console.log('second: ');
-        runSOR(
-            DAI,
-            USDC,
-            SwapTypes.SwapExactIn,
-            new BigNumber(2500),
-            singleLinear
-        );
-        console.log('third: ');
-        runSOR(
-            WETH,
-            USDC,
-            SwapTypes.SwapExactIn,
-            new BigNumber(10),
-            smallLinear
-        );
-        console.log('fourth: ');
-        runSOR(
-            WETH,
-            USDC,
-            SwapTypes.SwapExactOut,
-            new BigNumber(10),
-            smallLinear
+
+        context(
+            'getPathsUsingLinearPools - non-stable pair with two linear pathways',
+            () => {
+                it('should return 2 valid linear paths', async () => {
+                    const tokenIn = USDT.address;
+                    const tokenOut = WETH.address;
+                    const maxPools = 10;
+                    const testPools: any = cloneDeep(smallLinear.pools);
+
+                    const [poolsDict, , linearPoolsInfo] =
+                        filterPoolsOfInterest(
+                            testPools,
+                            tokenIn,
+                            tokenOut,
+                            maxPools
+                        );
+
+                    const [, pathsUsingLinear] = getPathsUsingLinearPools(
+                        tokenIn,
+                        tokenOut,
+                        linearPoolsInfo,
+                        poolsDict,
+                        poolsDict
+                    );
+
+                    assert.equal(pathsUsingLinear.length, 2);
+                    checkPath(
+                        [
+                            'linearUSDT',
+                            'multiid',
+                            'linearUSDC',
+                            'weightedUsdcWeth',
+                        ],
+                        poolsDict,
+                        pathsUsingLinear[0],
+                        tokenIn,
+                        tokenOut
+                    );
+                    checkPath(
+                        [
+                            'linearUSDT',
+                            'multiid',
+                            'linearDAI',
+                            'weightedDaiWeth',
+                        ],
+                        poolsDict,
+                        pathsUsingLinear[1],
+                        tokenIn,
+                        tokenOut
+                    );
+                });
+            }
         );
     });
+
+    context('Considering All Paths', () => {
+        context('stable pair with weighted and linear pools', () => {
+            it('should return 3 paths', async () => {
+                const tokenIn = DAI.address;
+                const tokenOut = USDC.address;
+                const maxPools = 10;
+                const testPools: any = cloneDeep(smallLinear.pools);
+
+                const [paths, poolsDict] = getPaths(
+                    tokenIn,
+                    tokenOut,
+                    SwapTypes.SwapExactIn,
+                    testPools,
+                    maxPools
+                );
+
+                assert.equal(paths.length, 3);
+                checkPath(
+                    ['linearDAI', 'multiid', 'linearUSDC'],
+                    poolsDict,
+                    paths[0],
+                    tokenIn,
+                    tokenOut
+                );
+                checkPath(
+                    ['weightedDaiWeth', 'weightedUsdcWeth'],
+                    poolsDict,
+                    paths[1],
+                    tokenIn,
+                    tokenOut
+                );
+                checkPath(
+                    ['weightedDaiUsdc'],
+                    poolsDict,
+                    paths[2],
+                    tokenIn,
+                    tokenOut
+                );
+            });
+        });
+
+        context('non-stable pair with weighted and linear pools', () => {
+            it('should return 3 paths', async () => {
+                const tokenIn = WETH.address;
+                const tokenOut = DAI.address;
+                const maxPools = 10;
+                const testPools: any = cloneDeep(smallLinear.pools);
+
+                const [paths, poolsDict] = getPaths(
+                    tokenIn,
+                    tokenOut,
+                    SwapTypes.SwapExactIn,
+                    testPools,
+                    maxPools
+                );
+
+                assert.equal(paths.length, 3);
+                checkPath(
+                    ['weightedUsdcWeth', 'linearUSDC', 'multiid', 'linearDAI'],
+                    poolsDict,
+                    paths[0],
+                    tokenIn,
+                    tokenOut
+                );
+                checkPath(
+                    ['weightedUsdcWeth', 'weightedDaiUsdc'],
+                    poolsDict,
+                    paths[1],
+                    tokenIn,
+                    tokenOut
+                );
+                checkPath(
+                    ['weightedDaiWeth'],
+                    poolsDict,
+                    paths[2],
+                    tokenIn,
+                    tokenOut
+                );
+            });
+        });
+
+        context('non-stable pair with weighted and linear pools', () => {
+            it('should return 2 valid linear paths, no other paths', async () => {
+                const tokenIn = USDT.address;
+                const tokenOut = WETH.address;
+                const maxPools = 10;
+                const testPools: any = cloneDeep(smallLinear.pools);
+
+                const [paths, poolsDict] = getPaths(
+                    tokenIn,
+                    tokenOut,
+                    SwapTypes.SwapExactIn,
+                    testPools,
+                    maxPools
+                );
+
+                assert.equal(paths.length, 2);
+                checkPath(
+                    ['linearUSDT', 'multiid', 'linearUSDC', 'weightedUsdcWeth'],
+                    poolsDict,
+                    paths[0],
+                    tokenIn,
+                    tokenOut
+                );
+                checkPath(
+                    ['linearUSDT', 'multiid', 'linearDAI', 'weightedDaiWeth'],
+                    poolsDict,
+                    paths[1],
+                    tokenIn,
+                    tokenOut
+                );
+            });
+        });
+    });
+
+    // context('TO DO - ADD SOME TESTS FOR THESE FULL CASES??', () => {
+    //     it('basic swap cases', async () => {
+    //         runSOR(
+    //             DAI,
+    //             USDC,
+    //             SwapTypes.SwapExactIn,
+    //             new BigNumber(2500),
+    //             subgraphPoolsLargeLinear
+    //         );
+    //         console.log('second: ');
+    //         runSOR(
+    //             DAI,
+    //             USDC,
+    //             SwapTypes.SwapExactIn,
+    //             new BigNumber(2500),
+    //             singleLinear
+    //         );
+    //         console.log('third: ');
+    //         runSOR(
+    //             WETH,
+    //             USDC,
+    //             SwapTypes.SwapExactIn,
+    //             new BigNumber(10),
+    //             smallLinear
+    //         );
+    //         console.log('fourth: ');
+    //         runSOR(
+    //             WETH,
+    //             USDC,
+    //             SwapTypes.SwapExactOut,
+    //             new BigNumber(10),
+    //             smallLinear
+    //         );
+    //     });
+    // });
 });
 
-describe('Some more linear pools tests', () => {
-    it('more than one linear pathway', async () => {
-        let [pools, linearPoolsInfo, paths] = getPaths(
-            USDT.address,
-            WETH.address,
-            SwapTypes.SwapExactIn,
-            smallLinear.pools,
-            10
-        );
-        assert.equal(paths.length, 2);
-        [pools, linearPoolsInfo, paths] = getPaths(
-            DAI.address,
-            USDC.address,
-            SwapTypes.SwapExactIn,
-            smallLinear.pools,
-            10
-        );
-        assert.equal(paths.length, 3);
-        [pools, linearPoolsInfo, paths] = getPaths(
-            WETH.address,
-            DAI.address,
-            SwapTypes.SwapExactIn,
-            smallLinear.pools,
-            10
-        );
-        assert.equal(paths.length, 3);
-    });
-});
+/*
+Checks path for:
+- ID
+- tokenIn/Out
+- poolPairData
+- Valid swap path
+*/
+function checkPath(
+    poolIds: string[],
+    pools: PoolDictionary,
+    path: NewPath,
+    tokenIn: string,
+    tokenOut: string
+) {
+    // IDS should be all IDS concatenated
+    expect(path.id).to.eq(poolIds.join(''));
+    // Lengths of pools, pairData and swaps should all be equal
+    expect(poolIds.length).to.eq(path.poolPairData.length);
+    expect(
+        path.poolPairData.length === path.swaps.length &&
+            path.swaps.length === path.pools.length
+    ).to.be.true;
+
+    let lastTokenOut = path.swaps[0].tokenIn;
+
+    // Check each part of path
+    for (let i = 0; i < poolIds.length; i++) {
+        const poolId = poolIds[i];
+        const poolInfo = pools[poolId];
+        const tokenIn = path.swaps[i].tokenIn;
+        const tokenOut = path.swaps[i].tokenOut;
+        const poolPairData = poolInfo.parsePoolPairData(tokenIn, tokenOut);
+        expect(path.pools[i]).to.deep.eq(poolInfo);
+        expect(path.poolPairData[i]).to.deep.eq(poolPairData);
+
+        expect(path.swaps[i].pool).eq(poolId);
+        // TokenIn should equal previous swaps tokenOut
+        expect(path.swaps[i].tokenIn).eq(lastTokenOut);
+        // expect(path.swaps[i].tokenInDecimals).eq(poolPairData.decimalsIn); TO DO - Not currently passing
+        // expect(path.swaps[i].tokenOutDecimals).eq(poolPairData.decimalsOut);
+        lastTokenOut = tokenOut;
+    }
+
+    // TokenIn/Out should be first and last of path
+    expect(path.swaps[0].tokenIn).to.eq(tokenIn);
+    expect(path.swaps[path.swaps.length - 1].tokenOut).to.eq(tokenOut);
+}
+
+function getPaths(
+    tokenIn: string,
+    tokenOut: string,
+    swapType: SwapTypes,
+    pools,
+    maxPools
+): [NewPath[], PoolDictionary] {
+    const [poolsDict, hopTokens, linearPoolsInfo] = filterPoolsOfInterest(
+        cloneDeep(pools),
+        tokenIn,
+        tokenOut,
+        maxPools
+    );
+
+    let pathData: NewPath[] = [];
+    [, pathData] = filterHopPools(tokenIn, tokenOut, hopTokens, poolsDict);
+
+    const [, pathsUsingLinear] = getPathsUsingLinearPools(
+        tokenIn,
+        tokenOut,
+        linearPoolsInfo,
+        poolsDict,
+        poolsDict
+    );
+    pathData = pathData.concat(pathsUsingLinear);
+    const [paths] = calculatePathLimits(pathData, swapType);
+    return [paths, poolsDict];
+}
 
 function runSOR(
     tokIn,
@@ -126,9 +483,9 @@ function runSOR(
         '\n'
     );
     const maxPools = 10;
-    let tokenIn = tokIn.address;
-    let tokenOut = tokOut.address;
-    let [pools, linearPoolsInfo, paths] = getPaths(
+    const tokenIn = tokIn.address;
+    const tokenOut = tokOut.address;
+    const [paths] = getPaths(
         tokenIn,
         tokenOut,
         swapType,
@@ -141,7 +498,6 @@ function runSOR(
         marketSp: BigNumber;
     [swaps, total, marketSp, totalConsideringFees] = getBestPaths(
         // getBestRoute?
-        cloneDeep(pools),
         paths,
         swapType,
         swapAmount,
@@ -162,44 +518,4 @@ function runSOR(
     );
     console.log(swapInfo.swaps );
     console.log(swapInfo.tokenAddresses );*/
-}
-
-function getPaths(
-    tokenIn: string,
-    tokenOut: string,
-    swapType: SwapTypes,
-    pools,
-    maxPools
-): [PoolDictionary, [PoolDictionaryByMain, MetaStablePool], NewPath[]] {
-    let paths: NewPath[];
-    let hopTokens: string[];
-    let linearPoolsInfo: [PoolDictionaryByMain, MetaStablePool];
-    let poolsDict: PoolDictionary;
-    [poolsDict, hopTokens, linearPoolsInfo] = filterPoolsOfInterest(
-        cloneDeep(pools),
-        tokenIn,
-        tokenOut,
-        maxPools
-    );
-    let pathData: NewPath[] = [];
-
-    let filteredPoolsDict: PoolDictionary;
-    [filteredPoolsDict, pathData] = filterHopPools(
-        tokenIn,
-        tokenOut,
-        hopTokens,
-        poolsDict
-    );
-
-    let pathsUsingLinear: NewPath[];
-    [filteredPoolsDict, pathsUsingLinear] = getPathsUsingLinearPools(
-        tokenIn,
-        tokenOut,
-        linearPoolsInfo,
-        poolsDict,
-        filteredPoolsDict
-    );
-    pathData = pathData.concat(pathsUsingLinear);
-    [paths] = calculatePathLimits(pathData, swapType);
-    return [filteredPoolsDict, linearPoolsInfo, paths];
 }

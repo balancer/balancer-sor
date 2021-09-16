@@ -1,7 +1,7 @@
 {
     "pools": [
         {
-            "id": "0x510432e28fa9fe26df6c505104d1d66ff1f66839",
+            "id": "weightedUsdcWeth",
             "publicSwap": true,
             "swapFee": "0.01",
             "tokens": [
@@ -10,7 +10,7 @@
                     "balance": "100000.000000",
                     "decimals": 6,
                     "weight": "50",
-                    "id": "0x510432e28fa9fe26df6c505104d1d66ff1f66839-0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+                    "id": "weightedUsdcWeth-0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
                     "symbol": "USDC"
                 },
                 {
@@ -18,7 +18,7 @@
                     "balance": "200.024280334764487791",
                     "decimals": 18,
                     "weight": "50",
-                    "id": "0x510432e28fa9fe26df6c505104d1d66ff1f66839-0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
+                    "id": "weightedUsdcWeth-0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
                     "symbol": "WETH"
                 }
             ],
@@ -29,10 +29,10 @@
             "totalWeight": "100",
             "totalShares": "100",
             "poolType": "Weighted",
-            "address": "0x510432e28fa9fe26df6c505104d1d66ff1f66839"
+            "address": "weightedUsdcWeth"
         },
         {
-            "id": "0x4b47b11c353f0056c73a87fefccb6c43dc0d8065",
+            "id": "weightedDaiWeth",
             "publicSwap": true,
             "swapFee": "0.001",
             "tokens": [
@@ -41,7 +41,7 @@
                     "balance": "10000.635152452773970596",
                     "decimals": 18,
                     "weight": "50",
-                    "id": "0x4b47b11c353f0056c73a87fefccb6c43dc0d8065-0x6b175474e89094c44da98b954eedeac495271d0f",
+                    "id": "weightedDaiWeth-0x6b175474e89094c44da98b954eedeac495271d0f",
                     "symbol": "DAI"
                 },
                 {
@@ -49,7 +49,7 @@
                     "balance": "10.021383606725669115",
                     "decimals": 18,
                     "weight": "50",
-                    "id": "0x4b47b11c353f0056c73a87fefccb6c43dc0d8065-0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
+                    "id": "weightedDaiWeth-0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
                     "symbol": "WETH"
                 }
             ],
@@ -60,10 +60,10 @@
             "totalWeight": "100",
             "totalShares": "100",
             "poolType": "Weighted",
-            "address": "0x4b47b11c353f0056c73a87fefccb6c43dc0d8065"
+            "address": "weightedDaiWeth"
         },
         {
-            "id": "weightedid",
+            "id": "weightedDaiUsdc",
             "publicSwap": true,
             "swapFee": "0.01",
             "tokens": [
@@ -72,7 +72,7 @@
                     "balance": "10000",
                     "decimals": 18,
                     "weight": "50",
-                    "id": "weightedid-0x6b175474e89094c44da98b954eedeac495271d0f",
+                    "id": "weightedDaiUsdc-0x6b175474e89094c44da98b954eedeac495271d0f",
                     "symbol": "DAI"
                 },
                 {
@@ -80,7 +80,7 @@
                     "balance": "10000",
                     "decimals": 6,
                     "weight": "50",
-                    "id": "weightedid-0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+                    "id": "weightedDaiUsdc-0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
                     "symbol": "USDC"
                 }
             ],
@@ -214,7 +214,7 @@
             "target2": "150000.000000"
         },
         {
-            "id": "muliid",
+            "id": "multiid",
             "address": "multiaddress",
             "swapFee": "0.0004",
             "amp": "10",
