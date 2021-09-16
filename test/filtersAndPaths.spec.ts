@@ -708,7 +708,6 @@ describe('Tests pools filtering and path processing', () => {
 
         let swaps: any, total: BigNumber, marketSp: BigNumber;
         [swaps, total, marketSp] = getBestPaths(
-            cloneDeep(poolsOfInterestDictionary), // Need to keep original pools for cache
             paths,
             SwapTypes.SwapExactIn,
             new BigNumber(1),
@@ -818,7 +817,6 @@ describe('Tests pools filtering and path processing', () => {
 
         let swaps: any, total: BigNumber, marketSp: BigNumber;
         [swaps, total, marketSp] = getBestPaths(
-            cloneDeep(poolsOfInterestDictionary), // Need to keep original pools for cache
             paths,
             SwapTypes.SwapExactOut,
             new BigNumber(1),
