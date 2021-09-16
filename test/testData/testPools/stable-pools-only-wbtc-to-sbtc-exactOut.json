@@ -1,0 +1,946 @@
+{
+    "tradeInfo": {
+        "SwapType": "swapExactOut",
+        "TokenIn": "0x2260fac5e5542a773aa44fbcfedf7c193bc2c599",
+        "TokenOut": "0xfe18be6b3bd88a2d2a7f928d00292e7a9963cfc6",
+        "NoPools": 4,
+        "SwapAmount": "803442002550000000000",
+        "GasPrice": "0",
+        "SwapAmountDecimals": "18",
+        "ReturnAmountDecimals": "8"
+    },
+    "pools": [
+        {
+            "id": "0x6c3f90f043a72fa612cbac8115ee7e52bde6e490",
+            "swapFee": "0.0004",
+            "amp": "600",
+            "tokens": [
+                {
+                    "address": "0x6b175474e89094c44da98b954eedeac495271d0f",
+                    "balance": "150082162.017801073617152519",
+                    "decimals": 18,
+                    "denormWeight": "0"
+                },
+                {
+                    "address": "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+                    "balance": "255110295.97792",
+                    "decimals": 6,
+                    "denormWeight": "0"
+                },
+                {
+                    "address": "0xdac17f958d2ee523a2206206994597c13d831ec7",
+                    "balance": "286806114.776785",
+                    "decimals": 6,
+                    "denormWeight": "0"
+                }
+            ],
+            "tokensList": [
+                "0x6b175474e89094c44da98b954eedeac495271d0f",
+                "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+                "0xdac17f958d2ee523a2206206994597c13d831ec7"
+            ],
+            "totalWeight": "0",
+            "balanceBpt": "785224145.723155205181003818",
+            "totalShares": "785224145.723155205181003818",
+            "poolType": "Stable",
+            "address": "0x6c3f90f043a72fa612cbac8115ee7e52bde6e490"
+        },
+        {
+            "id": "0x3b3ac5386837dc563660fb6a0937dfaa5924333b",
+            "swapFee": "0.0004",
+            "amp": "500",
+            "tokens": [
+                {
+                    "address": "0xc2cb1040220768554cf699b0d863a3cd4324ce32",
+                    "balance": "28305713.038511823169249109",
+                    "decimals": 18,
+                    "denormWeight": "0"
+                },
+                {
+                    "address": "0x26ea744e5b887e5205727f55dfbe8685e3b21951",
+                    "balance": "41917162.823508",
+                    "decimals": 6,
+                    "denormWeight": "0"
+                },
+                {
+                    "address": "0xe6354ed5bc4b393a5aad09f21c46e101e692d447",
+                    "balance": "47853558.63846",
+                    "decimals": 6,
+                    "denormWeight": "0"
+                },
+                {
+                    "address": "0x04bc0ab673d88ae9dbc9da2380cb6b79c4bca9ae",
+                    "balance": "39196676.813907828185016584",
+                    "decimals": 18,
+                    "denormWeight": "0"
+                }
+            ],
+            "tokensList": [
+                "0xc2cb1040220768554cf699b0d863a3cd4324ce32",
+                "0x26ea744e5b887e5205727f55dfbe8685e3b21951",
+                "0xe6354ed5bc4b393a5aad09f21c46e101e692d447",
+                "0x04bc0ab673d88ae9dbc9da2380cb6b79c4bca9ae"
+            ],
+            "totalWeight": "0",
+            "balanceBpt": "78350279.810168052058997162",
+            "totalShares": "78350279.810168052058997162",
+            "poolType": "Stable",
+            "address": "0x3b3ac5386837dc563660fb6a0937dfaa5924333b"
+        },
+        {
+            "id": "0x845838df265dcd2c412a1dc9e959c7d08537f8a2",
+            "swapFee": "0.0004",
+            "amp": "450",
+            "tokens": [
+                {
+                    "address": "0x5d3a536e4d6dbd6114cc1ead35777bab948e3643",
+                    "balance": "2969382559.19959996",
+                    "decimals": 8,
+                    "denormWeight": "0"
+                },
+                {
+                    "address": "0x39aa39c021dfbae8fac545936693ac917d5e7563",
+                    "balance": "4004144153.58577689",
+                    "decimals": 8,
+                    "denormWeight": "0"
+                }
+            ],
+            "tokensList": [
+                "0x5d3a536e4d6dbd6114cc1ead35777bab948e3643",
+                "0x39aa39c021dfbae8fac545936693ac917d5e7563"
+            ],
+            "totalWeight": "0",
+            "balanceBpt": "130257219.433128260878947018",
+            "totalShares": "130257219.433128260878947018",
+            "poolType": "Stable",
+            "address": "0x845838df265dcd2c412a1dc9e959c7d08537f8a2"
+        },
+        {
+            "id": "0xd2967f45c4f384deea880f807be904762a3dea07",
+            "swapFee": "0.0004",
+            "amp": "200",
+            "tokens": [
+                {
+                    "address": "0x056fd409e1d7a124bd7017459dfea2f387b6d5cd",
+                    "balance": "103722276.38",
+                    "decimals": 2,
+                    "denormWeight": "0"
+                },
+                {
+                    "address": "0x6c3f90f043a72fa612cbac8115ee7e52bde6e490",
+                    "balance": "82123100.844025967752876937",
+                    "decimals": 18,
+                    "denormWeight": "0"
+                }
+            ],
+            "tokensList": [
+                "0x056fd409e1d7a124bd7017459dfea2f387b6d5cd",
+                "0x6c3f90f043a72fa612cbac8115ee7e52bde6e490"
+            ],
+            "totalWeight": "0",
+            "balanceBpt": "176767260.573887543004237546",
+            "totalShares": "176767260.573887543004237546",
+            "poolType": "Stable",
+            "address": "0xd2967f45c4f384deea880f807be904762a3dea07"
+        },
+        {
+            "id": "0xb19059ebb43466c323583928285a49f558e572fd",
+            "swapFee": "0.0004",
+            "amp": "300",
+            "tokens": [
+                {
+                    "address": "0x0316eb71485b0ab14103307bf65a021042c6d380",
+                    "balance": "3030.074809293170421252",
+                    "decimals": 18,
+                    "denormWeight": "0"
+                },
+                {
+                    "address": "0x2260fac5e5542a773aa44fbcfedf7c193bc2c599",
+                    "balance": "3067.29853279",
+                    "decimals": 8,
+                    "denormWeight": "0"
+                }
+            ],
+            "tokensList": [
+                "0x0316eb71485b0ab14103307bf65a021042c6d380",
+                "0x2260fac5e5542a773aa44fbcfedf7c193bc2c599"
+            ],
+            "totalWeight": "0",
+            "balanceBpt": "6241.09089955559171898",
+            "totalShares": "6241.09089955559171898",
+            "poolType": "Stable",
+            "address": "0xb19059ebb43466c323583928285a49f558e572fd"
+        },
+        {
+            "id": "0x5b5cfe992adac0c9d48e05854b2d91c73a003858",
+            "swapFee": "0.0004",
+            "amp": "200",
+            "tokens": [
+                {
+                    "address": "0xdf574c24545e5ffecb9a659c229253d4111d87e1",
+                    "balance": "883571.21016352",
+                    "decimals": 8,
+                    "denormWeight": "0"
+                },
+                {
+                    "address": "0x6c3f90f043a72fa612cbac8115ee7e52bde6e490",
+                    "balance": "1016316.804859297016817155",
+                    "decimals": 18,
+                    "denormWeight": "0"
+                }
+            ],
+            "tokensList": [
+                "0xdf574c24545e5ffecb9a659c229253d4111d87e1",
+                "0x6c3f90f043a72fa612cbac8115ee7e52bde6e490"
+            ],
+            "totalWeight": "0",
+            "balanceBpt": "3060150.794777194169980587",
+            "totalShares": "3060150.794777194169980587",
+            "poolType": "Stable",
+            "address": "0x5b5cfe992adac0c9d48e05854b2d91c73a003858"
+        },
+        {
+            "id": "0x6d65b498cb23deaba52db31c93da9bffb340fb8f",
+            "swapFee": "0.0004",
+            "amp": "5",
+            "tokens": [
+                {
+                    "address": "0x0e2ec54fc0b509f445631bf4b91ab8168230c752",
+                    "balance": "22539.335137729931263554",
+                    "decimals": 18,
+                    "denormWeight": "0"
+                },
+                {
+                    "address": "0x6c3f90f043a72fa612cbac8115ee7e52bde6e490",
+                    "balance": "24911.849484924224056756",
+                    "decimals": 18,
+                    "denormWeight": "0"
+                }
+            ],
+            "tokensList": [
+                "0x0e2ec54fc0b509f445631bf4b91ab8168230c752",
+                "0x6c3f90f043a72fa612cbac8115ee7e52bde6e490"
+            ],
+            "totalWeight": "0",
+            "balanceBpt": "47597.652790040337801526",
+            "totalShares": "47597.652790040337801526",
+            "poolType": "Stable",
+            "address": "0x6d65b498cb23deaba52db31c93da9bffb340fb8f"
+        },
+        {
+            "id": "0x1aef73d49dedc4b1778d0706583995958dc862e6",
+            "swapFee": "0.0004",
+            "amp": "200",
+            "tokens": [
+                {
+                    "address": "0xe2f2a5c287993345a840db3b0845fbc70f5935a5",
+                    "balance": "6550659.266892287844418395",
+                    "decimals": 18,
+                    "denormWeight": "0"
+                },
+                {
+                    "address": "0x6c3f90f043a72fa612cbac8115ee7e52bde6e490",
+                    "balance": "4013349.844059132218079284",
+                    "decimals": 18,
+                    "denormWeight": "0"
+                }
+            ],
+            "tokensList": [
+                "0xe2f2a5c287993345a840db3b0845fbc70f5935a5",
+                "0x6c3f90f043a72fa612cbac8115ee7e52bde6e490"
+            ],
+            "totalWeight": "0",
+            "balanceBpt": "10317675.188246770072279668",
+            "totalShares": "10317675.188246770072279668",
+            "poolType": "Stable",
+            "address": "0x1aef73d49dedc4b1778d0706583995958dc862e6"
+        },
+        {
+            "id": "0xd905e2eaebe188fc92179b6350807d8bd91db0d8",
+            "swapFee": "0.0004",
+            "amp": "200",
+            "tokens": [
+                {
+                    "address": "0x99d1fa417f94dcd62bfe781a1213c092a47041bc",
+                    "balance": "1154631.735770018560406178",
+                    "decimals": 18,
+                    "denormWeight": "0"
+                },
+                {
+                    "address": "0x9777d7e2b60bb01759d0e2f8be2095df444cb07e",
+                    "balance": "1323819.373207",
+                    "decimals": 6,
+                    "denormWeight": "0"
+                },
+                {
+                    "address": "0x1be5d71f2da660bfdee8012ddc58d024448a0a59",
+                    "balance": "1205509.525273",
+                    "decimals": 6,
+                    "denormWeight": "0"
+                },
+                {
+                    "address": "0x8e870d67f660d95d5be530380d0ec0bd388289e1",
+                    "balance": "1076014.491046108530243728",
+                    "decimals": 18,
+                    "denormWeight": "0"
+                }
+            ],
+            "tokensList": [
+                "0x99d1fa417f94dcd62bfe781a1213c092a47041bc",
+                "0x9777d7e2b60bb01759d0e2f8be2095df444cb07e",
+                "0x1be5d71f2da660bfdee8012ddc58d024448a0a59",
+                "0x8e870d67f660d95d5be530380d0ec0bd388289e1"
+            ],
+            "totalWeight": "0",
+            "balanceBpt": "6701166.455045313562297391",
+            "totalShares": "6701166.455045313562297391",
+            "poolType": "Stable",
+            "address": "0xd905e2eaebe188fc92179b6350807d8bd91db0d8"
+        },
+        {
+            "id": "0x49849c98ae39fff122806c06791fa73784fb3675",
+            "swapFee": "0.0004",
+            "amp": "200",
+            "tokens": [
+                {
+                    "address": "0xeb4c2781e4eba804ce9a9803c67d0893436bb27d",
+                    "balance": "7784.47077846",
+                    "decimals": 8,
+                    "denormWeight": "0"
+                },
+                {
+                    "address": "0x2260fac5e5542a773aa44fbcfedf7c193bc2c599",
+                    "balance": "6891.99941103",
+                    "decimals": 8,
+                    "denormWeight": "0"
+                }
+            ],
+            "tokensList": [
+                "0xeb4c2781e4eba804ce9a9803c67d0893436bb27d",
+                "0x2260fac5e5542a773aa44fbcfedf7c193bc2c599"
+            ],
+            "totalWeight": "0",
+            "balanceBpt": "9145.740856515896674181",
+            "totalShares": "9145.740856515896674181",
+            "poolType": "Stable",
+            "address": "0x49849c98ae39fff122806c06791fa73784fb3675"
+        },
+        {
+            "id": "0xc2ee6b0334c261ed60c72f6054450b61b8f18e35",
+            "swapFee": "0.0004",
+            "amp": "200",
+            "tokens": [
+                {
+                    "address": "0x196f4727526ea7fb1e17b2071b3d8eaa38486988",
+                    "balance": "216551.292625248774545047",
+                    "decimals": 18,
+                    "denormWeight": "0"
+                },
+                {
+                    "address": "0x6c3f90f043a72fa612cbac8115ee7e52bde6e490",
+                    "balance": "205006.783134171270806369",
+                    "decimals": 18,
+                    "denormWeight": "0"
+                }
+            ],
+            "tokensList": [
+                "0x196f4727526ea7fb1e17b2071b3d8eaa38486988",
+                "0x6c3f90f043a72fa612cbac8115ee7e52bde6e490"
+            ],
+            "totalWeight": "0",
+            "balanceBpt": "403145.272586437806747404",
+            "totalShares": "403145.272586437806747404",
+            "poolType": "Stable",
+            "address": "0xc2ee6b0334c261ed60c72f6054450b61b8f18e35"
+        },
+        {
+            "id": "0x075b1bb99792c9e1041ba13afef80c91a1e70fb3",
+            "swapFee": "0.0004",
+            "amp": "100",
+            "tokens": [
+                {
+                    "address": "0xeb4c2781e4eba804ce9a9803c67d0893436bb27d",
+                    "balance": "4783.67012405",
+                    "decimals": 8,
+                    "denormWeight": "0"
+                },
+                {
+                    "address": "0x2260fac5e5542a773aa44fbcfedf7c193bc2c599",
+                    "balance": "4190.01129025",
+                    "decimals": 8,
+                    "denormWeight": "0"
+                },
+                {
+                    "address": "0xfe18be6b3bd88a2d2a7f928d00292e7a9963cfc6",
+                    "balance": "2581.966971398766245882",
+                    "decimals": 18,
+                    "denormWeight": "0"
+                }
+            ],
+            "tokensList": [
+                "0xeb4c2781e4eba804ce9a9803c67d0893436bb27d",
+                "0x2260fac5e5542a773aa44fbcfedf7c193bc2c599",
+                "0xfe18be6b3bd88a2d2a7f928d00292e7a9963cfc6"
+            ],
+            "totalWeight": "0",
+            "balanceBpt": "8344.732986077874727564",
+            "totalShares": "8344.732986077874727564",
+            "poolType": "Stable",
+            "address": "0x075b1bb99792c9e1041ba13afef80c91a1e70fb3"
+        },
+        {
+            "id": "0xc25a3a3b969415c80451098fa907ec722572917f",
+            "swapFee": "0.0004",
+            "amp": "100",
+            "tokens": [
+                {
+                    "address": "0x6b175474e89094c44da98b954eedeac495271d0f",
+                    "balance": "44743980.060995147043975263",
+                    "decimals": 18,
+                    "denormWeight": "0"
+                },
+                {
+                    "address": "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+                    "balance": "51717768.876865",
+                    "decimals": 6,
+                    "denormWeight": "0"
+                },
+                {
+                    "address": "0xdac17f958d2ee523a2206206994597c13d831ec7",
+                    "balance": "52701213.632863",
+                    "decimals": 6,
+                    "denormWeight": "0"
+                },
+                {
+                    "address": "0x57ab1ec28d129707052df4df418d58a2d46d5f51",
+                    "balance": "23987575.688145746161841025",
+                    "decimals": 18,
+                    "denormWeight": "0"
+                }
+            ],
+            "tokensList": [
+                "0x6b175474e89094c44da98b954eedeac495271d0f",
+                "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+                "0xdac17f958d2ee523a2206206994597c13d831ec7",
+                "0x57ab1ec28d129707052df4df418d58a2d46d5f51"
+            ],
+            "totalWeight": "0",
+            "balanceBpt": "189544577.082200885106933188",
+            "totalShares": "189544577.082200885106933188",
+            "poolType": "Stable",
+            "address": "0xc25a3a3b969415c80451098fa907ec722572917f"
+        },
+        {
+            "id": "0x64eda51d3ad40d56b9dfc5554e06f94e1dd786fd",
+            "swapFee": "0.0004",
+            "amp": "150",
+            "tokens": [
+                {
+                    "address": "0x8daebade922df735c38c80c7ebd708af50815faa",
+                    "balance": "1186.023678351815642774",
+                    "decimals": 18,
+                    "denormWeight": "0"
+                },
+                {
+                    "address": "0x075b1bb99792c9e1041ba13afef80c91a1e70fb3",
+                    "balance": "3135.249112232453654432",
+                    "decimals": 18,
+                    "denormWeight": "0"
+                }
+            ],
+            "tokensList": [
+                "0x8daebade922df735c38c80c7ebd708af50815faa",
+                "0x075b1bb99792c9e1041ba13afef80c91a1e70fb3"
+            ],
+            "totalWeight": "0",
+            "balanceBpt": "3463.289652651412422971",
+            "totalShares": "3463.289652651412422971",
+            "poolType": "Stable",
+            "address": "0x64eda51d3ad40d56b9dfc5554e06f94e1dd786fd"
+        },
+        {
+            "id": "0x97e2768e8e73511ca874545dc5ff8067eb19b787",
+            "swapFee": "0.0004",
+            "amp": "200",
+            "tokens": [
+                {
+                    "address": "0x1c48f86ae57291f7686349f12601910bd8d470bb",
+                    "balance": "619988.17526590929263206",
+                    "decimals": 18,
+                    "denormWeight": "0"
+                },
+                {
+                    "address": "0x6c3f90f043a72fa612cbac8115ee7e52bde6e490",
+                    "balance": "785921.142429463644066637",
+                    "decimals": 18,
+                    "denormWeight": "0"
+                }
+            ],
+            "tokensList": [
+                "0x1c48f86ae57291f7686349f12601910bd8d470bb",
+                "0x6c3f90f043a72fa612cbac8115ee7e52bde6e490"
+            ],
+            "totalWeight": "0",
+            "balanceBpt": "566979.928037020244630497",
+            "totalShares": "566979.928037020244630497",
+            "poolType": "Stable",
+            "address": "0x97e2768e8e73511ca874545dc5ff8067eb19b787"
+        },
+        {
+            "id": "0x4f3e8f405cf5afc05d68142f3783bdfe13811522",
+            "swapFee": "0.0004",
+            "amp": "50",
+            "tokens": [
+                {
+                    "address": "0x674c6ad92fd080e4004b2312b45f796a192d27a0",
+                    "balance": "124583592.841552932276119728",
+                    "decimals": 18,
+                    "denormWeight": "0"
+                },
+                {
+                    "address": "0x6c3f90f043a72fa612cbac8115ee7e52bde6e490",
+                    "balance": "111402200.871024784221396266",
+                    "decimals": 18,
+                    "denormWeight": "0"
+                }
+            ],
+            "tokensList": [
+                "0x674c6ad92fd080e4004b2312b45f796a192d27a0",
+                "0x6c3f90f043a72fa612cbac8115ee7e52bde6e490"
+            ],
+            "totalWeight": "0",
+            "balanceBpt": "247114809.283632322750889394",
+            "totalShares": "247114809.283632322750889394",
+            "poolType": "Stable",
+            "address": "0x4f3e8f405cf5afc05d68142f3783bdfe13811522"
+        },
+        {
+            "id": "0x9fc689ccada600b6df723d9e47d84d76664a1f23",
+            "swapFee": "0.0004",
+            "amp": "2000",
+            "tokens": [
+                {
+                    "address": "0x5d3a536e4d6dbd6114cc1ead35777bab948e3643",
+                    "balance": "3119526.77387572",
+                    "decimals": 8,
+                    "denormWeight": "0"
+                },
+                {
+                    "address": "0x39aa39c021dfbae8fac545936693ac917d5e7563",
+                    "balance": "16192243.66664316",
+                    "decimals": 8,
+                    "denormWeight": "0"
+                },
+                {
+                    "address": "0xdac17f958d2ee523a2206206994597c13d831ec7",
+                    "balance": "114410.656912",
+                    "decimals": 6,
+                    "denormWeight": "0"
+                }
+            ],
+            "tokensList": [
+                "0x5d3a536e4d6dbd6114cc1ead35777bab948e3643",
+                "0x39aa39c021dfbae8fac545936693ac917d5e7563",
+                "0xdac17f958d2ee523a2206206994597c13d831ec7"
+            ],
+            "totalWeight": "0",
+            "balanceBpt": "776330.924270778577797086",
+            "totalShares": "776330.924270778577797086",
+            "poolType": "Stable",
+            "address": "0x9fc689ccada600b6df723d9e47d84d76664a1f23"
+        },
+        {
+            "id": "0xdf5e0e81dff6faf3a7e52ba697820c5e32d806a8",
+            "swapFee": "0.0004",
+            "amp": "1000",
+            "tokens": [
+                {
+                    "address": "0x16de59092dae5ccf4a1e6439d611fd0653f0bd01",
+                    "balance": "19402698.917074322628216607",
+                    "decimals": 18,
+                    "denormWeight": "0"
+                },
+                {
+                    "address": "0xd6ad7a6750a7593e092a9b218d66c0a814a3436e",
+                    "balance": "33434718.956893",
+                    "decimals": 6,
+                    "denormWeight": "0"
+                },
+                {
+                    "address": "0x83f798e925bcd4017eb265844fddabb448f1707d",
+                    "balance": "39552289.671256",
+                    "decimals": 6,
+                    "denormWeight": "0"
+                },
+                {
+                    "address": "0x73a052500105205d34daf004eab301916da8190f",
+                    "balance": "28047858.695560014393398746",
+                    "decimals": 18,
+                    "denormWeight": "0"
+                }
+            ],
+            "tokensList": [
+                "0x16de59092dae5ccf4a1e6439d611fd0653f0bd01",
+                "0xd6ad7a6750a7593e092a9b218d66c0a814a3436e",
+                "0x83f798e925bcd4017eb265844fddabb448f1707d",
+                "0x73a052500105205d34daf004eab301916da8190f"
+            ],
+            "totalWeight": "0",
+            "balanceBpt": "95890268.100961763004689059",
+            "totalShares": "95890268.100961763004689059",
+            "poolType": "Stable",
+            "address": "0xdf5e0e81dff6faf3a7e52ba697820c5e32d806a8"
+        },
+        {
+            "id": "0x3a664ab939fd8482048609f652f9a0b0677337b9",
+            "swapFee": "0.0004",
+            "amp": "200",
+            "tokens": [
+                {
+                    "address": "0x5bc25f649fc4e26069ddf4cf4010f9f706c23831",
+                    "balance": "5548585.257007204339759906",
+                    "decimals": 18,
+                    "denormWeight": "0"
+                },
+                {
+                    "address": "0x6c3f90f043a72fa612cbac8115ee7e52bde6e490",
+                    "balance": "3796400.86921297990154136",
+                    "decimals": 18,
+                    "denormWeight": "0"
+                }
+            ],
+            "tokensList": [
+                "0x5bc25f649fc4e26069ddf4cf4010f9f706c23831",
+                "0x6c3f90f043a72fa612cbac8115ee7e52bde6e490"
+            ],
+            "totalWeight": "0",
+            "balanceBpt": "9382236.417093337368789253",
+            "totalShares": "9382236.417093337368789253",
+            "poolType": "Stable",
+            "address": "0x3a664ab939fd8482048609f652f9a0b0677337b9"
+        },
+        {
+            "id": "0x410e3e86ef427e30b9235497143881f717d93c2a",
+            "swapFee": "0.0004",
+            "amp": "200",
+            "tokens": [
+                {
+                    "address": "0x9be89d2a4cd102d8fecc6bf9da793be995c22541",
+                    "balance": "942.06513239",
+                    "decimals": 8,
+                    "denormWeight": "0"
+                },
+                {
+                    "address": "0x075b1bb99792c9e1041ba13afef80c91a1e70fb3",
+                    "balance": "592.227178300645985396",
+                    "decimals": 18,
+                    "denormWeight": "0"
+                }
+            ],
+            "tokensList": [
+                "0x9be89d2a4cd102d8fecc6bf9da793be995c22541",
+                "0x075b1bb99792c9e1041ba13afef80c91a1e70fb3"
+            ],
+            "totalWeight": "0",
+            "balanceBpt": "566.442406434323042121",
+            "totalShares": "566.442406434323042121",
+            "poolType": "Stable",
+            "address": "0x410e3e86ef427e30b9235497143881f717d93c2a"
+        },
+        {
+            "id": "0x2fe94ea3d5d4a175184081439753de15aef9d614",
+            "swapFee": "0.0004",
+            "amp": "200",
+            "tokens": [
+                {
+                    "address": "0x8064d9ae6cdf087b1bcd5bdf3531bd5d8c537a68",
+                    "balance": "311.909384998375126587",
+                    "decimals": 18,
+                    "denormWeight": "0"
+                },
+                {
+                    "address": "0x075b1bb99792c9e1041ba13afef80c91a1e70fb3",
+                    "balance": "175.431732809019520805",
+                    "decimals": 18,
+                    "denormWeight": "0"
+                }
+            ],
+            "tokensList": [
+                "0x8064d9ae6cdf087b1bcd5bdf3531bd5d8c537a68",
+                "0x075b1bb99792c9e1041ba13afef80c91a1e70fb3"
+            ],
+            "totalWeight": "0",
+            "balanceBpt": "651.849882964119308775",
+            "totalShares": "651.849882964119308775",
+            "poolType": "Stable",
+            "address": "0x2fe94ea3d5d4a175184081439753de15aef9d614"
+        },
+        {
+            "id": "0xde5331ac4b3630f94853ff322b66407e0d6331e8",
+            "swapFee": "0.0004",
+            "amp": "200",
+            "tokens": [
+                {
+                    "address": "0x5228a22e72ccc52d415ecfd199f99d0665e7733b",
+                    "balance": "183.795639492647424191",
+                    "decimals": 18,
+                    "denormWeight": "0"
+                },
+                {
+                    "address": "0x075b1bb99792c9e1041ba13afef80c91a1e70fb3",
+                    "balance": "133.438833489712065313",
+                    "decimals": 18,
+                    "denormWeight": "0"
+                }
+            ],
+            "tokensList": [
+                "0x5228a22e72ccc52d415ecfd199f99d0665e7733b",
+                "0x075b1bb99792c9e1041ba13afef80c91a1e70fb3"
+            ],
+            "totalWeight": "0",
+            "balanceBpt": "328.10509538677717503",
+            "totalShares": "328.10509538677717503",
+            "poolType": "Stable",
+            "address": "0xde5331ac4b3630f94853ff322b66407e0d6331e8"
+        },
+        {
+            "id": "0x94e131324b6054c0d789b190b2dac504e4361b53",
+            "swapFee": "0.0004",
+            "amp": "100",
+            "tokens": [
+                {
+                    "address": "0xa47c8bf37f92abed4a126bda807a7b7498661acd",
+                    "balance": "33714061.17776155789451978",
+                    "decimals": 18,
+                    "denormWeight": "0"
+                },
+                {
+                    "address": "0x6c3f90f043a72fa612cbac8115ee7e52bde6e490",
+                    "balance": "37363135.606926795953705965",
+                    "decimals": 18,
+                    "denormWeight": "0"
+                }
+            ],
+            "tokensList": [
+                "0xa47c8bf37f92abed4a126bda807a7b7498661acd",
+                "0x6c3f90f043a72fa612cbac8115ee7e52bde6e490"
+            ],
+            "totalWeight": "0",
+            "balanceBpt": "70709685.449203738865903436",
+            "totalShares": "70709685.449203738865903436",
+            "poolType": "Stable",
+            "address": "0x94e131324b6054c0d789b190b2dac504e4361b53"
+        },
+        {
+            "id": "0x194ebd173f6cdace046c53eacce9b953f28411d1",
+            "swapFee": "0.0004",
+            "amp": "100",
+            "tokens": [
+                {
+                    "address": "0xdb25f211ab05b1c97d595516f45794528a807ad8",
+                    "balance": "29312366.69",
+                    "decimals": 2,
+                    "denormWeight": "0"
+                },
+                {
+                    "address": "0xd71ecff9342a5ced620049e616c5035f1db98620",
+                    "balance": "27917360.230880864076561741",
+                    "decimals": 18,
+                    "denormWeight": "0"
+                }
+            ],
+            "tokensList": [
+                "0xdb25f211ab05b1c97d595516f45794528a807ad8",
+                "0xd71ecff9342a5ced620049e616c5035f1db98620"
+            ],
+            "totalWeight": "0",
+            "balanceBpt": "49525452.059504973052698928",
+            "totalShares": "49525452.059504973052698928",
+            "poolType": "Stable",
+            "address": "0x194ebd173f6cdace046c53eacce9b953f28411d1"
+        },
+        {
+            "id": "0xa3d87fffce63b53e0d54faa1cc983b7eb0b74a9c",
+            "swapFee": "0.0004",
+            "amp": "100",
+            "tokens": [
+                {
+                    "address": "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+                    "balance": "95892.963914767495178417",
+                    "decimals": 18,
+                    "denormWeight": "0"
+                },
+                {
+                    "address": "0x5e74c9036fb86bd7ecdcb084a0673efc32ea31cb",
+                    "balance": "46142.742315717081122247",
+                    "decimals": 18,
+                    "denormWeight": "0"
+                }
+            ],
+            "tokensList": [
+                "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+                "0x5e74c9036fb86bd7ecdcb084a0673efc32ea31cb"
+            ],
+            "totalWeight": "0",
+            "balanceBpt": "200883.643998455915842631",
+            "totalShares": "200883.643998455915842631",
+            "poolType": "Stable",
+            "address": "0xa3d87fffce63b53e0d54faa1cc983b7eb0b74a9c"
+        },
+        {
+            "id": "0x06325440d014e39736583c165c2963ba99faf14e",
+            "swapFee": "0.0004",
+            "amp": "10",
+            "tokens": [
+                {
+                    "address": "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+                    "balance": "112108.509504089049207659",
+                    "decimals": 18,
+                    "denormWeight": "0"
+                },
+                {
+                    "address": "0xae7ab96520de3a18e5e111b5eaab095312d7fe84",
+                    "balance": "126455.799315713096952651",
+                    "decimals": 18,
+                    "denormWeight": "0"
+                }
+            ],
+            "tokensList": [
+                "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+                "0xae7ab96520de3a18e5e111b5eaab095312d7fe84"
+            ],
+            "totalWeight": "0",
+            "balanceBpt": "195462.394762603394589742",
+            "totalShares": "195462.394762603394589742",
+            "poolType": "Stable",
+            "address": "0x06325440d014e39736583c165c2963ba99faf14e"
+        },
+        {
+            "id": "0xaa17a236f2badc98ddc0cf999abb47d47fc0a6cf",
+            "swapFee": "0.0004",
+            "amp": "10",
+            "tokens": [
+                {
+                    "address": "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+                    "balance": "6865.696537641968760914",
+                    "decimals": 18,
+                    "denormWeight": "0"
+                },
+                {
+                    "address": "0xe95a203b1a91a908f9b9ce46459d101078c2c3cb",
+                    "balance": "8238.390855431911466054",
+                    "decimals": 18,
+                    "denormWeight": "0"
+                }
+            ],
+            "tokensList": [
+                "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+                "0xe95a203b1a91a908f9b9ce46459d101078c2c3cb"
+            ],
+            "totalWeight": "0",
+            "balanceBpt": "9205.363867781904897357",
+            "totalShares": "9205.363867781904897357",
+            "poolType": "Stable",
+            "address": "0xaa17a236f2badc98ddc0cf999abb47d47fc0a6cf"
+        },
+        {
+            "id": "0x5282a4ef67d9c33135340fb3289cc1711c13638c",
+            "swapFee": "0.0004",
+            "amp": "600",
+            "tokens": [
+                {
+                    "address": "0x8e595470ed749b85c6f7669de83eae304c2ec68f",
+                    "balance": "196221175.05587572",
+                    "decimals": 8,
+                    "denormWeight": "0"
+                },
+                {
+                    "address": "0x76eb2fe28b36b3ee97f3adae0c69606eedb2a37c",
+                    "balance": "403397798.25286222",
+                    "decimals": 8,
+                    "denormWeight": "0"
+                },
+                {
+                    "address": "0x48759f220ed983db51fa7a8c0d2aab8f3ce4166a",
+                    "balance": "425061711.36569482",
+                    "decimals": 8,
+                    "denormWeight": "0"
+                }
+            ],
+            "tokensList": [
+                "0x8e595470ed749b85c6f7669de83eae304c2ec68f",
+                "0x76eb2fe28b36b3ee97f3adae0c69606eedb2a37c",
+                "0x48759f220ed983db51fa7a8c0d2aab8f3ce4166a"
+            ],
+            "totalWeight": "0",
+            "balanceBpt": "4485645.299464193750509996",
+            "totalShares": "4485645.299464193750509996",
+            "poolType": "Stable",
+            "address": "0x5282a4ef67d9c33135340fb3289cc1711c13638c"
+        },
+        {
+            "id": "0xcee60cfa923170e4f8204ae08b4fa6a3f5656f3a",
+            "swapFee": "0.0004",
+            "amp": "100",
+            "tokens": [
+                {
+                    "address": "0x514910771af9ca656af840dff83e8264ecf986ca",
+                    "balance": "303349.059373739075602394",
+                    "decimals": 18,
+                    "denormWeight": "0"
+                },
+                {
+                    "address": "0xbbc455cb4f1b9e4bfc4b73970d360c8f032efee6",
+                    "balance": "82417.238027975345708918",
+                    "decimals": 18,
+                    "denormWeight": "0"
+                }
+            ],
+            "tokensList": [
+                "0x514910771af9ca656af840dff83e8264ecf986ca",
+                "0xbbc455cb4f1b9e4bfc4b73970d360c8f032efee6"
+            ],
+            "totalWeight": "0",
+            "balanceBpt": "2696237.243629509472920807",
+            "totalShares": "2696237.243629509472920807",
+            "poolType": "Stable",
+            "address": "0xcee60cfa923170e4f8204ae08b4fa6a3f5656f3a"
+        },
+        {
+            "id": "0x7eb40e450b9655f4b3cc4259bcc731c63ff55ae6",
+            "swapFee": "0.0004",
+            "amp": "100",
+            "tokens": [
+                {
+                    "address": "0x1456688345527be1f37e9e627da0837d6f08c925",
+                    "balance": "27807.536614907523279256",
+                    "decimals": 18,
+                    "denormWeight": "0"
+                },
+                {
+                    "address": "0x6c3f90f043a72fa612cbac8115ee7e52bde6e490",
+                    "balance": "77669.496321547747767131",
+                    "decimals": 18,
+                    "denormWeight": "0"
+                }
+            ],
+            "tokensList": [
+                "0x1456688345527be1f37e9e627da0837d6f08c925",
+                "0x6c3f90f043a72fa612cbac8115ee7e52bde6e490"
+            ],
+            "totalWeight": "0",
+            "balanceBpt": "117469984.649647264506827089",
+            "totalShares": "117469984.649647264506827089",
+            "poolType": "Stable",
+            "address": "0x7eb40e450b9655f4b3cc4259bcc731c63ff55ae6"
+        }
+    ],
+    "v1Result": {
+        "title": "v1",
+        "swaps": [],
+        "returnAmount": "0",
+        "timeData": {
+            "fullSwap": 0
+        }
+    }
+}

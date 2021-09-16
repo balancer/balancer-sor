@@ -1,0 +1,131 @@
+{
+    "tradeInfo": {
+        "SwapType": "n/a",
+        "TokenIn": "n/a",
+        "TokenOut": "n/a",
+        "NoPools": 4,
+        "SwapAmount": "n/a",
+        "GasPrice": "n/a",
+        "SwapAmountDecimals": "n/a",
+        "ReturnAmountDecimals": "n/a"
+    },
+    "pools": [
+        {
+            "address": "0x06df3b2bbb68adc8b0e302443692037ed9f91b42",
+            "amp": "200",
+            "baseToken": null,
+            "expiryTime": null,
+            "id": "0x06df3b2bbb68adc8b0e302443692037ed9f91b42000000000000000000000063",
+            "poolType": "Stable",
+            "principalToken": null,
+            "swapEnabled": true,
+            "swapFee": "0.0005",
+            "tokens": [
+                {
+                    "address": "0x6b175474e89094c44da98b954eedeac495271d0f",
+                    "balance": "45795282.291209453240330327",
+                    "decimals": 18,
+                    "priceRate": null,
+                    "symbol": "DAI",
+                    "weight": null
+                },
+                {
+                    "address": "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+                    "balance": "51415452.783274",
+                    "decimals": 6,
+                    "priceRate": null,
+                    "symbol": "USDC",
+                    "weight": null
+                },
+                {
+                    "address": "0xdac17f958d2ee523a2206206994597c13d831ec7",
+                    "balance": "48861685.530712",
+                    "decimals": 6,
+                    "priceRate": null,
+                    "symbol": "USDT",
+                    "weight": null
+                }
+            ],
+            "tokensList": [
+                "0x6b175474e89094c44da98b954eedeac495271d0f",
+                "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+                "0xdac17f958d2ee523a2206206994597c13d831ec7"
+            ],
+            "totalShares": "145747600.211911429365644832",
+            "totalWeight": "0",
+            "unitSeconds": null
+        },
+        {
+            "address": "0x0b09dea16768f0799065c475be02919503cb2a35",
+            "amp": null,
+            "baseToken": null,
+            "expiryTime": null,
+            "id": "0x0b09dea16768f0799065c475be02919503cb2a3500020000000000000000001a",
+            "poolType": "Weighted",
+            "principalToken": null,
+            "swapEnabled": true,
+            "swapFee": "0.0033",
+            "tokens": [
+                {
+                    "address": "0x6b175474e89094c44da98b954eedeac495271d0f",
+                    "balance": "41476253.022693257948597201",
+                    "decimals": 18,
+                    "priceRate": null,
+                    "symbol": "DAI",
+                    "weight": "0.4"
+                },
+                {
+                    "address": "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
+                    "balance": "19671.814946560840959771",
+                    "decimals": 18,
+                    "priceRate": null,
+                    "symbol": "WETH",
+                    "weight": "0.6"
+                }
+            ],
+            "tokensList": [
+                "0x6b175474e89094c44da98b954eedeac495271d0f",
+                "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2"
+            ],
+            "totalShares": "819919.275136494180654341",
+            "totalWeight": "1",
+            "unitSeconds": null
+        },
+        {
+            "address": "0xe08590bde837eb9b2d42aa1196469d6e08fe96ec",
+            "amp": "10",
+            "baseToken": null,
+            "expiryTime": null,
+            "id": "TODO",
+            "poolType": "MetaStable",
+            "principalToken": null,
+            "swapEnabled": true,
+            "swapFee": "0.0001",
+            "tokens": [
+                {
+                    "address": "0x7f39c581f595b53c5cb19bd0b3f8da6c935e2ca0",
+                    "balance": "149.999968285624206151",
+                    "decimals": 18,
+                    "priceRate": "1.5",
+                    "symbol": "wstETH",
+                    "weight": null
+                },
+                {
+                    "address": "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
+                    "balance": "100.000043445025075048",
+                    "decimals": 18,
+                    "priceRate": "1",
+                    "symbol": "WETH",
+                    "weight": null
+                }
+            ],
+            "tokensList": [
+                "0x7f39c581f595b53c5cb19bd0b3f8da6c935e2ca0",
+                "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2"
+            ],
+            "totalShares": "322.491584799342983787",
+            "totalWeight": "0",
+            "unitSeconds": null
+        }
+    ]
+}

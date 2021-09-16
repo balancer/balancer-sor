@@ -1,0 +1,50 @@
+{
+    "tradeInfo": {
+        "SwapType": "swapExactIn",
+        "TokenIn": "0x0000000000000000000000000000000000000001",
+        "TokenOut": "0x000000000000000000000000000000000000000b",
+        "NoPools": 1,
+        "SwapAmount": "2193719312762269000000",
+        "GasPrice": "30000000000",
+        "SwapAmountDecimals": "18",
+        "ReturnAmountDecimals": "18"
+    },
+    "pools": [
+        {
+            "id": "0xelementPool4",
+            "poolType": "Element",
+            "swapFee": "0.05",
+            "totalShares": "203024.0527059632",
+            "unitSeconds": "60",
+            "expiryTime": "0.06075",
+            "principalToken": "0x0000000000000000000000000000000000000001",
+            "baseToken": "0x000000000000000000000000000000000000000b",
+            "tokens": [
+                {
+                    "address": "0x0000000000000000000000000000000000000001",
+                    "balance": "475364.5726183281",
+                    "decimals": 18,
+                    "weight": "5"
+                },
+                {
+                    "address": "0x000000000000000000000000000000000000000b",
+                    "balance": "251639.14235585282",
+                    "decimals": 18,
+                    "weight": "5"
+                }
+            ],
+            "tokensList": [
+                "0x0000000000000000000000000000000000000001",
+                "0x000000000000000000000000000000000000000b"
+            ],
+            "totalWeight": "10",
+            "address": "0xelementPool4"
+        }
+    ],
+    "v1Result": {
+        "title": "v1",
+        "swaps": [],
+        "returnAmount": "0",
+        "timeData": { "fullSwap": 0 }
+    }
+}

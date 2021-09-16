@@ -1,0 +1,78 @@
+{
+    "USDC": {
+        "address": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+        "decimals": 6
+    },
+    "DAI": {
+        "address": "0x6B175474E89094C44Da98b954EedeAC495271d0F",
+        "decimals": 18
+    },
+    "USDT": {
+        "address": "0xdac17f958d2ee523a2206206994597c13d831ec7",
+        "decimals": 6
+    },
+    "sUSD": {
+        "address": "0x57Ab1ec28D129707052df4dF418D58a2D46d5f51",
+        "decimals": 18
+    },
+    "aDAI": {
+        "address": "0xfC1E690f61EFd961294b3e1Ce3313fBD8aa4f85d",
+        "decimals": 18
+    },
+    "aUSDT": {
+        "address": "0x71fc860F7D3A592A4a98740e39dB31d25db65ae8",
+        "decimals": 6
+    },
+    "aUSDC": {
+        "address": "0x9bA00D6856a4eDF4665BcA2C2309936572473B7E",
+        "decimals": 6
+    },
+    "aSUSD": {
+        "address": "0x625aE63000f46200499120B906716420bd059240",
+        "decimals": 18
+    },
+    "aTUSD": {
+        "address": "0x4DA9b813057D04BAef4e5800E36083717b4a0341",
+        "decimals": 18
+    },
+    "aBUSD": {
+        "address": "0x6Ee0f7BB50a54AB5253dA0667B0Dc2ee526C30a8",
+        "decimals": 18
+    },
+    "cUSDC": {
+        "address": "0x39AA39c021dfbaE8faC545936693aC917d5E7563",
+        "decimals": 8
+    },
+    "cDAI": {
+        "address": "0x5d3a536E4D6DbD6114cc1Ead35777bAB948E3643",
+        "decimals": 8
+    },
+    "cUSDT": {
+        "address": "0xf650C3d88D12dB855b8bf7D11Be6C55A4e07dCC9",
+        "decimals": 8
+    },
+    "yDAI": {
+        "address": "0x16de59092dae5ccf4a1e6439d611fd0653f0bd01",
+        "decimals": 18
+    },
+    "yUSDC": {
+        "address": "0xd6ad7a6750a7593e092a9b218d66c0a814a3436e",
+        "decimals": 6
+    },
+    "yUSDT": {
+        "address": "0x83f798e925bcd4017eb265844fddabb448f1707d",
+        "decimals": 6
+    },
+    "yBUSD": {
+        "address": "0x04bc0ab673d88ae9dbc9da2380cb6b79c4bca9ae",
+        "decimals": 18
+    },
+    "GUSD": {
+        "address": "0x056Fd409E1d7A124BD7017459dFEa2F387b6d5Cd",
+        "decimals": 2
+    },
+    "3Pool": {
+        "address": "0x6c3F90f043a72FA612cbac8115EE7e52BDe6E490",
+        "decimals": 18
+    }
+}

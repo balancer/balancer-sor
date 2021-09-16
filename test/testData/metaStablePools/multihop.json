@@ -1,0 +1,256 @@
+{
+    "tradeInfo": {
+        "SwapType": "n/a",
+        "TokenIn": "n/a",
+        "TokenOut": "n/a",
+        "NoPools": 4,
+        "SwapAmount": "n/a",
+        "GasPrice": "n/a",
+        "SwapAmountDecimals": "n/a",
+        "ReturnAmountDecimals": "n/a"
+    },
+    "metaStablePools": [
+        {
+            "id": "0xebfed10e11dc08fcda1af1fda146945e8710f22e00000000000000000000007f",
+            "address": "0xebfed10e11dc08fcda1af1fda146945e8710f22e",
+            "swapFee": "0.0003",
+            "amp": "10",
+            "tokens": [
+                {
+                    "address": "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
+                    "balance": "1000",
+                    "decimals": 18,
+                    "symbol": "WETH",
+                    "priceRate": "1"
+                },
+                {
+                    "address": "0xae7ab96520de3a18e5e111b5eaab095312d7fe84",
+                    "balance": "4000",
+                    "decimals": 18,
+                    "symbol": "stETH",
+                    "priceRate": "0.25"
+                }
+            ],
+            "tokensList": [
+                "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
+                "0xae7ab96520de3a18e5e111b5eaab095312d7fe84"
+            ],
+            "totalShares": "1000",
+            "poolType": "MetaStable"
+        },
+        {
+            "id": "0xa6f548df93de924d73be7d25dc02554c6bd66db500020000000000000000000e",
+            "address": "0xa6f548df93de924d73be7d25dc02554c6bd66db5",
+            "swapFee": "0.002",
+            "amp": "10",
+            "tokens": [
+                {
+                    "address": "0xae7ab96520de3a18e5e111b5eaab095312d7fe84",
+                    "balance": "8000",
+                    "decimals": 18,
+                    "symbol": "stETH",
+                    "priceRate": "0.25"
+                },
+                {
+                    "address": "0x42d6622dece394b54999fbd73d108123806f6a18",
+                    "balance": "2000",
+                    "decimals": 18,
+                    "symbol": "randomETH",
+                    "priceRate": "1"
+                }
+            ],
+            "tokensList": [
+                "0xae7ab96520de3a18e5e111b5eaab095312d7fe84",
+                "0x42d6622dece394b54999fbd73d108123806f6a18"
+            ],
+            "totalShares": "2000",
+            "poolType": "MetaStable"
+        }
+    ],
+    "stablePools": [
+        {
+            "id": "0xebfed10e11dc08fcda1af1fda146945e8710f22e00000000000000000000007f",
+            "address": "0xebfed10e11dc08fcda1af1fda146945e8710f22e",
+            "swapFee": "0.0003",
+            "amp": "10",
+            "tokens": [
+                {
+                    "address": "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
+                    "balance": "1000",
+                    "decimals": 18,
+                    "symbol": "WETH"
+                },
+                {
+                    "address": "0xae7ab96520de3a18e5e111b5eaab095312d7fe84",
+                    "balance": "1000",
+                    "decimals": 18,
+                    "symbol": "stETH"
+                }
+            ],
+            "tokensList": [
+                "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
+                "0xae7ab96520de3a18e5e111b5eaab095312d7fe84"
+            ],
+            "totalShares": "1000",
+            "poolType": "Stable"
+        },
+        {
+            "id": "0xa6f548df93de924d73be7d25dc02554c6bd66db500020000000000000000000e",
+            "address": "0xa6f548df93de924d73be7d25dc02554c6bd66db5",
+            "swapFee": "0.002",
+            "amp": "10",
+            "tokens": [
+                {
+                    "address": "0xae7ab96520de3a18e5e111b5eaab095312d7fe84",
+                    "balance": "2000",
+                    "decimals": 18,
+                    "symbol": "stETH"
+                },
+                {
+                    "address": "0x42d6622dece394b54999fbd73d108123806f6a18",
+                    "balance": "2000",
+                    "decimals": 18,
+                    "symbol": "randomETH"
+                }
+            ],
+            "tokensList": [
+                "0xae7ab96520de3a18e5e111b5eaab095312d7fe84",
+                "0x42d6622dece394b54999fbd73d108123806f6a18"
+            ],
+            "totalShares": "2000",
+            "poolType": "Stable"
+        }
+    ],
+    "metaWithStable": [
+        {
+            "address": "0xf216cc947c5ffc2045db16bc98b2535f0689cde8",
+            "amp": "10",
+            "id": "0xf216cc947c5ffc2045db16bc98b2535f0689cde80002000000000000000000fa",
+            "poolType": "MetaStable",
+            "swapFee": "0.001",
+            "tokens": [
+                {
+                    "address": "0x5f304f6cf88dc76b414f301e05adfb5a429e8b67",
+                    "balance": "20246.422732507587057905",
+                    "decimals": 18,
+                    "priceRate": "1.00239199558952863",
+                    "symbol": "PTSP"
+                },
+                {
+                    "address": "0xc2569dd7d0fd715b054fbf16e75b001e5c0c1115",
+                    "balance": "19803.578738",
+                    "decimals": 6,
+                    "priceRate": "1",
+                    "symbol": "USDC"
+                }
+            ],
+            "tokensList": [
+                "0x5f304f6cf88dc76b414f301e05adfb5a429e8b67",
+                "0xc2569dd7d0fd715b054fbf16e75b001e5c0c1115"
+            ],
+            "totalShares": "40018.638353252561099177"
+        },
+        {
+            "address": "0x5f304f6cf88dc76b414f301e05adfb5a429e8b67",
+            "amp": "2000",
+            "id": "0x5f304f6cf88dc76b414f301e05adfb5a429e8b670000000000000000000000f4",
+            "poolType": "Stable",
+            "swapFee": "0.03",
+            "tokens": [
+                {
+                    "address": "0x04df6e4121c27713ed22341e7c7df330f56f289b",
+                    "balance": "11044.697773108789252775",
+                    "decimals": 18,
+                    "priceRate": null,
+                    "symbol": "DAI"
+                },
+                {
+                    "address": "0xc2569dd7d0fd715b054fbf16e75b001e5c0c1115",
+                    "balance": "10981.662702",
+                    "decimals": 6,
+                    "priceRate": null,
+                    "symbol": "USDC"
+                },
+                {
+                    "address": "0xcc08220af469192c53295fdd34cfb8df29aa17ab",
+                    "balance": "11010",
+                    "decimals": 6,
+                    "priceRate": null,
+                    "symbol": "'USDT'"
+                }
+            ],
+            "tokensList": [
+                "0x04df6e4121c27713ed22341e7c7df330f56f289b",
+                "0xc2569dd7d0fd715b054fbf16e75b001e5c0c1115",
+                "0xcc08220af469192c53295fdd34cfb8df29aa17ab"
+            ],
+            "totalShares": "32957.526172637102769068"
+        }
+    ],
+    "metaWithStable2": [
+        {
+            "address": "0xf216cc947c5ffc2045db16bc98b2535f0689cde8",
+            "amp": "10",
+            "id": "0xf216cc947c5ffc2045db16bc98b2535f0689cde80002000000000000000000fa",
+            "poolType": "MetaStable",
+            "swapFee": "0.001",
+            "tokens": [
+                {
+                    "address": "0x5f304f6cf88dc76b414f301e05adfb5a429e8b67",
+                    "balance": "20246.422732507587057905",
+                    "decimals": 18,
+                    "priceRate": "1.00239199558952863",
+                    "symbol": "PTSP"
+                },
+                {
+                    "address": "0xc2569dd7d0fd715b054fbf16e75b001e5c0c1115",
+                    "balance": "19803.578738",
+                    "decimals": 6,
+                    "priceRate": "1",
+                    "symbol": "USDC"
+                }
+            ],
+            "tokensList": [
+                "0x5f304f6cf88dc76b414f301e05adfb5a429e8b67",
+                "0xc2569dd7d0fd715b054fbf16e75b001e5c0c1115"
+            ],
+            "totalShares": "40018.638353252561099177"
+        },
+        {
+            "address": "0x6b15a01b5d46a5321b627bd7deef1af57bc62907",
+            "amp": "2000",
+            "id": "0x6b15a01b5d46a5321b627bd7deef1af57bc629070000000000000000000000d4",
+            "poolType": "Stable",
+            "swapFee": "0.0004",
+            "tokens": [
+                {
+                    "address": "0x04df6e4121c27713ed22341e7c7df330f56f289b",
+                    "balance": "1010815464.031449904413500383",
+                    "decimals": 18,
+                    "priceRate": null,
+                    "symbol": "DAI"
+                },
+                {
+                    "address": "0xc2569dd7d0fd715b054fbf16e75b001e5c0c1115",
+                    "balance": "592062193.53414",
+                    "decimals": 6,
+                    "priceRate": null,
+                    "symbol": "USDC"
+                },
+                {
+                    "address": "0xcc08220af469192c53295fdd34cfb8df29aa17ab",
+                    "balance": "141394.922161",
+                    "decimals": 6,
+                    "priceRate": null,
+                    "symbol": "'USDT'"
+                }
+            ],
+            "tokensList": [
+                "0x04df6e4121c27713ed22341e7c7df330f56f289b",
+                "0xc2569dd7d0fd715b054fbf16e75b001e5c0c1115",
+                "0xcc08220af469192c53295fdd34cfb8df29aa17ab"
+            ],
+            "totalShares": "33081862.621900738211184893"
+        }
+    ]
+}

@@ -1,0 +1,70 @@
+{
+    "tradeInfo": {
+        "SwapType": "n/a",
+        "TokenIn": "n/a",
+        "TokenOut": "n/a",
+        "NoPools": 4,
+        "SwapAmount": "n/a",
+        "GasPrice": "n/a",
+        "SwapAmountDecimals": "n/a",
+        "ReturnAmountDecimals": "n/a"
+    },
+    "metaStablePool": [
+        {
+            "id": "0xebfed10e11dc08fcda1af1fda146945e8710f22e00000000000000000000007f",
+            "address": "0xebfed10e11dc08fcda1af1fda146945e8710f22e",
+            "swapFee": "0.0004",
+            "amp": "10",
+            "tokens": [
+                {
+                    "address": "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
+                    "balance": "10",
+                    "decimals": 18,
+                    "symbol": "WETH",
+                    "priceRate": "1"
+                },
+                {
+                    "address": "0xae7ab96520de3a18e5e111b5eaab095312d7fe84",
+                    "balance": "20",
+                    "decimals": 18,
+                    "symbol": "stETH",
+                    "priceRate": "0.5"
+                }
+            ],
+            "tokensList": [
+                "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
+                "0xae7ab96520de3a18e5e111b5eaab095312d7fe84"
+            ],
+            "totalShares": "10",
+            "poolType": "MetaStable"
+        }
+    ],
+    "stablePool": [
+        {
+            "id": "0xebfed10e11dc08fcda1af1fda146945e8710f22e00000000000000000000007f",
+            "address": "0xebfed10e11dc08fcda1af1fda146945e8710f22e",
+            "swapFee": "0.0004",
+            "amp": "10",
+            "tokens": [
+                {
+                    "address": "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
+                    "balance": "10",
+                    "decimals": 18,
+                    "symbol": "WETH"
+                },
+                {
+                    "address": "0xae7ab96520de3a18e5e111b5eaab095312d7fe84",
+                    "balance": "10",
+                    "decimals": 18,
+                    "symbol": "stETH"
+                }
+            ],
+            "tokensList": [
+                "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
+                "0xae7ab96520de3a18e5e111b5eaab095312d7fe84"
+            ],
+            "totalShares": "10",
+            "poolType": "Stable"
+        }
+    ]
+}

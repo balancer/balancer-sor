@@ -1,0 +1,120 @@
+{
+    "tradeInfo": {
+        "SwapType": "swapExactIn",
+        "TokenIn": "0x04df6e4121c27713ed22341e7c7df330f56f289b",
+        "TokenOut": "0xdfcea9088c8a88a76ff74892c1457c17dfeef9c1",
+        "NoPools": 4,
+        "SwapAmount": "10000000000000000",
+        "GasPrice": "40000000000",
+        "SwapAmountDecimals": "18",
+        "ReturnAmountDecimals": "18"
+    },
+    "pools": [
+        {
+            "address": "0x3f7471c0f9f60bf8ad54253b1696613fc90e7157",
+            "amp": "2000",
+            "baseToken": null,
+            "expiryTime": null,
+            "id": "0x3f7471c0f9f60bf8ad54253b1696613fc90e7157000000000000000000000084",
+            "poolType": "Stable",
+            "principalToken": null,
+            "swapFee": "0.005",
+            "tokens": [
+                {
+                    "address": "0x04df6e4121c27713ed22341e7c7df330f56f289b",
+                    "balance": "2984.889583903402839656",
+                    "decimals": 18,
+                    "weight": null
+                },
+                {
+                    "address": "0x15e76fc74c6ab1c3141d61219883d1c59f716e21",
+                    "balance": "1023.835158765216747309",
+                    "decimals": 18,
+                    "weight": null
+                },
+                {
+                    "address": "0x22ee6c3b011facc530dd01fe94c58919344d6db5",
+                    "balance": "18.08",
+                    "decimals": 2,
+                    "weight": null
+                },
+                {
+                    "address": "0xc2569dd7d0fd715b054fbf16e75b001e5c0c1115",
+                    "balance": "3098.862073",
+                    "decimals": 6,
+                    "weight": null
+                },
+                {
+                    "address": "0xcc08220af469192c53295fdd34cfb8df29aa17ab",
+                    "balance": "3459.835157",
+                    "decimals": 6,
+                    "weight": null
+                }
+            ],
+            "tokensList": [
+                "0x04df6e4121c27713ed22341e7c7df330f56f289b",
+                "0x15e76fc74c6ab1c3141d61219883d1c59f716e21",
+                "0x22ee6c3b011facc530dd01fe94c58919344d6db5",
+                "0xc2569dd7d0fd715b054fbf16e75b001e5c0c1115",
+                "0xcc08220af469192c53295fdd34cfb8df29aa17ab"
+            ],
+            "totalShares": "6991.04078288779131",
+            "totalWeight": "0",
+            "unitSeconds": null
+        },
+        {
+            "address": "0xa7ff759dbef9f3efdd1d59beee44b966acafe214",
+            "amp": null,
+            "baseToken": null,
+            "expiryTime": null,
+            "id": "0xa7ff759dbef9f3efdd1d59beee44b966acafe2140001000000000000000000c8",
+            "poolType": "Weighted",
+            "principalToken": null,
+            "swapFee": "0.03",
+            "tokens": [
+                {
+                    "address": "0x22ee6c3b011facc530dd01fe94c58919344d6db5",
+                    "balance": "5507.77",
+                    "decimals": 2,
+                    "weight": "0.15"
+                },
+                {
+                    "address": "0xaf9ac3235be96ed496db7969f60d354fe5e426b0",
+                    "balance": "10.5",
+                    "decimals": 18,
+                    "weight": "0.7"
+                },
+                {
+                    "address": "0xdfcea9088c8a88a76ff74892c1457c17dfeef9c1",
+                    "balance": "2.250921414781004001",
+                    "decimals": 18,
+                    "weight": "0.15"
+                }
+            ],
+            "tokensList": [
+                "0x22ee6c3b011facc530dd01fe94c58919344d6db5",
+                "0xaf9ac3235be96ed496db7969f60d354fe5e426b0",
+                "0xdfcea9088c8a88a76ff74892c1457c17dfeef9c1"
+            ],
+            "totalShares": "63.966303488164502193",
+            "totalWeight": "1",
+            "unitSeconds": null
+        }
+    ],
+    "v1Result": {
+        "title": "v1",
+        "swaps": [],
+        "returnAmount": "0",
+        "timeData": {
+            "fullSwap": 0.37354302406311035,
+            "costOutputToken": 0.0007779598236083984,
+            "filterPools": 0.026635050773620605,
+            "sortPools": 0.004045963287353516,
+            "parsePool": 0.09807300567626953,
+            "processPaths": 0.0027559995651245117,
+            "processEps": 0.0029420852661132812,
+            "filter": "N/A",
+            "sor": 0.08017098903656006
+        }
+    }
+}

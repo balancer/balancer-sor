@@ -1,100 +1,181 @@
 import { BigNumber } from './utils/bignumber';
 
-export interface PoolPairData {
+export type NoNullableField<T> = {
+    [P in keyof T]: NonNullable<T[P]>;
+};
+
+export enum SwapTypes {
+    SwapExactIn,
+    SwapExactOut,
+}
+
+export enum PoolTypes {
+    Weighted,
+    Stable,
+    Element,
+    MetaStable,
+}
+
+export enum SwapPairType {
+    Direct,
+    HopIn,
+    HopOut,
+}
+
+export interface SwapOptions {
+    gasPrice: BigNumber;
+    swapGas: BigNumber;
+    timestamp: number;
+    maxPools: number;
+    poolTypeFilter: PoolFilter;
+    forceRefresh: boolean;
+}
+
+export type PoolPairBase = {
     id: string;
+    address: string;
+    poolType: PoolTypes;
+    swapFee: BigNumber;
     tokenIn: string;
     tokenOut: string;
+    decimalsIn: number;
+    decimalsOut: number;
     balanceIn: BigNumber;
     balanceOut: BigNumber;
-    weightIn: BigNumber;
-    weightOut: BigNumber;
-    swapFee: BigNumber;
-}
+};
 
-export interface Path {
-    id: string; // pool address if direct path, contactenation of pool addresses if multihop
-    swaps: Swap[];
-    spotPrice?: BigNumber;
-    slippage?: BigNumber;
-    limitAmount?: BigNumber;
-    slippagePriceFactor?: BigNumber;
-}
-
-export interface EffectivePrice {
-    price?: BigNumber;
-    id?: string;
-    maxAmount?: string;
-    swap?: string[];
-    amounts?: BigNumber[];
-    bestPools?: string[];
-}
-
-export interface Price {
-    price?: BigNumber;
-    id?: string;
-    maxAmount?: string;
-    swap?: string[];
-    amounts?: BigNumber[];
-    bestPathsIds?: string[];
-}
-
-export type Swap = {
+export interface Swap {
     pool: string;
     tokenIn: string;
     tokenOut: string;
     swapAmount?: string;
     limitReturnAmount?: string;
     maxPrice?: string;
-};
-
-export interface Pools {
-    pools: Pool[];
+    tokenInDecimals: number;
+    tokenOutDecimals: number;
 }
 
-export interface Pool {
+export interface SubgraphPoolBase {
     id: string;
-    swapFee: BigNumber;
-    totalWeight: BigNumber;
-    tokens: Token[];
-    tokensList: string[];
-}
-
-export interface Token {
     address: string;
-    balance: BigNumber;
-    decimals: number;
-    denormWeight: BigNumber;
-}
-
-export interface SubGraphPools {
-    pools: SubGraphPool[];
-}
-
-export interface SubGraphPool {
-    id: string;
+    poolType: string;
     swapFee: string;
-    totalWeight: string;
-    publicSwap: string;
-    tokens: SubGraphToken[];
+    totalShares: string;
+    tokens: SubgraphToken[];
     tokensList: string[];
+
+    // Weighted & Element field
+    totalWeight?: string;
+
+    // Stable specific fields
+    amp?: string;
+
+    // Element specific fields
+    expiryTime?: number;
+    unitSeconds?: number;
+    principalToken?: string;
+    baseToken?: string;
+
+    // LBP specific fields
+    swapEnabled?: boolean;
 }
 
-export interface SubGraphToken {
+export type SubgraphToken = {
     address: string;
     balance: string;
-    decimals: string;
-    denormWeight: string;
+    decimals: number;
+    priceRate: string;
+    // WeightedPool field
+    weight: string | null;
+};
+
+export interface SwapV2 {
+    poolId: string;
+    assetInIndex: number;
+    assetOutIndex: number;
+    amount: string;
+    userData: string;
+}
+
+export interface SwapInfo {
+    tokenAddresses: string[];
+    swaps: SwapV2[];
+    swapAmount: BigNumber;
+    swapAmountForSwaps?: BigNumber; // Used with stETH/wstETH
+    returnAmount: BigNumber;
+    returnAmountFromSwaps?: BigNumber; // Used with stETH/wstETH
+    returnAmountConsideringFees: BigNumber;
+    tokenIn: string;
+    tokenOut: string;
+    marketSp: BigNumber;
 }
 
 export interface PoolDictionary {
-    [poolId: string]: Pool;
+    [poolId: string]: PoolBase;
 }
 
-export interface DisabledOptions {
-    isOverRide: boolean;
-    disabledTokens: DisabledToken[];
+export interface PoolPairDictionary {
+    [tokenInOut: string]: PoolPairBase;
 }
-export interface DisabledToken {
+
+export interface NewPath {
+    id: string; // pool address if direct path, contactenation of pool addresses if multihop
+    swaps: Swap[];
+    poolPairData: PoolPairBase[];
+    limitAmount: BigNumber;
+    pools: PoolBase[];
+    filterEffectivePrice?: BigNumber; // TODO: This is just used for filtering, maybe there is a better way to filter?
+}
+
+export enum PoolFilter {
+    All = 'All',
+    Weighted = 'Weighted',
+    Stable = 'Stable',
+    MetaStable = 'MetaStable',
+    LBP = 'LiquidityBootstrapping',
+}
+
+export interface PoolBase {
+    poolType: PoolTypes;
+    swapPairType: SwapPairType;
+    id: string;
     address: string;
-    symbol: string;
+    tokensList: string[];
+    parsePoolPairData: (tokenIn: string, tokenOut: string) => PoolPairBase;
+    getNormalizedLiquidity: (poolPairData: PoolPairBase) => BigNumber;
+    getLimitAmountSwap: (
+        poolPairData: PoolPairBase,
+        swapType: SwapTypes
+    ) => BigNumber;
+    updateTokenBalanceForPool: (token: string, newBalance: BigNumber) => void;
+    _exactTokenInForTokenOut: (
+        poolPairData: PoolPairBase,
+        amount: BigNumber,
+        exact: boolean
+    ) => BigNumber;
+    _tokenInForExactTokenOut: (
+        poolPairData: PoolPairBase,
+        amount: BigNumber,
+        exact: boolean
+    ) => BigNumber;
+    _spotPriceAfterSwapExactTokenInForTokenOut: (
+        poolPairData: PoolPairBase,
+        amount: BigNumber
+    ) => BigNumber;
+    _spotPriceAfterSwapTokenInForExactTokenOut: (
+        poolPairData: PoolPairBase,
+        amount: BigNumber
+    ) => BigNumber;
+    _derivativeSpotPriceAfterSwapExactTokenInForTokenOut: (
+        poolPairData: PoolPairBase,
+        amount: BigNumber
+    ) => BigNumber;
+    _derivativeSpotPriceAfterSwapTokenInForExactTokenOut: (
+        poolPairData: PoolPairBase,
+        amount: BigNumber
+    ) => BigNumber;
+}
+
+export interface WeightedPool extends PoolBase {
+    totalWeight: string;
 }
