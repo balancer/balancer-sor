@@ -14,7 +14,7 @@ import {
 } from '../types';
 
 export class RouteProposer {
-    cache: Record<string, { pools: PoolDictionary; paths: NewPath[] }> = {};
+    cache: Record<string, { paths: NewPath[] }> = {};
 
     /**
      * Given a list of pools and a desired input/output, returns a set of possible paths to route through
@@ -26,8 +26,8 @@ export class RouteProposer {
         pools: SubgraphPoolBase[],
         swapOptions: SwapOptions,
         chainId: number
-    ): { pools: PoolDictionary; paths: NewPath[] } {
-        if (pools.length === 0) return { pools: {}, paths: [] };
+    ): NewPath[] {
+        if (pools.length === 0) return [];
 
         // If token pair has been processed before that info can be reused to speed up execution
         const cache =
@@ -38,10 +38,7 @@ export class RouteProposer {
         // forceRefresh can be set to force fresh processing of paths/prices
         if (!swapOptions.forceRefresh && !!cache) {
             // Using pre-processed data from cache
-            return {
-                pools: cache.pools,
-                paths: cache.paths,
-            };
+            return cache.paths;
         }
 
         // Some functions alter pools list directly but we want to keep original so make a copy to work from
@@ -79,10 +76,9 @@ export class RouteProposer {
 
         this.cache[`${tokenIn}${tokenOut}${swapType}${swapOptions.timestamp}`] =
             {
-                pools: filteredPoolsDict,
                 paths: paths,
             };
 
-        return { pools: filteredPoolsDict, paths };
+        return paths;
     }
 }
