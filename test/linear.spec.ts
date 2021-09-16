@@ -41,6 +41,8 @@ const USDT = {
     address: '0xdac17f958d2ee523a2206206994597c13d831ec7',
 }; // USDT precision = 6
 
+const chainId = 1;
+
 describe('linear pool tests', () => {
     context('with no LinearPools', () => {
         it('getPathsUsingLinearPool return empty paths', () => {
@@ -50,23 +52,22 @@ describe('linear pool tests', () => {
 
             const testPools: any = cloneDeep(singleLinear.pools);
 
-            const [poolsDict, , linearPoolsInfo] = filterPoolsOfInterest(
+            let [poolsFilteredDict, , poolsAllDict] = filterPoolsOfInterest(
                 testPools,
                 tokenIn,
                 tokenOut,
                 maxPools
             );
 
-            // Set LinearPools dict to empty
-            linearPoolsInfo[0] = {};
-
-            const [, pathsUsingLinear] = getPathsUsingLinearPools(
+            const pathsUsingLinear = getPathsUsingLinearPools(
                 tokenIn,
                 tokenOut,
-                linearPoolsInfo,
-                poolsDict,
-                poolsDict
+                poolsAllDict,
+                poolsFilteredDict,
+                chainId
             );
+
+            console.log(pathsUsingLinear);
 
             expect(pathsUsingLinear).to.be.empty;
         });
@@ -80,22 +81,19 @@ describe('linear pool tests', () => {
 
             const testPools: any = cloneDeep(singleLinear.pools);
 
-            const [poolsDict, , linearPoolsInfo] = filterPoolsOfInterest(
+            const [poolsFilteredDict, , poolsAllDict] = filterPoolsOfInterest(
                 testPools,
                 tokenIn,
                 tokenOut,
                 maxPools
             );
 
-            // Set MetaStablePool to empty
-            linearPoolsInfo[1] = {} as MetaStablePool;
-
-            const [, pathsUsingLinear] = getPathsUsingLinearPools(
+            const pathsUsingLinear = getPathsUsingLinearPools(
                 tokenIn,
                 tokenOut,
-                linearPoolsInfo,
-                poolsDict,
-                poolsDict
+                poolsAllDict,
+                poolsFilteredDict,
+                99
             );
 
             expect(pathsUsingLinear).to.be.empty;
@@ -110,25 +108,26 @@ describe('linear pool tests', () => {
                 const maxPools = 10;
                 const testPools: any = cloneDeep(smallLinear.pools);
 
-                const [poolsDict, , linearPoolsInfo] = filterPoolsOfInterest(
-                    testPools,
-                    tokenIn,
-                    tokenOut,
-                    maxPools
-                );
+                const [poolsFilteredDict, , poolsAllDict] =
+                    filterPoolsOfInterest(
+                        testPools,
+                        tokenIn,
+                        tokenOut,
+                        maxPools
+                    );
 
-                const [, pathsUsingLinear] = getPathsUsingLinearPools(
+                const pathsUsingLinear = getPathsUsingLinearPools(
                     tokenIn,
                     tokenOut,
-                    linearPoolsInfo,
-                    poolsDict,
-                    poolsDict
+                    poolsAllDict,
+                    poolsFilteredDict,
+                    chainId
                 );
 
                 assert.equal(pathsUsingLinear.length, 1);
                 checkPath(
                     ['linearDAI', 'multiid', 'linearUSDC'],
-                    poolsDict,
+                    poolsAllDict,
                     pathsUsingLinear[0],
                     tokenIn,
                     tokenOut
@@ -145,7 +144,7 @@ describe('linear pool tests', () => {
                     const maxPools = 10;
                     const testPools: any = cloneDeep(smallLinear.pools);
 
-                    const [poolsDict, , linearPoolsInfo] =
+                    const [poolsFilteredDict, , poolsAllDict] =
                         filterPoolsOfInterest(
                             testPools,
                             tokenIn,
@@ -153,12 +152,12 @@ describe('linear pool tests', () => {
                             maxPools
                         );
 
-                    const [, pathsUsingLinear] = getPathsUsingLinearPools(
+                    const pathsUsingLinear = getPathsUsingLinearPools(
                         tokenIn,
                         tokenOut,
-                        linearPoolsInfo,
-                        poolsDict,
-                        poolsDict
+                        poolsAllDict,
+                        poolsFilteredDict,
+                        chainId
                     );
 
                     assert.equal(pathsUsingLinear.length, 1);
@@ -169,7 +168,7 @@ describe('linear pool tests', () => {
                             'multiid',
                             'linearDAI',
                         ],
-                        poolsDict,
+                        poolsAllDict,
                         pathsUsingLinear[0],
                         tokenIn,
                         tokenOut
@@ -187,7 +186,7 @@ describe('linear pool tests', () => {
                     const maxPools = 10;
                     const testPools: any = cloneDeep(smallLinear.pools);
 
-                    const [poolsDict, , linearPoolsInfo] =
+                    const [poolsFilteredDict, , poolsAllDict] =
                         filterPoolsOfInterest(
                             testPools,
                             tokenIn,
@@ -195,12 +194,12 @@ describe('linear pool tests', () => {
                             maxPools
                         );
 
-                    const [, pathsUsingLinear] = getPathsUsingLinearPools(
+                    const pathsUsingLinear = getPathsUsingLinearPools(
                         tokenIn,
                         tokenOut,
-                        linearPoolsInfo,
-                        poolsDict,
-                        poolsDict
+                        poolsAllDict,
+                        poolsFilteredDict,
+                        chainId
                     );
 
                     assert.equal(pathsUsingLinear.length, 2);
@@ -211,7 +210,7 @@ describe('linear pool tests', () => {
                             'linearUSDC',
                             'weightedUsdcWeth',
                         ],
-                        poolsDict,
+                        poolsAllDict,
                         pathsUsingLinear[0],
                         tokenIn,
                         tokenOut
@@ -223,7 +222,7 @@ describe('linear pool tests', () => {
                             'linearDAI',
                             'weightedDaiWeth',
                         ],
-                        poolsDict,
+                        poolsAllDict,
                         pathsUsingLinear[1],
                         tokenIn,
                         tokenOut
@@ -241,7 +240,7 @@ describe('linear pool tests', () => {
                 const maxPools = 10;
                 const testPools: any = cloneDeep(smallLinear.pools);
 
-                const [paths, poolsDict] = getPaths(
+                const [paths, poolAllDict] = getPaths(
                     tokenIn,
                     tokenOut,
                     SwapTypes.SwapExactIn,
@@ -252,21 +251,21 @@ describe('linear pool tests', () => {
                 assert.equal(paths.length, 3);
                 checkPath(
                     ['linearDAI', 'multiid', 'linearUSDC'],
-                    poolsDict,
+                    poolAllDict,
                     paths[0],
                     tokenIn,
                     tokenOut
                 );
                 checkPath(
                     ['weightedDaiWeth', 'weightedUsdcWeth'],
-                    poolsDict,
+                    poolAllDict,
                     paths[1],
                     tokenIn,
                     tokenOut
                 );
                 checkPath(
                     ['weightedDaiUsdc'],
-                    poolsDict,
+                    poolAllDict,
                     paths[2],
                     tokenIn,
                     tokenOut
@@ -281,7 +280,7 @@ describe('linear pool tests', () => {
                 const maxPools = 10;
                 const testPools: any = cloneDeep(smallLinear.pools);
 
-                const [paths, poolsDict] = getPaths(
+                const [paths, poolsAllDict] = getPaths(
                     tokenIn,
                     tokenOut,
                     SwapTypes.SwapExactIn,
@@ -292,21 +291,21 @@ describe('linear pool tests', () => {
                 assert.equal(paths.length, 3);
                 checkPath(
                     ['weightedUsdcWeth', 'linearUSDC', 'multiid', 'linearDAI'],
-                    poolsDict,
+                    poolsAllDict,
                     paths[0],
                     tokenIn,
                     tokenOut
                 );
                 checkPath(
                     ['weightedUsdcWeth', 'weightedDaiUsdc'],
-                    poolsDict,
+                    poolsAllDict,
                     paths[1],
                     tokenIn,
                     tokenOut
                 );
                 checkPath(
                     ['weightedDaiWeth'],
-                    poolsDict,
+                    poolsAllDict,
                     paths[2],
                     tokenIn,
                     tokenOut
@@ -321,7 +320,7 @@ describe('linear pool tests', () => {
                 const maxPools = 10;
                 const testPools: any = cloneDeep(smallLinear.pools);
 
-                const [paths, poolsDict] = getPaths(
+                const [paths, poolsAllDict] = getPaths(
                     tokenIn,
                     tokenOut,
                     SwapTypes.SwapExactIn,
@@ -332,14 +331,14 @@ describe('linear pool tests', () => {
                 assert.equal(paths.length, 2);
                 checkPath(
                     ['linearUSDT', 'multiid', 'linearUSDC', 'weightedUsdcWeth'],
-                    poolsDict,
+                    poolsAllDict,
                     paths[0],
                     tokenIn,
                     tokenOut
                 );
                 checkPath(
                     ['linearUSDT', 'multiid', 'linearDAI', 'weightedDaiWeth'],
-                    poolsDict,
+                    poolsAllDict,
                     paths[1],
                     tokenIn,
                     tokenOut
@@ -440,7 +439,7 @@ function getPaths(
     pools,
     maxPools
 ): [NewPath[], PoolDictionary] {
-    const [poolsDict, hopTokens, linearPoolsInfo] = filterPoolsOfInterest(
+    const [poolsFilteredDict, hopTokens, poolsAllDict] = filterPoolsOfInterest(
         cloneDeep(pools),
         tokenIn,
         tokenOut,
@@ -448,18 +447,23 @@ function getPaths(
     );
 
     let pathData: NewPath[] = [];
-    [, pathData] = filterHopPools(tokenIn, tokenOut, hopTokens, poolsDict);
-
-    const [, pathsUsingLinear] = getPathsUsingLinearPools(
+    [, pathData] = filterHopPools(
         tokenIn,
         tokenOut,
-        linearPoolsInfo,
-        poolsDict,
-        poolsDict
+        hopTokens,
+        poolsFilteredDict
+    );
+
+    const pathsUsingLinear = getPathsUsingLinearPools(
+        tokenIn,
+        tokenOut,
+        poolsAllDict,
+        poolsFilteredDict,
+        chainId
     );
     pathData = pathData.concat(pathsUsingLinear);
     const [paths] = calculatePathLimits(pathData, swapType);
-    return [paths, poolsDict];
+    return [paths, poolsAllDict];
 }
 
 function runSOR(

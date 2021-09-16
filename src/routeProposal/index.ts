@@ -44,12 +44,11 @@ export class RouteProposer {
         // Some functions alter pools list directly but we want to keep original so make a copy to work from
         const poolsList = cloneDeep(pools);
 
-        const [poolsDict, hopTokens, linearPoolsInfo] = filterPoolsOfInterest(
+        const [poolsDict, hopTokens, poolsAllDict] = filterPoolsOfInterest(
             poolsList,
             tokenIn,
             tokenOut,
             swapOptions.maxPools,
-            chainId,
             swapOptions.timestamp
         );
 
@@ -62,13 +61,12 @@ export class RouteProposer {
             poolsDict
         );
 
-        let pathsUsingLinear: NewPath[];
-        [filteredPoolsDict, pathsUsingLinear] = getPathsUsingLinearPools(
+        const pathsUsingLinear: NewPath[] = getPathsUsingLinearPools(
             tokenIn,
             tokenOut,
-            linearPoolsInfo,
+            poolsAllDict,
             poolsDict,
-            filteredPoolsDict
+            chainId
         );
         pathData = pathData.concat(pathsUsingLinear);
 
