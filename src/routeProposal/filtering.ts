@@ -412,15 +412,15 @@ function createDirectPath(
     tokenIn: string,
     tokenOut: string
 ): NewPath {
+    const poolPairData = pool.parsePoolPairData(tokenIn, tokenOut);
+
     const swap: Swap = {
         pool: pool.id,
         tokenIn: tokenIn,
         tokenOut: tokenOut,
-        tokenInDecimals: 18, // TO DO - Add decimals here
-        tokenOutDecimals: 18,
+        tokenInDecimals: poolPairData.decimalsIn,
+        tokenOutDecimals: poolPairData.decimalsOut,
     };
-
-    const poolPairData = pool.parsePoolPairData(tokenIn, tokenOut);
 
     const path: NewPath = {
         id: pool.id,
@@ -471,24 +471,24 @@ function createMultihopPath(
     hopToken: string,
     tokenOut: string
 ): NewPath {
+    const poolPairDataFirst = firstPool.parsePoolPairData(tokenIn, hopToken);
+    const poolPairDataSecond = secondPool.parsePoolPairData(hopToken, tokenOut);
+
     const swap1: Swap = {
         pool: firstPool.id,
         tokenIn: tokenIn,
         tokenOut: hopToken,
-        tokenInDecimals: 18, // Placeholder for actual decimals TO DO
-        tokenOutDecimals: 18,
+        tokenInDecimals: poolPairDataFirst.decimalsIn,
+        tokenOutDecimals: poolPairDataSecond.decimalsOut,
     };
 
     const swap2: Swap = {
         pool: secondPool.id,
         tokenIn: hopToken,
         tokenOut: tokenOut,
-        tokenInDecimals: 18, // Placeholder for actual decimals TO DO
-        tokenOutDecimals: 18,
+        tokenInDecimals: poolPairDataSecond.decimalsIn,
+        tokenOutDecimals: poolPairDataSecond.decimalsOut,
     };
-
-    const poolPairDataFirst = firstPool.parsePoolPairData(tokenIn, hopToken);
-    const poolPairDataSecond = secondPool.parsePoolPairData(hopToken, tokenOut);
 
     // Path id is the concatenation of the ids of poolFirstHop and poolSecondHop
     const path: NewPath = {
