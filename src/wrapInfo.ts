@@ -1,5 +1,7 @@
+import { BigNumber as EBigNumber } from '@ethersproject/bignumber';
+
 import { BaseProvider } from '@ethersproject/providers';
-import { AddressZero } from '@ethersproject/constants';
+import { AddressZero, WeiPerEther as ONE } from '@ethersproject/constants';
 
 import { Lido, getStEthRate } from './pools/lido';
 import { BigNumber, bnum, scale } from './utils/bignumber';
@@ -18,7 +20,7 @@ export interface TokenInfo {
     addressOriginal: string;
     addressForSwaps: string;
     wrapType: WrapTypes;
-    rate: BigNumber;
+    rate: EBigNumber;
 }
 
 export enum WrapTypes {
@@ -45,8 +47,8 @@ export async function getWrappedInfo(
     let tokenInWrapType = WrapTypes.None;
     let tokenOutForSwaps = tokenOut;
     let tokenOutWrapType = WrapTypes.None;
-    let tokenInRate = bnum(1);
-    let tokenOutRate = bnum(1);
+    let tokenInRate = ONE;
+    let tokenOutRate = ONE;
 
     // Handle ETH wrapping
     if (tokenIn === AddressZero) {
@@ -65,7 +67,12 @@ export async function getWrappedInfo(
         const rate = await getStEthRate(provider, chainId);
         tokenInRate = rate;
         if (swapType === SwapTypes.SwapExactIn)
-            swapAmountForSwaps = swapAmount.times(rate).dp(18);
+            swapAmountForSwaps = scale(
+                bnum(
+                    EBigNumber.from(swapAmount.toString()).mul(rate).toString()
+                ),
+                -18
+            );
     }
     if (tokenOut === Lido.stETH[chainId]) {
         tokenOutForSwaps = Lido.wstETH[chainId];
@@ -73,7 +80,12 @@ export async function getWrappedInfo(
         const rate = await getStEthRate(provider, chainId);
         tokenOutRate = rate;
         if (swapType === SwapTypes.SwapExactOut)
-            swapAmountForSwaps = swapAmount.times(rate).dp(18);
+            swapAmountForSwaps = scale(
+                bnum(
+                    EBigNumber.from(swapAmount.toString()).mul(rate).toString()
+                ),
+                -18
+            );
     }
 
     return {
@@ -141,11 +153,13 @@ export function setWrappedInfo(
         wrappedInfo.tokenOut.wrapType === WrapTypes.stETH
     ) {
         swapInfo.returnAmount = swapInfo.returnAmount
-            .div(wrappedInfo.tokenOut.rate)
+            .multipliedBy(ONE.toString())
+            .div(wrappedInfo.tokenOut.rate.toString())
             .dp(0);
         swapInfo.returnAmountConsideringFees =
             swapInfo.returnAmountConsideringFees
-                .div(wrappedInfo.tokenOut.rate)
+                .multipliedBy(ONE.toString())
+                .div(wrappedInfo.tokenOut.rate.toString())
                 .dp(0);
     }
 
@@ -155,11 +169,13 @@ export function setWrappedInfo(
         wrappedInfo.tokenIn.wrapType === WrapTypes.stETH
     ) {
         swapInfo.returnAmount = swapInfo.returnAmount
-            .div(wrappedInfo.tokenIn.rate)
+            .multipliedBy(ONE.toString())
+            .div(wrappedInfo.tokenIn.rate.toString())
             .dp(0);
         swapInfo.returnAmountConsideringFees =
             swapInfo.returnAmountConsideringFees
-                .div(wrappedInfo.tokenIn.rate)
+                .multipliedBy(ONE.toString())
+                .div(wrappedInfo.tokenIn.rate.toString())
                 .dp(0);
     }
     return swapInfo;

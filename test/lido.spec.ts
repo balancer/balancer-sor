@@ -86,8 +86,10 @@ describe(`Tests for Lido USD routes.`, () => {
         it(`stETH swap should be same as wstETH with priceRate allowance, SwapExactIn, stETH In`, async () => {
             const swapType = SwapTypes.SwapExactIn;
             const swapAmt = bnum('1');
-            const priceRate = await getStEthRate(provider, chainId);
-
+            const priceRate = scale(
+                bnum((await getStEthRate(provider, chainId)).toString()),
+                -18
+            );
             const sor = new SOR(provider, chainId, null, pools);
             const fetchSuccess = await sor.fetchPools([], false);
             expect(fetchSuccess).to.be.true;
@@ -155,7 +157,10 @@ describe(`Tests for Lido USD routes.`, () => {
         it(`stETH swap should be same as wstETH with priceRate allowance, SwapExactIn, stETH Out`, async () => {
             const swapType = SwapTypes.SwapExactIn;
             const swapAmt = bnum('1');
-            const priceRate = await getStEthRate(provider, chainId);
+            const priceRate = scale(
+                bnum((await getStEthRate(provider, chainId)).toString()),
+                -18
+            );
 
             const sor = new SOR(provider, chainId, null, pools);
             const fetchSuccess = await sor.fetchPools([], false);
@@ -222,8 +227,10 @@ describe(`Tests for Lido USD routes.`, () => {
         it(`stETH swap should be same as wstETH with priceRate allowance, SwapExactOut, stETH In`, async () => {
             const swapType = SwapTypes.SwapExactOut;
             const swapAmt = bnum('1');
-            const priceRate = await getStEthRate(provider, chainId);
-
+            const priceRate = scale(
+                bnum((await getStEthRate(provider, chainId)).toString()),
+                -18
+            );
             const sor = new SOR(provider, chainId, null, pools);
             const fetchSuccess = await sor.fetchPools([], false);
             expect(fetchSuccess).to.be.true;
@@ -287,8 +294,10 @@ describe(`Tests for Lido USD routes.`, () => {
         it(`stETH swap should be same as wstETH with priceRate allowance, SwapExactOut, stETH Out`, async () => {
             const swapType = SwapTypes.SwapExactOut;
             const swapAmt = bnum('1');
-            const priceRate = await getStEthRate(provider, chainId);
-
+            const priceRate = scale(
+                bnum((await getStEthRate(provider, chainId)).toString()),
+                -18
+            );
             const sor = new SOR(provider, chainId, null, pools);
             const fetchSuccess = await sor.fetchPools([], false);
             expect(fetchSuccess).to.be.true;

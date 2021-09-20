@@ -1,3 +1,4 @@
+import { BigNumber as EBigNumber } from '@ethersproject/bignumber';
 import { BaseProvider } from '@ethersproject/providers';
 import { AddressZero } from '@ethersproject/constants';
 import { Contract } from '@ethersproject/contracts';
@@ -897,7 +898,7 @@ function calculateMarketSp(
 export async function getStEthRate(
     provider: BaseProvider,
     chainId: number
-): Promise<BigNumber> {
+): Promise<EBigNumber> {
     // Call stEthPerToken or tokensPerStETH to get the scaling factors in each direction.
     const wstETHContract = new Contract(
         Lido.wstETH[chainId],
@@ -905,7 +906,7 @@ export async function getStEthRate(
         provider
     );
     const rate = await wstETHContract.tokensPerStEth();
-    return scale(bnum(rate.toString()), -18);
+    return rate;
 }
 
 /*

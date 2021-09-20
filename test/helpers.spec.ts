@@ -1,4 +1,5 @@
 import { assert, expect } from 'chai';
+import { WeiPerEther as ONE } from '@ethersproject/constants';
 import { AddressZero } from '@ethersproject/constants';
 import { JsonRpcProvider } from '@ethersproject/providers';
 
@@ -8,7 +9,7 @@ import { bnum, scale } from '../src';
 import { WETHADDR } from '../src/constants';
 import { Lido } from '../src/pools/lido';
 import { SwapInfo, SwapTypes, SwapV2 } from '../src/types';
-import { BigNumber } from '../src/utils/bignumber';
+import { BigNumber, BONE } from '../src/utils/bignumber';
 import testSwaps from './testData/swapsForFormatting.json';
 
 const marketSp: BigNumber = new BigNumber(7);
@@ -1671,11 +1672,11 @@ describe(`Tests for Helpers.`, () => {
                 BAL,
             ]);
             expect(swapInfoUpdated.swapAmount.toString()).to.eq(
-                scale(swapAmount, 18).toString()
+                swapAmount.toString()
             );
             // This should be equivalent amount of wstETH in for swaps
             expect(swapInfoUpdated.swapAmountForSwaps?.toString()).to.eq(
-                scale(wrappedInfo.swapAmountForSwaps, 18).toString()
+                wrappedInfo.swapAmountForSwaps.toString()
             );
             // Return amount is in BAL so no conversion
             expect(swapInfoUpdated.returnAmount.toString()).to.eq(
@@ -1747,7 +1748,11 @@ describe(`Tests for Helpers.`, () => {
             );
             // Return amount is in stETH so needs conversion
             expect(swapInfoUpdated.returnAmount.toString()).to.eq(
-                returnAmount.div(wrappedInfo.tokenIn.rate).dp(0).toString()
+                returnAmount
+                    .times(ONE.toString())
+                    .div(wrappedInfo.tokenOut.rate.toString())
+                    .dp(0)
+                    .toString()
             );
             // Return amount from swaps is original return amount
             expect(swapInfoUpdated.returnAmountFromSwaps?.toString()).to.eq(
@@ -1762,8 +1767,8 @@ describe(`Tests for Helpers.`, () => {
             const swapType = SwapTypes.SwapExactIn;
             const tokenIn = BAL;
             const tokenOut = Lido.stETH[chainId];
-            const swapAmount = bnum(7.7);
-            const returnAmount = bnum(1.67);
+            const swapAmount = bnum(7.7).times(BONE);
+            const returnAmount = bnum(1.67).times(BONE);
 
             const swap: SwapV2 = {
                 poolId: '0x',
@@ -1815,7 +1820,11 @@ describe(`Tests for Helpers.`, () => {
             );
             // Return amount is stETH so from swaps will be converted
             expect(swapInfoUpdated.returnAmount.toString()).to.eq(
-                returnAmount.div(wrappedInfo.tokenOut.rate).dp(0).toString()
+                returnAmount
+                    .times(ONE.toString())
+                    .div(wrappedInfo.tokenOut.rate.toString())
+                    .dp(0)
+                    .toString()
             );
             // Return amount from swaps is original return amount
             expect(swapInfoUpdated.returnAmountFromSwaps?.toString()).to.eq(
@@ -1830,8 +1839,8 @@ describe(`Tests for Helpers.`, () => {
             const swapType = SwapTypes.SwapExactOut;
             const tokenIn = BAL;
             const tokenOut = Lido.stETH[chainId];
-            const swapAmount = bnum(7.7);
-            const returnAmount = bnum(1.67);
+            const swapAmount = bnum(7.7).times(BONE);
+            const returnAmount = bnum(1.67).times(BONE);
 
             const swap: SwapV2 = {
                 poolId: '0x',
@@ -1875,11 +1884,13 @@ describe(`Tests for Helpers.`, () => {
                 Lido.wstETH[chainId],
             ]);
             expect(swapInfoUpdated.swapAmount.toString()).to.eq(
-                scale(swapAmount, 18).toString()
+                swapAmount.toString()
             );
             // stETH in so should be exchanged to wstETH
             expect(swapInfoUpdated.swapAmountForSwaps?.toString()).to.eq(
-                scale(swapAmount.times(wrappedInfo.tokenOut.rate), 18)
+                swapAmount
+                    .times(wrappedInfo.tokenOut.rate.toString())
+                    .dividedBy(ONE.toString())
                     .dp(0)
                     .toString()
             );
@@ -1900,8 +1911,8 @@ describe(`Tests for Helpers.`, () => {
             const swapType = SwapTypes.SwapExactIn;
             const tokenIn = Lido.stETH[chainId];
             const tokenOut = AddressZero;
-            const swapAmount = bnum(7.7);
-            const returnAmount = bnum(1.67);
+            const swapAmount = bnum(7.7).times(BONE);
+            const returnAmount = bnum(1.67).times(BONE);
 
             const swap: SwapV2 = {
                 poolId: '0x',
@@ -1945,11 +1956,11 @@ describe(`Tests for Helpers.`, () => {
                 AddressZero,
             ]);
             expect(swapInfoUpdated.swapAmount.toString()).to.eq(
-                scale(swapAmount, 18).toString()
+                swapAmount.toString()
             );
             // This should be equivalent amount of wstETH in for swaps
             expect(swapInfoUpdated.swapAmountForSwaps?.toString()).to.eq(
-                scale(wrappedInfo.swapAmountForSwaps, 18).toString()
+                wrappedInfo.swapAmountForSwaps.toString()
             );
             // Return amount is in ETH so no conversion
             expect(swapInfoUpdated.returnAmount.toString()).to.eq(
