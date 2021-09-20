@@ -919,7 +919,7 @@ export async function getLidoStaticSwaps(
     tokenIn: string,
     tokenOut: string,
     swapType: SwapTypes,
-    swapAmount: BigNumber,
+    swapAmount: EBigNumber,
     provider: BaseProvider
 ): Promise<SwapInfo> {
     // Check for stETH tokens and convert to use wstETH for routing
@@ -940,15 +940,16 @@ export async function getLidoStaticSwaps(
 
     swapInfo.tokenAddresses = staticRoute.tokenAddresses;
     swapInfo.swaps = staticRoute.swaps;
-    if (swapType === SwapTypes.SwapExactIn)
-        swapInfo.swapAmount = scale(swapAmount, staticRoute.tokenInDecimals).dp(
-            0
-        );
-    else
-        swapInfo.swapAmount = scale(
-            swapAmount,
-            staticRoute.tokenOutDecimals
-        ).dp(0);
+    swapInfo.swapAmount = bnum(swapAmount.toString());
+    // if (swapType === SwapTypes.SwapExactIn)
+    //     swapInfo.swapAmount = scale(swapAmount, staticRoute.tokenInDecimals).dp(
+    //         0
+    //     );
+    // else
+    //     swapInfo.swapAmount = scale(
+    //         swapAmount,
+    //         staticRoute.tokenOutDecimals
+    //     ).dp(0);
 
     swapInfo.swaps[0].amount = swapInfo.swapAmount.toString();
     if (isWrappingIn) swapInfo.tokenIn = Lido.stETH[chainId];

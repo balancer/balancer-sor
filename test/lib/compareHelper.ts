@@ -1,3 +1,4 @@
+import { BigNumber as EBigNumber } from '@ethersproject/bignumber';
 import { JsonRpcProvider } from '@ethersproject/providers';
 import cloneDeep from 'lodash.clonedeep';
 import { performance } from 'perf_hooks';
@@ -11,13 +12,13 @@ import {
 } from './testHelpers';
 import { bnum } from '../../src/utils/bignumber';
 import { SwapInfo } from '../../src/types';
-import BigNumber from 'bignumber.js';
+import { Zero } from '@ethersproject/constants';
 
 export interface TestSettings {
     compareResults: boolean;
     costOutputTokenOveride: {
         isOverRide: boolean;
-        overRideCost: BigNumber;
+        overRideCost: EBigNumber;
     };
 }
 
@@ -27,16 +28,13 @@ export async function compareTest(
     testData: TestData,
     testSettings: TestSettings = {
         compareResults: true,
-        costOutputTokenOveride: { isOverRide: true, overRideCost: bnum(0) },
+        costOutputTokenOveride: { isOverRide: true, overRideCost: Zero },
     }
 ): Promise<[Result, SwapInfo]> {
-    const amountNormalised = testData.tradeInfo.SwapAmount.div(
-        bnum(10 ** testData.tradeInfo.SwapAmountDecimals)
-    );
-
-    const swapGas = bnum('100000'); // A pool swap costs approx 100000 gas
-    const costOutputToken = bnum(0);
+    const swapGas = EBigNumber.from('100000'); // A pool swap costs approx 100000 gas
+    const costOutputToken = Zero;
     const fullSwapStart = performance.now();
+
     const swapInfo: SwapInfo = await getFullSwap(
         cloneDeep(testData.pools),
         testData.tradeInfo.TokenIn,
@@ -44,7 +42,7 @@ export async function compareTest(
         testData.tradeInfo.ReturnAmountDecimals,
         testData.tradeInfo.NoPools,
         testData.tradeInfo.SwapType,
-        amountNormalised,
+        testData.tradeInfo.SwapAmount,
         costOutputToken,
         testData.tradeInfo.GasPrice,
         provider,

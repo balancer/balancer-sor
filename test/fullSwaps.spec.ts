@@ -1,16 +1,16 @@
 // npx mocha -r ts-node/register test/fullSwaps.spec.ts
+import { BigNumber as EBigNumber } from '@ethersproject/bignumber';
 import { JsonRpcProvider } from '@ethersproject/providers';
 import cloneDeep from 'lodash.clonedeep';
 import { assert } from 'chai';
 import { SwapTypes } from '../src/types';
-import BigNumber from 'bignumber.js';
 import { compareTest } from './lib/compareHelper';
-import { getFullSwap, ResultParsed } from './lib/testHelpers';
-
-const gasPrice = new BigNumber('30000000000');
+import { getFullSwap, ResultParsed, TradeInfo } from './lib/testHelpers';
 
 import subgraphPoolsLarge from './testData/testPools/subgraphPoolsLarge.json';
 import testPools from './testData/filterTestPools.json';
+import { parseFixed } from '@ethersproject/bignumber';
+import { Zero } from '@ethersproject/constants';
 
 const WETH = '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2'; // WETH lower case
 const DAI = '0x6B175474E89094C44Da98b954EedeAC495271d0F'.toLowerCase();
@@ -26,6 +26,8 @@ const provider = new JsonRpcProvider(
 );
 
 describe('Tests full swaps against known values', () => {
+    const gasPrice = parseFixed('30', 9);
+
     it('weighted test pools check', () => {
         assert.equal(
             testPools.weightedOnly.length,
@@ -45,9 +47,9 @@ describe('Tests full swaps against known values', () => {
         const swapType = SwapTypes.SwapExactIn;
         const returnAmountDecimals = 18;
         const maxPools = 4;
-        const swapAmount = new BigNumber('1');
-        const swapGas = new BigNumber('100000');
-        const costOutputToken = new BigNumber('0');
+        const swapAmount = parseFixed('1', 18);
+        const swapGas = EBigNumber.from('100000');
+        const costOutputToken = Zero;
 
         const swapInfo = await getFullSwap(
             cloneDeep(subgraphPoolsLarge.pools),
@@ -77,9 +79,9 @@ describe('Tests full swaps against known values', () => {
         const swapType = SwapTypes.SwapExactOut;
         const returnAmountDecimals = 18;
         const maxPools = 4;
-        const swapAmount = new BigNumber('1');
-        const swapGas = new BigNumber('100000');
-        const costOutputToken = new BigNumber('0');
+        const swapAmount = parseFixed('1', 18);
+        const swapGas = EBigNumber.from('100000');
+        const costOutputToken = Zero;
 
         const swapInfo = await getFullSwap(
             cloneDeep(subgraphPoolsLarge.pools),
@@ -106,19 +108,19 @@ describe('Tests full swaps against known values', () => {
     it('USDC>MKR, subgraphPoolsLarge.json, swapExactIn', async () => {
         // This was a previous failing case because of a bug.
         const name = 'USDC>MKR, subgraphPoolsLarge.json,  swapExactIn';
-        const amountIn = new BigNumber('1000000'); // 1 USDC
+        const amountIn = parseFixed('1', 6); // 1 USDC
         const swapType = 'swapExactIn';
         const noPools = 4;
         const tokenIn = USDC;
         const tokenOut = MKR;
 
-        const tradeInfo = {
+        const tradeInfo: TradeInfo = {
             SwapType: swapType,
             TokenIn: tokenIn,
             TokenOut: tokenOut,
             NoPools: noPools,
-            SwapAmount: amountIn,
-            GasPrice: gasPrice,
+            SwapAmount: EBigNumber.from(amountIn),
+            GasPrice: EBigNumber.from(gasPrice),
             SwapAmountDecimals: 6,
             ReturnAmountDecimals: 18,
         };
@@ -134,7 +136,7 @@ describe('Tests full swaps against known values', () => {
             compareResults: false,
             costOutputTokenOveride: {
                 isOverRide: true,
-                overRideCost: new BigNumber(0),
+                overRideCost: Zero,
             },
         });
 
@@ -152,9 +154,9 @@ describe('Tests full swaps against known values', () => {
         const swapType = 'swapExactIn';
         const returnAmountDecimals = 6;
         const maxPools = 4;
-        const swapAmt = new BigNumber('0.1');
-        const swapGas = new BigNumber('100000');
-        const costOutputToken = new BigNumber('0');
+        const swapAmt = parseFixed('0.1', 18);
+        const swapGas = EBigNumber.from('100000');
+        const costOutputToken = Zero;
 
         const swapInfo = await getFullSwap(
             cloneDeep(testPools.weightedOnly),
@@ -208,7 +210,7 @@ describe('Tests full swaps against known values', () => {
         const tokenOut = USDC;
         const swapType = 'swapExactOut';
         const noPools = 4;
-        const swapAmt = new BigNumber('100000');
+        const swapAmt = EBigNumber.from('100000');
 
         const tradeInfo = {
             SwapType: swapType,
@@ -231,7 +233,7 @@ describe('Tests full swaps against known values', () => {
             compareResults: true,
             costOutputTokenOveride: {
                 isOverRide: true,
-                overRideCost: new BigNumber(0),
+                overRideCost: Zero,
             },
         });
 
@@ -273,7 +275,7 @@ describe('Tests full swaps against known values', () => {
         const tokenOut = USDC;
         const swapType = 'swapExactIn';
         const noPools = 4;
-        const swapAmt = new BigNumber('100000000000000000');
+        const swapAmt = parseFixed('0.1', 18);
 
         const tradeInfo = {
             SwapType: swapType,
@@ -296,7 +298,7 @@ describe('Tests full swaps against known values', () => {
             compareResults: true,
             costOutputTokenOveride: {
                 isOverRide: true,
-                overRideCost: new BigNumber(0),
+                overRideCost: Zero,
             },
         });
         // The expected test results are from previous version
@@ -324,7 +326,7 @@ describe('Tests full swaps against known values', () => {
         const tokenOut = USDC;
         const swapType = 'swapExactOut';
         const noPools = 4;
-        const swapAmt = new BigNumber('100000');
+        const swapAmt = EBigNumber.from('100000');
 
         const tradeInfo = {
             SwapType: swapType,
@@ -347,7 +349,7 @@ describe('Tests full swaps against known values', () => {
             compareResults: true,
             costOutputTokenOveride: {
                 isOverRide: true,
-                overRideCost: new BigNumber(0),
+                overRideCost: Zero,
             },
         });
         assert.equal(swapInfo.returnAmount.toString(), '99922470289305282');
@@ -376,7 +378,7 @@ describe('Tests full swaps against known values', () => {
         const tokenOut = USDC;
         const swapType = 'swapExactIn';
         const noPools = 4;
-        const swapAmt = new BigNumber('770000000000000000');
+        const swapAmt = parseFixed('0.77', 18);
 
         const tradeInfo = {
             SwapType: swapType,
@@ -400,7 +402,7 @@ describe('Tests full swaps against known values', () => {
             compareResults: false,
             costOutputTokenOveride: {
                 isOverRide: true,
-                overRideCost: new BigNumber(0),
+                overRideCost: Zero,
             },
         });
 
@@ -451,7 +453,7 @@ describe('Tests full swaps against known values', () => {
         const tokenOut = USDC;
         const swapType = 'swapExactOut';
         const noPools = 4;
-        const swapAmt = new BigNumber('100732100');
+        const swapAmt = EBigNumber.from('100732100');
 
         const tradeInfo = {
             SwapType: swapType,
@@ -474,7 +476,7 @@ describe('Tests full swaps against known values', () => {
             compareResults: true,
             costOutputTokenOveride: {
                 isOverRide: true,
-                overRideCost: new BigNumber(0),
+                overRideCost: Zero,
             },
         });
 
@@ -523,7 +525,7 @@ describe('Tests full swaps against known values', () => {
 
     it('WBTC>MKR2, swapExactIn', async () => {
         const allPools = require('./testData/testPools/subgraphPoolsDecimalsTest.json');
-        const amountIn = new BigNumber(100000); // 0.00100000 WBTC
+        const amountIn = parseFixed('0.001', 8); // 0.00100000 WBTC
         const swapType = 'swapExactIn';
         const noPools = 4;
         const tokenIn = WBTC;
@@ -562,7 +564,7 @@ describe('Tests full swaps against known values', () => {
 
     it('Full Multihop SOR, USDC>yUSD, swapExactIn', async () => {
         const allPools = require('./testData/testPools/subgraphPoolsDecimalsTest.json');
-        const amountIn = new BigNumber(1000000);
+        const amountIn = parseFixed('1', 6);
         const swapType = 'swapExactIn';
         const noPools = 4;
         const tokenIn = USDC;
@@ -601,7 +603,7 @@ describe('Tests full swaps against known values', () => {
 
     it('Full Multihop SOR,  WBTC>MKR2, swapExactOut', async () => {
         const allPools = require('./testData/testPools/subgraphPoolsDecimalsTest.json');
-        const amountOut = new BigNumber(1000000000000000);
+        const amountOut = parseFixed('0.001', 18);
         const swapType = 'swapExactOut';
         const noPools = 4;
         const tokenIn = WBTC;
@@ -633,7 +635,7 @@ describe('Tests full swaps against known values', () => {
                 compareResults: false,
                 costOutputTokenOveride: {
                     isOverRide: true,
-                    overRideCost: new BigNumber(0),
+                    overRideCost: Zero,
                 },
             }
         );
@@ -649,7 +651,7 @@ describe('Tests full swaps against known values', () => {
 
     it('Full Multihop SOR, USDC>yUSD, swapExactOut', async () => {
         const allPools = require('./testData/testPools/subgraphPoolsDecimalsTest.json');
-        const amountOut = new BigNumber(10000000000000000);
+        const amountOut = parseFixed('0.01', 18);
         const swapType = 'swapExactOut';
         const noPools = 4;
         const tokenIn = USDC;
@@ -681,7 +683,7 @@ describe('Tests full swaps against known values', () => {
                 compareResults: false,
                 costOutputTokenOveride: {
                     isOverRide: true,
-                    overRideCost: new BigNumber(0),
+                    overRideCost: Zero,
                 },
             }
         );
@@ -700,7 +702,7 @@ describe('Tests full swaps against known values', () => {
         Before fix the wrapper would return swaps even when return amount was 0.
         */
         const allPools = require('./testData/testPools/gusdBugSinglePath.json');
-        const amountOut = new BigNumber(10000000000000000);
+        const amountOut = parseFixed('0.01', 18);
         const swapType = 'swapExactIn';
         const noPools = 4;
         const tokenIn = '0x04df6e4121c27713ed22341e7c7df330f56f289b';
@@ -732,7 +734,7 @@ describe('Tests full swaps against known values', () => {
                 compareResults: false,
                 costOutputTokenOveride: {
                     isOverRide: true,
-                    overRideCost: new BigNumber(0),
+                    overRideCost: Zero,
                 },
             }
         );
@@ -748,7 +750,7 @@ describe('Tests full swaps against known values', () => {
         After fix the SOR should consider an alternative viable route with swap amount > 0.
         */
         const allPools = require('./testData/testPools/gusdBug.json');
-        const amountOut = new BigNumber(10000000000000000);
+        const amountOut = parseFixed('0.01', 18);
         const swapType = 'swapExactIn';
         const noPools = 4;
         const tokenIn = '0x04df6e4121c27713ed22341e7c7df330f56f289b';
@@ -780,7 +782,7 @@ describe('Tests full swaps against known values', () => {
                 compareResults: false,
                 costOutputTokenOveride: {
                     isOverRide: true,
-                    overRideCost: new BigNumber(0),
+                    overRideCost: Zero,
                 },
             }
         );

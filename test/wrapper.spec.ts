@@ -1,6 +1,7 @@
 // npx mocha -r ts-node/register test/wrapper.spec.ts
 require('dotenv').config();
-import { AddressZero } from '@ethersproject/constants';
+import { parseFixed } from '@ethersproject/bignumber';
+import { AddressZero, Zero } from '@ethersproject/constants';
 import { JsonRpcProvider } from '@ethersproject/providers';
 import { assert, expect } from 'chai';
 import { SOR } from '../src';
@@ -17,7 +18,7 @@ const WETHADDR = '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2';
 const provider = new JsonRpcProvider(
     `https://mainnet.infura.io/v3/${process.env.INFURA}`
 );
-const gasPrice = new BigNumber('30000000000');
+const gasPrice = parseFixed('30', 9);
 const maxPools = 4;
 const chainId = 1;
 const poolsUrl = `https://ipfs.fleek.co/ipns/balancer-team-bucket.storage.fleek.co/balancer-exchange/pools`;
@@ -32,7 +33,7 @@ describe(`Tests for wrapper class.`, () => {
         const tokenIn = '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2';
         const tokenOut = '0x6b175474e89094c44da98b954eedeac495271d0f';
         const swapType = SwapTypes.SwapExactIn;
-        const swapAmt: BigNumber = bnum(0);
+        const swapAmt = Zero;
         const sor = new SOR(provider, chainId, poolsUrl);
         const swaps: SwapInfo = await sor.getSwaps(
             tokenIn,
@@ -53,7 +54,7 @@ describe(`Tests for wrapper class.`, () => {
         const tokenIn = '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2';
         const tokenOut = '0x6b175474e89094c44da98b954eedeac495271d0f';
         const swapType = SwapTypes.SwapExactIn;
-        const swapAmt: BigNumber = bnum('0.1');
+        const swapAmt = parseFixed('0.1', 18);
 
         const sor = new SOR(provider, chainId, null, pools);
 
@@ -83,7 +84,7 @@ describe(`Tests for wrapper class.`, () => {
         assert.equal(tokenOut, swapInfo.tokenOut);
         assert.equal(
             swapInfo.swapAmount.toString(),
-            swapAmt.times(bnum(10 ** 18)).toString(),
+            swapAmt.toString(),
             `Wrapper should have same amount as helper.`
         );
         assert.equal(
@@ -101,7 +102,7 @@ describe(`Tests for wrapper class.`, () => {
         const tokenIn = '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2';
         const tokenOut = '0x6b175474e89094c44da98b954eedeac495271d0f';
         const swapType = SwapTypes.SwapExactIn;
-        const swapAmt: BigNumber = bnum('0.1');
+        const swapAmt = parseFixed('0.1', 18);
 
         const sor = new SOR(provider, chainId, null, pools);
 
@@ -127,7 +128,7 @@ describe(`Tests for wrapper class.`, () => {
         assert.equal(tokenOut, swapInfo.tokenOut);
         assert.equal(
             swapInfo.swapAmount.toString(),
-            swapAmt.times(bnum(10 ** 18)).toString(),
+            swapAmt.toString(),
             `Wrapper should have same amount as helper.`
         );
     });
@@ -141,7 +142,7 @@ describe(`Tests for wrapper class.`, () => {
         const tokenIn = '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2';
         const tokenOut = '0x6b175474e89094c44da98b954eedeac495271d0f';
         const swapType = SwapTypes.SwapExactIn;
-        const swapAmt: BigNumber = bnum('0.1');
+        const swapAmt = parseFixed('0.1', 18);
 
         const sor = new SOR(provider, chainId, null, pools);
 
@@ -177,7 +178,7 @@ describe(`Tests for wrapper class.`, () => {
         const tokenIn = AddressZero;
         const tokenOut = '0x6b175474e89094c44da98b954eedeac495271d0f';
         const swapType = SwapTypes.SwapExactIn;
-        const swapAmt: BigNumber = bnum('0.1');
+        const swapAmt = parseFixed('0.1', 18);
 
         const sor = new SOR(provider, chainId, null, pools);
 
@@ -205,7 +206,7 @@ describe(`Tests for wrapper class.`, () => {
         assert.equal(tokenOut, swapInfo.tokenOut);
         assert.equal(
             swapInfo.swapAmount.toString(),
-            swapAmt.times(bnum(10 ** 18)).toString(),
+            swapAmt.toString(),
             `Wrapper should have same amount as helper.`
         );
     });
@@ -220,7 +221,7 @@ describe(`Tests for wrapper class.`, () => {
         const tokenInEth = AddressZero;
         const tokenOut = '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48';
         const swapType = SwapTypes.SwapExactIn;
-        const swapAmt: BigNumber = bnum('0.1');
+        const swapAmt = parseFixed('0.1', 18);
 
         const sor = new SOR(provider, chainId, null, pools);
 
@@ -277,7 +278,7 @@ describe(`Tests for wrapper class.`, () => {
         assert.equal(tokenOut, swapInfoEth.tokenOut);
         assert.equal(
             swapInfo.swapAmount.toString(),
-            swapAmt.times(bnum(10 ** 18)).toString(),
+            swapAmt.toString(),
             `Wrapper should have same amount as helper.`
         );
     });
@@ -292,7 +293,7 @@ describe(`Tests for wrapper class.`, () => {
         const tokenOutWeth = WETHADDR;
         const tokenOutEth = AddressZero;
         const swapType = SwapTypes.SwapExactIn;
-        const swapAmt: BigNumber = bnum('0.1');
+        const swapAmt = parseFixed('0.1', 6);
 
         const sor = new SOR(provider, chainId, null, pools);
 
@@ -341,7 +342,7 @@ describe(`Tests for wrapper class.`, () => {
         assert.equal(tokenOutEth, swapInfoEth.tokenOut);
         assert.equal(
             swapInfo.swapAmount.toString(),
-            swapAmt.times(bnum(10 ** 6)).toString(),
+            swapAmt.toString(),
             `Wrapper should have same amount as helper.`
         );
     });
@@ -355,7 +356,7 @@ describe(`Tests for wrapper class.`, () => {
         const tokenInEth = AddressZero;
         const tokenOut = '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48';
         const swapType = SwapTypes.SwapExactOut;
-        const swapAmt: BigNumber = bnum('0.1');
+        const swapAmt = parseFixed('0.1', 6);
 
         const sor = new SOR(provider, chainId, null, pools);
 
@@ -410,11 +411,7 @@ describe(`Tests for wrapper class.`, () => {
         assert.equal(tokenOut, swapInfo.tokenOut);
         assert.equal(tokenInEth, swapInfoEth.tokenIn);
         assert.equal(tokenOut, swapInfoEth.tokenOut);
-        assert.equal(
-            swapInfo.swapAmount.toString(),
-            swapAmt.times(bnum(10 ** 6)).toString(),
-            `Wrapper should have same amount as helper.`
-        );
+        expect(swapInfo.swapAmount.toString()).to.be.eq(swapAmt.toString());
     });
 
     it(`compare weth/eth swaps, SwapExactOut, Weth Out`, async () => {
@@ -426,7 +423,7 @@ describe(`Tests for wrapper class.`, () => {
         const tokenOutWeth = WETHADDR;
         const tokenOutEth = AddressZero;
         const swapType = SwapTypes.SwapExactOut;
-        const swapAmt: BigNumber = bnum('0.1');
+        const swapAmt = parseFixed('0.1', 18);
 
         const sor = new SOR(provider, chainId, null, pools);
 
@@ -483,7 +480,7 @@ describe(`Tests for wrapper class.`, () => {
         assert.equal(tokenOutEth, swapInfoEth.tokenOut);
         assert.equal(
             swapInfo.swapAmount.toString(),
-            swapAmt.times(bnum(10 ** 18)).toString(),
+            swapAmt.toString(),
             `Wrapper should have same amount as helper.`
         );
     });

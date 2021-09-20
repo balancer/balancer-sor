@@ -15,8 +15,9 @@ import { calcRelativeDiffBn } from './lib/testHelpers';
 import { PoolFilter, SubgraphPoolBase } from '../src/types';
 
 import testTrades from './testData/elementPools/testTrades.json';
+import { parseFixed } from '@ethersproject/bignumber';
 
-const gasPrice = bnum('30000000000');
+const gasPrice = parseFixed('30', 9);
 const maxPools = 4;
 const chainId = 1;
 const provider = new JsonRpcProvider(
@@ -96,7 +97,7 @@ describe(`Tests against Element generated test trade file.`, () => {
                 trade.input.token_out === 'base'
                     ? '0x000000000000000000000000000000000000000b'
                     : '0x0000000000000000000000000000000000000001';
-            const swapAmt = bnum(trade.input.amount_in);
+            const swapAmt = parseFixed(trade.input.amount_in.toString(), 18);
 
             const sor = new SOR(provider, chainId, null, poolsFromFile);
             // Both tokens use 18 decimals

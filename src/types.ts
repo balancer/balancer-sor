@@ -1,3 +1,4 @@
+import { BigNumber as EBigNumber } from '@ethersproject/bignumber';
 import { BigNumber } from './utils/bignumber';
 
 export type NoNullableField<T> = {
@@ -23,8 +24,8 @@ export enum SwapPairType {
 }
 
 export interface SwapOptions {
-    gasPrice: BigNumber;
-    swapGas: BigNumber;
+    gasPrice: EBigNumber;
+    swapGas: EBigNumber;
     timestamp: number;
     maxPools: number;
     poolTypeFilter: PoolFilter;

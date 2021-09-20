@@ -4,14 +4,14 @@ import { BaseProvider } from '@ethersproject/providers';
 import { AddressZero, WeiPerEther as ONE } from '@ethersproject/constants';
 
 import { Lido, getStEthRate } from './pools/lido';
-import { BigNumber, bnum, scale } from './utils/bignumber';
+import { bnum, scale } from './utils/bignumber';
 import { WETHADDR } from './constants';
 import { SwapTypes, SwapInfo } from './types';
 import { isSameAddress } from './utils';
 
 export interface WrappedInfo {
-    swapAmountOriginal: BigNumber;
-    swapAmountForSwaps: BigNumber;
+    swapAmountOriginal: EBigNumber;
+    swapAmountForSwaps: EBigNumber;
     tokenIn: TokenInfo;
     tokenOut: TokenInfo;
 }
@@ -35,7 +35,7 @@ export async function getWrappedInfo(
     tokenIn: string,
     tokenOut: string,
     chainId: number,
-    swapAmount: BigNumber
+    swapAmount: EBigNumber
 ): Promise<WrappedInfo> {
     // The Subgraph returns tokens in lower case format so we must match this
     tokenIn = tokenIn.toLowerCase();
@@ -67,12 +67,7 @@ export async function getWrappedInfo(
         const rate = await getStEthRate(provider, chainId);
         tokenInRate = rate;
         if (swapType === SwapTypes.SwapExactIn)
-            swapAmountForSwaps = scale(
-                bnum(
-                    EBigNumber.from(swapAmount.toString()).mul(rate).toString()
-                ),
-                -18
-            );
+            swapAmountForSwaps = swapAmount.mul(rate).div(ONE);
     }
     if (tokenOut === Lido.stETH[chainId]) {
         tokenOutForSwaps = Lido.wstETH[chainId];
@@ -80,12 +75,7 @@ export async function getWrappedInfo(
         const rate = await getStEthRate(provider, chainId);
         tokenOutRate = rate;
         if (swapType === SwapTypes.SwapExactOut)
-            swapAmountForSwaps = scale(
-                bnum(
-                    EBigNumber.from(swapAmount.toString()).mul(rate).toString()
-                ),
-                -18
-            );
+            swapAmountForSwaps = swapAmount.mul(rate).div(ONE);
     }
 
     return {
@@ -134,11 +124,10 @@ export function setWrappedInfo(
         (wrappedInfo.tokenOut.wrapType === WrapTypes.stETH &&
             swapType === SwapTypes.SwapExactOut)
     ) {
-        swapInfo.swapAmountForSwaps = scale(
-            wrappedInfo.swapAmountForSwaps,
-            18
-        ).dp(0); // Always 18 because wstETH
-        swapInfo.swapAmount = scale(wrappedInfo.swapAmountOriginal, 18).dp(0);
+        swapInfo.swapAmountForSwaps = bnum(
+            wrappedInfo.swapAmountForSwaps.toString()
+        );
+        swapInfo.swapAmount = bnum(wrappedInfo.swapAmountOriginal.toString());
     } else {
         // Should be same when standard tokens and swapAmount should already be scaled
         swapInfo.swapAmountForSwaps = swapInfo.swapAmount;

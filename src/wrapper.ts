@@ -1,6 +1,12 @@
+import {
+    BigNumber as EBigNumber,
+    BigNumberish,
+    formatFixed,
+    parseFixed,
+} from '@ethersproject/bignumber';
 import { BaseProvider } from '@ethersproject/providers';
 import cloneDeep from 'lodash.clonedeep';
-import { BigNumber, ZERO } from './utils/bignumber';
+import { BigNumber, bnum, ZERO } from './utils/bignumber';
 import { getBestPaths } from './router';
 import { getWrappedInfo, setWrappedInfo } from './wrapInfo';
 import { formatSwaps } from './formatSwaps';
@@ -28,8 +34,8 @@ export class SOR {
     swapCostCalculator: SwapCostCalculator;
 
     private readonly defaultSwapOptions: SwapOptions = {
-        gasPrice: new BigNumber('50e9'),
-        swapGas: new BigNumber('35000'),
+        gasPrice: parseFixed('50', 9),
+        swapGas: EBigNumber.from('35000'),
         poolTypeFilter: PoolFilter.All,
         maxPools: 4,
         timestamp: Math.floor(Date.now() / 1000),
@@ -74,7 +80,7 @@ export class SOR {
         tokenIn: string,
         tokenOut: string,
         swapType: SwapTypes,
-        swapAmount: BigNumber,
+        swapAmount: BigNumberish,
         swapOptions?: Partial<SwapOptions>
     ): Promise<SwapInfo> {
         if (!this.poolCacher.finishedFetchingOnChain)
@@ -96,7 +102,7 @@ export class SOR {
             tokenIn,
             tokenOut,
             this.chainId,
-            swapAmount
+            EBigNumber.from(swapAmount)
         );
 
         let swapInfo: SwapInfo;
@@ -151,7 +157,7 @@ export class SOR {
         tokenIn: string,
         tokenOut: string,
         swapType: SwapTypes,
-        swapAmount: BigNumber,
+        swapAmount: EBigNumber,
         pools: SubgraphPoolBase[],
         swapOptions: SwapOptions
     ): Promise<SwapInfo> {
@@ -169,6 +175,8 @@ export class SOR {
         if (paths.length == 0) return { ...EMPTY_SWAPINFO };
 
         // Path is guaranteed to contain both tokenIn and tokenOut
+        let tokenInDecimals;
+        let tokenOutDecimals;
         paths[0].swaps.forEach((swap) => {
             // Inject token decimals to avoid having to query onchain
             if (isSameAddress(swap.tokenIn, tokenIn)) {
@@ -176,26 +184,35 @@ export class SOR {
                     tokenIn,
                     swap.tokenInDecimals
                 );
+                tokenInDecimals = swap.tokenInDecimals;
             }
             if (isSameAddress(swap.tokenOut, tokenOut)) {
                 this.swapCostCalculator.setTokenDecimals(
                     tokenOut,
                     swap.tokenOutDecimals
                 );
+                tokenOutDecimals = swap.tokenOutDecimals;
             }
         });
+
         const costOutputToken = await this.getCostOfSwapInToken(
             swapType === SwapTypes.SwapExactIn ? tokenOut : tokenIn,
-            swapOptions.gasPrice,
-            swapOptions.swapGas
+            bnum(swapOptions.gasPrice.toString()),
+            bnum(swapOptions.swapGas.toString())
         );
+
+        const inputDecimals =
+            swapType === SwapTypes.SwapExactIn
+                ? tokenInDecimals
+                : tokenOutDecimals;
+        const scaledSwapAmount = bnum(formatFixed(swapAmount, inputDecimals));
 
         // Returns list of swaps
         const [swaps, total, marketSp, totalConsideringFees] =
             this.getBestPaths(
                 poolsOfInterest,
                 paths,
-                swapAmount,
+                scaledSwapAmount,
                 swapType,
                 costOutputToken,
                 swapOptions.maxPools
@@ -204,7 +221,7 @@ export class SOR {
         const swapInfo = formatSwaps(
             swaps,
             swapType,
-            swapAmount,
+            bnum(swapAmount.toString()),
             tokenIn,
             tokenOut,
             total,

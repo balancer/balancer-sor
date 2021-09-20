@@ -117,7 +117,7 @@ export function formatSwaps(
             ? [tokenInDecimals, tokenOutDecimals]
             : [tokenOutDecimals, tokenInDecimals];
 
-    swapInfo.swapAmount = scale(swapAmount, inputDecimals);
+    swapInfo.swapAmount = swapAmount;
     swapInfo.returnAmount = scale(returnAmount, returnDecimals).dp(
         0,
         BigNumber.ROUND_FLOOR

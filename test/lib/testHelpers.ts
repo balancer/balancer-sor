@@ -1,3 +1,4 @@
+import { BigNumber as EBigNumber } from '@ethersproject/bignumber';
 import { JsonRpcProvider } from '@ethersproject/providers';
 import { BigNumber } from 'bignumber.js';
 import cloneDeep from 'lodash.clonedeep';
@@ -12,20 +13,21 @@ import {
     PoolFilter,
     SwapV2,
 } from '../../src/types';
-import { bnum, BONE } from '../../src/utils/bignumber';
+import { bnum } from '../../src/utils/bignumber';
 import * as fs from 'fs';
 import { assert } from 'chai';
 // Mainnet reference tokens with addresses & decimals
 import WeightedTokens from '../testData/eligibleTokens.json';
 import StableTokens from '../testData/stableTokens.json';
+import { WeiPerEther as ONE } from '@ethersproject/constants';
 
 export interface TradeInfo {
     SwapType: string;
     TokenIn: string;
     TokenOut: string;
     NoPools: number;
-    SwapAmount: BigNumber;
-    GasPrice: BigNumber;
+    SwapAmount: EBigNumber;
+    GasPrice: EBigNumber;
     SwapAmountDecimals: number;
     ReturnAmountDecimals: number;
 }
@@ -95,8 +97,8 @@ export function loadTestFile(File: string): TestData {
     const fileJson = JSON.parse(fileString);
     if (!fileJson.tradeInfo) return fileJson;
 
-    fileJson.tradeInfo.GasPrice = new BigNumber(fileJson.tradeInfo.GasPrice);
-    fileJson.tradeInfo.SwapAmount = new BigNumber(
+    fileJson.tradeInfo.GasPrice = EBigNumber.from(fileJson.tradeInfo.GasPrice);
+    fileJson.tradeInfo.SwapAmount = EBigNumber.from(
         fileJson.tradeInfo.SwapAmount.split('.')[0] // This is getting rid of decimals that shouldn't be there.
     );
     return fileJson;
@@ -332,11 +334,11 @@ export async function getFullSwap(
     returnAmountDecimals: number,
     maxPools: number,
     swapType: string | SwapTypes,
-    swapAmountNormalised: BigNumber,
-    costOutputToken: BigNumber,
-    gasPrice: BigNumber,
+    swapAmount: EBigNumber,
+    costOutputToken: EBigNumber,
+    gasPrice: EBigNumber,
     provider: JsonRpcProvider,
-    swapGas: BigNumber = new BigNumber('100000')
+    swapGas: EBigNumber = EBigNumber.from('100000')
 ): Promise<SwapInfo> {
     const sor = new sorv2.SOR(provider, 1, null, cloneDeep(pools));
 
@@ -346,13 +348,13 @@ export async function getFullSwap(
         swapType === 'swapExactIn' ? tokenOut : tokenIn,
         returnAmountDecimals
     );
+
     // We're wanting to set the value of costOutputToken so we calculate
     // a native asset price which will give the desired value
-    const effectiveNativeAssetPrice = costOutputToken
-        .div(gasPrice)
-        .div(swapGas)
-        .div(BONE)
-        .toString();
+    const effectiveNativeAssetPrice =
+        gasPrice.gt(0) && swapGas.gt(0)
+            ? costOutputToken.div(gasPrice).div(swapGas).div(ONE).toString()
+            : '0';
     if (swapType === 'swapExactIn')
         await sor.swapCostCalculator.setNativeAssetPriceInToken(
             tokenOut,
@@ -373,7 +375,7 @@ export async function getFullSwap(
         tokenIn,
         tokenOut,
         swapTypeCorrect,
-        swapAmountNormalised,
+        swapAmount,
         { gasPrice, maxPools, timestamp: 0, poolTypeFilter: PoolFilter.All }
     );
 

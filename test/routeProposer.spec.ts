@@ -5,8 +5,9 @@ import { expect } from 'chai';
 import { RouteProposer } from '../src/routeProposal';
 import { BigNumber } from '../src/utils/bignumber';
 import { SwapTypes, SubgraphPoolBase, SwapOptions } from '../src/types';
+import { parseFixed } from '@ethersproject/bignumber';
 
-const gasPrice = new BigNumber('30000000000');
+const gasPrice = parseFixed('30', 9);
 const maxPools = 4;
 
 describe(`RouteProposer.`, () => {

@@ -1,20 +1,14 @@
 require('dotenv').config();
 import { expect } from 'chai';
 import cloneDeep from 'lodash.clonedeep';
-import { AddressZero } from '@ethersproject/constants';
+import { AddressZero, WeiPerEther as ONE } from '@ethersproject/constants';
 import { JsonRpcProvider } from '@ethersproject/providers';
-import {
-    SOR,
-    SwapInfo,
-    SwapTypes,
-    bnum,
-    scale,
-    SubgraphPoolBase,
-} from '../src';
+import { SOR, SwapInfo, SwapTypes, bnum, SubgraphPoolBase } from '../src';
 import { Lido, getLidoStaticSwaps, isLidoStableSwap } from '../src/pools/lido';
 import { getStEthRate } from '../src/pools/lido';
+import { formatFixed, parseFixed } from '@ethersproject/bignumber';
 
-const gasPrice = bnum('30000000000');
+const gasPrice = parseFixed('30', 9);
 const maxPools = 4;
 const chainId = 1;
 const provider = new JsonRpcProvider(
@@ -51,7 +45,7 @@ describe(`Tests for Lido USD routes.`, () => {
             const tokenIn = DAI;
             const tokenOut = USDC;
             const swapType = SwapTypes.SwapExactIn;
-            const swapAmt = bnum('1');
+            const swapAmt = parseFixed('1', 18);
 
             const swapInfo: SwapInfo = await getLidoStaticSwaps(
                 pools,
@@ -85,11 +79,9 @@ describe(`Tests for Lido USD routes.`, () => {
 
         it(`stETH swap should be same as wstETH with priceRate allowance, SwapExactIn, stETH In`, async () => {
             const swapType = SwapTypes.SwapExactIn;
-            const swapAmt = bnum('1');
-            const priceRate = scale(
-                bnum((await getStEthRate(provider, chainId)).toString()),
-                -18
-            );
+            const swapAmt = parseFixed('1', 18);
+            const priceRate = await getStEthRate(provider, chainId);
+
             const sor = new SOR(provider, chainId, null, pools);
             const fetchSuccess = await sor.fetchPools([], false);
             expect(fetchSuccess).to.be.true;
@@ -112,7 +104,7 @@ describe(`Tests for Lido USD routes.`, () => {
                 wstETH,
                 DAI,
                 swapType,
-                swapAmt.times(priceRate),
+                swapAmt.mul(priceRate).div(ONE),
                 {
                     gasPrice,
                     maxPools,
@@ -131,7 +123,7 @@ describe(`Tests for Lido USD routes.`, () => {
             expect(swapInfowstEth.tokenOut).to.eq(DAI);
             // SwapAmount should be original amount scaled
             expect(testSwapInfo.swapAmount.toString()).to.eq(
-                scale(swapAmt, 18).toString()
+                swapAmt.toString()
             );
             // The swapAmountForSwaps for stETH should be using exchangeRate allowance, i.e. same as wstETH amount
             expect(testSwapInfo.swapAmountForSwaps?.toString()).to.eq(
@@ -156,11 +148,8 @@ describe(`Tests for Lido USD routes.`, () => {
 
         it(`stETH swap should be same as wstETH with priceRate allowance, SwapExactIn, stETH Out`, async () => {
             const swapType = SwapTypes.SwapExactIn;
-            const swapAmt = bnum('1');
-            const priceRate = scale(
-                bnum((await getStEthRate(provider, chainId)).toString()),
-                -18
-            );
+            const swapAmt = parseFixed('1', 6);
+            const priceRate = await getStEthRate(provider, chainId);
 
             const sor = new SOR(provider, chainId, null, pools);
             const fetchSuccess = await sor.fetchPools([], false);
@@ -197,7 +186,7 @@ describe(`Tests for Lido USD routes.`, () => {
             expect(swapInfowstEth.tokenOut).to.eq(wstETH);
             // SwapAmount should be original amount scaled
             expect(testSwapInfo.swapAmount.toString()).to.eq(
-                scale(swapAmt, 6).toString()
+                swapAmt.toString()
             );
             // These should be same as no rate difference for input token
             expect(testSwapInfo.swapAmountForSwaps?.toString()).to.eq(
@@ -209,12 +198,17 @@ describe(`Tests for Lido USD routes.`, () => {
             );
             // This is pulled from mainnet so needs valid routes - will be 0 if not
             // returnAmount for stETH should be using exchangeRate
+            const priceRateScaled = bnum(formatFixed(priceRate, 18));
+
             expect(testSwapInfo.returnAmount.toString()).to.eq(
-                swapInfowstEth.returnAmount.div(priceRate).dp(0).toString()
+                swapInfowstEth.returnAmount
+                    .div(priceRateScaled)
+                    .dp(0)
+                    .toString()
             );
             expect(testSwapInfo.returnAmountConsideringFees.toString()).to.eq(
                 swapInfowstEth.returnAmountConsideringFees
-                    .div(priceRate)
+                    .div(priceRateScaled)
                     .dp(0)
                     .toString()
             );
@@ -226,11 +220,9 @@ describe(`Tests for Lido USD routes.`, () => {
 
         it(`stETH swap should be same as wstETH with priceRate allowance, SwapExactOut, stETH In`, async () => {
             const swapType = SwapTypes.SwapExactOut;
-            const swapAmt = bnum('1');
-            const priceRate = scale(
-                bnum((await getStEthRate(provider, chainId)).toString()),
-                -18
-            );
+            const swapAmt = parseFixed('1', 18);
+            const priceRate = await getStEthRate(provider, chainId);
+
             const sor = new SOR(provider, chainId, null, pools);
             const fetchSuccess = await sor.fetchPools([], false);
             expect(fetchSuccess).to.be.true;
@@ -269,7 +261,7 @@ describe(`Tests for Lido USD routes.`, () => {
             expect(swapInfowstEth.tokenOut).to.eq(DAI);
             // SwapAmount should be original amount scaled
             expect(testSwapInfo.swapAmount.toString()).to.eq(
-                scale(swapAmt, 18).toString()
+                swapAmt.toString()
             );
             expect(testSwapInfo.swapAmount.toString()).to.eq(
                 swapInfowstEth.swapAmount.toString()
@@ -280,12 +272,16 @@ describe(`Tests for Lido USD routes.`, () => {
             );
             // This is pulled from mainnet so needs valid routes - will be 0 if not
             // returnAmount (amount of input stETH) should be using exchangeRate
+            const priceRateScaled = bnum(formatFixed(priceRate, 18));
             expect(testSwapInfo.returnAmount.toString()).to.eq(
-                swapInfowstEth.returnAmount.div(priceRate).dp(0).toString()
+                swapInfowstEth.returnAmount
+                    .div(priceRateScaled)
+                    .dp(0)
+                    .toString()
             );
             expect(testSwapInfo.returnAmountConsideringFees.toString()).to.eq(
                 swapInfowstEth.returnAmountConsideringFees
-                    .div(priceRate)
+                    .div(priceRateScaled)
                     .dp(0)
                     .toString()
             );
@@ -293,11 +289,9 @@ describe(`Tests for Lido USD routes.`, () => {
 
         it(`stETH swap should be same as wstETH with priceRate allowance, SwapExactOut, stETH Out`, async () => {
             const swapType = SwapTypes.SwapExactOut;
-            const swapAmt = bnum('1');
-            const priceRate = scale(
-                bnum((await getStEthRate(provider, chainId)).toString()),
-                -18
-            );
+            const swapAmt = parseFixed('1', 18);
+            const priceRate = await getStEthRate(provider, chainId);
+
             const sor = new SOR(provider, chainId, null, pools);
             const fetchSuccess = await sor.fetchPools([], false);
             expect(fetchSuccess).to.be.true;
@@ -320,7 +314,7 @@ describe(`Tests for Lido USD routes.`, () => {
                 USDT,
                 wstETH,
                 swapType,
-                swapAmt.times(priceRate),
+                swapAmt.mul(priceRate).div(ONE),
                 { gasPrice, maxPools }
             );
 
@@ -336,7 +330,7 @@ describe(`Tests for Lido USD routes.`, () => {
             expect(swapInfowstEth.tokenOut).to.eq(wstETH);
             // SwapAmount should be original amount scaled
             expect(testSwapInfo.swapAmount.toString()).to.eq(
-                scale(swapAmt, 18).toString()
+                swapAmt.toString()
             );
             // The swapAmountForSwaps for stETH should be using exchangeRate allowance, i.e. same as wstETH amount
             expect(testSwapInfo.swapAmountForSwaps?.toString()).to.eq(
@@ -366,7 +360,7 @@ describe(`Tests for Lido USD routes.`, () => {
             const tokenIn = DAI;
             const tokenOut = wstETH;
             const swapType = SwapTypes.SwapExactIn;
-            const swapAmt = bnum('1');
+            const swapAmt = parseFixed('1', 18);
 
             const sor = new SOR(provider, chainId, null, pools);
             const fetchSuccess = await sor.fetchPools([], false);
@@ -386,7 +380,7 @@ describe(`Tests for Lido USD routes.`, () => {
             expect(swapInfo.swaps.length).to.eq(2);
             expect(swapInfo.swaps[0].poolId).to.eq(poolWethDai);
             expect(swapInfo.swaps[0].amount.toString()).to.eq(
-                scale(swapAmt, 18).toString()
+                swapAmt.toString()
             );
             expect(swapInfo.swaps[0].assetInIndex).to.eq('0');
             expect(swapInfo.swaps[0].assetOutIndex).to.eq('1');
@@ -403,7 +397,7 @@ describe(`Tests for Lido USD routes.`, () => {
             const tokenIn = DAI;
             const tokenOut = wstETH;
             const swapType = SwapTypes.SwapExactOut;
-            const swapAmt = bnum('1');
+            const swapAmt = parseFixed('1', 18);
 
             const sor = new SOR(provider, chainId, null, pools);
             const fetchSuccess = await sor.fetchPools([], false);
@@ -426,7 +420,7 @@ describe(`Tests for Lido USD routes.`, () => {
             expect(swapInfo.swaps.length).to.eq(2);
             expect(swapInfo.swaps[0].poolId).to.eq(poolLido);
             expect(swapInfo.swaps[0].amount.toString()).to.eq(
-                scale(swapAmt, 18).toString()
+                swapAmt.toString()
             );
             expect(swapInfo.swaps[0].assetInIndex).to.eq('1');
             expect(swapInfo.swaps[0].assetOutIndex).to.eq('2');
@@ -443,7 +437,7 @@ describe(`Tests for Lido USD routes.`, () => {
             const tokenIn = wstETH;
             const tokenOut = DAI;
             const swapType = SwapTypes.SwapExactIn;
-            const swapAmt = bnum('1');
+            const swapAmt = parseFixed('1', 18);
 
             const sor = new SOR(provider, chainId, null, pools);
             const fetchSuccess = await sor.fetchPools([], false);
@@ -463,7 +457,7 @@ describe(`Tests for Lido USD routes.`, () => {
             expect(swapInfo.swaps.length).to.eq(2);
             expect(swapInfo.swaps[0].poolId).to.eq(poolLido);
             expect(swapInfo.swaps[0].amount.toString()).to.eq(
-                scale(swapAmt, 18).toString()
+                swapAmt.toString()
             );
             expect(swapInfo.swaps[0].assetInIndex).to.eq('0');
             expect(swapInfo.swaps[0].assetOutIndex).to.eq('1');
@@ -480,7 +474,7 @@ describe(`Tests for Lido USD routes.`, () => {
             const tokenIn = wstETH;
             const tokenOut = DAI;
             const swapType = SwapTypes.SwapExactOut;
-            const swapAmt = bnum('1');
+            const swapAmt = parseFixed('1', 18);
 
             const sor = new SOR(provider, chainId, null, pools);
             const fetchSuccess = await sor.fetchPools([], false);
@@ -500,7 +494,7 @@ describe(`Tests for Lido USD routes.`, () => {
             expect(swapInfo.swaps.length).to.eq(2);
             expect(swapInfo.swaps[0].poolId).to.eq(poolWethDai);
             expect(swapInfo.swaps[0].amount.toString()).to.eq(
-                scale(swapAmt, 18).toString()
+                swapAmt.toString()
             );
             expect(swapInfo.swaps[0].assetInIndex).to.eq('1');
             expect(swapInfo.swaps[0].assetOutIndex).to.eq('2');
@@ -519,7 +513,7 @@ describe(`Tests for Lido USD routes.`, () => {
             const tokenIn = USDC;
             const tokenOut = wstETH;
             const swapType = SwapTypes.SwapExactIn;
-            const swapAmt = bnum('1');
+            const swapAmt = parseFixed('1', 6);
 
             const sor = new SOR(provider, chainId, null, pools);
             const fetchSuccess = await sor.fetchPools([], false);
@@ -544,7 +538,7 @@ describe(`Tests for Lido USD routes.`, () => {
             expect(swapInfo.swaps.length).to.eq(3);
             expect(swapInfo.swaps[0].poolId).to.eq(poolStaBal);
             expect(swapInfo.swaps[0].amount.toString()).to.eq(
-                scale(swapAmt, 6).toString()
+                swapAmt.toString()
             );
             expect(swapInfo.swaps[0].assetInIndex).to.eq('0');
             expect(swapInfo.swaps[0].assetOutIndex).to.eq('1');
@@ -565,7 +559,7 @@ describe(`Tests for Lido USD routes.`, () => {
             const tokenIn = USDC;
             const tokenOut = wstETH;
             const swapType = SwapTypes.SwapExactOut;
-            const swapAmt = bnum('1');
+            const swapAmt = parseFixed('1', 18);
 
             const sor = new SOR(provider, chainId, null, pools);
             const fetchSuccess = await sor.fetchPools([], false);
@@ -590,7 +584,7 @@ describe(`Tests for Lido USD routes.`, () => {
             expect(swapInfo.swaps.length).to.eq(3);
             expect(swapInfo.swaps[0].poolId).to.eq(poolLido);
             expect(swapInfo.swaps[0].amount.toString()).to.eq(
-                scale(swapAmt, 18).toString()
+                swapAmt.toString()
             );
             expect(swapInfo.swaps[0].assetInIndex).to.eq('2');
             expect(swapInfo.swaps[0].assetOutIndex).to.eq('3');
@@ -611,7 +605,7 @@ describe(`Tests for Lido USD routes.`, () => {
             const tokenIn = wstETH;
             const tokenOut = USDC;
             const swapType = SwapTypes.SwapExactIn;
-            const swapAmt = bnum('1');
+            const swapAmt = parseFixed('1', 18);
 
             const sor = new SOR(provider, chainId, null, pools);
             const fetchSuccess = await sor.fetchPools([], false);
@@ -636,7 +630,7 @@ describe(`Tests for Lido USD routes.`, () => {
             expect(swapInfo.swaps.length).to.eq(3);
             expect(swapInfo.swaps[0].poolId).to.eq(poolLido);
             expect(swapInfo.swaps[0].amount.toString()).to.eq(
-                scale(swapAmt, 18).toString()
+                swapAmt.toString()
             );
             expect(swapInfo.swaps[0].assetInIndex).to.eq('0');
             expect(swapInfo.swaps[0].assetOutIndex).to.eq('1');
@@ -657,7 +651,7 @@ describe(`Tests for Lido USD routes.`, () => {
             const tokenIn = wstETH;
             const tokenOut = USDC;
             const swapType = SwapTypes.SwapExactOut;
-            const swapAmt = bnum('1');
+            const swapAmt = parseFixed('1', 6);
 
             const sor = new SOR(provider, chainId, null, pools);
             const fetchSuccess = await sor.fetchPools([], false);
@@ -682,7 +676,7 @@ describe(`Tests for Lido USD routes.`, () => {
             expect(swapInfo.swaps.length).to.eq(3);
             expect(swapInfo.swaps[0].poolId).to.eq(poolStaBal);
             expect(swapInfo.swaps[0].amount.toString()).to.eq(
-                scale(swapAmt, 6).toString()
+                swapAmt.toString()
             );
             expect(swapInfo.swaps[0].assetInIndex).to.eq('2');
             expect(swapInfo.swaps[0].assetOutIndex).to.eq('3');
@@ -705,7 +699,7 @@ describe(`Tests for Lido USD routes.`, () => {
             const tokenIn = USDT;
             const tokenOut = wstETH;
             const swapType = SwapTypes.SwapExactIn;
-            const swapAmt = bnum('1');
+            const swapAmt = parseFixed('1', 6);
 
             const sor = new SOR(provider, chainId, null, pools);
             const fetchSuccess = await sor.fetchPools([], false);
@@ -730,7 +724,7 @@ describe(`Tests for Lido USD routes.`, () => {
             expect(swapInfo.swaps.length).to.eq(3);
             expect(swapInfo.swaps[0].poolId).to.eq(poolStaBal);
             expect(swapInfo.swaps[0].amount.toString()).to.eq(
-                scale(swapAmt, 6).toString()
+                swapAmt.toString()
             );
             expect(swapInfo.swaps[0].assetInIndex).to.eq('0');
             expect(swapInfo.swaps[0].assetOutIndex).to.eq('1');
@@ -751,7 +745,7 @@ describe(`Tests for Lido USD routes.`, () => {
             const tokenIn = USDT;
             const tokenOut = wstETH;
             const swapType = SwapTypes.SwapExactOut;
-            const swapAmt = bnum('1');
+            const swapAmt = parseFixed('1', 18);
 
             const sor = new SOR(provider, chainId, null, pools);
             const fetchSuccess = await sor.fetchPools([], false);
@@ -776,7 +770,7 @@ describe(`Tests for Lido USD routes.`, () => {
             expect(swapInfo.swaps.length).to.eq(3);
             expect(swapInfo.swaps[0].poolId).to.eq(poolLido);
             expect(swapInfo.swaps[0].amount.toString()).to.eq(
-                scale(swapAmt, 18).toString()
+                swapAmt.toString()
             );
             expect(swapInfo.swaps[0].assetInIndex).to.eq('2');
             expect(swapInfo.swaps[0].assetOutIndex).to.eq('3');
@@ -797,7 +791,7 @@ describe(`Tests for Lido USD routes.`, () => {
             const tokenIn = wstETH;
             const tokenOut = USDT;
             const swapType = SwapTypes.SwapExactIn;
-            const swapAmt = bnum('1');
+            const swapAmt = parseFixed('1', 18);
 
             const sor = new SOR(provider, chainId, null, pools);
 
@@ -823,7 +817,7 @@ describe(`Tests for Lido USD routes.`, () => {
             expect(swapInfo.swaps.length).to.eq(3);
             expect(swapInfo.swaps[0].poolId).to.eq(poolLido);
             expect(swapInfo.swaps[0].amount.toString()).to.eq(
-                scale(swapAmt, 18).toString()
+                swapAmt.toString()
             );
             expect(swapInfo.swaps[0].assetInIndex).to.eq('0');
             expect(swapInfo.swaps[0].assetOutIndex).to.eq('1');
@@ -844,7 +838,7 @@ describe(`Tests for Lido USD routes.`, () => {
             const tokenIn = wstETH;
             const tokenOut = USDT;
             const swapType = SwapTypes.SwapExactOut;
-            const swapAmt = bnum('1');
+            const swapAmt = parseFixed('1', 6);
 
             const sor = new SOR(provider, chainId, null, pools);
             const fetchSuccess = await sor.fetchPools([], false);
@@ -872,7 +866,7 @@ describe(`Tests for Lido USD routes.`, () => {
             expect(swapInfo.swaps.length).to.eq(3);
             expect(swapInfo.swaps[0].poolId).to.eq(poolStaBal);
             expect(swapInfo.swaps[0].amount.toString()).to.eq(
-                scale(swapAmt, 6).toString()
+                swapAmt.toString()
             );
             expect(swapInfo.swaps[0].assetInIndex).to.eq('2');
             expect(swapInfo.swaps[0].assetOutIndex).to.eq('3');

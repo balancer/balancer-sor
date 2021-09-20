@@ -11,6 +11,7 @@ import { Lido } from '../src/pools/lido';
 import { SwapInfo, SwapTypes, SwapV2 } from '../src/types';
 import { BigNumber, BONE } from '../src/utils/bignumber';
 import testSwaps from './testData/swapsForFormatting.json';
+import { formatFixed, parseFixed } from '@ethersproject/bignumber';
 
 const marketSp: BigNumber = new BigNumber(7);
 
@@ -23,7 +24,7 @@ const BAL = '0xba100000625a3754423978a60c9317c58a424e3d';
 // npx mocha -r ts-node/register test/helpers.spec.ts
 describe(`Tests for Helpers.`, () => {
     it(`Should format directhop swapExactIn`, () => {
-        const swapAmount = new BigNumber(1);
+        const swapAmount = bnum(parseFixed('1', 18).toString());
         const returnAmount = new BigNumber(2);
         const returnAmountConsideringFees = new BigNumber(1.9);
         const tokenIn = '0x6b175474e89094c44da98b954eedeac495271d0f';
@@ -67,7 +68,7 @@ describe(`Tests for Helpers.`, () => {
     });
 
     it(`Should format multihop swapExactIn`, () => {
-        const swapAmount = new BigNumber(1);
+        const swapAmount = bnum(parseFixed('1', 18).toString());
         const returnAmount = new BigNumber(2);
         const returnAmountConsideringFees = new BigNumber(1.9);
         const tokenIn = '0x6b175474e89094c44da98b954eedeac495271d0f';
@@ -119,7 +120,7 @@ describe(`Tests for Helpers.`, () => {
     });
 
     it(`Should format direct & multihop swapExactIn`, () => {
-        const swapAmount = new BigNumber(1);
+        const swapAmount = bnum(parseFixed('1', 18).toString());
         const returnAmount = new BigNumber(2);
         const returnAmountConsideringFees = new BigNumber(1.9);
         const tokenIn = '0x6b175474e89094c44da98b954eedeac495271d0f';
@@ -167,7 +168,7 @@ describe(`Tests for Helpers.`, () => {
     });
 
     it(`Should format directhop swapExactOut`, () => {
-        const swapAmount = new BigNumber(1);
+        const swapAmount = bnum(parseFixed('1', 18).toString());
         const returnAmount = new BigNumber(1);
         const returnAmountConsideringFees = new BigNumber(0.9);
         const tokenIn = '0x6b175474e89094c44da98b954eedeac495271d0f';
@@ -211,7 +212,7 @@ describe(`Tests for Helpers.`, () => {
     });
 
     it(`Should format multihop swapExactOut`, () => {
-        const swapAmount = new BigNumber(1);
+        const swapAmount = bnum(parseFixed('1', 18).toString());
         const returnAmount = new BigNumber(2);
         const returnAmountConsideringFees = new BigNumber(1.9);
         const tokenIn = '0x6b175474e89094c44da98b954eedeac495271d0f';
@@ -259,7 +260,7 @@ describe(`Tests for Helpers.`, () => {
     });
 
     it(`Should format direct & multihop swapExactOut`, () => {
-        const swapAmount = new BigNumber(1);
+        const swapAmount = bnum(parseFixed('1', 18).toString());
         const returnAmount = new BigNumber(2);
         const returnAmountConsideringFees = new BigNumber(1.9);
         const tokenIn = '0x6b175474e89094c44da98b954eedeac495271d0f';
@@ -304,7 +305,7 @@ describe(`Tests for Helpers.`, () => {
     });
 
     it(`Should scale 6 decimal token correctly swapExactIn, USDC In`, () => {
-        const swapAmount = new BigNumber(1);
+        const swapAmount = bnum(parseFixed('1', 6).toString());
         const returnAmount = new BigNumber(2);
         const returnAmountConsideringFees = new BigNumber(1.9);
         const tokenIn = '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48';
@@ -341,7 +342,7 @@ describe(`Tests for Helpers.`, () => {
     });
 
     it(`Should scale 6 decimal token correctly swapExactOut, USDC In`, () => {
-        const swapAmount = new BigNumber(1);
+        const swapAmount = bnum(parseFixed('1', 18).toString());
         const returnAmount = new BigNumber(2);
         const returnAmountConsideringFees = new BigNumber(1.9);
         const tokenIn = '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48';
@@ -378,7 +379,7 @@ describe(`Tests for Helpers.`, () => {
     });
 
     it(`Should scale 6 decimal token correctly swapExactIn, USDC Out`, () => {
-        const swapAmount = new BigNumber(1);
+        const swapAmount = bnum(parseFixed('1', 18).toString());
         const returnAmount = new BigNumber(2);
         const returnAmountConsideringFees = new BigNumber(1.9);
         const tokenIn = '0x6b175474e89094c44da98b954eedeac495271d0f';
@@ -415,7 +416,7 @@ describe(`Tests for Helpers.`, () => {
     });
 
     it(`Should scale 6 decimal token correctly swapExactOut, USDC Out`, () => {
-        const swapAmount = new BigNumber(1);
+        const swapAmount = bnum(parseFixed('1', 6).toString());
         const returnAmount = new BigNumber(2);
         const returnAmountConsideringFees = new BigNumber(1.9);
         const tokenIn = '0x6b175474e89094c44da98b954eedeac495271d0f';
@@ -452,7 +453,7 @@ describe(`Tests for Helpers.`, () => {
     });
 
     it(`Should handle no swaps case`, () => {
-        const swapAmount = new BigNumber(1);
+        const swapAmount = bnum(parseFixed('1', 18).toString());
         const returnAmount = new BigNumber(2);
         const returnAmountConsideringFees = new BigNumber(1.9);
         const tokenIn = '0x6b175474e89094c44da98b954eedeac495271d0f';
@@ -483,7 +484,7 @@ describe(`Tests for Helpers.`, () => {
     });
 
     it(`Should return marketSp`, () => {
-        const swapAmount = new BigNumber(1);
+        const swapAmount = bnum(parseFixed('1', 6).toString());
         const returnAmount = new BigNumber(2);
         const returnAmountConsideringFees = new BigNumber(1.9);
         const tokenIn = '0x6b175474e89094c44da98b954eedeac495271d0f';
@@ -509,7 +510,7 @@ describe(`Tests for Helpers.`, () => {
     });
 
     it(`Should format directhop swapExactIn for Weth In, no Eth Wrap`, () => {
-        const swapAmount = new BigNumber(1);
+        const swapAmount = bnum(parseFixed('1', 18).toString());
         const returnAmount = new BigNumber(2);
         const returnAmountConsideringFees = new BigNumber(1.9);
         const tokenIn = '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2'; // Weth In
@@ -546,7 +547,7 @@ describe(`Tests for Helpers.`, () => {
     });
 
     it(`Should format directhop swapExactIn for Eth Wrap, Weth In`, () => {
-        const swapAmount = new BigNumber(1);
+        const swapAmount = bnum(parseFixed('1', 18).toString());
         const returnAmount = new BigNumber(2);
         const returnAmountConsideringFees = new BigNumber(1.9);
         const tokenIn = '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2'; // Weth In
@@ -587,7 +588,7 @@ describe(`Tests for Helpers.`, () => {
     });
 
     it(`Should format directhop swapExactIn for Weth Out, no Eth Wrap`, () => {
-        const swapAmount = new BigNumber(1);
+        const swapAmount = bnum(parseFixed('1', 18).toString());
         const returnAmount = new BigNumber(2);
         const returnAmountConsideringFees = new BigNumber(1.9);
         const tokenIn = '0xba100000625a3754423978a60c9317c58a424e3d';
@@ -624,7 +625,7 @@ describe(`Tests for Helpers.`, () => {
     });
 
     it(`Should format directhop swapExactIn for Eth Wrap, Weth Out`, () => {
-        const swapAmount = new BigNumber(1);
+        const swapAmount = bnum(parseFixed('1', 18).toString());
         const returnAmount = new BigNumber(2);
         const returnAmountConsideringFees = new BigNumber(1.9);
         const tokenIn = '0xba100000625a3754423978a60c9317c58a424e3d';
@@ -665,7 +666,7 @@ describe(`Tests for Helpers.`, () => {
     });
 
     it(`Should format directhop swapExactOut for No Eth Wrap, Weth In`, () => {
-        const swapAmount = new BigNumber(2);
+        const swapAmount = bnum(parseFixed('2', 18).toString());
         const returnAmount = new BigNumber(1);
         const returnAmountConsideringFees = new BigNumber(0.9);
         const tokenIn = '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2';
@@ -702,7 +703,7 @@ describe(`Tests for Helpers.`, () => {
     });
 
     it(`Should format directhop swapExactOut for Eth Wrap, Weth In`, () => {
-        const swapAmount = new BigNumber(2);
+        const swapAmount = bnum(parseFixed('2', 18).toString());
         const returnAmount = new BigNumber(1);
         const returnAmountConsideringFees = new BigNumber(0.9);
         const tokenIn = '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2';
@@ -743,7 +744,7 @@ describe(`Tests for Helpers.`, () => {
     });
 
     it(`Should format directhop swapExactOut for No Eth Wrap, Weth Out`, () => {
-        const swapAmount = new BigNumber(2);
+        const swapAmount = bnum(parseFixed('2', 18).toString());
         const returnAmount = new BigNumber(1);
         const returnAmountConsideringFees = new BigNumber(0.9);
         const tokenIn = '0xba100000625a3754423978a60c9317c58a424e3d';
@@ -780,7 +781,7 @@ describe(`Tests for Helpers.`, () => {
     });
 
     it(`Should format directhop swapExactOut for Eth Wrap, Weth Out`, () => {
-        const swapAmount = new BigNumber(2);
+        const swapAmount = bnum(parseFixed('2', 18).toString());
         const returnAmount = new BigNumber(1);
         const returnAmountConsideringFees = new BigNumber(0.9);
         const tokenIn = '0xba100000625a3754423978a60c9317c58a424e3d';
@@ -821,7 +822,7 @@ describe(`Tests for Helpers.`, () => {
     });
 
     it(`Should format direct & multihop swapExactIn, No Eth Wrap, Weth In`, () => {
-        const swapAmount = new BigNumber(1);
+        const swapAmount = bnum(parseFixed('1', 18).toString());
         const returnAmount = new BigNumber(2);
         const returnAmountConsideringFees = new BigNumber(1.9);
         const tokenIn = '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2';
@@ -865,7 +866,7 @@ describe(`Tests for Helpers.`, () => {
     });
 
     it(`Should format direct & multihop swapExactIn, Eth Wrap, Weth In`, () => {
-        const swapAmount = new BigNumber(1);
+        const swapAmount = bnum(parseFixed('1', 18).toString());
         const returnAmount = new BigNumber(2);
         const returnAmountConsideringFees = new BigNumber(1.9);
         const tokenIn = '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2';
@@ -913,7 +914,7 @@ describe(`Tests for Helpers.`, () => {
     });
 
     it(`Should format direct & multihop swapExactOut, No Eth Wrap, Weth In`, () => {
-        const swapAmount = new BigNumber(1);
+        const swapAmount = bnum(parseFixed('1', 18).toString());
         const returnAmount = new BigNumber(2);
         const returnAmountConsideringFees = new BigNumber(1.9);
         const tokenIn = '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2';
@@ -958,7 +959,7 @@ describe(`Tests for Helpers.`, () => {
     });
 
     it(`Should format direct & multihop swapExactOut, Eth Wrap, Weth In`, () => {
-        const swapAmount = new BigNumber(1);
+        const swapAmount = bnum(parseFixed('1', 18).toString());
         const returnAmount = new BigNumber(2);
         const returnAmountConsideringFees = new BigNumber(1.9);
         const tokenIn = '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2';
@@ -1007,7 +1008,7 @@ describe(`Tests for Helpers.`, () => {
     });
 
     it(`Should format direct & multihop swapExactIn, No Eth Wrap, Weth In`, () => {
-        const swapAmount = new BigNumber(1);
+        const swapAmount = bnum(parseFixed('1', 18).toString());
         const returnAmount = new BigNumber(2);
         const returnAmountConsideringFees = new BigNumber(1.9);
         const tokenIn = '0x056fd409e1d7a124bd7017459dfea2f387b6d5cd';
@@ -1051,7 +1052,7 @@ describe(`Tests for Helpers.`, () => {
     });
 
     it(`Should format direct & multihop swapExactIn, Eth Wrap, Weth Out`, () => {
-        const swapAmount = new BigNumber(1);
+        const swapAmount = bnum(parseFixed('1', 18).toString());
         const returnAmount = new BigNumber(2);
         const returnAmountConsideringFees = new BigNumber(1.9);
         const tokenIn = '0x056fd409e1d7a124bd7017459dfea2f387b6d5cd';
@@ -1099,7 +1100,7 @@ describe(`Tests for Helpers.`, () => {
     });
 
     it(`Should format direct & multihop swapExactOut, No Eth Wrap, Weth Out`, () => {
-        const swapAmount = new BigNumber(1);
+        const swapAmount = bnum(parseFixed('1', 18).toString());
         const returnAmount = new BigNumber(2);
         const returnAmountConsideringFees = new BigNumber(1.9);
         const tokenIn = '0x056fd409e1d7a124bd7017459dfea2f387b6d5cd';
@@ -1144,7 +1145,7 @@ describe(`Tests for Helpers.`, () => {
     });
 
     it(`Should format direct & multihop swapExactOut, Eth Wrap, Weth Out`, () => {
-        const swapAmount = new BigNumber(1);
+        const swapAmount = bnum(parseFixed('1', 18).toString());
         const returnAmount = new BigNumber(2);
         const returnAmountConsideringFees = new BigNumber(1.9);
         const tokenIn = '0x056fd409e1d7a124bd7017459dfea2f387b6d5cd';
@@ -1363,7 +1364,7 @@ describe(`Tests for Helpers.`, () => {
             const swapType = SwapTypes.SwapExactIn;
             const tokenIn = AddressZero;
             const tokenOut = BAL;
-            const swapAmount = bnum(7.7);
+            const swapAmount = parseFixed('7.7', 18);
             const returnAmount = bnum(1.67);
 
             const swap: SwapV2 = {
@@ -1377,7 +1378,7 @@ describe(`Tests for Helpers.`, () => {
             const swapInfo: SwapInfo = {
                 tokenAddresses: [WETHADDR[chainId], BAL],
                 swaps: [swap, swap], // Doesn't need valid swaps for this
-                swapAmount,
+                swapAmount: scale(bnum(swapAmount.toString()), -18),
                 swapAmountForSwaps: bnum(0), // This isn't set until after setWrappedInfo
                 returnAmount: returnAmount,
                 returnAmountConsideringFees: returnAmount,
@@ -1408,10 +1409,10 @@ describe(`Tests for Helpers.`, () => {
                 BAL,
             ]);
             expect(swapInfoUpdated.swapAmount.toString()).to.eq(
-                swapAmount.toString()
+                formatFixed(swapAmount, 18)
             );
             expect(swapInfoUpdated.swapAmountForSwaps?.toString()).to.eq(
-                swapAmount.toString()
+                formatFixed(swapAmount, 18)
             );
             expect(swapInfoUpdated.returnAmount.toString()).to.eq(
                 returnAmount.toString()
@@ -1429,7 +1430,7 @@ describe(`Tests for Helpers.`, () => {
             const swapType = SwapTypes.SwapExactOut;
             const tokenIn = AddressZero;
             const tokenOut = BAL;
-            const swapAmount = bnum(7.7);
+            const swapAmount = parseFixed('7.7', 18);
             const returnAmount = bnum(1.67);
 
             const swap: SwapV2 = {
@@ -1443,7 +1444,7 @@ describe(`Tests for Helpers.`, () => {
             const swapInfo: SwapInfo = {
                 tokenAddresses: [WETHADDR[chainId], BAL],
                 swaps: [swap, swap], // Doesn't need valid swaps for this
-                swapAmount,
+                swapAmount: scale(bnum(swapAmount.toString()), -18),
                 swapAmountForSwaps: bnum(0), // This isn't set until after setWrappedInfo
                 returnAmount: returnAmount,
                 returnAmountConsideringFees: returnAmount,
@@ -1474,10 +1475,10 @@ describe(`Tests for Helpers.`, () => {
                 BAL,
             ]);
             expect(swapInfoUpdated.swapAmount.toString()).to.eq(
-                swapAmount.toString()
+                formatFixed(swapAmount, 18)
             );
             expect(swapInfoUpdated.swapAmountForSwaps?.toString()).to.eq(
-                swapAmount.toString()
+                formatFixed(swapAmount, 18)
             );
             expect(swapInfoUpdated.returnAmount.toString()).to.eq(
                 returnAmount.toString()
@@ -1495,7 +1496,7 @@ describe(`Tests for Helpers.`, () => {
             const swapType = SwapTypes.SwapExactIn;
             const tokenIn = BAL;
             const tokenOut = AddressZero;
-            const swapAmount = bnum(7.7);
+            const swapAmount = parseFixed('7.7', 18);
             const returnAmount = bnum(1.67);
 
             const swap: SwapV2 = {
@@ -1509,7 +1510,7 @@ describe(`Tests for Helpers.`, () => {
             const swapInfo: SwapInfo = {
                 tokenAddresses: [BAL, WETHADDR[chainId]],
                 swaps: [swap, swap], // Doesn't need valid swaps for this
-                swapAmount,
+                swapAmount: scale(bnum(swapAmount.toString()), -18),
                 swapAmountForSwaps: bnum(0), // This isn't set until after setWrappedInfo
                 returnAmount: returnAmount,
                 returnAmountFromSwaps: bnum(0), // This isn't set until after setWrappedInfo
@@ -1540,10 +1541,10 @@ describe(`Tests for Helpers.`, () => {
                 AddressZero,
             ]);
             expect(swapInfoUpdated.swapAmount.toString()).to.eq(
-                swapAmount.toString()
+                formatFixed(swapAmount, 18)
             );
             expect(swapInfoUpdated.swapAmountForSwaps?.toString()).to.eq(
-                swapAmount.toString()
+                formatFixed(swapAmount, 18)
             );
             expect(swapInfoUpdated.returnAmount.toString()).to.eq(
                 returnAmount.toString()
@@ -1561,7 +1562,7 @@ describe(`Tests for Helpers.`, () => {
             const swapType = SwapTypes.SwapExactOut;
             const tokenIn = BAL;
             const tokenOut = AddressZero;
-            const swapAmount = bnum(7.7);
+            const swapAmount = parseFixed('7.7', 18);
             const returnAmount = bnum(1.67);
 
             const swap: SwapV2 = {
@@ -1575,7 +1576,7 @@ describe(`Tests for Helpers.`, () => {
             const swapInfo: SwapInfo = {
                 tokenAddresses: [BAL, WETHADDR[chainId]],
                 swaps: [swap, swap], // Doesn't need valid swaps for this
-                swapAmount,
+                swapAmount: scale(bnum(swapAmount.toString()), -18),
                 swapAmountForSwaps: bnum(0), // This isn't set until after setWrappedInfo
                 returnAmount: returnAmount,
                 returnAmountFromSwaps: bnum(0), // This isn't set until after setWrappedInfo
@@ -1606,10 +1607,10 @@ describe(`Tests for Helpers.`, () => {
                 AddressZero,
             ]);
             expect(swapInfoUpdated.swapAmount.toString()).to.eq(
-                swapAmount.toString()
+                formatFixed(swapAmount, 18)
             );
             expect(swapInfoUpdated.swapAmountForSwaps?.toString()).to.eq(
-                swapAmount.toString()
+                formatFixed(swapAmount, 18)
             );
             expect(swapInfoUpdated.returnAmount.toString()).to.eq(
                 returnAmount.toString()
@@ -1627,7 +1628,7 @@ describe(`Tests for Helpers.`, () => {
             const swapType = SwapTypes.SwapExactIn;
             const tokenIn = Lido.stETH[chainId];
             const tokenOut = BAL;
-            const swapAmount = bnum(7.7);
+            const swapAmount = parseFixed('7.7', 18);
             const returnAmount = bnum(1.67);
 
             const swap: SwapV2 = {
@@ -1641,7 +1642,7 @@ describe(`Tests for Helpers.`, () => {
             const swapInfo: SwapInfo = {
                 tokenAddresses: [Lido.wstETH[chainId], BAL],
                 swaps: [swap, swap], // Doesn't need valid swaps for this
-                swapAmount: swapAmount,
+                swapAmount: bnum(swapAmount.toString()),
                 swapAmountForSwaps: bnum(0), // This isn't set until after setWrappedInfo
                 returnAmount: returnAmount,
                 returnAmountFromSwaps: bnum(0), // This isn't set until after setWrappedInfo
@@ -1695,7 +1696,7 @@ describe(`Tests for Helpers.`, () => {
             const swapType = SwapTypes.SwapExactOut;
             const tokenIn = Lido.stETH[chainId];
             const tokenOut = BAL;
-            const swapAmount = bnum(7.7);
+            const swapAmount = parseFixed('7.7', 18);
             const returnAmount = bnum(1.67);
 
             const swap: SwapV2 = {
@@ -1709,7 +1710,7 @@ describe(`Tests for Helpers.`, () => {
             const swapInfo: SwapInfo = {
                 tokenAddresses: [Lido.wstETH[chainId], BAL],
                 swaps: [swap, swap], // Doesn't need valid swaps for this
-                swapAmount: swapAmount,
+                swapAmount: bnum(swapAmount.toString()),
                 swapAmountForSwaps: bnum(0), // This isn't set until after setWrappedInfo
                 returnAmount: returnAmount,
                 returnAmountFromSwaps: bnum(0), // This isn't set until after setWrappedInfo
@@ -1767,7 +1768,7 @@ describe(`Tests for Helpers.`, () => {
             const swapType = SwapTypes.SwapExactIn;
             const tokenIn = BAL;
             const tokenOut = Lido.stETH[chainId];
-            const swapAmount = bnum(7.7).times(BONE);
+            const swapAmount = parseFixed('7.7', 18);
             const returnAmount = bnum(1.67).times(BONE);
 
             const swap: SwapV2 = {
@@ -1781,7 +1782,7 @@ describe(`Tests for Helpers.`, () => {
             const swapInfo: SwapInfo = {
                 tokenAddresses: [BAL, Lido.wstETH[chainId]],
                 swaps: [swap, swap], // Doesn't need valid swaps for this
-                swapAmount: swapAmount,
+                swapAmount: bnum(swapAmount.toString()),
                 swapAmountForSwaps: bnum(0), // This isn't set until after setWrappedInfo
                 returnAmount: returnAmount,
                 returnAmountFromSwaps: bnum(0), // This isn't set until after setWrappedInfo
@@ -1839,7 +1840,7 @@ describe(`Tests for Helpers.`, () => {
             const swapType = SwapTypes.SwapExactOut;
             const tokenIn = BAL;
             const tokenOut = Lido.stETH[chainId];
-            const swapAmount = bnum(7.7).times(BONE);
+            const swapAmount = parseFixed('7.7', 18);
             const returnAmount = bnum(1.67).times(BONE);
 
             const swap: SwapV2 = {
@@ -1853,7 +1854,7 @@ describe(`Tests for Helpers.`, () => {
             const swapInfo: SwapInfo = {
                 tokenAddresses: [BAL, Lido.wstETH[chainId]],
                 swaps: [swap, swap], // Doesn't need valid swaps for this
-                swapAmount: swapAmount,
+                swapAmount: bnum(swapAmount.toString()),
                 swapAmountForSwaps: bnum(0), // This isn't set until after setWrappedInfo
                 returnAmount: returnAmount,
                 returnAmountFromSwaps: bnum(0), // This isn't set until after setWrappedInfo
@@ -1888,7 +1889,7 @@ describe(`Tests for Helpers.`, () => {
             );
             // stETH in so should be exchanged to wstETH
             expect(swapInfoUpdated.swapAmountForSwaps?.toString()).to.eq(
-                swapAmount
+                bnum(swapAmount.toString())
                     .times(wrappedInfo.tokenOut.rate.toString())
                     .dividedBy(ONE.toString())
                     .dp(0)
@@ -1911,7 +1912,7 @@ describe(`Tests for Helpers.`, () => {
             const swapType = SwapTypes.SwapExactIn;
             const tokenIn = Lido.stETH[chainId];
             const tokenOut = AddressZero;
-            const swapAmount = bnum(7.7).times(BONE);
+            const swapAmount = parseFixed('7.7', 18);
             const returnAmount = bnum(1.67).times(BONE);
 
             const swap: SwapV2 = {
@@ -1925,7 +1926,7 @@ describe(`Tests for Helpers.`, () => {
             const swapInfo: SwapInfo = {
                 tokenAddresses: [Lido.wstETH[chainId], WETHADDR[chainId]],
                 swaps: [swap, swap], // Doesn't need valid swaps for this
-                swapAmount: swapAmount,
+                swapAmount: bnum(swapAmount.toString()),
                 swapAmountForSwaps: bnum(0), // This isn't set until after setWrappedInfo
                 returnAmount: returnAmount,
                 returnAmountFromSwaps: bnum(0), // This isn't set until after setWrappedInfo

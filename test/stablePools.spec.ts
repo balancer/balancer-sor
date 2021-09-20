@@ -9,8 +9,9 @@ import {
     StablePoolPairData,
 } from '../src/pools/stablePool/stablePool';
 import { BPTForTokensZeroPriceImpact } from '../src/frontendHelpers/stableHelpers';
+import { parseFixed } from '@ethersproject/bignumber';
 
-const gasPrice = bnum('30000000000');
+const gasPrice = parseFixed('30', 9);
 const maxPools = 4;
 const chainId = 1;
 const provider = new JsonRpcProvider(
@@ -119,7 +120,7 @@ describe(`Tests for Stable Pools.`, () => {
             const tokenIn = BAL;
             const tokenOut = USDC;
             const swapType = SwapTypes.SwapExactIn;
-            const swapAmt: BigNumber = bnum('1');
+            const swapAmt = parseFixed('1', 18);
 
             const sor = new SOR(provider, chainId, null, pools);
             const fetchSuccess = await sor.fetchPools([], false);
@@ -145,7 +146,7 @@ describe(`Tests for Stable Pools.`, () => {
             const tokenIn = BAL;
             const tokenOut = USDC;
             const swapType = SwapTypes.SwapExactOut;
-            const swapAmt: BigNumber = bnum('1');
+            const swapAmt = parseFixed('1', 18);
 
             const sor = new SOR(provider, chainId, null, pools);
             const fetchSuccess = await sor.fetchPools([], false);
@@ -171,7 +172,7 @@ describe(`Tests for Stable Pools.`, () => {
             const tokenIn = DAI;
             const tokenOut = USDC;
             const swapType = SwapTypes.SwapExactIn;
-            const swapAmt: BigNumber = bnum('1');
+            const swapAmt = parseFixed('1', 18);
 
             const sor = new SOR(provider, chainId, null, pools);
             const fetchSuccess = await sor.fetchPools([], false);
@@ -190,9 +191,7 @@ describe(`Tests for Stable Pools.`, () => {
             // This value is hard coded as sanity check if things unexpectedly change. Taken from V2 test run (with extra fee logic added).
             expect(swapInfo.returnAmount.toString()).eq('999603');
             expect(swapInfo.swaps.length).eq(1);
-            expect(swapInfo.swaps[0].amount.toString()).eq(
-                swapAmt.times(1e18).toString()
-            );
+            expect(swapInfo.swaps[0].amount.toString()).eq(swapAmt.toString());
             expect(swapInfo.swaps[0].poolId).eq(poolsFromFile.pools[0].id);
             expect(swapInfo.tokenAddresses[swapInfo.swaps[0].assetInIndex]).eq(
                 tokenIn
@@ -210,7 +209,7 @@ describe(`Tests for Stable Pools.`, () => {
             const tokenIn = USDC;
             const tokenOut = USDT;
             const swapType = SwapTypes.SwapExactOut;
-            const swapAmt: BigNumber = bnum('1');
+            const swapAmt = parseFixed('1', 6);
 
             const sor = new SOR(provider, chainId, null, pools);
             const fetchSuccess = await sor.fetchPools([], false);
@@ -229,9 +228,7 @@ describe(`Tests for Stable Pools.`, () => {
             // This value is hard coded as sanity check if things unexpectedly change. Taken from V2 test run (with extra fee logic added).
             expect(swapInfo.returnAmount.toString()).eq('1000401');
             expect(swapInfo.swaps.length).eq(1);
-            expect(swapInfo.swaps[0].amount.toString()).eq(
-                swapAmt.times(1e6).toString()
-            );
+            expect(swapInfo.swaps[0].amount.toString()).eq(swapAmt.toString());
             expect(swapInfo.swaps[0].poolId).eq(poolsFromFile.pools[0].id);
             expect(swapInfo.tokenAddresses[swapInfo.swaps[0].assetInIndex]).eq(
                 tokenIn
@@ -251,7 +248,7 @@ describe(`Tests for Stable Pools.`, () => {
             const tokenIn = DAI;
             const tokenOut = USDT;
             const swapType = SwapTypes.SwapExactIn;
-            const swapAmt: BigNumber = bnum('23.45');
+            const swapAmt = parseFixed('23.45', 18);
 
             const sor = new SOR(provider, chainId, null, pools);
             const fetchSuccess = await sor.fetchPools([], false);
@@ -267,9 +264,7 @@ describe(`Tests for Stable Pools.`, () => {
             // This value is hard coded as sanity check if things unexpectedly change. Taken from V2 test run (with extra fee logic added).
             expect(swapInfo.returnAmount.toString()).eq('23533631');
             expect(swapInfo.swaps.length).eq(2);
-            expect(swapInfo.swaps[0].amount.toString()).eq(
-                swapAmt.times(1e18).toString()
-            );
+            expect(swapInfo.swaps[0].amount.toString()).eq(swapAmt.toString());
             expect(swapInfo.swaps[0].poolId).eq(poolsFromFile.pools[0].id);
             expect(swapInfo.tokenAddresses[swapInfo.swaps[0].assetInIndex]).eq(
                 tokenIn
@@ -295,7 +290,7 @@ describe(`Tests for Stable Pools.`, () => {
             const tokenIn = USDT;
             const tokenOut = DAI;
             const swapType = SwapTypes.SwapExactOut;
-            const swapAmt: BigNumber = bnum('17.77');
+            const swapAmt = parseFixed('17.77', 18);
 
             const sor = new SOR(provider, chainId, null, pools);
             const fetchSuccess = await sor.fetchPools([], false);
@@ -312,9 +307,7 @@ describe(`Tests for Stable Pools.`, () => {
             // This value is hard coded as sanity check if things unexpectedly change. Taken from V2 test run (with extra fee logic added).
             expect(swapInfo.returnAmount.toString()).eq('18089532');
             expect(swapInfo.swaps.length).eq(2);
-            expect(swapInfo.swaps[0].amount.toString()).eq(
-                swapAmt.times(1e18).toString()
-            );
+            expect(swapInfo.swaps[0].amount.toString()).eq(swapAmt.toString());
             expect(swapInfo.swaps[0].poolId).eq(poolsFromFile.pools[0].id);
             expect(swapInfo.tokenAddresses[swapInfo.swaps[0].assetInIndex]).eq(
                 USDC
