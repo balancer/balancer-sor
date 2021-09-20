@@ -1,3 +1,4 @@
+import { parseFixed } from '@ethersproject/bignumber';
 import cloneDeep from 'lodash.clonedeep';
 import { BigNumber, bnum, scale, ZERO } from './utils/bignumber';
 import { EMPTY_SWAPINFO } from './constants';
@@ -62,9 +63,10 @@ const formatSequence = (
                     ? swap.tokenInDecimals
                     : swap.tokenOutDecimals;
 
-            amountScaled = scale(bnum(swap.swapAmount as string), scalingFactor)
-                .decimalPlaces(0, 1)
-                .toString();
+            amountScaled = parseFixed(
+                swap.swapAmount as string,
+                scalingFactor
+            ).toString();
         }
 
         const inIndex = tokenAddresses.indexOf(swap.tokenIn);
