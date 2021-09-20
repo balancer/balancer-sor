@@ -1,7 +1,8 @@
+import { BigNumber, parseFixed } from '@ethersproject/bignumber';
+import { WeiPerEther as ONE, Zero } from '@ethersproject/constants';
 import { Contract } from '@ethersproject/contracts';
 import { BaseProvider } from '@ethersproject/providers';
 import { WETHADDR } from '../constants';
-import { BigNumber, bnum, BONE, scale, ZERO } from '../utils/bignumber';
 import { getTokenPriceInNativeAsset } from './coingecko';
 
 export function calculateTotalSwapCost(
@@ -9,7 +10,7 @@ export function calculateTotalSwapCost(
     swapGas: BigNumber,
     gasPriceWei: BigNumber
 ): BigNumber {
-    return gasPriceWei.times(swapGas).times(tokenPrice).div(BONE);
+    return gasPriceWei.mul(swapGas).mul(tokenPrice).div(ONE);
 }
 
 export class SwapCostCalculator {
@@ -18,8 +19,8 @@ export class SwapCostCalculator {
 
     private initializeCache(): void {
         this.tokenPriceCache = {
-            AddressZero: BONE.toString(),
-            [WETHADDR[this.chainId].toLowerCase()]: BONE.toString(),
+            AddressZero: ONE.toString(),
+            [WETHADDR[this.chainId].toLowerCase()]: ONE.toString(),
         };
         this.tokenDecimalsCache = {};
     }
@@ -45,7 +46,7 @@ export class SwapCostCalculator {
         // Check if we have token price cached
         const cachedTokenPrice =
             this.tokenPriceCache[tokenAddress.toLowerCase()];
-        if (cachedTokenPrice) return bnum(cachedTokenPrice);
+        if (cachedTokenPrice) return BigNumber.from(cachedTokenPrice);
 
         try {
             // Query Coingecko first and only check decimals
@@ -59,8 +60,8 @@ export class SwapCostCalculator {
 
             // Coingecko returns price of token in terms of ETH
             // We want the price of 1 ETH in terms of the token base units
-            const ethPerTokenWei = scale(bnum(ethPerToken), 18 - tokenDecimals);
-            const ethPriceInToken = BONE.div(ethPerTokenWei).dp(0);
+            const ethPerTokenWei = parseFixed(ethPerToken, 18 - tokenDecimals);
+            const ethPriceInToken = ONE.div(ethPerTokenWei);
 
             this.setNativeAssetPriceInToken(
                 tokenAddress,
@@ -69,7 +70,7 @@ export class SwapCostCalculator {
             return ethPriceInToken;
         } catch (err) {
             console.log('Error Getting Token Price. Defaulting to 0.');
-            return ZERO;
+            return Zero;
         }
     }
 
@@ -98,9 +99,9 @@ export class SwapCostCalculator {
     async convertGasCostToToken(
         tokenAddress: string,
         gasPriceWei: BigNumber,
-        swapGas: BigNumber = new BigNumber('35000')
+        swapGas: BigNumber = BigNumber.from('35000')
     ): Promise<BigNumber> {
-        if (gasPriceWei.isZero() || swapGas.isZero()) return ZERO;
+        if (gasPriceWei.isZero() || swapGas.isZero()) return Zero;
         return calculateTotalSwapCost(
             await this.getNativeAssetPriceInToken(tokenAddress),
             swapGas,

@@ -6,7 +6,7 @@ import {
 } from '@ethersproject/bignumber';
 import { BaseProvider } from '@ethersproject/providers';
 import cloneDeep from 'lodash.clonedeep';
-import { BigNumber as OldBigNumber, bnum, ZERO } from './utils/bignumber';
+import { BigNumber as OldBigNumber, bnum } from './utils/bignumber';
 import { getBestPaths } from './router';
 import { getWrappedInfo, setWrappedInfo } from './wrapInfo';
 import { formatSwaps } from './formatSwaps';
@@ -27,6 +27,7 @@ import {
     SubgraphPoolBase,
     SwapOptions,
 } from './types';
+import { Zero } from '@ethersproject/constants';
 
 export class SOR {
     poolCacher: PoolCacher;
@@ -141,10 +142,10 @@ export class SOR {
 
     async getCostOfSwapInToken(
         outputToken: string,
-        gasPrice: OldBigNumber,
-        swapGas?: OldBigNumber
-    ): Promise<OldBigNumber> {
-        if (gasPrice.isZero()) return ZERO;
+        gasPrice: BigNumber,
+        swapGas?: BigNumber
+    ): Promise<BigNumber> {
+        if (gasPrice.isZero()) return Zero;
         return this.swapCostCalculator.convertGasCostToToken(
             outputToken,
             gasPrice,
@@ -197,8 +198,8 @@ export class SOR {
 
         const costOutputToken = await this.getCostOfSwapInToken(
             swapType === SwapTypes.SwapExactIn ? tokenOut : tokenIn,
-            bnum(swapOptions.gasPrice.toString()),
-            bnum(swapOptions.swapGas.toString())
+            swapOptions.gasPrice,
+            swapOptions.swapGas
         );
 
         const inputDecimals =
@@ -214,7 +215,7 @@ export class SOR {
                 paths,
                 scaledSwapAmount,
                 swapType,
-                costOutputToken,
+                bnum(costOutputToken.toString()),
                 swapOptions.maxPools
             );
 
