@@ -1,11 +1,11 @@
-import { BigNumber as EBigNumber } from '@ethersproject/bignumber';
+import { BigNumber } from '@ethersproject/bignumber';
 import { BaseProvider } from '@ethersproject/providers';
 import { AddressZero } from '@ethersproject/constants';
 import { Contract } from '@ethersproject/contracts';
 import cloneDeep from 'lodash.clonedeep';
 import { SubgraphPoolBase, SwapInfo, SwapTypes, SwapV2 } from '../../types';
 import { parseNewPool } from '../../pools';
-import { BigNumber, ZERO, scale, bnum } from '../../utils/bignumber';
+import { BigNumber as OldBigNumber, ZERO, bnum } from '../../utils/bignumber';
 import vaultAbi from '../../abi/Vault.json';
 import { EMPTY_SWAPINFO } from '../../constants';
 
@@ -816,7 +816,7 @@ async function queryBatchSwap(
     swaps: SwapV2[],
     assets: string[],
     provider: BaseProvider
-): Promise<BigNumber> {
+): Promise<OldBigNumber> {
     const vaultAddr = '0xBA12222222228d8Ba445958a75a0704d566BF2C8';
     const vaultContract = new Contract(vaultAddr, vaultAbi, provider);
     const funds = {
@@ -854,8 +854,8 @@ function calculateMarketSp(
     swaps: SwapV2[],
     assets: string[],
     pools: SubgraphPoolBase[]
-): BigNumber {
-    const spotPrices: BigNumber[] = [];
+): OldBigNumber {
+    const spotPrices: OldBigNumber[] = [];
     for (let i = 0; i < swaps.length; i++) {
         const swap = swaps[i];
 
@@ -874,7 +874,7 @@ function calculateMarketSp(
         );
 
         // Calculate current spot price
-        let spotPrice: BigNumber;
+        let spotPrice: OldBigNumber;
         if (swapType === SwapTypes.SwapExactIn)
             spotPrice = newPool._spotPriceAfterSwapExactTokenInForTokenOut(
                 poolPairData,
@@ -898,7 +898,7 @@ function calculateMarketSp(
 export async function getStEthRate(
     provider: BaseProvider,
     chainId: number
-): Promise<EBigNumber> {
+): Promise<BigNumber> {
     // Call stEthPerToken or tokensPerStETH to get the scaling factors in each direction.
     const wstETHContract = new Contract(
         Lido.wstETH[chainId],
@@ -919,7 +919,7 @@ export async function getLidoStaticSwaps(
     tokenIn: string,
     tokenOut: string,
     swapType: SwapTypes,
-    swapAmount: EBigNumber,
+    swapAmount: BigNumber,
     provider: BaseProvider
 ): Promise<SwapInfo> {
     // Check for stETH tokens and convert to use wstETH for routing

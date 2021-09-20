@@ -1,5 +1,5 @@
 // npx mocha -r ts-node/register test/fullSwaps.spec.ts
-import { BigNumber as EBigNumber } from '@ethersproject/bignumber';
+import { BigNumber } from '@ethersproject/bignumber';
 import { JsonRpcProvider } from '@ethersproject/providers';
 import cloneDeep from 'lodash.clonedeep';
 import { assert } from 'chai';
@@ -48,7 +48,7 @@ describe('Tests full swaps against known values', () => {
         const returnAmountDecimals = 18;
         const maxPools = 4;
         const swapAmount = parseFixed('1', 18);
-        const swapGas = EBigNumber.from('100000');
+        const swapGas = BigNumber.from('100000');
         const costOutputToken = Zero;
 
         const swapInfo = await getFullSwap(
@@ -80,7 +80,7 @@ describe('Tests full swaps against known values', () => {
         const returnAmountDecimals = 18;
         const maxPools = 4;
         const swapAmount = parseFixed('1', 18);
-        const swapGas = EBigNumber.from('100000');
+        const swapGas = BigNumber.from('100000');
         const costOutputToken = Zero;
 
         const swapInfo = await getFullSwap(
@@ -119,8 +119,8 @@ describe('Tests full swaps against known values', () => {
             TokenIn: tokenIn,
             TokenOut: tokenOut,
             NoPools: noPools,
-            SwapAmount: EBigNumber.from(amountIn),
-            GasPrice: EBigNumber.from(gasPrice),
+            SwapAmount: BigNumber.from(amountIn),
+            GasPrice: BigNumber.from(gasPrice),
             SwapAmountDecimals: 6,
             ReturnAmountDecimals: 18,
         };
@@ -155,7 +155,7 @@ describe('Tests full swaps against known values', () => {
         const returnAmountDecimals = 6;
         const maxPools = 4;
         const swapAmt = parseFixed('0.1', 18);
-        const swapGas = EBigNumber.from('100000');
+        const swapGas = BigNumber.from('100000');
         const costOutputToken = Zero;
 
         const swapInfo = await getFullSwap(
@@ -210,7 +210,7 @@ describe('Tests full swaps against known values', () => {
         const tokenOut = USDC;
         const swapType = 'swapExactOut';
         const noPools = 4;
-        const swapAmt = EBigNumber.from('100000');
+        const swapAmt = BigNumber.from('100000');
 
         const tradeInfo = {
             SwapType: swapType,
@@ -326,7 +326,7 @@ describe('Tests full swaps against known values', () => {
         const tokenOut = USDC;
         const swapType = 'swapExactOut';
         const noPools = 4;
-        const swapAmt = EBigNumber.from('100000');
+        const swapAmt = BigNumber.from('100000');
 
         const tradeInfo = {
             SwapType: swapType,
@@ -453,7 +453,7 @@ describe('Tests full swaps against known values', () => {
         const tokenOut = USDC;
         const swapType = 'swapExactOut';
         const noPools = 4;
-        const swapAmt = EBigNumber.from('100732100');
+        const swapAmt = BigNumber.from('100732100');
 
         const tradeInfo = {
             SwapType: swapType,

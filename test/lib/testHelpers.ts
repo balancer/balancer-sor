@@ -1,6 +1,6 @@
-import { BigNumber as EBigNumber } from '@ethersproject/bignumber';
+import { BigNumber } from '@ethersproject/bignumber';
 import { JsonRpcProvider } from '@ethersproject/providers';
-import { BigNumber } from 'bignumber.js';
+import { BigNumber as OldBigNumber } from 'bignumber.js';
 import cloneDeep from 'lodash.clonedeep';
 import * as sorv2 from '../../src';
 import {
@@ -26,8 +26,8 @@ export interface TradeInfo {
     TokenIn: string;
     TokenOut: string;
     NoPools: number;
-    SwapAmount: EBigNumber;
-    GasPrice: EBigNumber;
+    SwapAmount: BigNumber;
+    GasPrice: BigNumber;
     SwapAmountDecimals: number;
     ReturnAmountDecimals: number;
 }
@@ -41,7 +41,7 @@ export interface TestData {
 export interface Result {
     title: string;
     timeData: TimeData;
-    returnAmount: BigNumber;
+    returnAmount: OldBigNumber;
     swaps: SwapV2[] | Swap[][];
 }
 
@@ -97,8 +97,8 @@ export function loadTestFile(File: string): TestData {
     const fileJson = JSON.parse(fileString);
     if (!fileJson.tradeInfo) return fileJson;
 
-    fileJson.tradeInfo.GasPrice = EBigNumber.from(fileJson.tradeInfo.GasPrice);
-    fileJson.tradeInfo.SwapAmount = EBigNumber.from(
+    fileJson.tradeInfo.GasPrice = BigNumber.from(fileJson.tradeInfo.GasPrice);
+    fileJson.tradeInfo.SwapAmount = BigNumber.from(
         fileJson.tradeInfo.SwapAmount.split('.')[0] // This is getting rid of decimals that shouldn't be there.
     );
     return fileJson;
@@ -282,7 +282,7 @@ function testSwapAmountsForDecimals(
 function getTotalSwapAmount(
     swapType: SwapTypes,
     swapInfo: SwapInfo
-): BigNumber {
+): OldBigNumber {
     let total = bnum(0);
     const inIndex = swapInfo.tokenAddresses.indexOf(swapInfo.tokenIn);
     const outIndex = swapInfo.tokenAddresses.indexOf(swapInfo.tokenOut);
@@ -299,9 +299,9 @@ function getTotalSwapAmount(
 }
 
 export function calcRelativeDiffBn(
-    expected: BigNumber,
-    actual: BigNumber
-): BigNumber {
+    expected: OldBigNumber,
+    actual: OldBigNumber
+): OldBigNumber {
     return expected.minus(actual).div(expected).abs();
 }
 
@@ -334,11 +334,11 @@ export async function getFullSwap(
     returnAmountDecimals: number,
     maxPools: number,
     swapType: string | SwapTypes,
-    swapAmount: EBigNumber,
-    costOutputToken: EBigNumber,
-    gasPrice: EBigNumber,
+    swapAmount: BigNumber,
+    costOutputToken: BigNumber,
+    gasPrice: BigNumber,
     provider: JsonRpcProvider,
-    swapGas: EBigNumber = EBigNumber.from('100000')
+    swapGas: BigNumber = BigNumber.from('100000')
 ): Promise<SwapInfo> {
     const sor = new sorv2.SOR(provider, 1, null, cloneDeep(pools));
 

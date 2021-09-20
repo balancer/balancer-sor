@@ -1,4 +1,4 @@
-import { BigNumber as EBigNumber } from '@ethersproject/bignumber';
+import { BigNumber } from '@ethersproject/bignumber';
 import { JsonRpcProvider } from '@ethersproject/providers';
 import cloneDeep from 'lodash.clonedeep';
 import { performance } from 'perf_hooks';
@@ -18,7 +18,7 @@ export interface TestSettings {
     compareResults: boolean;
     costOutputTokenOveride: {
         isOverRide: boolean;
-        overRideCost: EBigNumber;
+        overRideCost: BigNumber;
     };
 }
 
@@ -31,7 +31,7 @@ export async function compareTest(
         costOutputTokenOveride: { isOverRide: true, overRideCost: Zero },
     }
 ): Promise<[Result, SwapInfo]> {
-    const swapGas = EBigNumber.from('100000'); // A pool swap costs approx 100000 gas
+    const swapGas = BigNumber.from('100000'); // A pool swap costs approx 100000 gas
     const costOutputToken = Zero;
     const fullSwapStart = performance.now();
 

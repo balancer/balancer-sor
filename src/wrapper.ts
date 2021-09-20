@@ -1,12 +1,12 @@
 import {
-    BigNumber as EBigNumber,
+    BigNumber,
     BigNumberish,
     formatFixed,
     parseFixed,
 } from '@ethersproject/bignumber';
 import { BaseProvider } from '@ethersproject/providers';
 import cloneDeep from 'lodash.clonedeep';
-import { BigNumber, bnum, ZERO } from './utils/bignumber';
+import { BigNumber as OldBigNumber, bnum, ZERO } from './utils/bignumber';
 import { getBestPaths } from './router';
 import { getWrappedInfo, setWrappedInfo } from './wrapInfo';
 import { formatSwaps } from './formatSwaps';
@@ -35,7 +35,7 @@ export class SOR {
 
     private readonly defaultSwapOptions: SwapOptions = {
         gasPrice: parseFixed('50', 9),
-        swapGas: EBigNumber.from('35000'),
+        swapGas: BigNumber.from('35000'),
         poolTypeFilter: PoolFilter.All,
         maxPools: 4,
         timestamp: Math.floor(Date.now() / 1000),
@@ -102,7 +102,7 @@ export class SOR {
             tokenIn,
             tokenOut,
             this.chainId,
-            EBigNumber.from(swapAmount)
+            BigNumber.from(swapAmount)
         );
 
         let swapInfo: SwapInfo;
@@ -141,9 +141,9 @@ export class SOR {
 
     async getCostOfSwapInToken(
         outputToken: string,
-        gasPrice: BigNumber,
-        swapGas?: BigNumber
-    ): Promise<BigNumber> {
+        gasPrice: OldBigNumber,
+        swapGas?: OldBigNumber
+    ): Promise<OldBigNumber> {
         if (gasPrice.isZero()) return ZERO;
         return this.swapCostCalculator.convertGasCostToToken(
             outputToken,
@@ -157,7 +157,7 @@ export class SOR {
         tokenIn: string,
         tokenOut: string,
         swapType: SwapTypes,
-        swapAmount: EBigNumber,
+        swapAmount: BigNumber,
         pools: SubgraphPoolBase[],
         swapOptions: SwapOptions
     ): Promise<SwapInfo> {
@@ -238,11 +238,11 @@ export class SOR {
     private getBestPaths(
         pools: PoolDictionary,
         paths: NewPath[],
-        swapAmount: BigNumber,
+        swapAmount: OldBigNumber,
         swapType: SwapTypes,
-        costOutputToken: BigNumber,
+        costOutputToken: OldBigNumber,
         maxPools: number
-    ): [Swap[][], BigNumber, BigNumber, BigNumber] {
+    ): [Swap[][], OldBigNumber, OldBigNumber, OldBigNumber] {
         // swapExactIn - total = total amount swap will return of tokenOut
         // swapExactOut - total = total amount of tokenIn required for swap
         return getBestPaths(

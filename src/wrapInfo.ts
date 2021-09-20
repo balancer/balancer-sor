@@ -1,17 +1,16 @@
-import { BigNumber as EBigNumber } from '@ethersproject/bignumber';
-
+import { BigNumber } from '@ethersproject/bignumber';
 import { BaseProvider } from '@ethersproject/providers';
 import { AddressZero, WeiPerEther as ONE } from '@ethersproject/constants';
 
 import { Lido, getStEthRate } from './pools/lido';
-import { bnum, scale } from './utils/bignumber';
+import { bnum } from './utils/bignumber';
 import { WETHADDR } from './constants';
 import { SwapTypes, SwapInfo } from './types';
 import { isSameAddress } from './utils';
 
 export interface WrappedInfo {
-    swapAmountOriginal: EBigNumber;
-    swapAmountForSwaps: EBigNumber;
+    swapAmountOriginal: BigNumber;
+    swapAmountForSwaps: BigNumber;
     tokenIn: TokenInfo;
     tokenOut: TokenInfo;
 }
@@ -20,7 +19,7 @@ export interface TokenInfo {
     addressOriginal: string;
     addressForSwaps: string;
     wrapType: WrapTypes;
-    rate: EBigNumber;
+    rate: BigNumber;
 }
 
 export enum WrapTypes {
@@ -35,7 +34,7 @@ export async function getWrappedInfo(
     tokenIn: string,
     tokenOut: string,
     chainId: number,
-    swapAmount: EBigNumber
+    swapAmount: BigNumber
 ): Promise<WrappedInfo> {
     // The Subgraph returns tokens in lower case format so we must match this
     tokenIn = tokenIn.toLowerCase();

@@ -1,4 +1,4 @@
-import { BigNumber, ZERO } from '../utils/bignumber';
+import { BigNumber as OldBigNumber, ZERO } from '../utils/bignumber';
 import { getHighestLimitAmountsForPaths } from './helpersClass';
 import { formatSwaps, optimizeSwapAmounts } from './sorClass';
 import { NewPath, PoolDictionary, Swap, SwapTypes } from '../types';
@@ -7,10 +7,10 @@ export const getBestPaths = (
     pools: PoolDictionary,
     paths: NewPath[],
     swapType: SwapTypes,
-    totalSwapAmount: BigNumber,
+    totalSwapAmount: OldBigNumber,
     maxPools: number,
-    costReturnToken: BigNumber
-): [Swap[][], BigNumber, BigNumber, BigNumber] => {
+    costReturnToken: OldBigNumber
+): [Swap[][], OldBigNumber, OldBigNumber, OldBigNumber] => {
     // No paths available or totalSwapAmount == 0, return empty solution
     if (paths.length == 0 || totalSwapAmount.isZero()) {
         return [[], ZERO, ZERO, ZERO];
@@ -19,7 +19,7 @@ export const getBestPaths = (
     // Before we start the main loop, we first check if there is enough liquidity for this totalSwapAmount
     const highestLimitAmounts = getHighestLimitAmountsForPaths(paths, maxPools);
     const sumLimitAmounts = highestLimitAmounts.reduce(
-        (r: BigNumber[], pathLimit: BigNumber) => {
+        (r: OldBigNumber[], pathLimit: OldBigNumber) => {
             r.push(pathLimit.plus(r[r.length - 1] || ZERO));
             return r;
         },
@@ -38,7 +38,7 @@ export const getBestPaths = (
             totalSwapAmount.lte(cumulativeLimit)
         ) + 1;
 
-    const initialSwapAmounts: BigNumber[] = highestLimitAmounts.slice(
+    const initialSwapAmounts: OldBigNumber[] = highestLimitAmounts.slice(
         0,
         initialNumPaths
     );

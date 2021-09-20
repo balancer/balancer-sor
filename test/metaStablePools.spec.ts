@@ -1,12 +1,12 @@
 require('dotenv').config();
 import { expect } from 'chai';
 import cloneDeep from 'lodash.clonedeep';
-import { BigNumber as EBigNumber, parseFixed } from '@ethersproject/bignumber';
+import { BigNumber, parseFixed } from '@ethersproject/bignumber';
 import { WeiPerEther as ONE } from '@ethersproject/constants';
 import { JsonRpcProvider } from '@ethersproject/providers';
 import { SOR } from '../src';
 import { SwapInfo, SwapTypes, PoolTypes, SubgraphPoolBase } from '../src/types';
-import { BigNumber, bnum, scale } from '../src/utils/bignumber';
+import { bnum, scale } from '../src/utils/bignumber';
 import {
     MetaStablePool,
     MetaStablePoolPairData,
@@ -34,7 +34,7 @@ async function getStableComparrison(
     tokenIn: string,
     tokenOut: string,
     swapType: SwapTypes,
-    swapAmt: EBigNumber
+    swapAmt: BigNumber
 ): Promise<SwapInfo> {
     const sorStable = new SOR(provider, chainId, null, stablePools);
     await sorStable.fetchPools([], false);

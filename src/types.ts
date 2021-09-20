@@ -1,5 +1,5 @@
-import { BigNumber as EBigNumber } from '@ethersproject/bignumber';
-import { BigNumber } from './utils/bignumber';
+import { BigNumber } from '@ethersproject/bignumber';
+import { BigNumber as OldBigNumber } from './utils/bignumber';
 
 export type NoNullableField<T> = {
     [P in keyof T]: NonNullable<T[P]>;
@@ -24,8 +24,8 @@ export enum SwapPairType {
 }
 
 export interface SwapOptions {
-    gasPrice: EBigNumber;
-    swapGas: EBigNumber;
+    gasPrice: BigNumber;
+    swapGas: BigNumber;
     timestamp: number;
     maxPools: number;
     poolTypeFilter: PoolFilter;
@@ -36,13 +36,13 @@ export type PoolPairBase = {
     id: string;
     address: string;
     poolType: PoolTypes;
-    swapFee: BigNumber;
+    swapFee: OldBigNumber;
     tokenIn: string;
     tokenOut: string;
     decimalsIn: number;
     decimalsOut: number;
-    balanceIn: BigNumber;
-    balanceOut: BigNumber;
+    balanceIn: OldBigNumber;
+    balanceOut: OldBigNumber;
 };
 
 export interface Swap {
@@ -101,14 +101,14 @@ export interface SwapV2 {
 export interface SwapInfo {
     tokenAddresses: string[];
     swaps: SwapV2[];
-    swapAmount: BigNumber;
-    swapAmountForSwaps?: BigNumber; // Used with stETH/wstETH
-    returnAmount: BigNumber;
-    returnAmountFromSwaps?: BigNumber; // Used with stETH/wstETH
-    returnAmountConsideringFees: BigNumber;
+    swapAmount: OldBigNumber;
+    swapAmountForSwaps?: OldBigNumber; // Used with stETH/wstETH
+    returnAmount: OldBigNumber;
+    returnAmountFromSwaps?: OldBigNumber; // Used with stETH/wstETH
+    returnAmountConsideringFees: OldBigNumber;
     tokenIn: string;
     tokenOut: string;
-    marketSp: BigNumber;
+    marketSp: OldBigNumber;
 }
 
 export interface PoolDictionary {
@@ -123,9 +123,9 @@ export interface NewPath {
     id: string; // pool address if direct path, contactenation of pool addresses if multihop
     swaps: Swap[];
     poolPairData: PoolPairBase[];
-    limitAmount: BigNumber;
+    limitAmount: OldBigNumber;
     pools: PoolBase[];
-    filterEffectivePrice?: BigNumber; // TODO: This is just used for filtering, maybe there is a better way to filter?
+    filterEffectivePrice?: OldBigNumber; // TODO: This is just used for filtering, maybe there is a better way to filter?
 }
 
 export enum PoolFilter {
@@ -143,38 +143,41 @@ export interface PoolBase {
     address: string;
     tokensList: string[];
     parsePoolPairData: (tokenIn: string, tokenOut: string) => PoolPairBase;
-    getNormalizedLiquidity: (poolPairData: PoolPairBase) => BigNumber;
+    getNormalizedLiquidity: (poolPairData: PoolPairBase) => OldBigNumber;
     getLimitAmountSwap: (
         poolPairData: PoolPairBase,
         swapType: SwapTypes
-    ) => BigNumber;
-    updateTokenBalanceForPool: (token: string, newBalance: BigNumber) => void;
+    ) => OldBigNumber;
+    updateTokenBalanceForPool: (
+        token: string,
+        newBalance: OldBigNumber
+    ) => void;
     _exactTokenInForTokenOut: (
         poolPairData: PoolPairBase,
-        amount: BigNumber,
+        amount: OldBigNumber,
         exact: boolean
-    ) => BigNumber;
+    ) => OldBigNumber;
     _tokenInForExactTokenOut: (
         poolPairData: PoolPairBase,
-        amount: BigNumber,
+        amount: OldBigNumber,
         exact: boolean
-    ) => BigNumber;
+    ) => OldBigNumber;
     _spotPriceAfterSwapExactTokenInForTokenOut: (
         poolPairData: PoolPairBase,
-        amount: BigNumber
-    ) => BigNumber;
+        amount: OldBigNumber
+    ) => OldBigNumber;
     _spotPriceAfterSwapTokenInForExactTokenOut: (
         poolPairData: PoolPairBase,
-        amount: BigNumber
-    ) => BigNumber;
+        amount: OldBigNumber
+    ) => OldBigNumber;
     _derivativeSpotPriceAfterSwapExactTokenInForTokenOut: (
         poolPairData: PoolPairBase,
-        amount: BigNumber
-    ) => BigNumber;
+        amount: OldBigNumber
+    ) => OldBigNumber;
     _derivativeSpotPriceAfterSwapTokenInForExactTokenOut: (
         poolPairData: PoolPairBase,
-        amount: BigNumber
-    ) => BigNumber;
+        amount: OldBigNumber
+    ) => OldBigNumber;
 }
 
 export interface WeightedPool extends PoolBase {
