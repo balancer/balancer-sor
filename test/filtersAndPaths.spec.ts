@@ -47,8 +47,7 @@ describe('Tests pools filtering and path processing', () => {
             testPools.weightedOnly,
             DAI,
             USDC,
-            maxPools,
-            1
+            maxPools
         );
 
         let noDirect = 0,
@@ -91,8 +90,7 @@ describe('Tests pools filtering and path processing', () => {
             subgraphPoolsLarge.pools,
             WETH,
             DAI,
-            4,
-            1
+            4
         );
 
         [poolsOfInterestDictionary, pathData] = filterHopPools(
@@ -183,8 +181,7 @@ describe('Tests pools filtering and path processing', () => {
             testPools.weightedOnly,
             DAI,
             USDC,
-            4,
-            1
+            4
         );
 
         let noDirect = 0,
@@ -229,8 +226,7 @@ describe('Tests pools filtering and path processing', () => {
             testPools.stableOnly,
             DAI,
             USDC,
-            4,
-            1
+            4
         );
 
         let noDirect = 0,
@@ -274,8 +270,7 @@ describe('Tests pools filtering and path processing', () => {
             allPools,
             DAI,
             USDC,
-            4,
-            1
+            4
         );
 
         let noDirect = 0,
@@ -322,8 +317,7 @@ describe('Tests pools filtering and path processing', () => {
             testPools.weightedOnly,
             DAI,
             USDC,
-            4,
-            1
+            4
         );
 
         [poolsOfInterestDictionary, pathData] = filterHopPools(
@@ -434,9 +428,7 @@ describe('Tests pools filtering and path processing', () => {
             testPools.stableOnly,
             DAI,
             USDC,
-            4,
-            1,
-            1
+            4
         );
 
         [poolsOfInterestDictionary, pathData] = filterHopPools(
@@ -499,8 +491,7 @@ describe('Tests pools filtering and path processing', () => {
             testPools.weightedOnly,
             DAI,
             USDC,
-            4,
-            1
+            4
         );
 
         [poolsOfInterestDictionary, pathData] = filterHopPools(
@@ -544,8 +535,7 @@ describe('Tests pools filtering and path processing', () => {
             testPools.weightedOnly,
             DAI,
             USDC,
-            4,
-            1
+            4
         );
 
         [poolsOfInterestDictionary, pathData] = filterHopPools(
@@ -583,8 +573,7 @@ describe('Tests pools filtering and path processing', () => {
             testPools.stableOnly,
             DAI,
             USDC,
-            4,
-            1
+            4
         );
 
         [poolsOfInterestDictionary, pathData] = filterHopPools(
@@ -626,8 +615,7 @@ describe('Tests pools filtering and path processing', () => {
             pools,
             tokenIn,
             tokenOut,
-            4,
-            1
+            4
         );
         /*
         [poolsOfInterestDictionary, pathData] = filterHopPools(
@@ -662,8 +650,7 @@ describe('Tests pools filtering and path processing', () => {
             pools,
             tokenIn,
             tokenOut,
-            4,
-            1
+            4
         );
 
         const [noDirect, noHopIn, noHopOut] = countPoolSwapPairTypes(
@@ -708,7 +695,6 @@ describe('Tests pools filtering and path processing', () => {
 
         let swaps: any, total: BigNumber, marketSp: BigNumber;
         [swaps, total, marketSp] = getBestPaths(
-            cloneDeep(poolsOfInterestDictionary), // Need to keep original pools for cache
             paths,
             SwapTypes.SwapExactIn,
             new BigNumber(1),
@@ -772,8 +758,7 @@ describe('Tests pools filtering and path processing', () => {
             pools,
             tokenIn,
             tokenOut,
-            4,
-            1
+            4
         );
 
         const [noDirect, noHopIn, noHopOut] = countPoolSwapPairTypes(
@@ -818,7 +803,6 @@ describe('Tests pools filtering and path processing', () => {
 
         let swaps: any, total: BigNumber, marketSp: BigNumber;
         [swaps, total, marketSp] = getBestPaths(
-            cloneDeep(poolsOfInterestDictionary), // Need to keep original pools for cache
             paths,
             SwapTypes.SwapExactOut,
             new BigNumber(1),

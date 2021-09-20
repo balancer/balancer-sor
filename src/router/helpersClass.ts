@@ -26,7 +26,6 @@ export function getHighestLimitAmountsForPaths(
 }
 
 export function getEffectivePriceSwapForPath(
-    pools: PoolDictionary,
     path: NewPath,
     swapType: SwapTypes,
     amount: BigNumber
