@@ -66,9 +66,6 @@ describe('linear pool tests', () => {
                 poolsFilteredDict,
                 chainId
             );
-
-            console.log(pathsUsingLinear);
-
             expect(pathsUsingLinear).to.be.empty;
         });
     });
@@ -422,8 +419,8 @@ function checkPath(
         expect(path.swaps[i].pool).eq(poolId);
         // TokenIn should equal previous swaps tokenOut
         expect(path.swaps[i].tokenIn).eq(lastTokenOut);
-        // expect(path.swaps[i].tokenInDecimals).eq(poolPairData.decimalsIn); TO DO - Not currently passing
-        // expect(path.swaps[i].tokenOutDecimals).eq(poolPairData.decimalsOut);
+        expect(path.swaps[i].tokenInDecimals).eq(poolPairData.decimalsIn);
+        expect(path.swaps[i].tokenOutDecimals).eq(poolPairData.decimalsOut);
         lastTokenOut = tokenOut;
     }
 

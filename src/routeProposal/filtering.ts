@@ -476,7 +476,7 @@ function createMultihopPath(
         tokenIn: tokenIn,
         tokenOut: hopToken,
         tokenInDecimals: poolPairDataFirst.decimalsIn,
-        tokenOutDecimals: poolPairDataSecond.decimalsOut,
+        tokenOutDecimals: poolPairDataFirst.decimalsOut,
     };
 
     const swap2: Swap = {
