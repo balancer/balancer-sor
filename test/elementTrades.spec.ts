@@ -120,8 +120,9 @@ describe(`Tests against Element generated test trade file.`, () => {
                 }
             );
 
-            const amountNormalised = bnum(trade.output.amount_out).times(
-                bnum(10 ** 18)
+            const amountNormalised = parseFixed(
+                trade.output.amount_out.toString(),
+                18
             );
 
             const relDiffBn = calcRelativeDiffBn(
@@ -131,7 +132,7 @@ describe(`Tests against Element generated test trade file.`, () => {
 
             expect(swapInfo.returnAmount.gt(0)).to.be.true;
             const errorDelta = 10 ** -6;
-            assert.isAtMost(relDiffBn.toNumber(), errorDelta);
+            assert.isAtMost(relDiffBn, errorDelta);
         });
     });
 });

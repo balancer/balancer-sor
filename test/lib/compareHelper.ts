@@ -57,7 +57,6 @@ export async function compareTest(
     };
 
     const v1SwapData = parseV1Result(testData.v1Result);
-    v1SwapData.returnAmount = bnum(v1SwapData.returnAmount);
 
     displayResults(
         `${testName}`,

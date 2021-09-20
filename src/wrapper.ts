@@ -222,7 +222,7 @@ export class SOR {
         const swapInfo = formatSwaps(
             swaps,
             swapType,
-            bnum(swapAmount.toString()),
+            swapAmount,
             tokenIn,
             tokenOut,
             total,

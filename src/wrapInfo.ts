@@ -3,7 +3,6 @@ import { BaseProvider } from '@ethersproject/providers';
 import { AddressZero, WeiPerEther as ONE } from '@ethersproject/constants';
 
 import { Lido, getStEthRate } from './pools/lido';
-import { bnum } from './utils/bignumber';
 import { WETHADDR } from './constants';
 import { SwapTypes, SwapInfo } from './types';
 import { isSameAddress } from './utils';
@@ -123,10 +122,8 @@ export function setWrappedInfo(
         (wrappedInfo.tokenOut.wrapType === WrapTypes.stETH &&
             swapType === SwapTypes.SwapExactOut)
     ) {
-        swapInfo.swapAmountForSwaps = bnum(
-            wrappedInfo.swapAmountForSwaps.toString()
-        );
-        swapInfo.swapAmount = bnum(wrappedInfo.swapAmountOriginal.toString());
+        swapInfo.swapAmountForSwaps = wrappedInfo.swapAmountForSwaps;
+        swapInfo.swapAmount = wrappedInfo.swapAmountOriginal;
     } else {
         // Should be same when standard tokens and swapAmount should already be scaled
         swapInfo.swapAmountForSwaps = swapInfo.swapAmount;
@@ -141,14 +138,13 @@ export function setWrappedInfo(
         wrappedInfo.tokenOut.wrapType === WrapTypes.stETH
     ) {
         swapInfo.returnAmount = swapInfo.returnAmount
-            .multipliedBy(ONE.toString())
-            .div(wrappedInfo.tokenOut.rate.toString())
-            .dp(0);
+            .mul(ONE)
+            .div(wrappedInfo.tokenOut.rate);
+
         swapInfo.returnAmountConsideringFees =
             swapInfo.returnAmountConsideringFees
-                .multipliedBy(ONE.toString())
-                .div(wrappedInfo.tokenOut.rate.toString())
-                .dp(0);
+                .mul(ONE)
+                .div(wrappedInfo.tokenOut.rate);
     }
 
     // SwapExactOut, stETH in, returnAmount us stETH amount in, returnAmountForSwaps is wstETH amount in
@@ -157,14 +153,13 @@ export function setWrappedInfo(
         wrappedInfo.tokenIn.wrapType === WrapTypes.stETH
     ) {
         swapInfo.returnAmount = swapInfo.returnAmount
-            .multipliedBy(ONE.toString())
-            .div(wrappedInfo.tokenIn.rate.toString())
-            .dp(0);
+            .mul(ONE)
+            .div(wrappedInfo.tokenIn.rate);
+
         swapInfo.returnAmountConsideringFees =
             swapInfo.returnAmountConsideringFees
-                .multipliedBy(ONE.toString())
-                .div(wrappedInfo.tokenIn.rate.toString())
-                .dp(0);
+                .mul(ONE)
+                .div(wrappedInfo.tokenIn.rate);
     }
     return swapInfo;
 }

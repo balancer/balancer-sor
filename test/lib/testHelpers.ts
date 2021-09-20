@@ -19,7 +19,7 @@ import { assert } from 'chai';
 // Mainnet reference tokens with addresses & decimals
 import WeightedTokens from '../testData/eligibleTokens.json';
 import StableTokens from '../testData/stableTokens.json';
-import { WeiPerEther as ONE } from '@ethersproject/constants';
+import { WeiPerEther as ONE, Zero } from '@ethersproject/constants';
 
 export interface TradeInfo {
     SwapType: string;
@@ -41,7 +41,7 @@ export interface TestData {
 export interface Result {
     title: string;
     timeData: TimeData;
-    returnAmount: OldBigNumber;
+    returnAmount: BigNumber;
     swaps: SwapV2[] | Swap[][];
 }
 
@@ -185,16 +185,18 @@ function testReturnAmountAgainstV1(
     v1SwapData: Result,
     swapInfo: SwapInfo
 ): void {
+    if (swapInfo.returnAmount.eq(v1SwapData.returnAmount.toString())) return;
+
     const relDiffBn = calcRelativeDiffBn(
         swapInfo.returnAmount,
-        v1SwapData.returnAmount
+        BigNumber.from(v1SwapData.returnAmount.toString())
     );
     const errorDelta = 10 ** -6;
 
     if (swapType === SwapTypes.SwapExactIn) {
         // Current result should be better or equal to V1 result or within errorDelta
-        if (!swapInfo.returnAmount.gte(v1SwapData.returnAmount)) {
-            assert.isAtMost(relDiffBn.toNumber(), errorDelta);
+        if (!swapInfo.returnAmount.gte(v1SwapData.returnAmount.toString())) {
+            assert.isAtMost(relDiffBn, errorDelta);
             console.log(
                 `!!!!!! V2 < V1 but error delta ok. (${relDiffBn.toString()})`
             );
@@ -212,8 +214,8 @@ function testReturnAmountAgainstV1(
         }
 
         // Current result should be less than or equal to V1 result or within errorDelta
-        if (!swapInfo.returnAmount.lte(v1SwapData.returnAmount)) {
-            assert.isAtMost(relDiffBn.toNumber(), errorDelta);
+        if (!swapInfo.returnAmount.lte(v1SwapData.returnAmount.toString())) {
+            assert.isAtMost(relDiffBn, errorDelta);
             console.log(
                 `!!!!!! V2 > V1 but error delta ok. (${relDiffBn.toString()})`
             );
@@ -299,10 +301,13 @@ function getTotalSwapAmount(
 }
 
 export function calcRelativeDiffBn(
-    expected: OldBigNumber,
-    actual: OldBigNumber
-): OldBigNumber {
-    return expected.minus(actual).div(expected).abs();
+    expected: BigNumber,
+    actual: BigNumber
+): number {
+    return (
+        expected.sub(actual).mul(1000000).div(expected).abs().toNumber() /
+        1000000
+    );
 }
 
 export function countPoolSwapPairTypes(
@@ -387,7 +392,7 @@ export function parseV1Result(v1ResultParsed: ResultParsed): Result {
         return {
             title: 'N/A',
             timeData: { fullSwap: 0 },
-            returnAmount: bnum(0),
+            returnAmount: Zero,
             swaps: [] as SwapV2[],
         };
     }
@@ -395,7 +400,7 @@ export function parseV1Result(v1ResultParsed: ResultParsed): Result {
     return {
         title: v1ResultParsed.title,
         timeData: v1ResultParsed.timeData,
-        returnAmount: bnum(v1ResultParsed.returnAmount),
+        returnAmount: BigNumber.from(v1ResultParsed.returnAmount),
         swaps: v1ResultParsed.swaps,
     };
 }

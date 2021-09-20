@@ -101,11 +101,11 @@ export interface SwapV2 {
 export interface SwapInfo {
     tokenAddresses: string[];
     swaps: SwapV2[];
-    swapAmount: OldBigNumber;
-    swapAmountForSwaps?: OldBigNumber; // Used with stETH/wstETH
-    returnAmount: OldBigNumber;
-    returnAmountFromSwaps?: OldBigNumber; // Used with stETH/wstETH
-    returnAmountConsideringFees: OldBigNumber;
+    swapAmount: BigNumber;
+    swapAmountForSwaps?: BigNumber; // Used with stETH/wstETH
+    returnAmount: BigNumber;
+    returnAmountFromSwaps?: BigNumber; // Used with stETH/wstETH
+    returnAmountConsideringFees: BigNumber;
     tokenIn: string;
     tokenOut: string;
     marketSp: OldBigNumber;

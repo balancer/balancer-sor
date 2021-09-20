@@ -255,15 +255,12 @@ describe(`Tests for MetaStable Pools.`, () => {
             expect(swapInfoStable.tokenOut).to.deep.eq(swapInfo.tokenOut);
             // Would expect stable to be half of amounts, i.e. 2stETH = 1ETH
             expect(swapInfoStable.returnAmount.toString()).eq(
-                swapInfo.returnAmount
-                    .times(tokenOutPriceRate.toString())
-                    .div(ONE.toString())
-                    .toString()
+                swapInfo.returnAmount.mul(tokenOutPriceRate).div(ONE).toString()
             );
             expect(swapInfoStable.returnAmountConsideringFees.toString()).eq(
                 swapInfo.returnAmountConsideringFees
-                    .times(tokenOutPriceRate.toString())
-                    .div(ONE.toString())
+                    .mul(tokenOutPriceRate)
+                    .div(ONE)
                     .toString()
             );
             expect(swapInfoStable.swaps.length).eq(swapInfo.swaps.length);
@@ -277,9 +274,9 @@ describe(`Tests for MetaStable Pools.`, () => {
                 );
                 expect(swapStable.userData).eq(swapInfo.swaps[i].userData);
                 expect(swapStable.amount).eq(
-                    bnum(swapInfo.swaps[i].amount)
-                        .times(tokenInPriceRate.toString())
-                        .div(ONE.toString())
+                    BigNumber.from(swapInfo.swaps[i].amount)
+                        .mul(tokenInPriceRate)
+                        .div(ONE)
                         .toString()
                 );
             });
@@ -343,9 +340,9 @@ describe(`Tests for MetaStable Pools.`, () => {
                 );
                 expect(swapStable.userData).eq(swapInfo.swaps[i].userData);
                 expect(swapStable.amount).eq(
-                    bnum(swapInfo.swaps[i].amount)
-                        .times(tokenInPriceRate.toString())
-                        .div(ONE.toString())
+                    BigNumber.from(swapInfo.swaps[i].amount)
+                        .mul(tokenInPriceRate)
+                        .div(ONE)
                         .toString()
                 );
             });
@@ -408,9 +405,9 @@ describe(`Tests for MetaStable Pools.`, () => {
                 );
                 expect(swapStable.userData).eq(swapInfo.swaps[i].userData);
                 expect(swapStable.amount).eq(
-                    bnum(swapInfo.swaps[i].amount)
-                        .times(tokenOutPriceRate.toString())
-                        .div(ONE.toString())
+                    BigNumber.from(swapInfo.swaps[i].amount)
+                        .mul(tokenOutPriceRate)
+                        .div(ONE)
                         .toString()
                 );
             });
@@ -457,15 +454,12 @@ describe(`Tests for MetaStable Pools.`, () => {
             expect(swapInfoStable.tokenIn).to.deep.eq(swapInfo.tokenIn);
             expect(swapInfoStable.tokenOut).to.deep.eq(swapInfo.tokenOut);
             expect(swapInfoStable.returnAmount.toString()).eq(
-                swapInfo.returnAmount
-                    .times(tokenInPriceRate.toString())
-                    .div(ONE.toString())
-                    .toString()
+                swapInfo.returnAmount.mul(tokenInPriceRate).div(ONE).toString()
             );
             expect(swapInfoStable.returnAmountConsideringFees.toString()).eq(
                 swapInfo.returnAmountConsideringFees
-                    .times(tokenInPriceRate.toString())
-                    .div(ONE.toString())
+                    .mul(tokenInPriceRate)
+                    .div(ONE)
                     .toString()
             );
             expect(swapInfoStable.swaps.length).eq(swapInfo.swaps.length);
@@ -479,9 +473,9 @@ describe(`Tests for MetaStable Pools.`, () => {
                 );
                 expect(swapStable.userData).eq(swapInfo.swaps[i].userData);
                 expect(swapStable.amount).eq(
-                    bnum(swapInfo.swaps[i].amount)
-                        .times(tokenOutPriceRate.toString())
-                        .div(ONE.toString())
+                    BigNumber.from(swapInfo.swaps[i].amount)
+                        .mul(tokenOutPriceRate)
+                        .div(ONE)
                         .toString()
                 );
             });
@@ -538,8 +532,8 @@ describe(`Tests for MetaStable Pools.`, () => {
             );
             expect(swapInfoStable.returnAmountConsideringFees.toString()).eq(
                 swapInfo.returnAmountConsideringFees
-                    .times(tokenOutPriceRate.toString())
-                    .div(ONE.toString())
+                    .mul(tokenOutPriceRate)
+                    .div(ONE)
                     .toString()
             );
             expect(swapInfoStable.swaps.length).eq(swapInfo.swaps.length);
@@ -553,9 +547,9 @@ describe(`Tests for MetaStable Pools.`, () => {
                 );
                 expect(swapStable.userData).eq(swapInfo.swaps[i].userData);
                 expect(swapStable.amount).eq(
-                    bnum(swapInfo.swaps[i].amount)
-                        .times(tokenInPriceRate.toString())
-                        .div(ONE.toString())
+                    BigNumber.from(swapInfo.swaps[i].amount)
+                        .mul(tokenInPriceRate)
+                        .div(ONE)
                         .toString()
                 );
             });
@@ -611,8 +605,8 @@ describe(`Tests for MetaStable Pools.`, () => {
             );
             expect(swapInfoStable.returnAmountConsideringFees.toString()).eq(
                 swapInfo.returnAmountConsideringFees
-                    .times(tokenOutPriceRate.toString())
-                    .div(ONE.toString())
+                    .mul(tokenOutPriceRate)
+                    .div(ONE)
                     .toString()
             );
             expect(swapInfoStable.swaps.length).eq(swapInfo.swaps.length);
@@ -626,9 +620,9 @@ describe(`Tests for MetaStable Pools.`, () => {
                 );
                 expect(swapStable.userData).eq(swapInfo.swaps[i].userData);
                 expect(swapStable.amount).eq(
-                    bnum(swapInfo.swaps[i].amount)
-                        .times(tokenInPriceRate.toString())
-                        .div(ONE.toString())
+                    BigNumber.from(swapInfo.swaps[i].amount)
+                        .mul(tokenInPriceRate)
+                        .div(ONE)
                         .toString()
                 );
             });

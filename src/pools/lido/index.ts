@@ -1,6 +1,6 @@
 import { BigNumber } from '@ethersproject/bignumber';
 import { BaseProvider } from '@ethersproject/providers';
-import { AddressZero } from '@ethersproject/constants';
+import { AddressZero, Zero } from '@ethersproject/constants';
 import { Contract } from '@ethersproject/contracts';
 import cloneDeep from 'lodash.clonedeep';
 import { SubgraphPoolBase, SwapInfo, SwapTypes, SwapV2 } from '../../types';
@@ -816,7 +816,7 @@ async function queryBatchSwap(
     swaps: SwapV2[],
     assets: string[],
     provider: BaseProvider
-): Promise<OldBigNumber> {
+): Promise<BigNumber> {
     const vaultAddr = '0xBA12222222228d8Ba445958a75a0704d566BF2C8';
     const vaultContract = new Contract(vaultAddr, vaultAbi, provider);
     const funds = {
@@ -827,21 +827,22 @@ async function queryBatchSwap(
     };
 
     try {
-        const deltas = await vaultContract.callStatic.queryBatchSwap(
-            swapType,
-            swaps,
-            assets,
-            funds
-        );
+        const deltas: BigNumber[] =
+            await vaultContract.callStatic.queryBatchSwap(
+                swapType,
+                swaps,
+                assets,
+                funds
+            );
         // negative amounts represent tokens (or ETH) sent by the Vault
         if (swapType === SwapTypes.SwapExactIn)
-            return bnum(deltas[assets.length - 1].toString()).times(-1);
-        else return bnum(deltas[0].toString());
+            return deltas[assets.length - 1].mul(-1);
+        else return deltas[0];
     } catch (err) {
         console.error(
             `SOR - Lido Static Route QueryBatchSwap Error. No swaps.`
         );
-        return bnum(0);
+        return Zero;
     }
 }
 
@@ -940,7 +941,7 @@ export async function getLidoStaticSwaps(
 
     swapInfo.tokenAddresses = staticRoute.tokenAddresses;
     swapInfo.swaps = staticRoute.swaps;
-    swapInfo.swapAmount = bnum(swapAmount.toString());
+    swapInfo.swapAmount = swapAmount;
     // if (swapType === SwapTypes.SwapExactIn)
     //     swapInfo.swapAmount = scale(swapAmount, staticRoute.tokenInDecimals).dp(
     //         0

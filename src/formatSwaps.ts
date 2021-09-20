@@ -1,8 +1,9 @@
-import { parseFixed } from '@ethersproject/bignumber';
+import { BigNumber, parseFixed } from '@ethersproject/bignumber';
 import cloneDeep from 'lodash.clonedeep';
-import { BigNumber, bnum, scale, ZERO } from './utils/bignumber';
+import { BigNumber as OldBigNumber, bnum, scale } from './utils/bignumber';
 import { EMPTY_SWAPINFO } from './constants';
 import { SwapTypes, SwapV2, Swap, SwapInfo } from './types';
+import { Zero } from '@ethersproject/constants';
 
 /**
  * @returns an array of deduplicated token addresses used in the provided swaps
@@ -25,7 +26,7 @@ const getTokenAddresses = (swaps: Swap[][]): string[] => {
  * @returns the total amount of tokens used in the described batchSwap
  */
 const getTotalSwapAmount = (swaps: SwapV2[]) => {
-    return swaps.reduce((acc, { amount }) => acc.plus(amount), ZERO);
+    return swaps.reduce((acc, { amount }) => acc.add(amount), Zero);
 };
 
 /**
@@ -63,10 +64,9 @@ const formatSequence = (
                     ? swap.tokenInDecimals
                     : swap.tokenOutDecimals;
 
-            amountScaled = parseFixed(
-                swap.swapAmount as string,
-                scalingFactor
-            ).toString();
+            amountScaled = scale(bnum(swap.swapAmount as string), scalingFactor)
+                .decimalPlaces(0, 1)
+                .toString();
         }
 
         const inIndex = tokenAddresses.indexOf(swap.tokenIn);
@@ -87,9 +87,9 @@ export function formatSwaps(
     swapAmount: BigNumber,
     tokenIn: string,
     tokenOut: string,
-    returnAmount: BigNumber,
-    returnAmountConsideringFees: BigNumber,
-    marketSp: BigNumber
+    returnAmount: OldBigNumber,
+    returnAmountConsideringFees: OldBigNumber,
+    marketSp: OldBigNumber
 ): SwapInfo {
     const swaps: Swap[][] = cloneDeep(swapsOriginal);
 
@@ -118,21 +118,23 @@ export function formatSwaps(
         swapType === SwapTypes.SwapExactIn ? tokenOutDecimals : tokenInDecimals;
 
     swapInfo.swapAmount = swapAmount;
-    swapInfo.returnAmount = scale(returnAmount, returnDecimals).dp(
-        0,
-        BigNumber.ROUND_FLOOR
-    );
-    swapInfo.returnAmountConsideringFees = scale(
-        returnAmountConsideringFees,
+    swapInfo.returnAmount = parseFixed(
+        returnAmount.dp(returnDecimals, OldBigNumber.ROUND_FLOOR).toString(),
         returnDecimals
-    ).dp(0, BigNumber.ROUND_FLOOR);
+    );
+    swapInfo.returnAmountConsideringFees = parseFixed(
+        returnAmountConsideringFees
+            .dp(returnDecimals, OldBigNumber.ROUND_FLOOR)
+            .toString(),
+        returnDecimals
+    );
 
     // We need to account for any rounding losses by adding dust to first path
-    const dust = swapInfo.swapAmount
-        .minus(getTotalSwapAmount(swapsV2))
-        .dp(0, 0);
+    const dust = swapInfo.swapAmount.sub(getTotalSwapAmount(swapsV2));
     if (dust.gt(0))
-        swapsV2[0].amount = bnum(swapsV2[0].amount).plus(dust).toString();
+        swapsV2[0].amount = BigNumber.from(swapsV2[0].amount)
+            .add(dust)
+            .toString();
 
     swapInfo.swaps = swapsV2;
     swapInfo.tokenAddresses = tokenArray;

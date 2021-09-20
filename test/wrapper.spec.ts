@@ -1,6 +1,6 @@
 // npx mocha -r ts-node/register test/wrapper.spec.ts
 require('dotenv').config();
-import { parseFixed } from '@ethersproject/bignumber';
+import { BigNumber, parseFixed } from '@ethersproject/bignumber';
 import { AddressZero, Zero } from '@ethersproject/constants';
 import { JsonRpcProvider } from '@ethersproject/providers';
 import { assert, expect } from 'chai';
@@ -11,7 +11,6 @@ import {
     PoolFilter,
     SubgraphPoolBase,
 } from '../src/types';
-import { BigNumber, bnum } from '../src/utils/bignumber';
 
 const WETHADDR = '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2';
 
@@ -74,12 +73,12 @@ describe(`Tests for wrapper class.`, () => {
             }
         );
 
-        assert.isAbove(swapInfo.returnAmount.toNumber(), 0);
+        expect(swapInfo.returnAmount.gt(0)).to.be.true;
         assert.equal(
             swapInfo.returnAmountFromSwaps?.toString(),
             swapInfo.returnAmount.toString()
         );
-        assert.isAbove(bnum(swapInfo.swaps[0].amount).toNumber(), 0);
+        expect(BigNumber.from(swapInfo.swaps[0].amount).gt(0)).to.be.true;
         assert.equal(tokenIn, swapInfo.tokenIn);
         assert.equal(tokenOut, swapInfo.tokenOut);
         assert.equal(
@@ -122,8 +121,8 @@ describe(`Tests for wrapper class.`, () => {
             }
         );
 
-        assert.isAbove(swapInfo.returnAmount.toNumber(), 0);
-        assert.isAbove(bnum(swapInfo.swaps[0].amount).toNumber(), 0);
+        expect(swapInfo.returnAmount.gt(0)).to.be.true;
+        expect(BigNumber.from(swapInfo.swaps[0].amount).gt(0)).to.be.true;
         assert.equal(tokenIn, swapInfo.tokenIn);
         assert.equal(tokenOut, swapInfo.tokenOut);
         assert.equal(
@@ -162,7 +161,7 @@ describe(`Tests for wrapper class.`, () => {
             }
         );
 
-        assert.equal(swapInfo.returnAmount.toNumber(), 0);
+        expect(swapInfo.returnAmount.eq(0)).to.be.true;
         assert.equal(swapInfo.swaps.length, 0);
         assert.equal(swapInfo.tokenIn, '');
         assert.equal(swapInfo.tokenOut, '');
@@ -200,8 +199,8 @@ describe(`Tests for wrapper class.`, () => {
         ];
 
         expect(expectedTokenAddresses).to.deep.eq(swapInfo.tokenAddresses);
-        assert.isAbove(swapInfo.returnAmount.toNumber(), 0);
-        assert.isAbove(bnum(swapInfo.swaps[0].amount).toNumber(), 0);
+        expect(swapInfo.returnAmount.gt(0)).to.be.true;
+        expect(BigNumber.from(swapInfo.swaps[0].amount).gt(0)).to.be.true;
         assert.equal(tokenIn, swapInfo.tokenIn);
         assert.equal(tokenOut, swapInfo.tokenOut);
         assert.equal(
@@ -266,12 +265,12 @@ describe(`Tests for wrapper class.`, () => {
         // Swaps/amts, etc should be same. Token list should be different
         expect(expectedTokenAddressesWeth).to.deep.eq(swapInfo.tokenAddresses);
         expect(swapInfoEth.swaps).to.deep.eq(swapInfo.swaps);
-        assert.isAbove(swapInfo.returnAmount.toNumber(), 0);
+        expect(swapInfo.returnAmount.gt(0)).to.be.true;
         assert.equal(
             swapInfoEth.returnAmount.toNumber(),
             swapInfo.returnAmount.toNumber()
         );
-        assert.isAbove(bnum(swapInfo.swaps[0].amount).toNumber(), 0);
+        expect(BigNumber.from(swapInfo.swaps[0].amount).gt(0)).to.be.true;
         assert.equal(tokenInWeth, swapInfo.tokenIn);
         assert.equal(tokenOut, swapInfo.tokenOut);
         assert.equal(tokenInEth, swapInfoEth.tokenIn);
@@ -330,12 +329,12 @@ describe(`Tests for wrapper class.`, () => {
         // Swaps/amts, etc should be same. Token list should be different
         expect(expectedTokenAddressesWeth).to.deep.eq(swapInfo.tokenAddresses);
         expect(swapInfoEth.swaps).to.deep.eq(swapInfo.swaps);
-        assert.isAbove(swapInfo.returnAmount.toNumber(), 0);
+        expect(swapInfo.returnAmount.gt(0)).to.be.true;
         assert.equal(
             swapInfoEth.returnAmount.toNumber(),
             swapInfo.returnAmount.toNumber()
         );
-        assert.isAbove(bnum(swapInfo.swaps[0].amount).toNumber(), 0);
+        expect(BigNumber.from(swapInfo.swaps[0].amount).gt(0)).to.be.true;
         assert.equal(tokenIn, swapInfo.tokenIn);
         assert.equal(tokenOutWeth, swapInfo.tokenOut);
         assert.equal(tokenIn, swapInfoEth.tokenIn);
@@ -401,12 +400,12 @@ describe(`Tests for wrapper class.`, () => {
         // Swaps/amts, etc should be same. Token list should be different
         expect(expectedTokenAddressesWeth).to.deep.eq(swapInfo.tokenAddresses);
         expect(swapInfoEth.swaps).to.deep.eq(swapInfo.swaps);
-        assert.isAbove(swapInfo.returnAmount.toNumber(), 0);
+        expect(swapInfo.returnAmount.gt(0)).to.be.true;
         assert.equal(
             swapInfoEth.returnAmount.toNumber(),
             swapInfo.returnAmount.toNumber()
         );
-        assert.isAbove(bnum(swapInfo.swaps[0].amount).toNumber(), 0);
+        expect(BigNumber.from(swapInfo.swaps[0].amount).gt(0)).to.be.true;
         assert.equal(tokenInWeth, swapInfo.tokenIn);
         assert.equal(tokenOut, swapInfo.tokenOut);
         assert.equal(tokenInEth, swapInfoEth.tokenIn);
@@ -468,12 +467,12 @@ describe(`Tests for wrapper class.`, () => {
         // Swaps/amts, etc should be same. Token list should be different
         expect(expectedTokenAddressesWeth).to.deep.eq(swapInfo.tokenAddresses);
         expect(swapInfoEth.swaps).to.deep.eq(swapInfo.swaps);
-        assert.isAbove(swapInfo.returnAmount.toNumber(), 0);
+        expect(swapInfo.returnAmount.gt(0)).to.be.true;
         assert.equal(
             swapInfoEth.returnAmount.toNumber(),
             swapInfo.returnAmount.toNumber()
         );
-        assert.isAbove(bnum(swapInfo.swaps[0].amount).toNumber(), 0);
+        expect(BigNumber.from(swapInfo.swaps[0].amount).gt(0)).to.be.true;
         assert.equal(tokenIn, swapInfo.tokenIn);
         assert.equal(tokenOutWeth, swapInfo.tokenOut);
         assert.equal(tokenIn, swapInfoEth.tokenIn);

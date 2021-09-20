@@ -3,10 +3,10 @@ import { expect } from 'chai';
 import cloneDeep from 'lodash.clonedeep';
 import { AddressZero, WeiPerEther as ONE } from '@ethersproject/constants';
 import { JsonRpcProvider } from '@ethersproject/providers';
-import { SOR, SwapInfo, SwapTypes, bnum, SubgraphPoolBase } from '../src';
+import { SOR, SwapInfo, SwapTypes, SubgraphPoolBase } from '../src';
 import { Lido, getLidoStaticSwaps, isLidoStableSwap } from '../src/pools/lido';
 import { getStEthRate } from '../src/pools/lido';
-import { formatFixed, parseFixed } from '@ethersproject/bignumber';
+import { parseFixed } from '@ethersproject/bignumber';
 
 const gasPrice = parseFixed('30', 9);
 const maxPools = 4;
@@ -198,18 +198,13 @@ describe(`Tests for Lido USD routes.`, () => {
             );
             // This is pulled from mainnet so needs valid routes - will be 0 if not
             // returnAmount for stETH should be using exchangeRate
-            const priceRateScaled = bnum(formatFixed(priceRate, 18));
-
             expect(testSwapInfo.returnAmount.toString()).to.eq(
-                swapInfowstEth.returnAmount
-                    .div(priceRateScaled)
-                    .dp(0)
-                    .toString()
+                swapInfowstEth.returnAmount.mul(ONE).div(priceRate).toString()
             );
             expect(testSwapInfo.returnAmountConsideringFees.toString()).to.eq(
                 swapInfowstEth.returnAmountConsideringFees
-                    .div(priceRateScaled)
-                    .dp(0)
+                    .mul(ONE)
+                    .div(priceRate)
                     .toString()
             );
             // return amounts for swaps should be same
@@ -272,17 +267,13 @@ describe(`Tests for Lido USD routes.`, () => {
             );
             // This is pulled from mainnet so needs valid routes - will be 0 if not
             // returnAmount (amount of input stETH) should be using exchangeRate
-            const priceRateScaled = bnum(formatFixed(priceRate, 18));
             expect(testSwapInfo.returnAmount.toString()).to.eq(
-                swapInfowstEth.returnAmount
-                    .div(priceRateScaled)
-                    .dp(0)
-                    .toString()
+                swapInfowstEth.returnAmount.mul(ONE).div(priceRate).toString()
             );
             expect(testSwapInfo.returnAmountConsideringFees.toString()).to.eq(
                 swapInfowstEth.returnAmountConsideringFees
-                    .div(priceRateScaled)
-                    .dp(0)
+                    .mul(ONE)
+                    .div(priceRate)
                     .toString()
             );
         }).timeout(100000);
