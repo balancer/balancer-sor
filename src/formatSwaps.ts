@@ -114,10 +114,8 @@ export function formatSwaps(
         formatSequence(swapType, sequence, tokenArray)
     );
 
-    const [inputDecimals, returnDecimals] =
-        swapType === SwapTypes.SwapExactIn
-            ? [tokenInDecimals, tokenOutDecimals]
-            : [tokenOutDecimals, tokenInDecimals];
+    const returnDecimals =
+        swapType === SwapTypes.SwapExactIn ? tokenOutDecimals : tokenInDecimals;
 
     swapInfo.swapAmount = swapAmount;
     swapInfo.returnAmount = scale(returnAmount, returnDecimals).dp(
