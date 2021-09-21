@@ -1,4 +1,4 @@
-import { BigNumber as OldBigNumber } from '../utils/bignumber';
+import { BigNumber as OldBigNumber, ZERO } from '../utils/bignumber';
 import * as weightedMath from '../pools/weightedPool/weightedMath';
 import { WeightedPoolPairData } from 'pools/weightedPool/weightedPool';
 import { Zero } from '@ethersproject/constants';
@@ -19,7 +19,6 @@ export function BPTForTokensZeroPriceImpact(
     amounts: OldBigNumber[],
     bptTotalSupply: OldBigNumber
 ): OldBigNumber {
-    const zero = new OldBigNumber(0);
     let amountBPTOut = new OldBigNumber(0);
     // Calculate the amount of BPT adding this liquidity would result in
     // if there were no price impact, i.e. using the spot price of tokenIn/BPT
@@ -33,7 +32,7 @@ export function BPTForTokensZeroPriceImpact(
             swapFee: Zero,
         } as WeightedPoolPairData;
         const BPTPrice = weightedMath._spotPriceAfterSwapTokenInForExactBPTOut(
-            zero,
+            ZERO,
             poolPairData
         );
         amountBPTOut = amountBPTOut.plus(amounts[i].div(BPTPrice));

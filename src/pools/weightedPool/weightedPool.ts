@@ -167,7 +167,7 @@ export class WeightedPool implements PoolBase {
     updateTokenBalanceForPool(token: string, newBalance: BigNumber): void {
         // token is BPT
         if (this.address == token) {
-            this.totalShares = newBalance.toString();
+            this.totalShares = formatFixed(newBalance, 18);
         } else {
             // token is underlying in the pool
             const T = this.tokens.find((t) => t.address === token);
