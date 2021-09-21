@@ -202,18 +202,15 @@ export class SOR {
             swapOptions.swapGas
         );
 
-        const [inputDecimals, outputDecimals] =
-            swapType === SwapTypes.SwapExactIn
-                ? [tokenInDecimals, tokenOutDecimals]
-                : [tokenOutDecimals, tokenInDecimals];
-
         // Returns list of swaps
         const [swaps, total, marketSp, totalConsideringFees] =
             this.getBestPaths(
                 poolsOfInterest,
                 paths,
-                bnum(formatFixed(swapAmount, inputDecimals)),
+                swapAmount,
                 swapType,
+                tokenInDecimals,
+                tokenOutDecimals,
                 costOutputToken,
                 swapOptions.maxPools
             );
@@ -224,16 +221,8 @@ export class SOR {
             swapAmount,
             tokenIn,
             tokenOut,
-            parseFixed(
-                total.dp(outputDecimals, OldBigNumber.ROUND_FLOOR).toString(),
-                outputDecimals
-            ),
-            parseFixed(
-                totalConsideringFees
-                    .dp(outputDecimals, OldBigNumber.ROUND_FLOOR)
-                    .toString(),
-                outputDecimals
-            ),
+            total,
+            totalConsideringFees,
             marketSp
         );
 
@@ -246,20 +235,43 @@ export class SOR {
     private getBestPaths(
         pools: PoolDictionary,
         paths: NewPath[],
-        swapAmount: OldBigNumber,
+        swapAmount: BigNumber,
         swapType: SwapTypes,
+        tokenInDecimals: number,
+        tokenOutDecimals: number,
         costOutputToken: BigNumber,
         maxPools: number
-    ): [Swap[][], OldBigNumber, OldBigNumber, OldBigNumber] {
+    ): [Swap[][], BigNumber, OldBigNumber, BigNumber] {
         // swapExactIn - total = total amount swap will return of tokenOut
         // swapExactOut - total = total amount of tokenIn required for swap
-        return getBestPaths(
+
+        const [inputDecimals, outputDecimals] =
+            swapType === SwapTypes.SwapExactIn
+                ? [tokenInDecimals, tokenOutDecimals]
+                : [tokenOutDecimals, tokenInDecimals];
+
+        const [swaps, total, marketSp, totalConsideringFees] = getBestPaths(
             cloneDeep(pools),
             paths,
             swapType,
-            swapAmount,
+            bnum(formatFixed(swapAmount, inputDecimals)),
             maxPools,
             costOutputToken
         );
+
+        return [
+            swaps,
+            parseFixed(
+                total.dp(outputDecimals, OldBigNumber.ROUND_FLOOR).toString(),
+                outputDecimals
+            ),
+            marketSp,
+            parseFixed(
+                totalConsideringFees
+                    .dp(outputDecimals, OldBigNumber.ROUND_FLOOR)
+                    .toString(),
+                outputDecimals
+            ),
+        ];
     }
 }
