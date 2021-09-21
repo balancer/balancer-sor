@@ -16,6 +16,7 @@ import {
     EVMgetOutputAmountSwap,
 } from './helpersClass';
 import { MaxUint256 } from '@ethersproject/constants';
+import { BigNumber } from '@ethersproject/bignumber';
 
 // TODO get max price from slippage tolerance given by user options
 export const MAX_UINT = MaxUint256.toString();
@@ -33,7 +34,7 @@ export const optimizeSwapAmounts = (
     highestLimitAmounts: OldBigNumber[],
     initialNumPaths: number,
     maxPools: number,
-    costReturnToken: OldBigNumber
+    costReturnToken: BigNumber
 ): [NewPath[], OldBigNumber[], OldBigNumber] => {
     // First get the optimal totalReturn to trade 'totalSwapAmount' with
     // one path only (b=1). Then increase the number of pools as long as
@@ -129,7 +130,9 @@ export const optimizeSwapAmounts = (
         // amount of tokenIn needed to buy totalSwapAmount of tokenOut
         let improvementCondition = false;
         let totalReturnConsideringFees = ZERO;
-        const gasFees = bnum(totalNumberOfPools).times(costReturnToken);
+        const gasFees = bnum(totalNumberOfPools).times(
+            costReturnToken.toString()
+        );
         if (swapType === SwapTypes.SwapExactIn) {
             totalReturnConsideringFees = totalReturn.minus(gasFees);
             improvementCondition = totalReturnConsideringFees.isGreaterThan(

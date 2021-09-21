@@ -215,7 +215,7 @@ export class SOR {
                 paths,
                 scaledSwapAmount,
                 swapType,
-                bnum(costOutputToken.toString()),
+                costOutputToken,
                 swapOptions.maxPools
             );
 
@@ -241,7 +241,7 @@ export class SOR {
         paths: NewPath[],
         swapAmount: OldBigNumber,
         swapType: SwapTypes,
-        costOutputToken: OldBigNumber,
+        costOutputToken: BigNumber,
         maxPools: number
     ): [Swap[][], OldBigNumber, OldBigNumber, OldBigNumber] {
         // swapExactIn - total = total amount swap will return of tokenOut

@@ -19,6 +19,7 @@ import { countPoolSwapPairTypes } from './lib/testHelpers';
 
 import subgraphPoolsLarge from './testData/testPools/subgraphPoolsLarge.json';
 import testPools from './testData/filterTestPools.json';
+import { Zero } from '@ethersproject/constants';
 
 const WETH = '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2'; // WETH lower case
 const DAI = '0x6B175474E89094C44Da98b954EedeAC495271d0F'.toLowerCase();
@@ -700,7 +701,7 @@ describe('Tests pools filtering and path processing', () => {
             SwapTypes.SwapExactIn,
             new BigNumber(1),
             4,
-            new BigNumber(0)
+            Zero
         );
 
         assert.equal(total.toString(), '0.979134514480937');
@@ -809,7 +810,7 @@ describe('Tests pools filtering and path processing', () => {
             SwapTypes.SwapExactOut,
             new BigNumber(1),
             4,
-            new BigNumber(0)
+            Zero
         );
 
         assert.equal(total.toString(), '1.021332');

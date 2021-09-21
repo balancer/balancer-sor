@@ -2,6 +2,7 @@ import { BigNumber as OldBigNumber, ZERO } from '../utils/bignumber';
 import { getHighestLimitAmountsForPaths } from './helpersClass';
 import { formatSwaps, optimizeSwapAmounts } from './sorClass';
 import { NewPath, PoolDictionary, Swap, SwapTypes } from '../types';
+import { BigNumber } from '@ethersproject/bignumber';
 
 export const getBestPaths = (
     pools: PoolDictionary,
@@ -9,7 +10,7 @@ export const getBestPaths = (
     swapType: SwapTypes,
     totalSwapAmount: OldBigNumber,
     maxPools: number,
-    costReturnToken: OldBigNumber
+    costReturnToken: BigNumber
 ): [Swap[][], OldBigNumber, OldBigNumber, OldBigNumber] => {
     // No paths available or totalSwapAmount == 0, return empty solution
     if (paths.length == 0 || totalSwapAmount.isZero()) {
