@@ -25,6 +25,7 @@ import {
     _derivativeSpotPriceAfterSwapTokenInForExactTokenOut,
 } from './weightedMath';
 import { BigNumber, formatFixed, parseFixed } from '@ethersproject/bignumber';
+import { WeiPerEther as ONE } from '@ethersproject/constants';
 
 export type WeightedPoolToken = Pick<
     NoNullableField<SubgraphToken>,
@@ -46,8 +47,8 @@ export class WeightedPool implements PoolBase {
     tokens: WeightedPoolToken[];
     totalWeight: OldBigNumber;
     tokensList: string[];
-    MAX_IN_RATIO = bnum(0.3);
-    MAX_OUT_RATIO = bnum(0.3);
+    MAX_IN_RATIO = parseFixed('0.3', 18);
+    MAX_OUT_RATIO = parseFixed('0.3', 18);
 
     static fromPool(pool: SubgraphPoolBase): WeightedPool {
         if (!pool.totalWeight)
@@ -140,12 +141,18 @@ export class WeightedPool implements PoolBase {
     ): OldBigNumber {
         if (swapType === SwapTypes.SwapExactIn) {
             return bnum(
-                formatFixed(poolPairData.balanceIn, poolPairData.decimalsIn)
-            ).times(this.MAX_IN_RATIO);
+                formatFixed(
+                    poolPairData.balanceIn.mul(this.MAX_IN_RATIO).div(ONE),
+                    poolPairData.decimalsIn
+                )
+            );
         } else {
             return bnum(
-                formatFixed(poolPairData.balanceOut, poolPairData.decimalsOut)
-            ).times(this.MAX_OUT_RATIO);
+                formatFixed(
+                    poolPairData.balanceOut.mul(this.MAX_OUT_RATIO).div(ONE),
+                    poolPairData.decimalsOut
+                )
+            );
         }
     }
 
