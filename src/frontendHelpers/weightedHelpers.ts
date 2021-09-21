@@ -1,6 +1,7 @@
 import { BigNumber as OldBigNumber } from '../utils/bignumber';
 import * as weightedMath from '../pools/weightedPool/weightedMath';
 import { WeightedPoolPairData } from 'pools/weightedPool/weightedPool';
+import { Zero } from '@ethersproject/constants';
 
 /////////
 /// UI Helpers
@@ -30,7 +31,7 @@ export function BPTForTokensZeroPriceImpact(
             ),
             balanceOut: bptTotalSupply.times(new OldBigNumber(10).pow(-18)),
             weightIn: normalizedWeights[i].times(new OldBigNumber(10).pow(-18)),
-            swapFee: zero,
+            swapFee: Zero,
         } as WeightedPoolPairData;
         const BPTPrice = weightedMath._spotPriceAfterSwapTokenInForExactBPTOut(
             zero,

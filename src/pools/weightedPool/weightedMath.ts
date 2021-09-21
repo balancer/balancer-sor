@@ -1,3 +1,4 @@
+import { formatFixed } from '@ethersproject/bignumber';
 import { BigNumber as OldBigNumber, bnum } from '../../utils/bignumber';
 import { WeightedPoolPairData } from './weightedPool';
 // All functions came from https://www.wolframcloud.com/obj/fernando.martinel/Published/SOR_equations_published.nb
@@ -17,7 +18,7 @@ export function _exactTokenInForTokenOut(
     const wi = poolPairData.weightIn.toNumber();
     const wo = poolPairData.weightOut.toNumber();
     const Ai = amount.toNumber();
-    const f = poolPairData.swapFee.toNumber();
+    const f = parseFloat(formatFixed(poolPairData.swapFee, 18));
     return bnum(Bo * (1 - (Bi / (Bi + Ai * (1 - f))) ** (wi / wo)));
     // return Bo.times(
     //     bnum(1).minus(
@@ -41,7 +42,7 @@ export function _tokenInForExactTokenOut(
     const wi = poolPairData.weightIn.toNumber();
     const wo = poolPairData.weightOut.toNumber();
     const Ao = amount.toNumber();
-    const f = poolPairData.swapFee.toNumber();
+    const f = parseFloat(formatFixed(poolPairData.swapFee, 18));
     return bnum((Bi * (-1 + (Bo / (-Ao + Bo)) ** (wo / wi))) / (1 - f));
     // return Bi.times(
     //     bnum(-1).plus(
@@ -61,7 +62,7 @@ export function _spotPriceAfterSwapTokenInForExactBPTOut(
     const Bbpt = poolPairData.balanceOut.toNumber();
     const wi = poolPairData.weightIn.toNumber();
     const Aobpt = amount.toNumber();
-    const f = poolPairData.swapFee.toNumber();
+    const f = parseFloat(formatFixed(poolPairData.swapFee, 18));
     return bnum(
         (((Aobpt + Bbpt) / Bbpt) ** (1 / wi) * Bi) /
             ((Aobpt + Bbpt) * (1 + f * (-1 + wi)) * wi)
@@ -83,7 +84,7 @@ export function _spotPriceAfterSwapExactTokenInForTokenOut(
     const wi = poolPairData.weightIn.toNumber();
     const wo = poolPairData.weightOut.toNumber();
     const Ai = amount.toNumber();
-    const f = poolPairData.swapFee.toNumber();
+    const f = parseFloat(formatFixed(poolPairData.swapFee, 18));
     return bnum(
         -(
             (Bi * wo) /
@@ -103,7 +104,7 @@ export function _spotPriceAfterSwapTokenInForExactTokenOut(
     const wi = poolPairData.weightIn.toNumber();
     const wo = poolPairData.weightOut.toNumber();
     const Ao = amount.toNumber();
-    const f = poolPairData.swapFee.toNumber();
+    const f = parseFloat(formatFixed(poolPairData.swapFee, 18));
     return bnum(
         -(
             (Bi * (Bo / (-Ao + Bo)) ** ((wi + wo) / wi) * wo) /
@@ -127,7 +128,7 @@ export function _derivativeSpotPriceAfterSwapExactTokenInForTokenOut(
     const wi = poolPairData.weightIn.toNumber();
     const wo = poolPairData.weightOut.toNumber();
     const Ai = amount.toNumber();
-    const f = poolPairData.swapFee.toNumber();
+    const f = parseFloat(formatFixed(poolPairData.swapFee, 18));
     return bnum((wi + wo) / (Bo * (Bi / (Ai + Bi - Ai * f)) ** (wi / wo) * wi));
 }
 
@@ -142,7 +143,7 @@ export function _derivativeSpotPriceAfterSwapTokenInForExactTokenOut(
     const wi = poolPairData.weightIn.toNumber();
     const wo = poolPairData.weightOut.toNumber();
     const Ao = amount.toNumber();
-    const f = poolPairData.swapFee.toNumber();
+    const f = parseFloat(formatFixed(poolPairData.swapFee, 18));
     return bnum(
         -(
             (Bi * (Bo / (-Ao + Bo)) ** (wo / wi) * wo * (wi + wo)) /

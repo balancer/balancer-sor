@@ -24,6 +24,7 @@ import {
     _derivativeSpotPriceAfterSwapExactTokenInForTokenOut,
     _derivativeSpotPriceAfterSwapTokenInForExactTokenOut,
 } from './weightedMath';
+import { BigNumber, parseFixed } from '@ethersproject/bignumber';
 
 export type WeightedPoolToken = Pick<
     NoNullableField<SubgraphToken>,
@@ -40,7 +41,7 @@ export class WeightedPool implements PoolBase {
     swapPairType: SwapPairType;
     id: string;
     address: string;
-    swapFee: OldBigNumber;
+    swapFee: BigNumber;
     totalShares: string;
     tokens: WeightedPoolToken[];
     totalWeight: OldBigNumber;
@@ -73,7 +74,7 @@ export class WeightedPool implements PoolBase {
     ) {
         this.id = id;
         this.address = address;
-        this.swapFee = bnum(swapFee);
+        this.swapFee = parseFixed(swapFee, 18);
         this.totalShares = totalShares;
         this.tokens = tokens;
         this.tokensList = tokensList;
@@ -172,7 +173,7 @@ export class WeightedPool implements PoolBase {
                     scale(poolPairData.balanceOut, poolPairData.decimalsOut),
                     scale(poolPairData.weightOut, 18),
                     scale(amount, poolPairData.decimalsIn),
-                    scale(poolPairData.swapFee, 18)
+                    bnum(poolPairData.swapFee.toString())
                 );
                 // return normalised amount
                 return scale(amt, -poolPairData.decimalsOut);
@@ -203,7 +204,7 @@ export class WeightedPool implements PoolBase {
                     scale(poolPairData.balanceOut, poolPairData.decimalsOut),
                     scale(poolPairData.weightOut, 18),
                     scale(amount, poolPairData.decimalsOut),
-                    scale(poolPairData.swapFee, 18)
+                    bnum(poolPairData.swapFee.toString())
                 );
 
                 // return normalised amount

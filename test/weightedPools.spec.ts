@@ -9,6 +9,7 @@ import {
     WeightedPoolPairData,
     WeightedPoolToken,
 } from '../src/pools/weightedPool/weightedPool';
+import { parseFixed } from '@ethersproject/bignumber';
 
 const gasPrice = bnum('30000000000');
 const maxPools = 4;
@@ -46,7 +47,7 @@ describe(`Tests for Weighted Pools.`, () => {
                 tokenOut: pool.tokens[1].address,
                 balanceIn: bnum(pool.tokens[0].balance),
                 balanceOut: bnum(pool.tokens[1].balance),
-                swapFee: bnum(pool.swapFee),
+                swapFee: parseFixed(pool.swapFee, 18),
                 decimalsIn: Number(pool.tokens[0].decimals),
                 decimalsOut: Number(pool.tokens[1].decimals),
                 weightIn: bnum(pool.tokens[0].weight as string),
@@ -79,7 +80,7 @@ describe(`Tests for Weighted Pools.`, () => {
                 tokenOut: pool.tokens[1].address,
                 balanceIn: bnum(pool.tokens[0].balance),
                 balanceOut: bnum(pool.tokens[1].balance),
-                swapFee: bnum(pool.swapFee),
+                swapFee: parseFixed(pool.swapFee, 18),
                 decimalsIn: Number(pool.tokens[0].decimals),
                 decimalsOut: Number(pool.tokens[1].decimals),
                 weightIn: bnum(pool.tokens[0].weight as string),

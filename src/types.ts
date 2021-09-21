@@ -36,7 +36,7 @@ export type PoolPairBase = {
     id: string;
     address: string;
     poolType: PoolTypes;
-    swapFee: OldBigNumber;
+    swapFee: BigNumber;
     tokenIn: string;
     tokenOut: string;
     decimalsIn: number;
