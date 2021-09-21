@@ -87,8 +87,8 @@ export function formatSwaps(
     swapAmount: BigNumber,
     tokenIn: string,
     tokenOut: string,
-    returnAmount: OldBigNumber,
-    returnAmountConsideringFees: OldBigNumber,
+    returnAmount: BigNumber,
+    returnAmountConsideringFees: BigNumber,
     marketSp: OldBigNumber
 ): SwapInfo {
     const swaps: Swap[][] = cloneDeep(swapsOriginal);
@@ -102,32 +102,14 @@ export function formatSwaps(
         return swapInfo;
     }
 
-    const { tokenInDecimals } = swaps[0].find(
-        (swap) => swap.tokenIn === tokenIn
-    ) as Swap;
-    const { tokenOutDecimals } = swaps[0].find(
-        (swap) => swap.tokenOut === tokenOut
-    ) as Swap;
-
     const tokenArray = getTokenAddresses(swaps);
     const swapsV2: SwapV2[] = swaps.flatMap((sequence) =>
         formatSequence(swapType, sequence, tokenArray)
     );
 
-    const returnDecimals =
-        swapType === SwapTypes.SwapExactIn ? tokenOutDecimals : tokenInDecimals;
-
     swapInfo.swapAmount = swapAmount;
-    swapInfo.returnAmount = parseFixed(
-        returnAmount.dp(returnDecimals, OldBigNumber.ROUND_FLOOR).toString(),
-        returnDecimals
-    );
-    swapInfo.returnAmountConsideringFees = parseFixed(
-        returnAmountConsideringFees
-            .dp(returnDecimals, OldBigNumber.ROUND_FLOOR)
-            .toString(),
-        returnDecimals
-    );
+    swapInfo.returnAmount = returnAmount;
+    swapInfo.returnAmountConsideringFees = returnAmountConsideringFees;
 
     // We need to account for any rounding losses by adding dust to first path
     const dust = swapInfo.swapAmount.sub(getTotalSwapAmount(swapsV2));

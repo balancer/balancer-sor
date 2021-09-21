@@ -1,5 +1,4 @@
 import { assert, expect } from 'chai';
-import { BigNumber } from '@ethersproject/bignumber';
 import { WeiPerEther as ONE, Zero } from '@ethersproject/constants';
 import { AddressZero } from '@ethersproject/constants';
 import { JsonRpcProvider } from '@ethersproject/providers';
@@ -10,7 +9,7 @@ import { bnum } from '../src';
 import { WETHADDR } from '../src/constants';
 import { Lido } from '../src/pools/lido';
 import { SwapInfo, SwapTypes, SwapV2 } from '../src/types';
-import { BigNumber as OldBigNumber, BONE } from '../src/utils/bignumber';
+import { BigNumber as OldBigNumber } from '../src/utils/bignumber';
 import testSwaps from './testData/swapsForFormatting.json';
 import { parseFixed } from '@ethersproject/bignumber';
 
@@ -26,8 +25,8 @@ const BAL = '0xba100000625a3754423978a60c9317c58a424e3d';
 describe(`Tests for Helpers.`, () => {
     it(`Should format directhop swapExactIn`, () => {
         const swapAmount = parseFixed('1', 18);
-        const returnAmount = new OldBigNumber(2);
-        const returnAmountConsideringFees = new OldBigNumber(1.9);
+        const returnAmount = parseFixed('2', 18);
+        const returnAmountConsideringFees = parseFixed('1.9', 18);
         const tokenIn = '0x6b175474e89094c44da98b954eedeac495271d0f';
         const tokenOut = '0xba100000625a3754423978a60c9317c58a424e3d';
         const swapType = SwapTypes.SwapExactIn;
@@ -70,8 +69,8 @@ describe(`Tests for Helpers.`, () => {
 
     it(`Should format multihop swapExactIn`, () => {
         const swapAmount = parseFixed('1', 18);
-        const returnAmount = new OldBigNumber(2);
-        const returnAmountConsideringFees = new OldBigNumber(1.9);
+        const returnAmount = parseFixed('2', 18);
+        const returnAmountConsideringFees = parseFixed('1.9', 18);
         const tokenIn = '0x6b175474e89094c44da98b954eedeac495271d0f';
         const tokenOut = '0x056fd409e1d7a124bd7017459dfea2f387b6d5cd';
         const swapType = SwapTypes.SwapExactIn;
@@ -122,8 +121,8 @@ describe(`Tests for Helpers.`, () => {
 
     it(`Should format direct & multihop swapExactIn`, () => {
         const swapAmount = parseFixed('1', 18);
-        const returnAmount = new OldBigNumber(2);
-        const returnAmountConsideringFees = new OldBigNumber(1.9);
+        const returnAmount = parseFixed('2', 18);
+        const returnAmountConsideringFees = parseFixed('1.9', 18);
         const tokenIn = '0x6b175474e89094c44da98b954eedeac495271d0f';
         const tokenOut = '0x056fd409e1d7a124bd7017459dfea2f387b6d5cd';
         const swapType = SwapTypes.SwapExactIn;
@@ -170,8 +169,8 @@ describe(`Tests for Helpers.`, () => {
 
     it(`Should format directhop swapExactOut`, () => {
         const swapAmount = parseFixed('1', 18);
-        const returnAmount = new OldBigNumber(1);
-        const returnAmountConsideringFees = new OldBigNumber(0.9);
+        const returnAmount = parseFixed('1', 18);
+        const returnAmountConsideringFees = parseFixed('0.9', 18);
         const tokenIn = '0x6b175474e89094c44da98b954eedeac495271d0f';
         const tokenOut = '0xba100000625a3754423978a60c9317c58a424e3d';
         const swapType = SwapTypes.SwapExactOut;
@@ -214,8 +213,8 @@ describe(`Tests for Helpers.`, () => {
 
     it(`Should format multihop swapExactOut`, () => {
         const swapAmount = parseFixed('1', 18);
-        const returnAmount = new OldBigNumber(2);
-        const returnAmountConsideringFees = new OldBigNumber(1.9);
+        const returnAmount = parseFixed('2', 18);
+        const returnAmountConsideringFees = parseFixed('1.9', 18);
         const tokenIn = '0x6b175474e89094c44da98b954eedeac495271d0f';
         const tokenOut = '0x056fd409e1d7a124bd7017459dfea2f387b6d5cd';
         const swapType = SwapTypes.SwapExactOut;
@@ -262,8 +261,8 @@ describe(`Tests for Helpers.`, () => {
 
     it(`Should format direct & multihop swapExactOut`, () => {
         const swapAmount = parseFixed('1', 18);
-        const returnAmount = new OldBigNumber(2);
-        const returnAmountConsideringFees = new OldBigNumber(1.9);
+        const returnAmount = parseFixed('2', 18);
+        const returnAmountConsideringFees = parseFixed('1.9', 18);
         const tokenIn = '0x6b175474e89094c44da98b954eedeac495271d0f';
         const tokenOut = '0x056fd409e1d7a124bd7017459dfea2f387b6d5cd';
         const swapType = SwapTypes.SwapExactOut;
@@ -307,8 +306,8 @@ describe(`Tests for Helpers.`, () => {
 
     it(`Should scale 6 decimal token correctly swapExactIn, USDC In`, () => {
         const swapAmount = parseFixed('1', 6);
-        const returnAmount = new OldBigNumber(2);
-        const returnAmountConsideringFees = new OldBigNumber(1.9);
+        const returnAmount = parseFixed('2', 18);
+        const returnAmountConsideringFees = parseFixed('1.9', 18);
         const tokenIn = '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48';
         const tokenOut = '0x6b175474e89094c44da98b954eedeac495271d0f';
         const swapType = SwapTypes.SwapExactIn;
@@ -344,8 +343,8 @@ describe(`Tests for Helpers.`, () => {
 
     it(`Should scale 6 decimal token correctly swapExactOut, USDC In`, () => {
         const swapAmount = parseFixed('1', 18);
-        const returnAmount = new OldBigNumber(2);
-        const returnAmountConsideringFees = new OldBigNumber(1.9);
+        const returnAmount = parseFixed('2', 6);
+        const returnAmountConsideringFees = parseFixed('1.9', 6);
         const tokenIn = '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48';
         const tokenOut = '0x6b175474e89094c44da98b954eedeac495271d0f';
         const swapType = SwapTypes.SwapExactOut;
@@ -381,8 +380,8 @@ describe(`Tests for Helpers.`, () => {
 
     it(`Should scale 6 decimal token correctly swapExactIn, USDC Out`, () => {
         const swapAmount = parseFixed('1', 18);
-        const returnAmount = new OldBigNumber(2);
-        const returnAmountConsideringFees = new OldBigNumber(1.9);
+        const returnAmount = parseFixed('2', 6);
+        const returnAmountConsideringFees = parseFixed('1.9', 6);
         const tokenIn = '0x6b175474e89094c44da98b954eedeac495271d0f';
         const tokenOut = '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48';
         const swapType = SwapTypes.SwapExactIn;
@@ -418,8 +417,8 @@ describe(`Tests for Helpers.`, () => {
 
     it(`Should scale 6 decimal token correctly swapExactOut, USDC Out`, () => {
         const swapAmount = parseFixed('1', 6);
-        const returnAmount = new OldBigNumber(2);
-        const returnAmountConsideringFees = new OldBigNumber(1.9);
+        const returnAmount = parseFixed('2', 18);
+        const returnAmountConsideringFees = parseFixed('1.9', 18);
         const tokenIn = '0x6b175474e89094c44da98b954eedeac495271d0f';
         const tokenOut = '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48';
         const swapType = SwapTypes.SwapExactOut;
@@ -455,8 +454,8 @@ describe(`Tests for Helpers.`, () => {
 
     it(`Should handle no swaps case`, () => {
         const swapAmount = parseFixed('1', 18);
-        const returnAmount = new OldBigNumber(2);
-        const returnAmountConsideringFees = new OldBigNumber(1.9);
+        const returnAmount = parseFixed('2', 18);
+        const returnAmountConsideringFees = parseFixed('1.9', 18);
         const tokenIn = '0x6b175474e89094c44da98b954eedeac495271d0f';
         const tokenOut = '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48';
         const swapType = SwapTypes.SwapExactOut;
@@ -486,8 +485,8 @@ describe(`Tests for Helpers.`, () => {
 
     it(`Should return marketSp`, () => {
         const swapAmount = parseFixed('1', 6);
-        const returnAmount = new OldBigNumber(2);
-        const returnAmountConsideringFees = new OldBigNumber(1.9);
+        const returnAmount = parseFixed('2', 18);
+        const returnAmountConsideringFees = parseFixed('1.9', 18);
         const tokenIn = '0x6b175474e89094c44da98b954eedeac495271d0f';
         const tokenOut = '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48';
         const swapType = SwapTypes.SwapExactOut;
@@ -512,8 +511,8 @@ describe(`Tests for Helpers.`, () => {
 
     it(`Should format directhop swapExactIn for Weth In, no Eth Wrap`, () => {
         const swapAmount = parseFixed('1', 18);
-        const returnAmount = new OldBigNumber(2);
-        const returnAmountConsideringFees = new OldBigNumber(1.9);
+        const returnAmount = parseFixed('2', 18);
+        const returnAmountConsideringFees = parseFixed('1.9', 18);
         const tokenIn = '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2'; // Weth In
         const tokenOut = '0xba100000625a3754423978a60c9317c58a424e3d';
         const swapType = SwapTypes.SwapExactIn;
@@ -549,8 +548,8 @@ describe(`Tests for Helpers.`, () => {
 
     it(`Should format directhop swapExactIn for Eth Wrap, Weth In`, () => {
         const swapAmount = parseFixed('1', 18);
-        const returnAmount = new OldBigNumber(2);
-        const returnAmountConsideringFees = new OldBigNumber(1.9);
+        const returnAmount = parseFixed('2', 18);
+        const returnAmountConsideringFees = parseFixed('1.9', 18);
         const tokenIn = '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2'; // Weth In
         const tokenOut = '0xba100000625a3754423978a60c9317c58a424e3d';
         const swapType = SwapTypes.SwapExactIn;
@@ -590,8 +589,8 @@ describe(`Tests for Helpers.`, () => {
 
     it(`Should format directhop swapExactIn for Weth Out, no Eth Wrap`, () => {
         const swapAmount = parseFixed('1', 18);
-        const returnAmount = new OldBigNumber(2);
-        const returnAmountConsideringFees = new OldBigNumber(1.9);
+        const returnAmount = parseFixed('2', 18);
+        const returnAmountConsideringFees = parseFixed('1.9', 18);
         const tokenIn = '0xba100000625a3754423978a60c9317c58a424e3d';
         const tokenOut = '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2'; // Weth Out
         const swapType = SwapTypes.SwapExactIn;
@@ -627,8 +626,8 @@ describe(`Tests for Helpers.`, () => {
 
     it(`Should format directhop swapExactIn for Eth Wrap, Weth Out`, () => {
         const swapAmount = parseFixed('1', 18);
-        const returnAmount = new OldBigNumber(2);
-        const returnAmountConsideringFees = new OldBigNumber(1.9);
+        const returnAmount = parseFixed('2', 18);
+        const returnAmountConsideringFees = parseFixed('1.9', 18);
         const tokenIn = '0xba100000625a3754423978a60c9317c58a424e3d';
         const tokenOut = '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2'; // Weth Out
         const swapType = SwapTypes.SwapExactIn;
@@ -668,8 +667,8 @@ describe(`Tests for Helpers.`, () => {
 
     it(`Should format directhop swapExactOut for No Eth Wrap, Weth In`, () => {
         const swapAmount = parseFixed('2', 18);
-        const returnAmount = new OldBigNumber(1);
-        const returnAmountConsideringFees = new OldBigNumber(0.9);
+        const returnAmount = parseFixed('1', 18);
+        const returnAmountConsideringFees = parseFixed('0.9', 18);
         const tokenIn = '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2';
         const tokenOut = '0xba100000625a3754423978a60c9317c58a424e3d';
         const swapType = SwapTypes.SwapExactOut;
@@ -705,8 +704,8 @@ describe(`Tests for Helpers.`, () => {
 
     it(`Should format directhop swapExactOut for Eth Wrap, Weth In`, () => {
         const swapAmount = parseFixed('2', 18);
-        const returnAmount = new OldBigNumber(1);
-        const returnAmountConsideringFees = new OldBigNumber(0.9);
+        const returnAmount = parseFixed('1', 18);
+        const returnAmountConsideringFees = parseFixed('0.9', 18);
         const tokenIn = '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2';
         const tokenOut = '0xba100000625a3754423978a60c9317c58a424e3d';
         const swapType = SwapTypes.SwapExactOut;
@@ -746,8 +745,8 @@ describe(`Tests for Helpers.`, () => {
 
     it(`Should format directhop swapExactOut for No Eth Wrap, Weth Out`, () => {
         const swapAmount = parseFixed('2', 18);
-        const returnAmount = new OldBigNumber(1);
-        const returnAmountConsideringFees = new OldBigNumber(0.9);
+        const returnAmount = parseFixed('1', 18);
+        const returnAmountConsideringFees = parseFixed('0.9', 18);
         const tokenIn = '0xba100000625a3754423978a60c9317c58a424e3d';
         const tokenOut = '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2';
         const swapType = SwapTypes.SwapExactOut;
@@ -783,8 +782,8 @@ describe(`Tests for Helpers.`, () => {
 
     it(`Should format directhop swapExactOut for Eth Wrap, Weth Out`, () => {
         const swapAmount = parseFixed('2', 18);
-        const returnAmount = new OldBigNumber(1);
-        const returnAmountConsideringFees = new OldBigNumber(0.9);
+        const returnAmount = parseFixed('1', 18);
+        const returnAmountConsideringFees = parseFixed('0.9', 18);
         const tokenIn = '0xba100000625a3754423978a60c9317c58a424e3d';
         const tokenOut = '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2';
         const swapType = SwapTypes.SwapExactOut;
@@ -824,8 +823,8 @@ describe(`Tests for Helpers.`, () => {
 
     it(`Should format direct & multihop swapExactIn, No Eth Wrap, Weth In`, () => {
         const swapAmount = parseFixed('1', 18);
-        const returnAmount = new OldBigNumber(2);
-        const returnAmountConsideringFees = new OldBigNumber(1.9);
+        const returnAmount = parseFixed('2', 18);
+        const returnAmountConsideringFees = parseFixed('1.9', 18);
         const tokenIn = '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2';
         const tokenOut = '0x056fd409e1d7a124bd7017459dfea2f387b6d5cd';
         const swapType = SwapTypes.SwapExactIn;
@@ -868,8 +867,8 @@ describe(`Tests for Helpers.`, () => {
 
     it(`Should format direct & multihop swapExactIn, Eth Wrap, Weth In`, () => {
         const swapAmount = parseFixed('1', 18);
-        const returnAmount = new OldBigNumber(2);
-        const returnAmountConsideringFees = new OldBigNumber(1.9);
+        const returnAmount = parseFixed('2', 18);
+        const returnAmountConsideringFees = parseFixed('1.9', 18);
         const tokenIn = '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2';
         const tokenOut = '0x056fd409e1d7a124bd7017459dfea2f387b6d5cd';
         const swapType = SwapTypes.SwapExactIn;
@@ -916,8 +915,8 @@ describe(`Tests for Helpers.`, () => {
 
     it(`Should format direct & multihop swapExactOut, No Eth Wrap, Weth In`, () => {
         const swapAmount = parseFixed('1', 18);
-        const returnAmount = new OldBigNumber(2);
-        const returnAmountConsideringFees = new OldBigNumber(1.9);
+        const returnAmount = parseFixed('2', 18);
+        const returnAmountConsideringFees = parseFixed('1.9', 18);
         const tokenIn = '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2';
         const tokenOut = '0x056fd409e1d7a124bd7017459dfea2f387b6d5cd';
         const swapType = SwapTypes.SwapExactOut;
@@ -961,8 +960,8 @@ describe(`Tests for Helpers.`, () => {
 
     it(`Should format direct & multihop swapExactOut, Eth Wrap, Weth In`, () => {
         const swapAmount = parseFixed('1', 18);
-        const returnAmount = new OldBigNumber(2);
-        const returnAmountConsideringFees = new OldBigNumber(1.9);
+        const returnAmount = parseFixed('2', 18);
+        const returnAmountConsideringFees = parseFixed('1.9', 18);
         const tokenIn = '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2';
         const tokenOut = '0x056fd409e1d7a124bd7017459dfea2f387b6d5cd';
         const swapType = SwapTypes.SwapExactOut;
@@ -1010,8 +1009,8 @@ describe(`Tests for Helpers.`, () => {
 
     it(`Should format direct & multihop swapExactIn, No Eth Wrap, Weth In`, () => {
         const swapAmount = parseFixed('1', 18);
-        const returnAmount = new OldBigNumber(2);
-        const returnAmountConsideringFees = new OldBigNumber(1.9);
+        const returnAmount = parseFixed('2', 18);
+        const returnAmountConsideringFees = parseFixed('1.9', 18);
         const tokenIn = '0x056fd409e1d7a124bd7017459dfea2f387b6d5cd';
         const tokenOut = '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2';
         const swapType = SwapTypes.SwapExactIn;
@@ -1054,8 +1053,8 @@ describe(`Tests for Helpers.`, () => {
 
     it(`Should format direct & multihop swapExactIn, Eth Wrap, Weth Out`, () => {
         const swapAmount = parseFixed('1', 18);
-        const returnAmount = new OldBigNumber(2);
-        const returnAmountConsideringFees = new OldBigNumber(1.9);
+        const returnAmount = parseFixed('2', 18);
+        const returnAmountConsideringFees = parseFixed('1.9', 18);
         const tokenIn = '0x056fd409e1d7a124bd7017459dfea2f387b6d5cd';
         const tokenOut = '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2';
         const swapType = SwapTypes.SwapExactIn;
@@ -1102,8 +1101,8 @@ describe(`Tests for Helpers.`, () => {
 
     it(`Should format direct & multihop swapExactOut, No Eth Wrap, Weth Out`, () => {
         const swapAmount = parseFixed('1', 18);
-        const returnAmount = new OldBigNumber(2);
-        const returnAmountConsideringFees = new OldBigNumber(1.9);
+        const returnAmount = parseFixed('2', 18);
+        const returnAmountConsideringFees = parseFixed('1.9', 18);
         const tokenIn = '0x056fd409e1d7a124bd7017459dfea2f387b6d5cd';
         const tokenOut = '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2';
         const swapType = SwapTypes.SwapExactOut;
@@ -1147,8 +1146,8 @@ describe(`Tests for Helpers.`, () => {
 
     it(`Should format direct & multihop swapExactOut, Eth Wrap, Weth Out`, () => {
         const swapAmount = parseFixed('1', 18);
-        const returnAmount = new OldBigNumber(2);
-        const returnAmountConsideringFees = new OldBigNumber(1.9);
+        const returnAmount = parseFixed('2', 18);
+        const returnAmountConsideringFees = parseFixed('1.9', 18);
         const tokenIn = '0x056fd409e1d7a124bd7017459dfea2f387b6d5cd';
         const tokenOut = '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2';
         const swapType = SwapTypes.SwapExactOut;

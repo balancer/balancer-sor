@@ -202,18 +202,17 @@ export class SOR {
             swapOptions.swapGas
         );
 
-        const inputDecimals =
+        const [inputDecimals, outputDecimals] =
             swapType === SwapTypes.SwapExactIn
-                ? tokenInDecimals
-                : tokenOutDecimals;
-        const scaledSwapAmount = bnum(formatFixed(swapAmount, inputDecimals));
+                ? [tokenInDecimals, tokenOutDecimals]
+                : [tokenOutDecimals, tokenInDecimals];
 
         // Returns list of swaps
         const [swaps, total, marketSp, totalConsideringFees] =
             this.getBestPaths(
                 poolsOfInterest,
                 paths,
-                scaledSwapAmount,
+                bnum(formatFixed(swapAmount, inputDecimals)),
                 swapType,
                 costOutputToken,
                 swapOptions.maxPools
@@ -225,8 +224,16 @@ export class SOR {
             swapAmount,
             tokenIn,
             tokenOut,
-            total,
-            totalConsideringFees,
+            parseFixed(
+                total.dp(outputDecimals, OldBigNumber.ROUND_FLOOR).toString(),
+                outputDecimals
+            ),
+            parseFixed(
+                totalConsideringFees
+                    .dp(outputDecimals, OldBigNumber.ROUND_FLOOR)
+                    .toString(),
+                outputDecimals
+            ),
             marketSp
         );
 
