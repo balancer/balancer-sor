@@ -190,7 +190,7 @@ const testDir = `${__dirname}/testData/testPools/`;
 // Compare V1 vs V2 and V2 vs V2 with filter.
 // !!! Note - testFiles array must be manually updated to contain pools of interest.
 async function loopTests(file) {
-    it.only(`Compare Testing: ${file}`, async () => {
+    it(`Compare Testing: ${file}`, async () => {
         const testData = loadTestFile(`${testDir}/${file}.json`);
 
         if (!testData.tradeInfo) return;

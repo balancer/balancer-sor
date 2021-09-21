@@ -27,7 +27,7 @@ const BPT = '0xebfed10e11dc08fcda1af1fda146945e8710f22e';
 const RANDOM = '0x1456688345527be1f37e9e627da0837d6f08c925';
 
 // npx mocha -r ts-node/register test/stablePools.spec.ts
-describe.only(`Tests for Stable Pools.`, () => {
+describe(`Tests for Stable Pools.`, () => {
     context('limit amounts', () => {
         it(`tests getLimitAmountSwap SwapExactIn`, async () => {
             const poolsFromFile: {
