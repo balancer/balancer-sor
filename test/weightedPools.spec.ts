@@ -56,8 +56,8 @@ describe(`Tests for Weighted Pools.`, () => {
                 swapFee: parseFixed(pool.swapFee, 18),
                 decimalsIn: Number(pool.tokens[0].decimals),
                 decimalsOut: Number(pool.tokens[1].decimals),
-                weightIn: bnum(pool.tokens[0].weight as string),
-                weightOut: bnum(pool.tokens[1].weight as string),
+                weightIn: parseFixed(pool.tokens[0].weight as string, 18),
+                weightOut: parseFixed(pool.tokens[1].weight as string, 18),
             };
 
             const limitAmt = newPool.getLimitAmountSwap(poolPairData, swapType);
@@ -95,8 +95,8 @@ describe(`Tests for Weighted Pools.`, () => {
                 swapFee: parseFixed(pool.swapFee, 18),
                 decimalsIn: Number(pool.tokens[0].decimals),
                 decimalsOut: Number(pool.tokens[1].decimals),
-                weightIn: bnum(pool.tokens[0].weight as string),
-                weightOut: bnum(pool.tokens[1].weight as string),
+                weightIn: parseFixed(pool.tokens[0].weight as string, 18),
+                weightOut: parseFixed(pool.tokens[1].weight as string, 18),
             };
 
             const limitAmt = newPool.getLimitAmountSwap(poolPairData, swapType);

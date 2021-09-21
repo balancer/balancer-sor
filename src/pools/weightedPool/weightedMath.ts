@@ -19,8 +19,8 @@ export function _exactTokenInForTokenOut(
     const Bo = parseFloat(
         formatFixed(poolPairData.balanceOut, poolPairData.decimalsOut)
     );
-    const wi = poolPairData.weightIn.toNumber();
-    const wo = poolPairData.weightOut.toNumber();
+    const wi = parseFloat(formatFixed(poolPairData.weightIn, 18));
+    const wo = parseFloat(formatFixed(poolPairData.weightOut, 18));
     const Ai = amount.toNumber();
     const f = parseFloat(formatFixed(poolPairData.swapFee, 18));
     return bnum(Bo * (1 - (Bi / (Bi + Ai * (1 - f))) ** (wi / wo)));
@@ -47,8 +47,8 @@ export function _tokenInForExactTokenOut(
     const Bo = parseFloat(
         formatFixed(poolPairData.balanceOut, poolPairData.decimalsOut)
     );
-    const wi = poolPairData.weightIn.toNumber();
-    const wo = poolPairData.weightOut.toNumber();
+    const wi = parseFloat(formatFixed(poolPairData.weightIn, 18));
+    const wo = parseFloat(formatFixed(poolPairData.weightOut, 18));
     const Ao = amount.toNumber();
     const f = parseFloat(formatFixed(poolPairData.swapFee, 18));
     return bnum((Bi * (-1 + (Bo / (-Ao + Bo)) ** (wo / wi))) / (1 - f));
@@ -70,7 +70,7 @@ export function _spotPriceAfterSwapTokenInForExactBPTOut(
         formatFixed(poolPairData.balanceIn, poolPairData.decimalsIn)
     );
     const Bbpt = parseFloat(formatFixed(poolPairData.balanceOut, 18));
-    const wi = poolPairData.weightIn.toNumber();
+    const wi = parseFloat(formatFixed(poolPairData.weightIn, 18));
     const Aobpt = amount.toNumber();
     const f = parseFloat(formatFixed(poolPairData.swapFee, 18));
     return bnum(
@@ -95,8 +95,8 @@ export function _spotPriceAfterSwapExactTokenInForTokenOut(
     const Bo = parseFloat(
         formatFixed(poolPairData.balanceOut, poolPairData.decimalsOut)
     );
-    const wi = poolPairData.weightIn.toNumber();
-    const wo = poolPairData.weightOut.toNumber();
+    const wi = parseFloat(formatFixed(poolPairData.weightIn, 18));
+    const wo = parseFloat(formatFixed(poolPairData.weightOut, 18));
     const Ai = amount.toNumber();
     const f = parseFloat(formatFixed(poolPairData.swapFee, 18));
     return bnum(
@@ -119,8 +119,8 @@ export function _spotPriceAfterSwapTokenInForExactTokenOut(
     const Bo = parseFloat(
         formatFixed(poolPairData.balanceOut, poolPairData.decimalsOut)
     );
-    const wi = poolPairData.weightIn.toNumber();
-    const wo = poolPairData.weightOut.toNumber();
+    const wi = parseFloat(formatFixed(poolPairData.weightIn, 18));
+    const wo = parseFloat(formatFixed(poolPairData.weightOut, 18));
     const Ao = amount.toNumber();
     const f = parseFloat(formatFixed(poolPairData.swapFee, 18));
     return bnum(
@@ -147,8 +147,8 @@ export function _derivativeSpotPriceAfterSwapExactTokenInForTokenOut(
     const Bo = parseFloat(
         formatFixed(poolPairData.balanceOut, poolPairData.decimalsOut)
     );
-    const wi = poolPairData.weightIn.toNumber();
-    const wo = poolPairData.weightOut.toNumber();
+    const wi = parseFloat(formatFixed(poolPairData.weightIn, 18));
+    const wo = parseFloat(formatFixed(poolPairData.weightOut, 18));
     const Ai = amount.toNumber();
     const f = parseFloat(formatFixed(poolPairData.swapFee, 18));
     return bnum((wi + wo) / (Bo * (Bi / (Ai + Bi - Ai * f)) ** (wi / wo) * wi));
@@ -166,8 +166,8 @@ export function _derivativeSpotPriceAfterSwapTokenInForExactTokenOut(
     const Bo = parseFloat(
         formatFixed(poolPairData.balanceOut, poolPairData.decimalsOut)
     );
-    const wi = poolPairData.weightIn.toNumber();
-    const wo = poolPairData.weightOut.toNumber();
+    const wi = parseFloat(formatFixed(poolPairData.weightIn, 18));
+    const wo = parseFloat(formatFixed(poolPairData.weightOut, 18));
     const Ao = amount.toNumber();
     const f = parseFloat(formatFixed(poolPairData.swapFee, 18));
     return bnum(

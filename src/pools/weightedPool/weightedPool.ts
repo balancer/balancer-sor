@@ -33,8 +33,8 @@ export type WeightedPoolToken = Pick<
 >;
 
 export type WeightedPoolPairData = PoolPairBase & {
-    weightIn: OldBigNumber;
-    weightOut: OldBigNumber;
+    weightIn: BigNumber;
+    weightOut: BigNumber;
 };
 
 export class WeightedPool implements PoolBase {
@@ -45,7 +45,7 @@ export class WeightedPool implements PoolBase {
     swapFee: BigNumber;
     totalShares: string;
     tokens: WeightedPoolToken[];
-    totalWeight: OldBigNumber;
+    totalWeight: BigNumber;
     tokensList: string[];
     MAX_IN_RATIO = parseFixed('0.3', 18);
     MAX_OUT_RATIO = parseFixed('0.3', 18);
@@ -79,7 +79,7 @@ export class WeightedPool implements PoolBase {
         this.totalShares = totalShares;
         this.tokens = tokens;
         this.tokensList = tokensList;
-        this.totalWeight = bnum(totalWeight);
+        this.totalWeight = parseFixed(totalWeight, 18);
     }
 
     setTypeForSwap(type: SwapPairType): void {
@@ -94,7 +94,9 @@ export class WeightedPool implements PoolBase {
         const tI = this.tokens[tokenIndexIn];
         const balanceIn = tI.balance;
         const decimalsIn = tI.decimals;
-        const weightIn = bnum(tI.weight).div(this.totalWeight);
+        const weightIn = parseFixed(tI.weight, 18)
+            .mul(ONE)
+            .div(this.totalWeight);
 
         const tokenIndexOut = this.tokens.findIndex(
             (t) => getAddress(t.address) === getAddress(tokenOut)
@@ -103,7 +105,9 @@ export class WeightedPool implements PoolBase {
         const tO = this.tokens[tokenIndexOut];
         const balanceOut = tO.balance;
         const decimalsOut = tO.decimals;
-        const weightOut = bnum(tO.weight).div(this.totalWeight);
+        const weightOut = parseFixed(tO.weight, 18)
+            .mul(ONE)
+            .div(this.totalWeight);
 
         const poolPairData: WeightedPoolPairData = {
             id: this.id,
@@ -129,10 +133,13 @@ export class WeightedPool implements PoolBase {
     // As a standard, we define normalized liquidity in tokenOut
     getNormalizedLiquidity(poolPairData: WeightedPoolPairData): OldBigNumber {
         return bnum(
-            formatFixed(poolPairData.balanceOut, poolPairData.decimalsOut)
-        )
-            .times(poolPairData.weightIn)
-            .div(poolPairData.weightIn.plus(poolPairData.weightOut));
+            formatFixed(
+                poolPairData.balanceOut
+                    .mul(poolPairData.weightIn)
+                    .div(poolPairData.weightIn.add(poolPairData.weightOut)),
+                poolPairData.decimalsOut
+            )
+        );
     }
 
     getLimitAmountSwap(
@@ -182,9 +189,9 @@ export class WeightedPool implements PoolBase {
                 // poolPair balances are normalised so must be scaled before use
                 const amt = SDK.WeightedMath._calcOutGivenIn(
                     bnum(poolPairData.balanceIn.toString()),
-                    scale(poolPairData.weightIn, 18),
+                    bnum(poolPairData.weightIn.toString()),
                     bnum(poolPairData.balanceOut.toString()),
-                    scale(poolPairData.weightOut, 18),
+                    bnum(poolPairData.weightOut.toString()),
                     scale(amount, poolPairData.decimalsIn),
                     bnum(poolPairData.swapFee.toString())
                 );
@@ -213,9 +220,9 @@ export class WeightedPool implements PoolBase {
                 // poolPair balances are normalised so must be scaled before use
                 const amt = SDK.WeightedMath._calcInGivenOut(
                     bnum(poolPairData.balanceIn.toString()),
-                    scale(poolPairData.weightIn, 18),
+                    bnum(poolPairData.weightIn.toString()),
                     bnum(poolPairData.balanceOut.toString()),
-                    scale(poolPairData.weightOut, 18),
+                    bnum(poolPairData.weightOut.toString()),
                     scale(amount, poolPairData.decimalsOut),
                     bnum(poolPairData.swapFee.toString())
                 );

@@ -29,7 +29,7 @@ export function BPTForTokensZeroPriceImpact(
         const poolPairData: WeightedPoolPairData = {
             balanceIn: BigNumber.from(balances[i].toString()),
             balanceOut: BigNumber.from(bptTotalSupply.toString()),
-            weightIn: normalizedWeights[i].times(new OldBigNumber(10).pow(-18)),
+            weightIn: BigNumber.from(normalizedWeights[i].toString()),
             swapFee: Zero,
         } as WeightedPoolPairData;
         const BPTPrice = weightedMath._spotPriceAfterSwapTokenInForExactBPTOut(
