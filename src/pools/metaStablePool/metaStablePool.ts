@@ -1,4 +1,6 @@
 import { BigNumber, formatFixed, parseFixed } from '@ethersproject/bignumber';
+import { WeiPerEther as ONE } from '@ethersproject/constants';
+
 import {
     BigNumber as OldBigNumber,
     bnum,
@@ -112,16 +114,12 @@ export class MetaStablePool implements PoolBase {
         const tokenOutPriceRate = parseFixed(tO.priceRate, 18);
 
         // Get all token balances
-        const allBalances: OldBigNumber[] = [];
-        const allBalancesScaled: OldBigNumber[] = [];
-        for (let i = 0; i < this.tokens.length; i++) {
-            // const balanceBn = bnum(this.tokens[i].balance);
-            const balanceBn = bnum(this.tokens[i].balance)
-                .times(bnum(this.tokens[i].priceRate))
-                .dp(Number(this.tokens[i].decimals), 1);
-            allBalances.push(balanceBn);
-            allBalancesScaled.push(scale(balanceBn, 18));
-        }
+        const allBalances = this.tokens.map(({ balance, priceRate }) =>
+            bnum(balance).times(priceRate)
+        );
+        const allBalancesScaled = this.tokens.map(({ balance, priceRate }) =>
+            parseFixed(balance, 18).mul(parseFixed(priceRate, 18)).div(ONE)
+        );
 
         const inv = _invariant(this.amp, allBalances);
 
@@ -216,7 +214,9 @@ export class MetaStablePool implements PoolBase {
 
             const amt = SDK.StableMath._calcOutGivenIn(
                 bnum(this.ampAdjusted.toString()),
-                poolPairData.allBalancesScaled,
+                poolPairData.allBalancesScaled.map((balance) =>
+                    bnum(balance.toString())
+                ),
                 poolPairData.tokenIndexIn,
                 poolPairData.tokenIndexOut,
                 amountConverted,
@@ -251,7 +251,9 @@ export class MetaStablePool implements PoolBase {
 
             const amt = SDK.StableMath._calcInGivenOut(
                 bnum(this.ampAdjusted.toString()),
-                poolPairData.allBalancesScaled,
+                poolPairData.allBalancesScaled.map((balance) =>
+                    bnum(balance.toString())
+                ),
                 poolPairData.tokenIndexIn,
                 poolPairData.tokenIndexOut,
                 amountConverted,

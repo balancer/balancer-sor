@@ -64,8 +64,8 @@ describe(`Tests for Stable Pools.`, () => {
                     bnum(pool.tokens[1].balance),
                 ],
                 allBalancesScaled: [
-                    scale(bnum(pool.tokens[0].balance), 18),
-                    scale(bnum(pool.tokens[1].balance), 18),
+                    parseFixed(pool.tokens[0].balance, 18),
+                    parseFixed(pool.tokens[1].balance, 18),
                 ],
                 invariant: bnum(0),
                 tokenIndexIn: 0,

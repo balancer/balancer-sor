@@ -29,7 +29,7 @@ type StablePoolToken = Pick<SubgraphToken, 'address' | 'balance' | 'decimals'>;
 
 export type StablePoolPairData = PoolPairBase & {
     allBalances: OldBigNumber[];
-    allBalancesScaled: OldBigNumber[]; // EVM Maths uses everything in 1e18 upscaled format and this avoids repeated scaling
+    allBalancesScaled: BigNumber[]; // EVM Maths uses everything in 1e18 upscaled format and this avoids repeated scaling
     invariant: OldBigNumber;
     amp: BigNumber;
     tokenIndexIn: number;
@@ -105,13 +105,10 @@ export class StablePool implements PoolBase {
         const decimalsOut = tO.decimals;
 
         // Get all token balances
-        const allBalances: OldBigNumber[] = [];
-        const allBalancesScaled: OldBigNumber[] = [];
-        for (let i = 0; i < this.tokens.length; i++) {
-            const balanceBn = bnum(this.tokens[i].balance);
-            allBalances.push(balanceBn);
-            allBalancesScaled.push(scale(balanceBn, 18));
-        }
+        const allBalances = this.tokens.map(({ balance }) => bnum(balance));
+        const allBalancesScaled = this.tokens.map(({ balance }) =>
+            parseFixed(balance, 18)
+        );
 
         const inv = _invariant(this.amp, allBalances);
 
@@ -196,7 +193,9 @@ export class StablePool implements PoolBase {
 
             const amt = SDK.StableMath._calcOutGivenIn(
                 bnum(this.ampAdjusted.toString()),
-                poolPairData.allBalancesScaled,
+                poolPairData.allBalancesScaled.map((balance) =>
+                    bnum(balance.toString())
+                ),
                 poolPairData.tokenIndexIn,
                 poolPairData.tokenIndexOut,
                 amtScaled,
@@ -226,7 +225,9 @@ export class StablePool implements PoolBase {
 
             const amt = SDK.StableMath._calcInGivenOut(
                 bnum(this.ampAdjusted.toString()),
-                poolPairData.allBalancesScaled,
+                poolPairData.allBalancesScaled.map((balance) =>
+                    bnum(balance.toString())
+                ),
                 poolPairData.tokenIndexIn,
                 poolPairData.tokenIndexOut,
                 amtScaled,
