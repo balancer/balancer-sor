@@ -1,7 +1,12 @@
 import cloneDeep from 'lodash.clonedeep';
 import { PRICE_ERROR_TOLERANCE } from '../config';
-import { bnum, ZERO, ONE, INFINITY } from '../utils/bignumber';
-import { BigNumber as OldBigNumber } from '../utils/bignumber';
+import {
+    BigNumber as OldBigNumber,
+    bnum,
+    ZERO,
+    ONE,
+    INFINITY,
+} from '../utils/bignumber';
 import { SwapTypes, NewPath, PoolDictionary, Swap } from '../types';
 import {
     getEffectivePriceSwapForPath,

@@ -1,5 +1,4 @@
-import { BigNumber as OldBigNumber } from '../../utils/bignumber';
-import { bnum } from '../../utils/bignumber';
+import { BigNumber as OldBigNumber, bnum } from '../../utils/bignumber';
 import { WeightedPoolPairData } from './weightedPool';
 // All functions came from https://www.wolframcloud.com/obj/fernando.martinel/Published/SOR_equations_published.nb
 

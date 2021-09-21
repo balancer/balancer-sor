@@ -1,6 +1,5 @@
-import { BigNumber as OldBigNumber } from '../../utils/bignumber';
+import { BigNumber as OldBigNumber, bnum } from '../../utils/bignumber';
 import { ElementPoolPairData } from './elementPool';
-import { bnum } from '../../utils/bignumber';
 
 // calc_out_given_in (swap)
 export function _exactTokenInForTokenOut(

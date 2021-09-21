@@ -1,4 +1,4 @@
-import { BigNumber as OldBigNumber } from '../../utils/bignumber';
+import { BigNumber as OldBigNumber, bnum } from '../../utils/bignumber';
 import {
     PoolBase,
     PoolTypes,
@@ -9,7 +9,6 @@ import {
     SubgraphToken,
 } from '../../types';
 import { getAddress } from '@ethersproject/address';
-import { bnum } from '../../utils/bignumber';
 import {
     _exactTokenInForTokenOut,
     _tokenInForExactTokenOut,

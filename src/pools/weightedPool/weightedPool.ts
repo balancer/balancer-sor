@@ -1,6 +1,10 @@
 import { getAddress } from '@ethersproject/address';
-import { bnum, scale, ZERO } from '../../utils/bignumber';
-import { BigNumber as OldBigNumber } from '../../utils/bignumber';
+import {
+    BigNumber as OldBigNumber,
+    bnum,
+    scale,
+    ZERO,
+} from '../../utils/bignumber';
 import * as SDK from '@georgeroman/balancer-v2-pools';
 import {
     PoolBase,

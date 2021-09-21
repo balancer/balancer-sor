@@ -1,5 +1,9 @@
-import { BigNumber as OldBigNumber } from '../../utils/bignumber';
-import { bnum, ZERO, ONE } from '../../utils/bignumber';
+import {
+    BigNumber as OldBigNumber,
+    bnum,
+    ZERO,
+    ONE,
+} from '../../utils/bignumber';
 import { StablePoolPairData } from './stablePool';
 // All functions are adapted from the solidity ones to be found on:
 // https://github.com/balancer-labs/balancer-core-v2/blob/master/contracts/pools/stable/StableMath.sol
