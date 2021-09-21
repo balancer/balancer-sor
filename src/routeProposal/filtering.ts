@@ -9,8 +9,8 @@ import {
 } from '../types';
 import { WeightedPool } from '../pools/weightedPool/weightedPool';
 import { StablePool } from '../pools/stablePool/stablePool';
-// import { ElementPool } from '../pools/elementPool/elementPool';
 import { MetaStablePool } from '../pools/metaStablePool/metaStablePool';
+import { ElementPool } from '../pools/elementPool/elementPool';
 import { ZERO } from '../utils/bignumber';
 
 import { parseNewPool } from '../pools';
@@ -59,7 +59,7 @@ export function filterPoolsOfInterest(
             | WeightedPool
             | StablePool
             | MetaStablePool
-            // | ElementPool
+            | ElementPool
             | undefined = parseNewPool(pool, currentBlockTimestamp);
         if (!newPool) return;
 

@@ -507,19 +507,16 @@ describe('Tests pools filtering and path processing', () => {
         [paths, maxAmt] = calculatePathLimits(pathData, SwapTypes.SwapExactIn);
 
         // Known results taken from previous version
-        assert.equal(maxAmt.toString(), '1620.713758415909242297');
+        assert.equal(maxAmt.toString(), '1620.713758415909242296');
         assert.equal(paths[0].id, '0x75286e183d923a5f52f52be205e358c5c9101b09');
         assert.equal(
             paths[0].limitAmount.toString(),
-            '1469.3506706536194958983'
+            '1469.350670653619495898'
         );
         assert.equal(paths[1].id, '0x57755f7dec33320bca83159c26e93751bfd30fbe');
-        assert.equal(
-            paths[1].limitAmount.toString(),
-            '141.7338105725583675081'
-        );
+        assert.equal(paths[1].limitAmount.toString(), '141.733810572558367508');
         assert.equal(paths[2].id, '0x2dbd24322757d2e28de4230b1ca5b88e49a76979');
-        assert.equal(paths[2].limitAmount.toString(), '9.5956664317167564606');
+        assert.equal(paths[2].limitAmount.toString(), '9.59566643171675646');
         assert.equal(
             paths[3].id,
             '0x29f55de880d4dcae40ba3e63f16407a31b4d44ee0x12d6b6e24fdd9849abd42afd8f5775d36084a828'
@@ -551,18 +548,18 @@ describe('Tests pools filtering and path processing', () => {
         [paths, maxAmt] = calculatePathLimits(pathData, SwapTypes.SwapExactOut);
 
         // Known results taken from previous version
-        assert.equal(maxAmt.toString(), '1265.9311029');
+        assert.equal(maxAmt.toString(), '1265.931102');
         assert.equal(paths[0].id, '0x75286e183d923a5f52f52be205e358c5c9101b09');
         assert.equal(paths[0].limitAmount.toString(), '1113.575469');
         assert.equal(paths[1].id, '0x57755f7dec33320bca83159c26e93751bfd30fbe');
-        assert.equal(paths[1].limitAmount.toString(), '142.8770136');
+        assert.equal(paths[1].limitAmount.toString(), '142.877013');
         assert.equal(paths[2].id, '0x2dbd24322757d2e28de4230b1ca5b88e49a76979');
-        assert.equal(paths[2].limitAmount.toString(), '9.4459251');
+        assert.equal(paths[2].limitAmount.toString(), '9.445925');
         assert.equal(
             paths[3].id,
             '0x29f55de880d4dcae40ba3e63f16407a31b4d44ee0x12d6b6e24fdd9849abd42afd8f5775d36084a828'
         );
-        assert.equal(paths[3].limitAmount.toString(), '0.0326952');
+        assert.equal(paths[3].limitAmount.toString(), '0.032695');
     });
 
     it('should calc stable path limits', () => {
@@ -589,11 +586,11 @@ describe('Tests pools filtering and path processing', () => {
         [paths, maxAmt] = calculatePathLimits(pathData, SwapTypes.SwapExactIn);
 
         // Known results taken from previous version
-        assert.equal(maxAmt.toString(), '45024648.6053403220851457557');
+        assert.equal(maxAmt.toString(), '45024648.605340322085145755');
         assert.equal(paths[0].id, '0x6c3f90f043a72fa612cbac8115ee7e52bde6e490');
         assert.equal(
             paths[0].limitAmount.toString(),
-            '45024648.6053403220851457557'
+            '45024648.605340322085145755'
         );
 
         [paths, maxAmt] = calculatePathLimits(pathData, SwapTypes.SwapExactOut);

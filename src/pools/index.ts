@@ -1,7 +1,7 @@
 import { WeightedPool } from './weightedPool/weightedPool';
 import { StablePool } from './stablePool/stablePool';
-// import { ElementPool } from './elementPool/elementPool';
 import { MetaStablePool } from './metaStablePool/metaStablePool';
+import { ElementPool } from './elementPool/elementPool';
 import {
     BigNumber as OldBigNumber,
     INFINITY,
@@ -13,12 +13,12 @@ import { SubgraphPoolBase, PoolBase, SwapTypes, PoolPairBase } from '../types';
 export function parseNewPool(
     pool: SubgraphPoolBase,
     currentBlockTimestamp = 0
-): WeightedPool | StablePool | MetaStablePool | undefined {
+): WeightedPool | StablePool | MetaStablePool | ElementPool | undefined {
     // We're not interested in any pools which don't allow swapping
     // (Explicit check for false as many of the tests omit this flag)
     if (pool.swapEnabled === false) return undefined;
 
-    let newPool: WeightedPool | StablePool | MetaStablePool;
+    let newPool: WeightedPool | StablePool | MetaStablePool | ElementPool;
     if (
         pool.poolType === 'Weighted' ||
         pool.poolType === 'LiquidityBootstrapping' ||
@@ -27,11 +27,11 @@ export function parseNewPool(
         newPool = WeightedPool.fromPool(pool);
     } else if (pool.poolType === 'Stable') {
         newPool = StablePool.fromPool(pool);
-        // } else if (pool.poolType === 'Element') {
-        //     newPool = ElementPool.fromPool(pool);
-        //     newPool.setCurrentBlockTimestamp(currentBlockTimestamp);
     } else if (pool.poolType === 'MetaStable') {
         newPool = MetaStablePool.fromPool(pool);
+    } else if (pool.poolType === 'Element') {
+        newPool = ElementPool.fromPool(pool);
+        newPool.setCurrentBlockTimestamp(currentBlockTimestamp);
     } else {
         console.error(
             `Unknown pool type or type field missing: ${pool.poolType} ${pool.id}`
