@@ -41,7 +41,7 @@ export class MetaStablePool implements PoolBase {
     address: string;
     amp: BigNumber;
     swapFee: BigNumber;
-    totalShares: string;
+    totalShares: BigNumber;
     tokens: MetaStablePoolToken[];
     tokensList: string[];
     AMP_PRECISION = BigNumber.from('1000');
@@ -75,7 +75,7 @@ export class MetaStablePool implements PoolBase {
         this.address = address;
         this.amp = BigNumber.from(amp);
         this.swapFee = parseFixed(swapFee, 18);
-        this.totalShares = totalShares;
+        this.totalShares = parseFixed(totalShares, 18);
         this.tokens = tokens;
         this.tokensList = tokensList;
         this.ampAdjusted = this.amp.mul(this.AMP_PRECISION);
@@ -192,7 +192,7 @@ export class MetaStablePool implements PoolBase {
     updateTokenBalanceForPool(token: string, newBalance: BigNumber): void {
         // token is BPT
         if (this.address == token) {
-            this.totalShares = formatFixed(newBalance, 18);
+            this.totalShares = newBalance;
         } else {
             // token is underlying in the pool
             const T = this.tokens.find((t) => t.address === token);

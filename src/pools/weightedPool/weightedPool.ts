@@ -43,7 +43,7 @@ export class WeightedPool implements PoolBase {
     id: string;
     address: string;
     swapFee: BigNumber;
-    totalShares: string;
+    totalShares: BigNumber;
     tokens: WeightedPoolToken[];
     totalWeight: BigNumber;
     tokensList: string[];
@@ -76,7 +76,7 @@ export class WeightedPool implements PoolBase {
         this.id = id;
         this.address = address;
         this.swapFee = parseFixed(swapFee, 18);
-        this.totalShares = totalShares;
+        this.totalShares = parseFixed(totalShares, 18);
         this.tokens = tokens;
         this.tokensList = tokensList;
         this.totalWeight = parseFixed(totalWeight, 18);
@@ -167,7 +167,7 @@ export class WeightedPool implements PoolBase {
     updateTokenBalanceForPool(token: string, newBalance: BigNumber): void {
         // token is BPT
         if (this.address == token) {
-            this.totalShares = formatFixed(newBalance, 18);
+            this.totalShares = newBalance;
         } else {
             // token is underlying in the pool
             const T = this.tokens.find((t) => t.address === token);
