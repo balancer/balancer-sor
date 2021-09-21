@@ -1,11 +1,11 @@
-import { BigNumber, ZERO } from '../utils/bignumber';
+import { BigNumber as OldBigNumber, ZERO } from '../utils/bignumber';
 import { SwapTypes, NewPath } from '../types';
 import { getOutputAmountSwap } from '../pools';
 
 export function calculatePathLimits(
     paths: NewPath[],
     swapType: SwapTypes
-): [NewPath[], BigNumber] {
+): [NewPath[], OldBigNumber] {
     let maxLiquidityAvailable = ZERO;
     paths.forEach((path) => {
         // Original parsedPoolPairForPath here but this has already been done.
@@ -23,7 +23,7 @@ export function calculatePathLimits(
 export function getLimitAmountSwapForPath(
     path: NewPath,
     swapType: SwapTypes
-): BigNumber {
+): OldBigNumber {
     const poolPairData = path.poolPairData;
     if (poolPairData.length == 1) {
         return path.pools[0].getLimitAmountSwap(poolPairData[0], swapType);

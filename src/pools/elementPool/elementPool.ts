@@ -1,4 +1,4 @@
-import { BigNumber } from '../../utils/bignumber';
+import { BigNumber as OldBigNumber } from '../../utils/bignumber';
 import {
     PoolBase,
     PoolTypes,
@@ -23,7 +23,7 @@ import {
 type ElementPoolToken = Pick<SubgraphToken, 'address' | 'balance' | 'decimals'>;
 
 export type ElementPoolPairData = PoolPairBase & {
-    totalShares: BigNumber;
+    totalShares: OldBigNumber;
     expiryTime: number;
     unitSeconds: number;
     principalToken: string;
@@ -154,7 +154,7 @@ export class ElementPool implements PoolBase {
     // inverse of the slippage. It is proportional to the token balances in the
     // pool but also depends on the shape of the invariant curve.
     // As a standard, we define normalized liquidity in tokenOut
-    getNormalizedLiquidity(poolPairData: ElementPoolPairData): BigNumber {
+    getNormalizedLiquidity(poolPairData: ElementPoolPairData): OldBigNumber {
         // This could be refined by using the inverse of the slippage, but
         // in practice this won't have a big impact in path selection for
         // multi-hops so not a big priority
@@ -164,7 +164,7 @@ export class ElementPool implements PoolBase {
     getLimitAmountSwap(
         poolPairData: ElementPoolPairData,
         swapType: SwapTypes
-    ): BigNumber {
+    ): OldBigNumber {
         const MAX_OUT_RATIO = bnum(0.3);
         if (swapType === SwapTypes.SwapExactIn) {
             // "Ai < (Bi**(1-t)+Bo**(1-t))**(1/(1-t))-Bi" must hold in order for
@@ -183,7 +183,7 @@ export class ElementPool implements PoolBase {
     }
 
     // Updates the balance of a given token for the pool
-    updateTokenBalanceForPool(token: string, newBalance: BigNumber): void {
+    updateTokenBalanceForPool(token: string, newBalance: OldBigNumber): void {
         // token is BPT
         if (this.address == token) {
             this.totalShares = newBalance.toString();
@@ -197,42 +197,42 @@ export class ElementPool implements PoolBase {
 
     _exactTokenInForTokenOut(
         poolPairData: ElementPoolPairData,
-        amount: BigNumber,
+        amount: OldBigNumber,
         exact: boolean
-    ): BigNumber {
+    ): OldBigNumber {
         poolPairData.currentBlockTimestamp = this.currentBlockTimestamp;
         return _exactTokenInForTokenOut(amount, poolPairData);
     }
 
     _tokenInForExactTokenOut(
         poolPairData: ElementPoolPairData,
-        amount: BigNumber,
+        amount: OldBigNumber,
         exact: boolean
-    ): BigNumber {
+    ): OldBigNumber {
         poolPairData.currentBlockTimestamp = this.currentBlockTimestamp;
         return _tokenInForExactTokenOut(amount, poolPairData);
     }
 
     _spotPriceAfterSwapExactTokenInForTokenOut(
         poolPairData: ElementPoolPairData,
-        amount: BigNumber
-    ): BigNumber {
+        amount: OldBigNumber
+    ): OldBigNumber {
         poolPairData.currentBlockTimestamp = this.currentBlockTimestamp;
         return _spotPriceAfterSwapExactTokenInForTokenOut(amount, poolPairData);
     }
 
     _spotPriceAfterSwapTokenInForExactTokenOut(
         poolPairData: ElementPoolPairData,
-        amount: BigNumber
-    ): BigNumber {
+        amount: OldBigNumber
+    ): OldBigNumber {
         poolPairData.currentBlockTimestamp = this.currentBlockTimestamp;
         return _spotPriceAfterSwapTokenInForExactTokenOut(amount, poolPairData);
     }
 
     _derivativeSpotPriceAfterSwapExactTokenInForTokenOut(
         poolPairData: ElementPoolPairData,
-        amount: BigNumber
-    ): BigNumber {
+        amount: OldBigNumber
+    ): OldBigNumber {
         poolPairData.currentBlockTimestamp = this.currentBlockTimestamp;
         return _derivativeSpotPriceAfterSwapExactTokenInForTokenOut(
             amount,
@@ -242,8 +242,8 @@ export class ElementPool implements PoolBase {
 
     _derivativeSpotPriceAfterSwapTokenInForExactTokenOut(
         poolPairData: ElementPoolPairData,
-        amount: BigNumber
-    ): BigNumber {
+        amount: OldBigNumber
+    ): OldBigNumber {
         poolPairData.currentBlockTimestamp = this.currentBlockTimestamp;
         return _derivativeSpotPriceAfterSwapTokenInForExactTokenOut(
             amount,

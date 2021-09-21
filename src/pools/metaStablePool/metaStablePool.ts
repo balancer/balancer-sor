@@ -1,4 +1,4 @@
-import { BigNumber } from '../../utils/bignumber';
+import { BigNumber as OldBigNumber } from '../../utils/bignumber';
 import {
     PoolBase,
     PoolTypes,
@@ -25,8 +25,8 @@ type MetaStablePoolToken = Pick<
 >;
 
 export type MetaStablePoolPairData = StablePoolPairData & {
-    tokenInPriceRate: BigNumber;
-    tokenOutPriceRate: BigNumber;
+    tokenInPriceRate: OldBigNumber;
+    tokenOutPriceRate: OldBigNumber;
 };
 
 export class MetaStablePool implements PoolBase {
@@ -34,16 +34,16 @@ export class MetaStablePool implements PoolBase {
     swapPairType: SwapPairType;
     id: string;
     address: string;
-    amp: BigNumber;
-    swapFee: BigNumber;
-    swapFeeScaled: BigNumber; // EVM Maths uses everything in 1e18 upscaled format and this avoids repeated scaling
+    amp: OldBigNumber;
+    swapFee: OldBigNumber;
+    swapFeeScaled: OldBigNumber; // EVM Maths uses everything in 1e18 upscaled format and this avoids repeated scaling
     totalShares: string;
     tokens: MetaStablePoolToken[];
     tokensList: string[];
     AMP_PRECISION = bnum(1000);
     MAX_IN_RATIO = bnum(0.3);
     MAX_OUT_RATIO = bnum(0.3);
-    ampAdjusted: BigNumber;
+    ampAdjusted: OldBigNumber;
 
     static fromPool(pool: SubgraphPoolBase): MetaStablePool {
         if (!pool.amp) throw new Error('MetaStablePool missing amp factor');
@@ -107,8 +107,8 @@ export class MetaStablePool implements PoolBase {
         const tokenOutPriceRate = bnum(tO.priceRate);
 
         // Get all token balances
-        const allBalances: BigNumber[] = [];
-        const allBalancesScaled: BigNumber[] = [];
+        const allBalances: OldBigNumber[] = [];
+        const allBalancesScaled: OldBigNumber[] = [];
         for (let i = 0; i < this.tokens.length; i++) {
             // const balanceBn = bnum(this.tokens[i].balance);
             const balanceBn = bnum(this.tokens[i].balance)
@@ -145,7 +145,7 @@ export class MetaStablePool implements PoolBase {
         return poolPairData;
     }
 
-    getNormalizedLiquidity(poolPairData: MetaStablePoolPairData): BigNumber {
+    getNormalizedLiquidity(poolPairData: MetaStablePoolPairData): OldBigNumber {
         // This is an approximation as the actual normalized liquidity is a lot more complicated to calculate
         return poolPairData.balanceOut.times(poolPairData.amp);
     }
@@ -153,7 +153,7 @@ export class MetaStablePool implements PoolBase {
     getLimitAmountSwap(
         poolPairData: MetaStablePoolPairData,
         swapType: SwapTypes
-    ): BigNumber {
+    ): OldBigNumber {
         // We multiply ratios by 10**-18 because we are in normalized space
         // so 0.5 should be 0.5 and not 500000000000000000
         // TODO: update bmath to use everything normalized
@@ -170,7 +170,7 @@ export class MetaStablePool implements PoolBase {
     }
 
     // Updates the balance of a given token for the pool
-    updateTokenBalanceForPool(token: string, newBalance: BigNumber): void {
+    updateTokenBalanceForPool(token: string, newBalance: OldBigNumber): void {
         // token is BPT
         if (this.address == token) {
             this.totalShares = newBalance.toString();
@@ -184,9 +184,9 @@ export class MetaStablePool implements PoolBase {
 
     _exactTokenInForTokenOut(
         poolPairData: MetaStablePoolPairData,
-        amount: BigNumber,
+        amount: OldBigNumber,
         exact: boolean
-    ): BigNumber {
+    ): OldBigNumber {
         try {
             // All values should use 1e18 fixed point
             // i.e. 1USDC => 1e18 not 1e6
@@ -219,9 +219,9 @@ export class MetaStablePool implements PoolBase {
 
     _tokenInForExactTokenOut(
         poolPairData: MetaStablePoolPairData,
-        amount: BigNumber,
+        amount: OldBigNumber,
         exact: boolean
-    ): BigNumber {
+    ): OldBigNumber {
         try {
             // All values should use 1e18 fixed point
             // i.e. 1USDC => 1e18 not 1e6
@@ -255,8 +255,8 @@ export class MetaStablePool implements PoolBase {
 
     _spotPriceAfterSwapExactTokenInForTokenOut(
         poolPairData: MetaStablePoolPairData,
-        amount: BigNumber
-    ): BigNumber {
+        amount: OldBigNumber
+    ): OldBigNumber {
         const amountConverted = amount.times(poolPairData.tokenInPriceRate);
         const result = _spotPriceAfterSwapExactTokenInForTokenOut(
             amountConverted,
@@ -267,8 +267,8 @@ export class MetaStablePool implements PoolBase {
 
     _spotPriceAfterSwapTokenInForExactTokenOut(
         poolPairData: MetaStablePoolPairData,
-        amount: BigNumber
-    ): BigNumber {
+        amount: OldBigNumber
+    ): OldBigNumber {
         const amountConverted = amount.times(poolPairData.tokenOutPriceRate);
         const result = _spotPriceAfterSwapTokenInForExactTokenOut(
             amountConverted,
@@ -279,8 +279,8 @@ export class MetaStablePool implements PoolBase {
 
     _derivativeSpotPriceAfterSwapExactTokenInForTokenOut(
         poolPairData: MetaStablePoolPairData,
-        amount: BigNumber
-    ): BigNumber {
+        amount: OldBigNumber
+    ): OldBigNumber {
         return _derivativeSpotPriceAfterSwapExactTokenInForTokenOut(
             amount,
             poolPairData
@@ -289,8 +289,8 @@ export class MetaStablePool implements PoolBase {
 
     _derivativeSpotPriceAfterSwapTokenInForExactTokenOut(
         poolPairData: MetaStablePoolPairData,
-        amount: BigNumber
-    ): BigNumber {
+        amount: OldBigNumber
+    ): OldBigNumber {
         return _derivativeSpotPriceAfterSwapTokenInForExactTokenOut(
             amount,
             poolPairData

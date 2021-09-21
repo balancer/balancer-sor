@@ -2,7 +2,7 @@ import { WeightedPool } from './weightedPool/weightedPool';
 import { StablePool } from './stablePool/stablePool';
 import { ElementPool } from './elementPool/elementPool';
 import { MetaStablePool } from './metaStablePool/metaStablePool';
-import { BigNumber, INFINITY, ZERO } from '../utils/bignumber';
+import { BigNumber as OldBigNumber, INFINITY, ZERO } from '../utils/bignumber';
 import { SubgraphPoolBase, PoolBase, SwapTypes, PoolPairBase } from '../types';
 
 export function parseNewPool(
@@ -41,8 +41,8 @@ export function getOutputAmountSwap(
     pool: PoolBase,
     poolPairData: PoolPairBase,
     swapType: SwapTypes,
-    amount: BigNumber
-): BigNumber {
+    amount: OldBigNumber
+): OldBigNumber {
     // TODO: check if necessary to check if amount > limitAmount
     if (swapType === SwapTypes.SwapExactIn) {
         if (poolPairData.balanceIn.isZero()) {

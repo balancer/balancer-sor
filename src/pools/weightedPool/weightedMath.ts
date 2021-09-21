@@ -1,4 +1,4 @@
-import { BigNumber } from '../../utils/bignumber';
+import { BigNumber as OldBigNumber } from '../../utils/bignumber';
 import { bnum } from '../../utils/bignumber';
 import { WeightedPoolPairData } from './weightedPool';
 // All functions came from https://www.wolframcloud.com/obj/fernando.martinel/Published/SOR_equations_published.nb
@@ -10,9 +10,9 @@ import { WeightedPoolPairData } from './weightedPool';
 // PairType = 'token->token'
 // SwapType = 'swapExactIn'
 export function _exactTokenInForTokenOut(
-    amount: BigNumber,
+    amount: OldBigNumber,
     poolPairData: WeightedPoolPairData
-): BigNumber {
+): OldBigNumber {
     const Bi = poolPairData.balanceIn.toNumber();
     const Bo = poolPairData.balanceOut.toNumber();
     const wi = poolPairData.weightIn.toNumber();
@@ -34,9 +34,9 @@ export function _exactTokenInForTokenOut(
 // PairType = 'token->token'
 // SwapType = 'swapExactOut'
 export function _tokenInForExactTokenOut(
-    amount: BigNumber,
+    amount: OldBigNumber,
     poolPairData: WeightedPoolPairData
-): BigNumber {
+): OldBigNumber {
     const Bi = poolPairData.balanceIn.toNumber();
     const Bo = poolPairData.balanceOut.toNumber();
     const wi = poolPairData.weightIn.toNumber();
@@ -55,9 +55,9 @@ export function _tokenInForExactTokenOut(
 // PairType = 'token->BPT'
 // SwapType = 'swapExactOut'
 export function _spotPriceAfterSwapTokenInForExactBPTOut(
-    amount: BigNumber,
+    amount: OldBigNumber,
     poolPairData: WeightedPoolPairData
-): BigNumber {
+): OldBigNumber {
     const Bi = poolPairData.balanceIn.toNumber();
     const Bbpt = poolPairData.balanceOut.toNumber();
     const wi = poolPairData.weightIn.toNumber();
@@ -76,9 +76,9 @@ export function _spotPriceAfterSwapTokenInForExactBPTOut(
 // PairType = 'token->token'
 // SwapType = 'swapExactIn'
 export function _spotPriceAfterSwapExactTokenInForTokenOut(
-    amount: BigNumber,
+    amount: OldBigNumber,
     poolPairData: WeightedPoolPairData
-): BigNumber {
+): OldBigNumber {
     const Bi = poolPairData.balanceIn.toNumber();
     const Bo = poolPairData.balanceOut.toNumber();
     const wi = poolPairData.weightIn.toNumber();
@@ -96,9 +96,9 @@ export function _spotPriceAfterSwapExactTokenInForTokenOut(
 // PairType = 'token->token'
 // SwapType = 'swapExactOut'
 export function _spotPriceAfterSwapTokenInForExactTokenOut(
-    amount: BigNumber,
+    amount: OldBigNumber,
     poolPairData: WeightedPoolPairData
-): BigNumber {
+): OldBigNumber {
     const Bi = poolPairData.balanceIn.toNumber();
     const Bo = poolPairData.balanceOut.toNumber();
     const wi = poolPairData.weightIn.toNumber();
@@ -120,9 +120,9 @@ export function _spotPriceAfterSwapTokenInForExactTokenOut(
 // PairType = 'token->token'
 // SwapType = 'swapExactIn'
 export function _derivativeSpotPriceAfterSwapExactTokenInForTokenOut(
-    amount: BigNumber,
+    amount: OldBigNumber,
     poolPairData: WeightedPoolPairData
-): BigNumber {
+): OldBigNumber {
     const Bi = poolPairData.balanceIn.toNumber();
     const Bo = poolPairData.balanceOut.toNumber();
     const wi = poolPairData.weightIn.toNumber();
@@ -135,9 +135,9 @@ export function _derivativeSpotPriceAfterSwapExactTokenInForTokenOut(
 // PairType = 'token->token'
 // SwapType = 'swapExactOut'
 export function _derivativeSpotPriceAfterSwapTokenInForExactTokenOut(
-    amount: BigNumber,
+    amount: OldBigNumber,
     poolPairData: WeightedPoolPairData
-): BigNumber {
+): OldBigNumber {
     const Bi = poolPairData.balanceIn.toNumber();
     const Bo = poolPairData.balanceOut.toNumber();
     const wi = poolPairData.weightIn.toNumber();

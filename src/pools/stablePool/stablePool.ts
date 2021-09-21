@@ -1,4 +1,4 @@
-import { BigNumber } from '../../utils/bignumber';
+import { BigNumber as OldBigNumber } from '../../utils/bignumber';
 import {
     PoolBase,
     PoolTypes,
@@ -22,11 +22,11 @@ import {
 type StablePoolToken = Pick<SubgraphToken, 'address' | 'balance' | 'decimals'>;
 
 export type StablePoolPairData = PoolPairBase & {
-    swapFeeScaled: BigNumber; // EVM Maths uses everything in 1e18 upscaled format and this avoids repeated scaling
-    allBalances: BigNumber[];
-    allBalancesScaled: BigNumber[]; // EVM Maths uses everything in 1e18 upscaled format and this avoids repeated scaling
-    invariant: BigNumber;
-    amp: BigNumber;
+    swapFeeScaled: OldBigNumber; // EVM Maths uses everything in 1e18 upscaled format and this avoids repeated scaling
+    allBalances: OldBigNumber[];
+    allBalancesScaled: OldBigNumber[]; // EVM Maths uses everything in 1e18 upscaled format and this avoids repeated scaling
+    invariant: OldBigNumber;
+    amp: OldBigNumber;
     tokenIndexIn: number;
     tokenIndexOut: number;
 };
@@ -36,16 +36,16 @@ export class StablePool implements PoolBase {
     swapPairType: SwapPairType;
     id: string;
     address: string;
-    amp: BigNumber;
-    swapFee: BigNumber;
-    swapFeeScaled: BigNumber; // EVM Maths uses everything in 1e18 upscaled format and this avoids repeated scaling
+    amp: OldBigNumber;
+    swapFee: OldBigNumber;
+    swapFeeScaled: OldBigNumber; // EVM Maths uses everything in 1e18 upscaled format and this avoids repeated scaling
     totalShares: string;
     tokens: StablePoolToken[];
     tokensList: string[];
     AMP_PRECISION = bnum(1000);
     MAX_IN_RATIO = bnum(0.3);
     MAX_OUT_RATIO = bnum(0.3);
-    ampAdjusted: BigNumber;
+    ampAdjusted: OldBigNumber;
 
     static fromPool(pool: SubgraphPoolBase): StablePool {
         if (!pool.amp) throw new Error('StablePool missing amp factor');
@@ -102,8 +102,8 @@ export class StablePool implements PoolBase {
         const decimalsOut = tO.decimals;
 
         // Get all token balances
-        const allBalances: BigNumber[] = [];
-        const allBalancesScaled: BigNumber[] = [];
+        const allBalances: OldBigNumber[] = [];
+        const allBalancesScaled: OldBigNumber[] = [];
         for (let i = 0; i < this.tokens.length; i++) {
             const balanceBn = bnum(this.tokens[i].balance);
             allBalances.push(balanceBn);
@@ -135,7 +135,7 @@ export class StablePool implements PoolBase {
         return poolPairData;
     }
 
-    getNormalizedLiquidity(poolPairData: StablePoolPairData): BigNumber {
+    getNormalizedLiquidity(poolPairData: StablePoolPairData): OldBigNumber {
         // This is an approximation as the actual normalized liquidity is a lot more complicated to calculate
         return poolPairData.balanceOut.times(poolPairData.amp);
     }
@@ -143,7 +143,7 @@ export class StablePool implements PoolBase {
     getLimitAmountSwap(
         poolPairData: PoolPairBase,
         swapType: SwapTypes
-    ): BigNumber {
+    ): OldBigNumber {
         // We multiply ratios by 10**-18 because we are in normalized space
         // so 0.5 should be 0.5 and not 500000000000000000
         // TODO: update bmath to use everything normalized
@@ -155,7 +155,7 @@ export class StablePool implements PoolBase {
     }
 
     // Updates the balance of a given token for the pool
-    updateTokenBalanceForPool(token: string, newBalance: BigNumber): void {
+    updateTokenBalanceForPool(token: string, newBalance: OldBigNumber): void {
         // token is BPT
         if (this.address == token) {
             this.totalShares = newBalance.toString();
@@ -169,9 +169,9 @@ export class StablePool implements PoolBase {
 
     _exactTokenInForTokenOut(
         poolPairData: StablePoolPairData,
-        amount: BigNumber,
+        amount: OldBigNumber,
         exact: boolean
-    ): BigNumber {
+    ): OldBigNumber {
         try {
             // All values should use 1e18 fixed point
             // i.e. 1USDC => 1e18 not 1e6
@@ -199,9 +199,9 @@ export class StablePool implements PoolBase {
 
     _tokenInForExactTokenOut(
         poolPairData: StablePoolPairData,
-        amount: BigNumber,
+        amount: OldBigNumber,
         exact: boolean
-    ): BigNumber {
+    ): OldBigNumber {
         try {
             // All values should use 1e18 fixed point
             // i.e. 1USDC => 1e18 not 1e6
@@ -229,22 +229,22 @@ export class StablePool implements PoolBase {
 
     _spotPriceAfterSwapExactTokenInForTokenOut(
         poolPairData: StablePoolPairData,
-        amount: BigNumber
-    ): BigNumber {
+        amount: OldBigNumber
+    ): OldBigNumber {
         return _spotPriceAfterSwapExactTokenInForTokenOut(amount, poolPairData);
     }
 
     _spotPriceAfterSwapTokenInForExactTokenOut(
         poolPairData: StablePoolPairData,
-        amount: BigNumber
-    ): BigNumber {
+        amount: OldBigNumber
+    ): OldBigNumber {
         return _spotPriceAfterSwapTokenInForExactTokenOut(amount, poolPairData);
     }
 
     _derivativeSpotPriceAfterSwapExactTokenInForTokenOut(
         poolPairData: StablePoolPairData,
-        amount: BigNumber
-    ): BigNumber {
+        amount: OldBigNumber
+    ): OldBigNumber {
         return _derivativeSpotPriceAfterSwapExactTokenInForTokenOut(
             amount,
             poolPairData
@@ -253,8 +253,8 @@ export class StablePool implements PoolBase {
 
     _derivativeSpotPriceAfterSwapTokenInForExactTokenOut(
         poolPairData: StablePoolPairData,
-        amount: BigNumber
-    ): BigNumber {
+        amount: OldBigNumber
+    ): OldBigNumber {
         return _derivativeSpotPriceAfterSwapTokenInForExactTokenOut(
             amount,
             poolPairData

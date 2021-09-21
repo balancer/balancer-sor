@@ -1,4 +1,4 @@
-import { BigNumber, ZERO, INFINITY } from '../utils/bignumber';
+import { BigNumber as OldBigNumber, ZERO, INFINITY } from '../utils/bignumber';
 import { getOutputAmountSwap } from '../pools';
 import { INFINITESIMAL } from '../config';
 import {
@@ -13,9 +13,9 @@ import {
 export function getHighestLimitAmountsForPaths(
     paths: NewPath[],
     maxPools: number
-): BigNumber[] {
+): OldBigNumber[] {
     if (paths.length === 0) return [];
-    const limitAmounts: BigNumber[] = [];
+    const limitAmounts: OldBigNumber[] = [];
     for (let i = 0; i < maxPools; i++) {
         if (i < paths.length) {
             const limitAmount = paths[i].limitAmount;
@@ -29,8 +29,8 @@ export function getEffectivePriceSwapForPath(
     pools: PoolDictionary,
     path: NewPath,
     swapType: SwapTypes,
-    amount: BigNumber
-): BigNumber {
+    amount: OldBigNumber
+): OldBigNumber {
     if (amount.lt(INFINITESIMAL)) {
         // Return spot price as code below would be 0/0 = undefined
         // or small_amount/0 or 0/small_amount which would cause bugs
@@ -47,8 +47,8 @@ export function getEffectivePriceSwapForPath(
 export function getOutputAmountSwapForPath(
     path: NewPath,
     swapType: SwapTypes,
-    amount: BigNumber
-): BigNumber {
+    amount: OldBigNumber
+): OldBigNumber {
     const pools = path.pools;
 
     // First of all check if the amount is above limit, if so, return 0 for
@@ -106,8 +106,8 @@ export function getOutputAmountSwapForPath(
 export function getSpotPriceAfterSwapForPath(
     path: NewPath,
     swapType: SwapTypes,
-    amount: BigNumber
-): BigNumber {
+    amount: OldBigNumber
+): OldBigNumber {
     const pools = path.pools;
     const poolPairData = path.poolPairData;
     if (poolPairData.length == 1) {
@@ -169,8 +169,8 @@ export function getSpotPriceAfterSwap(
     pool: PoolBase,
     poolPairData: PoolPairBase,
     swapType: SwapTypes,
-    amount: BigNumber
-): BigNumber {
+    amount: OldBigNumber
+): OldBigNumber {
     // TODO: check if necessary to check if amount > limitAmount
     if (swapType === SwapTypes.SwapExactIn) {
         if (poolPairData.balanceIn.isZero()) {
@@ -199,8 +199,8 @@ export function getSpotPriceAfterSwap(
 export function getDerivativeSpotPriceAfterSwapForPath(
     path: NewPath,
     swapType: SwapTypes,
-    amount: BigNumber
-): BigNumber {
+    amount: OldBigNumber
+): OldBigNumber {
     const poolPairData = path.poolPairData;
     if (poolPairData.length == 1) {
         return getDerivativeSpotPriceAfterSwap(
@@ -304,8 +304,8 @@ export function getDerivativeSpotPriceAfterSwap(
     pool: PoolBase,
     poolPairData: PoolPairBase,
     swapType: SwapTypes,
-    amount: BigNumber
-): BigNumber {
+    amount: OldBigNumber
+): OldBigNumber {
     // TODO: check if necessary to check if amount > limitAmount
     if (swapType === SwapTypes.SwapExactIn) {
         if (poolPairData.balanceIn.isZero()) {
@@ -337,11 +337,11 @@ export function EVMgetOutputAmountSwap(
     pool: PoolBase,
     poolPairData: PoolPairBase,
     swapType: SwapTypes,
-    amount: BigNumber
-): BigNumber {
+    amount: OldBigNumber
+): OldBigNumber {
     const { balanceIn, balanceOut, tokenIn, tokenOut } = poolPairData;
 
-    let returnAmount: BigNumber;
+    let returnAmount: OldBigNumber;
 
     if (swapType === SwapTypes.SwapExactIn) {
         if (poolPairData.balanceIn.isZero()) {

@@ -1,7 +1,7 @@
 import cloneDeep from 'lodash.clonedeep';
 import { PRICE_ERROR_TOLERANCE } from '../config';
 import { bnum, ZERO, ONE, INFINITY } from '../utils/bignumber';
-import { BigNumber } from '../utils/bignumber';
+import { BigNumber as OldBigNumber } from '../utils/bignumber';
 import { SwapTypes, NewPath, PoolDictionary, Swap } from '../types';
 import {
     getEffectivePriceSwapForPath,
@@ -23,19 +23,19 @@ export const optimizeSwapAmounts = (
     pools: PoolDictionary,
     paths: NewPath[],
     swapType: SwapTypes,
-    totalSwapAmount: BigNumber,
-    initialSwapAmounts: BigNumber[],
-    highestLimitAmounts: BigNumber[],
+    totalSwapAmount: OldBigNumber,
+    initialSwapAmounts: OldBigNumber[],
+    highestLimitAmounts: OldBigNumber[],
     initialNumPaths: number,
     maxPools: number,
-    costReturnToken: BigNumber
-): [NewPath[], BigNumber[], BigNumber] => {
+    costReturnToken: OldBigNumber
+): [NewPath[], OldBigNumber[], OldBigNumber] => {
     // First get the optimal totalReturn to trade 'totalSwapAmount' with
     // one path only (b=1). Then increase the number of pools as long as
     // improvementCondition is true (see more information below)
     let bestTotalReturnConsideringFees =
         swapType === SwapTypes.SwapExactIn ? INFINITY.times(-1) : INFINITY;
-    let bestSwapAmounts: BigNumber[] = [];
+    let bestSwapAmounts: OldBigNumber[] = [];
     let bestPaths: NewPath[] = [];
     let swapAmounts = initialSwapAmounts;
     for (let b = initialNumPaths; b <= paths.length; b++) {
@@ -49,7 +49,7 @@ export const optimizeSwapAmounts = (
             // 20% of the totalSwapAmount for this new swapAmount added). However, we need to make sure
             // that this value is not higher then the bth limit of the paths available otherwise there
             // won't be any possible path to process this swapAmount:
-            const newSwapAmount = BigNumber.min.apply(null, [
+            const newSwapAmount = OldBigNumber.min.apply(null, [
                 totalSwapAmount.times(bnum(1 / b)),
                 highestLimitAmounts[b - 1],
             ]);
@@ -160,9 +160,9 @@ export const optimizeSwapAmounts = (
 export const formatSwaps = (
     bestPaths: NewPath[],
     swapType: SwapTypes,
-    totalSwapAmount: BigNumber,
-    bestSwapAmounts: BigNumber[]
-): [Swap[][], BigNumber, BigNumber] => {
+    totalSwapAmount: OldBigNumber,
+    bestSwapAmounts: OldBigNumber[]
+): [Swap[][], OldBigNumber, OldBigNumber] => {
     //// Prepare swap data from paths
     const swaps: Swap[][] = [];
     let highestSwapAmt = bestSwapAmounts[0];
@@ -188,7 +188,7 @@ export const formatSwaps = (
         );
             */
 
-        let returnAmount: BigNumber;
+        let returnAmount: OldBigNumber;
 
         if (path.poolPairData.length == 1) {
             // Direct trade: add swap from only pool
@@ -329,12 +329,12 @@ function getBestPathIds(
     pools: PoolDictionary,
     originalPaths: NewPath[],
     swapType: SwapTypes,
-    swapAmounts: BigNumber[]
-): [NewPath[], BigNumber[], BigNumber[], string[]] {
+    swapAmounts: OldBigNumber[]
+): [NewPath[], OldBigNumber[], OldBigNumber[], string[]] {
     const bestPathIds: string[] = [];
     const selectedPaths: NewPath[] = [];
-    const selectedPathLimitAmounts: BigNumber[] = [];
-    const selectedPathExceedingAmounts: BigNumber[] = [];
+    const selectedPathLimitAmounts: OldBigNumber[] = [];
+    const selectedPathExceedingAmounts: OldBigNumber[] = [];
     const paths = cloneDeep(originalPaths); // Deep copy to avoid changing the original path data
 
     // Sort swapAmounts in descending order without changing original: https://stackoverflow.com/a/42442909
@@ -343,7 +343,7 @@ function getBestPathIds(
     });
 
     for (let i = 0; i < sortedSwapAmounts.length; i++) {
-        const swapAmount: BigNumber = sortedSwapAmounts[i];
+        const swapAmount: OldBigNumber = sortedSwapAmounts[i];
         // Find path that has best effective price
         let bestPathIndex = -1;
         let bestEffectivePrice = INFINITY; // Start with worst price possible
@@ -400,13 +400,13 @@ function iterateSwapAmounts(
     pools: PoolDictionary,
     selectedPaths: NewPath[],
     swapType: SwapTypes,
-    totalSwapAmount: BigNumber,
-    swapAmounts: BigNumber[],
-    exceedingAmounts: BigNumber[],
-    pathLimitAmounts: BigNumber[]
-): [BigNumber[], BigNumber[]] {
+    totalSwapAmount: OldBigNumber,
+    swapAmounts: OldBigNumber[],
+    exceedingAmounts: OldBigNumber[],
+    pathLimitAmounts: OldBigNumber[]
+): [OldBigNumber[], OldBigNumber[]] {
     let priceError = ONE; // Initialize priceError just so that while starts
-    let prices: BigNumber[] = [];
+    let prices: OldBigNumber[] = [];
     // // Since this is the beginning of an iteration with a new set of paths, we
     // // set any swapAmounts that were 0 previously to 1 wei or at the limit
     // // to limit minus 1 wei just so that they
@@ -443,8 +443,8 @@ function iterateSwapAmounts(
                 pathLimitAmounts,
                 iterationCount
             );
-        const maxPrice = BigNumber.max.apply(null, prices);
-        const minPrice = BigNumber.min.apply(null, prices);
+        const maxPrice = OldBigNumber.max.apply(null, prices);
+        const minPrice = OldBigNumber.min.apply(null, prices);
         priceError = maxPrice.minus(minPrice).div(minPrice);
         iterationCount++;
         if (iterationCount > 100) break;
@@ -456,16 +456,16 @@ function iterateSwapAmountsApproximation(
     pools: PoolDictionary,
     selectedPaths: NewPath[],
     swapType: SwapTypes,
-    totalSwapAmount: BigNumber,
-    swapAmounts: BigNumber[],
-    exceedingAmounts: BigNumber[], // This is the amount by which swapAmount exceeds the pool limit_amount
-    pathLimitAmounts: BigNumber[],
+    totalSwapAmount: OldBigNumber,
+    swapAmounts: OldBigNumber[],
+    exceedingAmounts: OldBigNumber[], // This is the amount by which swapAmount exceeds the pool limit_amount
+    pathLimitAmounts: OldBigNumber[],
     iterationCount: number
-): [BigNumber[], BigNumber[], BigNumber[]] {
+): [OldBigNumber[], OldBigNumber[], OldBigNumber[]] {
     let sumInverseDerivativeSPaSs = ZERO;
     let sumSPaSDividedByDerivativeSPaSs = ZERO;
-    const SPaSs: BigNumber[] = [];
-    const derivativeSPaSs: BigNumber[] = [];
+    const SPaSs: OldBigNumber[] = [];
+    const derivativeSPaSs: OldBigNumber[] = [];
 
     // We only iterate on the swapAmounts that are viable (i.e. no negative or > than path limit)
     // OR if this is the first time "iterateSwapAmountsApproximation" is called
@@ -536,8 +536,8 @@ function iterateSwapAmountsApproximation(
 
     // Make sure no input amount is negative or above the path limit
     while (
-        BigNumber.min.apply(null, swapAmounts).lt(ZERO) ||
-        BigNumber.max.apply(null, exceedingAmounts).gt(ZERO)
+        OldBigNumber.min.apply(null, swapAmounts).lt(ZERO) ||
+        OldBigNumber.max.apply(null, exceedingAmounts).gt(ZERO)
     ) {
         [swapAmounts, exceedingAmounts] = redistributeInputAmounts(
             swapAmounts,
@@ -546,7 +546,7 @@ function iterateSwapAmountsApproximation(
         );
     }
 
-    const pricesForViableAmounts: BigNumber[] = []; // Get prices for all non-negative AND below-limit input amounts
+    const pricesForViableAmounts: OldBigNumber[] = []; // Get prices for all non-negative AND below-limit input amounts
     let swapAmountsSumWithRoundingErrors = ZERO;
     swapAmounts.forEach((swapAmount, i) => {
         swapAmountsSumWithRoundingErrors =
@@ -599,10 +599,10 @@ function iterateSwapAmountsApproximation(
 }
 
 function redistributeInputAmounts(
-    swapAmounts: BigNumber[],
-    exceedingAmounts: BigNumber[],
-    derivativeSPaSs: BigNumber[]
-): [BigNumber[], BigNumber[]] {
+    swapAmounts: OldBigNumber[],
+    exceedingAmounts: OldBigNumber[],
+    derivativeSPaSs: OldBigNumber[]
+): [OldBigNumber[], OldBigNumber[]] {
     let sumInverseDerivativeSPaSsForViableAmounts = ZERO;
     let sumInverseDerivativeSPaSsForNegativeAmounts = ZERO;
     let sumInverseDerivativeSPaSsForExceedingAmounts = ZERO;
@@ -692,9 +692,9 @@ function redistributeInputAmounts(
 export const calcTotalReturn = (
     paths: NewPath[],
     swapType: SwapTypes,
-    swapAmounts: BigNumber[]
-): BigNumber => {
-    let totalReturn = new BigNumber(0);
+    swapAmounts: OldBigNumber[]
+): OldBigNumber => {
+    let totalReturn = new OldBigNumber(0);
     // changing the contents of pools (parameter passed as reference)
     paths.forEach((path, i) => {
         totalReturn = totalReturn.plus(

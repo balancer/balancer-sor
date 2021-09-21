@@ -1,6 +1,6 @@
 import { getAddress } from '@ethersproject/address';
 import { bnum, scale, ZERO } from '../../utils/bignumber';
-import { BigNumber } from '../../utils/bignumber';
+import { BigNumber as OldBigNumber } from '../../utils/bignumber';
 import * as SDK from '@georgeroman/balancer-v2-pools';
 import {
     PoolBase,
@@ -27,8 +27,8 @@ export type WeightedPoolToken = Pick<
 >;
 
 export type WeightedPoolPairData = PoolPairBase & {
-    weightIn: BigNumber;
-    weightOut: BigNumber;
+    weightIn: OldBigNumber;
+    weightOut: OldBigNumber;
 };
 
 export class WeightedPool implements PoolBase {
@@ -36,10 +36,10 @@ export class WeightedPool implements PoolBase {
     swapPairType: SwapPairType;
     id: string;
     address: string;
-    swapFee: BigNumber;
+    swapFee: OldBigNumber;
     totalShares: string;
     tokens: WeightedPoolToken[];
-    totalWeight: BigNumber;
+    totalWeight: OldBigNumber;
     tokensList: string[];
     MAX_IN_RATIO = bnum(0.3);
     MAX_OUT_RATIO = bnum(0.3);
@@ -121,7 +121,7 @@ export class WeightedPool implements PoolBase {
     // inverse of the slippage. It is proportional to the token balances in the
     // pool but also depends on the shape of the invariant curve.
     // As a standard, we define normalized liquidity in tokenOut
-    getNormalizedLiquidity(poolPairData: WeightedPoolPairData): BigNumber {
+    getNormalizedLiquidity(poolPairData: WeightedPoolPairData): OldBigNumber {
         return poolPairData.balanceOut
             .times(poolPairData.weightIn)
             .div(poolPairData.weightIn.plus(poolPairData.weightOut));
@@ -130,7 +130,7 @@ export class WeightedPool implements PoolBase {
     getLimitAmountSwap(
         poolPairData: PoolPairBase,
         swapType: SwapTypes
-    ): BigNumber {
+    ): OldBigNumber {
         if (swapType === SwapTypes.SwapExactIn) {
             return poolPairData.balanceIn.times(this.MAX_IN_RATIO);
         } else {
@@ -139,7 +139,7 @@ export class WeightedPool implements PoolBase {
     }
 
     // Updates the balance of a given token for the pool
-    updateTokenBalanceForPool(token: string, newBalance: BigNumber): void {
+    updateTokenBalanceForPool(token: string, newBalance: OldBigNumber): void {
         // token is BPT
         if (this.address == token) {
             this.totalShares = newBalance.toString();
@@ -156,9 +156,9 @@ export class WeightedPool implements PoolBase {
     // Uses ROUND_DOWN mode (1)
     _exactTokenInForTokenOut(
         poolPairData: WeightedPoolPairData,
-        amount: BigNumber,
+        amount: OldBigNumber,
         exact: boolean
-    ): BigNumber {
+    ): OldBigNumber {
         if (exact) {
             try {
                 // poolPair balances are normalised so must be scaled before use
@@ -187,9 +187,9 @@ export class WeightedPool implements PoolBase {
     // Uses ROUND_UP mode (0)
     _tokenInForExactTokenOut(
         poolPairData: WeightedPoolPairData,
-        amount: BigNumber,
+        amount: OldBigNumber,
         exact: boolean
-    ): BigNumber {
+    ): OldBigNumber {
         if (exact) {
             try {
                 // poolPair balances are normalised so must be scaled before use
@@ -216,22 +216,22 @@ export class WeightedPool implements PoolBase {
 
     _spotPriceAfterSwapExactTokenInForTokenOut(
         poolPairData: WeightedPoolPairData,
-        amount: BigNumber
-    ): BigNumber {
+        amount: OldBigNumber
+    ): OldBigNumber {
         return _spotPriceAfterSwapExactTokenInForTokenOut(amount, poolPairData);
     }
 
     _spotPriceAfterSwapTokenInForExactTokenOut(
         poolPairData: WeightedPoolPairData,
-        amount: BigNumber
-    ): BigNumber {
+        amount: OldBigNumber
+    ): OldBigNumber {
         return _spotPriceAfterSwapTokenInForExactTokenOut(amount, poolPairData);
     }
 
     _derivativeSpotPriceAfterSwapExactTokenInForTokenOut(
         poolPairData: WeightedPoolPairData,
-        amount: BigNumber
-    ): BigNumber {
+        amount: OldBigNumber
+    ): OldBigNumber {
         return _derivativeSpotPriceAfterSwapExactTokenInForTokenOut(
             amount,
             poolPairData
@@ -240,8 +240,8 @@ export class WeightedPool implements PoolBase {
 
     _derivativeSpotPriceAfterSwapTokenInForExactTokenOut(
         poolPairData: WeightedPoolPairData,
-        amount: BigNumber
-    ): BigNumber {
+        amount: OldBigNumber
+    ): OldBigNumber {
         return _derivativeSpotPriceAfterSwapTokenInForExactTokenOut(
             amount,
             poolPairData
