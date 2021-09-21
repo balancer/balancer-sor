@@ -2,6 +2,7 @@ import { BigNumber as OldBigNumber } from '../utils/bignumber';
 import * as weightedMath from '../pools/weightedPool/weightedMath';
 import { WeightedPoolPairData } from 'pools/weightedPool/weightedPool';
 import { Zero } from '@ethersproject/constants';
+import { BigNumber } from '@ethersproject/bignumber';
 
 /////////
 /// UI Helpers
@@ -26,10 +27,8 @@ export function BPTForTokensZeroPriceImpact(
         // We need to scale down all the balances and amounts
         amounts[i] = amounts[i].times(new OldBigNumber(10).pow(-decimals[i]));
         const poolPairData: WeightedPoolPairData = {
-            balanceIn: balances[i].times(
-                new OldBigNumber(10).pow(-decimals[i])
-            ),
-            balanceOut: bptTotalSupply.times(new OldBigNumber(10).pow(-18)),
+            balanceIn: BigNumber.from(balances[i].toString()),
+            balanceOut: BigNumber.from(bptTotalSupply.toString()),
             weightIn: normalizedWeights[i].times(new OldBigNumber(10).pow(-18)),
             swapFee: Zero,
         } as WeightedPoolPairData;

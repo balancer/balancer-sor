@@ -1,4 +1,9 @@
-import { BigNumber as OldBigNumber, ZERO, INFINITY } from '../utils/bignumber';
+import {
+    BigNumber as OldBigNumber,
+    ZERO,
+    INFINITY,
+    scale,
+} from '../utils/bignumber';
 import { getOutputAmountSwap } from '../pools';
 import { INFINITESIMAL } from '../config';
 import {
@@ -9,6 +14,7 @@ import {
     PoolPairBase,
     PoolTypes,
 } from '../types';
+import { parseFixed } from '@ethersproject/bignumber';
 
 export function getHighestLimitAmountsForPaths(
     paths: NewPath[],
@@ -180,7 +186,12 @@ export function getSpotPriceAfterSwap(
         if (poolPairData.balanceOut.isZero()) {
             return ZERO;
         }
-        if (amount.gte(poolPairData.balanceOut)) return INFINITY;
+        if (
+            scale(amount, poolPairData.decimalsOut).gte(
+                poolPairData.balanceOut.toString()
+            )
+        )
+            return INFINITY;
     }
     if (swapType === SwapTypes.SwapExactIn) {
         return pool._spotPriceAfterSwapExactTokenInForTokenOut(
@@ -315,7 +326,12 @@ export function getDerivativeSpotPriceAfterSwap(
         if (poolPairData.balanceOut.isZero()) {
             return ZERO;
         }
-        if (amount.gte(poolPairData.balanceOut)) return INFINITY;
+        if (
+            scale(amount, poolPairData.decimalsOut).gte(
+                poolPairData.balanceOut.toString()
+            )
+        )
+            return INFINITY;
     }
     if (swapType === SwapTypes.SwapExactIn) {
         return pool._derivativeSpotPriceAfterSwapExactTokenInForTokenOut(
@@ -351,7 +367,12 @@ export function EVMgetOutputAmountSwap(
         if (poolPairData.balanceOut.isZero()) {
             return ZERO;
         }
-        if (amount.gte(poolPairData.balanceOut)) return INFINITY;
+        if (
+            scale(amount, poolPairData.decimalsOut).gte(
+                poolPairData.balanceOut.toString()
+            )
+        )
+            return INFINITY;
     }
     if (swapType === SwapTypes.SwapExactIn) {
         // TODO we will be able to remove pooltype check once Element EVM maths is available
@@ -402,8 +423,24 @@ export function EVMgetOutputAmountSwap(
         }
     }
     // Update balances of tokenIn and tokenOut
-    pool.updateTokenBalanceForPool(tokenIn, balanceIn.plus(returnAmount));
-    pool.updateTokenBalanceForPool(tokenOut, balanceOut.minus(amount));
+    pool.updateTokenBalanceForPool(
+        tokenIn,
+        balanceIn.add(
+            parseFixed(
+                returnAmount.dp(poolPairData.decimalsIn).toString(),
+                poolPairData.decimalsIn
+            )
+        )
+    );
+    pool.updateTokenBalanceForPool(
+        tokenOut,
+        balanceOut.sub(
+            parseFixed(
+                amount.dp(poolPairData.decimalsOut).toString(),
+                poolPairData.decimalsOut
+            )
+        )
+    );
 
     return returnAmount;
 }

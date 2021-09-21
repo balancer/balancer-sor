@@ -45,8 +45,14 @@ describe(`Tests for Weighted Pools.`, () => {
                 poolType: PoolTypes.Weighted,
                 tokenIn: pool.tokens[0].address,
                 tokenOut: pool.tokens[1].address,
-                balanceIn: bnum(pool.tokens[0].balance),
-                balanceOut: bnum(pool.tokens[1].balance),
+                balanceIn: parseFixed(
+                    pool.tokens[0].balance,
+                    pool.tokens[0].decimals
+                ),
+                balanceOut: parseFixed(
+                    pool.tokens[1].balance,
+                    pool.tokens[1].decimals
+                ),
                 swapFee: parseFixed(pool.swapFee, 18),
                 decimalsIn: Number(pool.tokens[0].decimals),
                 decimalsOut: Number(pool.tokens[1].decimals),
@@ -78,8 +84,14 @@ describe(`Tests for Weighted Pools.`, () => {
                 poolType: PoolTypes.Weighted,
                 tokenIn: pool.tokens[0].address,
                 tokenOut: pool.tokens[1].address,
-                balanceIn: bnum(pool.tokens[0].balance),
-                balanceOut: bnum(pool.tokens[1].balance),
+                balanceIn: parseFixed(
+                    pool.tokens[0].balance,
+                    pool.tokens[0].decimals
+                ),
+                balanceOut: parseFixed(
+                    pool.tokens[1].balance,
+                    pool.tokens[1].decimals
+                ),
                 swapFee: parseFixed(pool.swapFee, 18),
                 decimalsIn: Number(pool.tokens[0].decimals),
                 decimalsOut: Number(pool.tokens[1].decimals),

@@ -13,8 +13,12 @@ export function _exactTokenInForTokenOut(
     amount: OldBigNumber,
     poolPairData: WeightedPoolPairData
 ): OldBigNumber {
-    const Bi = poolPairData.balanceIn.toNumber();
-    const Bo = poolPairData.balanceOut.toNumber();
+    const Bi = parseFloat(
+        formatFixed(poolPairData.balanceIn, poolPairData.decimalsIn)
+    );
+    const Bo = parseFloat(
+        formatFixed(poolPairData.balanceOut, poolPairData.decimalsOut)
+    );
     const wi = poolPairData.weightIn.toNumber();
     const wo = poolPairData.weightOut.toNumber();
     const Ai = amount.toNumber();
@@ -37,8 +41,12 @@ export function _tokenInForExactTokenOut(
     amount: OldBigNumber,
     poolPairData: WeightedPoolPairData
 ): OldBigNumber {
-    const Bi = poolPairData.balanceIn.toNumber();
-    const Bo = poolPairData.balanceOut.toNumber();
+    const Bi = parseFloat(
+        formatFixed(poolPairData.balanceIn, poolPairData.decimalsIn)
+    );
+    const Bo = parseFloat(
+        formatFixed(poolPairData.balanceOut, poolPairData.decimalsOut)
+    );
     const wi = poolPairData.weightIn.toNumber();
     const wo = poolPairData.weightOut.toNumber();
     const Ao = amount.toNumber();
@@ -58,8 +66,10 @@ export function _spotPriceAfterSwapTokenInForExactBPTOut(
     amount: OldBigNumber,
     poolPairData: WeightedPoolPairData
 ): OldBigNumber {
-    const Bi = poolPairData.balanceIn.toNumber();
-    const Bbpt = poolPairData.balanceOut.toNumber();
+    const Bi = parseFloat(
+        formatFixed(poolPairData.balanceIn, poolPairData.decimalsIn)
+    );
+    const Bbpt = parseFloat(formatFixed(poolPairData.balanceOut, 18));
     const wi = poolPairData.weightIn.toNumber();
     const Aobpt = amount.toNumber();
     const f = parseFloat(formatFixed(poolPairData.swapFee, 18));
@@ -79,8 +89,12 @@ export function _spotPriceAfterSwapExactTokenInForTokenOut(
     amount: OldBigNumber,
     poolPairData: WeightedPoolPairData
 ): OldBigNumber {
-    const Bi = poolPairData.balanceIn.toNumber();
-    const Bo = poolPairData.balanceOut.toNumber();
+    const Bi = parseFloat(
+        formatFixed(poolPairData.balanceIn, poolPairData.decimalsIn)
+    );
+    const Bo = parseFloat(
+        formatFixed(poolPairData.balanceOut, poolPairData.decimalsOut)
+    );
     const wi = poolPairData.weightIn.toNumber();
     const wo = poolPairData.weightOut.toNumber();
     const Ai = amount.toNumber();
@@ -99,8 +113,12 @@ export function _spotPriceAfterSwapTokenInForExactTokenOut(
     amount: OldBigNumber,
     poolPairData: WeightedPoolPairData
 ): OldBigNumber {
-    const Bi = poolPairData.balanceIn.toNumber();
-    const Bo = poolPairData.balanceOut.toNumber();
+    const Bi = parseFloat(
+        formatFixed(poolPairData.balanceIn, poolPairData.decimalsIn)
+    );
+    const Bo = parseFloat(
+        formatFixed(poolPairData.balanceOut, poolPairData.decimalsOut)
+    );
     const wi = poolPairData.weightIn.toNumber();
     const wo = poolPairData.weightOut.toNumber();
     const Ao = amount.toNumber();
@@ -123,8 +141,12 @@ export function _derivativeSpotPriceAfterSwapExactTokenInForTokenOut(
     amount: OldBigNumber,
     poolPairData: WeightedPoolPairData
 ): OldBigNumber {
-    const Bi = poolPairData.balanceIn.toNumber();
-    const Bo = poolPairData.balanceOut.toNumber();
+    const Bi = parseFloat(
+        formatFixed(poolPairData.balanceIn, poolPairData.decimalsIn)
+    );
+    const Bo = parseFloat(
+        formatFixed(poolPairData.balanceOut, poolPairData.decimalsOut)
+    );
     const wi = poolPairData.weightIn.toNumber();
     const wo = poolPairData.weightOut.toNumber();
     const Ai = amount.toNumber();
@@ -138,8 +160,12 @@ export function _derivativeSpotPriceAfterSwapTokenInForExactTokenOut(
     amount: OldBigNumber,
     poolPairData: WeightedPoolPairData
 ): OldBigNumber {
-    const Bi = poolPairData.balanceIn.toNumber();
-    const Bo = poolPairData.balanceOut.toNumber();
+    const Bi = parseFloat(
+        formatFixed(poolPairData.balanceIn, poolPairData.decimalsIn)
+    );
+    const Bo = parseFloat(
+        formatFixed(poolPairData.balanceOut, poolPairData.decimalsOut)
+    );
     const wi = poolPairData.weightIn.toNumber();
     const wo = poolPairData.weightOut.toNumber();
     const Ao = amount.toNumber();

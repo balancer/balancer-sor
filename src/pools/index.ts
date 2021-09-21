@@ -2,7 +2,12 @@ import { WeightedPool } from './weightedPool/weightedPool';
 // import { StablePool } from './stablePool/stablePool';
 // import { ElementPool } from './elementPool/elementPool';
 // import { MetaStablePool } from './metaStablePool/metaStablePool';
-import { BigNumber as OldBigNumber, INFINITY, ZERO } from '../utils/bignumber';
+import {
+    BigNumber as OldBigNumber,
+    INFINITY,
+    scale,
+    ZERO,
+} from '../utils/bignumber';
 import { SubgraphPoolBase, PoolBase, SwapTypes, PoolPairBase } from '../types';
 
 export function parseNewPool(
@@ -53,7 +58,11 @@ export function getOutputAmountSwap(
     } else {
         if (poolPairData.balanceOut.isZero()) {
             return ZERO;
-        } else if (amount.gte(poolPairData.balanceOut)) {
+        } else if (
+            scale(amount, poolPairData.decimalsOut).gte(
+                poolPairData.balanceOut.toString()
+            )
+        ) {
             return INFINITY;
         } else {
             return pool._tokenInForExactTokenOut(poolPairData, amount, false);

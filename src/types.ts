@@ -41,8 +41,8 @@ export type PoolPairBase = {
     tokenOut: string;
     decimalsIn: number;
     decimalsOut: number;
-    balanceIn: OldBigNumber;
-    balanceOut: OldBigNumber;
+    balanceIn: BigNumber;
+    balanceOut: BigNumber;
 };
 
 export interface Swap {
@@ -148,10 +148,7 @@ export interface PoolBase {
         poolPairData: PoolPairBase,
         swapType: SwapTypes
     ) => OldBigNumber;
-    updateTokenBalanceForPool: (
-        token: string,
-        newBalance: OldBigNumber
-    ) => void;
+    updateTokenBalanceForPool: (token: string, newBalance: BigNumber) => void;
     _exactTokenInForTokenOut: (
         poolPairData: PoolPairBase,
         amount: OldBigNumber,

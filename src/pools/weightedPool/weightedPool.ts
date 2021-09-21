@@ -24,7 +24,7 @@ import {
     _derivativeSpotPriceAfterSwapExactTokenInForTokenOut,
     _derivativeSpotPriceAfterSwapTokenInForExactTokenOut,
 } from './weightedMath';
-import { BigNumber, parseFixed } from '@ethersproject/bignumber';
+import { BigNumber, formatFixed, parseFixed } from '@ethersproject/bignumber';
 
 export type WeightedPoolToken = Pick<
     NoNullableField<SubgraphToken>,
@@ -112,8 +112,8 @@ export class WeightedPool implements PoolBase {
             tokenOut: tokenOut,
             decimalsIn: Number(decimalsIn),
             decimalsOut: Number(decimalsOut),
-            balanceIn: bnum(balanceIn),
-            balanceOut: bnum(balanceOut),
+            balanceIn: parseFixed(balanceIn, decimalsIn),
+            balanceOut: parseFixed(balanceOut, decimalsOut),
             weightIn: weightIn,
             weightOut: weightOut,
             swapFee: this.swapFee,
@@ -127,7 +127,9 @@ export class WeightedPool implements PoolBase {
     // pool but also depends on the shape of the invariant curve.
     // As a standard, we define normalized liquidity in tokenOut
     getNormalizedLiquidity(poolPairData: WeightedPoolPairData): OldBigNumber {
-        return poolPairData.balanceOut
+        return bnum(
+            formatFixed(poolPairData.balanceOut, poolPairData.decimalsOut)
+        )
             .times(poolPairData.weightIn)
             .div(poolPairData.weightIn.plus(poolPairData.weightOut));
     }
@@ -137,14 +139,18 @@ export class WeightedPool implements PoolBase {
         swapType: SwapTypes
     ): OldBigNumber {
         if (swapType === SwapTypes.SwapExactIn) {
-            return poolPairData.balanceIn.times(this.MAX_IN_RATIO);
+            return bnum(
+                formatFixed(poolPairData.balanceIn, poolPairData.decimalsIn)
+            ).times(this.MAX_IN_RATIO);
         } else {
-            return poolPairData.balanceOut.times(this.MAX_OUT_RATIO);
+            return bnum(
+                formatFixed(poolPairData.balanceOut, poolPairData.decimalsOut)
+            ).times(this.MAX_OUT_RATIO);
         }
     }
 
     // Updates the balance of a given token for the pool
-    updateTokenBalanceForPool(token: string, newBalance: OldBigNumber): void {
+    updateTokenBalanceForPool(token: string, newBalance: BigNumber): void {
         // token is BPT
         if (this.address == token) {
             this.totalShares = newBalance.toString();
@@ -152,7 +158,7 @@ export class WeightedPool implements PoolBase {
             // token is underlying in the pool
             const T = this.tokens.find((t) => t.address === token);
             if (!T) throw Error('Pool does not contain this token');
-            T.balance = newBalance.toString();
+            T.balance = formatFixed(newBalance, T.decimals);
         }
     }
 
@@ -168,9 +174,9 @@ export class WeightedPool implements PoolBase {
             try {
                 // poolPair balances are normalised so must be scaled before use
                 const amt = SDK.WeightedMath._calcOutGivenIn(
-                    scale(poolPairData.balanceIn, poolPairData.decimalsIn),
+                    bnum(poolPairData.balanceIn.toString()),
                     scale(poolPairData.weightIn, 18),
-                    scale(poolPairData.balanceOut, poolPairData.decimalsOut),
+                    bnum(poolPairData.balanceOut.toString()),
                     scale(poolPairData.weightOut, 18),
                     scale(amount, poolPairData.decimalsIn),
                     bnum(poolPairData.swapFee.toString())
@@ -199,9 +205,9 @@ export class WeightedPool implements PoolBase {
             try {
                 // poolPair balances are normalised so must be scaled before use
                 const amt = SDK.WeightedMath._calcInGivenOut(
-                    scale(poolPairData.balanceIn, poolPairData.decimalsIn),
+                    bnum(poolPairData.balanceIn.toString()),
                     scale(poolPairData.weightIn, 18),
-                    scale(poolPairData.balanceOut, poolPairData.decimalsOut),
+                    bnum(poolPairData.balanceOut.toString()),
                     scale(poolPairData.weightOut, 18),
                     scale(amount, poolPairData.decimalsOut),
                     bnum(poolPairData.swapFee.toString())
