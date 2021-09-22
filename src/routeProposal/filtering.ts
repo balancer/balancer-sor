@@ -374,8 +374,11 @@ export function getPathsUsingStaBalPool(
     chainId: number
 ): NewPath[] {
     // This will be the USDC/staBAL Connecting pool used in Polygon
+    const usdcConnectingPoolInfo = USDCCONNECTINGPOOL[chainId];
+    if (!usdcConnectingPoolInfo) return [];
+
     const usdcConnectingPool: StablePool = poolsAll[
-        USDCCONNECTINGPOOL[chainId].id
+        usdcConnectingPoolInfo.id
     ] as StablePool;
 
     if (!usdcConnectingPool) return [];
@@ -411,12 +414,12 @@ export function getPathsUsingStaBalPool(
             usdcConnectingPool,
             tokenIn,
             hopTokenStaBal,
-            USDCCONNECTINGPOOL[chainId].usdc
+            usdcConnectingPoolInfo.usdc
         );
 
         // Hop out as it is USDC > tokenOut
         const mostLiquidLastPool = getHighestLiquidityPool(
-            USDCCONNECTINGPOOL[chainId].usdc,
+            usdcConnectingPoolInfo.usdc,
             tokenOut,
             SwapPairType.HopOut,
             poolsFiltered
@@ -427,7 +430,7 @@ export function getPathsUsingStaBalPool(
         const lastPool = poolsFiltered[mostLiquidLastPool];
         const pathEnd = createDirectPath(
             lastPool,
-            USDCCONNECTINGPOOL[chainId].usdc,
+            usdcConnectingPoolInfo.usdc,
             tokenOut
         );
 
@@ -442,7 +445,7 @@ export function getPathsUsingStaBalPool(
         // Hop in as it is tokenIn > USDC
         const mostLiquidFirstPool = getHighestLiquidityPool(
             tokenIn,
-            USDCCONNECTINGPOOL[chainId].usdc,
+            usdcConnectingPoolInfo.usdc,
             SwapPairType.HopIn,
             poolsFiltered
         );
@@ -456,7 +459,7 @@ export function getPathsUsingStaBalPool(
         const staBalPath = createMultihopPath(
             usdcConnectingPool,
             metaStablePoolIn,
-            USDCCONNECTINGPOOL[chainId].usdc,
+            usdcConnectingPoolInfo.usdc,
             hopTokenStaBal,
             tokenOut
         );
@@ -464,7 +467,7 @@ export function getPathsUsingStaBalPool(
         const pathStart = createDirectPath(
             firstPool,
             tokenIn,
-            USDCCONNECTINGPOOL[chainId].usdc
+            usdcConnectingPoolInfo.usdc
         );
 
         return [composePaths([pathStart, staBalPath])];

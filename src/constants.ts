@@ -30,25 +30,9 @@ export const VAULTADDR: { [chainId: number]: string } = {
 export const USDCCONNECTINGPOOL: {
     [chainId: number]: { id: string; usdc: string };
 } = {
-    1: {
-        id: 'N/A',
-        usdc: 'N/A',
-    },
-    5: {
-        id: 'N/A',
-        usdc: 'N/A',
-    },
-    42: {
-        id: 'N/A',
-        usdc: 'N/A',
-    },
     137: {
         id: 'TODO',
         usdc: 'TODO',
-    },
-    42161: {
-        id: 'N/A',
-        usdc: 'N/A',
     },
     99: {
         id: 'usdcConnecting',
