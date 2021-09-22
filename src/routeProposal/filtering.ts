@@ -362,58 +362,53 @@ function composePaths(paths: NewPath[]): NewPath {
 
 /*
 The staBAL3 pool (STABALADDR) is the main stable pool that holds DAI/USDC/USDT and has the staBAL3 BPT.
-staBAL Pools are metastable pools that contain a project token, i.e. TUSD, paired with staBAL3 BPT.
+Metastable pools that contain a project token, i.e. TUSD, paired with staBAL3 BPT.
 USDC connecting pool (USDCCONNECTINGPOOL) is a metastable pool containing USDC and staBAL3 BPT.
 This setup should enable paths between the new project metastable pools and other liquidity. I.e. TUSD > BAL, which would look like:
 TUSD>[TUSDstaBALPool]>staBAL3>[ConnectingPool]>USDC>[BalWeightedPool]>BAL
 */
-export function getPathUsingStaBalPools(
+export function getPathsUsingStaBalPool(
     tokenIn: string,
     tokenOut: string,
     poolsAll: PoolDictionary,
     poolsFiltered: PoolDictionary,
     chainId: number
-): NewPath {
+): NewPath[] {
     // This will be the USDC/staBAL Connecting pool used in Polygon
     const usdcConnectingPool: StablePool = poolsAll[
         USDCCONNECTINGPOOL[chainId].id
     ] as StablePool;
 
-    if (!usdcConnectingPool) return {} as NewPath;
+    if (!usdcConnectingPool) return [];
 
     // staBal BPT token is the hop token between token and USDC connecting pool
     const hopTokenStaBal = STABALADDR[chainId];
 
-    // Finds the best staBAL Pool with tokenIn/staBal3Bpt or returns '' if doesn't exist
-    const staBalPoolIdIn = getHighestLiquidityPool(
+    // Finds the best metastable Pool with tokenIn/staBal3Bpt or returns null if doesn't exist
+    const metastablePoolIdIn = getHighestLiquidityPool(
         tokenIn,
         hopTokenStaBal,
         SwapPairType.HopIn,
         poolsFiltered
     );
-    // Finds the best staBAL Pool with tokenOut/staBal3Bpt or returns '' if doesn't exist
-    const staBalPoolIdOut = getHighestLiquidityPool(
+    // Finds the best metastable Pool with tokenOut/staBal3Bpt or returns null if doesn't exist
+    const metastablePoolIdOut = getHighestLiquidityPool(
         hopTokenStaBal,
         tokenOut,
         SwapPairType.HopOut,
         poolsFiltered
     );
 
-    // Path must start or finish with a staBAL Pool
-    if (!staBalPoolIdIn && !staBalPoolIdOut) return {} as NewPath;
-    else if (staBalPoolIdIn && staBalPoolIdOut) {
-        // This case should be handled by existing multihop algorithm because it is tokenIn>[staBalPoolIn]>staBal>[staBalPoolOut]>tokenOut
-        return {} as NewPath;
-    } else if (staBalPoolIdIn && !staBalPoolIdOut) {
-        // First part of path is multihop through staBalPool and USDC Connecting Pools
+    if (metastablePoolIdIn && !metastablePoolIdOut) {
+        // First part of path is multihop through metaStablePool and USDC Connecting Pools
         // Last part of path is single hop through USDC/tokenOut highest liquidity pool
-        // i.e. tokenIn>[staBalPair1]>staBAL>[usdcConnecting]>USDC>[HighLiqPool]>tokenOut
+        // i.e. tokenIn>[metaStablePool]>staBAL>[usdcConnecting]>USDC>[HighLiqPool]>tokenOut
 
-        const staBalPoolIn = poolsFiltered[staBalPoolIdIn];
+        const metaStablePoolIn = poolsFiltered[metastablePoolIdIn];
 
-        // tokenIn > [staBalPool] > staBal > [UsdcConnectingPool] > USDC
+        // tokenIn > [metaStablePool] > staBal > [UsdcConnectingPool] > USDC
         const staBalPath = createMultihopPath(
-            staBalPoolIn,
+            metaStablePoolIn,
             usdcConnectingPool,
             tokenIn,
             hopTokenStaBal,
@@ -428,22 +423,22 @@ export function getPathUsingStaBalPools(
             poolsFiltered
         );
         // No USDC>tokenOut pool so return empty path
-        if (mostLiquidLastPool === null) return {} as NewPath;
-        else {
-            const lastPool = poolsFiltered[mostLiquidLastPool];
-            const pathEnd = createDirectPath(
-                lastPool,
-                USDCCONNECTINGPOOL[chainId].usdc,
-                tokenOut
-            );
+        if (mostLiquidLastPool === null) return [];
 
-            return composePaths([staBalPath, pathEnd]);
-        }
-    } else if (!staBalPoolIdIn && staBalPoolIdOut) {
+        const lastPool = poolsFiltered[mostLiquidLastPool];
+        const pathEnd = createDirectPath(
+            lastPool,
+            USDCCONNECTINGPOOL[chainId].usdc,
+            tokenOut
+        );
+
+        return [composePaths([staBalPath, pathEnd])];
+    }
+
+    if (!metastablePoolIdIn && metastablePoolIdOut) {
         // First part of path is single hop through tokenIn/USDC highest liquidity pool
-        // Last part of path is multihop through USDC Connecting Pools and staBalPool
-        // i.e. i.e. tokenIn>[HighLiqPool]>USDC>[usdcConnecting]>staBAL>[staBalPair1]>tokenOut
-        const staBalPoolIn = poolsFiltered[staBalPoolIdOut];
+        // Last part of path is multihop through USDC Connecting Pools and metaStablePool
+        // i.e. i.e. tokenIn>[HighLiqPool]>USDC>[usdcConnecting]>staBAL>[metaStablePool]>tokenOut
 
         // Hop in as it is tokenIn > USDC
         const mostLiquidFirstPool = getHighestLiquidityPool(
@@ -453,14 +448,15 @@ export function getPathUsingStaBalPools(
             poolsFiltered
         );
         // No tokenIn>USDC pool so return empty path
-        if (mostLiquidFirstPool === null) return {} as NewPath;
+        if (mostLiquidFirstPool === null) return [];
 
+        const metaStablePoolIn = poolsFiltered[metastablePoolIdOut];
         const firstPool = poolsFiltered[mostLiquidFirstPool];
 
-        // USDC > [UsdcConnectingPool] > staBal > [staBalPool] > tokenOut
+        // USDC > [UsdcConnectingPool] > staBal > [metaStablePool] > tokenOut
         const staBalPath = createMultihopPath(
             usdcConnectingPool,
-            staBalPoolIn,
+            metaStablePoolIn,
             USDCCONNECTINGPOOL[chainId].usdc,
             hopTokenStaBal,
             tokenOut
@@ -472,7 +468,13 @@ export function getPathUsingStaBalPools(
             USDCCONNECTINGPOOL[chainId].usdc
         );
 
-        return composePaths([pathStart, staBalPath]);
+        return [composePaths([pathStart, staBalPath])];
     }
-    return {} as NewPath;
+
+    // If we're here either the path doesn't use metastable pools (and so will not be routed through StaBAL)
+    // or both input and output tokens are in metastable pools and so should be handled by existing multihop algorithm
+    // (because it is tokenIn>[metaStablePoolIn]>staBal>[metaStablePoolOut]>tokenOut)
+    //
+    // We then return an empty set of paths
+    return [];
 }
