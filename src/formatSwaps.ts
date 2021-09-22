@@ -1,4 +1,4 @@
-import { BigNumber, parseFixed } from '@ethersproject/bignumber';
+import { BigNumber } from '@ethersproject/bignumber';
 import cloneDeep from 'lodash.clonedeep';
 import { BigNumber as OldBigNumber, bnum, scale } from './utils/bignumber';
 import { EMPTY_SWAPINFO } from './constants';

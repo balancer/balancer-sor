@@ -1,12 +1,7 @@
-import {
-    BigNumber,
-    BigNumberish,
-    formatFixed,
-    parseFixed,
-} from '@ethersproject/bignumber';
+import { BigNumber, BigNumberish, parseFixed } from '@ethersproject/bignumber';
 import { BaseProvider } from '@ethersproject/providers';
 import cloneDeep from 'lodash.clonedeep';
-import { BigNumber as OldBigNumber, bnum } from './utils/bignumber';
+import { BigNumber as OldBigNumber } from './utils/bignumber';
 import { getBestPaths } from './router';
 import { getWrappedInfo, setWrappedInfo } from './wrapInfo';
 import { formatSwaps } from './formatSwaps';

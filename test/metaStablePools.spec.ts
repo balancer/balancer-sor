@@ -6,7 +6,7 @@ import { WeiPerEther as ONE } from '@ethersproject/constants';
 import { JsonRpcProvider } from '@ethersproject/providers';
 import { SOR } from '../src';
 import { SwapInfo, SwapTypes, PoolTypes, SubgraphPoolBase } from '../src/types';
-import { bnum, scale } from '../src/utils/bignumber';
+import { bnum } from '../src/utils/bignumber';
 import {
     MetaStablePool,
     MetaStablePoolPairData,
