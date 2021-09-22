@@ -14,6 +14,7 @@ import { ElementPool } from '../pools/elementPool/elementPool';
 import { ZERO } from '../utils/bignumber';
 
 import { parseNewPool } from '../pools';
+import { Zero } from '@ethersproject/constants';
 
 export const filterPoolsByType = (
     pools: SubgraphPoolBase[],
@@ -250,7 +251,7 @@ function createDirectPath(
     const path: NewPath = {
         id: pool.id,
         swaps: [swap],
-        limitAmount: ZERO,
+        limitAmount: Zero,
         poolPairData: [poolPairData],
         pools: [pool],
     };
@@ -289,7 +290,7 @@ function createMultihopPath(
     const path: NewPath = {
         id: firstPool.id + secondPool.id,
         swaps: [swap1, swap2],
-        limitAmount: ZERO,
+        limitAmount: Zero,
         poolPairData: [poolPairDataFirst, poolPairDataSecond],
         pools: [firstPool, secondPool],
     };

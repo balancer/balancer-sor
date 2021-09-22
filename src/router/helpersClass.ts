@@ -3,6 +3,7 @@ import {
     ZERO,
     INFINITY,
     scale,
+    bnum,
 } from '../utils/bignumber';
 import { getOutputAmountSwap } from '../pools';
 import { INFINITESIMAL } from '../config';
@@ -14,14 +15,14 @@ import {
     PoolPairBase,
     PoolTypes,
 } from '../types';
-import { parseFixed } from '@ethersproject/bignumber';
+import { BigNumber, formatFixed, parseFixed } from '@ethersproject/bignumber';
 
 export function getHighestLimitAmountsForPaths(
     paths: NewPath[],
     maxPools: number
-): OldBigNumber[] {
+): BigNumber[] {
     if (paths.length === 0) return [];
-    const limitAmounts: OldBigNumber[] = [];
+    const limitAmounts: BigNumber[] = [];
     for (let i = 0; i < maxPools; i++) {
         if (i < paths.length) {
             const limitAmount = paths[i].limitAmount;
@@ -35,14 +36,20 @@ export function getEffectivePriceSwapForPath(
     pools: PoolDictionary,
     path: NewPath,
     swapType: SwapTypes,
-    amount: OldBigNumber
+    amount: OldBigNumber,
+    inputDecimals: number
 ): OldBigNumber {
     if (amount.lt(INFINITESIMAL)) {
         // Return spot price as code below would be 0/0 = undefined
         // or small_amount/0 or 0/small_amount which would cause bugs
         return getSpotPriceAfterSwapForPath(path, swapType, amount);
     }
-    const outputAmountSwap = getOutputAmountSwapForPath(path, swapType, amount);
+    const outputAmountSwap = getOutputAmountSwapForPath(
+        path,
+        swapType,
+        amount,
+        inputDecimals
+    );
     if (swapType === SwapTypes.SwapExactIn) {
         return amount.div(outputAmountSwap); // amountIn/AmountOut
     } else {
@@ -53,13 +60,14 @@ export function getEffectivePriceSwapForPath(
 export function getOutputAmountSwapForPath(
     path: NewPath,
     swapType: SwapTypes,
-    amount: OldBigNumber
+    amount: OldBigNumber,
+    inputDecimals: number
 ): OldBigNumber {
     const pools = path.pools;
 
     // First of all check if the amount is above limit, if so, return 0 for
     // 'swapExactIn' or Inf for swapExactOut
-    if (amount.gt(path.limitAmount)) {
+    if (amount.gt(bnum(formatFixed(path.limitAmount, inputDecimals)))) {
         if (swapType === SwapTypes.SwapExactIn) {
             return ZERO;
         } else {

@@ -123,7 +123,7 @@ export interface NewPath {
     id: string; // pool address if direct path, contactenation of pool addresses if multihop
     swaps: Swap[];
     poolPairData: PoolPairBase[];
-    limitAmount: OldBigNumber;
+    limitAmount: BigNumber;
     pools: PoolBase[];
     filterEffectivePrice?: OldBigNumber; // TODO: This is just used for filtering, maybe there is a better way to filter?
 }

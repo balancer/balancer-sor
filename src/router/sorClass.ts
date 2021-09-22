@@ -16,7 +16,7 @@ import {
     EVMgetOutputAmountSwap,
 } from './helpersClass';
 import { MaxUint256 } from '@ethersproject/constants';
-import { BigNumber } from '@ethersproject/bignumber';
+import { BigNumber, formatFixed } from '@ethersproject/bignumber';
 
 // TODO get max price from slippage tolerance given by user options
 export const MAX_UINT = MaxUint256.toString();
@@ -32,6 +32,7 @@ export const optimizeSwapAmounts = (
     totalSwapAmount: OldBigNumber,
     initialSwapAmounts: OldBigNumber[],
     highestLimitAmounts: OldBigNumber[],
+    inputDecimals: number,
     initialNumPaths: number,
     maxPools: number,
     costReturnToken: BigNumber
@@ -78,7 +79,7 @@ export const optimizeSwapAmounts = (
             exceedingAmounts,
             selectedPathLimitAmounts,
             pathIds,
-        ] = getBestPathIds(pools, paths, swapType, swapAmounts);
+        ] = getBestPathIds(pools, paths, swapType, swapAmounts, inputDecimals);
 
         // Check if ids are in history of ids, but first sort and stringify to make comparison possible
         // Copy array https://stackoverflow.com/a/42442909
@@ -102,7 +103,13 @@ export const optimizeSwapAmounts = (
                 exceedingAmounts,
                 selectedPathLimitAmounts,
                 pathIds,
-            ] = getBestPathIds(pools, paths, swapType, swapAmounts);
+            ] = getBestPathIds(
+                pools,
+                paths,
+                swapType,
+                swapAmounts,
+                inputDecimals
+            );
 
             if (pathIds.length === 0) break;
 
@@ -114,7 +121,8 @@ export const optimizeSwapAmounts = (
         const totalReturn = calcTotalReturn(
             selectedPaths,
             swapType,
-            swapAmounts
+            swapAmounts,
+            inputDecimals
         );
 
         // Calculates the number of pools in all the paths to include the gas costs
@@ -337,7 +345,8 @@ function getBestPathIds(
     pools: PoolDictionary,
     originalPaths: NewPath[],
     swapType: SwapTypes,
-    swapAmounts: OldBigNumber[]
+    swapAmounts: OldBigNumber[],
+    inputDecimals: number
 ): [NewPath[], OldBigNumber[], OldBigNumber[], string[]] {
     const bestPathIds: string[] = [];
     const selectedPaths: NewPath[] = [];
@@ -357,13 +366,21 @@ function getBestPathIds(
         let bestEffectivePrice = INFINITY; // Start with worst price possible
         paths.forEach((path, j) => {
             // Do not consider this path if its limit is below swapAmount
-            if (path.limitAmount.gte(swapAmount)) {
+            if (
+                bnum(formatFixed(path.limitAmount, inputDecimals)).gte(
+                    swapAmount
+                )
+            ) {
                 // Calculate effective price of this path for this swapAmount
                 // If path.limitAmount = swapAmount we set effectivePrice as
                 // Infinity because we know this path is maxed out and we want
                 // to select other paths that can still be improved on
                 let effectivePrice;
-                if (path.limitAmount.eq(swapAmount)) {
+                if (
+                    bnum(formatFixed(path.limitAmount, inputDecimals)).eq(
+                        swapAmount
+                    )
+                ) {
                     effectivePrice = INFINITY;
                 } else {
                     // TODO for optimization: pass already calculated limitAmount as input
@@ -372,7 +389,8 @@ function getBestPathIds(
                         pools,
                         path,
                         swapType,
-                        swapAmount
+                        swapAmount,
+                        inputDecimals
                     );
                 }
                 if (effectivePrice.lte(bestEffectivePrice)) {
@@ -387,9 +405,15 @@ function getBestPathIds(
         }
         bestPathIds.push(paths[bestPathIndex].id);
         selectedPaths.push(paths[bestPathIndex]);
-        selectedPathLimitAmounts.push(paths[bestPathIndex].limitAmount);
+        selectedPathLimitAmounts.push(
+            bnum(formatFixed(paths[bestPathIndex].limitAmount, inputDecimals))
+        );
         selectedPathExceedingAmounts.push(
-            swapAmount.minus(paths[bestPathIndex].limitAmount)
+            swapAmount.minus(
+                bnum(
+                    formatFixed(paths[bestPathIndex].limitAmount, inputDecimals)
+                )
+            )
         );
         paths.splice(bestPathIndex, 1); // Remove path from list
     }
@@ -700,13 +724,19 @@ function redistributeInputAmounts(
 export const calcTotalReturn = (
     paths: NewPath[],
     swapType: SwapTypes,
-    swapAmounts: OldBigNumber[]
+    swapAmounts: OldBigNumber[],
+    inputDecimals: number
 ): OldBigNumber => {
     let totalReturn = new OldBigNumber(0);
     // changing the contents of pools (parameter passed as reference)
     paths.forEach((path, i) => {
         totalReturn = totalReturn.plus(
-            getOutputAmountSwapForPath(path, swapType, swapAmounts[i])
+            getOutputAmountSwapForPath(
+                path,
+                swapType,
+                swapAmounts[i],
+                inputDecimals
+            )
         );
     });
     return totalReturn;

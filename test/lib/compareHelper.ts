@@ -10,7 +10,6 @@ import {
     Result,
     parseV1Result,
 } from './testHelpers';
-import { bnum } from '../../src/utils/bignumber';
 import { SwapInfo } from '../../src/types';
 import { Zero } from '@ethersproject/constants';
 

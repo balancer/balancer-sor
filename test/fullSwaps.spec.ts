@@ -1,5 +1,5 @@
 // npx mocha -r ts-node/register test/fullSwaps.spec.ts
-import { BigNumber } from '@ethersproject/bignumber';
+import { BigNumber, formatFixed } from '@ethersproject/bignumber';
 import { JsonRpcProvider } from '@ethersproject/providers';
 import cloneDeep from 'lodash.clonedeep';
 import { assert } from 'chai';

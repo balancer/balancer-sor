@@ -14,12 +14,12 @@ import {
 } from '../src/routeProposal/filtering';
 import { calculatePathLimits } from '../src/routeProposal/pathLimits';
 import { getBestPaths } from '../src/router';
-import BigNumber from 'bignumber.js';
 import { countPoolSwapPairTypes } from './lib/testHelpers';
 
 import subgraphPoolsLarge from './testData/testPools/subgraphPoolsLarge.json';
 import testPools from './testData/filterTestPools.json';
 import { Zero } from '@ethersproject/constants';
+import { parseFixed, BigNumber } from '@ethersproject/bignumber';
 
 const WETH = '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2'; // WETH lower case
 const DAI = '0x6B175474E89094C44Da98b954EedeAC495271d0F'.toLowerCase();
@@ -502,26 +502,24 @@ describe('Tests pools filtering and path processing', () => {
             poolsOfInterestDictionary
         );
 
-        let paths: NewPath[];
-        let maxAmt: BigNumber;
-        [paths, maxAmt] = calculatePathLimits(pathData, SwapTypes.SwapExactIn);
+        const [paths, maxAmt] = calculatePathLimits(
+            pathData,
+            SwapTypes.SwapExactIn
+        );
 
         // Known results taken from previous version
-        assert.equal(maxAmt.toString(), '1620.713758415909242296');
+        assert.equal(maxAmt.toString(), '1620713758415909242296');
         assert.equal(paths[0].id, '0x75286e183d923a5f52f52be205e358c5c9101b09');
-        assert.equal(
-            paths[0].limitAmount.toString(),
-            '1469.350670653619495898'
-        );
+        assert.equal(paths[0].limitAmount.toString(), '1469350670653619495898');
         assert.equal(paths[1].id, '0x57755f7dec33320bca83159c26e93751bfd30fbe');
-        assert.equal(paths[1].limitAmount.toString(), '141.733810572558367508');
+        assert.equal(paths[1].limitAmount.toString(), '141733810572558367508');
         assert.equal(paths[2].id, '0x2dbd24322757d2e28de4230b1ca5b88e49a76979');
-        assert.equal(paths[2].limitAmount.toString(), '9.59566643171675646');
+        assert.equal(paths[2].limitAmount.toString(), '9595666431716756460');
         assert.equal(
             paths[3].id,
             '0x29f55de880d4dcae40ba3e63f16407a31b4d44ee0x12d6b6e24fdd9849abd42afd8f5775d36084a828'
         );
-        assert.equal(paths[3].limitAmount.toString(), '0.03361075801462243');
+        assert.equal(paths[3].limitAmount.toString(), '33610758014622430');
     });
 
     it('should calc weighted path limits, exactOut', () => {
@@ -543,23 +541,24 @@ describe('Tests pools filtering and path processing', () => {
             poolsOfInterestDictionary
         );
 
-        let paths: NewPath[];
-        let maxAmt: BigNumber;
-        [paths, maxAmt] = calculatePathLimits(pathData, SwapTypes.SwapExactOut);
+        const [paths, maxAmt] = calculatePathLimits(
+            pathData,
+            SwapTypes.SwapExactOut
+        );
 
         // Known results taken from previous version
-        assert.equal(maxAmt.toString(), '1265.931102');
+        assert.equal(maxAmt.toString(), '1265931102');
         assert.equal(paths[0].id, '0x75286e183d923a5f52f52be205e358c5c9101b09');
-        assert.equal(paths[0].limitAmount.toString(), '1113.575469');
+        assert.equal(paths[0].limitAmount.toString(), '1113575469');
         assert.equal(paths[1].id, '0x57755f7dec33320bca83159c26e93751bfd30fbe');
-        assert.equal(paths[1].limitAmount.toString(), '142.877013');
+        assert.equal(paths[1].limitAmount.toString(), '142877013');
         assert.equal(paths[2].id, '0x2dbd24322757d2e28de4230b1ca5b88e49a76979');
-        assert.equal(paths[2].limitAmount.toString(), '9.445925');
+        assert.equal(paths[2].limitAmount.toString(), '9445925');
         assert.equal(
             paths[3].id,
             '0x29f55de880d4dcae40ba3e63f16407a31b4d44ee0x12d6b6e24fdd9849abd42afd8f5775d36084a828'
         );
-        assert.equal(paths[3].limitAmount.toString(), '0.032695');
+        assert.equal(paths[3].limitAmount.toString(), '32695');
     });
 
     it('should calc stable path limits', () => {
@@ -586,19 +585,19 @@ describe('Tests pools filtering and path processing', () => {
         [paths, maxAmt] = calculatePathLimits(pathData, SwapTypes.SwapExactIn);
 
         // Known results taken from previous version
-        assert.equal(maxAmt.toString(), '45024648.605340322085145755');
+        assert.equal(maxAmt.toString(), '45024648605340322085145755');
         assert.equal(paths[0].id, '0x6c3f90f043a72fa612cbac8115ee7e52bde6e490');
         assert.equal(
             paths[0].limitAmount.toString(),
-            '45024648.605340322085145755'
+            '45024648605340322085145755'
         );
 
         [paths, maxAmt] = calculatePathLimits(pathData, SwapTypes.SwapExactOut);
 
         // Known results taken from previous version
-        assert.equal(maxAmt.toString(), '76533088.793376');
+        assert.equal(maxAmt.toString(), '76533088793376');
         assert.equal(paths[0].id, '0x6c3f90f043a72fa612cbac8115ee7e52bde6e490');
-        assert.equal(paths[0].limitAmount.toString(), '76533088.793376');
+        assert.equal(paths[0].limitAmount.toString(), '76533088793376');
     });
 
     it('Test pool class that has direct & multihop paths', async () => {
@@ -640,11 +639,8 @@ describe('Tests pools filtering and path processing', () => {
         const pools = cloneDeep(testPools).pathTestPoolTwoMultiHops;
         const tokenIn = USDC;
         const tokenOut = DAI;
-        let hopTokens: string[];
-        let poolsOfInterestDictionary: PoolDictionary;
-        let pathData: NewPath[];
 
-        [poolsOfInterestDictionary, hopTokens] = filterPoolsOfInterest(
+        const [poolsOfInterestDictionary, hopTokens] = filterPoolsOfInterest(
             pools,
             tokenIn,
             tokenOut,
@@ -661,42 +657,41 @@ describe('Tests pools filtering and path processing', () => {
         assert.equal(noHopIn, 1);
         assert.equal(noHopOut, 1);
 
-        [poolsOfInterestDictionary, pathData] = filterHopPools(
-            tokenIn,
-            tokenOut,
-            hopTokens,
-            poolsOfInterestDictionary
-        );
+        const [filteredPoolsOfInterestDictionary, candidatePaths] =
+            filterHopPools(
+                tokenIn,
+                tokenOut,
+                hopTokens,
+                poolsOfInterestDictionary
+            );
 
-        assert.equal(pathData.length, 2);
-        assert.equal(Object.keys(poolsOfInterestDictionary).length, 2);
+        assert.equal(candidatePaths.length, 2);
+        assert.equal(Object.keys(filteredPoolsOfInterestDictionary).length, 2);
         assert.equal(
-            pathData[0].id,
+            candidatePaths[0].id,
             '0x0481d726c3d25250a8963221945ed93b8a5315a90x07d13ed39ee291c1506675ff42f9b2b6b50e2d3e'
         );
         assert.equal(
-            pathData[1].id,
+            candidatePaths[1].id,
             '0x0481d726c3d25250a8963221945ed93b8a5315a90x07d13ed39ee291c1506675ff42f9b2b6b50e2d3e'
         );
 
-        let paths: NewPath[];
-        let maxLiquidityAvailable: BigNumber;
-        [paths, maxLiquidityAvailable] = calculatePathLimits(
-            pathData,
+        const [pathsWithLimits, maxLiquidityAvailable] = calculatePathLimits(
+            candidatePaths,
             SwapTypes.SwapExactIn
         );
 
-        assert.equal(maxLiquidityAvailable.toString(), '600');
-        assert.equal(paths.length, 2);
-        assert.equal(paths[0].limitAmount.toString(), '300');
-        assert.equal(paths[1].limitAmount.toString(), '300');
+        assert.equal(maxLiquidityAvailable.toString(), '600000000');
+        assert.equal(pathsWithLimits.length, 2);
+        assert.equal(pathsWithLimits[0].limitAmount.toString(), '300000000');
+        assert.equal(pathsWithLimits[1].limitAmount.toString(), '300000000');
 
-        let swaps: any, total: BigNumber, marketSp: BigNumber;
-        [swaps, total, marketSp] = getBestPaths(
+        const [swaps, total, marketSp] = getBestPaths(
             cloneDeep(poolsOfInterestDictionary), // Need to keep original pools for cache
-            paths,
+            pathsWithLimits,
             SwapTypes.SwapExactIn,
-            new BigNumber(1),
+            parseFixed('1', 6),
+            6,
             4,
             Zero
         );
@@ -711,7 +706,7 @@ describe('Tests pools filtering and path processing', () => {
         assert.equal(swaps[0][0].tokenIn, tokenIn);
         assert.equal(
             swaps[0][0].tokenOut,
-            '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2'
+            '0x0000000000085d4780b73119b644ae5ecd22b376'
         );
         assert.equal(
             swaps[0][1].pool,
@@ -720,7 +715,7 @@ describe('Tests pools filtering and path processing', () => {
         assert.equal(swaps[0][1].swapAmount, '0.494754097206656');
         assert.equal(
             swaps[0][1].tokenIn,
-            '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2'
+            '0x0000000000085d4780b73119b644ae5ecd22b376'
         );
         assert.equal(swaps[0][1].tokenOut, tokenOut);
         assert.equal(
@@ -731,7 +726,7 @@ describe('Tests pools filtering and path processing', () => {
         assert.equal(swaps[1][0].tokenIn, tokenIn);
         assert.equal(
             swaps[1][0].tokenOut,
-            '0x0000000000085d4780b73119b644ae5ecd22b376'
+            '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2'
         );
         assert.equal(
             swaps[1][1].pool,
@@ -740,7 +735,7 @@ describe('Tests pools filtering and path processing', () => {
         assert.equal(swaps[1][1].swapAmount, '0.494755096217348');
         assert.equal(
             swaps[1][1].tokenIn,
-            '0x0000000000085d4780b73119b644ae5ecd22b376'
+            '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2'
         );
         assert.equal(swaps[1][1].tokenOut, tokenOut);
     });
@@ -788,24 +783,22 @@ describe('Tests pools filtering and path processing', () => {
             '0x0481d726c3d25250a8963221945ed93b8a5315a90x07d13ed39ee291c1506675ff42f9b2b6b50e2d3e'
         );
 
-        let paths: NewPath[];
-        let maxLiquidityAvailable: BigNumber;
-        [paths, maxLiquidityAvailable] = calculatePathLimits(
+        const [paths, maxLiquidityAvailable] = calculatePathLimits(
             pathData,
             SwapTypes.SwapExactOut
         );
 
-        assert.equal(maxLiquidityAvailable.toString(), '457.9799537393987');
+        assert.equal(maxLiquidityAvailable.toString(), '457979953739398700000');
         assert.equal(paths.length, 2);
-        assert.equal(paths[0].limitAmount.toString(), '228.98997686969935');
-        assert.equal(paths[1].limitAmount.toString(), '228.98997686969935');
+        assert.equal(paths[0].limitAmount.toString(), '228989976869699350000');
+        assert.equal(paths[1].limitAmount.toString(), '228989976869699350000');
 
-        let swaps: any, total: BigNumber, marketSp: BigNumber;
-        [swaps, total, marketSp] = getBestPaths(
+        const [swaps, total, marketSp] = getBestPaths(
             cloneDeep(poolsOfInterestDictionary), // Need to keep original pools for cache
             paths,
             SwapTypes.SwapExactOut,
-            new BigNumber(1),
+            parseFixed('1', 18),
+            18,
             4,
             Zero
         );
@@ -820,7 +813,7 @@ describe('Tests pools filtering and path processing', () => {
         assert.equal(swaps[0][0].tokenIn, tokenIn);
         assert.equal(
             swaps[0][0].tokenOut,
-            '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2'
+            '0x0000000000085d4780b73119b644ae5ecd22b376'
         );
         assert.equal(
             swaps[0][1].pool,
@@ -829,7 +822,7 @@ describe('Tests pools filtering and path processing', () => {
         assert.equal(swaps[0][1].swapAmount, '0.499999999999981612');
         assert.equal(
             swaps[0][1].tokenIn,
-            '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2'
+            '0x0000000000085d4780b73119b644ae5ecd22b376'
         );
         assert.equal(swaps[0][1].tokenOut, tokenOut);
         assert.equal(
@@ -840,7 +833,7 @@ describe('Tests pools filtering and path processing', () => {
         assert.equal(swaps[1][0].tokenIn, tokenIn);
         assert.equal(
             swaps[1][0].tokenOut,
-            '0x0000000000085d4780b73119b644ae5ecd22b376'
+            '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2'
         );
         assert.equal(
             swaps[1][1].pool,
@@ -849,7 +842,7 @@ describe('Tests pools filtering and path processing', () => {
         assert.equal(swaps[1][1].swapAmount, '0.500000000000018388');
         assert.equal(
             swaps[1][1].tokenIn,
-            '0x0000000000085d4780b73119b644ae5ecd22b376'
+            '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2'
         );
         assert.equal(swaps[1][1].tokenOut, tokenOut);
     });

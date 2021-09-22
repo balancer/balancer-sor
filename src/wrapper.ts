@@ -215,6 +215,8 @@ export class SOR {
                 swapOptions.maxPools
             );
 
+        console.log('swaps', swaps);
+
         const swapInfo = formatSwaps(
             swaps,
             swapType,
@@ -254,7 +256,8 @@ export class SOR {
             cloneDeep(pools),
             paths,
             swapType,
-            bnum(formatFixed(swapAmount, inputDecimals)),
+            swapAmount,
+            inputDecimals,
             maxPools,
             costOutputToken
         );

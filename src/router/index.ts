@@ -1,14 +1,16 @@
-import { BigNumber as OldBigNumber, ZERO } from '../utils/bignumber';
+import { BigNumber as OldBigNumber, bnum, ZERO } from '../utils/bignumber';
 import { getHighestLimitAmountsForPaths } from './helpersClass';
 import { formatSwaps, optimizeSwapAmounts } from './sorClass';
 import { NewPath, PoolDictionary, Swap, SwapTypes } from '../types';
-import { BigNumber } from '@ethersproject/bignumber';
+import { BigNumber, formatFixed } from '@ethersproject/bignumber';
+import { Zero } from '@ethersproject/constants';
 
 export const getBestPaths = (
     pools: PoolDictionary,
     paths: NewPath[],
     swapType: SwapTypes,
-    totalSwapAmount: OldBigNumber,
+    totalSwapAmount: BigNumber,
+    inputDecimals: number,
     maxPools: number,
     costReturnToken: BigNumber
 ): [Swap[][], OldBigNumber, OldBigNumber, OldBigNumber] => {
@@ -20,8 +22,8 @@ export const getBestPaths = (
     // Before we start the main loop, we first check if there is enough liquidity for this totalSwapAmount
     const highestLimitAmounts = getHighestLimitAmountsForPaths(paths, maxPools);
     const sumLimitAmounts = highestLimitAmounts.reduce(
-        (r: OldBigNumber[], pathLimit: OldBigNumber) => {
-            r.push(pathLimit.plus(r[r.length - 1] || ZERO));
+        (r: BigNumber[], pathLimit: BigNumber) => {
+            r.push(pathLimit.add(r[r.length - 1] || Zero));
             return r;
         },
         []
@@ -39,26 +41,28 @@ export const getBestPaths = (
             totalSwapAmount.lte(cumulativeLimit)
         ) + 1;
 
-    const initialSwapAmounts: OldBigNumber[] = highestLimitAmounts.slice(
-        0,
-        initialNumPaths
-    );
+    const initialSwapAmounts = highestLimitAmounts.slice(0, initialNumPaths);
 
     //  Since the sum of the first i highest limits will be less than totalSwapAmount, we remove the difference to the last swapAmount
     //  so we are sure that the sum of swapAmounts will be equal to totalSwapAmount
     const difference =
-        sumLimitAmounts[initialNumPaths - 1].minus(totalSwapAmount);
+        sumLimitAmounts[initialNumPaths - 1].sub(totalSwapAmount);
     initialSwapAmounts[initialSwapAmounts.length - 1] =
-        initialSwapAmounts[initialSwapAmounts.length - 1].minus(difference);
+        initialSwapAmounts[initialSwapAmounts.length - 1].sub(difference);
 
     const [bestPaths, bestSwapAmounts, bestTotalReturnConsideringFees] =
         optimizeSwapAmounts(
             pools,
             paths,
             swapType,
-            totalSwapAmount,
-            initialSwapAmounts,
-            highestLimitAmounts,
+            bnum(formatFixed(totalSwapAmount, inputDecimals)),
+            initialSwapAmounts.map((amount) =>
+                bnum(formatFixed(amount, inputDecimals))
+            ),
+            highestLimitAmounts.map((amount) =>
+                bnum(formatFixed(amount, inputDecimals))
+            ),
+            inputDecimals,
             initialNumPaths,
             maxPools,
             costReturnToken
@@ -67,7 +71,7 @@ export const getBestPaths = (
     const [swaps, bestTotalReturn, marketSp] = formatSwaps(
         bestPaths,
         swapType,
-        totalSwapAmount,
+        bnum(formatFixed(totalSwapAmount, inputDecimals)),
         bestSwapAmounts
     );
 
