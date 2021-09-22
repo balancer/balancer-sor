@@ -13,6 +13,7 @@
         {
             "id": "0x0481d726c3d25250a8963221945ed93b8a5315a9",
             "swapFee": "0.01",
+            "swapEnabled": true,
             "tokens": [
                 {
                     "address": "0x0000000000085d4780b73119b644ae5ecd22b376",
@@ -61,6 +62,7 @@
         {
             "id": "0x07d13ed39ee291c1506675ff42f9b2b6b50e2d3e",
             "swapFee": "0.0099",
+            "swapEnabled": true,
             "tokens": [
                 {
                     "address": "0x2260fac5e5542a773aa44fbcfedf7c193bc2c599",
@@ -175,6 +177,7 @@
         {
             "id": "0x10fd0adaf5de39ddd81165d770367fde8883157d",
             "swapFee": "0.01",
+            "swapEnabled": true,
             "tokens": [
                 {
                     "address": "0x2260fac5e5542a773aa44fbcfedf7c193bc2c599",
@@ -313,6 +316,7 @@
         {
             "id": "0x254d519110d215fb657c621afc7d4b76ce2c0265",
             "swapFee": "0.01",
+            "swapEnabled": true,
             "tokens": [
                 {
                     "address": "0x9cb2f26a23b8d89973f08c957c4d7cdf75cd341c",
@@ -400,6 +404,7 @@
         {
             "id": "0x2dbd24322757d2e28de4230b1ca5b88e49a76979",
             "swapFee": "0.01",
+            "swapEnabled": true,
             "tokens": [
                 {
                     "address": "0x2260fac5e5542a773aa44fbcfedf7c193bc2c599",

@@ -1406,6 +1406,7 @@
             "poolType": "Weighted",
             "principalToken": null,
             "swapFee": "0.01",
+            "swapEnabled": true,
             "tokens": [
                 {
                     "address": "0x41286bb1d3e870f3f750eb7e1c25d7e48c8a1ac7",
@@ -2262,6 +2263,7 @@
             "poolType": "Weighted",
             "principalToken": null,
             "swapFee": "0.01",
+            "swapEnabled": true,
             "tokens": [
                 {
                     "address": "0x41286bb1d3e870f3f750eb7e1c25d7e48c8a1ac7",
@@ -3474,6 +3476,7 @@
             "poolType": "Weighted",
             "principalToken": null,
             "swapFee": "0.0099",
+            "swapEnabled": true,
             "tokens": [
                 {
                     "address": "0x41286bb1d3e870f3f750eb7e1c25d7e48c8a1ac7",
@@ -4930,6 +4933,7 @@
             "poolType": "Weighted",
             "principalToken": null,
             "swapFee": "0.01",
+            "swapEnabled": true,
             "tokens": [
                 {
                     "address": "0x41286bb1d3e870f3f750eb7e1c25d7e48c8a1ac7",
