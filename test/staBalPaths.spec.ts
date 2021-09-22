@@ -28,8 +28,7 @@ describe(`staBalPaths.`, () => {
             testPools,
             tokenIn,
             tokenOut,
-            maxPools,
-            1
+            maxPools
         );
 
         const paths = getPathsUsingStaBalPool(
@@ -54,8 +53,7 @@ describe(`staBalPaths.`, () => {
             testPools,
             tokenIn,
             tokenOut,
-            maxPools,
-            chainId
+            maxPools
         );
 
         const staBalPoolIdIn = 'staBalPair1';
@@ -113,8 +111,7 @@ describe(`staBalPaths.`, () => {
             testPools,
             tokenIn,
             tokenOut,
-            maxPools,
-            chainId
+            maxPools
         );
 
         // Hop out as it is USDC > tokenOut
@@ -139,8 +136,7 @@ describe(`staBalPaths.`, () => {
             testPools,
             tokenIn,
             tokenOut,
-            maxPools,
-            chainId
+            maxPools
         );
 
         // Hop in as it is tokenIn > USDC
@@ -164,8 +160,7 @@ describe(`staBalPaths.`, () => {
             testPools,
             tokenIn,
             tokenOut,
-            maxPools,
-            chainId
+            maxPools
         );
 
         const paths = getPathsUsingStaBalPool(
@@ -189,8 +184,7 @@ describe(`staBalPaths.`, () => {
             testPools,
             tokenIn,
             tokenOut,
-            maxPools,
-            chainId
+            maxPools
         );
 
         const paths = getPathsUsingStaBalPool(
@@ -214,8 +208,7 @@ describe(`staBalPaths.`, () => {
             testPools,
             tokenIn,
             tokenOut,
-            maxPools,
-            chainId
+            maxPools
         );
 
         const paths = getPathsUsingStaBalPool(
@@ -241,8 +234,7 @@ describe(`staBalPaths.`, () => {
             testPools,
             tokenIn,
             tokenOut,
-            maxPools,
-            chainId
+            maxPools
         );
 
         const [path] = getPathsUsingStaBalPool(
@@ -279,8 +271,7 @@ describe(`staBalPaths.`, () => {
             testPools,
             tokenIn,
             tokenOut,
-            maxPools,
-            chainId
+            maxPools
         );
 
         const [path] = getPathsUsingStaBalPool(
@@ -320,8 +311,7 @@ describe(`staBalPaths.`, () => {
             testPools,
             tokenIn,
             tokenOut,
-            maxPools,
-            chainId
+            maxPools
         );
 
         const paths = getPathsUsingStaBalPool(

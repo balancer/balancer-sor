@@ -53,7 +53,6 @@ export class RouteProposer {
                 tokenIn,
                 tokenOut,
                 swapOptions.maxPools,
-                chainId,
                 swapOptions.timestamp
             );
 

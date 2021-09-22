@@ -48,8 +48,7 @@ describe('Tests pools filtering and path processing', () => {
             testPools.weightedOnly,
             DAI,
             USDC,
-            maxPools,
-            chainId
+            maxPools
         );
 
         let noDirect = 0,
@@ -92,8 +91,7 @@ describe('Tests pools filtering and path processing', () => {
             subgraphPoolsLarge.pools,
             WETH,
             DAI,
-            4,
-            chainId
+            4
         );
 
         [poolsOfInterestDictionary, pathData] = filterHopPools(
@@ -184,8 +182,7 @@ describe('Tests pools filtering and path processing', () => {
             testPools.weightedOnly,
             DAI,
             USDC,
-            4,
-            chainId
+            4
         );
 
         let noDirect = 0,
@@ -230,8 +227,7 @@ describe('Tests pools filtering and path processing', () => {
             testPools.stableOnly,
             DAI,
             USDC,
-            4,
-            chainId
+            4
         );
 
         let noDirect = 0,
@@ -275,8 +271,7 @@ describe('Tests pools filtering and path processing', () => {
             allPools,
             DAI,
             USDC,
-            4,
-            chainId
+            4
         );
 
         let noDirect = 0,
@@ -323,8 +318,7 @@ describe('Tests pools filtering and path processing', () => {
             testPools.weightedOnly,
             DAI,
             USDC,
-            4,
-            chainId
+            4
         );
 
         [poolsOfInterestDictionary, pathData] = filterHopPools(
@@ -435,8 +429,7 @@ describe('Tests pools filtering and path processing', () => {
             testPools.stableOnly,
             DAI,
             USDC,
-            4,
-            chainId
+            4
         );
 
         [poolsOfInterestDictionary, pathData] = filterHopPools(
@@ -499,8 +492,7 @@ describe('Tests pools filtering and path processing', () => {
             testPools.weightedOnly,
             DAI,
             USDC,
-            4,
-            chainId
+            4
         );
 
         [poolsOfInterestDictionary, pathData] = filterHopPools(
@@ -544,8 +536,7 @@ describe('Tests pools filtering and path processing', () => {
             testPools.weightedOnly,
             DAI,
             USDC,
-            4,
-            chainId
+            4
         );
 
         [poolsOfInterestDictionary, pathData] = filterHopPools(
@@ -583,8 +574,7 @@ describe('Tests pools filtering and path processing', () => {
             testPools.stableOnly,
             DAI,
             USDC,
-            4,
-            chainId
+            4
         );
 
         [poolsOfInterestDictionary, pathData] = filterHopPools(
@@ -626,8 +616,7 @@ describe('Tests pools filtering and path processing', () => {
             pools,
             tokenIn,
             tokenOut,
-            4,
-            chainId
+            4
         );
         /*
         [poolsOfInterestDictionary, pathData] = filterHopPools(
@@ -662,8 +651,7 @@ describe('Tests pools filtering and path processing', () => {
             pools,
             tokenIn,
             tokenOut,
-            4,
-            chainId
+            4
         );
 
         const [noDirect, noHopIn, noHopOut] = countPoolSwapPairTypes(
@@ -772,8 +760,7 @@ describe('Tests pools filtering and path processing', () => {
             pools,
             tokenIn,
             tokenOut,
-            4,
-            chainId
+            4
         );
 
         const [noDirect, noHopIn, noHopOut] = countPoolSwapPairTypes(

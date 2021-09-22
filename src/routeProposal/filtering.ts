@@ -42,7 +42,6 @@ export function filterPoolsOfInterest(
     tokenIn: string,
     tokenOut: string,
     maxPools: number,
-    chainId: number,
     currentBlockTimestamp = 0
 ): [PoolDictionary, string[], PoolDictionary] {
     // This will include all pools
