@@ -311,9 +311,9 @@ export function getHighestLiquidityPool(
     tokenOut: string,
     swapPairType: SwapPairType,
     poolsOfInterest: PoolDictionary
-): string {
+): string | null {
     let highestNormalizedLiquidity = ZERO;
-    let highestNormalizedLiquidityPoolId = '';
+    let highestNormalizedLiquidityPoolId: string | null = null;
     for (const id in poolsOfInterest) {
         const pool = poolsOfInterest[id];
         if (swapPairType != pool.swapPairType) continue;
@@ -428,7 +428,7 @@ export function getPathUsingStaBalPools(
             poolsFiltered
         );
         // No USDC>tokenOut pool so return empty path
-        if (mostLiquidLastPool === '') return {} as NewPath;
+        if (mostLiquidLastPool === null) return {} as NewPath;
         else {
             const lastPool = poolsFiltered[mostLiquidLastPool];
             const pathEnd = createDirectPath(
@@ -439,7 +439,7 @@ export function getPathUsingStaBalPools(
 
             return composePaths([staBalPath, pathEnd]);
         }
-    } else {
+    } else if (!staBalPoolIdIn && staBalPoolIdOut) {
         // First part of path is single hop through tokenIn/USDC highest liquidity pool
         // Last part of path is multihop through USDC Connecting Pools and staBalPool
         // i.e. i.e. tokenIn>[HighLiqPool]>USDC>[usdcConnecting]>staBAL>[staBalPair1]>tokenOut
@@ -453,7 +453,7 @@ export function getPathUsingStaBalPools(
             poolsFiltered
         );
         // No tokenIn>USDC pool so return empty path
-        if (mostLiquidFirstPool === '') return {} as NewPath;
+        if (mostLiquidFirstPool === null) return {} as NewPath;
 
         const firstPool = poolsFiltered[mostLiquidFirstPool];
 
@@ -474,4 +474,5 @@ export function getPathUsingStaBalPools(
 
         return composePaths([pathStart, staBalPath]);
     }
+    return {} as NewPath;
 }
