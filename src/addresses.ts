@@ -5,7 +5,13 @@ export enum Network {
     POLYGON = 137,
 }
 
-export const MULTIMETASTABLEPOOL = {
-    [Network.MAINNET]: { id: 'multiid', address: 'multiaddress' },
-    [Network.KOVAN]: { id: 'multiid', address: 'multiaddress' },
+export const STABAL3POOL = {
+    [Network.MAINNET]: {
+        id: 'staBal3Id',
+        address: '0x06df3b2bbb68adc8b0e302443692037ed9f91b42',
+    },
+    [Network.KOVAN]: {
+        id: 'staBal3Id',
+        address: '0x06df3b2bbb68adc8b0e302443692037ed9f91b42',
+    },
 };

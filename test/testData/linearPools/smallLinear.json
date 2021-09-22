@@ -1,6 +1,37 @@
 {
     "pools": [
         {
+            "id": "weightedBalStaBal3",
+            "publicSwap": true,
+            "swapFee": "0.01",
+            "tokens": [
+                {
+                    "address": "0x06df3b2bbb68adc8b0e302443692037ed9f91b42",
+                    "balance": "100000.000000",
+                    "decimals": 18,
+                    "weight": "50",
+                    "id": "weightedBalStaBal3-0x06df3b2bbb68adc8b0e302443692037ed9f91b42",
+                    "symbol": "staBal3"
+                },
+                {
+                    "address": "0xba100000625a3754423978a60c9317c58a424e3d",
+                    "balance": "20000000.78213445",
+                    "decimals": 18,
+                    "weight": "50",
+                    "id": "weightedBalStaBal3-0xba100000625a3754423978a60c9317c58a424e3d",
+                    "symbol": "BAL"
+                }
+            ],
+            "tokensList": [
+                "0xba100000625a3754423978a60c9317c58a424e3d",
+                "0x06df3b2bbb68adc8b0e302443692037ed9f91b42"
+            ],
+            "totalWeight": "100",
+            "totalShares": "100",
+            "poolType": "Weighted",
+            "address": "weightedBalStaBal3"
+        },
+        {
             "id": "weightedUsdcWeth",
             "publicSwap": true,
             "swapFee": "0.01",
@@ -214,8 +245,8 @@
             "target2": "150000.000000"
         },
         {
-            "id": "multiid",
-            "address": "multiaddress",
+            "id": "staBal3Id",
+            "address": "0x06df3b2bbb68adc8b0e302443692037ed9f91b42",
             "swapFee": "0.0004",
             "amp": "10",
             "tokens": [
@@ -239,12 +270,20 @@
                     "decimals": "18",
                     "symbol": "bUSDT",
                     "priceRate": "1"
+                },
+                {
+                    "address": "0x06df3b2bbb68adc8b0e302443692037ed9f91b42",
+                    "balance": "1500000000000000",
+                    "decimals": "18",
+                    "symbol": "staBal3",
+                    "priceRate": "1"
                 }
             ],
             "tokensList": [
                 "0x0000000000000000000000000000000000000001",
                 "0x0000000000000000000000000000000000000002",
-                "0x0000000000000000000000000000000000000003"
+                "0x0000000000000000000000000000000000000003",
+                "0x06df3b2bbb68adc8b0e302443692037ed9f91b42"
             ],
             "totalShares": "10000000",
             "poolType": "MetaStable"

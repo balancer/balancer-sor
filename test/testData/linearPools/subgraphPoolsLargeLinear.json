@@ -2657,8 +2657,8 @@
             "target2": "1500.000000"
         },
         {
-            "id": "muliid",
-            "address": "multiaddress",
+            "id": "staBal3Id",
+            "address": "0x06df3b2bbb68adc8b0e302443692037ed9f91b42",
             "swapFee": "0.0004",
             "amp": "10",
             "tokens": [
