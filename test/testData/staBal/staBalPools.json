@@ -11,19 +11,25 @@
                     "address": "0x6b175474e89094c44da98b954eedeac495271d0f",
                     "balance": "53795002.9145678718781426",
                     "decimals": 18,
-                    "symbol": "DAI"
+                    "symbol": "DAI",
+                    "weight": null,
+                    "priceRate": "1"
                 },
                 {
                     "address": "0x2791bca1f2de4661ed88a30c99a7a9449aa84174",
                     "balance": "55068217.350122",
                     "decimals": 6,
-                    "symbol": "USDC"
+                    "symbol": "USDC",
+                    "weight": null,
+                    "priceRate": "1"
                 },
                 {
                     "address": "0xdac17f958d2ee523a2206206994597c13d831ec7",
                     "balance": "54192989.921803",
                     "decimals": 6,
-                    "symbol": "USDT"
+                    "symbol": "USDT",
+                    "weight": null,
+                    "priceRate": "1"
                 }
             ],
             "totalShares": "162663805.865764625430381901",
@@ -44,13 +50,17 @@
                     "address": "0x0000000000000000000000000000000000000001",
                     "balance": "53795002.9145678718781426",
                     "decimals": 18,
-                    "symbol": "staBal3"
+                    "symbol": "staBal3",
+                    "weight": null,
+                    "priceRate": "1"
                 },
                 {
                     "address": "0x2791bca1f2de4661ed88a30c99a7a9449aa84174",
                     "balance": "55068217.350122",
                     "decimals": 6,
-                    "symbol": "USDC"
+                    "symbol": "USDC",
+                    "weight": null,
+                    "priceRate": "1"
                 }
             ],
             "totalShares": "162663805.865764625430381901",
@@ -70,13 +80,17 @@
                     "address": "0x0000000000000000000000000000000000000001",
                     "balance": "7777777",
                     "decimals": 18,
-                    "symbol": "staBal3"
+                    "symbol": "staBal3",
+                    "weight": null,
+                    "priceRate": "1"
                 },
                 {
                     "address": "0x0000000000085d4780B73119b644AE5ecd22b376",
                     "balance": "7777777",
                     "decimals": 18,
-                    "symbol": "TUSD"
+                    "symbol": "TUSD",
+                    "weight": null,
+                    "priceRate": "1"
                 }
             ],
             "totalShares": "100000000",
@@ -96,13 +110,17 @@
                     "address": "0x0000000000000000000000000000000000000001",
                     "balance": "123456",
                     "decimals": 18,
-                    "symbol": "staBal3"
+                    "symbol": "staBal3",
+                    "weight": null,
+                    "priceRate": "1"
                 },
                 {
                     "address": "0x0000000000000000000000000000000000000002",
                     "balance": "123457",
                     "decimals": 18,
-                    "symbol": "TUSD2"
+                    "symbol": "TUSD2",
+                    "weight": null,
+                    "priceRate": "1"
                 }
             ],
             "totalShares": "100000000",
@@ -114,7 +132,7 @@
         {
             "id": "balPool",
             "address": "0x0297e37f1873d2dab4487aa67cd56b58e2f27875",
-            "amp": null,
+            "amp": "null",
             "poolType": "Weighted",
             "swapFee": "0.0025",
             "tokens": [
@@ -123,28 +141,32 @@
                     "balance": "6891368.668129188897904039",
                     "decimals": 18,
                     "symbol": "WMATIC",
-                    "weight": "0.25"
+                    "weight": "0.25",
+                    "priceRate": "1"
                 },
                 {
                     "address": "0x2791bca1f2de4661ed88a30c99a7a9449aa84174",
                     "balance": "8445127.654386",
                     "decimals": 6,
                     "symbol": "USDC",
-                    "weight": "0.25"
+                    "weight": "0.25",
+                    "priceRate": "1"
                 },
                 {
                     "address": "0x7ceb23fd6bc0add59e62ac25578270cff1b9f619",
                     "balance": "2635.757849468860993182",
                     "decimals": 18,
                     "symbol": "WETH",
-                    "weight": "0.25"
+                    "weight": "0.25",
+                    "priceRate": "1"
                 },
                 {
                     "address": "0x9a71012b13ca4d3d0cdc72a177df3ef03b0e76a3",
                     "balance": "343464.522579791060696747",
                     "decimals": 18,
                     "symbol": "BAL",
-                    "weight": "0.25"
+                    "weight": "0.25",
+                    "priceRate": "1"
                 }
             ],
             "tokensList": [
