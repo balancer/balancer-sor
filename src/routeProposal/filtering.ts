@@ -1,3 +1,4 @@
+import cloneDeep from 'lodash.clonedeep';
 import {
     SubgraphPoolBase,
     PoolDictionary,
@@ -8,13 +9,9 @@ import {
     PoolFilter,
     PoolPairBase,
 } from '../types';
-import { WeightedPool } from '../pools/weightedPool/weightedPool';
 import { StablePool } from '../pools/stablePool/stablePool';
-import { ElementPool } from '../pools/elementPool/elementPool';
-import { MetaStablePool } from '../pools/metaStablePool/metaStablePool';
 import { ZERO } from '../utils/bignumber';
 import { USDCCONNECTINGPOOL, STABALADDR } from '../constants';
-
 import { parseNewPool } from '../pools';
 
 export const filterPoolsByType = (
@@ -38,14 +35,14 @@ As we're looping all here, it also does a number of other things to avoid unnece
 - We also create and return a pools dictionary that includes all pools which is useful for future pool filtering
 */
 export function filterPoolsOfInterest(
-    allPools: SubgraphPoolBase[],
+    allPools: PoolDictionary,
     tokenIn: string,
     tokenOut: string,
-    maxPools: number,
-    currentBlockTimestamp = 0
-): [PoolDictionary, string[], PoolDictionary] {
+    maxPools: number
+    // currentBlockTimestamp = 0
+): [PoolDictionary, string[]] {
     // This will include all pools
-    const poolsAllDictionary: PoolDictionary = {};
+    // const poolsAllDictionary: PoolDictionary = {};
     // This will include pools with tokenIn and/or tokenOut only
     const poolsFilteredDictionary: PoolDictionary = {};
 
@@ -56,22 +53,8 @@ export function filterPoolsOfInterest(
     let tokenInPairedTokens: Set<string> = new Set();
     let tokenOutPairedTokens: Set<string> = new Set();
 
-    allPools.forEach((pool) => {
-        if (pool.tokensList.length === 0 || pool.tokens[0].balance === '0') {
-            return;
-        }
-
-        const newPool:
-            | WeightedPool
-            | StablePool
-            | MetaStablePool
-            | ElementPool
-            | undefined = parseNewPool(pool, currentBlockTimestamp);
-        if (!newPool) return;
-
-        // Add all pools to this dictionary
-        poolsAllDictionary[pool.id] = newPool;
-
+    Object.keys(allPools).forEach((id) => {
+        const pool = allPools[id];
         const tokenListSet = new Set(pool.tokensList);
 
         // This is a direct pool as has both tokenIn and tokenOut
@@ -80,10 +63,10 @@ export function filterPoolsOfInterest(
             (tokenListSet.has(tokenIn.toLowerCase()) &&
                 tokenListSet.has(tokenOut.toLowerCase()))
         ) {
-            newPool.setTypeForSwap(SwapPairType.Direct);
+            pool.setTypeForSwap(SwapPairType.Direct);
             // parsePoolPairData for Direct pools as it avoids having to loop later
-            newPool.parsePoolPairData(tokenIn, tokenOut);
-            poolsFilteredDictionary[pool.id] = newPool;
+            pool.parsePoolPairData(tokenIn, tokenOut);
+            poolsFilteredDictionary[pool.id] = pool;
             return;
         }
 
@@ -96,15 +79,15 @@ export function filterPoolsOfInterest(
                     ...tokenInPairedTokens,
                     ...tokenListSet,
                 ]);
-                newPool.setTypeForSwap(SwapPairType.HopIn);
-                poolsFilteredDictionary[pool.id] = newPool;
+                pool.setTypeForSwap(SwapPairType.HopIn);
+                poolsFilteredDictionary[pool.id] = pool;
             } else if (!containsTokenIn && containsTokenOut) {
                 tokenOutPairedTokens = new Set([
                     ...tokenOutPairedTokens,
                     ...tokenListSet,
                 ]);
-                newPool.setTypeForSwap(SwapPairType.HopOut);
-                poolsFilteredDictionary[pool.id] = newPool;
+                pool.setTypeForSwap(SwapPairType.HopOut);
+                poolsFilteredDictionary[pool.id] = pool;
             }
         }
     });
@@ -116,7 +99,7 @@ export function filterPoolsOfInterest(
 
     // Transform set into Array
     const hopTokens = [...hopTokensSet];
-    return [poolsFilteredDictionary, hopTokens, poolsAllDictionary];
+    return [poolsFilteredDictionary, hopTokens];
 }
 
 /*
@@ -479,4 +462,20 @@ export function getPathsUsingStaBalPool(
     //
     // We then return an empty set of paths
     return [];
+}
+
+export function parseToPoolsDict(
+    pools: SubgraphPoolBase[],
+    timestamp: number
+): PoolDictionary {
+    return Object.fromEntries(
+        cloneDeep(pools)
+            .filter(
+                (pool) =>
+                    pool.tokensList.length !== 0 &&
+                    pool.tokens[0].balance !== '0'
+            )
+            .map((pool) => [pool.id, parseNewPool(pool, timestamp)])
+            .filter(([, pool]) => pool !== undefined)
+    );
 }

@@ -2,12 +2,7 @@
 require('dotenv').config();
 import { expect } from 'chai';
 import cloneDeep from 'lodash.clonedeep';
-import {
-    PoolDictionary,
-    SwapPairType,
-    NewPath,
-    SubgraphPoolBase,
-} from '../src/types';
+import { PoolDictionary, SwapPairType, SubgraphPoolBase } from '../src/types';
 import { StablePool } from '../src/pools/stablePool/stablePool';
 import {
     filterPoolsOfInterest,
@@ -15,6 +10,7 @@ import {
     createMultihopPath,
     getHighestLiquidityPool,
     filterHopPools,
+    parseToPoolsDict,
 } from '../src/routeProposal/filtering';
 import { STABALADDR, USDCCONNECTINGPOOL } from '../src/constants';
 import staBalPools from './testData/staBal/staBalPools.json';
@@ -44,17 +40,16 @@ describe(`staBalPaths.`, () => {
         const tokenOut = '0x9a71012b13ca4d3d0cdc72a177df3ef03b0e76a3'; // BAL
         const chainId = 99; // Test chain
 
-        const testPools: any = cloneDeep(staBalPools.pools);
-
-        const [poolsFiltered, , poolsAll] = filterPoolsOfInterest(
-            testPools,
+        const [poolsOfInterest, , poolsAll] = itCreatesCorrectPath(
             tokenIn,
             tokenOut,
-            maxPools
+            cloneDeep(staBalPools.pools),
+            ['staBalPair1', 'usdcConnecting', 'balPool'],
+            chainId
         );
 
         const staBalPoolIdIn = 'staBalPair1';
-        const staBalPoolIn = poolsFiltered[staBalPoolIdIn];
+        const staBalPoolIn = poolsOfInterest[staBalPoolIdIn];
         const hopTokenStaBal = STABALADDR[chainId];
         const usdcConnectingPool: StablePool = poolsAll[
             USDCCONNECTINGPOOL[chainId].id
@@ -82,13 +77,12 @@ describe(`staBalPaths.`, () => {
         const tokenOut = '0x9a71012b13ca4d3d0cdc72a177df3ef03b0e76a3'; // BAL
         const chainId = 99; // Test chain
 
-        const testPools: any = cloneDeep(staBalPools.pools);
-
-        const [pools] = filterPoolsOfInterest(
-            testPools,
+        const [poolsOfInterest] = itCreatesCorrectPath(
             tokenIn,
             tokenOut,
-            maxPools
+            cloneDeep(staBalPools.pools),
+            ['staBalPair1', 'usdcConnecting', 'balPool'],
+            chainId
         );
 
         // Hop out as it is USDC > tokenOut
@@ -96,7 +90,7 @@ describe(`staBalPaths.`, () => {
             USDCCONNECTINGPOOL[chainId].usdc,
             tokenOut,
             SwapPairType.HopOut,
-            pools
+            poolsOfInterest
         );
 
         expect(mostLiquidPool).to.eq('balPool');
@@ -107,13 +101,12 @@ describe(`staBalPaths.`, () => {
         const tokenOut = '0x0000000000085d4780B73119b644AE5ecd22b376';
         const chainId = 99; // Test chain
 
-        const testPools: any = cloneDeep(staBalPools.pools);
-
-        const [pools] = filterPoolsOfInterest(
-            testPools,
+        const [poolsOfInterest] = itCreatesCorrectPath(
             tokenIn,
             tokenOut,
-            maxPools
+            cloneDeep(staBalPools.pools),
+            ['balPool', 'usdcConnecting', 'staBalPair1'],
+            chainId
         );
 
         // Hop in as it is tokenIn > USDC
@@ -121,7 +114,7 @@ describe(`staBalPaths.`, () => {
             tokenIn,
             USDCCONNECTINGPOOL[chainId].usdc,
             SwapPairType.HopIn,
-            pools
+            poolsOfInterest
         );
 
         expect(mostLiquidPool).to.eq('balPool');
@@ -243,12 +236,13 @@ function itCreatesCorrectPath(
     expectedPoolIds: string[],
     chainId = 99
 ): [PoolDictionary, string[], PoolDictionary] {
-    let poolsFiltered: PoolDictionary;
-    let poolsAll: PoolDictionary;
+    let poolsOfInterest: PoolDictionary;
     let hopTokens: string[];
 
-    [poolsFiltered, hopTokens, poolsAll] = filterPoolsOfInterest(
-        pools,
+    const poolsAll = parseToPoolsDict(pools, 0);
+
+    [poolsOfInterest, hopTokens] = filterPoolsOfInterest(
+        poolsAll,
         tokenIn,
         tokenOut,
         maxPools
@@ -258,18 +252,18 @@ function itCreatesCorrectPath(
         tokenIn,
         tokenOut,
         poolsAll,
-        poolsFiltered,
+        poolsOfInterest,
         chainId
     );
 
     if (expectedPoolIds.length === 0) {
         expect(paths.length).to.eq(0);
-        return [poolsFiltered, hopTokens, poolsAll];
+        return [poolsOfInterest, hopTokens, poolsAll];
     }
 
     expect(paths.length).to.eq(1);
 
     checkPath(expectedPoolIds, poolsAll, paths[0], tokenIn, tokenOut);
 
-    return [poolsFiltered, hopTokens, poolsAll];
+    return [poolsOfInterest, hopTokens, poolsAll];
 }

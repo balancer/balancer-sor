@@ -3,8 +3,10 @@ import {
     filterPoolsOfInterest,
     filterHopPools,
     getPathsUsingStaBalPool,
+    parseToPoolsDict,
 } from './filtering';
 import { calculatePathLimits } from './pathLimits';
+import { parseNewPool } from '../pools';
 import {
     SwapOptions,
     SwapTypes,
@@ -44,17 +46,14 @@ export class RouteProposer {
             };
         }
 
-        // Some functions alter pools list directly but we want to keep original so make a copy to work from
-        const poolsList = cloneDeep(pools);
+        const poolsAllDict = parseToPoolsDict(pools, swapOptions.timestamp);
 
-        const [poolsFilteredDict, hopTokens, poolsAllDict] =
-            filterPoolsOfInterest(
-                poolsList,
-                tokenIn,
-                tokenOut,
-                swapOptions.maxPools,
-                swapOptions.timestamp
-            );
+        const [poolsFilteredDict, hopTokens] = filterPoolsOfInterest(
+            poolsAllDict,
+            tokenIn,
+            tokenOut,
+            swapOptions.maxPools
+        );
 
         const [poolsMostLiquidDict, pathData] = filterHopPools(
             tokenIn,

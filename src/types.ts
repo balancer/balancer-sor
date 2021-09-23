@@ -141,6 +141,7 @@ export interface PoolBase {
     id: string;
     address: string;
     tokensList: string[];
+    setTypeForSwap: (type: SwapPairType) => void;
     parsePoolPairData: (tokenIn: string, tokenOut: string) => PoolPairBase;
     getNormalizedLiquidity: (poolPairData: PoolPairBase) => BigNumber;
     getLimitAmountSwap: (

@@ -10,6 +10,7 @@ import {
 import {
     filterPoolsOfInterest,
     filterHopPools,
+    parseToPoolsDict,
 } from '../src/routeProposal/filtering';
 import { calculatePathLimits } from '../src/routeProposal/pathLimits';
 import { getBestPaths } from '../src/router';
@@ -761,8 +762,15 @@ function filter(
     NewPath[],
     BigNumber
 ] {
-    const [poolsOfInterestDictionary, hopTokens, poolsAll] =
-        filterPoolsOfInterest(cloneDeep(pools), tokenIn, tokenOut, maxPools);
+    const timestamp = 0;
+    const poolsAll = parseToPoolsDict(pools, timestamp);
+
+    const [poolsOfInterestDictionary, hopTokens] = filterPoolsOfInterest(
+        poolsAll,
+        tokenIn,
+        tokenOut,
+        maxPools
+    );
 
     const [poolsMostLiquid, pathData] = filterHopPools(
         tokenIn,
