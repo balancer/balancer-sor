@@ -18,6 +18,7 @@ import {
 } from '../src/routeProposal/filtering';
 import { STABALADDR, USDCCONNECTINGPOOL } from '../src/constants';
 import staBalPools from './testData/staBal/staBalPools.json';
+import { checkPath } from './lib/testHelpers';
 
 const maxPools = 4;
 const chainId = 99;
@@ -271,52 +272,4 @@ function itCreatesCorrectPath(
     checkPath(expectedPoolIds, poolsAll, paths[0], tokenIn, tokenOut);
 
     return [poolsFiltered, hopTokens, poolsAll];
-}
-
-/*
-Checks path for:
-- ID
-- tokenIn/Out
-- poolPairData
-- Valid swap path
-*/
-function checkPath(
-    expectedPoolIds: string[], // IDs of pools used in path
-    pools: PoolDictionary,
-    path: NewPath,
-    tokenIn: string,
-    tokenOut: string
-) {
-    // IDS should be all IDS concatenated
-    expect(path.id).to.eq(expectedPoolIds.join(''));
-    // Lengths of pools, pairData and swaps should all be equal
-    expect(expectedPoolIds.length).to.eq(path.poolPairData.length);
-    expect(
-        path.poolPairData.length === path.swaps.length &&
-            path.swaps.length === path.pools.length
-    ).to.be.true;
-
-    let lastTokenOut = path.swaps[0].tokenIn;
-
-    // Check each part of path
-    for (let i = 0; i < expectedPoolIds.length; i++) {
-        const poolId = expectedPoolIds[i];
-        const poolInfo = pools[poolId];
-        const tokenIn = path.swaps[i].tokenIn;
-        const tokenOut = path.swaps[i].tokenOut;
-        const poolPairData = poolInfo.parsePoolPairData(tokenIn, tokenOut);
-        expect(path.pools[i]).to.deep.eq(poolInfo);
-        expect(path.poolPairData[i]).to.deep.eq(poolPairData);
-
-        expect(path.swaps[i].pool).eq(poolId);
-        // TokenIn should equal previous swaps tokenOut
-        expect(path.swaps[i].tokenIn).eq(lastTokenOut);
-        expect(path.swaps[i].tokenInDecimals).eq(poolPairData.decimalsIn);
-        expect(path.swaps[i].tokenOutDecimals).eq(poolPairData.decimalsOut);
-        lastTokenOut = tokenOut;
-    }
-
-    // TokenIn/Out should be first and last of path
-    expect(path.swaps[0].tokenIn).to.eq(tokenIn);
-    expect(path.swaps[path.swaps.length - 1].tokenOut).to.eq(tokenOut);
 }
