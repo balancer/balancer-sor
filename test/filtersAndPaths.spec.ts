@@ -1,10 +1,8 @@
 // TS_NODE_PROJECT='tsconfig.testing.json' npx mocha -r ts-node/register test/filtersAndPaths.spec.ts
-import { assert, expect } from 'chai';
+import { assert } from 'chai';
 import cloneDeep from 'lodash.clonedeep';
 import {
     PoolDictionary,
-    SwapPairType,
-    PoolTypes,
     NewPath,
     SwapTypes,
     SubgraphPoolBase,
@@ -24,7 +22,6 @@ import testPools from './testData/filterTestPools.json';
 const WETH = '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2'; // WETH lower case
 const DAI = '0x6B175474E89094C44Da98b954EedeAC495271d0F'.toLowerCase();
 const USDC = '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48'.toLowerCase();
-const chainId = 99;
 
 describe('Tests pools filtering and path processing', () => {
     it('weighted test pools check', () => {
@@ -497,17 +494,16 @@ describe('Tests pools filtering and path processing', () => {
     });
 
     it('Test pool class that has direct & multihop paths', async () => {
-        const pools = cloneDeep(testPools).pathTestDirectAndMulti;
         const tokenIn = USDC;
         const tokenOut = DAI;
-        let hopTokens: string[];
-        let poolsOfInterestDictionary: PoolDictionary;
+        const maxPools = 4;
 
-        [poolsOfInterestDictionary, hopTokens] = filterPoolsOfInterest(
-            pools,
+        const [poolsOfInterestDictionary, hopTokens] = filter(
+            testPools.pathTestDirectAndMulti,
             tokenIn,
             tokenOut,
-            4
+            maxPools,
+            SwapTypes.SwapExactIn
         );
 
         const [noDirect, noHopIn, noHopOut] = countPoolSwapPairTypes(
@@ -516,7 +512,6 @@ describe('Tests pools filtering and path processing', () => {
 
         assert.equal(hopTokens.length, 0);
         assert.equal(Object.keys(poolsOfInterestDictionary).length, 2);
-
         assert.equal(noDirect, 1);
         assert.equal(noHopIn, 0);
         assert.equal(noHopOut, 1);
@@ -773,7 +768,7 @@ function filter(
         tokenIn,
         tokenOut,
         hopTokens,
-        poolsOfInterestDictionary
+        cloneDeep(poolsOfInterestDictionary)
     );
 
     let pathsSorted: NewPath[] = [];
