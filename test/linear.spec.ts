@@ -263,7 +263,7 @@ describe('linear pool tests', () => {
                 );
             });
 
-            it('should return 2 valid linear paths', async () => {
+            it('should return 1 valid linear paths', async () => {
                 const tokenIn = USDC.address;
                 const tokenOut = BAL.address;
                 const maxPools = 10;
@@ -278,7 +278,7 @@ describe('linear pool tests', () => {
                 );
 
                 assert.equal(paths.length, 1);
-                // TokenIn>[WeightedPool]>staBal3Bpt>[staBAL3]>bStable>[LINEARPOOL]>TokenOut
+                // TokenIn>[linearUSDC]>bUSDC>[staBAL3]>staBal3>[weightedBalStaBal3]>TokenOut
                 checkPath(
                     ['linearUSDC', 'staBal3Id', 'weightedBalStaBal3'],
                     poolsAllDict,
