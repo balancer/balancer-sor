@@ -11,19 +11,19 @@ const testFiles = [
     'gusdBug',
     'gusdBugSinglePath',
     '25178485-blockKovan', // UI-506, WETH to WBTC Bug
-    // // 'stable-and-weighted-token-btp-test',
-    // // Added pools 'stable-and-weighted-token-btp-test' to element pools
-    // //  and replaced the base token with DAI. Also
-    // // added a weighted pool (last in json) with DAI and 0x000...001 to test 2 paths
-    // 'elementFinanceTest_multihop_1path',
-    // 'elementFinanceTest_multihop_2paths',
-    // 'elementFinanceTest_multihop_1path_swapExactOut',
-    // 'elementFinanceTest_multihop_2paths_swapExactOut', // Returning a second swap with -ve amount
-    // 'elementFinanceTestFourPools',
-    // 'elementFinanceTest1',
-    // 'elementFinanceTest2',
-    // 'elementFinanceTest3',
-    // 'elementFinanceTest4',
+    // 'stable-and-weighted-token-btp-test',
+    // Added pools 'stable-and-weighted-token-btp-test' to element pools
+    //  and replaced the base token with DAI. Also
+    // added a weighted pool (last in json) with DAI and 0x000...001 to test 2 paths
+    'elementFinanceTest_multihop_1path',
+    'elementFinanceTest_multihop_2paths',
+    'elementFinanceTest_multihop_1path_swapExactOut',
+    'elementFinanceTest_multihop_2paths_swapExactOut', // Returning a second swap with -ve amount
+    'elementFinanceTestFourPools',
+    'elementFinanceTest1',
+    'elementFinanceTest2',
+    'elementFinanceTest3',
+    'elementFinanceTest4',
     // 07/04/21 - Below have been checked and pass
     '0x04ec8acaa4f419bc1525eaa8d37faae2d4acb64c5521a3718593c626962de170', // Dust amounts
     '0xa7a3cf76686c6d6aa6e976724b4463c6f7b0e98453ad3a8488b6e9daa2fecc42', // Dust amounts
