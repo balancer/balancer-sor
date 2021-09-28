@@ -100,9 +100,6 @@ describe(`Tests against Element generated test trade file.`, () => {
             const swapAmt = parseFixed(trade.input.amount_in.toString(), 18);
 
             const sor = new SOR(provider, chainId, null, poolsFromFile);
-            // Both tokens use 18 decimals
-            sor.swapCostCalculator.setTokenDecimals(tokenIn, 18);
-            sor.swapCostCalculator.setTokenDecimals(tokenOut, 18);
 
             const fetchSuccess = await sor.fetchPools([], false);
             expect(fetchSuccess).to.be.true;

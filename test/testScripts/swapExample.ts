@@ -192,11 +192,11 @@ const vaultAddr = '0xBA12222222228d8Ba445958a75a0704d566BF2C8';
 
 async function getSwap(
     provider: JsonRpcProvider,
-    networkId,
+    networkId: number,
     poolsSource: string,
     queryOnChain: boolean,
-    tokenIn,
-    tokenOut,
+    tokenIn: { symbol: string; address: string; decimals: number },
+    tokenOut: { symbol: string; address: string; decimals: number },
     swapType: SwapTypes,
     swapAmount: BigNumberish
 ): Promise<SwapInfo> {
@@ -215,7 +215,13 @@ async function getSwap(
     // Note - tokenOut for SwapExactIn, tokenIn for SwapExactOut
     const outputToken =
         swapType === SwapTypes.SwapExactOut ? tokenIn : tokenOut;
-    const cost = await sor.getCostOfSwapInToken(outputToken.address, gasPrice);
+    const cost = await sor.getCostOfSwapInToken(
+        outputToken.address,
+        outputToken.decimals,
+        gasPrice,
+        BigNumber.from('35000')
+    );
+    console.log(`getCostOfSwapInToken: ${cost.toString()}`);
 
     const swapInfo: SwapInfo = await sor.getSwaps(
         tokenIn.address,

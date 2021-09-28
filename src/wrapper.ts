@@ -51,7 +51,7 @@ export class SOR {
             initialPools
         );
         this.routeProposer = new RouteProposer();
-        this.swapCostCalculator = new SwapCostCalculator(provider, chainId);
+        this.swapCostCalculator = new SwapCostCalculator(chainId);
     }
 
     getPools(): SubgraphPoolBase[] {
@@ -137,12 +137,14 @@ export class SOR {
 
     async getCostOfSwapInToken(
         outputToken: string,
+        outputTokenDecimals: number,
         gasPrice: BigNumber,
         swapGas?: BigNumber
     ): Promise<BigNumber> {
         if (gasPrice.isZero()) return Zero;
         return this.swapCostCalculator.convertGasCostToToken(
             outputToken,
+            outputTokenDecimals,
             gasPrice,
             swapGas
         );
@@ -176,23 +178,18 @@ export class SOR {
         paths[0].swaps.forEach((swap) => {
             // Inject token decimals to avoid having to query onchain
             if (isSameAddress(swap.tokenIn, tokenIn)) {
-                this.swapCostCalculator.setTokenDecimals(
-                    tokenIn,
-                    swap.tokenInDecimals
-                );
                 tokenInDecimals = swap.tokenInDecimals;
             }
             if (isSameAddress(swap.tokenOut, tokenOut)) {
-                this.swapCostCalculator.setTokenDecimals(
-                    tokenOut,
-                    swap.tokenOutDecimals
-                );
                 tokenOutDecimals = swap.tokenOutDecimals;
             }
         });
 
         const costOutputToken = await this.getCostOfSwapInToken(
             swapType === SwapTypes.SwapExactIn ? tokenOut : tokenIn,
+            swapType === SwapTypes.SwapExactIn
+                ? tokenOutDecimals
+                : tokenInDecimals,
             swapOptions.gasPrice,
             swapOptions.swapGas
         );

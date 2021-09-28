@@ -1,12 +1,7 @@
 // Tests costOutputToken
 import { expect } from 'chai';
 import { BigNumber, formatFixed } from '@ethersproject/bignumber';
-import { JsonRpcProvider } from '@ethersproject/providers';
 import { calculateTotalSwapCost, SwapCostCalculator } from '../src/swapCost';
-
-const provider = new JsonRpcProvider(
-    `https://mainnet.infura.io/v3/${process.env.INFURA}`
-);
 
 describe('calculateTotalSwapCost', () => {
     it('should return correct total swap cost', async () => {
@@ -40,7 +35,7 @@ describe('calculateTotalSwapCost', () => {
     });
 });
 
-describe('Test SwapCostCalculator', () => {
+describe.only('Test SwapCostCalculator', () => {
     const DAI = '0x6B175474E89094C44Da98b954EedeAC495271d0F';
     const WETH = '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2';
     const USDC = '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48';
@@ -51,10 +46,12 @@ describe('Test SwapCostCalculator', () => {
             const swapGas = BigNumber.from('100000');
 
             const costExpected = BigNumber.from('0');
-            const cost = await new SwapCostCalculator(
-                provider,
-                1
-            ).convertGasCostToToken('0x0', gasPriceWei, swapGas);
+            const cost = await new SwapCostCalculator(1).convertGasCostToToken(
+                '0x0',
+                18,
+                gasPriceWei,
+                swapGas
+            );
 
             expect(cost).to.eql(costExpected);
         });
@@ -63,10 +60,12 @@ describe('Test SwapCostCalculator', () => {
             const gasPriceWei = BigNumber.from('30000000000');
             const swapGas = BigNumber.from('100000');
 
-            const cost = await new SwapCostCalculator(
-                provider,
-                1
-            ).convertGasCostToToken(DAI, gasPriceWei, swapGas);
+            const cost = await new SwapCostCalculator(1).convertGasCostToToken(
+                DAI,
+                18,
+                gasPriceWei,
+                swapGas
+            );
             const costEth = formatFixed(cost, 18);
             console.log(`CostOutputToken DAI: ${costEth.toString()}`);
         }).timeout(5000);
@@ -75,10 +74,12 @@ describe('Test SwapCostCalculator', () => {
             const gasPriceWei = BigNumber.from('30000000000');
             const swapGas = BigNumber.from('100000');
 
-            const cost = await new SwapCostCalculator(
-                provider,
-                1
-            ).convertGasCostToToken(USDC, gasPriceWei, swapGas);
+            const cost = await new SwapCostCalculator(1).convertGasCostToToken(
+                USDC,
+                6,
+                gasPriceWei,
+                swapGas
+            );
             const costEth = formatFixed(cost, 6);
             console.log(`CostOutputToken USDC: ${costEth.toString()}`);
         }).timeout(5000);
@@ -88,10 +89,12 @@ describe('Test SwapCostCalculator', () => {
             const swapGas = BigNumber.from('100000');
             const MKR = '0x9f8F72aA9304c8B593d555F12eF6589cC3A579A2';
 
-            const cost = await new SwapCostCalculator(
-                provider,
-                1
-            ).convertGasCostToToken(MKR, gasPriceWei, swapGas);
+            const cost = await new SwapCostCalculator(1).convertGasCostToToken(
+                MKR,
+                18,
+                gasPriceWei,
+                swapGas
+            );
             const costEth = formatFixed(cost, 18);
             console.log(`CostOutputToken MKR: ${costEth.toString()}`);
         }).timeout(5000);
@@ -100,10 +103,12 @@ describe('Test SwapCostCalculator', () => {
             const gasPriceWei = BigNumber.from('30000000000');
             const swapGas = BigNumber.from('100000');
 
-            const cost = await new SwapCostCalculator(
-                provider,
-                1
-            ).convertGasCostToToken(WETH, gasPriceWei, swapGas);
+            const cost = await new SwapCostCalculator(1).convertGasCostToToken(
+                WETH,
+                18,
+                gasPriceWei,
+                swapGas
+            );
             const costEth = formatFixed(cost, 18);
             console.log(`CostOutputToken WETH: ${costEth.toString()}`);
         }).timeout(5000);
