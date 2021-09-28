@@ -200,7 +200,7 @@ export function _spotPriceAfterSwapExactTokenInForBPTOut(
     if (!bptSupply.eq(0)) {
         poolFactor = invariant.div(bptSupply);
     }
-    return poolFactor.times(rightDerivativeToNominal(finalMainBalance, params));
+    return poolFactor.div(rightDerivativeToNominal(finalMainBalance, params));
 }
 
 // PairType = 'token->BPT'
@@ -259,8 +259,8 @@ export function _spotPriceAfterSwapExactBPTInForTokenOut(
     const poolFactor = invariant.div(bptSupply);
     const deltaNominalMain = bptIn.times(poolFactor);
     const afterNominalMain = previousNominalMain.minus(deltaNominalMain);
-    return poolFactor.times(
-        leftDerivativeFromNominal(afterNominalMain, params)
+    return bnum(1).div(
+        poolFactor.times(leftDerivativeFromNominal(afterNominalMain, params))
     );
 }
 
@@ -287,7 +287,7 @@ export function _spotPriceAfterSwapBPTInForExactTokenOut(
         params
     );
     const poolFactor = invariant.div(bptSupply);
-    return poolFactor.times(leftDerivativeToNominal(finalMainBalance, params));
+    return leftDerivativeToNominal(finalMainBalance, params).div(poolFactor);
 }
 
 /////////
