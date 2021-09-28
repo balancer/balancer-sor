@@ -213,7 +213,7 @@ async function getSwap(
 
     // gasPrice is used by SOR as a factor to determine how many pools to swap against.
     // i.e. higher cost means more costly to trade against lots of different pools.
-    const gasPrice = new BigNumber('40000000000');
+    const gasPrice = new BigNumber('100000000000');
     // This determines the max no of pools the SOR will use to swap.
     const maxPools = 4;
 
@@ -221,7 +221,12 @@ async function getSwap(
     // Note - tokenOut for SwapExactIn, tokenIn for SwapExactOut
     const outputToken =
         swapType === SwapTypes.SwapExactOut ? tokenIn : tokenOut;
-    const cost = await sor.getCostOfSwapInToken(outputToken.address, gasPrice);
+    const cost = await sor.getCostOfSwapInToken(
+        outputToken.address,
+        gasPrice,
+        bnum('35000')
+    );
+    console.log(`getCostOfSwapInToken: ${cost.toString()}`);
 
     const swapInfo: SwapInfo = await sor.getSwaps(
         tokenIn.address,
@@ -562,7 +567,7 @@ async function simpleSwap() {
     const tokenIn = ADDRESSES[networkId].DAI;
     const tokenOut = ADDRESSES[networkId].USDC;
     const swapType = SwapTypes.SwapExactIn;
-    const swapAmount = new BigNumber(0.07); // In normalized format, i.e. 1USDC = 1
+    const swapAmount = new BigNumber(0.01); // In normalized format, i.e. 1USDC = 1
     const executeTrade = false;
 
     const provider = new JsonRpcProvider(PROVIDER_URLS[networkId]);
