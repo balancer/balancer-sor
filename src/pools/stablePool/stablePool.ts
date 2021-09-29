@@ -75,7 +75,7 @@ export class StablePool implements PoolBase {
     ) {
         this.id = id;
         this.address = address;
-        this.amp = BigNumber.from(amp);
+        this.amp = parseFixed(amp, 0);
         this.swapFee = parseFixed(swapFee, 18);
         this.totalShares = parseFixed(totalShares, 18);
         this.tokens = tokens;
