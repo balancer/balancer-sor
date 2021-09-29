@@ -32,7 +32,7 @@ export async function getOnChainBalances(
 
     const multiPool = new Multicaller(multiAddress, provider, abis);
 
-    subgraphPools.forEach((pool, i) => {
+    subgraphPools.forEach((pool) => {
         multiPool.call(`${pool.id}.poolTokens`, vaultAddress, 'getPoolTokens', [
             pool.id,
         ]);
