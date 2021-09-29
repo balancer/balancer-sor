@@ -2541,7 +2541,6 @@
             "id": "0x1066a453127fad74d0ab1c981dffa56d76310517",
             "swapFee": "0.00001",
             "swapEnabled": true,
-            "swapEnabled": true,
             "tokens": [
                 {
                     "address": "0x0bc529c00c6401aef6d220be8c6ea1667f6ad93e",
@@ -6042,7 +6041,6 @@
             "id": "0x28841acdddd21568eade5f2ee127175bf4229c23",
             "swapFee": "0.00001",
             "swapEnabled": true,
-            "swapEnabled": true,
             "tokens": [
                 {
                     "address": "0x846c66cf71c43f80403b51fe3906b3599d63336f",
@@ -8387,7 +8385,6 @@
         {
             "id": "0x3554dd27ed345f4b9c09aa1283f42fa73ee12a5e",
             "swapFee": "0.00001",
-            "swapEnabled": true,
             "swapEnabled": true,
             "tokens": [
                 {
