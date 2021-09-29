@@ -3,7 +3,6 @@ require('dotenv').config();
 import { expect } from 'chai';
 import cloneDeep from 'lodash.clonedeep';
 import { PoolDictionary, SwapPairType, SubgraphPoolBase } from '../src/types';
-import { StablePool } from '../src/pools/stablePool/stablePool';
 import {
     filterPoolsOfInterest,
     getPathsUsingStaBalPool,
@@ -51,9 +50,7 @@ describe(`staBalPaths.`, () => {
         const staBalPoolIdIn = 'staBalPair1';
         const staBalPoolIn = poolsOfInterest[staBalPoolIdIn];
         const hopTokenStaBal = STABALADDR[chainId];
-        const usdcConnectingPool: StablePool = poolsAll[
-            USDCCONNECTINGPOOL[chainId].id
-        ] as unknown as StablePool;
+        const usdcConnectingPool = poolsAll[USDCCONNECTINGPOOL[chainId].id];
 
         const multihopPath = createMultihopPath(
             staBalPoolIn,
