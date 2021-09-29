@@ -10,8 +10,7 @@ export function parseNewPool(
     currentBlockTimestamp = 0
 ): WeightedPool | StablePool | ElementPool | undefined {
     // We're not interested in any pools which don't allow swapping
-    // (Explicit check for false as many of the tests omit this flag)
-    if (pool.swapEnabled === false) return undefined;
+    if (!pool.swapEnabled) return undefined;
 
     let newPool: WeightedPool | StablePool | ElementPool;
     if (

@@ -60,6 +60,7 @@ export interface SubgraphPoolBase {
     address: string;
     poolType: string;
     swapFee: string;
+    swapEnabled: boolean;
     totalShares: string;
     tokens: SubgraphToken[];
     tokensList: string[];
@@ -75,9 +76,6 @@ export interface SubgraphPoolBase {
     unitSeconds?: number;
     principalToken?: string;
     baseToken?: string;
-
-    // LBP specific fields
-    swapEnabled?: boolean;
 }
 
 export type SubgraphToken = {
