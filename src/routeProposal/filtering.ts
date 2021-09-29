@@ -456,8 +456,7 @@ export function parseToPoolsDict(
         cloneDeep(pools)
             .filter(
                 (pool) =>
-                    pool.tokensList.length !== 0 &&
-                    pool.tokens[0].balance !== '0'
+                    pool.tokensList.length > 0 && pool.tokens[0].balance !== '0'
             )
             .map((pool) => [pool.id, parseNewPool(pool, timestamp)])
             .filter(([, pool]) => pool !== undefined)
