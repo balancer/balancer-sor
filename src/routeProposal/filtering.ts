@@ -347,10 +347,7 @@ export function getPathsUsingStaBalPool(
     const usdcConnectingPoolInfo = USDCCONNECTINGPOOL[chainId];
     if (!usdcConnectingPoolInfo) return [];
 
-    const usdcConnectingPool: StablePool = poolsAll[
-        usdcConnectingPoolInfo.id
-    ] as StablePool;
-
+    const usdcConnectingPool = poolsAll[usdcConnectingPoolInfo.id];
     if (!usdcConnectingPool) return [];
 
     // staBal BPT token is the hop token between token and USDC connecting pool
