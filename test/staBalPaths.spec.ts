@@ -233,12 +233,9 @@ function itCreatesCorrectPath(
     expectedPoolIds: string[],
     chainId = 99
 ): [PoolDictionary, string[], PoolDictionary] {
-    let poolsOfInterest: PoolDictionary;
-    let hopTokens: string[];
-
     const poolsAll = parseToPoolsDict(pools, 0);
 
-    [poolsOfInterest, hopTokens] = filterPoolsOfInterest(
+    const [poolsOfInterest, hopTokens] = filterPoolsOfInterest(
         poolsAll,
         tokenIn,
         tokenOut,
