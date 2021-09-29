@@ -53,6 +53,7 @@ describe(`Tests against Element generated test trade file.`, () => {
                     address: 'n/a',
                     poolType: 'Element',
                     swapFee: testTrades.init.percent_fee.toString(),
+                    swapEnabled: true,
                     totalShares: trade.input.total_supply.toString(),
                     unitSeconds: 1,
                     expiryTime: trade.input.time,

@@ -1,4 +1,4 @@
-// Example showing SOR with Vault batchSwap and Subgraph pool data, run using: $ ts-node ./test/testScripts/swapExample.ts
+// Example showing SOR with Vault batchSwap and Subgraph pool data, run using: $ TS_NODE_PROJECT='tsconfig.testing.json' ts-node ./test/testScripts/swapExample.ts
 require('dotenv').config();
 import { BigNumber } from 'bignumber.js';
 import { JsonRpcProvider } from '@ethersproject/providers';
@@ -22,6 +22,7 @@ export enum Network {
     GOERLI = 5,
     KOVAN = 42,
     POLYGON = 137,
+    ARBITRUM = 42161,
 }
 
 export const PROVIDER_URLS = {
@@ -29,6 +30,7 @@ export const PROVIDER_URLS = {
     [Network.GOERLI]: `https://goerli.infura.io/v3/${process.env.INFURA}`,
     [Network.KOVAN]: `https://kovan.infura.io/v3/${process.env.INFURA}`,
     [Network.POLYGON]: `https://rpc-mainnet.matic.network`,
+    [Network.ARBITRUM]: `https://arb1.arbitrum.io/rpc`,
 };
 
 export const SUBGRAPH_URLS = {
@@ -40,6 +42,7 @@ export const SUBGRAPH_URLS = {
         'https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-kovan-v2',
     [Network.POLYGON]:
         'https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-polygon-v2',
+    [Network.ARBITRUM]: `https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-arbitrum-v2`,
 };
 
 export const ADDRESSES = {
@@ -166,6 +169,28 @@ export const ADDRESSES = {
             symbol: 'DAI',
         },
     },
+    [Network.ARBITRUM]: {
+        WETH: {
+            address: '0x82af49447d8a07e3bd95bd0d56f35241523fbab1',
+            decimals: 18,
+            symbol: 'WETH',
+        },
+        BAL: {
+            address: '0x040d1edc9569d4bab2d15287dc5a4f10f56a56b8',
+            decimals: 18,
+            symbol: 'BAL',
+        },
+        USDC: {
+            address: '0xff970a61a04b1ca14834a43f5de4533ebddb5cc8',
+            decimals: 6,
+            symbol: 'USDC',
+        },
+        STETH: {
+            address: 'N/A',
+            decimals: 18,
+            symbol: 'STETH',
+        },
+    },
 };
 
 // This is the same across networks
@@ -174,7 +199,7 @@ const vaultAddr = '0xBA12222222228d8Ba445958a75a0704d566BF2C8';
 async function getSwap(
     provider: JsonRpcProvider,
     networkId,
-    poolsSource: string | SubgraphPoolBase[],
+    poolsSource: string,
     queryOnChain: boolean,
     tokenIn,
     tokenOut,
@@ -184,7 +209,7 @@ async function getSwap(
     const sor = new SOR(provider, networkId, poolsSource);
 
     // Will get onChain data for pools list
-    await sor.fetchPools(queryOnChain);
+    await sor.fetchPools([], queryOnChain);
 
     // gasPrice is used by SOR as a factor to determine how many pools to swap against.
     // i.e. higher cost means more costly to trade against lots of different pools.
@@ -196,11 +221,7 @@ async function getSwap(
     // Note - tokenOut for SwapExactIn, tokenIn for SwapExactOut
     const outputToken =
         swapType === SwapTypes.SwapExactOut ? tokenIn : tokenOut;
-    const cost = await sor.getCostOfSwapInToken(
-        outputToken.address,
-        outputToken.decimals,
-        gasPrice
-    );
+    const cost = await sor.getCostOfSwapInToken(outputToken.address, gasPrice);
 
     const swapInfo: SwapInfo = await sor.getSwaps(
         tokenIn.address,
@@ -242,7 +263,8 @@ async function makeTrade(
         console.log(`Return Amount is 0. No swaps to exectute.`);
         return;
     }
-    const wallet = new Wallet(process.env.TRADER_KEY, provider);
+    const key: any = process.env.TRADER_KEY;
+    const wallet = new Wallet(key, provider);
 
     if (swapInfo.tokenIn !== AddressZero) {
         // Vault needs approval for swapping non ETH
@@ -297,7 +319,7 @@ async function makeTrade(
     // -ve mean min to receive
     // For a multihop the intermediate tokens should be 0
     // This is where slippage tolerance would be added
-    const limits = [];
+    const limits: string[] = [];
     if (swapType === SwapTypes.SwapExactIn) {
         swapInfo.tokenAddresses.forEach((token, i) => {
             if (token.toLowerCase() === swapInfo.tokenIn.toLowerCase()) {
@@ -370,7 +392,8 @@ async function makeRelayerTrade(
         console.log(`Return Amount is 0. No swaps to exectute.`);
         return;
     }
-    const wallet = new Wallet(process.env.TRADER_KEY, provider);
+    const key: any = process.env.TRADER_KEY;
+    const wallet = new Wallet(key, provider);
 
     if (swapInfo.tokenIn !== AddressZero) {
         // Vault needs approval for swapping non ETH
@@ -438,12 +461,14 @@ async function makeRelayerTrade(
     // -ve mean min to receive
     // For a multihop the intermediate tokens should be 0
     // This is where slippage tolerance would be added
-    const limits = [];
+    const limits: string[] = [];
     if (swapType === SwapTypes.SwapExactIn) {
         swapInfo.tokenAddresses.forEach((token, i) => {
             if (token.toLowerCase() === tokenIn.toLowerCase()) {
-                limits[i] = swapInfo.swapAmountForSwaps?.toString();
+                if (!swapInfo.swapAmountForSwaps) return;
+                limits[i] = swapInfo.swapAmountForSwaps.toString();
             } else if (token.toLowerCase() === tokenOut.toLowerCase()) {
+                if (!swapInfo.returnAmountFromSwaps) return;
                 limits[i] = swapInfo.returnAmountFromSwaps
                     .times(-0.99)
                     .toString()
@@ -455,12 +480,14 @@ async function makeRelayerTrade(
     } else {
         swapInfo.tokenAddresses.forEach((token, i) => {
             if (token.toLowerCase() === tokenIn.toLowerCase()) {
+                if (!swapInfo.returnAmountFromSwaps) return;
                 limits[i] = swapInfo.returnAmountFromSwaps
                     .times(1.001)
                     .toString()
                     .split('.')[0];
                 // limits[i] = swapInfo.returnAmountFromSwaps?.toString(); // No buffer
             } else if (token.toLowerCase() === tokenOut.toLowerCase()) {
+                if (!swapInfo.swapAmountForSwaps) return;
                 limits[i] = swapInfo.swapAmountForSwaps.times(-1).toString();
             } else {
                 limits[i] = '0';
@@ -493,6 +520,8 @@ async function makeRelayerTrade(
             amount: swapInfo.swaps[0].amount,
             userData: swapInfo.swaps[0].userData,
         };
+
+        if (!swapInfo.returnAmountFromSwaps) return;
 
         let limit = swapInfo.returnAmountFromSwaps.times(1.01).dp(0).toString(); // Max In
         if (swapType === SwapTypes.SwapExactIn)
@@ -530,8 +559,8 @@ async function simpleSwap() {
     // const poolsSource = require('../testData/testPools/gusdBug.json');
     // Update pools list with most recent onchain balances
     const queryOnChain = true;
-    const tokenIn = ADDRESSES[networkId].STETH;
-    const tokenOut = ADDRESSES[networkId].DAI;
+    const tokenIn = ADDRESSES[networkId].DAI;
+    const tokenOut = ADDRESSES[networkId].USDC;
     const swapType = SwapTypes.SwapExactIn;
     const swapAmount = new BigNumber(0.07); // In normalized format, i.e. 1USDC = 1
     const executeTrade = false;

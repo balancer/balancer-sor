@@ -105,5 +105,34 @@ describe('PoolCacher', () => {
             expect(poolCache.finishedFetchingOnChain).to.be.true;
             expect(poolCache.getPools().length).to.be.gt(0);
         });
+
+        it(`should fail multicall`, async () => {
+            // Calling mainnet multicall with kovan pools will cause multicall to fail
+            const poolCache = new PoolCacher(
+                provider,
+                chainId,
+                'https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-kovan-v2',
+                []
+            );
+
+            const fetchSuccess = await poolCache.fetchPools([], true);
+            expect(fetchSuccess).to.be.false;
+            expect(poolCache.finishedFetchingOnChain).to.be.false;
+            expect(poolCache.getPools().length).to.eq(0);
+        }).timeout(10000);
+
+        it(`should successfully call onchain data`, async () => {
+            const poolCache = new PoolCacher(
+                provider,
+                chainId,
+                'https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-v2',
+                []
+            );
+
+            const fetchSuccess = await poolCache.fetchPools([], true);
+            expect(fetchSuccess).to.be.true;
+            expect(poolCache.finishedFetchingOnChain).to.be.true;
+            expect(poolCache.getPools().length).to.be.gt(0);
+        }).timeout(10000);
     });
 });

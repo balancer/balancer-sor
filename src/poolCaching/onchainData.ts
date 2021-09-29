@@ -1,4 +1,4 @@
-import { formatFixed } from '@ethersproject/bignumber';
+import { BigNumber, formatFixed } from '@ethersproject/bignumber';
 import { BaseProvider } from '@ethersproject/providers';
 import { SubgraphPoolBase } from '../types';
 import { isSameAddress } from '../utils';
@@ -32,14 +32,7 @@ export async function getOnChainBalances(
 
     const multiPool = new Multicaller(multiAddress, provider, abis);
 
-    subgraphPools.forEach((pool, i) => {
-        // TO DO - This is a temp filter
-        if (
-            pool.id ===
-            '0x6b15a01b5d46a5321b627bd7deef1af57bc629070000000000000000000000d4'
-        )
-            subgraphPools.splice(i, 1);
-
+    subgraphPools.forEach((pool) => {
         multiPool.call(`${pool.id}.poolTokens`, vaultAddress, 'getPoolTokens', [
             pool.id,
         ]);
@@ -81,10 +74,10 @@ export async function getOnChainBalances(
         }
     });
 
-    const pools = (await multiPool.execute()) as Record<
+    let pools = {} as Record<
         string,
         {
-            amp?: string;
+            amp?: string[];
             swapFee: string;
             weights?: string[];
             poolTokens: {
@@ -94,16 +87,50 @@ export async function getOnChainBalances(
         }
     >;
 
-    Object.entries(pools).forEach(([poolId, onchainData]) => {
+    try {
+        pools = (await multiPool.execute()) as Record<
+            string,
+            {
+                amp?: string[];
+                swapFee: string;
+                weights?: string[];
+                poolTokens: {
+                    tokens: string[];
+                    balances: string[];
+                };
+            }
+        >;
+    } catch (err) {
+        throw `Issue with multicall execution.`;
+    }
+
+    Object.entries(pools).forEach(([poolId, onchainData], index) => {
         try {
             const { poolTokens, swapFee, weights } = onchainData;
 
-            subgraphPools[poolId].swapFee = formatFixed(swapFee, 18);
+            if (
+                subgraphPools[index].poolType === 'Stable' ||
+                subgraphPools[index].poolType === 'MetaStable'
+            ) {
+                if (!onchainData.amp) {
+                    throw `Stable Pool Missing Amp: ${poolId}`;
+                } else {
+                    // Need to scale amp by precision to match expected Subgraph scale
+                    // amp is stored with 3 decimals of precision
+                    subgraphPools[index].amp = formatFixed(
+                        onchainData.amp[0],
+                        3
+                    );
+                }
+            }
+
+            subgraphPools[index].swapFee = formatFixed(swapFee, 18);
 
             poolTokens.tokens.forEach((token, i) => {
-                const T = subgraphPools[poolId].tokens.find((t) =>
+                const T = subgraphPools[index].tokens.find((t) =>
                     isSameAddress(t.address, token)
                 );
+                if (!T) throw `Pool Missing Expected Token: ${poolId} ${token}`;
                 T.balance = formatFixed(poolTokens.balances[i], T.decimals);
                 if (weights) {
                     // Only expected for WeightedPools
@@ -111,10 +138,7 @@ export async function getOnChainBalances(
                 }
             });
         } catch (err) {
-            // Likely an unsupported pool type
-            // console.log(`Issue with pool onchain call`)
-            // console.log(subgraphPool.id);
-            // console.log(onChainResult);
+            throw `Issue with pool onchain data: ${err}`;
         }
     });
 
