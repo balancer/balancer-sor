@@ -29,10 +29,6 @@ The main purpose of this function is to:
     - TokenIn & !TokenOut, i.e. a hop pool with only TokenIn
     - !TokenIn & TokenOut, i.e. a hop pool with only TokenOut
 - find list of hop tokens, i.e. tokens that join hop pools
-As we're looping all here, it also does a number of other things to avoid unnecessary loops later:
-- parsePoolPairData for Direct pools
-- store token decimals for future use
-- We also create and return a pools dictionary that includes all pools which is useful for future pool filtering
 */
 export function filterPoolsOfInterest(
     allPools: PoolDictionary,
@@ -60,8 +56,6 @@ export function filterPoolsOfInterest(
         // This is a direct pool as has both tokenIn and tokenOut
         if (containsTokenIn && containsTokenOut) {
             pool.setTypeForSwap(SwapPairType.Direct);
-            // parsePoolPairData for Direct pools as it avoids having to loop later
-            pool.parsePoolPairData(tokenIn, tokenOut);
             poolsFilteredDictionary[pool.id] = pool;
             return;
         }
