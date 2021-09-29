@@ -39,10 +39,7 @@ export function filterPoolsOfInterest(
     tokenIn: string,
     tokenOut: string,
     maxPools: number
-    // currentBlockTimestamp = 0
 ): [PoolDictionary, string[]] {
-    // This will include all pools
-    // const poolsAllDictionary: PoolDictionary = {};
     // This will include pools with tokenIn and/or tokenOut only
     const poolsFilteredDictionary: PoolDictionary = {};
 
