@@ -108,7 +108,7 @@ export class SwapCostCalculator {
         );
     }
 
-    private async getTokenDecimals(tokenAddress: string): Promise<number> {
+    async getTokenDecimals(tokenAddress: string): Promise<number> {
         const cache = this.tokenDecimalsCache[tokenAddress.toLowerCase()];
         if (cache !== undefined) {
             return cache;

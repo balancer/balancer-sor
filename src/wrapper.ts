@@ -1,6 +1,6 @@
 import { BaseProvider } from '@ethersproject/providers';
 import cloneDeep from 'lodash.clonedeep';
-import { BigNumber, ZERO } from './utils/bignumber';
+import { BigNumber, ZERO, scale } from './utils/bignumber';
 import { getBestPaths } from './router';
 import { getWrappedInfo, setWrappedInfo } from './wrapInfo';
 import { formatSwaps } from './formatSwaps';
@@ -184,11 +184,21 @@ export class SOR {
                 );
             }
         });
-        const costOutputToken = await this.getCostOfSwapInToken(
-            swapType === SwapTypes.SwapExactIn ? tokenOut : tokenIn,
+        const outputToken =
+            swapType === SwapTypes.SwapExactIn ? tokenOut : tokenIn;
+        const costOutputTokenEvm = await this.getCostOfSwapInToken(
+            outputToken,
             swapOptions.gasPrice,
             swapOptions.swapGas
         );
+
+        // optimizeSwapAmounts uses human scaled numbers
+        // scaled here to reuse output token/decimals info
+        const costOutputToken = scale(
+            costOutputTokenEvm.dp(0),
+            -(await this.swapCostCalculator.getTokenDecimals(outputToken))
+        );
+        // const costOutputToken = costOutputTokenEvm;
 
         // Returns list of swaps
         const [swaps, total, marketSp, totalConsideringFees] =
