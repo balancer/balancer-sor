@@ -38,195 +38,205 @@ describe(`staBalPaths.`, () => {
         );
     });
 
-    it(`should create a valid multihop path`, () => {
-        const tokenIn = TUSD;
-        const tokenOut = BAL;
-        const chainId = 99; // Test chain
-
-        const [poolsOfInterest, , poolsAll] = itCreatesCorrectPath(
-            tokenIn,
-            tokenOut,
-            cloneDeep(staBalPools.pools),
-            ['staBalPair1', 'usdcConnecting', 'balPool'],
-            chainId
-        );
-
-        const staBalPoolIdIn = 'staBalPair1';
-        const staBalPoolIn = poolsOfInterest[staBalPoolIdIn];
-        const hopTokenStaBal = STABALADDR[chainId];
-        const usdcConnectingPool = poolsAll[USDCCONNECTINGPOOL[chainId].id];
-
-        const multihopPath = createMultihopPath(
-            staBalPoolIn,
-            usdcConnectingPool,
-            tokenIn,
-            hopTokenStaBal,
-            USDCCONNECTINGPOOL[chainId].usdc
-        );
-
-        checkPath(
-            ['staBalPair1', 'usdcConnecting'],
-            poolsAll,
-            multihopPath,
-            tokenIn,
-            USDCCONNECTINGPOOL[chainId].usdc
-        );
-    });
-
-    it(`should return pool with highest liquidity, hopOut`, () => {
-        const tokenIn = TUSD;
-        const tokenOut = BAL;
-        const chainId = 99; // Test chain
-
-        const [poolsOfInterest] = itCreatesCorrectPath(
-            tokenIn,
-            tokenOut,
-            cloneDeep(staBalPools.pools),
-            ['staBalPair1', 'usdcConnecting', 'balPool'],
-            chainId
-        );
-
-        // Hop out as it is USDC > tokenOut
-        const mostLiquidPool = getHighestLiquidityPool(
-            USDCCONNECTINGPOOL[chainId].usdc,
-            tokenOut,
-            SwapPairType.HopOut,
-            poolsOfInterest
-        );
-
-        expect(mostLiquidPool).to.eq('balPool');
-    });
-
-    it(`should return pool with highest liquidity, hopIn`, () => {
-        const tokenIn = BAL;
-        const tokenOut = TUSD;
-        const chainId = 99; // Test chain
-
-        const [poolsOfInterest] = itCreatesCorrectPath(
-            tokenIn,
-            tokenOut,
-            cloneDeep(staBalPools.pools),
-            ['balPool', 'usdcConnecting', 'staBalPair1'],
-            chainId
-        );
-
-        // Hop in as it is tokenIn > USDC
-        const mostLiquidPool = getHighestLiquidityPool(
-            tokenIn,
-            USDCCONNECTINGPOOL[chainId].usdc,
-            SwapPairType.HopIn,
-            poolsOfInterest
-        );
-
-        expect(mostLiquidPool).to.eq('balPool');
-    });
-
-    it(`non staBal pair tokens should have no staBal path`, () => {
-        const tokenIn = '0x0d500b1d8e8ef31e21c99d1db9a6444d3adf1270';
-        const tokenOut = '0x7ceb23fd6bc0add59e62ac25578270cff1b9f619';
-        const correctPoolIds = [];
-
-        itCreatesCorrectPath(
-            tokenIn,
-            tokenOut,
-            cloneDeep(staBalPools.pools),
-            correctPoolIds,
-            chainId
-        );
-    });
-
-    it(`TokenIn has no USDC pool, expect no route`, () => {
-        const tokenIn = TOKEN_WITH_NO_USDC_PAIR;
-        const tokenOut = TUSD;
-        const correctPoolIds = [];
-
-        itCreatesCorrectPath(
-            tokenIn,
-            tokenOut,
-            cloneDeep(staBalPools.pools),
-            correctPoolIds,
-            chainId
-        );
-    });
-
-    it(`TokenOut has no USDC pool, expect no route`, () => {
-        const tokenIn = TUSD;
-        const tokenOut = TOKEN_WITH_NO_USDC_PAIR;
-        const correctPoolIds = [];
-
-        itCreatesCorrectPath(
-            tokenIn,
-            tokenOut,
-            cloneDeep(staBalPools.pools),
-            correctPoolIds,
-            chainId
-        );
-    });
-
-    it(`staBal Paired Token In`, () => {
-        // staBal Pair Token In
-        const tokenIn = TUSD;
-        const tokenOut = BAL;
-        // i.e. TUSD>[staBalPair1]>staBAL>[usdcConnecting]>USDC>[balPool]>BAL
-        const correctPoolIds = ['staBalPair1', 'usdcConnecting', 'balPool'];
-
-        itCreatesCorrectPath(
-            tokenIn,
-            tokenOut,
-            cloneDeep(staBalPools.pools),
-            correctPoolIds,
-            chainId
-        );
-    });
-
-    it(`staBal Paired Token Out`, () => {
-        // staBal Pair Token Out
-        const tokenIn = BAL;
-        const tokenOut = TUSD;
-        // i.e. BAL>[balPool]>USDC>[usdcConnecting]>staBAL>[staBalPair1]>TUSD
-        const correctPoolIds = ['balPool', 'usdcConnecting', 'staBalPair1'];
-
-        itCreatesCorrectPath(
-            tokenIn,
-            tokenOut,
-            cloneDeep(staBalPools.pools),
-            correctPoolIds,
-            chainId
-        );
-    });
-
-    it(`staBal Paired Token In & Out`, () => {
-        // staBal Pair Token In & Out
+    context('when both tokens are paired with staBAL', () => {
         const tokenIn = '0x0000000000000000000000000000000000000002';
         const tokenOut = TUSD;
-        // We expect no specific staBalPaths as the path already exists as multihop
-        const correctPoolIds = [];
+        it('returns an empty array', () => {
+            // We expect no staBalPaths as the path already exists as multihop
+            const correctPoolIds = [];
 
-        const [poolsFiltered, hopTokens, poolsAll] = itCreatesCorrectPath(
-            tokenIn,
-            tokenOut,
-            cloneDeep(staBalPools.pools),
-            correctPoolIds,
-            chainId
-        );
+            const [poolsFiltered, hopTokens, poolsAll] = itCreatesCorrectPath(
+                tokenIn,
+                tokenOut,
+                cloneDeep(staBalPools.pools),
+                correctPoolIds,
+                chainId
+            );
 
-        // Returns multihop path: TUSD2>[staBalPair2]>staBAL>[staBalPair1]>TUSD
-        const [, pathData] = filterHopPools(
-            tokenIn,
-            tokenOut,
-            hopTokens,
-            poolsFiltered
-        );
+            // Returns multihop path: TUSD2>[staBalPair2]>staBAL>[staBalPair1]>TUSD
+            const [, pathData] = filterHopPools(
+                tokenIn,
+                tokenOut,
+                hopTokens,
+                poolsFiltered
+            );
 
-        expect(pathData.length).to.eq(1);
+            expect(pathData.length).to.eq(1);
 
-        checkPath(
-            ['staBalPair2', 'staBalPair1'],
-            poolsAll,
-            pathData[0],
-            tokenIn,
-            tokenOut
-        );
+            checkPath(
+                ['staBalPair2', 'staBalPair1'],
+                poolsAll,
+                pathData[0],
+                tokenIn,
+                tokenOut
+            );
+        });
+    });
+
+    context('when neither token is paired with staBAL', () => {
+        const tokenIn = '0x0d500b1d8e8ef31e21c99d1db9a6444d3adf1270';
+        const tokenOut = '0x7ceb23fd6bc0add59e62ac25578270cff1b9f619';
+        it('returns an empty array', () => {
+            const correctPoolIds = [];
+
+            itCreatesCorrectPath(
+                tokenIn,
+                tokenOut,
+                cloneDeep(staBalPools.pools),
+                correctPoolIds,
+                chainId
+            );
+        });
+    });
+
+    context('when tokenIn is paired with staBAL', () => {
+        const tokenIn = TUSD;
+        context('when tokenOut is paired with USDC', () => {
+            const tokenOut = BAL;
+            it('returns the expected route', () => {
+                // i.e. TUSD>[staBalPair1]>staBAL>[usdcConnecting]>USDC>[balPool]>BAL
+                const correctPoolIds = [
+                    'staBalPair1',
+                    'usdcConnecting',
+                    'balPool',
+                ];
+
+                itCreatesCorrectPath(
+                    tokenIn,
+                    tokenOut,
+                    cloneDeep(staBalPools.pools),
+                    correctPoolIds,
+                    chainId
+                );
+            });
+
+            it('should use the most liquid tokenOut-USDC pool', () => {
+                const [poolsOfInterest] = itCreatesCorrectPath(
+                    tokenIn,
+                    tokenOut,
+                    cloneDeep(staBalPools.pools),
+                    ['staBalPair1', 'usdcConnecting', 'balPool'],
+                    chainId
+                );
+
+                // Hop out as it is USDC > tokenOut
+                const mostLiquidPool = getHighestLiquidityPool(
+                    USDCCONNECTINGPOOL[chainId].usdc,
+                    tokenOut,
+                    SwapPairType.HopOut,
+                    poolsOfInterest
+                );
+
+                expect(mostLiquidPool).to.eq('balPool');
+            });
+
+            it(`should create a valid multihop path`, () => {
+                const [poolsOfInterest, , poolsAll] = itCreatesCorrectPath(
+                    tokenIn,
+                    tokenOut,
+                    cloneDeep(staBalPools.pools),
+                    ['staBalPair1', 'usdcConnecting', 'balPool'],
+                    chainId
+                );
+
+                const staBalPoolIdIn = 'staBalPair1';
+                const staBalPoolIn = poolsOfInterest[staBalPoolIdIn];
+                const hopTokenStaBal = STABALADDR[chainId];
+                const usdcConnectingPool =
+                    poolsAll[USDCCONNECTINGPOOL[chainId].id];
+
+                const multihopPath = createMultihopPath(
+                    staBalPoolIn,
+                    usdcConnectingPool,
+                    tokenIn,
+                    hopTokenStaBal,
+                    USDCCONNECTINGPOOL[chainId].usdc
+                );
+
+                checkPath(
+                    ['staBalPair1', 'usdcConnecting'],
+                    poolsAll,
+                    multihopPath,
+                    tokenIn,
+                    USDCCONNECTINGPOOL[chainId].usdc
+                );
+            });
+        });
+
+        context('when tokenOut is not paired with USDC', () => {
+            const tokenOut = TOKEN_WITH_NO_USDC_PAIR;
+            it(`returns an empty array`, () => {
+                const correctPoolIds = [];
+
+                itCreatesCorrectPath(
+                    tokenIn,
+                    tokenOut,
+                    cloneDeep(staBalPools.pools),
+                    correctPoolIds,
+                    chainId
+                );
+            });
+        });
+    });
+
+    context('when tokenOut is paired with staBAL', () => {
+        const tokenOut = TUSD;
+        context('when tokenIn is paired with USDC', () => {
+            const tokenIn = BAL;
+
+            it('returns the expected route', () => {
+                // i.e. BAL>[balPool]>USDC>[usdcConnecting]>staBAL>[staBalPair1]>TUSD
+                const correctPoolIds = [
+                    'balPool',
+                    'usdcConnecting',
+                    'staBalPair1',
+                ];
+
+                itCreatesCorrectPath(
+                    tokenIn,
+                    tokenOut,
+                    cloneDeep(staBalPools.pools),
+                    correctPoolIds,
+                    chainId
+                );
+            });
+
+            it('should use the most liquid tokenIn-USDC pool', () => {
+                const [poolsOfInterest] = itCreatesCorrectPath(
+                    tokenIn,
+                    tokenOut,
+                    cloneDeep(staBalPools.pools),
+                    ['balPool', 'usdcConnecting', 'staBalPair1'],
+                    chainId
+                );
+
+                // Hop in as it is tokenIn > USDC
+                const mostLiquidPool = getHighestLiquidityPool(
+                    tokenIn,
+                    USDCCONNECTINGPOOL[chainId].usdc,
+                    SwapPairType.HopIn,
+                    poolsOfInterest
+                );
+
+                expect(mostLiquidPool).to.eq('balPool');
+            });
+        });
+
+        context('when tokenIn is not paired with USDC', () => {
+            it(`returns an empty array`, () => {
+                const tokenIn = TOKEN_WITH_NO_USDC_PAIR;
+                const tokenOut = TUSD;
+                const correctPoolIds = [];
+
+                itCreatesCorrectPath(
+                    tokenIn,
+                    tokenOut,
+                    cloneDeep(staBalPools.pools),
+                    correctPoolIds,
+                    chainId
+                );
+            });
+        });
     });
 });
 
