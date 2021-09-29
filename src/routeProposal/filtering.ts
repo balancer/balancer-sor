@@ -54,12 +54,11 @@ export function filterPoolsOfInterest(
         const pool = allPools[id];
         const tokenListSet = new Set(pool.tokensList);
 
+        const containsTokenIn = tokenListSet.has(tokenIn);
+        const containsTokenOut = tokenListSet.has(tokenOut);
+
         // This is a direct pool as has both tokenIn and tokenOut
-        if (
-            (tokenListSet.has(tokenIn) && tokenListSet.has(tokenOut)) ||
-            (tokenListSet.has(tokenIn.toLowerCase()) &&
-                tokenListSet.has(tokenOut.toLowerCase()))
-        ) {
+        if (containsTokenIn && containsTokenOut) {
             pool.setTypeForSwap(SwapPairType.Direct);
             // parsePoolPairData for Direct pools as it avoids having to loop later
             pool.parsePoolPairData(tokenIn, tokenOut);
@@ -68,9 +67,6 @@ export function filterPoolsOfInterest(
         }
 
         if (maxPools > 1) {
-            const containsTokenIn = tokenListSet.has(tokenIn);
-            const containsTokenOut = tokenListSet.has(tokenOut);
-
             if (containsTokenIn && !containsTokenOut) {
                 tokenInPairedTokens = new Set([
                     ...tokenInPairedTokens,
