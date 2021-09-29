@@ -1,4 +1,3 @@
-import cloneDeep from 'lodash.clonedeep';
 import {
     filterPoolsOfInterest,
     filterHopPools,
@@ -6,7 +5,6 @@ import {
     parseToPoolsDict,
 } from './filtering';
 import { calculatePathLimits } from './pathLimits';
-import { parseNewPool } from '../pools';
 import {
     SwapOptions,
     SwapTypes,
