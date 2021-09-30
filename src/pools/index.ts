@@ -1,18 +1,23 @@
 import { WeightedPool } from './weightedPool/weightedPool';
 import { StablePool } from './stablePool/stablePool';
-import { ElementPool } from './elementPool/elementPool';
 import { MetaStablePool } from './metaStablePool/metaStablePool';
-import { BigNumber, INFINITY, ZERO } from '../utils/bignumber';
+import { ElementPool } from './elementPool/elementPool';
+import {
+    BigNumber as OldBigNumber,
+    INFINITY,
+    scale,
+    ZERO,
+} from '../utils/bignumber';
 import { SubgraphPoolBase, PoolBase, SwapTypes, PoolPairBase } from '../types';
 
 export function parseNewPool(
     pool: SubgraphPoolBase,
     currentBlockTimestamp = 0
-): WeightedPool | StablePool | ElementPool | undefined {
+): WeightedPool | StablePool | MetaStablePool | ElementPool | undefined {
     // We're not interested in any pools which don't allow swapping
     if (!pool.swapEnabled) return undefined;
 
-    let newPool: WeightedPool | StablePool | ElementPool;
+    let newPool: WeightedPool | StablePool | MetaStablePool | ElementPool;
     if (
         pool.poolType === 'Weighted' ||
         pool.poolType === 'LiquidityBootstrapping' ||
@@ -21,11 +26,11 @@ export function parseNewPool(
         newPool = WeightedPool.fromPool(pool);
     } else if (pool.poolType === 'Stable') {
         newPool = StablePool.fromPool(pool);
+    } else if (pool.poolType === 'MetaStable') {
+        newPool = MetaStablePool.fromPool(pool);
     } else if (pool.poolType === 'Element') {
         newPool = ElementPool.fromPool(pool);
         newPool.setCurrentBlockTimestamp(currentBlockTimestamp);
-    } else if (pool.poolType === 'MetaStable') {
-        newPool = MetaStablePool.fromPool(pool);
     } else {
         console.error(
             `Unknown pool type or type field missing: ${pool.poolType} ${pool.id}`
@@ -40,8 +45,8 @@ export function getOutputAmountSwap(
     pool: PoolBase,
     poolPairData: PoolPairBase,
     swapType: SwapTypes,
-    amount: BigNumber
-): BigNumber {
+    amount: OldBigNumber
+): OldBigNumber {
     // TODO: check if necessary to check if amount > limitAmount
     if (swapType === SwapTypes.SwapExactIn) {
         if (poolPairData.balanceIn.isZero()) {
@@ -52,7 +57,11 @@ export function getOutputAmountSwap(
     } else {
         if (poolPairData.balanceOut.isZero()) {
             return ZERO;
-        } else if (amount.gte(poolPairData.balanceOut)) {
+        } else if (
+            scale(amount, poolPairData.decimalsOut).gte(
+                poolPairData.balanceOut.toString()
+            )
+        ) {
             return INFINITY;
         } else {
             return pool._tokenInForExactTokenOut(poolPairData, amount, false);

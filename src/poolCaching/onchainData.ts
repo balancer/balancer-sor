@@ -1,7 +1,7 @@
+import { BigNumber, formatFixed } from '@ethersproject/bignumber';
 import { BaseProvider } from '@ethersproject/providers';
 import { SubgraphPoolBase } from '../types';
 import { isSameAddress } from '../utils';
-import { scale, bnum } from '../utils/bignumber';
 import { Multicaller } from '../utils/multicaller';
 
 // TODO: decide whether we want to trim these ABIs down to the relevant functions
@@ -116,26 +116,25 @@ export async function getOnChainBalances(
                     throw `Stable Pool Missing Amp: ${poolId}`;
                 } else {
                     // Need to scale amp by precision to match expected Subgraph scale
-                    subgraphPools[index].amp = bnum(onchainData.amp[0])
-                        .div(bnum(onchainData.amp[2]))
-                        .toString();
+                    // amp is stored with 3 decimals of precision
+                    subgraphPools[index].amp = formatFixed(
+                        onchainData.amp[0],
+                        3
+                    );
                 }
             }
 
-            subgraphPools[index].swapFee = scale(bnum(swapFee), -18).toString();
+            subgraphPools[index].swapFee = formatFixed(swapFee, 18);
 
             poolTokens.tokens.forEach((token, i) => {
                 const T = subgraphPools[index].tokens.find((t) =>
                     isSameAddress(t.address, token)
                 );
                 if (!T) throw `Pool Missing Expected Token: ${poolId} ${token}`;
-                T.balance = scale(
-                    bnum(poolTokens.balances[i]),
-                    -Number(T.decimals)
-                ).toString();
+                T.balance = formatFixed(poolTokens.balances[i], T.decimals);
                 if (weights) {
                     // Only expected for WeightedPools
-                    T.weight = scale(bnum(weights[i]), -18).toString();
+                    T.weight = formatFixed(weights[i], 18);
                 }
             });
         } catch (err) {

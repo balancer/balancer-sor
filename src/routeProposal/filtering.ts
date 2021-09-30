@@ -9,11 +9,12 @@ import {
 } from '../types';
 import { WeightedPool } from '../pools/weightedPool/weightedPool';
 import { StablePool } from '../pools/stablePool/stablePool';
-import { ElementPool } from '../pools/elementPool/elementPool';
 import { MetaStablePool } from '../pools/metaStablePool/metaStablePool';
+import { ElementPool } from '../pools/elementPool/elementPool';
 import { ZERO } from '../utils/bignumber';
 
 import { parseNewPool } from '../pools';
+import { Zero } from '@ethersproject/constants';
 
 export const filterPoolsByType = (
     pools: SubgraphPoolBase[],
@@ -237,20 +238,20 @@ function createDirectPath(
     tokenIn: string,
     tokenOut: string
 ): NewPath {
+    const poolPairData = pool.parsePoolPairData(tokenIn, tokenOut);
+
     const swap: Swap = {
         pool: pool.id,
         tokenIn: tokenIn,
         tokenOut: tokenOut,
-        tokenInDecimals: 18, // TO DO - Add decimals here
-        tokenOutDecimals: 18,
+        tokenInDecimals: poolPairData.decimalsIn,
+        tokenOutDecimals: poolPairData.decimalsOut,
     };
-
-    const poolPairData = pool.parsePoolPairData(tokenIn, tokenOut);
 
     const path: NewPath = {
         id: pool.id,
         swaps: [swap],
-        limitAmount: ZERO,
+        limitAmount: Zero,
         poolPairData: [poolPairData],
         pools: [pool],
     };
@@ -265,30 +266,31 @@ function createMultihopPath(
     hopToken: string,
     tokenOut: string
 ): NewPath {
+    const poolPairDataFirst = firstPool.parsePoolPairData(tokenIn, hopToken);
+
     const swap1: Swap = {
         pool: firstPool.id,
         tokenIn: tokenIn,
         tokenOut: hopToken,
-        tokenInDecimals: 18, // Placeholder for actual decimals TO DO
-        tokenOutDecimals: 18,
+        tokenInDecimals: poolPairDataFirst.decimalsIn,
+        tokenOutDecimals: poolPairDataFirst.decimalsOut,
     };
+
+    const poolPairDataSecond = secondPool.parsePoolPairData(hopToken, tokenOut);
 
     const swap2: Swap = {
         pool: secondPool.id,
         tokenIn: hopToken,
         tokenOut: tokenOut,
-        tokenInDecimals: 18, // Placeholder for actual decimals TO DO
-        tokenOutDecimals: 18,
+        tokenInDecimals: poolPairDataSecond.decimalsIn,
+        tokenOutDecimals: poolPairDataSecond.decimalsOut,
     };
-
-    const poolPairDataFirst = firstPool.parsePoolPairData(tokenIn, hopToken);
-    const poolPairDataSecond = secondPool.parsePoolPairData(hopToken, tokenOut);
 
     // Path id is the concatenation of the ids of poolFirstHop and poolSecondHop
     const path: NewPath = {
         id: firstPool.id + secondPool.id,
         swaps: [swap1, swap2],
-        limitAmount: ZERO,
+        limitAmount: Zero,
         poolPairData: [poolPairDataFirst, poolPairDataSecond],
         pools: [firstPool, secondPool],
     };

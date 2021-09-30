@@ -1,16 +1,18 @@
 require('dotenv').config();
 import { expect } from 'chai';
 import cloneDeep from 'lodash.clonedeep';
+import { BigNumber, parseFixed } from '@ethersproject/bignumber';
+import { WeiPerEther as ONE } from '@ethersproject/constants';
 import { JsonRpcProvider } from '@ethersproject/providers';
 import { SOR } from '../src';
 import { SwapInfo, SwapTypes, PoolTypes, SubgraphPoolBase } from '../src/types';
-import { BigNumber, bnum, scale } from '../src/utils/bignumber';
+import { bnum } from '../src/utils/bignumber';
 import {
     MetaStablePool,
     MetaStablePoolPairData,
 } from '../src/pools/metaStablePool/metaStablePool';
 
-const gasPrice = bnum('30000000000');
+const gasPrice = parseFixed('30', 9);
 const maxPools = 4;
 const chainId = 1;
 const provider = new JsonRpcProvider(
@@ -78,26 +80,31 @@ describe(`Tests for MetaStable Pools.`, () => {
                 poolType: PoolTypes.Stable,
                 tokenIn: pool.tokens[0].address,
                 tokenOut: pool.tokens[1].address,
-                balanceIn: bnum(pool.tokens[0].balance),
-                balanceOut: bnum(pool.tokens[1].balance),
-                swapFee: bnum(pool.swapFee),
-                swapFeeScaled: scale(bnum(pool.swapFee), 18),
+                balanceIn: parseFixed(
+                    pool.tokens[0].balance,
+                    pool.tokens[0].decimals
+                ),
+                balanceOut: parseFixed(
+                    pool.tokens[1].balance,
+                    pool.tokens[1].decimals
+                ),
+                swapFee: parseFixed(pool.swapFee, 18),
                 decimalsIn: Number(pool.tokens[0].decimals),
                 decimalsOut: Number(pool.tokens[1].decimals),
-                amp: bnum(pool.amp),
+                amp: BigNumber.from(pool.amp),
                 allBalances: [
                     bnum(pool.tokens[0].balance),
                     bnum(pool.tokens[1].balance),
                 ],
                 allBalancesScaled: [
-                    scale(bnum(pool.tokens[0].balance), 18),
-                    scale(bnum(pool.tokens[1].balance), 18),
+                    parseFixed(pool.tokens[0].balance, 18),
+                    parseFixed(pool.tokens[1].balance, 18),
                 ],
                 invariant: bnum(0),
                 tokenIndexIn: 0,
                 tokenIndexOut: 1,
-                tokenInPriceRate: bnum(pool.tokens[0].priceRate),
-                tokenOutPriceRate: bnum(pool.tokens[1].priceRate),
+                tokenInPriceRate: parseFixed(pool.tokens[0].priceRate, 18),
+                tokenOutPriceRate: parseFixed(pool.tokens[1].priceRate, 18),
             };
 
             const limitAmt = newPool.getLimitAmountSwap(poolPairData, swapType);
@@ -130,20 +137,25 @@ describe(`Tests for MetaStable Pools.`, () => {
                 poolType: PoolTypes.Stable,
                 tokenIn: pool.tokens[0].address,
                 tokenOut: pool.tokens[1].address,
-                balanceIn: bnum(pool.tokens[0].balance),
-                balanceOut: bnum(pool.tokens[1].balance),
-                swapFee: bnum(pool.swapFee),
-                swapFeeScaled: scale(bnum(pool.swapFee), 18),
+                balanceIn: parseFixed(
+                    pool.tokens[0].balance,
+                    pool.tokens[0].decimals
+                ),
+                balanceOut: parseFixed(
+                    pool.tokens[1].balance,
+                    pool.tokens[1].decimals
+                ),
+                swapFee: parseFixed(pool.swapFee, 18),
                 decimalsIn: Number(pool.tokens[0].decimals),
                 decimalsOut: Number(pool.tokens[1].decimals),
-                amp: bnum(pool.amp),
+                amp: BigNumber.from(pool.amp),
                 allBalances: [],
                 allBalancesScaled: [],
                 invariant: bnum(0),
                 tokenIndexIn: 0,
                 tokenIndexOut: 1,
-                tokenInPriceRate: bnum(pool.tokens[0].priceRate),
-                tokenOutPriceRate: bnum(pool.tokens[1].priceRate),
+                tokenInPriceRate: parseFixed(pool.tokens[0].priceRate, 18),
+                tokenOutPriceRate: parseFixed(pool.tokens[1].priceRate, 18),
             };
 
             const limitAmt = newPool.getLimitAmountSwap(poolPairData, swapType);
@@ -165,7 +177,7 @@ describe(`Tests for MetaStable Pools.`, () => {
             const tokenIn = BAL;
             const tokenOut = USDC;
             const swapType = SwapTypes.SwapExactIn;
-            const swapAmt: BigNumber = bnum('1');
+            const swapAmt = parseFixed('1', 18);
 
             const sor = new SOR(provider, chainId, null, pools);
 
@@ -192,7 +204,7 @@ describe(`Tests for MetaStable Pools.`, () => {
             const tokenIn = BAL;
             const tokenOut = USDC;
             const swapType = SwapTypes.SwapExactOut;
-            const swapAmt: BigNumber = bnum('1');
+            const swapAmt = parseFixed('1', 18);
 
             const sor = new SOR(provider, chainId, null, pools);
 
@@ -217,11 +229,11 @@ describe(`Tests for MetaStable Pools.`, () => {
                 poolsFromFile.metaStablePool
             );
             const tokenIn = WETH;
-            const tokenInPriceRate = bnum(1);
+            const tokenInPriceRate = ONE;
             const tokenOut = stETH;
-            const tokenOutPriceRate = bnum(0.5);
+            const tokenOutPriceRate = ONE.div(2);
             const swapType = SwapTypes.SwapExactIn;
-            const swapAmt: BigNumber = bnum('1'); // Would expect ~ 2 back
+            const swapAmt = parseFixed('1', 18); // Would expect ~ 2 back
 
             const sor = new SOR(provider, chainId, null, pools);
 
@@ -243,7 +255,7 @@ describe(`Tests for MetaStable Pools.`, () => {
                 tokenIn,
                 tokenOut,
                 swapType,
-                swapAmt.times(tokenInPriceRate)
+                swapAmt.mul(tokenInPriceRate).div(ONE)
             );
 
             expect(swapInfoStable.tokenAddresses).to.deep.eq(
@@ -253,11 +265,12 @@ describe(`Tests for MetaStable Pools.`, () => {
             expect(swapInfoStable.tokenOut).to.deep.eq(swapInfo.tokenOut);
             // Would expect stable to be half of amounts, i.e. 2stETH = 1ETH
             expect(swapInfoStable.returnAmount.toString()).eq(
-                swapInfo.returnAmount.times(tokenOutPriceRate).toString()
+                swapInfo.returnAmount.mul(tokenOutPriceRate).div(ONE).toString()
             );
             expect(swapInfoStable.returnAmountConsideringFees.toString()).eq(
                 swapInfo.returnAmountConsideringFees
-                    .times(tokenOutPriceRate)
+                    .mul(tokenOutPriceRate)
+                    .div(ONE)
                     .toString()
             );
             expect(swapInfoStable.swaps.length).eq(swapInfo.swaps.length);
@@ -271,8 +284,9 @@ describe(`Tests for MetaStable Pools.`, () => {
                 );
                 expect(swapStable.userData).eq(swapInfo.swaps[i].userData);
                 expect(swapStable.amount).eq(
-                    bnum(swapInfo.swaps[i].amount)
-                        .times(tokenInPriceRate)
+                    BigNumber.from(swapInfo.swaps[i].amount)
+                        .mul(tokenInPriceRate)
+                        .div(ONE)
                         .toString()
                 );
             });
@@ -284,11 +298,11 @@ describe(`Tests for MetaStable Pools.`, () => {
                 poolsFromFile.metaStablePool
             );
             const tokenIn = stETH;
-            const tokenInPriceRate = bnum(0.5);
+            const tokenInPriceRate = ONE.div(2);
             const tokenOut = WETH;
-            const tokenOutPriceRate = bnum(1);
+            const tokenOutPriceRate = ONE;
             const swapType = SwapTypes.SwapExactIn;
-            const swapAmt: BigNumber = bnum('2'); // Would expect ~ 1 back
+            const swapAmt = parseFixed('1', 18); // Would expect ~ 1 back
 
             const sor = new SOR(provider, chainId, null, pools);
 
@@ -311,7 +325,7 @@ describe(`Tests for MetaStable Pools.`, () => {
                 tokenIn,
                 tokenOut,
                 swapType,
-                swapAmt.times(tokenInPriceRate)
+                swapAmt.mul(tokenInPriceRate).div(ONE)
             );
 
             expect(swapInfoStable.tokenAddresses).to.deep.eq(
@@ -336,8 +350,9 @@ describe(`Tests for MetaStable Pools.`, () => {
                 );
                 expect(swapStable.userData).eq(swapInfo.swaps[i].userData);
                 expect(swapStable.amount).eq(
-                    bnum(swapInfo.swaps[i].amount)
-                        .times(tokenInPriceRate)
+                    BigNumber.from(swapInfo.swaps[i].amount)
+                        .mul(tokenInPriceRate)
+                        .div(ONE)
                         .toString()
                 );
             });
@@ -349,11 +364,11 @@ describe(`Tests for MetaStable Pools.`, () => {
                 poolsFromFile.metaStablePool
             );
             const tokenIn = WETH;
-            const tokenInPriceRate = bnum(1);
+            const tokenInPriceRate = ONE;
             const tokenOut = stETH;
-            const tokenOutPriceRate = bnum(0.5);
+            const tokenOutPriceRate = ONE.div(2);
             const swapType = SwapTypes.SwapExactOut;
-            const swapAmt: BigNumber = bnum('2'); // Would expect ~ 1 as input
+            const swapAmt = parseFixed('2', 18); // Would expect ~ 1 as input
 
             const sor = new SOR(provider, chainId, null, pools);
 
@@ -375,7 +390,7 @@ describe(`Tests for MetaStable Pools.`, () => {
                 tokenIn,
                 tokenOut,
                 swapType,
-                swapAmt.times(tokenOutPriceRate)
+                swapAmt.mul(tokenOutPriceRate).div(ONE)
             );
 
             expect(swapInfoStable.tokenAddresses).to.deep.eq(
@@ -400,8 +415,9 @@ describe(`Tests for MetaStable Pools.`, () => {
                 );
                 expect(swapStable.userData).eq(swapInfo.swaps[i].userData);
                 expect(swapStable.amount).eq(
-                    bnum(swapInfo.swaps[i].amount)
-                        .times(tokenOutPriceRate)
+                    BigNumber.from(swapInfo.swaps[i].amount)
+                        .mul(tokenOutPriceRate)
+                        .div(ONE)
                         .toString()
                 );
             });
@@ -413,11 +429,11 @@ describe(`Tests for MetaStable Pools.`, () => {
                 poolsFromFile.metaStablePool
             );
             const tokenIn = stETH;
-            const tokenInPriceRate = bnum(0.5);
+            const tokenInPriceRate = ONE.div(2);
             const tokenOut = WETH;
-            const tokenOutPriceRate = bnum(1);
+            const tokenOutPriceRate = ONE;
             const swapType = SwapTypes.SwapExactOut;
-            const swapAmt: BigNumber = bnum('2'); // Would expect ~ 4 as input
+            const swapAmt = parseFixed('2', 18); // Would expect ~ 4 as input
 
             const sor = new SOR(provider, chainId, null, pools);
 
@@ -439,7 +455,7 @@ describe(`Tests for MetaStable Pools.`, () => {
                 tokenIn,
                 tokenOut,
                 swapType,
-                swapAmt.times(tokenOutPriceRate)
+                swapAmt.mul(tokenOutPriceRate).div(ONE)
             );
 
             expect(swapInfoStable.tokenAddresses).to.deep.eq(
@@ -448,11 +464,12 @@ describe(`Tests for MetaStable Pools.`, () => {
             expect(swapInfoStable.tokenIn).to.deep.eq(swapInfo.tokenIn);
             expect(swapInfoStable.tokenOut).to.deep.eq(swapInfo.tokenOut);
             expect(swapInfoStable.returnAmount.toString()).eq(
-                swapInfo.returnAmount.times(tokenInPriceRate).toString()
+                swapInfo.returnAmount.mul(tokenInPriceRate).div(ONE).toString()
             );
             expect(swapInfoStable.returnAmountConsideringFees.toString()).eq(
                 swapInfo.returnAmountConsideringFees
-                    .times(tokenInPriceRate)
+                    .mul(tokenInPriceRate)
+                    .div(ONE)
                     .toString()
             );
             expect(swapInfoStable.swaps.length).eq(swapInfo.swaps.length);
@@ -466,8 +483,9 @@ describe(`Tests for MetaStable Pools.`, () => {
                 );
                 expect(swapStable.userData).eq(swapInfo.swaps[i].userData);
                 expect(swapStable.amount).eq(
-                    bnum(swapInfo.swaps[i].amount)
-                        .times(tokenOutPriceRate)
+                    BigNumber.from(swapInfo.swaps[i].amount)
+                        .mul(tokenOutPriceRate)
+                        .div(ONE)
                         .toString()
                 );
             });
@@ -482,13 +500,13 @@ describe(`Tests for MetaStable Pools.`, () => {
                 poolsFromFile.metaStablePools
             );
             const tokenIn = WETH;
-            const tokenInPriceRate = bnum(1);
+            const tokenInPriceRate = ONE;
             const tokenHop = stETH;
-            const tokenHopPriceRate = bnum(0.25);
+            const tokenHopPriceRate = ONE.div(4);
             const tokenOut = randomETH;
-            const tokenOutPriceRate = bnum(1);
+            const tokenOutPriceRate = ONE;
             const swapType = SwapTypes.SwapExactIn;
-            const swapAmt: BigNumber = bnum('77.723');
+            const swapAmt = parseFixed('77.723', 18);
 
             const sor = new SOR(provider, chainId, null, pools);
 
@@ -510,7 +528,7 @@ describe(`Tests for MetaStable Pools.`, () => {
                 tokenIn,
                 tokenOut,
                 swapType,
-                swapAmt.times(tokenInPriceRate)
+                swapAmt.mul(tokenInPriceRate).div(ONE)
             );
 
             expect(swapInfoStable.tokenAddresses).to.deep.eq(
@@ -524,7 +542,8 @@ describe(`Tests for MetaStable Pools.`, () => {
             );
             expect(swapInfoStable.returnAmountConsideringFees.toString()).eq(
                 swapInfo.returnAmountConsideringFees
-                    .times(tokenOutPriceRate)
+                    .mul(tokenOutPriceRate)
+                    .div(ONE)
                     .toString()
             );
             expect(swapInfoStable.swaps.length).eq(swapInfo.swaps.length);
@@ -538,8 +557,9 @@ describe(`Tests for MetaStable Pools.`, () => {
                 );
                 expect(swapStable.userData).eq(swapInfo.swaps[i].userData);
                 expect(swapStable.amount).eq(
-                    bnum(swapInfo.swaps[i].amount)
-                        .times(tokenInPriceRate)
+                    BigNumber.from(swapInfo.swaps[i].amount)
+                        .mul(tokenInPriceRate)
+                        .div(ONE)
                         .toString()
                 );
             });
@@ -552,13 +572,13 @@ describe(`Tests for MetaStable Pools.`, () => {
                 poolsFromFile.metaStablePools
             );
             const tokenIn = WETH;
-            const tokenInPriceRate = bnum(1);
+            const tokenInPriceRate = ONE;
             const tokenHop = stETH;
-            const tokenHopPriceRate = bnum(0.25);
+            const tokenHopPriceRate = ONE.div(4);
             const tokenOut = randomETH;
-            const tokenOutPriceRate = bnum(1);
+            const tokenOutPriceRate = ONE;
             const swapType = SwapTypes.SwapExactOut;
-            const swapAmt: BigNumber = bnum('77.8');
+            const swapAmt = parseFixed('77.8', 18);
 
             const sor = new SOR(provider, chainId, null, pools);
 
@@ -581,7 +601,7 @@ describe(`Tests for MetaStable Pools.`, () => {
                 tokenIn,
                 tokenOut,
                 swapType,
-                swapAmt.times(tokenInPriceRate)
+                swapAmt.mul(tokenInPriceRate).div(ONE)
             );
 
             expect(swapInfoStable.tokenAddresses).to.deep.eq(
@@ -595,7 +615,8 @@ describe(`Tests for MetaStable Pools.`, () => {
             );
             expect(swapInfoStable.returnAmountConsideringFees.toString()).eq(
                 swapInfo.returnAmountConsideringFees
-                    .times(tokenOutPriceRate)
+                    .mul(tokenOutPriceRate)
+                    .div(ONE)
                     .toString()
             );
             expect(swapInfoStable.swaps.length).eq(swapInfo.swaps.length);
@@ -609,8 +630,9 @@ describe(`Tests for MetaStable Pools.`, () => {
                 );
                 expect(swapStable.userData).eq(swapInfo.swaps[i].userData);
                 expect(swapStable.amount).eq(
-                    bnum(swapInfo.swaps[i].amount)
-                        .times(tokenInPriceRate)
+                    BigNumber.from(swapInfo.swaps[i].amount)
+                        .mul(tokenInPriceRate)
+                        .div(ONE)
                         .toString()
                 );
             });

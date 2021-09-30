@@ -10,13 +10,13 @@ require('dotenv').config();
 import { expect, assert } from 'chai';
 import { JsonRpcProvider } from '@ethersproject/providers';
 import { SOR, SwapInfo, SwapTypes } from '../src';
-import { bnum } from '../src/utils/bignumber';
 import { calcRelativeDiffBn } from './lib/testHelpers';
 import { PoolFilter, SubgraphPoolBase } from '../src/types';
 
 import testTrades from './testData/elementPools/testTrades.json';
+import { parseFixed } from '@ethersproject/bignumber';
 
-const gasPrice = bnum('30000000000');
+const gasPrice = parseFixed('30', 9);
 const maxPools = 4;
 const chainId = 1;
 const provider = new JsonRpcProvider(
@@ -97,12 +97,9 @@ describe(`Tests against Element generated test trade file.`, () => {
                 trade.input.token_out === 'base'
                     ? '0x000000000000000000000000000000000000000b'
                     : '0x0000000000000000000000000000000000000001';
-            const swapAmt = bnum(trade.input.amount_in);
+            const swapAmt = parseFixed(trade.input.amount_in.toString(), 18);
 
             const sor = new SOR(provider, chainId, null, poolsFromFile);
-            // Both tokens use 18 decimals
-            sor.swapCostCalculator.setTokenDecimals(tokenIn, 18);
-            sor.swapCostCalculator.setTokenDecimals(tokenOut, 18);
 
             const fetchSuccess = await sor.fetchPools([], false);
             expect(fetchSuccess).to.be.true;
@@ -120,8 +117,9 @@ describe(`Tests against Element generated test trade file.`, () => {
                 }
             );
 
-            const amountNormalised = bnum(trade.output.amount_out).times(
-                bnum(10 ** 18)
+            const amountNormalised = parseFixed(
+                trade.output.amount_out.toString(),
+                18
             );
 
             const relDiffBn = calcRelativeDiffBn(
@@ -131,7 +129,7 @@ describe(`Tests against Element generated test trade file.`, () => {
 
             expect(swapInfo.returnAmount.gt(0)).to.be.true;
             const errorDelta = 10 ** -6;
-            assert.isAtMost(relDiffBn.toNumber(), errorDelta);
+            assert.isAtMost(relDiffBn, errorDelta);
         });
     });
 });

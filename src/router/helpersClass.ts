@@ -1,4 +1,10 @@
-import { BigNumber, ZERO, INFINITY } from '../utils/bignumber';
+import {
+    BigNumber as OldBigNumber,
+    ZERO,
+    INFINITY,
+    scale,
+    bnum,
+} from '../utils/bignumber';
 import { getOutputAmountSwap } from '../pools';
 import { INFINITESIMAL } from '../config';
 import {
@@ -9,6 +15,7 @@ import {
     PoolPairBase,
     PoolTypes,
 } from '../types';
+import { BigNumber, formatFixed, parseFixed } from '@ethersproject/bignumber';
 
 export function getHighestLimitAmountsForPaths(
     paths: NewPath[],
@@ -29,14 +36,20 @@ export function getEffectivePriceSwapForPath(
     pools: PoolDictionary,
     path: NewPath,
     swapType: SwapTypes,
-    amount: BigNumber
-): BigNumber {
+    amount: OldBigNumber,
+    inputDecimals: number
+): OldBigNumber {
     if (amount.lt(INFINITESIMAL)) {
         // Return spot price as code below would be 0/0 = undefined
         // or small_amount/0 or 0/small_amount which would cause bugs
         return getSpotPriceAfterSwapForPath(path, swapType, amount);
     }
-    const outputAmountSwap = getOutputAmountSwapForPath(path, swapType, amount);
+    const outputAmountSwap = getOutputAmountSwapForPath(
+        path,
+        swapType,
+        amount,
+        inputDecimals
+    );
     if (swapType === SwapTypes.SwapExactIn) {
         return amount.div(outputAmountSwap); // amountIn/AmountOut
     } else {
@@ -47,13 +60,14 @@ export function getEffectivePriceSwapForPath(
 export function getOutputAmountSwapForPath(
     path: NewPath,
     swapType: SwapTypes,
-    amount: BigNumber
-): BigNumber {
+    amount: OldBigNumber,
+    inputDecimals: number
+): OldBigNumber {
     const pools = path.pools;
 
     // First of all check if the amount is above limit, if so, return 0 for
     // 'swapExactIn' or Inf for swapExactOut
-    if (amount.gt(path.limitAmount)) {
+    if (amount.gt(bnum(formatFixed(path.limitAmount, inputDecimals)))) {
         if (swapType === SwapTypes.SwapExactIn) {
             return ZERO;
         } else {
@@ -106,8 +120,8 @@ export function getOutputAmountSwapForPath(
 export function getSpotPriceAfterSwapForPath(
     path: NewPath,
     swapType: SwapTypes,
-    amount: BigNumber
-): BigNumber {
+    amount: OldBigNumber
+): OldBigNumber {
     const pools = path.pools;
     const poolPairData = path.poolPairData;
     if (poolPairData.length == 1) {
@@ -169,8 +183,8 @@ export function getSpotPriceAfterSwap(
     pool: PoolBase,
     poolPairData: PoolPairBase,
     swapType: SwapTypes,
-    amount: BigNumber
-): BigNumber {
+    amount: OldBigNumber
+): OldBigNumber {
     // TODO: check if necessary to check if amount > limitAmount
     if (swapType === SwapTypes.SwapExactIn) {
         if (poolPairData.balanceIn.isZero()) {
@@ -180,7 +194,12 @@ export function getSpotPriceAfterSwap(
         if (poolPairData.balanceOut.isZero()) {
             return ZERO;
         }
-        if (amount.gte(poolPairData.balanceOut)) return INFINITY;
+        if (
+            scale(amount, poolPairData.decimalsOut).gte(
+                poolPairData.balanceOut.toString()
+            )
+        )
+            return INFINITY;
     }
     if (swapType === SwapTypes.SwapExactIn) {
         return pool._spotPriceAfterSwapExactTokenInForTokenOut(
@@ -199,8 +218,8 @@ export function getSpotPriceAfterSwap(
 export function getDerivativeSpotPriceAfterSwapForPath(
     path: NewPath,
     swapType: SwapTypes,
-    amount: BigNumber
-): BigNumber {
+    amount: OldBigNumber
+): OldBigNumber {
     const poolPairData = path.poolPairData;
     if (poolPairData.length == 1) {
         return getDerivativeSpotPriceAfterSwap(
@@ -304,8 +323,8 @@ export function getDerivativeSpotPriceAfterSwap(
     pool: PoolBase,
     poolPairData: PoolPairBase,
     swapType: SwapTypes,
-    amount: BigNumber
-): BigNumber {
+    amount: OldBigNumber
+): OldBigNumber {
     // TODO: check if necessary to check if amount > limitAmount
     if (swapType === SwapTypes.SwapExactIn) {
         if (poolPairData.balanceIn.isZero()) {
@@ -315,7 +334,12 @@ export function getDerivativeSpotPriceAfterSwap(
         if (poolPairData.balanceOut.isZero()) {
             return ZERO;
         }
-        if (amount.gte(poolPairData.balanceOut)) return INFINITY;
+        if (
+            scale(amount, poolPairData.decimalsOut).gte(
+                poolPairData.balanceOut.toString()
+            )
+        )
+            return INFINITY;
     }
     if (swapType === SwapTypes.SwapExactIn) {
         return pool._derivativeSpotPriceAfterSwapExactTokenInForTokenOut(
@@ -337,11 +361,11 @@ export function EVMgetOutputAmountSwap(
     pool: PoolBase,
     poolPairData: PoolPairBase,
     swapType: SwapTypes,
-    amount: BigNumber
-): BigNumber {
+    amount: OldBigNumber
+): OldBigNumber {
     const { balanceIn, balanceOut, tokenIn, tokenOut } = poolPairData;
 
-    let returnAmount: BigNumber;
+    let returnAmount: OldBigNumber;
 
     if (swapType === SwapTypes.SwapExactIn) {
         if (poolPairData.balanceIn.isZero()) {
@@ -351,7 +375,12 @@ export function EVMgetOutputAmountSwap(
         if (poolPairData.balanceOut.isZero()) {
             return ZERO;
         }
-        if (amount.gte(poolPairData.balanceOut)) return INFINITY;
+        if (
+            scale(amount, poolPairData.decimalsOut).gte(
+                poolPairData.balanceOut.toString()
+            )
+        )
+            return INFINITY;
     }
     if (swapType === SwapTypes.SwapExactIn) {
         // TODO we will be able to remove pooltype check once Element EVM maths is available
@@ -402,8 +431,24 @@ export function EVMgetOutputAmountSwap(
         }
     }
     // Update balances of tokenIn and tokenOut
-    pool.updateTokenBalanceForPool(tokenIn, balanceIn.plus(returnAmount));
-    pool.updateTokenBalanceForPool(tokenOut, balanceOut.minus(amount));
+    pool.updateTokenBalanceForPool(
+        tokenIn,
+        balanceIn.add(
+            parseFixed(
+                returnAmount.dp(poolPairData.decimalsIn).toString(),
+                poolPairData.decimalsIn
+            )
+        )
+    );
+    pool.updateTokenBalanceForPool(
+        tokenOut,
+        balanceOut.sub(
+            parseFixed(
+                amount.dp(poolPairData.decimalsOut).toString(),
+                poolPairData.decimalsOut
+            )
+        )
+    );
 
     return returnAmount;
 }

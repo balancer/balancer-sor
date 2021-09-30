@@ -1,4 +1,5 @@
-import { BigNumber } from './utils/bignumber';
+import { BigNumber } from '@ethersproject/bignumber';
+import { BigNumber as OldBigNumber } from './utils/bignumber';
 
 export type NoNullableField<T> = {
     [P in keyof T]: NonNullable<T[P]>;
@@ -105,7 +106,7 @@ export interface SwapInfo {
     returnAmountConsideringFees: BigNumber;
     tokenIn: string;
     tokenOut: string;
-    marketSp: BigNumber;
+    marketSp: OldBigNumber;
 }
 
 export interface PoolDictionary {
@@ -122,7 +123,7 @@ export interface NewPath {
     poolPairData: PoolPairBase[];
     limitAmount: BigNumber;
     pools: PoolBase[];
-    filterEffectivePrice?: BigNumber; // TODO: This is just used for filtering, maybe there is a better way to filter?
+    filterEffectivePrice?: OldBigNumber; // TODO: This is just used for filtering, maybe there is a better way to filter?
 }
 
 export enum PoolFilter {
@@ -140,38 +141,38 @@ export interface PoolBase {
     address: string;
     tokensList: string[];
     parsePoolPairData: (tokenIn: string, tokenOut: string) => PoolPairBase;
-    getNormalizedLiquidity: (poolPairData: PoolPairBase) => BigNumber;
+    getNormalizedLiquidity: (poolPairData: PoolPairBase) => OldBigNumber;
     getLimitAmountSwap: (
         poolPairData: PoolPairBase,
         swapType: SwapTypes
-    ) => BigNumber;
+    ) => OldBigNumber;
     updateTokenBalanceForPool: (token: string, newBalance: BigNumber) => void;
     _exactTokenInForTokenOut: (
         poolPairData: PoolPairBase,
-        amount: BigNumber,
+        amount: OldBigNumber,
         exact: boolean
-    ) => BigNumber;
+    ) => OldBigNumber;
     _tokenInForExactTokenOut: (
         poolPairData: PoolPairBase,
-        amount: BigNumber,
+        amount: OldBigNumber,
         exact: boolean
-    ) => BigNumber;
+    ) => OldBigNumber;
     _spotPriceAfterSwapExactTokenInForTokenOut: (
         poolPairData: PoolPairBase,
-        amount: BigNumber
-    ) => BigNumber;
+        amount: OldBigNumber
+    ) => OldBigNumber;
     _spotPriceAfterSwapTokenInForExactTokenOut: (
         poolPairData: PoolPairBase,
-        amount: BigNumber
-    ) => BigNumber;
+        amount: OldBigNumber
+    ) => OldBigNumber;
     _derivativeSpotPriceAfterSwapExactTokenInForTokenOut: (
         poolPairData: PoolPairBase,
-        amount: BigNumber
-    ) => BigNumber;
+        amount: OldBigNumber
+    ) => OldBigNumber;
     _derivativeSpotPriceAfterSwapTokenInForExactTokenOut: (
         poolPairData: PoolPairBase,
-        amount: BigNumber
-    ) => BigNumber;
+        amount: OldBigNumber
+    ) => OldBigNumber;
 }
 
 export interface WeightedPool extends PoolBase {
