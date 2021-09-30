@@ -1,12 +1,17 @@
 // Example showing SOR with Vault batchSwap and Subgraph pool data, run using: $ TS_NODE_PROJECT='tsconfig.testing.json' ts-node ./test/testScripts/swapExample.ts
 require('dotenv').config();
-import { BigNumber, BigNumberish, parseFixed } from '@ethersproject/bignumber';
+import {
+    BigNumber,
+    BigNumberish,
+    formatFixed,
+    parseFixed,
+} from '@ethersproject/bignumber';
 // import { BigNumber } from 'bignumber.js';
 import { JsonRpcProvider } from '@ethersproject/providers';
 import { Wallet } from '@ethersproject/wallet';
 import { Contract } from '@ethersproject/contracts';
 import { AddressZero, MaxUint256 } from '@ethersproject/constants';
-import { SOR, SwapInfo, SwapTypes, scale, bnum } from '../../src';
+import { SOR, SwapInfo, SwapTypes } from '../../src';
 import vaultArtifact from '../../src/abi/Vault.json';
 import relayerAbi from '../abi/BatchRelayer.json';
 import erc20abi from '../abi/ERC20.json';
@@ -233,33 +238,24 @@ async function getSwap(
 
     const amtInScaled =
         swapType === SwapTypes.SwapExactIn
-            ? scale(bnum(swapAmount.toString()), -tokenIn.decimals).toString()
-            : scale(
-                  bnum(swapInfo.returnAmount.toString()),
-                  -tokenIn.decimals
-              ).toString();
+            ? formatFixed(swapAmount, tokenIn.decimals)
+            : formatFixed(swapInfo.returnAmount, tokenIn.decimals);
     const amtOutScaled =
         swapType === SwapTypes.SwapExactIn
-            ? scale(
-                  bnum(swapInfo.returnAmount.toString()),
-                  -tokenOut.decimals
-              ).toString()
-            : scale(bnum(swapAmount.toString()), -tokenOut.decimals).toString();
+            ? formatFixed(swapInfo.returnAmount, tokenOut.decimals)
+            : formatFixed(swapAmount, tokenOut.decimals);
 
     const returnDecimals =
         swapType === SwapTypes.SwapExactIn
             ? tokenOut.decimals
             : tokenIn.decimals;
 
-    const returnWithFees = scale(
-        bnum(swapInfo.returnAmountConsideringFees.toString()),
-        -returnDecimals
-    ).toString();
+    const returnWithFees = formatFixed(
+        swapInfo.returnAmountConsideringFees,
+        returnDecimals
+    );
 
-    const costToSwapScaled = scale(
-        bnum(cost.toString()),
-        -returnDecimals
-    ).toString();
+    const costToSwapScaled = formatFixed(cost, returnDecimals);
 
     const swapTypeStr =
         swapType === SwapTypes.SwapExactIn ? 'SwapExactIn' : 'SwapExactOut';
