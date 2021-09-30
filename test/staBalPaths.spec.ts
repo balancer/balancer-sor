@@ -111,7 +111,7 @@ describe(`staBalPaths.`, () => {
             });
 
             it('should use the most liquid tokenOut-USDC pool', () => {
-                const [poolsOfInterest] = itCreatesCorrectPath(
+                const [, , poolsAll] = itCreatesCorrectPath(
                     tokenIn,
                     tokenOut,
                     cloneDeep(staBalPools.pools),
@@ -124,7 +124,7 @@ describe(`staBalPaths.`, () => {
                     USDCCONNECTINGPOOL[chainId].usdc,
                     tokenOut,
                     SwapPairType.HopOut,
-                    poolsOfInterest
+                    poolsAll
                 );
 
                 expect(mostLiquidPool).to.eq('balPool');
@@ -202,7 +202,7 @@ describe(`staBalPaths.`, () => {
             });
 
             it('should use the most liquid tokenIn-USDC pool', () => {
-                const [poolsOfInterest] = itCreatesCorrectPath(
+                const [, , poolsAll] = itCreatesCorrectPath(
                     tokenIn,
                     tokenOut,
                     cloneDeep(staBalPools.pools),
@@ -215,7 +215,7 @@ describe(`staBalPaths.`, () => {
                     tokenIn,
                     USDCCONNECTINGPOOL[chainId].usdc,
                     SwapPairType.HopIn,
-                    poolsOfInterest
+                    poolsAll
                 );
 
                 expect(mostLiquidPool).to.eq('balPool');
