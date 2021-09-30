@@ -2,6 +2,7 @@
 import { expect } from 'chai';
 import { BigNumber, formatFixed } from '@ethersproject/bignumber';
 import { calculateTotalSwapCost, SwapCostCalculator } from '../src/swapCost';
+import { DAI, MKR, USDC, WETH } from './lib/constants';
 
 describe('calculateTotalSwapCost', () => {
     it('should return correct total swap cost', async () => {
@@ -36,10 +37,6 @@ describe('calculateTotalSwapCost', () => {
 });
 
 describe('Test SwapCostCalculator', () => {
-    const DAI = '0x6B175474E89094C44Da98b954EedeAC495271d0F';
-    const WETH = '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2';
-    const USDC = '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48';
-
     describe('convertGasCostToToken', () => {
         it("Should return 0 if CoinGecko doesn't recognise token", async () => {
             const gasPriceWei = BigNumber.from('30000000000');
@@ -87,7 +84,6 @@ describe('Test SwapCostCalculator', () => {
         it('Example of full call with MKR & 30GWEI Gas Price', async () => {
             const gasPriceWei = BigNumber.from('30000000000');
             const swapGas = BigNumber.from('100000');
-            const MKR = '0x9f8F72aA9304c8B593d555F12eF6589cC3A579A2';
 
             const cost = await new SwapCostCalculator(1).convertGasCostToToken(
                 MKR,
