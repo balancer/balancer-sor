@@ -29,7 +29,7 @@ export const optimizeSwapAmounts = (
     paths: NewPath[],
     swapType: SwapTypes,
     totalSwapAmount: OldBigNumber,
-    initialSwapAmounts: OldBigNumber[],
+    initialSwapAmounts: BigNumber[],
     highestLimitAmounts: OldBigNumber[],
     inputDecimals: number,
     outputDecimals: number,
@@ -44,7 +44,9 @@ export const optimizeSwapAmounts = (
         swapType === SwapTypes.SwapExactIn ? INFINITY.times(-1) : INFINITY;
     let bestSwapAmounts: OldBigNumber[] = [];
     let bestPaths: NewPath[] = [];
-    let swapAmounts = initialSwapAmounts;
+    let swapAmounts = initialSwapAmounts.map((amount) =>
+        bnum(formatFixed(amount, inputDecimals))
+    );
     for (let b = initialNumPaths; b <= paths.length; b++) {
         if (b != initialNumPaths) {
             // We already had a previous iteration and are adding another pool this new iteration
