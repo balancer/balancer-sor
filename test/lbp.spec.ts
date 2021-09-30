@@ -3,9 +3,9 @@ import { expect } from 'chai';
 import { JsonRpcProvider } from '@ethersproject/providers';
 import { SOR } from '../src';
 import { SwapInfo, SwapTypes, SubgraphPoolBase } from '../src/types';
-import { BigNumber, bnum } from '../src/utils/bignumber';
+import { parseFixed } from '@ethersproject/bignumber';
 
-const gasPrice = bnum('30000000000');
+const gasPrice = parseFixed('30', 9);
 const maxPools = 4;
 const chainId = 1;
 const provider = new JsonRpcProvider(
@@ -36,7 +36,7 @@ describe(`Tests for LBP Pools.`, () => {
             const tokenIn = DAI;
             const tokenOut = USDC;
             const swapType = SwapTypes.SwapExactIn;
-            const swapAmt: BigNumber = bnum('1');
+            const swapAmt = parseFixed('1', 18);
 
             const sor = new SOR(provider, chainId, null, pools);
 
@@ -66,7 +66,7 @@ describe(`Tests for LBP Pools.`, () => {
             const tokenIn = DAI;
             const tokenOut = USDC;
             const swapType = SwapTypes.SwapExactIn;
-            const swapAmt: BigNumber = bnum('1');
+            const swapAmt = parseFixed('1', 18);
 
             const sor = new SOR(provider, chainId, null, pools);
 

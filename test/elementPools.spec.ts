@@ -10,13 +10,13 @@ import {
     SubgraphPoolBase,
 } from '../src/types';
 import { bnum } from '../src/utils/bignumber';
-import { BigNumber } from '../src/utils/bignumber';
 import {
     ElementPool,
     ElementPoolPairData,
 } from '../src/pools/elementPool/elementPool';
+import { parseFixed } from '@ethersproject/bignumber';
 
-const gasPrice = bnum('30000000000');
+const gasPrice = parseFixed('30', 9);
 const maxPools = 4;
 const chainId = 1;
 const provider = new JsonRpcProvider(
@@ -43,12 +43,18 @@ describe(`Tests for Element Pools.`, () => {
             poolType: PoolTypes.Element,
             tokenIn: pool.tokens[0].address,
             tokenOut: pool.tokens[1].address,
-            balanceIn: bnum(pool.tokens[0].balance),
-            balanceOut: bnum(pool.tokens[1].balance),
-            swapFee: bnum(pool.swapFee),
+            balanceIn: parseFixed(
+                pool.tokens[0].balance,
+                pool.tokens[0].decimals
+            ),
+            balanceOut: parseFixed(
+                pool.tokens[1].balance,
+                pool.tokens[1].decimals
+            ),
+            swapFee: parseFixed(pool.swapFee, 18),
             decimalsIn: Number(pool.tokens[0].decimals),
             decimalsOut: Number(pool.tokens[1].decimals),
-            totalShares: bnum(pool.totalShares),
+            totalShares: parseFixed(pool.totalShares, 18),
             expiryTime: pool.expiryTime as number,
             unitSeconds: pool.unitSeconds as number,
             principalToken: pool.principalToken as string,
@@ -81,12 +87,18 @@ describe(`Tests for Element Pools.`, () => {
             poolType: PoolTypes.Element,
             tokenIn: pool.tokens[0].address,
             tokenOut: pool.tokens[1].address,
-            balanceIn: bnum(pool.tokens[0].balance),
-            balanceOut: bnum(pool.tokens[1].balance),
-            swapFee: bnum(pool.swapFee),
+            balanceIn: parseFixed(
+                pool.tokens[0].balance,
+                pool.tokens[0].decimals
+            ),
+            balanceOut: parseFixed(
+                pool.tokens[1].balance,
+                pool.tokens[1].decimals
+            ),
+            swapFee: parseFixed(pool.swapFee, 18),
             decimalsIn: Number(pool.tokens[0].decimals),
             decimalsOut: Number(pool.tokens[1].decimals),
-            totalShares: bnum(pool.totalShares),
+            totalShares: parseFixed(pool.totalShares, 18),
             expiryTime: pool.expiryTime as number,
             unitSeconds: pool.unitSeconds as number,
             principalToken: pool.principalToken as string,
@@ -119,12 +131,18 @@ describe(`Tests for Element Pools.`, () => {
             poolType: PoolTypes.Element,
             tokenIn: pool.tokens[0].address,
             tokenOut: pool.tokens[1].address,
-            balanceIn: bnum(pool.tokens[0].balance),
-            balanceOut: bnum(pool.tokens[1].balance),
-            swapFee: bnum(pool.swapFee),
+            balanceIn: parseFixed(
+                pool.tokens[0].balance,
+                pool.tokens[0].decimals
+            ),
+            balanceOut: parseFixed(
+                pool.tokens[1].balance,
+                pool.tokens[1].decimals
+            ),
+            swapFee: parseFixed(pool.swapFee, 18),
             decimalsIn: Number(pool.tokens[0].decimals),
             decimalsOut: Number(pool.tokens[1].decimals),
-            totalShares: bnum(pool.totalShares),
+            totalShares: parseFixed(pool.totalShares, 18),
             expiryTime: pool.expiryTime as number,
             unitSeconds: pool.unitSeconds as number,
             principalToken: pool.principalToken as string,
@@ -146,7 +164,7 @@ describe(`Tests for Element Pools.`, () => {
         const tokenIn = '0x0000000000000000000000000000000000000001';
         const tokenOut = '0x000000000000000000000000000000000000000b';
         const swapType = SwapTypes.SwapExactIn;
-        const swapAmt: BigNumber = bnum('0.1');
+        const swapAmt = parseFixed('0.1', 18);
 
         const sor = new SOR(provider, chainId, null, pools);
 
@@ -180,7 +198,7 @@ describe(`Tests for Element Pools.`, () => {
         const tokenIn = '0x0000000000000000000000000000000000000001';
         const tokenOut = '0x000000000000000000000000000000000000000b';
         const swapType = SwapTypes.SwapExactIn;
-        const swapAmt: BigNumber = bnum('0.1');
+        const swapAmt = parseFixed('0.1', 18);
 
         const sor = new SOR(provider, chainId, null, pools);
 
@@ -214,7 +232,7 @@ describe(`Tests for Element Pools.`, () => {
         const tokenIn = '0x0000000000000000000000000000000000000001';
         const tokenOut = '0x000000000000000000000000000000000000000b';
         const swapType = SwapTypes.SwapExactOut;
-        const swapAmt: BigNumber = bnum('777');
+        const swapAmt = parseFixed('777', 18);
 
         const sor = new SOR(provider, chainId, null, pools);
 
@@ -248,7 +266,7 @@ describe(`Tests for Element Pools.`, () => {
         const tokenIn = '0x0000000000000000000000000000000000000001';
         const tokenOut = '0x000000000000000000000000000000000000000b';
         const swapType = SwapTypes.SwapExactOut;
-        const swapAmt: BigNumber = bnum('777');
+        const swapAmt = parseFixed('777', 18);
 
         const sor = new SOR(provider, chainId, null, pools);
 

@@ -20,6 +20,7 @@
             "principalToken": null,
             "swapEnabled": true,
             "swapFee": "0.0005",
+            "swapEnabled": true,
             "tokens": [
                 {
                     "address": "0x6b175474e89094c44da98b954eedeac495271d0f",
@@ -65,6 +66,7 @@
             "principalToken": null,
             "swapEnabled": true,
             "swapFee": "0.0033",
+            "swapEnabled": true,
             "tokens": [
                 {
                     "address": "0x6b175474e89094c44da98b954eedeac495271d0f",
@@ -101,6 +103,7 @@
             "principalToken": null,
             "swapEnabled": true,
             "swapFee": "0.0001",
+            "swapEnabled": true,
             "tokens": [
                 {
                     "address": "0x7f39c581f595b53c5cb19bd0b3f8da6c935e2ca0",

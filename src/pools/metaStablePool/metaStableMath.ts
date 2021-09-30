@@ -1,5 +1,11 @@
-import { BigNumber } from '../../utils/bignumber';
-import { bnum, ZERO, ONE } from '../../utils/bignumber';
+import { BigNumber } from '@ethersproject/bignumber';
+import { WeiPerEther as EONE } from '@ethersproject/constants';
+import {
+    BigNumber as OldBigNumber,
+    bnum,
+    ZERO,
+    ONE,
+} from '../../utils/bignumber';
 import { MetaStablePoolPairData } from './metaStablePool';
 // All functions are adapted from the solidity ones to be found on:
 // https://github.com/balancer-labs/balancer-core-v2/blob/master/contracts/pools/stable/StableMath.sol
@@ -16,8 +22,8 @@ import { MetaStablePoolPairData } from './metaStablePool';
     **********************************************************************************************/
 export function _invariant(
     amp: BigNumber, // amp
-    balances: BigNumber[] // balances
-): BigNumber {
+    balances: OldBigNumber[] // balances
+): OldBigNumber {
     let sum = ZERO;
     const totalCoins = balances.length;
     for (let i = 0; i < totalCoins; i++) {
@@ -28,7 +34,7 @@ export function _invariant(
     }
     let prevInv = ZERO;
     let inv = sum;
-    const ampTimesNpowN = amp.times(totalCoins ** totalCoins); // A*n^n
+    const ampTimesNpowN = bnum(amp.toString()).times(totalCoins ** totalCoins); // A*n^n
 
     for (let i = 0; i < 255; i++) {
         let P_D = bnum(totalCoins).times(balances[0]);
@@ -63,10 +69,10 @@ export function _invariant(
 // // This function has to be zero if the invariant D was calculated correctly
 // // It was only used for double checking that the invariant was correct
 // export function _invariantValueFunction(
-//     amp: BigNumber, // amp
-//     balances: BigNumber[], // balances
-//     D: BigNumber
-// ): BigNumber {
+//     amp: OldBigNumber, // amp
+//     balances: OldBigNumber[], // balances
+//     D: OldBigNumber
+// ): OldBigNumber {
 //     let invariantValueFunction;
 //     let prod = ONE;
 //     let sum = ZERO;
@@ -102,9 +108,9 @@ export function _invariant(
     // P = product of final balances but y                                                       //
     **********************************************************************************************/
 export function _exactTokenInForTokenOut(
-    amount: BigNumber,
+    amount: OldBigNumber,
     poolPairData: MetaStablePoolPairData
-): BigNumber {
+): OldBigNumber {
     // The formula below returns some dust (due to rounding errors) but when
     // we input zero the output should be zero
     if (amount.isZero()) return amount;
@@ -112,7 +118,9 @@ export function _exactTokenInForTokenOut(
         poolPairData;
     const balances = [...allBalances];
     let tokenAmountIn = amount;
-    tokenAmountIn = tokenAmountIn.times(ONE.minus(swapFee));
+    tokenAmountIn = tokenAmountIn
+        .times(EONE.sub(swapFee).toString())
+        .div(EONE.toString());
 
     //Invariant is rounded up
     const inv = _invariant(amp, balances);
@@ -158,9 +166,9 @@ export function _exactTokenInForTokenOut(
     // P = product of final balances but x                                                       //
     **********************************************************************************************/
 export function _tokenInForExactTokenOut(
-    amount: BigNumber,
+    amount: OldBigNumber,
     poolPairData: MetaStablePoolPairData
-): BigNumber {
+): OldBigNumber {
     // The formula below returns some dust (due to rounding errors) but when
     // we input zero the output should be zero
     if (amount.isZero()) return amount;
@@ -194,17 +202,20 @@ export function _tokenInForExactTokenOut(
     const y = _solveAnalyticalBalance(sum, inv, amp, n_pow_n, p);
 
     //Result is rounded up
-    return y.minus(balances[tokenIndexIn]).div(ONE.minus(swapFee));
+    return y
+        .minus(balances[tokenIndexIn])
+        .multipliedBy(EONE.toString())
+        .div(EONE.sub(swapFee).toString());
 }
 
 //This function calculates the balance of a given token (tokenIndex)
 // given all the other balances and the invariant
 function _getTokenBalanceGivenInvariantAndAllOtherBalances(
     amp: BigNumber,
-    balances: BigNumber[],
-    inv: BigNumber,
+    balances: OldBigNumber[],
+    inv: OldBigNumber,
     tokenIndex: number
-): BigNumber {
+): OldBigNumber {
     let p = inv;
     let sum = ZERO;
     const totalCoins = balances.length;
@@ -228,16 +239,18 @@ function _getTokenBalanceGivenInvariantAndAllOtherBalances(
 
 //This function calcuates the analytical solution to find the balance required
 export function _solveAnalyticalBalance(
-    sum: BigNumber,
-    inv: BigNumber,
+    sum: OldBigNumber,
+    inv: OldBigNumber,
     amp: BigNumber,
-    n_pow_n: BigNumber,
-    p: BigNumber
-): BigNumber {
+    n_pow_n: OldBigNumber,
+    p: OldBigNumber
+): OldBigNumber {
+    const oldBN_amp = bnum(amp.toString());
+
     //Round up p
-    p = p.times(inv).div(amp.times(n_pow_n).times(n_pow_n));
+    p = p.times(inv).div(oldBN_amp.times(n_pow_n).times(n_pow_n));
     //Round down b
-    const b = sum.plus(inv.div(amp.times(n_pow_n)));
+    const b = sum.plus(inv.div(oldBN_amp.times(n_pow_n)));
     //Round up c
     // let c = inv >= b
     //     ? inv.minus(b).plus(Math.sqrtUp(inv.minus(b).times(inv.minus(b)).plus(p.times(4))))
@@ -265,12 +278,12 @@ export function _solveAnalyticalBalance(
 
 export function _poolDerivatives(
     amp: BigNumber,
-    balances: BigNumber[],
+    balances: OldBigNumber[],
     tokenIndexIn: number,
     tokenIndexOut: number,
     is_first_derivative: boolean,
     wrt_out: boolean
-): BigNumber {
+): OldBigNumber {
     const totalCoins = balances.length;
     const D = _invariant(amp, balances);
     let S = ZERO;
@@ -281,7 +294,7 @@ export function _poolDerivatives(
     }
     const x = balances[tokenIndexIn];
     const y = balances[tokenIndexOut];
-    const a = amp.times(totalCoins ** totalCoins); // = ampTimesNpowN
+    const a = bnum(amp.toString()).times(totalCoins ** totalCoins); // = ampTimesNpowN
     const b = S.minus(D).times(a).plus(D);
     const twoaxy = bnum(2).times(a).times(x).times(y);
     const partial_x = twoaxy.plus(a.times(y).times(y)).plus(b.times(y));
@@ -315,14 +328,14 @@ export function _poolDerivatives(
 // PairType = 'token->token'
 // SwapType = 'swapExactIn'
 export function _spotPriceAfterSwapExactTokenInForTokenOut(
-    amount: BigNumber,
+    amount: OldBigNumber,
     poolPairData: MetaStablePoolPairData
-): BigNumber {
+): OldBigNumber {
     const { amp, allBalances, tokenIndexIn, tokenIndexOut, swapFee } =
         poolPairData;
     const balances = [...allBalances];
     balances[tokenIndexIn] = balances[tokenIndexIn].plus(
-        amount.times(ONE.minus(swapFee))
+        amount.times(EONE.sub(swapFee).toString()).div(EONE.toString())
     );
     balances[tokenIndexOut] = balances[tokenIndexOut].minus(
         _exactTokenInForTokenOut(amount, poolPairData)
@@ -335,22 +348,22 @@ export function _spotPriceAfterSwapExactTokenInForTokenOut(
         true,
         false
     );
-    ans = ONE.div(ans.times(ONE.minus(swapFee)));
+    ans = ONE.div(ans.times(EONE.sub(swapFee).toString()).div(EONE.toString()));
     return ans;
 }
 
 // PairType = 'token->token'
 // SwapType = 'swapExactOut'
 export function _spotPriceAfterSwapTokenInForExactTokenOut(
-    amount: BigNumber,
+    amount: OldBigNumber,
     poolPairData: MetaStablePoolPairData
-): BigNumber {
+): OldBigNumber {
     const { amp, allBalances, tokenIndexIn, tokenIndexOut, swapFee } =
         poolPairData;
     const balances = [...allBalances];
-    const _in = _tokenInForExactTokenOut(amount, poolPairData).times(
-        ONE.minus(swapFee)
-    );
+    const _in = _tokenInForExactTokenOut(amount, poolPairData)
+        .times(EONE.sub(swapFee).toString())
+        .div(EONE.toString());
     balances[tokenIndexIn] = balances[tokenIndexIn].plus(_in);
     balances[tokenIndexOut] = balances[tokenIndexOut].minus(amount);
     let ans = _poolDerivatives(
@@ -361,15 +374,15 @@ export function _spotPriceAfterSwapTokenInForExactTokenOut(
         true,
         true
     );
-    ans = ONE.div(ans.times(ONE.minus(swapFee)));
+    ans = ONE.div(ans.times(EONE.sub(swapFee).toString()).div(EONE.toString()));
     return ans;
 }
 
 function _feeFactor(
-    balances: BigNumber[],
+    balances: OldBigNumber[],
     tokenIndex: number,
-    swapFee: BigNumber
-): BigNumber {
+    swapFee: OldBigNumber
+): OldBigNumber {
     const sumBalances = balances.reduce((a, b) => a.plus(b));
     const currentWeight = balances[tokenIndex].div(sumBalances);
     const tokenBalancePercentageExcess = ONE.minus(currentWeight);
@@ -383,14 +396,14 @@ function _feeFactor(
 // PairType = 'token->token'
 // SwapType = 'swapExactIn'
 export function _derivativeSpotPriceAfterSwapExactTokenInForTokenOut(
-    amount: BigNumber,
+    amount: OldBigNumber,
     poolPairData: MetaStablePoolPairData
-): BigNumber {
+): OldBigNumber {
     const { amp, allBalances, tokenIndexIn, tokenIndexOut, swapFee } =
         poolPairData;
     const balances = [...allBalances];
     balances[tokenIndexIn] = balances[tokenIndexIn].plus(
-        amount.times(ONE.minus(swapFee))
+        amount.times(EONE.sub(swapFee).toString()).div(EONE.toString())
     );
     balances[tokenIndexOut] = balances[tokenIndexOut].minus(
         _exactTokenInForTokenOut(amount, poolPairData)
@@ -408,18 +421,18 @@ export function _derivativeSpotPriceAfterSwapExactTokenInForTokenOut(
 // PairType = 'token->token'
 // SwapType = 'swapExactOut'
 export function _derivativeSpotPriceAfterSwapTokenInForExactTokenOut(
-    amount: BigNumber,
+    amount: OldBigNumber,
     poolPairData: MetaStablePoolPairData
-): BigNumber {
+): OldBigNumber {
     const { amp, allBalances, tokenIndexIn, tokenIndexOut, swapFee } =
         poolPairData;
     const balances = [...allBalances];
-    const _in = _tokenInForExactTokenOut(amount, poolPairData).times(
-        ONE.minus(swapFee)
-    );
+    const _in = _tokenInForExactTokenOut(amount, poolPairData)
+        .times(EONE.sub(swapFee).toString())
+        .div(EONE.toString());
     balances[tokenIndexIn] = balances[tokenIndexIn].plus(_in);
     balances[tokenIndexOut] = balances[tokenIndexOut].minus(amount);
-    const feeFactor = ONE.minus(swapFee);
+    const feeFactor = EONE.div(swapFee).toString();
     return _poolDerivatives(
         amp,
         balances,

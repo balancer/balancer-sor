@@ -14,6 +14,7 @@
             "id": "0xebfed10e11dc08fcda1af1fda146945e8710f22e00000000000000000000007f",
             "address": "0xebfed10e11dc08fcda1af1fda146945e8710f22e",
             "swapFee": "0.0004",
+            "swapEnabled": true,
             "amp": "10",
             "tokens": [
                 {

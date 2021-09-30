@@ -1,3 +1,4 @@
+import { Zero } from '@ethersproject/constants';
 import { ZERO } from './utils/bignumber';
 import { SwapInfo } from './types';
 
@@ -54,12 +55,12 @@ export const STABALADDR: { [chainId: number]: string } = {
 export const EMPTY_SWAPINFO: SwapInfo = {
     tokenAddresses: [],
     swaps: [],
-    swapAmount: ZERO,
-    swapAmountForSwaps: ZERO,
+    swapAmount: Zero,
+    swapAmountForSwaps: Zero,
     tokenIn: '',
     tokenOut: '',
-    returnAmount: ZERO,
-    returnAmountConsideringFees: ZERO,
-    returnAmountFromSwaps: ZERO,
+    returnAmount: Zero,
+    returnAmountConsideringFees: Zero,
+    returnAmountFromSwaps: Zero,
     marketSp: ZERO,
 };

@@ -9,10 +9,10 @@ import {
     PoolFilter,
     PoolPairBase,
 } from '../types';
-import { StablePool } from '../pools/stablePool/stablePool';
 import { ZERO } from '../utils/bignumber';
 import { USDCCONNECTINGPOOL, STABALADDR } from '../constants';
 import { parseNewPool } from '../pools';
+import { Zero } from '@ethersproject/constants';
 
 export const filterPoolsByType = (
     pools: SubgraphPoolBase[],
@@ -229,7 +229,7 @@ function createDirectPath(
     const path: NewPath = {
         id: pool.id,
         swaps: [swap],
-        limitAmount: ZERO,
+        limitAmount: Zero,
         poolPairData: [poolPairData],
         pools: [pool],
     };
@@ -267,7 +267,7 @@ export function createMultihopPath(
     const path: NewPath = {
         id: firstPool.id + secondPool.id,
         swaps: [swap1, swap2],
-        limitAmount: ZERO,
+        limitAmount: Zero,
         poolPairData: [poolPairDataFirst, poolPairDataSecond],
         pools: [firstPool, secondPool],
     };
@@ -323,7 +323,7 @@ function composePaths(paths: NewPath[]): NewPath {
         id: id,
         swaps: swaps,
         poolPairData: poolPairData,
-        limitAmount: ZERO,
+        limitAmount: Zero,
         pools: pools,
     };
     return path;

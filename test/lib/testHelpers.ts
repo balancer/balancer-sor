@@ -1,5 +1,6 @@
+import { BigNumber } from '@ethersproject/bignumber';
 import { JsonRpcProvider } from '@ethersproject/providers';
-import { BigNumber } from 'bignumber.js';
+import { BigNumber as OldBigNumber } from 'bignumber.js';
 import cloneDeep from 'lodash.clonedeep';
 import * as sorv2 from '../../src';
 import {
@@ -14,12 +15,13 @@ import {
     PoolTypes,
     NewPath,
 } from '../../src/types';
-import { bnum, BONE } from '../../src/utils/bignumber';
+import { bnum } from '../../src/utils/bignumber';
 import * as fs from 'fs';
 import { assert, expect } from 'chai';
 // Mainnet reference tokens with addresses & decimals
 import WeightedTokens from '../testData/eligibleTokens.json';
 import StableTokens from '../testData/stableTokens.json';
+import { WeiPerEther as ONE, Zero } from '@ethersproject/constants';
 
 export interface TradeInfo {
     SwapType: string;
@@ -97,8 +99,8 @@ export function loadTestFile(File: string): TestData {
     const fileJson = JSON.parse(fileString);
     if (!fileJson.tradeInfo) return fileJson;
 
-    fileJson.tradeInfo.GasPrice = new BigNumber(fileJson.tradeInfo.GasPrice);
-    fileJson.tradeInfo.SwapAmount = new BigNumber(
+    fileJson.tradeInfo.GasPrice = BigNumber.from(fileJson.tradeInfo.GasPrice);
+    fileJson.tradeInfo.SwapAmount = BigNumber.from(
         fileJson.tradeInfo.SwapAmount.split('.')[0] // This is getting rid of decimals that shouldn't be there.
     );
     return fileJson;
@@ -185,16 +187,18 @@ function testReturnAmountAgainstV1(
     v1SwapData: Result,
     swapInfo: SwapInfo
 ): void {
+    if (swapInfo.returnAmount.eq(v1SwapData.returnAmount.toString())) return;
+
     const relDiffBn = calcRelativeDiffBn(
         swapInfo.returnAmount,
-        v1SwapData.returnAmount
+        BigNumber.from(v1SwapData.returnAmount.toString())
     );
     const errorDelta = 10 ** -6;
 
     if (swapType === SwapTypes.SwapExactIn) {
         // Current result should be better or equal to V1 result or within errorDelta
-        if (!swapInfo.returnAmount.gte(v1SwapData.returnAmount)) {
-            assert.isAtMost(relDiffBn.toNumber(), errorDelta);
+        if (!swapInfo.returnAmount.gte(v1SwapData.returnAmount.toString())) {
+            assert.isAtMost(relDiffBn, errorDelta);
             console.log(
                 `!!!!!! V2 < V1 but error delta ok. (${relDiffBn.toString()})`
             );
@@ -212,8 +216,8 @@ function testReturnAmountAgainstV1(
         }
 
         // Current result should be less than or equal to V1 result or within errorDelta
-        if (!swapInfo.returnAmount.lte(v1SwapData.returnAmount)) {
-            assert.isAtMost(relDiffBn.toNumber(), errorDelta);
+        if (!swapInfo.returnAmount.lte(v1SwapData.returnAmount.toString())) {
+            assert.isAtMost(relDiffBn, errorDelta);
             console.log(
                 `!!!!!! V2 > V1 but error delta ok. (${relDiffBn.toString()})`
             );
@@ -282,7 +286,7 @@ function testSwapAmountsForDecimals(
 function getTotalSwapAmount(
     swapType: SwapTypes,
     swapInfo: SwapInfo
-): BigNumber {
+): OldBigNumber {
     let total = bnum(0);
     const inIndex = swapInfo.tokenAddresses.indexOf(swapInfo.tokenIn);
     const outIndex = swapInfo.tokenAddresses.indexOf(swapInfo.tokenOut);
@@ -301,8 +305,11 @@ function getTotalSwapAmount(
 export function calcRelativeDiffBn(
     expected: BigNumber,
     actual: BigNumber
-): BigNumber {
-    return expected.minus(actual).div(expected).abs();
+): number {
+    return (
+        expected.sub(actual).mul(1000000).div(expected).abs().toNumber() /
+        1000000
+    );
 }
 
 export function countPoolSwapPairTypes(
@@ -341,27 +348,22 @@ export async function getFullSwap(
     returnAmountDecimals: number,
     maxPools: number,
     swapType: string | SwapTypes,
-    swapAmountNormalised: BigNumber,
+    swapAmount: BigNumber,
     costOutputToken: BigNumber,
     gasPrice: BigNumber,
     provider: JsonRpcProvider,
-    swapGas: BigNumber = new BigNumber('100000')
+    swapGas: BigNumber = BigNumber.from('100000')
 ): Promise<SwapInfo> {
     const sor = new sorv2.SOR(provider, 1, null, cloneDeep(pools));
 
     let swapTypeCorrect = SwapTypes.SwapExactIn;
 
-    sor.swapCostCalculator.setTokenDecimals(
-        swapType === 'swapExactIn' ? tokenOut : tokenIn,
-        returnAmountDecimals
-    );
     // We're wanting to set the value of costOutputToken so we calculate
     // a native asset price which will give the desired value
-    const effectiveNativeAssetPrice = costOutputToken
-        .div(gasPrice)
-        .div(swapGas)
-        .div(BONE)
-        .toString();
+    const effectiveNativeAssetPrice =
+        gasPrice.gt(0) && swapGas.gt(0)
+            ? costOutputToken.div(gasPrice).div(swapGas).div(ONE).toString()
+            : '0';
     if (swapType === 'swapExactIn')
         await sor.swapCostCalculator.setNativeAssetPriceInToken(
             tokenOut,
@@ -382,7 +384,7 @@ export async function getFullSwap(
         tokenIn,
         tokenOut,
         swapTypeCorrect,
-        swapAmountNormalised,
+        swapAmount,
         { gasPrice, maxPools, timestamp: 0, poolTypeFilter: PoolFilter.All }
     );
 
@@ -394,7 +396,7 @@ export function parseV1Result(v1ResultParsed: ResultParsed): Result {
         return {
             title: 'N/A',
             timeData: { fullSwap: 0 },
-            returnAmount: bnum(0),
+            returnAmount: Zero,
             swaps: [] as SwapV2[],
         };
     }
@@ -402,7 +404,7 @@ export function parseV1Result(v1ResultParsed: ResultParsed): Result {
     return {
         title: v1ResultParsed.title,
         timeData: v1ResultParsed.timeData,
-        returnAmount: bnum(v1ResultParsed.returnAmount),
+        returnAmount: BigNumber.from(v1ResultParsed.returnAmount),
         swaps: v1ResultParsed.swaps,
     };
 }
