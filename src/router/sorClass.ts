@@ -6,7 +6,6 @@ import {
     ZERO,
     ONE,
     INFINITY,
-    scale,
 } from '../utils/bignumber';
 import { SwapTypes, NewPath, PoolDictionary, Swap } from '../types';
 import {
@@ -138,9 +137,9 @@ export const optimizeSwapAmounts = (
         // and MINIMIZED for 'swapExactOut'
         // This is because for the case of 'swapExactOut', totalReturn means the
         // amount of tokenIn needed to buy totalSwapAmount of tokenOut
-        const costReturnTokenHuman = scale(
-            bnum(costReturnToken.toString()),
-            -outputDecimals
+        const costReturnTokenHuman = formatFixed(
+            costReturnToken,
+            outputDecimals
         );
         let improvementCondition = false;
         let totalReturnConsideringFees = ZERO;
