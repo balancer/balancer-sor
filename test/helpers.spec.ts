@@ -1,19 +1,18 @@
 import { assert, expect } from 'chai';
+import { parseFixed } from '@ethersproject/bignumber';
 import { WeiPerEther as ONE, Zero } from '@ethersproject/constants';
 import { AddressZero } from '@ethersproject/constants';
 import { JsonRpcProvider } from '@ethersproject/providers';
 
 import { formatSwaps } from '../src/formatSwaps';
 import { getWrappedInfo, setWrappedInfo } from '../src/wrapInfo';
-import { bnum } from '../src';
 import { WETHADDR } from '../src/constants';
 import { Lido } from '../src/pools/lido';
-import { BigNumber as OldBigNumber } from '../src/utils/bignumber';
 import { Swap, SwapInfo, SwapTypes, SwapV2 } from '../src/types';
+import { bnum } from '../src/utils/bignumber';
 import testSwaps from './testData/swapsForFormatting.json';
-import { parseFixed } from '@ethersproject/bignumber';
 
-const marketSp: OldBigNumber = new OldBigNumber(7);
+const marketSp = bnum(7);
 
 const provider = new JsonRpcProvider(
     `https://mainnet.infura.io/v3/${process.env.INFURA}`
@@ -491,7 +490,7 @@ describe(`Tests for Helpers.`, () => {
         const tokenOut = '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48';
         const swapType = SwapTypes.SwapExactOut;
 
-        const swapsV1Format: Swap[][] = [];
+        const swapsV1Format: Swap[][] = testSwaps.directhopUSDCOut;
 
         const swapInfo: SwapInfo = formatSwaps(
             swapsV1Format,
@@ -504,7 +503,7 @@ describe(`Tests for Helpers.`, () => {
             marketSp
         );
 
-        assert.equal(swapInfo.marketSp, marketSp);
+        expect(swapInfo.marketSp.toString()).to.be.eq(marketSp.toString());
     });
 
     it(`Should format directhop swapExactIn for Weth In, no Eth Wrap`, () => {
