@@ -69,12 +69,12 @@ const formatSequence = (
                 .toString();
         }
 
-        const inIndex = tokenAddresses.indexOf(swap.tokenIn);
-        const outIndex = tokenAddresses.indexOf(swap.tokenOut);
+        const assetInIndex = tokenAddresses.indexOf(swap.tokenIn);
+        const assetOutIndex = tokenAddresses.indexOf(swap.tokenOut);
         return {
             poolId: swap.pool,
-            assetInIndex: inIndex,
-            assetOutIndex: outIndex,
+            assetInIndex,
+            assetOutIndex,
             amount: amountScaled,
             userData: '0x',
         };
