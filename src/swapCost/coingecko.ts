@@ -5,6 +5,7 @@ const getPlatformId = (chainId: string | number): string => {
         '1': 'ethereum',
         '42': 'ethereum',
         '137': 'polygon-pos',
+        '42161': 'arbitrum-one',
     };
 
     return mapping[chainId.toString()] || 'ethereum';
@@ -17,6 +18,7 @@ const getNativeAssetId = (chainId: string | number): string => {
         // CoinGecko does not provide prices in terms of MATIC
         // TODO: convert through ETH as intermediary
         '137': '',
+        '42161': 'eth',
     };
 
     return mapping[chainId.toString()] || 'eth';
