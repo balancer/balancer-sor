@@ -31,10 +31,6 @@ export const VAULTADDR: { [chainId: number]: string } = {
 export const USDCCONNECTINGPOOL: {
     [chainId: number]: { id: string; usdc: string };
 } = {
-    137: {
-        id: 'TODO',
-        usdc: 'TODO',
-    },
     99: {
         id: 'usdcConnecting',
         usdc: '0x2791bca1f2de4661ed88a30c99a7a9449aa84174',
@@ -44,11 +40,6 @@ export const USDCCONNECTINGPOOL: {
 // Currently only used for Polygon
 // Address of staBAL3 pool
 export const STABALADDR: { [chainId: number]: string } = {
-    1: 'N/A',
-    5: 'N/A',
-    42: 'N/A',
-    137: 'TODO',
-    42161: 'N/A',
     99: '0x0000000000000000000000000000000000000001',
 };
 
