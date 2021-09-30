@@ -692,6 +692,7 @@ describe('Tests pools filtering and path processing', () => {
             SwapTypes.SwapExactIn,
             parseFixed('1', 6),
             6,
+            18,
             4,
             Zero
         );
@@ -799,6 +800,7 @@ describe('Tests pools filtering and path processing', () => {
             SwapTypes.SwapExactOut,
             parseFixed('1', 18),
             18,
+            6,
             4,
             Zero
         );

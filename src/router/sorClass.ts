@@ -33,6 +33,7 @@ export const optimizeSwapAmounts = (
     initialSwapAmounts: OldBigNumber[],
     highestLimitAmounts: OldBigNumber[],
     inputDecimals: number,
+    outputDecimals: number,
     initialNumPaths: number,
     maxPools: number,
     costReturnToken: BigNumber
@@ -136,11 +137,13 @@ export const optimizeSwapAmounts = (
         // and MINIMIZED for 'swapExactOut'
         // This is because for the case of 'swapExactOut', totalReturn means the
         // amount of tokenIn needed to buy totalSwapAmount of tokenOut
+        const costReturnTokenHuman = formatFixed(
+            costReturnToken,
+            outputDecimals
+        );
         let improvementCondition = false;
         let totalReturnConsideringFees = ZERO;
-        const gasFees = bnum(totalNumberOfPools).times(
-            costReturnToken.toString()
-        );
+        const gasFees = bnum(totalNumberOfPools).times(costReturnTokenHuman);
         if (swapType === SwapTypes.SwapExactIn) {
             totalReturnConsideringFees = totalReturn.minus(gasFees);
             improvementCondition = totalReturnConsideringFees.isGreaterThan(
