@@ -21,8 +21,6 @@ import testPools from './testData/filterTestPools.json';
 import { Zero } from '@ethersproject/constants';
 import { parseFixed, BigNumber } from '@ethersproject/bignumber';
 
-import { BigNumber as OldBigNumber } from '../src/utils/bignumber';
-
 const WETH = '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2'; // WETH lower case
 const DAI = '0x6B175474E89094C44Da98b954EedeAC495271d0F'.toLowerCase();
 const USDC = '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48'.toLowerCase();
@@ -250,8 +248,9 @@ describe('Tests pools filtering and path processing', () => {
         const maxPools = 4;
         const tokenIn = DAI;
         const tokenOut = USDC;
-        const weighted: any = testPools.weightedOnly;
-        const allPools: any = testPools.stableOnly.concat(weighted);
+        const weighted: SubgraphPoolBase[] = testPools.weightedOnly;
+        const stable: SubgraphPoolBase[] = testPools.stableOnly;
+        const allPools = stable.concat(...weighted);
 
         const [poolsOfInterestDictionary, hopTokens] = filter(
             allPools,
@@ -579,7 +578,7 @@ describe('Tests pools filtering and path processing', () => {
         assert.equal(pathsSorted[0].limitAmount.toString(), '300000000');
         assert.equal(pathsSorted[1].limitAmount.toString(), '300000000');
 
-        const [swaps, total, marketSp] = getBestPaths(
+        const [swaps, total] = getBestPaths(
             cloneDeep(poolsOfInterestDictionary), // Need to keep original pools for cache
             pathsSorted,
             SwapTypes.SwapExactIn,
@@ -697,8 +696,7 @@ describe('Tests pools filtering and path processing', () => {
             '228989976869699350000'
         );
 
-        let swaps: any, total: OldBigNumber, marketSp: OldBigNumber;
-        [swaps, total, marketSp] = getBestPaths(
+        const [swaps, total] = getBestPaths(
             cloneDeep(poolsOfInterestDictionary), // Need to keep original pools for cache
             pathsSorted,
             SwapTypes.SwapExactOut,
@@ -787,7 +785,7 @@ function filter(
     );
 
     let pathsSorted: NewPath[] = [];
-    let maxAmt = BigNumber.from('0');
+    let maxAmt = Zero;
     [pathsSorted, maxAmt] = calculatePathLimits(cloneDeep(pathData), swapType);
 
     return [
