@@ -11,6 +11,7 @@ export const getBestPaths = (
     swapType: SwapTypes,
     totalSwapAmount: BigNumber,
     inputDecimals: number,
+    outputDecimals: number,
     maxPools: number,
     costReturnToken: BigNumber
 ): [Swap[][], OldBigNumber, OldBigNumber, OldBigNumber] => {
@@ -63,6 +64,7 @@ export const getBestPaths = (
                 bnum(formatFixed(amount, inputDecimals))
             ),
             inputDecimals,
+            outputDecimals,
             initialNumPaths,
             maxPools,
             costReturnToken

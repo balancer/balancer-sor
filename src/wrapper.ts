@@ -250,6 +250,7 @@ export class SOR {
             swapType,
             swapAmount,
             inputDecimals,
+            outputDecimals,
             maxPools,
             costOutputToken
         );

@@ -244,7 +244,23 @@ async function getSwap(
                   bnum(swapInfo.returnAmount.toString()),
                   -tokenOut.decimals
               ).toString()
-            : swapAmount.toString();
+            : scale(bnum(swapAmount.toString()), -tokenOut.decimals).toString();
+
+    const returnDecimals =
+        swapType === SwapTypes.SwapExactIn
+            ? tokenOut.decimals
+            : tokenIn.decimals;
+
+    const returnWithFees = scale(
+        bnum(swapInfo.returnAmountConsideringFees.toString()),
+        -returnDecimals
+    ).toString();
+
+    const costToSwapScaled = scale(
+        bnum(cost.toString()),
+        -returnDecimals
+    ).toString();
+
     const swapTypeStr =
         swapType === SwapTypes.SwapExactIn ? 'SwapExactIn' : 'SwapExactOut';
     console.log(swapTypeStr);
@@ -252,7 +268,8 @@ async function getSwap(
     console.log(
         `Token Out: ${tokenOut.symbol}, Amt: ${amtOutScaled.toString()}`
     );
-    console.log(`Cost to swap: ${cost.toString()}`);
+    console.log(`Cost to swap: ${costToSwapScaled.toString()}`);
+    console.log(`Return Considering Fees: ${returnWithFees.toString()}`);
     console.log(`Swaps:`);
     console.log(swapInfo.swaps);
     console.log(swapInfo.tokenAddresses);
@@ -564,10 +581,10 @@ async function simpleSwap() {
     // const poolsSource = require('../testData/testPools/gusdBug.json');
     // Update pools list with most recent onchain balances
     const queryOnChain = true;
-    const tokenIn = ADDRESSES[networkId].USDC;
-    const tokenOut = ADDRESSES[networkId].DAI;
+    const tokenIn = ADDRESSES[networkId].DAI;
+    const tokenOut = ADDRESSES[networkId].USDC;
     const swapType = SwapTypes.SwapExactIn;
-    const swapAmount = parseFixed('0.07', 6); // In normalized format, i.e. 1USDC = 1
+    const swapAmount = parseFixed('0.07', 18); // In normalized format, i.e. 1USDC = 1
     const executeTrade = false;
 
     const provider = new JsonRpcProvider(PROVIDER_URLS[networkId]);
