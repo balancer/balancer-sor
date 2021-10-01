@@ -20,10 +20,7 @@ import subgraphPoolsLarge from './testData/testPools/subgraphPoolsLarge.json';
 import testPools from './testData/filterTestPools.json';
 import { Zero } from '@ethersproject/constants';
 import { parseFixed, BigNumber } from '@ethersproject/bignumber';
-
-const WETH = '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2'; // WETH lower case
-const DAI = '0x6B175474E89094C44Da98b954EedeAC495271d0F'.toLowerCase();
-const USDC = '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48'.toLowerCase();
+import { DAI, USDC, WETH } from './lib/constants';
 
 describe('Tests pools filtering and path processing', () => {
     it('weighted test pools check', () => {

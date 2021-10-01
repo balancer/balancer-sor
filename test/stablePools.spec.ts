@@ -11,6 +11,7 @@ import {
 } from '../src/pools/stablePool/stablePool';
 import { BPTForTokensZeroPriceImpact } from '../src/frontendHelpers/stableHelpers';
 import { parseFixed } from '@ethersproject/bignumber';
+import { BAL, DAI, USDC, USDT } from './lib/constants';
 
 const gasPrice = parseFixed('30', 9);
 const maxPools = 4;
@@ -18,13 +19,6 @@ const chainId = 1;
 const provider = new JsonRpcProvider(
     `https://mainnet.infura.io/v3/${process.env.INFURA}`
 );
-
-const BAL = '0xba100000625a3754423978a60c9317c58a424e3d';
-const USDC = '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48';
-const DAI = '0x6b175474e89094c44da98b954eedeac495271d0f';
-const USDT = '0xdac17f958d2ee523a2206206994597c13d831ec7';
-const BPT = '0xebfed10e11dc08fcda1af1fda146945e8710f22e';
-const RANDOM = '0x1456688345527be1f37e9e627da0837d6f08c925';
 
 // npx mocha -r ts-node/register test/stablePools.spec.ts
 describe(`Tests for Stable Pools.`, () => {

@@ -7,6 +7,7 @@ import {
     scale,
     ZERO,
 } from '../../utils/bignumber';
+import { isSameAddress } from '../../utils';
 import {
     PoolBase,
     PoolTypes,
@@ -175,7 +176,7 @@ export class StablePool implements PoolBase {
             this.totalShares = newBalance;
         } else {
             // token is underlying in the pool
-            const T = this.tokens.find((t) => t.address === token);
+            const T = this.tokens.find((t) => isSameAddress(t.address, token));
             if (!T) throw Error('Pool does not contain this token');
             T.balance = formatFixed(newBalance, T.decimals);
         }
