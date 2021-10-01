@@ -153,7 +153,7 @@ const optimizePathDistribution = (
     initialSwapAmounts: OldBigNumber[],
     inputDecimals: number
 ): { paths: NewPath[]; swapAmounts: OldBigNumber[] } => {
-    let [selectedPaths, exceedingAmounts, pathIds] = getBestPathIds(
+    let [selectedPaths, exceedingAmounts] = getBestPathIds(
         allPaths,
         swapType,
         initialSwapAmounts,
@@ -179,7 +179,9 @@ const optimizePathDistribution = (
 
     // We now loop to iterateSwapAmounts until we converge.
     const historyOfSortedPathIds: string[] = [];
-    let sortedPathIdsJSON = JSON.stringify([...pathIds].sort());
+    let sortedPathIdsJSON = JSON.stringify(
+        newSelectedPaths.map(({ id }) => id).sort()
+    );
 
     while (!historyOfSortedPathIds.includes(sortedPathIdsJSON)) {
         // Local minima can result in infinite loops
@@ -194,16 +196,17 @@ const optimizePathDistribution = (
             swapAmounts,
             exceedingAmounts
         );
-        [newSelectedPaths, exceedingAmounts, pathIds] = getBestPathIds(
+        [newSelectedPaths, exceedingAmounts] = getBestPathIds(
             allPaths,
             swapType,
             swapAmounts,
             inputDecimals
         );
 
-        if (pathIds.length === 0) break;
+        if (newSelectedPaths.length === 0) break;
 
-        sortedPathIdsJSON = JSON.stringify([...pathIds].sort());
+        const pathIds = newSelectedPaths.map(({ id }) => id).sort();
+        sortedPathIdsJSON = JSON.stringify(pathIds);
     }
 
     return {
@@ -385,8 +388,7 @@ function getBestPathIds(
     swapType: SwapTypes,
     swapAmounts: OldBigNumber[],
     inputDecimals: number
-): [NewPath[], OldBigNumber[], string[]] {
-    const bestPathIds: string[] = [];
+): [NewPath[], OldBigNumber[]] {
     const selectedPaths: NewPath[] = [];
     const selectedPathExceedingAmounts: OldBigNumber[] = [];
     const paths = cloneDeep(originalPaths); // Deep copy to avoid changing the original path data
@@ -438,7 +440,7 @@ function getBestPathIds(
         if (bestPathIndex === -1) {
             return [[], [], []];
         }
-        bestPathIds.push(paths[bestPathIndex].id);
+
         selectedPaths.push(paths[bestPathIndex]);
         selectedPathExceedingAmounts.push(
             swapAmount.minus(
@@ -450,7 +452,7 @@ function getBestPathIds(
         paths.splice(bestPathIndex, 1); // Remove path from list
     });
 
-    return [selectedPaths, selectedPathExceedingAmounts, bestPathIds];
+    return [selectedPaths, selectedPathExceedingAmounts];
 }
 
 // This functions finds the swapAmounts such that all the paths that have viable swapAmounts (i.e.
