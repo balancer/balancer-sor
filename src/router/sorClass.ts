@@ -438,7 +438,7 @@ function getBestPathIds(
         });
 
         if (bestPathIndex === -1) {
-            return [[], [], []];
+            return [[], []];
         }
 
         selectedPaths.push(paths[bestPathIndex]);
