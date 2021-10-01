@@ -28,9 +28,9 @@ const maxPrice: string = MAX_UINT;
 export const optimizeSwapAmounts = (
     paths: NewPath[],
     swapType: SwapTypes,
-    totalSwapAmount: OldBigNumber,
+    totalSwapAmount: BigNumber,
     initialSwapAmounts: BigNumber[],
-    highestLimitAmounts: OldBigNumber[],
+    highestLimitAmounts: BigNumber[],
     inputDecimals: number,
     outputDecimals: number,
     initialNumPaths: number,
@@ -58,15 +58,19 @@ export const optimizeSwapAmounts = (
             // 20% of the totalSwapAmount for this new swapAmount added). However, we need to make sure
             // that this value is not higher then the bth limit of the paths available otherwise there
             // won't be any possible path to process this swapAmount:
+            const humanTotalSwapAmount = formatFixed(
+                totalSwapAmount,
+                inputDecimals
+            );
             const newSwapAmount = OldBigNumber.min.apply(null, [
-                totalSwapAmount.times(bnum(1 / b)),
-                highestLimitAmounts[b - 1],
+                bnum(humanTotalSwapAmount).times(bnum(1 / b)),
+                formatFixed(highestLimitAmounts[b - 1], inputDecimals),
             ]);
             // We need then to multiply all current
             // swapAmounts by 1-newSwapAmount/totalSwapAmount.
             swapAmounts.forEach((swapAmount, i) => {
-                swapAmounts[i] = swapAmounts[i].times(
-                    ONE.minus(newSwapAmount.div(totalSwapAmount))
+                swapAmounts[i] = swapAmount.times(
+                    ONE.minus(newSwapAmount.div(humanTotalSwapAmount))
                 );
             });
             swapAmounts.push(newSwapAmount);
@@ -94,7 +98,7 @@ export const optimizeSwapAmounts = (
             [swapAmounts, exceedingAmounts] = iterateSwapAmounts(
                 selectedPaths,
                 swapType,
-                totalSwapAmount,
+                bnum(formatFixed(totalSwapAmount, inputDecimals)),
                 swapAmounts,
                 exceedingAmounts
             );
