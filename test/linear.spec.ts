@@ -7,6 +7,8 @@ import {
     SwapTypes,
     PoolDictionaryByMain,
     PoolPairBase,
+    SubgraphPoolBase,
+    PoolTypes,
 } from '../src/types';
 import {
     filterPoolsOfInterest,
@@ -24,6 +26,12 @@ import { MetaStablePool } from '../src/pools/metaStablePool/metaStablePool';
 import { bnum } from '../src/index';
 import { getBestPaths } from '../src/router';
 import path from 'path';
+import {
+    LinearPool,
+    LinearPoolPairData,
+} from '../src/pools/linearPool/linearPool';
+import { _BPTInForExactTokenOut } from '../src/pools/linearPool/linearMath';
+import { LinearMath } from '@georgeroman/balancer-v2-pools';
 
 const WETH = {
     symbol: 'WETH',
@@ -248,6 +256,88 @@ describe('linear pool tests', () => {
         });
     });
 
+    context('limit amounts', () => {
+        const ALMOST_ONE = 0.99;
+        const MAX_RATIO = 10;
+        const poolsFromFile: {
+            pools: SubgraphPoolBase[];
+        } = require('./testData/linearPools/singleLinear.json');
+        const pool = poolsFromFile.pools[0];
+        const linearPool = LinearPool.fromPool(pool);
+        const wrappedIndex: number = linearPool.wrappedIndex;
+
+        const mainAddress = pool.tokens[0].address;
+        const mainDecimals = pool.tokens[0].decimals;
+        const mainBalance = bnum(pool.tokens[0].balance);
+        const bptAddress = pool.tokens[2].address;
+        const bptDecimals = pool.tokens[2].decimals;
+        const bptBalance = bnum(pool.tokens[2].balance);
+
+        const poolPairData: LinearPoolPairData = {
+            id: pool.id,
+            address: pool.address,
+            poolType: PoolTypes.Linear,
+            tokenIn: mainAddress,
+            tokenOut: bptAddress,
+            balanceIn: mainBalance,
+            balanceOut: bptBalance,
+            swapFee: bnum(pool.swapFee),
+            decimalsIn: mainDecimals,
+            decimalsOut: bptDecimals,
+            pairType: 0,
+            wrappedBalance: bnum(pool.tokens[1].balance),
+            wrappedDecimals: pool.tokens[wrappedIndex].decimals,
+            rate: bnum(pool.tokens[wrappedIndex].priceRate),
+            target1: bnum(linearPool.target1),
+            target2: bnum(linearPool.target2),
+        };
+
+        it('tests getLimitAmountSwap token to BPT', async () => {
+            let swapType = SwapTypes.SwapExactIn;
+            let limit = linearPool.getLimitAmountSwap(poolPairData, swapType);
+            assert.equal(
+                limit.toNumber(),
+                mainBalance.toNumber() * MAX_RATIO,
+                'incorrect limit amount'
+            );
+
+            swapType = SwapTypes.SwapExactOut;
+            limit = linearPool.getLimitAmountSwap(poolPairData, swapType);
+            assert.equal(
+                limit.toNumber(),
+                bptBalance.toNumber() * MAX_RATIO,
+                'incorrect limit amount'
+            );
+        });
+
+        it('tests getLimitAmountSwap BPT to token', async () => {
+            poolPairData.tokenIn = bptAddress;
+            poolPairData.decimalsIn = bptDecimals;
+            poolPairData.balanceIn = bptBalance;
+            poolPairData.tokenOut = mainAddress;
+            poolPairData.decimalsOut = mainDecimals;
+            poolPairData.balanceOut = mainBalance;
+            let swapType = SwapTypes.SwapExactOut;
+
+            let limit = linearPool.getLimitAmountSwap(poolPairData, swapType);
+            assert.equal(
+                limit.toNumber(),
+                mainBalance.toNumber() * ALMOST_ONE,
+                'incorrect limit amount'
+            );
+
+            swapType = SwapTypes.SwapExactIn;
+            limit = linearPool.getLimitAmountSwap(poolPairData, swapType);
+            assert.equal(
+                limit.toNumber(),
+                _BPTInForExactTokenOut(poolPairData.balanceOut, poolPairData)
+                    .times(ALMOST_ONE)
+                    .toNumber(),
+                'incorrect limit amount'
+            );
+        });
+    });
+
     // context('TO DO - ADD SOME TESTS FOR THESE FULL CASES??', () => {
     //     it('basic swap cases', async () => {
     //         runSOR(
@@ -436,17 +526,17 @@ function runSOR(
         bnum(0.01)
     );
     console.log('swaps: ', swaps);
-    /*
+
     const swapInfo = formatSwaps(
         swaps,
         swapType,
         swapAmount,
-        tokIn,
+        tokenIn,
         tokenOut,
         total,
         totalConsideringFees,
         marketSp
     );
-    console.log(swapInfo.swaps );
-    console.log(swapInfo.tokenAddresses );*/
+    console.log(swapInfo.swaps);
+    console.log(swapInfo.tokenAddresses);
 }

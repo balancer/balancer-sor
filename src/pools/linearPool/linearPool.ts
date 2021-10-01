@@ -67,8 +67,8 @@ export class LinearPool implements PoolBase {
     wrappedIndex: number;
     target1: BigNumber;
     target2: BigNumber;
-    MAX_IN_RATIO = bnum(0.3); // ?
-    MAX_OUT_RATIO = bnum(0.3); // ?
+    MAX_RATIO = 10;
+    ALMOST_ONE = 0.99;
 
     static fromPool(pool: SubgraphPoolBase): LinearPool {
         if (!pool.wrappedIndex)
@@ -192,18 +192,18 @@ export class LinearPool implements PoolBase {
         );
         if (swapType === SwapTypes.SwapExactIn) {
             if (linearPoolPairData.pairType === PairTypes.TokenToBpt)
-                return poolPairData.balanceIn.times(this.MAX_IN_RATIO);
+                return poolPairData.balanceIn.times(this.MAX_RATIO);
             else if (linearPoolPairData.pairType === PairTypes.BptToToken) {
                 return _BPTInForExactTokenOut(
                     poolPairData.balanceOut,
                     linearPoolPairData
-                ).times(0.99);
+                ).times(this.ALMOST_ONE);
             } else throw Error('LinearPool does not support TokenToToken');
         } else {
             if (linearPoolPairData.pairType === PairTypes.TokenToBpt) {
-                return poolPairData.balanceOut.times(this.MAX_IN_RATIO);
+                return poolPairData.balanceOut.times(this.MAX_RATIO);
             } else if (linearPoolPairData.pairType === PairTypes.BptToToken) {
-                return poolPairData.balanceOut.times(0.99);
+                return poolPairData.balanceOut.times(this.ALMOST_ONE);
             } else throw Error('LinearPool does not support TokenToToken');
         }
     }
