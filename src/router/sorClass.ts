@@ -396,12 +396,11 @@ function getBestPathIds(
         return b.minus(a).toNumber();
     });
 
-    for (let i = 0; i < sortedSwapAmounts.length; i++) {
-        const swapAmount: OldBigNumber = sortedSwapAmounts[i];
+    sortedSwapAmounts.forEach((swapAmount) => {
         // Find path that has best effective price
         let bestPathIndex = -1;
         let bestEffectivePrice = INFINITY; // Start with worst price possible
-        paths.forEach((path, j) => {
+        paths.forEach((path, i) => {
             // Do not consider this path if its limit is below swapAmount
             if (
                 bnum(formatFixed(path.limitAmount, inputDecimals)).gte(
@@ -431,7 +430,7 @@ function getBestPathIds(
                 }
                 if (effectivePrice.lte(bestEffectivePrice)) {
                     bestEffectivePrice = effectivePrice;
-                    bestPathIndex = j;
+                    bestPathIndex = i;
                 }
             }
         });
@@ -449,7 +448,8 @@ function getBestPathIds(
             )
         );
         paths.splice(bestPathIndex, 1); // Remove path from list
-    }
+    });
+
     return [selectedPaths, selectedPathExceedingAmounts, bestPathIds];
 }
 
