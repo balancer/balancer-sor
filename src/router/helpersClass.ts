@@ -9,7 +9,6 @@ import { getOutputAmountSwap } from '../pools';
 import { INFINITESIMAL } from '../config';
 import {
     NewPath,
-    PoolDictionary,
     SwapTypes,
     PoolBase,
     PoolPairBase,
@@ -33,7 +32,6 @@ export function getHighestLimitAmountsForPaths(
 }
 
 export function getEffectivePriceSwapForPath(
-    pools: PoolDictionary,
     path: NewPath,
     swapType: SwapTypes,
     amount: OldBigNumber,
