@@ -11,6 +11,7 @@ import {
     MetaStablePool,
     MetaStablePoolPairData,
 } from '../src/pools/metaStablePool/metaStablePool';
+import { BAL, USDC, WETH } from './lib/constants';
 
 const gasPrice = parseFixed('30', 9);
 const maxPools = 4;
@@ -19,12 +20,7 @@ const provider = new JsonRpcProvider(
     `https://mainnet.infura.io/v3/${process.env.INFURA}`
 );
 
-const BAL = '0xba100000625a3754423978a60c9317c58a424e3d';
-const USDC = '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48';
-// const DAI = '0x04df6e4121c27713ed22341e7c7df330f56f289b';
-// const USDT = '0xdac17f958d2ee523a2206206994597c13d831ec7';
 // const BPT = '0xebfed10e11dc08fcda1af1fda146945e8710f22e';
-const WETH = '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2';
 const stETH = '0xae7ab96520de3a18e5e111b5eaab095312d7fe84';
 const randomETH = '0x42d6622dece394b54999fbd73d108123806f6a18';
 // const PTSP = '0x5f304f6cf88dc76b414f301e05adfb5a429e8b67';

@@ -11,8 +11,7 @@ import {
     PoolFilter,
     SubgraphPoolBase,
 } from '../src/types';
-
-const WETHADDR = '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2';
+import { DAI, USDC, WETH } from './lib/constants';
 
 const provider = new JsonRpcProvider(
     `https://mainnet.infura.io/v3/${process.env.INFURA}`
@@ -30,7 +29,7 @@ describe(`Tests for wrapper class.`, () => {
 
     it(`Should return no swaps when pools not retrieved.`, async () => {
         const tokenIn = '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2';
-        const tokenOut = '0x6b175474e89094c44da98b954eedeac495271d0f';
+        const tokenOut = DAI;
         const swapType = SwapTypes.SwapExactIn;
         const swapAmt = Zero;
         const sor = new SOR(provider, chainId, poolsUrl);
@@ -51,7 +50,7 @@ describe(`Tests for wrapper class.`, () => {
         } = require('./testData/testPools/subgraphPoolsSmallWithTrade.json');
         const pools = poolsFromFile.pools;
         const tokenIn = '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2';
-        const tokenOut = '0x6b175474e89094c44da98b954eedeac495271d0f';
+        const tokenOut = DAI;
         const swapType = SwapTypes.SwapExactIn;
         const swapAmt = parseFixed('0.1', 18);
 
@@ -99,7 +98,7 @@ describe(`Tests for wrapper class.`, () => {
         const pools = poolsFromFile.pools;
 
         const tokenIn = '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2';
-        const tokenOut = '0x6b175474e89094c44da98b954eedeac495271d0f';
+        const tokenOut = DAI;
         const swapType = SwapTypes.SwapExactIn;
         const swapAmt = parseFixed('0.1', 18);
 
@@ -139,7 +138,7 @@ describe(`Tests for wrapper class.`, () => {
         const pools = poolsFromFile.pools;
 
         const tokenIn = '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2';
-        const tokenOut = '0x6b175474e89094c44da98b954eedeac495271d0f';
+        const tokenOut = DAI;
         const swapType = SwapTypes.SwapExactIn;
         const swapAmt = parseFixed('0.1', 18);
 
@@ -175,7 +174,7 @@ describe(`Tests for wrapper class.`, () => {
         const pools = poolsFromFile.pools;
 
         const tokenIn = AddressZero;
-        const tokenOut = '0x6b175474e89094c44da98b954eedeac495271d0f';
+        const tokenOut = DAI;
         const swapType = SwapTypes.SwapExactIn;
         const swapAmt = parseFixed('0.1', 18);
 
@@ -192,11 +191,7 @@ describe(`Tests for wrapper class.`, () => {
             { gasPrice, maxPools }
         );
 
-        const expectedTokenAddresses = [
-            AddressZero,
-            '0x6b175474e89094c44da98b954eedeac495271d0f',
-            '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48',
-        ];
+        const expectedTokenAddresses = [AddressZero, DAI, USDC];
 
         expect(expectedTokenAddresses).to.deep.eq(swapInfo.tokenAddresses);
         expect(swapInfo.returnAmount.gt(0)).to.be.true;
@@ -216,9 +211,9 @@ describe(`Tests for wrapper class.`, () => {
         } = require('./testData/testPools/subgraphPoolsSmallWithTrade.json');
         const pools = poolsFromFile.pools;
 
-        const tokenInWeth = WETHADDR;
+        const tokenInWeth = WETH;
         const tokenInEth = AddressZero;
-        const tokenOut = '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48';
+        const tokenOut = USDC;
         const swapType = SwapTypes.SwapExactIn;
         const swapAmt = parseFixed('0.1', 18);
 
@@ -235,11 +230,7 @@ describe(`Tests for wrapper class.`, () => {
             { gasPrice, maxPools }
         );
 
-        const expectedTokenAddressesEth = [
-            tokenInEth,
-            '0x6b175474e89094c44da98b954eedeac495271d0f',
-            tokenOut,
-        ];
+        const expectedTokenAddressesEth = [tokenInEth, DAI, tokenOut];
 
         expect(expectedTokenAddressesEth).to.deep.eq(
             swapInfoEth.tokenAddresses
@@ -256,11 +247,7 @@ describe(`Tests for wrapper class.`, () => {
             { gasPrice, maxPools }
         );
 
-        const expectedTokenAddressesWeth = [
-            tokenInWeth,
-            '0x6b175474e89094c44da98b954eedeac495271d0f',
-            tokenOut,
-        ];
+        const expectedTokenAddressesWeth = [tokenInWeth, DAI, tokenOut];
 
         // Swaps/amts, etc should be same. Token list should be different
         expect(expectedTokenAddressesWeth).to.deep.eq(swapInfo.tokenAddresses);
@@ -288,8 +275,8 @@ describe(`Tests for wrapper class.`, () => {
         } = require('./testData/testPools/subgraphPoolsSmallWithTrade.json');
         const pools = poolsFromFile.pools;
 
-        const tokenIn = '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48';
-        const tokenOutWeth = WETHADDR;
+        const tokenIn = USDC;
+        const tokenOutWeth = WETH;
         const tokenOutEth = AddressZero;
         const swapType = SwapTypes.SwapExactIn;
         const swapAmt = parseFixed('0.1', 6);
@@ -324,7 +311,7 @@ describe(`Tests for wrapper class.`, () => {
             { gasPrice, maxPools }
         );
 
-        const expectedTokenAddressesWeth = [tokenIn, WETHADDR];
+        const expectedTokenAddressesWeth = [tokenIn, WETH];
 
         // Swaps/amts, etc should be same. Token list should be different
         expect(expectedTokenAddressesWeth).to.deep.eq(swapInfo.tokenAddresses);
@@ -351,9 +338,9 @@ describe(`Tests for wrapper class.`, () => {
             pools: SubgraphPoolBase[];
         } = require('./testData/testPools/subgraphPoolsSmallWithTrade.json');
         const pools = poolsFromFile.pools;
-        const tokenInWeth = WETHADDR;
+        const tokenInWeth = WETH;
         const tokenInEth = AddressZero;
-        const tokenOut = '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48';
+        const tokenOut = USDC;
         const swapType = SwapTypes.SwapExactOut;
         const swapAmt = parseFixed('0.1', 6);
 
@@ -370,11 +357,7 @@ describe(`Tests for wrapper class.`, () => {
             { gasPrice, maxPools }
         );
 
-        const expectedTokenAddressesEth = [
-            tokenInEth,
-            '0x6b175474e89094c44da98b954eedeac495271d0f',
-            tokenOut,
-        ];
+        const expectedTokenAddressesEth = [tokenInEth, DAI, tokenOut];
 
         expect(expectedTokenAddressesEth).to.deep.eq(
             swapInfoEth.tokenAddresses
@@ -391,11 +374,7 @@ describe(`Tests for wrapper class.`, () => {
             { gasPrice, maxPools }
         );
 
-        const expectedTokenAddressesWeth = [
-            tokenInWeth,
-            '0x6b175474e89094c44da98b954eedeac495271d0f',
-            tokenOut,
-        ];
+        const expectedTokenAddressesWeth = [tokenInWeth, DAI, tokenOut];
 
         // Swaps/amts, etc should be same. Token list should be different
         expect(expectedTokenAddressesWeth).to.deep.eq(swapInfo.tokenAddresses);
@@ -418,8 +397,8 @@ describe(`Tests for wrapper class.`, () => {
             pools: SubgraphPoolBase[];
         } = require('./testData/testPools/subgraphPoolsSmallWithTrade.json');
         const pools = poolsFromFile.pools;
-        const tokenIn = '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48';
-        const tokenOutWeth = WETHADDR;
+        const tokenIn = USDC;
+        const tokenOutWeth = WETH;
         const tokenOutEth = AddressZero;
         const swapType = SwapTypes.SwapExactOut;
         const swapAmt = parseFixed('0.1', 18);
@@ -437,11 +416,7 @@ describe(`Tests for wrapper class.`, () => {
             { gasPrice, maxPools }
         );
 
-        const expectedTokenAddressesEth = [
-            tokenIn,
-            '0x6b175474e89094c44da98b954eedeac495271d0f',
-            AddressZero,
-        ];
+        const expectedTokenAddressesEth = [tokenIn, DAI, AddressZero];
 
         expect(expectedTokenAddressesEth).to.deep.eq(
             swapInfoEth.tokenAddresses
@@ -458,11 +433,7 @@ describe(`Tests for wrapper class.`, () => {
             { gasPrice, maxPools }
         );
 
-        const expectedTokenAddressesWeth = [
-            tokenIn,
-            '0x6b175474e89094c44da98b954eedeac495271d0f',
-            WETHADDR,
-        ];
+        const expectedTokenAddressesWeth = [tokenIn, DAI, WETH];
 
         // Swaps/amts, etc should be same. Token list should be different
         expect(expectedTokenAddressesWeth).to.deep.eq(swapInfo.tokenAddresses);

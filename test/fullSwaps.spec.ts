@@ -1,5 +1,5 @@
 // npx mocha -r ts-node/register test/fullSwaps.spec.ts
-import { BigNumber, formatFixed } from '@ethersproject/bignumber';
+import { BigNumber } from '@ethersproject/bignumber';
 import { JsonRpcProvider } from '@ethersproject/providers';
 import cloneDeep from 'lodash.clonedeep';
 import { assert } from 'chai';
@@ -11,13 +11,9 @@ import subgraphPoolsLarge from './testData/testPools/subgraphPoolsLarge.json';
 import testPools from './testData/filterTestPools.json';
 import { parseFixed } from '@ethersproject/bignumber';
 import { Zero } from '@ethersproject/constants';
+import { WETH, DAI, USDC, MKR, WBTC } from './lib/constants';
 
-const WETH = '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2'; // WETH lower case
-const DAI = '0x6B175474E89094C44Da98b954EedeAC495271d0F'.toLowerCase();
-const USDC = '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48'.toLowerCase();
 const ANT = '0x960b236a07cf122663c4303350609a66a7b288c0'; // ANT lower case
-const MKR = '0x9f8f72aa9304c8b593d555f12ef6589cc3a579a2'; // MKR lower case
-const WBTC = '0xe0C9275E44Ea80eF17579d33c55136b7DA269aEb'.toLowerCase();
 const MKR2 = '0xef13C0c8abcaf5767160018d268f9697aE4f5375'.toLowerCase();
 const yUSD = '0xb2fdd60ad80ca7ba89b9bab3b5336c2601c020b4';
 
