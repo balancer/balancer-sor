@@ -1,12 +1,11 @@
 import { BigNumber as OldBigNumber, bnum, ZERO } from '../utils/bignumber';
 import { getHighestLimitAmountsForPaths } from './helpersClass';
 import { formatSwaps, optimizeSwapAmounts } from './sorClass';
-import { NewPath, PoolDictionary, Swap, SwapTypes } from '../types';
+import { NewPath, Swap, SwapTypes } from '../types';
 import { BigNumber, formatFixed } from '@ethersproject/bignumber';
 import { Zero } from '@ethersproject/constants';
 
 export const getBestPaths = (
-    pools: PoolDictionary,
     paths: NewPath[],
     swapType: SwapTypes,
     totalSwapAmount: BigNumber,
@@ -53,7 +52,6 @@ export const getBestPaths = (
 
     const [bestPaths, bestSwapAmounts, bestTotalReturnConsideringFees] =
         optimizeSwapAmounts(
-            pools,
             paths,
             swapType,
             bnum(formatFixed(totalSwapAmount, inputDecimals)),

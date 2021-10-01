@@ -16,7 +16,6 @@ import {
     SwapInfo,
     SwapTypes,
     NewPath,
-    PoolDictionary,
     PoolFilter,
     Swap,
     SubgraphPoolBase,
@@ -161,14 +160,13 @@ export class SOR {
     ): Promise<SwapInfo> {
         if (pools.length === 0) return cloneDeep(EMPTY_SWAPINFO);
 
-        const { pools: poolsOfInterest, paths } =
-            this.routeProposer.getCandidatePaths(
-                tokenIn,
-                tokenOut,
-                swapType,
-                pools,
-                swapOptions
-            );
+        const paths = this.routeProposer.getCandidatePaths(
+            tokenIn,
+            tokenOut,
+            swapType,
+            pools,
+            swapOptions
+        );
 
         if (paths.length == 0) return { ...EMPTY_SWAPINFO };
 
@@ -197,7 +195,6 @@ export class SOR {
         // Returns list of swaps
         const [swaps, total, marketSp, totalConsideringFees] =
             this.getBestPaths(
-                poolsOfInterest,
                 paths,
                 swapAmount,
                 swapType,
@@ -227,7 +224,6 @@ export class SOR {
      * Find optimal routes for trade from given candidate paths
      */
     private getBestPaths(
-        pools: PoolDictionary,
         paths: NewPath[],
         swapAmount: BigNumber,
         swapType: SwapTypes,
@@ -245,7 +241,6 @@ export class SOR {
                 : [tokenOutDecimals, tokenInDecimals];
 
         const [swaps, total, marketSp, totalConsideringFees] = getBestPaths(
-            cloneDeep(pools),
             paths,
             swapType,
             swapAmount,

@@ -687,7 +687,6 @@ describe('Tests pools filtering and path processing', () => {
         assert.equal(pathsWithLimits[1].limitAmount.toString(), '300000000');
 
         const [swaps, total, marketSp] = getBestPaths(
-            cloneDeep(poolsOfInterestDictionary), // Need to keep original pools for cache
             pathsWithLimits,
             SwapTypes.SwapExactIn,
             parseFixed('1', 6),
@@ -795,7 +794,6 @@ describe('Tests pools filtering and path processing', () => {
         assert.equal(paths[1].limitAmount.toString(), '228989976869699350000');
 
         const [swaps, total, marketSp] = getBestPaths(
-            cloneDeep(poolsOfInterestDictionary), // Need to keep original pools for cache
             paths,
             SwapTypes.SwapExactOut,
             parseFixed('1', 18),
