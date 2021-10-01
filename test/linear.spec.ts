@@ -12,6 +12,7 @@ import {
     filterPoolsOfInterest,
     filterHopPools,
     getPathsUsingLinearPools,
+    parseToPoolsDict,
 } from '../src/routeProposal/filtering';
 import { calculatePathLimits } from '../src/routeProposal/pathLimits';
 import BigNumber from 'bignumber.js';
@@ -340,8 +341,10 @@ function getLinearPaths(
     pools,
     maxPools
 ): [NewPath[], PoolDictionary] {
-    const [poolsFilteredDict, , poolsAllDict] = filterPoolsOfInterest(
-        cloneDeep(pools),
+    const poolsAll = parseToPoolsDict(cloneDeep(pools), 0);
+
+    const [poolsFilteredDict] = filterPoolsOfInterest(
+        poolsAll,
         tokenIn,
         tokenOut,
         maxPools
@@ -350,12 +353,12 @@ function getLinearPaths(
     const pathsUsingLinear = getPathsUsingLinearPools(
         tokenIn,
         tokenOut,
-        poolsAllDict,
+        poolsAll,
         poolsFilteredDict,
         chainId
     );
 
-    return [pathsUsingLinear, poolsAllDict];
+    return [pathsUsingLinear, poolsAll];
 }
 
 // Gets linear and non-linear paths
@@ -366,8 +369,10 @@ function getFullPaths(
     pools,
     maxPools
 ): [NewPath[], PoolDictionary] {
-    const [poolsFilteredDict, hopTokens, poolsAllDict] = filterPoolsOfInterest(
-        cloneDeep(pools),
+    const poolsAll = parseToPoolsDict(cloneDeep(pools), 0);
+
+    const [poolsFilteredDict, hopTokens] = filterPoolsOfInterest(
+        poolsAll,
         tokenIn,
         tokenOut,
         maxPools
@@ -384,13 +389,13 @@ function getFullPaths(
     const pathsUsingLinear = getPathsUsingLinearPools(
         tokenIn,
         tokenOut,
-        poolsAllDict,
+        poolsAll,
         poolsFilteredDict,
         chainId
     );
     pathData = pathData.concat(pathsUsingLinear);
     const [paths] = calculatePathLimits(pathData, swapType);
-    return [paths, poolsAllDict];
+    return [paths, poolsAll];
 }
 
 function runSOR(

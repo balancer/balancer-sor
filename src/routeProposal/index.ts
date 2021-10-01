@@ -1,17 +1,11 @@
-import cloneDeep from 'lodash.clonedeep';
 import {
     filterPoolsOfInterest,
     filterHopPools,
     getPathsUsingLinearPools,
+    parseToPoolsDict,
 } from './filtering';
 import { calculatePathLimits } from './pathLimits';
-import {
-    SwapOptions,
-    SwapTypes,
-    NewPath,
-    PoolDictionary,
-    SubgraphPoolBase,
-} from '../types';
+import { SwapOptions, SwapTypes, NewPath, SubgraphPoolBase } from '../types';
 
 export class RouteProposer {
     cache: Record<string, { paths: NewPath[] }> = {};
@@ -41,25 +35,17 @@ export class RouteProposer {
             return cache.paths;
         }
 
-        // Some functions alter pools list directly but we want to keep original so make a copy to work from
-        const poolsList = cloneDeep(pools);
+        const poolsAllDict = parseToPoolsDict(pools, swapOptions.timestamp);
 
-        const [poolsDict, hopTokens, poolsAllDict] = filterPoolsOfInterest(
-            poolsList,
+        const [poolsDict, hopTokens] = filterPoolsOfInterest(
+            poolsAllDict,
             tokenIn,
             tokenOut,
-            swapOptions.maxPools,
-            swapOptions.timestamp
+            swapOptions.maxPools
         );
 
         let pathData: NewPath[];
-        let filteredPoolsDict: PoolDictionary;
-        [filteredPoolsDict, pathData] = filterHopPools(
-            tokenIn,
-            tokenOut,
-            hopTokens,
-            poolsDict
-        );
+        [, pathData] = filterHopPools(tokenIn, tokenOut, hopTokens, poolsDict);
 
         const pathsUsingLinear: NewPath[] = getPathsUsingLinearPools(
             tokenIn,
