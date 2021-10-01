@@ -9,6 +9,7 @@ import { DAI, WETH } from './lib/constants';
 
 const gasPrice = parseFixed('30', 9);
 const maxPools = 4;
+const chainId = 99;
 
 describe(`RouteProposer.`, () => {
     it(`should have no cached process data on creation`, () => {
@@ -32,7 +33,8 @@ describe(`RouteProposer.`, () => {
             tokenOut,
             swapType,
             pools,
-            { gasPrice, maxPools, timestamp: 0 } as SwapOptions
+            { gasPrice, maxPools, timestamp: 0 } as SwapOptions,
+            chainId
         );
 
         const cacheZero =
@@ -46,7 +48,8 @@ describe(`RouteProposer.`, () => {
             tokenOut,
             swapType,
             pools,
-            { gasPrice, maxPools, timestamp: 1 } as SwapOptions
+            { gasPrice, maxPools, timestamp: 1 } as SwapOptions,
+            chainId
         );
 
         const cacheZeroRepeat =

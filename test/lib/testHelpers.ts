@@ -12,10 +12,12 @@ import {
     SwapInfo,
     PoolFilter,
     SwapV2,
+    PoolTypes,
+    NewPath,
 } from '../../src/types';
 import { bnum } from '../../src/utils/bignumber';
 import * as fs from 'fs';
-import { assert } from 'chai';
+import { assert, expect } from 'chai';
 // Mainnet reference tokens with addresses & decimals
 import WeightedTokens from '../testData/eligibleTokens.json';
 import StableTokens from '../testData/stableTokens.json';
@@ -312,10 +314,12 @@ export function calcRelativeDiffBn(
 
 export function countPoolSwapPairTypes(
     poolsOfInterestDictionary: PoolDictionary
-): [number, number, number] {
+): [number, number, number, number, number] {
     let noDirect = 0,
         noHopIn = 0,
-        noHopOut = 0;
+        noHopOut = 0,
+        noWeighted = 0,
+        noStable = 0;
     for (const k in poolsOfInterestDictionary) {
         if (poolsOfInterestDictionary[k].swapPairType === SwapPairType.Direct)
             noDirect++;
@@ -327,9 +331,14 @@ export function countPoolSwapPairTypes(
             poolsOfInterestDictionary[k].swapPairType === SwapPairType.HopOut
         )
             noHopOut++;
+
+        if (poolsOfInterestDictionary[k].poolType === PoolTypes.Weighted)
+            noWeighted++;
+        else if (poolsOfInterestDictionary[k].poolType === PoolTypes.Stable)
+            noStable++;
     }
 
-    return [noDirect, noHopIn, noHopOut];
+    return [noDirect, noHopIn, noHopOut, noWeighted, noStable];
 }
 
 export async function getFullSwap(
@@ -398,4 +407,52 @@ export function parseV1Result(v1ResultParsed: ResultParsed): Result {
         returnAmount: BigNumber.from(v1ResultParsed.returnAmount),
         swaps: v1ResultParsed.swaps,
     };
+}
+
+/*
+Checks path for:
+- ID
+- tokenIn/Out
+- poolPairData
+- Valid swap path
+*/
+export function checkPath(
+    expectedPoolIds: string[], // IDs of pools used in path
+    pools: PoolDictionary,
+    path: NewPath,
+    tokenIn: string,
+    tokenOut: string
+) {
+    // IDS should be all IDS concatenated
+    expect(path.id).to.eq(expectedPoolIds.join(''));
+    // Lengths of pools, pairData and swaps should all be equal
+    expect(expectedPoolIds.length).to.eq(path.poolPairData.length);
+    expect(
+        path.poolPairData.length === path.swaps.length &&
+            path.swaps.length === path.pools.length
+    ).to.be.true;
+
+    let lastTokenOut = path.swaps[0].tokenIn;
+
+    // Check each part of path
+    for (let i = 0; i < expectedPoolIds.length; i++) {
+        const poolId = expectedPoolIds[i];
+        const poolInfo = pools[poolId];
+        const tokenIn = path.swaps[i].tokenIn;
+        const tokenOut = path.swaps[i].tokenOut;
+        const poolPairData = poolInfo.parsePoolPairData(tokenIn, tokenOut);
+        expect(path.pools[i]).to.deep.eq(poolInfo);
+        expect(path.poolPairData[i]).to.deep.eq(poolPairData);
+
+        expect(path.swaps[i].pool).eq(poolId);
+        // TokenIn should equal previous swaps tokenOut
+        expect(path.swaps[i].tokenIn).eq(lastTokenOut);
+        expect(path.swaps[i].tokenInDecimals).eq(poolPairData.decimalsIn);
+        expect(path.swaps[i].tokenOutDecimals).eq(poolPairData.decimalsOut);
+        lastTokenOut = tokenOut;
+    }
+
+    // TokenIn/Out should be first and last of path
+    expect(path.swaps[0].tokenIn).to.eq(tokenIn);
+    expect(path.swaps[path.swaps.length - 1].tokenOut).to.eq(tokenOut);
 }

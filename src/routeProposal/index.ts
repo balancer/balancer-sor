@@ -1,5 +1,9 @@
-import cloneDeep from 'lodash.clonedeep';
-import { filterPoolsOfInterest, filterHopPools } from './filtering';
+import {
+    filterPoolsOfInterest,
+    filterHopPools,
+    getPathsUsingStaBalPool,
+    parseToPoolsDict,
+} from './filtering';
 import { calculatePathLimits } from './pathLimits';
 import {
     SwapOptions,
@@ -20,7 +24,8 @@ export class RouteProposer {
         tokenOut: string,
         swapType: SwapTypes,
         pools: SubgraphPoolBase[],
-        swapOptions: SwapOptions
+        swapOptions: SwapOptions,
+        chainId: number
     ): { pools: PoolDictionary; paths: NewPath[] } {
         if (pools.length === 0) return { pools: {}, paths: [] };
 
@@ -39,30 +44,39 @@ export class RouteProposer {
             };
         }
 
-        // Some functions alter pools list directly but we want to keep original so make a copy to work from
-        const poolsList = cloneDeep(pools);
+        const poolsAllDict = parseToPoolsDict(pools, swapOptions.timestamp);
 
-        const [poolsDict, hopTokens] = filterPoolsOfInterest(
-            poolsList,
+        const [poolsFilteredDict, hopTokens] = filterPoolsOfInterest(
+            poolsAllDict,
             tokenIn,
             tokenOut,
-            swapOptions.maxPools,
-            swapOptions.timestamp
+            swapOptions.maxPools
         );
-        const [filteredPoolsDict, pathData] = filterHopPools(
+
+        const [poolsMostLiquidDict, pathData] = filterHopPools(
             tokenIn,
             tokenOut,
             hopTokens,
-            poolsDict
+            poolsFilteredDict
         );
-        const [paths] = calculatePathLimits(pathData, swapType);
+
+        const pathsUsingStaBal = getPathsUsingStaBalPool(
+            tokenIn,
+            tokenOut,
+            poolsAllDict,
+            poolsFilteredDict,
+            chainId
+        );
+
+        const combinedPathData = pathData.concat(...pathsUsingStaBal);
+        const [paths] = calculatePathLimits(combinedPathData, swapType);
 
         this.cache[`${tokenIn}${tokenOut}${swapType}${swapOptions.timestamp}`] =
             {
-                pools: filteredPoolsDict,
+                pools: poolsMostLiquidDict,
                 paths: paths,
             };
 
-        return { pools: filteredPoolsDict, paths };
+        return { pools: poolsMostLiquidDict, paths };
     }
 }

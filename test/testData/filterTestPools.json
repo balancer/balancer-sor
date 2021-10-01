@@ -622,7 +622,6 @@
                 "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
                 "0xdac17f958d2ee523a2206206994597c13d831ec7"
             ],
-            "balanceBpt": "785224145.723155205181003818",
             "poolType": "Stable",
             "address": "0x6c3f90f043a72fa612cbac8115ee7e52bde6e490"
         },
@@ -668,7 +667,6 @@
                 "0xe6354ed5bc4b393a5aad09f21c46e101e692d447",
                 "0x04bc0ab673d88ae9dbc9da2380cb6b79c4bca9ae"
             ],
-            "balanceBpt": "78350279.810168052058997162",
             "poolType": "Stable",
             "address": "0x3b3ac5386837dc563660fb6a0937dfaa5924333b"
         }

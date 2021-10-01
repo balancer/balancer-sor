@@ -1,20 +1,20 @@
-// npx mocha -r ts-node/register test/filtersAndPaths.spec.ts
+// TS_NODE_PROJECT='tsconfig.testing.json' npx mocha -r ts-node/register test/filtersAndPaths.spec.ts
 import { assert } from 'chai';
 import cloneDeep from 'lodash.clonedeep';
 import {
     PoolDictionary,
-    SwapPairType,
-    PoolTypes,
     NewPath,
     SwapTypes,
+    SubgraphPoolBase,
 } from '../src/types';
 import {
     filterPoolsOfInterest,
     filterHopPools,
+    parseToPoolsDict,
 } from '../src/routeProposal/filtering';
 import { calculatePathLimits } from '../src/routeProposal/pathLimits';
 import { getBestPaths } from '../src/router';
-import { countPoolSwapPairTypes } from './lib/testHelpers';
+import { countPoolSwapPairTypes, checkPath } from './lib/testHelpers';
 
 import subgraphPoolsLarge from './testData/testPools/subgraphPoolsLarge.json';
 import testPools from './testData/filterTestPools.json';
@@ -39,39 +39,16 @@ describe('Tests pools filtering and path processing', () => {
     it('should filter to only direct pools for maxPools = 1', () => {
         const maxPools = 1;
 
-        let hopTokens: string[];
-        let poolsOfInterestDictionary: PoolDictionary;
-        [poolsOfInterestDictionary, hopTokens] = filterPoolsOfInterest(
+        const [poolsOfInterestDictionary, hopTokens] = filter(
             testPools.weightedOnly,
             DAI,
             USDC,
             maxPools
         );
 
-        let noDirect = 0,
-            noHopIn = 0,
-            noHopOut = 0;
-        for (const k in poolsOfInterestDictionary) {
-            if (
-                poolsOfInterestDictionary[k].swapPairType ===
-                SwapPairType.Direct
-            )
-                noDirect++;
-            else if (
-                poolsOfInterestDictionary[k].swapPairType === SwapPairType.HopIn
-            )
-                noHopIn++;
-            else if (
-                poolsOfInterestDictionary[k].swapPairType ===
-                SwapPairType.HopOut
-            )
-                noHopOut++;
-
-            assert.equal(
-                poolsOfInterestDictionary[k].poolType,
-                PoolTypes.Weighted
-            );
-        }
+        const [noDirect, noHopIn, noHopOut] = countPoolSwapPairTypes(
+            poolsOfInterestDictionary
+        );
 
         assert.equal(hopTokens.length, 0);
         assert.equal(noHopIn, 0);
@@ -80,31 +57,22 @@ describe('Tests pools filtering and path processing', () => {
     });
 
     it('Get multihop pools - WETH>DAI', async () => {
-        let hopTokens: string[];
-        let poolsOfInterestDictionary: PoolDictionary;
-        let pathData: NewPath[];
+        const maxPools = 4;
+        const tokenIn = WETH;
+        const tokenOut = DAI;
 
-        [poolsOfInterestDictionary, hopTokens] = filterPoolsOfInterest(
+        const [, hopTokens, poolsMostLiquid, pathData, poolsAll] = filter(
             subgraphPoolsLarge.pools,
-            WETH,
-            DAI,
-            4
+            tokenIn,
+            tokenOut,
+            maxPools
         );
 
-        [poolsOfInterestDictionary, pathData] = filterHopPools(
-            WETH,
-            DAI,
-            hopTokens,
-            poolsOfInterestDictionary
-        );
-
-        const [noDirect, noHopIn, noHopOut] = countPoolSwapPairTypes(
-            poolsOfInterestDictionary
-        );
+        const [, noHopIn, noHopOut] = countPoolSwapPairTypes(poolsMostLiquid);
 
         assert.equal(hopTokens.length, 4, 'Should have 4 hopTokens');
         assert.equal(
-            Object.keys(poolsOfInterestDictionary).length,
+            Object.keys(poolsMostLiquid).length,
             16,
             'Should have 16 multi-hop pools'
         );
@@ -113,99 +81,134 @@ describe('Tests pools filtering and path processing', () => {
         assert.equal(noHopIn, 3, 'Should have 3 hop in pools');
         assert.equal(noHopOut, 3, 'Should have 3 hop out pools');
         assert.equal(pathData.length, 14, 'Should have 14 paths');
-        assert.equal(
-            pathData[0].id,
-            '0x165a50bc092f6870dc111c349bae5fc35147ac86'
+        checkPath(
+            ['0x165a50bc092f6870dc111c349bae5fc35147ac86'],
+            poolsAll,
+            pathData[0],
+            tokenIn,
+            tokenOut
         );
-        assert.equal(
-            pathData[1].id,
-            '0x1b09173a0ffbad1cb7670b1a640013c0facfb71f'
+        checkPath(
+            ['0x1b09173a0ffbad1cb7670b1a640013c0facfb71f'],
+            poolsAll,
+            pathData[1],
+            tokenIn,
+            tokenOut
         );
-        assert.equal(
-            pathData[2].id,
-            '0x29f55de880d4dcae40ba3e63f16407a31b4d44ee'
+        checkPath(
+            ['0x29f55de880d4dcae40ba3e63f16407a31b4d44ee'],
+            poolsAll,
+            pathData[2],
+            tokenIn,
+            tokenOut
         );
-        assert.equal(
-            pathData[3].id,
-            '0x2dbd24322757d2e28de4230b1ca5b88e49a76979'
+        checkPath(
+            ['0x2dbd24322757d2e28de4230b1ca5b88e49a76979'],
+            poolsAll,
+            pathData[3],
+            tokenIn,
+            tokenOut
         );
-        assert.equal(
-            pathData[4].id,
-            '0x4b47b11c353f0056c73a87fefccb6c43dc0d8065'
+        checkPath(
+            ['0x4b47b11c353f0056c73a87fefccb6c43dc0d8065'],
+            poolsAll,
+            pathData[4],
+            tokenIn,
+            tokenOut
         );
-        assert.equal(
-            pathData[5].id,
-            '0x53b89ce35928dda346c574d9105a5479cb87231c'
+        checkPath(
+            ['0x53b89ce35928dda346c574d9105a5479cb87231c'],
+            poolsAll,
+            pathData[5],
+            tokenIn,
+            tokenOut
         );
-        assert.equal(
-            pathData[6].id,
-            '0x9b208194acc0a8ccb2a8dcafeacfbb7dcc093f81'
+        checkPath(
+            ['0x9b208194acc0a8ccb2a8dcafeacfbb7dcc093f81'],
+            poolsAll,
+            pathData[6],
+            tokenIn,
+            tokenOut
         );
-        assert.equal(
-            pathData[7].id,
-            '0xc0b2b0c5376cb2e6f73b473a7caa341542f707ce'
+        checkPath(
+            ['0xc0b2b0c5376cb2e6f73b473a7caa341542f707ce'],
+            poolsAll,
+            pathData[7],
+            tokenIn,
+            tokenOut
         );
-        assert.equal(
-            pathData[8].id,
-            '0xe5d1fab0c5596ef846dcc0958d6d0b20e1ec4498'
+        checkPath(
+            ['0xe5d1fab0c5596ef846dcc0958d6d0b20e1ec4498'],
+            poolsAll,
+            pathData[8],
+            tokenIn,
+            tokenOut
         );
-        assert.equal(
-            pathData[9].id,
-            '0xec577a919fca1b682f584a50b1048331ef0f30dd'
+        checkPath(
+            ['0xec577a919fca1b682f584a50b1048331ef0f30dd'],
+            poolsAll,
+            pathData[9],
+            tokenIn,
+            tokenOut
         );
-        assert.equal(
-            pathData[10].id,
-            '0xd6f0d319b2cce75123bf63e2c2bd8ba1f7d6b37a0xa29f5e42760aa987214844e5db9ac4a8e16ca969'
+        checkPath(
+            [
+                '0xd6f0d319b2cce75123bf63e2c2bd8ba1f7d6b37a',
+                '0xa29f5e42760aa987214844e5db9ac4a8e16ca969',
+            ],
+            poolsAll,
+            pathData[10],
+            tokenIn,
+            tokenOut
         );
-        assert.equal(
-            pathData[11].id,
-            '0x7f0b4d22b8a9abe2ae9ea1077fe1ab77dc7283a30xeba4dd6771c3e8ba3f168e47d052819abcc87cb2'
+        checkPath(
+            [
+                '0x7f0b4d22b8a9abe2ae9ea1077fe1ab77dc7283a3',
+                '0xeba4dd6771c3e8ba3f168e47d052819abcc87cb2',
+            ],
+            poolsAll,
+            pathData[11],
+            tokenIn,
+            tokenOut
         );
-        assert.equal(
-            pathData[12].id,
-            '0xd6f0d319b2cce75123bf63e2c2bd8ba1f7d6b37a0xeba4dd6771c3e8ba3f168e47d052819abcc87cb2'
+        checkPath(
+            [
+                '0xd6f0d319b2cce75123bf63e2c2bd8ba1f7d6b37a',
+                '0xeba4dd6771c3e8ba3f168e47d052819abcc87cb2',
+            ],
+            poolsAll,
+            pathData[12],
+            tokenIn,
+            tokenOut
         );
-        assert.equal(
-            pathData[13].id,
-            '0xd4dbf96db2fdf8ed40296d8d104b371adf7dee120x75286e183d923a5f52f52be205e358c5c9101b09'
+        checkPath(
+            [
+                '0xd4dbf96db2fdf8ed40296d8d104b371adf7dee12',
+                '0x75286e183d923a5f52f52be205e358c5c9101b09',
+            ],
+            poolsAll,
+            pathData[13],
+            tokenIn,
+            tokenOut
         );
     });
 
     it('should filter weighted only pools correctly', () => {
-        let hopTokens: string[];
-        let poolsOfInterestDictionary: PoolDictionary;
+        const maxPools = 4;
+        const tokenIn = DAI;
+        const tokenOut = USDC;
 
-        [poolsOfInterestDictionary, hopTokens] = filterPoolsOfInterest(
+        const [poolsOfInterestDictionary, hopTokens] = filter(
             testPools.weightedOnly,
-            DAI,
-            USDC,
-            4
+            tokenIn,
+            tokenOut,
+            maxPools
         );
 
-        let noDirect = 0,
-            noHopIn = 0,
-            noHopOut = 0;
-        for (const k in poolsOfInterestDictionary) {
-            if (
-                poolsOfInterestDictionary[k].swapPairType ===
-                SwapPairType.Direct
-            )
-                noDirect++;
-            else if (
-                poolsOfInterestDictionary[k].swapPairType === SwapPairType.HopIn
-            )
-                noHopIn++;
-            else if (
-                poolsOfInterestDictionary[k].swapPairType ===
-                SwapPairType.HopOut
-            )
-                noHopOut++;
+        const [noDirect, noHopIn, noHopOut] = countPoolSwapPairTypes(
+            poolsOfInterestDictionary
+        );
 
-            assert.equal(
-                poolsOfInterestDictionary[k].poolType,
-                PoolTypes.Weighted
-            );
-        }
         assert.equal(hopTokens.length, 1);
         assert.equal(noHopIn, 2); // 1 has 0 balances
         assert.equal(noHopOut, 1); // 1 has 0 balances
@@ -217,40 +220,20 @@ describe('Tests pools filtering and path processing', () => {
     });
 
     it('should filter stable only pools correctly', () => {
-        let hopTokens: string[];
-        let poolsOfInterestDictionary: PoolDictionary;
+        const maxPools = 4;
+        const tokenIn = DAI;
+        const tokenOut = USDC;
 
-        [poolsOfInterestDictionary, hopTokens] = filterPoolsOfInterest(
+        const [poolsOfInterestDictionary, hopTokens] = filter(
             testPools.stableOnly,
-            DAI,
-            USDC,
-            4
+            tokenIn,
+            tokenOut,
+            maxPools
         );
 
-        let noDirect = 0,
-            noHopIn = 0,
-            noHopOut = 0;
-        for (const k in poolsOfInterestDictionary) {
-            if (
-                poolsOfInterestDictionary[k].swapPairType ===
-                SwapPairType.Direct
-            )
-                noDirect++;
-            else if (
-                poolsOfInterestDictionary[k].swapPairType === SwapPairType.HopIn
-            )
-                noHopIn++;
-            else if (
-                poolsOfInterestDictionary[k].swapPairType ===
-                SwapPairType.HopOut
-            )
-                noHopOut++;
-
-            assert.equal(
-                poolsOfInterestDictionary[k].poolType,
-                PoolTypes.Stable
-            );
-        }
+        const [noDirect, noHopIn, noHopOut] = countPoolSwapPairTypes(
+            poolsOfInterestDictionary
+        );
 
         assert.equal(hopTokens.length, 0);
         assert.equal(noHopIn, 0); // 1 has 0 balances
@@ -259,44 +242,22 @@ describe('Tests pools filtering and path processing', () => {
     });
 
     it('should filter stable & weighted pools correctly', () => {
-        let hopTokens: string[];
-        let poolsOfInterestDictionary: PoolDictionary;
-        const weighted: any = testPools.weightedOnly;
-        const allPools: any = testPools.stableOnly.concat(weighted);
+        const maxPools = 4;
+        const tokenIn = DAI;
+        const tokenOut = USDC;
+        const weighted: SubgraphPoolBase[] = testPools.weightedOnly;
+        const stable: SubgraphPoolBase[] = testPools.stableOnly;
+        const allPools = stable.concat(...weighted);
 
-        [poolsOfInterestDictionary, hopTokens] = filterPoolsOfInterest(
+        const [poolsOfInterestDictionary, hopTokens] = filter(
             allPools,
-            DAI,
-            USDC,
-            4
+            tokenIn,
+            tokenOut,
+            maxPools
         );
 
-        let noDirect = 0,
-            noHopIn = 0,
-            noHopOut = 0,
-            noWeighted = 0,
-            noStable = 0;
-        for (const k in poolsOfInterestDictionary) {
-            if (
-                poolsOfInterestDictionary[k].swapPairType ===
-                SwapPairType.Direct
-            )
-                noDirect++;
-            else if (
-                poolsOfInterestDictionary[k].swapPairType === SwapPairType.HopIn
-            )
-                noHopIn++;
-            else if (
-                poolsOfInterestDictionary[k].swapPairType ===
-                SwapPairType.HopOut
-            )
-                noHopOut++;
-
-            if (poolsOfInterestDictionary[k].poolType === PoolTypes.Weighted)
-                noWeighted++;
-            else if (poolsOfInterestDictionary[k].poolType === PoolTypes.Stable)
-                noStable++;
-        }
+        const [noDirect, noHopIn, noHopOut, noWeighted, noStable] =
+            countPoolSwapPairTypes(poolsOfInterestDictionary);
 
         assert.equal(hopTokens.length, 1);
         assert.equal(noHopIn, 2); // 1 has 0 balances
@@ -307,341 +268,275 @@ describe('Tests pools filtering and path processing', () => {
     });
 
     it('should filter weighted only hop pools correctly', () => {
-        let hopTokens: string[];
-        let poolsOfInterestDictionary: PoolDictionary;
-        let pathData: NewPath[];
+        const maxPools = 4;
+        const tokenIn = DAI;
+        const tokenOut = USDC;
 
-        [poolsOfInterestDictionary, hopTokens] = filterPoolsOfInterest(
+        const [, hopTokens, poolsMostLiquid, pathData, poolsAll] = filter(
             testPools.weightedOnly,
-            DAI,
-            USDC,
-            4
+            tokenIn,
+            tokenOut,
+            maxPools
         );
 
-        [poolsOfInterestDictionary, pathData] = filterHopPools(
-            DAI,
-            USDC,
-            hopTokens,
-            poolsOfInterestDictionary
-        );
+        const [noDirect, noHopIn, noHopOut] =
+            countPoolSwapPairTypes(poolsMostLiquid);
 
-        let noDirect = 0,
-            noHopIn = 0,
-            noHopOut = 0;
-        for (const k in poolsOfInterestDictionary) {
-            if (
-                poolsOfInterestDictionary[k].swapPairType ===
-                SwapPairType.Direct
-            )
-                noDirect++;
-            else if (
-                poolsOfInterestDictionary[k].swapPairType === SwapPairType.HopIn
-            ) {
-                noHopIn++;
-                assert.equal(
-                    poolsOfInterestDictionary[k].id,
-                    '0x29f55de880d4dcae40ba3e63f16407a31b4d44ee',
-                    'Pool Addresses should match.'
-                );
-            } else if (
-                poolsOfInterestDictionary[k].swapPairType ===
-                SwapPairType.HopOut
-            ) {
-                noHopOut++;
-                assert.equal(
-                    poolsOfInterestDictionary[k].id,
-                    '0x12d6b6e24fdd9849abd42afd8f5775d36084a828',
-                    'Pool Addresses should match.'
-                );
-            }
-
-            assert.equal(
-                poolsOfInterestDictionary[k].poolType,
-                PoolTypes.Weighted
-            );
-        }
         assert.equal(hopTokens.length, 1);
         assert.equal(noHopIn, hopTokens.length);
         assert.equal(noHopOut, hopTokens.length);
         assert.equal(noDirect, 3);
         assert.equal(pathData.length, 4);
-        assert.equal(
-            pathData[0].id,
-            '0x2dbd24322757d2e28de4230b1ca5b88e49a76979'
+
+        checkPath(
+            ['0x2dbd24322757d2e28de4230b1ca5b88e49a76979'],
+            poolsAll,
+            pathData[0],
+            tokenIn,
+            tokenOut
         );
-        assert.equal(pathData[0].swaps.length, 1);
-        assert.equal(
-            pathData[0].swaps[0].pool,
-            '0x2dbd24322757d2e28de4230b1ca5b88e49a76979'
+        checkPath(
+            ['0x57755f7dec33320bca83159c26e93751bfd30fbe'],
+            poolsAll,
+            pathData[1],
+            tokenIn,
+            tokenOut
         );
-        assert.equal(pathData[0].swaps[0].tokenIn, DAI);
-        assert.equal(pathData[0].swaps[0].tokenOut, USDC);
-        assert.equal(
-            pathData[1].id,
-            '0x57755f7dec33320bca83159c26e93751bfd30fbe'
+        checkPath(
+            ['0x75286e183d923a5f52f52be205e358c5c9101b09'],
+            poolsAll,
+            pathData[2],
+            tokenIn,
+            tokenOut
         );
-        assert.equal(pathData[1].swaps.length, 1);
-        assert.equal(
-            pathData[1].swaps[0].pool,
-            '0x57755f7dec33320bca83159c26e93751bfd30fbe'
+        checkPath(
+            [
+                '0x29f55de880d4dcae40ba3e63f16407a31b4d44ee',
+                '0x12d6b6e24fdd9849abd42afd8f5775d36084a828',
+            ],
+            poolsAll,
+            pathData[3],
+            tokenIn,
+            tokenOut
         );
-        assert.equal(pathData[1].swaps[0].tokenIn, DAI);
-        assert.equal(pathData[1].swaps[0].tokenOut, USDC);
-        assert.equal(
-            pathData[2].id,
-            '0x75286e183d923a5f52f52be205e358c5c9101b09'
-        );
-        assert.equal(pathData[2].swaps.length, 1);
-        assert.equal(
-            pathData[2].swaps[0].pool,
-            '0x75286e183d923a5f52f52be205e358c5c9101b09'
-        );
-        assert.equal(pathData[2].swaps[0].tokenIn, DAI);
-        assert.equal(pathData[2].swaps[0].tokenOut, USDC);
-        assert.equal(
-            pathData[3].id,
-            '0x29f55de880d4dcae40ba3e63f16407a31b4d44ee0x12d6b6e24fdd9849abd42afd8f5775d36084a828'
-        );
-        assert.equal(pathData[3].swaps.length, 2);
-        assert.equal(
-            pathData[3].swaps[0].pool,
-            '0x29f55de880d4dcae40ba3e63f16407a31b4d44ee'
-        );
-        assert.equal(pathData[3].swaps[0].tokenIn, DAI);
-        assert.equal(pathData[3].swaps[0].tokenOut, hopTokens[0]);
-        assert.equal(
-            pathData[3].swaps[1].pool,
-            '0x12d6b6e24fdd9849abd42afd8f5775d36084a828'
-        );
-        assert.equal(pathData[3].swaps[1].tokenIn, hopTokens[0]);
-        assert.equal(pathData[3].swaps[1].tokenOut, USDC);
     });
 
     it('should filter stable only hop pools correctly', () => {
-        let hopTokens: string[];
-        let poolsOfInterestDictionary: PoolDictionary;
-        let pathData: NewPath[];
+        const maxPools = 4;
+        const tokenIn = DAI;
+        const tokenOut = USDC;
 
-        [poolsOfInterestDictionary, hopTokens] = filterPoolsOfInterest(
+        const [, hopTokens, poolsMostLiquid, pathData, poolsAll] = filter(
             testPools.stableOnly,
-            DAI,
-            USDC,
-            4
+            tokenIn,
+            tokenOut,
+            maxPools
         );
 
-        [poolsOfInterestDictionary, pathData] = filterHopPools(
-            DAI,
-            USDC,
-            hopTokens,
-            poolsOfInterestDictionary
-        );
+        const [noDirect, noHopIn, noHopOut] =
+            countPoolSwapPairTypes(poolsMostLiquid);
 
-        let noDirect = 0,
-            noHopIn = 0,
-            noHopOut = 0;
-
-        for (const k in poolsOfInterestDictionary) {
-            if (
-                poolsOfInterestDictionary[k].swapPairType ===
-                SwapPairType.Direct
-            )
-                noDirect++;
-            else if (
-                poolsOfInterestDictionary[k].swapPairType === SwapPairType.HopIn
-            ) {
-                noHopIn++;
-            } else if (
-                poolsOfInterestDictionary[k].swapPairType ===
-                SwapPairType.HopOut
-            ) {
-                noHopOut++;
-            }
-
-            assert.equal(
-                poolsOfInterestDictionary[k].poolType,
-                PoolTypes.Stable
-            );
-        }
         assert.equal(hopTokens.length, 0);
         assert.equal(noHopIn, hopTokens.length);
         assert.equal(noHopOut, hopTokens.length);
         assert.equal(noDirect, 1);
         assert.equal(pathData.length, 1);
-        assert.equal(
-            pathData[0].id,
-            '0x6c3f90f043a72fa612cbac8115ee7e52bde6e490'
+        checkPath(
+            ['0x6c3f90f043a72fa612cbac8115ee7e52bde6e490'],
+            poolsAll,
+            pathData[0],
+            tokenIn,
+            tokenOut
         );
-        assert.equal(pathData[0].swaps.length, 1);
-        assert.equal(
-            pathData[0].swaps[0].pool,
-            '0x6c3f90f043a72fa612cbac8115ee7e52bde6e490'
-        );
-        assert.equal(pathData[0].swaps[0].tokenIn, DAI);
-        assert.equal(pathData[0].swaps[0].tokenOut, USDC);
     });
 
     it('should calc weighted path limits', () => {
-        let hopTokens: string[];
-        let poolsOfInterestDictionary: PoolDictionary;
-        let pathData: NewPath[];
+        const maxPools = 4;
+        const tokenIn = DAI;
+        const tokenOut = USDC;
 
-        [poolsOfInterestDictionary, hopTokens] = filterPoolsOfInterest(
+        const [, , , , poolsAll, pathsSorted, maxAmt] = filter(
             testPools.weightedOnly,
-            DAI,
-            USDC,
-            4
-        );
-
-        [poolsOfInterestDictionary, pathData] = filterHopPools(
-            DAI,
-            USDC,
-            hopTokens,
-            poolsOfInterestDictionary
-        );
-
-        const [paths, maxAmt] = calculatePathLimits(
-            pathData,
-            SwapTypes.SwapExactIn
+            tokenIn,
+            tokenOut,
+            maxPools
         );
 
         // Known results taken from previous version
         assert.equal(maxAmt.toString(), '1620713758415909242296');
-        assert.equal(paths[0].id, '0x75286e183d923a5f52f52be205e358c5c9101b09');
-        assert.equal(paths[0].limitAmount.toString(), '1469350670653619495898');
-        assert.equal(paths[1].id, '0x57755f7dec33320bca83159c26e93751bfd30fbe');
-        assert.equal(paths[1].limitAmount.toString(), '141733810572558367508');
-        assert.equal(paths[2].id, '0x2dbd24322757d2e28de4230b1ca5b88e49a76979');
-        assert.equal(paths[2].limitAmount.toString(), '9595666431716756460');
-        assert.equal(
-            paths[3].id,
-            '0x29f55de880d4dcae40ba3e63f16407a31b4d44ee0x12d6b6e24fdd9849abd42afd8f5775d36084a828'
+        checkPath(
+            ['0x75286e183d923a5f52f52be205e358c5c9101b09'],
+            poolsAll,
+            pathsSorted[0],
+            tokenIn,
+            tokenOut
         );
-        assert.equal(paths[3].limitAmount.toString(), '33610758014622430');
+        assert.equal(
+            pathsSorted[0].limitAmount.toString(),
+            '1469350670653619495898'
+        );
+        checkPath(
+            ['0x57755f7dec33320bca83159c26e93751bfd30fbe'],
+            poolsAll,
+            pathsSorted[1],
+            tokenIn,
+            tokenOut
+        );
+        assert.equal(
+            pathsSorted[1].limitAmount.toString(),
+            '141733810572558367508'
+        );
+        checkPath(
+            ['0x2dbd24322757d2e28de4230b1ca5b88e49a76979'],
+            poolsAll,
+            pathsSorted[2],
+            tokenIn,
+            tokenOut
+        );
+        assert.equal(
+            pathsSorted[2].limitAmount.toString(),
+            '9595666431716756460'
+        );
+        checkPath(
+            [
+                '0x29f55de880d4dcae40ba3e63f16407a31b4d44ee',
+                '0x12d6b6e24fdd9849abd42afd8f5775d36084a828',
+            ],
+            poolsAll,
+            pathsSorted[3],
+            tokenIn,
+            tokenOut
+        );
+
+        assert.equal(
+            pathsSorted[3].limitAmount.toString(),
+            '33610758014622430'
+        );
     });
 
     it('should calc weighted path limits, exactOut', () => {
-        let hopTokens: string[];
-        let poolsOfInterestDictionary: PoolDictionary;
-        let pathData: NewPath[];
+        const maxPools = 4;
+        const tokenIn = DAI;
+        const tokenOut = USDC;
 
-        [poolsOfInterestDictionary, hopTokens] = filterPoolsOfInterest(
+        const [, , , , poolsAll, pathsSorted, maxAmt] = filter(
             testPools.weightedOnly,
-            DAI,
-            USDC,
-            4
-        );
-
-        [poolsOfInterestDictionary, pathData] = filterHopPools(
-            DAI,
-            USDC,
-            hopTokens,
-            poolsOfInterestDictionary
-        );
-
-        const [paths, maxAmt] = calculatePathLimits(
-            pathData,
+            tokenIn,
+            tokenOut,
+            maxPools,
             SwapTypes.SwapExactOut
         );
 
         // Known results taken from previous version
         assert.equal(maxAmt.toString(), '1265931102');
-        assert.equal(paths[0].id, '0x75286e183d923a5f52f52be205e358c5c9101b09');
-        assert.equal(paths[0].limitAmount.toString(), '1113575469');
-        assert.equal(paths[1].id, '0x57755f7dec33320bca83159c26e93751bfd30fbe');
-        assert.equal(paths[1].limitAmount.toString(), '142877013');
-        assert.equal(paths[2].id, '0x2dbd24322757d2e28de4230b1ca5b88e49a76979');
-        assert.equal(paths[2].limitAmount.toString(), '9445925');
-        assert.equal(
-            paths[3].id,
-            '0x29f55de880d4dcae40ba3e63f16407a31b4d44ee0x12d6b6e24fdd9849abd42afd8f5775d36084a828'
+        checkPath(
+            ['0x75286e183d923a5f52f52be205e358c5c9101b09'],
+            poolsAll,
+            pathsSorted[0],
+            tokenIn,
+            tokenOut
         );
-        assert.equal(paths[3].limitAmount.toString(), '32695');
+        assert.equal(pathsSorted[0].limitAmount.toString(), '1113575469');
+        checkPath(
+            ['0x57755f7dec33320bca83159c26e93751bfd30fbe'],
+            poolsAll,
+            pathsSorted[1],
+            tokenIn,
+            tokenOut
+        );
+        assert.equal(pathsSorted[1].limitAmount.toString(), '142877013');
+        checkPath(
+            ['0x2dbd24322757d2e28de4230b1ca5b88e49a76979'],
+            poolsAll,
+            pathsSorted[2],
+            tokenIn,
+            tokenOut
+        );
+        assert.equal(pathsSorted[2].limitAmount.toString(), '9445925');
+        checkPath(
+            [
+                '0x29f55de880d4dcae40ba3e63f16407a31b4d44ee',
+                '0x12d6b6e24fdd9849abd42afd8f5775d36084a828',
+            ],
+            poolsAll,
+            pathsSorted[3],
+            tokenIn,
+            tokenOut
+        );
+        assert.equal(pathsSorted[3].limitAmount.toString(), '32695');
     });
 
     it('should calc stable path limits', () => {
-        let hopTokens: string[];
-        let poolsOfInterestDictionary: PoolDictionary;
-        let pathData: NewPath[];
+        const maxPools = 4;
+        const tokenIn = DAI;
+        const tokenOut = USDC;
 
-        [poolsOfInterestDictionary, hopTokens] = filterPoolsOfInterest(
+        const [, , , , poolsAll, pathsSorted, maxAmt] = filter(
             testPools.stableOnly,
-            DAI,
-            USDC,
-            4
+            tokenIn,
+            tokenOut,
+            maxPools,
+            SwapTypes.SwapExactIn
         );
-
-        [poolsOfInterestDictionary, pathData] = filterHopPools(
-            DAI,
-            USDC,
-            hopTokens,
-            poolsOfInterestDictionary
-        );
-
-        let paths: NewPath[];
-        let maxAmt: BigNumber;
-        [paths, maxAmt] = calculatePathLimits(pathData, SwapTypes.SwapExactIn);
 
         // Known results taken from previous version
         assert.equal(maxAmt.toString(), '45024648605340322085145755');
-        assert.equal(paths[0].id, '0x6c3f90f043a72fa612cbac8115ee7e52bde6e490');
+        checkPath(
+            ['0x6c3f90f043a72fa612cbac8115ee7e52bde6e490'],
+            poolsAll,
+            pathsSorted[0],
+            tokenIn,
+            tokenOut
+        );
         assert.equal(
-            paths[0].limitAmount.toString(),
+            pathsSorted[0].limitAmount.toString(),
             '45024648605340322085145755'
         );
-
-        [paths, maxAmt] = calculatePathLimits(pathData, SwapTypes.SwapExactOut);
-
-        // Known results taken from previous version
-        assert.equal(maxAmt.toString(), '76533088793376');
-        assert.equal(paths[0].id, '0x6c3f90f043a72fa612cbac8115ee7e52bde6e490');
-        assert.equal(paths[0].limitAmount.toString(), '76533088793376');
     });
 
     it('Test pool class that has direct & multihop paths', async () => {
-        const pools = cloneDeep(testPools).pathTestDirectAndMulti;
         const tokenIn = USDC;
         const tokenOut = DAI;
-        let hopTokens: string[];
-        let poolsOfInterestDictionary: PoolDictionary;
-        let pathData: NewPath[];
+        const maxPools = 4;
 
-        [poolsOfInterestDictionary, hopTokens] = filterPoolsOfInterest(
-            pools,
+        const [poolsOfInterestDictionary, hopTokens] = filter(
+            testPools.pathTestDirectAndMulti,
             tokenIn,
             tokenOut,
-            4
+            maxPools,
+            SwapTypes.SwapExactIn
         );
-        /*
-        [poolsOfInterestDictionary, pathData] = filterHopPools(
-            tokenIn,
-            tokenOut,
-            hopTokens,
-            poolsOfInterestDictionary
-        );
-        */
 
         const [noDirect, noHopIn, noHopOut] = countPoolSwapPairTypes(
-            poolsOfInterestDictionary
+            poolsOfInterestDictionary // poolsMostLiquid
         );
 
         assert.equal(hopTokens.length, 0);
         assert.equal(Object.keys(poolsOfInterestDictionary).length, 2);
-
         assert.equal(noDirect, 1);
         assert.equal(noHopIn, 0);
         assert.equal(noHopOut, 1);
     });
 
     it('Test pool class that has two multihop paths, swapExactIn', async () => {
-        const pools = cloneDeep(testPools).pathTestPoolTwoMultiHops;
+        const maxPools = 4;
         const tokenIn = USDC;
         const tokenOut = DAI;
 
-        const [poolsOfInterestDictionary, hopTokens] = filterPoolsOfInterest(
-            pools,
+        const [
+            poolsOfInterestDictionary,
+            hopTokens,
+            poolsMostLiquid,
+            pathData,
+            poolsAll,
+            pathsSorted,
+            maxAmt,
+        ] = filter(
+            testPools.pathTestPoolTwoMultiHops,
             tokenIn,
             tokenOut,
-            4
+            maxPools,
+            SwapTypes.SwapExactIn
         );
 
         const [noDirect, noHopIn, noHopOut] = countPoolSwapPairTypes(
@@ -653,39 +548,36 @@ describe('Tests pools filtering and path processing', () => {
         assert.equal(noDirect, 0);
         assert.equal(noHopIn, 1);
         assert.equal(noHopOut, 1);
-
-        const [filteredPoolsOfInterestDictionary, candidatePaths] =
-            filterHopPools(
-                tokenIn,
-                tokenOut,
-                hopTokens,
-                poolsOfInterestDictionary
-            );
-
-        assert.equal(candidatePaths.length, 2);
-        assert.equal(Object.keys(filteredPoolsOfInterestDictionary).length, 2);
-        assert.equal(
-            candidatePaths[0].id,
-            '0x0481d726c3d25250a8963221945ed93b8a5315a90x07d13ed39ee291c1506675ff42f9b2b6b50e2d3e'
+        assert.equal(pathData.length, 2);
+        assert.equal(Object.keys(poolsMostLiquid).length, 2);
+        checkPath(
+            [
+                '0x0481d726c3d25250a8963221945ed93b8a5315a9',
+                '0x07d13ed39ee291c1506675ff42f9b2b6b50e2d3e',
+            ],
+            poolsAll,
+            pathsSorted[0],
+            tokenIn,
+            tokenOut
         );
-        assert.equal(
-            candidatePaths[1].id,
-            '0x0481d726c3d25250a8963221945ed93b8a5315a90x07d13ed39ee291c1506675ff42f9b2b6b50e2d3e'
+        checkPath(
+            [
+                '0x0481d726c3d25250a8963221945ed93b8a5315a9',
+                '0x07d13ed39ee291c1506675ff42f9b2b6b50e2d3e',
+            ],
+            poolsAll,
+            pathsSorted[1],
+            tokenIn,
+            tokenOut
         );
+        assert.equal(maxAmt.toString(), '600000000');
+        assert.equal(pathsSorted.length, 2);
+        assert.equal(pathsSorted[0].limitAmount.toString(), '300000000');
+        assert.equal(pathsSorted[1].limitAmount.toString(), '300000000');
 
-        const [pathsWithLimits, maxLiquidityAvailable] = calculatePathLimits(
-            candidatePaths,
-            SwapTypes.SwapExactIn
-        );
-
-        assert.equal(maxLiquidityAvailable.toString(), '600000000');
-        assert.equal(pathsWithLimits.length, 2);
-        assert.equal(pathsWithLimits[0].limitAmount.toString(), '300000000');
-        assert.equal(pathsWithLimits[1].limitAmount.toString(), '300000000');
-
-        const [swaps, total, marketSp] = getBestPaths(
+        const [swaps, total] = getBestPaths(
             cloneDeep(poolsOfInterestDictionary), // Need to keep original pools for cache
-            pathsWithLimits,
+            pathsSorted,
             SwapTypes.SwapExactIn,
             parseFixed('1', 6),
             6,
@@ -739,18 +631,24 @@ describe('Tests pools filtering and path processing', () => {
     });
 
     it('Test pool class that has two multihop paths, swapExactOut', async () => {
-        const pools = cloneDeep(testPools).pathTestPoolTwoMultiHops;
+        const maxPools = 4;
         const tokenIn = USDC;
         const tokenOut = DAI;
-        let hopTokens: string[];
-        let poolsOfInterestDictionary: PoolDictionary;
-        let pathData: NewPath[];
 
-        [poolsOfInterestDictionary, hopTokens] = filterPoolsOfInterest(
-            pools,
+        const [
+            poolsOfInterestDictionary,
+            hopTokens,
+            poolsMostLiquid,
+            pathData,
+            poolsAll,
+            pathsSorted,
+            maxLiquidityAvailable,
+        ] = filter(
+            testPools.pathTestPoolTwoMultiHops,
             tokenIn,
             tokenOut,
-            4
+            maxPools,
+            SwapTypes.SwapExactOut
         );
 
         const [noDirect, noHopIn, noHopOut] = countPoolSwapPairTypes(
@@ -762,38 +660,42 @@ describe('Tests pools filtering and path processing', () => {
         assert.equal(noDirect, 0);
         assert.equal(noHopIn, 1);
         assert.equal(noHopOut, 1);
-
-        [poolsOfInterestDictionary, pathData] = filterHopPools(
-            tokenIn,
-            tokenOut,
-            hopTokens,
-            poolsOfInterestDictionary
-        );
-
         assert.equal(pathData.length, 2);
         assert.equal(Object.keys(poolsOfInterestDictionary).length, 2);
-        assert.equal(
-            pathData[0].id,
-            '0x0481d726c3d25250a8963221945ed93b8a5315a90x07d13ed39ee291c1506675ff42f9b2b6b50e2d3e'
+        checkPath(
+            [
+                '0x0481d726c3d25250a8963221945ed93b8a5315a9',
+                '0x07d13ed39ee291c1506675ff42f9b2b6b50e2d3e',
+            ],
+            poolsAll,
+            pathData[0],
+            tokenIn,
+            tokenOut
         );
-        assert.equal(
-            pathData[1].id,
-            '0x0481d726c3d25250a8963221945ed93b8a5315a90x07d13ed39ee291c1506675ff42f9b2b6b50e2d3e'
+        checkPath(
+            [
+                '0x0481d726c3d25250a8963221945ed93b8a5315a9',
+                '0x07d13ed39ee291c1506675ff42f9b2b6b50e2d3e',
+            ],
+            poolsAll,
+            pathData[1],
+            tokenIn,
+            tokenOut
         );
-
-        const [paths, maxLiquidityAvailable] = calculatePathLimits(
-            pathData,
-            SwapTypes.SwapExactOut
-        );
-
         assert.equal(maxLiquidityAvailable.toString(), '457979953739398700000');
-        assert.equal(paths.length, 2);
-        assert.equal(paths[0].limitAmount.toString(), '228989976869699350000');
-        assert.equal(paths[1].limitAmount.toString(), '228989976869699350000');
+        assert.equal(pathsSorted.length, 2);
+        assert.equal(
+            pathsSorted[0].limitAmount.toString(),
+            '228989976869699350000'
+        );
+        assert.equal(
+            pathsSorted[1].limitAmount.toString(),
+            '228989976869699350000'
+        );
 
-        const [swaps, total, marketSp] = getBestPaths(
+        const [swaps, total] = getBestPaths(
             cloneDeep(poolsOfInterestDictionary), // Need to keep original pools for cache
-            paths,
+            pathsSorted,
             SwapTypes.SwapExactOut,
             parseFixed('1', 18),
             18,
@@ -846,3 +748,50 @@ describe('Tests pools filtering and path processing', () => {
         assert.equal(swaps[1][1].tokenOut, tokenOut);
     });
 });
+
+function filter(
+    pools: SubgraphPoolBase[],
+    tokenIn: string,
+    tokenOut: string,
+    maxPools: number,
+    swapType = SwapTypes.SwapExactIn
+): [
+    PoolDictionary,
+    string[],
+    PoolDictionary,
+    NewPath[],
+    PoolDictionary,
+    NewPath[],
+    BigNumber
+] {
+    const timestamp = 0;
+    const poolsAll = parseToPoolsDict(pools, timestamp);
+
+    const [poolsOfInterestDictionary, hopTokens] = filterPoolsOfInterest(
+        poolsAll,
+        tokenIn,
+        tokenOut,
+        maxPools
+    );
+
+    const [poolsMostLiquid, pathData] = filterHopPools(
+        tokenIn,
+        tokenOut,
+        hopTokens,
+        cloneDeep(poolsOfInterestDictionary)
+    );
+
+    let pathsSorted: NewPath[] = [];
+    let maxAmt = Zero;
+    [pathsSorted, maxAmt] = calculatePathLimits(cloneDeep(pathData), swapType);
+
+    return [
+        poolsOfInterestDictionary,
+        hopTokens,
+        poolsMostLiquid,
+        pathData,
+        poolsAll,
+        pathsSorted,
+        maxAmt,
+    ];
+}
