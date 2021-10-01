@@ -1,25 +1,23 @@
 import { assert, expect } from 'chai';
+import { parseFixed } from '@ethersproject/bignumber';
 import { WeiPerEther as ONE, Zero } from '@ethersproject/constants';
 import { AddressZero } from '@ethersproject/constants';
 import { JsonRpcProvider } from '@ethersproject/providers';
 
 import { formatSwaps } from '../src/formatSwaps';
 import { getWrappedInfo, setWrappedInfo } from '../src/wrapInfo';
-import { bnum } from '../src';
 import { WETHADDR } from '../src/constants';
 import { Lido } from '../src/pools/lido';
-import { SwapInfo, SwapTypes, SwapV2 } from '../src/types';
-import { BigNumber as OldBigNumber } from '../src/utils/bignumber';
+import { Swap, SwapInfo, SwapTypes, SwapV2 } from '../src/types';
+import { bnum } from '../src/utils/bignumber';
 import testSwaps from './testData/swapsForFormatting.json';
-import { parseFixed } from '@ethersproject/bignumber';
+import { BAL, DAI, GUSD, USDC, WETH } from './lib/constants';
 
-const marketSp: OldBigNumber = new OldBigNumber(7);
+const marketSp = bnum(7);
 
 const provider = new JsonRpcProvider(
     `https://mainnet.infura.io/v3/${process.env.INFURA}`
 );
-
-const BAL = '0xba100000625a3754423978a60c9317c58a424e3d';
 
 // npx mocha -r ts-node/register test/helpers.spec.ts
 describe(`Tests for Helpers.`, () => {
@@ -27,16 +25,13 @@ describe(`Tests for Helpers.`, () => {
         const swapAmount = parseFixed('1', 18);
         const returnAmount = parseFixed('2', 18);
         const returnAmountConsideringFees = parseFixed('1.9', 18);
-        const tokenIn = '0x6b175474e89094c44da98b954eedeac495271d0f';
-        const tokenOut = '0xba100000625a3754423978a60c9317c58a424e3d';
+        const tokenIn = DAI;
+        const tokenOut = BAL;
         const swapType = SwapTypes.SwapExactIn;
 
-        const swapsV1Format: any = testSwaps.directhops;
+        const swapsV1Format: Swap[][] = testSwaps.directhops;
 
-        const expectedTokenAddresses: string[] = [
-            '0x6b175474e89094c44da98b954eedeac495271d0f',
-            '0xba100000625a3754423978a60c9317c58a424e3d',
-        ];
+        const expectedTokenAddresses: string[] = [DAI, BAL];
 
         const swapInfo: SwapInfo = formatSwaps(
             swapsV1Format,
@@ -71,18 +66,13 @@ describe(`Tests for Helpers.`, () => {
         const swapAmount = parseFixed('1', 18);
         const returnAmount = parseFixed('2', 18);
         const returnAmountConsideringFees = parseFixed('1.9', 18);
-        const tokenIn = '0x6b175474e89094c44da98b954eedeac495271d0f';
-        const tokenOut = '0x056fd409e1d7a124bd7017459dfea2f387b6d5cd';
+        const tokenIn = DAI;
+        const tokenOut = GUSD;
         const swapType = SwapTypes.SwapExactIn;
 
-        const swapsV1Format: any = testSwaps.multihops;
+        const swapsV1Format: Swap[][] = testSwaps.multihops;
 
-        const expectedTokenAddresses: string[] = [
-            '0x6b175474e89094c44da98b954eedeac495271d0f',
-            '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2',
-            '0x056fd409e1d7a124bd7017459dfea2f387b6d5cd',
-            '0xba100000625a3754423978a60c9317c58a424e3d',
-        ];
+        const expectedTokenAddresses: string[] = [DAI, WETH, GUSD, BAL];
 
         const swapInfo: SwapInfo = formatSwaps(
             swapsV1Format,
@@ -123,17 +113,13 @@ describe(`Tests for Helpers.`, () => {
         const swapAmount = parseFixed('1', 18);
         const returnAmount = parseFixed('2', 18);
         const returnAmountConsideringFees = parseFixed('1.9', 18);
-        const tokenIn = '0x6b175474e89094c44da98b954eedeac495271d0f';
-        const tokenOut = '0x056fd409e1d7a124bd7017459dfea2f387b6d5cd';
+        const tokenIn = DAI;
+        const tokenOut = GUSD;
         const swapType = SwapTypes.SwapExactIn;
 
-        const swapsV1Format: any = testSwaps.directandmultihops;
+        const swapsV1Format: Swap[][] = testSwaps.directandmultihops;
 
-        const expectedTokenAddresses: string[] = [
-            '0x6b175474e89094c44da98b954eedeac495271d0f',
-            '0x056fd409e1d7a124bd7017459dfea2f387b6d5cd',
-            '0xba100000625a3754423978a60c9317c58a424e3d',
-        ];
+        const expectedTokenAddresses: string[] = [DAI, GUSD, BAL];
 
         const swapInfo: SwapInfo = formatSwaps(
             swapsV1Format,
@@ -171,16 +157,13 @@ describe(`Tests for Helpers.`, () => {
         const swapAmount = parseFixed('1', 18);
         const returnAmount = parseFixed('1', 18);
         const returnAmountConsideringFees = parseFixed('0.9', 18);
-        const tokenIn = '0x6b175474e89094c44da98b954eedeac495271d0f';
-        const tokenOut = '0xba100000625a3754423978a60c9317c58a424e3d';
+        const tokenIn = DAI;
+        const tokenOut = BAL;
         const swapType = SwapTypes.SwapExactOut;
 
-        const swapsV1Format: any = testSwaps.directhops;
+        const swapsV1Format: Swap[][] = testSwaps.directhops;
 
-        const expectedTokenAddresses: string[] = [
-            '0x6b175474e89094c44da98b954eedeac495271d0f',
-            '0xba100000625a3754423978a60c9317c58a424e3d',
-        ];
+        const expectedTokenAddresses: string[] = [DAI, BAL];
 
         const swapInfo: SwapInfo = formatSwaps(
             swapsV1Format,
@@ -215,18 +198,13 @@ describe(`Tests for Helpers.`, () => {
         const swapAmount = parseFixed('1', 18);
         const returnAmount = parseFixed('2', 18);
         const returnAmountConsideringFees = parseFixed('1.9', 18);
-        const tokenIn = '0x6b175474e89094c44da98b954eedeac495271d0f';
-        const tokenOut = '0x056fd409e1d7a124bd7017459dfea2f387b6d5cd';
+        const tokenIn = DAI;
+        const tokenOut = GUSD;
         const swapType = SwapTypes.SwapExactOut;
 
-        const swapsV1Format: any = testSwaps.multihops;
+        const swapsV1Format: Swap[][] = testSwaps.multihops;
 
-        const expectedTokenAddresses: string[] = [
-            '0x6b175474e89094c44da98b954eedeac495271d0f',
-            '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2',
-            '0x056fd409e1d7a124bd7017459dfea2f387b6d5cd',
-            '0xba100000625a3754423978a60c9317c58a424e3d',
-        ];
+        const expectedTokenAddresses: string[] = [DAI, WETH, GUSD, BAL];
 
         const swapInfo: SwapInfo = formatSwaps(
             swapsV1Format,
@@ -263,17 +241,13 @@ describe(`Tests for Helpers.`, () => {
         const swapAmount = parseFixed('1', 18);
         const returnAmount = parseFixed('2', 18);
         const returnAmountConsideringFees = parseFixed('1.9', 18);
-        const tokenIn = '0x6b175474e89094c44da98b954eedeac495271d0f';
-        const tokenOut = '0x056fd409e1d7a124bd7017459dfea2f387b6d5cd';
+        const tokenIn = DAI;
+        const tokenOut = GUSD;
         const swapType = SwapTypes.SwapExactOut;
 
-        const swapsV1Format: any = testSwaps.directandmultihops;
+        const swapsV1Format: Swap[][] = testSwaps.directandmultihops;
 
-        const expectedTokenAddresses: string[] = [
-            '0x6b175474e89094c44da98b954eedeac495271d0f',
-            '0x056fd409e1d7a124bd7017459dfea2f387b6d5cd',
-            '0xba100000625a3754423978a60c9317c58a424e3d',
-        ];
+        const expectedTokenAddresses: string[] = [DAI, GUSD, BAL];
 
         const swapInfo: SwapInfo = formatSwaps(
             swapsV1Format,
@@ -308,16 +282,13 @@ describe(`Tests for Helpers.`, () => {
         const swapAmount = parseFixed('1', 6);
         const returnAmount = parseFixed('2', 18);
         const returnAmountConsideringFees = parseFixed('1.9', 18);
-        const tokenIn = '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48';
-        const tokenOut = '0x6b175474e89094c44da98b954eedeac495271d0f';
+        const tokenIn = USDC;
+        const tokenOut = DAI;
         const swapType = SwapTypes.SwapExactIn;
 
-        const swapsV1Format: any = testSwaps.directhopUSDCIn;
+        const swapsV1Format: Swap[][] = testSwaps.directhopUSDCIn;
 
-        const expectedTokenAddresses: string[] = [
-            '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48',
-            '0x6b175474e89094c44da98b954eedeac495271d0f',
-        ];
+        const expectedTokenAddresses: string[] = [USDC, DAI];
 
         const swapInfo: SwapInfo = formatSwaps(
             swapsV1Format,
@@ -345,16 +316,13 @@ describe(`Tests for Helpers.`, () => {
         const swapAmount = parseFixed('1', 18);
         const returnAmount = parseFixed('2', 6);
         const returnAmountConsideringFees = parseFixed('1.9', 6);
-        const tokenIn = '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48';
-        const tokenOut = '0x6b175474e89094c44da98b954eedeac495271d0f';
+        const tokenIn = USDC;
+        const tokenOut = DAI;
         const swapType = SwapTypes.SwapExactOut;
 
-        const swapsV1Format: any = testSwaps.directhopUSDCIn;
+        const swapsV1Format: Swap[][] = testSwaps.directhopUSDCIn;
 
-        const expectedTokenAddresses: string[] = [
-            '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48',
-            '0x6b175474e89094c44da98b954eedeac495271d0f',
-        ];
+        const expectedTokenAddresses: string[] = [USDC, DAI];
 
         const swapInfo: SwapInfo = formatSwaps(
             swapsV1Format,
@@ -382,16 +350,13 @@ describe(`Tests for Helpers.`, () => {
         const swapAmount = parseFixed('1', 18);
         const returnAmount = parseFixed('2', 6);
         const returnAmountConsideringFees = parseFixed('1.9', 6);
-        const tokenIn = '0x6b175474e89094c44da98b954eedeac495271d0f';
-        const tokenOut = '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48';
+        const tokenIn = DAI;
+        const tokenOut = USDC;
         const swapType = SwapTypes.SwapExactIn;
 
-        const swapsV1Format: any = testSwaps.directhopUSDCOut;
+        const swapsV1Format: Swap[][] = testSwaps.directhopUSDCOut;
 
-        const expectedTokenAddresses: string[] = [
-            '0x6b175474e89094c44da98b954eedeac495271d0f',
-            '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48',
-        ];
+        const expectedTokenAddresses: string[] = [DAI, USDC];
 
         const swapInfo: SwapInfo = formatSwaps(
             swapsV1Format,
@@ -419,16 +384,13 @@ describe(`Tests for Helpers.`, () => {
         const swapAmount = parseFixed('1', 6);
         const returnAmount = parseFixed('2', 18);
         const returnAmountConsideringFees = parseFixed('1.9', 18);
-        const tokenIn = '0x6b175474e89094c44da98b954eedeac495271d0f';
-        const tokenOut = '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48';
+        const tokenIn = DAI;
+        const tokenOut = USDC;
         const swapType = SwapTypes.SwapExactOut;
 
-        const swapsV1Format: any = testSwaps.directhopUSDCOut;
+        const swapsV1Format: Swap[][] = testSwaps.directhopUSDCOut;
 
-        const expectedTokenAddresses: string[] = [
-            '0x6b175474e89094c44da98b954eedeac495271d0f',
-            '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48',
-        ];
+        const expectedTokenAddresses: string[] = [DAI, USDC];
 
         const swapInfo: SwapInfo = formatSwaps(
             swapsV1Format,
@@ -456,11 +418,11 @@ describe(`Tests for Helpers.`, () => {
         const swapAmount = parseFixed('1', 18);
         const returnAmount = parseFixed('2', 18);
         const returnAmountConsideringFees = parseFixed('1.9', 18);
-        const tokenIn = '0x6b175474e89094c44da98b954eedeac495271d0f';
-        const tokenOut = '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48';
+        const tokenIn = DAI;
+        const tokenOut = USDC;
         const swapType = SwapTypes.SwapExactOut;
 
-        const swapsV1Format: any = [];
+        const swapsV1Format: Swap[][] = [];
 
         const expectedTokenAddresses: string[] = [];
 
@@ -487,13 +449,11 @@ describe(`Tests for Helpers.`, () => {
         const swapAmount = parseFixed('1', 6);
         const returnAmount = parseFixed('2', 18);
         const returnAmountConsideringFees = parseFixed('1.9', 18);
-        const tokenIn = '0x6b175474e89094c44da98b954eedeac495271d0f';
-        const tokenOut = '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48';
+        const tokenIn = DAI;
+        const tokenOut = USDC;
         const swapType = SwapTypes.SwapExactOut;
 
-        const swapsV1Format: any = [];
-
-        const expectedTokenAddresses: string[] = [];
+        const swapsV1Format: Swap[][] = testSwaps.directhopUSDCOut;
 
         const swapInfo: SwapInfo = formatSwaps(
             swapsV1Format,
@@ -506,23 +466,20 @@ describe(`Tests for Helpers.`, () => {
             marketSp
         );
 
-        assert.equal(swapInfo.marketSp, marketSp);
+        expect(swapInfo.marketSp.toString()).to.be.eq(marketSp.toString());
     });
 
     it(`Should format directhop swapExactIn for Weth In, no Eth Wrap`, () => {
         const swapAmount = parseFixed('1', 18);
         const returnAmount = parseFixed('2', 18);
         const returnAmountConsideringFees = parseFixed('1.9', 18);
-        const tokenIn = '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2'; // Weth In
-        const tokenOut = '0xba100000625a3754423978a60c9317c58a424e3d';
+        const tokenIn = WETH;
+        const tokenOut = BAL;
         const swapType = SwapTypes.SwapExactIn;
 
-        const swapsV1Format: any = testSwaps.directhopsWethIn;
+        const swapsV1Format: Swap[][] = testSwaps.directhopsWethIn;
 
-        const expectedTokenAddresses: string[] = [
-            '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2',
-            '0xba100000625a3754423978a60c9317c58a424e3d',
-        ];
+        const expectedTokenAddresses: string[] = [WETH, BAL];
 
         const swapInfo: SwapInfo = formatSwaps(
             swapsV1Format,
@@ -550,20 +507,17 @@ describe(`Tests for Helpers.`, () => {
         const swapAmount = parseFixed('1', 18);
         const returnAmount = parseFixed('2', 18);
         const returnAmountConsideringFees = parseFixed('1.9', 18);
-        const tokenIn = '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2'; // Weth In
-        const tokenOut = '0xba100000625a3754423978a60c9317c58a424e3d';
+        const tokenIn = WETH; // Weth In
+        const tokenOut = BAL;
         const swapType = SwapTypes.SwapExactIn;
         const isEthSwap = {
             isEthSwap: true,
-            wethAddress: '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2',
+            wethAddress: WETH,
         };
 
-        const swapsV1Format: any = testSwaps.directhopsWethIn;
+        const swapsV1Format: Swap[][] = testSwaps.directhopsWethIn;
 
-        const expectedTokenAddresses: string[] = [
-            isEthSwap.wethAddress,
-            '0xba100000625a3754423978a60c9317c58a424e3d',
-        ];
+        const expectedTokenAddresses: string[] = [isEthSwap.wethAddress, BAL];
 
         const swapInfo: SwapInfo = formatSwaps(
             swapsV1Format,
@@ -591,16 +545,13 @@ describe(`Tests for Helpers.`, () => {
         const swapAmount = parseFixed('1', 18);
         const returnAmount = parseFixed('2', 18);
         const returnAmountConsideringFees = parseFixed('1.9', 18);
-        const tokenIn = '0xba100000625a3754423978a60c9317c58a424e3d';
-        const tokenOut = '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2'; // Weth Out
+        const tokenIn = BAL;
+        const tokenOut = WETH; // Weth Out
         const swapType = SwapTypes.SwapExactIn;
 
-        const swapsV1Format: any = testSwaps.directhopsWethOut;
+        const swapsV1Format: Swap[][] = testSwaps.directhopsWethOut;
 
-        const expectedTokenAddresses: string[] = [
-            '0xba100000625a3754423978a60c9317c58a424e3d',
-            '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2',
-        ];
+        const expectedTokenAddresses: string[] = [BAL, WETH];
 
         const swapInfo: SwapInfo = formatSwaps(
             swapsV1Format,
@@ -628,20 +579,17 @@ describe(`Tests for Helpers.`, () => {
         const swapAmount = parseFixed('1', 18);
         const returnAmount = parseFixed('2', 18);
         const returnAmountConsideringFees = parseFixed('1.9', 18);
-        const tokenIn = '0xba100000625a3754423978a60c9317c58a424e3d';
-        const tokenOut = '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2'; // Weth Out
+        const tokenIn = BAL;
+        const tokenOut = WETH; // Weth Out
         const swapType = SwapTypes.SwapExactIn;
         const isEthSwap = {
             isEthSwap: true,
-            wethAddress: '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2',
+            wethAddress: WETH,
         };
 
-        const swapsV1Format: any = testSwaps.directhopsWethOut;
+        const swapsV1Format: Swap[][] = testSwaps.directhopsWethOut;
 
-        const expectedTokenAddresses: string[] = [
-            '0xba100000625a3754423978a60c9317c58a424e3d',
-            isEthSwap.wethAddress,
-        ];
+        const expectedTokenAddresses: string[] = [BAL, isEthSwap.wethAddress];
 
         const swapInfo: SwapInfo = formatSwaps(
             swapsV1Format,
@@ -669,16 +617,13 @@ describe(`Tests for Helpers.`, () => {
         const swapAmount = parseFixed('2', 18);
         const returnAmount = parseFixed('1', 18);
         const returnAmountConsideringFees = parseFixed('0.9', 18);
-        const tokenIn = '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2';
-        const tokenOut = '0xba100000625a3754423978a60c9317c58a424e3d';
+        const tokenIn = WETH;
+        const tokenOut = BAL;
         const swapType = SwapTypes.SwapExactOut;
 
-        const swapsV1Format: any = testSwaps.directhopsWethIn;
+        const swapsV1Format: Swap[][] = testSwaps.directhopsWethIn;
 
-        const expectedTokenAddresses: string[] = [
-            '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2',
-            '0xba100000625a3754423978a60c9317c58a424e3d',
-        ];
+        const expectedTokenAddresses: string[] = [WETH, BAL];
 
         const swapInfo: SwapInfo = formatSwaps(
             swapsV1Format,
@@ -706,20 +651,17 @@ describe(`Tests for Helpers.`, () => {
         const swapAmount = parseFixed('2', 18);
         const returnAmount = parseFixed('1', 18);
         const returnAmountConsideringFees = parseFixed('0.9', 18);
-        const tokenIn = '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2';
-        const tokenOut = '0xba100000625a3754423978a60c9317c58a424e3d';
+        const tokenIn = WETH;
+        const tokenOut = BAL;
         const swapType = SwapTypes.SwapExactOut;
         const isEthSwap = {
             isEthSwap: true,
-            wethAddress: '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2',
+            wethAddress: WETH,
         };
 
-        const swapsV1Format: any = testSwaps.directhopsWethIn;
+        const swapsV1Format: Swap[][] = testSwaps.directhopsWethIn;
 
-        const expectedTokenAddresses: string[] = [
-            isEthSwap.wethAddress,
-            '0xba100000625a3754423978a60c9317c58a424e3d',
-        ];
+        const expectedTokenAddresses: string[] = [isEthSwap.wethAddress, BAL];
 
         const swapInfo: SwapInfo = formatSwaps(
             swapsV1Format,
@@ -747,16 +689,13 @@ describe(`Tests for Helpers.`, () => {
         const swapAmount = parseFixed('2', 18);
         const returnAmount = parseFixed('1', 18);
         const returnAmountConsideringFees = parseFixed('0.9', 18);
-        const tokenIn = '0xba100000625a3754423978a60c9317c58a424e3d';
-        const tokenOut = '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2';
+        const tokenIn = BAL;
+        const tokenOut = WETH;
         const swapType = SwapTypes.SwapExactOut;
 
-        const swapsV1Format: any = testSwaps.directhopsWethOut;
+        const swapsV1Format: Swap[][] = testSwaps.directhopsWethOut;
 
-        const expectedTokenAddresses: string[] = [
-            '0xba100000625a3754423978a60c9317c58a424e3d',
-            '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2',
-        ];
+        const expectedTokenAddresses: string[] = [BAL, WETH];
 
         const swapInfo: SwapInfo = formatSwaps(
             swapsV1Format,
@@ -784,20 +723,17 @@ describe(`Tests for Helpers.`, () => {
         const swapAmount = parseFixed('2', 18);
         const returnAmount = parseFixed('1', 18);
         const returnAmountConsideringFees = parseFixed('0.9', 18);
-        const tokenIn = '0xba100000625a3754423978a60c9317c58a424e3d';
-        const tokenOut = '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2';
+        const tokenIn = BAL;
+        const tokenOut = WETH;
         const swapType = SwapTypes.SwapExactOut;
         const isEthSwap = {
             isEthSwap: true,
-            wethAddress: '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2',
+            wethAddress: WETH,
         };
 
-        const swapsV1Format: any = testSwaps.directhopsWethOut;
+        const swapsV1Format: Swap[][] = testSwaps.directhopsWethOut;
 
-        const expectedTokenAddresses: string[] = [
-            '0xba100000625a3754423978a60c9317c58a424e3d',
-            isEthSwap.wethAddress,
-        ];
+        const expectedTokenAddresses: string[] = [BAL, isEthSwap.wethAddress];
 
         const swapInfo: SwapInfo = formatSwaps(
             swapsV1Format,
@@ -825,17 +761,13 @@ describe(`Tests for Helpers.`, () => {
         const swapAmount = parseFixed('1', 18);
         const returnAmount = parseFixed('2', 18);
         const returnAmountConsideringFees = parseFixed('1.9', 18);
-        const tokenIn = '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2';
-        const tokenOut = '0x056fd409e1d7a124bd7017459dfea2f387b6d5cd';
+        const tokenIn = WETH;
+        const tokenOut = GUSD;
         const swapType = SwapTypes.SwapExactIn;
 
-        const swapsV1Format: any = testSwaps.directandmultihopsWethIn;
+        const swapsV1Format: Swap[][] = testSwaps.directandmultihopsWethIn;
 
-        const expectedTokenAddresses: string[] = [
-            '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2',
-            '0x056fd409e1d7a124bd7017459dfea2f387b6d5cd',
-            '0xba100000625a3754423978a60c9317c58a424e3d',
-        ];
+        const expectedTokenAddresses: string[] = [WETH, GUSD, BAL];
 
         const swapInfo: SwapInfo = formatSwaps(
             swapsV1Format,
@@ -869,20 +801,20 @@ describe(`Tests for Helpers.`, () => {
         const swapAmount = parseFixed('1', 18);
         const returnAmount = parseFixed('2', 18);
         const returnAmountConsideringFees = parseFixed('1.9', 18);
-        const tokenIn = '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2';
-        const tokenOut = '0x056fd409e1d7a124bd7017459dfea2f387b6d5cd';
+        const tokenIn = WETH;
+        const tokenOut = GUSD;
         const swapType = SwapTypes.SwapExactIn;
         const isEthSwap = {
             isEthSwap: true,
-            wethAddress: '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2',
+            wethAddress: WETH,
         };
 
-        const swapsV1Format: any = testSwaps.directandmultihopsWethIn;
+        const swapsV1Format: Swap[][] = testSwaps.directandmultihopsWethIn;
 
         const expectedTokenAddresses: string[] = [
             isEthSwap.wethAddress,
-            '0x056fd409e1d7a124bd7017459dfea2f387b6d5cd',
-            '0xba100000625a3754423978a60c9317c58a424e3d',
+            GUSD,
+            BAL,
         ];
 
         const swapInfo: SwapInfo = formatSwaps(
@@ -917,17 +849,13 @@ describe(`Tests for Helpers.`, () => {
         const swapAmount = parseFixed('1', 18);
         const returnAmount = parseFixed('2', 18);
         const returnAmountConsideringFees = parseFixed('1.9', 18);
-        const tokenIn = '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2';
-        const tokenOut = '0x056fd409e1d7a124bd7017459dfea2f387b6d5cd';
+        const tokenIn = WETH;
+        const tokenOut = GUSD;
         const swapType = SwapTypes.SwapExactOut;
 
-        const swapsV1Format: any = testSwaps.directandmultihopsWethIn;
+        const swapsV1Format: Swap[][] = testSwaps.directandmultihopsWethIn;
 
-        const expectedTokenAddresses: string[] = [
-            '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2',
-            '0x056fd409e1d7a124bd7017459dfea2f387b6d5cd',
-            '0xba100000625a3754423978a60c9317c58a424e3d',
-        ];
+        const expectedTokenAddresses: string[] = [WETH, GUSD, BAL];
 
         const swapInfo: SwapInfo = formatSwaps(
             swapsV1Format,
@@ -962,20 +890,20 @@ describe(`Tests for Helpers.`, () => {
         const swapAmount = parseFixed('1', 18);
         const returnAmount = parseFixed('2', 18);
         const returnAmountConsideringFees = parseFixed('1.9', 18);
-        const tokenIn = '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2';
-        const tokenOut = '0x056fd409e1d7a124bd7017459dfea2f387b6d5cd';
+        const tokenIn = WETH;
+        const tokenOut = GUSD;
         const swapType = SwapTypes.SwapExactOut;
         const isEthSwap = {
             isEthSwap: true,
-            wethAddress: '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2',
+            wethAddress: WETH,
         };
 
-        const swapsV1Format: any = testSwaps.directandmultihopsWethIn;
+        const swapsV1Format: Swap[][] = testSwaps.directandmultihopsWethIn;
 
         const expectedTokenAddresses: string[] = [
             isEthSwap.wethAddress,
-            '0x056fd409e1d7a124bd7017459dfea2f387b6d5cd',
-            '0xba100000625a3754423978a60c9317c58a424e3d',
+            GUSD,
+            BAL,
         ];
 
         const swapInfo: SwapInfo = formatSwaps(
@@ -1011,17 +939,13 @@ describe(`Tests for Helpers.`, () => {
         const swapAmount = parseFixed('1', 18);
         const returnAmount = parseFixed('2', 18);
         const returnAmountConsideringFees = parseFixed('1.9', 18);
-        const tokenIn = '0x056fd409e1d7a124bd7017459dfea2f387b6d5cd';
-        const tokenOut = '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2';
+        const tokenIn = GUSD;
+        const tokenOut = WETH;
         const swapType = SwapTypes.SwapExactIn;
 
-        const swapsV1Format: any = testSwaps.directandmultihopsWethOut;
+        const swapsV1Format: Swap[][] = testSwaps.directandmultihopsWethOut;
 
-        const expectedTokenAddresses: string[] = [
-            '0x056fd409e1d7a124bd7017459dfea2f387b6d5cd',
-            '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2',
-            '0xba100000625a3754423978a60c9317c58a424e3d',
-        ];
+        const expectedTokenAddresses: string[] = [GUSD, WETH, BAL];
 
         const swapInfo: SwapInfo = formatSwaps(
             swapsV1Format,
@@ -1055,20 +979,20 @@ describe(`Tests for Helpers.`, () => {
         const swapAmount = parseFixed('1', 18);
         const returnAmount = parseFixed('2', 18);
         const returnAmountConsideringFees = parseFixed('1.9', 18);
-        const tokenIn = '0x056fd409e1d7a124bd7017459dfea2f387b6d5cd';
-        const tokenOut = '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2';
+        const tokenIn = GUSD;
+        const tokenOut = WETH;
         const swapType = SwapTypes.SwapExactIn;
         const isEthSwap = {
             isEthSwap: true,
-            wethAddress: '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2',
+            wethAddress: WETH,
         };
 
-        const swapsV1Format: any = testSwaps.directandmultihopsWethOut;
+        const swapsV1Format: Swap[][] = testSwaps.directandmultihopsWethOut;
 
         const expectedTokenAddresses: string[] = [
-            '0x056fd409e1d7a124bd7017459dfea2f387b6d5cd',
+            GUSD,
             isEthSwap.wethAddress,
-            '0xba100000625a3754423978a60c9317c58a424e3d',
+            BAL,
         ];
 
         const swapInfo: SwapInfo = formatSwaps(
@@ -1103,17 +1027,13 @@ describe(`Tests for Helpers.`, () => {
         const swapAmount = parseFixed('1', 18);
         const returnAmount = parseFixed('2', 18);
         const returnAmountConsideringFees = parseFixed('1.9', 18);
-        const tokenIn = '0x056fd409e1d7a124bd7017459dfea2f387b6d5cd';
-        const tokenOut = '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2';
+        const tokenIn = GUSD;
+        const tokenOut = WETH;
         const swapType = SwapTypes.SwapExactOut;
 
-        const swapsV1Format: any = testSwaps.directandmultihopsWethOut;
+        const swapsV1Format: Swap[][] = testSwaps.directandmultihopsWethOut;
 
-        const expectedTokenAddresses: string[] = [
-            '0x056fd409e1d7a124bd7017459dfea2f387b6d5cd',
-            '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2',
-            '0xba100000625a3754423978a60c9317c58a424e3d',
-        ];
+        const expectedTokenAddresses: string[] = [GUSD, WETH, BAL];
 
         const swapInfo: SwapInfo = formatSwaps(
             swapsV1Format,
@@ -1148,20 +1068,20 @@ describe(`Tests for Helpers.`, () => {
         const swapAmount = parseFixed('1', 18);
         const returnAmount = parseFixed('2', 18);
         const returnAmountConsideringFees = parseFixed('1.9', 18);
-        const tokenIn = '0x056fd409e1d7a124bd7017459dfea2f387b6d5cd';
-        const tokenOut = '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2';
+        const tokenIn = GUSD;
+        const tokenOut = WETH;
         const swapType = SwapTypes.SwapExactOut;
         const isEthSwap = {
             isEthSwap: true,
-            wethAddress: '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2',
+            wethAddress: WETH,
         };
 
-        const swapsV1Format: any = testSwaps.directandmultihopsWethOut;
+        const swapsV1Format: Swap[][] = testSwaps.directandmultihopsWethOut;
 
         const expectedTokenAddresses: string[] = [
-            '0x056fd409e1d7a124bd7017459dfea2f387b6d5cd',
+            GUSD,
             isEthSwap.wethAddress,
-            '0xba100000625a3754423978a60c9317c58a424e3d',
+            BAL,
         ];
 
         const swapInfo: SwapInfo = formatSwaps(

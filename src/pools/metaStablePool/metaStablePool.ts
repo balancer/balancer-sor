@@ -1,6 +1,6 @@
 import { BigNumber, formatFixed, parseFixed } from '@ethersproject/bignumber';
 import { WeiPerEther as ONE } from '@ethersproject/constants';
-
+import { isSameAddress } from '../../utils';
 import {
     BigNumber as OldBigNumber,
     bnum,
@@ -193,7 +193,7 @@ export class MetaStablePool implements PoolBase {
             this.totalShares = newBalance;
         } else {
             // token is underlying in the pool
-            const T = this.tokens.find((t) => t.address === token);
+            const T = this.tokens.find((t) => isSameAddress(t.address, token));
             if (!T) throw Error('Pool does not contain this token');
             T.balance = formatFixed(newBalance, T.decimals);
         }

@@ -49,9 +49,8 @@ export function filterPoolsOfInterest(
     Object.keys(allPools).forEach((id) => {
         const pool = allPools[id];
         const tokenListSet = new Set(pool.tokensList);
-
-        const containsTokenIn = tokenListSet.has(tokenIn);
-        const containsTokenOut = tokenListSet.has(tokenOut);
+        const containsTokenIn = tokenListSet.has(tokenIn.toLowerCase());
+        const containsTokenOut = tokenListSet.has(tokenOut.toLowerCase());
 
         // This is a direct pool as has both tokenIn and tokenOut
         if (containsTokenIn && containsTokenOut) {
@@ -290,7 +289,11 @@ export function getHighestLiquidityPool(
 
         // If pool doesn't have tokenIn or tokenOut then ignore
 
-        if (!tokenListSet.has(tokenIn) || !tokenListSet.has(tokenOut)) continue;
+        if (
+            !tokenListSet.has(tokenIn.toLowerCase()) ||
+            !tokenListSet.has(tokenOut.toLowerCase())
+        )
+            continue;
         const poolPairData = pool.parsePoolPairData(tokenIn, tokenOut);
         const normalizedLiquidity = pool.getNormalizedLiquidity(poolPairData);
         // Cannot be strictly greater otherwise highestNormalizedLiquidityPoolId = 0 if hopTokens[i] balance is 0 in this pool.
