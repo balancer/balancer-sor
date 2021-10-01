@@ -1,20 +1,19 @@
 import { assert, expect } from 'chai';
+import { parseFixed } from '@ethersproject/bignumber';
 import { WeiPerEther as ONE, Zero } from '@ethersproject/constants';
 import { AddressZero } from '@ethersproject/constants';
 import { JsonRpcProvider } from '@ethersproject/providers';
 
 import { formatSwaps } from '../src/formatSwaps';
 import { getWrappedInfo, setWrappedInfo } from '../src/wrapInfo';
-import { bnum } from '../src';
 import { WETHADDR } from '../src/constants';
 import { Lido } from '../src/pools/lido';
-import { SwapInfo, SwapTypes, SwapV2 } from '../src/types';
-import { BigNumber as OldBigNumber } from '../src/utils/bignumber';
+import { Swap, SwapInfo, SwapTypes, SwapV2 } from '../src/types';
+import { bnum } from '../src/utils/bignumber';
 import testSwaps from './testData/swapsForFormatting.json';
-import { parseFixed } from '@ethersproject/bignumber';
 import { BAL, DAI, GUSD, USDC, WETH } from './lib/constants';
 
-const marketSp: OldBigNumber = new OldBigNumber(7);
+const marketSp = bnum(7);
 
 const provider = new JsonRpcProvider(
     `https://mainnet.infura.io/v3/${process.env.INFURA}`
@@ -30,7 +29,7 @@ describe(`Tests for Helpers.`, () => {
         const tokenOut = BAL;
         const swapType = SwapTypes.SwapExactIn;
 
-        const swapsV1Format: any = testSwaps.directhops;
+        const swapsV1Format: Swap[][] = testSwaps.directhops;
 
         const expectedTokenAddresses: string[] = [DAI, BAL];
 
@@ -71,7 +70,7 @@ describe(`Tests for Helpers.`, () => {
         const tokenOut = GUSD;
         const swapType = SwapTypes.SwapExactIn;
 
-        const swapsV1Format: any = testSwaps.multihops;
+        const swapsV1Format: Swap[][] = testSwaps.multihops;
 
         const expectedTokenAddresses: string[] = [DAI, WETH, GUSD, BAL];
 
@@ -118,7 +117,7 @@ describe(`Tests for Helpers.`, () => {
         const tokenOut = GUSD;
         const swapType = SwapTypes.SwapExactIn;
 
-        const swapsV1Format: any = testSwaps.directandmultihops;
+        const swapsV1Format: Swap[][] = testSwaps.directandmultihops;
 
         const expectedTokenAddresses: string[] = [DAI, GUSD, BAL];
 
@@ -162,7 +161,7 @@ describe(`Tests for Helpers.`, () => {
         const tokenOut = BAL;
         const swapType = SwapTypes.SwapExactOut;
 
-        const swapsV1Format: any = testSwaps.directhops;
+        const swapsV1Format: Swap[][] = testSwaps.directhops;
 
         const expectedTokenAddresses: string[] = [DAI, BAL];
 
@@ -203,7 +202,7 @@ describe(`Tests for Helpers.`, () => {
         const tokenOut = GUSD;
         const swapType = SwapTypes.SwapExactOut;
 
-        const swapsV1Format: any = testSwaps.multihops;
+        const swapsV1Format: Swap[][] = testSwaps.multihops;
 
         const expectedTokenAddresses: string[] = [DAI, WETH, GUSD, BAL];
 
@@ -246,7 +245,7 @@ describe(`Tests for Helpers.`, () => {
         const tokenOut = GUSD;
         const swapType = SwapTypes.SwapExactOut;
 
-        const swapsV1Format: any = testSwaps.directandmultihops;
+        const swapsV1Format: Swap[][] = testSwaps.directandmultihops;
 
         const expectedTokenAddresses: string[] = [DAI, GUSD, BAL];
 
@@ -287,7 +286,7 @@ describe(`Tests for Helpers.`, () => {
         const tokenOut = DAI;
         const swapType = SwapTypes.SwapExactIn;
 
-        const swapsV1Format: any = testSwaps.directhopUSDCIn;
+        const swapsV1Format: Swap[][] = testSwaps.directhopUSDCIn;
 
         const expectedTokenAddresses: string[] = [USDC, DAI];
 
@@ -321,7 +320,7 @@ describe(`Tests for Helpers.`, () => {
         const tokenOut = DAI;
         const swapType = SwapTypes.SwapExactOut;
 
-        const swapsV1Format: any = testSwaps.directhopUSDCIn;
+        const swapsV1Format: Swap[][] = testSwaps.directhopUSDCIn;
 
         const expectedTokenAddresses: string[] = [USDC, DAI];
 
@@ -355,7 +354,7 @@ describe(`Tests for Helpers.`, () => {
         const tokenOut = USDC;
         const swapType = SwapTypes.SwapExactIn;
 
-        const swapsV1Format: any = testSwaps.directhopUSDCOut;
+        const swapsV1Format: Swap[][] = testSwaps.directhopUSDCOut;
 
         const expectedTokenAddresses: string[] = [DAI, USDC];
 
@@ -389,7 +388,7 @@ describe(`Tests for Helpers.`, () => {
         const tokenOut = USDC;
         const swapType = SwapTypes.SwapExactOut;
 
-        const swapsV1Format: any = testSwaps.directhopUSDCOut;
+        const swapsV1Format: Swap[][] = testSwaps.directhopUSDCOut;
 
         const expectedTokenAddresses: string[] = [DAI, USDC];
 
@@ -423,7 +422,7 @@ describe(`Tests for Helpers.`, () => {
         const tokenOut = USDC;
         const swapType = SwapTypes.SwapExactOut;
 
-        const swapsV1Format: any = [];
+        const swapsV1Format: Swap[][] = [];
 
         const expectedTokenAddresses: string[] = [];
 
@@ -454,9 +453,7 @@ describe(`Tests for Helpers.`, () => {
         const tokenOut = USDC;
         const swapType = SwapTypes.SwapExactOut;
 
-        const swapsV1Format: any = [];
-
-        const expectedTokenAddresses: string[] = [];
+        const swapsV1Format: Swap[][] = testSwaps.directhopUSDCOut;
 
         const swapInfo: SwapInfo = formatSwaps(
             swapsV1Format,
@@ -469,7 +466,7 @@ describe(`Tests for Helpers.`, () => {
             marketSp
         );
 
-        assert.equal(swapInfo.marketSp, marketSp);
+        expect(swapInfo.marketSp.toString()).to.be.eq(marketSp.toString());
     });
 
     it(`Should format directhop swapExactIn for Weth In, no Eth Wrap`, () => {
@@ -480,7 +477,7 @@ describe(`Tests for Helpers.`, () => {
         const tokenOut = BAL;
         const swapType = SwapTypes.SwapExactIn;
 
-        const swapsV1Format: any = testSwaps.directhopsWethIn;
+        const swapsV1Format: Swap[][] = testSwaps.directhopsWethIn;
 
         const expectedTokenAddresses: string[] = [WETH, BAL];
 
@@ -518,7 +515,7 @@ describe(`Tests for Helpers.`, () => {
             wethAddress: WETH,
         };
 
-        const swapsV1Format: any = testSwaps.directhopsWethIn;
+        const swapsV1Format: Swap[][] = testSwaps.directhopsWethIn;
 
         const expectedTokenAddresses: string[] = [isEthSwap.wethAddress, BAL];
 
@@ -552,7 +549,7 @@ describe(`Tests for Helpers.`, () => {
         const tokenOut = WETH; // Weth Out
         const swapType = SwapTypes.SwapExactIn;
 
-        const swapsV1Format: any = testSwaps.directhopsWethOut;
+        const swapsV1Format: Swap[][] = testSwaps.directhopsWethOut;
 
         const expectedTokenAddresses: string[] = [BAL, WETH];
 
@@ -590,7 +587,7 @@ describe(`Tests for Helpers.`, () => {
             wethAddress: WETH,
         };
 
-        const swapsV1Format: any = testSwaps.directhopsWethOut;
+        const swapsV1Format: Swap[][] = testSwaps.directhopsWethOut;
 
         const expectedTokenAddresses: string[] = [BAL, isEthSwap.wethAddress];
 
@@ -624,7 +621,7 @@ describe(`Tests for Helpers.`, () => {
         const tokenOut = BAL;
         const swapType = SwapTypes.SwapExactOut;
 
-        const swapsV1Format: any = testSwaps.directhopsWethIn;
+        const swapsV1Format: Swap[][] = testSwaps.directhopsWethIn;
 
         const expectedTokenAddresses: string[] = [WETH, BAL];
 
@@ -662,7 +659,7 @@ describe(`Tests for Helpers.`, () => {
             wethAddress: WETH,
         };
 
-        const swapsV1Format: any = testSwaps.directhopsWethIn;
+        const swapsV1Format: Swap[][] = testSwaps.directhopsWethIn;
 
         const expectedTokenAddresses: string[] = [isEthSwap.wethAddress, BAL];
 
@@ -696,7 +693,7 @@ describe(`Tests for Helpers.`, () => {
         const tokenOut = WETH;
         const swapType = SwapTypes.SwapExactOut;
 
-        const swapsV1Format: any = testSwaps.directhopsWethOut;
+        const swapsV1Format: Swap[][] = testSwaps.directhopsWethOut;
 
         const expectedTokenAddresses: string[] = [BAL, WETH];
 
@@ -734,7 +731,7 @@ describe(`Tests for Helpers.`, () => {
             wethAddress: WETH,
         };
 
-        const swapsV1Format: any = testSwaps.directhopsWethOut;
+        const swapsV1Format: Swap[][] = testSwaps.directhopsWethOut;
 
         const expectedTokenAddresses: string[] = [BAL, isEthSwap.wethAddress];
 
@@ -768,7 +765,7 @@ describe(`Tests for Helpers.`, () => {
         const tokenOut = GUSD;
         const swapType = SwapTypes.SwapExactIn;
 
-        const swapsV1Format: any = testSwaps.directandmultihopsWethIn;
+        const swapsV1Format: Swap[][] = testSwaps.directandmultihopsWethIn;
 
         const expectedTokenAddresses: string[] = [WETH, GUSD, BAL];
 
@@ -812,7 +809,7 @@ describe(`Tests for Helpers.`, () => {
             wethAddress: WETH,
         };
 
-        const swapsV1Format: any = testSwaps.directandmultihopsWethIn;
+        const swapsV1Format: Swap[][] = testSwaps.directandmultihopsWethIn;
 
         const expectedTokenAddresses: string[] = [
             isEthSwap.wethAddress,
@@ -856,7 +853,7 @@ describe(`Tests for Helpers.`, () => {
         const tokenOut = GUSD;
         const swapType = SwapTypes.SwapExactOut;
 
-        const swapsV1Format: any = testSwaps.directandmultihopsWethIn;
+        const swapsV1Format: Swap[][] = testSwaps.directandmultihopsWethIn;
 
         const expectedTokenAddresses: string[] = [WETH, GUSD, BAL];
 
@@ -901,7 +898,7 @@ describe(`Tests for Helpers.`, () => {
             wethAddress: WETH,
         };
 
-        const swapsV1Format: any = testSwaps.directandmultihopsWethIn;
+        const swapsV1Format: Swap[][] = testSwaps.directandmultihopsWethIn;
 
         const expectedTokenAddresses: string[] = [
             isEthSwap.wethAddress,
@@ -946,7 +943,7 @@ describe(`Tests for Helpers.`, () => {
         const tokenOut = WETH;
         const swapType = SwapTypes.SwapExactIn;
 
-        const swapsV1Format: any = testSwaps.directandmultihopsWethOut;
+        const swapsV1Format: Swap[][] = testSwaps.directandmultihopsWethOut;
 
         const expectedTokenAddresses: string[] = [GUSD, WETH, BAL];
 
@@ -990,7 +987,7 @@ describe(`Tests for Helpers.`, () => {
             wethAddress: WETH,
         };
 
-        const swapsV1Format: any = testSwaps.directandmultihopsWethOut;
+        const swapsV1Format: Swap[][] = testSwaps.directandmultihopsWethOut;
 
         const expectedTokenAddresses: string[] = [
             GUSD,
@@ -1034,7 +1031,7 @@ describe(`Tests for Helpers.`, () => {
         const tokenOut = WETH;
         const swapType = SwapTypes.SwapExactOut;
 
-        const swapsV1Format: any = testSwaps.directandmultihopsWethOut;
+        const swapsV1Format: Swap[][] = testSwaps.directandmultihopsWethOut;
 
         const expectedTokenAddresses: string[] = [GUSD, WETH, BAL];
 
@@ -1079,7 +1076,7 @@ describe(`Tests for Helpers.`, () => {
             wethAddress: WETH,
         };
 
-        const swapsV1Format: any = testSwaps.directandmultihopsWethOut;
+        const swapsV1Format: Swap[][] = testSwaps.directandmultihopsWethOut;
 
         const expectedTokenAddresses: string[] = [
             GUSD,

@@ -69,12 +69,12 @@ const formatSequence = (
                 .toString();
         }
 
-        const inIndex = tokenAddresses.indexOf(swap.tokenIn);
-        const outIndex = tokenAddresses.indexOf(swap.tokenOut);
+        const assetInIndex = tokenAddresses.indexOf(swap.tokenIn);
+        const assetOutIndex = tokenAddresses.indexOf(swap.tokenOut);
         return {
             poolId: swap.pool,
-            assetInIndex: inIndex,
-            assetOutIndex: outIndex,
+            assetInIndex,
+            assetOutIndex,
             amount: amountScaled,
             userData: '0x',
         };
@@ -91,36 +91,32 @@ export function formatSwaps(
     returnAmountConsideringFees: BigNumber,
     marketSp: OldBigNumber
 ): SwapInfo {
-    const swaps: Swap[][] = cloneDeep(swapsOriginal);
-
-    const swapInfo: SwapInfo = {
-        ...EMPTY_SWAPINFO,
-        marketSp: marketSp,
-    };
-
-    if (swaps.length === 0) {
-        return swapInfo;
+    if (swapsOriginal.length === 0) {
+        return cloneDeep(EMPTY_SWAPINFO);
     }
 
-    const tokenArray = getTokenAddresses(swaps);
-    const swapsV2: SwapV2[] = swaps.flatMap((sequence) =>
-        formatSequence(swapType, sequence, tokenArray)
+    const swapsClone = cloneDeep(swapsOriginal);
+    const tokenAddresses = getTokenAddresses(swapsClone);
+    const swaps: SwapV2[] = swapsClone.flatMap((sequence) =>
+        formatSequence(swapType, sequence, tokenAddresses)
     );
 
-    swapInfo.swapAmount = swapAmount;
-    swapInfo.returnAmount = returnAmount;
-    swapInfo.returnAmountConsideringFees = returnAmountConsideringFees;
-
     // We need to account for any rounding losses by adding dust to first path
-    const dust = swapInfo.swapAmount.sub(getTotalSwapAmount(swapsV2));
-    if (dust.gt(0))
-        swapsV2[0].amount = BigNumber.from(swapsV2[0].amount)
-            .add(dust)
-            .toString();
+    const dust = swapAmount.sub(getTotalSwapAmount(swaps));
+    if (dust.gt(0)) {
+        swaps[0].amount = BigNumber.from(swaps[0].amount).add(dust).toString();
+    }
 
-    swapInfo.swaps = swapsV2;
-    swapInfo.tokenAddresses = tokenArray;
-    swapInfo.tokenIn = tokenIn;
-    swapInfo.tokenOut = tokenOut;
+    const swapInfo: SwapInfo = {
+        swapAmount,
+        returnAmount,
+        returnAmountConsideringFees,
+        swaps,
+        tokenAddresses,
+        tokenIn,
+        tokenOut,
+        marketSp,
+    };
+
     return swapInfo;
 }
