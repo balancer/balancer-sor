@@ -2,6 +2,7 @@ import {
     filterPoolsOfInterest,
     filterHopPools,
     getPathsUsingLinearPools,
+    getPathsUsingStaBalPool,
     parseToPoolsDict,
 } from './filtering';
 import { calculatePathLimits } from './pathLimits';
@@ -37,26 +38,40 @@ export class RouteProposer {
 
         const poolsAllDict = parseToPoolsDict(pools, swapOptions.timestamp);
 
-        const [poolsDict, hopTokens] = filterPoolsOfInterest(
+        const [poolsFilteredDict, hopTokens] = filterPoolsOfInterest(
             poolsAllDict,
             tokenIn,
             tokenOut,
             swapOptions.maxPools
         );
 
-        let pathData: NewPath[];
-        [, pathData] = filterHopPools(tokenIn, tokenOut, hopTokens, poolsDict);
+        const [, pathData] = filterHopPools(
+            tokenIn,
+            tokenOut,
+            hopTokens,
+            poolsFilteredDict
+        );
 
         const pathsUsingLinear: NewPath[] = getPathsUsingLinearPools(
             tokenIn,
             tokenOut,
             poolsAllDict,
-            poolsDict,
+            poolsFilteredDict,
             chainId
         );
-        pathData = pathData.concat(pathsUsingLinear);
 
-        const [paths] = calculatePathLimits(pathData, swapType);
+        const pathsUsingStaBal = getPathsUsingStaBalPool(
+            tokenIn,
+            tokenOut,
+            poolsAllDict,
+            poolsFilteredDict,
+            chainId
+        );
+
+        const combinedPathData = pathData
+            .concat(...pathsUsingLinear)
+            .concat(...pathsUsingStaBal);
+        const [paths] = calculatePathLimits(combinedPathData, swapType);
 
         this.cache[`${tokenIn}${tokenOut}${swapType}${swapOptions.timestamp}`] =
             {

@@ -398,60 +398,60 @@ function getFullPaths(
     return [paths, poolsAll];
 }
 
-function runSOR(
-    tokIn,
-    tokOut,
-    swapType: SwapTypes,
-    swapAmount: BigNumber,
-    jsonPools
-) {
-    console.log(
-        'Input info:\ntoken in: ',
-        tokIn.symbol,
-        '\ntoken out:',
-        tokOut.symbol
-    );
-    console.log(
-        'swap type: ',
-        swapType.toString(),
-        '\nswap amount: ',
-        swapAmount.toString(),
-        '\n'
-    );
-    const maxPools = 10;
-    const tokenIn = tokIn.address;
-    const tokenOut = tokOut.address;
-    const [paths] = getFullPaths(
-        tokenIn,
-        tokenOut,
-        swapType,
-        jsonPools.pools,
-        maxPools
-    );
-    let swaps: any,
-        total: BigNumber,
-        totalConsideringFees: BigNumber,
-        marketSp: BigNumber;
-    [swaps, total, marketSp, totalConsideringFees] = getBestPaths(
-        // getBestRoute?
-        paths,
-        swapType,
-        swapAmount,
-        maxPools,
-        bnum(0.01)
-    );
-    console.log('swaps: ', swaps);
-    /*
-    const swapInfo = formatSwaps(
-        swaps,
-        swapType,
-        swapAmount,
-        tokIn,
-        tokenOut,
-        total,
-        totalConsideringFees,
-        marketSp
-    );
-    console.log(swapInfo.swaps );
-    console.log(swapInfo.tokenAddresses );*/
-}
+// function runSOR(
+//     tokIn,
+//     tokOut,
+//     swapType: SwapTypes,
+//     swapAmount: BigNumber,
+//     jsonPools
+// ) {
+//     console.log(
+//         'Input info:\ntoken in: ',
+//         tokIn.symbol,
+//         '\ntoken out:',
+//         tokOut.symbol
+//     );
+//     console.log(
+//         'swap type: ',
+//         swapType.toString(),
+//         '\nswap amount: ',
+//         swapAmount.toString(),
+//         '\n'
+//     );
+//     const maxPools = 10;
+//     const tokenIn = tokIn.address;
+//     const tokenOut = tokOut.address;
+//     const [paths] = getFullPaths(
+//         tokenIn,
+//         tokenOut,
+//         swapType,
+//         jsonPools.pools,
+//         maxPools
+//     );
+//     let swaps: any,
+//         total: BigNumber,
+//         totalConsideringFees: BigNumber,
+//         marketSp: BigNumber;
+//     [swaps, total, marketSp, totalConsideringFees] = getBestPaths(
+//         // getBestRoute?
+//         paths,
+//         swapType,
+//         swapAmount,
+//         maxPools,
+//         bnum(0.01)
+//     );
+//     console.log('swaps: ', swaps);
+//     /*
+//     const swapInfo = formatSwaps(
+//         swaps,
+//         swapType,
+//         swapAmount,
+//         tokIn,
+//         tokenOut,
+//         total,
+//         totalConsideringFees,
+//         marketSp
+//     );
+//     console.log(swapInfo.swaps );
+//     console.log(swapInfo.tokenAddresses );*/
+// }

@@ -14,8 +14,9 @@ import {
 import { MetaStablePool } from '../pools/metaStablePool/metaStablePool';
 import { ZERO } from '../utils/bignumber';
 import { STABAL3POOL } from '../addresses';
-
+import { USDCCONNECTINGPOOL, STABALADDR } from '../constants';
 import { parseNewPool } from '../pools';
+import { Zero } from '@ethersproject/constants';
 
 export const filterPoolsByType = (
     pools: SubgraphPoolBase[],
@@ -32,9 +33,6 @@ The main purpose of this function is to:
     - TokenIn & !TokenOut, i.e. a hop pool with only TokenIn
     - !TokenIn & TokenOut, i.e. a hop pool with only TokenOut
 - find list of hop tokens, i.e. tokens that join hop pools
-As we're looping all here, it also does a number of other things to avoid unnecessary loops later:
-- parsePoolPairData for Direct pools
-- store token decimals for future use
 */
 export function filterPoolsOfInterest(
     allPools: PoolDictionary,
@@ -71,7 +69,6 @@ export function filterPoolsOfInterest(
                     ...tokenInPairedTokens,
                     ...tokenListSet,
                 ]);
-                console.log(pool.id);
                 pool.setTypeForSwap(SwapPairType.HopIn);
                 poolsFilteredDictionary[pool.id] = pool;
             } else if (!containsTokenIn && containsTokenOut) {
@@ -276,7 +273,7 @@ export function getPathsUsingLinearPools(
             poolsFilteredDict
         );
         // No pool for TokenOut/staBal3
-        if (pairedPoolId === '') return [];
+        if (pairedPoolId === '' || pairedPoolId === null) return [];
 
         // Creates first part of path: TokenIn>[LINEARPOOL]>bStable>[staBAL3]>staBal3Bpt
         const linearPathway = createMultihopPath(
@@ -310,7 +307,7 @@ export function getPathsUsingLinearPools(
         );
 
         // No pool for TokenIn/staBal3
-        if (pairedPoolId === '') return [];
+        if (pairedPoolId === '' || pairedPoolId === null) return [];
 
         // Creates first part of path: TokenIn>[PairedPool]>staBal3Bpt
         const pairedPool = poolsFilteredDict[pairedPoolId];
@@ -334,60 +331,6 @@ export function getPathsUsingLinearPools(
     }
 }
 
-function getHighestLiquidityPool(
-    tokenIn: string,
-    tokenOut: string,
-    swapPairType: SwapPairType,
-    poolsOfInterest: PoolDictionary
-): string {
-    let highestNormalizedLiquidity = ZERO;
-    let highestNormalizedLiquidityPoolId = '';
-    for (const id in poolsOfInterest) {
-        const pool = poolsOfInterest[id];
-        if (swapPairType != pool.swapPairType) continue;
-        const tokenListSet = new Set(pool.tokensList);
-
-        // If pool doesn't have tokenIn or tokenOut then ignore
-
-        if (!tokenListSet.has(tokenIn) || !tokenListSet.has(tokenOut)) continue;
-        const poolPairData = pool.parsePoolPairData(tokenIn, tokenOut);
-        const normalizedLiquidity = pool.getNormalizedLiquidity(poolPairData);
-        // Cannot be strictly greater otherwise highestNormalizedLiquidityPoolId = 0 if hopTokens[i] balance is 0 in this pool.
-        if (
-            normalizedLiquidity.isGreaterThanOrEqualTo(
-                highestNormalizedLiquidity
-            )
-        ) {
-            highestNormalizedLiquidity = normalizedLiquidity;
-            highestNormalizedLiquidityPoolId = id;
-        }
-    }
-    return highestNormalizedLiquidityPoolId;
-}
-
-// This function will only work correctly if the input is composable
-// i.e. each path's token out = next path's token in
-function composePaths(paths: NewPath[]): NewPath {
-    let id = '';
-    let swaps: Swap[] = [];
-    let poolPairData: PoolPairBase[] = [];
-    let pools: PoolBase[] = [];
-    for (const path of paths) {
-        id += path.id;
-        swaps = swaps.concat(path.swaps);
-        poolPairData = poolPairData.concat(path.poolPairData);
-        pools = pools.concat(path.pools);
-    }
-    const path: NewPath = {
-        id: id,
-        swaps: swaps,
-        poolPairData: poolPairData,
-        limitAmount: ZERO,
-        pools: pools,
-    };
-    return path;
-}
-
 function createDirectPath(
     pool: PoolBase,
     tokenIn: string,
@@ -406,7 +349,7 @@ function createDirectPath(
     const path: NewPath = {
         id: pool.id,
         swaps: [swap],
-        limitAmount: ZERO,
+        limitAmount: Zero,
         poolPairData: [poolPairData],
         pools: [pool],
     };
@@ -445,7 +388,7 @@ function makeLinearPathway(
     ]);
 }
 
-function createMultihopPath(
+export function createMultihopPath(
     firstPool: PoolBase,
     secondPool: PoolBase,
     tokenIn: string,
@@ -475,12 +418,189 @@ function createMultihopPath(
     const path: NewPath = {
         id: firstPool.id + secondPool.id,
         swaps: [swap1, swap2],
-        limitAmount: ZERO,
+        limitAmount: Zero,
         poolPairData: [poolPairDataFirst, poolPairDataSecond],
         pools: [firstPool, secondPool],
     };
 
     return path;
+}
+
+export function getHighestLiquidityPool(
+    tokenIn: string,
+    tokenOut: string,
+    swapPairType: SwapPairType,
+    poolsOfInterest: PoolDictionary
+): string | null {
+    let highestNormalizedLiquidity = ZERO;
+    let highestNormalizedLiquidityPoolId: string | null = null;
+    for (const id in poolsOfInterest) {
+        const pool = poolsOfInterest[id];
+        if (swapPairType != pool.swapPairType) continue;
+        const tokenListSet = new Set(pool.tokensList);
+
+        // If pool doesn't have tokenIn or tokenOut then ignore
+
+        if (
+            !tokenListSet.has(tokenIn.toLowerCase()) ||
+            !tokenListSet.has(tokenOut.toLowerCase())
+        )
+            continue;
+        const poolPairData = pool.parsePoolPairData(tokenIn, tokenOut);
+        const normalizedLiquidity = pool.getNormalizedLiquidity(poolPairData);
+        // Cannot be strictly greater otherwise highestNormalizedLiquidityPoolId = 0 if hopTokens[i] balance is 0 in this pool.
+        if (
+            normalizedLiquidity.isGreaterThanOrEqualTo(
+                highestNormalizedLiquidity
+            )
+        ) {
+            highestNormalizedLiquidity = normalizedLiquidity;
+            highestNormalizedLiquidityPoolId = id;
+        }
+    }
+    return highestNormalizedLiquidityPoolId;
+}
+
+// This function will only work correctly if the input is composable
+// i.e. each path's token out = next path's token in
+function composePaths(paths: NewPath[]): NewPath {
+    let id = '';
+    let swaps: Swap[] = [];
+    let poolPairData: PoolPairBase[] = [];
+    let pools: PoolBase[] = [];
+    for (const path of paths) {
+        id += path.id;
+        swaps = swaps.concat(path.swaps);
+        poolPairData = poolPairData.concat(path.poolPairData);
+        pools = pools.concat(path.pools);
+    }
+    const path: NewPath = {
+        id: id,
+        swaps: swaps,
+        poolPairData: poolPairData,
+        limitAmount: Zero,
+        pools: pools,
+    };
+    return path;
+}
+
+/*
+The staBAL3 pool (STABALADDR) is the main stable pool that holds DAI/USDC/USDT and has the staBAL3 BPT.
+Metastable pools that contain a project token, i.e. TUSD, paired with staBAL3 BPT.
+USDC connecting pool (USDCCONNECTINGPOOL) is a metastable pool containing USDC and staBAL3 BPT.
+This setup should enable paths between the new project metastable pools and other liquidity. I.e. TUSD > BAL, which would look like:
+TUSD>[TUSDstaBALPool]>staBAL3>[ConnectingPool]>USDC>[BalWeightedPool]>BAL
+*/
+export function getPathsUsingStaBalPool(
+    tokenIn: string,
+    tokenOut: string,
+    poolsAll: PoolDictionary,
+    poolsFiltered: PoolDictionary,
+    chainId: number
+): NewPath[] {
+    // This will be the USDC/staBAL Connecting pool used in Polygon
+    const usdcConnectingPoolInfo = USDCCONNECTINGPOOL[chainId];
+    if (!usdcConnectingPoolInfo) return [];
+
+    const usdcConnectingPool = poolsAll[usdcConnectingPoolInfo.id];
+    if (!usdcConnectingPool) return [];
+
+    // staBal BPT token is the hop token between token and USDC connecting pool
+    const hopTokenStaBal = STABALADDR[chainId];
+
+    // Finds the best metastable Pool with tokenIn/staBal3Bpt or returns null if doesn't exist
+    const metastablePoolIdIn = getHighestLiquidityPool(
+        tokenIn,
+        hopTokenStaBal,
+        SwapPairType.HopIn,
+        poolsFiltered
+    );
+    // Finds the best metastable Pool with tokenOut/staBal3Bpt or returns null if doesn't exist
+    const metastablePoolIdOut = getHighestLiquidityPool(
+        hopTokenStaBal,
+        tokenOut,
+        SwapPairType.HopOut,
+        poolsFiltered
+    );
+
+    if (metastablePoolIdIn && !metastablePoolIdOut) {
+        // First part of path is multihop through metaStablePool and USDC Connecting Pools
+        // Last part of path is single hop through USDC/tokenOut highest liquidity pool
+        // i.e. tokenIn>[metaStablePool]>staBAL>[usdcConnecting]>USDC>[HighLiqPool]>tokenOut
+
+        const metaStablePoolIn = poolsFiltered[metastablePoolIdIn];
+
+        // tokenIn > [metaStablePool] > staBal > [UsdcConnectingPool] > USDC
+        const staBalPath = createMultihopPath(
+            metaStablePoolIn,
+            usdcConnectingPool,
+            tokenIn,
+            hopTokenStaBal,
+            usdcConnectingPoolInfo.usdc
+        );
+
+        // Hop out as it is USDC > tokenOut
+        const mostLiquidLastPool = getHighestLiquidityPool(
+            usdcConnectingPoolInfo.usdc,
+            tokenOut,
+            SwapPairType.HopOut,
+            poolsFiltered
+        );
+        // No USDC>tokenOut pool so return empty path
+        if (mostLiquidLastPool === null) return [];
+
+        const lastPool = poolsFiltered[mostLiquidLastPool];
+        const pathEnd = createDirectPath(
+            lastPool,
+            usdcConnectingPoolInfo.usdc,
+            tokenOut
+        );
+
+        return [composePaths([staBalPath, pathEnd])];
+    }
+
+    if (!metastablePoolIdIn && metastablePoolIdOut) {
+        // First part of path is single hop through tokenIn/USDC highest liquidity pool
+        // Last part of path is multihop through USDC Connecting Pools and metaStablePool
+        // i.e. i.e. tokenIn>[HighLiqPool]>USDC>[usdcConnecting]>staBAL>[metaStablePool]>tokenOut
+
+        // Hop in as it is tokenIn > USDC
+        const mostLiquidFirstPool = getHighestLiquidityPool(
+            tokenIn,
+            usdcConnectingPoolInfo.usdc,
+            SwapPairType.HopIn,
+            poolsFiltered
+        );
+        // No tokenIn>USDC pool so return empty path
+        if (mostLiquidFirstPool === null) return [];
+
+        const metaStablePoolIn = poolsFiltered[metastablePoolIdOut];
+        const firstPool = poolsFiltered[mostLiquidFirstPool];
+
+        // USDC > [UsdcConnectingPool] > staBal > [metaStablePool] > tokenOut
+        const staBalPath = createMultihopPath(
+            usdcConnectingPool,
+            metaStablePoolIn,
+            usdcConnectingPoolInfo.usdc,
+            hopTokenStaBal,
+            tokenOut
+        );
+
+        const pathStart = createDirectPath(
+            firstPool,
+            tokenIn,
+            usdcConnectingPoolInfo.usdc
+        );
+
+        return [composePaths([pathStart, staBalPath])];
+    }
+
+    // If we're here either the path doesn't use metastable pools (and so will not be routed through StaBAL)
+    // or both input and output tokens are in metastable pools and so should be handled by existing multihop algorithm
+    // (because it is tokenIn>[metaStablePoolIn]>staBal>[metaStablePoolOut]>tokenOut)
+    //
+    // We then return an empty set of paths
+    return [];
 }
 
 export function parseToPoolsDict(

@@ -1110,6 +1110,7 @@
         {
             "id": "0x0092b2d25d76d84d27b999fe93d5e1c70511cd2b",
             "swapFee": "0.01",
+            "swapEnabled": true,
             "tokens": [
                 {
                     "address": "0x6b175474e89094c44da98b954eedeac495271d0f",
@@ -1137,6 +1138,7 @@
         {
             "id": "0x00e5a66d31768318a7cae45dd7a0ef8288d7288d",
             "swapFee": "0.01",
+            "swapEnabled": true,
             "tokens": [
                 {
                     "address": "0x2260fac5e5542a773aa44fbcfedf7c193bc2c599",
@@ -1146,7 +1148,7 @@
                 },
                 {
                     "address": "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
-                    "balance": "348800.157205921841690823",
+                    "balance": "348800.157205",
                     "decimals": 6,
                     "weight": "5"
                 },
