@@ -7,7 +7,6 @@
                 "tokenOut": "0xba100000625a3754423978a60c9317c58a424e3d",
                 "swapAmount": "79025.357871722424185502",
                 "limitReturnAmount": "0",
-                "maxPrice": "115792089237316195423570985008687907853269984665640564039457584007913129639935",
                 "tokenInDecimals": 18,
                 "tokenOutDecimals": 18
             }
@@ -19,7 +18,6 @@
                 "tokenOut": "0xba100000625a3754423978a60c9317c58a424e3d",
                 "swapAmount": "20974.642128277575814498",
                 "limitReturnAmount": "0",
-                "maxPrice": "115792089237316195423570985008687907853269984665640564039457584007913129639935",
                 "tokenInDecimals": 18,
                 "tokenOutDecimals": 18
             }
@@ -33,7 +31,6 @@
                 "tokenOut": "0x6b175474e89094c44da98b954eedeac495271d0f",
                 "swapAmount": "77.777777",
                 "limitReturnAmount": "0",
-                "maxPrice": "115792089237316195423570985008687907853269984665640564039457584007913129639935",
                 "tokenInDecimals": 6,
                 "tokenOutDecimals": 18
             }
@@ -47,7 +44,6 @@
                 "tokenOut": "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
                 "swapAmount": "77.777777",
                 "limitReturnAmount": "0",
-                "maxPrice": "115792089237316195423570985008687907853269984665640564039457584007913129639935",
                 "tokenInDecimals": 18,
                 "tokenOutDecimals": 6
             }
@@ -61,7 +57,6 @@
                 "tokenOut": "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
                 "swapAmount": "79025.357871722424185502",
                 "limitReturnAmount": "0",
-                "maxPrice": "115792089237316195423570985008687907853269984665640564039457584007913129639935",
                 "tokenInDecimals": 18,
                 "tokenOutDecimals": 18
             },
@@ -71,7 +66,6 @@
                 "tokenOut": "0x056fd409e1d7a124bd7017459dfea2f387b6d5cd",
                 "swapAmount": "50.388502611813030611",
                 "limitReturnAmount": "0",
-                "maxPrice": "115792089237316195423570985008687907853269984665640564039457584007913129639935",
                 "tokenInDecimals": 18,
                 "tokenOutDecimals": 18
             }
@@ -83,7 +77,6 @@
                 "tokenOut": "0xba100000625a3754423978a60c9317c58a424e3d",
                 "swapAmount": "20974.642128277575814498",
                 "limitReturnAmount": "0",
-                "maxPrice": "115792089237316195423570985008687907853269984665640564039457584007913129639935",
                 "tokenInDecimals": 18,
                 "tokenOutDecimals": 18
             },
@@ -93,7 +86,6 @@
                 "tokenOut": "0x056fd409e1d7a124bd7017459dfea2f387b6d5cd",
                 "swapAmount": "576.855408194315533683",
                 "limitReturnAmount": "0",
-                "maxPrice": "115792089237316195423570985008687907853269984665640564039457584007913129639935",
                 "tokenInDecimals": 18,
                 "tokenOutDecimals": 18
             }
@@ -107,7 +99,6 @@
                 "tokenOut": "0x056fd409e1d7a124bd7017459dfea2f387b6d5cd",
                 "swapAmount": "79025.357871722424185502",
                 "limitReturnAmount": "0",
-                "maxPrice": "115792089237316195423570985008687907853269984665640564039457584007913129639935",
                 "tokenInDecimals": 18,
                 "tokenOutDecimals": 18
             }
@@ -119,7 +110,6 @@
                 "tokenOut": "0xba100000625a3754423978a60c9317c58a424e3d",
                 "swapAmount": "20974.642128277575814498",
                 "limitReturnAmount": "0",
-                "maxPrice": "115792089237316195423570985008687907853269984665640564039457584007913129639935",
                 "tokenInDecimals": 18,
                 "tokenOutDecimals": 18
             },
@@ -129,7 +119,6 @@
                 "tokenOut": "0x056fd409e1d7a124bd7017459dfea2f387b6d5cd",
                 "swapAmount": "576.855408194315533683",
                 "limitReturnAmount": "0",
-                "maxPrice": "115792089237316195423570985008687907853269984665640564039457584007913129639935",
                 "tokenInDecimals": 18,
                 "tokenOutDecimals": 18
             }
@@ -143,7 +132,6 @@
                 "tokenOut": "0xba100000625a3754423978a60c9317c58a424e3d",
                 "swapAmount": "79025.357871722424185502",
                 "limitReturnAmount": "0",
-                "maxPrice": "115792089237316195423570985008687907853269984665640564039457584007913129639935",
                 "tokenInDecimals": 18,
                 "tokenOutDecimals": 18
             }
@@ -157,7 +145,6 @@
                 "tokenOut": "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
                 "swapAmount": "79025.357871722424185502",
                 "limitReturnAmount": "0",
-                "maxPrice": "115792089237316195423570985008687907853269984665640564039457584007913129639935",
                 "tokenInDecimals": 18,
                 "tokenOutDecimals": 18
             }
@@ -171,7 +158,6 @@
                 "tokenOut": "0x056fd409e1d7a124bd7017459dfea2f387b6d5cd",
                 "swapAmount": "79025.357871722424185502",
                 "limitReturnAmount": "0",
-                "maxPrice": "115792089237316195423570985008687907853269984665640564039457584007913129639935",
                 "tokenInDecimals": 18,
                 "tokenOutDecimals": 18
             }
@@ -183,7 +169,6 @@
                 "tokenOut": "0xba100000625a3754423978a60c9317c58a424e3d",
                 "swapAmount": "20974.642128277575814498",
                 "limitReturnAmount": "0",
-                "maxPrice": "115792089237316195423570985008687907853269984665640564039457584007913129639935",
                 "tokenInDecimals": 18,
                 "tokenOutDecimals": 18
             },
@@ -193,7 +178,6 @@
                 "tokenOut": "0x056fd409e1d7a124bd7017459dfea2f387b6d5cd",
                 "swapAmount": "576.855408194315533683",
                 "limitReturnAmount": "0",
-                "maxPrice": "115792089237316195423570985008687907853269984665640564039457584007913129639935",
                 "tokenInDecimals": 18,
                 "tokenOutDecimals": 18
             }
@@ -207,7 +191,6 @@
                 "tokenOut": "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
                 "swapAmount": "79025.357871722424185502",
                 "limitReturnAmount": "0",
-                "maxPrice": "115792089237316195423570985008687907853269984665640564039457584007913129639935",
                 "tokenInDecimals": 18,
                 "tokenOutDecimals": 18
             }
@@ -219,7 +202,6 @@
                 "tokenOut": "0xba100000625a3754423978a60c9317c58a424e3d",
                 "swapAmount": "20974.642128277575814498",
                 "limitReturnAmount": "0",
-                "maxPrice": "115792089237316195423570985008687907853269984665640564039457584007913129639935",
                 "tokenInDecimals": 18,
                 "tokenOutDecimals": 18
             },
@@ -229,7 +211,6 @@
                 "tokenOut": "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
                 "swapAmount": "576.855408194315533683",
                 "limitReturnAmount": "0",
-                "maxPrice": "115792089237316195423570985008687907853269984665640564039457584007913129639935",
                 "tokenInDecimals": 18,
                 "tokenOutDecimals": 18
             }

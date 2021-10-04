@@ -41397,16 +41397,14 @@
                     "tokenIn": "0x9f8f72aa9304c8b593d555f12ef6589cc3a579a2",
                     "tokenOut": "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
                     "swapAmount": "287403725658538200",
-                    "limitReturnAmount": "0",
-                    "maxPrice": "115792089237316195423570985008687907853269984665640564039457584007913129639935"
+                    "limitReturnAmount": "0"
                 },
                 {
                     "pool": "0xc48b8329d47ae8fd504c0b81cf8435486380e858",
                     "tokenIn": "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
                     "tokenOut": "0xc00e94cb662c3520282e6f5717214004a7f26888",
                     "swapAmount": "388861760856345373",
-                    "limitReturnAmount": "0",
-                    "maxPrice": "115792089237316195423570985008687907853269984665640564039457584007913129639935"
+                    "limitReturnAmount": "0"
                 }
             ]
         ],

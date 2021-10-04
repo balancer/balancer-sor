@@ -23,7 +23,6 @@ export const MAX_UINT = MaxUint256.toString();
 
 const minAmountOut = 0;
 const maxAmountIn: string = MAX_UINT;
-const maxPrice: string = MAX_UINT;
 
 export const optimizeSwapAmounts = (
     paths: NewPath[],
@@ -211,7 +210,6 @@ export const formatSwaps = (
                     swapType === SwapTypes.SwapExactIn
                         ? minAmountOut.toString()
                         : maxAmountIn,
-                maxPrice: maxPrice,
                 tokenInDecimals: path.poolPairData[0].decimalsIn,
                 tokenOutDecimals: path.poolPairData[0].decimalsOut,
             };
@@ -271,7 +269,6 @@ export const formatSwaps = (
                     swapType === SwapTypes.SwapExactIn
                         ? minAmountOut.toString()
                         : maxAmountIn,
-                maxPrice: maxPrice,
                 tokenInDecimals: path.poolPairData[0].decimalsIn,
                 tokenOutDecimals: path.poolPairData[0].decimalsOut,
             };
@@ -286,7 +283,6 @@ export const formatSwaps = (
                     swapType === SwapTypes.SwapExactIn
                         ? minAmountOut.toString()
                         : maxAmountIn,
-                maxPrice: maxPrice,
                 tokenInDecimals: path.poolPairData[1].decimalsIn,
                 tokenOutDecimals: path.poolPairData[1].decimalsOut,
             };

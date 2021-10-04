@@ -42322,16 +42322,14 @@
                     "tokenIn": "0x6b175474e89094c44da98b954eedeac495271d0f",
                     "tokenOut": "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
                     "swapAmount": "7362089933310887730479",
-                    "limitReturnAmount": "0",
-                    "maxPrice": "115792089237316195423570985008687907853269984665640564039457584007913129639935"
+                    "limitReturnAmount": "0"
                 },
                 {
                     "pool": "0x8a649274e4d777ffc6851f13d23a86bbfa2f2fbf",
                     "tokenIn": "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
                     "tokenOut": "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
                     "swapAmount": "4703662693829015829",
-                    "limitReturnAmount": "0",
-                    "maxPrice": "115792089237316195423570985008687907853269984665640564039457584007913129639935"
+                    "limitReturnAmount": "0"
                 }
             ],
             [
@@ -42340,16 +42338,14 @@
                     "tokenIn": "0x6b175474e89094c44da98b954eedeac495271d0f",
                     "tokenOut": "0xba100000625a3754423978a60c9317c58a424e3d",
                     "swapAmount": "2637910066689112269521",
-                    "limitReturnAmount": "0",
-                    "maxPrice": "115792089237316195423570985008687907853269984665640564039457584007913129639935"
+                    "limitReturnAmount": "0"
                 },
                 {
                     "pool": "0xe2eb726bce7790e57d978c6a2649186c4d481658",
                     "tokenIn": "0xba100000625a3754423978a60c9317c58a424e3d",
                     "tokenOut": "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
                     "swapAmount": "74676542397267184676",
-                    "limitReturnAmount": "0",
-                    "maxPrice": "115792089237316195423570985008687907853269984665640564039457584007913129639935"
+                    "limitReturnAmount": "0"
                 }
             ]
         ],
