@@ -15,14 +15,7 @@ import {
     getOutputAmountSwapForPath,
     EVMgetOutputAmountSwap,
 } from './helpersClass';
-import { MaxUint256 } from '@ethersproject/constants';
 import { BigNumber, formatFixed } from '@ethersproject/bignumber';
-
-// TODO get max price from slippage tolerance given by user options
-export const MAX_UINT = MaxUint256.toString();
-
-const minAmountOut = 0;
-const maxAmountIn: string = MAX_UINT;
 
 export const optimizeSwapAmounts = (
     paths: NewPath[],
@@ -206,10 +199,6 @@ export const formatSwaps = (
                 tokenIn: path.swaps[0].tokenIn,
                 tokenOut: path.swaps[0].tokenOut,
                 swapAmount: swapAmount.toString(),
-                limitReturnAmount:
-                    swapType === SwapTypes.SwapExactIn
-                        ? minAmountOut.toString()
-                        : maxAmountIn,
                 tokenInDecimals: path.poolPairData[0].decimalsIn,
                 tokenOutDecimals: path.poolPairData[0].decimalsOut,
             };
@@ -265,10 +254,6 @@ export const formatSwaps = (
                 tokenIn: path.swaps[0].tokenIn,
                 tokenOut: path.swaps[0].tokenOut,
                 swapAmount: amountSwap1.toString(),
-                limitReturnAmount:
-                    swapType === SwapTypes.SwapExactIn
-                        ? minAmountOut.toString()
-                        : maxAmountIn,
                 tokenInDecimals: path.poolPairData[0].decimalsIn,
                 tokenOutDecimals: path.poolPairData[0].decimalsOut,
             };
@@ -279,10 +264,6 @@ export const formatSwaps = (
                 tokenIn: path.swaps[1].tokenIn,
                 tokenOut: path.swaps[1].tokenOut,
                 swapAmount: amountSwap2.toString(),
-                limitReturnAmount:
-                    swapType === SwapTypes.SwapExactIn
-                        ? minAmountOut.toString()
-                        : maxAmountIn,
                 tokenInDecimals: path.poolPairData[1].decimalsIn,
                 tokenOutDecimals: path.poolPairData[1].decimalsOut,
             };

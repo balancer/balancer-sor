@@ -41424,15 +41424,13 @@
                     "pool": "0xe78e458cbc9a57dc831e66c9187b0324b4e8304b",
                     "tokenIn": "0xba100000625a3754423978a60c9317c58a424e3d",
                     "tokenOut": "0xc00e94cb662c3520282e6f5717214004a7f26888",
-                    "swapAmount": "481534952576087482",
-                    "limitReturnAmount": "0"
+                    "swapAmount": "481534952576087482"
                 },
                 {
                     "pool": "0x1811a719a05d20b6447ca556a54f00f9c14578be",
                     "tokenIn": "0xc00e94cb662c3520282e6f5717214004a7f26888",
                     "tokenOut": "0x2260fac5e5542a773aa44fbcfedf7c193bc2c599",
-                    "swapAmount": "51325037089192320",
-                    "limitReturnAmount": "0"
+                    "swapAmount": "51325037089192320"
                 }
             ],
             [
@@ -41440,8 +41438,7 @@
                     "pool": "0x7f8ec02007ea664b3cac5694f8f57ad020a921db",
                     "tokenIn": "0xba100000625a3754423978a60c9317c58a424e3d",
                     "tokenOut": "0x2260fac5e5542a773aa44fbcfedf7c193bc2c599",
-                    "swapAmount": "344083506487952818",
-                    "limitReturnAmount": "0"
+                    "swapAmount": "344083506487952818"
                 }
             ]
         ],

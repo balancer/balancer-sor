@@ -43757,8 +43757,7 @@
                     "pool": "0x4b51e86848fa2fb0f30375bf88d2e56249fb9479",
                     "tokenIn": "0xc011a73ee8576fb46f5e1c5751ca3b9fe0af2a6f",
                     "tokenOut": "0xba100000625a3754423978a60c9317c58a424e3d",
-                    "swapAmount": "81014119817736980",
-                    "limitReturnAmount": "0"
+                    "swapAmount": "81014119817736980"
                 }
             ]
         ],

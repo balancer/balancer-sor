@@ -562,8 +562,7 @@
                     "pool": "0x29f55de880d4dcae40ba3e63f16407a31b4d44ee",
                     "tokenIn": "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
                     "tokenOut": "0x6b175474e89094c44da98b954eedeac495271d0f",
-                    "swapAmount": "10000000000000000",
-                    "limitReturnAmount": "0"
+                    "swapAmount": "10000000000000000"
                 }
             ]
         ],

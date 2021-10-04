@@ -41396,15 +41396,13 @@
                     "pool": "0x9866772a9bdb4dc9d2c5a4753e8658b8b0ca1fc3",
                     "tokenIn": "0x9f8f72aa9304c8b593d555f12ef6589cc3a579a2",
                     "tokenOut": "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
-                    "swapAmount": "287403725658538200",
-                    "limitReturnAmount": "0"
+                    "swapAmount": "287403725658538200"
                 },
                 {
                     "pool": "0xc48b8329d47ae8fd504c0b81cf8435486380e858",
                     "tokenIn": "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
                     "tokenOut": "0xc00e94cb662c3520282e6f5717214004a7f26888",
-                    "swapAmount": "388861760856345373",
-                    "limitReturnAmount": "0"
+                    "swapAmount": "388861760856345373"
                 }
             ]
         ],
