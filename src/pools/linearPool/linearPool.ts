@@ -2,6 +2,7 @@ import { getAddress } from '@ethersproject/address';
 import { BigNumber, parseFixed } from '@ethersproject/bignumber';
 import { bnum, scale, ZERO } from '../../utils/bignumber';
 import { BigNumber as OldBigNumber } from '../../utils/bignumber';
+import { WeiPerEther as ONE } from '@ethersproject/constants';
 import * as SDK from '@georgeroman/balancer-v2-pools';
 import {
     PoolBase,
@@ -31,8 +32,6 @@ import {
     _derivativeSpotPriceAfterSwapBPTInForExactTokenOut,
 } from './linearMath';
 
-const FPPRECISION = 18;
-
 enum PairTypes {
     BptToToken,
     TokenToBpt,
@@ -49,8 +48,8 @@ export type LinearPoolPairData = PoolPairBase & {
     wrappedBalance: OldBigNumber;
     wrappedDecimals: number;
     rate: OldBigNumber;
-    target1: OldBigNumber;
-    target2: OldBigNumber;
+    target1: BigNumber;
+    target2: BigNumber;
 };
 
 export class LinearPool implements PoolBase {
@@ -64,9 +63,10 @@ export class LinearPool implements PoolBase {
     tokensList: string[];
 
     wrappedIndex: number;
-    target1: OldBigNumber;
-    target2: OldBigNumber;
-    MAX_IN_RATIO = parseFixed('0.3', 18);
+    wrappedDecimals: number;
+    target1: BigNumber;
+    target2: BigNumber;
+    MAX_IN_RATIO = parseFixed('0.3', 18); // TO DO - Check with Sergio/Dani
     MAX_OUT_RATIO = parseFixed('0.3', 18);
 
     static fromPool(pool: SubgraphPoolBase): LinearPool {
@@ -105,9 +105,10 @@ export class LinearPool implements PoolBase {
         this.tokens = tokens;
         this.tokensList = tokensList;
         this.wrappedIndex = wrappedIndex;
-        // rate is now inside wrapped token info
-        this.target1 = bnum(target1);
-        this.target2 = bnum(target2);
+        this.wrappedDecimals = this.tokens[this.wrappedIndex].decimals;
+
+        this.target1 = parseFixed(target1, this.wrappedDecimals);
+        this.target2 = parseFixed(target2, this.wrappedDecimals);
     }
 
     setTypeForSwap(type: SwapPairType): void {
@@ -167,9 +168,12 @@ export class LinearPool implements PoolBase {
             balanceIn: balanceIn,
             balanceOut: balanceOut,
             swapFee: this.swapFee,
-            wrappedBalance: bnum(this.tokens[this.wrappedIndex].balance),
-            wrappedDecimals: +this.tokens[this.wrappedIndex].decimals,
-            rate: bnum(this.tokens[this.wrappedIndex].priceRate),
+            wrappedBalance: scale(
+                bnum(this.tokens[this.wrappedIndex].balance),
+                this.wrappedDecimals
+            ),
+            wrappedDecimals: this.wrappedDecimals,
+            rate: scale(bnum(this.tokens[this.wrappedIndex].priceRate), 18),
             target1: this.target1,
             target2: this.target2,
         };
@@ -185,28 +189,44 @@ export class LinearPool implements PoolBase {
         poolPairData: PoolPairBase,
         swapType: SwapTypes
     ): OldBigNumber {
+        // Needs to return human scaled numbers
         const linearPoolPairData = this.parsePoolPairData(
             poolPairData.tokenIn,
             poolPairData.tokenOut
         );
         if (swapType === SwapTypes.SwapExactIn) {
-            if (linearPoolPairData.pairType === PairTypes.TokenToBpt)
-                return bnum(
-                    poolPairData.balanceIn.mul(this.MAX_IN_RATIO).toString()
+            if (linearPoolPairData.pairType === PairTypes.TokenToBpt) {
+                const limit = bnum(
+                    poolPairData.balanceIn
+                        .mul(this.MAX_IN_RATIO)
+                        .div(ONE)
+                        .toString()
                 );
-            else if (linearPoolPairData.pairType === PairTypes.BptToToken) {
-                return _BPTInForExactTokenOut(
+                return scale(limit, -poolPairData.decimalsIn);
+            } else if (linearPoolPairData.pairType === PairTypes.BptToToken) {
+                const limit = _BPTInForExactTokenOut(
                     bnum(poolPairData.balanceOut.toString()),
                     linearPoolPairData
                 ).times(0.99);
+                console.log(limit.toString());
+                return scale(limit, -poolPairData.decimalsIn).dp(
+                    poolPairData.decimalsIn
+                );
             } else throw Error('LinearPool does not support TokenToToken');
         } else {
             if (linearPoolPairData.pairType === PairTypes.TokenToBpt) {
-                return bnum(
-                    poolPairData.balanceOut.mul(this.MAX_IN_RATIO).toString()
+                const limit = bnum(
+                    poolPairData.balanceOut
+                        .mul(this.MAX_OUT_RATIO)
+                        .div(ONE)
+                        .toString()
                 );
+                return scale(limit, -poolPairData.decimalsOut);
             } else if (linearPoolPairData.pairType === PairTypes.BptToToken) {
-                return bnum(poolPairData.balanceOut.mul(0.99).toString());
+                return scale(
+                    bnum(poolPairData.balanceOut.toString()).times(0.99),
+                    -poolPairData.decimalsOut
+                );
             } else throw Error('LinearPool does not support TokenToToken');
         }
     }
@@ -243,40 +263,20 @@ export class LinearPool implements PoolBase {
     ): OldBigNumber {
         if (exact) {
             try {
-                // poolPair balances are normalised so must be scaled before use
-                // in = main
-                // out = BPT
+                // poolPair balances are human readable so must be scaled before use
                 const amt = SDK.LinearMath._calcBptOutPerMainIn(
                     scale(amount, poolPairData.decimalsIn),
-                    scale(
-                        bnum(poolPairData.balanceIn.toString()),
-                        poolPairData.decimalsIn
-                    ),
-                    scale(
-                        poolPairData.wrappedBalance,
-                        poolPairData.wrappedDecimals
-                    ),
-                    scale(
-                        bnum(poolPairData.balanceOut.toString()),
-                        poolPairData.decimalsOut
-                    ),
+                    bnum(poolPairData.balanceIn.toString()),
+                    poolPairData.wrappedBalance,
+                    bnum(poolPairData.balanceOut.toString()),
                     {
-                        fee: scale(
-                            bnum(poolPairData.swapFee.toString()),
-                            FPPRECISION
-                        ),
-                        rate: scale(poolPairData.rate, FPPRECISION),
-                        lowerTarget: scale(
-                            poolPairData.target1,
-                            poolPairData.decimalsIn
-                        ),
-                        upperTarget: scale(
-                            poolPairData.target2,
-                            poolPairData.decimalsIn
-                        ),
+                        fee: bnum(poolPairData.swapFee.toString()),
+                        rate: poolPairData.rate,
+                        lowerTarget: bnum(poolPairData.target1.toString()),
+                        upperTarget: bnum(poolPairData.target2.toString()),
                     }
                 );
-                // return normalised amount
+                // return human readable number
                 return scale(amt, -poolPairData.decimalsOut);
             } catch (err) {
                 return ZERO;
@@ -294,40 +294,20 @@ export class LinearPool implements PoolBase {
     ): OldBigNumber {
         if (exact) {
             try {
-                // poolPair balances are normalised so must be scaled before use
-                // in = BPT
-                // out = main
+                // poolPair balances are human readable so must be scaled before use
                 const amt = SDK.LinearMath._calcMainOutPerBptIn(
                     scale(amount, poolPairData.decimalsIn),
-                    scale(
-                        bnum(poolPairData.balanceOut.toString()),
-                        poolPairData.decimalsOut
-                    ),
-                    scale(
-                        poolPairData.wrappedBalance,
-                        poolPairData.wrappedDecimals
-                    ),
-                    scale(
-                        bnum(poolPairData.balanceIn.toString()),
-                        poolPairData.decimalsIn
-                    ),
+                    bnum(poolPairData.balanceOut.toString()),
+                    poolPairData.wrappedBalance,
+                    bnum(poolPairData.balanceIn.toString()),
                     {
-                        fee: scale(
-                            bnum(poolPairData.swapFee.toString()),
-                            FPPRECISION
-                        ),
-                        rate: scale(poolPairData.rate, FPPRECISION),
-                        lowerTarget: scale(
-                            poolPairData.target1,
-                            poolPairData.decimalsOut
-                        ),
-                        upperTarget: scale(
-                            poolPairData.target2,
-                            poolPairData.decimalsOut
-                        ),
+                        fee: bnum(poolPairData.swapFee.toString()),
+                        rate: poolPairData.rate,
+                        lowerTarget: bnum(poolPairData.target1.toString()),
+                        upperTarget: bnum(poolPairData.target2.toString()),
                     }
                 );
-                // return normalised amount
+                // return human readable number
                 return scale(amt, -poolPairData.decimalsOut);
             } catch (err) {
                 return ZERO;
@@ -356,40 +336,22 @@ export class LinearPool implements PoolBase {
     ): OldBigNumber {
         if (exact) {
             try {
-                // poolPair balances are normalised so must be scaled before use
+                // poolPair balances are human readable so must be scaled before use
                 // in = main
                 // out = BPT
                 const amt = SDK.LinearMath._calcMainInPerBptOut(
                     scale(amount, poolPairData.decimalsOut),
-                    scale(
-                        bnum(poolPairData.balanceIn.toString()),
-                        poolPairData.decimalsIn
-                    ),
-                    scale(
-                        poolPairData.wrappedBalance,
-                        poolPairData.wrappedDecimals
-                    ),
-                    scale(
-                        bnum(poolPairData.balanceOut.toString()),
-                        poolPairData.decimalsOut
-                    ),
+                    bnum(poolPairData.balanceIn.toString()),
+                    poolPairData.wrappedBalance,
+                    bnum(poolPairData.balanceOut.toString()),
                     {
-                        fee: scale(
-                            bnum(poolPairData.swapFee.toString()),
-                            FPPRECISION
-                        ),
-                        rate: scale(poolPairData.rate, FPPRECISION),
-                        lowerTarget: scale(
-                            poolPairData.target1,
-                            poolPairData.decimalsIn
-                        ),
-                        upperTarget: scale(
-                            poolPairData.target2,
-                            poolPairData.decimalsIn
-                        ),
+                        fee: bnum(poolPairData.swapFee.toString()),
+                        rate: poolPairData.rate,
+                        lowerTarget: bnum(poolPairData.target1.toString()),
+                        upperTarget: bnum(poolPairData.target2.toString()),
                     }
                 );
-                // return normalised amount
+                // return human readable number
                 return scale(amt, -poolPairData.decimalsIn);
             } catch (err) {
                 return ZERO;
@@ -406,40 +368,22 @@ export class LinearPool implements PoolBase {
     ): OldBigNumber {
         if (exact) {
             try {
-                // poolPair balances are normalised so must be scaled before use
+                // poolPair balances are human readable so must be scaled before use
                 // in = BPT
                 // out = main
                 const amt = SDK.LinearMath._calcBptInPerMainOut(
                     scale(amount, poolPairData.decimalsOut),
-                    scale(
-                        bnum(poolPairData.balanceOut.toString()),
-                        poolPairData.decimalsOut
-                    ),
-                    scale(
-                        poolPairData.wrappedBalance,
-                        poolPairData.wrappedDecimals
-                    ),
-                    scale(
-                        bnum(poolPairData.balanceIn.toString()),
-                        poolPairData.decimalsIn
-                    ),
+                    bnum(poolPairData.balanceOut.toString()),
+                    poolPairData.wrappedBalance,
+                    bnum(poolPairData.balanceIn.toString()),
                     {
-                        fee: scale(
-                            bnum(poolPairData.swapFee.toString()),
-                            FPPRECISION
-                        ),
-                        rate: scale(poolPairData.rate, FPPRECISION),
-                        lowerTarget: scale(
-                            poolPairData.target1,
-                            poolPairData.decimalsOut
-                        ),
-                        upperTarget: scale(
-                            poolPairData.target2,
-                            poolPairData.decimalsOut
-                        ),
+                        fee: bnum(poolPairData.swapFee.toString()),
+                        rate: poolPairData.rate,
+                        lowerTarget: bnum(poolPairData.target1.toString()),
+                        upperTarget: bnum(poolPairData.target2.toString()),
                     }
                 );
-                // return normalised amount
+                // return human readable number
                 return scale(amt, -poolPairData.decimalsIn);
             } catch (err) {
                 return ZERO;
