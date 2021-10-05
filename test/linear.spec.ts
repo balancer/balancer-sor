@@ -73,9 +73,7 @@ describe('linear pool tests', () => {
             const tokenOut = bDAI.address;
             const poolSG = cloneDeep(singleLinear);
             const swapType = SwapTypes.SwapExactIn;
-
-            // Max out uses standard V2 limits - TO DO Confirm this is the case with Linear
-            const MAX_IN_RATIO = bnum(0.3);
+            const MAX_RATIO = bnum(10);
 
             const pool = LinearPool.fromPool(poolSG.pools[0]);
 
@@ -84,7 +82,7 @@ describe('linear pool tests', () => {
             const limitAmt = pool.getLimitAmountSwap(poolPairData, swapType);
             expect(limitAmt.toString()).to.eq(
                 bnum(pool.tokens[0].balance)
-                    .times(MAX_IN_RATIO)
+                    .times(MAX_RATIO)
                     .dp(tokenInDecimals)
                     .toString()
             );
@@ -110,9 +108,7 @@ describe('linear pool tests', () => {
             const tokenOutDecimals = bDAI.decimals;
             const poolSG = cloneDeep(singleLinear);
             const swapType = SwapTypes.SwapExactOut;
-
-            // Max out uses standard V2 limits - TO DO Confirm this is the case with Linear
-            const MAX_OUT_RATIO = bnum(0.3);
+            const MAX_RATIO = bnum(10);
 
             const pool = LinearPool.fromPool(poolSG.pools[0]);
 
@@ -121,7 +117,7 @@ describe('linear pool tests', () => {
             const limitAmt = pool.getLimitAmountSwap(poolPairData, swapType);
             expect(limitAmt.toString()).to.eq(
                 bnum(pool.tokens[2].balance)
-                    .times(MAX_OUT_RATIO)
+                    .times(MAX_RATIO)
                     .dp(tokenOutDecimals)
                     .toString()
             );
@@ -138,9 +134,7 @@ describe('linear pool tests', () => {
             const poolPairData = pool.parsePoolPairData(tokenIn, tokenOut);
 
             const limitAmt = pool.getLimitAmountSwap(poolPairData, swapType);
-            expect(limitAmt.toString()).to.eq(
-                '1485000000.12222222123222222111'
-            ); // TO DO - Confirm with Sergio this limit looks ok
+            expect(limitAmt.toString()).to.eq('1485000000.122222221232222221'); // TO DO - Confirm with Sergio this limit looks ok
         });
     });
     context('with no LinearPools', () => {

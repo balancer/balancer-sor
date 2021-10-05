@@ -66,8 +66,8 @@ export class LinearPool implements PoolBase {
     wrappedDecimals: number;
     target1: BigNumber;
     target2: BigNumber;
-    MAX_IN_RATIO = parseFixed('0.3', 18); // TO DO - Check with Sergio/Dani
-    MAX_OUT_RATIO = parseFixed('0.3', 18);
+    MAX_RATIO = parseFixed('10', 18);
+    ALMOST_ONE = parseFixed('0.99', 18);
 
     static fromPool(pool: SubgraphPoolBase): LinearPool {
         if (!pool.wrappedIndex)
@@ -198,7 +198,7 @@ export class LinearPool implements PoolBase {
             if (linearPoolPairData.pairType === PairTypes.TokenToBpt) {
                 const limit = bnum(
                     poolPairData.balanceIn
-                        .mul(this.MAX_IN_RATIO)
+                        .mul(this.MAX_RATIO)
                         .div(ONE)
                         .toString()
                 );
@@ -207,8 +207,9 @@ export class LinearPool implements PoolBase {
                 const limit = _BPTInForExactTokenOut(
                     bnum(poolPairData.balanceOut.toString()),
                     linearPoolPairData
-                ).times(0.99);
-                console.log(limit.toString());
+                )
+                    .times(bnum(this.ALMOST_ONE.toString()))
+                    .div(bnum(ONE.toString()));
                 return scale(limit, -poolPairData.decimalsIn).dp(
                     poolPairData.decimalsIn
                 );
@@ -217,16 +218,19 @@ export class LinearPool implements PoolBase {
             if (linearPoolPairData.pairType === PairTypes.TokenToBpt) {
                 const limit = bnum(
                     poolPairData.balanceOut
-                        .mul(this.MAX_OUT_RATIO)
+                        .mul(this.MAX_RATIO)
                         .div(ONE)
                         .toString()
                 );
                 return scale(limit, -poolPairData.decimalsOut);
             } else if (linearPoolPairData.pairType === PairTypes.BptToToken) {
-                return scale(
-                    bnum(poolPairData.balanceOut.toString()).times(0.99),
-                    -poolPairData.decimalsOut
+                const limit = bnum(
+                    poolPairData.balanceOut
+                        .mul(this.ALMOST_ONE)
+                        .div(ONE)
+                        .toString()
                 );
+                return scale(limit, -poolPairData.decimalsOut);
             } else throw Error('LinearPool does not support TokenToToken');
         }
     }
