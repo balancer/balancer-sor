@@ -41424,17 +41424,13 @@
                     "pool": "0x4939e1557613b6e84b92bf4c5d2db4061bd1a7c7",
                     "tokenIn": "0x7fc66500c84a76ad7e9c93437bfc5ac33e2ddae9",
                     "tokenOut": "0x0bc529c00c6401aef6d220be8c6ea1667f6ad93e",
-                    "swapAmount": "143180086821510258",
-                    "limitReturnAmount": "0",
-                    "maxPrice": "115792089237316195423570985008687907853269984665640564039457584007913129639935"
+                    "swapAmount": "143180086821510258"
                 },
                 {
                     "pool": "0x80cba5ba9259c08851d94d6bf45e248541fb3e86",
                     "tokenIn": "0x0bc529c00c6401aef6d220be8c6ea1667f6ad93e",
                     "tokenOut": "0xc011a73ee8576fb46f5e1c5751ca3b9fe0af2a6f",
-                    "swapAmount": "1529796822015354",
-                    "limitReturnAmount": "0",
-                    "maxPrice": "115792089237316195423570985008687907853269984665640564039457584007913129639935"
+                    "swapAmount": "1529796822015354"
                 }
             ],
             [
@@ -41442,9 +41438,7 @@
                     "pool": "0x6d59cf780d70927f022e3b827f31d6a6235a8d20",
                     "tokenIn": "0x7fc66500c84a76ad7e9c93437bfc5ac33e2ddae9",
                     "tokenOut": "0xc011a73ee8576fb46f5e1c5751ca3b9fe0af2a6f",
-                    "swapAmount": "20247423770002078",
-                    "limitReturnAmount": "0",
-                    "maxPrice": "115792089237316195423570985008687907853269984665640564039457584007913129639935"
+                    "swapAmount": "20247423770002078"
                 }
             ],
             [
@@ -41452,9 +41446,7 @@
                     "pool": "0xfcdfebef6ba1fef310e073d7f88202721915e1b6",
                     "tokenIn": "0x7fc66500c84a76ad7e9c93437bfc5ac33e2ddae9",
                     "tokenOut": "0xc011a73ee8576fb46f5e1c5751ca3b9fe0af2a6f",
-                    "swapAmount": "2448325882008564",
-                    "limitReturnAmount": "0",
-                    "maxPrice": "115792089237316195423570985008687907853269984665640564039457584007913129639935"
+                    "swapAmount": "2448325882008564"
                 }
             ]
         ],

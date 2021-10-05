@@ -41396,9 +41396,7 @@
                     "pool": "0x221bf20c2ad9e5d7ec8a9d1991d8e2edcfcb9d6c",
                     "tokenIn": "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
                     "tokenOut": "0x2260fac5e5542a773aa44fbcfedf7c193bc2c599",
-                    "swapAmount": "906722132148876100",
-                    "limitReturnAmount": "0",
-                    "maxPrice": "115792089237316195423570985008687907853269984665640564039457584007913129639935"
+                    "swapAmount": "906722132148876100"
                 }
             ]
         ],
