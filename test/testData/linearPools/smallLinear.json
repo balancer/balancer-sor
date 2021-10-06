@@ -126,7 +126,7 @@
             "totalWeight": "100",
             "totalShares": "20000",
             "poolType": "Weighted",
-            "address": "0x0000000000000000000000000000000000000003"
+            "address": "0x0000000000000000000000000000000000000004"
         },
         {
             "id": "linearUSDC",
@@ -261,28 +261,28 @@
                 {
                     "address": "0x0000000000000000000000000000000000000001",
                     "balance": "2000000000000000",
-                    "decimals": "18",
+                    "decimals": 18,
                     "symbol": "bUSDC",
                     "priceRate": "1"
                 },
                 {
                     "address": "0x0000000000000000000000000000000000000002",
                     "balance": "1500000000000000",
-                    "decimals": "18",
+                    "decimals": 18,
                     "symbol": "bDAI",
                     "priceRate": "1"
                 },
                 {
                     "address": "0x0000000000000000000000000000000000000003",
                     "balance": "1500000000000000",
-                    "decimals": "18",
+                    "decimals": 18,
                     "symbol": "bUSDT",
                     "priceRate": "1"
                 },
                 {
                     "address": "0x06df3b2bbb68adc8b0e302443692037ed9f91b42",
                     "balance": "1500000000000000",
-                    "decimals": "18",
+                    "decimals": 18,
                     "symbol": "staBal3",
                     "priceRate": "1"
                 }
