@@ -28,60 +28,53 @@ export function getLimitAmountSwapForPath(
 ): BigNumber {
     const poolPairData = path.poolPairData;
     let limit = ZERO;
-    let index = 0;
     if (swapType === SwapTypes.SwapExactIn) {
-        for (let i = 0; i < poolPairData.length; i++) {
+        limit = path.pools[poolPairData.length - 1].getLimitAmountSwap(
+            poolPairData[poolPairData.length - 1],
+            SwapTypes.SwapExactIn
+        );
+        for (let i = poolPairData.length - 2; i >= 0; i--) {
             const poolLimit = path.pools[i].getLimitAmountSwap(
                 poolPairData[i],
                 SwapTypes.SwapExactIn
             );
-            let pulledPoolLimit = poolLimit;
-            let pulledIndex = i;
-            for (let j = i; j > 0; j--) {
-                pulledPoolLimit = getOutputAmountSwap(
-                    path.pools[j - 1],
-                    path.poolPairData[j - 1],
-                    SwapTypes.SwapExactOut,
-                    pulledPoolLimit
-                );
-                pulledIndex = j - 1;
-            }
-            if (pulledPoolLimit.lt(limit) || i === 0) {
-                limit = pulledPoolLimit;
-                index = pulledIndex;
-            }
+            let pulledLimit = getOutputAmountSwap(
+                path.pools[i],
+                path.poolPairData[i],
+                SwapTypes.SwapExactOut,
+                limit
+            );
+            limit = poolLimit.lt(pulledLimit) ? poolLimit : pulledLimit;
         }
         if (limit.isZero()) return Zero;
         return parseFixed(
-            limit.dp(poolPairData[index].decimalsIn).toString(),
-            poolPairData[index].decimalsIn
+            limit.dp(poolPairData[0].decimalsIn).toString(),
+            poolPairData[0].decimalsIn
         );
     } else {
-        for (let i = 0; i < poolPairData.length; i++) {
+        limit = path.pools[0].getLimitAmountSwap(
+            poolPairData[0],
+            SwapTypes.SwapExactOut
+        );
+        for (let i = 1; i < poolPairData.length; i++) {
             const poolLimit = path.pools[i].getLimitAmountSwap(
                 poolPairData[i],
                 SwapTypes.SwapExactOut
             );
-            let pushedPoolLimit = poolLimit;
-            let pulledIndex = i;
-            for (let j = i + 1; j < poolPairData.length; j++) {
-                pushedPoolLimit = getOutputAmountSwap(
-                    path.pools[j],
-                    path.poolPairData[j],
-                    SwapTypes.SwapExactIn,
-                    pushedPoolLimit
-                );
-                pulledIndex = j;
-            }
-            if (pushedPoolLimit.lt(limit) || i === 0) {
-                limit = pushedPoolLimit;
-                index = pulledIndex;
-            }
+            let pushedLimit = getOutputAmountSwap(
+                path.pools[i],
+                path.poolPairData[i],
+                SwapTypes.SwapExactIn,
+                limit
+            );
+            limit = poolLimit.lte(pushedLimit) ? poolLimit : pushedLimit;
         }
         if (limit.isZero()) return Zero;
         return parseFixed(
-            limit.dp(poolPairData[index].decimalsOut).toString(),
-            poolPairData[index].decimalsOut
+            limit
+                .dp(poolPairData[poolPairData.length - 1].decimalsOut)
+                .toString(),
+            poolPairData[poolPairData.length - 1].decimalsOut
         );
     }
 }
