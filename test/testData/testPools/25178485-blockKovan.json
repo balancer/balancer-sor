@@ -3149,9 +3149,7 @@
                     "pool": "0x647c1fd457b95b75d0972ff08fe01d7d7bda05df000200000000000000000001",
                     "tokenIn": "0xdfcea9088c8a88a76ff74892c1457c17dfeef9c1",
                     "tokenOut": "0x1c8e3bcb3378a443cc591f154c5ce0ebb4da9648",
-                    "swapAmount": "8999973249256645695",
-                    "limitReturnAmount": "0",
-                    "maxPrice": "115792089237316195423570985008687907853269984665640564039457584007913129639935"
+                    "swapAmount": "8999973249256645695"
                 }
             ],
             [
@@ -3159,17 +3157,13 @@
                     "pool": "0x3a19030ed746bd1c3f2b0f996ff9479af04c5f0a000200000000000000000004",
                     "tokenIn": "0xdfcea9088c8a88a76ff74892c1457c17dfeef9c1",
                     "tokenOut": "0xc2569dd7d0fd715b054fbf16e75b001e5c0c1115",
-                    "swapAmount": "26750743354305",
-                    "limitReturnAmount": "0",
-                    "maxPrice": "115792089237316195423570985008687907853269984665640564039457584007913129639935"
+                    "swapAmount": "26750743354305"
                 },
                 {
                     "pool": "0x494b26d4aee801cb1fabf498ee24f0af20238743000100000000000000000063",
                     "tokenIn": "0xc2569dd7d0fd715b054fbf16e75b001e5c0c1115",
                     "tokenOut": "0x1c8e3bcb3378a443cc591f154c5ce0ebb4da9648",
-                    "swapAmount": "5295321",
-                    "limitReturnAmount": "0",
-                    "maxPrice": "115792089237316195423570985008687907853269984665640564039457584007913129639935"
+                    "swapAmount": "5295321"
                 }
             ]
         ],

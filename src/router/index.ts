@@ -54,13 +54,9 @@ export const getBestPaths = (
         optimizeSwapAmounts(
             paths,
             swapType,
-            bnum(formatFixed(totalSwapAmount, inputDecimals)),
-            initialSwapAmounts.map((amount) =>
-                bnum(formatFixed(amount, inputDecimals))
-            ),
-            highestLimitAmounts.map((amount) =>
-                bnum(formatFixed(amount, inputDecimals))
-            ),
+            totalSwapAmount,
+            initialSwapAmounts,
+            highestLimitAmounts,
             inputDecimals,
             outputDecimals,
             initialNumPaths,
