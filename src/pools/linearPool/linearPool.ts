@@ -32,7 +32,7 @@ import {
     _derivativeSpotPriceAfterSwapBPTInForExactTokenOut,
 } from './linearMath';
 
-enum PairTypes {
+export enum PairTypes {
     BptToToken,
     TokenToBpt,
     TokenToToken,

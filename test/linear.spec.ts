@@ -7,10 +7,13 @@ import {
     SwapTypes,
     PoolDictionaryByMain,
     PoolPairBase,
+    PoolTypes,
+    SubgraphPoolBase,
 } from '../src/types';
 import {
     LinearPool,
     LinearPoolPairData,
+    PairTypes,
 } from '../src/pools/linearPool/linearPool';
 import {
     filterPoolsOfInterest,
@@ -31,6 +34,12 @@ import { bnum } from '../src/index';
 import { getBestPaths } from '../src/router';
 import path from 'path';
 
+export interface TestToken {
+    symbol: string;
+    address: string;
+    decimals: number;
+}
+
 const WETH = {
     symbol: 'WETH',
     address: '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2',
@@ -41,11 +50,21 @@ const DAI = {
     address: '0x6b175474e89094c44da98b954eedeac495271d0f',
     decimals: 18,
 };
+const aDAI = {
+    symbol: 'aDAI',
+    address: '0xfc1e690f61efd961294b3e1ce3313fbd8aa4f85d',
+    decimals: 18,
+};
 const USDC = {
     symbol: 'USDC',
     address: '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48',
     decimals: 6,
-}; // USDC precision = 6
+};
+const bUSDC = {
+    symbol: 'bUSDC',
+    address: '0x0000000000000000000000000000000000000001',
+    decimals: 18,
+};
 const USDT = {
     symbol: 'USDT',
     address: '0xdac17f958d2ee523a2206206994597c13d831ec7',
@@ -66,6 +85,29 @@ const bDAI = {
 const chainId = 1;
 
 describe('linear pool tests', () => {
+    context('parsePoolPairData', () => {
+        it(`should correctly parse token > phantomBpt`, async () => {
+            const tokenIn = DAI;
+            const tokenOut = bDAI;
+            const poolSG = cloneDeep(singleLinear).pools[0];
+            testParsePool(poolSG, tokenIn, tokenOut, PairTypes.TokenToBpt);
+        });
+
+        it(`should correctly parse phantomBpt > token`, async () => {
+            const tokenIn = bUSDC;
+            const tokenOut = USDC;
+            const poolSG = cloneDeep(smallLinear).pools[4];
+            testParsePool(poolSG, tokenIn, tokenOut, PairTypes.BptToToken);
+        });
+
+        it(`should correctly parse token > token`, async () => {
+            const tokenIn = DAI;
+            const tokenOut = aDAI;
+            const poolSG = cloneDeep(singleLinear).pools[0];
+            testParsePool(poolSG, tokenIn, tokenOut, PairTypes.TokenToToken);
+        });
+    });
+
     context('limit amounts', () => {
         it(`getLimitAmountSwap, SwapExactIn, TokenToBpt should return valid limit`, async () => {
             const tokenIn = DAI.address;
@@ -135,6 +177,22 @@ describe('linear pool tests', () => {
 
             const limitAmt = pool.getLimitAmountSwap(poolPairData, swapType);
             expect(limitAmt.toString()).to.eq('1485000000.122222221232222221'); // TO DO - Confirm with Sergio this limit looks ok
+        });
+
+        it(`getLimitAmountSwap, token to token should throw error`, async () => {
+            const tokenIn = DAI.address;
+            const tokenOut = aDAI.address;
+            const poolSG = cloneDeep(singleLinear);
+            const pool = LinearPool.fromPool(poolSG.pools[0]);
+            const poolPairData = pool.parsePoolPairData(tokenIn, tokenOut);
+
+            expect(() =>
+                pool.getLimitAmountSwap(poolPairData, SwapTypes.SwapExactIn)
+            ).to.throw('LinearPool does not support TokenToToken');
+
+            expect(() =>
+                pool.getLimitAmountSwap(poolPairData, SwapTypes.SwapExactOut)
+            ).to.throw('LinearPool does not support TokenToToken');
         });
     });
     context('with no LinearPools', () => {
@@ -593,5 +651,74 @@ function runSOR(
     console.log(`SwapInfo Return: ${swapInfo.returnAmount.toString()}`);
     console.log(
         `SwapInfo Return Considering Fees: ${swapInfo.returnAmountConsideringFees.toString()}`
+    );
+}
+
+function testParsePool(
+    poolSG: SubgraphPoolBase,
+    tokenIn: TestToken,
+    tokenOut: TestToken,
+    pairType: PairTypes
+) {
+    const tokenIndexIn = poolSG.tokens.findIndex(
+        (t) => t.address === tokenIn.address
+    );
+    const tokenIndexOut = poolSG.tokens.findIndex(
+        (t) => t.address === tokenOut.address
+    );
+
+    const pool = LinearPool.fromPool(poolSG);
+
+    const poolPairData = pool.parsePoolPairData(
+        tokenIn.address,
+        tokenOut.address
+    );
+    if (!poolSG.wrappedIndex || !poolSG.target1 || !poolSG.target2) return;
+    expect(poolPairData.id).to.eq(poolSG.id);
+    expect(poolPairData.address).to.eq(poolSG.address);
+    expect(poolPairData.tokenIn).to.eq(tokenIn.address);
+    expect(poolPairData.tokenOut).to.eq(tokenOut.address);
+    expect(poolPairData.decimalsIn).to.eq(tokenIn.decimals);
+    expect(poolPairData.decimalsOut).to.eq(tokenOut.decimals);
+    expect(poolPairData.poolType).to.eq(PoolTypes.Linear);
+    expect(poolPairData.swapFee.toString()).to.eq(
+        parseFixed(poolSG.swapFee, 18).toString()
+    );
+    expect(poolPairData.balanceIn.toString()).to.eq(
+        parseFixed(
+            poolSG.tokens[tokenIndexIn].balance,
+            poolSG.tokens[tokenIndexIn].decimals
+        ).toString()
+    );
+    expect(poolPairData.balanceOut.toString()).to.eq(
+        parseFixed(
+            poolSG.tokens[tokenIndexOut].balance,
+            poolSG.tokens[tokenIndexOut].decimals
+        ).toString()
+    );
+    expect(poolPairData.pairType).to.eq(pairType);
+    expect(poolPairData.wrappedDecimals).to.eq(
+        poolSG.tokens[poolSG.wrappedIndex].decimals
+    );
+    expect(poolPairData.wrappedBalance.toString()).to.eq(
+        parseFixed(
+            poolSG.tokens[poolSG.wrappedIndex].balance,
+            poolSG.tokens[poolSG.wrappedIndex].decimals
+        ).toString()
+    );
+    expect(poolPairData.rate.toString()).to.eq(
+        parseFixed(poolSG.tokens[poolSG.wrappedIndex].priceRate, 18).toString()
+    );
+    expect(poolPairData.target1.toString()).to.eq(
+        parseFixed(
+            poolSG.target1,
+            poolSG.tokens[poolSG.wrappedIndex].decimals
+        ).toString()
+    );
+    expect(poolPairData.target2.toString()).to.eq(
+        parseFixed(
+            poolSG.target2,
+            poolSG.tokens[poolSG.wrappedIndex].decimals
+        ).toString()
     );
 }
