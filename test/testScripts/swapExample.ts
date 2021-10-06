@@ -570,7 +570,7 @@ async function makeRelayerTrade(
 }
 
 async function simpleSwap() {
-    const networkId = Network.ARBITRUM;
+    const networkId = Network.MAINNET;
     // const networkId = Network.KOVAN;
     // Pools source can be Subgraph URL or pools data set passed directly
     const poolsSource = SUBGRAPH_URLS[networkId];
