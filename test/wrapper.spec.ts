@@ -1,6 +1,7 @@
 // npx mocha -r ts-node/register test/wrapper.spec.ts
 require('dotenv').config();
-import { AddressZero } from '@ethersproject/constants';
+import { BigNumber, parseFixed } from '@ethersproject/bignumber';
+import { AddressZero, Zero } from '@ethersproject/constants';
 import { JsonRpcProvider } from '@ethersproject/providers';
 import { assert, expect } from 'chai';
 import { SOR } from '../src';
@@ -10,14 +11,12 @@ import {
     PoolFilter,
     SubgraphPoolBase,
 } from '../src/types';
-import { BigNumber, bnum } from '../src/utils/bignumber';
-
-const WETHADDR = '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2';
+import { DAI, USDC, WETH } from './lib/constants';
 
 const provider = new JsonRpcProvider(
     `https://mainnet.infura.io/v3/${process.env.INFURA}`
 );
-const gasPrice = new BigNumber('30000000000');
+const gasPrice = parseFixed('30', 9);
 const maxPools = 4;
 const chainId = 1;
 const poolsUrl = `https://ipfs.fleek.co/ipns/balancer-team-bucket.storage.fleek.co/balancer-exchange/pools`;
@@ -30,9 +29,9 @@ describe(`Tests for wrapper class.`, () => {
 
     it(`Should return no swaps when pools not retrieved.`, async () => {
         const tokenIn = '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2';
-        const tokenOut = '0x6b175474e89094c44da98b954eedeac495271d0f';
+        const tokenOut = DAI;
         const swapType = SwapTypes.SwapExactIn;
-        const swapAmt: BigNumber = bnum(0);
+        const swapAmt = Zero;
         const sor = new SOR(provider, chainId, poolsUrl);
         const swaps: SwapInfo = await sor.getSwaps(
             tokenIn,
@@ -51,9 +50,9 @@ describe(`Tests for wrapper class.`, () => {
         } = require('./testData/testPools/subgraphPoolsSmallWithTrade.json');
         const pools = poolsFromFile.pools;
         const tokenIn = '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2';
-        const tokenOut = '0x6b175474e89094c44da98b954eedeac495271d0f';
+        const tokenOut = DAI;
         const swapType = SwapTypes.SwapExactIn;
-        const swapAmt: BigNumber = bnum('0.1');
+        const swapAmt = parseFixed('0.1', 18);
 
         const sor = new SOR(provider, chainId, null, pools);
 
@@ -73,17 +72,17 @@ describe(`Tests for wrapper class.`, () => {
             }
         );
 
-        assert.isAbove(swapInfo.returnAmount.toNumber(), 0);
+        expect(swapInfo.returnAmount.gt(0)).to.be.true;
         assert.equal(
             swapInfo.returnAmountFromSwaps?.toString(),
             swapInfo.returnAmount.toString()
         );
-        assert.isAbove(bnum(swapInfo.swaps[0].amount).toNumber(), 0);
+        expect(BigNumber.from(swapInfo.swaps[0].amount).gt(0)).to.be.true;
         assert.equal(tokenIn, swapInfo.tokenIn);
         assert.equal(tokenOut, swapInfo.tokenOut);
         assert.equal(
             swapInfo.swapAmount.toString(),
-            swapAmt.times(bnum(10 ** 18)).toString(),
+            swapAmt.toString(),
             `Wrapper should have same amount as helper.`
         );
         assert.equal(
@@ -99,9 +98,9 @@ describe(`Tests for wrapper class.`, () => {
         const pools = poolsFromFile.pools;
 
         const tokenIn = '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2';
-        const tokenOut = '0x6b175474e89094c44da98b954eedeac495271d0f';
+        const tokenOut = DAI;
         const swapType = SwapTypes.SwapExactIn;
-        const swapAmt: BigNumber = bnum('0.1');
+        const swapAmt = parseFixed('0.1', 18);
 
         const sor = new SOR(provider, chainId, null, pools);
 
@@ -121,13 +120,13 @@ describe(`Tests for wrapper class.`, () => {
             }
         );
 
-        assert.isAbove(swapInfo.returnAmount.toNumber(), 0);
-        assert.isAbove(bnum(swapInfo.swaps[0].amount).toNumber(), 0);
+        expect(swapInfo.returnAmount.gt(0)).to.be.true;
+        expect(BigNumber.from(swapInfo.swaps[0].amount).gt(0)).to.be.true;
         assert.equal(tokenIn, swapInfo.tokenIn);
         assert.equal(tokenOut, swapInfo.tokenOut);
         assert.equal(
             swapInfo.swapAmount.toString(),
-            swapAmt.times(bnum(10 ** 18)).toString(),
+            swapAmt.toString(),
             `Wrapper should have same amount as helper.`
         );
     });
@@ -139,9 +138,9 @@ describe(`Tests for wrapper class.`, () => {
         const pools = poolsFromFile.pools;
 
         const tokenIn = '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2';
-        const tokenOut = '0x6b175474e89094c44da98b954eedeac495271d0f';
+        const tokenOut = DAI;
         const swapType = SwapTypes.SwapExactIn;
-        const swapAmt: BigNumber = bnum('0.1');
+        const swapAmt = parseFixed('0.1', 18);
 
         const sor = new SOR(provider, chainId, null, pools);
 
@@ -161,7 +160,7 @@ describe(`Tests for wrapper class.`, () => {
             }
         );
 
-        assert.equal(swapInfo.returnAmount.toNumber(), 0);
+        expect(swapInfo.returnAmount.eq(0)).to.be.true;
         assert.equal(swapInfo.swaps.length, 0);
         assert.equal(swapInfo.tokenIn, '');
         assert.equal(swapInfo.tokenOut, '');
@@ -175,9 +174,9 @@ describe(`Tests for wrapper class.`, () => {
         const pools = poolsFromFile.pools;
 
         const tokenIn = AddressZero;
-        const tokenOut = '0x6b175474e89094c44da98b954eedeac495271d0f';
+        const tokenOut = DAI;
         const swapType = SwapTypes.SwapExactIn;
-        const swapAmt: BigNumber = bnum('0.1');
+        const swapAmt = parseFixed('0.1', 18);
 
         const sor = new SOR(provider, chainId, null, pools);
 
@@ -192,20 +191,16 @@ describe(`Tests for wrapper class.`, () => {
             { gasPrice, maxPools }
         );
 
-        const expectedTokenAddresses = [
-            AddressZero,
-            '0x6b175474e89094c44da98b954eedeac495271d0f',
-            '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48',
-        ];
+        const expectedTokenAddresses = [AddressZero, DAI, USDC];
 
         expect(expectedTokenAddresses).to.deep.eq(swapInfo.tokenAddresses);
-        assert.isAbove(swapInfo.returnAmount.toNumber(), 0);
-        assert.isAbove(bnum(swapInfo.swaps[0].amount).toNumber(), 0);
+        expect(swapInfo.returnAmount.gt(0)).to.be.true;
+        expect(BigNumber.from(swapInfo.swaps[0].amount).gt(0)).to.be.true;
         assert.equal(tokenIn, swapInfo.tokenIn);
         assert.equal(tokenOut, swapInfo.tokenOut);
         assert.equal(
             swapInfo.swapAmount.toString(),
-            swapAmt.times(bnum(10 ** 18)).toString(),
+            swapAmt.toString(),
             `Wrapper should have same amount as helper.`
         );
     });
@@ -216,11 +211,11 @@ describe(`Tests for wrapper class.`, () => {
         } = require('./testData/testPools/subgraphPoolsSmallWithTrade.json');
         const pools = poolsFromFile.pools;
 
-        const tokenInWeth = WETHADDR;
+        const tokenInWeth = WETH;
         const tokenInEth = AddressZero;
-        const tokenOut = '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48';
+        const tokenOut = USDC;
         const swapType = SwapTypes.SwapExactIn;
-        const swapAmt: BigNumber = bnum('0.1');
+        const swapAmt = parseFixed('0.1', 18);
 
         const sor = new SOR(provider, chainId, null, pools);
 
@@ -235,11 +230,7 @@ describe(`Tests for wrapper class.`, () => {
             { gasPrice, maxPools }
         );
 
-        const expectedTokenAddressesEth = [
-            tokenInEth,
-            '0x6b175474e89094c44da98b954eedeac495271d0f',
-            tokenOut,
-        ];
+        const expectedTokenAddressesEth = [tokenInEth, DAI, tokenOut];
 
         expect(expectedTokenAddressesEth).to.deep.eq(
             swapInfoEth.tokenAddresses
@@ -256,28 +247,24 @@ describe(`Tests for wrapper class.`, () => {
             { gasPrice, maxPools }
         );
 
-        const expectedTokenAddressesWeth = [
-            tokenInWeth,
-            '0x6b175474e89094c44da98b954eedeac495271d0f',
-            tokenOut,
-        ];
+        const expectedTokenAddressesWeth = [tokenInWeth, DAI, tokenOut];
 
         // Swaps/amts, etc should be same. Token list should be different
         expect(expectedTokenAddressesWeth).to.deep.eq(swapInfo.tokenAddresses);
         expect(swapInfoEth.swaps).to.deep.eq(swapInfo.swaps);
-        assert.isAbove(swapInfo.returnAmount.toNumber(), 0);
+        expect(swapInfo.returnAmount.gt(0)).to.be.true;
         assert.equal(
             swapInfoEth.returnAmount.toNumber(),
             swapInfo.returnAmount.toNumber()
         );
-        assert.isAbove(bnum(swapInfo.swaps[0].amount).toNumber(), 0);
+        expect(BigNumber.from(swapInfo.swaps[0].amount).gt(0)).to.be.true;
         assert.equal(tokenInWeth, swapInfo.tokenIn);
         assert.equal(tokenOut, swapInfo.tokenOut);
         assert.equal(tokenInEth, swapInfoEth.tokenIn);
         assert.equal(tokenOut, swapInfoEth.tokenOut);
         assert.equal(
             swapInfo.swapAmount.toString(),
-            swapAmt.times(bnum(10 ** 18)).toString(),
+            swapAmt.toString(),
             `Wrapper should have same amount as helper.`
         );
     });
@@ -288,11 +275,11 @@ describe(`Tests for wrapper class.`, () => {
         } = require('./testData/testPools/subgraphPoolsSmallWithTrade.json');
         const pools = poolsFromFile.pools;
 
-        const tokenIn = '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48';
-        const tokenOutWeth = WETHADDR;
+        const tokenIn = USDC;
+        const tokenOutWeth = WETH;
         const tokenOutEth = AddressZero;
         const swapType = SwapTypes.SwapExactIn;
-        const swapAmt: BigNumber = bnum('0.1');
+        const swapAmt = parseFixed('0.1', 6);
 
         const sor = new SOR(provider, chainId, null, pools);
 
@@ -324,24 +311,24 @@ describe(`Tests for wrapper class.`, () => {
             { gasPrice, maxPools }
         );
 
-        const expectedTokenAddressesWeth = [tokenIn, WETHADDR];
+        const expectedTokenAddressesWeth = [tokenIn, WETH];
 
         // Swaps/amts, etc should be same. Token list should be different
         expect(expectedTokenAddressesWeth).to.deep.eq(swapInfo.tokenAddresses);
         expect(swapInfoEth.swaps).to.deep.eq(swapInfo.swaps);
-        assert.isAbove(swapInfo.returnAmount.toNumber(), 0);
+        expect(swapInfo.returnAmount.gt(0)).to.be.true;
         assert.equal(
             swapInfoEth.returnAmount.toNumber(),
             swapInfo.returnAmount.toNumber()
         );
-        assert.isAbove(bnum(swapInfo.swaps[0].amount).toNumber(), 0);
+        expect(BigNumber.from(swapInfo.swaps[0].amount).gt(0)).to.be.true;
         assert.equal(tokenIn, swapInfo.tokenIn);
         assert.equal(tokenOutWeth, swapInfo.tokenOut);
         assert.equal(tokenIn, swapInfoEth.tokenIn);
         assert.equal(tokenOutEth, swapInfoEth.tokenOut);
         assert.equal(
             swapInfo.swapAmount.toString(),
-            swapAmt.times(bnum(10 ** 6)).toString(),
+            swapAmt.toString(),
             `Wrapper should have same amount as helper.`
         );
     });
@@ -351,11 +338,11 @@ describe(`Tests for wrapper class.`, () => {
             pools: SubgraphPoolBase[];
         } = require('./testData/testPools/subgraphPoolsSmallWithTrade.json');
         const pools = poolsFromFile.pools;
-        const tokenInWeth = WETHADDR;
+        const tokenInWeth = WETH;
         const tokenInEth = AddressZero;
-        const tokenOut = '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48';
+        const tokenOut = USDC;
         const swapType = SwapTypes.SwapExactOut;
-        const swapAmt: BigNumber = bnum('0.1');
+        const swapAmt = parseFixed('0.1', 6);
 
         const sor = new SOR(provider, chainId, null, pools);
 
@@ -370,11 +357,7 @@ describe(`Tests for wrapper class.`, () => {
             { gasPrice, maxPools }
         );
 
-        const expectedTokenAddressesEth = [
-            tokenInEth,
-            '0x6b175474e89094c44da98b954eedeac495271d0f',
-            tokenOut,
-        ];
+        const expectedTokenAddressesEth = [tokenInEth, DAI, tokenOut];
 
         expect(expectedTokenAddressesEth).to.deep.eq(
             swapInfoEth.tokenAddresses
@@ -391,30 +374,22 @@ describe(`Tests for wrapper class.`, () => {
             { gasPrice, maxPools }
         );
 
-        const expectedTokenAddressesWeth = [
-            tokenInWeth,
-            '0x6b175474e89094c44da98b954eedeac495271d0f',
-            tokenOut,
-        ];
+        const expectedTokenAddressesWeth = [tokenInWeth, DAI, tokenOut];
 
         // Swaps/amts, etc should be same. Token list should be different
         expect(expectedTokenAddressesWeth).to.deep.eq(swapInfo.tokenAddresses);
         expect(swapInfoEth.swaps).to.deep.eq(swapInfo.swaps);
-        assert.isAbove(swapInfo.returnAmount.toNumber(), 0);
+        expect(swapInfo.returnAmount.gt(0)).to.be.true;
         assert.equal(
             swapInfoEth.returnAmount.toNumber(),
             swapInfo.returnAmount.toNumber()
         );
-        assert.isAbove(bnum(swapInfo.swaps[0].amount).toNumber(), 0);
+        expect(BigNumber.from(swapInfo.swaps[0].amount).gt(0)).to.be.true;
         assert.equal(tokenInWeth, swapInfo.tokenIn);
         assert.equal(tokenOut, swapInfo.tokenOut);
         assert.equal(tokenInEth, swapInfoEth.tokenIn);
         assert.equal(tokenOut, swapInfoEth.tokenOut);
-        assert.equal(
-            swapInfo.swapAmount.toString(),
-            swapAmt.times(bnum(10 ** 6)).toString(),
-            `Wrapper should have same amount as helper.`
-        );
+        expect(swapInfo.swapAmount.toString()).to.be.eq(swapAmt.toString());
     });
 
     it(`compare weth/eth swaps, SwapExactOut, Weth Out`, async () => {
@@ -422,11 +397,11 @@ describe(`Tests for wrapper class.`, () => {
             pools: SubgraphPoolBase[];
         } = require('./testData/testPools/subgraphPoolsSmallWithTrade.json');
         const pools = poolsFromFile.pools;
-        const tokenIn = '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48';
-        const tokenOutWeth = WETHADDR;
+        const tokenIn = USDC;
+        const tokenOutWeth = WETH;
         const tokenOutEth = AddressZero;
         const swapType = SwapTypes.SwapExactOut;
-        const swapAmt: BigNumber = bnum('0.1');
+        const swapAmt = parseFixed('0.1', 18);
 
         const sor = new SOR(provider, chainId, null, pools);
 
@@ -441,11 +416,7 @@ describe(`Tests for wrapper class.`, () => {
             { gasPrice, maxPools }
         );
 
-        const expectedTokenAddressesEth = [
-            tokenIn,
-            '0x6b175474e89094c44da98b954eedeac495271d0f',
-            AddressZero,
-        ];
+        const expectedTokenAddressesEth = [tokenIn, DAI, AddressZero];
 
         expect(expectedTokenAddressesEth).to.deep.eq(
             swapInfoEth.tokenAddresses
@@ -462,28 +433,24 @@ describe(`Tests for wrapper class.`, () => {
             { gasPrice, maxPools }
         );
 
-        const expectedTokenAddressesWeth = [
-            tokenIn,
-            '0x6b175474e89094c44da98b954eedeac495271d0f',
-            WETHADDR,
-        ];
+        const expectedTokenAddressesWeth = [tokenIn, DAI, WETH];
 
         // Swaps/amts, etc should be same. Token list should be different
         expect(expectedTokenAddressesWeth).to.deep.eq(swapInfo.tokenAddresses);
         expect(swapInfoEth.swaps).to.deep.eq(swapInfo.swaps);
-        assert.isAbove(swapInfo.returnAmount.toNumber(), 0);
+        expect(swapInfo.returnAmount.gt(0)).to.be.true;
         assert.equal(
             swapInfoEth.returnAmount.toNumber(),
             swapInfo.returnAmount.toNumber()
         );
-        assert.isAbove(bnum(swapInfo.swaps[0].amount).toNumber(), 0);
+        expect(BigNumber.from(swapInfo.swaps[0].amount).gt(0)).to.be.true;
         assert.equal(tokenIn, swapInfo.tokenIn);
         assert.equal(tokenOutWeth, swapInfo.tokenOut);
         assert.equal(tokenIn, swapInfoEth.tokenIn);
         assert.equal(tokenOutEth, swapInfoEth.tokenOut);
         assert.equal(
             swapInfo.swapAmount.toString(),
-            swapAmt.times(bnum(10 ** 18)).toString(),
+            swapAmt.toString(),
             `Wrapper should have same amount as helper.`
         );
     });

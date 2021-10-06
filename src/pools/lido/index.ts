@@ -1,10 +1,11 @@
+import { BigNumber } from '@ethersproject/bignumber';
 import { BaseProvider } from '@ethersproject/providers';
-import { AddressZero } from '@ethersproject/constants';
+import { AddressZero, Zero } from '@ethersproject/constants';
 import { Contract } from '@ethersproject/contracts';
 import cloneDeep from 'lodash.clonedeep';
 import { SubgraphPoolBase, SwapInfo, SwapTypes, SwapV2 } from '../../types';
 import { parseNewPool } from '../../pools';
-import { BigNumber, ZERO, scale, bnum } from '../../utils/bignumber';
+import { BigNumber as OldBigNumber, ZERO, bnum } from '../../utils/bignumber';
 import vaultAbi from '../../abi/Vault.json';
 import { EMPTY_SWAPINFO } from '../../constants';
 
@@ -826,21 +827,22 @@ async function queryBatchSwap(
     };
 
     try {
-        const deltas = await vaultContract.callStatic.queryBatchSwap(
-            swapType,
-            swaps,
-            assets,
-            funds
-        );
+        const deltas: BigNumber[] =
+            await vaultContract.callStatic.queryBatchSwap(
+                swapType,
+                swaps,
+                assets,
+                funds
+            );
         // negative amounts represent tokens (or ETH) sent by the Vault
         if (swapType === SwapTypes.SwapExactIn)
-            return bnum(deltas[assets.length - 1].toString()).times(-1);
-        else return bnum(deltas[0].toString());
+            return deltas[assets.length - 1].mul(-1);
+        else return deltas[0];
     } catch (err) {
         console.error(
             `SOR - Lido Static Route QueryBatchSwap Error. No swaps.`
         );
-        return bnum(0);
+        return Zero;
     }
 }
 
@@ -853,8 +855,8 @@ function calculateMarketSp(
     swaps: SwapV2[],
     assets: string[],
     pools: SubgraphPoolBase[]
-): BigNumber {
-    const spotPrices: BigNumber[] = [];
+): OldBigNumber {
+    const spotPrices: OldBigNumber[] = [];
     for (let i = 0; i < swaps.length; i++) {
         const swap = swaps[i];
 
@@ -873,7 +875,7 @@ function calculateMarketSp(
         );
 
         // Calculate current spot price
-        let spotPrice: BigNumber;
+        let spotPrice: OldBigNumber;
         if (swapType === SwapTypes.SwapExactIn)
             spotPrice = newPool._spotPriceAfterSwapExactTokenInForTokenOut(
                 poolPairData,
@@ -905,7 +907,7 @@ export async function getStEthRate(
         provider
     );
     const rate = await wstETHContract.tokensPerStEth();
-    return scale(bnum(rate.toString()), -18);
+    return rate;
 }
 
 /*
@@ -939,15 +941,16 @@ export async function getLidoStaticSwaps(
 
     swapInfo.tokenAddresses = staticRoute.tokenAddresses;
     swapInfo.swaps = staticRoute.swaps;
-    if (swapType === SwapTypes.SwapExactIn)
-        swapInfo.swapAmount = scale(swapAmount, staticRoute.tokenInDecimals).dp(
-            0
-        );
-    else
-        swapInfo.swapAmount = scale(
-            swapAmount,
-            staticRoute.tokenOutDecimals
-        ).dp(0);
+    swapInfo.swapAmount = swapAmount;
+    // if (swapType === SwapTypes.SwapExactIn)
+    //     swapInfo.swapAmount = scale(swapAmount, staticRoute.tokenInDecimals).dp(
+    //         0
+    //     );
+    // else
+    //     swapInfo.swapAmount = scale(
+    //         swapAmount,
+    //         staticRoute.tokenOutDecimals
+    //     ).dp(0);
 
     swapInfo.swaps[0].amount = swapInfo.swapAmount.toString();
     if (isWrappingIn) swapInfo.tokenIn = Lido.stETH[chainId];

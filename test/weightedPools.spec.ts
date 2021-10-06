@@ -1,27 +1,12 @@
 require('dotenv').config();
 import { expect } from 'chai';
-import { JsonRpcProvider } from '@ethersproject/providers';
-import { SOR } from '../src';
-import { SwapInfo, SwapTypes, PoolTypes, SubgraphPoolBase } from '../src/types';
-import { BigNumber, bnum } from '../src/utils/bignumber';
+import { SwapTypes, PoolTypes, SubgraphPoolBase } from '../src/types';
+import { bnum } from '../src/utils/bignumber';
 import {
     WeightedPool,
     WeightedPoolPairData,
-    WeightedPoolToken,
 } from '../src/pools/weightedPool/weightedPool';
-
-const gasPrice = bnum('30000000000');
-const maxPools = 4;
-const chainId = 1;
-const provider = new JsonRpcProvider(
-    `https://mainnet.infura.io/v3/${process.env.INFURA}`
-);
-
-const USDC = '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48';
-const DAI = '0x6b175474e89094c44da98b954eedeac495271d0f';
-const USDT = '0xdac17f958d2ee523a2206206994597c13d831ec7';
-const BPT = '0xebfed10e11dc08fcda1af1fda146945e8710f22e';
-const RANDOM = '0x1456688345527be1f37e9e627da0837d6f08c925';
+import { parseFixed } from '@ethersproject/bignumber';
 
 // npx mocha -r ts-node/register test/weightedPools.spec.ts
 describe(`Tests for Weighted Pools.`, () => {
@@ -44,13 +29,19 @@ describe(`Tests for Weighted Pools.`, () => {
                 poolType: PoolTypes.Weighted,
                 tokenIn: pool.tokens[0].address,
                 tokenOut: pool.tokens[1].address,
-                balanceIn: bnum(pool.tokens[0].balance),
-                balanceOut: bnum(pool.tokens[1].balance),
-                swapFee: bnum(pool.swapFee),
+                balanceIn: parseFixed(
+                    pool.tokens[0].balance,
+                    pool.tokens[0].decimals
+                ),
+                balanceOut: parseFixed(
+                    pool.tokens[1].balance,
+                    pool.tokens[1].decimals
+                ),
+                swapFee: parseFixed(pool.swapFee, 18),
                 decimalsIn: Number(pool.tokens[0].decimals),
                 decimalsOut: Number(pool.tokens[1].decimals),
-                weightIn: bnum(pool.tokens[0].weight as string),
-                weightOut: bnum(pool.tokens[1].weight as string),
+                weightIn: parseFixed(pool.tokens[0].weight as string, 18),
+                weightOut: parseFixed(pool.tokens[1].weight as string, 18),
             };
 
             const limitAmt = newPool.getLimitAmountSwap(poolPairData, swapType);
@@ -77,13 +68,19 @@ describe(`Tests for Weighted Pools.`, () => {
                 poolType: PoolTypes.Weighted,
                 tokenIn: pool.tokens[0].address,
                 tokenOut: pool.tokens[1].address,
-                balanceIn: bnum(pool.tokens[0].balance),
-                balanceOut: bnum(pool.tokens[1].balance),
-                swapFee: bnum(pool.swapFee),
+                balanceIn: parseFixed(
+                    pool.tokens[0].balance,
+                    pool.tokens[0].decimals
+                ),
+                balanceOut: parseFixed(
+                    pool.tokens[1].balance,
+                    pool.tokens[1].decimals
+                ),
+                swapFee: parseFixed(pool.swapFee, 18),
                 decimalsIn: Number(pool.tokens[0].decimals),
                 decimalsOut: Number(pool.tokens[1].decimals),
-                weightIn: bnum(pool.tokens[0].weight as string),
-                weightOut: bnum(pool.tokens[1].weight as string),
+                weightIn: parseFixed(pool.tokens[0].weight as string, 18),
+                weightOut: parseFixed(pool.tokens[1].weight as string, 18),
             };
 
             const limitAmt = newPool.getLimitAmountSwap(poolPairData, swapType);

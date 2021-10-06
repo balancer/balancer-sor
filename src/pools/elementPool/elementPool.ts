@@ -1,4 +1,7 @@
-import { BigNumber } from '../../utils/bignumber';
+import { BigNumber, formatFixed, parseFixed } from '@ethersproject/bignumber';
+import { WeiPerEther as ONE } from '@ethersproject/constants';
+import { isSameAddress } from '../../utils';
+import { BigNumber as OldBigNumber, bnum } from '../../utils/bignumber';
 import {
     PoolBase,
     PoolTypes,
@@ -9,7 +12,6 @@ import {
     SubgraphToken,
 } from '../../types';
 import { getAddress } from '@ethersproject/address';
-import { bnum } from '../../utils/bignumber';
 import {
     _exactTokenInForTokenOut,
     _tokenInForExactTokenOut,
@@ -36,8 +38,8 @@ export class ElementPool implements PoolBase {
     swapPairType: SwapPairType;
     id: string;
     address: string;
-    swapFee: string;
-    totalShares: string;
+    swapFee: BigNumber;
+    totalShares: BigNumber;
     tokens: ElementPoolToken[];
     tokensList: string[];
     // Element specific
@@ -84,8 +86,8 @@ export class ElementPool implements PoolBase {
     ) {
         this.id = id;
         this.address = address;
-        this.swapFee = swapFee;
-        this.totalShares = totalShares;
+        this.swapFee = parseFixed(swapFee, 18);
+        this.totalShares = parseFixed(totalShares, 18);
         this.tokens = tokens;
         this.tokensList = tokensList;
         this.expiryTime = expiryTime;
@@ -109,7 +111,6 @@ export class ElementPool implements PoolBase {
         );
         if (tokenIndexIn < 0) throw 'Pool does not contain tokenIn';
         const tI = this.tokens[tokenIndexIn];
-        const balanceIn = tI.balance;
         const decimalsIn = tI.decimals;
 
         const tokenIndexOut = this.tokens.findIndex(
@@ -117,17 +118,19 @@ export class ElementPool implements PoolBase {
         );
         if (tokenIndexOut < 0) throw 'Pool does not contain tokenOut';
         const tO = this.tokens[tokenIndexOut];
-        const balanceOut = tO.balance;
         const decimalsOut = tO.decimals;
 
         // We already add the virtual LP shares to the right balance
-        let bnumBalanceIn = bnum(balanceIn);
-        let bnumBalanceOut = bnum(balanceOut);
+        const realBalanceIn = parseFixed(tI.balance, decimalsIn);
+        const realBalanceOut = parseFixed(tO.balance, decimalsOut);
+        let balanceIn = realBalanceIn;
+        let balanceOut = realBalanceOut;
         if (tokenIn == this.principalToken) {
-            bnumBalanceIn = bnumBalanceIn.plus(bnum(this.totalShares));
+            balanceIn = realBalanceIn.add(this.totalShares);
         } else if (tokenOut == this.principalToken) {
-            bnumBalanceOut = bnumBalanceOut.plus(bnum(this.totalShares));
+            balanceOut = realBalanceOut.add(this.totalShares);
         }
+
         const poolPairData: ElementPoolPairData = {
             id: this.id,
             address: this.address,
@@ -138,10 +141,10 @@ export class ElementPool implements PoolBase {
             baseToken: this.baseToken,
             decimalsIn: Number(decimalsIn),
             decimalsOut: Number(decimalsOut),
-            balanceIn: bnumBalanceIn,
-            balanceOut: bnumBalanceOut,
-            swapFee: bnum(this.swapFee),
-            totalShares: bnum(this.totalShares),
+            balanceIn,
+            balanceOut,
+            swapFee: this.swapFee,
+            totalShares: this.totalShares,
             expiryTime: this.expiryTime,
             unitSeconds: this.unitSeconds,
             currentBlockTimestamp: this.currentBlockTimestamp,
@@ -154,23 +157,29 @@ export class ElementPool implements PoolBase {
     // inverse of the slippage. It is proportional to the token balances in the
     // pool but also depends on the shape of the invariant curve.
     // As a standard, we define normalized liquidity in tokenOut
-    getNormalizedLiquidity(poolPairData: ElementPoolPairData): BigNumber {
+    getNormalizedLiquidity(poolPairData: ElementPoolPairData): OldBigNumber {
         // This could be refined by using the inverse of the slippage, but
         // in practice this won't have a big impact in path selection for
         // multi-hops so not a big priority
-        return poolPairData.balanceOut;
+        return bnum(
+            formatFixed(poolPairData.balanceOut, poolPairData.decimalsOut)
+        );
     }
 
     getLimitAmountSwap(
         poolPairData: ElementPoolPairData,
         swapType: SwapTypes
-    ): BigNumber {
-        const MAX_OUT_RATIO = bnum(0.3);
+    ): OldBigNumber {
+        const MAX_OUT_RATIO = parseFixed('0.3', 18);
         if (swapType === SwapTypes.SwapExactIn) {
             // "Ai < (Bi**(1-t)+Bo**(1-t))**(1/(1-t))-Bi" must hold in order for
             // base of root to be non-negative
-            const Bi = poolPairData.balanceIn.toNumber();
-            const Bo = poolPairData.balanceOut.toNumber();
+            const Bi = parseFloat(
+                formatFixed(poolPairData.balanceIn, poolPairData.decimalsIn)
+            );
+            const Bo = parseFloat(
+                formatFixed(poolPairData.balanceOut, poolPairData.decimalsOut)
+            );
             const t = getTimeTillExpiry(
                 this.expiryTime,
                 this.currentBlockTimestamp,
@@ -178,7 +187,12 @@ export class ElementPool implements PoolBase {
             );
             return bnum((Bi ** (1 - t) + Bo ** (1 - t)) ** (1 / (1 - t)) - Bi);
         } else {
-            return poolPairData.balanceOut.times(MAX_OUT_RATIO);
+            return bnum(
+                formatFixed(
+                    poolPairData.balanceOut.mul(MAX_OUT_RATIO).div(ONE),
+                    poolPairData.decimalsOut
+                )
+            );
         }
     }
 
@@ -186,53 +200,53 @@ export class ElementPool implements PoolBase {
     updateTokenBalanceForPool(token: string, newBalance: BigNumber): void {
         // token is BPT
         if (this.address == token) {
-            this.totalShares = newBalance.toString();
+            this.totalShares = newBalance;
         } else {
             // token is underlying in the pool
-            const T = this.tokens.find((t) => t.address === token);
+            const T = this.tokens.find((t) => isSameAddress(t.address, token));
             if (!T) throw Error('Pool does not contain this token');
-            T.balance = newBalance.toString();
+            T.balance = formatFixed(newBalance, T.decimals);
         }
     }
 
     _exactTokenInForTokenOut(
         poolPairData: ElementPoolPairData,
-        amount: BigNumber,
+        amount: OldBigNumber,
         exact: boolean
-    ): BigNumber {
+    ): OldBigNumber {
         poolPairData.currentBlockTimestamp = this.currentBlockTimestamp;
         return _exactTokenInForTokenOut(amount, poolPairData);
     }
 
     _tokenInForExactTokenOut(
         poolPairData: ElementPoolPairData,
-        amount: BigNumber,
+        amount: OldBigNumber,
         exact: boolean
-    ): BigNumber {
+    ): OldBigNumber {
         poolPairData.currentBlockTimestamp = this.currentBlockTimestamp;
         return _tokenInForExactTokenOut(amount, poolPairData);
     }
 
     _spotPriceAfterSwapExactTokenInForTokenOut(
         poolPairData: ElementPoolPairData,
-        amount: BigNumber
-    ): BigNumber {
+        amount: OldBigNumber
+    ): OldBigNumber {
         poolPairData.currentBlockTimestamp = this.currentBlockTimestamp;
         return _spotPriceAfterSwapExactTokenInForTokenOut(amount, poolPairData);
     }
 
     _spotPriceAfterSwapTokenInForExactTokenOut(
         poolPairData: ElementPoolPairData,
-        amount: BigNumber
-    ): BigNumber {
+        amount: OldBigNumber
+    ): OldBigNumber {
         poolPairData.currentBlockTimestamp = this.currentBlockTimestamp;
         return _spotPriceAfterSwapTokenInForExactTokenOut(amount, poolPairData);
     }
 
     _derivativeSpotPriceAfterSwapExactTokenInForTokenOut(
         poolPairData: ElementPoolPairData,
-        amount: BigNumber
-    ): BigNumber {
+        amount: OldBigNumber
+    ): OldBigNumber {
         poolPairData.currentBlockTimestamp = this.currentBlockTimestamp;
         return _derivativeSpotPriceAfterSwapExactTokenInForTokenOut(
             amount,
@@ -242,8 +256,8 @@ export class ElementPool implements PoolBase {
 
     _derivativeSpotPriceAfterSwapTokenInForExactTokenOut(
         poolPairData: ElementPoolPairData,
-        amount: BigNumber
-    ): BigNumber {
+        amount: OldBigNumber
+    ): OldBigNumber {
         poolPairData.currentBlockTimestamp = this.currentBlockTimestamp;
         return _derivativeSpotPriceAfterSwapTokenInForExactTokenOut(
             amount,

@@ -1188,6 +1188,7 @@
         {
             "id": "0x07d13ed39ee291c1506675ff42f9b2b6b50e2d3e",
             "swapFee": "0.0099",
+            "swapEnabled": true,
             "tokens": [
                 {
                     "address": "0x2260fac5e5542a773aa44fbcfedf7c193bc2c599",
@@ -2459,6 +2460,7 @@
         {
             "id": "0x1066a453127fad74d0ab1c981dffa56d76310517",
             "swapFee": "0.00001",
+            "swapEnabled": true,
             "tokens": [
                 {
                     "address": "0x0bc529c00c6401aef6d220be8c6ea1667f6ad93e",
@@ -5946,6 +5948,7 @@
         {
             "id": "0x28841acdddd21568eade5f2ee127175bf4229c23",
             "swapFee": "0.00001",
+            "swapEnabled": true,
             "tokens": [
                 {
                     "address": "0x846c66cf71c43f80403b51fe3906b3599d63336f",
@@ -8235,6 +8238,7 @@
         {
             "id": "0x3554dd27ed345f4b9c09aa1283f42fa73ee12a5e",
             "swapFee": "0.00001",
+            "swapEnabled": true,
             "tokens": [
                 {
                     "address": "0x7e8539d1e5cb91d63e46b8e188403b3f262a949b",
@@ -8575,6 +8579,7 @@
         {
             "id": "0x39ee0f29253017d69909b7286caf8c080e9d6da2",
             "swapFee": "0.0099",
+            "swapEnabled": true,
             "tokens": [
                 {
                     "address": "0x27054b13b1b798b345b591a4d22e6562d47ea75a",
@@ -14900,6 +14905,7 @@
         {
             "id": "0x5b475f2cc362265ddf6a958f3519a35b305d2824",
             "swapFee": "0.0099",
+            "swapEnabled": true,
             "tokens": [
                 {
                     "address": "0x9f8f72aa9304c8b593d555f12ef6589cc3a579a2",
@@ -20591,6 +20597,7 @@
         {
             "id": "0x7f3bc8cc642fb8633ef58560802643935f8b3682",
             "swapFee": "0.0099",
+            "swapEnabled": true,
             "tokens": [
                 {
                     "address": "0x7c5a0ce9267ed19b22f8cae653f198e3e8daf098",
@@ -20858,6 +20865,7 @@
         {
             "id": "0x8012cf225535c377f47781ff8937b1901be4da71",
             "swapFee": "0.00001",
+            "swapEnabled": true,
             "tokens": [
                 {
                     "address": "0x3505f494c3f0fed0b594e01fa41dd3967645ca39",
@@ -30095,6 +30103,7 @@
         {
             "id": "0xbcbaa95dba4c31283bbc4454c6aa137e26eab009",
             "swapFee": "0.00001",
+            "swapEnabled": true,
             "tokens": [
                 {
                     "address": "0x3505f494c3f0fed0b594e01fa41dd3967645ca39",
@@ -34102,6 +34111,7 @@
         {
             "id": "0xd7458db5142c1a1499ea740356eebc5412622ea5",
             "swapFee": "0.00001",
+            "swapEnabled": true,
             "tokens": [
                 {
                     "address": "0x6fe56c0bcdd471359019fcbc48863d6c3e9d4f41",

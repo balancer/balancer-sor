@@ -1,7 +1,9 @@
+import { BigNumber } from '@ethersproject/bignumber';
 import cloneDeep from 'lodash.clonedeep';
-import { BigNumber, bnum, scale, ZERO } from './utils/bignumber';
+import { BigNumber as OldBigNumber, bnum, scale } from './utils/bignumber';
 import { EMPTY_SWAPINFO } from './constants';
 import { SwapTypes, SwapV2, Swap, SwapInfo } from './types';
+import { Zero } from '@ethersproject/constants';
 
 /**
  * @returns an array of deduplicated token addresses used in the provided swaps
@@ -24,7 +26,7 @@ const getTokenAddresses = (swaps: Swap[][]): string[] => {
  * @returns the total amount of tokens used in the described batchSwap
  */
 const getTotalSwapAmount = (swaps: SwapV2[]) => {
-    return swaps.reduce((acc, { amount }) => acc.plus(amount), ZERO);
+    return swaps.reduce((acc, { amount }) => acc.add(amount), Zero);
 };
 
 /**
@@ -67,12 +69,12 @@ const formatSequence = (
                 .toString();
         }
 
-        const inIndex = tokenAddresses.indexOf(swap.tokenIn);
-        const outIndex = tokenAddresses.indexOf(swap.tokenOut);
+        const assetInIndex = tokenAddresses.indexOf(swap.tokenIn);
+        const assetOutIndex = tokenAddresses.indexOf(swap.tokenOut);
         return {
             poolId: swap.pool,
-            assetInIndex: inIndex,
-            assetOutIndex: outIndex,
+            assetInIndex,
+            assetOutIndex,
             amount: amountScaled,
             userData: '0x',
         };
@@ -87,56 +89,34 @@ export function formatSwaps(
     tokenOut: string,
     returnAmount: BigNumber,
     returnAmountConsideringFees: BigNumber,
-    marketSp: BigNumber
+    marketSp: OldBigNumber
 ): SwapInfo {
-    const swaps: Swap[][] = cloneDeep(swapsOriginal);
-
-    const swapInfo: SwapInfo = {
-        ...EMPTY_SWAPINFO,
-        marketSp: marketSp,
-    };
-
-    if (swaps.length === 0) {
-        return swapInfo;
+    if (swapsOriginal.length === 0) {
+        return cloneDeep(EMPTY_SWAPINFO);
     }
 
-    const { tokenInDecimals } = swaps[0].find(
-        (swap) => swap.tokenIn === tokenIn
-    ) as Swap;
-    const { tokenOutDecimals } = swaps[0].find(
-        (swap) => swap.tokenOut === tokenOut
-    ) as Swap;
-
-    const tokenArray = getTokenAddresses(swaps);
-    const swapsV2: SwapV2[] = swaps.flatMap((sequence) =>
-        formatSequence(swapType, sequence, tokenArray)
+    const swapsClone = cloneDeep(swapsOriginal);
+    const tokenAddresses = getTokenAddresses(swapsClone);
+    const swaps: SwapV2[] = swapsClone.flatMap((sequence) =>
+        formatSequence(swapType, sequence, tokenAddresses)
     );
-
-    const [inputDecimals, returnDecimals] =
-        swapType === SwapTypes.SwapExactIn
-            ? [tokenInDecimals, tokenOutDecimals]
-            : [tokenOutDecimals, tokenInDecimals];
-
-    swapInfo.swapAmount = scale(swapAmount, inputDecimals);
-    swapInfo.returnAmount = scale(returnAmount, returnDecimals).dp(
-        0,
-        BigNumber.ROUND_FLOOR
-    );
-    swapInfo.returnAmountConsideringFees = scale(
-        returnAmountConsideringFees,
-        returnDecimals
-    ).dp(0, BigNumber.ROUND_FLOOR);
 
     // We need to account for any rounding losses by adding dust to first path
-    const dust = swapInfo.swapAmount
-        .minus(getTotalSwapAmount(swapsV2))
-        .dp(0, 0);
-    if (dust.gt(0))
-        swapsV2[0].amount = bnum(swapsV2[0].amount).plus(dust).toString();
+    const dust = swapAmount.sub(getTotalSwapAmount(swaps));
+    if (dust.gt(0)) {
+        swaps[0].amount = BigNumber.from(swaps[0].amount).add(dust).toString();
+    }
 
-    swapInfo.swaps = swapsV2;
-    swapInfo.tokenAddresses = tokenArray;
-    swapInfo.tokenIn = tokenIn;
-    swapInfo.tokenOut = tokenOut;
+    const swapInfo: SwapInfo = {
+        swapAmount,
+        returnAmount,
+        returnAmountConsideringFees,
+        swaps,
+        tokenAddresses,
+        tokenIn,
+        tokenOut,
+        marketSp,
+    };
+
     return swapInfo;
 }

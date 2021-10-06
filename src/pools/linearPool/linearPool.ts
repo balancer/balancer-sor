@@ -1,6 +1,8 @@
 import { getAddress } from '@ethersproject/address';
+import { BigNumber, parseFixed } from '@ethersproject/bignumber';
 import { bnum, scale, ZERO } from '../../utils/bignumber';
-import { BigNumber } from '../../utils/bignumber';
+import { BigNumber as OldBigNumber } from '../../utils/bignumber';
+import { WeiPerEther as ONE } from '@ethersproject/constants';
 import * as SDK from '@georgeroman/balancer-v2-pools';
 import {
     PoolBase,
@@ -12,10 +14,8 @@ import {
     SubgraphToken,
 } from '../../types';
 import {
-    _exactTokenInForTokenOut,
     _exactTokenInForBPTOut,
     _exactBPTInForTokenOut,
-    _tokenInForExactTokenOut,
     _tokenInForExactBPTOut,
     _BPTInForExactTokenOut,
     _spotPriceAfterSwapExactTokenInForTokenOut,
@@ -32,8 +32,6 @@ import {
     _derivativeSpotPriceAfterSwapBPTInForExactTokenOut,
 } from './linearMath';
 
-const FPPRECISION = 18;
-
 enum PairTypes {
     BptToToken,
     TokenToBpt,
@@ -47,9 +45,9 @@ type LinearPoolToken = Pick<
 
 export type LinearPoolPairData = PoolPairBase & {
     pairType: PairTypes;
-    wrappedBalance: BigNumber;
+    wrappedBalance: OldBigNumber;
     wrappedDecimals: number;
-    rate: BigNumber;
+    rate: OldBigNumber;
     target1: BigNumber;
     target2: BigNumber;
 };
@@ -65,10 +63,11 @@ export class LinearPool implements PoolBase {
     tokensList: string[];
 
     wrappedIndex: number;
+    wrappedDecimals: number;
     target1: BigNumber;
     target2: BigNumber;
-    MAX_IN_RATIO = bnum(0.3); // ?
-    MAX_OUT_RATIO = bnum(0.3); // ?
+    MAX_RATIO = parseFixed('10', 18);
+    ALMOST_ONE = parseFixed('0.99', 18);
 
     static fromPool(pool: SubgraphPoolBase): LinearPool {
         if (!pool.wrappedIndex)
@@ -101,14 +100,15 @@ export class LinearPool implements PoolBase {
     ) {
         this.id = id;
         this.address = address;
-        this.swapFee = bnum(swapFee);
-        this.totalShares = bnum(totalShares);
+        this.swapFee = parseFixed(swapFee, 18);
+        this.totalShares = parseFixed(totalShares, 18);
         this.tokens = tokens;
         this.tokensList = tokensList;
         this.wrappedIndex = wrappedIndex;
-        // rate is now inside wrapped token info
-        this.target1 = bnum(target1);
-        this.target2 = bnum(target2);
+        this.wrappedDecimals = this.tokens[this.wrappedIndex].decimals;
+
+        this.target1 = parseFixed(target1, this.wrappedDecimals);
+        this.target2 = parseFixed(target2, this.wrappedDecimals);
     }
 
     setTypeForSwap(type: SwapPairType): void {
@@ -144,16 +144,16 @@ export class LinearPool implements PoolBase {
         );
         if (tokenIndexIn < 0) throw 'Pool does not contain tokenIn';
         const tI: LinearPoolToken = this.tokens[tokenIndexIn];
-        balanceIn = bnum(tI.balance);
         decimalsIn = tI.decimals;
+        balanceIn = parseFixed(tI.balance, decimalsIn);
 
         const tokenIndexOut = this.tokens.findIndex(
             (t) => getAddress(t.address) === getAddress(tokenOut)
         );
         if (tokenIndexOut < 0) throw 'Pool does not contain tokenOut';
         const tO: LinearPoolToken = this.tokens[tokenIndexOut];
-        balanceOut = bnum(tO.balance);
         decimalsOut = tO.decimals;
+        balanceOut = parseFixed(tO.balance, decimalsOut);
         //}
 
         const poolPairData: LinearPoolPairData = {
@@ -168,9 +168,12 @@ export class LinearPool implements PoolBase {
             balanceIn: balanceIn,
             balanceOut: balanceOut,
             swapFee: this.swapFee,
-            wrappedBalance: bnum(this.tokens[this.wrappedIndex].balance),
-            wrappedDecimals: +this.tokens[this.wrappedIndex].decimals,
-            rate: bnum(this.tokens[this.wrappedIndex].priceRate),
+            wrappedBalance: scale(
+                bnum(this.tokens[this.wrappedIndex].balance),
+                this.wrappedDecimals
+            ),
+            wrappedDecimals: this.wrappedDecimals,
+            rate: scale(bnum(this.tokens[this.wrappedIndex].priceRate), 18),
             target1: this.target1,
             target2: this.target2,
         };
@@ -178,32 +181,56 @@ export class LinearPool implements PoolBase {
         return poolPairData;
     }
 
-    getNormalizedLiquidity(poolPairData: LinearPoolPairData): BigNumber {
+    getNormalizedLiquidity(poolPairData: LinearPoolPairData): OldBigNumber {
         return bnum(0);
     }
 
     getLimitAmountSwap(
         poolPairData: PoolPairBase,
         swapType: SwapTypes
-    ): BigNumber {
+    ): OldBigNumber {
+        // Needs to return human scaled numbers
         const linearPoolPairData = this.parsePoolPairData(
             poolPairData.tokenIn,
             poolPairData.tokenOut
         );
         if (swapType === SwapTypes.SwapExactIn) {
-            if (linearPoolPairData.pairType === PairTypes.TokenToBpt)
-                return poolPairData.balanceIn.times(this.MAX_IN_RATIO);
-            else if (linearPoolPairData.pairType === PairTypes.BptToToken) {
-                return _BPTInForExactTokenOut(
-                    poolPairData.balanceOut,
+            if (linearPoolPairData.pairType === PairTypes.TokenToBpt) {
+                const limit = bnum(
+                    poolPairData.balanceIn
+                        .mul(this.MAX_RATIO)
+                        .div(ONE)
+                        .toString()
+                );
+                return scale(limit, -poolPairData.decimalsIn);
+            } else if (linearPoolPairData.pairType === PairTypes.BptToToken) {
+                const limit = _BPTInForExactTokenOut(
+                    bnum(poolPairData.balanceOut.toString()),
                     linearPoolPairData
-                ).times(0.99);
+                )
+                    .times(bnum(this.ALMOST_ONE.toString()))
+                    .div(bnum(ONE.toString()));
+                return scale(limit, -poolPairData.decimalsIn).dp(
+                    poolPairData.decimalsIn
+                );
             } else throw Error('LinearPool does not support TokenToToken');
         } else {
             if (linearPoolPairData.pairType === PairTypes.TokenToBpt) {
-                return poolPairData.balanceOut.times(this.MAX_IN_RATIO);
+                const limit = bnum(
+                    poolPairData.balanceOut
+                        .mul(this.MAX_RATIO)
+                        .div(ONE)
+                        .toString()
+                );
+                return scale(limit, -poolPairData.decimalsOut);
             } else if (linearPoolPairData.pairType === PairTypes.BptToToken) {
-                return poolPairData.balanceOut.times(0.99);
+                const limit = bnum(
+                    poolPairData.balanceOut
+                        .mul(this.ALMOST_ONE)
+                        .div(ONE)
+                        .toString()
+                );
+                return scale(limit, -poolPairData.decimalsOut);
             } else throw Error('LinearPool does not support TokenToToken');
         }
     }
@@ -223,9 +250,9 @@ export class LinearPool implements PoolBase {
 
     _exactTokenInForTokenOut(
         poolPairData: LinearPoolPairData,
-        amount: BigNumber,
+        amount: OldBigNumber,
         exact: boolean
-    ): BigNumber {
+    ): OldBigNumber {
         if (poolPairData.pairType === PairTypes.TokenToBpt) {
             return this._exactTokenInForBPTOut(poolPairData, amount, exact);
         } else if (poolPairData.pairType === PairTypes.BptToToken) {
@@ -235,36 +262,25 @@ export class LinearPool implements PoolBase {
 
     _exactTokenInForBPTOut(
         poolPairData: LinearPoolPairData,
-        amount: BigNumber,
+        amount: OldBigNumber,
         exact: boolean
-    ): BigNumber {
+    ): OldBigNumber {
         if (exact) {
             try {
-                // poolPair balances are normalised so must be scaled before use
-                // in = main
-                // out = BPT
+                // poolPair balances are human readable so must be scaled before use
                 const amt = SDK.LinearMath._calcBptOutPerMainIn(
                     scale(amount, poolPairData.decimalsIn),
-                    scale(poolPairData.balanceIn, poolPairData.decimalsIn),
-                    scale(
-                        poolPairData.wrappedBalance,
-                        poolPairData.wrappedDecimals
-                    ),
-                    scale(poolPairData.balanceOut, poolPairData.decimalsOut),
+                    bnum(poolPairData.balanceIn.toString()),
+                    poolPairData.wrappedBalance,
+                    bnum(poolPairData.balanceOut.toString()),
                     {
-                        fee: scale(poolPairData.swapFee, FPPRECISION),
-                        rate: scale(poolPairData.rate, FPPRECISION),
-                        lowerTarget: scale(
-                            poolPairData.target1,
-                            poolPairData.decimalsIn
-                        ),
-                        upperTarget: scale(
-                            poolPairData.target2,
-                            poolPairData.decimalsIn
-                        ),
+                        fee: bnum(poolPairData.swapFee.toString()),
+                        rate: poolPairData.rate,
+                        lowerTarget: bnum(poolPairData.target1.toString()),
+                        upperTarget: bnum(poolPairData.target2.toString()),
                     }
                 );
-                // return normalised amount
+                // return human readable number
                 return scale(amt, -poolPairData.decimalsOut);
             } catch (err) {
                 return ZERO;
@@ -277,36 +293,25 @@ export class LinearPool implements PoolBase {
     // bug alert: exact and "not exact" differ more than they should
     _exactBPTInForTokenOut(
         poolPairData: LinearPoolPairData,
-        amount: BigNumber,
+        amount: OldBigNumber,
         exact: boolean
-    ): BigNumber {
+    ): OldBigNumber {
         if (exact) {
             try {
-                // poolPair balances are normalised so must be scaled before use
-                // in = BPT
-                // out = main
+                // poolPair balances are human readable so must be scaled before use
                 const amt = SDK.LinearMath._calcMainOutPerBptIn(
                     scale(amount, poolPairData.decimalsIn),
-                    scale(poolPairData.balanceOut, poolPairData.decimalsOut),
-                    scale(
-                        poolPairData.wrappedBalance,
-                        poolPairData.wrappedDecimals
-                    ),
-                    scale(poolPairData.balanceIn, poolPairData.decimalsIn),
+                    bnum(poolPairData.balanceOut.toString()),
+                    poolPairData.wrappedBalance,
+                    bnum(poolPairData.balanceIn.toString()),
                     {
-                        fee: scale(poolPairData.swapFee, FPPRECISION),
-                        rate: scale(poolPairData.rate, FPPRECISION),
-                        lowerTarget: scale(
-                            poolPairData.target1,
-                            poolPairData.decimalsOut
-                        ),
-                        upperTarget: scale(
-                            poolPairData.target2,
-                            poolPairData.decimalsOut
-                        ),
+                        fee: bnum(poolPairData.swapFee.toString()),
+                        rate: poolPairData.rate,
+                        lowerTarget: bnum(poolPairData.target1.toString()),
+                        upperTarget: bnum(poolPairData.target2.toString()),
                     }
                 );
-                // return normalised amount
+                // return human readable number
                 return scale(amt, -poolPairData.decimalsOut);
             } catch (err) {
                 return ZERO;
@@ -318,9 +323,9 @@ export class LinearPool implements PoolBase {
 
     _tokenInForExactTokenOut(
         poolPairData: LinearPoolPairData,
-        amount: BigNumber,
+        amount: OldBigNumber,
         exact: boolean
-    ): BigNumber {
+    ): OldBigNumber {
         if (poolPairData.pairType === PairTypes.TokenToBpt) {
             return this._tokenInForExactBPTOut(poolPairData, amount, exact);
         } else if (poolPairData.pairType === PairTypes.BptToToken) {
@@ -330,36 +335,27 @@ export class LinearPool implements PoolBase {
 
     _tokenInForExactBPTOut(
         poolPairData: LinearPoolPairData,
-        amount: BigNumber,
+        amount: OldBigNumber,
         exact: boolean
-    ): BigNumber {
+    ): OldBigNumber {
         if (exact) {
             try {
-                // poolPair balances are normalised so must be scaled before use
+                // poolPair balances are human readable so must be scaled before use
                 // in = main
                 // out = BPT
                 const amt = SDK.LinearMath._calcMainInPerBptOut(
                     scale(amount, poolPairData.decimalsOut),
-                    scale(poolPairData.balanceIn, poolPairData.decimalsIn),
-                    scale(
-                        poolPairData.wrappedBalance,
-                        poolPairData.wrappedDecimals
-                    ),
-                    scale(poolPairData.balanceOut, poolPairData.decimalsOut),
+                    bnum(poolPairData.balanceIn.toString()),
+                    poolPairData.wrappedBalance,
+                    bnum(poolPairData.balanceOut.toString()),
                     {
-                        fee: scale(poolPairData.swapFee, FPPRECISION),
-                        rate: scale(poolPairData.rate, FPPRECISION),
-                        lowerTarget: scale(
-                            poolPairData.target1,
-                            poolPairData.decimalsIn
-                        ),
-                        upperTarget: scale(
-                            poolPairData.target2,
-                            poolPairData.decimalsIn
-                        ),
+                        fee: bnum(poolPairData.swapFee.toString()),
+                        rate: poolPairData.rate,
+                        lowerTarget: bnum(poolPairData.target1.toString()),
+                        upperTarget: bnum(poolPairData.target2.toString()),
                     }
                 );
-                // return normalised amount
+                // return human readable number
                 return scale(amt, -poolPairData.decimalsIn);
             } catch (err) {
                 return ZERO;
@@ -371,36 +367,27 @@ export class LinearPool implements PoolBase {
     // bug alert: exact and "not exact" differ more than they should
     _BPTInForExactTokenOut(
         poolPairData: LinearPoolPairData,
-        amount: BigNumber,
+        amount: OldBigNumber,
         exact: boolean
-    ): BigNumber {
+    ): OldBigNumber {
         if (exact) {
             try {
-                // poolPair balances are normalised so must be scaled before use
+                // poolPair balances are human readable so must be scaled before use
                 // in = BPT
                 // out = main
                 const amt = SDK.LinearMath._calcBptInPerMainOut(
                     scale(amount, poolPairData.decimalsOut),
-                    scale(poolPairData.balanceOut, poolPairData.decimalsOut),
-                    scale(
-                        poolPairData.wrappedBalance,
-                        poolPairData.wrappedDecimals
-                    ),
-                    scale(poolPairData.balanceIn, poolPairData.decimalsIn),
+                    bnum(poolPairData.balanceOut.toString()),
+                    poolPairData.wrappedBalance,
+                    bnum(poolPairData.balanceIn.toString()),
                     {
-                        fee: scale(poolPairData.swapFee, FPPRECISION),
-                        rate: scale(poolPairData.rate, FPPRECISION),
-                        lowerTarget: scale(
-                            poolPairData.target1,
-                            poolPairData.decimalsOut
-                        ),
-                        upperTarget: scale(
-                            poolPairData.target2,
-                            poolPairData.decimalsOut
-                        ),
+                        fee: bnum(poolPairData.swapFee.toString()),
+                        rate: poolPairData.rate,
+                        lowerTarget: bnum(poolPairData.target1.toString()),
+                        upperTarget: bnum(poolPairData.target2.toString()),
                     }
                 );
-                // return normalised amount
+                // return human readable number
                 return scale(amt, -poolPairData.decimalsIn);
             } catch (err) {
                 return ZERO;
@@ -411,8 +398,8 @@ export class LinearPool implements PoolBase {
 
     _spotPriceAfterSwapExactTokenInForTokenOut(
         poolPairData: LinearPoolPairData,
-        amount: BigNumber
-    ): BigNumber {
+        amount: OldBigNumber
+    ): OldBigNumber {
         if (poolPairData.pairType === PairTypes.TokenToBpt) {
             return this._spotPriceAfterSwapExactTokenInForBPTOut(
                 poolPairData,
@@ -432,22 +419,22 @@ export class LinearPool implements PoolBase {
 
     _spotPriceAfterSwapExactTokenInForBPTOut(
         poolPairData: LinearPoolPairData,
-        amount: BigNumber
-    ): BigNumber {
+        amount: OldBigNumber
+    ): OldBigNumber {
         return _spotPriceAfterSwapExactTokenInForBPTOut(amount, poolPairData);
     }
 
     _spotPriceAfterSwapExactBPTInForTokenOut(
         poolPairData: LinearPoolPairData,
-        amount: BigNumber
-    ): BigNumber {
+        amount: OldBigNumber
+    ): OldBigNumber {
         return _spotPriceAfterSwapExactBPTInForTokenOut(amount, poolPairData);
     }
 
     _spotPriceAfterSwapTokenInForExactTokenOut(
         poolPairData: LinearPoolPairData,
-        amount: BigNumber
-    ): BigNumber {
+        amount: OldBigNumber
+    ): OldBigNumber {
         if (poolPairData.pairType === PairTypes.TokenToBpt) {
             return this._spotPriceAfterSwapTokenInForExactBPTOut(
                 poolPairData,
@@ -467,22 +454,22 @@ export class LinearPool implements PoolBase {
 
     _spotPriceAfterSwapTokenInForExactBPTOut(
         poolPairData: LinearPoolPairData,
-        amount: BigNumber
-    ): BigNumber {
+        amount: OldBigNumber
+    ): OldBigNumber {
         return _spotPriceAfterSwapTokenInForExactBPTOut(amount, poolPairData);
     }
 
     _spotPriceAfterSwapBPTInForExactTokenOut(
         poolPairData: LinearPoolPairData,
-        amount: BigNumber
-    ): BigNumber {
+        amount: OldBigNumber
+    ): OldBigNumber {
         return _spotPriceAfterSwapBPTInForExactTokenOut(amount, poolPairData);
     }
 
     _derivativeSpotPriceAfterSwapExactTokenInForTokenOut(
         poolPairData: LinearPoolPairData,
-        amount: BigNumber
-    ): BigNumber {
+        amount: OldBigNumber
+    ): OldBigNumber {
         if (poolPairData.pairType === PairTypes.TokenToBpt) {
             return this._derivativeSpotPriceAfterSwapExactTokenInForBPTOut(
                 poolPairData,
@@ -502,8 +489,8 @@ export class LinearPool implements PoolBase {
 
     _derivativeSpotPriceAfterSwapExactTokenInForBPTOut(
         poolPairData: LinearPoolPairData,
-        amount: BigNumber
-    ): BigNumber {
+        amount: OldBigNumber
+    ): OldBigNumber {
         return _derivativeSpotPriceAfterSwapExactTokenInForBPTOut(
             amount,
             poolPairData
@@ -512,8 +499,8 @@ export class LinearPool implements PoolBase {
 
     _derivativeSpotPriceAfterSwapExactBPTInForTokenOut(
         poolPairData: LinearPoolPairData,
-        amount: BigNumber
-    ): BigNumber {
+        amount: OldBigNumber
+    ): OldBigNumber {
         return _derivativeSpotPriceAfterSwapExactBPTInForTokenOut(
             amount,
             poolPairData
@@ -522,8 +509,8 @@ export class LinearPool implements PoolBase {
 
     _derivativeSpotPriceAfterSwapTokenInForExactTokenOut(
         poolPairData: LinearPoolPairData,
-        amount: BigNumber
-    ): BigNumber {
+        amount: OldBigNumber
+    ): OldBigNumber {
         if (poolPairData.pairType === PairTypes.TokenToBpt) {
             return this._derivativeSpotPriceAfterSwapTokenInForExactBPTOut(
                 poolPairData,
@@ -543,8 +530,8 @@ export class LinearPool implements PoolBase {
 
     _derivativeSpotPriceAfterSwapTokenInForExactBPTOut(
         poolPairData: LinearPoolPairData,
-        amount: BigNumber
-    ): BigNumber {
+        amount: OldBigNumber
+    ): OldBigNumber {
         return _derivativeSpotPriceAfterSwapTokenInForExactBPTOut(
             amount,
             poolPairData
@@ -553,8 +540,8 @@ export class LinearPool implements PoolBase {
 
     _derivativeSpotPriceAfterSwapBPTInForExactTokenOut(
         poolPairData: LinearPoolPairData,
-        amount: BigNumber
-    ): BigNumber {
+        amount: OldBigNumber
+    ): OldBigNumber {
         return _derivativeSpotPriceAfterSwapBPTInForExactTokenOut(
             amount,
             poolPairData

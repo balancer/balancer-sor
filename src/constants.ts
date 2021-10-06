@@ -1,3 +1,4 @@
+import { Zero } from '@ethersproject/constants';
 import { ZERO } from './utils/bignumber';
 import { SwapInfo } from './types';
 
@@ -25,15 +26,32 @@ export const VAULTADDR: { [chainId: number]: string } = {
     42161: '0xBA12222222228d8Ba445958a75a0704d566BF2C8',
 };
 
+// Currently only used for Polygon
+// ID of USDC Connecting Pool & USDC token address
+export const USDCCONNECTINGPOOL: {
+    [chainId: number]: { id: string; usdc: string };
+} = {
+    99: {
+        id: 'usdcConnecting',
+        usdc: '0x2791bca1f2de4661ed88a30c99a7a9449aa84174',
+    },
+};
+
+// Currently only used for Polygon
+// Address of staBAL3 pool
+export const STABALADDR: { [chainId: number]: string } = {
+    99: '0x0000000000000000000000000000000000000001',
+};
+
 export const EMPTY_SWAPINFO: SwapInfo = {
     tokenAddresses: [],
     swaps: [],
-    swapAmount: ZERO,
-    swapAmountForSwaps: ZERO,
+    swapAmount: Zero,
+    swapAmountForSwaps: Zero,
     tokenIn: '',
     tokenOut: '',
-    returnAmount: ZERO,
-    returnAmountConsideringFees: ZERO,
-    returnAmountFromSwaps: ZERO,
+    returnAmount: Zero,
+    returnAmountConsideringFees: Zero,
+    returnAmountFromSwaps: Zero,
     marketSp: ZERO,
 };

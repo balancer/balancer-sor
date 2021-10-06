@@ -1,14 +1,15 @@
 // npx mocha -r ts-node/register test/wrapper.spec.ts
 require('dotenv').config();
+import { parseFixed } from '@ethersproject/bignumber';
 import { expect } from 'chai';
 
 import { RouteProposer } from '../src/routeProposal';
-import { BigNumber } from '../src/utils/bignumber';
 import { SwapTypes, SubgraphPoolBase, SwapOptions } from '../src/types';
+import { DAI, WETH } from './lib/constants';
 
-const gasPrice = new BigNumber('30000000000');
+const gasPrice = parseFixed('30', 9);
 const maxPools = 4;
-const chainId = 1;
+const chainId = 99;
 
 describe(`RouteProposer.`, () => {
     it(`should have no cached process data on creation`, () => {
@@ -21,8 +22,8 @@ describe(`RouteProposer.`, () => {
             pools: SubgraphPoolBase[];
         } = require('./testData/testPools/subgraphPoolsSmallWithTrade.json');
         const pools = poolsFromFile.pools;
-        const tokenIn = '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2';
-        const tokenOut = '0x6b175474e89094c44da98b954eedeac495271d0f';
+        const tokenIn = WETH;
+        const tokenOut = DAI;
         const swapType = SwapTypes.SwapExactIn;
 
         const routeProposer = new RouteProposer();

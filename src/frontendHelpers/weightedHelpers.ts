@@ -1,6 +1,8 @@
-import { BigNumber } from '../utils/bignumber';
+import { BigNumber as OldBigNumber, ZERO } from '../utils/bignumber';
 import * as weightedMath from '../pools/weightedPool/weightedMath';
 import { WeightedPoolPairData } from 'pools/weightedPool/weightedPool';
+import { Zero } from '@ethersproject/constants';
+import { BigNumber } from '@ethersproject/bignumber';
 
 /////////
 /// UI Helpers
@@ -11,31 +13,30 @@ import { WeightedPoolPairData } from 'pools/weightedPool/weightedPool';
 // an Add or Remove liquidity operation: The spot prices of BPT in tokens
 // are the same regardless.
 export function BPTForTokensZeroPriceImpact(
-    balances: BigNumber[],
+    balances: OldBigNumber[],
     decimals: number[],
-    normalizedWeights: BigNumber[],
-    amounts: BigNumber[],
-    bptTotalSupply: BigNumber
-): BigNumber {
-    const zero = new BigNumber(0);
-    let amountBPTOut = new BigNumber(0);
+    normalizedWeights: OldBigNumber[],
+    amounts: OldBigNumber[],
+    bptTotalSupply: OldBigNumber
+): OldBigNumber {
+    let amountBPTOut = new OldBigNumber(0);
     // Calculate the amount of BPT adding this liquidity would result in
     // if there were no price impact, i.e. using the spot price of tokenIn/BPT
     for (let i = 0; i < balances.length; i++) {
         // We need to scale down all the balances and amounts
-        amounts[i] = amounts[i].times(new BigNumber(10).pow(-decimals[i]));
+        amounts[i] = amounts[i].times(new OldBigNumber(10).pow(-decimals[i]));
         const poolPairData: WeightedPoolPairData = {
-            balanceIn: balances[i].times(new BigNumber(10).pow(-decimals[i])),
-            balanceOut: bptTotalSupply.times(new BigNumber(10).pow(-18)),
-            weightIn: normalizedWeights[i].times(new BigNumber(10).pow(-18)),
-            swapFee: zero,
+            balanceIn: BigNumber.from(balances[i].toString()),
+            balanceOut: BigNumber.from(bptTotalSupply.toString()),
+            weightIn: BigNumber.from(normalizedWeights[i].toString()),
+            swapFee: Zero,
         } as WeightedPoolPairData;
         const BPTPrice = weightedMath._spotPriceAfterSwapTokenInForExactBPTOut(
-            zero,
+            ZERO,
             poolPairData
         );
         amountBPTOut = amountBPTOut.plus(amounts[i].div(BPTPrice));
     }
     // We need to scale up the amount of BPT out
-    return amountBPTOut.times(new BigNumber(10).pow(18));
+    return amountBPTOut.times(new OldBigNumber(10).pow(18));
 }

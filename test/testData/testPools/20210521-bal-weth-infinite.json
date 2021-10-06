@@ -624,6 +624,7 @@
             "id": "0x7eb878107af0440f9e776f999ce053d277c8aca8000200000000000000000012",
             "poolType": "Weighted",
             "swapFee": "0.0099",
+            "swapEnabled": true,
             "tokens": [
                 {
                     "address": "0x27054b13b1b798b345b591a4d22e6562d47ea75a",
