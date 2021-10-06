@@ -1,8 +1,8 @@
-import { getAddress } from '@ethersproject/address';
 import { BigNumber, parseFixed } from '@ethersproject/bignumber';
 import { bnum, scale, ZERO } from '../../utils/bignumber';
 import { BigNumber as OldBigNumber } from '../../utils/bignumber';
 import { WeiPerEther as ONE } from '@ethersproject/constants';
+import { isSameAddress } from '../../utils';
 import * as SDK from '@georgeroman/balancer-v2-pools';
 import {
     PoolBase,
@@ -45,11 +45,11 @@ type LinearPoolToken = Pick<
 
 export type LinearPoolPairData = PoolPairBase & {
     pairType: PairTypes;
-    wrappedBalance: OldBigNumber;
+    wrappedBalance: OldBigNumber; // If main token is USDC then wrapped token is aUSDC (or a wrapped version of it)
     wrappedDecimals: number;
-    rate: OldBigNumber;
-    target1: BigNumber;
-    target2: BigNumber;
+    rate: OldBigNumber; // PriceRate of wrapped token
+    target1: BigNumber; // Target determine the range where there are positive, zero or negative fees
+    target2: BigNumber; // when the "main token" has a balance below target1, there are negative fees when adding main token
 };
 
 export class LinearPool implements PoolBase {
@@ -66,7 +66,7 @@ export class LinearPool implements PoolBase {
     wrappedDecimals: number;
     target1: BigNumber;
     target2: BigNumber;
-    MAX_RATIO = parseFixed('10', 18);
+    MAX_RATIO = parseFixed('10', 18); // Specific for Linear pool types
     ALMOST_ONE = parseFixed('0.99', 18);
 
     static fromPool(pool: SubgraphPoolBase): LinearPool {
@@ -107,7 +107,7 @@ export class LinearPool implements PoolBase {
         this.wrappedIndex = wrappedIndex;
         this.wrappedDecimals = this.tokens[this.wrappedIndex].decimals;
 
-        this.target1 = parseFixed(target1, this.wrappedDecimals);
+        this.target1 = parseFixed(target1, this.wrappedDecimals); // Wrapped token will have same decimals as underlying
         this.target2 = parseFixed(target2, this.wrappedDecimals);
     }
 
@@ -117,44 +117,25 @@ export class LinearPool implements PoolBase {
 
     parsePoolPairData(tokenIn: string, tokenOut: string): LinearPoolPairData {
         let pairType: PairTypes;
-        let balanceIn: BigNumber;
-        let balanceOut: BigNumber;
-        let decimalsOut: string | number;
-        let decimalsIn: string | number;
 
-        // Check if tokenIn is the pool token itself (BPT)
-        if (tokenIn == this.address) {
+        const tI = this.tokens.find((t) => isSameAddress(t.address, tokenIn));
+        if (!tI) throw Error(`Pool does not contain token in ${tokenIn}`);
+        const decimalsIn = tI.decimals;
+        const balanceIn = parseFixed(tI.balance, decimalsIn);
+
+        const tO = this.tokens.find((t) => isSameAddress(t.address, tokenOut));
+        if (!tO) throw Error(`Pool does not contain token out ${tokenOut}`);
+        const decimalsOut = tO.decimals;
+        const balanceOut = parseFixed(tO.balance, decimalsOut);
+
+        // Linear pools allow trading between token and pool BPT (phantom BPT)
+        if (isSameAddress(tokenIn, this.address)) {
             pairType = PairTypes.BptToToken;
-            if (this.totalShares === undefined)
-                throw 'Pool missing totalShares field';
-            balanceIn = this.totalShares;
-            decimalsIn = '18'; // Not used but has to be defined
-        } else if (tokenOut == this.address) {
+        } else if (isSameAddress(tokenOut, this.address)) {
             pairType = PairTypes.TokenToBpt;
-            if (this.totalShares === undefined)
-                throw 'Pool missing totalShares field';
-            balanceOut = this.totalShares;
-            decimalsOut = '18'; // Not used but has to be defined
         } else {
             pairType = PairTypes.TokenToToken;
         }
-
-        const tokenIndexIn = this.tokens.findIndex(
-            (t) => getAddress(t.address) === getAddress(tokenIn)
-        );
-        if (tokenIndexIn < 0) throw 'Pool does not contain tokenIn';
-        const tI: LinearPoolToken = this.tokens[tokenIndexIn];
-        decimalsIn = tI.decimals;
-        balanceIn = parseFixed(tI.balance, decimalsIn);
-
-        const tokenIndexOut = this.tokens.findIndex(
-            (t) => getAddress(t.address) === getAddress(tokenOut)
-        );
-        if (tokenIndexOut < 0) throw 'Pool does not contain tokenOut';
-        const tO: LinearPoolToken = this.tokens[tokenIndexOut];
-        decimalsOut = tO.decimals;
-        balanceOut = parseFixed(tO.balance, decimalsOut);
-        //}
 
         const poolPairData: LinearPoolPairData = {
             id: this.id,
@@ -190,10 +171,8 @@ export class LinearPool implements PoolBase {
         swapType: SwapTypes
     ): OldBigNumber {
         // Needs to return human scaled numbers
-        const linearPoolPairData = this.parsePoolPairData(
-            poolPairData.tokenIn,
-            poolPairData.tokenOut
-        );
+        const linearPoolPairData = poolPairData as LinearPoolPairData;
+
         if (swapType === SwapTypes.SwapExactIn) {
             if (linearPoolPairData.pairType === PairTypes.TokenToBpt) {
                 const limit = bnum(
@@ -242,7 +221,7 @@ export class LinearPool implements PoolBase {
             this.totalShares = newBalance;
         } else {
             // token is underlying in the pool
-            const T = this.tokens.find((t) => t.address === token);
+            const T = this.tokens.find((t) => isSameAddress(t.address, token));
             if (!T) throw Error('Pool does not contain this token');
             T.balance = newBalance.toString();
         }
