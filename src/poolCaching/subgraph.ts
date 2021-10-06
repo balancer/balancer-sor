@@ -33,7 +33,6 @@ export async function fetchSubgraphPools(
       }
     `;
 
-    console.log(`fetchSubgraphPools: ${subgraphUrl}`);
     const response = await fetch(subgraphUrl, {
         method: 'POST',
         headers: {

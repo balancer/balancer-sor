@@ -55,7 +55,6 @@ export class SwapCostCalculator {
             // Coingecko returns price of token in terms of ETH
             // We want the price of 1 ETH in terms of the token base units
             const ethPriceInToken = bnum(1).div(bnum(ethPerToken)).toString();
-            console.log('ETH', ethPriceInToken.toString());
 
             this.setNativeAssetPriceInToken(tokenAddress, ethPriceInToken);
             return ethPriceInToken;
