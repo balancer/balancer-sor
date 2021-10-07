@@ -71,7 +71,7 @@ const staBAL3 = {
     decimals: 18,
 };
 
-const chainId = 1;
+const chainId = 99;
 
 describe('linear pool tests', () => {
     context('parsePoolPairData', () => {
@@ -543,7 +543,8 @@ async function testFullSwap(
         costOutputToken,
         gasPrice,
         provider,
-        swapGas
+        swapGas,
+        chainId
     );
 
     const totalSwapAmount = getTotalSwapAmount(swapType, swapInfo);

@@ -13,8 +13,7 @@ import {
 } from '../types';
 import { MetaStablePool } from '../pools/metaStablePool/metaStablePool';
 import { ZERO } from '../utils/bignumber';
-import { STABAL3POOL } from '../addresses';
-import { USDCCONNECTINGPOOL, STABALADDR } from '../constants';
+import { USDCCONNECTINGPOOL, STABAL3POOL } from '../constants';
 import { parseNewPool } from '../pools';
 import { Zero } from '@ethersproject/constants';
 
@@ -506,7 +505,7 @@ export function getPathsUsingStaBalPool(
     if (!usdcConnectingPool) return [];
 
     // staBal BPT token is the hop token between token and USDC connecting pool
-    const hopTokenStaBal = STABALADDR[chainId];
+    const hopTokenStaBal = STABAL3POOL[chainId].address;
 
     // Finds the best metastable Pool with tokenIn/staBal3Bpt or returns null if doesn't exist
     const metastablePoolIdIn = getHighestLiquidityPool(
