@@ -33,6 +33,7 @@ import {
 } from './lib/constants';
 
 import smallLinear from './testData/linearPools/smallLinear.json';
+import mediumLinear from './testData/linearPools/mediumLinear.json';
 import singleLinear from './testData/linearPools/singleLinear.json';
 
 const chainId = 99;
@@ -349,6 +350,25 @@ describe('linear pool tests', () => {
                     tokenOut
                 );
             });
+        });
+    });
+
+    context('Long paths using linear and WETH-staBAL3 pool', () => {
+        it('should return 2 valid linear paths', async () => {
+            const TOKAddress = '0x0000000000000000000000000000000000000101';
+            const tokenIn = USDC.address;
+            const tokenOut = TOKAddress;
+            const maxPools = 10;
+
+            const [paths] = getPaths(
+                tokenIn,
+                tokenOut,
+                SwapTypes.SwapExactIn,
+                mediumLinear.pools,
+                maxPools
+            );
+            console.log(paths[0]);
+            assert.equal(paths.length, 2);
         });
     });
 
