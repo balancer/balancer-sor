@@ -37,7 +37,7 @@ describe('Tests full swaps against known values', () => {
     });
 
     it('Should have no swaps for pair with no routes, ExactIn', async () => {
-        const tokenIn = WETH;
+        const tokenIn = WETH.address;
         const tokenOut = ANT;
         const swapType = SwapTypes.SwapExactIn;
         const returnAmountDecimals = 18;
@@ -69,7 +69,7 @@ describe('Tests full swaps against known values', () => {
     }).timeout(10000);
 
     it('Should have no swaps for pair with no routes, ExactOut', async () => {
-        const tokenIn = WETH;
+        const tokenIn = WETH.address;
         const tokenOut = ANT;
         const swapType = SwapTypes.SwapExactOut;
         const returnAmountDecimals = 18;
@@ -106,8 +106,8 @@ describe('Tests full swaps against known values', () => {
         const amountIn = parseFixed('1', 6); // 1 USDC
         const swapType = 'swapExactIn';
         const noPools = 4;
-        const tokenIn = USDC;
-        const tokenOut = MKR;
+        const tokenIn = USDC.address;
+        const tokenOut = MKR.address;
 
         const tradeInfo: TradeInfo = {
             SwapType: swapType,
@@ -144,8 +144,8 @@ describe('Tests full swaps against known values', () => {
     }).timeout(10000);
 
     it('should full swap weighted swapExactIn', async () => {
-        const tokenIn = DAI;
-        const tokenOut = USDC;
+        const tokenIn = DAI.address;
+        const tokenOut = USDC.address;
         const swapType = 'swapExactIn';
         const returnAmountDecimals = 6;
         const maxPools = 4;
@@ -177,11 +177,11 @@ describe('Tests full swaps against known values', () => {
         );
         assert.equal(
             swapInfo.tokenAddresses[swapInfo.swaps[0].assetInIndex],
-            DAI
+            DAI.address
         );
         assert.equal(
             swapInfo.tokenAddresses[swapInfo.swaps[0].assetOutIndex],
-            USDC
+            USDC.address
         );
         assert.equal(swapInfo.swaps[0].amount, '89882277269017451');
         assert.equal(
@@ -190,19 +190,19 @@ describe('Tests full swaps against known values', () => {
         );
         assert.equal(
             swapInfo.tokenAddresses[swapInfo.swaps[1].assetInIndex],
-            DAI
+            DAI.address
         );
         assert.equal(
             swapInfo.tokenAddresses[swapInfo.swaps[1].assetOutIndex],
-            USDC
+            USDC.address
         );
         assert.equal(swapInfo.swaps[1].amount, '10117722730982549');
     }).timeout(10000);
 
     it('should full swap weighted swapExactOut', async () => {
         const name = 'full swap weighted swapExactOut';
-        const tokenIn = DAI;
-        const tokenOut = USDC;
+        const tokenIn = DAI.address;
+        const tokenOut = USDC.address;
         const swapType = 'swapExactOut';
         const noPools = 4;
         const swapAmt = BigNumber.from('100000');
@@ -241,11 +241,11 @@ describe('Tests full swaps against known values', () => {
         );
         assert.equal(
             swapInfo.tokenAddresses[swapInfo.swaps[0].assetInIndex],
-            DAI
+            DAI.address
         );
         assert.equal(
             swapInfo.tokenAddresses[swapInfo.swaps[0].assetOutIndex],
-            USDC
+            USDC.address
         );
         assert.equal(swapInfo.swaps[0].amount, '89884');
         assert.equal(
@@ -254,11 +254,11 @@ describe('Tests full swaps against known values', () => {
         );
         assert.equal(
             swapInfo.tokenAddresses[swapInfo.swaps[1].assetInIndex],
-            DAI
+            DAI.address
         );
         assert.equal(
             swapInfo.tokenAddresses[swapInfo.swaps[1].assetOutIndex],
-            USDC
+            USDC.address
         );
         assert.equal(swapInfo.swaps[1].amount, '10116');
         // assert.equal(marketSp.toString(), '0.9924950453298881'); // TODO Different method to V1 so find diff result 0.9925374301712606
@@ -266,8 +266,8 @@ describe('Tests full swaps against known values', () => {
 
     it('should full swap stable swapExactIn', async () => {
         const name = 'full swap stable swapExactIn';
-        const tokenIn = DAI;
-        const tokenOut = USDC;
+        const tokenIn = DAI.address;
+        const tokenOut = USDC.address;
         const swapType = 'swapExactIn';
         const noPools = 4;
         const swapAmt = parseFixed('0.1', 18);
@@ -305,11 +305,11 @@ describe('Tests full swaps against known values', () => {
         );
         assert.equal(
             swapInfo.tokenAddresses[swapInfo.swaps[0].assetInIndex],
-            DAI
+            DAI.address
         );
         assert.equal(
             swapInfo.tokenAddresses[swapInfo.swaps[0].assetOutIndex],
-            USDC
+            USDC.address
         );
         assert.equal(swapInfo.swaps[0].amount, swapAmt.toString());
         // assert.equal(marketSp.toString(), '1.000269192445070817');
@@ -317,8 +317,8 @@ describe('Tests full swaps against known values', () => {
 
     it('should full swap stable swapExactOut', async () => {
         const name = 'full swap stable swapExactOut';
-        const tokenIn = DAI;
-        const tokenOut = USDC;
+        const tokenIn = DAI.address;
+        const tokenOut = USDC.address;
         const swapType = 'swapExactOut';
         const noPools = 4;
         const swapAmt = BigNumber.from('100000');
@@ -355,11 +355,11 @@ describe('Tests full swaps against known values', () => {
         );
         assert.equal(
             swapInfo.tokenAddresses[swapInfo.swaps[0].assetInIndex],
-            DAI
+            DAI.address
         );
         assert.equal(
             swapInfo.tokenAddresses[swapInfo.swaps[0].assetOutIndex],
-            USDC
+            USDC.address
         );
         assert.equal(swapInfo.swaps[0].amount, swapAmt.toString());
     }).timeout(10000);
@@ -369,8 +369,8 @@ describe('Tests full swaps against known values', () => {
         const testPools = require('./testData/filterTestPools.json');
         const weighted: any = testPools.weightedOnly;
         const allPools: any = testPools.stableOnly.concat(weighted);
-        const tokenIn = DAI;
-        const tokenOut = USDC;
+        const tokenIn = DAI.address;
+        const tokenOut = USDC.address;
         const swapType = 'swapExactIn';
         const noPools = 4;
         const swapAmt = parseFixed('0.77', 18);
@@ -417,11 +417,11 @@ describe('Tests full swaps against known values', () => {
         );
         assert.equal(
             swapInfo.tokenAddresses[swapInfo.swaps[0].assetInIndex],
-            DAI
+            DAI.address
         );
         assert.equal(
             swapInfo.tokenAddresses[swapInfo.swaps[0].assetOutIndex],
-            USDC
+            USDC.address
         );
         assert.equal(swapInfo.swaps[0].amount, '692168081518784406');
         assert.equal(
@@ -430,11 +430,11 @@ describe('Tests full swaps against known values', () => {
         );
         assert.equal(
             swapInfo.tokenAddresses[swapInfo.swaps[1].assetInIndex],
-            DAI
+            DAI.address
         );
         assert.equal(
             swapInfo.tokenAddresses[swapInfo.swaps[1].assetOutIndex],
-            USDC
+            USDC.address
         );
         assert.equal(swapInfo.swaps[1].amount, '77831918481215594');
     }).timeout(10000);
@@ -444,8 +444,8 @@ describe('Tests full swaps against known values', () => {
         const testPools = require('./testData/filterTestPools.json');
         const weighted: any = testPools.weightedOnly;
         const allPools: any = testPools.stableOnly.concat(weighted);
-        const tokenIn = DAI;
-        const tokenOut = USDC;
+        const tokenIn = DAI.address;
+        const tokenOut = USDC.address;
         const swapType = 'swapExactOut';
         const noPools = 4;
         const swapAmt = BigNumber.from('100732100');
@@ -483,11 +483,11 @@ describe('Tests full swaps against known values', () => {
         );
         assert.equal(
             swapInfo.tokenAddresses[swapInfo.swaps[0].assetInIndex],
-            DAI
+            DAI.address
         );
         assert.equal(
             swapInfo.tokenAddresses[swapInfo.swaps[0].assetOutIndex],
-            USDC
+            USDC.address
         );
         assert.equal(swapInfo.swaps[0].amount, '82364889');
         assert.equal(
@@ -496,11 +496,11 @@ describe('Tests full swaps against known values', () => {
         );
         assert.equal(
             swapInfo.tokenAddresses[swapInfo.swaps[1].assetInIndex],
-            DAI
+            DAI.address
         );
         assert.equal(
             swapInfo.tokenAddresses[swapInfo.swaps[1].assetOutIndex],
-            USDC
+            USDC.address
         );
         assert.equal(swapInfo.swaps[1].amount, '16512830');
         assert.equal(
@@ -509,11 +509,11 @@ describe('Tests full swaps against known values', () => {
         );
         assert.equal(
             swapInfo.tokenAddresses[swapInfo.swaps[2].assetInIndex],
-            DAI
+            DAI.address
         );
         assert.equal(
             swapInfo.tokenAddresses[swapInfo.swaps[2].assetOutIndex],
-            USDC
+            USDC.address
         );
         assert.equal(swapInfo.swaps[2].amount, '1854381');
     }).timeout(10000);
@@ -523,7 +523,7 @@ describe('Tests full swaps against known values', () => {
         const amountIn = parseFixed('0.001', 8); // 0.00100000 WBTC
         const swapType = 'swapExactIn';
         const noPools = 4;
-        const tokenIn = WBTC;
+        const tokenIn = WBTC.address;
         const tokenOut = MKR2;
 
         const tradeInfo = {
@@ -562,7 +562,7 @@ describe('Tests full swaps against known values', () => {
         const amountIn = parseFixed('1', 6);
         const swapType = 'swapExactIn';
         const noPools = 4;
-        const tokenIn = USDC;
+        const tokenIn = USDC.address;
         const tokenOut = yUSD;
 
         const tradeInfo = {
@@ -601,7 +601,7 @@ describe('Tests full swaps against known values', () => {
         const amountOut = parseFixed('0.001', 18);
         const swapType = 'swapExactOut';
         const noPools = 4;
-        const tokenIn = WBTC;
+        const tokenIn = WBTC.address;
         const tokenOut = MKR2;
 
         const tradeInfo = {
@@ -649,7 +649,7 @@ describe('Tests full swaps against known values', () => {
         const amountOut = parseFixed('0.01', 18);
         const swapType = 'swapExactOut';
         const noPools = 4;
-        const tokenIn = USDC;
+        const tokenIn = USDC.address;
         const tokenOut = yUSD;
 
         const tradeInfo = {

@@ -20,56 +20,20 @@ import {
 import { calculatePathLimits } from '../src/routeProposal/pathLimits';
 import { LinearPool, PairTypes } from '../src/pools/linearPool/linearPool';
 import { checkPath, getFullSwap, getTotalSwapAmount } from './lib/testHelpers';
+import {
+    DAI,
+    aDAI,
+    bDAI,
+    USDC,
+    bUSDC,
+    WETH,
+    BAL,
+    staBAL3,
+    TestToken,
+} from './lib/constants';
 
 import smallLinear from './testData/linearPools/smallLinear.json';
 import singleLinear from './testData/linearPools/singleLinear.json';
-
-interface TestToken {
-    symbol: string;
-    address: string;
-    decimals: number;
-}
-
-const WETH = {
-    symbol: 'WETH',
-    address: '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2',
-    decimals: 18,
-};
-const DAI = {
-    symbol: 'DAI',
-    address: '0x6b175474e89094c44da98b954eedeac495271d0f',
-    decimals: 18,
-};
-const aDAI = {
-    symbol: 'aDAI',
-    address: '0xfc1e690f61efd961294b3e1ce3313fbd8aa4f85d',
-    decimals: 18,
-};
-const USDC = {
-    symbol: 'USDC',
-    address: '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48',
-    decimals: 6,
-};
-const bUSDC = {
-    symbol: 'bUSDC',
-    address: '0x0000000000000000000000000000000000000001',
-    decimals: 18,
-};
-const BAL = {
-    symbol: 'BAL',
-    address: '0xba100000625a3754423978a60c9317c58a424e3d',
-    decimals: 18,
-};
-const bDAI = {
-    symbol: 'bDAI',
-    address: '0x0000000000000000000000000000000000000002',
-    decimals: 18,
-};
-const staBAL3 = {
-    symbol: 'staBAL3',
-    address: '0x06df3b2bbb68adc8b0e302443692037ed9f91b42',
-    decimals: 18,
-};
 
 const chainId = 99;
 
@@ -394,7 +358,7 @@ describe('linear pool tests', () => {
                 DAI.address,
                 USDC.address,
                 SwapTypes.SwapExactIn,
-                parseFixed('25', 18),
+                parseFixed('25', DAI.decimals),
                 smallLinear.pools
             );
             expect(returnAmount).to.eq('24688894');
@@ -405,7 +369,7 @@ describe('linear pool tests', () => {
                 DAI.address,
                 USDC.address,
                 SwapTypes.SwapExactOut,
-                parseFixed('27', 6),
+                parseFixed('27', USDC.decimals),
                 smallLinear.pools
             );
             expect(returnAmount).to.eq('26335005495898592574');
@@ -416,7 +380,7 @@ describe('linear pool tests', () => {
                 USDC.address,
                 DAI.address,
                 SwapTypes.SwapExactIn,
-                parseFixed('270', 6),
+                parseFixed('270', USDC.decimals),
                 smallLinear.pools
             );
             expect(returnAmount).to.eq('504771279674181968953'); // Confirmed by Sergio
@@ -427,7 +391,7 @@ describe('linear pool tests', () => {
                 USDC.address,
                 DAI.address,
                 SwapTypes.SwapExactOut,
-                parseFixed('7777', 18),
+                parseFixed('7777', DAI.decimals),
                 smallLinear.pools
             );
             expect(returnAmount).to.eq('7979762223'); // Confirmed by Sergio
@@ -438,7 +402,7 @@ describe('linear pool tests', () => {
                 DAI.address,
                 staBAL3.address,
                 SwapTypes.SwapExactIn,
-                parseFixed('1', 18),
+                parseFixed('1', DAI.decimals),
                 smallLinear.pools
             );
             expect(returnAmount).to.eq('946927175843694145');
@@ -449,7 +413,7 @@ describe('linear pool tests', () => {
                 USDC.address,
                 staBAL3.address,
                 SwapTypes.SwapExactOut,
-                parseFixed('1', 18),
+                parseFixed('1', staBAL3.decimals),
                 smallLinear.pools
             );
             expect(returnAmount).to.eq('1083149');
@@ -460,7 +424,7 @@ describe('linear pool tests', () => {
                 staBAL3.address,
                 USDC.address,
                 SwapTypes.SwapExactIn,
-                parseFixed('1', 18),
+                parseFixed('1', staBAL3.decimals),
                 smallLinear.pools
             );
             expect(returnAmount).to.eq('1083149'); // TO DO - Failing because of Limit amount?
@@ -471,7 +435,7 @@ describe('linear pool tests', () => {
                 staBAL3.address,
                 DAI.address,
                 SwapTypes.SwapExactOut,
-                parseFixed('1', 18),
+                parseFixed('1', DAI.decimals),
                 smallLinear.pools
             );
             expect(returnAmount).to.eq('947685172351949208');

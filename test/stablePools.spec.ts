@@ -122,8 +122,8 @@ describe(`Tests for Stable Pools.`, () => {
                 pools: SubgraphPoolBase[];
             } = require('./testData/stablePools/singlePool.json');
             const pools = poolsFromFile.pools;
-            const tokenIn = BAL;
-            const tokenOut = USDC;
+            const tokenIn = BAL.address;
+            const tokenOut = USDC.address;
             const swapType = SwapTypes.SwapExactIn;
             const swapAmt = parseFixed('1', 18);
 
@@ -148,8 +148,8 @@ describe(`Tests for Stable Pools.`, () => {
                 pools: SubgraphPoolBase[];
             } = require('./testData/stablePools/singlePool.json');
             const pools = poolsFromFile.pools;
-            const tokenIn = BAL;
-            const tokenOut = USDC;
+            const tokenIn = BAL.address;
+            const tokenOut = USDC.address;
             const swapType = SwapTypes.SwapExactOut;
             const swapAmt = parseFixed('1', 18);
 
@@ -174,8 +174,8 @@ describe(`Tests for Stable Pools.`, () => {
                 pools: SubgraphPoolBase[];
             } = require('./testData/stablePools/singlePool.json');
             const pools = poolsFromFile.pools;
-            const tokenIn = DAI;
-            const tokenOut = USDC;
+            const tokenIn = DAI.address;
+            const tokenOut = USDC.address;
             const swapType = SwapTypes.SwapExactIn;
             const swapAmt = parseFixed('1', 18);
 
@@ -211,8 +211,8 @@ describe(`Tests for Stable Pools.`, () => {
                 pools: SubgraphPoolBase[];
             } = require('./testData/stablePools/singlePool.json');
             const pools = poolsFromFile.pools;
-            const tokenIn = USDC;
-            const tokenOut = USDT;
+            const tokenIn = USDC.address;
+            const tokenOut = USDT.address;
             const swapType = SwapTypes.SwapExactOut;
             const swapAmt = parseFixed('1', 6);
 
@@ -250,8 +250,8 @@ describe(`Tests for Stable Pools.`, () => {
                 pools: SubgraphPoolBase[];
             } = require('./testData/stablePools/multihop.json');
             const pools = poolsFromFile.pools;
-            const tokenIn = DAI;
-            const tokenOut = USDT;
+            const tokenIn = DAI.address;
+            const tokenOut = USDT.address;
             const swapType = SwapTypes.SwapExactIn;
             const swapAmt = parseFixed('23.45', 18);
 
@@ -275,12 +275,12 @@ describe(`Tests for Stable Pools.`, () => {
                 tokenIn
             );
             expect(swapInfo.tokenAddresses[swapInfo.swaps[0].assetOutIndex]).eq(
-                USDC
+                USDC.address
             );
             expect(swapInfo.swaps[1].amount.toString()).eq('0'); // Should be 0 for multihop
             expect(swapInfo.swaps[1].poolId).eq(poolsFromFile.pools[1].id);
             expect(swapInfo.tokenAddresses[swapInfo.swaps[1].assetInIndex]).eq(
-                USDC
+                USDC.address
             );
             expect(swapInfo.tokenAddresses[swapInfo.swaps[1].assetOutIndex]).eq(
                 tokenOut
@@ -292,8 +292,8 @@ describe(`Tests for Stable Pools.`, () => {
                 pools: SubgraphPoolBase[];
             } = require('./testData/stablePools/multihop.json');
             const pools = poolsFromFile.pools;
-            const tokenIn = USDT;
-            const tokenOut = DAI;
+            const tokenIn = USDT.address;
+            const tokenOut = DAI.address;
             const swapType = SwapTypes.SwapExactOut;
             const swapAmt = parseFixed('17.77', 18);
 
@@ -315,7 +315,7 @@ describe(`Tests for Stable Pools.`, () => {
             expect(swapInfo.swaps[0].amount.toString()).eq(swapAmt.toString());
             expect(swapInfo.swaps[0].poolId).eq(poolsFromFile.pools[0].id);
             expect(swapInfo.tokenAddresses[swapInfo.swaps[0].assetInIndex]).eq(
-                USDC
+                USDC.address
             );
             expect(swapInfo.tokenAddresses[swapInfo.swaps[0].assetOutIndex]).eq(
                 tokenOut
@@ -326,7 +326,7 @@ describe(`Tests for Stable Pools.`, () => {
                 tokenIn
             );
             expect(swapInfo.tokenAddresses[swapInfo.swaps[1].assetOutIndex]).eq(
-                USDC
+                USDC.address
             );
         });
     });
