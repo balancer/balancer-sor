@@ -40,12 +40,6 @@ export const USDCCONNECTINGPOOL: {
     },
 };
 
-// // Currently only used for Polygon
-// // Address of staBAL3 pool
-// export const STABALADDR: { [chainId: number]: string } = {
-//     99: '0x0000000000000000000000000000000000000001',
-// };
-
 export const STABAL3POOL: {
     [chainId: number]: { id: string; address: string };
 } = {
