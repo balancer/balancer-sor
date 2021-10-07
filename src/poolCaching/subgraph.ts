@@ -8,7 +8,12 @@ export async function fetchSubgraphPools(
     // can filter for publicSwap too??
     const query = `
       {
-        pools: pools(first: 1000) {
+        pools: pools(
+          first: 1000,
+          where: { swapEnabled: true },
+          orderBy: totalLiquidity,
+          orderDirection: desc
+        ) {
           id
           address
           poolType
