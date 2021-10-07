@@ -1,5 +1,9 @@
-import cloneDeep from 'lodash.clonedeep';
-import { filterPoolsOfInterest, filterHopPools } from './filtering';
+import {
+    filterPoolsOfInterest,
+    filterHopPools,
+    getPathsUsingStaBalPool,
+    parseToPoolsDict,
+} from './filtering';
 import { calculatePathLimits } from './pathLimits';
 import {
     SwapOptions,
@@ -10,7 +14,7 @@ import {
 } from '../types';
 
 export class RouteProposer {
-    cache: Record<string, { pools: PoolDictionary; paths: NewPath[] }> = {};
+    cache: Record<string, { paths: NewPath[] }> = {};
 
     /**
      * Given a list of pools and a desired input/output, returns a set of possible paths to route through
@@ -20,9 +24,10 @@ export class RouteProposer {
         tokenOut: string,
         swapType: SwapTypes,
         pools: SubgraphPoolBase[],
-        swapOptions: SwapOptions
-    ): { pools: PoolDictionary; paths: NewPath[] } {
-        if (pools.length === 0) return { pools: {}, paths: [] };
+        swapOptions: SwapOptions,
+        chainId: number
+    ): NewPath[] {
+        if (pools.length === 0) return [];
 
         // If token pair has been processed before that info can be reused to speed up execution
         const cache =
@@ -33,36 +38,41 @@ export class RouteProposer {
         // forceRefresh can be set to force fresh processing of paths/prices
         if (!swapOptions.forceRefresh && !!cache) {
             // Using pre-processed data from cache
-            return {
-                pools: cache.pools,
-                paths: cache.paths,
-            };
+            return cache.paths;
         }
 
-        // Some functions alter pools list directly but we want to keep original so make a copy to work from
-        const poolsList = cloneDeep(pools);
+        const poolsAllDict = parseToPoolsDict(pools, swapOptions.timestamp);
 
-        const [poolsDict, hopTokens] = filterPoolsOfInterest(
-            poolsList,
+        const [poolsFilteredDict, hopTokens] = filterPoolsOfInterest(
+            poolsAllDict,
             tokenIn,
             tokenOut,
-            swapOptions.maxPools,
-            swapOptions.timestamp
+            swapOptions.maxPools
         );
-        const [filteredPoolsDict, pathData] = filterHopPools(
+
+        const [, pathData] = filterHopPools(
             tokenIn,
             tokenOut,
             hopTokens,
-            poolsDict
+            poolsFilteredDict
         );
-        const [paths] = calculatePathLimits(pathData, swapType);
+
+        const pathsUsingStaBal = getPathsUsingStaBalPool(
+            tokenIn,
+            tokenOut,
+            poolsAllDict,
+            poolsFilteredDict,
+            chainId
+        );
+
+        const combinedPathData = pathData.concat(...pathsUsingStaBal);
+        const [paths] = calculatePathLimits(combinedPathData, swapType);
 
         this.cache[`${tokenIn}${tokenOut}${swapType}${swapOptions.timestamp}`] =
             {
-                pools: filteredPoolsDict,
                 paths: paths,
             };
 
-        return { pools: filteredPoolsDict, paths };
+        return paths;
     }
 }

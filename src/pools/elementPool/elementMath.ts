@@ -1,18 +1,22 @@
-import { BigNumber } from '../../utils/bignumber';
+import { formatFixed } from '@ethersproject/bignumber';
+import { BigNumber as OldBigNumber, bnum } from '../../utils/bignumber';
 import { ElementPoolPairData } from './elementPool';
-import { bnum } from '../../utils/bignumber';
 
 // calc_out_given_in (swap)
 export function _exactTokenInForTokenOut(
-    amount: BigNumber,
+    amount: OldBigNumber,
     poolPairData: ElementPoolPairData
-): BigNumber {
+): OldBigNumber {
     // The formula below returns some dust (due to rounding errors) but when
     // we input zero the output should be zero
     if (amount.isZero()) return amount;
-    const f = poolPairData.swapFee.toNumber();
-    const Bi = poolPairData.balanceIn.toNumber();
-    const Bo = poolPairData.balanceOut.toNumber();
+    const f = parseFloat(formatFixed(poolPairData.swapFee, 18));
+    const Bi = parseFloat(
+        formatFixed(poolPairData.balanceIn, poolPairData.decimalsIn)
+    );
+    const Bo = parseFloat(
+        formatFixed(poolPairData.balanceOut, poolPairData.decimalsOut)
+    );
     const t = getTimeTillExpiry(
         poolPairData.expiryTime,
         poolPairData.currentBlockTimestamp,
@@ -35,15 +39,19 @@ export function _exactTokenInForTokenOut(
 
 // calc_in_given_out (swap)
 export function _tokenInForExactTokenOut(
-    amount: BigNumber,
+    amount: OldBigNumber,
     poolPairData: ElementPoolPairData
-): BigNumber {
+): OldBigNumber {
     // The formula below returns some dust (due to rounding errors) but when
     // we input zero the output should be zero
     if (amount.isZero()) return amount;
-    const f = poolPairData.swapFee.toNumber();
-    const Bi = poolPairData.balanceIn.toNumber();
-    const Bo = poolPairData.balanceOut.toNumber();
+    const f = parseFloat(formatFixed(poolPairData.swapFee, 18));
+    const Bi = parseFloat(
+        formatFixed(poolPairData.balanceIn, poolPairData.decimalsIn)
+    );
+    const Bo = parseFloat(
+        formatFixed(poolPairData.balanceOut, poolPairData.decimalsOut)
+    );
     const t = getTimeTillExpiry(
         poolPairData.expiryTime,
         poolPairData.currentBlockTimestamp,
@@ -71,12 +79,16 @@ export function _tokenInForExactTokenOut(
 // PairType = 'token->token'
 // SwapType = 'swapExactIn'
 export function _spotPriceAfterSwapExactTokenInForTokenOut(
-    amount: BigNumber,
+    amount: OldBigNumber,
     poolPairData: ElementPoolPairData
-): BigNumber {
-    const f = poolPairData.swapFee.toNumber();
-    const Bi = poolPairData.balanceIn.toNumber();
-    const Bo = poolPairData.balanceOut.toNumber();
+): OldBigNumber {
+    const f = parseFloat(formatFixed(poolPairData.swapFee, 18));
+    const Bi = parseFloat(
+        formatFixed(poolPairData.balanceIn, poolPairData.decimalsIn)
+    );
+    const Bo = parseFloat(
+        formatFixed(poolPairData.balanceOut, poolPairData.decimalsOut)
+    );
     const t = getTimeTillExpiry(
         poolPairData.expiryTime,
         poolPairData.currentBlockTimestamp,
@@ -103,12 +115,16 @@ export function _spotPriceAfterSwapExactTokenInForTokenOut(
 // PairType = 'token->token'
 // SwapType = 'swapExactOut'
 export function _spotPriceAfterSwapTokenInForExactTokenOut(
-    amount: BigNumber,
+    amount: OldBigNumber,
     poolPairData: ElementPoolPairData
-): BigNumber {
-    const f = poolPairData.swapFee.toNumber();
-    const Bi = poolPairData.balanceIn.toNumber();
-    const Bo = poolPairData.balanceOut.toNumber();
+): OldBigNumber {
+    const f = parseFloat(formatFixed(poolPairData.swapFee, 18));
+    const Bi = parseFloat(
+        formatFixed(poolPairData.balanceIn, poolPairData.decimalsIn)
+    );
+    const Bo = parseFloat(
+        formatFixed(poolPairData.balanceOut, poolPairData.decimalsOut)
+    );
     const t = getTimeTillExpiry(
         poolPairData.expiryTime,
         poolPairData.currentBlockTimestamp,
@@ -136,12 +152,16 @@ export function _spotPriceAfterSwapTokenInForExactTokenOut(
 // PairType = 'token->token'
 // SwapType = 'swapExactIn'
 export function _derivativeSpotPriceAfterSwapExactTokenInForTokenOut(
-    amount: BigNumber,
+    amount: OldBigNumber,
     poolPairData: ElementPoolPairData
-): BigNumber {
-    const f = poolPairData.swapFee.toNumber();
-    const Bi = poolPairData.balanceIn.toNumber();
-    const Bo = poolPairData.balanceOut.toNumber();
+): OldBigNumber {
+    const f = parseFloat(formatFixed(poolPairData.swapFee, 18));
+    const Bi = parseFloat(
+        formatFixed(poolPairData.balanceIn, poolPairData.decimalsIn)
+    );
+    const Bo = parseFloat(
+        formatFixed(poolPairData.balanceOut, poolPairData.decimalsOut)
+    );
     const t = getTimeTillExpiry(
         poolPairData.expiryTime,
         poolPairData.currentBlockTimestamp,
@@ -197,12 +217,16 @@ export function _derivativeSpotPriceAfterSwapExactTokenInForTokenOut(
 // PairType = 'token->token'
 // SwapType = 'swapExactOut'
 export function _derivativeSpotPriceAfterSwapTokenInForExactTokenOut(
-    amount: BigNumber,
+    amount: OldBigNumber,
     poolPairData: ElementPoolPairData
-): BigNumber {
-    const f = poolPairData.swapFee.toNumber();
-    const Bi = poolPairData.balanceIn.toNumber();
-    const Bo = poolPairData.balanceOut.toNumber();
+): OldBigNumber {
+    const f = parseFloat(formatFixed(poolPairData.swapFee, 18));
+    const Bi = parseFloat(
+        formatFixed(poolPairData.balanceIn, poolPairData.decimalsIn)
+    );
+    const Bo = parseFloat(
+        formatFixed(poolPairData.balanceOut, poolPairData.decimalsOut)
+    );
     const t = getTimeTillExpiry(
         poolPairData.expiryTime,
         poolPairData.currentBlockTimestamp,

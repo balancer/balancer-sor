@@ -1,6 +1,7 @@
+import { BigNumber, BigNumberish, parseFixed } from '@ethersproject/bignumber';
 import { BaseProvider } from '@ethersproject/providers';
 import cloneDeep from 'lodash.clonedeep';
-import { BigNumber, ZERO } from './utils/bignumber';
+import { BigNumber as OldBigNumber } from './utils/bignumber';
 import { getBestPaths } from './router';
 import { getWrappedInfo, setWrappedInfo } from './wrapInfo';
 import { formatSwaps } from './formatSwaps';
@@ -21,6 +22,7 @@ import {
     SubgraphPoolBase,
     SwapOptions,
 } from './types';
+import { Zero } from '@ethersproject/constants';
 
 export class SOR {
     poolCacher: PoolCacher;
@@ -28,8 +30,8 @@ export class SOR {
     swapCostCalculator: SwapCostCalculator;
 
     private readonly defaultSwapOptions: SwapOptions = {
-        gasPrice: new BigNumber('50e9'),
-        swapGas: new BigNumber('35000'),
+        gasPrice: parseFixed('50', 9),
+        swapGas: BigNumber.from('35000'),
         poolTypeFilter: PoolFilter.All,
         maxPools: 4,
         timestamp: Math.floor(Date.now() / 1000),
@@ -49,7 +51,7 @@ export class SOR {
             initialPools
         );
         this.routeProposer = new RouteProposer();
-        this.swapCostCalculator = new SwapCostCalculator(provider, chainId);
+        this.swapCostCalculator = new SwapCostCalculator(chainId);
     }
 
     getPools(): SubgraphPoolBase[] {
@@ -74,7 +76,7 @@ export class SOR {
         tokenIn: string,
         tokenOut: string,
         swapType: SwapTypes,
-        swapAmount: BigNumber,
+        swapAmount: BigNumberish,
         swapOptions?: Partial<SwapOptions>
     ): Promise<SwapInfo> {
         if (!this.poolCacher.finishedFetchingOnChain)
@@ -96,7 +98,7 @@ export class SOR {
             tokenIn,
             tokenOut,
             this.chainId,
-            swapAmount
+            BigNumber.from(swapAmount)
         );
 
         let swapInfo: SwapInfo;
@@ -135,12 +137,14 @@ export class SOR {
 
     async getCostOfSwapInToken(
         outputToken: string,
+        outputTokenDecimals: number,
         gasPrice: BigNumber,
         swapGas?: BigNumber
     ): Promise<BigNumber> {
-        if (gasPrice.isZero()) return ZERO;
+        if (gasPrice.isZero()) return Zero;
         return this.swapCostCalculator.convertGasCostToToken(
             outputToken,
+            outputTokenDecimals,
             gasPrice,
             swapGas
         );
@@ -157,35 +161,35 @@ export class SOR {
     ): Promise<SwapInfo> {
         if (pools.length === 0) return cloneDeep(EMPTY_SWAPINFO);
 
-        const { pools: poolsOfInterest, paths } =
-            this.routeProposer.getCandidatePaths(
-                tokenIn,
-                tokenOut,
-                swapType,
-                pools,
-                swapOptions
-            );
+        const paths = this.routeProposer.getCandidatePaths(
+            tokenIn,
+            tokenOut,
+            swapType,
+            pools,
+            swapOptions,
+            this.chainId
+        );
 
         if (paths.length == 0) return { ...EMPTY_SWAPINFO };
 
         // Path is guaranteed to contain both tokenIn and tokenOut
+        let tokenInDecimals;
+        let tokenOutDecimals;
         paths[0].swaps.forEach((swap) => {
             // Inject token decimals to avoid having to query onchain
             if (isSameAddress(swap.tokenIn, tokenIn)) {
-                this.swapCostCalculator.setTokenDecimals(
-                    tokenIn,
-                    swap.tokenInDecimals
-                );
+                tokenInDecimals = swap.tokenInDecimals;
             }
             if (isSameAddress(swap.tokenOut, tokenOut)) {
-                this.swapCostCalculator.setTokenDecimals(
-                    tokenOut,
-                    swap.tokenOutDecimals
-                );
+                tokenOutDecimals = swap.tokenOutDecimals;
             }
         });
+
         const costOutputToken = await this.getCostOfSwapInToken(
             swapType === SwapTypes.SwapExactIn ? tokenOut : tokenIn,
+            swapType === SwapTypes.SwapExactIn
+                ? tokenOutDecimals
+                : tokenInDecimals,
             swapOptions.gasPrice,
             swapOptions.swapGas
         );
@@ -193,10 +197,11 @@ export class SOR {
         // Returns list of swaps
         const [swaps, total, marketSp, totalConsideringFees] =
             this.getBestPaths(
-                poolsOfInterest,
                 paths,
                 swapAmount,
                 swapType,
+                tokenInDecimals,
+                tokenOutDecimals,
                 costOutputToken,
                 swapOptions.maxPools
             );
@@ -219,22 +224,45 @@ export class SOR {
      * Find optimal routes for trade from given candidate paths
      */
     private getBestPaths(
-        pools: PoolDictionary,
         paths: NewPath[],
         swapAmount: BigNumber,
         swapType: SwapTypes,
+        tokenInDecimals: number,
+        tokenOutDecimals: number,
         costOutputToken: BigNumber,
         maxPools: number
-    ): [Swap[][], BigNumber, BigNumber, BigNumber] {
+    ): [Swap[][], BigNumber, OldBigNumber, BigNumber] {
         // swapExactIn - total = total amount swap will return of tokenOut
         // swapExactOut - total = total amount of tokenIn required for swap
-        return getBestPaths(
-            cloneDeep(pools),
+
+        const [inputDecimals, outputDecimals] =
+            swapType === SwapTypes.SwapExactIn
+                ? [tokenInDecimals, tokenOutDecimals]
+                : [tokenOutDecimals, tokenInDecimals];
+
+        const [swaps, total, marketSp, totalConsideringFees] = getBestPaths(
             paths,
             swapType,
             swapAmount,
+            inputDecimals,
+            outputDecimals,
             maxPools,
             costOutputToken
         );
+
+        return [
+            swaps,
+            parseFixed(
+                total.dp(outputDecimals, OldBigNumber.ROUND_FLOOR).toString(),
+                outputDecimals
+            ),
+            marketSp,
+            parseFixed(
+                totalConsideringFees
+                    .dp(outputDecimals, OldBigNumber.ROUND_FLOOR)
+                    .toString(),
+                outputDecimals
+            ),
+        ];
     }
 }

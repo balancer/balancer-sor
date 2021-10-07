@@ -17,6 +17,7 @@
             "id": "0x01abc00e86c7e258823b9a055fd62ca6cf61a16300020000000000000000003e",
             "poolType": "Weighted",
             "swapFee": "0.001",
+            "swapEnabled": true,
             "tokens": [
                 {
                     "address": "0x4e84056760c8d8c3dd2c1980585acdf42183fc61",
@@ -44,6 +45,7 @@
             "id": "0x021c343c6180f03ce9e48fae3ff432309b9af19900020000000000000000000f",
             "poolType": "Weighted",
             "swapFee": "0.008",
+            "swapEnabled": true,
             "tokens": [
                 {
                     "address": "0x41286bb1d3e870f3f750eb7e1c25d7e48c8a1ac7",
@@ -71,6 +73,7 @@
             "id": "0x0297e37f1873d2dab4487aa67cd56b58e2f27875000200000000000000000002",
             "poolType": "Weighted",
             "swapFee": "0.004",
+            "swapEnabled": true,
             "tokens": [
                 {
                     "address": "0x41286bb1d3e870f3f750eb7e1c25d7e48c8a1ac7",
@@ -98,6 +101,7 @@
             "id": "0x03cd191f589d12b0582a99808cf19851e468e6b500020000000000000000000a",
             "poolType": "Weighted",
             "swapFee": "0.004",
+            "swapEnabled": true,
             "tokens": [
                 {
                     "address": "0x468c26d86c614cc3d8eb8cfd89d5607f79d46289",
@@ -125,6 +129,7 @@
             "id": "0x072f14b85add63488ddad88f855fda4a99d6ac9b00020000000000000000002b",
             "poolType": "Weighted",
             "swapFee": "0.0015",
+            "swapEnabled": true,
             "tokens": [
                 {
                     "address": "0x41286bb1d3e870f3f750eb7e1c25d7e48c8a1ac7",
@@ -152,6 +157,7 @@
             "id": "0x09804caea2400035b18e2173fdd10ec8b670ca09000200000000000000000036",
             "poolType": "Weighted",
             "swapFee": "0.001",
+            "swapEnabled": true,
             "tokens": [
                 {
                     "address": "0x8186e1d916774ab8004cb84d7adc945953ee966d",
@@ -179,6 +185,7 @@
             "id": "0x0a9e96988e21c9a03b8dc011826a00259e02c46e000100000000000000000048",
             "poolType": "Weighted",
             "swapFee": "0.005",
+            "swapEnabled": true,
             "tokens": [
                 {
                     "address": "0x1c8e3bcb3378a443cc591f154c5ce0ebb4da9648",
@@ -213,6 +220,7 @@
             "id": "0x0b09dea16768f0799065c475be02919503cb2a3500020000000000000000001e",
             "poolType": "Weighted",
             "swapFee": "0.006",
+            "swapEnabled": true,
             "tokens": [
                 {
                     "address": "0x41286bb1d3e870f3f750eb7e1c25d7e48c8a1ac7",
@@ -240,6 +248,7 @@
             "id": "0x148ce9b50be946a96e94a4f5479b771bab9b1c59000100000000000000000047",
             "poolType": "Weighted",
             "swapFee": "0.005",
+            "swapEnabled": true,
             "tokens": [
                 {
                     "address": "0x1c8e3bcb3378a443cc591f154c5ce0ebb4da9648",
@@ -274,6 +283,7 @@
             "id": "0x14bf727f67aa294ec36347bd95aba1a2c136fe7a00020000000000000000002f",
             "poolType": "Weighted",
             "swapFee": "0.0015",
+            "swapEnabled": true,
             "tokens": [
                 {
                     "address": "0x41286bb1d3e870f3f750eb7e1c25d7e48c8a1ac7",
@@ -301,6 +311,7 @@
             "id": "0x15432ba000e58e3c0ae52a5dec0579215ebc75d000010000000000000000005b",
             "poolType": "Weighted",
             "swapFee": "0.005",
+            "swapEnabled": true,
             "tokens": [
                 {
                     "address": "0x1c8e3bcb3378a443cc591f154c5ce0ebb4da9648",
@@ -335,6 +346,7 @@
             "id": "0x16faf9f73748013155b7bc116a3008b57332d1e6000200000000000000000020",
             "poolType": "Weighted",
             "swapFee": "0.002",
+            "swapEnabled": true,
             "tokens": [
                 {
                     "address": "0x41286bb1d3e870f3f750eb7e1c25d7e48c8a1ac7",
@@ -362,6 +374,7 @@
             "id": "0x186084ff790c65088ba694df11758fae4943ee9e000200000000000000000017",
             "poolType": "Weighted",
             "swapFee": "0.008",
+            "swapEnabled": true,
             "tokens": [
                 {
                     "address": "0x41286bb1d3e870f3f750eb7e1c25d7e48c8a1ac7",
@@ -389,6 +402,7 @@
             "id": "0x231e687c9961d3a27e6e266ac5c433ce4f8253e4000200000000000000000027",
             "poolType": "Weighted",
             "swapFee": "0.0015",
+            "swapEnabled": true,
             "tokens": [
                 {
                     "address": "0x41286bb1d3e870f3f750eb7e1c25d7e48c8a1ac7",
@@ -416,6 +430,7 @@
             "id": "0x2d6e3515c8b47192ca3913770fa741d3c4dac35400010000000000000000005f",
             "poolType": "Weighted",
             "swapFee": "0.005",
+            "swapEnabled": true,
             "tokens": [
                 {
                     "address": "0x1c8e3bcb3378a443cc591f154c5ce0ebb4da9648",
@@ -450,6 +465,7 @@
             "id": "0x32fc95287b14eaef3afa92cccc48c285ee3a280a000100000000000000000005",
             "poolType": "Weighted",
             "swapFee": "0.008",
+            "swapEnabled": true,
             "tokens": [
                 {
                     "address": "0x41286bb1d3e870f3f750eb7e1c25d7e48c8a1ac7",
@@ -484,6 +500,7 @@
             "id": "0x344e8f99a55da2ba6b4b5158df2143374e400df200010000000000000000005d",
             "poolType": "Weighted",
             "swapFee": "0.005",
+            "swapEnabled": true,
             "tokens": [
                 {
                     "address": "0x1c8e3bcb3378a443cc591f154c5ce0ebb4da9648",
@@ -518,6 +535,7 @@
             "id": "0x36128d5436d2d70cab39c9af9cce146c38554ff0000200000000000000000008",
             "poolType": "Weighted",
             "swapFee": "0.004",
+            "swapEnabled": true,
             "tokens": [
                 {
                     "address": "0x468c26d86c614cc3d8eb8cfd89d5607f79d46289",
@@ -545,6 +563,7 @@
             "id": "0x38a01c45d86b61a70044fb2a76eac8e75b1ac78e00020000000000000000003c",
             "poolType": "Weighted",
             "swapFee": "0.001",
+            "swapEnabled": true,
             "tokens": [
                 {
                     "address": "0x02822e968856186a20fec2c824d4b174d0b70502",
@@ -572,6 +591,7 @@
             "id": "0x39cd55ff7e7d7c66d7d2736f1d5d4791cdab895b000100000000000000000057",
             "poolType": "Weighted",
             "swapFee": "0.005",
+            "swapEnabled": true,
             "tokens": [
                 {
                     "address": "0x1c8e3bcb3378a443cc591f154c5ce0ebb4da9648",
@@ -606,6 +626,7 @@
             "id": "0x3a19030ed746bd1c3f2b0f996ff9479af04c5f0a000200000000000000000004",
             "poolType": "Weighted",
             "swapFee": "0.008",
+            "swapEnabled": true,
             "tokens": [
                 {
                     "address": "0xc2569dd7d0fd715b054fbf16e75b001e5c0c1115",
@@ -633,6 +654,7 @@
             "id": "0x3ebf48cd7586d7a4521ce59e53d9a907ebf1480f00020000000000000000002c",
             "poolType": "Weighted",
             "swapFee": "0.01",
+            "swapEnabled": true,
             "tokens": [
                 {
                     "address": "0x41286bb1d3e870f3f750eb7e1c25d7e48c8a1ac7",
@@ -660,6 +682,7 @@
             "id": "0x41175c3ee2dd49fca9b263f49525c069095b87c700010000000000000000005a",
             "poolType": "Weighted",
             "swapFee": "0.005",
+            "swapEnabled": true,
             "tokens": [
                 {
                     "address": "0x1c8e3bcb3378a443cc591f154c5ce0ebb4da9648",
@@ -694,6 +717,7 @@
             "id": "0x4212be3c7b255ba4b29705573abd023cdce2154200020000000000000000006d",
             "poolType": "Weighted",
             "swapFee": "0.001",
+            "swapEnabled": true,
             "tokens": [
                 {
                     "address": "0xc2569dd7d0fd715b054fbf16e75b001e5c0c1115",
@@ -721,6 +745,7 @@
             "id": "0x45910faff3cbf990fdb204682e93055506682d17000200000000000000000011",
             "poolType": "Weighted",
             "swapFee": "0.0005",
+            "swapEnabled": true,
             "tokens": [
                 {
                     "address": "0x41286bb1d3e870f3f750eb7e1c25d7e48c8a1ac7",
@@ -748,6 +773,7 @@
             "id": "0x4626d81b3a1711beb79f4cecff2413886d461677000200000000000000000015",
             "poolType": "Weighted",
             "swapFee": "0.0095",
+            "swapEnabled": true,
             "tokens": [
                 {
                     "address": "0x41286bb1d3e870f3f750eb7e1c25d7e48c8a1ac7",
@@ -775,6 +801,7 @@
             "id": "0x494b26d4aee801cb1fabf498ee24f0af20238743000100000000000000000063",
             "poolType": "Weighted",
             "swapFee": "0.005",
+            "swapEnabled": true,
             "tokens": [
                 {
                     "address": "0x1c8e3bcb3378a443cc591f154c5ce0ebb4da9648",
@@ -809,6 +836,7 @@
             "id": "0x4e7f40cd37cee710f5e87ad72959d30ef8a01a5d00020000000000000000000b",
             "poolType": "Weighted",
             "swapFee": "0.0015",
+            "swapEnabled": true,
             "tokens": [
                 {
                     "address": "0x04df6e4121c27713ed22341e7c7df330f56f289b",
@@ -836,6 +864,7 @@
             "id": "0x503717b3dc137e230afc7c772520d7974474fb70000100000000000000000061",
             "poolType": "Weighted",
             "swapFee": "0.005",
+            "swapEnabled": true,
             "tokens": [
                 {
                     "address": "0x1c8e3bcb3378a443cc591f154c5ce0ebb4da9648",
@@ -870,6 +899,7 @@
             "id": "0x571046eae58c783f29f95adba17dd561af8a8712000200000000000000000010",
             "poolType": "Weighted",
             "swapFee": "0.0005",
+            "swapEnabled": true,
             "tokens": [
                 {
                     "address": "0x41286bb1d3e870f3f750eb7e1c25d7e48c8a1ac7",
@@ -897,6 +927,7 @@
             "id": "0x58af920d9dc0bc4e8f771ff013d79215cabcaa9e00010000000000000000004e",
             "poolType": "Weighted",
             "swapFee": "0.005",
+            "swapEnabled": true,
             "tokens": [
                 {
                     "address": "0x1c8e3bcb3378a443cc591f154c5ce0ebb4da9648",
@@ -931,6 +962,7 @@
             "id": "0x59e2563c08029f13f80cba9eb610bfd0367ed266000100000000000000000062",
             "poolType": "Weighted",
             "swapFee": "0.005",
+            "swapEnabled": true,
             "tokens": [
                 {
                     "address": "0x1c8e3bcb3378a443cc591f154c5ce0ebb4da9648",
@@ -965,6 +997,7 @@
             "id": "0x5aa90c7362ea46b3cbfbd7f01ea5ca69c98fef1c000200000000000000000024",
             "poolType": "Weighted",
             "swapFee": "0.01",
+            "swapEnabled": true,
             "tokens": [
                 {
                     "address": "0x41286bb1d3e870f3f750eb7e1c25d7e48c8a1ac7",
@@ -992,6 +1025,7 @@
             "id": "0x5c6ee304399dbdb9c8ef030ab642b10820db8f56000200000000000000000018",
             "poolType": "Weighted",
             "swapFee": "0.0015",
+            "swapEnabled": true,
             "tokens": [
                 {
                     "address": "0x41286bb1d3e870f3f750eb7e1c25d7e48c8a1ac7",
@@ -1019,6 +1053,7 @@
             "id": "0x5d563ca1e2daaae3402c36097b934630ab53702c000200000000000000000028",
             "poolType": "Weighted",
             "swapFee": "0.002",
+            "swapEnabled": true,
             "tokens": [
                 {
                     "address": "0x41286bb1d3e870f3f750eb7e1c25d7e48c8a1ac7",
@@ -1046,6 +1081,7 @@
             "id": "0x606e3ccc8c51cbbb1ff07ad03c6f95a84672ab16000100000000000000000051",
             "poolType": "Weighted",
             "swapFee": "0.005",
+            "swapEnabled": true,
             "tokens": [
                 {
                     "address": "0x1c8e3bcb3378a443cc591f154c5ce0ebb4da9648",
@@ -1080,6 +1116,7 @@
             "id": "0x614b5038611729ed49e0ded154d8a5d3af9d1d9e000100000000000000000043",
             "poolType": "Weighted",
             "swapFee": "0.005",
+            "swapEnabled": true,
             "tokens": [
                 {
                     "address": "0x41286bb1d3e870f3f750eb7e1c25d7e48c8a1ac7",
@@ -1114,6 +1151,7 @@
             "id": "0x61d5dc44849c9c87b0856a2a311536205c96c7fd000200000000000000000000",
             "poolType": "Weighted",
             "swapFee": "0.0015",
+            "swapEnabled": true,
             "tokens": [
                 {
                     "address": "0x41286bb1d3e870f3f750eb7e1c25d7e48c8a1ac7",
@@ -1141,6 +1179,7 @@
             "id": "0x647c1fd457b95b75d0972ff08fe01d7d7bda05df000200000000000000000001",
             "poolType": "Weighted",
             "swapFee": "0.004",
+            "swapEnabled": true,
             "tokens": [
                 {
                     "address": "0x1c8e3bcb3378a443cc591f154c5ce0ebb4da9648",
@@ -1168,6 +1207,7 @@
             "id": "0x67f8fcb9d3c463da05de1392efdbb2a87f8599ea00010000000000000000004f",
             "poolType": "Weighted",
             "swapFee": "0.005",
+            "swapEnabled": true,
             "tokens": [
                 {
                     "address": "0x1c8e3bcb3378a443cc591f154c5ce0ebb4da9648",
@@ -1202,6 +1242,7 @@
             "id": "0x6ae82385f76e3742f89cb46343b169f6ee49de1b00020000000000000000001a",
             "poolType": "Weighted",
             "swapFee": "0.001",
+            "swapEnabled": true,
             "tokens": [
                 {
                     "address": "0x41286bb1d3e870f3f750eb7e1c25d7e48c8a1ac7",
@@ -1229,6 +1270,7 @@
             "id": "0x72ab6ff76554f90532e2809cee019ade724e029a000100000000000000000045",
             "poolType": "Weighted",
             "swapFee": "0.005",
+            "swapEnabled": true,
             "tokens": [
                 {
                     "address": "0x1c8e3bcb3378a443cc591f154c5ce0ebb4da9648",
@@ -1263,6 +1305,7 @@
             "id": "0x7320d680ca9bce8048a286f00a79a2c9f8dcd7b3000100000000000000000064",
             "poolType": "Weighted",
             "swapFee": "0.005",
+            "swapEnabled": true,
             "tokens": [
                 {
                     "address": "0x1c8e3bcb3378a443cc591f154c5ce0ebb4da9648",
@@ -1297,6 +1340,7 @@
             "id": "0x7bf521b4f4c1543a622e11ee347efb1a2374332200010000000000000000004c",
             "poolType": "Weighted",
             "swapFee": "0.005",
+            "swapEnabled": true,
             "tokens": [
                 {
                     "address": "0x1c8e3bcb3378a443cc591f154c5ce0ebb4da9648",
@@ -1331,6 +1375,7 @@
             "id": "0x7eb878107af0440f9e776f999ce053d277c8aca8000200000000000000000016",
             "poolType": "Weighted",
             "swapFee": "0.0099",
+            "swapEnabled": true,
             "tokens": [
                 {
                     "address": "0x41286bb1d3e870f3f750eb7e1c25d7e48c8a1ac7",
@@ -1358,6 +1403,7 @@
             "id": "0x80be0c303d8ad2a280878b50a39b1ee8e54dbd22000200000000000000000013",
             "poolType": "Weighted",
             "swapFee": "0.002",
+            "swapEnabled": true,
             "tokens": [
                 {
                     "address": "0x41286bb1d3e870f3f750eb7e1c25d7e48c8a1ac7",
@@ -1385,6 +1431,7 @@
             "id": "0x8339e311265a025fd5792db800daa8eda4264e2c00020000000000000000002d",
             "poolType": "Weighted",
             "swapFee": "0.002",
+            "swapEnabled": true,
             "tokens": [
                 {
                     "address": "0x41286bb1d3e870f3f750eb7e1c25d7e48c8a1ac7",
@@ -1412,6 +1459,7 @@
             "id": "0x87165b659ba7746907a48763063efa3b323c2b07000200000000000000000030",
             "poolType": "Weighted",
             "swapFee": "0.003",
+            "swapEnabled": true,
             "tokens": [
                 {
                     "address": "0x41286bb1d3e870f3f750eb7e1c25d7e48c8a1ac7",
@@ -1439,6 +1487,7 @@
             "id": "0x89ea4363bd541d27d9811e4df1209daa73154472000200000000000000000037",
             "poolType": "Weighted",
             "swapFee": "0.0025",
+            "swapEnabled": true,
             "tokens": [
                 {
                     "address": "0x41286bb1d3e870f3f750eb7e1c25d7e48c8a1ac7",
@@ -1466,6 +1515,7 @@
             "id": "0x8a92c3afabab59101b4e2426c82a7ddbb66b5450000200000000000000000023",
             "poolType": "Weighted",
             "swapFee": "0.002",
+            "swapEnabled": true,
             "tokens": [
                 {
                     "address": "0x41286bb1d3e870f3f750eb7e1c25d7e48c8a1ac7",
@@ -1493,6 +1543,7 @@
             "id": "0x8bda1ab5eead21547ba0f33c07c86c5dc48d9baa00010000000000000000004b",
             "poolType": "Weighted",
             "swapFee": "0.005",
+            "swapEnabled": true,
             "tokens": [
                 {
                     "address": "0x1c8e3bcb3378a443cc591f154c5ce0ebb4da9648",
@@ -1527,6 +1578,7 @@
             "id": "0x96646936b91d6b9d7d0c47c496afbf3d6ec7b6f800020000000000000000001d",
             "poolType": "Weighted",
             "swapFee": "0.001",
+            "swapEnabled": true,
             "tokens": [
                 {
                     "address": "0x41286bb1d3e870f3f750eb7e1c25d7e48c8a1ac7",
@@ -1554,6 +1606,7 @@
             "id": "0x991aeafbe1b1c7ac8348dc623ae350768d0c65b3000200000000000000000007",
             "poolType": "Weighted",
             "swapFee": "0.004",
+            "swapEnabled": true,
             "tokens": [
                 {
                     "address": "0x468c26d86c614cc3d8eb8cfd89d5607f79d46289",
@@ -1581,6 +1634,7 @@
             "id": "0x9c08c7a7a89cfd671c79eacdc6f07c1996277ed5000200000000000000000029",
             "poolType": "Weighted",
             "swapFee": "0.0015",
+            "swapEnabled": true,
             "tokens": [
                 {
                     "address": "0x41286bb1d3e870f3f750eb7e1c25d7e48c8a1ac7",
@@ -1608,6 +1662,7 @@
             "id": "0x9e030b67a8384cbba09d5927533aa98010c87d91000100000000000000000066",
             "poolType": "Weighted",
             "swapFee": "0.005",
+            "swapEnabled": true,
             "tokens": [
                 {
                     "address": "0x1c8e3bcb3378a443cc591f154c5ce0ebb4da9648",
@@ -1642,6 +1697,7 @@
             "id": "0x9e7fd25ad9d97f1e6716fa5bb04749a4621e892d00020000000000000000003b",
             "poolType": "Weighted",
             "swapFee": "0.001",
+            "swapEnabled": true,
             "tokens": [
                 {
                     "address": "0x02822e968856186a20fec2c824d4b174d0b70502",
@@ -1669,6 +1725,7 @@
             "id": "0x9f1f16b025f703ee985b58ced48daf93dad2f7ef000200000000000000000022",
             "poolType": "Weighted",
             "swapFee": "0.003",
+            "swapEnabled": true,
             "tokens": [
                 {
                     "address": "0x41286bb1d3e870f3f750eb7e1c25d7e48c8a1ac7",
@@ -1696,6 +1753,7 @@
             "id": "0xa0488d89fb8d3085d83ad2426b94b9715cf02869000200000000000000000032",
             "poolType": "Weighted",
             "swapFee": "0.0014",
+            "swapEnabled": true,
             "tokens": [
                 {
                     "address": "0x41286bb1d3e870f3f750eb7e1c25d7e48c8a1ac7",
@@ -1723,6 +1781,7 @@
             "id": "0xa660ba113f9aabaeb4bcd28a4a1705f4997d5432000200000000000000000026",
             "poolType": "Weighted",
             "swapFee": "0.0014",
+            "swapEnabled": true,
             "tokens": [
                 {
                     "address": "0x41286bb1d3e870f3f750eb7e1c25d7e48c8a1ac7",
@@ -1750,6 +1809,7 @@
             "id": "0xa6f548df93de924d73be7d25dc02554c6bd66db5000200000000000000000012",
             "poolType": "Weighted",
             "swapFee": "0.004",
+            "swapEnabled": true,
             "tokens": [
                 {
                     "address": "0x41286bb1d3e870f3f750eb7e1c25d7e48c8a1ac7",
@@ -1777,6 +1837,7 @@
             "id": "0xaac98ee71d4f8a156b6abaa6844cdb7789d086ce00020000000000000000001f",
             "poolType": "Weighted",
             "swapFee": "0.0019",
+            "swapEnabled": true,
             "tokens": [
                 {
                     "address": "0x41286bb1d3e870f3f750eb7e1c25d7e48c8a1ac7",
@@ -1804,6 +1865,7 @@
             "id": "0xb0fba102a03703fe2c1dd6300e7b431eac60e4b6000200000000000000000034",
             "poolType": "Weighted",
             "swapFee": "0.0015",
+            "swapEnabled": true,
             "tokens": [
                 {
                     "address": "0x41286bb1d3e870f3f750eb7e1c25d7e48c8a1ac7",
@@ -1831,6 +1893,7 @@
             "id": "0xb2634e2bfab9664f603626afc3d270be63c09ade000100000000000000000046",
             "poolType": "Weighted",
             "swapFee": "0.005",
+            "swapEnabled": true,
             "tokens": [
                 {
                     "address": "0x1c8e3bcb3378a443cc591f154c5ce0ebb4da9648",
@@ -1865,6 +1928,7 @@
             "id": "0xb6b9b165c4ac3f5233a0cf413126c72be28b468a00010000000000000000004a",
             "poolType": "Weighted",
             "swapFee": "0.005",
+            "swapEnabled": true,
             "tokens": [
                 {
                     "address": "0x1c8e3bcb3378a443cc591f154c5ce0ebb4da9648",
@@ -1899,6 +1963,7 @@
             "id": "0xb82a45ea7c6d7c90bd95e9e2af13242538f2e26900010000000000000000005e",
             "poolType": "Weighted",
             "swapFee": "0.005",
+            "swapEnabled": true,
             "tokens": [
                 {
                     "address": "0x1c8e3bcb3378a443cc591f154c5ce0ebb4da9648",
@@ -1933,6 +1998,7 @@
             "id": "0xbb31b8eebb9c71001562ae56aa5751af313e6d89000200000000000000000031",
             "poolType": "Weighted",
             "swapFee": "0.01",
+            "swapEnabled": true,
             "tokens": [
                 {
                     "address": "0x41286bb1d3e870f3f750eb7e1c25d7e48c8a1ac7",
@@ -1960,6 +2026,7 @@
             "id": "0xc6a5032dc4bf638e15b4a66bc718ba7ba474ff73000200000000000000000003",
             "poolType": "Weighted",
             "swapFee": "0.004",
+            "swapEnabled": true,
             "tokens": [
                 {
                     "address": "0x468c26d86c614cc3d8eb8cfd89d5607f79d46289",
@@ -1987,6 +2054,7 @@
             "id": "0xce66904b68f1f070332cbc631de7ee98b650b499000200000000000000000009",
             "poolType": "Weighted",
             "swapFee": "0.004",
+            "swapEnabled": true,
             "tokens": [
                 {
                     "address": "0x468c26d86c614cc3d8eb8cfd89d5607f79d46289",
@@ -2014,6 +2082,7 @@
             "id": "0xd0e43c99c05271fa9fdf82281d4d1831a47be81f00020000000000000000003a",
             "poolType": "Weighted",
             "swapFee": "0.0015",
+            "swapEnabled": true,
             "tokens": [
                 {
                     "address": "0x071af828464def6979fadaa34703deaacd3ac71d",
@@ -2041,6 +2110,7 @@
             "id": "0xd16847480d6bc218048cd31ad98b63cc34e5c2bf000100000000000000000060",
             "poolType": "Weighted",
             "swapFee": "0.005",
+            "swapEnabled": true,
             "tokens": [
                 {
                     "address": "0x1c8e3bcb3378a443cc591f154c5ce0ebb4da9648",
@@ -2075,6 +2145,7 @@
             "id": "0xd208168d2a512240eb82582205d94a0710bce4e7000100000000000000000058",
             "poolType": "Weighted",
             "swapFee": "0.005",
+            "swapEnabled": true,
             "tokens": [
                 {
                     "address": "0x1c8e3bcb3378a443cc591f154c5ce0ebb4da9648",
@@ -2109,6 +2180,7 @@
             "id": "0xd47c0734a0b5feff3bb2fc8542cd5b9751afeefb00010000000000000000000e",
             "poolType": "Weighted",
             "swapFee": "0.008",
+            "swapEnabled": true,
             "tokens": [
                 {
                     "address": "0x32fc95287b14eaef3afa92cccc48c285ee3a280a",
@@ -2150,6 +2222,7 @@
             "id": "0xd57b0ee9e080e3f6aa0c30bae98234359e97ea9800010000000000000000000d",
             "poolType": "Weighted",
             "swapFee": "0.008",
+            "swapEnabled": true,
             "tokens": [
                 {
                     "address": "0x41286bb1d3e870f3f750eb7e1c25d7e48c8a1ac7",
@@ -2191,6 +2264,7 @@
             "id": "0xd5d7bc115b32ad1449c6d0083e43c87be95f2809000100000000000000000054",
             "poolType": "Weighted",
             "swapFee": "0.005",
+            "swapEnabled": true,
             "tokens": [
                 {
                     "address": "0x1c8e3bcb3378a443cc591f154c5ce0ebb4da9648",
@@ -2225,6 +2299,7 @@
             "id": "0xdb1db6e248d7bb4175f6e5a382d0a03fe3dcc813000100000000000000000055",
             "poolType": "Weighted",
             "swapFee": "0.005",
+            "swapEnabled": true,
             "tokens": [
                 {
                     "address": "0x1c8e3bcb3378a443cc591f154c5ce0ebb4da9648",
@@ -2259,6 +2334,7 @@
             "id": "0xdb3e5cf969c05625db344dea9c8b12515e235df3000100000000000000000052",
             "poolType": "Weighted",
             "swapFee": "0.005",
+            "swapEnabled": true,
             "tokens": [
                 {
                     "address": "0x1c8e3bcb3378a443cc591f154c5ce0ebb4da9648",
@@ -2293,6 +2369,7 @@
             "id": "0xde148e6cc3f6047eed6e97238d341a2b8589e19e00020000000000000000001b",
             "poolType": "Weighted",
             "swapFee": "0.006",
+            "swapEnabled": true,
             "tokens": [
                 {
                     "address": "0x41286bb1d3e870f3f750eb7e1c25d7e48c8a1ac7",
@@ -2320,6 +2397,7 @@
             "id": "0xde620bb8be43ee54d7aa73f8e99a7409fe51108400010000000000000000004d",
             "poolType": "Weighted",
             "swapFee": "0.005",
+            "swapEnabled": true,
             "tokens": [
                 {
                     "address": "0x1c8e3bcb3378a443cc591f154c5ce0ebb4da9648",
@@ -2354,6 +2432,7 @@
             "id": "0xe0947a0d847f9662a6a22ca2eff9d7e6352a123e000100000000000000000059",
             "poolType": "Weighted",
             "swapFee": "0.005",
+            "swapEnabled": true,
             "tokens": [
                 {
                     "address": "0x1c8e3bcb3378a443cc591f154c5ce0ebb4da9648",
@@ -2388,6 +2467,7 @@
             "id": "0xe2cd73cfeb471f9f2b08a18afbc87ff2324ef24e000100000000000000000049",
             "poolType": "Weighted",
             "swapFee": "0.005",
+            "swapEnabled": true,
             "tokens": [
                 {
                     "address": "0x1c8e3bcb3378a443cc591f154c5ce0ebb4da9648",
@@ -2422,6 +2502,7 @@
             "id": "0xe54b3f5c444a801e61becdca93e74cdc1c4c1f9000010000000000000000005c",
             "poolType": "Weighted",
             "swapFee": "0.005",
+            "swapEnabled": true,
             "tokens": [
                 {
                     "address": "0x1c8e3bcb3378a443cc591f154c5ce0ebb4da9648",
@@ -2456,6 +2537,7 @@
             "id": "0xe8075304a388f2f9b2af61f502741a88ff21d9a4000100000000000000000053",
             "poolType": "Weighted",
             "swapFee": "0.005",
+            "swapEnabled": true,
             "tokens": [
                 {
                     "address": "0x1c8e3bcb3378a443cc591f154c5ce0ebb4da9648",
@@ -2490,6 +2572,7 @@
             "id": "0xe99481dc77691d8e2456e5f3f61c1810adfc150300020000000000000000001c",
             "poolType": "Weighted",
             "swapFee": "0.0019",
+            "swapEnabled": true,
             "tokens": [
                 {
                     "address": "0x41286bb1d3e870f3f750eb7e1c25d7e48c8a1ac7",
@@ -2517,6 +2600,7 @@
             "id": "0xea0b9c466e6c8d344f75ece6c69d99e7e4f8660000020000000000000000003f",
             "poolType": "Weighted",
             "swapFee": "0.0015",
+            "swapEnabled": true,
             "tokens": [
                 {
                     "address": "0x071af828464def6979fadaa34703deaacd3ac71d",
@@ -2544,6 +2628,7 @@
             "id": "0xea39581977325c0833694d51656316ef8a926a62000200000000000000000039",
             "poolType": "Weighted",
             "swapFee": "0.0015",
+            "swapEnabled": true,
             "tokens": [
                 {
                     "address": "0x071af828464def6979fadaa34703deaacd3ac71d",
@@ -2571,6 +2656,7 @@
             "id": "0xea8886a24b6e01fba88a9e98d794e8d1f29ed863000200000000000000000014",
             "poolType": "Weighted",
             "swapFee": "0.0025",
+            "swapEnabled": true,
             "tokens": [
                 {
                     "address": "0x41286bb1d3e870f3f750eb7e1c25d7e48c8a1ac7",
@@ -2598,6 +2684,7 @@
             "id": "0xeb58be542e77195355d90100beb07105b9bd295e000100000000000000000042",
             "poolType": "Weighted",
             "swapFee": "0.005",
+            "swapEnabled": true,
             "tokens": [
                 {
                     "address": "0x41286bb1d3e870f3f750eb7e1c25d7e48c8a1ac7",
@@ -2632,6 +2719,7 @@
             "id": "0xec60a5fef79a92c741cb74fdd6bfc340c0279b01000200000000000000000019",
             "poolType": "Weighted",
             "swapFee": "0.002",
+            "swapEnabled": true,
             "tokens": [
                 {
                     "address": "0x41286bb1d3e870f3f750eb7e1c25d7e48c8a1ac7",
@@ -2659,6 +2747,7 @@
             "id": "0xef123b9e0485d837281342af27012c54bbc0d26100020000000000000000003d",
             "poolType": "Weighted",
             "swapFee": "0.002",
+            "swapEnabled": true,
             "tokens": [
                 {
                     "address": "0x4e84056760c8d8c3dd2c1980585acdf42183fc61",
@@ -2686,6 +2775,7 @@
             "id": "0xefaa1604e82e1b3af8430b90192c1b9e8197e377000200000000000000000025",
             "poolType": "Weighted",
             "swapFee": "0.003",
+            "swapEnabled": true,
             "tokens": [
                 {
                     "address": "0x41286bb1d3e870f3f750eb7e1c25d7e48c8a1ac7",
@@ -2713,6 +2803,7 @@
             "id": "0xf099b7c3bd5a221aa34cb83004a50d66b0189ad0000100000000000000000056",
             "poolType": "Weighted",
             "swapFee": "0.005",
+            "swapEnabled": true,
             "tokens": [
                 {
                     "address": "0x1c8e3bcb3378a443cc591f154c5ce0ebb4da9648",
@@ -2747,6 +2838,7 @@
             "id": "0xf3a605da753e9de545841de10ea8bffbd1da9c75000200000000000000000038",
             "poolType": "Weighted",
             "swapFee": "0.0025",
+            "swapEnabled": true,
             "tokens": [
                 {
                     "address": "0x41286bb1d3e870f3f750eb7e1c25d7e48c8a1ac7",
@@ -2774,6 +2866,7 @@
             "id": "0xf461f2240b66d55dcf9059e26c022160c06863bf000200000000000000000006",
             "poolType": "Weighted",
             "swapFee": "0.004",
+            "swapEnabled": true,
             "tokens": [
                 {
                     "address": "0x468c26d86c614cc3d8eb8cfd89d5607f79d46289",
@@ -2801,6 +2894,7 @@
             "id": "0xf4c0dd9b82da36c07605df83c8a416f11724d88b00020000000000000000002a",
             "poolType": "Weighted",
             "swapFee": "0.0025",
+            "swapEnabled": true,
             "tokens": [
                 {
                     "address": "0x41286bb1d3e870f3f750eb7e1c25d7e48c8a1ac7",
@@ -2828,6 +2922,7 @@
             "id": "0xf7cd489c2b7e199e2d3e8a982eb6fd51d71c1ce4000100000000000000000044",
             "poolType": "Weighted",
             "swapFee": "0.005",
+            "swapEnabled": true,
             "tokens": [
                 {
                     "address": "0x1c8e3bcb3378a443cc591f154c5ce0ebb4da9648",
@@ -2862,6 +2957,7 @@
             "id": "0xf8a0623ab66f985effc1c69d05f1af4badb01b00000200000000000000000021",
             "poolType": "Weighted",
             "swapFee": "0.008",
+            "swapEnabled": true,
             "tokens": [
                 {
                     "address": "0x41286bb1d3e870f3f750eb7e1c25d7e48c8a1ac7",
@@ -2889,6 +2985,7 @@
             "id": "0xf93e20844fd084b657d5e71342157b36c5f3032d000100000000000000000041",
             "poolType": "Weighted",
             "swapFee": "0.005",
+            "swapEnabled": true,
             "tokens": [
                 {
                     "address": "0x41286bb1d3e870f3f750eb7e1c25d7e48c8a1ac7",
@@ -2923,6 +3020,7 @@
             "id": "0xf94a7df264a2ec8bceef2cfe54d7ca3f6c6dfc7a000100000000000000000050",
             "poolType": "Weighted",
             "swapFee": "0.005",
+            "swapEnabled": true,
             "tokens": [
                 {
                     "address": "0x1c8e3bcb3378a443cc591f154c5ce0ebb4da9648",
@@ -2957,6 +3055,7 @@
             "id": "0xfa1575c57d887e93f37a3c267a548ede008458b3000100000000000000000065",
             "poolType": "Weighted",
             "swapFee": "0.005",
+            "swapEnabled": true,
             "tokens": [
                 {
                     "address": "0x1c8e3bcb3378a443cc591f154c5ce0ebb4da9648",
@@ -2991,6 +3090,7 @@
             "id": "0xfa22ec1c02f121083bf04fbbcaad019f490d7a3000020000000000000000002e",
             "poolType": "Weighted",
             "swapFee": "0.001",
+            "swapEnabled": true,
             "tokens": [
                 {
                     "address": "0x41286bb1d3e870f3f750eb7e1c25d7e48c8a1ac7",
@@ -3018,6 +3118,7 @@
             "id": "0xff083f57a556bfb3bbe46ea1b4fa154b2b1fbe88000200000000000000000033",
             "poolType": "Weighted",
             "swapFee": "0.0005",
+            "swapEnabled": true,
             "tokens": [
                 {
                     "address": "0x41286bb1d3e870f3f750eb7e1c25d7e48c8a1ac7",
@@ -3048,9 +3149,7 @@
                     "pool": "0x647c1fd457b95b75d0972ff08fe01d7d7bda05df000200000000000000000001",
                     "tokenIn": "0xdfcea9088c8a88a76ff74892c1457c17dfeef9c1",
                     "tokenOut": "0x1c8e3bcb3378a443cc591f154c5ce0ebb4da9648",
-                    "swapAmount": "8999973249256645695",
-                    "limitReturnAmount": "0",
-                    "maxPrice": "115792089237316195423570985008687907853269984665640564039457584007913129639935"
+                    "swapAmount": "8999973249256645695"
                 }
             ],
             [
@@ -3058,17 +3157,13 @@
                     "pool": "0x3a19030ed746bd1c3f2b0f996ff9479af04c5f0a000200000000000000000004",
                     "tokenIn": "0xdfcea9088c8a88a76ff74892c1457c17dfeef9c1",
                     "tokenOut": "0xc2569dd7d0fd715b054fbf16e75b001e5c0c1115",
-                    "swapAmount": "26750743354305",
-                    "limitReturnAmount": "0",
-                    "maxPrice": "115792089237316195423570985008687907853269984665640564039457584007913129639935"
+                    "swapAmount": "26750743354305"
                 },
                 {
                     "pool": "0x494b26d4aee801cb1fabf498ee24f0af20238743000100000000000000000063",
                     "tokenIn": "0xc2569dd7d0fd715b054fbf16e75b001e5c0c1115",
                     "tokenOut": "0x1c8e3bcb3378a443cc591f154c5ce0ebb4da9648",
-                    "swapAmount": "5295321",
-                    "limitReturnAmount": "0",
-                    "maxPrice": "115792089237316195423570985008687907853269984665640564039457584007913129639935"
+                    "swapAmount": "5295321"
                 }
             ]
         ],
