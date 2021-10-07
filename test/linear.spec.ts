@@ -1,20 +1,16 @@
 // TS_NODE_PROJECT='tsconfig.testing.json' npx mocha -r ts-node/register test/linear.spec.ts
 import { assert, expect } from 'chai';
 import cloneDeep from 'lodash.clonedeep';
+import { JsonRpcProvider } from '@ethersproject/providers';
+import { BigNumber, parseFixed } from '@ethersproject/bignumber';
+import { BigNumber as OldBigNumber, bnum } from '../src/utils/bignumber';
 import {
     PoolDictionary,
     NewPath,
     SwapTypes,
-    PoolDictionaryByMain,
-    PoolPairBase,
     PoolTypes,
     SubgraphPoolBase,
 } from '../src/types';
-import {
-    LinearPool,
-    LinearPoolPairData,
-    PairTypes,
-} from '../src/pools/linearPool/linearPool';
 import {
     filterPoolsOfInterest,
     filterHopPools,
@@ -22,19 +18,13 @@ import {
     parseToPoolsDict,
 } from '../src/routeProposal/filtering';
 import { calculatePathLimits } from '../src/routeProposal/pathLimits';
-import OldBigNumber from 'bignumber.js';
-import { BigNumber, parseFixed } from '@ethersproject/bignumber';
-import { formatSwaps } from '../src/formatSwaps';
+import { LinearPool, PairTypes } from '../src/pools/linearPool/linearPool';
+import { checkPath, getFullSwap, getTotalSwapAmount } from './lib/testHelpers';
 
-import subgraphPoolsLargeLinear from './testData/linearPools/subgraphPoolsLargeLinear.json';
 import smallLinear from './testData/linearPools/smallLinear.json';
 import singleLinear from './testData/linearPools/singleLinear.json';
-import { MetaStablePool } from '../src/pools/metaStablePool/metaStablePool';
-import { bnum } from '../src/index';
-import { getBestPaths } from '../src/router';
-import path from 'path';
 
-export interface TestToken {
+interface TestToken {
     symbol: string;
     address: string;
     decimals: number;
@@ -65,20 +55,19 @@ const bUSDC = {
     address: '0x0000000000000000000000000000000000000001',
     decimals: 18,
 };
-const USDT = {
-    symbol: 'USDT',
-    address: '0xdac17f958d2ee523a2206206994597c13d831ec7',
-    decimals: 6,
-}; // USDT precision = 6
 const BAL = {
     symbol: 'BAL',
     address: '0xba100000625a3754423978a60c9317c58a424e3d',
     decimals: 18,
 };
-
 const bDAI = {
     symbol: 'bDAI',
     address: '0x0000000000000000000000000000000000000002',
+    decimals: 18,
+};
+const staBAL3 = {
+    symbol: 'staBAL3',
+    address: '0x06df3b2bbb68adc8b0e302443692037ed9f91b42',
     decimals: 18,
 };
 
@@ -109,76 +98,6 @@ describe('linear pool tests', () => {
     });
 
     context('limit amounts', () => {
-        it(`getLimitAmountSwap, SwapExactIn, TokenToBpt should return valid limit`, async () => {
-            const tokenIn = DAI.address;
-            const tokenInDecimals = DAI.decimals;
-            const tokenOut = bDAI.address;
-            const poolSG = cloneDeep(singleLinear);
-            const swapType = SwapTypes.SwapExactIn;
-            const MAX_RATIO = bnum(10);
-
-            const pool = LinearPool.fromPool(poolSG.pools[0]);
-
-            const poolPairData = pool.parsePoolPairData(tokenIn, tokenOut);
-
-            const limitAmt = pool.getLimitAmountSwap(poolPairData, swapType);
-            expect(limitAmt.toString()).to.eq(
-                bnum(pool.tokens[0].balance)
-                    .times(MAX_RATIO)
-                    .dp(tokenInDecimals)
-                    .toString()
-            );
-        });
-
-        it(`getLimitAmountSwap, SwapExactIn, BptToToken should return valid limit`, async () => {
-            const tokenIn = bDAI.address;
-            const tokenOut = DAI.address;
-            const poolSG = cloneDeep(singleLinear);
-            const swapType = SwapTypes.SwapExactIn;
-
-            const pool = LinearPool.fromPool(poolSG.pools[0]);
-
-            const poolPairData = pool.parsePoolPairData(tokenIn, tokenOut);
-
-            const limitAmt = pool.getLimitAmountSwap(poolPairData, swapType);
-            expect(limitAmt.toString()).to.eq('956.89246046982109274'); // TO DO - Confirm with Sergio this limit looks ok
-        });
-
-        it(`getLimitAmountSwap, SwapExactOut, TokenToBpt should return valid limit`, async () => {
-            const tokenIn = DAI.address;
-            const tokenOut = bDAI.address;
-            const tokenOutDecimals = bDAI.decimals;
-            const poolSG = cloneDeep(singleLinear);
-            const swapType = SwapTypes.SwapExactOut;
-            const MAX_RATIO = bnum(10);
-
-            const pool = LinearPool.fromPool(poolSG.pools[0]);
-
-            const poolPairData = pool.parsePoolPairData(tokenIn, tokenOut);
-
-            const limitAmt = pool.getLimitAmountSwap(poolPairData, swapType);
-            expect(limitAmt.toString()).to.eq(
-                bnum(pool.tokens[2].balance)
-                    .times(MAX_RATIO)
-                    .dp(tokenOutDecimals)
-                    .toString()
-            );
-        });
-
-        it(`getLimitAmountSwap, SwapExactOut, BptToToken should return valid limit`, async () => {
-            const tokenIn = bDAI.address;
-            const tokenOut = DAI.address;
-            const poolSG = cloneDeep(singleLinear);
-            const swapType = SwapTypes.SwapExactOut;
-
-            const pool = LinearPool.fromPool(poolSG.pools[0]);
-
-            const poolPairData = pool.parsePoolPairData(tokenIn, tokenOut);
-
-            const limitAmt = pool.getLimitAmountSwap(poolPairData, swapType);
-            expect(limitAmt.toString()).to.eq('1485000000.122222221232222221'); // TO DO - Confirm with Sergio this limit looks ok
-        });
-
         it(`getLimitAmountSwap, token to token should throw error`, async () => {
             const tokenIn = DAI.address;
             const tokenOut = aDAI.address;
@@ -194,16 +113,88 @@ describe('linear pool tests', () => {
                 pool.getLimitAmountSwap(poolPairData, SwapTypes.SwapExactOut)
             ).to.throw('LinearPool does not support TokenToToken');
         });
+
+        it(`getLimitAmountSwap, SwapExactIn, TokenToBpt should return valid limit`, async () => {
+            const tokenIn = DAI.address;
+            const tokenInDecimals = DAI.decimals;
+            const tokenOut = bDAI.address;
+            const swapType = SwapTypes.SwapExactIn;
+            const pools = singleLinear.pools;
+            const poolIndex = 0;
+
+            const MAX_RATIO = bnum(10);
+
+            const expectedAmt = bnum(pools[poolIndex].tokens[0].balance)
+                .times(MAX_RATIO)
+                .dp(tokenInDecimals);
+
+            testLimit(
+                tokenIn,
+                tokenOut,
+                swapType,
+                pools,
+                poolIndex,
+                expectedAmt
+            );
+        });
+
+        it(`getLimitAmountSwap, SwapExactIn, BptToToken should return valid limit`, async () => {
+            testLimit(
+                bDAI.address,
+                DAI.address,
+                SwapTypes.SwapExactIn,
+                singleLinear.pools,
+                0,
+                bnum('956.89246046982109274')
+            );
+        });
+
+        it(`getLimitAmountSwap, SwapExactOut, TokenToBpt should return valid limit`, async () => {
+            const tokenIn = DAI.address;
+            const tokenOut = bDAI.address;
+            const tokenOutDecimals = bDAI.decimals;
+            const swapType = SwapTypes.SwapExactOut;
+            const pools = singleLinear.pools;
+            const poolIndex = 0;
+
+            const MAX_RATIO = bnum(10);
+
+            const expectedAmt = bnum(pools[poolIndex].tokens[2].balance)
+                .times(MAX_RATIO)
+                .dp(tokenOutDecimals);
+
+            testLimit(
+                tokenIn,
+                tokenOut,
+                swapType,
+                pools,
+                poolIndex,
+                expectedAmt
+            );
+        });
+
+        it(`getLimitAmountSwap, SwapExactOut, BptToToken should return valid limit`, async () => {
+            testLimit(
+                bDAI.address,
+                DAI.address,
+                SwapTypes.SwapExactOut,
+                singleLinear.pools,
+                0,
+                bnum('1485000000.122222221232222221')
+            );
+        });
     });
+
     context('with no LinearPools', () => {
         it('getPathsUsingLinearPool return empty paths', () => {
             const tokenIn = DAI.address;
             const tokenOut = USDC.address;
             const maxPools = 4;
 
-            const [pathsUsingLinear] = getLinearPaths(
+            const [, , pathsUsingLinear] = getPaths(
                 tokenIn,
                 tokenOut,
+                SwapTypes.SwapExactIn,
                 singleLinear.pools,
                 maxPools
             );
@@ -217,9 +208,10 @@ describe('linear pool tests', () => {
             const tokenOut = USDC.address;
             const maxPools = 4;
 
-            const [pathsUsingLinear] = getLinearPaths(
+            const [, , pathsUsingLinear] = getPaths(
                 tokenIn,
                 tokenOut,
+                SwapTypes.SwapExactIn,
                 singleLinear.pools,
                 maxPools
             );
@@ -234,9 +226,10 @@ describe('linear pool tests', () => {
             const tokenOut = DAI.address;
             const maxPools = 10;
 
-            const [pathsUsingLinear] = getLinearPaths(
+            const [, , pathsUsingLinear] = getPaths(
                 tokenIn,
                 tokenOut,
+                SwapTypes.SwapExactIn,
                 smallLinear.pools,
                 maxPools
             );
@@ -252,9 +245,10 @@ describe('linear pool tests', () => {
                 const tokenOut = USDC.address;
                 const maxPools = 10;
 
-                const [pathsUsingLinear, poolsAllDict] = getLinearPaths(
+                const [, poolsAllDict, pathsUsingLinear] = getPaths(
                     tokenIn,
                     tokenOut,
+                    SwapTypes.SwapExactIn,
                     smallLinear.pools,
                     maxPools
                 );
@@ -278,7 +272,7 @@ describe('linear pool tests', () => {
                 const tokenOut = USDC.address;
                 const maxPools = 10;
 
-                const [paths, poolAllDict] = getFullPaths(
+                const [paths, poolAllDict] = getPaths(
                     tokenIn,
                     tokenOut,
                     SwapTypes.SwapExactIn,
@@ -317,7 +311,7 @@ describe('linear pool tests', () => {
                 const tokenOut = DAI.address;
                 const maxPools = 10;
 
-                const [paths, poolsAllDict] = getFullPaths(
+                const [paths, poolsAllDict] = getPaths(
                     tokenIn,
                     tokenOut,
                     SwapTypes.SwapExactIn,
@@ -349,7 +343,7 @@ describe('linear pool tests', () => {
                 const tokenOut = DAI.address;
                 const maxPools = 10;
 
-                const [paths, poolsAllDict] = getFullPaths(
+                const [paths, poolsAllDict] = getPaths(
                     tokenIn,
                     tokenOut,
                     SwapTypes.SwapExactIn,
@@ -373,7 +367,7 @@ describe('linear pool tests', () => {
                 const tokenOut = BAL.address;
                 const maxPools = 10;
 
-                const [paths, poolsAllDict] = getFullPaths(
+                const [paths, poolsAllDict] = getPaths(
                     tokenIn,
                     tokenOut,
                     SwapTypes.SwapExactIn,
@@ -394,163 +388,104 @@ describe('linear pool tests', () => {
         });
     });
 
-    context('TO DO - ADD SOME TESTS FOR THESE FULL CASES??', () => {
-        it('basic swap cases', async () => {
-            runSOR(
-                DAI,
-                USDC,
+    context('SOR Full Swaps', () => {
+        it('DAI>USDC, SwapExactIn', async () => {
+            const returnAmount = await testFullSwap(
+                DAI.address,
+                USDC.address,
                 SwapTypes.SwapExactIn,
                 parseFixed('25', 18),
-                smallLinear
+                smallLinear.pools
             );
-            // runSOR(
-            //     DAI,
-            //     USDC,
-            //     SwapTypes.SwapExactIn,
-            //     parseFixed('2500', 18),
-            //     subgraphPoolsLargeLinear
-            // );
-            // console.log('second: ');
-            // runSOR(
-            //     DAI,
-            //     USDC,
-            //     SwapTypes.SwapExactIn,
-            //     parseFixed('2500', 18),
-            //     singleLinear
-            // );
-            // console.log('third: ');
-            // runSOR(
-            //     WETH,
-            //     USDC,
-            //     SwapTypes.SwapExactIn,
-            //     parseFixed('10', 18),
-            //     smallLinear
-            // );
-            // console.log('fourth: ');
-            // runSOR(
-            //     WETH,
-            //     USDC,
-            //     SwapTypes.SwapExactOut,
-            //     parseFixed('10', 6),
-            //     smallLinear
-            // );
+            expect(returnAmount).to.eq('24688894');
         });
 
-        it('basic swap cases', async () => {
-            runSOR(
-                DAI,
-                USDC,
+        it('DAI>USDC, SwapExactOut', async () => {
+            const returnAmount = await testFullSwap(
+                DAI.address,
+                USDC.address,
                 SwapTypes.SwapExactOut,
                 parseFixed('27', 6),
-                smallLinear
+                smallLinear.pools
             );
+            expect(returnAmount).to.eq('26335005495898592574');
         });
 
-        it('basic swap cases', async () => {
-            runSOR(
-                USDC,
-                DAI,
+        it('USDC>DAI, SwapExactIn', async () => {
+            const returnAmount = await testFullSwap(
+                USDC.address,
+                DAI.address,
                 SwapTypes.SwapExactIn,
                 parseFixed('270', 6),
-                smallLinear
+                smallLinear.pools
             );
+            expect(returnAmount).to.eq('504771279674181968953'); // Confirmed by Sergio
         });
 
-        it('basic swap cases', async () => {
-            runSOR(
-                USDC,
-                DAI,
+        it('USDC>DAI, SwapExactOut', async () => {
+            const returnAmount = await testFullSwap(
+                USDC.address,
+                DAI.address,
                 SwapTypes.SwapExactOut,
                 parseFixed('7777', 18),
-                smallLinear
+                smallLinear.pools
             );
+            expect(returnAmount).to.eq('7979762223'); // Confirmed by Sergio
+        });
+
+        it('DAI>staBAL3, SwapExactIn', async () => {
+            const returnAmount = await testFullSwap(
+                DAI.address,
+                staBAL3.address,
+                SwapTypes.SwapExactIn,
+                parseFixed('1', 18),
+                smallLinear.pools
+            );
+            expect(returnAmount).to.eq('946927175843694145');
+        });
+
+        it('USDC>staBAL3, SwapExactOut', async () => {
+            const returnAmount = await testFullSwap(
+                USDC.address,
+                staBAL3.address,
+                SwapTypes.SwapExactOut,
+                parseFixed('1', 18),
+                smallLinear.pools
+            );
+            expect(returnAmount).to.eq('1083149');
+        });
+
+        it('staBAL3>USDC, SwapExactIn', async () => {
+            const returnAmount = await testFullSwap(
+                staBAL3.address,
+                USDC.address,
+                SwapTypes.SwapExactIn,
+                parseFixed('1', 18),
+                smallLinear.pools
+            );
+            expect(returnAmount).to.eq('1083149'); // TO DO - Failing because of Limit amount?
+        });
+
+        it('staBAL3>DAI, SwapExactOut', async () => {
+            const returnAmount = await testFullSwap(
+                staBAL3.address,
+                DAI.address,
+                SwapTypes.SwapExactOut,
+                parseFixed('1', 18),
+                smallLinear.pools
+            );
+            expect(returnAmount).to.eq('947685172351949208');
         });
     });
 });
 
-/*
-Checks path for:
-- ID
-- tokenIn/Out
-- poolPairData
-- Valid swap path
-*/
-function checkPath(
-    poolIds: string[],
-    pools: PoolDictionary,
-    path: NewPath,
-    tokenIn: string,
-    tokenOut: string
-) {
-    // IDS should be all IDS concatenated
-    expect(path.id).to.eq(poolIds.join(''));
-    // Lengths of pools, pairData and swaps should all be equal
-    expect(poolIds.length).to.eq(path.poolPairData.length);
-    expect(
-        path.poolPairData.length === path.swaps.length &&
-            path.swaps.length === path.pools.length
-    ).to.be.true;
-
-    let lastTokenOut = path.swaps[0].tokenIn;
-
-    // Check each part of path
-    for (let i = 0; i < poolIds.length; i++) {
-        const poolId = poolIds[i];
-        const poolInfo = pools[poolId];
-        const tokenIn = path.swaps[i].tokenIn;
-        const tokenOut = path.swaps[i].tokenOut;
-        const poolPairData = poolInfo.parsePoolPairData(tokenIn, tokenOut);
-        expect(path.pools[i]).to.deep.eq(poolInfo);
-        expect(path.poolPairData[i]).to.deep.eq(poolPairData);
-
-        expect(path.swaps[i].pool).eq(poolId);
-        // TokenIn should equal previous swaps tokenOut
-        expect(path.swaps[i].tokenIn).eq(lastTokenOut);
-        expect(path.swaps[i].tokenInDecimals).eq(poolPairData.decimalsIn);
-        expect(path.swaps[i].tokenOutDecimals).eq(poolPairData.decimalsOut);
-        lastTokenOut = tokenOut;
-    }
-
-    // TokenIn/Out should be first and last of path
-    expect(path.swaps[0].tokenIn).to.eq(tokenIn);
-    expect(path.swaps[path.swaps.length - 1].tokenOut).to.eq(tokenOut);
-}
-
-// Gets Linear paths only.
-function getLinearPaths(
-    tokenIn: string,
-    tokenOut: string,
-    pools,
-    maxPools
-): [NewPath[], PoolDictionary] {
-    const poolsAll = parseToPoolsDict(cloneDeep(pools), 0);
-
-    const [poolsFilteredDict] = filterPoolsOfInterest(
-        poolsAll,
-        tokenIn,
-        tokenOut,
-        maxPools
-    );
-
-    const pathsUsingLinear = getPathsUsingLinearPools(
-        tokenIn,
-        tokenOut,
-        poolsAll,
-        poolsFilteredDict,
-        chainId
-    );
-
-    return [pathsUsingLinear, poolsAll];
-}
-
-// Gets linear and non-linear paths
-function getFullPaths(
+function getPaths(
     tokenIn: string,
     tokenOut: string,
     swapType: SwapTypes,
-    pools,
-    maxPools
-): [NewPath[], PoolDictionary] {
+    pools: SubgraphPoolBase[],
+    maxPools: number
+): [NewPath[], PoolDictionary, NewPath[]] {
     const poolsAll = parseToPoolsDict(cloneDeep(pools), 0);
 
     const [poolsFilteredDict, hopTokens] = filterPoolsOfInterest(
@@ -577,81 +512,66 @@ function getFullPaths(
     );
     pathData = pathData.concat(pathsUsingLinear);
     const [paths] = calculatePathLimits(pathData, swapType);
-    return [paths, poolsAll];
+    return [paths, poolsAll, pathsUsingLinear];
 }
 
-function runSOR(
-    tokIn,
-    tokOut,
+async function testFullSwap(
+    tokenIn: string,
+    tokenOut: string,
     swapType: SwapTypes,
     swapAmount: BigNumber,
-    jsonPools
+    pools: SubgraphPoolBase[]
 ) {
-    console.log(
-        'Input info:\ntoken in: ',
-        tokIn.symbol,
-        '\ntoken out:',
-        tokOut.symbol
+    const returnAmountDecimals = 18; // TO DO Remove?
+    const maxPools = 4;
+    // const costOutputToken = BigNumber.from('1000000000000000000');
+    const costOutputToken = BigNumber.from('0');
+    const gasPrice = BigNumber.from(`10000000000`);
+    const provider = new JsonRpcProvider(
+        `https://mainnet.infura.io/v3/${process.env.INFURA}`
     );
-    console.log(
-        'swap type: ',
-        swapType.toString(),
-        '\nswap amount: ',
-        swapAmount.toString(),
-        '\n'
-    );
-    const maxPools = 10;
-    const tokenIn = tokIn.address;
-    const tokenOut = tokOut.address;
-    const [paths] = getFullPaths(
+    const swapGas = BigNumber.from(`32500`);
+
+    const swapInfo = await getFullSwap(
+        cloneDeep(pools),
         tokenIn,
         tokenOut,
-        swapType,
-        jsonPools.pools,
-        maxPools
-    );
-
-    const [inputDecimals, outputDecimals] =
-        swapType === SwapTypes.SwapExactIn
-            ? [tokIn.decimals, tokOut.decimals]
-            : [tokOut.decimals, tokIn.decimals];
-
-    const [swaps, total, marketSp, totalConsideringFees] = getBestPaths(
-        paths,
-        swapType,
-        swapAmount,
-        inputDecimals,
-        outputDecimals,
+        returnAmountDecimals,
         maxPools,
-        parseFixed('0.01', outputDecimals)
-    );
-
-    const swapInfo = formatSwaps(
-        swaps,
         swapType,
         swapAmount,
-        tokenIn,
-        tokenOut,
-        parseFixed(
-            total.dp(outputDecimals, OldBigNumber.ROUND_FLOOR).toString(),
-            outputDecimals
-        ),
-        parseFixed(
-            totalConsideringFees
-                .dp(outputDecimals, OldBigNumber.ROUND_FLOOR)
-                .toString(),
-            outputDecimals
-        ),
-        marketSp
+        costOutputToken,
+        gasPrice,
+        provider,
+        swapGas
     );
-    // console.log('swaps: ', swaps);
-    console.log(`Swap Amt: ${swapAmount.toString()}`);
-    console.log(`Total: ${total.toString()}`);
-    console.log(`Total Considering Fees: ${totalConsideringFees.toString()}`);
-    console.log(`SwapInfo Return: ${swapInfo.returnAmount.toString()}`);
+
+    const totalSwapAmount = getTotalSwapAmount(swapType, swapInfo);
+    assert.equal(
+        swapAmount.toString(),
+        totalSwapAmount.toString(),
+        'Total From SwapInfo Should Equal Swap Amount.'
+    );
+
+    console.log(`Return: ${swapInfo.returnAmount.toString()}`);
     console.log(
-        `SwapInfo Return Considering Fees: ${swapInfo.returnAmountConsideringFees.toString()}`
+        `ReturnFees: ${swapInfo.returnAmountConsideringFees.toString()}`
     );
+    return swapInfo.returnAmount.toString();
+}
+
+function testLimit(
+    tokenIn: string,
+    tokenOut: string,
+    swapType: SwapTypes,
+    pools: SubgraphPoolBase[],
+    poolIndex: number,
+    expectedAmt: OldBigNumber
+) {
+    const pool = LinearPool.fromPool(cloneDeep(pools)[poolIndex]);
+    const poolPairData = pool.parsePoolPairData(tokenIn, tokenOut);
+    const limitAmt = pool.getLimitAmountSwap(poolPairData, swapType);
+    expect(limitAmt.toString()).to.eq(expectedAmt.toString());
 }
 
 function testParsePool(
