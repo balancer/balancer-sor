@@ -12,7 +12,8 @@
                     "decimals": 18,
                     "weight": "50",
                     "id": "weightedBalStaBal3-0x06df3b2bbb68adc8b0e302443692037ed9f91b42",
-                    "symbol": "staBal3"
+                    "symbol": "staBal3",
+                    "priceRate": "1"
                 },
                 {
                     "address": "0xba100000625a3754423978a60c9317c58a424e3d",
@@ -20,7 +21,8 @@
                     "decimals": 18,
                     "weight": "50",
                     "id": "weightedBalStaBal3-0xba100000625a3754423978a60c9317c58a424e3d",
-                    "symbol": "BAL"
+                    "symbol": "BAL",
+                    "priceRate": "1"
                 }
             ],
             "tokensList": [
@@ -44,7 +46,8 @@
                     "decimals": 6,
                     "weight": "50",
                     "id": "weightedUsdcWeth-0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
-                    "symbol": "USDC"
+                    "symbol": "USDC",
+                    "priceRate": "1"
                 },
                 {
                     "address": "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
@@ -52,7 +55,8 @@
                     "decimals": 18,
                     "weight": "50",
                     "id": "weightedUsdcWeth-0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
-                    "symbol": "WETH"
+                    "symbol": "WETH",
+                    "priceRate": "1"
                 }
             ],
             "tokensList": [
@@ -76,7 +80,8 @@
                     "decimals": 18,
                     "weight": "50",
                     "id": "weightedDaiWeth-0x6b175474e89094c44da98b954eedeac495271d0f",
-                    "symbol": "DAI"
+                    "symbol": "DAI",
+                    "priceRate": "1"
                 },
                 {
                     "address": "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
@@ -84,7 +89,8 @@
                     "decimals": 18,
                     "weight": "50",
                     "id": "weightedDaiWeth-0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
-                    "symbol": "WETH"
+                    "symbol": "WETH",
+                    "priceRate": "1"
                 }
             ],
             "tokensList": [
@@ -108,7 +114,8 @@
                     "decimals": 18,
                     "weight": "50",
                     "id": "weightedDaiUsdc-0x6b175474e89094c44da98b954eedeac495271d0f",
-                    "symbol": "DAI"
+                    "symbol": "DAI",
+                    "priceRate": "1"
                 },
                 {
                     "address": "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
@@ -116,7 +123,8 @@
                     "decimals": 6,
                     "weight": "50",
                     "id": "weightedDaiUsdc-0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
-                    "symbol": "USDC"
+                    "symbol": "USDC",
+                    "priceRate": "1"
                 }
             ],
             "tokensList": [
@@ -139,7 +147,9 @@
                     "balance": "200000.000000",
                     "decimals": 6,
                     "id": "linearUSDC-0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
-                    "symbol": "USDC"
+                    "symbol": "USDC",
+                    "priceRate": "1",
+                    "weight": null
                 },
                 {
                     "address": "0x9ba00d6856a4edf4665bca2c2309936572473b7e",
@@ -147,14 +157,17 @@
                     "decimals": 6,
                     "id": "linearUSDC-0x9ba00d6856a4edf4665bca2c2309936572473b7e",
                     "symbol": "aUSDC",
-                    "priceRate": "1"
+                    "priceRate": "1.1",
+                    "weight": null
                 },
                 {
                     "address": "0x0000000000000000000000000000000000000001",
                     "balance": "400000.000000",
                     "decimals": 18,
                     "id": "linearUSDC-0x0000000000000000000000000000000000000001",
-                    "symbol": "bUSDC"
+                    "symbol": "bUSDC",
+                    "priceRate": "1",
+                    "weight": null
                 }
             ],
             "tokensList": [
@@ -180,7 +193,9 @@
                     "balance": "100000",
                     "decimals": 18,
                     "id": "linearDAI-0x6b175474e89094c44da98b954eedeac495271d0f",
-                    "symbol": "DAI"
+                    "symbol": "DAI",
+                    "priceRate": "1",
+                    "weight": null
                 },
                 {
                     "address": "0xfc1e690f61efd961294b3e1ce3313fbd8aa4f85d",
@@ -188,14 +203,17 @@
                     "decimals": 18,
                     "id": "linearDAI-0xfc1e690f61efd961294b3e1ce3313fbd8aa4f85d",
                     "symbol": "aDAI",
-                    "priceRate": "1"
+                    "priceRate": "1.1",
+                    "weight": null
                 },
                 {
                     "address": "0x0000000000000000000000000000000000000002",
                     "balance": "200000",
                     "decimals": 18,
                     "id": "linearDAI-0x0000000000000000000000000000000000000002",
-                    "symbol": "bDAI"
+                    "symbol": "bDAI",
+                    "priceRate": "1",
+                    "weight": null
                 }
             ],
             "tokensList": [
@@ -221,7 +239,9 @@
                     "balance": "100000",
                     "decimals": 6,
                     "id": "linearUSDT-0xdac17f958d2ee523a2206206994597c13d831ec7",
-                    "symbol": "USDT"
+                    "symbol": "USDT",
+                    "priceRate": "1",
+                    "weight": null
                 },
                 {
                     "address": "0x71fc860f7d3a592a4a98740e39db31d25db65ae8",
@@ -229,14 +249,17 @@
                     "decimals": 6,
                     "id": "linearUSDT-0x71fc860f7d3a592a4a98740e39db31d25db65ae8",
                     "symbol": "aUSDT",
-                    "priceRate": "1.1"
+                    "priceRate": "1.1",
+                    "weight": null
                 },
                 {
                     "address": "0x0000000000000000000000000000000000000003",
                     "balance": "200000",
                     "decimals": 18,
                     "id": "linearUSDT-0x0000000000000000000000000000000000000003",
-                    "symbol": "bUSDT"
+                    "symbol": "bUSDT",
+                    "priceRate": "1",
+                    "weight": null
                 }
             ],
             "tokensList": [
@@ -263,28 +286,32 @@
                     "balance": "2000000000000000",
                     "decimals": 18,
                     "symbol": "bUSDC",
-                    "priceRate": "1"
+                    "priceRate": "1",
+                    "weight": null
                 },
                 {
                     "address": "0x0000000000000000000000000000000000000002",
                     "balance": "1500000000000000",
                     "decimals": 18,
                     "symbol": "bDAI",
-                    "priceRate": "1"
+                    "priceRate": "1",
+                    "weight": null
                 },
                 {
                     "address": "0x0000000000000000000000000000000000000003",
                     "balance": "1500000000000000",
                     "decimals": 18,
                     "symbol": "bUSDT",
-                    "priceRate": "1"
+                    "priceRate": "1",
+                    "weight": null
                 },
                 {
                     "address": "0x06df3b2bbb68adc8b0e302443692037ed9f91b42",
                     "balance": "1500000000000000",
                     "decimals": 18,
                     "symbol": "staBal3",
-                    "priceRate": "1"
+                    "priceRate": "1",
+                    "weight": null
                 }
             ],
             "tokensList": [

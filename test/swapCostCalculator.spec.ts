@@ -58,7 +58,7 @@ describe('Test SwapCostCalculator', () => {
             const swapGas = BigNumber.from('100000');
 
             const cost = await new SwapCostCalculator(1).convertGasCostToToken(
-                DAI,
+                DAI.address,
                 18,
                 gasPriceWei,
                 swapGas
@@ -72,7 +72,7 @@ describe('Test SwapCostCalculator', () => {
             const swapGas = BigNumber.from('100000');
 
             const cost = await new SwapCostCalculator(1).convertGasCostToToken(
-                USDC,
+                USDC.address,
                 6,
                 gasPriceWei,
                 swapGas
@@ -86,7 +86,7 @@ describe('Test SwapCostCalculator', () => {
             const swapGas = BigNumber.from('100000');
 
             const cost = await new SwapCostCalculator(1).convertGasCostToToken(
-                MKR,
+                MKR.address,
                 18,
                 gasPriceWei,
                 swapGas
@@ -100,7 +100,7 @@ describe('Test SwapCostCalculator', () => {
             const swapGas = BigNumber.from('100000');
 
             const cost = await new SwapCostCalculator(1).convertGasCostToToken(
-                WETH,
+                WETH.address,
                 18,
                 gasPriceWei,
                 swapGas

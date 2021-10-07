@@ -170,8 +170,8 @@ describe(`Tests for MetaStable Pools.`, () => {
             const pools: SubgraphPoolBase[] = cloneDeep(
                 poolsFromFile.metaStablePool
             );
-            const tokenIn = BAL;
-            const tokenOut = USDC;
+            const tokenIn = BAL.address;
+            const tokenOut = USDC.address;
             const swapType = SwapTypes.SwapExactIn;
             const swapAmt = parseFixed('1', 18);
 
@@ -197,8 +197,8 @@ describe(`Tests for MetaStable Pools.`, () => {
             const pools: SubgraphPoolBase[] = cloneDeep(
                 poolsFromFile.metaStablePool
             );
-            const tokenIn = BAL;
-            const tokenOut = USDC;
+            const tokenIn = BAL.address;
+            const tokenOut = USDC.address;
             const swapType = SwapTypes.SwapExactOut;
             const swapAmt = parseFixed('1', 18);
 
@@ -224,7 +224,7 @@ describe(`Tests for MetaStable Pools.`, () => {
             const pools: SubgraphPoolBase[] = cloneDeep(
                 poolsFromFile.metaStablePool
             );
-            const tokenIn = WETH;
+            const tokenIn = WETH.address;
             const tokenInPriceRate = ONE;
             const tokenOut = stETH;
             const tokenOutPriceRate = ONE.div(2);
@@ -295,7 +295,7 @@ describe(`Tests for MetaStable Pools.`, () => {
             );
             const tokenIn = stETH;
             const tokenInPriceRate = ONE.div(2);
-            const tokenOut = WETH;
+            const tokenOut = WETH.address;
             const tokenOutPriceRate = ONE;
             const swapType = SwapTypes.SwapExactIn;
             const swapAmt = parseFixed('1', 18); // Would expect ~ 1 back
@@ -359,7 +359,7 @@ describe(`Tests for MetaStable Pools.`, () => {
             const pools: SubgraphPoolBase[] = cloneDeep(
                 poolsFromFile.metaStablePool
             );
-            const tokenIn = WETH;
+            const tokenIn = WETH.address;
             const tokenInPriceRate = ONE;
             const tokenOut = stETH;
             const tokenOutPriceRate = ONE.div(2);
@@ -426,7 +426,7 @@ describe(`Tests for MetaStable Pools.`, () => {
             );
             const tokenIn = stETH;
             const tokenInPriceRate = ONE.div(2);
-            const tokenOut = WETH;
+            const tokenOut = WETH.address;
             const tokenOutPriceRate = ONE;
             const swapType = SwapTypes.SwapExactOut;
             const swapAmt = parseFixed('2', 18); // Would expect ~ 4 as input
@@ -495,7 +495,7 @@ describe(`Tests for MetaStable Pools.`, () => {
             const pools: SubgraphPoolBase[] = cloneDeep(
                 poolsFromFile.metaStablePools
             );
-            const tokenIn = WETH;
+            const tokenIn = WETH.address;
             const tokenInPriceRate = ONE;
             const tokenHop = stETH;
             const tokenHopPriceRate = ONE.div(4);
@@ -567,7 +567,7 @@ describe(`Tests for MetaStable Pools.`, () => {
             const pools: SubgraphPoolBase[] = cloneDeep(
                 poolsFromFile.metaStablePools
             );
-            const tokenIn = WETH;
+            const tokenIn = WETH.address;
             const tokenInPriceRate = ONE;
             const tokenHop = stETH;
             const tokenHopPriceRate = ONE.div(4);
@@ -645,7 +645,7 @@ describe(`Tests for MetaStable Pools.`, () => {
         //     };
         //     const tokenIn = DAI;
         //     const tokenInPriceRate = bnum(1);
-        //     const tokenHop = USDC;
+        //     const tokenHop = USDC.address;
         //     const tokenHopPriceRate = bnum(1);
         //     const tokenOut = PTSP;
         //     const tokenOutPriceRate = bnum('1.00239199558952863');

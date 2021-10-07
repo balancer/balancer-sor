@@ -41,8 +41,8 @@ describe('Tests pools filtering and path processing', () => {
 
         const [poolsOfInterestDictionary, hopTokens] = filter(
             testPools.weightedOnly,
-            DAI,
-            USDC,
+            DAI.address,
+            USDC.address,
             maxPools
         );
 
@@ -58,8 +58,8 @@ describe('Tests pools filtering and path processing', () => {
 
     it('Get multihop pools - WETH>DAI', async () => {
         const maxPools = 4;
-        const tokenIn = WETH;
-        const tokenOut = DAI;
+        const tokenIn = WETH.address;
+        const tokenOut = DAI.address;
 
         const [, hopTokens, poolsMostLiquid, pathData, poolsAll] = filter(
             subgraphPoolsLarge.pools,
@@ -195,8 +195,8 @@ describe('Tests pools filtering and path processing', () => {
 
     it('should filter weighted only pools correctly', () => {
         const maxPools = 4;
-        const tokenIn = DAI;
-        const tokenOut = USDC;
+        const tokenIn = DAI.address;
+        const tokenOut = USDC.address;
 
         const [poolsOfInterestDictionary, hopTokens] = filter(
             testPools.weightedOnly,
@@ -221,8 +221,8 @@ describe('Tests pools filtering and path processing', () => {
 
     it('should filter stable only pools correctly', () => {
         const maxPools = 4;
-        const tokenIn = DAI;
-        const tokenOut = USDC;
+        const tokenIn = DAI.address;
+        const tokenOut = USDC.address;
 
         const [poolsOfInterestDictionary, hopTokens] = filter(
             testPools.stableOnly,
@@ -243,8 +243,8 @@ describe('Tests pools filtering and path processing', () => {
 
     it('should filter stable & weighted pools correctly', () => {
         const maxPools = 4;
-        const tokenIn = DAI;
-        const tokenOut = USDC;
+        const tokenIn = DAI.address;
+        const tokenOut = USDC.address;
         const weighted: SubgraphPoolBase[] = testPools.weightedOnly;
         const stable: SubgraphPoolBase[] = testPools.stableOnly;
         const allPools = stable.concat(...weighted);
@@ -269,8 +269,8 @@ describe('Tests pools filtering and path processing', () => {
 
     it('should filter weighted only hop pools correctly', () => {
         const maxPools = 4;
-        const tokenIn = DAI;
-        const tokenOut = USDC;
+        const tokenIn = DAI.address;
+        const tokenOut = USDC.address;
 
         const [, hopTokens, poolsMostLiquid, pathData, poolsAll] = filter(
             testPools.weightedOnly,
@@ -323,8 +323,8 @@ describe('Tests pools filtering and path processing', () => {
 
     it('should filter stable only hop pools correctly', () => {
         const maxPools = 4;
-        const tokenIn = DAI;
-        const tokenOut = USDC;
+        const tokenIn = DAI.address;
+        const tokenOut = USDC.address;
 
         const [, hopTokens, poolsMostLiquid, pathData, poolsAll] = filter(
             testPools.stableOnly,
@@ -352,8 +352,8 @@ describe('Tests pools filtering and path processing', () => {
 
     it('should calc weighted path limits', () => {
         const maxPools = 4;
-        const tokenIn = DAI;
-        const tokenOut = USDC;
+        const tokenIn = DAI.address;
+        const tokenOut = USDC.address;
 
         const [, , , , poolsAll, pathsSorted, maxAmt] = filter(
             testPools.weightedOnly,
@@ -416,8 +416,8 @@ describe('Tests pools filtering and path processing', () => {
 
     it('should calc weighted path limits, exactOut', () => {
         const maxPools = 4;
-        const tokenIn = DAI;
-        const tokenOut = USDC;
+        const tokenIn = DAI.address;
+        const tokenOut = USDC.address;
 
         const [, , , , poolsAll, pathsSorted, maxAmt] = filter(
             testPools.weightedOnly,
@@ -468,8 +468,8 @@ describe('Tests pools filtering and path processing', () => {
 
     it('should calc stable path limits', () => {
         const maxPools = 4;
-        const tokenIn = DAI;
-        const tokenOut = USDC;
+        const tokenIn = DAI.address;
+        const tokenOut = USDC.address;
 
         const [, , , , poolsAll, pathsSorted, maxAmt] = filter(
             testPools.stableOnly,
@@ -495,8 +495,8 @@ describe('Tests pools filtering and path processing', () => {
     });
 
     it('Test pool class that has direct & multihop paths', async () => {
-        const tokenIn = USDC;
-        const tokenOut = DAI;
+        const tokenIn = USDC.address;
+        const tokenOut = DAI.address;
         const maxPools = 4;
 
         const [poolsOfInterestDictionary, hopTokens] = filter(
@@ -520,8 +520,8 @@ describe('Tests pools filtering and path processing', () => {
 
     it('Test pool class that has two multihop paths, swapExactIn', async () => {
         const maxPools = 4;
-        const tokenIn = USDC;
-        const tokenOut = DAI;
+        const tokenIn = USDC.address;
+        const tokenOut = DAI.address;
 
         const [
             poolsOfInterestDictionary,
@@ -631,8 +631,8 @@ describe('Tests pools filtering and path processing', () => {
 
     it('Test pool class that has two multihop paths, swapExactOut', async () => {
         const maxPools = 4;
-        const tokenIn = USDC;
-        const tokenOut = DAI;
+        const tokenIn = USDC.address;
+        const tokenOut = DAI.address;
 
         const [
             poolsOfInterestDictionary,
