@@ -183,15 +183,21 @@ export class LinearPool implements PoolBase {
                 );
                 return scale(limit, -poolPairData.decimalsIn);
             } else if (linearPoolPairData.pairType === PairTypes.BptToToken) {
-                const limit = _BPTInForExactTokenOut(
+                // Limit is amount of BPT in for pool balance of tokenOut
+
+                // Amount must be in human scale
+                const balanceOutHuman = scale(
                     bnum(poolPairData.balanceOut.toString()),
+                    -poolPairData.decimalsOut
+                );
+
+                const limit = _BPTInForExactTokenOut(
+                    balanceOutHuman,
                     linearPoolPairData
                 )
                     .times(bnum(this.ALMOST_ONE.toString()))
                     .div(bnum(ONE.toString()));
-                return scale(limit, -poolPairData.decimalsIn).dp(
-                    poolPairData.decimalsIn
-                );
+                return limit;
             } else throw Error('LinearPool does not support TokenToToken');
         } else {
             if (linearPoolPairData.pairType === PairTypes.TokenToBpt) {

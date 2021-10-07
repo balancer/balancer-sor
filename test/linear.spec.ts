@@ -109,7 +109,7 @@ describe('linear pool tests', () => {
                 SwapTypes.SwapExactIn,
                 singleLinear.pools,
                 0,
-                bnum('956.89246046982109274')
+                bnum('937.94411054836482804')
             );
         });
 
@@ -246,21 +246,21 @@ describe('linear pool tests', () => {
 
                 assert.equal(paths.length, 3);
                 checkPath(
-                    ['weightedDaiWeth', 'weightedUsdcWeth'],
+                    ['linearDAI', 'staBal3Id', 'linearUSDC'],
                     poolAllDict,
                     paths[0],
                     tokenIn,
                     tokenOut
                 );
                 checkPath(
-                    ['weightedDaiUsdc'],
+                    ['weightedDaiWeth', 'weightedUsdcWeth'],
                     poolAllDict,
                     paths[1],
                     tokenIn,
                     tokenOut
                 );
                 checkPath(
-                    ['linearDAI', 'staBal3Id', 'linearUSDC'],
+                    ['weightedDaiUsdc'],
                     poolAllDict,
                     paths[2],
                     tokenIn,
@@ -361,7 +361,7 @@ describe('linear pool tests', () => {
                 parseFixed('25', DAI.decimals),
                 smallLinear.pools
             );
-            expect(returnAmount).to.eq('24688894');
+            expect(returnAmount).to.eq('25631282');
         });
 
         it('DAI>USDC, SwapExactOut', async () => {
@@ -427,7 +427,7 @@ describe('linear pool tests', () => {
                 parseFixed('1', staBAL3.decimals),
                 smallLinear.pools
             );
-            expect(returnAmount).to.eq('1083149'); // TO DO - Failing because of Limit amount?
+            expect(returnAmount).to.eq('1082280');
         });
 
         it('staBAL3>DAI, SwapExactOut', async () => {
