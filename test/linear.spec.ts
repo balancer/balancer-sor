@@ -376,7 +376,7 @@ describe('linear pool tests', () => {
                 maxPools
             );
             assert.equal(paths.length, 2);
-            // USDC>[linearUSDC]>bUSDC>[staBAL3]>staBal3>[staBAL3Weth]>WETH>[BalWeth]>TokenOut
+            // USDC>[linearUSDC]>bUSDC>[staBAL3]>staBal3Bpt>[staBAL3Weth]>WETH>[BalWeth]>BAL
             checkPath(
                 [
                     'linearUSDC',
@@ -392,6 +392,41 @@ describe('linear pool tests', () => {
 
             checkPath(
                 ['weightedUsdcWeth', 'weightedBalWeth'],
+                poolsAllDict,
+                paths[1],
+                tokenIn,
+                tokenOut
+            );
+        });
+        it('should return 2 valid linear paths', async () => {
+            const tokenIn = BAL.address;
+            const tokenOut = USDC.address;
+            const maxPools = 10;
+
+            const [paths, poolsAllDict] = getPaths(
+                tokenIn,
+                tokenOut,
+                SwapTypes.SwapExactIn,
+                smallLinear.pools,
+                maxPools
+            );
+            assert.equal(paths.length, 2);
+
+            // BAL>[BalWeth]>WETH>[staBAL3Weth]>staBal3Bpt>[staBAL3]>bUSDC>[linearUSDC]>USDC
+            checkPath(
+                [
+                    'weightedBalWeth',
+                    'weightedWethStaBal3Id',
+                    'staBal3Id',
+                    'linearUSDC',
+                ],
+                poolsAllDict,
+                paths[0],
+                tokenIn,
+                tokenOut
+            );
+            checkPath(
+                ['weightedBalWeth', 'weightedUsdcWeth'],
                 poolsAllDict,
                 paths[1],
                 tokenIn,
