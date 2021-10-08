@@ -1,48 +1,48 @@
 {
     "pools": [
         {
-            "id": "weightedBalStaBal3",
+            "id": "weightedWethStaBal3Id",
             "publicSwap": true,
             "swapFee": "0.01",
             "swapEnabled": true,
             "tokens": [
                 {
                     "address": "0x06df3b2bbb68adc8b0e302443692037ed9f91b42",
-                    "balance": "100000.000000",
+                    "balance": "20000000",
                     "decimals": 18,
                     "weight": "50",
-                    "id": "weightedBalStaBal3-0x06df3b2bbb68adc8b0e302443692037ed9f91b42",
+                    "id": "weightedWethStaBal3Id-0x06df3b2bbb68adc8b0e302443692037ed9f91b42",
                     "symbol": "staBal3",
                     "priceRate": "1"
                 },
                 {
-                    "address": "0xba100000625a3754423978a60c9317c58a424e3d",
-                    "balance": "20000000.78213445",
+                    "address": "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
+                    "balance": "10000.12345",
                     "decimals": 18,
                     "weight": "50",
-                    "id": "weightedBalStaBal3-0xba100000625a3754423978a60c9317c58a424e3d",
-                    "symbol": "BAL",
+                    "id": "weightedWethStaBal3Id-0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
+                    "symbol": "WETH",
                     "priceRate": "1"
                 }
             ],
             "tokensList": [
-                "0xba100000625a3754423978a60c9317c58a424e3d",
+                "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
                 "0x06df3b2bbb68adc8b0e302443692037ed9f91b42"
             ],
             "totalWeight": "100",
-            "totalShares": "100",
+            "totalShares": "1000000",
             "poolType": "Weighted",
-            "address": "weightedBalStaBal3"
+            "address": "weightedWethStaBal3"
         },
         {
             "id": "weightedUsdcWeth",
             "publicSwap": true,
-            "swapFee": "0.01",
+            "swapFee": "0.1",
             "swapEnabled": true,
             "tokens": [
                 {
                     "address": "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
-                    "balance": "100000.000000",
+                    "balance": "400000.98765",
                     "decimals": 6,
                     "weight": "50",
                     "id": "weightedUsdcWeth-0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
@@ -71,12 +71,12 @@
         {
             "id": "weightedDaiWeth",
             "publicSwap": true,
-            "swapFee": "0.001",
+            "swapFee": "0.1",
             "swapEnabled": true,
             "tokens": [
                 {
                     "address": "0x6b175474e89094c44da98b954eedeac495271d0f",
-                    "balance": "10000.635152452773970596",
+                    "balance": "20000.567432",
                     "decimals": 18,
                     "weight": "50",
                     "id": "weightedDaiWeth-0x6b175474e89094c44da98b954eedeac495271d0f",
@@ -105,7 +105,7 @@
         {
             "id": "weightedDaiUsdc",
             "publicSwap": true,
-            "swapFee": "0.01",
+            "swapFee": "0.1",
             "swapEnabled": true,
             "tokens": [
                 {
@@ -322,6 +322,105 @@
             ],
             "totalShares": "10000000",
             "poolType": "MetaStable"
+        },
+        {
+            "id": "staBal3Gusd",
+            "address": "0xebfed10e11dc08fcda1af1fda146945e8710f22e",
+            "swapFee": "0.0004",
+            "swapEnabled": true,
+            "amp": "10",
+            "tokens": [
+                {
+                    "address": "0x06df3b2bbb68adc8b0e302443692037ed9f91b42",
+                    "balance": "100000000",
+                    "decimals": 18,
+                    "symbol": "staBal3",
+                    "priceRate": "1",
+                    "weight": null
+                },
+                {
+                    "address": "0x056fd409e1d7a124bd7017459dfea2f387b6d5cd",
+                    "balance": "100000000",
+                    "decimals": 2,
+                    "symbol": "GUSD",
+                    "priceRate": "1",
+                    "weight": null
+                }
+            ],
+            "tokensList": [
+                "0x06df3b2bbb68adc8b0e302443692037ed9f91b42",
+                "0x056fd409e1d7a124bd7017459dfea2f387b6d5cd"
+            ],
+            "totalShares": "10",
+            "poolType": "MetaStable"
+        },
+        {
+            "id": "weightedBalWeth",
+            "publicSwap": true,
+            "swapFee": "0.01",
+            "swapEnabled": true,
+            "tokens": [
+                {
+                    "address": "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
+                    "balance": "100000.000000",
+                    "decimals": 18,
+                    "weight": "50",
+                    "id": "weightedBalWeth-0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
+                    "symbol": "staBal3",
+                    "priceRate": "1"
+                },
+                {
+                    "address": "0xba100000625a3754423978a60c9317c58a424e3d",
+                    "balance": "20000000.78213445",
+                    "decimals": 18,
+                    "weight": "50",
+                    "id": "weightedBalWeth-0xba100000625a3754423978a60c9317c58a424e3d",
+                    "symbol": "BAL",
+                    "priceRate": "1"
+                }
+            ],
+            "tokensList": [
+                "0xba100000625a3754423978a60c9317c58a424e3d",
+                "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2"
+            ],
+            "totalWeight": "100",
+            "totalShares": "100",
+            "poolType": "Weighted",
+            "address": "weightedBalWeth"
+        },
+        {
+            "id": "weightedMkrDai",
+            "publicSwap": true,
+            "swapFee": "0.01",
+            "swapEnabled": true,
+            "tokens": [
+                {
+                    "address": "0x9f8f72aa9304c8b593d555f12ef6589cc3a579a2",
+                    "balance": "389.9",
+                    "decimals": 18,
+                    "weight": "50",
+                    "id": "weightedMkrDai-0x9f8f72aa9304c8b593d555f12ef6589cc3a579a2",
+                    "symbol": "MKR",
+                    "priceRate": "1"
+                },
+                {
+                    "address": "0x6b175474e89094c44da98b954eedeac495271d0f",
+                    "balance": "101980.111",
+                    "decimals": 18,
+                    "weight": "50",
+                    "id": "weightedMkrDai-0x6b175474e89094c44da98b954eedeac495271d0f",
+                    "symbol": "DAI",
+                    "priceRate": "1"
+                }
+            ],
+            "tokensList": [
+                "0x9f8f72aa9304c8b593d555f12ef6589cc3a579a2",
+                "0x6b175474e89094c44da98b954eedeac495271d0f"
+            ],
+            "totalWeight": "100",
+            "totalShares": "100",
+            "poolType": "Weighted",
+            "address": "weightedMkrDai"
         }
     ]
 }
