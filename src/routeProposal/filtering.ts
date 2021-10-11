@@ -13,7 +13,12 @@ import {
 } from '../types';
 import { MetaStablePool } from '../pools/metaStablePool/metaStablePool';
 import { ZERO } from '../utils/bignumber';
-import { USDCCONNECTINGPOOL, STABAL3POOL } from '../constants';
+import {
+    USDCCONNECTINGPOOL,
+    STABAL3POOL,
+    WETHSTABAL3,
+    WETHADDR,
+} from '../constants';
 import { parseNewPool } from '../pools';
 import { Zero } from '@ethersproject/constants';
 
@@ -247,6 +252,9 @@ export function getPathsUsingLinearPools(
     const linearPoolIn = linearPoolsDictByMain[tokenIn];
     const linearPoolOut = linearPoolsDictByMain[tokenOut];
 
+    // Retrieve WETHStaBal3 pool if it exists
+    const WETHStaBal3Pool = poolsAllDict[WETHSTABAL3[chainId].id];
+
     // If neither of tokenIn and tokenOut have linear pools, return an empty array.
     if (!linearPoolIn && !linearPoolOut) return [];
     else if (linearPoolIn && linearPoolOut) {
@@ -261,20 +269,7 @@ export function getPathsUsingLinearPools(
         pathsUsingLinear.push(linearPathway);
         return pathsUsingLinear;
     } else if (linearPoolIn && !linearPoolOut) {
-        // TokenIn is stable. TokenOut should be paired in a pool with staBal3 BPT.
-        // TokenIn>[LINEARPOOL]>bStable>[staBAL3]>staBal3Bpt>[WeightedPool]>TokenOut
-
-        // Find best paired pool, i.e. with staBal3 BP and tokenOut
-        const pairedPoolId = getHighestLiquidityPool(
-            staBal3Pool.address,
-            tokenOut,
-            SwapPairType.HopOut,
-            poolsFilteredDict
-        );
-        // No pool for TokenOut/staBal3
-        if (pairedPoolId === '' || pairedPoolId === null) return [];
-
-        // Creates first part of path: TokenIn>[LINEARPOOL]>bStable>[staBAL3]>staBal3Bpt
+        // Creates first part of paths: TokenIn>[LINEARPOOL]>bStable>[staBAL3]>staBal3Bpt
         const linearPathway = createMultihopPath(
             linearPoolIn,
             staBal3Pool,
@@ -282,40 +277,45 @@ export function getPathsUsingLinearPools(
             linearPoolIn.address,
             staBal3Pool.address
         );
-
-        // Creates last part of path: staBal3Bpt>[PairedPool]>TokenOut
-        const pairedPool = poolsFilteredDict[pairedPoolId];
-        const pathEnd = createDirectPath(
-            pairedPool,
-            staBal3Pool.address,
-            tokenOut
-        );
-        pathsUsingLinear.push(composePaths([linearPathway, pathEnd]));
-
-        return pathsUsingLinear;
-    } else {
-        // TokenOut is stable. TokenIn should be paired in a pool with staBal3 BPT.
-        // TokenIn>[PairedPool]>staBal3Bpt>[staBAL3]>bStable>[LINEARPOOL]>TokenOut
-
-        // Find best paired pool, i.e. with tokenIn and staBal3 BP
+        // Create if possible
+        // TokenIn>[LINEARPOOL]>bStable>[staBAL3]>staBal3Bpt>[staBal3Bpt-TokenOut]>TokenOut
         const pairedPoolId = getHighestLiquidityPool(
-            tokenIn,
             staBal3Pool.address,
-            SwapPairType.HopIn,
+            tokenOut,
+            SwapPairType.HopOut,
             poolsFilteredDict
         );
-
-        // No pool for TokenIn/staBal3
-        if (pairedPoolId === '' || pairedPoolId === null) return [];
-
-        // Creates first part of path: TokenIn>[PairedPool]>staBal3Bpt
-        const pairedPool = poolsFilteredDict[pairedPoolId];
-        const pathStart = createDirectPath(
-            pairedPool,
-            tokenIn,
-            staBal3Pool.address
+        if (pairedPoolId != null) {
+            const pairedPool = poolsFilteredDict[pairedPoolId];
+            const pathEnd = createDirectPath(
+                pairedPool,
+                staBal3Pool.address,
+                tokenOut
+            );
+            pathsUsingLinear.push(composePaths([linearPathway, pathEnd]));
+        }
+        // Create if possible
+        // TokenIn>[LINEARPOOL]>bStable>[staBAL3]>staBal3Bpt>[staBal3Bpt-WETH]>WETH>[WETH-TokenOut]>TokenOut
+        const WETHTokenOutPoolId = getHighestLiquidityPool(
+            WETHADDR[chainId],
+            tokenOut,
+            SwapPairType.HopOut,
+            poolsFilteredDict
         );
-
+        if (WETHStaBal3Pool != null && WETHTokenOutPoolId != null) {
+            const pathEndThroughWETH = createMultihopPath(
+                WETHStaBal3Pool,
+                poolsFilteredDict[WETHTokenOutPoolId],
+                staBal3Pool.address,
+                WETHADDR[chainId],
+                tokenOut
+            );
+            const longPath = composePaths([linearPathway, pathEndThroughWETH]);
+            pathsUsingLinear.push(longPath);
+        }
+        return pathsUsingLinear;
+    } else {
+        // here we have the condition (!linearPoolIn && linearPoolOut)
         // Creates second part of path: staBal3Bpt>[staBAL3]>bStable>[LINEARPOOL]>TokenOut
         const linearPathway = createMultihopPath(
             staBal3Pool,
@@ -325,7 +325,45 @@ export function getPathsUsingLinearPools(
             tokenOut
         );
 
-        pathsUsingLinear.push(composePaths([pathStart, linearPathway]));
+        // Create if possible
+        // TokenIn>[staBal3Bpt-TokenIn]>staBal3Bpt>[staBAL3]>bStable>[LINEARPOOL]>TokenOut
+        const pairedPoolId = getHighestLiquidityPool(
+            tokenIn,
+            staBal3Pool.address,
+            SwapPairType.HopIn,
+            poolsFilteredDict
+        );
+        if (pairedPoolId != null) {
+            const pairedPool = poolsFilteredDict[pairedPoolId];
+            const pathStart = createDirectPath(
+                pairedPool,
+                tokenIn,
+                staBal3Pool.address
+            );
+            pathsUsingLinear.push(composePaths([pathStart, linearPathway]));
+        }
+        // Create if possible
+        // TokenIn>[WETH-TokenIn]>WETH>[staBal3Bpt-WETH]>staBal3Bpt>[staBAL3]>bStable>[LINEARPOOL]>TokenOut
+        const WETHTokenInPoolId = getHighestLiquidityPool(
+            WETHADDR[chainId],
+            tokenIn,
+            SwapPairType.HopIn,
+            poolsFilteredDict
+        );
+        if (WETHStaBal3Pool != null && WETHTokenInPoolId != null) {
+            const pathStartThroughWETH = createMultihopPath(
+                poolsFilteredDict[WETHTokenInPoolId],
+                WETHStaBal3Pool,
+                tokenIn,
+                WETHADDR[chainId],
+                staBal3Pool.address
+            );
+            const longPath = composePaths([
+                pathStartThroughWETH,
+                linearPathway,
+            ]);
+            pathsUsingLinear.push(longPath);
+        }
         return pathsUsingLinear;
     }
 }

@@ -51,6 +51,15 @@ export const STABAL3POOL: {
     },
 };
 
+export const WETHSTABAL3: {
+    [chainId: number]: { id: string; address: string };
+} = {
+    99: {
+        id: 'weightedWethStaBal3Id',
+        address: 'weightedWethStaBal3',
+    },
+};
+
 export const EMPTY_SWAPINFO: SwapInfo = {
     tokenAddresses: [],
     swaps: [],
