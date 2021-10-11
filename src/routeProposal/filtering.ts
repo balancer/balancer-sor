@@ -283,7 +283,7 @@ export function getPathsUsingLinearPools(
             [linearPoolIn.address]
         );
 
-        // Creates a path through any staBal3/Token pool
+        // Creates a path through most liquid staBal3/Token pool
         // TokenIn>[LINEARPOOL]>bStable>[staBAL3]>staBal3Bpt>[staBal3Bpt-TokenOut]>TokenOut
         const shortPath = getStaBal3TokenPath(
             linearPathway,
@@ -295,7 +295,7 @@ export function getPathsUsingLinearPools(
 
         if (shortPath.swaps) pathsUsingLinear.push(shortPath);
 
-        // Creates a path through any WETH paired pool and staBal3 / WETH pool
+        // Creates a path through most liquid WETH paired pool and staBal3 / WETH pool
         // TokenIn>[LINEARPOOL]>bStable>[staBAL3]>staBal3Bpt>[staBal3Bpt-WETH]>WETH>[WETH-TokenOut]>TokenOut
         const longPath = getStaBal3WethPath(
             linearPathway,
@@ -319,7 +319,7 @@ export function getPathsUsingLinearPools(
             [linearPoolOut.address]
         );
 
-        // Creates a path through any staBal3/Token pool
+        // Creates a path through most liquid staBal3/Token pool
         // TokenIn>[staBal3Bpt-TokenIn]>staBal3Bpt>[staBAL3]>bStable>[LINEARPOOL]>TokenOut
         const shortPath = getStaBal3TokenPath(
             linearPathway,
@@ -331,7 +331,7 @@ export function getPathsUsingLinearPools(
 
         if (shortPath.swaps) pathsUsingLinear.push(shortPath);
 
-        // Creates a path through any WETH paired pool and staBal3 / WETH pool
+        // Creates a path through most liquid WETH paired pool and staBal3 / WETH pool
         // TokenIn>[WETH-TokenIn]>WETH>[staBal3Bpt-WETH]>staBal3Bpt>[staBAL3]>bStable>[LINEARPOOL]>TokenOut
         const longPath = getStaBal3WethPath(
             linearPathway,
