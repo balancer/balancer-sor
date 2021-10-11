@@ -282,43 +282,32 @@ export function getPathsUsingLinearPools(
             [linearPoolIn, staBal3Pool],
             [linearPoolIn.address]
         );
-        // Create if possible
-        // TokenIn>[LINEARPOOL]>bStable>[staBAL3]>staBal3Bpt>[staBal3Bpt-TokenOut]>TokenOut
-        const pairedPoolId = getHighestLiquidityPool(
-            staBal3Pool.address,
-            tokenOut,
-            SwapPairType.HopOut,
-            poolsFilteredDict
-        );
-        if (pairedPoolId != null) {
-            const pairedPool = poolsFilteredDict[pairedPoolId];
-            const pathEnd = createPath(
-                staBal3Pool.address,
-                tokenOut,
-                [pairedPool],
-                []
-            );
-            pathsUsingLinear.push(composePaths([linearPathway, pathEnd]));
-        }
-        // Create if possible
-        // TokenIn>[LINEARPOOL]>bStable>[staBAL3]>staBal3Bpt>[staBal3Bpt-WETH]>WETH>[WETH-TokenOut]>TokenOut
-        const WETHTokenOutPoolId = getHighestLiquidityPool(
-            WETHADDR[chainId],
-            tokenOut,
-            SwapPairType.HopOut,
-            poolsFilteredDict
-        );
-        if (WETHTokenOutPoolId != null) {
-            const pathEndThroughWETH = createPath(
-                staBal3Pool.address,
-                tokenOut,
-                [wethStaBal3Pool, poolsFilteredDict[WETHTokenOutPoolId]],
-                [WETHADDR[chainId]]
-            );
 
-            const longPath = composePaths([linearPathway, pathEndThroughWETH]);
-            pathsUsingLinear.push(longPath);
-        }
+        // Creates a path through any staBal3/Token pool
+        // TokenIn>[LINEARPOOL]>bStable>[staBAL3]>staBal3Bpt>[staBal3Bpt-TokenOut]>TokenOut
+        const shortPath = getStaBal3TokenPath(
+            linearPathway,
+            tokenOut,
+            staBal3Pool.address,
+            poolsFilteredDict,
+            true
+        );
+
+        if (shortPath.swaps) pathsUsingLinear.push(shortPath);
+
+        // Creates a path through any WETH paired pool and staBal3 / WETH pool
+        // TokenIn>[LINEARPOOL]>bStable>[staBAL3]>staBal3Bpt>[staBal3Bpt-WETH]>WETH>[WETH-TokenOut]>TokenOut
+        const longPath = getStaBal3WethPath(
+            linearPathway,
+            tokenOut,
+            chainId,
+            staBal3Pool.address,
+            poolsFilteredDict,
+            poolsAllDict,
+            true
+        );
+        if (longPath.swaps) pathsUsingLinear.push(longPath);
+
         return pathsUsingLinear;
     } else {
         // here we have the condition (!linearPoolIn && linearPoolOut)
@@ -330,48 +319,119 @@ export function getPathsUsingLinearPools(
             [linearPoolOut.address]
         );
 
-        // Create if possible
+        // Creates a path through any staBal3/Token pool
         // TokenIn>[staBal3Bpt-TokenIn]>staBal3Bpt>[staBAL3]>bStable>[LINEARPOOL]>TokenOut
-        const pairedPoolId = getHighestLiquidityPool(
+        const shortPath = getStaBal3TokenPath(
+            linearPathway,
             tokenIn,
             staBal3Pool.address,
-            SwapPairType.HopIn,
-            poolsFilteredDict
+            poolsFilteredDict,
+            false
         );
-        if (pairedPoolId != null) {
-            const pairedPool = poolsFilteredDict[pairedPoolId];
-            const pathStart = createPath(
-                tokenIn,
-                staBal3Pool.address,
-                [pairedPool],
-                []
-            );
 
-            pathsUsingLinear.push(composePaths([pathStart, linearPathway]));
-        }
-        // Create if possible
+        if (shortPath.swaps) pathsUsingLinear.push(shortPath);
+
+        // Creates a path through any WETH paired pool and staBal3 / WETH pool
         // TokenIn>[WETH-TokenIn]>WETH>[staBal3Bpt-WETH]>staBal3Bpt>[staBAL3]>bStable>[LINEARPOOL]>TokenOut
-        const WETHTokenInPoolId = getHighestLiquidityPool(
-            WETHADDR[chainId],
+        const longPath = getStaBal3WethPath(
+            linearPathway,
             tokenIn,
-            SwapPairType.HopIn,
-            poolsFilteredDict
+            chainId,
+            staBal3Pool.address,
+            poolsFilteredDict,
+            poolsAllDict,
+            false
         );
-        if (wethStaBal3Pool != null && WETHTokenInPoolId != null) {
-            const pathStartThroughWETH = createPath(
-                tokenIn,
-                staBal3Pool.address,
-                [poolsFilteredDict[WETHTokenInPoolId], wethStaBal3Pool],
-                [WETHADDR[chainId]]
-            );
-            const longPath = composePaths([
-                pathStartThroughWETH,
-                linearPathway,
-            ]);
-            pathsUsingLinear.push(longPath);
-        }
+        if (longPath.swaps) pathsUsingLinear.push(longPath);
+
         return pathsUsingLinear;
     }
+}
+
+/**
+Creates a path through staBal3/Token pool
+pairedToken is the token that should be paird with staBal3
+staBal3PoolAddr is the staBalPool3 BPT
+isPairedTokenOut:
+    TokenIn>[staBal3Bpt-Token]>staBal3Bpt>[staBAL3]>bStable>[LINEARPOOL]>TokenOut
+else:
+    TokenIn>[LINEARPOOL]>bStable>[staBAL3]>staBal3Bpt>[staBal3Bpt-TokenOut]>TokenOut
+ */
+function getStaBal3TokenPath(
+    linearPathway: NewPath,
+    pairedToken: string,
+    staBal3PoolAddr: string,
+    poolsFilteredDict: PoolDictionary,
+    isPairedTokenOut: boolean
+): NewPath {
+    // Finds pool with highest liquidity for token/staBal3
+    const poolWithStaBal3Token = getHighestLiquidityPool(
+        isPairedTokenOut ? staBal3PoolAddr : pairedToken,
+        isPairedTokenOut ? pairedToken : staBal3PoolAddr,
+        isPairedTokenOut ? SwapPairType.HopOut : SwapPairType.HopIn,
+        poolsFilteredDict
+    );
+    // If there is a paired pool create a path with token/staBAL3
+    if (poolWithStaBal3Token === null) return {} as NewPath;
+
+    const staBal3TokenPath = createPath(
+        isPairedTokenOut ? staBal3PoolAddr : pairedToken,
+        isPairedTokenOut ? pairedToken : staBal3PoolAddr,
+        [poolsFilteredDict[poolWithStaBal3Token]],
+        []
+    );
+
+    return isPairedTokenOut
+        ? composePaths([linearPathway, staBal3TokenPath])
+        : composePaths([staBal3TokenPath, linearPathway]);
+}
+
+/**
+Creates a path through WETH paired pool and staBal3/WETH pool
+pairedToken is the token that should be paird with WETH
+staBal3PoolAddr is the staBalPool3 BPT
+isPairedTokenOut:
+    TokenIn>[WETH-TokenIn]>WETH>[staBal3Bpt-WETH]>staBal3Bpt>[staBAL3]>bStable>[LINEARPOOL]>TokenOut
+else:
+    TokenIn>[LINEARPOOL]>bStable>[staBAL3]>staBal3Bpt>[staBal3Bpt-WETH]>WETH>[WETH-TokenOut]>TokenOut
+ */
+function getStaBal3WethPath(
+    linearPathway: NewPath,
+    pairedToken: string,
+    chainId: number,
+    staBal3PoolAddr: string,
+    poolsFilteredDict: PoolDictionary,
+    poolsAllDict: PoolDictionary,
+    isPairedTokenOut: boolean
+): NewPath {
+    // This is the connecting pool WETH/staBal3
+    const wethStaBal3Info = WETHSTABAL3[chainId];
+    if (!wethStaBal3Info) return {} as NewPath;
+    const wethStaBal3Pool = poolsAllDict[wethStaBal3Info.id];
+    if (!wethStaBal3Pool) return {} as NewPath;
+
+    // Finds pool with highest liquidity for token/WETH
+    const poolWithWethToken = getHighestLiquidityPool(
+        isPairedTokenOut ? WETHADDR[chainId] : pairedToken,
+        isPairedTokenOut ? pairedToken : WETHADDR[chainId],
+        isPairedTokenOut ? SwapPairType.HopOut : SwapPairType.HopIn,
+        poolsFilteredDict
+    );
+    // If there is a WETH paired pool create a path with WETH/staBAL3
+    if (poolWithWethToken === null) return {} as NewPath;
+
+    const wethPath = createPath(
+        isPairedTokenOut ? staBal3PoolAddr : pairedToken,
+        isPairedTokenOut ? pairedToken : staBal3PoolAddr,
+        isPairedTokenOut
+            ? [wethStaBal3Pool, poolsFilteredDict[poolWithWethToken]]
+            : [poolsFilteredDict[poolWithWethToken], wethStaBal3Pool],
+        [WETHADDR[chainId]]
+    );
+
+    return isPairedTokenOut
+        ? composePaths([linearPathway, wethPath])
+        : composePaths([wethPath, linearPathway]);
 }
 
 // Creates a path with pools.length hops
