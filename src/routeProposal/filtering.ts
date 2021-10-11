@@ -252,7 +252,7 @@ export function getPathsUsingLinearPools(
     for (const id in poolsAllDict) {
         if (poolsAllDict[id].poolType === PoolTypes.Linear) {
             linearPoolsDictByMain[poolsAllDict[id].tokensList[0]] =
-                poolsAllDict[id]; // TO DO - Check if we can rely on the token address
+                poolsAllDict[id]; // TO DO - This should be referncing main token. Waiting to see Subgraph schema before this is finalised
         }
     }
 
