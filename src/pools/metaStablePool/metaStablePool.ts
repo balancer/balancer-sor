@@ -41,15 +41,15 @@ export class MetaStablePool implements PoolBase {
     swapPairType: SwapPairType;
     id: string;
     address: string;
-    amp: BigNumber;
+    amp: OldBigNumber;
     swapFee: BigNumber;
     totalShares: BigNumber;
     tokens: MetaStablePoolToken[];
     tokensList: string[];
-    AMP_PRECISION = BigNumber.from('1000');
+    AMP_PRECISION = bnum('1000');
     MAX_IN_RATIO = parseFixed('0.3', 18);
     MAX_OUT_RATIO = parseFixed('0.3', 18);
-    ampAdjusted: BigNumber;
+    ampAdjusted: OldBigNumber;
 
     static fromPool(pool: SubgraphPoolBase): MetaStablePool {
         if (!pool.amp) throw new Error('MetaStablePool missing amp factor');
@@ -75,12 +75,12 @@ export class MetaStablePool implements PoolBase {
     ) {
         this.id = id;
         this.address = address;
-        this.amp = parseFixed(amp, 0);
+        this.amp = bnum(amp);
         this.swapFee = parseFixed(swapFee, 18);
         this.totalShares = parseFixed(totalShares, 18);
         this.tokens = tokens;
         this.tokensList = tokensList;
-        this.ampAdjusted = this.amp.mul(this.AMP_PRECISION);
+        this.ampAdjusted = this.amp.times(this.AMP_PRECISION);
     }
 
     setTypeForSwap(type: SwapPairType): void {
@@ -151,7 +151,9 @@ export class MetaStablePool implements PoolBase {
         // This is an approximation as the actual normalized liquidity is a lot more complicated to calculate
         return bnum(
             formatFixed(
-                poolPairData.balanceOut.mul(poolPairData.amp),
+                bnum(poolPairData.balanceOut.toString())
+                    .times(poolPairData.amp)
+                    .toString(),
                 poolPairData.decimalsOut
             )
         );

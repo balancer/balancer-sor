@@ -21,7 +21,7 @@ import { StablePoolPairData } from './stablePool';
     // n = number of tokens                                                                      //
     **********************************************************************************************/
 export function _invariant(
-    amp: BigNumber, // amp
+    amp: OldBigNumber, // amp
     balances: OldBigNumber[] // balances
 ): OldBigNumber {
     let sum = ZERO;
@@ -34,7 +34,7 @@ export function _invariant(
     }
     let prevInv = ZERO;
     let inv = sum;
-    const ampTimesNpowN = bnum(amp.toString()).times(totalCoins ** totalCoins); // A*n^n
+    const ampTimesNpowN = amp.times(totalCoins ** totalCoins); // A*n^n
 
     for (let i = 0; i < 255; i++) {
         let P_D = bnum(totalCoins).times(balances[0]);
@@ -271,7 +271,7 @@ export function _tokenInForExactBPTOut(
 //This function calculates the balance of a given token (tokenIndex)
 // given all the other balances and the invariant
 function _getTokenBalanceGivenInvariantAndAllOtherBalances(
-    amp: BigNumber,
+    amp: OldBigNumber,
     balances: OldBigNumber[],
     inv: OldBigNumber,
     tokenIndex: number
@@ -301,7 +301,7 @@ function _getTokenBalanceGivenInvariantAndAllOtherBalances(
 export function _solveAnalyticalBalance(
     sum: OldBigNumber,
     inv: OldBigNumber,
-    amp: BigNumber,
+    amp: OldBigNumber,
     n_pow_n: OldBigNumber,
     p: OldBigNumber
 ): OldBigNumber {
@@ -336,7 +336,7 @@ export function _solveAnalyticalBalance(
 //////////////////////
 
 export function _poolDerivatives(
-    amp: BigNumber,
+    amp: OldBigNumber,
     balances: OldBigNumber[],
     tokenIndexIn: number,
     tokenIndexOut: number,
@@ -385,7 +385,7 @@ export function _poolDerivatives(
 /////////
 
 export function _poolDerivativesBPT(
-    amp: BigNumber,
+    amp: OldBigNumber,
     balances: OldBigNumber[],
     bptSupply: OldBigNumber,
     tokenIndexIn: number,
