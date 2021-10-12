@@ -651,6 +651,7 @@ async function testFullSwap(
         'Total From SwapInfo Should Equal Swap Amount.'
     );
     console.log(swapInfo.swaps);
+    console.log(swapInfo.tokenAddresses);
     console.log(`Return: ${swapInfo.returnAmount.toString()}`);
     console.log(
         `ReturnFees: ${swapInfo.returnAmountConsideringFees.toString()}`

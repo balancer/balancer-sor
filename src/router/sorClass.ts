@@ -40,7 +40,6 @@ export const optimizeSwapAmounts = (
         bnum(formatFixed(amount, inputDecimals))
     );
     for (let b = initialNumPaths; b <= paths.length; b++) {
-        console.log('starting search with ', b, 'paths');
         if (b != initialNumPaths) {
             // We already had a previous iteration and are adding another pool this new iteration
             // swapAmounts.push(ONE); // Initialize new swapAmount with 1 wei to
@@ -127,10 +126,6 @@ export const optimizeSwapAmounts = (
         if (totalNumberOfPools >= maxPools) break;
     }
 
-    console.log(
-        'bestTotalReturnConsideringFees:',
-        bestTotalReturnConsideringFees.toString()
-    );
     // 0 swap amounts can occur due to rounding errors but we don't want to pass those on so filter out
     bestPaths = bestPaths.filter((_, i) => !bestSwapAmounts[i].isZero());
     bestSwapAmounts = bestSwapAmounts.filter(
@@ -226,19 +221,6 @@ export const formatSwaps = (
     // calculated with the EVM maths so the return is exactly what the user will get
     // after executing the transaction (given there are no front-runners)
 
-    // TO DO
-    console.log('\nPaths and swap amounts have been chosen now');
-    console.log('Number of paths: ', bestPaths.length);
-    for (let i = 0; i < bestPaths.length; i++) {
-        console.log('Length of path', i, ':', bestPaths[i].pools.length);
-        for (let j = 0; j < bestPaths[i].pools.length; j++) {
-            console.log('pool address:', bestPaths[i].pools[j].address);
-        }
-    }
-
-    console.log(`!!!!!!! bestSwapAmounts`);
-    console.log(JSON.stringify(bestSwapAmounts));
-
     bestPaths.forEach((path, i) => {
         const swapAmount = bestSwapAmounts[i];
 
@@ -283,8 +265,6 @@ export const formatSwaps = (
                 pathSwaps.push(swap);
             }
             returnAmount = amounts[n];
-            console.log('i: ', i, 'amounts: ', amounts.toString());
-            console.log('returnAmount: ', returnAmount.toString());
         } else {
             for (let i = 0; i < n; i++) {
                 amounts.unshift(
