@@ -46,10 +46,10 @@ export class MetaStablePool implements PoolBase {
     totalShares: BigNumber;
     tokens: MetaStablePoolToken[];
     tokensList: string[];
-    AMP_PRECISION = BigNumber.from('1000');
     MAX_IN_RATIO = parseFixed('0.3', 18);
     MAX_OUT_RATIO = parseFixed('0.3', 18);
-    ampAdjusted: BigNumber;
+
+    static AMP_DECIMALS = 3;
 
     static fromPool(pool: SubgraphPoolBase): MetaStablePool {
         if (!pool.amp) throw new Error('MetaStablePool missing amp factor');
@@ -75,12 +75,11 @@ export class MetaStablePool implements PoolBase {
     ) {
         this.id = id;
         this.address = address;
-        this.amp = parseFixed(amp, 0);
+        this.amp = parseFixed(amp, MetaStablePool.AMP_DECIMALS);
         this.swapFee = parseFixed(swapFee, 18);
         this.totalShares = parseFixed(totalShares, 18);
         this.tokens = tokens;
         this.tokensList = tokensList;
-        this.ampAdjusted = this.amp.mul(this.AMP_PRECISION);
     }
 
     setTypeForSwap(type: SwapPairType): void {
@@ -213,7 +212,7 @@ export class MetaStablePool implements PoolBase {
             );
 
             const amt = SDK.StableMath._calcOutGivenIn(
-                bnum(this.ampAdjusted.toString()),
+                bnum(this.amp.toString()),
                 poolPairData.allBalancesScaled.map((balance) =>
                     bnum(balance.toString())
                 ),
@@ -250,7 +249,7 @@ export class MetaStablePool implements PoolBase {
             );
 
             const amt = SDK.StableMath._calcInGivenOut(
-                bnum(this.ampAdjusted.toString()),
+                bnum(this.amp.toString()),
                 poolPairData.allBalancesScaled.map((balance) =>
                     bnum(balance.toString())
                 ),

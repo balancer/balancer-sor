@@ -34,7 +34,10 @@ export function _invariant(
     }
     let prevInv = ZERO;
     let inv = sum;
-    const ampTimesNpowN = bnum(amp.toString()).times(totalCoins ** totalCoins); // A*n^n
+
+    // amp is passed as an ethers bignumber while maths uses bignumber.js
+    const ampAdjusted = bnum(formatFixed(amp, 3));
+    const ampTimesNpowN = ampAdjusted.times(totalCoins ** totalCoins); // A*n^n
 
     for (let i = 0; i < 255; i++) {
         let P_D = bnum(totalCoins).times(balances[0]);
