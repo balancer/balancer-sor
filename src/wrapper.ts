@@ -206,8 +206,6 @@ export class SOR {
                 swapOptions.maxPools
             );
 
-        console.log('swaps', swaps);
-
         const swapInfo = formatSwaps(
             swaps,
             swapType,

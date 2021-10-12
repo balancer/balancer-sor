@@ -436,92 +436,142 @@ describe('linear pool tests', () => {
     });
 
     context('SOR Full Swaps', () => {
-        it('DAI>USDC, SwapExactIn', async () => {
-            const returnAmount = await testFullSwap(
-                DAI.address,
-                USDC.address,
-                SwapTypes.SwapExactIn,
-                parseFixed('25', DAI.decimals),
-                smallLinear.pools
-            );
-            expect(returnAmount).to.eq('25631282');
+        context('Stable Swaps', () => {
+            it('DAI>USDC, SwapExactIn', async () => {
+                const returnAmount = await testFullSwap(
+                    DAI.address,
+                    USDC.address,
+                    SwapTypes.SwapExactIn,
+                    parseFixed('25', DAI.decimals),
+                    smallLinear.pools
+                );
+                expect(returnAmount).to.eq('25631282');
+            });
+
+            it('DAI>USDC, SwapExactOut', async () => {
+                const returnAmount = await testFullSwap(
+                    DAI.address,
+                    USDC.address,
+                    SwapTypes.SwapExactOut,
+                    parseFixed('27', USDC.decimals),
+                    smallLinear.pools
+                );
+                expect(returnAmount).to.eq('26335005495898592574');
+            });
+
+            it('USDC>DAI, SwapExactIn', async () => {
+                const returnAmount = await testFullSwap(
+                    USDC.address,
+                    DAI.address,
+                    SwapTypes.SwapExactIn,
+                    parseFixed('270', USDC.decimals),
+                    smallLinear.pools
+                );
+                expect(returnAmount).to.eq('263139420004032600258');
+            });
+
+            it('USDC>DAI, SwapExactOut', async () => {
+                const returnAmount = await testFullSwap(
+                    USDC.address,
+                    DAI.address,
+                    SwapTypes.SwapExactOut,
+                    parseFixed('7777', DAI.decimals),
+                    smallLinear.pools
+                );
+                expect(returnAmount).to.eq('7979762223'); // Confirmed by Sergio
+            });
         });
 
-        it('DAI>USDC, SwapExactOut', async () => {
-            const returnAmount = await testFullSwap(
-                DAI.address,
-                USDC.address,
-                SwapTypes.SwapExactOut,
-                parseFixed('27', USDC.decimals),
-                smallLinear.pools
-            );
-            expect(returnAmount).to.eq('26335005495898592574');
+        context('Stable <> Token paired with WETH', () => {
+            it('USDC>BAL, SwapExactIn', async () => {
+                const returnAmount = await testFullSwap(
+                    USDC.address,
+                    BAL.address,
+                    SwapTypes.SwapExactIn,
+                    parseFixed('7.21', USDC.decimals),
+                    smallLinear.pools
+                );
+                expect(returnAmount).to.eq('652413919893769122');
+            });
+
+            it('BAL>DAI, SwapExactIn', async () => {
+                const returnAmount = await testFullSwap(
+                    BAL.address,
+                    DAI.address,
+                    SwapTypes.SwapExactIn,
+                    parseFixed('321.123', BAL.decimals),
+                    smallLinear.pools
+                );
+                expect(returnAmount).to.eq('3320451170714139189569');
+            });
+
+            it('USDC>BAL, SwapExactOut', async () => {
+                const returnAmount = await testFullSwap(
+                    USDC.address,
+                    BAL.address,
+                    SwapTypes.SwapExactOut,
+                    parseFixed('0.652413919893769122', BAL.decimals),
+                    smallLinear.pools
+                );
+                expect(returnAmount).to.eq('7210002');
+            });
+
+            it('BAL>DAI, SwapExactOut', async () => {
+                const returnAmount = await testFullSwap(
+                    BAL.address,
+                    DAI.address,
+                    SwapTypes.SwapExactOut,
+                    parseFixed('3320.451170714139189569', DAI.decimals),
+                    smallLinear.pools
+                );
+                expect(returnAmount).to.eq('321122999999986750182');
+            });
         });
 
-        it('USDC>DAI, SwapExactIn', async () => {
-            const returnAmount = await testFullSwap(
-                USDC.address,
-                DAI.address,
-                SwapTypes.SwapExactIn,
-                parseFixed('270', USDC.decimals),
-                smallLinear.pools
-            );
-            expect(returnAmount).to.eq('263139420004032600258');
-        });
+        context('Relayer Routes', () => {
+            it('DAI>staBAL3, SwapExactIn', async () => {
+                const returnAmount = await testFullSwap(
+                    DAI.address,
+                    staBAL3.address,
+                    SwapTypes.SwapExactIn,
+                    parseFixed('1', DAI.decimals),
+                    smallLinear.pools
+                );
+                expect(returnAmount).to.eq('946927175843694145');
+            });
 
-        it('USDC>DAI, SwapExactOut', async () => {
-            const returnAmount = await testFullSwap(
-                USDC.address,
-                DAI.address,
-                SwapTypes.SwapExactOut,
-                parseFixed('7777', DAI.decimals),
-                smallLinear.pools
-            );
-            expect(returnAmount).to.eq('7979762223'); // Confirmed by Sergio
-        });
+            it('USDC>staBAL3, SwapExactOut', async () => {
+                const returnAmount = await testFullSwap(
+                    USDC.address,
+                    staBAL3.address,
+                    SwapTypes.SwapExactOut,
+                    parseFixed('1', staBAL3.decimals),
+                    smallLinear.pools
+                );
+                expect(returnAmount).to.eq('1083149');
+            });
 
-        it('DAI>staBAL3, SwapExactIn', async () => {
-            const returnAmount = await testFullSwap(
-                DAI.address,
-                staBAL3.address,
-                SwapTypes.SwapExactIn,
-                parseFixed('1', DAI.decimals),
-                smallLinear.pools
-            );
-            expect(returnAmount).to.eq('946927175843694145');
-        });
+            it('staBAL3>USDC, SwapExactIn', async () => {
+                const returnAmount = await testFullSwap(
+                    staBAL3.address,
+                    USDC.address,
+                    SwapTypes.SwapExactIn,
+                    parseFixed('1', staBAL3.decimals),
+                    smallLinear.pools
+                );
+                expect(returnAmount).to.eq('1082280');
+            });
 
-        it('USDC>staBAL3, SwapExactOut', async () => {
-            const returnAmount = await testFullSwap(
-                USDC.address,
-                staBAL3.address,
-                SwapTypes.SwapExactOut,
-                parseFixed('1', staBAL3.decimals),
-                smallLinear.pools
-            );
-            expect(returnAmount).to.eq('1083149');
-        });
-
-        it('staBAL3>USDC, SwapExactIn', async () => {
-            const returnAmount = await testFullSwap(
-                staBAL3.address,
-                USDC.address,
-                SwapTypes.SwapExactIn,
-                parseFixed('1', staBAL3.decimals),
-                smallLinear.pools
-            );
-            expect(returnAmount).to.eq('1082280');
-        });
-
-        it('staBAL3>DAI, SwapExactOut', async () => {
-            const returnAmount = await testFullSwap(
-                staBAL3.address,
-                DAI.address,
-                SwapTypes.SwapExactOut,
-                parseFixed('1', DAI.decimals),
-                smallLinear.pools
-            );
-            expect(returnAmount).to.eq('947685172351949208');
+            it('staBAL3>DAI, SwapExactOut', async () => {
+                const returnAmount = await testFullSwap(
+                    staBAL3.address,
+                    DAI.address,
+                    SwapTypes.SwapExactOut,
+                    parseFixed('1', DAI.decimals),
+                    smallLinear.pools
+                );
+                expect(returnAmount).to.eq('947685172351949208');
+            });
         });
     });
 });
@@ -600,7 +650,8 @@ async function testFullSwap(
         totalSwapAmount.toString(),
         'Total From SwapInfo Should Equal Swap Amount.'
     );
-
+    console.log(swapInfo.swaps);
+    console.log(swapInfo.tokenAddresses);
     console.log(`Return: ${swapInfo.returnAmount.toString()}`);
     console.log(
         `ReturnFees: ${swapInfo.returnAmountConsideringFees.toString()}`
