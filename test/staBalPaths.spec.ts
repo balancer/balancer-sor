@@ -146,10 +146,8 @@ describe(`staBalPaths.`, () => {
                     poolsAll[USDCCONNECTINGPOOL[chainId].id];
 
                 const multihopPath = createPath(
-                    tokenIn,
-                    USDCCONNECTINGPOOL[chainId].usdc,
-                    [staBalPoolIn, usdcConnectingPool],
-                    [hopTokenStaBal]
+                    [tokenIn, hopTokenStaBal, USDCCONNECTINGPOOL[chainId].usdc],
+                    [staBalPoolIn, usdcConnectingPool]
                 );
 
                 checkPath(
