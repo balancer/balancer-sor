@@ -69,7 +69,7 @@ export async function getOnChainBalances(
                 pool.address,
                 'getSwapFeePercentage'
             );
-        } else if (pool.poolType === 'Element') {
+        } else if (pool.poolType === 'Element' || pool.poolType === 'Linear') {
             multiPool.call(`${pool.id}.swapFee`, pool.address, 'percentFee');
         }
     });
