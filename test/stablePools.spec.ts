@@ -12,6 +12,7 @@ import {
 import { BPTForTokensZeroPriceImpact } from '../src/frontendHelpers/stableHelpers';
 import { parseFixed } from '@ethersproject/bignumber';
 import { BAL, DAI, USDC, USDT } from './lib/constants';
+import { Zero } from '@ethersproject/constants';
 
 const gasPrice = parseFixed('30', 9);
 const maxPools = 4;
@@ -333,10 +334,14 @@ describe(`Tests for Stable Pools.`, () => {
 
     context('stable helpers', () => {
         it('should test BPTForTokensZeroPriceImpact for 0.1% single token add', () => {
-            const allBalances = [bnum(1000e18), bnum(1000e18), bnum(1000e18)];
+            const allBalances = [
+                parseFixed('1000', 18),
+                parseFixed('1000', 18),
+                parseFixed('1000', 18),
+            ];
             const amp = parseFixed('500', 3);
-            const amounts = [bnum(1e18), bnum(0), bnum(0)];
-            const bptTotalSupply = bnum(3000e18);
+            const amounts = [parseFixed('1', 18), Zero, Zero];
+            const bptTotalSupply = parseFixed('3000', 18);
             const decimals = [18, 18, 18];
 
             const bptAmt = BPTForTokensZeroPriceImpact(
@@ -351,10 +356,14 @@ describe(`Tests for Stable Pools.`, () => {
         });
 
         it('should test BPTForTokensZeroPriceImpact for 1% single token add', () => {
-            const allBalances = [bnum(1000e18), bnum(1000e18), bnum(1000e18)];
+            const allBalances = [
+                parseFixed('1000', 18),
+                parseFixed('1000', 18),
+                parseFixed('1000', 18),
+            ];
             const amp = parseFixed('500', 3);
-            const amounts = [bnum(10e18), bnum(0), bnum(0)];
-            const bptTotalSupply = bnum(3000e18);
+            const amounts = [parseFixed('10', 18), Zero, Zero];
+            const bptTotalSupply = parseFixed('3000', 18);
             const decimals = [18, 18, 18];
 
             const bptAmt = BPTForTokensZeroPriceImpact(
@@ -369,10 +378,14 @@ describe(`Tests for Stable Pools.`, () => {
         });
 
         it('should test BPTForTokensZeroPriceImpact for 10% single token add', () => {
-            const allBalances = [bnum(1000e18), bnum(1000e18), bnum(1000e18)];
+            const allBalances = [
+                parseFixed('1000', 18),
+                parseFixed('1000', 18),
+                parseFixed('1000', 18),
+            ];
             const amp = parseFixed('500', 3);
-            const amounts = [bnum(100e18), bnum(0), bnum(0)];
-            const bptTotalSupply = bnum(3000e18);
+            const amounts = [parseFixed('100', 18), Zero, Zero];
+            const bptTotalSupply = parseFixed('3000', 18);
             const decimals = [18, 18, 18];
 
             const bptAmt = BPTForTokensZeroPriceImpact(
@@ -387,10 +400,18 @@ describe(`Tests for Stable Pools.`, () => {
         });
 
         it('should test BPTForTokensZeroPriceImpact for proportional add', () => {
-            const allBalances = [bnum(1000e18), bnum(1000e18), bnum(1000e18)];
+            const allBalances = [
+                parseFixed('1000', 18),
+                parseFixed('1000', 18),
+                parseFixed('1000', 18),
+            ];
             const amp = parseFixed('500', 3);
-            const amounts = [bnum(1e18), bnum(1e18), bnum(1e18)];
-            const bptTotalSupply = bnum(3000e18);
+            const amounts = [
+                parseFixed('1', 18),
+                parseFixed('1', 18),
+                parseFixed('1', 18),
+            ];
+            const bptTotalSupply = parseFixed('3000', 18);
             const decimals = [18, 18, 18];
 
             const bptAmt = BPTForTokensZeroPriceImpact(
@@ -405,10 +426,14 @@ describe(`Tests for Stable Pools.`, () => {
         });
 
         it('should test BPTForTokensZeroPriceImpact for single token add + uneven pool', () => {
-            const allBalances = [bnum(2000e18), bnum(1000e18), bnum(1000e18)];
+            const allBalances = [
+                parseFixed('2000', 18),
+                parseFixed('1000', 18),
+                parseFixed('1000', 18),
+            ];
             const amp = parseFixed('500', 3);
-            const amounts = [bnum(1e18), bnum(0), bnum(0)];
-            const bptTotalSupply = bnum(4000e18);
+            const amounts = [parseFixed('1', 18), Zero, Zero];
+            const bptTotalSupply = parseFixed('4000', 18);
             const decimals = [18, 18, 18];
 
             const bptAmt = BPTForTokensZeroPriceImpact(
@@ -423,10 +448,14 @@ describe(`Tests for Stable Pools.`, () => {
         });
 
         it('should test BPTForTokensZeroPriceImpact for single token add + VERY uneven pool', () => {
-            const allBalances = [bnum(2000e18), bnum(100e18), bnum(100e18)];
+            const allBalances = [
+                parseFixed('2000', 18),
+                parseFixed('100', 18),
+                parseFixed('100', 18),
+            ];
             const amp = parseFixed('500', 3);
-            const amounts = [bnum(1e18), bnum(0), bnum(0)];
-            const bptTotalSupply = bnum(2200e18);
+            const amounts = [parseFixed('1', 18), Zero, Zero];
+            const bptTotalSupply = parseFixed('2200', 18);
             const decimals = [18, 18, 18];
 
             const bptAmt = BPTForTokensZeroPriceImpact(
@@ -442,17 +471,19 @@ describe(`Tests for Stable Pools.`, () => {
 
         it('Derivative Bug Case', () => {
             const allBalances = [
-                bnum('999996728554597709758831249'),
-                bnum('1000005155543154'),
-                bnum('1000000822928777'),
-            ];
+                '999996728554597709758831249',
+                '1000005155543154',
+                '1000000822928777',
+            ].map(BigNumber.from);
             const amp = parseFixed('2000', 3);
             const amounts = [
-                bnum('9654961595845215917881'),
-                bnum('9655042958'),
-                bnum('9655001127'),
-            ];
-            const bptTotalSupply = bnum('2999263268368702307690295440');
+                '9654961595845215917881',
+                '9655042958',
+                '9655001127',
+            ].map(BigNumber.from);
+            const bptTotalSupply = BigNumber.from(
+                '2999263268368702307690295440'
+            );
             const decimals = [18, 6, 6];
 
             const bptAmt = BPTForTokensZeroPriceImpact(
