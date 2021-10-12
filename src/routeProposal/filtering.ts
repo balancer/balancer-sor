@@ -242,18 +242,27 @@ export function getPathsUsingLinearPools(
     )
         return [];
 
-    // Create a new dictionary containing all Linear pools
-    const linearPoolsDictByMain: PoolDictionaryByMain = {};
+    // Finds linear pool containing tokenIn/Out
+    // This is currently picking first matching pool as we expect a specific deployment setup
+    // Could be changed to find most liquid
+    let linearPoolIn, linearPoolOut;
     for (const id in poolsAllDict) {
         if (poolsAllDict[id].poolType === PoolTypes.Linear) {
-            linearPoolsDictByMain[poolsAllDict[id].tokensList[0]] =
-                poolsAllDict[id]; // TO DO - This should be referncing main token. Waiting to see Subgraph schema before this is finalised
+            if (
+                !linearPoolIn &&
+                poolsAllDict[id].tokensList.includes(tokenIn.toLowerCase())
+            ) {
+                linearPoolIn = poolsAllDict[id];
+            } else if (
+                !linearPoolOut &&
+                poolsAllDict[id].tokensList.includes(tokenOut.toLowerCase())
+            ) {
+                linearPoolOut = poolsAllDict[id];
+            }
         }
     }
 
     const pathsUsingLinear: NewPath[] = [];
-    const linearPoolIn = linearPoolsDictByMain[tokenIn];
-    const linearPoolOut = linearPoolsDictByMain[tokenOut];
 
     // If neither of tokenIn and tokenOut have linear pools, return an empty array.
     if (!linearPoolIn && !linearPoolOut) return [];

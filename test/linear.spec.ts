@@ -31,6 +31,7 @@ import {
     TestToken,
     MKR,
     GUSD,
+    WETH,
 } from './lib/constants';
 
 // Single Linear pool DAI/aDAI/bDAI
@@ -65,20 +66,26 @@ describe('linear pool tests', () => {
     });
 
     context('limit amounts', () => {
-        it(`getLimitAmountSwap, token to token should throw error`, async () => {
+        it(`getLimitAmountSwap, token to token should return 0`, async () => {
             const tokenIn = DAI.address;
             const tokenOut = aDAI.address;
             const poolSG = cloneDeep(singleLinear);
             const pool = LinearPool.fromPool(poolSG.pools[0]);
             const poolPairData = pool.parsePoolPairData(tokenIn, tokenOut);
 
-            expect(() =>
-                pool.getLimitAmountSwap(poolPairData, SwapTypes.SwapExactIn)
-            ).to.throw('LinearPool does not support TokenToToken');
+            let amount = pool.getLimitAmountSwap(
+                poolPairData,
+                SwapTypes.SwapExactIn
+            );
 
-            expect(() =>
-                pool.getLimitAmountSwap(poolPairData, SwapTypes.SwapExactOut)
-            ).to.throw('LinearPool does not support TokenToToken');
+            expect(amount.toString()).to.eq('0');
+
+            amount = pool.getLimitAmountSwap(
+                poolPairData,
+                SwapTypes.SwapExactOut
+            );
+
+            expect(amount.toString()).to.eq('0');
         });
 
         it(`getLimitAmountSwap, SwapExactIn, TokenToBpt should return valid limit`, async () => {
@@ -571,6 +578,28 @@ describe('linear pool tests', () => {
                     smallLinear.pools
                 );
                 expect(returnAmount).to.eq('947685172351949208');
+            });
+
+            it('aDAI>staBAL3, SwapExactIn', async () => {
+                const returnAmount = await testFullSwap(
+                    aDAI.address,
+                    staBAL3.address,
+                    SwapTypes.SwapExactIn,
+                    parseFixed('1', staBAL3.decimals),
+                    smallLinear.pools
+                );
+                expect(returnAmount).to.eq('946927175843694145');
+            });
+
+            it('aDAI>WETH, SwapExactIn', async () => {
+                const returnAmount = await testFullSwap(
+                    aDAI.address,
+                    WETH.address,
+                    SwapTypes.SwapExactIn,
+                    parseFixed('1', staBAL3.decimals),
+                    smallLinear.pools
+                );
+                expect(returnAmount).to.eq('468734616507406');
             });
         });
     });
