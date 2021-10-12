@@ -151,7 +151,7 @@ export class MetaStablePool implements PoolBase {
         return bnum(
             formatFixed(
                 poolPairData.balanceOut.mul(poolPairData.amp),
-                poolPairData.decimalsOut
+                poolPairData.decimalsOut + MetaStablePool.AMP_DECIMALS
             )
         );
     }

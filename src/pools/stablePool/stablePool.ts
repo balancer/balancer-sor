@@ -139,7 +139,7 @@ export class StablePool implements PoolBase {
         return bnum(
             formatFixed(
                 poolPairData.balanceOut.mul(poolPairData.amp),
-                poolPairData.decimalsOut
+                poolPairData.decimalsOut + StablePool.AMP_DECIMALS
             )
         );
     }

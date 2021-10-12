@@ -334,7 +334,7 @@ describe(`Tests for Stable Pools.`, () => {
     context('stable helpers', () => {
         it('should test BPTForTokensZeroPriceImpact for 0.1% single token add', () => {
             const allBalances = [bnum(1000e18), bnum(1000e18), bnum(1000e18)];
-            const amp = bnum(500);
+            const amp = parseFixed('500', 3);
             const amounts = [bnum(1e18), bnum(0), bnum(0)];
             const bptTotalSupply = bnum(3000e18);
             const decimals = [18, 18, 18];
@@ -352,7 +352,7 @@ describe(`Tests for Stable Pools.`, () => {
 
         it('should test BPTForTokensZeroPriceImpact for 1% single token add', () => {
             const allBalances = [bnum(1000e18), bnum(1000e18), bnum(1000e18)];
-            const amp = bnum(500);
+            const amp = parseFixed('500', 3);
             const amounts = [bnum(10e18), bnum(0), bnum(0)];
             const bptTotalSupply = bnum(3000e18);
             const decimals = [18, 18, 18];
@@ -370,7 +370,7 @@ describe(`Tests for Stable Pools.`, () => {
 
         it('should test BPTForTokensZeroPriceImpact for 10% single token add', () => {
             const allBalances = [bnum(1000e18), bnum(1000e18), bnum(1000e18)];
-            const amp = bnum(500);
+            const amp = parseFixed('500', 3);
             const amounts = [bnum(100e18), bnum(0), bnum(0)];
             const bptTotalSupply = bnum(3000e18);
             const decimals = [18, 18, 18];
@@ -388,7 +388,7 @@ describe(`Tests for Stable Pools.`, () => {
 
         it('should test BPTForTokensZeroPriceImpact for proportional add', () => {
             const allBalances = [bnum(1000e18), bnum(1000e18), bnum(1000e18)];
-            const amp = bnum(500);
+            const amp = parseFixed('500', 3);
             const amounts = [bnum(1e18), bnum(1e18), bnum(1e18)];
             const bptTotalSupply = bnum(3000e18);
             const decimals = [18, 18, 18];
@@ -406,7 +406,7 @@ describe(`Tests for Stable Pools.`, () => {
 
         it('should test BPTForTokensZeroPriceImpact for single token add + uneven pool', () => {
             const allBalances = [bnum(2000e18), bnum(1000e18), bnum(1000e18)];
-            const amp = bnum(500);
+            const amp = parseFixed('500', 3);
             const amounts = [bnum(1e18), bnum(0), bnum(0)];
             const bptTotalSupply = bnum(4000e18);
             const decimals = [18, 18, 18];
@@ -424,7 +424,7 @@ describe(`Tests for Stable Pools.`, () => {
 
         it('should test BPTForTokensZeroPriceImpact for single token add + VERY uneven pool', () => {
             const allBalances = [bnum(2000e18), bnum(100e18), bnum(100e18)];
-            const amp = bnum(500);
+            const amp = parseFixed('500', 3);
             const amounts = [bnum(1e18), bnum(0), bnum(0)];
             const bptTotalSupply = bnum(2200e18);
             const decimals = [18, 18, 18];
@@ -446,7 +446,7 @@ describe(`Tests for Stable Pools.`, () => {
                 bnum('1000005155543154'),
                 bnum('1000000822928777'),
             ];
-            const amp = bnum(2000);
+            const amp = parseFixed('2000', 3);
             const amounts = [
                 bnum('9654961595845215917881'),
                 bnum('9655042958'),

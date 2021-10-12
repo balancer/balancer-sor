@@ -17,7 +17,7 @@ export function BPTForTokensZeroPriceImpact(
     decimals: number[],
     amounts: OldBigNumber[], // This has to have the same lenght as allBalances
     bptTotalSupply: OldBigNumber,
-    amp: OldBigNumber
+    amp: BigNumber
 ): OldBigNumber {
     if (allBalances.length != amounts.length)
         throw 'allBalances and amounts have to have same length';
