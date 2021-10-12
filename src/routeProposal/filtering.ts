@@ -227,12 +227,7 @@ export function getPathsUsingLinearPools(
         staBal3PoolInfo.id
     ] as MetaStablePool;
 
-    // This is the connecting pool WETH/staBal3
-    const wethStaBal3Info = WETHSTABAL3[chainId];
-    if (!wethStaBal3Info) return [];
-    const wethStaBal3Pool = poolsAllDict[wethStaBal3Info.id];
-
-    if (!staBal3Pool || !wethStaBal3Pool) return [];
+    if (!staBal3Pool) return [];
 
     if (
         tokenIn === staBal3PoolInfo.address ||
