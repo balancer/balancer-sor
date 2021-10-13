@@ -250,6 +250,28 @@ describe('linear pool tests', () => {
                     tokenOut
                 );
             });
+
+            it('tokenIn and tokenOut belong to same linear pool, should return 1 valid linear path', async () => {
+                const tokenOut = DAI.address;
+                const tokenIn = '0xfc1e690f61efd961294b3e1ce3313fbd8aa4f85d'; // aDAI
+                const maxPools = 10;
+
+                const [, poolsAllDict, pathsUsingLinear] = getPaths(
+                    tokenIn,
+                    tokenOut,
+                    SwapTypes.SwapExactIn,
+                    smallLinear.pools,
+                    maxPools
+                );
+                assert.equal(pathsUsingLinear.length, 1);
+                checkPath(
+                    ['linearDAI'],
+                    poolsAllDict,
+                    pathsUsingLinear[0],
+                    tokenIn,
+                    tokenOut
+                );
+            });
         });
     });
 

@@ -245,20 +245,20 @@ export function getPathsUsingLinearPools(
     // Finds linear pool containing tokenIn/Out
     // This is currently picking first matching pool as we expect a specific deployment setup
     // Could be changed to find most liquid
+    // Here we assume that tokenIn, tokenOut are not linear pool tokens.
     let linearPoolIn, linearPoolOut;
     for (const id in poolsAllDict) {
         if (poolsAllDict[id].poolType === PoolTypes.Linear) {
             if (
                 !linearPoolIn &&
                 poolsAllDict[id].tokensList.includes(tokenIn.toLowerCase())
-            ) {
+            )
                 linearPoolIn = poolsAllDict[id];
-            } else if (
+            if (
                 !linearPoolOut &&
                 poolsAllDict[id].tokensList.includes(tokenOut.toLowerCase())
-            ) {
+            )
                 linearPoolOut = poolsAllDict[id];
-            }
         }
     }
 
@@ -266,17 +266,26 @@ export function getPathsUsingLinearPools(
 
     // If neither of tokenIn and tokenOut have linear pools, return an empty array.
     if (!linearPoolIn && !linearPoolOut) return [];
+    // If both tokenIn and tokenOut belong to linear pools
     else if (linearPoolIn && linearPoolOut) {
-        // If both tokenIn and tokenOut are stable coins
-        // TokenIn>[LINEARPOOL_IN]>BPT_IN>[staBAL3]>BPT_OUT>[LINEARPOOL_OUT]>TokenOut
-
-        const linearPathway = createPath(
-            tokenIn,
-            tokenOut,
-            [linearPoolIn, staBal3Pool, linearPoolOut],
-            [linearPoolIn.address, linearPoolOut.address]
-        );
-        pathsUsingLinear.push(linearPathway);
+        if (linearPoolIn == linearPoolOut) {
+            const singleLinearPoolPath = createPath(
+                tokenIn,
+                tokenOut,
+                [linearPoolIn],
+                []
+            );
+            pathsUsingLinear.push(singleLinearPoolPath);
+        } else {
+            // TokenIn>[LINEARPOOL_IN]>BPT_IN>[staBAL3]>BPT_OUT>[LINEARPOOL_OUT]>TokenOut
+            const linearPathway = createPath(
+                tokenIn,
+                tokenOut,
+                [linearPoolIn, staBal3Pool, linearPoolOut],
+                [linearPoolIn.address, linearPoolOut.address]
+            );
+            pathsUsingLinear.push(linearPathway);
+        }
         return pathsUsingLinear;
     } else if (linearPoolIn && !linearPoolOut) {
         // Creates first part of paths: TokenIn>[LINEARPOOL]>bStable>[staBAL3]>staBal3Bpt
@@ -286,7 +295,6 @@ export function getPathsUsingLinearPools(
             [linearPoolIn, staBal3Pool],
             [linearPoolIn.address]
         );
-
         // Creates a path through most liquid staBal3/Token pool
         // TokenIn>[LINEARPOOL]>bStable>[staBAL3]>staBal3Bpt>[staBal3Bpt-TokenOut]>TokenOut
         const shortPath = getStaBal3TokenPath(
