@@ -420,7 +420,7 @@ function getStaBal3WethPath(
 }
 
 // Creates a path with pools.length hops
-// i.e. tokenIn>[Pool1]>hopToken1>[Pool2]>hopToken2>[Pool3]>TokenOut
+// i.e. tokens[0]>[Pool0]>tokens[1]>[Pool1]>tokens[2]>[Pool2]>tokens[3]
 export function createPath(tokens: string[], pools: PoolBase[]): NewPath {
     let tI: string, tO: string;
     const swaps: Swap[] = [];
