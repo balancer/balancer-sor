@@ -55,3 +55,13 @@ export const GUSD: TestToken = {
     address: '0x056Fd409E1d7A124BD7017459dFEa2F387b6d5Cd'.toLowerCase(),
     decimals: 2,
 };
+
+export const TUSD: TestToken = {
+    address: '0x0000000000085d4780b73119b644ae5ecd22b376'.toLowerCase(),
+    decimals: 18,
+};
+
+export const bTUSD: TestToken = {
+    address: '0x0000000000000000000000000000000000000005'.toLowerCase(),
+    decimals: 18,
+};

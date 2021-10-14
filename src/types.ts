@@ -119,10 +119,6 @@ export interface PoolDictionary {
     [poolId: string]: PoolBase;
 }
 
-export interface PoolDictionaryByMain {
-    [mainToken: string]: PoolBase;
-}
-
 export interface PoolPairDictionary {
     [tokenInOut: string]: PoolPairBase;
 }

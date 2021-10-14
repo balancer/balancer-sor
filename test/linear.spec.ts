@@ -14,7 +14,7 @@ import {
 import {
     filterPoolsOfInterest,
     filterHopPools,
-    getPathsUsingLinearPools,
+    getLinearStaBal3Paths,
     parseToPoolsDict,
 } from '../src/routeProposal/filtering';
 import { calculatePathLimits } from '../src/routeProposal/pathLimits';
@@ -32,6 +32,8 @@ import {
     MKR,
     GUSD,
     WETH,
+    TUSD,
+    bTUSD,
 } from './lib/constants';
 
 // Single Linear pool DAI/aDAI/bDAI
@@ -193,6 +195,50 @@ describe('linear pool tests', () => {
             });
         });
 
+        context('Linear pool not part of StaBal3', () => {
+            // i.e. Not DAI/USDC/USDT
+            it('should have standard single hop path', async () => {
+                const tokenIn = TUSD.address;
+                const tokenOut = bTUSD.address;
+                const maxPools = 4;
+
+                const [allPaths, poolsAllDict, pathsUsingLinear] = getPaths(
+                    tokenIn,
+                    tokenOut,
+                    SwapTypes.SwapExactIn,
+                    smallLinear.pools,
+                    maxPools
+                );
+
+                expect(pathsUsingLinear).to.be.empty;
+                expect(allPaths.length).to.equal(1);
+                checkPath(
+                    ['linearTUSD'],
+                    poolsAllDict,
+                    allPaths[0],
+                    tokenIn,
+                    tokenOut
+                );
+            });
+
+            it('should return no paths', async () => {
+                const tokenIn = TUSD.address;
+                const tokenOut = USDC.address;
+                const maxPools = 4;
+
+                const [allPaths, , pathsUsingLinear] = getPaths(
+                    tokenIn,
+                    tokenOut,
+                    SwapTypes.SwapExactIn,
+                    smallLinear.pools,
+                    maxPools
+                );
+
+                expect(pathsUsingLinear).to.be.empty;
+                expect(allPaths).to.be.empty;
+            });
+        });
+
         context('Stable<>Token with no staBal or WETH paired pool', () => {
             it('Stable>Token, getPathsUsingLinearPool return empty paths', async () => {
                 const tokenIn = MKR.address;
@@ -251,23 +297,24 @@ describe('linear pool tests', () => {
                 );
             });
 
-            it('tokenIn and tokenOut belong to same linear pool, should return 1 valid linear path', async () => {
+            it('tokenIn and tokenOut belong to same linear pool should have standard single hop path', async () => {
                 const tokenOut = DAI.address;
                 const tokenIn = aDAI.address;
                 const maxPools = 10;
 
-                const [, poolsAllDict, pathsUsingLinear] = getPaths(
+                const [allPaths, poolsAllDict, pathsUsingLinear] = getPaths(
                     tokenIn,
                     tokenOut,
                     SwapTypes.SwapExactIn,
                     smallLinear.pools,
                     maxPools
                 );
-                assert.equal(pathsUsingLinear.length, 1);
+                expect(pathsUsingLinear).to.be.empty;
+                assert.equal(allPaths.length, 1);
                 checkPath(
                     ['linearDAI'],
                     poolsAllDict,
-                    pathsUsingLinear[0],
+                    allPaths[0],
                     tokenIn,
                     tokenOut
                 );
@@ -651,7 +698,7 @@ function getPaths(
         poolsFilteredDict
     );
 
-    const pathsUsingLinear = getPathsUsingLinearPools(
+    const pathsUsingLinear = getLinearStaBal3Paths(
         tokenIn,
         tokenOut,
         poolsAll,

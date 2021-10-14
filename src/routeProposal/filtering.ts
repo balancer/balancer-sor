@@ -2,7 +2,6 @@ import cloneDeep from 'lodash.clonedeep';
 import {
     SubgraphPoolBase,
     PoolDictionary,
-    PoolDictionaryByMain,
     SwapPairType,
     NewPath,
     Swap,
@@ -213,7 +212,15 @@ export function filterHopPools(
     return [filteredPoolsOfInterest, paths];
 }
 
-export function getPathsUsingLinearPools(
+/*
+Return paths through StaBal3 Linear pools.
+Paths can be created for any token that is paired to staBAL3 
+or WETH via a WETH/staBAL3 connecting pool
+LinearStable <> LinearStable: LinearStableIn>[LINEARPOOL_IN]>bStable_IN>[staBAL3]>bStable_OUT>[LINEARPOOL_OUT]>LinearStableOut
+LinearStable <> token paired to staBAL3: LinearStableIn>[LINEARPOOL]>bStable>[staBAL3]>staBal3>[staBal3-TokenOut]>TokenOut
+LinearStable <> token paired to WETH: LinearStableIn>[LINEARPOOL]>bStable>[staBAL3]>staBal3>[staBal3-WETH]>WETH>[WETH-TokenOut]>TokenOut
+*/
+export function getLinearStaBal3Paths(
     tokenIn: string,
     tokenOut: string,
     poolsAllDict: PoolDictionary,
@@ -235,24 +242,10 @@ export function getPathsUsingLinearPools(
     )
         return [];
 
-    // Finds linear pool containing tokenIn/Out
-    // This is currently picking first matching pool as we expect a specific deployment setup
-    // Could be changed to find most liquid
-    let linearPoolIn, linearPoolOut;
-    for (const id in poolsAllDict) {
-        if (poolsAllDict[id].poolType === PoolTypes.Linear) {
-            if (
-                !linearPoolIn &&
-                poolsAllDict[id].tokensList.includes(tokenIn.toLowerCase())
-            )
-                linearPoolIn = poolsAllDict[id];
-            if (
-                !linearPoolOut &&
-                poolsAllDict[id].tokensList.includes(tokenOut.toLowerCase())
-            )
-                linearPoolOut = poolsAllDict[id];
-        }
-    }
+    // Find Linear Pools that are connected to staBal3 and have tokenIn/Out
+    const linearStaBal3Pools = getLinearStaBal3Pools(poolsAllDict, staBal3Pool);
+    const linearPoolIn = getPoolWithToken(linearStaBal3Pools, tokenIn);
+    const linearPoolOut = getPoolWithToken(linearStaBal3Pools, tokenOut);
 
     const pathsUsingLinear: NewPath[] = [];
 
@@ -260,26 +253,15 @@ export function getPathsUsingLinearPools(
     if (!linearPoolIn && !linearPoolOut) return [];
     // If both tokenIn and tokenOut belong to linear pools
     else if (linearPoolIn && linearPoolOut) {
-        if (linearPoolIn.id === linearPoolOut.id) {
-            // TokenIn>[LINEARPOOL]>TokenOut
-            const singleLinearPoolPath = createPath(
-                [tokenIn, tokenOut],
-                [linearPoolIn]
-            );
-            pathsUsingLinear.push(singleLinearPoolPath);
-        } else {
-            // TokenIn>[LINEARPOOL_IN]>BPT_IN>[staBAL3]>BPT_OUT>[LINEARPOOL_OUT]>TokenOut
-            const linearPathway = createPath(
-                [
-                    tokenIn,
-                    linearPoolIn.address,
-                    linearPoolOut.address,
-                    tokenOut,
-                ],
-                [linearPoolIn, staBal3Pool, linearPoolOut]
-            );
-            pathsUsingLinear.push(linearPathway);
-        }
+        // tokenIn/tokenOut belong to same Linear Pool and don't need routed via staBAL3
+        if (linearPoolIn.id === linearPoolOut.id) return [];
+
+        // TokenIn>[LINEARPOOL_IN]>BPT_IN>[staBAL3]>BPT_OUT>[LINEARPOOL_OUT]>TokenOut
+        const linearPathway = createPath(
+            [tokenIn, linearPoolIn.address, linearPoolOut.address, tokenOut],
+            [linearPoolIn, staBal3Pool, linearPoolOut]
+        );
+        pathsUsingLinear.push(linearPathway);
         return pathsUsingLinear;
     } else if (linearPoolIn && !linearPoolOut) {
         // Creates first part of path: TokenIn>[LINEARPOOL]>bStable>[staBAL3]>staBal3Bpt
@@ -348,6 +330,34 @@ export function getPathsUsingLinearPools(
 
         return pathsUsingLinear;
     }
+}
+
+/*
+Returns Linear pools that are part of staBal3
+*/
+function getLinearStaBal3Pools(
+    pools: PoolDictionary,
+    staBal3Pool: PoolBase
+): PoolDictionary {
+    const linearStaBal3Pools = {};
+    for (const id in pools) {
+        if (pools[id].poolType === PoolTypes.Linear) {
+            // Check if pool is part of staBal3
+            if (staBal3Pool.tokensList.includes(pools[id].address))
+                linearStaBal3Pools[id] = pools[id];
+        }
+    }
+
+    return linearStaBal3Pools;
+}
+
+function getPoolWithToken(pools: PoolDictionary, token: string): PoolBase {
+    let pool;
+    for (const id in pools) {
+        if (pools[id].tokensList.includes(token.toLowerCase()))
+            return pools[id];
+    }
+    return pool;
 }
 
 /**
