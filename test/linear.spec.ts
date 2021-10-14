@@ -439,7 +439,7 @@ describe('linear pool tests', () => {
     });
 
     context('Long paths using linear and WETH-staBAL3 pool', () => {
-        it('should return 2 valid linear paths', async () => {
+        it('should return 2 valid linear paths, USDC>BAL', async () => {
             const tokenIn = USDC.address;
             const tokenOut = BAL.address;
             const maxPools = 10;
@@ -474,7 +474,7 @@ describe('linear pool tests', () => {
                 tokenOut
             );
         });
-        it('should return 2 valid linear paths', async () => {
+        it('should return 2 valid linear paths, BAL>USDC', async () => {
             const tokenIn = BAL.address;
             const tokenOut = USDC.address;
             const maxPools = 10;
