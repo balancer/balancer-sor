@@ -6,7 +6,7 @@ import { PoolDictionary, SwapPairType, SubgraphPoolBase } from '../src/types';
 import {
     filterPoolsOfInterest,
     getPathsUsingStaBalPool,
-    createMultihopPath,
+    createPath,
     getHighestLiquidityPool,
     filterHopPools,
     parseToPoolsDict,
@@ -145,12 +145,9 @@ describe(`staBalPaths.`, () => {
                 const usdcConnectingPool =
                     poolsAll[USDCCONNECTINGPOOL[chainId].id];
 
-                const multihopPath = createMultihopPath(
-                    staBalPoolIn,
-                    usdcConnectingPool,
-                    tokenIn,
-                    hopTokenStaBal,
-                    USDCCONNECTINGPOOL[chainId].usdc
+                const multihopPath = createPath(
+                    [tokenIn, hopTokenStaBal, USDCCONNECTINGPOOL[chainId].usdc],
+                    [staBalPoolIn, usdcConnectingPool]
                 );
 
                 checkPath(
