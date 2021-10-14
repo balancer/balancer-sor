@@ -245,7 +245,6 @@ export function getPathsUsingLinearPools(
     // Finds linear pool containing tokenIn/Out
     // This is currently picking first matching pool as we expect a specific deployment setup
     // Could be changed to find most liquid
-    // Here we assume that tokenIn, tokenOut are not linear pool tokens.
     let linearPoolIn, linearPoolOut;
     for (const id in poolsAllDict) {
         if (poolsAllDict[id].poolType === PoolTypes.Linear) {
@@ -268,7 +267,8 @@ export function getPathsUsingLinearPools(
     if (!linearPoolIn && !linearPoolOut) return [];
     // If both tokenIn and tokenOut belong to linear pools
     else if (linearPoolIn && linearPoolOut) {
-        if (linearPoolIn == linearPoolOut) {
+        if (linearPoolIn.id === linearPoolOut.id) {
+            // TokenIn>[LINEARPOOL]>TokenOut
             const singleLinearPoolPath = createPath(
                 tokenIn,
                 tokenOut,
@@ -288,7 +288,7 @@ export function getPathsUsingLinearPools(
         }
         return pathsUsingLinear;
     } else if (linearPoolIn && !linearPoolOut) {
-        // Creates first part of paths: TokenIn>[LINEARPOOL]>bStable>[staBAL3]>staBal3Bpt
+        // Creates first part of path: TokenIn>[LINEARPOOL]>bStable>[staBAL3]>staBal3Bpt
         const linearPathway = createPath(
             tokenIn,
             staBal3Pool.address,

@@ -253,7 +253,7 @@ describe('linear pool tests', () => {
 
             it('tokenIn and tokenOut belong to same linear pool, should return 1 valid linear path', async () => {
                 const tokenOut = DAI.address;
-                const tokenIn = '0xfc1e690f61efd961294b3e1ce3313fbd8aa4f85d'; // aDAI
+                const tokenIn = aDAI.address;
                 const maxPools = 10;
 
                 const [, poolsAllDict, pathsUsingLinear] = getPaths(
