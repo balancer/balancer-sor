@@ -117,12 +117,7 @@ export function filterHopPools(
                 continue;
             }
 
-            const path = createPath(
-                tokenIn,
-                tokenOut,
-                [poolsOfInterest[id]],
-                []
-            );
+            const path = createPath([tokenIn, tokenOut], [poolsOfInterest[id]]);
             paths.push(path);
             filteredPoolsOfInterest[id] = poolsOfInterest[id];
         }
@@ -141,7 +136,7 @@ export function filterHopPools(
             if (pool.swapPairType === SwapPairType.Direct) {
                 // First loop of all pools we add paths to list
                 if (firstPoolLoop) {
-                    const path = createPath(tokenIn, tokenOut, [pool], []);
+                    const path = createPath([tokenIn, tokenOut], [pool]);
                     paths.push(path);
                     filteredPoolsOfInterest[id] = pool;
                 }
@@ -205,13 +200,11 @@ export function filterHopPools(
                 poolsOfInterest[highestNormalizedLiquiditySecondPoolId];
 
             const path = createPath(
-                tokenIn,
-                tokenOut,
+                [tokenIn, hopTokens[i], tokenOut],
                 [
                     poolsOfInterest[highestNormalizedLiquidityFirstPoolId],
                     poolsOfInterest[highestNormalizedLiquiditySecondPoolId],
-                ],
-                [hopTokens[i]]
+                ]
             );
             paths.push(path);
         }
@@ -270,19 +263,20 @@ export function getPathsUsingLinearPools(
         if (linearPoolIn.id === linearPoolOut.id) {
             // TokenIn>[LINEARPOOL]>TokenOut
             const singleLinearPoolPath = createPath(
-                tokenIn,
-                tokenOut,
-                [linearPoolIn],
-                []
+                [tokenIn, tokenOut],
+                [linearPoolIn]
             );
             pathsUsingLinear.push(singleLinearPoolPath);
         } else {
             // TokenIn>[LINEARPOOL_IN]>BPT_IN>[staBAL3]>BPT_OUT>[LINEARPOOL_OUT]>TokenOut
             const linearPathway = createPath(
-                tokenIn,
-                tokenOut,
-                [linearPoolIn, staBal3Pool, linearPoolOut],
-                [linearPoolIn.address, linearPoolOut.address]
+                [
+                    tokenIn,
+                    linearPoolIn.address,
+                    linearPoolOut.address,
+                    tokenOut,
+                ],
+                [linearPoolIn, staBal3Pool, linearPoolOut]
             );
             pathsUsingLinear.push(linearPathway);
         }
@@ -290,10 +284,8 @@ export function getPathsUsingLinearPools(
     } else if (linearPoolIn && !linearPoolOut) {
         // Creates first part of path: TokenIn>[LINEARPOOL]>bStable>[staBAL3]>staBal3Bpt
         const linearPathway = createPath(
-            tokenIn,
-            staBal3Pool.address,
-            [linearPoolIn, staBal3Pool],
-            [linearPoolIn.address]
+            [tokenIn, linearPoolIn.address, staBal3Pool.address],
+            [linearPoolIn, staBal3Pool]
         );
         // Creates a path through most liquid staBal3/Token pool
         // TokenIn>[LINEARPOOL]>bStable>[staBAL3]>staBal3Bpt>[staBal3Bpt-TokenOut]>TokenOut
@@ -325,10 +317,8 @@ export function getPathsUsingLinearPools(
         // here we have the condition (!linearPoolIn && linearPoolOut)
         // Creates second part of path: staBal3Bpt>[staBAL3]>bStable>[LINEARPOOL]>TokenOut
         const linearPathway = createPath(
-            staBal3Pool.address,
-            tokenOut,
-            [staBal3Pool, linearPoolOut],
-            [linearPoolOut.address]
+            [staBal3Pool.address, linearPoolOut.address, tokenOut],
+            [staBal3Pool, linearPoolOut]
         );
 
         // Creates a path through most liquid staBal3/Token pool
@@ -387,10 +377,11 @@ function getStaBal3TokenPath(
     if (poolWithStaBal3Token === null) return {} as NewPath;
 
     const staBal3TokenPath = createPath(
-        isPairedTokenOut ? staBal3PoolAddr : pairedToken,
-        isPairedTokenOut ? pairedToken : staBal3PoolAddr,
-        [poolsFilteredDict[poolWithStaBal3Token]],
-        []
+        [
+            isPairedTokenOut ? staBal3PoolAddr : pairedToken,
+            isPairedTokenOut ? pairedToken : staBal3PoolAddr,
+        ],
+        [poolsFilteredDict[poolWithStaBal3Token]]
     );
 
     return isPairedTokenOut
@@ -433,12 +424,14 @@ function getStaBal3WethPath(
     if (poolWithWethToken === null) return {} as NewPath;
 
     const wethPath = createPath(
-        isPairedTokenOut ? staBal3PoolAddr : pairedToken,
-        isPairedTokenOut ? pairedToken : staBal3PoolAddr,
+        [
+            isPairedTokenOut ? staBal3PoolAddr : pairedToken,
+            WETHADDR[chainId],
+            isPairedTokenOut ? pairedToken : staBal3PoolAddr,
+        ],
         isPairedTokenOut
             ? [wethStaBal3Pool, poolsFilteredDict[poolWithWethToken]]
-            : [poolsFilteredDict[poolWithWethToken], wethStaBal3Pool],
-        [WETHADDR[chainId]]
+            : [poolsFilteredDict[poolWithWethToken], wethStaBal3Pool]
     );
 
     return isPairedTokenOut
@@ -447,36 +440,16 @@ function getStaBal3WethPath(
 }
 
 // Creates a path with pools.length hops
-// i.e. tokenIn>[Pool1]>hopToken1>[Pool2]>hopToken2>[Pool3]>TokenOut
-export function createPath(
-    tokenIn: string,
-    tokenOut: string,
-    pools: PoolBase[],
-    hopTokens: string[]
-): NewPath {
+// i.e. tokens[0]>[Pool0]>tokens[1]>[Pool1]>tokens[2]>[Pool2]>tokens[3]
+export function createPath(tokens: string[], pools: PoolBase[]): NewPath {
     let tI: string, tO: string;
     const swaps: Swap[] = [];
     const poolPairData: PoolPairBase[] = [];
     let id = '';
 
     for (let i = 0; i < pools.length; i++) {
-        if (hopTokens.length === 0) {
-            // Direct path
-            tI = tokenIn;
-            tO = tokenOut;
-        } else if (i === 0) {
-            // First hop in path
-            tI = tokenIn;
-            tO = hopTokens[i];
-        } else if (i === pools.length - 1) {
-            // Last hop in path
-            tI = hopTokens[i - 1];
-            tO = tokenOut;
-        } else {
-            // Middle hop
-            tI = hopTokens[i - 1];
-            tO = hopTokens[i];
-        }
+        tI = tokens[i];
+        tO = tokens[i + 1];
 
         const poolPair = pools[i].parsePoolPairData(tI, tO);
         poolPairData.push(poolPair);
@@ -610,10 +583,8 @@ export function getPathsUsingStaBalPool(
 
         // tokenIn > [metaStablePool] > staBal > [UsdcConnectingPool] > USDC
         const staBalPath = createPath(
-            tokenIn,
-            usdcConnectingPoolInfo.usdc,
-            [metaStablePoolIn, usdcConnectingPool],
-            [hopTokenStaBal]
+            [tokenIn, hopTokenStaBal, usdcConnectingPoolInfo.usdc],
+            [metaStablePoolIn, usdcConnectingPool]
         );
 
         // Hop out as it is USDC > tokenOut
@@ -628,10 +599,8 @@ export function getPathsUsingStaBalPool(
 
         const lastPool = poolsFiltered[mostLiquidLastPool];
         const pathEnd = createPath(
-            usdcConnectingPoolInfo.usdc,
-            tokenOut,
-            [lastPool],
-            []
+            [usdcConnectingPoolInfo.usdc, tokenOut],
+            [lastPool]
         );
 
         return [composePaths([staBalPath, pathEnd])];
@@ -657,16 +626,12 @@ export function getPathsUsingStaBalPool(
 
         // USDC > [UsdcConnectingPool] > staBal > [metaStablePool] > tokenOut
         const staBalPath = createPath(
-            usdcConnectingPoolInfo.usdc,
-            tokenOut,
-            [usdcConnectingPool, metaStablePoolIn],
-            [hopTokenStaBal]
+            [usdcConnectingPoolInfo.usdc, hopTokenStaBal, tokenOut],
+            [usdcConnectingPool, metaStablePoolIn]
         );
         const pathStart = createPath(
-            tokenIn,
-            usdcConnectingPoolInfo.usdc,
-            [firstPool],
-            []
+            [tokenIn, usdcConnectingPoolInfo.usdc],
+            [firstPool]
         );
 
         return [composePaths([pathStart, staBalPath])];
