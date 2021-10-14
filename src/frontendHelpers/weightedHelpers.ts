@@ -1,8 +1,8 @@
-import { BigNumber as OldBigNumber, ZERO } from '../utils/bignumber';
-import * as weightedMath from '../pools/weightedPool/weightedMath';
-import { WeightedPoolPairData } from 'pools/weightedPool/weightedPool';
+import { BigNumber, formatFixed, parseFixed } from '@ethersproject/bignumber';
 import { Zero } from '@ethersproject/constants';
-import { BigNumber } from '@ethersproject/bignumber';
+import { bnum, ZERO } from '../utils/bignumber';
+import * as weightedMath from '../pools/weightedPool/weightedMath';
+import { WeightedPoolPairData } from '../pools/weightedPool/weightedPool';
 
 /////////
 /// UI Helpers
@@ -13,30 +13,32 @@ import { BigNumber } from '@ethersproject/bignumber';
 // an Add or Remove liquidity operation: The spot prices of BPT in tokens
 // are the same regardless.
 export function BPTForTokensZeroPriceImpact(
-    balances: OldBigNumber[],
+    balances: BigNumber[],
     decimals: number[],
-    normalizedWeights: OldBigNumber[],
-    amounts: OldBigNumber[],
-    bptTotalSupply: OldBigNumber
-): OldBigNumber {
-    let amountBPTOut = new OldBigNumber(0);
-    // Calculate the amount of BPT adding this liquidity would result in
-    // if there were no price impact, i.e. using the spot price of tokenIn/BPT
-    for (let i = 0; i < balances.length; i++) {
-        // We need to scale down all the balances and amounts
-        amounts[i] = amounts[i].times(new OldBigNumber(10).pow(-decimals[i]));
+    normalizedWeights: BigNumber[],
+    amounts: BigNumber[],
+    bptTotalSupply: BigNumber
+): BigNumber {
+    const amountBPTOut = amounts.reduce((totalBptOut, amountIn, i) => {
+        // Calculate amount of BPT gained per token in
         const poolPairData: WeightedPoolPairData = {
-            balanceIn: BigNumber.from(balances[i].toString()),
-            balanceOut: BigNumber.from(bptTotalSupply.toString()),
-            weightIn: BigNumber.from(normalizedWeights[i].toString()),
+            balanceIn: balances[i],
+            balanceOut: bptTotalSupply,
+            weightIn: normalizedWeights[i],
             swapFee: Zero,
         } as WeightedPoolPairData;
         const BPTPrice = weightedMath._spotPriceAfterSwapTokenInForExactBPTOut(
             ZERO,
             poolPairData
         );
-        amountBPTOut = amountBPTOut.plus(amounts[i].div(BPTPrice));
-    }
-    // We need to scale up the amount of BPT out
-    return amountBPTOut.times(new OldBigNumber(10).pow(18));
+
+        // Multiply by amountIn to get contribution to total bpt out
+        const downscaledAmountIn = formatFixed(amountIn, decimals[i]);
+        const downscaledBptOut = bnum(downscaledAmountIn)
+            .div(BPTPrice)
+            .toString();
+        return totalBptOut.add(parseFixed(downscaledBptOut, 18));
+    }, Zero);
+
+    return amountBPTOut;
 }
