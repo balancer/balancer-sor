@@ -80,6 +80,7 @@ export interface SubgraphPoolBase {
     baseToken?: string;
 
     // Linear specific fields
+    mainIndex?: number;
     wrappedIndex?: number;
     target1?: string;
     target2?: string;
