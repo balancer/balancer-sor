@@ -19,6 +19,7 @@
         "src/abi/*.json",
         "src/pools/stablePool/stablePoolAbi.json",
         "src/pools/weightedPool/weightedPoolAbi.json",
-        "src/pools/elementPool/ConvergentCurvePool.json"
+        "src/pools/elementPool/ConvergentCurvePool.json",
+        "src/pools/linearPool/linearPoolAbi.json"
     ]
 }
