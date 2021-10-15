@@ -668,7 +668,7 @@ describe('linear pool tests', () => {
                     parseFixed('1', staBAL3.decimals),
                     smallLinear.pools
                 );
-                expect(returnAmount).to.eq('468734616507406');
+                expect(returnAmount).to.eq('468734616507406'); // TO DO - This will fail until we support wrapped tokens. Remove if decided we def won't
             });
         });
     });

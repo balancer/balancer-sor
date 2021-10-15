@@ -242,10 +242,11 @@ export function getLinearStaBal3Paths(
     )
         return [];
 
-    // Find Linear Pools that are connected to staBal3 and have tokenIn/Out
+    // Find Linear Pools that are connected to staBal3
     const linearStaBal3Pools = getLinearStaBal3Pools(poolsAllDict, staBal3Pool);
-    const linearPoolIn = getPoolWithToken(linearStaBal3Pools, tokenIn);
-    const linearPoolOut = getPoolWithToken(linearStaBal3Pools, tokenOut);
+    // Find Linear Pools that have tokenIn/Out as main token
+    const linearPoolIn = getPoolWithMainToken(linearStaBal3Pools, tokenIn);
+    const linearPoolOut = getPoolWithMainToken(linearStaBal3Pools, tokenOut);
 
     const pathsUsingLinear: NewPath[] = [];
 
@@ -374,11 +375,15 @@ function getLinearStaBal3Pools(
     return linearStaBal3Pools;
 }
 
-function getPoolWithToken(pools: PoolDictionary, token: string): PoolBase {
+function getPoolWithMainToken(pools: PoolDictionary, token: string): PoolBase {
     let pool;
     for (const id in pools) {
-        if (pools[id].tokensList.includes(token.toLowerCase()))
-            return pools[id];
+        // TO DO
+        // Currently maths doesn't support wrapped tokens (TBC if there is a workaround)
+        // This means we can only support main token
+        // Add mainTokenIndex if this is going to remain the case
+        // If can workaround then replace below with: if (pools[id].tokensList.includes(token.toLowerCase()))
+        if (pools[id].tokensList[0] === token.toLowerCase()) return pools[id];
     }
     return pool;
 }
