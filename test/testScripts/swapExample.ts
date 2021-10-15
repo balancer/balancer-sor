@@ -6,7 +6,6 @@ import {
     formatFixed,
     parseFixed,
 } from '@ethersproject/bignumber';
-// import { BigNumber } from 'bignumber.js';
 import { JsonRpcProvider } from '@ethersproject/providers';
 import { Wallet } from '@ethersproject/wallet';
 import { Contract } from '@ethersproject/contracts';
@@ -226,8 +225,6 @@ async function getSwap(
         gasPrice,
         BigNumber.from('35000')
     );
-    console.log(`getCostOfSwapInToken: ${cost.toString()}`);
-
     const swapInfo: SwapInfo = await sor.getSwaps(
         tokenIn.address,
         tokenOut.address,
@@ -250,7 +247,7 @@ async function getSwap(
             ? tokenOut.decimals
             : tokenIn.decimals;
 
-    const returnWithFees = formatFixed(
+    const returnWithFeesScaled = formatFixed(
         swapInfo.returnAmountConsideringFees,
         returnDecimals
     );
@@ -265,7 +262,7 @@ async function getSwap(
         `Token Out: ${tokenOut.symbol}, Amt: ${amtOutScaled.toString()}`
     );
     console.log(`Cost to swap: ${costToSwapScaled.toString()}`);
-    console.log(`Return Considering Fees: ${returnWithFees.toString()}`);
+    console.log(`Return Considering Fees: ${returnWithFeesScaled.toString()}`);
     console.log(`Swaps:`);
     console.log(swapInfo.swaps);
     console.log(swapInfo.tokenAddresses);
@@ -334,49 +331,19 @@ async function makeTrade(
         toInternalBalance: false,
     };
 
-    // Limits:
-    // +ve means max to send
-    // -ve mean min to receive
-    // For a multihop the intermediate tokens should be 0
-    // This is where slippage tolerance would be added
-    const limits: string[] = [];
-    if (swapType === SwapTypes.SwapExactIn) {
-        swapInfo.tokenAddresses.forEach((token, i) => {
-            if (token.toLowerCase() === swapInfo.tokenIn.toLowerCase()) {
-                limits[i] = swapInfo.swapAmount.toString();
-            } else if (
-                token.toLowerCase() === swapInfo.tokenOut.toLowerCase()
-            ) {
-                limits[i] = swapInfo.returnAmount
-                    .mul(-0.99)
-                    .toString()
-                    .split('.')[0];
-            } else {
-                limits[i] = '0';
-            }
-        });
-    } else {
-        swapInfo.tokenAddresses.forEach((token, i) => {
-            if (token.toLowerCase() === swapInfo.tokenIn.toLowerCase()) {
-                limits[i] = swapInfo.returnAmount.toString();
-            } else if (
-                token.toLowerCase() === swapInfo.tokenOut.toLowerCase()
-            ) {
-                limits[i] = swapInfo.swapAmount
-                    .mul(-0.99)
-                    .toString()
-                    .split('.')[0];
-            } else {
-                limits[i] = '0';
-            }
-        });
-    }
+    const limits: string[] = getLimits(
+        swapInfo.tokenIn,
+        swapInfo.tokenOut,
+        swapType,
+        swapInfo.swapAmount,
+        swapInfo.returnAmount,
+        swapInfo.tokenAddresses
+    );
     const deadline = MaxUint256;
 
     console.log(funds);
     console.log(swapInfo.tokenAddresses);
     console.log(limits);
-
     console.log('Swapping...');
 
     const overRides = {};
@@ -400,6 +367,43 @@ async function makeTrade(
         );
 
     console.log(`tx: ${tx.hash}`);
+}
+
+function getLimits(
+    tokenIn: string,
+    tokenOut: string,
+    swapType: SwapTypes,
+    swapAmount: BigNumber,
+    returnAmount: BigNumber,
+    tokenAddresses: string[]
+): string[] {
+    // Limits:
+    // +ve means max to send
+    // -ve mean min to receive
+    // For a multihop the intermediate tokens should be 0
+    // This is where slippage tolerance would be added
+    const limits: string[] = [];
+    const amountIn =
+        swapType === SwapTypes.SwapExactIn ? swapAmount : returnAmount;
+    const amountOut =
+        swapType === SwapTypes.SwapExactIn ? returnAmount : swapAmount;
+
+    tokenAddresses.forEach((token, i) => {
+        if (token.toLowerCase() === tokenIn.toLowerCase())
+            limits[i] = amountIn.toString();
+        else if (token.toLowerCase() === tokenOut.toLowerCase()) {
+            limits[i] = amountOut
+                .mul('990000000000000000') // 0.99
+                .div('1000000000000000000')
+                .mul(-1)
+                .toString()
+                .split('.')[0];
+        } else {
+            limits[i] = '0';
+        }
+    });
+
+    return limits;
 }
 
 async function makeRelayerTrade(
@@ -476,44 +480,15 @@ async function makeRelayerTrade(
         tokenOut = ADDRESSES[chainId].wSTETH.address;
     }
 
-    // Limits:
-    // +ve means max to send
-    // -ve mean min to receive
-    // For a multihop the intermediate tokens should be 0
-    // This is where slippage tolerance would be added
-    const limits: string[] = [];
-    if (swapType === SwapTypes.SwapExactIn) {
-        swapInfo.tokenAddresses.forEach((token, i) => {
-            if (token.toLowerCase() === tokenIn.toLowerCase()) {
-                if (!swapInfo.swapAmountForSwaps) return;
-                limits[i] = swapInfo.swapAmountForSwaps.toString();
-            } else if (token.toLowerCase() === tokenOut.toLowerCase()) {
-                if (!swapInfo.returnAmountFromSwaps) return;
-                limits[i] = swapInfo.returnAmountFromSwaps
-                    .mul(-0.99)
-                    .toString()
-                    .split('.')[0];
-            } else {
-                limits[i] = '0';
-            }
-        });
-    } else {
-        swapInfo.tokenAddresses.forEach((token, i) => {
-            if (token.toLowerCase() === tokenIn.toLowerCase()) {
-                if (!swapInfo.returnAmountFromSwaps) return;
-                limits[i] = swapInfo.returnAmountFromSwaps
-                    .mul(1.001)
-                    .toString()
-                    .split('.')[0];
-                // limits[i] = swapInfo.returnAmountFromSwaps?.toString(); // No buffer
-            } else if (token.toLowerCase() === tokenOut.toLowerCase()) {
-                if (!swapInfo.swapAmountForSwaps) return;
-                limits[i] = swapInfo.swapAmountForSwaps.mul(-1).toString();
-            } else {
-                limits[i] = '0';
-            }
-        });
-    }
+    const limits: string[] = getLimits(
+        swapInfo.tokenIn,
+        swapInfo.tokenOut,
+        swapType,
+        swapInfo.swapAmount,
+        swapInfo.returnAmount,
+        swapInfo.tokenAddresses
+    );
+
     const deadline = MaxUint256;
 
     console.log(funds);
@@ -570,8 +545,7 @@ async function makeRelayerTrade(
 }
 
 async function simpleSwap() {
-    const networkId = Network.MAINNET;
-    // const networkId = Network.KOVAN;
+    const networkId = Network.KOVAN;
     // Pools source can be Subgraph URL or pools data set passed directly
     const poolsSource = SUBGRAPH_URLS[networkId];
     // const poolsSource = require('../testData/testPools/gusdBug.json');
@@ -580,8 +554,8 @@ async function simpleSwap() {
     const tokenIn = ADDRESSES[networkId].DAI;
     const tokenOut = ADDRESSES[networkId].USDC;
     const swapType = SwapTypes.SwapExactIn;
-    const swapAmount = parseFixed('0.07', 18); // In normalized format, i.e. 1USDC = 1
-    const executeTrade = false;
+    const swapAmount = parseFixed('0.07', 18);
+    const executeTrade = true;
 
     const provider = new JsonRpcProvider(PROVIDER_URLS[networkId]);
 
@@ -614,4 +588,5 @@ async function simpleSwap() {
     }
 }
 
+// $ TS_NODE_PROJECT='tsconfig.testing.json' ts-node ./test/testScripts/swapExample.ts
 simpleSwap();
