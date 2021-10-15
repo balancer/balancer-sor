@@ -1,6 +1,6 @@
 {
     "name": "@balancer-labs/sor",
-    "version": "2.0.0-beta.2",
+    "version": "2.0.0-beta.3",
     "license": "GPL-3.0-only",
     "main": "dist/index.js",
     "module": "dist/index.esm.js",
