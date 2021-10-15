@@ -1,4 +1,9 @@
-import { BigNumber, formatFixed, parseFixed } from '@ethersproject/bignumber';
+import {
+    BigNumber,
+    BigNumberish,
+    formatFixed,
+    parseFixed,
+} from '@ethersproject/bignumber';
 import { Zero } from '@ethersproject/constants';
 import { bnum, ZERO } from '../utils/bignumber';
 import * as weightedMath from '../pools/weightedPool/weightedMath';
@@ -13,11 +18,11 @@ import { WeightedPoolPairData } from '../pools/weightedPool/weightedPool';
 // an Add or Remove liquidity operation: The spot prices of BPT in tokens
 // are the same regardless.
 export function BPTForTokensZeroPriceImpact(
-    balances: BigNumber[],
+    balances: BigNumberish[],
     decimals: number[],
-    normalizedWeights: BigNumber[],
-    amounts: BigNumber[],
-    bptTotalSupply: BigNumber
+    normalizedWeights: BigNumberish[],
+    amounts: BigNumberish[],
+    bptTotalSupply: BigNumberish
 ): BigNumber {
     const amountBPTOut = amounts.reduce((totalBptOut, amountIn, i) => {
         // Calculate amount of BPT gained per token in
@@ -38,8 +43,10 @@ export function BPTForTokensZeroPriceImpact(
         const downscaledBptOut = bnum(downscaledAmountIn)
             .div(BPTPrice)
             .toString();
-        return totalBptOut.add(parseFixed(downscaledBptOut, 18));
+        return BigNumber.from(totalBptOut).add(
+            parseFixed(downscaledBptOut, 18)
+        );
     }, Zero);
 
-    return amountBPTOut;
+    return BigNumber.from(amountBPTOut);
 }
