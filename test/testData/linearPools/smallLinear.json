@@ -421,6 +421,52 @@
             "totalShares": "100",
             "poolType": "Weighted",
             "address": "weightedMkrDai"
+        },
+        {
+            "id": "linearTUSD",
+            "publicSwap": true,
+            "swapFee": "0.01",
+            "swapEnabled": true,
+            "tokens": [
+                {
+                    "address": "0x0000000000085d4780b73119b644ae5ecd22b376",
+                    "balance": "100000",
+                    "decimals": 18,
+                    "id": "linearTUSD-0x0000000000085d4780b73119b644ae5ecd22b376",
+                    "symbol": "TUSD",
+                    "priceRate": "1",
+                    "weight": null
+                },
+                {
+                    "address": "0x101cc05f4a51c0319f570d5e146a8c625198e636",
+                    "balance": "100000",
+                    "decimals": 18,
+                    "id": "linearTUSD-0x101cc05f4a51c0319f570d5e146a8c625198e636",
+                    "symbol": "aTUSD",
+                    "priceRate": "1.1",
+                    "weight": null
+                },
+                {
+                    "address": "0x0000000000000000000000000000000000000005",
+                    "balance": "200000",
+                    "decimals": 18,
+                    "id": "linearTUSD-0x0000000000000000000000000000000000000005",
+                    "symbol": "bTUSD",
+                    "priceRate": "1",
+                    "weight": null
+                }
+            ],
+            "tokensList": [
+                "0x0000000000085d4780b73119b644ae5ecd22b376",
+                "0x101cc05f4a51c0319f570d5e146a8c625198e636",
+                "0x0000000000000000000000000000000000000005"
+            ],
+            "totalShares": "200000",
+            "poolType": "Linear",
+            "address": "0x0000000000000000000000000000000000000005",
+            "wrappedIndex": 1,
+            "target1": "1000.000000",
+            "target2": "1500.000000"
         }
     ]
 }

@@ -198,7 +198,7 @@ export class LinearPool implements PoolBase {
                     .times(bnum(this.ALMOST_ONE.toString()))
                     .div(bnum(ONE.toString()));
                 return limit;
-            } else throw Error('LinearPool does not support TokenToToken');
+            } else return bnum(0); // LinearPool does not support TokenToToken
         } else {
             if (linearPoolPairData.pairType === PairTypes.TokenToBpt) {
                 const limit = bnum(
@@ -216,21 +216,15 @@ export class LinearPool implements PoolBase {
                         .toString()
                 );
                 return scale(limit, -poolPairData.decimalsOut);
-            } else throw Error('LinearPool does not support TokenToToken');
+            } else return bnum(0); // LinearPool does not support TokenToToken
         }
     }
 
     // Updates the balance of a given token for the pool
     updateTokenBalanceForPool(token: string, newBalance: BigNumber): void {
-        // token is BPT
-        if (this.address == token) {
-            this.totalShares = newBalance;
-        } else {
-            // token is underlying in the pool
-            const T = this.tokens.find((t) => isSameAddress(t.address, token));
-            if (!T) throw Error('Pool does not contain this token');
-            T.balance = newBalance.toString();
-        }
+        const T = this.tokens.find((t) => isSameAddress(t.address, token));
+        if (!T) throw Error('Pool does not contain this token');
+        T.balance = newBalance.toString();
     }
 
     _exactTokenInForTokenOut(
@@ -242,7 +236,7 @@ export class LinearPool implements PoolBase {
             return this._exactTokenInForBPTOut(poolPairData, amount, exact);
         } else if (poolPairData.pairType === PairTypes.BptToToken) {
             return this._exactBPTInForTokenOut(poolPairData, amount, exact);
-        } else throw Error('LinearPool does not support TokenToToken');
+        } else return bnum(0); // LinearPool does not support TokenToToken
     }
 
     _exactTokenInForBPTOut(
@@ -315,7 +309,7 @@ export class LinearPool implements PoolBase {
             return this._tokenInForExactBPTOut(poolPairData, amount, exact);
         } else if (poolPairData.pairType === PairTypes.BptToToken) {
             return this._BPTInForExactTokenOut(poolPairData, amount, exact);
-        } else throw Error('LinearPool does not support TokenToToken');
+        } else return bnum(0); // LinearPool does not support TokenToToken
     }
 
     _tokenInForExactBPTOut(

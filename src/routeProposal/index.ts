@@ -1,7 +1,7 @@
 import {
     filterPoolsOfInterest,
     filterHopPools,
-    getPathsUsingLinearPools,
+    getLinearStaBal3Paths,
     getPathsUsingStaBalPool,
     parseToPoolsDict,
 } from './filtering';
@@ -52,7 +52,7 @@ export class RouteProposer {
             poolsFilteredDict
         );
 
-        const pathsUsingLinear: NewPath[] = getPathsUsingLinearPools(
+        const pathsUsingLinear: NewPath[] = getLinearStaBal3Paths(
             tokenIn,
             tokenOut,
             poolsAllDict,
