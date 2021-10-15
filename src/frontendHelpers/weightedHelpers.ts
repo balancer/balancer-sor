@@ -23,6 +23,7 @@ export function BPTForTokensZeroPriceImpact(
         // Calculate amount of BPT gained per token in
         const poolPairData: WeightedPoolPairData = {
             balanceIn: balances[i],
+            decimalsIn: decimals[i],
             balanceOut: bptTotalSupply,
             weightIn: normalizedWeights[i],
             swapFee: Zero,
