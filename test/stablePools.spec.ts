@@ -6,6 +6,7 @@ import { SOR } from '../src';
 import { SwapInfo, SwapTypes, PoolTypes, SubgraphPoolBase } from '../src/types';
 import { bnum } from '../src/utils/bignumber';
 import {
+    PairTypes,
     StablePool,
     StablePoolPairData,
 } from '../src/pools/stablePool/stablePool';
@@ -40,6 +41,8 @@ describe(`Tests for Stable Pools.`, () => {
                 id: pool.id,
                 address: pool.address,
                 poolType: PoolTypes.Stable,
+                pairType: PairTypes.TokenToToken,
+                bptIndex: -1,
                 tokenIn: pool.tokens[0].address,
                 tokenOut: pool.tokens[1].address,
                 balanceIn: parseFixed(
@@ -89,6 +92,8 @@ describe(`Tests for Stable Pools.`, () => {
                 id: pool.id,
                 address: pool.address,
                 poolType: PoolTypes.Stable,
+                pairType: PairTypes.TokenToToken,
+                bptIndex: -1,
                 tokenIn: pool.tokens[0].address,
                 tokenOut: pool.tokens[1].address,
                 balanceIn: parseFixed(

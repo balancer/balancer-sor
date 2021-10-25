@@ -12,6 +12,7 @@ import {
     MetaStablePoolPairData,
 } from '../src/pools/metaStablePool/metaStablePool';
 import { BAL, USDC, WETH } from './lib/constants';
+import { PairTypes } from '../src/pools/stablePool/stablePool';
 
 const gasPrice = parseFixed('30', 9);
 const maxPools = 4;
@@ -74,6 +75,8 @@ describe(`Tests for MetaStable Pools.`, () => {
                 id: pool.id,
                 address: pool.address,
                 poolType: PoolTypes.Stable,
+                pairType: PairTypes.TokenToToken,
+                bptIndex: -1,
                 tokenIn: pool.tokens[0].address,
                 tokenOut: pool.tokens[1].address,
                 balanceIn: parseFixed(
@@ -131,6 +134,8 @@ describe(`Tests for MetaStable Pools.`, () => {
                 id: pool.id,
                 address: pool.address,
                 poolType: PoolTypes.Stable,
+                pairType: PairTypes.TokenToToken,
+                bptIndex: -1,
                 tokenIn: pool.tokens[0].address,
                 tokenOut: pool.tokens[1].address,
                 balanceIn: parseFixed(

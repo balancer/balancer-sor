@@ -28,6 +28,12 @@ import {
 
 type StablePoolToken = Pick<SubgraphToken, 'address' | 'balance' | 'decimals'>;
 
+export enum PairTypes {
+    BptToToken,
+    TokenToBpt,
+    TokenToToken,
+}
+
 export type StablePoolPairData = PoolPairBase & {
     allBalances: OldBigNumber[];
     allBalancesScaled: BigNumber[]; // EVM Maths uses everything in 1e18 upscaled format and this avoids repeated scaling
@@ -35,6 +41,8 @@ export type StablePoolPairData = PoolPairBase & {
     amp: BigNumber;
     tokenIndexIn: number;
     tokenIndexOut: number;
+    pairType: PairTypes;
+    bptIndex: number;
 };
 
 export class StablePool implements PoolBase {
@@ -110,12 +118,26 @@ export class StablePool implements PoolBase {
             parseFixed(balance, 18)
         );
 
+        // Stable pools will allow trading between token and pool BPT
+        let pairType: PairTypes;
+        if (isSameAddress(tokenIn, this.address)) {
+            pairType = PairTypes.BptToToken;
+        } else if (isSameAddress(tokenOut, this.address)) {
+            pairType = PairTypes.TokenToBpt;
+        } else {
+            pairType = PairTypes.TokenToToken;
+        }
+
+        let bptIndex = this.tokensList.indexOf(this.address);
+
         const inv = _invariant(this.amp, allBalances);
 
         const poolPairData: StablePoolPairData = {
             id: this.id,
             address: this.address,
             poolType: this.poolType,
+            pairType: pairType,
+            bptIndex: bptIndex,
             tokenIn: tokenIn,
             tokenOut: tokenOut,
             balanceIn: parseFixed(balanceIn, decimalsIn),
