@@ -62,7 +62,7 @@ export class PoolCacher {
             // On error clear all caches and return false so user knows to try again.
             this.finishedFetchingOnChain = false;
             this.pools = [];
-            console.error(`Error: fetchPools(): ${err.message}`);
+            console.error(`Error: fetchPools(): ${err}`);
             return false;
         }
     }

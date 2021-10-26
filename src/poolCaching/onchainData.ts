@@ -58,9 +58,10 @@ export async function getOnChainBalances(
             );
         } else if (
             pool.poolType === 'Stable' ||
-            pool.poolType === 'MetaStable'
+            pool.poolType === 'MetaStable' ||
+            pool.poolType === 'PhantomStable'
         ) {
-            // MetaStable is the same as Stable for multicall purposes
+            // MetaStable & PhantomStable is the same as Stable for multicall purposes
             multiPool.call(
                 `${pool.id}.amp`,
                 pool.address,
@@ -133,7 +134,8 @@ export async function getOnChainBalances(
 
             if (
                 subgraphPools[index].poolType === 'Stable' ||
-                subgraphPools[index].poolType === 'MetaStable'
+                subgraphPools[index].poolType === 'MetaStable' ||
+                subgraphPools[index].poolType === 'PhantomStable'
             ) {
                 if (!onchainData.amp) {
                     throw `Stable Pool Missing Amp: ${poolId}`;
@@ -151,8 +153,14 @@ export async function getOnChainBalances(
                 if (!onchainData.targets)
                     throw `Linear Pool Missing Targets: ${poolId}`;
                 else {
-                    subgraphPools[index].target1 = onchainData.targets[0];
-                    subgraphPools[index].target2 = onchainData.targets[1];
+                    subgraphPools[index].target1 = formatFixed(
+                        onchainData.targets[0],
+                        18
+                    );
+                    subgraphPools[index].target2 = formatFixed(
+                        onchainData.targets[1],
+                        18
+                    );
                 }
 
                 if (!onchainData.mainIndex)
