@@ -260,6 +260,10 @@ function makeLinearPoolPairData(
         tokenOut: 'ignored',
         decimalsIn: 18,
         decimalsOut: 18,
+        mainBalanceScaled: parseFixed('0', 18),
+        wrappedBalanceScaled: parseFixed('0', 18),
+        bptBalanceScaled: parseFixed('0', 18),
+        bptSupply: parseFixed('0', 18),
     };
 }
 

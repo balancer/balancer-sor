@@ -43,6 +43,7 @@
             "poolType": "Linear",
             "address": "0x0000000000000000000000000000000000000002",
             "wrappedIndex": 1,
+            "mainIndex": 0,
             "target1": "1000.000000",
             "target2": "1500.000000"
         }
