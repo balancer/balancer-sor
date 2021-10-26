@@ -138,8 +138,8 @@ export class MetaStablePool implements PoolBase {
         } else {
             pairType = PairTypes.TokenToToken;
         }
-        let bptIndex = this.tokensList.indexOf(this.address);
 
+        const bptIndex = this.tokensList.indexOf(this.address);
         const inv = _invariant(this.amp, allBalances);
 
         const poolPairData: MetaStablePoolPairData = {
@@ -233,21 +233,21 @@ export class MetaStablePool implements PoolBase {
                 formatFixed(poolPairData.tokenInPriceRate, 18)
             );
 
-            let amp = bnum(this.amp.toString());
-            let balances = removeBPT(poolPairData).allBalancesScaled.map(
+            const amp = bnum(this.amp.toString());
+            const poolPairDataNoBPT = removeBPT(poolPairData);
+            const balances = poolPairDataNoBPT.allBalancesScaled.map(
                 (balance) => bnum(balance.toString())
             );
-            let swapFee = bnum(poolPairData.swapFee.toString());
-            let totalShares = bnum(this.totalShares.toString());
+            const tokenIndexIn = poolPairDataNoBPT.tokenIndexIn;
+            const tokenIndexOut = poolPairDataNoBPT.tokenIndexOut;
+            const swapFee = bnum(poolPairData.swapFee.toString());
+            const totalShares = bnum(this.totalShares.toString());
             let amt: OldBigNumber;
 
             if (poolPairData.pairType === PairTypes.TokenToBpt) {
                 let amountsIn: OldBigNumber[] = [];
                 for (let i = 0; i < balances.length - 1; i++) {
-                    // The following might fail if there was BPT among balances
-                    // with an index lower than tokenIndexIn
-                    let newValue =
-                        i == poolPairData.tokenIndexIn ? amountConverted : ZERO;
+                    let newValue = i == tokenIndexIn ? amountConverted : ZERO;
                     amountsIn.push(newValue);
                 }
                 amt = SDK.StableMath._calcBptOutGivenExactTokensIn(
@@ -261,7 +261,7 @@ export class MetaStablePool implements PoolBase {
                 amt = SDK.StableMath._calcTokenOutGivenExactBptIn(
                     amp,
                     balances,
-                    poolPairData.tokenIndexOut,
+                    tokenIndexOut,
                     amountConverted,
                     totalShares,
                     swapFee
@@ -270,8 +270,8 @@ export class MetaStablePool implements PoolBase {
                 amt = SDK.StableMath._calcOutGivenIn(
                     amp,
                     balances,
-                    poolPairData.tokenIndexIn,
-                    poolPairData.tokenIndexOut,
+                    tokenIndexIn,
+                    tokenIndexOut,
                     amountConverted,
                     swapFee
                 );
@@ -303,19 +303,22 @@ export class MetaStablePool implements PoolBase {
             const amountConverted = amtScaled.times(
                 formatFixed(poolPairData.tokenOutPriceRate, 18)
             );
-            let amp = bnum(this.amp.toString());
-            let balances = removeBPT(poolPairData).allBalancesScaled.map(
+            const amp = bnum(this.amp.toString());
+            const poolPairDataNoBPT = removeBPT(poolPairData);
+            const balances = poolPairDataNoBPT.allBalancesScaled.map(
                 (balance) => bnum(balance.toString())
             );
-            let swapFee = bnum(poolPairData.swapFee.toString());
-            let totalShares = bnum(this.totalShares.toString());
+            const tokenIndexIn = poolPairDataNoBPT.tokenIndexIn;
+            const tokenIndexOut = poolPairDataNoBPT.tokenIndexOut;
+            const swapFee = bnum(poolPairData.swapFee.toString());
+            const totalShares = bnum(this.totalShares.toString());
             let amt: OldBigNumber;
 
             if (poolPairData.pairType === PairTypes.TokenToBpt) {
                 amt = SDK.StableMath._calcTokenInGivenExactBptOut(
                     amp,
                     balances,
-                    poolPairData.tokenIndexIn,
+                    tokenIndexIn,
                     amountConverted,
                     totalShares,
                     swapFee
@@ -323,12 +326,7 @@ export class MetaStablePool implements PoolBase {
             } else if (poolPairData.pairType === PairTypes.BptToToken) {
                 let amountsOut: OldBigNumber[] = [];
                 for (let i = 0; i < balances.length - 1; i++) {
-                    // The following might fail if there was BPT among balances
-                    // with an index lower than tokenIndexOut
-                    let newValue =
-                        i == poolPairData.tokenIndexOut
-                            ? amountConverted
-                            : ZERO;
+                    let newValue = i == tokenIndexOut ? amountConverted : ZERO;
                     amountsOut.push(newValue);
                 }
                 amt = SDK.StableMath._calcBptInGivenExactTokensOut(
@@ -344,8 +342,8 @@ export class MetaStablePool implements PoolBase {
                     poolPairData.allBalancesScaled.map((balance) =>
                         bnum(balance.toString())
                     ),
-                    poolPairData.tokenIndexIn,
-                    poolPairData.tokenIndexOut,
+                    tokenIndexIn,
+                    tokenIndexOut,
                     amountConverted,
                     bnum(poolPairData.swapFee.toString())
                 );
@@ -473,14 +471,16 @@ export class MetaStablePool implements PoolBase {
     }
 }
 
-function removeBPT(
+export function removeBPT(
     poolPairData: MetaStablePoolPairData
 ): MetaStablePoolPairData {
     let ans = cloneDeep(poolPairData);
     let bptIndex = poolPairData.bptIndex;
-    if (bptIndex) {
-        ans.allBalances.splice(bptIndex);
-        ans.allBalancesScaled.splice(bptIndex);
+    if (bptIndex != -1) {
+        ans.allBalances.splice(bptIndex, 1);
+        ans.allBalancesScaled.splice(bptIndex, 1);
+        if (bptIndex < poolPairData.tokenIndexIn) ans.tokenIndexIn -= 1;
+        if (bptIndex < poolPairData.tokenIndexOut) ans.tokenIndexOut -= 1;
     }
     return ans;
 }

@@ -128,8 +128,7 @@ export class StablePool implements PoolBase {
             pairType = PairTypes.TokenToToken;
         }
 
-        let bptIndex = this.tokensList.indexOf(this.address);
-
+        const bptIndex = this.tokensList.indexOf(this.address);
         const inv = _invariant(this.amp, allBalances);
 
         const poolPairData: StablePoolPairData = {

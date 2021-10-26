@@ -10,6 +10,7 @@ import { bnum } from '../src/utils/bignumber';
 import {
     MetaStablePool,
     MetaStablePoolPairData,
+    removeBPT,
 } from '../src/pools/metaStablePool/metaStablePool';
 import { BAL, USDC, WETH } from './lib/constants';
 import { PairTypes } from '../src/pools/stablePool/stablePool';
@@ -716,5 +717,50 @@ describe(`Tests for MetaStable Pools.`, () => {
         //     //     );
         //     // });
         // });
+    });
+
+    context('Metastable pool with BPT', () => {
+        const TEST = '0xaaaaaaaaa0de3a18e5e111b5eaab095312d00000';
+        it('Test removeBPT', () => {
+            const poolsFromFile = require('./testData/metaStablePools/includesBPT.json');
+            const pool = poolsFromFile.metaStablePool[0];
+            const metaStableBptSwapPool = MetaStablePool.fromPool(pool);
+            let poolPairData = metaStableBptSwapPool.parsePoolPairData(
+                TEST,
+                stETH
+            );
+            let poolPairDataNoBPT = removeBPT(poolPairData);
+            expect(poolPairDataNoBPT.tokenIndexIn).to.eq(2);
+            expect(poolPairDataNoBPT.tokenIndexOut).to.eq(1);
+            let balances = poolPairDataNoBPT.allBalances;
+            let expectedallBalancesScaled = balances.map((balance) =>
+                parseFixed(balance.toString(), 18)
+            );
+            expect(poolPairDataNoBPT.allBalances).to.deep.eq([
+                bnum(10),
+                bnum(1000),
+                bnum(300),
+            ]);
+            expect(poolPairDataNoBPT.allBalancesScaled).to.deep.eq(
+                expectedallBalancesScaled
+            );
+
+            poolPairData = metaStableBptSwapPool.parsePoolPairData(TEST, WETH);
+            poolPairDataNoBPT = removeBPT(poolPairData);
+            expect(poolPairDataNoBPT.tokenIndexIn).to.eq(2);
+            expect(poolPairDataNoBPT.tokenIndexOut).to.eq(0);
+            balances = poolPairDataNoBPT.allBalances;
+            expectedallBalancesScaled = balances.map((balance) =>
+                parseFixed(balance.toString(), 18)
+            );
+            expect(poolPairDataNoBPT.allBalances).to.deep.eq([
+                bnum(10),
+                bnum(1000),
+                bnum(300),
+            ]);
+            expect(poolPairDataNoBPT.allBalancesScaled).to.deep.eq(
+                expectedallBalancesScaled
+            );
+        });
     });
 });
