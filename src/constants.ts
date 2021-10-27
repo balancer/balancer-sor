@@ -43,8 +43,12 @@ export const USDCCONNECTINGPOOL: {
 export const STABAL3POOL: {
     [chainId: number]: { id: string; address: string };
 } = {
-    // TO DO - Add Mainnet and TestNet info
+    // TO DO - Add Mainnet info
     // TO DO - Add for Polygon for staBAL3 pairs
+    42: {
+        id: '0x21ff756ca0cfcc5fff488ad67babadffee0c4149000000000000000000000240',
+        address: '0x21ff756ca0cfcc5fff488ad67babadffee0c4149',
+    },
     99: {
         id: 'staBal3Id',
         address: '0x06df3b2bbb68adc8b0e302443692037ed9f91b42',

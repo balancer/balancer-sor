@@ -36,7 +36,10 @@ export function parseNewPool(
         pool.poolType === 'Investment'
     ) {
         newPool = WeightedPool.fromPool(pool);
-    } else if (pool.poolType === 'Stable') {
+    } else if (
+        pool.poolType === 'Stable' ||
+        pool.poolType === 'PhantomStable'
+    ) {
         newPool = StablePool.fromPool(pool);
     } else if (pool.poolType === 'MetaStable') {
         newPool = MetaStablePool.fromPool(pool);
