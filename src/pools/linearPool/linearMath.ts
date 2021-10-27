@@ -46,9 +46,7 @@ export function _exactTokenInForBPTOut(
             poolPairData.wrappedDecimals
         )
     );
-    const bptSupply = bnum(
-        formatFixed(poolPairData.bptSupply, poolPairData.decimalsOut)
-    );
+    const bptSupply = bnum(formatFixed(poolPairData.bptSupply, 18));
     const params: BigNumber[] = [
         bnum(formatFixed(poolPairData.swapFee, 18)),
         bnum(formatFixed(poolPairData.rate.toString(), 18)),
@@ -79,9 +77,7 @@ export function _tokenInForExactBPTOut(
     poolPairData: LinearPoolPairData
 ): BigNumber {
     const bptOut = bnum(amount.toString());
-    const bptSupply = bnum(
-        formatFixed(poolPairData.bptSupply, poolPairData.decimalsOut)
-    );
+    const bptSupply = bnum(formatFixed(poolPairData.bptSupply, 18));
     const mainBalance = bnum(
         formatFixed(poolPairData.balanceIn, poolPairData.decimalsIn)
     );
@@ -130,9 +126,7 @@ export function _BPTInForExactTokenOut(
             poolPairData.wrappedDecimals
         )
     );
-    const bptSupply = bnum(
-        formatFixed(poolPairData.bptSupply, poolPairData.decimalsOut)
-    );
+    const bptSupply = bnum(formatFixed(poolPairData.bptSupply, 18));
     const params: BigNumber[] = [
         bnum(formatFixed(poolPairData.swapFee, 18)),
         bnum(formatFixed(poolPairData.rate.toString(), 18)),
@@ -168,9 +162,7 @@ export function _exactBPTInForTokenOut(
             poolPairData.wrappedDecimals
         )
     );
-    const bptSupply = bnum(
-        formatFixed(poolPairData.bptSupply, poolPairData.decimalsOut)
-    );
+    const bptSupply = bnum(formatFixed(poolPairData.bptSupply, 18));
     const params: BigNumber[] = [
         bnum(formatFixed(poolPairData.swapFee, 18)),
         bnum(formatFixed(poolPairData.rate.toString(), 18)),
@@ -234,9 +226,7 @@ export function _spotPriceAfterSwapExactTokenInForBPTOut(
             poolPairData.wrappedDecimals
         )
     );
-    const bptSupply = bnum(
-        formatFixed(poolPairData.bptSupply, poolPairData.decimalsOut)
-    );
+    const bptSupply = bnum(formatFixed(poolPairData.bptSupply, 18));
     const params: BigNumber[] = [
         bnum(formatFixed(poolPairData.swapFee, 18)),
         bnum(formatFixed(poolPairData.rate.toString(), 18)),
@@ -264,9 +254,7 @@ export function _spotPriceAfterSwapTokenInForExactBPTOut(
     poolPairData: LinearPoolPairData
 ): BigNumber {
     const bptOut = bnum(amount.toString());
-    const bptSupply = bnum(
-        formatFixed(poolPairData.bptSupply, poolPairData.decimalsOut)
-    );
+    const bptSupply = bnum(formatFixed(poolPairData.bptSupply, 18));
     const mainBalance = bnum(
         formatFixed(poolPairData.balanceIn, poolPairData.decimalsIn)
     );
@@ -316,9 +304,7 @@ export function _spotPriceAfterSwapExactBPTInForTokenOut(
             poolPairData.wrappedDecimals
         )
     );
-    const bptSupply = bnum(
-        formatFixed(poolPairData.bptSupply, poolPairData.decimalsOut)
-    );
+    const bptSupply = bnum(formatFixed(poolPairData.bptSupply, 18));
     const params: BigNumber[] = [
         bnum(formatFixed(poolPairData.swapFee, 18)),
         bnum(formatFixed(poolPairData.rate.toString(), 18)),
@@ -356,9 +342,7 @@ export function _spotPriceAfterSwapBPTInForExactTokenOut(
             poolPairData.wrappedDecimals
         )
     );
-    const bptSupply = bnum(
-        formatFixed(poolPairData.bptSupply, poolPairData.decimalsOut)
-    );
+    const bptSupply = bnum(formatFixed(poolPairData.bptSupply, 18));
     const finalMainBalance = mainBalance.minus(mainOut);
     const params: BigNumber[] = [
         bnum(formatFixed(poolPairData.swapFee, 18)),
