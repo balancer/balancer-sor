@@ -23,21 +23,22 @@ describe('stable-math tests', () => {
     const stableBptSwapPool = StablePool.fromPool(pool);
     // tokens: DAI, USDC, USDT in this order
     let poolPairData: StablePoolPairData;
-    const amount = 500000000000000;
+    poolPairData = createPoolPairData(stableBptSwapPool, USDT, DAI);
+    const allBalancesScaled = poolPairData.allBalancesScaled.map((balance) =>
+        bnum(balance.toString())
+    );
+    const amount = 5000000000000;
     const amtScaled = scale(bnum(amount), 18);
+    const amp1000 = bnum(stableBptSwapPool.amp.toString()).times(1000);
 
-    console.log('amtScaled: ', amtScaled.toString());
-
-    let error = 0.000001;
+    let error = 0.00005;
 
     context('swap outcomes', () => {
         it('_exactTokenInForTokenOut', () => {
             poolPairData = createPoolPairData(stableBptSwapPool, USDT, DAI);
             let sdkValue = SDK.StableMath._calcOutGivenIn(
-                bnum(stableBptSwapPool.amp.toString()).times(100),
-                poolPairData.allBalancesScaled.map((balance) =>
-                    bnum(balance.toString())
-                ),
+                amp1000,
+                allBalancesScaled,
                 poolPairData.tokenIndexIn,
                 poolPairData.tokenIndexOut,
                 amtScaled,
@@ -56,10 +57,8 @@ describe('stable-math tests', () => {
         it('_tokenInForExactTokenOut', () => {
             poolPairData = createPoolPairData(stableBptSwapPool, USDT, DAI);
             let sdkValue = SDK.StableMath._calcInGivenOut(
-                bnum(stableBptSwapPool.amp.toString()),
-                poolPairData.allBalancesScaled.map((balance) =>
-                    bnum(balance.toString())
-                ),
+                amp1000,
+                allBalancesScaled,
                 poolPairData.tokenIndexIn,
                 poolPairData.tokenIndexOut,
                 amtScaled,
@@ -82,10 +81,8 @@ describe('stable-math tests', () => {
                 BPTaddress
             );
             let sdkValue = SDK.StableMath._calcBptOutGivenExactTokensIn(
-                bnum(stableBptSwapPool.amp.toString()),
-                poolPairData.allBalancesScaled.map((balance) =>
-                    bnum(balance.toString())
-                ),
+                amp1000,
+                allBalancesScaled,
                 [bnum(0), bnum(0), amtScaled],
                 bnum(stableBptSwapPool.totalShares.toString()),
                 bnum(poolPairData.swapFee.toString())
@@ -107,10 +104,8 @@ describe('stable-math tests', () => {
                 BPTaddress
             );
             let sdkValue = SDK.StableMath._calcTokenInGivenExactBptOut(
-                bnum(stableBptSwapPool.amp.toString()),
-                poolPairData.allBalancesScaled.map((balance) =>
-                    bnum(balance.toString())
-                ),
+                amp1000,
+                allBalancesScaled,
                 poolPairData.tokenIndexIn,
                 amtScaled,
                 bnum(stableBptSwapPool.totalShares.toString()),
@@ -133,10 +128,8 @@ describe('stable-math tests', () => {
                 USDT
             );
             let sdkValue = SDK.StableMath._calcBptInGivenExactTokensOut(
-                bnum(stableBptSwapPool.amp.toString()),
-                poolPairData.allBalancesScaled.map((balance) =>
-                    bnum(balance.toString())
-                ),
+                amp1000,
+                allBalancesScaled,
                 [bnum(0), bnum(0), amtScaled],
                 bnum(stableBptSwapPool.totalShares.toString()),
                 bnum(poolPairData.swapFee.toString())
@@ -158,10 +151,8 @@ describe('stable-math tests', () => {
                 USDT
             );
             let sdkValue = SDK.StableMath._calcTokenOutGivenExactBptIn(
-                bnum(stableBptSwapPool.amp.toString()),
-                poolPairData.allBalancesScaled.map((balance) =>
-                    bnum(balance.toString())
-                ),
+                amp1000,
+                allBalancesScaled,
                 poolPairData.tokenIndexOut,
                 amtScaled,
                 bnum(stableBptSwapPool.totalShares.toString()),
@@ -381,12 +372,8 @@ function checkOutcome(
     expected: number,
     error: number
 ) {
-    assert.approximately(
-        fn(bnum(amount), poolPairData).toNumber() / expected,
-        1,
-        error,
-        'wrong result'
-    );
+    const fn_result = fn(bnum(amount), poolPairData).toNumber();
+    assert.approximately(fn_result / expected, 1, error, 'wrong result');
 }
 
 function checkDerivative(
@@ -411,11 +398,10 @@ function checkDerivative(
     if (inverse) incrementalQuotient = bnum(1).div(incrementalQuotient);
     const der_ans = der(x, poolPairData);
     let d = 10 ** -10;
-    console.log(der_ans.toString());
-    console.log(incrementalQuotient.toString());
     assert.approximately(
+        // adding d to both numerator and denominator prevents large relative errors
+        // when numbers are very small (even division by zero in some cases).
         incrementalQuotient.plus(d).div(der_ans.plus(d)).toNumber(),
-        //      incrementalQuotient.div(der_ans).toNumber(),
         1,
         error,
         'wrong result'
