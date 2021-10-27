@@ -53,7 +53,7 @@ export type LinearPoolPairData = PoolPairBase & {
     mainBalanceScaled: BigNumber; // Scaled are used for EVM/SDK maths
     wrappedBalanceScaled: BigNumber;
     bptBalanceScaled: BigNumber;
-    bptSupply: BigNumber;
+    virtualBptSupply: BigNumber;
 };
 
 export class LinearPool implements PoolBase {
@@ -74,6 +74,8 @@ export class LinearPool implements PoolBase {
     target2: BigNumber;
     MAX_RATIO = parseFixed('10', 18); // Specific for Linear pool types
     ALMOST_ONE = parseFixed('0.99', 18);
+    // Used for VirutalBpt and can be removed if SG is updated with VirtualBpt value
+    MAX_TOKEN_BALANCE = BigNumber.from('2').pow('112').sub('1');
 
     static fromPool(pool: SubgraphPoolBase): LinearPool {
         if (pool.mainIndex === undefined)
@@ -157,7 +159,9 @@ export class LinearPool implements PoolBase {
         const wrappedBalanceScaled = allBalancesScaled[this.wrappedIndex];
         const bptBalanceScaled = allBalancesScaled[this.bptIndex];
         // https://github.com/balancer-labs/balancer-v2-monorepo/blob/88a14eb623f6a22ef3f1afc5a8c49ebfa7eeceed/pkg/pool-linear/contracts/LinearPool.sol#L247
-        const bptSupply = this.totalShares.sub(bptBalanceScaled);
+        // VirtualBPTSupply must be used for the maths
+        // TO DO - SG should be updated to so that totalShares should return VirtualSupply
+        const virtualBptSupply = this.MAX_TOKEN_BALANCE.sub(bptBalanceScaled);
 
         const poolPairData: LinearPoolPairData = {
             id: this.id,
@@ -182,7 +186,7 @@ export class LinearPool implements PoolBase {
             mainBalanceScaled,
             wrappedBalanceScaled,
             bptBalanceScaled,
-            bptSupply,
+            virtualBptSupply,
         };
 
         return poolPairData;
@@ -280,7 +284,7 @@ export class LinearPool implements PoolBase {
                     amtScaled,
                     bnum(poolPairData.mainBalanceScaled.toString()),
                     bnum(poolPairData.wrappedBalanceScaled.toString()),
-                    bnum(poolPairData.bptSupply.toString()),
+                    bnum(poolPairData.virtualBptSupply.toString()),
                     {
                         fee: bnum(poolPairData.swapFee.toString()),
                         rate: poolPairData.rate,
@@ -314,7 +318,7 @@ export class LinearPool implements PoolBase {
                     amtScaled,
                     bnum(poolPairData.mainBalanceScaled.toString()),
                     bnum(poolPairData.wrappedBalanceScaled.toString()),
-                    bnum(poolPairData.bptSupply.toString()),
+                    bnum(poolPairData.virtualBptSupply.toString()),
                     {
                         fee: bnum(poolPairData.swapFee.toString()),
                         rate: poolPairData.rate,
@@ -358,7 +362,7 @@ export class LinearPool implements PoolBase {
                     amtScaled,
                     bnum(poolPairData.mainBalanceScaled.toString()),
                     bnum(poolPairData.wrappedBalanceScaled.toString()),
-                    bnum(poolPairData.bptSupply.toString()),
+                    bnum(poolPairData.virtualBptSupply.toString()),
                     {
                         fee: bnum(poolPairData.swapFee.toString()),
                         rate: poolPairData.rate,
@@ -391,7 +395,7 @@ export class LinearPool implements PoolBase {
                     amtScaled,
                     bnum(poolPairData.mainBalanceScaled.toString()),
                     bnum(poolPairData.wrappedBalanceScaled.toString()),
-                    bnum(poolPairData.bptSupply.toString()),
+                    bnum(poolPairData.virtualBptSupply.toString()),
                     {
                         fee: bnum(poolPairData.swapFee.toString()),
                         rate: poolPairData.rate,
