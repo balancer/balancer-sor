@@ -92,6 +92,12 @@ export async function getOnChainBalances(
                 pool.address,
                 'getWrappedIndex'
             );
+
+            multiPool.call(
+                `${pool.id}.wrappedTokenRateCache`,
+                pool.address,
+                'getWrappedTokenRateCache'
+            );
         }
     });
 
@@ -108,6 +114,7 @@ export async function getOnChainBalances(
                 tokens: string[];
                 balances: string[];
             };
+            wrappedTokenRateCache?: string;
         }
     >;
 
@@ -176,6 +183,17 @@ export async function getOnChainBalances(
                     subgraphPools[index].wrappedIndex = Number(
                         onchainData.wrappedIndex
                     );
+
+                if (!onchainData.wrappedTokenRateCache)
+                    throw `Linear Pool Missing WrappedTokenRateCache: ${poolId}`;
+                else {
+                    subgraphPools[index].tokens[
+                        onchainData.wrappedIndex
+                    ].priceRate = formatFixed(
+                        onchainData.wrappedTokenRateCache[0],
+                        18
+                    );
+                }
             }
 
             subgraphPools[index].swapFee = formatFixed(swapFee, 18);
