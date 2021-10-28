@@ -245,9 +245,10 @@ export class MetaStablePool implements PoolBase {
             let amt: OldBigNumber;
 
             if (poolPairData.pairType === PairTypes.TokenToBpt) {
-                let amountsIn: OldBigNumber[] = [];
+                const amountsIn: OldBigNumber[] = [];
                 for (let i = 0; i < balances.length - 1; i++) {
-                    let newValue = i == tokenIndexIn ? amountConverted : ZERO;
+                    const newValue =
+                        i === tokenIndexIn ? amountConverted : ZERO;
                     amountsIn.push(newValue);
                 }
                 amt = SDK.StableMath._calcBptOutGivenExactTokensIn(
@@ -324,9 +325,10 @@ export class MetaStablePool implements PoolBase {
                     swapFee
                 );
             } else if (poolPairData.pairType === PairTypes.BptToToken) {
-                let amountsOut: OldBigNumber[] = [];
+                const amountsOut: OldBigNumber[] = [];
                 for (let i = 0; i < balances.length - 1; i++) {
-                    let newValue = i == tokenIndexOut ? amountConverted : ZERO;
+                    const newValue =
+                        i === tokenIndexOut ? amountConverted : ZERO;
                     amountsOut.push(newValue);
                 }
                 amt = SDK.StableMath._calcBptInGivenExactTokensOut(
@@ -338,14 +340,12 @@ export class MetaStablePool implements PoolBase {
                 );
             } else {
                 amt = SDK.StableMath._calcInGivenOut(
-                    bnum(this.amp.toString()),
-                    poolPairData.allBalancesScaled.map((balance) =>
-                        bnum(balance.toString())
-                    ),
+                    amp,
+                    balances,
                     tokenIndexIn,
                     tokenIndexOut,
                     amountConverted,
-                    bnum(poolPairData.swapFee.toString())
+                    swapFee
                 );
             }
             // return normalised amount
@@ -474,8 +474,8 @@ export class MetaStablePool implements PoolBase {
 export function removeBPT(
     poolPairData: MetaStablePoolPairData
 ): MetaStablePoolPairData {
-    let ans = cloneDeep(poolPairData);
-    let bptIndex = poolPairData.bptIndex;
+    const ans = cloneDeep(poolPairData);
+    const bptIndex = poolPairData.bptIndex;
     if (bptIndex != -1) {
         ans.allBalances.splice(bptIndex, 1);
         ans.allBalancesScaled.splice(bptIndex, 1);
