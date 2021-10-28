@@ -233,7 +233,7 @@ export class StablePool implements PoolBase {
 
             if (poolPairData.pairType === PairTypes.TokenToBpt) {
                 const amountsIn: OldBigNumber[] = [];
-                for (let i = 0; i < balances.length - 1; i++) {
+                for (let i = 0; i < balances.length; i++) {
                     const newValue = i === tokenIndexIn ? amtScaled : ZERO;
                     amountsIn.push(newValue);
                 }
@@ -306,7 +306,7 @@ export class StablePool implements PoolBase {
                 );
             } else if (poolPairData.pairType === PairTypes.BptToToken) {
                 const amountsOut: OldBigNumber[] = [];
-                for (let i = 0; i < balances.length - 1; i++) {
+                for (let i = 0; i < balances.length; i++) {
                     const newValue = i === tokenIndexOut ? amtScaled : ZERO;
                     amountsOut.push(newValue);
                 }
