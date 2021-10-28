@@ -180,8 +180,8 @@
             "address": "0x0000000000000000000000000000000000000001",
             "wrappedIndex": 1,
             "mainIndex": 0,
-            "target1": "1000.000000",
-            "target2": "1500.000000"
+            "lowerTarget": "1000.000000",
+            "upperTarget": "1500.000000"
         },
         {
             "id": "linearDAI",
@@ -227,8 +227,8 @@
             "address": "0x0000000000000000000000000000000000000002",
             "wrappedIndex": 1,
             "mainIndex": 0,
-            "target1": "1000.000000",
-            "target2": "1500.000000"
+            "lowerTarget": "1000.000000",
+            "upperTarget": "1500.000000"
         },
         {
             "id": "linearUSDT",
@@ -274,8 +274,8 @@
             "address": "0x0000000000000000000000000000000000000003",
             "wrappedIndex": 1,
             "mainIndex": 0,
-            "target1": "100000.000000",
-            "target2": "150000.000000"
+            "lowerTarget": "100000.000000",
+            "upperTarget": "150000.000000"
         },
         {
             "id": "staBal3Id",
@@ -469,8 +469,8 @@
             "address": "0x0000000000000000000000000000000000000005",
             "wrappedIndex": 1,
             "mainIndex": 0,
-            "target1": "1000.000000",
-            "target2": "1500.000000"
+            "lowerTarget": "1000.000000",
+            "upperTarget": "1500.000000"
         }
     ]
 }

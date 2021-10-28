@@ -790,7 +790,8 @@ function testParsePool(
         tokenIn.address,
         tokenOut.address
     );
-    if (!poolSG.wrappedIndex || !poolSG.target1 || !poolSG.target2) return;
+    if (!poolSG.wrappedIndex || !poolSG.lowerTarget || !poolSG.upperTarget)
+        return;
     expect(poolPairData.id).to.eq(poolSG.id);
     expect(poolPairData.address).to.eq(poolSG.address);
     expect(poolPairData.tokenIn).to.eq(tokenIn.address);
@@ -826,10 +827,10 @@ function testParsePool(
     expect(poolPairData.rate.toString()).to.eq(
         parseFixed(poolSG.tokens[poolSG.wrappedIndex].priceRate, 18).toString()
     );
-    expect(poolPairData.target1.toString()).to.eq(
-        parseFixed(poolSG.target1, 18).toString()
+    expect(poolPairData.lowerTarget.toString()).to.eq(
+        parseFixed(poolSG.lowerTarget, 18).toString()
     );
-    expect(poolPairData.target2.toString()).to.eq(
-        parseFixed(poolSG.target2, 18).toString()
+    expect(poolPairData.upperTarget.toString()).to.eq(
+        parseFixed(poolSG.upperTarget, 18).toString()
     );
 }

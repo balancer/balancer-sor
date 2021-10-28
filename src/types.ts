@@ -82,8 +82,8 @@ export interface SubgraphPoolBase {
     // Linear specific fields
     mainIndex?: number;
     wrappedIndex?: number;
-    target1?: string;
-    target2?: string;
+    lowerTarget?: string;
+    upperTarget?: string;
 }
 
 export type SubgraphToken = {

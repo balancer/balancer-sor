@@ -295,8 +295,8 @@ function makeLinearPoolPairData(
     virtualBptSupply: BigNumber,
     swapFee: BigNumber = parseFixed('0.02', 18),
     rate: OldBigNumber = scale(bnum('1.1'), 18),
-    target1: BigNumber = parseFixed('1000', 18),
-    target2: BigNumber = parseFixed('2000', 18),
+    lowerTarget: BigNumber = parseFixed('1000', 18),
+    upperTarget: BigNumber = parseFixed('2000', 18),
     pairType = 0
 ): LinearPoolPairData {
     return {
@@ -306,8 +306,8 @@ function makeLinearPoolPairData(
         wrappedBalance: bnum(wrappedBalance.toString()),
         wrappedDecimals: 18,
         rate: rate,
-        target1: target1,
-        target2: target2,
+        lowerTarget: lowerTarget,
+        upperTarget: upperTarget,
         swapFee,
         id: 'ignored',
         address: 'ignored',

@@ -52,8 +52,8 @@ export function _exactTokenInForBPTOut(
     const params: BigNumber[] = [
         bnum(formatFixed(poolPairData.swapFee, 18)),
         bnum(formatFixed(poolPairData.rate.toString(), 18)),
-        bnum(formatFixed(poolPairData.target1.toString(), 18)),
-        bnum(formatFixed(poolPairData.target2.toString(), 18)),
+        bnum(formatFixed(poolPairData.lowerTarget.toString(), 18)),
+        bnum(formatFixed(poolPairData.upperTarget.toString(), 18)),
     ];
 
     if (virtualBptSupply.eq(0)) {
@@ -94,8 +94,8 @@ export function _tokenInForExactBPTOut(
     const params: BigNumber[] = [
         bnum(formatFixed(poolPairData.swapFee, 18)),
         bnum(formatFixed(poolPairData.rate.toString(), 18)),
-        bnum(formatFixed(poolPairData.target1.toString(), 18)),
-        bnum(formatFixed(poolPairData.target2.toString(), 18)),
+        bnum(formatFixed(poolPairData.lowerTarget.toString(), 18)),
+        bnum(formatFixed(poolPairData.upperTarget.toString(), 18)),
     ];
 
     if (virtualBptSupply.eq(0)) {
@@ -136,8 +136,8 @@ export function _BPTInForExactTokenOut(
     const params: BigNumber[] = [
         bnum(formatFixed(poolPairData.swapFee, 18)),
         bnum(formatFixed(poolPairData.rate.toString(), 18)),
-        bnum(formatFixed(poolPairData.target1.toString(), 18)),
-        bnum(formatFixed(poolPairData.target2.toString(), 18)),
+        bnum(formatFixed(poolPairData.lowerTarget.toString(), 18)),
+        bnum(formatFixed(poolPairData.upperTarget.toString(), 18)),
     ];
 
     const previousNominalMain = toNominal(mainBalance, params);
@@ -174,8 +174,8 @@ export function _exactBPTInForTokenOut(
     const params: BigNumber[] = [
         bnum(formatFixed(poolPairData.swapFee, 18)),
         bnum(formatFixed(poolPairData.rate.toString(), 18)),
-        bnum(formatFixed(poolPairData.target1.toString(), 18)),
-        bnum(formatFixed(poolPairData.target2.toString(), 18)),
+        bnum(formatFixed(poolPairData.lowerTarget.toString(), 18)),
+        bnum(formatFixed(poolPairData.upperTarget.toString(), 18)),
     ];
 
     const previousNominalMain = toNominal(mainBalance, params);
@@ -240,8 +240,8 @@ export function _spotPriceAfterSwapExactTokenInForBPTOut(
     const params: BigNumber[] = [
         bnum(formatFixed(poolPairData.swapFee, 18)),
         bnum(formatFixed(poolPairData.rate.toString(), 18)),
-        bnum(formatFixed(poolPairData.target1.toString(), 18)),
-        bnum(formatFixed(poolPairData.target2.toString(), 18)),
+        bnum(formatFixed(poolPairData.lowerTarget.toString(), 18)),
+        bnum(formatFixed(poolPairData.upperTarget.toString(), 18)),
     ];
 
     const previousNominalMain = toNominal(mainBalance, params);
@@ -279,8 +279,8 @@ export function _spotPriceAfterSwapTokenInForExactBPTOut(
     const params: BigNumber[] = [
         bnum(formatFixed(poolPairData.swapFee, 18)),
         bnum(formatFixed(poolPairData.rate.toString(), 18)),
-        bnum(formatFixed(poolPairData.target1.toString(), 18)),
-        bnum(formatFixed(poolPairData.target2.toString(), 18)),
+        bnum(formatFixed(poolPairData.lowerTarget.toString(), 18)),
+        bnum(formatFixed(poolPairData.upperTarget.toString(), 18)),
     ];
 
     const previousNominalMain = toNominal(mainBalance, params);
@@ -322,8 +322,8 @@ export function _spotPriceAfterSwapExactBPTInForTokenOut(
     const params: BigNumber[] = [
         bnum(formatFixed(poolPairData.swapFee, 18)),
         bnum(formatFixed(poolPairData.rate.toString(), 18)),
-        bnum(formatFixed(poolPairData.target1.toString(), 18)),
-        bnum(formatFixed(poolPairData.target2.toString(), 18)),
+        bnum(formatFixed(poolPairData.lowerTarget.toString(), 18)),
+        bnum(formatFixed(poolPairData.upperTarget.toString(), 18)),
     ];
 
     const previousNominalMain = toNominal(mainBalance, params);
@@ -363,8 +363,8 @@ export function _spotPriceAfterSwapBPTInForExactTokenOut(
     const params: BigNumber[] = [
         bnum(formatFixed(poolPairData.swapFee, 18)),
         bnum(formatFixed(poolPairData.rate.toString(), 18)),
-        bnum(formatFixed(poolPairData.target1.toString(), 18)),
-        bnum(formatFixed(poolPairData.target2.toString(), 18)),
+        bnum(formatFixed(poolPairData.lowerTarget.toString(), 18)),
+        bnum(formatFixed(poolPairData.upperTarget.toString(), 18)),
     ];
 
     const previousNominalMain = toNominal(mainBalance, params);
@@ -454,15 +454,15 @@ function calcInvariant(
 
 function toNominal(amount: BigNumber, params: BigNumber[]): BigNumber {
     const fee = params[0];
-    const target1 = params[2];
-    const target2 = params[3];
-    if (amount.lt(bnum(1).minus(fee).times(target1))) {
+    const lowerTarget = params[2];
+    const upperTarget = params[3];
+    if (amount.lt(bnum(1).minus(fee).times(lowerTarget))) {
         return amount.div(bnum(1).minus(fee));
-    } else if (amount.lt(target2.minus(fee.times(target1)))) {
-        return amount.plus(fee.times(target1));
+    } else if (amount.lt(upperTarget.minus(fee.times(lowerTarget)))) {
+        return amount.plus(fee.times(lowerTarget));
     } else {
         return amount
-            .plus(target1.plus(target2).times(fee))
+            .plus(lowerTarget.plus(upperTarget).times(fee))
             .div(bnum(1).plus(fee));
     }
 }
@@ -472,13 +472,13 @@ function leftDerivativeToNominal(
     params: BigNumber[]
 ): BigNumber {
     const fee = params[0];
-    const target1 = params[2];
-    const target2 = params[3];
+    const lowerTarget = params[2];
+    const upperTarget = params[3];
     const oneMinusFee = bnum(1).minus(fee);
     const onePlusFee = bnum(1).plus(fee);
-    if (amount.lte(oneMinusFee.times(target1))) {
+    if (amount.lte(oneMinusFee.times(lowerTarget))) {
         return bnum(1).div(oneMinusFee);
-    } else if (amount.lte(target2.minus(fee.times(target1)))) {
+    } else if (amount.lte(upperTarget.minus(fee.times(lowerTarget)))) {
         return bnum(1);
     } else {
         return bnum(1).div(onePlusFee);
@@ -490,13 +490,13 @@ function rightDerivativeToNominal(
     params: BigNumber[]
 ): BigNumber {
     const fee = params[0];
-    const target1 = params[2];
-    const target2 = params[3];
+    const lowerTarget = params[2];
+    const upperTarget = params[3];
     const oneMinusFee = bnum(1).minus(fee);
     const onePlusFee = bnum(1).plus(fee);
-    if (amount.lt(oneMinusFee.times(target1))) {
+    if (amount.lt(oneMinusFee.times(lowerTarget))) {
         return bnum(1).div(oneMinusFee);
-    } else if (amount.lt(target2.minus(fee.times(target1)))) {
+    } else if (amount.lt(upperTarget.minus(fee.times(lowerTarget)))) {
         return bnum(1);
     } else {
         return bnum(1).div(onePlusFee);
@@ -505,16 +505,16 @@ function rightDerivativeToNominal(
 
 function fromNominal(nominal: BigNumber, params: BigNumber[]): BigNumber {
     const fee = params[0];
-    const target1 = params[2];
-    const target2 = params[3];
-    if (nominal.lt(target1)) {
+    const lowerTarget = params[2];
+    const upperTarget = params[3];
+    if (nominal.lt(lowerTarget)) {
         return nominal.times(bnum(1).minus(fee));
-    } else if (nominal.lt(target2)) {
-        return nominal.minus(fee.times(target1));
+    } else if (nominal.lt(upperTarget)) {
+        return nominal.minus(fee.times(lowerTarget));
     } else {
         return nominal
             .times(bnum(1).plus(fee))
-            .minus(fee.times(target1.plus(target2)));
+            .minus(fee.times(lowerTarget.plus(upperTarget)));
     }
 }
 
@@ -523,11 +523,11 @@ function leftDerivativeFromNominal(
     params: BigNumber[]
 ): BigNumber {
     const fee = params[0];
-    const target1 = params[2];
-    const target2 = params[3];
-    if (amount.lte(target1)) {
+    const lowerTarget = params[2];
+    const upperTarget = params[3];
+    if (amount.lte(lowerTarget)) {
         return bnum(1).minus(fee);
-    } else if (amount.lte(target2)) {
+    } else if (amount.lte(upperTarget)) {
         return bnum(1);
     } else {
         return bnum(1).plus(fee);
@@ -539,11 +539,11 @@ function rightDerivativeFromNominal(
     params: BigNumber[]
 ): BigNumber {
     const fee = params[0];
-    const target1 = params[2];
-    const target2 = params[3];
-    if (amount.lt(target1)) {
+    const lowerTarget = params[2];
+    const upperTarget = params[3];
+    if (amount.lt(lowerTarget)) {
         return bnum(1).minus(fee);
-    } else if (amount.lt(target2)) {
+    } else if (amount.lt(upperTarget)) {
         return bnum(1);
     } else {
         return bnum(1).plus(fee);

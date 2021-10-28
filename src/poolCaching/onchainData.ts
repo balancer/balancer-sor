@@ -160,11 +160,11 @@ export async function getOnChainBalances(
                 if (!onchainData.targets)
                     throw `Linear Pool Missing Targets: ${poolId}`;
                 else {
-                    subgraphPools[index].target1 = formatFixed(
+                    subgraphPools[index].lowerTarget = formatFixed(
                         onchainData.targets[0],
                         18
                     );
-                    subgraphPools[index].target2 = formatFixed(
+                    subgraphPools[index].upperTarget = formatFixed(
                         onchainData.targets[1],
                         18
                     );

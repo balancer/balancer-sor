@@ -48,8 +48,8 @@ export type LinearPoolPairData = PoolPairBase & {
     wrappedBalance: OldBigNumber; // If main token is USDC then wrapped token is aUSDC (or a wrapped version of it)
     wrappedDecimals: number;
     rate: OldBigNumber; // PriceRate of wrapped token
-    target1: BigNumber; // Target determine the range where there are positive, zero or negative fees
-    target2: BigNumber; // when the "main token" has a balance below target1, there are negative fees when adding main token
+    lowerTarget: BigNumber; // Target determine the range where there are positive, zero or negative fees
+    upperTarget: BigNumber; // when the "main token" has a balance below lowerTarget, there are negative fees when adding main token
     mainBalanceScaled: BigNumber; // Scaled are used for EVM/SDK maths
     wrappedBalanceScaled: BigNumber;
     bptBalanceScaled: BigNumber;
@@ -70,8 +70,8 @@ export class LinearPool implements PoolBase {
     wrappedDecimals: number;
     mainIndex: number;
     bptIndex: number;
-    target1: BigNumber;
-    target2: BigNumber;
+    lowerTarget: BigNumber;
+    upperTarget: BigNumber;
     MAX_RATIO = parseFixed('10', 18); // Specific for Linear pool types
     ALMOST_ONE = parseFixed('0.99', 18);
     // Used for VirutalBpt and can be removed if SG is updated with VirtualBpt value
@@ -82,8 +82,10 @@ export class LinearPool implements PoolBase {
             throw new Error('LinearPool missing mainIndex');
         if (pool.wrappedIndex === undefined)
             throw new Error('LinearPool missing wrappedIndex');
-        if (!pool.target1) throw new Error('LinearPool missing target1');
-        if (!pool.target2) throw new Error('LinearPool missing target2');
+        if (!pool.lowerTarget)
+            throw new Error('LinearPool missing lowerTarget');
+        if (!pool.upperTarget)
+            throw new Error('LinearPool missing upperTarget');
         return new LinearPool(
             pool.id,
             pool.address,
@@ -93,8 +95,8 @@ export class LinearPool implements PoolBase {
             pool.tokensList,
             pool.mainIndex,
             pool.wrappedIndex,
-            pool.target1,
-            pool.target2
+            pool.lowerTarget,
+            pool.upperTarget
         );
     }
 
@@ -107,8 +109,8 @@ export class LinearPool implements PoolBase {
         tokensList: string[],
         mainIndex: number,
         wrappedIndex: number,
-        target1: string,
-        target2: string
+        lowerTarget: string,
+        upperTarget: string
     ) {
         this.id = id;
         this.address = address;
@@ -120,8 +122,8 @@ export class LinearPool implements PoolBase {
         this.bptIndex = this.tokensList.indexOf(this.address);
         this.wrappedIndex = wrappedIndex;
         this.wrappedDecimals = this.tokens[this.wrappedIndex].decimals;
-        this.target1 = parseFixed(target1, 18); // Wrapped token will have same decimals as underlying
-        this.target2 = parseFixed(target2, 18);
+        this.lowerTarget = parseFixed(lowerTarget, 18); // Wrapped token will have same decimals as underlying
+        this.upperTarget = parseFixed(upperTarget, 18);
     }
 
     setTypeForSwap(type: SwapPairType): void {
@@ -181,8 +183,8 @@ export class LinearPool implements PoolBase {
             ),
             wrappedDecimals: this.wrappedDecimals,
             rate: scale(bnum(this.tokens[this.wrappedIndex].priceRate), 18),
-            target1: this.target1,
-            target2: this.target2,
+            lowerTarget: this.lowerTarget,
+            upperTarget: this.upperTarget,
             mainBalanceScaled,
             wrappedBalanceScaled,
             bptBalanceScaled,
@@ -288,8 +290,8 @@ export class LinearPool implements PoolBase {
                     {
                         fee: bnum(poolPairData.swapFee.toString()),
                         rate: poolPairData.rate,
-                        lowerTarget: bnum(poolPairData.target1.toString()),
-                        upperTarget: bnum(poolPairData.target2.toString()),
+                        lowerTarget: bnum(poolPairData.lowerTarget.toString()),
+                        upperTarget: bnum(poolPairData.upperTarget.toString()),
                     }
                 );
                 // return human readable number
@@ -322,8 +324,8 @@ export class LinearPool implements PoolBase {
                     {
                         fee: bnum(poolPairData.swapFee.toString()),
                         rate: poolPairData.rate,
-                        lowerTarget: bnum(poolPairData.target1.toString()),
-                        upperTarget: bnum(poolPairData.target2.toString()),
+                        lowerTarget: bnum(poolPairData.lowerTarget.toString()),
+                        upperTarget: bnum(poolPairData.upperTarget.toString()),
                     }
                 );
                 // return human readable number
@@ -366,8 +368,8 @@ export class LinearPool implements PoolBase {
                     {
                         fee: bnum(poolPairData.swapFee.toString()),
                         rate: poolPairData.rate,
-                        lowerTarget: bnum(poolPairData.target1.toString()),
-                        upperTarget: bnum(poolPairData.target2.toString()),
+                        lowerTarget: bnum(poolPairData.lowerTarget.toString()),
+                        upperTarget: bnum(poolPairData.upperTarget.toString()),
                     }
                 );
                 // return human readable number
@@ -399,8 +401,8 @@ export class LinearPool implements PoolBase {
                     {
                         fee: bnum(poolPairData.swapFee.toString()),
                         rate: poolPairData.rate,
-                        lowerTarget: bnum(poolPairData.target1.toString()),
-                        upperTarget: bnum(poolPairData.target2.toString()),
+                        lowerTarget: bnum(poolPairData.lowerTarget.toString()),
+                        upperTarget: bnum(poolPairData.upperTarget.toString()),
                     }
                 );
                 // return human readable number
