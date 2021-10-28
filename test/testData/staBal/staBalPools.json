@@ -42,7 +42,7 @@
         },
         {
             "id": "usdcConnecting",
-            "address": "usdcConnecting",
+            "address": "0x0000000000000000000000000000000000000013",
             "amp": "200",
             "poolType": "Stable",
             "swapFee": "0.0005",
@@ -73,7 +73,7 @@
         },
         {
             "id": "staBalPair1",
-            "address": "staBalPair1",
+            "address": "0x0000000000000000000000000000000000000011",
             "amp": "200",
             "poolType": "Stable",
             "swapFee": "0.0005",
@@ -104,7 +104,7 @@
         },
         {
             "id": "staBalPair2",
-            "address": "staBalPair2",
+            "address": "0x0000000000000000000000000000000000000012",
             "amp": "200",
             "poolType": "Stable",
             "swapFee": "0.0005",
