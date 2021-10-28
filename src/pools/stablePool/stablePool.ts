@@ -235,13 +235,16 @@ export class StablePool implements PoolBase {
             const swapFee = bnum(poolPairData.swapFee.toString());
             let amt: OldBigNumber;
 
+            //EVM - 9901097957797894
+            //SOR - 9934289675943491
+            //SOR - 10001109048103954 (with 0 fee)
+
             if (poolPairData.pairType === PairTypes.TokenToBpt) {
                 // VirtualBPTSupply must be used for the maths
                 // TO DO - SG should be updated to so that totalShares should return VirtualSupply
                 const virtualBptSupply = this.MAX_TOKEN_BALANCE.sub(
                     poolPairData.allBalancesScaled[tokenIndexOut]
                 );
-
                 const amountsIn: OldBigNumber[] = [];
                 for (let i = 0; i < balances.length; i++) {
                     const newValue = i === tokenIndexIn ? amtScaled : ZERO;
@@ -253,6 +256,16 @@ export class StablePool implements PoolBase {
                     amountsIn,
                     bnum(virtualBptSupply.toString()),
                     swapFee
+                );
+                console.log(`!!!!!!! TokenToBpt AmtIn: ${amount.toString()}`);
+                console.log(amp.toString());
+                console.log(swapFee.toString());
+                balances.forEach((b) => console.log(b.toString()));
+                console.log(`Amts:`);
+                amountsIn.forEach((b) => console.log(b.toString()));
+                console.log(`!!!!!!! TokenToBpt: ${amt.toString()}`);
+                console.log(
+                    poolPairData.allBalancesScaled[tokenIndexOut].toString()
                 );
             } else if (poolPairData.pairType === PairTypes.BptToToken) {
                 // VirtualBPTSupply must be used for the maths
