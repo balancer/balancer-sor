@@ -55,8 +55,11 @@ export class MetaStablePool implements PoolBase {
     totalShares: BigNumber;
     tokens: MetaStablePoolToken[];
     tokensList: string[];
+    isPhantom: boolean;
     MAX_IN_RATIO = parseFixed('0.3', 18);
     MAX_OUT_RATIO = parseFixed('0.3', 18);
+    // Used for VirutalBpt and can be removed if SG is updated with VirtualBpt value
+    MAX_TOKEN_BALANCE = BigNumber.from('2').pow('112').sub('1');
 
     static AMP_DECIMALS = 3;
 
@@ -89,6 +92,8 @@ export class MetaStablePool implements PoolBase {
         this.totalShares = parseFixed(totalShares, 18);
         this.tokens = tokens;
         this.tokensList = tokensList;
+        // A PhantomPool will have its BPT in token list
+        this.isPhantom = this.tokensList.includes(this.address);
     }
 
     setTypeForSwap(type: SwapPairType): void {
@@ -129,11 +134,11 @@ export class MetaStablePool implements PoolBase {
             parseFixed(balance, 18).mul(parseFixed(priceRate, 18)).div(ONE)
         );
 
-        // Metastable pools allow trading between token and pool BPT
+        // Metastable Phantom pools allow trading between token and pool BPT
         let pairType: PairTypes;
-        if (isSameAddress(tokenIn, this.address)) {
+        if (this.isPhantom && isSameAddress(tokenIn, this.address)) {
             pairType = PairTypes.BptToToken;
-        } else if (isSameAddress(tokenOut, this.address)) {
+        } else if (this.isPhantom && isSameAddress(tokenOut, this.address)) {
             pairType = PairTypes.TokenToBpt;
         } else {
             pairType = PairTypes.TokenToToken;
@@ -241,12 +246,17 @@ export class MetaStablePool implements PoolBase {
             const tokenIndexIn = poolPairDataNoBPT.tokenIndexIn;
             const tokenIndexOut = poolPairDataNoBPT.tokenIndexOut;
             const swapFee = bnum(poolPairData.swapFee.toString());
-            const totalShares = bnum(this.totalShares.toString());
             let amt: OldBigNumber;
 
             if (poolPairData.pairType === PairTypes.TokenToBpt) {
+                // VirtualBPTSupply must be used for the maths
+                // TO DO - SG should be updated to so that totalShares should return VirtualSupply
+                const virtualBptSupply = this.MAX_TOKEN_BALANCE.sub(
+                    poolPairData.allBalancesScaled[tokenIndexOut]
+                );
+
                 const amountsIn: OldBigNumber[] = [];
-                for (let i = 0; i < balances.length - 1; i++) {
+                for (let i = 0; i < balances.length; i++) {
                     const newValue =
                         i === tokenIndexIn ? amountConverted : ZERO;
                     amountsIn.push(newValue);
@@ -255,16 +265,22 @@ export class MetaStablePool implements PoolBase {
                     amp,
                     balances,
                     amountsIn,
-                    totalShares,
+                    bnum(virtualBptSupply.toString()),
                     swapFee
                 );
             } else if (poolPairData.pairType === PairTypes.BptToToken) {
+                // VirtualBPTSupply must be used for the maths
+                // TO DO - SG should be updated to so that totalShares should return VirtualSupply
+                const virtualBptSupply = this.MAX_TOKEN_BALANCE.sub(
+                    poolPairData.allBalancesScaled[tokenIndexIn]
+                );
+
                 amt = SDK.StableMath._calcTokenOutGivenExactBptIn(
                     amp,
                     balances,
                     tokenIndexOut,
                     amountConverted,
-                    totalShares,
+                    bnum(virtualBptSupply.toString()),
                     swapFee
                 );
             } else {
@@ -312,30 +328,42 @@ export class MetaStablePool implements PoolBase {
             const tokenIndexIn = poolPairDataNoBPT.tokenIndexIn;
             const tokenIndexOut = poolPairDataNoBPT.tokenIndexOut;
             const swapFee = bnum(poolPairData.swapFee.toString());
-            const totalShares = bnum(this.totalShares.toString());
             let amt: OldBigNumber;
 
             if (poolPairData.pairType === PairTypes.TokenToBpt) {
+                // VirtualBPTSupply must be used for the maths
+                // TO DO - SG should be updated to so that totalShares should return VirtualSupply
+                const virtualBptSupply = this.MAX_TOKEN_BALANCE.sub(
+                    poolPairData.allBalancesScaled[tokenIndexOut]
+                );
+
                 amt = SDK.StableMath._calcTokenInGivenExactBptOut(
                     amp,
                     balances,
                     tokenIndexIn,
                     amountConverted,
-                    totalShares,
+                    bnum(virtualBptSupply.toString()),
                     swapFee
                 );
             } else if (poolPairData.pairType === PairTypes.BptToToken) {
                 const amountsOut: OldBigNumber[] = [];
-                for (let i = 0; i < balances.length - 1; i++) {
+                for (let i = 0; i < balances.length; i++) {
                     const newValue =
                         i === tokenIndexOut ? amountConverted : ZERO;
                     amountsOut.push(newValue);
                 }
+
+                // VirtualBPTSupply must be used for the maths
+                // TO DO - SG should be updated to so that totalShares should return VirtualSupply
+                const virtualBptSupply = this.MAX_TOKEN_BALANCE.sub(
+                    poolPairData.allBalancesScaled[tokenIndexIn]
+                );
+
                 amt = SDK.StableMath._calcBptInGivenExactTokensOut(
                     amp,
                     balances,
                     amountsOut,
-                    totalShares,
+                    bnum(virtualBptSupply.toString()),
                     swapFee
                 );
             } else {
