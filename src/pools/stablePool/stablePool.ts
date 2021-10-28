@@ -22,11 +22,26 @@ import {
     _invariant,
     _spotPriceAfterSwapExactTokenInForTokenOut,
     _spotPriceAfterSwapTokenInForExactTokenOut,
+    _spotPriceAfterSwapTokenInForExactBPTOut,
+    _spotPriceAfterSwapBPTInForExactTokenOut,
+    _spotPriceAfterSwapExactTokenInForBPTOut,
+    _spotPriceAfterSwapExactBPTInForTokenOut,
     _derivativeSpotPriceAfterSwapExactTokenInForTokenOut,
     _derivativeSpotPriceAfterSwapTokenInForExactTokenOut,
+    _derivativeSpotPriceAfterSwapExactTokenInForBPTOut,
+    _derivativeSpotPriceAfterSwapExactBPTInForTokenOut,
+    _derivativeSpotPriceAfterSwapTokenInForExactBPTOut,
+    _derivativeSpotPriceAfterSwapBPTInForExactTokenOut,
 } from './stableMath';
+import cloneDeep from 'lodash.clonedeep';
 
 type StablePoolToken = Pick<SubgraphToken, 'address' | 'balance' | 'decimals'>;
+
+export enum PairTypes {
+    BptToToken,
+    TokenToBpt,
+    TokenToToken,
+}
 
 export type StablePoolPairData = PoolPairBase & {
     allBalances: OldBigNumber[];
@@ -35,6 +50,8 @@ export type StablePoolPairData = PoolPairBase & {
     amp: BigNumber;
     tokenIndexIn: number;
     tokenIndexOut: number;
+    pairType: PairTypes;
+    bptIndex: number;
 };
 
 export class StablePool implements PoolBase {
@@ -47,10 +64,10 @@ export class StablePool implements PoolBase {
     totalShares: BigNumber;
     tokens: StablePoolToken[];
     tokensList: string[];
-    AMP_PRECISION = BigNumber.from('1000');
     MAX_IN_RATIO = parseFixed('0.3', 18);
     MAX_OUT_RATIO = parseFixed('0.3', 18);
-    ampAdjusted: BigNumber;
+
+    static AMP_DECIMALS = 3;
 
     static fromPool(pool: SubgraphPoolBase): StablePool {
         if (!pool.amp) throw new Error('StablePool missing amp factor');
@@ -76,12 +93,11 @@ export class StablePool implements PoolBase {
     ) {
         this.id = id;
         this.address = address;
-        this.amp = parseFixed(amp, 0);
+        this.amp = parseFixed(amp, StablePool.AMP_DECIMALS);
         this.swapFee = parseFixed(swapFee, 18);
         this.totalShares = parseFixed(totalShares, 18);
         this.tokens = tokens;
         this.tokensList = tokensList;
-        this.ampAdjusted = this.amp.mul(this.AMP_PRECISION);
     }
 
     setTypeForSwap(type: SwapPairType): void {
@@ -111,12 +127,25 @@ export class StablePool implements PoolBase {
             parseFixed(balance, 18)
         );
 
+        // Stable pools will allow trading between token and pool BPT
+        let pairType: PairTypes;
+        if (isSameAddress(tokenIn, this.address)) {
+            pairType = PairTypes.BptToToken;
+        } else if (isSameAddress(tokenOut, this.address)) {
+            pairType = PairTypes.TokenToBpt;
+        } else {
+            pairType = PairTypes.TokenToToken;
+        }
+
+        const bptIndex = this.tokensList.indexOf(this.address);
         const inv = _invariant(this.amp, allBalances);
 
         const poolPairData: StablePoolPairData = {
             id: this.id,
             address: this.address,
             poolType: this.poolType,
+            pairType: pairType,
+            bptIndex: bptIndex,
             tokenIn: tokenIn,
             tokenOut: tokenOut,
             balanceIn: parseFixed(balanceIn, decimalsIn),
@@ -140,7 +169,7 @@ export class StablePool implements PoolBase {
         return bnum(
             formatFixed(
                 poolPairData.balanceOut.mul(poolPairData.amp),
-                poolPairData.decimalsOut
+                poolPairData.decimalsOut + StablePool.AMP_DECIMALS
             )
         );
     }
@@ -191,17 +220,49 @@ export class StablePool implements PoolBase {
             // All values should use 1e18 fixed point
             // i.e. 1USDC => 1e18 not 1e6
             const amtScaled = scale(amount, 18);
-
-            const amt = SDK.StableMath._calcOutGivenIn(
-                bnum(this.ampAdjusted.toString()),
-                poolPairData.allBalancesScaled.map((balance) =>
-                    bnum(balance.toString())
-                ),
-                poolPairData.tokenIndexIn,
-                poolPairData.tokenIndexOut,
-                amtScaled,
-                bnum(poolPairData.swapFee.toString())
+            const amp = bnum(this.amp.toString());
+            const poolPairDataNoBPT = removeBPT(poolPairData);
+            const balances = poolPairDataNoBPT.allBalancesScaled.map(
+                (balance) => bnum(balance.toString())
             );
+            const tokenIndexIn = poolPairDataNoBPT.tokenIndexIn;
+            const tokenIndexOut = poolPairDataNoBPT.tokenIndexOut;
+            const swapFee = bnum(poolPairData.swapFee.toString());
+            const totalShares = bnum(this.totalShares.toString());
+            let amt: OldBigNumber;
+
+            if (poolPairData.pairType === PairTypes.TokenToBpt) {
+                const amountsIn: OldBigNumber[] = [];
+                for (let i = 0; i < balances.length - 1; i++) {
+                    const newValue = i === tokenIndexIn ? amtScaled : ZERO;
+                    amountsIn.push(newValue);
+                }
+                amt = SDK.StableMath._calcBptOutGivenExactTokensIn(
+                    amp,
+                    balances,
+                    amountsIn,
+                    totalShares,
+                    swapFee
+                );
+            } else if (poolPairData.pairType === PairTypes.BptToToken) {
+                amt = SDK.StableMath._calcTokenOutGivenExactBptIn(
+                    amp,
+                    balances,
+                    tokenIndexOut,
+                    amtScaled,
+                    totalShares,
+                    swapFee
+                );
+            } else {
+                amt = SDK.StableMath._calcOutGivenIn(
+                    amp,
+                    balances,
+                    tokenIndexIn,
+                    tokenIndexOut,
+                    amtScaled,
+                    bnum(poolPairData.swapFee.toString())
+                );
+            }
 
             // return normalised amount
             // Using BigNumber.js decimalPlaces (dp), allows us to consider token decimal accuracy correctly,
@@ -223,18 +284,49 @@ export class StablePool implements PoolBase {
             // All values should use 1e18 fixed point
             // i.e. 1USDC => 1e18 not 1e6
             const amtScaled = scale(amount, 18);
-
-            const amt = SDK.StableMath._calcInGivenOut(
-                bnum(this.ampAdjusted.toString()),
-                poolPairData.allBalancesScaled.map((balance) =>
-                    bnum(balance.toString())
-                ),
-                poolPairData.tokenIndexIn,
-                poolPairData.tokenIndexOut,
-                amtScaled,
-                bnum(poolPairData.swapFee.toString())
+            const amp = bnum(this.amp.toString());
+            const poolPairDataNoBPT = removeBPT(poolPairData);
+            const balances = poolPairDataNoBPT.allBalancesScaled.map(
+                (balance) => bnum(balance.toString())
             );
+            const tokenIndexIn = poolPairDataNoBPT.tokenIndexIn;
+            const tokenIndexOut = poolPairDataNoBPT.tokenIndexOut;
+            const swapFee = bnum(poolPairData.swapFee.toString());
+            const totalShares = bnum(this.totalShares.toString());
+            let amt: OldBigNumber;
 
+            if (poolPairData.pairType === PairTypes.TokenToBpt) {
+                amt = SDK.StableMath._calcTokenInGivenExactBptOut(
+                    amp,
+                    balances,
+                    tokenIndexIn,
+                    amtScaled,
+                    totalShares,
+                    swapFee
+                );
+            } else if (poolPairData.pairType === PairTypes.BptToToken) {
+                const amountsOut: OldBigNumber[] = [];
+                for (let i = 0; i < balances.length - 1; i++) {
+                    const newValue = i === tokenIndexOut ? amtScaled : ZERO;
+                    amountsOut.push(newValue);
+                }
+                amt = SDK.StableMath._calcBptInGivenExactTokensOut(
+                    amp,
+                    balances,
+                    amountsOut,
+                    totalShares,
+                    swapFee
+                );
+            } else {
+                amt = SDK.StableMath._calcInGivenOut(
+                    amp,
+                    balances,
+                    poolPairData.tokenIndexIn,
+                    poolPairData.tokenIndexOut,
+                    amtScaled,
+                    swapFee
+                );
+            }
             // return normalised amount
             // Using BigNumber.js decimalPlaces (dp), allows us to consider token decimal accuracy correctly,
             // i.e. when using token with 2decimals 0.002 should be returned as 0
@@ -250,33 +342,109 @@ export class StablePool implements PoolBase {
         poolPairData: StablePoolPairData,
         amount: OldBigNumber
     ): OldBigNumber {
-        return _spotPriceAfterSwapExactTokenInForTokenOut(amount, poolPairData);
+        let result: OldBigNumber;
+        if (poolPairData.pairType === PairTypes.TokenToBpt) {
+            result = _spotPriceAfterSwapExactTokenInForBPTOut(
+                amount,
+                removeBPT(poolPairData)
+            );
+        } else if (poolPairData.pairType === PairTypes.BptToToken) {
+            result = _spotPriceAfterSwapExactBPTInForTokenOut(
+                amount,
+                removeBPT(poolPairData)
+            );
+        } else {
+            result = _spotPriceAfterSwapExactTokenInForTokenOut(
+                amount,
+                removeBPT(poolPairData)
+            );
+        }
+        return result;
     }
 
     _spotPriceAfterSwapTokenInForExactTokenOut(
         poolPairData: StablePoolPairData,
         amount: OldBigNumber
     ): OldBigNumber {
-        return _spotPriceAfterSwapTokenInForExactTokenOut(amount, poolPairData);
+        let result: OldBigNumber;
+        if (poolPairData.pairType === PairTypes.TokenToBpt) {
+            result = _spotPriceAfterSwapTokenInForExactBPTOut(
+                amount,
+                removeBPT(poolPairData)
+            );
+        } else if (poolPairData.pairType === PairTypes.BptToToken) {
+            result = _spotPriceAfterSwapBPTInForExactTokenOut(
+                amount,
+                removeBPT(poolPairData)
+            );
+        } else {
+            result = _spotPriceAfterSwapTokenInForExactTokenOut(
+                amount,
+                removeBPT(poolPairData)
+            );
+        }
+        return result;
     }
 
     _derivativeSpotPriceAfterSwapExactTokenInForTokenOut(
         poolPairData: StablePoolPairData,
         amount: OldBigNumber
     ): OldBigNumber {
-        return _derivativeSpotPriceAfterSwapExactTokenInForTokenOut(
-            amount,
-            poolPairData
-        );
+        let result: OldBigNumber;
+        if (poolPairData.pairType === PairTypes.TokenToBpt) {
+            result = _derivativeSpotPriceAfterSwapExactTokenInForBPTOut(
+                amount,
+                removeBPT(poolPairData)
+            );
+        } else if (poolPairData.pairType === PairTypes.BptToToken) {
+            result = _derivativeSpotPriceAfterSwapExactBPTInForTokenOut(
+                amount,
+                removeBPT(poolPairData)
+            );
+        } else {
+            result = _derivativeSpotPriceAfterSwapExactTokenInForTokenOut(
+                amount,
+                removeBPT(poolPairData)
+            );
+        }
+        return result;
     }
 
     _derivativeSpotPriceAfterSwapTokenInForExactTokenOut(
         poolPairData: StablePoolPairData,
         amount: OldBigNumber
     ): OldBigNumber {
-        return _derivativeSpotPriceAfterSwapTokenInForExactTokenOut(
-            amount,
-            poolPairData
-        );
+        let result: OldBigNumber;
+        if (poolPairData.pairType === PairTypes.TokenToBpt) {
+            result = _derivativeSpotPriceAfterSwapTokenInForExactBPTOut(
+                amount,
+                removeBPT(poolPairData)
+            );
+        } else if (poolPairData.pairType === PairTypes.BptToToken) {
+            result = _derivativeSpotPriceAfterSwapBPTInForExactTokenOut(
+                amount,
+                removeBPT(poolPairData)
+            );
+        } else {
+            result = _derivativeSpotPriceAfterSwapTokenInForExactTokenOut(
+                amount,
+                removeBPT(poolPairData)
+            );
+        }
+        return result;
     }
+}
+
+export function removeBPT(
+    poolPairData: StablePoolPairData
+): StablePoolPairData {
+    const ans = cloneDeep(poolPairData);
+    const bptIndex = poolPairData.bptIndex;
+    if (bptIndex != -1) {
+        ans.allBalances.splice(bptIndex, 1);
+        ans.allBalancesScaled.splice(bptIndex, 1);
+        if (bptIndex < poolPairData.tokenIndexIn) ans.tokenIndexIn -= 1;
+        if (bptIndex < poolPairData.tokenIndexOut) ans.tokenIndexOut -= 1;
+    }
+    return ans;
 }
