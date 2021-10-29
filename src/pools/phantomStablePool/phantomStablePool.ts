@@ -49,6 +49,7 @@ type PhantomStablePoolToken = Pick<
 export type PhantomStablePoolPairData = MetaStablePoolPairData & {
     pairType: PairTypes;
     bptIndex: number;
+    virtualBptSupply: BigNumber;
 };
 
 export class PhantomStablePool implements PoolBase {
@@ -167,6 +168,12 @@ export class PhantomStablePool implements PoolBase {
         const bptIndex = this.tokensList.indexOf(this.address);
         const inv = _invariant(this.amp, allBalances);
 
+        // VirtualBPTSupply must be used for the maths
+        // TO DO - SG should be updated to so that totalShares should return VirtualSupply
+        const virtualBptSupply = this.MAX_TOKEN_BALANCE.sub(
+            allBalancesScaled[bptIndex]
+        );
+
         const poolPairData: PhantomStablePoolPairData = {
             id: this.id,
             address: this.address,
@@ -188,9 +195,10 @@ export class PhantomStablePool implements PoolBase {
             decimalsOut: Number(decimalsOut),
             tokenInPriceRate,
             tokenOutPriceRate,
+            virtualBptSupply,
         };
 
-        return poolPairData;
+        return PhantomStablePool.removeBPT(poolPairData);
     }
 
     getNormalizedLiquidity(
@@ -256,6 +264,8 @@ export class PhantomStablePool implements PoolBase {
             // All values should use 1e18 fixed point
             // i.e. 1USDC => 1e18 not 1e6
             const amtScaled = scale(amount, 18);
+
+            // In Phantom Pools every time there is a swap (token per token, bpt per token or token per bpt), we substract the fee from the amount in
             const amtWithFee = this.subtractSwapFeeAmount(
                 BigNumber.from(amtScaled.toString()),
                 poolPairData.swapFee
@@ -263,64 +273,49 @@ export class PhantomStablePool implements PoolBase {
             const amountConverted = bnum(amtWithFee.toString()).times(
                 formatFixed(poolPairData.tokenOutPriceRate, 18)
             );
-            const amp = bnum(this.amp.toString());
-            const poolPairDataNoBPT = PhantomStablePool.removeBPT(poolPairData);
-            const balances = poolPairDataNoBPT.allBalancesScaled.map(
-                (balance) => bnum(balance.toString())
-            );
-            const tokenIndexIn = poolPairDataNoBPT.tokenIndexIn;
-            const tokenIndexOut = poolPairDataNoBPT.tokenIndexOut;
-            const swapFee = bnum(poolPairData.swapFee.toString());
+
             let amt: OldBigNumber;
 
             if (poolPairData.pairType === PairTypes.TokenToBpt) {
-                // VirtualBPTSupply must be used for the maths
-                // TO DO - SG should be updated to so that totalShares should return VirtualSupply
-                const virtualBptSupply = this.MAX_TOKEN_BALANCE.sub(
-                    poolPairData.allBalancesScaled[tokenIndexOut]
+                const amountsIn = Array(
+                    poolPairData.allBalancesScaled.length
+                ).fill(ZERO);
+                amountsIn[poolPairData.tokenIndexIn] = bnum(
+                    amountConverted.toString()
                 );
 
-                const amountsIn: OldBigNumber[] = [];
-                for (let i = 0; i < balances.length; i++) {
-                    const newValue =
-                        i === tokenIndexIn
-                            ? bnum(amountConverted.toString())
-                            : ZERO;
-                    amountsIn.push(newValue);
-                }
                 amt = SDK.StableMath._calcBptOutGivenExactTokensIn(
-                    amp,
-                    balances,
+                    bnum(this.amp.toString()),
+                    poolPairData.allBalancesScaled.map((b) =>
+                        bnum(b.toString())
+                    ),
                     amountsIn,
-                    bnum(virtualBptSupply.toString()),
-                    bnum('0')
+                    bnum(poolPairData.virtualBptSupply.toString()),
+                    ZERO // Fee is handled above
                 );
             } else if (poolPairData.pairType === PairTypes.BptToToken) {
-                // VirtualBPTSupply must be used for the maths
-                // TO DO - SG should be updated to so that totalShares should return VirtualSupply
-                const virtualBptSupply = this.MAX_TOKEN_BALANCE.sub(
-                    poolPairData.allBalancesScaled[tokenIndexIn]
-                );
-
                 amt = SDK.StableMath._calcTokenOutGivenExactBptIn(
-                    amp,
-                    balances,
-                    tokenIndexOut,
+                    bnum(this.amp.toString()),
+                    poolPairData.allBalancesScaled.map((b) =>
+                        bnum(b.toString())
+                    ),
+                    poolPairData.tokenIndexOut,
                     bnum(amtWithFee.toString()),
-                    bnum(virtualBptSupply.toString()),
-                    swapFee
+                    bnum(poolPairData.virtualBptSupply.toString()),
+                    ZERO // Fee is handled above
                 );
             } else {
                 amt = SDK.StableMath._calcOutGivenIn(
-                    amp,
-                    balances,
-                    tokenIndexIn,
-                    tokenIndexOut,
+                    bnum(this.amp.toString()),
+                    poolPairData.allBalancesScaled.map((b) =>
+                        bnum(b.toString())
+                    ),
+                    poolPairData.tokenIndexIn,
+                    poolPairData.tokenIndexOut,
                     bnum(amtWithFee.toString()),
-                    swapFee
+                    ZERO // Fee is handled above
                 );
             }
-
             // return normalised amount
             // Using BigNumber.js decimalPlaces (dp), allows us to consider token decimal accuracy correctly,
             // i.e. when using token with 2decimals 0.002 should be returned as 0
@@ -347,30 +342,22 @@ export class PhantomStablePool implements PoolBase {
             const amountConverted = amtScaled.times(
                 formatFixed(poolPairData.tokenOutPriceRate, 18)
             );
-            const amp = bnum(this.amp.toString());
             const poolPairDataNoBPT = PhantomStablePool.removeBPT(poolPairData);
             const balances = poolPairDataNoBPT.allBalancesScaled.map(
                 (balance) => bnum(balance.toString())
             );
             const tokenIndexIn = poolPairDataNoBPT.tokenIndexIn;
             const tokenIndexOut = poolPairDataNoBPT.tokenIndexOut;
-            const swapFee = bnum(poolPairData.swapFee.toString());
             let amt: OldBigNumber;
 
             if (poolPairData.pairType === PairTypes.TokenToBpt) {
-                // VirtualBPTSupply must be used for the maths
-                // TO DO - SG should be updated to so that totalShares should return VirtualSupply
-                const virtualBptSupply = this.MAX_TOKEN_BALANCE.sub(
-                    poolPairData.allBalancesScaled[tokenIndexOut]
-                );
-
                 amt = SDK.StableMath._calcTokenInGivenExactBptOut(
-                    amp,
+                    bnum(this.amp.toString()),
                     balances,
                     tokenIndexIn,
                     amountConverted,
-                    bnum(virtualBptSupply.toString()),
-                    swapFee
+                    bnum(poolPairData.virtualBptSupply.toString()),
+                    bnum(poolPairData.swapFee.toString())
                 );
             } else if (poolPairData.pairType === PairTypes.BptToToken) {
                 const amountsOut: OldBigNumber[] = [];
@@ -380,27 +367,21 @@ export class PhantomStablePool implements PoolBase {
                     amountsOut.push(newValue);
                 }
 
-                // VirtualBPTSupply must be used for the maths
-                // TO DO - SG should be updated to so that totalShares should return VirtualSupply
-                const virtualBptSupply = this.MAX_TOKEN_BALANCE.sub(
-                    poolPairData.allBalancesScaled[tokenIndexIn]
-                );
-
                 amt = SDK.StableMath._calcBptInGivenExactTokensOut(
-                    amp,
+                    bnum(this.amp.toString()),
                     balances,
                     amountsOut,
-                    bnum(virtualBptSupply.toString()),
-                    swapFee
+                    bnum(poolPairData.virtualBptSupply.toString()),
+                    bnum(poolPairData.swapFee.toString())
                 );
             } else {
                 amt = SDK.StableMath._calcInGivenOut(
-                    amp,
+                    bnum(this.amp.toString()),
                     balances,
                     tokenIndexIn,
                     tokenIndexOut,
                     amountConverted,
-                    swapFee
+                    bnum(poolPairData.swapFee.toString())
                 );
             }
             // return normalised amount
@@ -428,17 +409,17 @@ export class PhantomStablePool implements PoolBase {
         if (poolPairData.pairType === PairTypes.TokenToBpt) {
             result = _spotPriceAfterSwapExactTokenInForBPTOut(
                 amount,
-                PhantomStablePool.removeBPT(poolPairData)
+                poolPairData
             );
         } else if (poolPairData.pairType === PairTypes.BptToToken) {
             result = _spotPriceAfterSwapExactBPTInForTokenOut(
                 amount,
-                PhantomStablePool.removeBPT(poolPairData)
+                poolPairData
             );
         } else {
             result = _spotPriceAfterSwapExactTokenInForTokenOut(
                 amountConverted,
-                PhantomStablePool.removeBPT(poolPairData)
+                poolPairData
             );
         }
         return result;
@@ -455,17 +436,17 @@ export class PhantomStablePool implements PoolBase {
         if (poolPairData.pairType === PairTypes.TokenToBpt) {
             result = _spotPriceAfterSwapTokenInForExactBPTOut(
                 amount,
-                PhantomStablePool.removeBPT(poolPairData)
+                poolPairData
             );
         } else if (poolPairData.pairType === PairTypes.BptToToken) {
             result = _spotPriceAfterSwapBPTInForExactTokenOut(
                 amount,
-                PhantomStablePool.removeBPT(poolPairData)
+                poolPairData
             );
         } else {
             result = _spotPriceAfterSwapTokenInForExactTokenOut(
                 amountConverted,
-                PhantomStablePool.removeBPT(poolPairData)
+                poolPairData
             );
         }
         return result;
@@ -482,17 +463,17 @@ export class PhantomStablePool implements PoolBase {
         if (poolPairData.pairType === PairTypes.TokenToBpt) {
             result = _derivativeSpotPriceAfterSwapExactTokenInForBPTOut(
                 amount,
-                PhantomStablePool.removeBPT(poolPairData)
+                poolPairData
             );
         } else if (poolPairData.pairType === PairTypes.BptToToken) {
             result = _derivativeSpotPriceAfterSwapExactBPTInForTokenOut(
                 amount,
-                PhantomStablePool.removeBPT(poolPairData)
+                poolPairData
             );
         } else {
             result = _derivativeSpotPriceAfterSwapExactTokenInForTokenOut(
                 amountConverted,
-                PhantomStablePool.removeBPT(poolPairData)
+                poolPairData
             );
         }
         return result;
@@ -509,17 +490,17 @@ export class PhantomStablePool implements PoolBase {
         if (poolPairData.pairType === PairTypes.TokenToBpt) {
             result = _derivativeSpotPriceAfterSwapTokenInForExactBPTOut(
                 amount,
-                PhantomStablePool.removeBPT(poolPairData)
+                poolPairData
             );
         } else if (poolPairData.pairType === PairTypes.BptToToken) {
             result = _derivativeSpotPriceAfterSwapBPTInForExactTokenOut(
                 amount,
-                PhantomStablePool.removeBPT(poolPairData)
+                poolPairData
             );
         } else {
             result = _derivativeSpotPriceAfterSwapTokenInForExactTokenOut(
                 amountConverted,
-                PhantomStablePool.removeBPT(poolPairData)
+                poolPairData
             );
         }
         return result;

@@ -149,6 +149,11 @@ export const ADDRESSES = {
             decimals: 18,
             symbol: 'bUSDT',
         },
+        bDAI: {
+            address: '0xcd32a460b6fecd053582e43b07ed6e2c04e15369',
+            decimals: 18,
+            symbol: 'bDAI',
+        },
         STABAL3: {
             address: '0x21ff756ca0cfcc5fff488ad67babadffee0c4149',
             decimals: 18,
@@ -579,11 +584,11 @@ async function simpleSwap() {
     // const poolsSource = require('../testData/testPools/gusdBug.json');
     // Update pools list with most recent onchain balances
     const queryOnChain = true;
-    const tokenIn = ADDRESSES[networkId].bUSDT;
-    const tokenOut = ADDRESSES[networkId].STABAL3;
+    const tokenIn = ADDRESSES[networkId].bDAI;
+    const tokenOut = ADDRESSES[networkId].bUSDT;
     const swapType = SwapTypes.SwapExactIn;
     // const swapAmount = parseFixed('0.01', 6);
-    const swapAmount = parseFixed('0.010001000098489046', 18);
+    const swapAmount = parseFixed('10.2563', 18);
     const executeTrade = true;
 
     const provider = new JsonRpcProvider(PROVIDER_URLS[networkId]);
