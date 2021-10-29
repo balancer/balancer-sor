@@ -1,29 +1,32 @@
 // TS_NODE_PROJECT='tsconfig.testing.json' npx mocha -r ts-node/register test/math.spec.ts
 import { assert } from 'chai';
-import { PoolTypes, SubgraphPoolBase } from '../src/types';
-import { BigNumber, parseFixed, formatFixed } from '@ethersproject/bignumber';
+import { SubgraphPoolBase } from '../src/types';
 import { BigNumber as OldBigNumber, scale, bnum } from '../src/utils/bignumber';
 import * as stableMath from '../src/pools/stablePool/stableMath';
 import {
     StablePool,
     StablePoolPairData,
 } from '../src/pools/stablePool/stablePool';
-import { Zero } from '@ethersproject/constants';
 import { DAI, USDC, USDT } from './lib/constants';
 import * as SDK from '@georgeroman/balancer-v2-pools';
+import poolsFromFile from './testData/stablePools/stablePoolWithBPT.json';
 
-const BPTaddress: string = '0xebfed10e11dc08fcda1af1fda146945e8710f22e';
+const BPTaddress = '0xebfed10e11dc08fcda1af1fda146945e8710f22e';
 
 describe('stable-math tests', () => {
     // Make a stable pool
-    const poolsFromFile: {
-        pools: SubgraphPoolBase[];
-    } = require('./testData/stablePools/stablePoolWithBPT.json');
-    const pool = poolsFromFile.pools[0];
+    // const poolsFromFile: {
+    //     pools: SubgraphPoolBase[];
+    // } = require('./testData/stablePools/stablePoolWithBPT.json');
+    const pool = poolsFromFile.pools[0] as SubgraphPoolBase;
     const stableBptSwapPool = StablePool.fromPool(pool);
     // tokens: DAI, USDC, USDT in this order
     let poolPairData: StablePoolPairData;
-    poolPairData = createPoolPairData(stableBptSwapPool, USDT, DAI);
+    poolPairData = createPoolPairData(
+        stableBptSwapPool,
+        USDT.address,
+        DAI.address
+    );
     const allBalancesScaled = poolPairData.allBalancesScaled.map((balance) =>
         bnum(balance.toString())
     );
@@ -31,11 +34,15 @@ describe('stable-math tests', () => {
     const amtScaled = scale(bnum(amount), 18);
     const amp1000 = bnum(stableBptSwapPool.amp.toString()).times(1000);
 
-    let error = 0.00005;
+    const error = 0.00005;
 
     context('swap outcomes', () => {
         it('_exactTokenInForTokenOut', () => {
-            poolPairData = createPoolPairData(stableBptSwapPool, USDT, DAI);
+            poolPairData = createPoolPairData(
+                stableBptSwapPool,
+                USDT.address,
+                DAI.address
+            );
             let sdkValue = SDK.StableMath._calcOutGivenIn(
                 amp1000,
                 allBalancesScaled,
@@ -55,7 +62,11 @@ describe('stable-math tests', () => {
         });
 
         it('_tokenInForExactTokenOut', () => {
-            poolPairData = createPoolPairData(stableBptSwapPool, USDT, DAI);
+            poolPairData = createPoolPairData(
+                stableBptSwapPool,
+                USDT.address,
+                DAI.address
+            );
             let sdkValue = SDK.StableMath._calcInGivenOut(
                 amp1000,
                 allBalancesScaled,
@@ -77,7 +88,7 @@ describe('stable-math tests', () => {
         it('_exactTokenInForBPTOut', () => {
             poolPairData = createPoolPairData(
                 stableBptSwapPool,
-                USDT,
+                USDT.address,
                 BPTaddress
             );
             let sdkValue = SDK.StableMath._calcBptOutGivenExactTokensIn(
@@ -100,7 +111,7 @@ describe('stable-math tests', () => {
         it('_tokenInForExactBPTOut', () => {
             poolPairData = createPoolPairData(
                 stableBptSwapPool,
-                USDT,
+                USDT.address,
                 BPTaddress
             );
             let sdkValue = SDK.StableMath._calcTokenInGivenExactBptOut(
@@ -125,7 +136,7 @@ describe('stable-math tests', () => {
             poolPairData = createPoolPairData(
                 stableBptSwapPool,
                 BPTaddress,
-                USDT
+                USDT.address
             );
             let sdkValue = SDK.StableMath._calcBptInGivenExactTokensOut(
                 amp1000,
@@ -148,7 +159,7 @@ describe('stable-math tests', () => {
             poolPairData = createPoolPairData(
                 stableBptSwapPool,
                 BPTaddress,
-                USDT
+                USDT.address
             );
             let sdkValue = SDK.StableMath._calcTokenOutGivenExactBptIn(
                 amp1000,
@@ -171,7 +182,11 @@ describe('stable-math tests', () => {
 
     context('spot price after swap', () => {
         it('_spotPriceAfterSwapExactTokenInForTokenOut', () => {
-            poolPairData = createPoolPairData(stableBptSwapPool, USDT, USDC);
+            poolPairData = createPoolPairData(
+                stableBptSwapPool,
+                USDT.address,
+                USDC.address
+            );
             checkDerivative(
                 stableMath._exactTokenInForTokenOut,
                 stableMath._spotPriceAfterSwapExactTokenInForTokenOut,
@@ -184,7 +199,11 @@ describe('stable-math tests', () => {
         });
 
         it('_spotPriceAfterSwapTokenInForExactTokenOut', () => {
-            poolPairData = createPoolPairData(stableBptSwapPool, USDT, USDC);
+            poolPairData = createPoolPairData(
+                stableBptSwapPool,
+                USDT.address,
+                USDC.address
+            );
             checkDerivative(
                 stableMath._tokenInForExactTokenOut,
                 stableMath._spotPriceAfterSwapTokenInForExactTokenOut,
@@ -199,7 +218,7 @@ describe('stable-math tests', () => {
         it('_spotPriceAfterSwapExactTokenInForBPTOut', () => {
             poolPairData = createPoolPairData(
                 stableBptSwapPool,
-                USDT,
+                USDT.address,
                 BPTaddress
             );
             checkDerivative(
@@ -216,7 +235,7 @@ describe('stable-math tests', () => {
         it('_spotPriceAfterSwapTokenInForExactBPTOut', () => {
             poolPairData = createPoolPairData(
                 stableBptSwapPool,
-                USDT,
+                USDT.address,
                 BPTaddress
             );
             checkDerivative(
@@ -234,7 +253,7 @@ describe('stable-math tests', () => {
             poolPairData = createPoolPairData(
                 stableBptSwapPool,
                 BPTaddress,
-                USDT
+                USDT.address
             );
             checkDerivative(
                 stableMath._BPTInForExactTokenOut,
@@ -251,7 +270,7 @@ describe('stable-math tests', () => {
             poolPairData = createPoolPairData(
                 stableBptSwapPool,
                 BPTaddress,
-                USDT
+                USDT.address
             );
             checkDerivative(
                 stableMath._exactBPTInForTokenOut,
@@ -267,7 +286,11 @@ describe('stable-math tests', () => {
 
     context('derivatives of spot price after swap', () => {
         it('_derivativeSpotPriceAfterSwapExactTokenInForTokenOut', () => {
-            poolPairData = createPoolPairData(stableBptSwapPool, USDT, USDC);
+            poolPairData = createPoolPairData(
+                stableBptSwapPool,
+                USDT.address,
+                USDC.address
+            );
             checkDerivative(
                 stableMath._spotPriceAfterSwapExactTokenInForTokenOut,
                 stableMath._derivativeSpotPriceAfterSwapExactTokenInForTokenOut,
@@ -280,7 +303,11 @@ describe('stable-math tests', () => {
         });
 
         it('_derivativeSpotPriceAfterSwapTokenInForExactTokenOut', () => {
-            poolPairData = createPoolPairData(stableBptSwapPool, USDT, USDC);
+            poolPairData = createPoolPairData(
+                stableBptSwapPool,
+                USDT.address,
+                USDC.address
+            );
             checkDerivative(
                 stableMath._spotPriceAfterSwapTokenInForExactTokenOut,
                 stableMath._derivativeSpotPriceAfterSwapTokenInForExactTokenOut,
@@ -295,7 +322,7 @@ describe('stable-math tests', () => {
         it('_derivativeSpotPriceAfterSwapExactTokenInForBPTOut', () => {
             poolPairData = createPoolPairData(
                 stableBptSwapPool,
-                USDT,
+                USDT.address,
                 BPTaddress
             );
             checkDerivative(
@@ -312,7 +339,7 @@ describe('stable-math tests', () => {
         it('_derivativeSpotPriceAfterSwapTokenInForExactBPTOut', () => {
             poolPairData = createPoolPairData(
                 stableBptSwapPool,
-                USDT,
+                USDT.address,
                 BPTaddress
             );
             checkDerivative(
@@ -330,7 +357,7 @@ describe('stable-math tests', () => {
             poolPairData = createPoolPairData(
                 stableBptSwapPool,
                 BPTaddress,
-                USDT
+                USDT.address
             );
             checkDerivative(
                 stableMath._spotPriceAfterSwapBPTInForExactTokenOut,
@@ -347,7 +374,7 @@ describe('stable-math tests', () => {
             poolPairData = createPoolPairData(
                 stableBptSwapPool,
                 BPTaddress,
-                USDT
+                USDT.address
             );
             checkDerivative(
                 stableMath._spotPriceAfterSwapExactBPTInForTokenOut,
@@ -389,15 +416,15 @@ function checkDerivative(
     amount: number,
     delta: number,
     error: number,
-    inverse: boolean = false
+    inverse = false
 ) {
-    let x = bnum(amount);
+    const x = bnum(amount);
     let incrementalQuotient = fn(x.plus(delta), poolPairData)
         .minus(fn(x, poolPairData))
         .div(delta);
     if (inverse) incrementalQuotient = bnum(1).div(incrementalQuotient);
     const der_ans = der(x, poolPairData);
-    let d = 10 ** -10;
+    const d = 10 ** -10;
     assert.approximately(
         // adding d to both numerator and denominator prevents large relative errors
         // when numbers are very small (even division by zero in some cases).
@@ -413,7 +440,7 @@ function createPoolPairData(
     tokenIn: string,
     tokenOut: string
 ): StablePoolPairData {
-    let poolPairData = pool.parsePoolPairData(tokenIn, tokenOut);
+    const poolPairData = pool.parsePoolPairData(tokenIn, tokenOut);
     poolPairData.allBalances.splice(-1);
     poolPairData.allBalancesScaled.splice(-1);
     return poolPairData;

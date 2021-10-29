@@ -65,3 +65,8 @@ export const bTUSD: TestToken = {
     address: '0x0000000000000000000000000000000000000005'.toLowerCase(),
     decimals: 18,
 };
+
+export const stETH: TestToken = {
+    address: '0xae7ab96520de3a18e5e111b5eaab095312d7fe84'.toLowerCase(),
+    decimals: 18,
+};
