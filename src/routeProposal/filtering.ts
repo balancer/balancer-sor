@@ -378,12 +378,16 @@ function getLinearStaBal3Pools(
 function getPoolWithMainToken(pools: PoolDictionary, token: string): PoolBase {
     let pool;
     for (const id in pools) {
-        // TO DO
-        // Currently maths doesn't support wrapped tokens (TBC if there is a workaround)
-        // This means we can only support main token
-        // Add mainTokenIndex if this is going to remain the case
-        // If can workaround then replace below with: if (pools[id].tokensList.includes(token.toLowerCase()))
-        if (pools[id].tokensList[0] === token.toLowerCase()) return pools[id];
+        const mainIndex = pools[id].mainIndex;
+        if (mainIndex) {
+            // TO DO
+            // Currently maths doesn't support wrapped tokens (TBC if there is a workaround)
+            // This means we can only support main token
+            // See Linear https://linear.app/balancer/issue/SOR-26/finalise-wrappedtoken-support
+            // If can workaround then replace below with: if (pools[id].tokensList.includes(token.toLowerCase()))
+            if (pools[id].tokensList[mainIndex] === token.toLowerCase())
+                return pools[id];
+        }
     }
     return pool;
 }

@@ -2613,8 +2613,8 @@
             "poolType": "Linear",
             "address": "0x0000000000000000000000000000000000000001",
             "wrappedIndex": 1,
-            "target1": "1000.000000",
-            "target2": "1500.000000"
+            "lowerTarget": "1000.000000",
+            "upperTarget": "1500.000000"
         },
         {
             "id": "linearDAI",
@@ -2653,8 +2653,8 @@
             "poolType": "Linear",
             "address": "0x0000000000000000000000000000000000000002",
             "wrappedIndex": 1,
-            "target1": "1000.000000",
-            "target2": "1500.000000"
+            "lowerTarget": "1000.000000",
+            "upperTarget": "1500.000000"
         },
         {
             "id": "staBal3Id",

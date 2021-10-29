@@ -37,7 +37,7 @@ export const SUBGRAPH_URLS = {
     [Network.GOERLI]:
         'https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-goerli-v2',
     [Network.KOVAN]:
-        'https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-kovan-v2',
+        'https://api.thegraph.com/subgraphs/name/destiner/balancer-kovan-v2',
     [Network.POLYGON]:
         'https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-polygon-v2',
     [Network.ARBITRUM]: `https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-arbitrum-v2`,
@@ -133,6 +133,31 @@ export const ADDRESSES = {
             address: '0xa387b91e393cfb9356a460370842bc8dbb2f29af',
             decimals: 18,
             symbol: 'wSTETH',
+        },
+        USDT_from_AAVE: {
+            address: '0x13512979ade267ab5100878e2e0f485b568328a4',
+            decimals: 6,
+            symbol: 'USDT_from_AAVE',
+        },
+        aUSDT: {
+            address: '0xe8191aacfcdb32260cda25830dc6c9342142f310',
+            decimals: 6,
+            symbol: 'aUSDT',
+        },
+        bUSDT: {
+            address: '0x6a8c3239695613c0710dc971310b36f9b81e115e',
+            decimals: 18,
+            symbol: 'bUSDT',
+        },
+        bDAI: {
+            address: '0xcd32a460b6fecd053582e43b07ed6e2c04e15369',
+            decimals: 18,
+            symbol: 'bDAI',
+        },
+        STABAL3: {
+            address: '0x21ff756ca0cfcc5fff488ad67babadffee0c4149',
+            decimals: 18,
+            symbol: 'STABAL3',
         },
     },
     [Network.POLYGON]: {
@@ -282,37 +307,37 @@ async function makeTrade(
     const key: any = process.env.TRADER_KEY;
     const wallet = new Wallet(key, provider);
 
-    if (swapInfo.tokenIn !== AddressZero) {
-        // Vault needs approval for swapping non ETH
-        console.log('Checking vault allowance...');
-        const tokenInContract = new Contract(
-            swapInfo.tokenIn,
-            erc20abi,
-            provider
-        );
+    // if (swapInfo.tokenIn !== AddressZero) {
+    //     // Vault needs approval for swapping non ETH
+    //     console.log('Checking vault allowance...');
+    //     const tokenInContract = new Contract(
+    //         swapInfo.tokenIn,
+    //         erc20abi,
+    //         provider
+    //     );
 
-        let allowance = await tokenInContract.allowance(
-            wallet.address,
-            vaultAddr
-        );
+    //     let allowance = await tokenInContract.allowance(
+    //         wallet.address,
+    //         vaultAddr
+    //     );
 
-        if (allowance.lt(swapInfo.swapAmount)) {
-            console.log(
-                `Not Enough Allowance: ${allowance.toString()}. Approving vault now...`
-            );
-            const txApprove = await tokenInContract
-                .connect(wallet)
-                .approve(vaultAddr, MaxUint256);
-            await txApprove.wait();
-            console.log(`Allowance updated: ${txApprove.hash}`);
-            allowance = await tokenInContract.allowance(
-                wallet.address,
-                vaultAddr
-            );
-        }
+    //     if (allowance.lt(swapInfo.swapAmount)) {
+    //         console.log(
+    //             `Not Enough Allowance: ${allowance.toString()}. Approving vault now...`
+    //         );
+    //         const txApprove = await tokenInContract
+    //             .connect(wallet)
+    //             .approve(vaultAddr, MaxUint256);
+    //         await txApprove.wait();
+    //         console.log(`Allowance updated: ${txApprove.hash}`);
+    //         allowance = await tokenInContract.allowance(
+    //             wallet.address,
+    //             vaultAddr
+    //         );
+    //     }
 
-        console.log(`Allowance: ${allowance.toString()}`);
-    }
+    //     console.log(`Allowance: ${allowance.toString()}`);
+    // }
 
     const vaultContract = new Contract(vaultAddr, vaultArtifact, provider);
     vaultContract.connect(wallet);
@@ -354,19 +379,27 @@ async function makeTrade(
         overRides['value'] = swapInfo.swapAmount.toString();
     }
 
-    const tx = await vaultContract
-        .connect(wallet)
-        .batchSwap(
-            swapType,
-            swapInfo.swaps,
-            swapInfo.tokenAddresses,
-            funds,
-            limits,
-            deadline,
-            overRides
-        );
+    const deltas = await vaultContract.queryBatchSwap(
+        0,
+        swapInfo.swaps,
+        swapInfo.tokenAddresses,
+        funds
+    );
+    console.log(deltas.toString());
 
-    console.log(`tx: ${tx.hash}`);
+    // const tx = await vaultContract
+    //     .connect(wallet)
+    //     .batchSwap(
+    //         swapType,
+    //         swapInfo.swaps,
+    //         swapInfo.tokenAddresses,
+    //         funds,
+    //         limits,
+    //         deadline,
+    //         overRides
+    //     );
+
+    // console.log(`tx: ${tx.hash}`);
 }
 
 function getLimits(
@@ -551,10 +584,11 @@ async function simpleSwap() {
     // const poolsSource = require('../testData/testPools/gusdBug.json');
     // Update pools list with most recent onchain balances
     const queryOnChain = true;
-    const tokenIn = ADDRESSES[networkId].DAI;
-    const tokenOut = ADDRESSES[networkId].USDC;
+    const tokenIn = ADDRESSES[networkId].bDAI;
+    const tokenOut = ADDRESSES[networkId].bUSDT;
     const swapType = SwapTypes.SwapExactIn;
-    const swapAmount = parseFixed('0.07', 18);
+    // const swapAmount = parseFixed('0.01', 6);
+    const swapAmount = parseFixed('10.2563', 18);
     const executeTrade = true;
 
     const provider = new JsonRpcProvider(PROVIDER_URLS[networkId]);

@@ -82,8 +82,8 @@ export interface SubgraphPoolBase {
     // Linear specific fields
     mainIndex?: number;
     wrappedIndex?: number;
-    target1?: string;
-    target2?: string;
+    lowerTarget?: string;
+    upperTarget?: string;
 }
 
 export type SubgraphToken = {
@@ -147,6 +147,7 @@ export interface PoolBase {
     id: string;
     address: string;
     tokensList: string[];
+    mainIndex?: number;
     setTypeForSwap: (type: SwapPairType) => void;
     parsePoolPairData: (tokenIn: string, tokenOut: string) => PoolPairBase;
     getNormalizedLiquidity: (poolPairData: PoolPairBase) => OldBigNumber;

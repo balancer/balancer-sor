@@ -65,3 +65,23 @@ export const bTUSD: TestToken = {
     address: '0x0000000000000000000000000000000000000005'.toLowerCase(),
     decimals: 18,
 };
+
+export const stETH: TestToken = {
+    address: '0xae7ab96520de3a18e5e111b5eaab095312d7fe84'.toLowerCase(),
+    decimals: 18,
+};
+
+export const LINEAR_AUSDT: TestToken = {
+    address: '0x6a8c3239695613c0710dc971310b36f9b81e115e',
+    decimals: 18,
+};
+
+export const LINEAR_ADAI: TestToken = {
+    address: '0xcd32a460b6fecd053582e43b07ed6e2c04e15369',
+    decimals: 18,
+};
+
+export const STABAL3PHANTOM: TestToken = {
+    address: '0x21ff756ca0cfcc5fff488ad67babadffee0c4149',
+    decimals: 18,
+};

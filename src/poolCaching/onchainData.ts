@@ -58,9 +58,10 @@ export async function getOnChainBalances(
             );
         } else if (
             pool.poolType === 'Stable' ||
-            pool.poolType === 'MetaStable'
+            pool.poolType === 'MetaStable' ||
+            pool.poolType === 'PhantomStable'
         ) {
-            // MetaStable is the same as Stable for multicall purposes
+            // MetaStable & PhantomStable is the same as Stable for multicall purposes
             multiPool.call(
                 `${pool.id}.amp`,
                 pool.address,
@@ -91,6 +92,12 @@ export async function getOnChainBalances(
                 pool.address,
                 'getWrappedIndex'
             );
+
+            multiPool.call(
+                `${pool.id}.wrappedTokenRateCache`,
+                pool.address,
+                'getWrappedTokenRateCache'
+            );
         }
     });
 
@@ -107,6 +114,7 @@ export async function getOnChainBalances(
                 tokens: string[];
                 balances: string[];
             };
+            wrappedTokenRateCache?: string;
         }
     >;
 
@@ -133,7 +141,8 @@ export async function getOnChainBalances(
 
             if (
                 subgraphPools[index].poolType === 'Stable' ||
-                subgraphPools[index].poolType === 'MetaStable'
+                subgraphPools[index].poolType === 'MetaStable' ||
+                subgraphPools[index].poolType === 'PhantomStable'
             ) {
                 if (!onchainData.amp) {
                     throw `Stable Pool Missing Amp: ${poolId}`;
@@ -151,8 +160,14 @@ export async function getOnChainBalances(
                 if (!onchainData.targets)
                     throw `Linear Pool Missing Targets: ${poolId}`;
                 else {
-                    subgraphPools[index].target1 = onchainData.targets[0];
-                    subgraphPools[index].target2 = onchainData.targets[1];
+                    subgraphPools[index].lowerTarget = formatFixed(
+                        onchainData.targets[0],
+                        18
+                    );
+                    subgraphPools[index].upperTarget = formatFixed(
+                        onchainData.targets[1],
+                        18
+                    );
                 }
 
                 if (!onchainData.mainIndex)
@@ -168,6 +183,17 @@ export async function getOnChainBalances(
                     subgraphPools[index].wrappedIndex = Number(
                         onchainData.wrappedIndex
                     );
+
+                if (!onchainData.wrappedTokenRateCache)
+                    throw `Linear Pool Missing WrappedTokenRateCache: ${poolId}`;
+                else {
+                    subgraphPools[index].tokens[
+                        onchainData.wrappedIndex
+                    ].priceRate = formatFixed(
+                        onchainData.wrappedTokenRateCache[0],
+                        18
+                    );
+                }
             }
 
             subgraphPools[index].swapFee = formatFixed(swapFee, 18);
