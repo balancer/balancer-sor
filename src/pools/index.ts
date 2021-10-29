@@ -3,6 +3,7 @@ import { StablePool } from './stablePool/stablePool';
 import { MetaStablePool } from './metaStablePool/metaStablePool';
 import { LinearPool } from './linearPool/linearPool';
 import { ElementPool } from './elementPool/elementPool';
+import { PhantomStablePool } from './phantomStablePool/phantomStablePool';
 import {
     BigNumber as OldBigNumber,
     INFINITY,
@@ -20,6 +21,7 @@ export function parseNewPool(
     | ElementPool
     | LinearPool
     | MetaStablePool
+    | PhantomStablePool
     | undefined {
     // We're not interested in any pools which don't allow swapping
     if (!pool.swapEnabled) return undefined;
@@ -29,17 +31,15 @@ export function parseNewPool(
         | StablePool
         | ElementPool
         | LinearPool
-        | MetaStablePool;
+        | MetaStablePool
+        | PhantomStablePool;
     if (
         pool.poolType === 'Weighted' ||
         pool.poolType === 'LiquidityBootstrapping' ||
         pool.poolType === 'Investment'
     ) {
         newPool = WeightedPool.fromPool(pool);
-    } else if (
-        pool.poolType === 'Stable' ||
-        pool.poolType === 'PhantomStable'
-    ) {
+    } else if (pool.poolType === 'Stable') {
         newPool = StablePool.fromPool(pool);
     } else if (pool.poolType === 'MetaStable') {
         newPool = MetaStablePool.fromPool(pool);
@@ -47,6 +47,8 @@ export function parseNewPool(
         newPool = ElementPool.fromPool(pool);
         newPool.setCurrentBlockTimestamp(currentBlockTimestamp);
     } else if (pool.poolType === 'Linear') newPool = LinearPool.fromPool(pool);
+    else if (pool.poolType === 'PhantomStable')
+        newPool = PhantomStablePool.fromPool(pool);
     else {
         console.error(
             `Unknown pool type or type field missing: ${pool.poolType} ${pool.id}`
