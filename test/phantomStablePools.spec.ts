@@ -81,38 +81,74 @@ describe(`Tests for PhantomStable Pools.`, () => {
         beforeEach(() => {
             pool = cloneDeep(poolsFromFile.STABAL3[0]) as SubgraphPoolBase;
         });
+        context('SwapExactIn', () => {
+            it('Token>Token, SwapExactIn', async () => {
+                const returnAmount = await testFullSwap(
+                    LINEAR_ADAI.address,
+                    LINEAR_AUSDT.address,
+                    SwapTypes.SwapExactIn,
+                    parseFixed('10.2563', 18),
+                    [pool]
+                );
+                expect(returnAmount).to.eq('10153428718607272909');
+            });
 
-        it('Token>Token, SwapExactIn', async () => {
-            const returnAmount = await testFullSwap(
-                LINEAR_AUSDT.address,
-                STABAL3PHANTOM.address,
-                SwapTypes.SwapExactIn,
-                parseFixed('0.010001000098489046', 18),
-                [pool]
-            );
-            expect(returnAmount).to.eq('9901097957797894');
+            it('Token>BPT, SwapExactIn', async () => {
+                const returnAmount = await testFullSwap(
+                    LINEAR_AUSDT.address,
+                    STABAL3PHANTOM.address,
+                    SwapTypes.SwapExactIn,
+                    parseFixed('0.010001000098489046', 18),
+                    [pool]
+                );
+                expect(returnAmount).to.eq('9901097957797894');
+            });
+
+            it('BPT>Token, SwapExactIn', async () => {
+                const returnAmount = await testFullSwap(
+                    STABAL3PHANTOM.address,
+                    LINEAR_AUSDT.address,
+                    SwapTypes.SwapExactIn,
+                    parseFixed('401.873', 18),
+                    [pool]
+                );
+                expect(returnAmount).to.eq('397821023707679256400');
+            });
         });
 
-        it('Token>BPT, SwapExactIn', async () => {
-            const returnAmount = await testFullSwap(
-                LINEAR_AUSDT.address,
-                STABAL3PHANTOM.address,
-                SwapTypes.SwapExactIn,
-                parseFixed('0.010001000098489046', 18),
-                [pool]
-            );
-            expect(returnAmount).to.eq('9901097957797894');
-        });
+        context('SwapExactOut', () => {
+            it('Token>Token, SwapExactOut', async () => {
+                const returnAmount = await testFullSwap(
+                    LINEAR_AUSDT.address,
+                    LINEAR_ADAI.address,
+                    SwapTypes.SwapExactOut,
+                    parseFixed('0.070007000109821346', 18),
+                    [pool]
+                );
+                expect(returnAmount).to.eq('70712367802296270');
+            });
 
-        it('BPT>Token, SwapExactIn', async () => {
-            const returnAmount = await testFullSwap(
-                LINEAR_ADAI.address,
-                LINEAR_AUSDT.address,
-                SwapTypes.SwapExactIn,
-                parseFixed('10.2563', 18),
-                [pool]
-            );
-            expect(returnAmount).to.eq('10153428718607272909');
+            it('Token>BPT, SwapExactOut', async () => {
+                const returnAmount = await testFullSwap(
+                    LINEAR_AUSDT.address,
+                    STABAL3PHANTOM.address,
+                    SwapTypes.SwapExactOut,
+                    parseFixed('654.98', 18),
+                    [pool]
+                );
+                expect(returnAmount).to.eq('661659057984436270212');
+            });
+
+            it('BPT>Token, SwapExactIn', async () => {
+                const returnAmount = await testFullSwap(
+                    STABAL3PHANTOM.address,
+                    LINEAR_AUSDT.address,
+                    SwapTypes.SwapExactOut,
+                    parseFixed('0.007321', 18),
+                    [pool]
+                );
+                expect(returnAmount).to.eq('7395030076860800');
+            });
         });
     });
 });

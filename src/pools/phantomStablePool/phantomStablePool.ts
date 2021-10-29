@@ -130,7 +130,6 @@ export class PhantomStablePool implements PoolBase {
         );
         if (tokenIndexIn < 0) throw 'Pool does not contain tokenIn';
         const tI = this.tokens[tokenIndexIn];
-        // balanceIn = tI.balance;
         const balanceIn = bnum(tI.balance).times(bnum(tI.priceRate)).toString();
         const decimalsIn = tI.decimals;
         const tokenInPriceRate = parseFixed(tI.priceRate, 18);
@@ -140,7 +139,6 @@ export class PhantomStablePool implements PoolBase {
         );
         if (tokenIndexOut < 0) throw 'Pool does not contain tokenOut';
         const tO = this.tokens[tokenIndexOut];
-        // balanceOut = tO.balance;
         const balanceOut = bnum(tO.balance)
             .times(bnum(tO.priceRate))
             .toString();
@@ -342,56 +340,62 @@ export class PhantomStablePool implements PoolBase {
             const amountConverted = amtScaled.times(
                 formatFixed(poolPairData.tokenOutPriceRate, 18)
             );
-            const poolPairDataNoBPT = PhantomStablePool.removeBPT(poolPairData);
-            const balances = poolPairDataNoBPT.allBalancesScaled.map(
-                (balance) => bnum(balance.toString())
-            );
-            const tokenIndexIn = poolPairDataNoBPT.tokenIndexIn;
-            const tokenIndexOut = poolPairDataNoBPT.tokenIndexOut;
+
             let amt: OldBigNumber;
 
             if (poolPairData.pairType === PairTypes.TokenToBpt) {
                 amt = SDK.StableMath._calcTokenInGivenExactBptOut(
                     bnum(this.amp.toString()),
-                    balances,
-                    tokenIndexIn,
-                    amountConverted,
+                    poolPairData.allBalancesScaled.map((b) =>
+                        bnum(b.toString())
+                    ),
+                    poolPairData.tokenIndexIn,
+                    bnum(amountConverted.toString()),
                     bnum(poolPairData.virtualBptSupply.toString()),
-                    bnum(poolPairData.swapFee.toString())
+                    ZERO // Fee is handled above
                 );
             } else if (poolPairData.pairType === PairTypes.BptToToken) {
-                const amountsOut: OldBigNumber[] = [];
-                for (let i = 0; i < balances.length; i++) {
-                    const newValue =
-                        i === tokenIndexOut ? amountConverted : ZERO;
-                    amountsOut.push(newValue);
-                }
+                const amountsOut = Array(
+                    poolPairData.allBalancesScaled.length
+                ).fill(ZERO);
+                amountsOut[poolPairData.tokenIndexOut] = bnum(
+                    amountConverted.toString()
+                );
 
                 amt = SDK.StableMath._calcBptInGivenExactTokensOut(
                     bnum(this.amp.toString()),
-                    balances,
+                    poolPairData.allBalancesScaled.map((b) =>
+                        bnum(b.toString())
+                    ),
                     amountsOut,
                     bnum(poolPairData.virtualBptSupply.toString()),
-                    bnum(poolPairData.swapFee.toString())
+                    ZERO // Fee is handled above
                 );
             } else {
                 amt = SDK.StableMath._calcInGivenOut(
                     bnum(this.amp.toString()),
-                    balances,
-                    tokenIndexIn,
-                    tokenIndexOut,
+                    poolPairData.allBalancesScaled.map((b) =>
+                        bnum(b.toString())
+                    ),
+                    poolPairData.tokenIndexIn,
+                    poolPairData.tokenIndexOut,
                     amountConverted,
-                    bnum(poolPairData.swapFee.toString())
+                    ZERO // Fee is handled above
                 );
             }
-            // return normalised amount
-            // Using BigNumber.js decimalPlaces (dp), allows us to consider token decimal accuracy correctly,
-            // i.e. when using token with 2decimals 0.002 should be returned as 0
-            // Uses ROUND_UP mode (0)
-            return scale(
-                amt.div(formatFixed(poolPairData.tokenInPriceRate, 18)),
-                -18
-            ).dp(poolPairData.decimalsIn, 0);
+            const returnScaled = amt.div(
+                formatFixed(poolPairData.tokenInPriceRate, 18)
+            );
+
+            // In Phantom Pools every time there is a swap (token per token, bpt per token or token per bpt), we substract the fee from the amount in
+            const returnWithFee = bnum(
+                this.addSwapFeeAmount(
+                    BigNumber.from(returnScaled.toString()),
+                    poolPairData.swapFee
+                ).toString()
+            );
+            // return human number
+            return scale(returnWithFee, -18);
         } catch (err) {
             console.error(`_evminGivenOut: ${err.message}`);
             return ZERO;
@@ -408,12 +412,12 @@ export class PhantomStablePool implements PoolBase {
         let result: OldBigNumber;
         if (poolPairData.pairType === PairTypes.TokenToBpt) {
             result = _spotPriceAfterSwapExactTokenInForBPTOut(
-                amount,
+                amountConverted,
                 poolPairData
             );
         } else if (poolPairData.pairType === PairTypes.BptToToken) {
             result = _spotPriceAfterSwapExactBPTInForTokenOut(
-                amount,
+                amountConverted,
                 poolPairData
             );
         } else {
@@ -435,12 +439,12 @@ export class PhantomStablePool implements PoolBase {
         let result: OldBigNumber;
         if (poolPairData.pairType === PairTypes.TokenToBpt) {
             result = _spotPriceAfterSwapTokenInForExactBPTOut(
-                amount,
+                amountConverted,
                 poolPairData
             );
         } else if (poolPairData.pairType === PairTypes.BptToToken) {
             result = _spotPriceAfterSwapBPTInForExactTokenOut(
-                amount,
+                amountConverted,
                 poolPairData
             );
         } else {
@@ -462,12 +466,12 @@ export class PhantomStablePool implements PoolBase {
         let result: OldBigNumber;
         if (poolPairData.pairType === PairTypes.TokenToBpt) {
             result = _derivativeSpotPriceAfterSwapExactTokenInForBPTOut(
-                amount,
+                amountConverted,
                 poolPairData
             );
         } else if (poolPairData.pairType === PairTypes.BptToToken) {
             result = _derivativeSpotPriceAfterSwapExactBPTInForTokenOut(
-                amount,
+                amountConverted,
                 poolPairData
             );
         } else {
@@ -489,12 +493,12 @@ export class PhantomStablePool implements PoolBase {
         let result: OldBigNumber;
         if (poolPairData.pairType === PairTypes.TokenToBpt) {
             result = _derivativeSpotPriceAfterSwapTokenInForExactBPTOut(
-                amount,
+                amountConverted,
                 poolPairData
             );
         } else if (poolPairData.pairType === PairTypes.BptToToken) {
             result = _derivativeSpotPriceAfterSwapBPTInForExactTokenOut(
-                amount,
+                amountConverted,
                 poolPairData
             );
         } else {
@@ -507,7 +511,14 @@ export class PhantomStablePool implements PoolBase {
     }
 
     subtractSwapFeeAmount(amount: BigNumber, swapFee: BigNumber): BigNumber {
+        // https://github.com/balancer-labs/balancer-v2-monorepo/blob/c18ff2686c61a8cbad72cdcfc65e9b11476fdbc3/pkg/pool-utils/contracts/BasePool.sol#L466
         const feeAmount = amount.mul(swapFee).div(ONE);
         return amount.sub(feeAmount);
+    }
+
+    addSwapFeeAmount(amount: BigNumber, swapFee: BigNumber): BigNumber {
+        // https://github.com/balancer-labs/balancer-v2-monorepo/blob/c18ff2686c61a8cbad72cdcfc65e9b11476fdbc3/pkg/pool-utils/contracts/BasePool.sol#L458
+        const feeAmount = ONE.sub(swapFee);
+        return amount.mul(ONE).div(feeAmount);
     }
 }
