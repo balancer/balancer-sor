@@ -85,3 +85,8 @@ export const STABAL3PHANTOM: TestToken = {
     address: '0x21ff756ca0cfcc5fff488ad67babadffee0c4149',
     decimals: 18,
 };
+
+export const aUSDT: TestToken = {
+    address: '0xe8191aacfcdb32260cda25830dc6c9342142f310',
+    decimals: 6,
+};

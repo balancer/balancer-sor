@@ -10,7 +10,13 @@ import {
     scale,
     ZERO,
 } from '../utils/bignumber';
-import { SubgraphPoolBase, PoolBase, SwapTypes, PoolPairBase } from '../types';
+import {
+    SubgraphPoolBase,
+    PoolBase,
+    SwapTypes,
+    PoolPairBase,
+    PoolTypes,
+} from '../types';
 
 export function parseNewPool(
     pool: SubgraphPoolBase,
@@ -67,7 +73,10 @@ export function getOutputAmountSwap(
 ): OldBigNumber {
     // TODO: check if necessary to check if amount > limitAmount
     if (swapType === SwapTypes.SwapExactIn) {
-        if (poolPairData.balanceIn.isZero()) {
+        if (
+            poolPairData.poolType !== PoolTypes.Linear &&
+            poolPairData.balanceIn.isZero()
+        ) {
             return ZERO;
         } else {
             return pool._exactTokenInForTokenOut(poolPairData, amount, false);

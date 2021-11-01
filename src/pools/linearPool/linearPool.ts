@@ -207,13 +207,8 @@ export class LinearPool implements PoolBase {
 
         if (swapType === SwapTypes.SwapExactIn) {
             if (linearPoolPairData.pairType === PairTypes.TokenToBpt) {
-                const limit = bnum(
-                    poolPairData.balanceIn
-                        .mul(this.MAX_RATIO)
-                        .div(ONE)
-                        .toString()
-                );
-                return scale(limit, -poolPairData.decimalsIn);
+                // Swapping to BPT allows for a very large amount so using pre-minted amount as estimation
+                return scale(bnum(this.MAX_TOKEN_BALANCE.toString()), -18);
             } else if (linearPoolPairData.pairType === PairTypes.BptToToken) {
                 // Limit is amount of BPT in for pool balance of tokenOut
 
