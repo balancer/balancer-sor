@@ -1,5 +1,5 @@
 import { BigNumber } from '@ethersproject/bignumber';
-import { BaseProvider } from '@ethersproject/providers';
+import { Provider } from '@ethersproject/providers';
 import { AddressZero, Zero } from '@ethersproject/constants';
 import { Contract } from '@ethersproject/contracts';
 import cloneDeep from 'lodash.clonedeep';
@@ -815,7 +815,7 @@ async function queryBatchSwap(
     swapType: SwapTypes,
     swaps: SwapV2[],
     assets: string[],
-    provider: BaseProvider
+    provider: Provider
 ): Promise<BigNumber> {
     const vaultAddr = '0xBA12222222228d8Ba445958a75a0704d566BF2C8';
     const vaultContract = new Contract(vaultAddr, vaultAbi, provider);
@@ -897,7 +897,7 @@ function calculateMarketSp(
 }
 
 export async function getStEthRate(
-    provider: BaseProvider,
+    provider: Provider,
     chainId: number
 ): Promise<BigNumber> {
     // Call stEthPerToken or tokensPerStETH to get the scaling factors in each direction.
@@ -921,7 +921,7 @@ export async function getLidoStaticSwaps(
     tokenOut: string,
     swapType: SwapTypes,
     swapAmount: BigNumber,
-    provider: BaseProvider
+    provider: Provider
 ): Promise<SwapInfo> {
     // Check for stETH tokens and convert to use wstETH for routing
     let isWrappingIn,

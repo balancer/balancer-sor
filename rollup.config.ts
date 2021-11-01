@@ -8,8 +8,8 @@ import pkg from './package.json';
 
 const external = [
     '@ethersproject/abi',
-    '@ethersproject/abstract-signer',
     '@ethersproject/address',
+    '@ethersproject/bignumber',
     '@ethersproject/constants',
     '@ethersproject/contracts',
     '@ethersproject/providers',
