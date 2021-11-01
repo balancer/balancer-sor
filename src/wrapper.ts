@@ -16,7 +16,6 @@ import {
     SwapInfo,
     SwapTypes,
     NewPath,
-    PoolDictionary,
     PoolFilter,
     Swap,
     SubgraphPoolBase,
