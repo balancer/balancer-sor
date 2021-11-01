@@ -59,5 +59,5 @@ export const EMPTY_SWAPINFO: SwapInfo = {
     returnAmount: Zero,
     returnAmountConsideringFees: Zero,
     returnAmountFromSwaps: Zero,
-    marketSp: ZERO,
+    marketSp: Zero.toString(),
 };

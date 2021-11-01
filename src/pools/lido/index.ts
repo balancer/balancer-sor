@@ -965,7 +965,7 @@ export async function getLidoStaticSwaps(
         swapInfo.swaps,
         swapInfo.tokenAddresses,
         pools
-    );
+    ).toString();
 
     // Unlike main SOR here we haven't calculated the return amount for swaps so use query call on Vault to get value.
     swapInfo.returnAmount = await queryBatchSwap(
@@ -976,7 +976,7 @@ export async function getLidoStaticSwaps(
     );
 
     if (swapInfo.returnAmount.isZero()) {
-        return { ...EMPTY_SWAPINFO };
+        return cloneDeep(EMPTY_SWAPINFO);
     }
 
     // Considering fees shouldn't matter as there won't be alternative options on V1

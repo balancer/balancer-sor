@@ -6,7 +6,6 @@ import {
     formatFixed,
     parseFixed,
 } from '@ethersproject/bignumber';
-// import { BigNumber } from 'bignumber.js';
 import { JsonRpcProvider } from '@ethersproject/providers';
 import { Wallet } from '@ethersproject/wallet';
 import { Contract } from '@ethersproject/contracts';

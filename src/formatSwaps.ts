@@ -89,7 +89,7 @@ export function formatSwaps(
     tokenOut: string,
     returnAmount: BigNumber,
     returnAmountConsideringFees: BigNumber,
-    marketSp: OldBigNumber
+    marketSp: string
 ): SwapInfo {
     if (swapsOriginal.length === 0) {
         return cloneDeep(EMPTY_SWAPINFO);
