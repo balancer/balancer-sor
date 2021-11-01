@@ -1,4 +1,4 @@
-import { BigNumber, formatFixed } from '@ethersproject/bignumber';
+import { formatFixed } from '@ethersproject/bignumber';
 import { BaseProvider } from '@ethersproject/providers';
 import { SubgraphPoolBase } from '../types';
 import { isSameAddress } from '../utils';

@@ -5,13 +5,7 @@ import {
     parseToPoolsDict,
 } from './filtering';
 import { calculatePathLimits } from './pathLimits';
-import {
-    SwapOptions,
-    SwapTypes,
-    NewPath,
-    PoolDictionary,
-    SubgraphPoolBase,
-} from '../types';
+import { SwapOptions, SwapTypes, NewPath, SubgraphPoolBase } from '../types';
 
 export class RouteProposer {
     cache: Record<string, { paths: NewPath[] }> = {};
