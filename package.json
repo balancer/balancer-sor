@@ -43,6 +43,8 @@
         "eslint-plugin-mocha-no-only": "^1.1.1",
         "eslint-plugin-prettier": "^3.4.1",
         "husky": "^4.2.1",
+        "lodash.clonedeep": "^4.5.0",
+        "lodash.set": "^4.3.2",
         "mocha": "8.2.1",
         "nyc": "^15.0.0",
         "perf_hooks": "^0.0.1",
@@ -61,8 +63,6 @@
         "@ethersproject/providers": "5.0.12",
         "@georgeroman/balancer-v2-pools": "^0.0.5",
         "bignumber.js": "^9.0.1",
-        "isomorphic-fetch": "^2.2.1",
-        "lodash.clonedeep": "^4.5.0",
-        "lodash.set": "^4.3.2"
+        "isomorphic-fetch": "^2.2.1"
     }
 }
