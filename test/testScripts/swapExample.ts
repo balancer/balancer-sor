@@ -346,10 +346,7 @@ async function makeTrade(
             } else if (
                 token.toLowerCase() === swapInfo.tokenOut.toLowerCase()
             ) {
-                limits[i] = swapInfo.returnAmount
-                    .mul(-0.99)
-                    .toString()
-                    .split('.')[0];
+                limits[i] = swapInfo.returnAmount.mul(-99).div(100).toString();
             } else {
                 limits[i] = '0';
             }
@@ -361,10 +358,7 @@ async function makeTrade(
             } else if (
                 token.toLowerCase() === swapInfo.tokenOut.toLowerCase()
             ) {
-                limits[i] = swapInfo.swapAmount
-                    .mul(-0.99)
-                    .toString()
-                    .split('.')[0];
+                limits[i] = swapInfo.swapAmount.mul(-99).div(100).toString();
             } else {
                 limits[i] = '0';
             }
