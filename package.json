@@ -25,7 +25,7 @@
         "dist"
     ],
     "devDependencies": {
-        "@ethersproject/wallet": "^5.0.7",
+        "@ethersproject/wallet": "^5.4.0",
         "@rollup/plugin-commonjs": "^20.0.0",
         "@rollup/plugin-json": "^4.1.0",
         "@rollup/plugin-node-resolve": "^13.0.4",
