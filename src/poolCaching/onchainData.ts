@@ -1,5 +1,5 @@
 import { formatFixed } from '@ethersproject/bignumber';
-import { BaseProvider } from '@ethersproject/providers';
+import { Provider } from '@ethersproject/providers';
 import { SubgraphPoolBase } from '../types';
 import { isSameAddress } from '../utils';
 import { Multicaller } from '../utils/multicaller';
@@ -14,7 +14,7 @@ export async function getOnChainBalances(
     subgraphPools: SubgraphPoolBase[],
     multiAddress: string,
     vaultAddress: string,
-    provider: BaseProvider
+    provider: Provider
 ): Promise<SubgraphPoolBase[]> {
     if (subgraphPools.length === 0) return subgraphPools;
 

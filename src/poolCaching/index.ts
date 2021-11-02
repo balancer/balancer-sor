@@ -1,4 +1,4 @@
-import { BaseProvider } from '@ethersproject/providers';
+import { Provider } from '@ethersproject/providers';
 import cloneDeep from 'lodash.clonedeep';
 import { MULTIADDR, VAULTADDR } from '../constants';
 import { SubgraphPoolBase } from '../types';
@@ -10,7 +10,7 @@ export class PoolCacher {
     finishedFetchingOnChain = false;
 
     constructor(
-        private provider: BaseProvider,
+        private provider: Provider,
         private chainId: number,
         private poolsUrl: string | null = null,
         initialPools: SubgraphPoolBase[] = []
