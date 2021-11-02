@@ -4,11 +4,14 @@ import { SubgraphPoolBase } from '../types';
 import { isSameAddress } from '../utils';
 import { Multicaller } from '../utils/multicaller';
 
-// TODO: decide whether we want to trim these ABIs down to the relevant functions
-import vaultAbi from '../abi/Vault.json';
-import weightedPoolAbi from '../pools/weightedPool/weightedPoolAbi.json';
-import stablePoolAbi from '../pools/stablePool/stablePoolAbi.json';
-import elementPoolAbi from '../pools/elementPool/ConvergentCurvePool.json';
+const abi = [
+    'function getPoolTokens(bytes32 poolId) external view returns (address[] memory tokens, uint256[] memory balances, uint256 lastChangeBlock)',
+    'function totalSupply() public view returns (uint256)',
+    'function getNormalizedWeights() external view returns (uint256[] memory)',
+    'function getSwapFeePercentage() public view returns (uint256)',
+    'function getAmplificationParameter() external view returns (uint256 value, bool isUpdating, uint256 precision)',
+    'function percentFee() public view returns (uint256)',
+];
 
 export async function getOnChainBalances(
     subgraphPools: SubgraphPoolBase[],
@@ -18,19 +21,7 @@ export async function getOnChainBalances(
 ): Promise<SubgraphPoolBase[]> {
     if (subgraphPools.length === 0) return subgraphPools;
 
-    const abis: any = Object.values(
-        // Remove duplicate entries using their names
-        Object.fromEntries(
-            [
-                ...vaultAbi,
-                ...weightedPoolAbi,
-                ...stablePoolAbi,
-                ...elementPoolAbi,
-            ].map((row) => [row.name, row])
-        )
-    );
-
-    const multiPool = new Multicaller(multiAddress, provider, abis);
+    const multiPool = new Multicaller(multiAddress, provider, abi);
 
     subgraphPools.forEach((pool) => {
         multiPool.call(`${pool.id}.poolTokens`, vaultAddress, 'getPoolTokens', [
