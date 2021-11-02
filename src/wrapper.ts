@@ -1,5 +1,5 @@
 import { BigNumber, BigNumberish, parseFixed } from '@ethersproject/bignumber';
-import { BaseProvider } from '@ethersproject/providers';
+import { Provider } from '@ethersproject/providers';
 import cloneDeep from 'lodash.clonedeep';
 import { BigNumber as OldBigNumber } from './utils/bignumber';
 import { getBestPaths } from './router';
@@ -38,7 +38,7 @@ export class SOR {
     };
 
     constructor(
-        public provider: BaseProvider,
+        public provider: Provider,
         public chainId: number,
         poolsSource: string | null,
         initialPools: SubgraphPoolBase[] = []
