@@ -519,6 +519,6 @@ export class PhantomStablePool implements PoolBase {
     addSwapFeeAmount(amount: BigNumber, swapFee: BigNumber): BigNumber {
         // https://github.com/balancer-labs/balancer-v2-monorepo/blob/c18ff2686c61a8cbad72cdcfc65e9b11476fdbc3/pkg/pool-utils/contracts/BasePool.sol#L458
         const feeAmount = ONE.sub(swapFee);
-        return amount.mul(ONE).div(feeAmount);
+        return amount.mul(ONE).add(feeAmount.sub(1)).div(feeAmount);
     }
 }
