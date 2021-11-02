@@ -207,13 +207,8 @@ export class LinearPool implements PoolBase {
 
         if (swapType === SwapTypes.SwapExactIn) {
             if (linearPoolPairData.pairType === PairTypes.TokenToBpt) {
-                const limit = bnum(
-                    poolPairData.balanceIn
-                        .mul(this.MAX_RATIO)
-                        .div(ONE)
-                        .toString()
-                );
-                return scale(limit, -poolPairData.decimalsIn);
+                // Swapping to BPT allows for a very large amount so using pre-minted amount as estimation
+                return scale(bnum(this.MAX_TOKEN_BALANCE.toString()), -18);
             } else if (linearPoolPairData.pairType === PairTypes.BptToToken) {
                 // Limit is amount of BPT in for pool balance of tokenOut
 
@@ -295,7 +290,10 @@ export class LinearPool implements PoolBase {
                     }
                 );
                 // return human readable number
-                return scale(amt, -18);
+                // Using BigNumber.js decimalPlaces (dp), allows us to consider token decimal accuracy correctly,
+                // i.e. when using token with 2decimals 0.002 should be returned as 0
+                // Uses ROUND_DOWN mode (1)
+                return scale(amt, -18).dp(poolPairData.decimalsOut, 1);
             } catch (err) {
                 return ZERO;
             }
@@ -329,7 +327,10 @@ export class LinearPool implements PoolBase {
                     }
                 );
                 // return human readable number
-                return scale(amt, -18);
+                // Using BigNumber.js decimalPlaces (dp), allows us to consider token decimal accuracy correctly,
+                // i.e. when using token with 2decimals 0.002 should be returned as 0
+                // Uses ROUND_DOWN mode (1)
+                return scale(amt, -18).dp(poolPairData.decimalsOut, 1);
             } catch (err) {
                 return ZERO;
             }
@@ -373,7 +374,10 @@ export class LinearPool implements PoolBase {
                     }
                 );
                 // return human readable number
-                return scale(amt, -18);
+                // Using BigNumber.js decimalPlaces (dp), allows us to consider token decimal accuracy correctly,
+                // i.e. when using token with 2decimals 0.002 should be returned as 0
+                // Uses ROUND_UP mode (0)
+                return scale(amt, -18).dp(poolPairData.decimalsIn, 0);
             } catch (err) {
                 return ZERO;
             }
@@ -406,7 +410,10 @@ export class LinearPool implements PoolBase {
                     }
                 );
                 // return human readable number
-                return scale(amt, -18);
+                // Using BigNumber.js decimalPlaces (dp), allows us to consider token decimal accuracy correctly,
+                // i.e. when using token with 2decimals 0.002 should be returned as 0
+                // Uses ROUND_UP mode (0)
+                return scale(amt, -18).dp(poolPairData.decimalsIn, 0);
             } catch (err) {
                 return ZERO;
             }

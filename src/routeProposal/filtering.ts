@@ -379,7 +379,7 @@ function getPoolWithMainToken(pools: PoolDictionary, token: string): PoolBase {
     let pool;
     for (const id in pools) {
         const mainIndex = pools[id].mainIndex;
-        if (mainIndex) {
+        if (mainIndex !== undefined) {
             // TO DO
             // Currently maths doesn't support wrapped tokens (TBC if there is a workaround)
             // This means we can only support main token

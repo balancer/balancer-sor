@@ -308,7 +308,10 @@ export function EVMgetOutputAmountSwap(
     let returnAmount: OldBigNumber;
 
     if (swapType === SwapTypes.SwapExactIn) {
-        if (poolPairData.balanceIn.isZero()) {
+        if (
+            poolPairData.poolType !== PoolTypes.Linear &&
+            poolPairData.balanceIn.isZero()
+        ) {
             return ZERO;
         }
     } else {

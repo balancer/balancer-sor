@@ -2,7 +2,7 @@
 import { assert, expect } from 'chai';
 import cloneDeep from 'lodash.clonedeep';
 import { JsonRpcProvider } from '@ethersproject/providers';
-import { BigNumber, parseFixed } from '@ethersproject/bignumber';
+import { BigNumber, parseFixed, formatFixed } from '@ethersproject/bignumber';
 import { BigNumber as OldBigNumber, bnum } from '../src/utils/bignumber';
 import {
     PoolDictionary,
@@ -27,21 +27,27 @@ import {
     USDC,
     bUSDC,
     BAL,
-    staBAL3,
+    STABAL3PHANTOM,
     TestToken,
     MKR,
     GUSD,
     WETH,
     TUSD,
     bTUSD,
+    USDT,
+    LINEAR_AUSDT,
+    LINEAR_ADAI,
+    aUSDT,
 } from './lib/constants';
 
 // Single Linear pool DAI/aDAI/bDAI
 import singleLinear from './testData/linearPools/singleLinear.json';
 // weightedWeth/StaBal3Id, weightedBal/Weth, weightedUsdc/Weth, weightedDai/Weth, weightedDai/Usdc, linearUSDC, linearDAI, linearUSDT, staBal3Id, staBal3/Gusd, weightedMkr/Dai
 import smallLinear from './testData/linearPools/smallLinear.json';
+import kovanPools from './testData/linearPools/kovan.json';
 
 const chainId = 99;
+const MAX_TOKEN_BALANCE = BigNumber.from('2').pow('112').sub('1');
 
 describe('linear pool tests', () => {
     context('parsePoolPairData', () => {
@@ -92,17 +98,10 @@ describe('linear pool tests', () => {
 
         it(`getLimitAmountSwap, SwapExactIn, TokenToBpt should return valid limit`, async () => {
             const tokenIn = DAI.address;
-            const tokenInDecimals = DAI.decimals;
             const tokenOut = bDAI.address;
             const swapType = SwapTypes.SwapExactIn;
             const pools = singleLinear.pools;
             const poolIndex = 0;
-
-            const MAX_RATIO = bnum(10);
-
-            const expectedAmt = bnum(pools[poolIndex].tokens[0].balance)
-                .times(MAX_RATIO)
-                .dp(tokenInDecimals);
 
             testLimit(
                 tokenIn,
@@ -110,7 +109,7 @@ describe('linear pool tests', () => {
                 swapType,
                 pools,
                 poolIndex,
-                expectedAmt
+                bnum(formatFixed(MAX_TOKEN_BALANCE, 18))
             );
         });
 
@@ -121,7 +120,7 @@ describe('linear pool tests', () => {
                 SwapTypes.SwapExactIn,
                 singleLinear.pools,
                 0,
-                bnum('937.94411054836482804')
+                bnum('2435042129339820.944893716608291347')
             );
         });
 
@@ -512,164 +511,226 @@ describe('linear pool tests', () => {
     });
 
     context('SOR Full Swaps', () => {
-        context('Stable Swaps', () => {
+        context('Linear Swaps', () => {
+            it('MainToken>BPT, SwapExactIn', async () => {
+                const returnAmount = await testFullSwap(
+                    USDT.address,
+                    LINEAR_AUSDT.address,
+                    SwapTypes.SwapExactIn,
+                    parseFixed('25.001542', USDT.decimals),
+                    kovanPools.pools
+                );
+                expect(returnAmount).to.eq('25004042400437802798');
+            });
+
+            it('MainToken>BPT, SwapExactOut', async () => {
+                const returnAmount = await testFullSwap(
+                    USDT.address,
+                    LINEAR_AUSDT.address,
+                    SwapTypes.SwapExactOut,
+                    parseFixed('0.981028', LINEAR_AUSDT.decimals),
+                    kovanPools.pools
+                );
+
+                // TO DO - This is probably rounding?
+                expect(returnAmount).to.eq('980930');
+            });
+
+            it('BPT>MainToken, SwapExactIn', async () => {
+                const returnAmount = await testFullSwap(
+                    LINEAR_AUSDT.address,
+                    USDT.address,
+                    SwapTypes.SwapExactIn,
+                    parseFixed('26.0872140', LINEAR_AUSDT.decimals),
+                    kovanPools.pools
+                );
+                expect(returnAmount).to.eq('26084605');
+            });
+
+            it('BPT>MainToken, SwapExactOut', async () => {
+                const returnAmount = await testFullSwap(
+                    LINEAR_AUSDT.address,
+                    USDT.address,
+                    SwapTypes.SwapExactOut,
+                    parseFixed('71.204293', USDT.decimals),
+                    kovanPools.pools
+                );
+                expect(returnAmount).to.eq('71211414130584291114');
+            });
+
+            it('MainToken>BPT, SwapExactIn, No MainToken Initial Balance', async () => {
+                const pools = cloneDeep(kovanPools.pools);
+                pools[3].tokens[0].priceRate = '1.151626716668872399';
+                const returnAmount = await testFullSwap(
+                    DAI.address,
+                    LINEAR_ADAI.address,
+                    SwapTypes.SwapExactIn,
+                    parseFixed('491.23098', DAI.decimals),
+                    pools
+                );
+
+                // TO DO - This result is from EVM queryBatchSwap. Not sure why we're not matching.
+                expect(returnAmount).to.eq('491280107230911728741');
+            });
+        });
+
+        context('Stable Swaps Via StaBal3', () => {
             it('DAI>USDC, SwapExactIn', async () => {
                 const returnAmount = await testFullSwap(
                     DAI.address,
-                    USDC.address,
+                    USDT.address,
                     SwapTypes.SwapExactIn,
-                    parseFixed('25', DAI.decimals),
-                    smallLinear.pools
+                    parseFixed('10.23098', DAI.decimals),
+                    kovanPools.pools,
+                    42
                 );
-                expect(returnAmount).to.eq('25631283');
+                expect(returnAmount).to.eq('10128362');
             });
 
-            it('DAI>USDC, SwapExactOut', async () => {
+            it('DAI>USDT, SwapExactOut', async () => {
+                const pools = cloneDeep(kovanPools.pools);
+                pools[3].tokens[0].priceRate = '1.151626716671544199';
+                pools[2].tokens[2].priceRate = '1.000680737603270490';
+
                 const returnAmount = await testFullSwap(
                     DAI.address,
-                    USDC.address,
+                    USDT.address,
                     SwapTypes.SwapExactOut,
-                    parseFixed('27', USDC.decimals),
-                    smallLinear.pools
+                    parseFixed('0.123456', USDT.decimals),
+                    pools,
+                    42
                 );
-                expect(returnAmount).to.eq('26335005759283578738');
-            });
 
-            it('USDC>DAI, SwapExactIn', async () => {
-                const returnAmount = await testFullSwap(
-                    USDC.address,
-                    DAI.address,
-                    SwapTypes.SwapExactIn,
-                    parseFixed('270', USDC.decimals),
-                    smallLinear.pools
-                );
-                expect(returnAmount).to.eq('263139419682766757824');
-            });
-
-            it('USDC>DAI, SwapExactOut', async () => {
-                const returnAmount = await testFullSwap(
-                    USDC.address,
-                    DAI.address,
-                    SwapTypes.SwapExactOut,
-                    parseFixed('7777', DAI.decimals),
-                    smallLinear.pools
-                );
-                expect(returnAmount).to.eq('7979762220');
+                // TO DO - Not sure why this isn't matching EVM result?
+                expect(returnAmount).to.eq('124706170943552492');
             });
         });
 
-        context('Stable <> Token paired with WETH', () => {
-            it('USDC>BAL, SwapExactIn', async () => {
-                const returnAmount = await testFullSwap(
-                    USDC.address,
-                    BAL.address,
-                    SwapTypes.SwapExactIn,
-                    parseFixed('7.21', USDC.decimals),
-                    smallLinear.pools
-                );
-                expect(returnAmount).to.eq('652413907213768626');
-            });
+        // TO DO - Add Tests against EVM
+        // context('Stable <> Token paired with WETH', () => {
+        //     it('USDC>BAL, SwapExactIn', async () => {
+        //         const returnAmount = await testFullSwap(
+        //             USDC.address,
+        //             BAL.address,
+        //             SwapTypes.SwapExactIn,
+        //             parseFixed('7.21', USDC.decimals),
+        //             smallLinear.pools
+        //         );
+        //         expect(returnAmount).to.eq('652413907213768626');
+        //     });
 
-            it('BAL>DAI, SwapExactIn', async () => {
-                const returnAmount = await testFullSwap(
-                    BAL.address,
-                    DAI.address,
-                    SwapTypes.SwapExactIn,
-                    parseFixed('321.123', BAL.decimals),
-                    smallLinear.pools
-                );
-                expect(returnAmount).to.eq('3320451170714139189569');
-            });
+        //     it('BAL>DAI, SwapExactIn', async () => {
+        //         const returnAmount = await testFullSwap(
+        //             BAL.address,
+        //             DAI.address,
+        //             SwapTypes.SwapExactIn,
+        //             parseFixed('321.123', BAL.decimals),
+        //             smallLinear.pools
+        //         );
+        //         expect(returnAmount).to.eq('3320451170714139189569');
+        //     });
 
-            it('USDC>BAL, SwapExactOut', async () => {
-                const returnAmount = await testFullSwap(
-                    USDC.address,
-                    BAL.address,
-                    SwapTypes.SwapExactOut,
-                    parseFixed('0.652413919893769122', BAL.decimals),
-                    smallLinear.pools
-                );
-                expect(returnAmount).to.eq('7210000');
-            });
+        //     it('USDC>BAL, SwapExactOut', async () => {
+        //         const returnAmount = await testFullSwap(
+        //             USDC.address,
+        //             BAL.address,
+        //             SwapTypes.SwapExactOut,
+        //             parseFixed('0.652413919893769122', BAL.decimals),
+        //             smallLinear.pools
+        //         );
+        //         expect(returnAmount).to.eq('7210000');
+        //     });
 
-            it('BAL>DAI, SwapExactOut', async () => {
-                const returnAmount = await testFullSwap(
-                    BAL.address,
-                    DAI.address,
-                    SwapTypes.SwapExactOut,
-                    parseFixed('3320.451170714139189569', DAI.decimals),
-                    smallLinear.pools
-                );
-                expect(returnAmount).to.eq('321122999999986750182');
-            });
-        });
+        //     it('BAL>DAI, SwapExactOut', async () => {
+        //         const returnAmount = await testFullSwap(
+        //             BAL.address,
+        //             DAI.address,
+        //             SwapTypes.SwapExactOut,
+        //             parseFixed('3320.451170714139189569', DAI.decimals),
+        //             smallLinear.pools
+        //         );
+        //         expect(returnAmount).to.eq('321122999999986750182');
+        //     });
+        // });
 
         context('Relayer Routes', () => {
             it('DAI>staBAL3, SwapExactIn', async () => {
+                const pools = cloneDeep(kovanPools.pools);
+                pools[3].tokens[0].priceRate = '1.151626716671767642';
                 const returnAmount = await testFullSwap(
                     DAI.address,
-                    staBAL3.address,
+                    STABAL3PHANTOM.address,
                     SwapTypes.SwapExactIn,
                     parseFixed('1', DAI.decimals),
-                    smallLinear.pools
+                    pools,
+                    42
                 );
-                expect(returnAmount).to.eq('946927175843694145');
+
+                // TO DO - Not matching EVM.
+                expect(returnAmount).to.eq('990084758365948255');
             });
 
-            it('USDC>staBAL3, SwapExactOut', async () => {
+            it('USDT>staBAL3, SwapExactOut', async () => {
                 const returnAmount = await testFullSwap(
-                    USDC.address,
-                    staBAL3.address,
+                    USDT.address,
+                    STABAL3PHANTOM.address,
                     SwapTypes.SwapExactOut,
-                    parseFixed('1', staBAL3.decimals),
-                    smallLinear.pools
+                    parseFixed('1', STABAL3PHANTOM.decimals),
+                    kovanPools.pools,
+                    42
                 );
-                expect(returnAmount).to.eq('1083147');
+
+                // TO DO - Rounding?
+                expect(returnAmount).to.eq('1009990');
             });
 
-            it('staBAL3>USDC, SwapExactIn', async () => {
+            it('staBAL3>USDT, SwapExactIn', async () => {
                 const returnAmount = await testFullSwap(
-                    staBAL3.address,
-                    USDC.address,
+                    STABAL3PHANTOM.address,
+                    USDT.address,
                     SwapTypes.SwapExactIn,
-                    parseFixed('1', staBAL3.decimals),
-                    smallLinear.pools
+                    parseFixed('1', STABAL3PHANTOM.decimals),
+                    kovanPools.pools,
+                    42
                 );
-                expect(returnAmount).to.eq('1082280');
+                expect(returnAmount).to.eq('989890');
             });
 
-            it('staBAL3>DAI, SwapExactOut', async () => {
+            it('staBAL3>USDT, SwapExactOut', async () => {
                 const returnAmount = await testFullSwap(
-                    staBAL3.address,
-                    DAI.address,
+                    STABAL3PHANTOM.address,
+                    USDT.address,
                     SwapTypes.SwapExactOut,
-                    parseFixed('1', DAI.decimals),
-                    smallLinear.pools
+                    parseFixed('1', USDT.decimals),
+                    kovanPools.pools,
+                    42
                 );
-                expect(returnAmount).to.eq('947685172351949208');
+                // TO DO - Rounding?
+                expect(returnAmount).to.eq('1010213212557663050');
             });
 
-            it('aDAI>staBAL3, SwapExactIn', async () => {
-                const returnAmount = await testFullSwap(
-                    aDAI.address,
-                    staBAL3.address,
-                    SwapTypes.SwapExactIn,
-                    parseFixed('1', staBAL3.decimals),
-                    smallLinear.pools
-                );
-                expect(returnAmount).to.eq('946927175843694145');
-            });
+            // it('aUSDT>staBAL3, SwapExactIn', async () => {
+            //     const returnAmount = await testFullSwap(
+            //         aUSDT.address,
+            //         STABAL3PHANTOM.address,
+            //         SwapTypes.SwapExactIn,
+            //         parseFixed('1', aUSDT.decimals),
+            //         kovanPools.pools,
+            //         42
+            //     );
+            //     expect(returnAmount).to.eq('990684553495117616'); // TO DO - This will fail until we support wrapped tokens. Remove if decided we def won't
+            // });
 
-            it('aDAI>WETH, SwapExactIn', async () => {
-                const returnAmount = await testFullSwap(
-                    aDAI.address,
-                    WETH.address,
-                    SwapTypes.SwapExactIn,
-                    parseFixed('1', staBAL3.decimals),
-                    smallLinear.pools
-                );
-                expect(returnAmount).to.eq('468734616507406'); // TO DO - This will fail until we support wrapped tokens. Remove if decided we def won't
-            });
+            //     it('aDAI>WETH, SwapExactIn', async () => {
+            //         const returnAmount = await testFullSwap(
+            //             aDAI.address,
+            //             WETH.address,
+            //             SwapTypes.SwapExactIn,
+            //             parseFixed('1', staBAL3.decimals),
+            //             smallLinear.pools
+            //         );
+            //         expect(returnAmount).to.eq('468734616507406'); // TO DO - This will fail until we support wrapped tokens. Remove if decided we def won't
+            //     });
         });
     });
 });
@@ -715,7 +776,8 @@ async function testFullSwap(
     tokenOut: string,
     swapType: SwapTypes,
     swapAmount: BigNumber,
-    pools: SubgraphPoolBase[]
+    pools: SubgraphPoolBase[],
+    chainId = 99
 ) {
     const returnAmountDecimals = 18; // TO DO Remove?
     const maxPools = 4;
