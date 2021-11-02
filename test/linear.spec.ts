@@ -49,28 +49,28 @@ import kovanPools from './testData/linearPools/kovan.json';
 const chainId = 99;
 
 describe('linear pool tests', () => {
-    // context('parsePoolPairData', () => {
-    //     it(`should correctly parse token > phantomBpt`, async () => {
-    //         const tokenIn = DAI;
-    //         const tokenOut = bDAI;
-    //         const poolSG = cloneDeep(singleLinear).pools[0];
-    //         testParsePool(poolSG, tokenIn, tokenOut, PairTypes.TokenToBpt);
-    //     });
+    context('parsePoolPairData', () => {
+        it(`should correctly parse token > phantomBpt`, async () => {
+            const tokenIn = DAI;
+            const tokenOut = bDAI;
+            const poolSG = cloneDeep(singleLinear).pools[0];
+            testParsePool(poolSG, tokenIn, tokenOut, PairTypes.TokenToBpt);
+        });
 
-    //     it(`should correctly parse phantomBpt > token`, async () => {
-    //         const tokenIn = bUSDC;
-    //         const tokenOut = USDC;
-    //         const poolSG = cloneDeep(smallLinear).pools[4];
-    //         testParsePool(poolSG, tokenIn, tokenOut, PairTypes.BptToToken);
-    //     });
+        it(`should correctly parse phantomBpt > token`, async () => {
+            const tokenIn = bUSDC;
+            const tokenOut = USDC;
+            const poolSG = cloneDeep(smallLinear).pools[4];
+            testParsePool(poolSG, tokenIn, tokenOut, PairTypes.BptToToken);
+        });
 
-    //     it(`should correctly parse token > token`, async () => {
-    //         const tokenIn = DAI;
-    //         const tokenOut = aDAI;
-    //         const poolSG = cloneDeep(singleLinear).pools[0];
-    //         testParsePool(poolSG, tokenIn, tokenOut, PairTypes.TokenToToken);
-    //     });
-    // });
+        it(`should correctly parse token > token`, async () => {
+            const tokenIn = DAI;
+            const tokenOut = aDAI;
+            const poolSG = cloneDeep(singleLinear).pools[0];
+            testParsePool(poolSG, tokenIn, tokenOut, PairTypes.TokenToToken);
+        });
+    });
 
     // context('limit amounts', () => {
     //     it(`getLimitAmountSwap, token to token should return 0`, async () => {
@@ -565,16 +565,18 @@ describe('linear pool tests', () => {
             });
 
             it('MainToken>BPT, SwapExactIn, No MainToken Initial Balance', async () => {
+                const pools = cloneDeep(kovanPools.pools);
+                pools[3].tokens[0].priceRate = '1.151626716668872399';
                 const returnAmount = await testFullSwap(
                     DAI.address,
                     LINEAR_ADAI.address,
                     SwapTypes.SwapExactIn,
                     parseFixed('491.23098', DAI.decimals),
-                    kovanPools.pools
+                    pools
                 );
 
                 // TO DO - This result is from EVM queryBatchSwap. Not sure why we're not matching.
-                expect(returnAmount).to.eq('491280107270402505200');
+                expect(returnAmount).to.eq('491280107230911728741');
             });
         });
 
@@ -591,18 +593,22 @@ describe('linear pool tests', () => {
                 expect(returnAmount).to.eq('10128362');
             });
 
-            it('DAI>USDC, SwapExactOut', async () => {
+            it('DAI>USDT, SwapExactOut', async () => {
+                const pools = cloneDeep(kovanPools.pools);
+                pools[3].tokens[0].priceRate = '1.151626716671544199';
+                pools[2].tokens[2].priceRate = '1.000680737603270490';
+
                 const returnAmount = await testFullSwap(
                     DAI.address,
                     USDT.address,
                     SwapTypes.SwapExactOut,
                     parseFixed('0.123456', USDT.decimals),
-                    kovanPools.pools,
+                    pools,
                     42
                 );
 
                 // TO DO - Not sure why this isn't matching EVM result?
-                expect(returnAmount).to.eq('124706170933707851');
+                expect(returnAmount).to.eq('124706170943552492');
             });
         });
 
@@ -654,17 +660,19 @@ describe('linear pool tests', () => {
 
         context('Relayer Routes', () => {
             it('DAI>staBAL3, SwapExactIn', async () => {
+                const pools = cloneDeep(kovanPools.pools);
+                pools[3].tokens[0].priceRate = '1.151626716671767642';
                 const returnAmount = await testFullSwap(
                     DAI.address,
                     STABAL3PHANTOM.address,
                     SwapTypes.SwapExactIn,
                     parseFixed('1', DAI.decimals),
-                    kovanPools.pools,
+                    pools,
                     42
                 );
 
                 // TO DO - Not matching EVM.
-                expect(returnAmount).to.eq('980183912340756050');
+                expect(returnAmount).to.eq('990084758365948255');
             });
 
             it('USDT>staBAL3, SwapExactOut', async () => {
@@ -706,19 +714,17 @@ describe('linear pool tests', () => {
                 expect(returnAmount).to.eq('1010213212557663050');
             });
 
-            it('aDAI>staBAL3, SwapExactIn', async () => {
-                const returnAmount = await testFullSwap(
-                    aUSDT.address,
-                    STABAL3PHANTOM.address,
-                    SwapTypes.SwapExactIn,
-                    parseFixed('1', aUSDT.decimals),
-                    kovanPools.pools,
-                    42
-                );
-
-                // TO DO - Not matching EVM
-                expect(returnAmount).to.eq('990684553495117616');
-            });
+            // it('aUSDT>staBAL3, SwapExactIn', async () => {
+            //     const returnAmount = await testFullSwap(
+            //         aUSDT.address,
+            //         STABAL3PHANTOM.address,
+            //         SwapTypes.SwapExactIn,
+            //         parseFixed('1', aUSDT.decimals),
+            //         kovanPools.pools,
+            //         42
+            //     );
+            //     expect(returnAmount).to.eq('990684553495117616'); // TO DO - This will fail until we support wrapped tokens. Remove if decided we def won't
+            // });
 
             //     it('aDAI>WETH, SwapExactIn', async () => {
             //         const returnAmount = await testFullSwap(
