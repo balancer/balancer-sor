@@ -90,3 +90,13 @@ export const aUSDT: TestToken = {
     address: '0xe8191aacfcdb32260cda25830dc6c9342142f310',
     decimals: 6,
 };
+
+export const KOVAN_BAL: TestToken = {
+    address: '0x41286Bb1D3E870f3F750eB7E1C25d7E48c8A1Ac7',
+    decimals: 18,
+};
+
+export const AAVE_USDT: TestToken = {
+    address: '0x13512979ade267ab5100878e2e0f485b568328a4',
+    decimals: 6,
+};

@@ -130,7 +130,10 @@ export class PhantomStablePool implements PoolBase {
         );
         if (tokenIndexIn < 0) throw 'Pool does not contain tokenIn';
         const tI = this.tokens[tokenIndexIn];
-        const balanceIn = bnum(tI.balance).times(bnum(tI.priceRate)).toString();
+        const balanceIn = bnum(tI.balance)
+            .times(bnum(tI.priceRate))
+            .dp(tI.decimals)
+            .toString();
         const decimalsIn = tI.decimals;
         const tokenInPriceRate = parseFixed(tI.priceRate, 18);
 
@@ -141,6 +144,7 @@ export class PhantomStablePool implements PoolBase {
         const tO = this.tokens[tokenIndexOut];
         const balanceOut = bnum(tO.balance)
             .times(bnum(tO.priceRate))
+            .dp(tO.decimals)
             .toString();
         const decimalsOut = tO.decimals;
         const tokenOutPriceRate = parseFixed(tO.priceRate, 18);
@@ -269,7 +273,7 @@ export class PhantomStablePool implements PoolBase {
                 poolPairData.swapFee
             );
             const amountConverted = bnum(amtWithFee.toString()).times(
-                formatFixed(poolPairData.tokenOutPriceRate, 18)
+                formatFixed(poolPairData.tokenInPriceRate, 18)
             );
 
             let amt: OldBigNumber;
@@ -323,7 +327,7 @@ export class PhantomStablePool implements PoolBase {
                 -18
             ).dp(poolPairData.decimalsOut, 1);
         } catch (err) {
-            console.error(`_evmoutGivenIn: ${err.message}`);
+            console.error(`PhantomStable _evmoutGivenIn: ${err.message}`);
             return ZERO;
         }
     }
@@ -383,9 +387,9 @@ export class PhantomStablePool implements PoolBase {
                     ZERO // Fee is handled above
                 );
             }
-            const returnScaled = amt.div(
-                formatFixed(poolPairData.tokenInPriceRate, 18)
-            );
+            const returnScaled = amt
+                .div(formatFixed(poolPairData.tokenInPriceRate, 18))
+                .dp(0);
 
             // In Phantom Pools every time there is a swap (token per token, bpt per token or token per bpt), we substract the fee from the amount in
             const returnWithFee = bnum(
@@ -397,7 +401,7 @@ export class PhantomStablePool implements PoolBase {
             // return human number
             return scale(returnWithFee, -18);
         } catch (err) {
-            console.error(`_evminGivenOut: ${err.message}`);
+            console.error(`PhantomStable _evminGivenOut: ${err.message}`);
             return ZERO;
         }
     }
