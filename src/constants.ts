@@ -58,6 +58,10 @@ export const STABAL3POOL: {
 export const WETHSTABAL3: {
     [chainId: number]: { id: string; address: string };
 } = {
+    42: {
+        id: '0x6be79a54f119dbf9e8ebd9ded8c5bd49205bc62d00020000000000000000033c',
+        address: '0x6be79a54f119dbf9e8ebd9ded8c5bd49205bc62d',
+    },
     99: {
         id: 'weightedWethStaBal3Id',
         address: 'weightedWethStaBal3',
