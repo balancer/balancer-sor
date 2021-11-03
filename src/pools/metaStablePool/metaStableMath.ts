@@ -34,7 +34,9 @@ export function _invariant(
     }
     let prevInv = ZERO;
     let inv = sum;
-    const ampTimesNpowN = bnum(amp.toString()).times(totalCoins ** totalCoins); // A*n^n
+    // amp is passed as an ethers bignumber while maths uses bignumber.js
+    const ampAdjusted = bnum(formatFixed(amp, 3));
+    const ampTimesNpowN = ampAdjusted.times(totalCoins ** totalCoins); // A*n^n
 
     for (let i = 0; i < 255; i++) {
         let P_D = bnum(totalCoins).times(balances[0]);
@@ -351,7 +353,8 @@ export function _solveAnalyticalBalance(
     n_pow_n: OldBigNumber,
     p: OldBigNumber
 ): OldBigNumber {
-    const oldBN_amp = bnum(amp.toString());
+    // amp is passed as an ethers bignumber while maths uses bignumber.js
+    const oldBN_amp = bnum(formatFixed(amp, 3));
     //Round up p
     p = p.times(inv).div(oldBN_amp.times(n_pow_n).times(n_pow_n));
     //Round down b
@@ -513,7 +516,9 @@ export function _poolDerivatives(
     }
     const x = balances[tokenIndexIn];
     const y = balances[tokenIndexOut];
-    const a = bnum(amp.toString()).times(totalCoins ** totalCoins); // = ampTimesNpowN
+    // amp is passed as an ethers bignumber while maths uses bignumber.js
+    const ampAdjusted = bnum(formatFixed(amp, 3));
+    const a = ampAdjusted.times(totalCoins ** totalCoins); // = ampTimesNpowN
     const b = S.minus(D).times(a).plus(D);
     const twoaxy = bnum(2).times(a).times(x).times(y);
     const partial_x = twoaxy.plus(a.times(y).times(y)).plus(b.times(y));
