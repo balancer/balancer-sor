@@ -159,6 +159,11 @@ export const ADDRESSES = {
             decimals: 18,
             symbol: 'STABAL3',
         },
+        DAI_from_AAVE: {
+            address: '0xff795577d9ac8bd7d90ee22b6c1703490b6512fd',
+            decimals: 18,
+            symbol: 'DAI_from_AAVE',
+        },
     },
     [Network.POLYGON]: {
         MATIC: {
@@ -298,7 +303,7 @@ async function getSwap(
 async function makeTrade(
     provider: JsonRpcProvider,
     swapInfo: SwapInfo,
-    swapType
+    swapType: SwapTypes
 ) {
     if (!swapInfo.returnAmount.gt(0)) {
         console.log(`Return Amount is 0. No swaps to exectute.`);
@@ -380,7 +385,7 @@ async function makeTrade(
     }
 
     const deltas = await vaultContract.queryBatchSwap(
-        0,
+        swapType, // SwapType 0=SwapExactIn, 1=SwapExactOut
         swapInfo.swaps,
         swapInfo.tokenAddresses,
         funds
@@ -584,11 +589,10 @@ async function simpleSwap() {
     // const poolsSource = require('../testData/testPools/gusdBug.json');
     // Update pools list with most recent onchain balances
     const queryOnChain = true;
-    const tokenIn = ADDRESSES[networkId].bDAI;
-    const tokenOut = ADDRESSES[networkId].bUSDT;
+    const tokenIn = ADDRESSES[networkId].BAL;
+    const tokenOut = ADDRESSES[networkId].USDT_from_AAVE;
     const swapType = SwapTypes.SwapExactIn;
-    // const swapAmount = parseFixed('0.01', 6);
-    const swapAmount = parseFixed('10.2563', 18);
+    const swapAmount = parseFixed('10.8248', 18);
     const executeTrade = true;
 
     const provider = new JsonRpcProvider(PROVIDER_URLS[networkId]);
