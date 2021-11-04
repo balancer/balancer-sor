@@ -1,4 +1,4 @@
-// TS_NODE_PROJECT='tsconfig.testing.json' npx mocha -r ts-node/register test/math.spec.ts
+// TS_NODE_PROJECT='tsconfig.testing.json' npx mocha -r ts-node/register test/stableMath.spec.ts
 import { assert } from 'chai';
 import { SubgraphPoolBase } from '../src/types';
 import { BigNumber as OldBigNumber, scale, bnum } from '../src/utils/bignumber';
@@ -44,7 +44,7 @@ describe('stable-math tests', () => {
                 DAI.address
             );
             let sdkValue = SDK.StableMath._calcOutGivenIn(
-                amp1000,
+                bnum(poolPairData.amp.toString()), // Think it should be using this now as it is already scaled? // amp1000,
                 allBalancesScaled,
                 poolPairData.tokenIndexIn,
                 poolPairData.tokenIndexOut,
