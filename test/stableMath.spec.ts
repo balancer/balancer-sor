@@ -34,7 +34,7 @@ describe('stable-math tests', () => {
     const amtScaled = scale(bnum(amount), 18);
     const amp1000 = bnum(stableBptSwapPool.amp.toString()).times(1000);
 
-    const error = 0.00005;
+    const error = 0.004;
 
     context('swap outcomes', () => {
         it('_exactTokenInForTokenOut', () => {
@@ -44,7 +44,7 @@ describe('stable-math tests', () => {
                 DAI.address
             );
             let sdkValue = SDK.StableMath._calcOutGivenIn(
-                bnum(poolPairData.amp.toString()), // Think it should be using this now as it is already scaled? // amp1000,
+                amp1000,
                 allBalancesScaled,
                 poolPairData.tokenIndexIn,
                 poolPairData.tokenIndexOut,
