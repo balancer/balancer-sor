@@ -1,4 +1,9 @@
-import { BigNumber, formatFixed, parseFixed } from '@ethersproject/bignumber';
+import {
+    BigNumber,
+    BigNumberish,
+    formatFixed,
+    parseFixed,
+} from '@ethersproject/bignumber';
 import { Zero } from '@ethersproject/constants';
 import { BigNumber as OldBigNumber, bnum, ZERO } from '../utils/bignumber';
 import * as stableMath from '../pools/stablePool/stableMath';
@@ -13,11 +18,11 @@ import { StablePoolPairData } from '../pools/stablePool/stablePool';
 // an Add or Remove liquidity operation: The spot prices of BPT in tokens
 // are the same regardless.
 export function BPTForTokensZeroPriceImpact(
-    allBalances: BigNumber[],
+    allBalances: BigNumberish[],
     decimals: number[],
-    amounts: BigNumber[], // This has to have the same lenght as allBalances
-    bptTotalSupply: BigNumber,
-    amp: BigNumber
+    amounts: BigNumberish[], // This has to have the same lenght as allBalances
+    bptTotalSupply: BigNumberish,
+    amp: BigNumberish
 ): BigNumber {
     if (allBalances.length != amounts.length)
         throw 'allBalances and amounts have to have same length';
@@ -49,8 +54,10 @@ export function BPTForTokensZeroPriceImpact(
         const downscaledBptOut = bnum(downscaledAmountIn)
             .div(BPTPrice)
             .toString();
-        return totalBptOut.add(parseFixed(downscaledBptOut, 18));
+        return BigNumber.from(totalBptOut).add(
+            parseFixed(downscaledBptOut, 18)
+        );
     }, Zero);
 
-    return amountBPTOut;
+    return BigNumber.from(amountBPTOut);
 }

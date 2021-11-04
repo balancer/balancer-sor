@@ -7,14 +7,8 @@ import dts from 'rollup-plugin-dts';
 import pkg from './package.json';
 
 const external = [
-    '@ethersproject/abi',
-    '@ethersproject/abstract-signer',
-    '@ethersproject/address',
-    '@ethersproject/constants',
-    '@ethersproject/contracts',
-    '@ethersproject/providers',
-    'isomorphic-fetch',
-    'bignumber.js',
+    ...Object.keys(pkg.dependencies),
+    ...Object.keys(pkg.peerDependencies),
 ];
 
 export default [

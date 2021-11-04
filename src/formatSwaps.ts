@@ -1,6 +1,6 @@
 import { BigNumber } from '@ethersproject/bignumber';
 import cloneDeep from 'lodash.clonedeep';
-import { BigNumber as OldBigNumber, bnum, scale } from './utils/bignumber';
+import { bnum, scale } from './utils/bignumber';
 import { EMPTY_SWAPINFO } from './constants';
 import { SwapTypes, SwapV2, Swap, SwapInfo } from './types';
 import { Zero } from '@ethersproject/constants';
@@ -89,7 +89,7 @@ export function formatSwaps(
     tokenOut: string,
     returnAmount: BigNumber,
     returnAmountConsideringFees: BigNumber,
-    marketSp: OldBigNumber
+    marketSp: string
 ): SwapInfo {
     if (swapsOriginal.length === 0) {
         return cloneDeep(EMPTY_SWAPINFO);

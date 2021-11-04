@@ -474,16 +474,14 @@ describe(`Tests for Stable Pools.`, () => {
                 '999996728554597709758831249',
                 '1000005155543154',
                 '1000000822928777',
-            ].map(BigNumber.from);
+            ];
             const amp = parseFixed('2000', 3);
             const amounts = [
                 '9654961595845215917881',
                 '9655042958',
                 '9655001127',
-            ].map(BigNumber.from);
-            const bptTotalSupply = BigNumber.from(
-                '2999263268368702307690295440'
-            );
+            ];
+            const bptTotalSupply = '2999263268368702307690295440';
             const decimals = [18, 6, 6];
 
             const bptAmt = BPTForTokensZeroPriceImpact(

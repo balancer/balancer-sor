@@ -1,5 +1,5 @@
 import { BigNumber, BigNumberish, parseFixed } from '@ethersproject/bignumber';
-import { BaseProvider } from '@ethersproject/providers';
+import { Provider } from '@ethersproject/providers';
 import cloneDeep from 'lodash.clonedeep';
 import { BigNumber as OldBigNumber } from './utils/bignumber';
 import { getBestPaths } from './router';
@@ -16,7 +16,6 @@ import {
     SwapInfo,
     SwapTypes,
     NewPath,
-    PoolDictionary,
     PoolFilter,
     Swap,
     SubgraphPoolBase,
@@ -39,7 +38,7 @@ export class SOR {
     };
 
     constructor(
-        public provider: BaseProvider,
+        public provider: Provider,
         public chainId: number,
         poolsSource: string | null,
         initialPools: SubgraphPoolBase[] = []
@@ -170,7 +169,7 @@ export class SOR {
             this.chainId
         );
 
-        if (paths.length == 0) return { ...EMPTY_SWAPINFO };
+        if (paths.length == 0) return cloneDeep(EMPTY_SWAPINFO);
 
         // Path is guaranteed to contain both tokenIn and tokenOut
         let tokenInDecimals;
@@ -231,7 +230,7 @@ export class SOR {
         tokenOutDecimals: number,
         costOutputToken: BigNumber,
         maxPools: number
-    ): [Swap[][], BigNumber, OldBigNumber, BigNumber] {
+    ): [Swap[][], BigNumber, string, BigNumber] {
         // swapExactIn - total = total amount swap will return of tokenOut
         // swapExactOut - total = total amount of tokenIn required for swap
 
@@ -256,7 +255,7 @@ export class SOR {
                 total.dp(outputDecimals, OldBigNumber.ROUND_FLOOR).toString(),
                 outputDecimals
             ),
-            marketSp,
+            marketSp.toString(),
             parseFixed(
                 totalConsideringFees
                     .dp(outputDecimals, OldBigNumber.ROUND_FLOOR)
