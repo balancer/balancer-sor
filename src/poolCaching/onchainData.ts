@@ -59,9 +59,9 @@ export async function getOnChainBalances(
         } else if (
             pool.poolType === 'Stable' ||
             pool.poolType === 'MetaStable' ||
-            pool.poolType === 'PhantomStable'
+            pool.poolType === 'StablePhantom'
         ) {
-            // MetaStable & PhantomStable is the same as Stable for multicall purposes
+            // MetaStable & StablePhantom is the same as Stable for multicall purposes
             multiPool.call(
                 `${pool.id}.amp`,
                 pool.address,
@@ -142,7 +142,7 @@ export async function getOnChainBalances(
             if (
                 subgraphPools[index].poolType === 'Stable' ||
                 subgraphPools[index].poolType === 'MetaStable' ||
-                subgraphPools[index].poolType === 'PhantomStable'
+                subgraphPools[index].poolType === 'StablePhantom'
             ) {
                 if (!onchainData.amp) {
                     throw `Stable Pool Missing Amp: ${poolId}`;

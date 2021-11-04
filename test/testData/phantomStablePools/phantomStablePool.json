@@ -56,7 +56,7 @@
                 "0x9f8f72aa9304c8b593d555f12ef6589cc3a579a2"
             ],
             "totalShares": "1000",
-            "poolType": "PhantomStable",
+            "poolType": "StablePhantom",
             "swapEnabled": true
         }
     ],
@@ -69,7 +69,7 @@
             "id": "0x21ff756ca0cfcc5fff488ad67babadffee0c4149000000000000000000000240",
             "lowerTarget": "0",
             "mainIndex": 0,
-            "poolType": "PhantomStable",
+            "poolType": "StablePhantom",
             "principalToken": "0",
             "swapEnabled": true,
             "swapFee": "0.01",

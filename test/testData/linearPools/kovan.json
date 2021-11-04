@@ -5,7 +5,7 @@
             "amp": "400",
             "id": "0x21ff756ca0cfcc5fff488ad67babadffee0c4149000000000000000000000240",
             "mainIndex": 0,
-            "poolType": "PhantomStable",
+            "poolType": "StablePhantom",
             "swapEnabled": true,
             "swapFee": "0.01",
             "tokens": [

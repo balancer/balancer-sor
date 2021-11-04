@@ -53,7 +53,7 @@ export function parseNewPool(
         newPool = ElementPool.fromPool(pool);
         newPool.setCurrentBlockTimestamp(currentBlockTimestamp);
     } else if (pool.poolType === 'Linear') newPool = LinearPool.fromPool(pool);
-    else if (pool.poolType === 'PhantomStable')
+    else if (pool.poolType === 'StablePhantom')
         newPool = PhantomStablePool.fromPool(pool);
     else {
         console.error(

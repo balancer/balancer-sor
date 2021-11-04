@@ -14478,7 +14478,7 @@
             "id": "0x21ff756ca0cfcc5fff488ad67babadffee0c4149000000000000000000000240",
             "lowerTarget": "null",
             "mainIndex": 0,
-            "poolType": "PhantomStable",
+            "poolType": "StablePhantom",
             "principalToken": "null",
             "swapEnabled": true,
             "swapFee": "0.01",
