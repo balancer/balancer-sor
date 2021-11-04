@@ -3,7 +3,7 @@ import { assert } from 'chai';
 import { PoolTypes } from '../src/types';
 import { BigNumber, parseFixed, formatFixed } from '@ethersproject/bignumber';
 import { BigNumber as OldBigNumber, scale } from '../src/utils/bignumber';
-import { bnum } from '../src/index';
+import { bnum } from '../src/utils/bignumber';
 import * as linearMath from '../src/pools/linearPool/linearMath';
 import { LinearPoolPairData } from '../src/pools/linearPool/linearPool';
 

@@ -256,7 +256,7 @@
     "@ethersproject/logger" "^5.4.0"
     "@ethersproject/rlp" "^5.4.0"
 
-"@ethersproject/base64@5.5.0", "@ethersproject/base64@^5.5.0":
+"@ethersproject/base64@5.5.0", "@ethersproject/base64@^5.4.0", "@ethersproject/base64@^5.5.0":
   version "5.5.0"
   resolved "https://registry.yarnpkg.com/@ethersproject/base64/-/base64-5.5.0.tgz#881e8544e47ed976930836986e5eb8fab259c090"
   integrity sha512-tdayUKhU1ljrlHzEWbStXazDpsx4eg1dBXUSI6+mHlYklOXoXF6lZvw8tnD6oVaWfnMxAgRSKROg3cVKtCcppA==
@@ -787,12 +787,11 @@
     "@ethersproject/properties" "^5.4.0"
     "@ethersproject/strings" "^5.4.0"
 
-"@georgeroman/balancer-v2-pools@^0.0.5":
-  version "0.0.5"
-  resolved "https://registry.yarnpkg.com/@georgeroman/balancer-v2-pools/-/balancer-v2-pools-0.0.5.tgz#e1a42be638803122196fd1a13b9fbed624f54549"
-  integrity sha512-fx+QmDJ80+E4RoaBfmnKFaOlRLM/FSbzksaTrqXM+0EeWX5Zu99SO03pjTIBDsBifq2WfHBcCU5CW5ulGF/kkg==
+"@georgeroman/balancer-v2-pools@^0.0.7":
+  version "0.0.7"
+  resolved "https://registry.yarnpkg.com/@georgeroman/balancer-v2-pools/-/balancer-v2-pools-0.0.7.tgz#eb197b7da7340878b14f4d6b892f0a27f8a79b66"
+  integrity sha512-tlEbAun1Fjwa/GFKBYwO3/IfkhemyyZ16DJjKStstYVOF2X+Tka7AHaAc3Xi3o/a4TWD1/NrRAI98PSzAGVQ8Q==
   dependencies:
-    "@balancer-labs/v2-deployments" "^1.0.0"
     bignumber.js "^9.0.1"
     ethers "^5.2.0"
     graphql "^15.5.0"
@@ -2486,6 +2485,11 @@ istanbul-reports@^3.0.0:
   dependencies:
     html-escaper "^2.0.0"
     istanbul-lib-report "^3.0.0"
+
+js-sha3@0.5.7:
+  version "0.5.7"
+  resolved "https://registry.yarnpkg.com/js-sha3/-/js-sha3-0.5.7.tgz#0d4ffd8002d5333aabaf4a23eed2f6374c9f28e7"
+  integrity sha1-DU/9gALVMzqrr0oj7tL2N0yfKOc=
 
 js-sha3@0.8.0:
   version "0.8.0"
