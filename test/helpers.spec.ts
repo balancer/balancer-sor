@@ -13,7 +13,7 @@ import { bnum } from '../src/utils/bignumber';
 import testSwaps from './testData/swapsForFormatting.json';
 import { BAL, DAI, GUSD, USDC, WETH } from './lib/constants';
 
-const marketSp = bnum(7);
+const marketSp = '7';
 
 const provider = new JsonRpcProvider(
     `https://mainnet.infura.io/v3/${process.env.INFURA}`
@@ -484,7 +484,7 @@ describe(`Tests for Helpers.`, () => {
             marketSp
         );
 
-        expect(swapInfo.marketSp.toString()).to.be.eq(marketSp.toString());
+        expect(swapInfo.marketSp.toString()).to.be.eq(marketSp);
     });
 
     it(`Should format directhop swapExactIn for Weth In, no Eth Wrap`, () => {
@@ -1314,7 +1314,7 @@ describe(`Tests for Helpers.`, () => {
         //         returnAmountConsideringFees: bnum(0),
         //         tokenIn: '',
         //         tokenOut: '',
-        //         marketSp: bnum(0)
+        //         marketSp: Zero.toString()
         //     }
 
         //     const wrappedInfo = await getWrappedInfo(provider, SwapTypes.SwapExactOut, tokenIn, tokenOut, chainId, swapAmount);
@@ -1351,7 +1351,7 @@ describe(`Tests for Helpers.`, () => {
                 returnAmountFromSwaps: Zero, // This isn't set until after setWrappedInfo
                 tokenIn: WETHADDR[chainId],
                 tokenOut: BAL.address,
-                marketSp: bnum(0),
+                marketSp: Zero.toString(),
             };
 
             const wrappedInfo = await getWrappedInfo(
@@ -1417,7 +1417,7 @@ describe(`Tests for Helpers.`, () => {
                 returnAmountFromSwaps: Zero, // This isn't set until after setWrappedInfo
                 tokenIn: WETHADDR[chainId],
                 tokenOut: BAL.address,
-                marketSp: bnum(0),
+                marketSp: Zero.toString(),
             };
 
             const wrappedInfo = await getWrappedInfo(
@@ -1483,7 +1483,7 @@ describe(`Tests for Helpers.`, () => {
                 returnAmountConsideringFees: returnAmount,
                 tokenIn: BAL.address,
                 tokenOut: WETHADDR[chainId],
-                marketSp: bnum(0),
+                marketSp: Zero.toString(),
             };
 
             const wrappedInfo = await getWrappedInfo(
@@ -1549,7 +1549,7 @@ describe(`Tests for Helpers.`, () => {
                 returnAmountConsideringFees: returnAmount,
                 tokenIn: BAL.address,
                 tokenOut: WETHADDR[chainId],
-                marketSp: bnum(0),
+                marketSp: Zero.toString(),
             };
 
             const wrappedInfo = await getWrappedInfo(
@@ -1615,7 +1615,7 @@ describe(`Tests for Helpers.`, () => {
                 returnAmountConsideringFees: returnAmount,
                 tokenIn: Lido.wstETH[chainId],
                 tokenOut: tokenOut,
-                marketSp: bnum(0),
+                marketSp: Zero.toString(),
             };
 
             const wrappedInfo = await getWrappedInfo(
@@ -1683,7 +1683,7 @@ describe(`Tests for Helpers.`, () => {
                 returnAmountConsideringFees: returnAmount,
                 tokenIn: Lido.wstETH[chainId],
                 tokenOut: tokenOut,
-                marketSp: bnum(0),
+                marketSp: Zero.toString(),
             };
 
             const wrappedInfo = await getWrappedInfo(
@@ -1751,7 +1751,7 @@ describe(`Tests for Helpers.`, () => {
                 returnAmountConsideringFees: returnAmount,
                 tokenIn: tokenIn,
                 tokenOut: Lido.wstETH[chainId],
-                marketSp: bnum(0),
+                marketSp: Zero.toString(),
             };
 
             const wrappedInfo = await getWrappedInfo(
@@ -1822,7 +1822,7 @@ describe(`Tests for Helpers.`, () => {
                 returnAmountConsideringFees: returnAmount,
                 tokenIn: tokenIn,
                 tokenOut: Lido.wstETH[chainId],
-                marketSp: bnum(0),
+                marketSp: Zero.toString(),
             };
 
             const wrappedInfo = await getWrappedInfo(
@@ -1894,7 +1894,7 @@ describe(`Tests for Helpers.`, () => {
                 returnAmountConsideringFees: returnAmount,
                 tokenIn: Lido.wstETH[chainId],
                 tokenOut: WETHADDR[chainId],
-                marketSp: bnum(0),
+                marketSp: Zero.toString(),
             };
 
             const wrappedInfo = await getWrappedInfo(

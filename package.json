@@ -1,6 +1,6 @@
 {
     "name": "@balancer-labs/sor",
-    "version": "2.0.0-beta.3",
+    "version": "2.0.0-beta.6",
     "license": "GPL-3.0-only",
     "main": "dist/index.js",
     "module": "dist/index.esm.js",
@@ -25,7 +25,13 @@
         "dist"
     ],
     "devDependencies": {
-        "@ethersproject/wallet": "^5.0.7",
+        "@ethersproject/abi": "^5.4.1",
+        "@ethersproject/address": "^5.4.0",
+        "@ethersproject/bignumber": "^5.4.2",
+        "@ethersproject/constants": "^5.4.0",
+        "@ethersproject/contracts": "^5.4.1",
+        "@ethersproject/providers": "^5.4.4",
+        "@ethersproject/wallet": "^5.4.0",
         "@rollup/plugin-commonjs": "^20.0.0",
         "@rollup/plugin-json": "^4.1.0",
         "@rollup/plugin-node-resolve": "^13.0.4",
@@ -36,6 +42,7 @@
         "@types/node": "^14.0.20",
         "@typescript-eslint/eslint-plugin": "^4.29.2",
         "@typescript-eslint/parser": "^4.29.2",
+        "bignumber.js": "^9.0.1",
         "chai": "^4.2.0",
         "coveralls": "^3.0.9",
         "dotenv": "^8.2.0",
@@ -43,6 +50,8 @@
         "eslint-plugin-mocha-no-only": "^1.1.1",
         "eslint-plugin-prettier": "^3.4.1",
         "husky": "^4.2.1",
+        "lodash.clonedeep": "^4.5.0",
+        "lodash.set": "^4.3.2",
         "mocha": "8.2.1",
         "nyc": "^15.0.0",
         "perf_hooks": "^0.0.1",
@@ -54,15 +63,15 @@
         "typescript": "^4.3.5"
     },
     "dependencies": {
-        "@ethersproject/address": "^5.0.5",
-        "@ethersproject/bignumber": "^5.4.1",
+        "@georgeroman/balancer-v2-pools": "^0.0.7",
+        "isomorphic-fetch": "^2.2.1"
+    },
+    "peerDependencies": {
+        "@ethersproject/abi": "^5.4.1",
+        "@ethersproject/address": "^5.4.0",
+        "@ethersproject/bignumber": "^5.4.2",
         "@ethersproject/constants": "^5.4.0",
-        "@ethersproject/contracts": "^5.0.5",
-        "@ethersproject/providers": "5.0.12",
-        "@georgeroman/balancer-v2-pools": "^0.0.6",
-        "bignumber.js": "^9.0.1",
-        "isomorphic-fetch": "^2.2.1",
-        "lodash.clonedeep": "^4.5.0",
-        "lodash.set": "^4.3.2"
+        "@ethersproject/contracts": "^5.4.1",
+        "@ethersproject/providers": "^5.4.4"
     }
 }

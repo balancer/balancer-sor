@@ -113,7 +113,7 @@ export interface SwapInfo {
     returnAmountConsideringFees: BigNumber;
     tokenIn: string;
     tokenOut: string;
-    marketSp: OldBigNumber;
+    marketSp: string;
 }
 
 export interface PoolDictionary {

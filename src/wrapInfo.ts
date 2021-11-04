@@ -1,5 +1,5 @@
 import { BigNumber } from '@ethersproject/bignumber';
-import { BaseProvider } from '@ethersproject/providers';
+import { Provider } from '@ethersproject/providers';
 import { AddressZero, WeiPerEther as ONE } from '@ethersproject/constants';
 
 import { Lido, getStEthRate } from './pools/lido';
@@ -28,7 +28,7 @@ export enum WrapTypes {
 }
 
 export async function getWrappedInfo(
-    provider: BaseProvider,
+    provider: Provider,
     swapType: SwapTypes,
     tokenIn: string,
     tokenOut: string,
