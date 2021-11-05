@@ -59,7 +59,7 @@ describe('Test SwapCostCalculator', () => {
 
             const cost = await new SwapCostCalculator(1).convertGasCostToToken(
                 DAI.address,
-                18,
+                DAI.decimals,
                 gasPriceWei,
                 swapGas
             );
@@ -73,7 +73,7 @@ describe('Test SwapCostCalculator', () => {
 
             const cost = await new SwapCostCalculator(1).convertGasCostToToken(
                 USDC.address,
-                6,
+                USDC.decimals,
                 gasPriceWei,
                 swapGas
             );
@@ -87,7 +87,7 @@ describe('Test SwapCostCalculator', () => {
 
             const cost = await new SwapCostCalculator(1).convertGasCostToToken(
                 MKR.address,
-                18,
+                MKR.decimals,
                 gasPriceWei,
                 swapGas
             );
@@ -101,7 +101,7 @@ describe('Test SwapCostCalculator', () => {
 
             const cost = await new SwapCostCalculator(1).convertGasCostToToken(
                 WETH.address,
-                18,
+                WETH.decimals,
                 gasPriceWei,
                 swapGas
             );

@@ -643,7 +643,7 @@ describe(`Tests for MetaStable Pools.`, () => {
         //             JSON.stringify(poolsFromFile.metaWithStable2)
         //         ),
         //     };
-        //     const tokenIn = DAI;
+        //     const tokenIn = DAI.address;
         //     const tokenInPriceRate = bnum(1);
         //     const tokenHop = USDC.address;
         //     const tokenHopPriceRate = bnum(1);

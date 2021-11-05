@@ -1,4 +1,4 @@
-// npx mocha -r ts-node/register test/wrapper.spec.ts
+// TS_NODE_PROJECT='tsconfig.testing.json' npx mocha -r ts-node/register test/wrapper.spec.ts
 require('dotenv').config();
 import { BigNumber, parseFixed } from '@ethersproject/bignumber';
 import { AddressZero, Zero } from '@ethersproject/constants';

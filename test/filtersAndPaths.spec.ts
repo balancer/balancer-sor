@@ -637,7 +637,7 @@ describe('Tests pools filtering and path processing', () => {
         const [
             poolsOfInterestDictionary,
             hopTokens,
-            poolsMostLiquid,
+            ,
             pathData,
             poolsAll,
             pathsSorted,

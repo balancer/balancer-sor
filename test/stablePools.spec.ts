@@ -1,3 +1,4 @@
+// TS_NODE_PROJECT='tsconfig.testing.json' npx mocha -r ts-node/register test/stablePools.spec.ts
 require('dotenv').config();
 import { expect } from 'chai';
 import { BigNumber } from '@ethersproject/bignumber';
@@ -21,7 +22,6 @@ const provider = new JsonRpcProvider(
     `https://mainnet.infura.io/v3/${process.env.INFURA}`
 );
 
-// TS_NODE_PROJECT='tsconfig.testing.json' npx mocha -r ts-node/register test/stablePools.spec.ts
 describe(`Tests for Stable Pools.`, () => {
     context('limit amounts', () => {
         it(`tests getLimitAmountSwap SwapExactIn`, async () => {
