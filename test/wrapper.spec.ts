@@ -191,7 +191,7 @@ describe(`Tests for wrapper class.`, () => {
             { gasPrice, maxPools }
         );
 
-        const expectedTokenAddresses = [AddressZero, DAI.address, USDC.address];
+        const expectedTokenAddresses = [AddressZero, DAI.address];
 
         expect(expectedTokenAddresses).to.deep.eq(swapInfo.tokenAddresses);
         expect(swapInfo.returnAmount.gt(0)).to.be.true;
