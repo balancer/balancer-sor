@@ -83,17 +83,6 @@ export async function getOnChainBalances(
 
             multiPool.call(`${pool.id}.targets`, pool.address, 'getTargets');
             multiPool.call(
-                `${pool.id}.mainIndex`,
-                pool.address,
-                'getMainIndex'
-            );
-            multiPool.call(
-                `${pool.id}.wrappedIndex`,
-                pool.address,
-                'getWrappedIndex'
-            );
-
-            multiPool.call(
                 `${pool.id}.wrappedTokenRateCache`,
                 pool.address,
                 'getWrappedTokenRateCache'
@@ -108,8 +97,6 @@ export async function getOnChainBalances(
             swapFee: string;
             weights?: string[];
             targets?: string[];
-            mainIndex?: string;
-            wrappedIndex?: string;
             poolTokens: {
                 tokens: string[];
                 balances: string[];
@@ -170,29 +157,15 @@ export async function getOnChainBalances(
                     );
                 }
 
-                if (!onchainData.mainIndex)
-                    throw `Linear Pool Missing MainIndex: ${poolId}`;
-                else
-                    subgraphPools[index].mainIndex = Number(
-                        onchainData.mainIndex
-                    );
-
-                if (!onchainData.wrappedIndex)
-                    throw `Linear Pool Missing WrappedIndex: ${poolId}`;
-                else
-                    subgraphPools[index].wrappedIndex = Number(
-                        onchainData.wrappedIndex
-                    );
-
                 if (!onchainData.wrappedTokenRateCache)
                     throw `Linear Pool Missing WrappedTokenRateCache: ${poolId}`;
                 else {
-                    subgraphPools[index].tokens[
-                        onchainData.wrappedIndex
-                    ].priceRate = formatFixed(
-                        onchainData.wrappedTokenRateCache[0],
-                        18
-                    );
+                    const wrappedIndex = subgraphPools[index].wrappedIndex;
+                    if (!wrappedIndex)
+                        throw `Linear Pool Missing WrappedIndex: ${poolId}`;
+
+                    subgraphPools[index].tokens[wrappedIndex].priceRate =
+                        formatFixed(onchainData.wrappedTokenRateCache[0], 18);
                 }
             }
 
