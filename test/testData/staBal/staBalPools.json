@@ -166,7 +166,7 @@
                     "priceRate": "1"
                 },
                 {
-                    "address": "0x9a71012b13ca4d3d0cdc72a177df3ef03b0e76a3",
+                    "address": "0xba100000625a3754423978a60c9317c58a424e3d",
                     "balance": "343464.522579791060696747",
                     "decimals": 18,
                     "symbol": "BAL",
@@ -178,7 +178,7 @@
                 "0x0d500b1d8e8ef31e21c99d1db9a6444d3adf1270",
                 "0x2791bca1f2de4661ed88a30c99a7a9449aa84174",
                 "0x7ceb23fd6bc0add59e62ac25578270cff1b9f619",
-                "0x9a71012b13ca4d3d0cdc72a177df3ef03b0e76a3"
+                "0xba100000625a3754423978a60c9317c58a424e3d"
             ],
             "totalShares": "1840639.186621387123223591",
             "totalWeight": "1"
