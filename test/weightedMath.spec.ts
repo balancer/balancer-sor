@@ -1,13 +1,10 @@
 // TS_NODE_PROJECT='tsconfig.testing.json' npx mocha -r ts-node/register test/math.spec.ts
 import { assert } from 'chai';
-import { BigNumber as OldBigNumber, scale } from '../src/utils/bignumber';
+import { BigNumber as OldBigNumber } from '../src/utils/bignumber';
 import { bnum } from '../src/utils/bignumber';
-import { BAL, DAI, USDC, WETH, USDT, STABAL3PHANTOM } from './lib/constants';
+import { BAL, WETH } from './lib/constants';
 import singleWeightedPool from './testData/weightedPools/singlePoolWithSwapEnabled.json';
-import {
-    WeightedPool,
-    WeightedPoolPairData,
-} from '../src/pools/weightedPool/weightedPool';
+import { WeightedPool } from '../src/pools/weightedPool/weightedPool';
 
 describe('weightedMath tests', () => {
     // TO DO: add items using checkOutcome function
@@ -82,9 +79,9 @@ function checkDerivative(
     amount: number,
     delta: number,
     error: number,
-    inverse: boolean = false
+    inverse = false
 ) {
-    let x = bnum(amount);
+    const x = bnum(amount);
     let incrementalQuotient = fn(poolPairData, x.plus(delta), true)
         .minus(fn(poolPairData, x, true))
         .div(delta);

@@ -1,7 +1,7 @@
 // TS_NODE_PROJECT='tsconfig.testing.json' npx mocha -r ts-node/register test/math.spec.ts
 import { assert } from 'chai';
 import { formatFixed } from '@ethersproject/bignumber';
-import { BigNumber as OldBigNumber, scale } from '../src/utils/bignumber';
+import { BigNumber as OldBigNumber } from '../src/utils/bignumber';
 import { bnum } from '../src/utils/bignumber';
 import phantomStableStabal3WithPriceRates from './testData/phantomStablePools/phantomStableStabal3WithPriceRates.json';
 import {
@@ -9,6 +9,7 @@ import {
     PhantomStablePoolPairData,
 } from '../src/pools/phantomStablePool/phantomStablePool';
 import * as phantomStableMath from '../src/pools/phantomStablePool/phantomStableMath';
+import { STABAL3PHANTOM, LINEAR_AUSDT, LINEAR_AUSDC } from './lib/constants';
 
 describe('phantomStable pools tests', () => {
     // For the moment we tolerate a moderate relative error until
@@ -19,24 +20,18 @@ describe('phantomStable pools tests', () => {
         const phantomStablePool = PhantomStablePool.fromPool(
             phantomStableStabal3WithPriceRates.pools[0]
         );
-        /*
-                "0x21ff756ca0cfcc5fff488ad67babadffee0c4149", // STABAL3
-                "0x3d1b554f1b1d1b6108b601ff22fea9c90fdfe50d", // LINEAR-AUSDC
-                "0x6a8c3239695613c0710dc971310b36f9b81e115e", // LINEAR-AUSDT
-                "0xcd32a460b6fecd053582e43b07ed6e2c04e15369" // LINEAR-ADAI
-*/
         it('phantomStable token -> token', () => {
-            let poolPairData = phantomStablePool.parsePoolPairData(
-                '0x3d1b554f1b1d1b6108b601ff22fea9c90fdfe50d', // LINEAR-AUSDC
-                '0x6a8c3239695613c0710dc971310b36f9b81e115e' // LINEAR-AUSDT
+            const poolPairData = phantomStablePool.parsePoolPairData(
+                LINEAR_AUSDC.address,
+                LINEAR_AUSDT.address
             );
-            let priceRateIn = bnum(
+            const priceRateIn = bnum(
                 formatFixed(poolPairData.tokenInPriceRate, 18)
             );
-            let priceRateOut = bnum(
+            const priceRateOut = bnum(
                 formatFixed(poolPairData.tokenOutPriceRate, 18)
             );
-            let { a1, a2 } = getSwapOutcomes(
+            const { a1, a2 } = getSwapOutcomes(
                 phantomStablePool,
                 poolPairData,
                 4000
@@ -81,11 +76,11 @@ describe('phantomStable pools tests', () => {
         });
 
         it('phantomStable BPT -> token', () => {
-            let poolPairData = phantomStablePool.parsePoolPairData(
-                '0x21ff756ca0cfcc5fff488ad67babadffee0c4149', // STABAL3
-                '0x3d1b554f1b1d1b6108b601ff22fea9c90fdfe50d' // LINEAR-AUSDC
+            const poolPairData = phantomStablePool.parsePoolPairData(
+                STABAL3PHANTOM.address,
+                LINEAR_AUSDC.address
             );
-            let priceRateOut = bnum(
+            const priceRateOut = bnum(
                 formatFixed(poolPairData.tokenOutPriceRate, 18)
             );
             // swap outcomes
@@ -122,16 +117,16 @@ describe('phantomStable pools tests', () => {
             );
         });
         it('phantomStable token -> BPT', () => {
-            let poolPairData = phantomStablePool.parsePoolPairData(
-                '0x3d1b554f1b1d1b6108b601ff22fea9c90fdfe50d', // LINEAR-AUSDC
-                '0x21ff756ca0cfcc5fff488ad67babadffee0c4149' // STABAL3
+            const poolPairData = phantomStablePool.parsePoolPairData(
+                LINEAR_AUSDC.address,
+                STABAL3PHANTOM.address
             );
             const { a1, a2 } = getSwapOutcomes(
                 phantomStablePool,
                 poolPairData,
                 4000
             );
-            let priceRateIn = bnum(
+            const priceRateIn = bnum(
                 formatFixed(poolPairData.tokenInPriceRate, 18)
             );
             const b1 = phantomStableMath._exactTokenInForBPTOut(
@@ -240,7 +235,7 @@ function incrementalQuotientExactTokenInForTokenOut(
         bnum(amount),
         true
     );
-    let incrementalQuotient = f1.minus(f0).div(delta);
+    const incrementalQuotient = f1.minus(f0).div(delta);
     return incrementalQuotient;
 }
 
@@ -260,7 +255,7 @@ function incrementalQuotientTokenInForExactTokenOut(
         bnum(amount),
         true
     );
-    let incrementalQuotient = f1.minus(f0).div(delta);
+    const incrementalQuotient = f1.minus(f0).div(delta);
     return incrementalQuotient;
 }
 
@@ -321,7 +316,7 @@ function incrementalQuotientSpotPriceAfterSwapExactTokenInForTokenOut(
         poolPairData,
         bnum(amount)
     );
-    let incrementalQuotient = f1.minus(f0).div(delta);
+    const incrementalQuotient = f1.minus(f0).div(delta);
     return incrementalQuotient;
 }
 
@@ -339,6 +334,6 @@ function incrementalQuotientSpotPriceAfterSwapTokenInForExactTokenOut(
         poolPairData,
         bnum(amount)
     );
-    let incrementalQuotient = f1.minus(f0).div(delta);
+    const incrementalQuotient = f1.minus(f0).div(delta);
     return incrementalQuotient;
 }
