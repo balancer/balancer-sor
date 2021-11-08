@@ -77,6 +77,12 @@ export interface SubgraphPoolBase {
     unitSeconds?: number;
     principalToken?: string;
     baseToken?: string;
+
+    // Linear specific fields
+    mainIndex?: number;
+    wrappedIndex?: number;
+    lowerTarget?: string;
+    upperTarget?: string;
 }
 
 export type SubgraphToken = {
