@@ -161,7 +161,7 @@ export async function getOnChainBalances(
                     throw `Linear Pool Missing WrappedTokenRateCache: ${poolId}`;
                 else {
                     const wrappedIndex = subgraphPools[index].wrappedIndex;
-                    if (!wrappedIndex)
+                    if (wrappedIndex === undefined)
                         throw `Linear Pool Missing WrappedIndex: ${poolId}`;
 
                     subgraphPools[index].tokens[wrappedIndex].priceRate =
