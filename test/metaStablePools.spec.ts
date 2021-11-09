@@ -49,7 +49,7 @@ async function getStableComparrison(
     return swapInfoStable;
 }
 
-// npx mocha -r ts-node/register test/metaStablePools.spec.ts
+// TS_NODE_PROJECT='tsconfig.testing.json' npx mocha -r ts-node/register test/metaStablePools.spec.ts
 describe(`Tests for MetaStable Pools.`, () => {
     context('limit amounts', () => {
         it(`tests getLimitAmountSwap SwapExactIn`, async () => {
