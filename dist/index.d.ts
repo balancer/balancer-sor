@@ -1,6 +1,7 @@
 import { BigNumber, BigNumberish } from '@ethersproject/bignumber';
 import { Provider } from '@ethersproject/providers';
 import { BigNumber as BigNumber$1 } from 'bignumber.js';
+import { Contract } from '@ethersproject/contracts';
 
 declare type NoNullableField<T> = {
     [P in keyof T]: NonNullable<T[P]>;
@@ -271,6 +272,52 @@ declare function BPTForTokensZeroPriceImpact(
     amp: BigNumberish
 ): BigNumber;
 
+declare function queryBatchSwapTokensIn(
+    sor: SOR,
+    vaultContract: Contract,
+    tokensIn: string[],
+    amountsIn: BigNumberish[],
+    tokenOut: string
+): Promise<{
+    amountTokenOut: string;
+    swaps: SwapV2[];
+    assets: string[];
+}>;
+declare function queryBatchSwapTokensInUpdateAmounts(
+    vaultContract: Contract,
+    swaps: SwapV2[],
+    assets: string[],
+    tokens: string[],
+    newAmounts: BigNumberish[],
+    tokenOut: string
+): Promise<{
+    amountTokenOut: string;
+    swaps: SwapV2[];
+    assets: string[];
+}>;
+declare function queryBatchSwapTokensOut(
+    sor: SOR,
+    vaultContract: Contract,
+    tokenIn: string,
+    amountsIn: BigNumberish[],
+    tokensOut: string[]
+): Promise<{
+    amountTokensOut: string[];
+    swaps: SwapV2[];
+    assets: string[];
+}>;
+declare function queryBatchSwapTokensOutUpdateAmounts(
+    vaultContract: Contract,
+    swaps: SwapV2[],
+    assets: string[],
+    newAmounts: BigNumberish[],
+    tokensOut: string[]
+): Promise<{
+    amountTokensOut: string[];
+    swaps: SwapV2[];
+    assets: string[];
+}>;
+
 export {
     NewPath,
     NoNullableField,
@@ -290,6 +337,10 @@ export {
     SwapTypes,
     SwapV2,
     WeightedPool,
+    queryBatchSwapTokensIn,
+    queryBatchSwapTokensInUpdateAmounts,
+    queryBatchSwapTokensOut,
+    queryBatchSwapTokensOutUpdateAmounts,
     BPTForTokensZeroPriceImpact as stableBPTForTokensZeroPriceImpact,
     BPTForTokensZeroPriceImpact$1 as weightedBPTForTokensZeroPriceImpact,
 };
