@@ -475,7 +475,7 @@ describe('Tests full swaps against known values', () => {
             },
         });
 
-        assert.equal(swapInfo.returnAmount.toString(), '100601647114107780422');
+        assert.equal(swapInfo.returnAmount.toString(), '100601647114105022960');
         assert.equal(swapInfo.swaps.length, 3);
         assert.equal(
             swapInfo.swaps[0].poolId,
