@@ -38,7 +38,7 @@ export function getLimitAmountSwapForPath(
                 poolPairData[i],
                 SwapTypes.SwapExactIn
             );
-            let pulledLimit = getOutputAmountSwap(
+            const pulledLimit = getOutputAmountSwap(
                 path.pools[i],
                 path.poolPairData[i],
                 SwapTypes.SwapExactOut,
@@ -61,7 +61,7 @@ export function getLimitAmountSwapForPath(
                 poolPairData[i],
                 SwapTypes.SwapExactOut
             );
-            let pushedLimit = getOutputAmountSwap(
+            const pushedLimit = getOutputAmountSwap(
                 path.pools[i],
                 path.poolPairData[i],
                 SwapTypes.SwapExactIn,

@@ -17,21 +17,7 @@ import {
 } from '../../types';
 import { getAddress } from '@ethersproject/address';
 import * as SDK from '@georgeroman/balancer-v2-pools';
-import {
-    _invariant,
-    _spotPriceAfterSwapExactTokenInForTokenOut,
-    _spotPriceAfterSwapTokenInForExactTokenOut,
-    _spotPriceAfterSwapTokenInForExactBPTOut,
-    _spotPriceAfterSwapBPTInForExactTokenOut,
-    _spotPriceAfterSwapExactTokenInForBPTOut,
-    _spotPriceAfterSwapExactBPTInForTokenOut,
-    _derivativeSpotPriceAfterSwapExactTokenInForTokenOut,
-    _derivativeSpotPriceAfterSwapTokenInForExactTokenOut,
-    _derivativeSpotPriceAfterSwapExactTokenInForBPTOut,
-    _derivativeSpotPriceAfterSwapExactBPTInForTokenOut,
-    _derivativeSpotPriceAfterSwapTokenInForExactBPTOut,
-    _derivativeSpotPriceAfterSwapBPTInForExactTokenOut,
-} from '../metaStablePool/metaStableMath';
+import * as phantomStableMath from '../phantomStablePool/phantomStableMath';
 import { MetaStablePoolPairData } from '../metaStablePool/metaStablePool';
 import cloneDeep from 'lodash.clonedeep';
 
@@ -168,7 +154,7 @@ export class PhantomStablePool implements PoolBase {
         }
 
         const bptIndex = this.tokensList.indexOf(this.address);
-        const inv = _invariant(this.amp, allBalances);
+        const inv = phantomStableMath._invariant(this.amp, allBalances);
 
         // VirtualBPTSupply must be used for the maths
         // TO DO - SG should be updated to so that totalShares should return VirtualSupply
@@ -302,7 +288,7 @@ export class PhantomStablePool implements PoolBase {
                         bnum(b.toString())
                     ),
                     poolPairData.tokenIndexOut,
-                    bnum(amtWithFee.toString()),
+                    bnum(amountConverted.toString()),
                     bnum(poolPairData.virtualBptSupply.toString()),
                     ZERO // Fee is handled above
                 );
@@ -314,7 +300,7 @@ export class PhantomStablePool implements PoolBase {
                     ),
                     poolPairData.tokenIndexIn,
                     poolPairData.tokenIndexOut,
-                    bnum(amtWithFee.toString()),
+                    bnum(amountConverted.toString()),
                     ZERO // Fee is handled above
                 );
             }
@@ -406,112 +392,129 @@ export class PhantomStablePool implements PoolBase {
         }
     }
 
+    // this is the multiplicative inverse of the derivative of _exactTokenInForTokenOut
     _spotPriceAfterSwapExactTokenInForTokenOut(
         poolPairData: PhantomStablePoolPairData,
         amount: OldBigNumber
     ): OldBigNumber {
+        const priceRateIn = formatFixed(poolPairData.tokenInPriceRate, 18);
+        const priceRateOut = formatFixed(poolPairData.tokenOutPriceRate, 18);
         const amountConverted = amount.times(
             formatFixed(poolPairData.tokenInPriceRate, 18)
         );
         let result: OldBigNumber;
         if (poolPairData.pairType === PairTypes.TokenToBpt) {
-            result = _spotPriceAfterSwapExactTokenInForBPTOut(
+            result = phantomStableMath._spotPriceAfterSwapExactTokenInForBPTOut(
                 amountConverted,
                 poolPairData
             );
         } else if (poolPairData.pairType === PairTypes.BptToToken) {
-            result = _spotPriceAfterSwapExactBPTInForTokenOut(
+            result = phantomStableMath._spotPriceAfterSwapExactBPTInForTokenOut(
                 amountConverted,
                 poolPairData
             );
         } else {
-            result = _spotPriceAfterSwapExactTokenInForTokenOut(
-                amountConverted,
-                poolPairData
-            );
+            result =
+                phantomStableMath._spotPriceAfterSwapExactTokenInForTokenOut(
+                    amountConverted,
+                    poolPairData
+                );
         }
-        return result;
+        return result.div(priceRateIn).times(priceRateOut);
     }
 
+    // this is the derivative of _tokenInForExactTokenOut
     _spotPriceAfterSwapTokenInForExactTokenOut(
         poolPairData: PhantomStablePoolPairData,
         amount: OldBigNumber
     ): OldBigNumber {
+        const priceRateIn = formatFixed(poolPairData.tokenInPriceRate, 18);
+        const priceRateOut = formatFixed(poolPairData.tokenOutPriceRate, 18);
         const amountConverted = amount.times(
             formatFixed(poolPairData.tokenOutPriceRate, 18)
         );
         let result: OldBigNumber;
         if (poolPairData.pairType === PairTypes.TokenToBpt) {
-            result = _spotPriceAfterSwapTokenInForExactBPTOut(
+            result = phantomStableMath._spotPriceAfterSwapTokenInForExactBPTOut(
                 amountConverted,
                 poolPairData
             );
         } else if (poolPairData.pairType === PairTypes.BptToToken) {
-            result = _spotPriceAfterSwapBPTInForExactTokenOut(
+            result = phantomStableMath._spotPriceAfterSwapBPTInForExactTokenOut(
                 amountConverted,
                 poolPairData
             );
         } else {
-            result = _spotPriceAfterSwapTokenInForExactTokenOut(
-                amountConverted,
-                poolPairData
-            );
+            result =
+                phantomStableMath._spotPriceAfterSwapTokenInForExactTokenOut(
+                    amountConverted,
+                    poolPairData
+                );
         }
-        return result;
+        return result.div(priceRateIn).times(priceRateOut);
     }
 
     _derivativeSpotPriceAfterSwapExactTokenInForTokenOut(
         poolPairData: PhantomStablePoolPairData,
         amount: OldBigNumber
     ): OldBigNumber {
+        const priceRateOut = formatFixed(poolPairData.tokenOutPriceRate, 18);
         const amountConverted = amount.times(
             formatFixed(poolPairData.tokenInPriceRate, 18)
         );
         let result: OldBigNumber;
         if (poolPairData.pairType === PairTypes.TokenToBpt) {
-            result = _derivativeSpotPriceAfterSwapExactTokenInForBPTOut(
-                amountConverted,
-                poolPairData
-            );
+            result =
+                phantomStableMath._derivativeSpotPriceAfterSwapExactTokenInForBPTOut(
+                    amountConverted,
+                    poolPairData
+                );
         } else if (poolPairData.pairType === PairTypes.BptToToken) {
-            result = _derivativeSpotPriceAfterSwapExactBPTInForTokenOut(
-                amountConverted,
-                poolPairData
-            );
+            result =
+                phantomStableMath._derivativeSpotPriceAfterSwapExactBPTInForTokenOut(
+                    amountConverted,
+                    poolPairData
+                );
         } else {
-            result = _derivativeSpotPriceAfterSwapExactTokenInForTokenOut(
-                amountConverted,
-                poolPairData
-            );
+            result =
+                phantomStableMath._derivativeSpotPriceAfterSwapExactTokenInForTokenOut(
+                    amountConverted,
+                    poolPairData
+                );
         }
-        return result;
+        return result.times(priceRateOut);
     }
 
     _derivativeSpotPriceAfterSwapTokenInForExactTokenOut(
         poolPairData: PhantomStablePoolPairData,
         amount: OldBigNumber
     ): OldBigNumber {
+        const priceRateIn = formatFixed(poolPairData.tokenInPriceRate, 18);
+        const priceRateOut = formatFixed(poolPairData.tokenOutPriceRate, 18);
         const amountConverted = amount.times(
             formatFixed(poolPairData.tokenOutPriceRate, 18)
         );
         let result: OldBigNumber;
         if (poolPairData.pairType === PairTypes.TokenToBpt) {
-            result = _derivativeSpotPriceAfterSwapTokenInForExactBPTOut(
-                amountConverted,
-                poolPairData
-            );
+            result =
+                phantomStableMath._derivativeSpotPriceAfterSwapTokenInForExactBPTOut(
+                    amountConverted,
+                    poolPairData
+                );
         } else if (poolPairData.pairType === PairTypes.BptToToken) {
-            result = _derivativeSpotPriceAfterSwapBPTInForExactTokenOut(
-                amountConverted,
-                poolPairData
-            );
+            result =
+                phantomStableMath._derivativeSpotPriceAfterSwapBPTInForExactTokenOut(
+                    amountConverted,
+                    poolPairData
+                );
         } else {
-            result = _derivativeSpotPriceAfterSwapTokenInForExactTokenOut(
-                amountConverted,
-                poolPairData
-            );
+            result =
+                phantomStableMath._derivativeSpotPriceAfterSwapTokenInForExactTokenOut(
+                    amountConverted,
+                    poolPairData
+                );
         }
-        return result;
+        return result.div(priceRateIn).times(priceRateOut).times(priceRateOut);
     }
 
     subtractSwapFeeAmount(amount: BigNumber, swapFee: BigNumber): BigNumber {

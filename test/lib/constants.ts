@@ -76,6 +76,11 @@ export const LINEAR_AUSDT: TestToken = {
     decimals: 18,
 };
 
+export const LINEAR_AUSDC: TestToken = {
+    address: '0x3d1b554f1b1d1b6108b601ff22fea9c90fdfe50d',
+    decimals: 18,
+};
+
 export const LINEAR_ADAI: TestToken = {
     address: '0xcd32a460b6fecd053582e43b07ed6e2c04e15369',
     decimals: 18,
