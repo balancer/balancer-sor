@@ -50,24 +50,6 @@ describe('weightedMath tests', () => {
     });
 });
 
-function checkOutcome(
-    fn: (
-        poolPairData: any,
-        amount: OldBigNumber,
-        exact: boolean
-    ) => OldBigNumber,
-    poolPairData: any,
-    amount: number,
-    error: number
-) {
-    assert.approximately(
-        fn(poolPairData, bnum(amount), true).toNumber(),
-        fn(poolPairData, bnum(amount), false).toNumber(),
-        error,
-        'wrong result'
-    );
-}
-
 function checkDerivative(
     fn: (
         poolPairData: any,
