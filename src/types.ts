@@ -15,6 +15,7 @@ export enum PoolTypes {
     Stable,
     Element,
     MetaStable,
+    Linear,
 }
 
 export enum SwapPairType {
@@ -146,6 +147,7 @@ export interface PoolBase {
     id: string;
     address: string;
     tokensList: string[];
+    mainIndex?: number;
     setTypeForSwap: (type: SwapPairType) => void;
     parsePoolPairData: (tokenIn: string, tokenOut: string) => PoolPairBase;
     getNormalizedLiquidity: (poolPairData: PoolPairBase) => OldBigNumber;
