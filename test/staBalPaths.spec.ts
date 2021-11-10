@@ -11,7 +11,7 @@ import {
     filterHopPools,
     parseToPoolsDict,
 } from '../src/routeProposal/filtering';
-import { STABALADDR, USDCCONNECTINGPOOL } from '../src/constants';
+import { STABAL3POOL, USDCCONNECTINGPOOL } from '../src/constants';
 import staBalPools from './testData/staBal/staBalPools.json';
 import { checkPath } from './lib/testHelpers';
 import { BAL, TUSD, MKR } from './lib/constants';
@@ -138,7 +138,7 @@ describe(`staBalPaths.`, () => {
 
                 const staBalPoolIdIn = 'staBalPair1';
                 const staBalPoolIn = poolsOfInterest[staBalPoolIdIn];
-                const hopTokenStaBal = STABALADDR[chainId];
+                const hopTokenStaBal = STABAL3POOL[chainId].address;
                 const usdcConnectingPool =
                     poolsAll[USDCCONNECTINGPOOL[chainId].id];
 

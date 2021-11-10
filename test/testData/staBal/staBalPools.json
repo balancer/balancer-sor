@@ -2,7 +2,7 @@
     "pools": [
         {
             "id": "staBal3",
-            "address": "0x0000000000000000000000000000000000000001",
+            "address": "0x06df3b2bbb68adc8b0e302443692037ed9f91b42",
             "amp": "200",
             "poolType": "Stable",
             "swapFee": "0.0005",
@@ -42,14 +42,14 @@
         },
         {
             "id": "usdcConnecting",
-            "address": "usdcConnecting",
+            "address": "0x0000000000000000000000000000000000000013",
             "amp": "200",
             "poolType": "Stable",
             "swapFee": "0.0005",
             "swapEnabled": true,
             "tokens": [
                 {
-                    "address": "0x0000000000000000000000000000000000000001",
+                    "address": "0x06df3b2bbb68adc8b0e302443692037ed9f91b42",
                     "balance": "53795002.9145678718781426",
                     "decimals": 18,
                     "symbol": "staBal3",
@@ -67,20 +67,20 @@
             ],
             "totalShares": "162663805.865764625430381901",
             "tokensList": [
-                "0x0000000000000000000000000000000000000001",
+                "0x06df3b2bbb68adc8b0e302443692037ed9f91b42",
                 "0x2791bca1f2de4661ed88a30c99a7a9449aa84174"
             ]
         },
         {
             "id": "staBalPair1",
-            "address": "staBalPair1",
+            "address": "0x0000000000000000000000000000000000000011",
             "amp": "200",
             "poolType": "Stable",
             "swapFee": "0.0005",
             "swapEnabled": true,
             "tokens": [
                 {
-                    "address": "0x0000000000000000000000000000000000000001",
+                    "address": "0x06df3b2bbb68adc8b0e302443692037ed9f91b42",
                     "balance": "7777777",
                     "decimals": 18,
                     "symbol": "staBal3",
@@ -98,20 +98,20 @@
             ],
             "totalShares": "100000000",
             "tokensList": [
-                "0x0000000000000000000000000000000000000001",
+                "0x06df3b2bbb68adc8b0e302443692037ed9f91b42",
                 "0x0000000000085d4780b73119b644ae5ecd22b376"
             ]
         },
         {
             "id": "staBalPair2",
-            "address": "staBalPair2",
+            "address": "0x0000000000000000000000000000000000000012",
             "amp": "200",
             "poolType": "Stable",
             "swapFee": "0.0005",
             "swapEnabled": true,
             "tokens": [
                 {
-                    "address": "0x0000000000000000000000000000000000000001",
+                    "address": "0x06df3b2bbb68adc8b0e302443692037ed9f91b42",
                     "balance": "123456",
                     "decimals": 18,
                     "symbol": "staBal3",
@@ -129,7 +129,7 @@
             ],
             "totalShares": "100000000",
             "tokensList": [
-                "0x0000000000000000000000000000000000000001",
+                "0x06df3b2bbb68adc8b0e302443692037ed9f91b42",
                 "0x0000000000000000000000000000000000000002"
             ]
         },
