@@ -8,7 +8,6 @@ import {
 } from '../../utils/bignumber';
 import { PhantomStablePoolPairData } from './phantomStablePool';
 
-//const MAX_TOKEN_BALANCE = bnum(BigNumber.from('2').pow('112').sub('1');
 const MAX_TOKEN_BALANCE = bnum(2)
     .pow(112)
     .minus(1)
