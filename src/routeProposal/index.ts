@@ -1,6 +1,7 @@
 import {
     filterPoolsOfInterest,
     filterHopPools,
+    getLinearStaBal3Paths,
     getPathsUsingStaBalPool,
     parseToPoolsDict,
 } from './filtering';
@@ -51,6 +52,14 @@ export class RouteProposer {
             poolsFilteredDict
         );
 
+        const pathsUsingLinear: NewPath[] = getLinearStaBal3Paths(
+            tokenIn,
+            tokenOut,
+            poolsAllDict,
+            poolsFilteredDict,
+            chainId
+        );
+
         const pathsUsingStaBal = getPathsUsingStaBalPool(
             tokenIn,
             tokenOut,
@@ -59,7 +68,9 @@ export class RouteProposer {
             chainId
         );
 
-        const combinedPathData = pathData.concat(...pathsUsingStaBal);
+        const combinedPathData = pathData
+            .concat(...pathsUsingLinear)
+            .concat(...pathsUsingStaBal);
         const [paths] = calculatePathLimits(combinedPathData, swapType);
 
         this.cache[`${tokenIn}${tokenOut}${swapType}${swapOptions.timestamp}`] =

@@ -258,7 +258,7 @@ export function getDerivativeSpotPriceAfterSwapForPath(
     return ans;
 }
 
-// TODO: Add cases for pairType = [BTP->token, token->BTP] and poolType = [weighted, stable]
+// TODO: Add cases for pairType = [BPT->token, token->BPT] and poolType = [weighted, stable]
 export function getDerivativeSpotPriceAfterSwap(
     pool: PoolBase,
     poolPairData: PoolPairBase,
@@ -308,7 +308,10 @@ export function EVMgetOutputAmountSwap(
     let returnAmount: OldBigNumber;
 
     if (swapType === SwapTypes.SwapExactIn) {
-        if (poolPairData.balanceIn.isZero()) {
+        if (
+            poolPairData.poolType !== PoolTypes.Linear &&
+            poolPairData.balanceIn.isZero()
+        ) {
             return ZERO;
         }
     } else {
@@ -327,7 +330,8 @@ export function EVMgetOutputAmountSwap(
         if (
             pool.poolType === PoolTypes.Weighted ||
             pool.poolType === PoolTypes.Stable ||
-            pool.poolType === PoolTypes.MetaStable
+            pool.poolType === PoolTypes.MetaStable ||
+            pool.poolType === PoolTypes.Linear
         ) {
             // Will accept/return normalised values
             returnAmount = pool._exactTokenInForTokenOut(
@@ -351,7 +355,8 @@ export function EVMgetOutputAmountSwap(
         if (
             pool.poolType === PoolTypes.Weighted ||
             pool.poolType === PoolTypes.Stable ||
-            pool.poolType === PoolTypes.MetaStable
+            pool.poolType === PoolTypes.MetaStable ||
+            pool.poolType === PoolTypes.Linear
         ) {
             returnAmount = pool._tokenInForExactTokenOut(
                 poolPairData,
