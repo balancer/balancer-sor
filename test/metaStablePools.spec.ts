@@ -49,7 +49,7 @@ async function getStableComparrison(
     return swapInfoStable;
 }
 
-// npx mocha -r ts-node/register test/metaStablePools.spec.ts
+// TS_NODE_PROJECT='tsconfig.testing.json' npx mocha -r ts-node/register test/metaStablePools.spec.ts
 describe(`Tests for MetaStable Pools.`, () => {
     context('limit amounts', () => {
         it(`tests getLimitAmountSwap SwapExactIn`, async () => {
@@ -296,7 +296,6 @@ describe(`Tests for MetaStable Pools.`, () => {
             const tokenIn = stETH;
             const tokenInPriceRate = ONE.div(2);
             const tokenOut = WETH.address;
-            const tokenOutPriceRate = ONE;
             const swapType = SwapTypes.SwapExactIn;
             const swapAmt = parseFixed('1', 18); // Would expect ~ 1 back
 
@@ -360,7 +359,6 @@ describe(`Tests for MetaStable Pools.`, () => {
                 poolsFromFile.metaStablePool
             );
             const tokenIn = WETH.address;
-            const tokenInPriceRate = ONE;
             const tokenOut = stETH;
             const tokenOutPriceRate = ONE.div(2);
             const swapType = SwapTypes.SwapExactOut;
@@ -497,8 +495,6 @@ describe(`Tests for MetaStable Pools.`, () => {
             );
             const tokenIn = WETH.address;
             const tokenInPriceRate = ONE;
-            const tokenHop = stETH;
-            const tokenHopPriceRate = ONE.div(4);
             const tokenOut = randomETH;
             const tokenOutPriceRate = ONE;
             const swapType = SwapTypes.SwapExactIn;
@@ -569,8 +565,6 @@ describe(`Tests for MetaStable Pools.`, () => {
             );
             const tokenIn = WETH.address;
             const tokenInPriceRate = ONE;
-            const tokenHop = stETH;
-            const tokenHopPriceRate = ONE.div(4);
             const tokenOut = randomETH;
             const tokenOutPriceRate = ONE;
             const swapType = SwapTypes.SwapExactOut;
