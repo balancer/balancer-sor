@@ -1,4 +1,4 @@
-// npx mocha -r ts-node/register test/fullSwaps.spec.ts
+// TS_NODE_PROJECT='tsconfig.testing.json' npx mocha -r ts-node/register test/fullSwaps.spec.ts
 import { BigNumber, parseFixed } from '@ethersproject/bignumber';
 import { Zero } from '@ethersproject/constants';
 import { JsonRpcProvider } from '@ethersproject/providers';
