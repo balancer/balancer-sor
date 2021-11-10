@@ -122,6 +122,8 @@ export async function getOnChainBalances(
         throw `Issue with multicall execution.`;
     }
 
+    const onChainPools: SubgraphPoolBase[] = [];
+
     Object.entries(pools).forEach(([poolId, onchainData], index) => {
         try {
             const { poolTokens, swapFee, weights } = onchainData;
@@ -132,7 +134,8 @@ export async function getOnChainBalances(
                 subgraphPools[index].poolType === 'StablePhantom'
             ) {
                 if (!onchainData.amp) {
-                    throw `Stable Pool Missing Amp: ${poolId}`;
+                    console.error(`Stable Pool Missing Amp: ${poolId}`);
+                    return;
                 } else {
                     // Need to scale amp by precision to match expected Subgraph scale
                     // amp is stored with 3 decimals of precision
@@ -144,9 +147,10 @@ export async function getOnChainBalances(
             }
 
             if (subgraphPools[index].poolType === 'Linear') {
-                if (!onchainData.targets)
-                    throw `Linear Pool Missing Targets: ${poolId}`;
-                else {
+                if (!onchainData.targets) {
+                    console.error(`Linear Pool Missing Targets: ${poolId}`);
+                    return;
+                } else {
                     subgraphPools[index].lowerTarget = formatFixed(
                         onchainData.targets[0],
                         18
@@ -157,12 +161,19 @@ export async function getOnChainBalances(
                     );
                 }
 
-                if (!onchainData.wrappedTokenRateCache)
-                    throw `Linear Pool Missing WrappedTokenRateCache: ${poolId}`;
-                else {
+                if (!onchainData.wrappedTokenRateCache) {
+                    console.error(
+                        `Linear Pool Missing WrappedTokenRateCache: ${poolId}`
+                    );
+                    return;
+                } else {
                     const wrappedIndex = subgraphPools[index].wrappedIndex;
-                    if (wrappedIndex === undefined)
-                        throw `Linear Pool Missing WrappedIndex: ${poolId}`;
+                    if (wrappedIndex === undefined) {
+                        console.error(
+                            `Linear Pool Missing WrappedIndex: ${poolId}`
+                        );
+                        return;
+                    }
 
                     subgraphPools[index].tokens[wrappedIndex].priceRate =
                         formatFixed(onchainData.wrappedTokenRateCache[0], 18);
@@ -182,10 +193,11 @@ export async function getOnChainBalances(
                     T.weight = formatFixed(weights[i], 18);
                 }
             });
+            onChainPools.push(subgraphPools[index]);
         } catch (err) {
             throw `Issue with pool onchain data: ${err}`;
         }
     });
 
-    return subgraphPools;
+    return onChainPools;
 }

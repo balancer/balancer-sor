@@ -37,7 +37,7 @@ export const SUBGRAPH_URLS = {
     [Network.GOERLI]:
         'https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-goerli-v2',
     [Network.KOVAN]:
-        'https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-kovan-v2',
+        'https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-kovan-v2', // 'https://api.thegraph.com/subgraphs/name/destiner/balancer-kovan-v2',
     [Network.POLYGON]:
         'https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-polygon-v2',
     [Network.ARBITRUM]: `https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-arbitrum-v2`,
@@ -134,6 +134,36 @@ export const ADDRESSES = {
             decimals: 18,
             symbol: 'wSTETH',
         },
+        USDT_from_AAVE: {
+            address: '0x13512979ade267ab5100878e2e0f485b568328a4',
+            decimals: 6,
+            symbol: 'USDT_from_AAVE',
+        },
+        aUSDT: {
+            address: '0xe8191aacfcdb32260cda25830dc6c9342142f310',
+            decimals: 6,
+            symbol: 'aUSDT',
+        },
+        bUSDT: {
+            address: '0x6a8c3239695613c0710dc971310b36f9b81e115e',
+            decimals: 18,
+            symbol: 'bUSDT',
+        },
+        bDAI: {
+            address: '0xcd32a460b6fecd053582e43b07ed6e2c04e15369',
+            decimals: 18,
+            symbol: 'bDAI',
+        },
+        STABAL3: {
+            address: '0x21ff756ca0cfcc5fff488ad67babadffee0c4149',
+            decimals: 18,
+            symbol: 'STABAL3',
+        },
+        DAI_from_AAVE: {
+            address: '0xff795577d9ac8bd7d90ee22b6c1703490b6512fd',
+            decimals: 18,
+            symbol: 'DAI_from_AAVE',
+        },
     },
     [Network.POLYGON]: {
         MATIC: {
@@ -225,8 +255,6 @@ async function getSwap(
         gasPrice,
         BigNumber.from('35000')
     );
-    console.log(`getCostOfSwapInToken: ${cost.toString()}`);
-
     const swapInfo: SwapInfo = await sor.getSwaps(
         tokenIn.address,
         tokenOut.address,
@@ -249,7 +277,7 @@ async function getSwap(
             ? tokenOut.decimals
             : tokenIn.decimals;
 
-    const returnWithFees = formatFixed(
+    const returnWithFeesScaled = formatFixed(
         swapInfo.returnAmountConsideringFees,
         returnDecimals
     );
@@ -264,7 +292,7 @@ async function getSwap(
         `Token Out: ${tokenOut.symbol}, Amt: ${amtOutScaled.toString()}`
     );
     console.log(`Cost to swap: ${costToSwapScaled.toString()}`);
-    console.log(`Return Considering Fees: ${returnWithFees.toString()}`);
+    console.log(`Return Considering Fees: ${returnWithFeesScaled.toString()}`);
     console.log(`Swaps:`);
     console.log(swapInfo.swaps);
     console.log(swapInfo.tokenAddresses);
@@ -275,7 +303,7 @@ async function getSwap(
 async function makeTrade(
     provider: JsonRpcProvider,
     swapInfo: SwapInfo,
-    swapType
+    swapType: SwapTypes
 ) {
     if (!swapInfo.returnAmount.gt(0)) {
         console.log(`Return Amount is 0. No swaps to exectute.`);
@@ -284,37 +312,37 @@ async function makeTrade(
     const key: any = process.env.TRADER_KEY;
     const wallet = new Wallet(key, provider);
 
-    if (swapInfo.tokenIn !== AddressZero) {
-        // Vault needs approval for swapping non ETH
-        console.log('Checking vault allowance...');
-        const tokenInContract = new Contract(
-            swapInfo.tokenIn,
-            erc20abi,
-            provider
-        );
+    // if (swapInfo.tokenIn !== AddressZero) {
+    //     // Vault needs approval for swapping non ETH
+    //     console.log('Checking vault allowance...');
+    //     const tokenInContract = new Contract(
+    //         swapInfo.tokenIn,
+    //         erc20abi,
+    //         provider
+    //     );
 
-        let allowance = await tokenInContract.allowance(
-            wallet.address,
-            vaultAddr
-        );
+    //     let allowance = await tokenInContract.allowance(
+    //         wallet.address,
+    //         vaultAddr
+    //     );
 
-        if (allowance.lt(swapInfo.swapAmount)) {
-            console.log(
-                `Not Enough Allowance: ${allowance.toString()}. Approving vault now...`
-            );
-            const txApprove = await tokenInContract
-                .connect(wallet)
-                .approve(vaultAddr, MaxUint256);
-            await txApprove.wait();
-            console.log(`Allowance updated: ${txApprove.hash}`);
-            allowance = await tokenInContract.allowance(
-                wallet.address,
-                vaultAddr
-            );
-        }
+    //     if (allowance.lt(swapInfo.swapAmount)) {
+    //         console.log(
+    //             `Not Enough Allowance: ${allowance.toString()}. Approving vault now...`
+    //         );
+    //         const txApprove = await tokenInContract
+    //             .connect(wallet)
+    //             .approve(vaultAddr, MaxUint256);
+    //         await txApprove.wait();
+    //         console.log(`Allowance updated: ${txApprove.hash}`);
+    //         allowance = await tokenInContract.allowance(
+    //             wallet.address,
+    //             vaultAddr
+    //         );
+    //     }
 
-        console.log(`Allowance: ${allowance.toString()}`);
-    }
+    //     console.log(`Allowance: ${allowance.toString()}`);
+    // }
 
     const vaultContract = new Contract(vaultAddr, vaultArtifact, provider);
     vaultContract.connect(wallet);
@@ -333,43 +361,19 @@ async function makeTrade(
         toInternalBalance: false,
     };
 
-    // Limits:
-    // +ve means max to send
-    // -ve mean min to receive
-    // For a multihop the intermediate tokens should be 0
-    // This is where slippage tolerance would be added
-    const limits: string[] = [];
-    if (swapType === SwapTypes.SwapExactIn) {
-        swapInfo.tokenAddresses.forEach((token, i) => {
-            if (token.toLowerCase() === swapInfo.tokenIn.toLowerCase()) {
-                limits[i] = swapInfo.swapAmount.toString();
-            } else if (
-                token.toLowerCase() === swapInfo.tokenOut.toLowerCase()
-            ) {
-                limits[i] = swapInfo.returnAmount.mul(-99).div(100).toString();
-            } else {
-                limits[i] = '0';
-            }
-        });
-    } else {
-        swapInfo.tokenAddresses.forEach((token, i) => {
-            if (token.toLowerCase() === swapInfo.tokenIn.toLowerCase()) {
-                limits[i] = swapInfo.returnAmount.toString();
-            } else if (
-                token.toLowerCase() === swapInfo.tokenOut.toLowerCase()
-            ) {
-                limits[i] = swapInfo.swapAmount.mul(-99).div(100).toString();
-            } else {
-                limits[i] = '0';
-            }
-        });
-    }
+    const limits: string[] = getLimits(
+        swapInfo.tokenIn,
+        swapInfo.tokenOut,
+        swapType,
+        swapInfo.swapAmount,
+        swapInfo.returnAmount,
+        swapInfo.tokenAddresses
+    );
     const deadline = MaxUint256;
 
     console.log(funds);
     console.log(swapInfo.tokenAddresses);
     console.log(limits);
-
     console.log('Swapping...');
 
     const overRides = {};
@@ -380,19 +384,64 @@ async function makeTrade(
         overRides['value'] = swapInfo.swapAmount.toString();
     }
 
-    const tx = await vaultContract
-        .connect(wallet)
-        .batchSwap(
-            swapType,
-            swapInfo.swaps,
-            swapInfo.tokenAddresses,
-            funds,
-            limits,
-            deadline,
-            overRides
-        );
+    const deltas = await vaultContract.queryBatchSwap(
+        swapType, // SwapType 0=SwapExactIn, 1=SwapExactOut
+        swapInfo.swaps,
+        swapInfo.tokenAddresses,
+        funds
+    );
+    console.log(deltas.toString());
 
-    console.log(`tx: ${tx.hash}`);
+    // const tx = await vaultContract
+    //     .connect(wallet)
+    //     .batchSwap(
+    //         swapType,
+    //         swapInfo.swaps,
+    //         swapInfo.tokenAddresses,
+    //         funds,
+    //         limits,
+    //         deadline,
+    //         overRides
+    //     );
+
+    // console.log(`tx: ${tx.hash}`);
+}
+
+function getLimits(
+    tokenIn: string,
+    tokenOut: string,
+    swapType: SwapTypes,
+    swapAmount: BigNumber,
+    returnAmount: BigNumber,
+    tokenAddresses: string[]
+): string[] {
+    // Limits:
+    // +ve means max to send
+    // -ve mean min to receive
+    // For a multihop the intermediate tokens should be 0
+    // This is where slippage tolerance would be added
+    const limits: string[] = [];
+    const amountIn =
+        swapType === SwapTypes.SwapExactIn ? swapAmount : returnAmount;
+    const amountOut =
+        swapType === SwapTypes.SwapExactIn ? returnAmount : swapAmount;
+
+    tokenAddresses.forEach((token, i) => {
+        if (token.toLowerCase() === tokenIn.toLowerCase())
+            limits[i] = amountIn.toString();
+        else if (token.toLowerCase() === tokenOut.toLowerCase()) {
+            limits[i] = amountOut
+                .mul('990000000000000000') // 0.99
+                .div('1000000000000000000')
+                .mul(-1)
+                .toString()
+                .split('.')[0];
+        } else {
+            limits[i] = '0';
+        }
+    });
+
+    return limits;
 }
 
 async function makeRelayerTrade(
@@ -469,44 +518,15 @@ async function makeRelayerTrade(
         tokenOut = ADDRESSES[chainId].wSTETH.address;
     }
 
-    // Limits:
-    // +ve means max to send
-    // -ve mean min to receive
-    // For a multihop the intermediate tokens should be 0
-    // This is where slippage tolerance would be added
-    const limits: string[] = [];
-    if (swapType === SwapTypes.SwapExactIn) {
-        swapInfo.tokenAddresses.forEach((token, i) => {
-            if (token.toLowerCase() === tokenIn.toLowerCase()) {
-                if (!swapInfo.swapAmountForSwaps) return;
-                limits[i] = swapInfo.swapAmountForSwaps.toString();
-            } else if (token.toLowerCase() === tokenOut.toLowerCase()) {
-                if (!swapInfo.returnAmountFromSwaps) return;
-                limits[i] = swapInfo.returnAmountFromSwaps
-                    .mul(-0.99)
-                    .toString()
-                    .split('.')[0];
-            } else {
-                limits[i] = '0';
-            }
-        });
-    } else {
-        swapInfo.tokenAddresses.forEach((token, i) => {
-            if (token.toLowerCase() === tokenIn.toLowerCase()) {
-                if (!swapInfo.returnAmountFromSwaps) return;
-                limits[i] = swapInfo.returnAmountFromSwaps
-                    .mul(1.001)
-                    .toString()
-                    .split('.')[0];
-                // limits[i] = swapInfo.returnAmountFromSwaps?.toString(); // No buffer
-            } else if (token.toLowerCase() === tokenOut.toLowerCase()) {
-                if (!swapInfo.swapAmountForSwaps) return;
-                limits[i] = swapInfo.swapAmountForSwaps.mul(-1).toString();
-            } else {
-                limits[i] = '0';
-            }
-        });
-    }
+    const limits: string[] = getLimits(
+        swapInfo.tokenIn,
+        swapInfo.tokenOut,
+        swapType,
+        swapInfo.swapAmount,
+        swapInfo.returnAmount,
+        swapInfo.tokenAddresses
+    );
+
     const deadline = MaxUint256;
 
     console.log(funds);
@@ -563,18 +583,17 @@ async function makeRelayerTrade(
 }
 
 async function simpleSwap() {
-    const networkId = Network.MAINNET;
-    // const networkId = Network.KOVAN;
+    const networkId = Network.KOVAN;
     // Pools source can be Subgraph URL or pools data set passed directly
     const poolsSource = SUBGRAPH_URLS[networkId];
     // const poolsSource = require('../testData/testPools/gusdBug.json');
     // Update pools list with most recent onchain balances
     const queryOnChain = true;
-    const tokenIn = ADDRESSES[networkId].DAI;
-    const tokenOut = ADDRESSES[networkId].USDC;
+    const tokenIn = ADDRESSES[networkId].BAL;
+    const tokenOut = ADDRESSES[networkId].WETH;
     const swapType = SwapTypes.SwapExactIn;
-    const swapAmount = parseFixed('0.07', 18); // In normalized format, i.e. 1USDC = 1
-    const executeTrade = false;
+    const swapAmount = parseFixed('0.001', 18);
+    const executeTrade = true;
 
     const provider = new JsonRpcProvider(PROVIDER_URLS[networkId]);
 
@@ -607,4 +626,5 @@ async function simpleSwap() {
     }
 }
 
+// $ TS_NODE_PROJECT='tsconfig.testing.json' ts-node ./test/testScripts/swapExample.ts
 simpleSwap();
