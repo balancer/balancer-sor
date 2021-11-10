@@ -1,7 +1,7 @@
-// TS_NODE_PROJECT='tsconfig.testing.json' npx mocha -r ts-node/register test/math.spec.ts
+// TS_NODE_PROJECT='tsconfig.testing.json' npx mocha -r ts-node/register test/linearMath.spec.ts
 import { assert } from 'chai';
 import { PoolTypes } from '../src/types';
-import { BigNumber, parseFixed, formatFixed } from '@ethersproject/bignumber';
+import { BigNumber, parseFixed } from '@ethersproject/bignumber';
 import { BigNumber as OldBigNumber, scale } from '../src/utils/bignumber';
 import { bnum } from '../src/utils/bignumber';
 import * as linearMath from '../src/pools/linearPool/linearMath';
@@ -355,9 +355,9 @@ function checkDerivative(
     amount: number,
     delta: number,
     error: number,
-    inverse: boolean = false
+    inverse = false
 ) {
-    let x = bnum(amount);
+    const x = bnum(amount);
     let incrementalQuotient = fn(x.plus(delta), poolPairData)
         .minus(fn(x, poolPairData))
         .div(delta);

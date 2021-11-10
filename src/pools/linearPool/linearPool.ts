@@ -156,7 +156,6 @@ export class LinearPool implements PoolBase {
         const allBalancesScaled = this.tokens.map(({ balance }) =>
             parseFixed(balance, 18)
         );
-
         const mainBalanceScaled = allBalancesScaled[this.mainIndex];
         const wrappedBalanceScaled = allBalancesScaled[this.wrappedIndex];
         const bptBalanceScaled = allBalancesScaled[this.bptIndex];
@@ -211,7 +210,6 @@ export class LinearPool implements PoolBase {
                 return scale(bnum(this.MAX_TOKEN_BALANCE.toString()), -18);
             } else if (linearPoolPairData.pairType === PairTypes.BptToToken) {
                 // Limit is amount of BPT in for pool balance of tokenOut
-
                 // Amount must be in human scale
                 const balanceOutHuman = scale(
                     bnum(poolPairData.balanceOut.toString()),
@@ -302,7 +300,6 @@ export class LinearPool implements PoolBase {
         }
     }
 
-    // bug alert: exact and "not exact" differ more than they should
     _exactBPTInForTokenOut(
         poolPairData: LinearPoolPairData,
         amount: OldBigNumber,
@@ -385,7 +382,6 @@ export class LinearPool implements PoolBase {
         return _tokenInForExactBPTOut(amount, poolPairData);
     }
 
-    // bug alert: exact and "not exact" differ more than they should
     _BPTInForExactTokenOut(
         poolPairData: LinearPoolPairData,
         amount: OldBigNumber,
