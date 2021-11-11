@@ -5550,40 +5550,45 @@ function _tokenInForExactBPTOut$2(amount, poolPairData) {
     // The formula below returns some dust (due to rounding errors) but when
     // we input zero the output should be zero
     if (amount.isZero()) return amount;
-    let { amp, allBalances, balanceOut, decimalsOut, tokenIndexIn, swapFee } =
+    const { amp, allBalances, tokenIndexIn, tokenIndexOut, swapFee } =
         poolPairData;
-    let balances = [...allBalances];
-    let bptAmountOut = amount;
+    const balances = [...allBalances];
+    const bptAmountOut = amount;
+    /**********************************************************************************************
+    // TODO description                            //
+    **********************************************************************************************/
     // Get current invariant
-    let currentInvariant = _invariant$2(amp, balances);
+    const currentInvariant = _invariant$2(amp, balances);
     // Calculate new invariant
-    let bnumBalanceOut = bnum(bignumber.formatFixed(balanceOut, decimalsOut));
-    let newInvariant = bnumBalanceOut
+    const newInvariant = allBalances[tokenIndexOut]
         .plus(bptAmountOut)
-        .div(bnumBalanceOut)
+        .div(allBalances[tokenIndexOut])
         .times(currentInvariant);
     // First calculate the sum of all token balances which will be used to calculate
     // the current weight of token
-    let sumBalances = bnum(0);
+    let sumBalances = ZERO;
     for (let i = 0; i < balances.length; i++) {
         sumBalances = sumBalances.plus(balances[i]);
     }
     // get amountInAfterFee
-    let newBalanceTokenIndex =
+    const newBalanceTokenIndex =
         _getTokenBalanceGivenInvariantAndAllOtherBalances$1(
             amp,
             balances,
             newInvariant,
             tokenIndexIn
         );
-    let amountInAfterFee = newBalanceTokenIndex.minus(balances[tokenIndexIn]);
+    const amountInAfterFee = newBalanceTokenIndex.minus(balances[tokenIndexIn]);
     // Get tokenBalancePercentageExcess
-    let currentWeight = balances[tokenIndexIn].div(sumBalances);
-    let tokenBalancePercentageExcess = bnum(1).minus(currentWeight);
+    const currentWeight = balances[tokenIndexIn].div(sumBalances);
+    const tokenBalancePercentageExcess = ONE.minus(currentWeight);
     // return amountIn
-    let bnumSwapFee = bnum(bignumber.formatFixed(swapFee, 18));
     return amountInAfterFee.div(
-        bnum(1).minus(tokenBalancePercentageExcess.times(bnumSwapFee))
+        ONE.minus(
+            tokenBalancePercentageExcess
+                .times(swapFee.toString())
+                .div(constants.WeiPerEther.toString())
+        )
     );
 }
 //This function calculates the balance of a given token (tokenIndex)
@@ -5641,6 +5646,9 @@ function _solveAnalyticalBalance$2(sum, inv, amp, n_pow_n, p) {
     //Round up y
     return c.div(2);
 }
+//////////////////////
+////  These functions have been added exclusively for the SORv2
+//////////////////////
 function _poolDerivatives$2(
     amp,
     balances,
@@ -5833,12 +5841,10 @@ function _spotPriceAfterSwapTokenInForExactBPTOut$2(amount, poolPairData) {
     const _in = _tokenInForExactBPTOut$2(amount, poolPairData);
     const feeFactor = _feeFactor$1(balances, tokenIndexIn, swapFee);
     balances[tokenIndexIn] = balances[tokenIndexIn].plus(_in.times(feeFactor));
-    let bnumBalanceOut = bnum(bignumber.formatFixed(balanceOut, decimalsOut));
-    bnumBalanceOut = bnumBalanceOut.plus(amount);
     let ans = _poolDerivativesBPT$1(
         amp,
         balances,
-        bnumBalanceOut,
+        bnum(bignumber.formatFixed(balanceOut, decimalsOut)).plus(amount),
         tokenIndexIn,
         true,
         true,
@@ -5882,16 +5888,15 @@ function _derivativeSpotPriceAfterSwapTokenInForExactTokenOut$4(
     amount,
     poolPairData
 ) {
-    let { amp, allBalances, tokenIndexIn, tokenIndexOut, swapFee } =
+    const { amp, allBalances, tokenIndexIn, tokenIndexOut, swapFee } =
         poolPairData;
-    let balances = [...allBalances];
-    let bnumSwapFee = bnum(bignumber.formatFixed(swapFee, 18));
-    let _in = _tokenInForExactTokenOut$3(amount, poolPairData).times(
-        bnum(1).minus(bnumSwapFee)
-    );
+    const balances = [...allBalances];
+    const _in = _tokenInForExactTokenOut$3(amount, poolPairData)
+        .times(constants.WeiPerEther.sub(swapFee).toString())
+        .div(constants.WeiPerEther.toString());
     balances[tokenIndexIn] = balances[tokenIndexIn].plus(_in);
     balances[tokenIndexOut] = balances[tokenIndexOut].minus(amount);
-    let feeFactor = bnum(1).minus(bnumSwapFee);
+    const feeFactor = constants.WeiPerEther.div(swapFee).toString();
     return _poolDerivatives$2(
         amp,
         balances,
@@ -6154,10 +6159,10 @@ function _invariant$1(
 // // This function has to be zero if the invariant D was calculated correctly
 // // It was only used for double checking that the invariant was correct
 // export function _invariantValueFunction(
-//     amp: BigNumber, // amp
-//     balances: BigNumber[], // balances
-//     D: BigNumber
-// ): BigNumber {
+//     amp: OldBigNumber, // amp
+//     balances: OldBigNumber[], // balances
+//     D: OldBigNumber
+// ): OldBigNumber {
 //     let invariantValueFunction;
 //     let prod = ONE;
 //     let sum = ZERO;
@@ -6303,6 +6308,9 @@ function _solveAnalyticalBalance$1(sum, inv, amp, n_pow_n, p) {
     //Round up y
     return c.div(2);
 }
+//////////////////////
+////  These functions have been added exclusively for the SORv2
+//////////////////////
 function _poolDerivatives$1(
     amp,
     balances,
@@ -6349,6 +6357,9 @@ function _poolDerivatives$1(
     }
     return ans;
 }
+/////////
+/// SpotPriceAfterSwap
+/////////
 // PairType = 'token->token'
 // SwapType = 'swapExactIn'
 function _spotPriceAfterSwapExactTokenInForTokenOut$3(amount, poolPairData) {
@@ -6439,16 +6450,15 @@ function _derivativeSpotPriceAfterSwapTokenInForExactTokenOut$3(
     amount,
     poolPairData
 ) {
-    let { amp, allBalances, tokenIndexIn, tokenIndexOut, swapFee } =
+    const { amp, allBalances, tokenIndexIn, tokenIndexOut, swapFee } =
         poolPairData;
-    let balances = [...allBalances];
-    let bnumSwapFee = bnum(bignumber.formatFixed(swapFee, 18));
-    let _in = _tokenInForExactTokenOut$2(amount, poolPairData).times(
-        bnum(1).minus(bnumSwapFee)
-    );
+    const balances = [...allBalances];
+    const _in = _tokenInForExactTokenOut$2(amount, poolPairData)
+        .times(constants.WeiPerEther.sub(swapFee).toString())
+        .div(constants.WeiPerEther.toString());
     balances[tokenIndexIn] = balances[tokenIndexIn].plus(_in);
     balances[tokenIndexOut] = balances[tokenIndexOut].minus(amount);
-    let feeFactor = bnum(1).minus(bnumSwapFee);
+    const feeFactor = constants.WeiPerEther.div(swapFee).toString();
     return _poolDerivatives$1(
         amp,
         balances,
@@ -7368,7 +7378,6 @@ class LinearPool {
             return _exactTokenInForBPTOut$1(amount, poolPairData);
         }
     }
-    // bug alert: exact and "not exact" differ more than they should
     _exactBPTInForTokenOut(poolPairData, amount, exact) {
         if (exact) {
             try {
@@ -7435,7 +7444,6 @@ class LinearPool {
         }
         return _tokenInForExactBPTOut$1(amount, poolPairData);
     }
-    // bug alert: exact and "not exact" differ more than they should
     _BPTInForExactTokenOut(poolPairData, amount, exact) {
         if (exact) {
             try {
@@ -8054,7 +8062,6 @@ class ElementPool {
     }
 }
 
-//const MAX_TOKEN_BALANCE = bnum(BigNumber.from('2').pow('112').sub('1');
 const MAX_TOKEN_BALANCE = bnum(2).pow(112).minus(1).div(Math.pow(10, 18));
 // All functions are adapted from the solidity ones to be found on:
 // https://github.com/balancer-labs/balancer-core-v2/blob/master/contracts/pools/stable/StableMath.sol
@@ -18024,6 +18031,7 @@ function getOnChainBalances(
         } catch (err) {
             throw `Issue with multicall execution.`;
         }
+        const onChainPools = [];
         Object.entries(pools).forEach(([poolId, onchainData], index) => {
             try {
                 const { poolTokens, swapFee, weights } = onchainData;
@@ -18033,7 +18041,8 @@ function getOnChainBalances(
                     subgraphPools[index].poolType === 'StablePhantom'
                 ) {
                     if (!onchainData.amp) {
-                        throw `Stable Pool Missing Amp: ${poolId}`;
+                        console.error(`Stable Pool Missing Amp: ${poolId}`);
+                        return;
                     } else {
                         // Need to scale amp by precision to match expected Subgraph scale
                         // amp is stored with 3 decimals of precision
@@ -18044,20 +18053,28 @@ function getOnChainBalances(
                     }
                 }
                 if (subgraphPools[index].poolType === 'Linear') {
-                    if (!onchainData.targets)
-                        throw `Linear Pool Missing Targets: ${poolId}`;
-                    else {
+                    if (!onchainData.targets) {
+                        console.error(`Linear Pool Missing Targets: ${poolId}`);
+                        return;
+                    } else {
                         subgraphPools[index].lowerTarget =
                             bignumber.formatFixed(onchainData.targets[0], 18);
                         subgraphPools[index].upperTarget =
                             bignumber.formatFixed(onchainData.targets[1], 18);
                     }
-                    if (!onchainData.wrappedTokenRateCache)
-                        throw `Linear Pool Missing WrappedTokenRateCache: ${poolId}`;
-                    else {
+                    if (!onchainData.wrappedTokenRateCache) {
+                        console.error(
+                            `Linear Pool Missing WrappedTokenRateCache: ${poolId}`
+                        );
+                        return;
+                    } else {
                         const wrappedIndex = subgraphPools[index].wrappedIndex;
-                        if (wrappedIndex === undefined)
-                            throw `Linear Pool Missing WrappedIndex: ${poolId}`;
+                        if (wrappedIndex === undefined) {
+                            console.error(
+                                `Linear Pool Missing WrappedIndex: ${poolId}`
+                            );
+                            return;
+                        }
                         subgraphPools[index].tokens[wrappedIndex].priceRate =
                             bignumber.formatFixed(
                                 onchainData.wrappedTokenRateCache[0],
@@ -18084,11 +18101,12 @@ function getOnChainBalances(
                         T.weight = bignumber.formatFixed(weights[i], 18);
                     }
                 });
+                onChainPools.push(subgraphPools[index]);
             } catch (err) {
                 throw `Issue with pool onchain data: ${err}`;
             }
         });
-        return subgraphPools;
+        return onChainPools;
     });
 }
 
@@ -19549,6 +19567,7 @@ function queryBatchSwapTokensOutUpdateAmounts(
 }
 
 exports.SOR = SOR;
+exports.parseToPoolsDict = parseToPoolsDict;
 exports.queryBatchSwapTokensIn = queryBatchSwapTokensIn;
 exports.queryBatchSwapTokensInUpdateAmounts =
     queryBatchSwapTokensInUpdateAmounts;

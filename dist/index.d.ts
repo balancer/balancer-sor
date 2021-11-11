@@ -318,6 +318,11 @@ declare function queryBatchSwapTokensOutUpdateAmounts(
     assets: string[];
 }>;
 
+declare function parseToPoolsDict(
+    pools: SubgraphPoolBase[],
+    timestamp: number
+): PoolDictionary;
+
 export {
     NewPath,
     NoNullableField,
@@ -337,6 +342,7 @@ export {
     SwapTypes,
     SwapV2,
     WeightedPool,
+    parseToPoolsDict,
     queryBatchSwapTokensIn,
     queryBatchSwapTokensInUpdateAmounts,
     queryBatchSwapTokensOut,
