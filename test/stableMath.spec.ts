@@ -11,8 +11,6 @@ import { DAI, USDC, USDT } from './lib/constants';
 import * as SDK from '@georgeroman/balancer-v2-pools';
 import poolsFromFile from './testData/stablePools/stablePoolWithBPT.json';
 
-const BPTaddress = '0xebfed10e11dc08fcda1af1fda146945e8710f22e';
-
 describe('stable-math tests', () => {
     // Make a stable pool
     // const poolsFromFile: {

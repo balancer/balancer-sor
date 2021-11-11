@@ -1,0 +1,256 @@
+{
+    "pools": [
+        {
+            "id": "0x12d6b6e24fdd9849abd42afd8f5775d36084a828",
+            "swapFee": "0.0029",
+            "swapEnabled": true,
+            "tokens": [
+                {
+                    "address": "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+                    "balance": "10000000",
+                    "decimals": 6,
+                    "weight": "1",
+                    "priceRate": "1",
+                    "id": "0x12d6b6e24fdd9849abd42afd8f5775d36084a828-0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+                    "symbol": "USDC"
+                },
+                {
+                    "address": "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
+                    "balance": "100000",
+                    "decimals": 18,
+                    "weight": "1",
+                    "priceRate": "1",
+                    "id": "0x12d6b6e24fdd9849abd42afd8f5775d36084a828-0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
+                    "symbol": "WETH"
+                },
+                {
+                    "address": "0xea5f88e54d982cbb0c441cde4e79bc305e5b43bc",
+                    "balance": "439.921699598818736873",
+                    "decimals": 18,
+                    "weight": "1",
+                    "priceRate": "1",
+                    "id": "0x12d6b6e24fdd9849abd42afd8f5775d36084a828-0xea5f88e54d982cbb0c441cde4e79bc305e5b43bc",
+                    "symbol": "PARETO"
+                }
+            ],
+            "tokensList": [
+                "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+                "0xea5f88e54d982cbb0c441cde4e79bc305e5b43bc",
+                "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2"
+            ],
+            "totalWeight": "50",
+            "totalShares": "100",
+            "poolType": "Weighted",
+            "address": "0x12d6b6e24fdd9849abd42afd8f5775d36084a828"
+        },
+        {
+            "id": "0x165a50bc092f6870dc111c349bae5fc35147ac86",
+            "swapFee": "0.003",
+            "swapEnabled": true,
+            "tokens": [
+                {
+                    "address": "0x6b175474e89094c44da98b954eedeac495271d0f",
+                    "balance": "12274002",
+                    "decimals": 18,
+                    "weight": "4",
+                    "priceRate": "1",
+                    "id": "0x165a50bc092f6870dc111c349bae5fc35147ac86-0x6b175474e89094c44da98b954eedeac495271d0f",
+                    "symbol": "DAI"
+                },
+                {
+                    "address": "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
+                    "balance": "85172",
+                    "decimals": 18,
+                    "weight": "6",
+                    "priceRate": "1",
+                    "id": "0x165a50bc092f6870dc111c349bae5fc35147ac86-0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
+                    "symbol": "WETH"
+                }
+            ],
+            "tokensList": [
+                "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
+                "0x6b175474e89094c44da98b954eedeac495271d0f"
+            ],
+            "totalWeight": "10",
+            "totalShares": "100",
+            "poolType": "Weighted",
+            "address": "0x165a50bc092f6870dc111c349bae5fc35147ac86"
+        },
+        {
+            "id": "0x2dbd24322757d2e28de4230b1ca5b88e49a76979",
+            "swapFee": "0.01",
+            "swapEnabled": true,
+            "tokens": [
+                {
+                    "address": "0x2260fac5e5542a773aa44fbcfedf7c193bc2c599",
+                    "balance": "4500.4345",
+                    "decimals": 8,
+                    "weight": "7.5",
+                    "priceRate": "1",
+                    "id": "0x2dbd24322757d2e28de4230b1ca5b88e49a76979-0x2260fac5e5542a773aa44fbcfedf7c193bc2c599",
+                    "symbol": "WBTC"
+                },
+                {
+                    "address": "0x4f3afec4e5a3f2a6a1a411def7d7dfe50ee057bf",
+                    "balance": "0.559861212",
+                    "decimals": 9,
+                    "weight": "6.25",
+                    "priceRate": "1",
+                    "id": "0x2dbd24322757d2e28de4230b1ca5b88e49a76979-0x4f3afec4e5a3f2a6a1a411def7d7dfe50ee057bf",
+                    "symbol": "DGX"
+                },
+                {
+                    "address": "0x514910771af9ca656af840dff83e8264ecf986ca",
+                    "balance": "9.88417866675729769",
+                    "decimals": 18,
+                    "weight": "7.5",
+                    "priceRate": "1",
+                    "id": "0x2dbd24322757d2e28de4230b1ca5b88e49a76979-0x514910771af9ca656af840dff83e8264ecf986ca",
+                    "symbol": "LINK"
+                },
+                {
+                    "address": "0x6b175474e89094c44da98b954eedeac495271d0f",
+                    "balance": "310000000.985554772389188202",
+                    "decimals": 18,
+                    "weight": "6.25",
+                    "priceRate": "1",
+                    "id": "0x2dbd24322757d2e28de4230b1ca5b88e49a76979-0x6b175474e89094c44da98b954eedeac495271d0f",
+                    "symbol": "DAI"
+                },
+                {
+                    "address": "0x9cb2f26a23b8d89973f08c957c4d7cdf75cd341c",
+                    "balance": "617.869915",
+                    "decimals": 6,
+                    "weight": "6.25",
+                    "priceRate": "1",
+                    "id": "0x2dbd24322757d2e28de4230b1ca5b88e49a76979-0x9cb2f26a23b8d89973f08c957c4d7cdf75cd341c",
+                    "symbol": "DZAR"
+                },
+                {
+                    "address": "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+                    "balance": "31.486417",
+                    "decimals": 6,
+                    "weight": "6.25",
+                    "priceRate": "1",
+                    "id": "0x2dbd24322757d2e28de4230b1ca5b88e49a76979-0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+                    "symbol": "USDC"
+                },
+                {
+                    "address": "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
+                    "balance": "0.252805870493122787",
+                    "decimals": 18,
+                    "weight": "10",
+                    "priceRate": "1",
+                    "id": "0x2dbd24322757d2e28de4230b1ca5b88e49a76979-0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
+                    "symbol": "WETH"
+                }
+            ],
+            "tokensList": [
+                "0x9cb2f26a23b8d89973f08c957c4d7cdf75cd341c",
+                "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+                "0x6b175474e89094c44da98b954eedeac495271d0f",
+                "0x4f3afec4e5a3f2a6a1a411def7d7dfe50ee057bf",
+                "0x2260fac5e5542a773aa44fbcfedf7c193bc2c599",
+                "0x514910771af9ca656af840dff83e8264ecf986ca",
+                "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2"
+            ],
+            "totalWeight": "50",
+            "totalShares": "100",
+            "poolType": "Weighted",
+            "address": "0x2dbd24322757d2e28de4230b1ca5b88e49a76979"
+        },
+        {
+            "id": "0x07d13ed39ee291c1506675ff42f9b2b6b50e2d3e",
+            "swapFee": "0.0099",
+            "swapEnabled": true,
+            "tokens": [
+                {
+                    "address": "0x2260fac5e5542a773aa44fbcfedf7c193bc2c599",
+                    "balance": "40.408397",
+                    "decimals": 8,
+                    "weight": "10",
+                    "priceRate": "1",
+                    "id": "0x07d13ed39ee291c1506675ff42f9b2b6b50e2d3e-0x2260fac5e5542a773aa44fbcfedf7c193bc2c599",
+                    "symbol": "WBTC"
+                },
+                {
+                    "address": "0x514910771af9ca656af840dff83e8264ecf986ca",
+                    "balance": "25.197461401226657195",
+                    "decimals": 18,
+                    "weight": "2.5",
+                    "priceRate": "1",
+                    "id": "0x07d13ed39ee291c1506675ff42f9b2b6b50e2d3e-0x514910771af9ca656af840dff83e8264ecf986ca",
+                    "symbol": "LINK"
+                },
+                {
+                    "address": "0x5d3a536e4d6dbd6114cc1ead35777bab948e3643",
+                    "balance": "9548.45375841",
+                    "decimals": 8,
+                    "weight": "5",
+                    "priceRate": "1",
+                    "id": "0x07d13ed39ee291c1506675ff42f9b2b6b50e2d3e-0x5d3a536e4d6dbd6114cc1ead35777bab948e3643",
+                    "symbol": "cDAI"
+                },
+                {
+                    "address": "0x9f8f72aa9304c8b593d555f12ef6589cc3a579a2",
+                    "balance": "0.290098892394657353",
+                    "decimals": 18,
+                    "weight": "2.5",
+                    "priceRate": "1",
+                    "id": "0x07d13ed39ee291c1506675ff42f9b2b6b50e2d3e-0x9f8f72aa9304c8b593d555f12ef6589cc3a579a2",
+                    "symbol": "MKR"
+                },
+                {
+                    "address": "0xbbbbca6a901c926f240b89eacb641d8aec7aeafd",
+                    "balance": "1467.388467898486830904",
+                    "decimals": 18,
+                    "weight": "1.5",
+                    "priceRate": "1",
+                    "id": "0x07d13ed39ee291c1506675ff42f9b2b6b50e2d3e-0xbbbbca6a901c926f240b89eacb641d8aec7aeafd",
+                    "symbol": "LRC"
+                },
+                {
+                    "address": "0xc011a73ee8576fb46f5e1c5751ca3b9fe0af2a6f",
+                    "balance": "103786015.755319",
+                    "decimals": 6,
+                    "weight": "10",
+                    "priceRate": "1",
+                    "id": "0x07d13ed39ee291c1506675ff42f9b2b6b50e2d3e-0xc011a73ee8576fb46f5e1c5751ca3b9fe0af2a6f",
+                    "symbol": "SNX"
+                },
+                {
+                    "address": "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
+                    "balance": "4.892527075485292715",
+                    "decimals": 18,
+                    "weight": "25",
+                    "priceRate": "1",
+                    "id": "0x07d13ed39ee291c1506675ff42f9b2b6b50e2d3e-0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
+                    "symbol": "WETH"
+                },
+                {
+                    "address": "0xdd974d5c2e2928dea5f71b9825b8b646686bd200",
+                    "balance": "85.692607860702857064",
+                    "decimals": 18,
+                    "weight": "1.5",
+                    "priceRate": "1",
+                    "id": "0x07d13ed39ee291c1506675ff42f9b2b6b50e2d3e-0xdd974d5c2e2928dea5f71b9825b8b646686bd200",
+                    "symbol": "KNC"
+                }
+            ],
+            "tokensList": [
+                "0xbbbbca6a901c926f240b89eacb641d8aec7aeafd",
+                "0xdd974d5c2e2928dea5f71b9825b8b646686bd200",
+                "0xc011a73ee8576fb46f5e1c5751ca3b9fe0af2a6f",
+                "0x514910771af9ca656af840dff83e8264ecf986ca",
+                "0x9f8f72aa9304c8b593d555f12ef6589cc3a579a2",
+                "0x5d3a536e4d6dbd6114cc1ead35777bab948e3643",
+                "0x2260fac5e5542a773aa44fbcfedf7c193bc2c599",
+                "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2"
+            ],
+            "totalWeight": "50",
+            "totalShares": "100",
+            "poolType": "Weighted",
+            "address": "0x07d13ed39ee291c1506675ff42f9b2b6b50e2d3e"
+        }
+    ]
+}
