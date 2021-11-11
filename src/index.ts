@@ -8,3 +8,4 @@ export {
     queryBatchSwapTokensOutUpdateAmounts,
 } from './frontendHelpers/queryBatchSwapHelpers';
 export * from './types';
+export { parseToPoolsDict } from './routeProposal/filtering';
