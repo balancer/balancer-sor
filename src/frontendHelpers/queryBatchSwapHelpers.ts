@@ -110,60 +110,25 @@ export async function queryBatchSwapTokensIn(
     // Join swaps and assets together correctly
     const batchedSwaps = batchSwaps(assetArray, swaps);
 
-    // Onchain query
-    const deltas = await queryBatchSwap(
-        vaultContract,
-        SwapTypes.SwapExactIn,
-        batchedSwaps.swaps,
-        batchedSwaps.assets
-    );
+    let amountTokenOut = '0';
+    try {
+        // Onchain query
+        const deltas = await queryBatchSwap(
+            vaultContract,
+            SwapTypes.SwapExactIn,
+            batchedSwaps.swaps,
+            batchedSwaps.assets
+        );
 
-    const amountTokenOut = deltas[batchedSwaps.assets.indexOf(tokenOut)];
+        amountTokenOut = deltas[batchedSwaps.assets.indexOf(tokenOut)];
+    } catch (err) {
+        console.error(`queryBatchSwapTokensIn error: ${err.message}`);
+    }
 
     return {
         amountTokenOut,
         swaps: batchedSwaps.swaps,
         assets: batchedSwaps.assets,
-    };
-}
-
-/*
-queryBatchSwap for multiple tokens in > single tokenOut.
-Uses existing swaps/assets information and updates swap amounts.
-*/
-export async function queryBatchSwapTokensInUpdateAmounts(
-    vaultContract: Contract,
-    swaps: SwapV2[],
-    assets: string[],
-    tokens: string[],
-    newAmounts: BigNumberish[],
-    tokenOut: string
-): Promise<{ amountTokenOut: string; swaps: SwapV2[]; assets: string[] }> {
-    for (let i = 0; i < tokens.length; i++) {
-        const tokenIndex = assets.indexOf(tokens[i]);
-        swaps.forEach((poolSwap) => {
-            if (
-                poolSwap.assetInIndex === tokenIndex ||
-                poolSwap.assetOutIndex === tokenIndex
-            )
-                poolSwap.amount = newAmounts[i].toString();
-        });
-    }
-
-    // Onchain query
-    const deltas = await queryBatchSwap(
-        vaultContract,
-        SwapTypes.SwapExactIn,
-        swaps,
-        assets
-    );
-
-    const amountTokenOut = deltas[assets.indexOf(tokenOut)];
-
-    return {
-        amountTokenOut,
-        swaps,
-        assets,
     };
 }
 
@@ -195,69 +160,27 @@ export async function queryBatchSwapTokensOut(
 
     // Join swaps and assets together correctly
     const batchedSwaps = batchSwaps(assetArray, swaps);
+    const amountTokensOut = Array(tokensOut.length).fill('0');
+    try {
+        // Onchain query
+        const deltas = await queryBatchSwap(
+            vaultContract,
+            SwapTypes.SwapExactIn,
+            batchedSwaps.swaps,
+            batchedSwaps.assets
+        );
 
-    // Onchain query
-    const deltas = await queryBatchSwap(
-        vaultContract,
-        SwapTypes.SwapExactIn,
-        batchedSwaps.swaps,
-        batchedSwaps.assets
-    );
-
-    const amountTokensOut: string[] = [];
-    tokensOut.forEach((t) => {
-        const amount = deltas[batchedSwaps.assets.indexOf(t)];
-        if (amount) amountTokensOut.push(amount);
-        else amountTokensOut.push('0');
-    });
+        tokensOut.forEach((t, i) => {
+            const amount = deltas[batchedSwaps.assets.indexOf(t)];
+            if (amount) amountTokensOut[i] = amount.toString();
+        });
+    } catch (err) {
+        console.error(`queryBatchSwapTokensOut error: ${err.message}`);
+    }
 
     return {
         amountTokensOut,
         swaps: batchedSwaps.swaps,
         assets: batchedSwaps.assets,
-    };
-}
-
-/*
-queryBatchSwap for a single token in > multiple tokens out.
-Uses existing swaps/assets information and updates swap amounts.
-*/
-export async function queryBatchSwapTokensOutUpdateAmounts(
-    vaultContract: Contract,
-    swaps: SwapV2[],
-    assets: string[],
-    newAmounts: BigNumberish[],
-    tokensOut: string[]
-): Promise<{ amountTokensOut: string[]; swaps: SwapV2[]; assets: string[] }> {
-    for (let i = 0; i < tokensOut.length; i++) {
-        const tokenIndex = assets.indexOf(tokensOut[i]);
-        swaps.forEach((poolSwap) => {
-            if (
-                poolSwap.assetInIndex === tokenIndex ||
-                poolSwap.assetOutIndex === tokenIndex
-            )
-                poolSwap.amount = newAmounts[i].toString();
-        });
-    }
-
-    // Onchain query
-    const deltas = await queryBatchSwap(
-        vaultContract,
-        SwapTypes.SwapExactIn,
-        swaps,
-        assets
-    );
-
-    const amountTokensOut: string[] = [];
-    tokensOut.forEach((t) => {
-        const amount = deltas[assets.indexOf(t)];
-        if (amount) amountTokensOut.push(amount);
-        else amountTokensOut.push('0');
-    });
-
-    return {
-        amountTokensOut,
-        swaps: swaps,
-        assets: assets,
     };
 }
