@@ -3,9 +3,7 @@ export { BPTForTokensZeroPriceImpact as weightedBPTForTokensZeroPriceImpact } fr
 export { BPTForTokensZeroPriceImpact as stableBPTForTokensZeroPriceImpact } from './frontendHelpers/stableHelpers';
 export {
     queryBatchSwapTokensIn,
-    queryBatchSwapTokensInUpdateAmounts,
     queryBatchSwapTokensOut,
-    queryBatchSwapTokensOutUpdateAmounts,
 } from './frontendHelpers/queryBatchSwapHelpers';
 export * from './types';
 export { parseToPoolsDict } from './routeProposal/filtering';
