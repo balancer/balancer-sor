@@ -119,8 +119,7 @@ export async function queryBatchSwapTokensIn(
             batchedSwaps.swaps,
             batchedSwaps.assets
         );
-
-        amountTokenOut = deltas[batchedSwaps.assets.indexOf(tokenOut)];
+        amountTokenOut = deltas[batchedSwaps.assets.indexOf(tokenOut)] ?? '0';
     } catch (err) {
         console.error(`queryBatchSwapTokensIn error: ${err.message}`);
     }
