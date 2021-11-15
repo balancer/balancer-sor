@@ -88,6 +88,13 @@ export type SubgraphToken = {
     weight: string | null;
 };
 
+export type SubgraphLatestTokenPrice = {
+    id: string;
+    asset: string;
+    pricingAsset: string;
+    price: string;
+};
+
 export interface SwapV2 {
     poolId: string;
     assetInIndex: number;

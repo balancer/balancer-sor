@@ -3,6 +3,7 @@ import { WeiPerEther as ONE, Zero } from '@ethersproject/constants';
 import { bnum, scale } from '../utils/bignumber';
 import { WETHADDR } from '../constants';
 import { getTokenPriceInNativeAsset } from './coingecko';
+import { getTokenPriceInNativeAssetFromSubgraph } from './subgraph';
 
 export function calculateTotalSwapCost(
     tokenPriceWei: BigNumber,
@@ -22,7 +23,7 @@ export class SwapCostCalculator {
         };
     }
 
-    constructor(private chainId: number) {
+    constructor(private chainId: number, private subgraphUrl: string | null) {
         this.initializeCache();
     }
 
@@ -45,14 +46,17 @@ export class SwapCostCalculator {
         if (cachedTokenPrice) return cachedTokenPrice;
 
         try {
-            // Query Coingecko first and only check decimals
+            // Query either the subgraph or Coingecko first and only check decimals
             // if we get a valid response to avoid unnecessary queries
-            const ethPerToken = await getTokenPriceInNativeAsset(
-                this.chainId,
-                tokenAddress
-            );
+            const ethPerToken = this.subgraphUrl
+                ? await getTokenPriceInNativeAssetFromSubgraph(
+                      tokenAddress,
+                      WETHADDR[this.chainId].toLowerCase(),
+                      this.subgraphUrl
+                  )
+                : await getTokenPriceInNativeAsset(this.chainId, tokenAddress);
 
-            // Coingecko returns price of token in terms of ETH
+            // We get the price of token in terms of ETH
             // We want the price of 1 ETH in terms of the token base units
             const ethPriceInToken = bnum(1).div(bnum(ethPerToken)).toString();
 

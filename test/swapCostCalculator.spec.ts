@@ -2,7 +2,7 @@
 import { expect } from 'chai';
 import { BigNumber, formatFixed } from '@ethersproject/bignumber';
 import { calculateTotalSwapCost, SwapCostCalculator } from '../src/swapCost';
-import { DAI, MKR, USDC, WETH } from './lib/constants';
+import { DAI, MKR, SUBGRAPH_URL, USDC, WETH } from './lib/constants';
 
 describe('calculateTotalSwapCost', () => {
     it('should return correct total swap cost', async () => {
@@ -43,12 +43,10 @@ describe('Test SwapCostCalculator', () => {
             const swapGas = BigNumber.from('100000');
 
             const costExpected = BigNumber.from('0');
-            const cost = await new SwapCostCalculator(1).convertGasCostToToken(
-                '0x0',
-                18,
-                gasPriceWei,
-                swapGas
-            );
+            const cost = await new SwapCostCalculator(
+                1,
+                SUBGRAPH_URL
+            ).convertGasCostToToken('0x0', 18, gasPriceWei, swapGas);
 
             expect(cost).to.eql(costExpected);
         });
@@ -57,12 +55,10 @@ describe('Test SwapCostCalculator', () => {
             const gasPriceWei = BigNumber.from('30000000000');
             const swapGas = BigNumber.from('100000');
 
-            const cost = await new SwapCostCalculator(1).convertGasCostToToken(
-                DAI,
-                18,
-                gasPriceWei,
-                swapGas
-            );
+            const cost = await new SwapCostCalculator(
+                1,
+                SUBGRAPH_URL
+            ).convertGasCostToToken(DAI, 18, gasPriceWei, swapGas);
             const costEth = formatFixed(cost, 18);
             console.log(`CostOutputToken DAI: ${costEth.toString()}`);
         }).timeout(5000);
@@ -71,12 +67,10 @@ describe('Test SwapCostCalculator', () => {
             const gasPriceWei = BigNumber.from('30000000000');
             const swapGas = BigNumber.from('100000');
 
-            const cost = await new SwapCostCalculator(1).convertGasCostToToken(
-                USDC,
-                6,
-                gasPriceWei,
-                swapGas
-            );
+            const cost = await new SwapCostCalculator(
+                1,
+                SUBGRAPH_URL
+            ).convertGasCostToToken(USDC, 6, gasPriceWei, swapGas);
             const costEth = formatFixed(cost, 6);
             console.log(`CostOutputToken USDC: ${costEth.toString()}`);
         }).timeout(5000);
@@ -85,12 +79,10 @@ describe('Test SwapCostCalculator', () => {
             const gasPriceWei = BigNumber.from('30000000000');
             const swapGas = BigNumber.from('100000');
 
-            const cost = await new SwapCostCalculator(1).convertGasCostToToken(
-                MKR,
-                18,
-                gasPriceWei,
-                swapGas
-            );
+            const cost = await new SwapCostCalculator(
+                1,
+                SUBGRAPH_URL
+            ).convertGasCostToToken(MKR, 18, gasPriceWei, swapGas);
             const costEth = formatFixed(cost, 18);
             console.log(`CostOutputToken MKR: ${costEth.toString()}`);
         }).timeout(5000);
@@ -99,12 +91,10 @@ describe('Test SwapCostCalculator', () => {
             const gasPriceWei = BigNumber.from('30000000000');
             const swapGas = BigNumber.from('100000');
 
-            const cost = await new SwapCostCalculator(1).convertGasCostToToken(
-                WETH,
-                18,
-                gasPriceWei,
-                swapGas
-            );
+            const cost = await new SwapCostCalculator(
+                1,
+                SUBGRAPH_URL
+            ).convertGasCostToToken(WETH, 18, gasPriceWei, swapGas);
             const costEth = formatFixed(cost, 18);
             console.log(`CostOutputToken WETH: ${costEth.toString()}`);
         }).timeout(5000);
