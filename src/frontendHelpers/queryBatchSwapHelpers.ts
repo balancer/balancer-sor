@@ -50,7 +50,12 @@ async function getSorSwapInfo(
     amount: string,
     sor: SOR
 ): Promise<SwapInfo> {
-    const swapInfo = await sor.getSwaps(tokenIn, tokenOut, swapType, amount);
+    const swapInfo = await sor.getSwaps(
+        tokenIn.toLowerCase(),
+        tokenOut.toLowerCase(),
+        swapType,
+        amount
+    );
     return swapInfo;
 }
 
@@ -119,7 +124,8 @@ export async function queryBatchSwapTokensIn(
             batchedSwaps.swaps,
             batchedSwaps.assets
         );
-        amountTokenOut = deltas[batchedSwaps.assets.indexOf(tokenOut)] ?? '0';
+        amountTokenOut =
+            deltas[batchedSwaps.assets.indexOf(tokenOut.toLowerCase())] ?? '0';
     } catch (err) {
         console.error(`queryBatchSwapTokensIn error: ${err.message}`);
     }
@@ -170,7 +176,7 @@ export async function queryBatchSwapTokensOut(
         );
 
         tokensOut.forEach((t, i) => {
-            const amount = deltas[batchedSwaps.assets.indexOf(t)];
+            const amount = deltas[batchedSwaps.assets.indexOf(t.toLowerCase())];
             if (amount) amountTokensOut[i] = amount.toString();
         });
     } catch (err) {
