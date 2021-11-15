@@ -283,34 +283,11 @@ declare function queryBatchSwapTokensIn(
     swaps: SwapV2[];
     assets: string[];
 }>;
-declare function queryBatchSwapTokensInUpdateAmounts(
-    vaultContract: Contract,
-    swaps: SwapV2[],
-    assets: string[],
-    tokens: string[],
-    newAmounts: BigNumberish[],
-    tokenOut: string
-): Promise<{
-    amountTokenOut: string;
-    swaps: SwapV2[];
-    assets: string[];
-}>;
 declare function queryBatchSwapTokensOut(
     sor: SOR,
     vaultContract: Contract,
     tokenIn: string,
     amountsIn: BigNumberish[],
-    tokensOut: string[]
-): Promise<{
-    amountTokensOut: string[];
-    swaps: SwapV2[];
-    assets: string[];
-}>;
-declare function queryBatchSwapTokensOutUpdateAmounts(
-    vaultContract: Contract,
-    swaps: SwapV2[],
-    assets: string[],
-    newAmounts: BigNumberish[],
     tokensOut: string[]
 ): Promise<{
     amountTokensOut: string[];
@@ -344,9 +321,7 @@ export {
     WeightedPool,
     parseToPoolsDict,
     queryBatchSwapTokensIn,
-    queryBatchSwapTokensInUpdateAmounts,
     queryBatchSwapTokensOut,
-    queryBatchSwapTokensOutUpdateAmounts,
     BPTForTokensZeroPriceImpact as stableBPTForTokensZeroPriceImpact,
     BPTForTokensZeroPriceImpact$1 as weightedBPTForTokensZeroPriceImpact,
 };

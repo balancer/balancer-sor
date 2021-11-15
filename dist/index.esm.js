@@ -9045,15 +9045,10 @@ class PhantomStablePool {
     }
     // Updates the balance of a given token for the pool
     updateTokenBalanceForPool(token, newBalance) {
-        // token is BPT
-        if (this.address == token) {
-            this.totalShares = newBalance;
-        } else {
-            // token is underlying in the pool
-            const T = this.tokens.find((t) => isSameAddress(t.address, token));
-            if (!T) throw Error('Pool does not contain this token');
-            T.balance = formatFixed(newBalance, T.decimals);
-        }
+        // token is underlying in the pool
+        const T = this.tokens.find((t) => isSameAddress(t.address, token));
+        if (!T) throw Error('Pool does not contain this token');
+        T.balance = formatFixed(newBalance, T.decimals);
     }
     _exactTokenInForTokenOut(poolPairData, amount, exact) {
         try {
@@ -9304,26 +9299,32 @@ function parseNewPool(pool, currentBlockTimestamp = 0) {
     // We're not interested in any pools which don't allow swapping
     if (!pool.swapEnabled) return undefined;
     let newPool;
-    if (
-        pool.poolType === 'Weighted' ||
-        pool.poolType === 'LiquidityBootstrapping' ||
-        pool.poolType === 'Investment'
-    ) {
-        newPool = WeightedPool.fromPool(pool);
-    } else if (pool.poolType === 'Stable') {
-        newPool = StablePool.fromPool(pool);
-    } else if (pool.poolType === 'MetaStable') {
-        newPool = MetaStablePool.fromPool(pool);
-    } else if (pool.poolType === 'Element') {
-        newPool = ElementPool.fromPool(pool);
-        newPool.setCurrentBlockTimestamp(currentBlockTimestamp);
-    } else if (pool.poolType === 'Linear') newPool = LinearPool.fromPool(pool);
-    else if (pool.poolType === 'StablePhantom')
-        newPool = PhantomStablePool.fromPool(pool);
-    else {
-        console.error(
-            `Unknown pool type or type field missing: ${pool.poolType} ${pool.id}`
-        );
+    try {
+        if (
+            pool.poolType === 'Weighted' ||
+            pool.poolType === 'LiquidityBootstrapping' ||
+            pool.poolType === 'Investment'
+        ) {
+            newPool = WeightedPool.fromPool(pool);
+        } else if (pool.poolType === 'Stable') {
+            newPool = StablePool.fromPool(pool);
+        } else if (pool.poolType === 'MetaStable') {
+            newPool = MetaStablePool.fromPool(pool);
+        } else if (pool.poolType === 'Element') {
+            newPool = ElementPool.fromPool(pool);
+            newPool.setCurrentBlockTimestamp(currentBlockTimestamp);
+        } else if (pool.poolType === 'Linear')
+            newPool = LinearPool.fromPool(pool);
+        else if (pool.poolType === 'StablePhantom')
+            newPool = PhantomStablePool.fromPool(pool);
+        else {
+            console.error(
+                `Unknown pool type or type field missing: ${pool.poolType} ${pool.id}`
+            );
+            return undefined;
+        }
+    } catch (err) {
+        console.error(`parseNewPool: ${err.message}`);
         return undefined;
     }
     return newPool;
@@ -19216,8 +19217,8 @@ SwapInfos.swaps has path information.
 function getSorSwapInfo(tokenIn, tokenOut, swapType, amount, sor) {
     return __awaiter(this, void 0, void 0, function* () {
         const swapInfo = yield sor.getSwaps(
-            tokenIn,
-            tokenOut,
+            tokenIn.toLowerCase(),
+            tokenOut.toLowerCase(),
             swapType,
             amount
         );
@@ -19256,6 +19257,7 @@ function queryBatchSwapTokensIn(
     amountsIn,
     tokenOut
 ) {
+    var _a;
     return __awaiter(this, void 0, void 0, function* () {
         const swaps = [];
         const assetArray = [];
@@ -19273,56 +19275,29 @@ function queryBatchSwapTokensIn(
         }
         // Join swaps and assets together correctly
         const batchedSwaps = batchSwaps(assetArray, swaps);
-        // Onchain query
-        const deltas = yield queryBatchSwap(
-            vaultContract,
-            SwapTypes.SwapExactIn,
-            batchedSwaps.swaps,
-            batchedSwaps.assets
-        );
-        const amountTokenOut = deltas[batchedSwaps.assets.indexOf(tokenOut)];
+        let amountTokenOut = '0';
+        try {
+            // Onchain query
+            const deltas = yield queryBatchSwap(
+                vaultContract,
+                SwapTypes.SwapExactIn,
+                batchedSwaps.swaps,
+                batchedSwaps.assets
+            );
+            amountTokenOut =
+                (_a =
+                    deltas[
+                        batchedSwaps.assets.indexOf(tokenOut.toLowerCase())
+                    ]) !== null && _a !== void 0
+                    ? _a
+                    : '0';
+        } catch (err) {
+            console.error(`queryBatchSwapTokensIn error: ${err.message}`);
+        }
         return {
             amountTokenOut,
             swaps: batchedSwaps.swaps,
             assets: batchedSwaps.assets,
-        };
-    });
-}
-/*
-queryBatchSwap for multiple tokens in > single tokenOut.
-Uses existing swaps/assets information and updates swap amounts.
-*/
-function queryBatchSwapTokensInUpdateAmounts(
-    vaultContract,
-    swaps,
-    assets,
-    tokens,
-    newAmounts,
-    tokenOut
-) {
-    return __awaiter(this, void 0, void 0, function* () {
-        for (let i = 0; i < tokens.length; i++) {
-            const tokenIndex = assets.indexOf(tokens[i]);
-            swaps.forEach((poolSwap) => {
-                if (
-                    poolSwap.assetInIndex === tokenIndex ||
-                    poolSwap.assetOutIndex === tokenIndex
-                )
-                    poolSwap.amount = newAmounts[i].toString();
-            });
-        }
-        // Onchain query
-        const deltas = yield queryBatchSwap(
-            vaultContract,
-            SwapTypes.SwapExactIn,
-            swaps,
-            assets
-        );
-        const amountTokenOut = deltas[assets.indexOf(tokenOut)];
-        return {
-            amountTokenOut,
-            swaps,
-            assets,
         };
     });
 }
@@ -19354,65 +19329,27 @@ function queryBatchSwapTokensOut(
         }
         // Join swaps and assets together correctly
         const batchedSwaps = batchSwaps(assetArray, swaps);
-        // Onchain query
-        const deltas = yield queryBatchSwap(
-            vaultContract,
-            SwapTypes.SwapExactIn,
-            batchedSwaps.swaps,
-            batchedSwaps.assets
-        );
-        const amountTokensOut = [];
-        tokensOut.forEach((t) => {
-            const amount = deltas[batchedSwaps.assets.indexOf(t)];
-            if (amount) amountTokensOut.push(amount);
-            else amountTokensOut.push('0');
-        });
+        const amountTokensOut = Array(tokensOut.length).fill('0');
+        try {
+            // Onchain query
+            const deltas = yield queryBatchSwap(
+                vaultContract,
+                SwapTypes.SwapExactIn,
+                batchedSwaps.swaps,
+                batchedSwaps.assets
+            );
+            tokensOut.forEach((t, i) => {
+                const amount =
+                    deltas[batchedSwaps.assets.indexOf(t.toLowerCase())];
+                if (amount) amountTokensOut[i] = amount.toString();
+            });
+        } catch (err) {
+            console.error(`queryBatchSwapTokensOut error: ${err.message}`);
+        }
         return {
             amountTokensOut,
             swaps: batchedSwaps.swaps,
             assets: batchedSwaps.assets,
-        };
-    });
-}
-/*
-queryBatchSwap for a single token in > multiple tokens out.
-Uses existing swaps/assets information and updates swap amounts.
-*/
-function queryBatchSwapTokensOutUpdateAmounts(
-    vaultContract,
-    swaps,
-    assets,
-    newAmounts,
-    tokensOut
-) {
-    return __awaiter(this, void 0, void 0, function* () {
-        for (let i = 0; i < tokensOut.length; i++) {
-            const tokenIndex = assets.indexOf(tokensOut[i]);
-            swaps.forEach((poolSwap) => {
-                if (
-                    poolSwap.assetInIndex === tokenIndex ||
-                    poolSwap.assetOutIndex === tokenIndex
-                )
-                    poolSwap.amount = newAmounts[i].toString();
-            });
-        }
-        // Onchain query
-        const deltas = yield queryBatchSwap(
-            vaultContract,
-            SwapTypes.SwapExactIn,
-            swaps,
-            assets
-        );
-        const amountTokensOut = [];
-        tokensOut.forEach((t) => {
-            const amount = deltas[assets.indexOf(t)];
-            if (amount) amountTokensOut.push(amount);
-            else amountTokensOut.push('0');
-        });
-        return {
-            amountTokensOut,
-            swaps: swaps,
-            assets: assets,
         };
     });
 }
@@ -19425,9 +19362,7 @@ export {
     SwapTypes,
     parseToPoolsDict,
     queryBatchSwapTokensIn,
-    queryBatchSwapTokensInUpdateAmounts,
     queryBatchSwapTokensOut,
-    queryBatchSwapTokensOutUpdateAmounts,
     BPTForTokensZeroPriceImpact as stableBPTForTokensZeroPriceImpact,
     BPTForTokensZeroPriceImpact$1 as weightedBPTForTokensZeroPriceImpact,
 };
