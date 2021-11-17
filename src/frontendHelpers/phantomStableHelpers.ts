@@ -4,6 +4,7 @@ import {
     formatFixed,
     parseFixed,
 } from '@ethersproject/bignumber';
+import { WeiPerEther as ONE } from '@ethersproject/constants';
 import { BigNumber as OldBigNumber, bnum, ZERO } from '../utils/bignumber';
 import { LinearPoolPairData } from '../pools/linearPool/linearPool';
 import { _spotPriceAfterSwapExactTokenInForBPTOut } from '../pools/linearPool/linearMath';
@@ -14,64 +15,35 @@ import { BPTForTokensZeroPriceImpact as stableBPTForTokensZeroPriceImpact } from
 /////////
 
 // Get BPT amount for token amounts with zero-price impact
-// This function is the same regardless of whether we are considering
-// an Add or Remove liquidity operation: The spot prices of BPT in tokens
-// are the same regardless.
+// Amounts are stablecoin amounts (DAI, USDT, USDC)
+// Since the phantom stable pool is actually metastable
+// and their components are bDAI, bUSDT, bUSDC,
+// we transform its balances according to the price rates
+// to obtain units of DAI, USDT, USDC.
 export function BPTForTokensZeroPriceImpact(
-    allBalances: BigNumberish[],
+    allBalances: BigNumberish[], // assuming that BPT balance was removed
     decimals: number[], // This should be [18, 18, 18]
     amounts: BigNumberish[], // This has to have the same length as allBalances
-    bptTotalSupply: BigNumberish,
+    virtualBptSupply: BigNumberish,
     amp: BigNumberish,
     fee: BigNumberish,
-    // linear pools parameters
-    mainBalances: BigNumberish[],
-    mainDecimals: Number[],
-    wrappedBalances: BigNumberish[],
-    wrappedDecimals: Number[],
-    virtualBptSupplies: BigNumberish[],
-    linearFees: BigNumberish[],
-    rates: BigNumberish[],
-    lowerTargets: BigNumberish[],
-    upperTargets: BigNumberish[]
+    rates: BigNumberish[]
 ): BigNumber {
-    // Amounts are stablecoin amounts (DAI, USDT, USDC)
-    // We first transform it into amounts of the
-    // corresponding linear pools' BPTs (bDAI, bUSDT, bUSDC)
-    // using _spotPriceAfterSwapExactTokenInForBPTOut
-    // Then the fee is charged to amounts and the result
-    // of this is passed to the regular stable
-    // BPTForTokensZeroPriceImpact.
+    const amountsAfterFee = amounts.map((amountIn, i) => {
+        const amount = BigNumber.from(amountIn);
+        const feeAmount = amount.mul(fee).div(ONE);
+        return amount.sub(feeAmount);
+    });
 
-    const transformedAmounts = amounts.map((amountIn, i) => {
-        const linearPoolPairData: LinearPoolPairData = {
-            balanceIn: mainBalances[i],
-            decimalsIn: mainDecimals[i],
-            wrappedBalance: wrappedBalances[i],
-            wrappedDecimals: wrappedDecimals[i],
-            virtualBptSupply: virtualBptSupplies[i],
-            swapFee: linearFees[i],
-            rate: rates[i],
-            lowerTarget: lowerTargets[i],
-            upperTarget: upperTargets[i],
-        } as unknown as LinearPoolPairData;
-        let ans = bnum(formatFixed(amountIn, decimals[i]));
-        ans = ans.div(
-            _spotPriceAfterSwapExactTokenInForBPTOut(
-                bnum(0),
-                linearPoolPairData
-            )
-        );
-        const feeAmount = ans.times(formatFixed(fee, 18));
-        ans = ans.minus(feeAmount);
-        return parseFixed(ans.toString(), decimals[i]);
+    const transformedBalances = allBalances.map((balance, i) => {
+        return BigNumber.from(balance).mul(rates[i]).div(ONE);
     });
 
     return stableBPTForTokensZeroPriceImpact(
-        allBalances,
+        transformedBalances,
         decimals,
-        transformedAmounts,
-        bptTotalSupply,
+        amountsAfterFee,
+        virtualBptSupply,
         amp
     );
 }
