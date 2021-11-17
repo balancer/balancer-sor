@@ -1,5 +1,4 @@
 import { Zero } from '@ethersproject/constants';
-import { ZERO } from './utils/bignumber';
 import { SwapInfo } from './types';
 
 export const WETHADDR: { [chainId: number]: string } = {

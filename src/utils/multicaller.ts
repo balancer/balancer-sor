@@ -1,11 +1,11 @@
 import set from 'lodash.set';
 import { Fragment, JsonFragment, Interface, Result } from '@ethersproject/abi';
 import { Contract } from '@ethersproject/contracts';
-import { BaseProvider } from '@ethersproject/providers';
+import { Provider } from '@ethersproject/providers';
 
 export class Multicaller {
     private multiAddress: string;
-    private provider: BaseProvider;
+    private provider: Provider;
     private interface: Interface;
     public options: any = {};
     private calls: [string, string, any][] = [];
@@ -13,7 +13,7 @@ export class Multicaller {
 
     constructor(
         multiAddress: string,
-        provider: BaseProvider,
+        provider: Provider,
         abi: string | Array<Fragment | JsonFragment | string>,
         options = {}
     ) {
