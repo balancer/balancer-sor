@@ -256,7 +256,7 @@ declare class SOR {
     private getBestPaths;
 }
 
-declare function BPTForTokensZeroPriceImpact$1(
+declare function BPTForTokensZeroPriceImpact$2(
     balances: BigNumberish[],
     decimals: number[],
     normalizedWeights: BigNumberish[],
@@ -264,12 +264,22 @@ declare function BPTForTokensZeroPriceImpact$1(
     bptTotalSupply: BigNumberish
 ): BigNumber;
 
-declare function BPTForTokensZeroPriceImpact(
+declare function BPTForTokensZeroPriceImpact$1(
     allBalances: BigNumberish[],
     decimals: number[],
     amounts: BigNumberish[], // This has to have the same lenght as allBalances
     bptTotalSupply: BigNumberish,
     amp: BigNumberish
+): BigNumber;
+
+declare function BPTForTokensZeroPriceImpact(
+    allBalances: BigNumberish[], // assuming that BPT balance was removed
+    decimals: number[], // This should be [18, 18, 18]
+    amounts: BigNumberish[], // This has to have the same length as allBalances
+    virtualBptSupply: BigNumberish,
+    amp: BigNumberish,
+    fee: BigNumberish,
+    rates: BigNumberish[]
 ): BigNumber;
 
 declare function queryBatchSwapTokensIn(
@@ -320,8 +330,9 @@ export {
     SwapV2,
     WeightedPool,
     parseToPoolsDict,
+    BPTForTokensZeroPriceImpact as phantomStableBPTForTokensZeroPriceImpact,
     queryBatchSwapTokensIn,
     queryBatchSwapTokensOut,
-    BPTForTokensZeroPriceImpact as stableBPTForTokensZeroPriceImpact,
-    BPTForTokensZeroPriceImpact$1 as weightedBPTForTokensZeroPriceImpact,
+    BPTForTokensZeroPriceImpact$1 as stableBPTForTokensZeroPriceImpact,
+    BPTForTokensZeroPriceImpact$2 as weightedBPTForTokensZeroPriceImpact,
 };

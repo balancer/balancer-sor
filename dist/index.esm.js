@@ -19102,7 +19102,7 @@ class SOR {
 // This function is the same regardless of whether we are considering
 // an Add or Remove liquidity operation: The spot prices of BPT in tokens
 // are the same regardless.
-function BPTForTokensZeroPriceImpact$1(
+function BPTForTokensZeroPriceImpact$2(
     balances,
     decimals,
     normalizedWeights,
@@ -19141,7 +19141,7 @@ function BPTForTokensZeroPriceImpact$1(
 // This function is the same regardless of whether we are considering
 // an Add or Remove liquidity operation: The spot prices of BPT in tokens
 // are the same regardless.
-function BPTForTokensZeroPriceImpact(
+function BPTForTokensZeroPriceImpact$1(
     allBalances,
     decimals,
     amounts, // This has to have the same lenght as allBalances
@@ -19180,6 +19180,41 @@ function BPTForTokensZeroPriceImpact(
         );
     }, Zero);
     return BigNumber$1.from(amountBPTOut);
+}
+
+/////////
+/// UI Helpers
+/////////
+// Get BPT amount for token amounts with zero-price impact
+// Amounts are stablecoin amounts (DAI, USDT, USDC)
+// Since the phantom stable pool is actually metastable
+// and their components are bDAI, bUSDT, bUSDC,
+// we transform its balances according to the price rates
+// to obtain units of DAI, USDT, USDC.
+function BPTForTokensZeroPriceImpact(
+    allBalances, // assuming that BPT balance was removed
+    decimals, // This should be [18, 18, 18]
+    amounts, // This has to have the same length as allBalances
+    virtualBptSupply,
+    amp,
+    fee,
+    rates
+) {
+    const amountsAfterFee = amounts.map((amountIn, i) => {
+        const amount = BigNumber$1.from(amountIn);
+        const feeAmount = amount.mul(fee).div(WeiPerEther);
+        return amount.sub(feeAmount);
+    });
+    const transformedBalances = allBalances.map((balance, i) => {
+        return BigNumber$1.from(balance).mul(rates[i]).div(WeiPerEther);
+    });
+    return BPTForTokensZeroPriceImpact$1(
+        transformedBalances,
+        decimals,
+        amountsAfterFee,
+        virtualBptSupply,
+        amp
+    );
 }
 
 /*
@@ -19361,9 +19396,10 @@ export {
     SwapPairType,
     SwapTypes,
     parseToPoolsDict,
+    BPTForTokensZeroPriceImpact as phantomStableBPTForTokensZeroPriceImpact,
     queryBatchSwapTokensIn,
     queryBatchSwapTokensOut,
-    BPTForTokensZeroPriceImpact as stableBPTForTokensZeroPriceImpact,
-    BPTForTokensZeroPriceImpact$1 as weightedBPTForTokensZeroPriceImpact,
+    BPTForTokensZeroPriceImpact$1 as stableBPTForTokensZeroPriceImpact,
+    BPTForTokensZeroPriceImpact$2 as weightedBPTForTokensZeroPriceImpact,
 };
 //# sourceMappingURL=index.esm.js.map

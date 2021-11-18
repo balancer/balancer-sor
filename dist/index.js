@@ -19251,7 +19251,7 @@ class SOR {
 // This function is the same regardless of whether we are considering
 // an Add or Remove liquidity operation: The spot prices of BPT in tokens
 // are the same regardless.
-function BPTForTokensZeroPriceImpact$1(
+function BPTForTokensZeroPriceImpact$2(
     balances,
     decimals,
     normalizedWeights,
@@ -19290,7 +19290,7 @@ function BPTForTokensZeroPriceImpact$1(
 // This function is the same regardless of whether we are considering
 // an Add or Remove liquidity operation: The spot prices of BPT in tokens
 // are the same regardless.
-function BPTForTokensZeroPriceImpact(
+function BPTForTokensZeroPriceImpact$1(
     allBalances,
     decimals,
     amounts, // This has to have the same lenght as allBalances
@@ -19329,6 +19329,43 @@ function BPTForTokensZeroPriceImpact(
         );
     }, constants.Zero);
     return bignumber.BigNumber.from(amountBPTOut);
+}
+
+/////////
+/// UI Helpers
+/////////
+// Get BPT amount for token amounts with zero-price impact
+// Amounts are stablecoin amounts (DAI, USDT, USDC)
+// Since the phantom stable pool is actually metastable
+// and their components are bDAI, bUSDT, bUSDC,
+// we transform its balances according to the price rates
+// to obtain units of DAI, USDT, USDC.
+function BPTForTokensZeroPriceImpact(
+    allBalances, // assuming that BPT balance was removed
+    decimals, // This should be [18, 18, 18]
+    amounts, // This has to have the same length as allBalances
+    virtualBptSupply,
+    amp,
+    fee,
+    rates
+) {
+    const amountsAfterFee = amounts.map((amountIn, i) => {
+        const amount = bignumber.BigNumber.from(amountIn);
+        const feeAmount = amount.mul(fee).div(constants.WeiPerEther);
+        return amount.sub(feeAmount);
+    });
+    const transformedBalances = allBalances.map((balance, i) => {
+        return bignumber.BigNumber.from(balance)
+            .mul(rates[i])
+            .div(constants.WeiPerEther);
+    });
+    return BPTForTokensZeroPriceImpact$1(
+        transformedBalances,
+        decimals,
+        amountsAfterFee,
+        virtualBptSupply,
+        amp
+    );
 }
 
 /*
@@ -19505,8 +19542,9 @@ function queryBatchSwapTokensOut(
 
 exports.SOR = SOR;
 exports.parseToPoolsDict = parseToPoolsDict;
+exports.phantomStableBPTForTokensZeroPriceImpact = BPTForTokensZeroPriceImpact;
 exports.queryBatchSwapTokensIn = queryBatchSwapTokensIn;
 exports.queryBatchSwapTokensOut = queryBatchSwapTokensOut;
-exports.stableBPTForTokensZeroPriceImpact = BPTForTokensZeroPriceImpact;
-exports.weightedBPTForTokensZeroPriceImpact = BPTForTokensZeroPriceImpact$1;
+exports.stableBPTForTokensZeroPriceImpact = BPTForTokensZeroPriceImpact$1;
+exports.weightedBPTForTokensZeroPriceImpact = BPTForTokensZeroPriceImpact$2;
 //# sourceMappingURL=index.js.map
