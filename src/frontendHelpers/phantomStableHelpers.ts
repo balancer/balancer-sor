@@ -1,13 +1,5 @@
-import {
-    BigNumber,
-    BigNumberish,
-    formatFixed,
-    parseFixed,
-} from '@ethersproject/bignumber';
+import { BigNumber, BigNumberish } from '@ethersproject/bignumber';
 import { WeiPerEther as ONE } from '@ethersproject/constants';
-import { BigNumber as OldBigNumber, bnum, ZERO } from '../utils/bignumber';
-import { LinearPoolPairData } from '../pools/linearPool/linearPool';
-import { _spotPriceAfterSwapExactTokenInForBPTOut } from '../pools/linearPool/linearMath';
 import { BPTForTokensZeroPriceImpact as stableBPTForTokensZeroPriceImpact } from './stableHelpers';
 
 /////////
