@@ -34,7 +34,7 @@ export function _tokenInForExactTokenOut(
     const exponent = MathSol.divUpFixed(weightOut, weightIn);
     const power = MathSol.powUpFixed(base, exponent);
     const ratio = MathSol.sub(power, MathSol.ONE);
-    let amountIn = MathSol.mulUpFixed(balanceIn, ratio);
+    const amountIn = MathSol.mulUpFixed(balanceIn, ratio);
     return addFee(amountIn, fee);
 }
 
@@ -80,28 +80,35 @@ export function _spotPriceAfterSwapExactTokenInForTokenOut(
     //            (Bo * (-1 + f) * (Bi / (Ai + Bi - Ai * f)) ** ((wi + wo) / wo) * wi)
     //        )
 }
-/*
+
 // PairType = 'token->token'
 // SwapType = 'swapExactOut'
 export function _spotPriceAfterSwapTokenInForExactTokenOut(
-    amount: OldBigNumber,
-    poolPairData: WeightedPoolPairData
-): OldBigNumber {
-    const Bi = parseFloat(
-        formatFixed(poolPairData.balanceIn, poolPairData.decimalsIn)
+    balanceIn: bigint,
+    weightIn: bigint,
+    balanceOut: bigint,
+    weightOut: bigint,
+    amountOut: bigint,
+    fee: bigint
+): bigint {
+    let numerator = MathSol.mulUpFixed(balanceIn, weightOut);
+    const feeComplement = MathSol.complementFixed(fee);
+    const base = MathSol.divUpFixed(
+        balanceOut,
+        MathSol.sub(balanceOut, amountOut)
     );
-    const Bo = parseFloat(
-        formatFixed(poolPairData.balanceOut, poolPairData.decimalsOut)
+    const exponent = MathSol.divUpFixed(weightIn + weightOut, weightIn);
+    numerator = MathSol.mulUpFixed(
+        numerator,
+        MathSol.powUpFixed(base, exponent)
     );
-    const wi = parseFloat(formatFixed(poolPairData.weightIn, 18));
-    const wo = parseFloat(formatFixed(poolPairData.weightOut, 18));
-    const Ao = amount.toNumber();
-    const f = parseFloat(formatFixed(poolPairData.swapFee, 18));
-    return bnum(
-        -(
-            (Bi * (Bo / (-Ao + Bo)) ** ((wi + wo) / wi) * wo) /
-            (Bo * (-1 + f) * wi)
-        )
+    const denominator = MathSol.mulUpFixed(
+        MathSol.mulUpFixed(balanceOut, weightIn),
+        feeComplement
     );
+    return MathSol.divUpFixed(numerator, denominator);
+    //        -(
+    //            (Bi * (Bo / (-Ao + Bo)) ** ((wi + wo) / wi) * wo) /
+    //            (Bo * (-1 + f) * wi)
+    //        )
 }
-*/

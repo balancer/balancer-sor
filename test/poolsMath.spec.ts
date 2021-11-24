@@ -1,13 +1,7 @@
 import * as weighted from '../src/poolsMath/weighted';
-import * as weightedMath from '../src/pools/weightedPool/weightedMath';
 import * as stable from '../src/poolsMath/stable';
 import * as SDK from '@georgeroman/balancer-v2-pools';
-import {
-    BigNumber as OldBigNumber,
-    bnum,
-    scale,
-    ZERO,
-} from '../src/utils/bignumber';
+import { BigNumber as OldBigNumber, bnum } from '../src/utils/bignumber';
 import { assert } from 'chai';
 import { MathSol } from '../src/poolsMath/basicOperations';
 
@@ -60,8 +54,23 @@ describe('poolsMath: numeric functions using bigint', () => {
                 30,
                 0.003,
                 0.01,
-                0.001,
+                0.00001,
                 true
+            );
+        });
+        it('_spotPriceAfterSwapTokenInForExactTokenOut', () => {
+            checkDerivative(
+                weighted._tokenInForExactTokenOut,
+                weighted._spotPriceAfterSwapTokenInForExactTokenOut,
+                1000,
+                1,
+                7000,
+                2,
+                30,
+                0.003,
+                0.01,
+                0.00001,
+                false
             );
         });
     });
@@ -72,7 +81,7 @@ describe('poolsMath: numeric functions using bigint', () => {
                 stable._exactTokenInForTokenOut,
                 SDK.StableMath._calcOutGivenIn,
                 1000,
-                [1000, 1000, 1000],
+                [1000, 3000, 2000],
                 0,
                 1,
                 10,
@@ -89,7 +98,7 @@ describe('poolsMath: numeric functions using bigint', () => {
                 stable._tokenInForExactTokenOut,
                 SDK.StableMath._calcInGivenOut,
                 1000,
-                [1000, 1000, 1000],
+                [1000, 3000, 2000],
                 0,
                 1,
                 10,
@@ -128,15 +137,15 @@ function getBothValuesWeighted(
     amount: number,
     fee: number
 ): { result: bigint; SDKResult: OldBigNumber } {
-    let result = SORFunction(
-        BigInt(balanceIn * 10 ** 18),
-        BigInt(weightIn * 10 ** 18),
-        BigInt(balanceOut * 10 ** 18),
-        BigInt(weightOut * 10 ** 18),
-        BigInt(amount * 10 ** 18),
-        BigInt(fee * 10 ** 18)
+    const result = SORFunction(
+        s(balanceIn),
+        s(weightIn),
+        s(balanceOut),
+        s(weightOut),
+        s(amount),
+        s(fee)
     );
-    let SDKResult = SDKFunction(
+    const SDKResult = SDKFunction(
         bnum(balanceIn * 10 ** 18),
         bnum(weightIn * 10 ** 18),
         bnum(balanceOut * 10 ** 18),
@@ -171,15 +180,15 @@ function getBothValuesStable(
     amount: number,
     fee: number
 ): { result: bigint; SDKResult: OldBigNumber } {
-    let result = SORFunction(
+    const result = SORFunction(
         BigInt(amplificationParameter),
-        balances.map((amount) => BigInt(amount * 10 ** 18)),
+        balances.map((amount) => s(amount)),
         tokenIndexIn,
         tokenIndexOut,
-        BigInt(amount * 10 ** 18),
-        BigInt(fee * 10 ** 18)
+        s(amount),
+        s(fee)
     );
-    let SDKResult = SDKFunction(
+    const SDKResult = SDKFunction(
         bnum(amplificationParameter),
         balances.map((amount) => bnum(amount * 10 ** 18)),
         tokenIndexIn,
