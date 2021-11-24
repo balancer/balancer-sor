@@ -1,4 +1,5 @@
 import * as weighted from '../src/poolsMath/weighted';
+import * as weightedMath from '../src/pools/weightedPool/weightedMath';
 import * as stable from '../src/poolsMath/stable';
 import * as SDK from '@georgeroman/balancer-v2-pools';
 import {
@@ -8,6 +9,7 @@ import {
     ZERO,
 } from '../src/utils/bignumber';
 import { assert } from 'chai';
+import { MathSol } from '../src/poolsMath/basicOperations';
 
 describe('poolsMath: numeric functions using bigint', () => {
     context('weighted pools', () => {
@@ -44,6 +46,22 @@ describe('poolsMath: numeric functions using bigint', () => {
                 result.toString(),
                 SDKResult.toString(),
                 'wrong result'
+            );
+        });
+
+        it('_spotPriceAfterSwapExactTokenInForTokenOut', () => {
+            checkDerivative(
+                weighted._exactTokenInForTokenOut,
+                weighted._spotPriceAfterSwapExactTokenInForTokenOut,
+                1000,
+                1,
+                7000,
+                2,
+                30,
+                0.003,
+                0.01,
+                0.001,
+                true
             );
         });
     });
@@ -170,4 +188,65 @@ function getBothValuesStable(
         bnum(fee * 10 ** 18)
     );
     return { result, SDKResult };
+}
+
+function checkDerivative(
+    fn: any,
+    der: any,
+    num_balanceIn: number,
+    num_weightIn: number,
+    num_balanceOut: number,
+    num_weightOut: number,
+    num_amount: number,
+    num_fee: number,
+    num_delta: number,
+    num_error: number,
+    inverse = false
+) {
+    const balanceIn = s(num_balanceIn);
+    const weightIn = s(num_weightIn);
+    const balanceOut = s(num_balanceOut);
+    const weightOut = s(num_weightOut);
+    const amount = s(num_amount);
+    const fee = s(num_fee);
+    const delta = s(num_delta);
+    const error = s(num_error);
+
+    let incrementalQuotient = MathSol.divUpFixed(
+        MathSol.sub(
+            fn(
+                balanceIn,
+                weightIn,
+                balanceOut,
+                weightOut,
+                MathSol.add(amount, delta),
+                fee
+            ),
+            fn(balanceIn, weightIn, balanceOut, weightOut, amount, fee)
+        ),
+        delta
+    );
+    if (inverse)
+        incrementalQuotient = MathSol.divUpFixed(
+            MathSol.ONE,
+            incrementalQuotient
+        );
+    const der_ans = der(
+        balanceIn,
+        weightIn,
+        balanceOut,
+        weightOut,
+        amount,
+        fee
+    );
+    assert.approximately(
+        Number(MathSol.divUpFixed(incrementalQuotient, der_ans)),
+        Number(MathSol.ONE),
+        Number(error),
+        'wrong result'
+    );
+}
+
+function s(a: number): bigint {
+    return BigInt(a * 10 ** 18);
 }

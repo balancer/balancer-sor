@@ -30,9 +30,6 @@ export function _exactTokenInForTokenOut(
         tokenIndexOut
     );
 
-    // No need to use checked arithmetic since `tokenAmountIn` was actually added to the same balance right before
-    // calling `_getTokenBalanceGivenInvariantAndAllOtherBalances` which doesn't alter the balances array.
-    // balances[tokenIndexIn] = balances[tokenIndexIn] - tokenAmountIn;
     return balances[tokenIndexOut] - finalBalanceOut - BigInt(1);
 }
 
@@ -200,4 +197,63 @@ function subtractFee(amount: bigint, fee: bigint): bigint {
 
 function addFee(amount: bigint, fee: bigint): bigint {
     return MathSol.divUpFixed(amount, MathSol.complementFixed(fee));
+}
+
+/* 
+Flow of calculations:
+amountBPTOut -> newInvariant -> (amountInProportional, amountInAfterFee) ->
+amountInPercentageExcess -> amountIn
+*/
+export function _tokenInForExactBPTOut( // _calcTokenInGivenExactBptOut
+    amp: bigint,
+    balances: bigint[],
+    tokenIndexIn: number,
+    bptAmountOut: bigint,
+    bptTotalSupply: bigint,
+    fee: bigint
+): bigint {
+    // Token in, so we round up overall.
+    const currentInvariant = _calculateInvariant(amp, balances, true);
+    const newInvariant = MathSol.mulUpFixed(
+        MathSol.divUp(
+            MathSol.add(bptTotalSupply, bptAmountOut),
+            bptTotalSupply
+        ),
+        currentInvariant
+    );
+
+    // Calculate amount in without fee.
+    const newBalanceTokenIndex =
+        _getTokenBalanceGivenInvariantAndAllOtherBalances(
+            amp,
+            balances,
+            newInvariant,
+            tokenIndexIn
+        );
+    const amountInWithoutFee = MathSol.sub(
+        newBalanceTokenIndex,
+        balances[tokenIndexIn]
+    );
+
+    // First calculate the sum of all token balances, which will be used to calculate
+    // the current weight of each token
+    let sumBalances = BigInt(0);
+    for (let i = 0; i < balances.length; i++) {
+        sumBalances = MathSol.add(sumBalances, balances[i]);
+    }
+
+    // We can now compute how much extra balance is being deposited
+    // and used in virtual swaps, and charge swap fees accordingly.
+    const currentWeight = MathSol.divDown(balances[tokenIndexIn], sumBalances);
+    const taxablePercentage = MathSol.complementFixed(currentWeight);
+    const taxableAmount = MathSol.mulUpFixed(
+        amountInWithoutFee,
+        taxablePercentage
+    );
+    const nonTaxableAmount = MathSol.sub(amountInWithoutFee, taxableAmount);
+
+    return MathSol.add(
+        nonTaxableAmount,
+        MathSol.divUp(taxableAmount, MathSol.sub(MathSol.ONE, fee))
+    );
 }
