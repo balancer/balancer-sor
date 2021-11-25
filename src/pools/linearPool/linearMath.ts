@@ -32,7 +32,7 @@ export function _tokenInForExactTokenOut(
 
 // PairType = 'token->BPT'
 // SwapType = 'swapExactIn'
-export function _exactTokenInForBPTOut(
+export function _exactMainTokenInForBPTOut(
     amount: BigNumber,
     poolPairData: LinearPoolPairData
 ): BigNumber {
@@ -74,7 +74,7 @@ export function _exactTokenInForBPTOut(
 
 // PairType = 'token->BPT'
 // SwapType = 'swapExactOut'
-export function _tokenInForExactBPTOut(
+export function _mainTokenInForExactBPTOut(
     amount: BigNumber,
     poolPairData: LinearPoolPairData
 ): BigNumber {
@@ -116,7 +116,7 @@ export function _tokenInForExactBPTOut(
 
 // PairType = 'BPT->token'
 // SwapType = 'swapExactIn'
-export function _BPTInForExactTokenOut(
+export function _BPTInForExactMainTokenOut(
     amount: BigNumber,
     poolPairData: LinearPoolPairData
 ): BigNumber {
@@ -154,7 +154,7 @@ export function _BPTInForExactTokenOut(
 
 // PairType = 'BPT->token'
 // SwapType = 'swapExactOut'
-export function _exactBPTInForTokenOut(
+export function _exactBPTInForMainTokenOut(
     amount: BigNumber,
     poolPairData: LinearPoolPairData
 ): BigNumber {
