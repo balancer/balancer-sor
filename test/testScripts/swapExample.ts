@@ -37,7 +37,7 @@ export const SUBGRAPH_URLS = {
     [Network.GOERLI]:
         'https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-goerli-v2',
     [Network.KOVAN]:
-        'https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-kovan-v2', // 'https://api.thegraph.com/subgraphs/name/destiner/balancer-kovan-v2',
+        'https://api.thegraph.com/subgraphs/name/destiner/balancer-kovan-v2',
     [Network.POLYGON]:
         'https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-polygon-v2',
     [Network.ARBITRUM]: `https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-arbitrum-v2`,
@@ -143,6 +143,11 @@ export const ADDRESSES = {
             address: '0xe8191aacfcdb32260cda25830dc6c9342142f310',
             decimals: 6,
             symbol: 'aUSDT',
+        },
+        aUSDC: {
+            address: '0x0fbddc06a4720408a2f5eb78e62bc31ac6e2a3c4',
+            decimals: 6,
+            symbol: 'aUSDC',
         },
         bUSDT: {
             address: '0x6a8c3239695613c0710dc971310b36f9b81e115e',
@@ -588,11 +593,11 @@ async function simpleSwap() {
     const poolsSource = SUBGRAPH_URLS[networkId];
     // const poolsSource = require('../testData/testPools/gusdBug.json');
     // Update pools list with most recent onchain balances
-    const queryOnChain = true;
-    const tokenIn = ADDRESSES[networkId].BAL;
-    const tokenOut = ADDRESSES[networkId].WETH;
+    const queryOnChain = false;
+    const tokenIn = ADDRESSES[networkId].STABAL3;
+    const tokenOut = ADDRESSES[networkId].aUSDC;
     const swapType = SwapTypes.SwapExactIn;
-    const swapAmount = parseFixed('0.001', 18);
+    const swapAmount = parseFixed('1000', 18);
     const executeTrade = true;
 
     const provider = new JsonRpcProvider(PROVIDER_URLS[networkId]);
