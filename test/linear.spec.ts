@@ -58,14 +58,14 @@ describe('linear pool tests', () => {
             const tokenIn = DAI;
             const tokenOut = bDAI;
             const poolSG = cloneDeep(singleLinear).pools[0];
-            testParsePool(poolSG, tokenIn, tokenOut, PairTypes.TokenToBpt);
+            testParsePool(poolSG, tokenIn, tokenOut, PairTypes.MainTokenToBpt);
         });
 
         it(`should correctly parse phantomBpt > token`, async () => {
             const tokenIn = bUSDC;
             const tokenOut = USDC;
             const poolSG = cloneDeep(smallLinear).pools[4];
-            testParsePool(poolSG, tokenIn, tokenOut, PairTypes.BptToToken);
+            testParsePool(poolSG, tokenIn, tokenOut, PairTypes.BptToMainToken);
         });
 
         it(`should correctly parse token > token`, async () => {
@@ -73,6 +73,30 @@ describe('linear pool tests', () => {
             const tokenOut = aDAI;
             const poolSG = cloneDeep(singleLinear).pools[0];
             testParsePool(poolSG, tokenIn, tokenOut, PairTypes.TokenToToken);
+        });
+
+        it(`should correctly parse wrappedToken > phantomBpt`, async () => {
+            const tokenIn = aDAI;
+            const tokenOut = bDAI;
+            const poolSG = cloneDeep(singleLinear).pools[0];
+            testParsePool(
+                poolSG,
+                tokenIn,
+                tokenOut,
+                PairTypes.WrappedTokenToBpt
+            );
+        });
+
+        it(`should correctly parse phantomBpt > wrappedToken`, async () => {
+            const tokenIn = bDAI;
+            const tokenOut = aDAI;
+            const poolSG = cloneDeep(singleLinear).pools[0];
+            testParsePool(
+                poolSG,
+                tokenIn,
+                tokenOut,
+                PairTypes.BptToWrappedToken
+            );
         });
     });
 
@@ -514,62 +538,110 @@ describe('linear pool tests', () => {
     });
 
     context('SOR Full Swaps', () => {
-        context('Linear Swaps', () => {
-            it('MainToken>BPT, SwapExactIn', async () => {
-                const returnAmount = await testFullSwap(
-                    USDT.address,
-                    LINEAR_AUSDT.address,
-                    SwapTypes.SwapExactIn,
-                    parseFixed('25.001542', USDT.decimals),
-                    kovanPools.pools
-                );
-                expect(returnAmount).to.eq('25004042400437802798');
+        context('Linear Pool Swaps', () => {
+            context('MainToken<>BPT', () => {
+                it('MainToken>BPT, SwapExactIn', async () => {
+                    const returnAmount = await testFullSwap(
+                        USDT.address,
+                        LINEAR_AUSDT.address,
+                        SwapTypes.SwapExactIn,
+                        parseFixed('25.001542', USDT.decimals),
+                        kovanPools.pools
+                    );
+                    expect(returnAmount).to.eq('25004042400437802798');
+                });
+
+                it('MainToken>BPT, SwapExactOut', async () => {
+                    const returnAmount = await testFullSwap(
+                        USDT.address,
+                        LINEAR_AUSDT.address,
+                        SwapTypes.SwapExactOut,
+                        parseFixed('0.981028', LINEAR_AUSDT.decimals),
+                        kovanPools.pools
+                    );
+                    expect(returnAmount).to.eq('980930');
+                });
+
+                it('BPT>MainToken, SwapExactIn', async () => {
+                    const returnAmount = await testFullSwap(
+                        LINEAR_AUSDT.address,
+                        USDT.address,
+                        SwapTypes.SwapExactIn,
+                        parseFixed('26.0872140', LINEAR_AUSDT.decimals),
+                        kovanPools.pools
+                    );
+                    expect(returnAmount).to.eq('26084605');
+                });
+
+                it('BPT>MainToken, SwapExactOut', async () => {
+                    const returnAmount = await testFullSwap(
+                        LINEAR_AUSDT.address,
+                        USDT.address,
+                        SwapTypes.SwapExactOut,
+                        parseFixed('71.204293', USDT.decimals),
+                        kovanPools.pools
+                    );
+                    expect(returnAmount).to.eq('71211414130584291114');
+                });
+
+                it('MainToken>BPT, SwapExactIn, No MainToken Initial Balance', async () => {
+                    const pools = cloneDeep(kovanPools.pools);
+                    pools[3].tokens[0].priceRate = '1.151626716668872399';
+                    const returnAmount = await testFullSwap(
+                        DAI.address,
+                        LINEAR_ADAI.address,
+                        SwapTypes.SwapExactIn,
+                        parseFixed('491.23098', DAI.decimals),
+                        pools
+                    );
+                    expect(returnAmount).to.eq('491280107230911728741');
+                });
             });
 
-            it('MainToken>BPT, SwapExactOut', async () => {
-                const returnAmount = await testFullSwap(
-                    USDT.address,
-                    LINEAR_AUSDT.address,
-                    SwapTypes.SwapExactOut,
-                    parseFixed('0.981028', LINEAR_AUSDT.decimals),
-                    kovanPools.pools
-                );
-                expect(returnAmount).to.eq('980930');
-            });
+            context('WrappedToken<>BPT', () => {
+                it('WrappedToken>BPT, SwapExactIn', async () => {
+                    const returnAmount = await testFullSwap(
+                        aUSDT.address,
+                        LINEAR_AUSDT.address,
+                        SwapTypes.SwapExactIn,
+                        parseFixed('25.001542', aUSDT.decimals),
+                        kovanPools.pools
+                    );
+                    expect(returnAmount).to.eq('25018561485974317182');
+                });
 
-            it('BPT>MainToken, SwapExactIn', async () => {
-                const returnAmount = await testFullSwap(
-                    LINEAR_AUSDT.address,
-                    USDT.address,
-                    SwapTypes.SwapExactIn,
-                    parseFixed('26.0872140', LINEAR_AUSDT.decimals),
-                    kovanPools.pools
-                );
-                expect(returnAmount).to.eq('26084605');
-            });
+                it('WrappedToken>BPT, SwapExactOut', async () => {
+                    const returnAmount = await testFullSwap(
+                        aUSDT.address,
+                        LINEAR_AUSDT.address,
+                        SwapTypes.SwapExactOut,
+                        parseFixed('0.981028', LINEAR_AUSDT.decimals),
+                        kovanPools.pools
+                    );
+                    expect(returnAmount).to.eq('980360');
+                });
 
-            it('BPT>MainToken, SwapExactOut', async () => {
-                const returnAmount = await testFullSwap(
-                    LINEAR_AUSDT.address,
-                    USDT.address,
-                    SwapTypes.SwapExactOut,
-                    parseFixed('71.204293', USDT.decimals),
-                    kovanPools.pools
-                );
-                expect(returnAmount).to.eq('71211414130584291114');
-            });
+                it('BPT>WrappedToken, SwapExactIn', async () => {
+                    const returnAmount = await testFullSwap(
+                        LINEAR_AUSDT.address,
+                        aUSDT.address,
+                        SwapTypes.SwapExactIn,
+                        parseFixed('26.0872140', LINEAR_AUSDT.decimals),
+                        kovanPools.pools
+                    );
+                    expect(returnAmount).to.eq('26069467');
+                });
 
-            it('MainToken>BPT, SwapExactIn, No MainToken Initial Balance', async () => {
-                const pools = cloneDeep(kovanPools.pools);
-                pools[3].tokens[0].priceRate = '1.151626716668872399';
-                const returnAmount = await testFullSwap(
-                    DAI.address,
-                    LINEAR_ADAI.address,
-                    SwapTypes.SwapExactIn,
-                    parseFixed('491.23098', DAI.decimals),
-                    pools
-                );
-                expect(returnAmount).to.eq('491280107230911728741');
+                it('BPT>MainToken, SwapExactOut', async () => {
+                    const returnAmount = await testFullSwap(
+                        LINEAR_AUSDT.address,
+                        aUSDT.address,
+                        SwapTypes.SwapExactOut,
+                        parseFixed('71.204293', aUSDT.decimals),
+                        kovanPools.pools
+                    );
+                    expect(returnAmount).to.eq('71252764000000000000');
+                });
             });
         });
 
