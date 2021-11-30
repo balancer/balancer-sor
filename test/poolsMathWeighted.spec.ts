@@ -1,5 +1,4 @@
 import * as weighted from '../src/poolsMath/weighted';
-import * as stable from '../src/poolsMath/stable';
 import * as SDK from '@georgeroman/balancer-v2-pools';
 import { BigNumber as OldBigNumber, bnum } from '../src/utils/bignumber';
 import { assert } from 'chai';
@@ -44,7 +43,7 @@ describe('poolsMath: numeric functions using bigint', () => {
         });
 
         it('_spotPriceAfterSwapExactTokenInForTokenOut', () => {
-            checkDerivative(
+            checkDerivative_weighted(
                 weighted._exactTokenInForTokenOut,
                 weighted._spotPriceAfterSwapExactTokenInForTokenOut,
                 1000,
@@ -59,7 +58,7 @@ describe('poolsMath: numeric functions using bigint', () => {
             );
         });
         it('_spotPriceAfterSwapTokenInForExactTokenOut', () => {
-            checkDerivative(
+            checkDerivative_weighted(
                 weighted._tokenInForExactTokenOut,
                 weighted._spotPriceAfterSwapTokenInForExactTokenOut,
                 1000,
@@ -71,43 +70,6 @@ describe('poolsMath: numeric functions using bigint', () => {
                 0.01,
                 0.00001,
                 false
-            );
-        });
-    });
-
-    context('stable pools', () => {
-        it('_exactTokenInForTokenOut', () => {
-            const { result, SDKResult } = getBothValuesStable(
-                stable._exactTokenInForTokenOut,
-                SDK.StableMath._calcOutGivenIn,
-                1000,
-                [1000, 3000, 2000],
-                0,
-                1,
-                10,
-                0.04
-            );
-            assert.equal(
-                result.toString(),
-                SDKResult.toString(),
-                'wrong result'
-            );
-        });
-        it('_tokenInForExactTokenOut', () => {
-            const { result, SDKResult } = getBothValuesStable(
-                stable._tokenInForExactTokenOut,
-                SDK.StableMath._calcInGivenOut,
-                1000,
-                [1000, 3000, 2000],
-                0,
-                1,
-                10,
-                0.04
-            );
-            assert.equal(
-                result.toString(),
-                SDKResult.toString(),
-                'wrong result'
             );
         });
     });
@@ -156,50 +118,7 @@ function getBothValuesWeighted(
     return { result, SDKResult };
 }
 
-function getBothValuesStable(
-    SORFunction: (
-        amplificationParameter: bigint,
-        balances: bigint[],
-        tokenIndexIn: number,
-        tokenIndexOut: number,
-        amount: bigint,
-        fee: bigint
-    ) => bigint,
-    SDKFunction: (
-        amplificationParameter: OldBigNumber,
-        balances: OldBigNumber[],
-        tokenIndexIn: number,
-        tokenIndexOut: number,
-        tokenAmount: OldBigNumber,
-        swapFeePercentage?: OldBigNumber
-    ) => OldBigNumber,
-    amplificationParameter: number,
-    balances: number[],
-    tokenIndexIn: number,
-    tokenIndexOut: number,
-    amount: number,
-    fee: number
-): { result: bigint; SDKResult: OldBigNumber } {
-    const result = SORFunction(
-        BigInt(amplificationParameter),
-        balances.map((amount) => s(amount)),
-        tokenIndexIn,
-        tokenIndexOut,
-        s(amount),
-        s(fee)
-    );
-    const SDKResult = SDKFunction(
-        bnum(amplificationParameter),
-        balances.map((amount) => bnum(amount * 10 ** 18)),
-        tokenIndexIn,
-        tokenIndexOut,
-        bnum(amount * 10 ** 18),
-        bnum(fee * 10 ** 18)
-    );
-    return { result, SDKResult };
-}
-
-function checkDerivative(
+function checkDerivative_weighted(
     fn: any,
     der: any,
     num_balanceIn: number,

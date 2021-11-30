@@ -6,7 +6,7 @@ const AMP_PRECISION = BigInt(1e3);
 // SwapType = 'swapExactIn'
 // Would it be better to call this _calcOutGivenIn?
 export function _exactTokenInForTokenOut(
-    amplificationParameter: bigint,
+    amp: bigint,
     balances: bigint[],
     tokenIndexIn: number,
     tokenIndexOut: number,
@@ -15,41 +15,32 @@ export function _exactTokenInForTokenOut(
 ): bigint {
     amountIn = subtractFee(amountIn, fee);
     // Given that we need to have a greater final balance out, the invariant needs to be rounded up
-    const invariant = _calculateInvariant(
-        amplificationParameter,
-        balances,
-        true
-    );
+    const invariant = _calculateInvariant(amp, balances, true);
 
     const initBalance = balances[tokenIndexIn];
     balances[tokenIndexIn] = initBalance + amountIn;
     const finalBalanceOut = _getTokenBalanceGivenInvariantAndAllOtherBalances(
-        amplificationParameter,
+        amp,
         balances,
         invariant,
         tokenIndexOut
     );
-
     return balances[tokenIndexOut] - finalBalanceOut - BigInt(1);
 }
 
 export function _tokenInForExactTokenOut(
-    amplificationParameter: bigint,
+    amp: bigint,
     balances: bigint[],
     tokenIndexIn: number,
     tokenIndexOut: number,
     amountOut: bigint,
     fee: bigint
 ): bigint {
-    const invariant = _calculateInvariant(
-        amplificationParameter,
-        balances,
-        true
-    );
+    const invariant = _calculateInvariant(amp, balances, true);
     balances[tokenIndexOut] = MathSol.sub(balances[tokenIndexOut], amountOut);
 
     const finalBalanceIn = _getTokenBalanceGivenInvariantAndAllOtherBalances(
-        amplificationParameter,
+        amp,
         balances,
         invariant,
         tokenIndexIn
@@ -64,7 +55,7 @@ export function _tokenInForExactTokenOut(
 }
 
 function _calculateInvariant(
-    amplificationParameter: bigint,
+    amp: bigint,
     balances: bigint[],
     roundUp: boolean
 ): bigint {
@@ -90,7 +81,7 @@ function _calculateInvariant(
 
     let prevInvariant = BZERO;
     let invariant = sum;
-    const ampTimesTotal = amplificationParameter * BigInt(numTokens);
+    const ampTimesTotal = amp * BigInt(numTokens);
 
     for (let i = 0; i < 255; i++) {
         let P_D = balances[0] * BigInt(numTokens);
@@ -132,14 +123,14 @@ function _calculateInvariant(
 }
 
 function _getTokenBalanceGivenInvariantAndAllOtherBalances(
-    amplificationParameter: bigint,
+    amp: bigint,
     balances: bigint[],
     invariant: bigint,
     tokenIndex: number
 ): bigint {
     // Rounds result up overall
 
-    const ampTimesTotal = amplificationParameter * BigInt(balances.length);
+    const ampTimesTotal = amp * BigInt(balances.length);
     let sum = balances[0];
     let P_D = balances[0] * BigInt(balances.length);
     for (let j = 1; j < balances.length; j++) {
@@ -199,6 +190,7 @@ function addFee(amount: bigint, fee: bigint): bigint {
     return MathSol.divUpFixed(amount, MathSol.complementFixed(fee));
 }
 
+// Untested:
 /* 
 Flow of calculations:
 amountBPTOut -> newInvariant -> (amountInProportional, amountInAfterFee) ->
@@ -256,4 +248,136 @@ export function _tokenInForExactBPTOut( // _calcTokenInGivenExactBptOut
         nonTaxableAmount,
         MathSol.divUp(taxableAmount, MathSol.sub(MathSol.ONE, fee))
     );
+}
+
+/////////
+/// SpotPriceAfterSwap
+/////////
+
+// PairType = 'token->token'
+// SwapType = 'swapExactIn'
+export function _spotPriceAfterSwapExactTokenInForTokenOut(
+    amp: bigint,
+    balances: bigint[],
+    tokenIndexIn: number,
+    tokenIndexOut: number,
+    amountIn: bigint,
+    fee: bigint
+): bigint {
+    const feeComplement = MathSol.complementFixed(fee);
+    const balancesCopy = [...balances];
+    balances[tokenIndexIn] = MathSol.add(
+        balances[tokenIndexIn],
+        MathSol.mulUpFixed(amountIn, feeComplement)
+    );
+    balances[tokenIndexOut] = MathSol.sub(
+        balances[tokenIndexOut],
+        _exactTokenInForTokenOut(
+            amp,
+            balancesCopy,
+            tokenIndexIn,
+            tokenIndexOut,
+            amountIn,
+            fee
+        )
+    );
+    let ans = _poolDerivatives(
+        amp,
+        balances,
+        tokenIndexIn,
+        tokenIndexOut,
+        true,
+        false
+    );
+    ans = MathSol.divDownFixed(
+        MathSol.ONE,
+        MathSol.mulDownFixed(ans, feeComplement)
+    );
+    return ans;
+}
+
+// PairType = 'token->token'
+// SwapType = 'swapExactOut'
+export function _spotPriceAfterSwapTokenInForExactTokenOut(
+    amp: bigint,
+    balances: bigint[],
+    tokenIndexIn: number,
+    tokenIndexOut: number,
+    amountOut: bigint,
+    fee: bigint
+): BigInt {
+    const balancesCopy = [...balances];
+    let _in = _tokenInForExactTokenOut(
+        amp,
+        balancesCopy,
+        tokenIndexIn,
+        tokenIndexOut,
+        amountOut,
+        fee
+    );
+    balances[tokenIndexIn] = balances[tokenIndexIn] + _in;
+    balances[tokenIndexOut] = MathSol.sub(balances[tokenIndexOut], amountOut);
+    let ans = _poolDerivatives(
+        amp,
+        balances,
+        tokenIndexIn,
+        tokenIndexOut,
+        true,
+        true
+    );
+    const feeComplement = MathSol.complementFixed(fee);
+    ans = MathSol.divUpFixed(
+        MathSol.ONE,
+        MathSol.mulUpFixed(ans, feeComplement)
+    );
+    return ans;
+}
+
+export function _poolDerivatives(
+    amp: bigint,
+    balances: bigint[],
+    tokenIndexIn: number,
+    tokenIndexOut: number,
+    is_first_derivative: boolean,
+    wrt_out: boolean
+): bigint {
+    let totalCoins = balances.length;
+    let D = _calculateInvariant(amp, balances, true);
+    let S = BigInt(0);
+    for (let i = 0; i < totalCoins; i++) {
+        if (i != tokenIndexIn && i != tokenIndexOut) {
+            S += balances[i];
+        }
+    }
+    let x = balances[tokenIndexIn];
+    let y = balances[tokenIndexOut];
+    let a = amp * BigInt(totalCoins);
+    let b = a * (S - D) + D * AMP_PRECISION;
+    let twoaxy = BigInt(2) * a * x * y;
+    let partial_x = twoaxy + a * y * y + b * y;
+    let partial_y = twoaxy + a * x * x + b * x;
+    let ans: bigint;
+    if (is_first_derivative) {
+        ans = MathSol.divUpFixed(partial_x, partial_y);
+    } else {
+        // Untested case:
+        let partial_xx = BigInt(2) * a * y;
+        let partial_yy = BigInt(2) * a * x;
+        let partial_xy = partial_xx + partial_yy + b; // AMP_PRECISION missing
+        let numerator: bigint;
+        numerator =
+            BigInt(2) * partial_x * partial_y * partial_xy -
+            partial_xx * partial_y * partial_y +
+            partial_yy * partial_x * partial_x;
+        let denominator = partial_x * partial_x * partial_y;
+        ans = MathSol.divUpFixed(numerator, denominator); // change the order to
+        if (wrt_out) {
+            // directly use integer operations
+            ans = MathSol.mulUpFixed(
+                MathSol.mulUpFixed(ans, partial_y),
+                partial_x
+            );
+        }
+    }
+    return ans;
 }
