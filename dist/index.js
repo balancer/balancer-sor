@@ -14189,6 +14189,46 @@ class Multicaller {
     }
 }
 
+var aTokenRateProvider = [
+    {
+        inputs: [
+            {
+                internalType: 'contract IStaticAToken',
+                name: '_waToken',
+                type: 'address',
+            },
+        ],
+        stateMutability: 'nonpayable',
+        type: 'constructor',
+    },
+    {
+        inputs: [],
+        name: 'getRate',
+        outputs: [
+            {
+                internalType: 'uint256',
+                name: '',
+                type: 'uint256',
+            },
+        ],
+        stateMutability: 'view',
+        type: 'function',
+    },
+    {
+        inputs: [],
+        name: 'waToken',
+        outputs: [
+            {
+                internalType: 'contract IStaticAToken',
+                name: '',
+                type: 'address',
+            },
+        ],
+        stateMutability: 'view',
+        type: 'function',
+    },
+];
+
 var weightedPoolAbi = [
     {
         inputs: [
@@ -18134,6 +18174,7 @@ function getOnChainBalances(
             Object.fromEntries(
                 [
                     ...vaultAbi,
+                    ...aTokenRateProvider,
                     ...weightedPoolAbi,
                     ...stablePoolAbi,
                     ...elementPoolAbi,
@@ -18143,6 +18184,7 @@ function getOnChainBalances(
         );
         const multiPool = new Multicaller(multiAddress, provider, abis);
         subgraphPools.forEach((pool) => {
+            var _a;
             multiPool.call(
                 `${pool.id}.poolTokens`,
                 vaultAddress,
@@ -18203,11 +18245,26 @@ function getOnChainBalances(
                     pool.address,
                     'getTargets'
                 );
-                multiPool.call(
-                    `${pool.id}.wrappedTokenRateCache`,
-                    pool.address,
-                    'getWrappedTokenRateCache'
-                );
+                if (pool.wrappedIndex !== undefined) {
+                    // We want to find the priceRate provider for the wrappedToken
+                    const wrappedToken = pool.tokensList[pool.wrappedIndex];
+                    const provider =
+                        (_a = pool.priceRateProviders) === null || _a === void 0
+                            ? void 0
+                            : _a.find((provider) =>
+                                  isSameAddress(
+                                      provider.token.address,
+                                      wrappedToken
+                                  )
+                              );
+                    if (provider !== undefined) {
+                        multiPool.call(
+                            `${pool.id}.rate`,
+                            provider.address,
+                            'getRate'
+                        );
+                    }
+                }
             }
         });
         let pools = {};
@@ -18247,25 +18304,19 @@ function getOnChainBalances(
                         subgraphPools[index].upperTarget =
                             bignumber.formatFixed(onchainData.targets[1], 18);
                     }
-                    if (!onchainData.wrappedTokenRateCache) {
+                    const wrappedIndex = subgraphPools[index].wrappedIndex;
+                    if (
+                        wrappedIndex === undefined ||
+                        onchainData.rate === undefined
+                    ) {
                         console.error(
-                            `Linear Pool Missing WrappedTokenRateCache: ${poolId}`
+                            `Linear Pool Missing WrappedIndex or PriceRate: ${poolId}`
                         );
                         return;
-                    } else {
-                        const wrappedIndex = subgraphPools[index].wrappedIndex;
-                        if (wrappedIndex === undefined) {
-                            console.error(
-                                `Linear Pool Missing WrappedIndex: ${poolId}`
-                            );
-                            return;
-                        }
-                        subgraphPools[index].tokens[wrappedIndex].priceRate =
-                            bignumber.formatFixed(
-                                onchainData.wrappedTokenRateCache[0],
-                                18
-                            );
                     }
+                    // Update priceRate of wrappedToken
+                    subgraphPools[index].tokens[wrappedIndex].priceRate =
+                        bignumber.formatFixed(onchainData.rate, 18);
                 }
                 subgraphPools[index].swapFee = bignumber.formatFixed(
                     swapFee,
@@ -18332,6 +18383,12 @@ function fetchSubgraphPools(subgraphUrl) {
           mainIndex
           lowerTarget
           upperTarget
+          priceRateProviders {
+            address
+            token{
+              address
+            }
+          }
         }
       }
     `;

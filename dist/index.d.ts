@@ -61,6 +61,14 @@ interface SubgraphPoolBase {
     totalShares: string;
     tokens: SubgraphToken[];
     tokensList: string[];
+    priceRateProviders?: [
+        {
+            address: string;
+            token: {
+                address: string;
+            };
+        }
+    ];
     totalWeight?: string;
     amp?: string;
     expiryTime?: number;
