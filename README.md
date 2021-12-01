@@ -21,7 +21,7 @@ SOR exists in the Bronze release as a way to aggregate liquidity across all Bala
 
 Liquidity aggregators are free to use the SOR npm package or create their own order routing across pools.
 
-[Read More](https://docs.balancer.finance/protocol/sor)
+[Read More](https://docs.balancer.fi/developers/smart-order-router)
 
 ## Overview Of Use And Example
 
