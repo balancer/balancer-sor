@@ -10,7 +10,7 @@ import { LinearPoolPairData } from '../src/pools/linearPool/linearPool';
 describe('linear math tests', () => {
     let poolPairData; //  = makeLinearPoolPairData(0, 0);
     context('swap outcomes', () => {
-        it('_exactTokenInForBPTOut', () => {
+        it('_exactMainTokenInForBPTOut', () => {
             poolPairData = makeLinearPoolPairData(
                 parseFixed('10000', 18), // balanceIn
                 parseFixed('10000', 18), // balanceOut
@@ -19,7 +19,7 @@ describe('linear math tests', () => {
                 parseFixed('10000', 0) // virtualBptSupply
             );
             checkOutcome(
-                linearMath._exactTokenInForBPTOut,
+                linearMath._exactMainTokenInForBPTOut,
                 poolPairData,
                 100,
                 98.307150862,
@@ -33,7 +33,7 @@ describe('linear math tests', () => {
                 parseFixed('10000', 0) // virtualBptSupply
             );
             checkOutcome(
-                linearMath._exactTokenInForBPTOut,
+                linearMath._exactMainTokenInForBPTOut,
                 poolPairData,
                 1300,
                 12615.3259478,
@@ -41,7 +41,7 @@ describe('linear math tests', () => {
             );
         });
 
-        it('_tokenInForExactBPTOut', () => {
+        it('_mainTokenInForExactBPTOut', () => {
             poolPairData = makeLinearPoolPairData(
                 parseFixed('900', 18), // balanceIn
                 parseFixed('10000', 18), // balanceOut
@@ -50,14 +50,14 @@ describe('linear math tests', () => {
                 parseFixed('10000', 0) // virtualBptSupply
             );
             checkOutcome(
-                linearMath._tokenInForExactBPTOut,
+                linearMath._mainTokenInForExactBPTOut,
                 poolPairData,
                 100,
                 10.078,
                 0.000000001
             );
             checkOutcome(
-                linearMath._tokenInForExactBPTOut,
+                linearMath._mainTokenInForExactBPTOut,
                 poolPairData,
                 5000,
                 512.5510204,
@@ -65,7 +65,7 @@ describe('linear math tests', () => {
             );
         });
 
-        it('_BPTInForExactTokenOut', () => {
+        it('_BPTInForExactMainTokenOut', () => {
             poolPairData = makeLinearPoolPairData(
                 parseFixed('10000', 18), // balanceIn
                 parseFixed('900', 18), // balanceOut
@@ -74,7 +74,7 @@ describe('linear math tests', () => {
                 parseFixed('10000', 0) // virtualBptSupply
             );
             checkOutcome(
-                linearMath._BPTInForExactTokenOut,
+                linearMath._BPTInForExactMainTokenOut,
                 poolPairData,
                 200,
                 1984.520738,
@@ -88,14 +88,14 @@ describe('linear math tests', () => {
                 parseFixed('10000', 0) // virtualBptSupply
             );
             checkOutcome(
-                linearMath._BPTInForExactTokenOut,
+                linearMath._BPTInForExactMainTokenOut,
                 poolPairData,
                 1600,
                 6074.64002,
                 0.000001
             );
             checkOutcome(
-                linearMath._BPTInForExactTokenOut,
+                linearMath._BPTInForExactMainTokenOut,
                 poolPairData,
                 800,
                 3014.744405,
@@ -103,7 +103,7 @@ describe('linear math tests', () => {
             );
         });
 
-        it('_exactBPTInForTokenOut', () => {
+        it('_exactBPTInForMainTokenOut', () => {
             poolPairData = makeLinearPoolPairData(
                 parseFixed('10000', 18), // balanceIn
                 parseFixed('2500', 18), // balanceOut
@@ -112,14 +112,14 @@ describe('linear math tests', () => {
                 parseFixed('10000', 0) // virtualBptSupply
             );
             checkOutcome(
-                linearMath._exactBPTInForTokenOut,
+                linearMath._exactBPTInForMainTokenOut,
                 poolPairData,
                 200,
                 53.444,
                 0.000001
             );
             checkOutcome(
-                linearMath._exactBPTInForTokenOut,
+                linearMath._exactBPTInForMainTokenOut,
                 poolPairData,
                 5000,
                 1320.098039,
@@ -138,7 +138,7 @@ describe('linear math tests', () => {
                 parseFixed('10000', 0) // virtualBptSupply
             );
             checkDerivative(
-                linearMath._exactTokenInForBPTOut,
+                linearMath._exactMainTokenInForBPTOut,
                 linearMath._spotPriceAfterSwapExactTokenInForBPTOut,
                 poolPairData,
                 200,
@@ -147,7 +147,7 @@ describe('linear math tests', () => {
                 true
             );
             checkDerivative(
-                linearMath._exactTokenInForBPTOut,
+                linearMath._exactMainTokenInForBPTOut,
                 linearMath._spotPriceAfterSwapExactTokenInForBPTOut,
                 poolPairData,
                 1500,
@@ -159,7 +159,7 @@ describe('linear math tests', () => {
 
         it('_spotPriceAfterSwapTokenInForExactBPTOut', () => {
             checkDerivative(
-                linearMath._tokenInForExactBPTOut,
+                linearMath._mainTokenInForExactBPTOut,
                 linearMath._spotPriceAfterSwapTokenInForExactBPTOut,
                 poolPairData,
                 500,
@@ -168,7 +168,7 @@ describe('linear math tests', () => {
                 false
             );
             checkDerivative(
-                linearMath._tokenInForExactBPTOut,
+                linearMath._mainTokenInForExactBPTOut,
                 linearMath._spotPriceAfterSwapTokenInForExactBPTOut,
                 poolPairData,
                 40000,
@@ -187,7 +187,7 @@ describe('linear math tests', () => {
                 parseFixed('10000', 0) // virtualBptSupply
             );
             checkDerivative(
-                linearMath._BPTInForExactTokenOut,
+                linearMath._BPTInForExactMainTokenOut,
                 linearMath._spotPriceAfterSwapBPTInForExactTokenOut,
                 poolPairData,
                 200,
@@ -196,7 +196,7 @@ describe('linear math tests', () => {
                 false
             );
             checkDerivative(
-                linearMath._BPTInForExactTokenOut,
+                linearMath._BPTInForExactMainTokenOut,
                 linearMath._spotPriceAfterSwapBPTInForExactTokenOut,
                 poolPairData,
                 1600,
@@ -205,7 +205,7 @@ describe('linear math tests', () => {
                 false
             );
             checkDerivative(
-                linearMath._BPTInForExactTokenOut,
+                linearMath._BPTInForExactMainTokenOut,
                 linearMath._spotPriceAfterSwapBPTInForExactTokenOut,
                 poolPairData,
                 3000,
@@ -224,7 +224,7 @@ describe('linear math tests', () => {
                 parseFixed('10000', 0) // virtualBptSupply
             );
             checkDerivative(
-                linearMath._exactBPTInForTokenOut,
+                linearMath._exactBPTInForMainTokenOut,
                 linearMath._spotPriceAfterSwapExactBPTInForTokenOut,
                 poolPairData,
                 200,
@@ -233,7 +233,7 @@ describe('linear math tests', () => {
                 true
             );
             checkDerivative(
-                linearMath._exactBPTInForTokenOut,
+                linearMath._exactBPTInForMainTokenOut,
                 linearMath._spotPriceAfterSwapExactBPTInForTokenOut,
                 poolPairData,
                 5000,
@@ -242,7 +242,7 @@ describe('linear math tests', () => {
                 true
             );
             checkDerivative(
-                linearMath._exactBPTInForTokenOut,
+                linearMath._exactBPTInForMainTokenOut,
                 linearMath._spotPriceAfterSwapExactBPTInForTokenOut,
                 poolPairData,
                 8000,
