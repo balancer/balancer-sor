@@ -593,7 +593,7 @@ async function simpleSwap() {
     const poolsSource = SUBGRAPH_URLS[networkId];
     // const poolsSource = require('../testData/testPools/gusdBug.json');
     // Update pools list with most recent onchain balances
-    const queryOnChain = false;
+    const queryOnChain = true;
     const tokenIn = ADDRESSES[networkId].STABAL3;
     const tokenOut = ADDRESSES[networkId].aUSDC;
     const swapType = SwapTypes.SwapExactIn;

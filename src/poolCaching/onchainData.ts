@@ -6,6 +6,7 @@ import { Multicaller } from '../utils/multicaller';
 
 // TODO: decide whether we want to trim these ABIs down to the relevant functions
 import vaultAbi from '../abi/Vault.json';
+import aTokenRateProvider from '../abi/StaticATokenRateProvider.json';
 import weightedPoolAbi from '../pools/weightedPool/weightedPoolAbi.json';
 import stablePoolAbi from '../pools/stablePool/stablePoolAbi.json';
 import elementPoolAbi from '../pools/elementPool/ConvergentCurvePool.json';
@@ -24,6 +25,7 @@ export async function getOnChainBalances(
         Object.fromEntries(
             [
                 ...vaultAbi,
+                ...aTokenRateProvider,
                 ...weightedPoolAbi,
                 ...stablePoolAbi,
                 ...elementPoolAbi,
@@ -82,11 +84,21 @@ export async function getOnChainBalances(
             );
 
             multiPool.call(`${pool.id}.targets`, pool.address, 'getTargets');
-            multiPool.call(
-                `${pool.id}.wrappedTokenRateCache`,
-                pool.address,
-                'getWrappedTokenRateCache'
-            );
+
+            if (pool.wrappedIndex !== undefined) {
+                // We want to find the priceRate provider for the wrappedToken
+                const wrappedToken = pool.tokensList[pool.wrappedIndex];
+                const provider = pool.priceRateProviders?.find((provider) =>
+                    isSameAddress(provider.token.address, wrappedToken)
+                );
+                if (provider !== undefined) {
+                    multiPool.call(
+                        `${pool.id}.rate`,
+                        provider.address,
+                        'getRate'
+                    );
+                }
+            }
         }
     });
 
@@ -101,7 +113,7 @@ export async function getOnChainBalances(
                 tokens: string[];
                 balances: string[];
             };
-            wrappedTokenRateCache?: string;
+            rate?: string;
         }
     >;
 
@@ -116,6 +128,7 @@ export async function getOnChainBalances(
                     tokens: string[];
                     balances: string[];
                 };
+                rate?: string;
             }
         >;
     } catch (err) {
@@ -161,23 +174,19 @@ export async function getOnChainBalances(
                     );
                 }
 
-                if (!onchainData.wrappedTokenRateCache) {
+                const wrappedIndex = subgraphPools[index].wrappedIndex;
+                if (
+                    wrappedIndex === undefined ||
+                    onchainData.rate === undefined
+                ) {
                     console.error(
-                        `Linear Pool Missing WrappedTokenRateCache: ${poolId}`
+                        `Linear Pool Missing WrappedIndex or PriceRate: ${poolId}`
                     );
                     return;
-                } else {
-                    const wrappedIndex = subgraphPools[index].wrappedIndex;
-                    if (wrappedIndex === undefined) {
-                        console.error(
-                            `Linear Pool Missing WrappedIndex: ${poolId}`
-                        );
-                        return;
-                    }
-
-                    subgraphPools[index].tokens[wrappedIndex].priceRate =
-                        formatFixed(onchainData.wrappedTokenRateCache[0], 18);
                 }
+                // Update priceRate of wrappedToken
+                subgraphPools[index].tokens[wrappedIndex].priceRate =
+                    formatFixed(onchainData.rate, 18);
             }
 
             subgraphPools[index].swapFee = formatFixed(swapFee, 18);
