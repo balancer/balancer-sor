@@ -6466,21 +6466,27 @@ class MetaStablePool {
         );
         if (tokenIndexIn < 0) throw 'Pool does not contain tokenIn';
         const tI = this.tokens[tokenIndexIn];
-        // balanceIn = tI.balance;
-        const balanceIn = bnum(tI.balance).times(bnum(tI.priceRate)).toString();
         const decimalsIn = tI.decimals;
         const tokenInPriceRate = parseFixed(tI.priceRate, 18);
+        const balanceIn = formatFixed(
+            parseFixed(tI.balance, decimalsIn)
+                .mul(tokenInPriceRate)
+                .div(WeiPerEther),
+            decimalsIn
+        );
         const tokenIndexOut = this.tokens.findIndex(
             (t) => getAddress(t.address) === getAddress(tokenOut)
         );
         if (tokenIndexOut < 0) throw 'Pool does not contain tokenOut';
         const tO = this.tokens[tokenIndexOut];
-        // balanceOut = tO.balance;
-        const balanceOut = bnum(tO.balance)
-            .times(bnum(tO.priceRate))
-            .toString();
         const decimalsOut = tO.decimals;
         const tokenOutPriceRate = parseFixed(tO.priceRate, 18);
+        const balanceOut = formatFixed(
+            parseFixed(tO.balance, decimalsOut)
+                .mul(tokenOutPriceRate)
+                .div(WeiPerEther),
+            decimalsOut
+        );
         // Get all token balances
         const allBalances = this.tokens.map(({ balance, priceRate }) =>
             bnum(balance).times(priceRate)
