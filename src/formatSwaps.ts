@@ -88,6 +88,13 @@ const formatSequence = (
     });
 };
 
+/**
+ * Formats a sequence of swaps to a format that is useful for displaying the routes in user interfaces.
+ * @dev The swaps are converted to an array of routes, where each route has an array of hops
+ * @param routes - The original Swaps
+ * @param swapAmount - The total amount being swapped
+ * @returns SwapInfoRoute[] - The swaps formatted as routes with hops
+ */
 function formatRoutes(
     routes: Swap[][],
     swapAmount: BigNumber
