@@ -241,16 +241,6 @@ export const formatSwaps = (
         let returnAmount: OldBigNumber;
 
         if (path.poolPairData.length == 1) {
-            // Direct trade: add swap from only pool
-            const swap: Swap = {
-                pool: path.swaps[0].pool,
-                tokenIn: path.swaps[0].tokenIn,
-                tokenOut: path.swaps[0].tokenOut,
-                swapAmount: swapAmount.toString(),
-                tokenInDecimals: path.poolPairData[0].decimalsIn,
-                tokenOutDecimals: path.poolPairData[0].decimalsOut,
-            };
-            swaps.push([swap]);
             // Call EVMgetOutputAmountSwap to guarantee pool state is updated
             returnAmount = EVMgetOutputAmountSwap(
                 path.pools[0],
@@ -258,6 +248,18 @@ export const formatSwaps = (
                 swapType,
                 swapAmount
             );
+
+            // Direct trade: add swap from only pool
+            const swap: Swap = {
+                pool: path.swaps[0].pool,
+                tokenIn: path.swaps[0].tokenIn,
+                tokenOut: path.swaps[0].tokenOut,
+                swapAmount: swapAmount.toString(),
+                swapAmountOut: returnAmount.toString(),
+                tokenInDecimals: path.poolPairData[0].decimalsIn,
+                tokenOutDecimals: path.poolPairData[0].decimalsOut,
+            };
+            swaps.push([swap]);
         } else {
             // Multi-hop:
 
@@ -302,6 +304,7 @@ export const formatSwaps = (
                 tokenIn: path.swaps[0].tokenIn,
                 tokenOut: path.swaps[0].tokenOut,
                 swapAmount: amountSwap1.toString(),
+                swapAmountOut: amountSwap2.toString(),
                 tokenInDecimals: path.poolPairData[0].decimalsIn,
                 tokenOutDecimals: path.poolPairData[0].decimalsOut,
             };
@@ -312,6 +315,7 @@ export const formatSwaps = (
                 tokenIn: path.swaps[1].tokenIn,
                 tokenOut: path.swaps[1].tokenOut,
                 swapAmount: amountSwap2.toString(),
+                swapAmountOut: returnAmount.toString(),
                 tokenInDecimals: path.poolPairData[1].decimalsIn,
                 tokenOutDecimals: path.poolPairData[1].decimalsOut,
             };

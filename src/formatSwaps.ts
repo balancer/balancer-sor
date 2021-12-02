@@ -2,7 +2,14 @@ import { BigNumber } from '@ethersproject/bignumber';
 import cloneDeep from 'lodash.clonedeep';
 import { bnum, scale } from './utils/bignumber';
 import { EMPTY_SWAPINFO } from './constants';
-import { SwapTypes, SwapV2, Swap, SwapInfo } from './types';
+import {
+    SwapTypes,
+    SwapV2,
+    Swap,
+    SwapInfo,
+    SwapInfoRoute,
+    SwapInfoRouteHop,
+} from './types';
 import { Zero } from '@ethersproject/constants';
 
 /**
@@ -81,6 +88,39 @@ const formatSequence = (
     });
 };
 
+function formatRoutes(
+    routes: Swap[][],
+    swapAmount: BigNumber
+): SwapInfoRoute[] {
+    return routes.map((swaps) => {
+        const first = swaps[0];
+        const last = swaps[swaps.length - 1];
+        const tokenInAmountScaled = scale(
+            bnum(first.swapAmount || '0'),
+            first.tokenInDecimals
+        );
+
+        return {
+            tokenIn: first.tokenIn,
+            tokenOut: last.tokenOut,
+            tokenInAmount: first.swapAmount || '0',
+            tokenOutAmount: last.swapAmountOut || '0',
+            share: tokenInAmountScaled
+                .div(bnum(swapAmount.toString()))
+                .toNumber(),
+            hops: swaps.map((swap): SwapInfoRouteHop => {
+                return {
+                    tokenIn: swap.tokenIn,
+                    tokenOut: swap.tokenOut,
+                    tokenInAmount: swap.swapAmount || '0',
+                    tokenOutAmount: swap.swapAmountOut || '0',
+                    poolId: swap.pool,
+                };
+            }),
+        };
+    });
+}
+
 export function formatSwaps(
     swapsOriginal: Swap[][],
     swapType: SwapTypes,
@@ -107,6 +147,8 @@ export function formatSwaps(
         swaps[0].amount = BigNumber.from(swaps[0].amount).add(dust).toString();
     }
 
+    const routes = formatRoutes(swapsOriginal, swapAmount);
+
     const swapInfo: SwapInfo = {
         swapAmount,
         returnAmount,
@@ -116,6 +158,7 @@ export function formatSwaps(
         tokenIn,
         tokenOut,
         marketSp,
+        routes,
     };
 
     return swapInfo;
