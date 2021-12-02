@@ -370,9 +370,8 @@ export function _poolDerivatives(
             partial_xx * partial_y * partial_y +
             partial_yy * partial_x * partial_x;
         let denominator = partial_x * partial_x * partial_y;
-        ans = MathSol.divUpFixed(numerator, denominator); // change the order to
+        ans = MathSol.divUpFixed(numerator, denominator); // change the order to directly use integer operations
         if (wrt_out) {
-            // directly use integer operations
             ans = MathSol.mulUpFixed(
                 MathSol.mulUpFixed(ans, partial_y),
                 partial_x
