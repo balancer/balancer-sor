@@ -199,7 +199,10 @@ export class StablePool implements PoolBase {
                 poolPairData.tokenIndexIn,
                 poolPairData.tokenIndexOut,
                 amtScaled,
-                bnum(poolPairData.swapFee.toString())
+                {
+                    swapFeePercentage: bnum(poolPairData.swapFee.toString()),
+                    tokenInDecimals: poolPairData.decimalsIn,
+                }
             );
 
             // return normalised amount
@@ -231,7 +234,10 @@ export class StablePool implements PoolBase {
                 poolPairData.tokenIndexIn,
                 poolPairData.tokenIndexOut,
                 amtScaled,
-                bnum(poolPairData.swapFee.toString())
+                {
+                    swapFeePercentage: bnum(poolPairData.swapFee.toString()),
+                    tokenInDecimals: poolPairData.decimalsIn,
+                }
             );
 
             // return normalised amount

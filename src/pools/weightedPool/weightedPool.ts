@@ -194,7 +194,12 @@ export class WeightedPool implements PoolBase {
                     bnum(poolPairData.balanceOut.toString()),
                     bnum(poolPairData.weightOut.toString()),
                     scale(amount, poolPairData.decimalsIn),
-                    bnum(poolPairData.swapFee.toString())
+                    {
+                        swapFeePercentage: bnum(
+                            poolPairData.swapFee.toString()
+                        ),
+                        tokenInDecimals: poolPairData.decimalsIn,
+                    }
                 );
                 // return normalised amount
                 return scale(amt, -poolPairData.decimalsOut);
@@ -225,7 +230,12 @@ export class WeightedPool implements PoolBase {
                     bnum(poolPairData.balanceOut.toString()),
                     bnum(poolPairData.weightOut.toString()),
                     scale(amount, poolPairData.decimalsOut),
-                    bnum(poolPairData.swapFee.toString())
+                    {
+                        swapFeePercentage: bnum(
+                            poolPairData.swapFee.toString()
+                        ),
+                        tokenInDecimals: poolPairData.decimalsIn,
+                    }
                 );
 
                 // return normalised amount
