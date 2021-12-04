@@ -6,6 +6,7 @@
                 "tokenIn": "0x6b175474e89094c44da98b954eedeac495271d0f",
                 "tokenOut": "0xba100000625a3754423978a60c9317c58a424e3d",
                 "swapAmount": "79025.357871722424185502",
+                "swapAmountOut": "3951.267893586121209",
                 "tokenInDecimals": 18,
                 "tokenOutDecimals": 18
             }
@@ -16,6 +17,7 @@
                 "tokenIn": "0x6b175474e89094c44da98b954eedeac495271d0f",
                 "tokenOut": "0xba100000625a3754423978a60c9317c58a424e3d",
                 "swapAmount": "20974.642128277575814498",
+                "swapAmountOut": "1048.732106413878791",
                 "tokenInDecimals": 18,
                 "tokenOutDecimals": 18
             }
@@ -52,6 +54,7 @@
                 "tokenIn": "0x6b175474e89094c44da98b954eedeac495271d0f",
                 "tokenOut": "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
                 "swapAmount": "79025.357871722424185502",
+                "swapAmountOut": "50.388502611813030611",
                 "tokenInDecimals": 18,
                 "tokenOutDecimals": 18
             },
@@ -60,6 +63,7 @@
                 "tokenIn": "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
                 "tokenOut": "0x056fd409e1d7a124bd7017459dfea2f387b6d5cd",
                 "swapAmount": "50.388502611813030611",
+                "swapAmountOut": "79020.357871722424185502",
                 "tokenInDecimals": 18,
                 "tokenOutDecimals": 18
             }
@@ -70,6 +74,7 @@
                 "tokenIn": "0x6b175474e89094c44da98b954eedeac495271d0f",
                 "tokenOut": "0xba100000625a3754423978a60c9317c58a424e3d",
                 "swapAmount": "20974.642128277575814498",
+                "swapAmountOut": "50.388502611813030611",
                 "tokenInDecimals": 18,
                 "tokenOutDecimals": 18
             },
@@ -78,6 +83,7 @@
                 "tokenIn": "0xba100000625a3754423978a60c9317c58a424e3d",
                 "tokenOut": "0x056fd409e1d7a124bd7017459dfea2f387b6d5cd",
                 "swapAmount": "576.855408194315533683",
+                "swapAmountOut": "50.388502611813030611",
                 "tokenInDecimals": 18,
                 "tokenOutDecimals": 18
             }
