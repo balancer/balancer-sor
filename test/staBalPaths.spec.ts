@@ -6,26 +6,23 @@ import { PoolDictionary, SwapPairType, SubgraphPoolBase } from '../src/types';
 import {
     filterPoolsOfInterest,
     getPathsUsingStaBalPool,
-    createMultihopPath,
+    createPath,
     getHighestLiquidityPool,
     filterHopPools,
     parseToPoolsDict,
 } from '../src/routeProposal/filtering';
-import { STABALADDR, USDCCONNECTINGPOOL } from '../src/constants';
+import { STABAL3POOL, USDCCONNECTINGPOOL } from '../src/constants';
 import staBalPools from './testData/staBal/staBalPools.json';
 import { checkPath } from './lib/testHelpers';
+import { BAL, TUSD, MKR } from './lib/constants';
 
 const maxPools = 4;
 const chainId = 99;
 
-const BAL = '0x9a71012b13ca4d3d0cdc72a177df3ef03b0e76a3';
-const TUSD = '0x0000000000085d4780B73119b644AE5ecd22b376';
-const TOKEN_WITH_NO_USDC_PAIR = '0x9f8f72aa9304c8b593d555f12ef6589cc3a579a2';
-
 describe(`staBalPaths.`, () => {
     it(`should be no USDC connecting pool for mainnet`, () => {
-        const tokenIn = TUSD;
-        const tokenOut = BAL;
+        const tokenIn = TUSD.address;
+        const tokenOut = BAL.address;
         const chainId = 1;
         const correctPoolIds = [];
 
@@ -40,7 +37,7 @@ describe(`staBalPaths.`, () => {
 
     context('when both tokens are paired with staBAL', () => {
         const tokenIn = '0x0000000000000000000000000000000000000002';
-        const tokenOut = TUSD;
+        const tokenOut = TUSD.address;
         it('returns an empty array', () => {
             // We expect no staBalPaths as the path already exists as multihop
             const correctPoolIds = [];
@@ -90,9 +87,9 @@ describe(`staBalPaths.`, () => {
     });
 
     context('when tokenIn is paired with staBAL', () => {
-        const tokenIn = TUSD;
+        const tokenIn = TUSD.address;
         context('when tokenOut is paired with USDC', () => {
-            const tokenOut = BAL;
+            const tokenOut = BAL.address;
             it('returns the expected route', () => {
                 // i.e. TUSD>[staBalPair1]>staBAL>[usdcConnecting]>USDC>[balPool]>BAL
                 const correctPoolIds = [
@@ -141,16 +138,13 @@ describe(`staBalPaths.`, () => {
 
                 const staBalPoolIdIn = 'staBalPair1';
                 const staBalPoolIn = poolsOfInterest[staBalPoolIdIn];
-                const hopTokenStaBal = STABALADDR[chainId];
+                const hopTokenStaBal = STABAL3POOL[chainId].address;
                 const usdcConnectingPool =
                     poolsAll[USDCCONNECTINGPOOL[chainId].id];
 
-                const multihopPath = createMultihopPath(
-                    staBalPoolIn,
-                    usdcConnectingPool,
-                    tokenIn,
-                    hopTokenStaBal,
-                    USDCCONNECTINGPOOL[chainId].usdc
+                const multihopPath = createPath(
+                    [tokenIn, hopTokenStaBal, USDCCONNECTINGPOOL[chainId].usdc],
+                    [staBalPoolIn, usdcConnectingPool]
                 );
 
                 checkPath(
@@ -164,7 +158,7 @@ describe(`staBalPaths.`, () => {
         });
 
         context('when tokenOut is not paired with USDC', () => {
-            const tokenOut = TOKEN_WITH_NO_USDC_PAIR;
+            const tokenOut = MKR.address;
             it(`returns an empty array`, () => {
                 const correctPoolIds = [];
 
@@ -180,9 +174,9 @@ describe(`staBalPaths.`, () => {
     });
 
     context('when tokenOut is paired with staBAL', () => {
-        const tokenOut = TUSD;
+        const tokenOut = TUSD.address;
         context('when tokenIn is paired with USDC', () => {
-            const tokenIn = BAL;
+            const tokenIn = BAL.address;
 
             it('returns the expected route', () => {
                 // i.e. BAL>[balPool]>USDC>[usdcConnecting]>staBAL>[staBalPair1]>TUSD
@@ -224,8 +218,8 @@ describe(`staBalPaths.`, () => {
 
         context('when tokenIn is not paired with USDC', () => {
             it(`returns an empty array`, () => {
-                const tokenIn = TOKEN_WITH_NO_USDC_PAIR;
-                const tokenOut = TUSD;
+                const tokenIn = MKR.address;
+                const tokenOut = TUSD.address;
                 const correctPoolIds = [];
 
                 itCreatesCorrectPath(

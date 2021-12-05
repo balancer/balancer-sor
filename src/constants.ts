@@ -9,6 +9,7 @@ export const WETHADDR: { [chainId: number]: string } = {
     42: '0xdFCeA9088c8A88A76FF74892C1457C17dfeef9C1',
     137: '0x0d500B1d8E8eF31E21C99d1Db9A6444d3ADf1270', // For Polygon this is actually wrapped MATIC
     42161: '0x82aF49447D8a07e3bd95BD0d56f35241523fBab1',
+    99: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2',
 };
 
 export const MULTIADDR: { [chainId: number]: string } = {
@@ -19,6 +20,7 @@ export const MULTIADDR: { [chainId: number]: string } = {
     42: '0x2cc8688C5f75E365aaEEb4ea8D6a480405A48D2A',
     137: '0xa1B2b503959aedD81512C37e9dce48164ec6a94d',
     42161: '0x269ff446d9892c9e19082564df3f5e8741e190a1',
+    99: '0xeefba1e63905ef1d7acba5a8513c70307c1ce441',
 };
 
 export const VAULTADDR: { [chainId: number]: string } = {
@@ -29,6 +31,7 @@ export const VAULTADDR: { [chainId: number]: string } = {
     42: '0xBA12222222228d8Ba445958a75a0704d566BF2C8',
     137: '0xBA12222222228d8Ba445958a75a0704d566BF2C8',
     42161: '0xBA12222222228d8Ba445958a75a0704d566BF2C8',
+    99: '0xBA12222222228d8Ba445958a75a0704d566BF2C8',
 };
 
 // Currently only used for Polygon
@@ -42,10 +45,32 @@ export const USDCCONNECTINGPOOL: {
     },
 };
 
-// Currently only used for Polygon
-// Address of staBAL3 pool
-export const STABALADDR: { [chainId: number]: string } = {
-    99: '0x0000000000000000000000000000000000000001',
+export const STABAL3POOL: {
+    [chainId: number]: { id: string; address: string };
+} = {
+    // TO DO - Add Mainnet info
+    // TO DO - Add for Polygon for staBAL3 pairs
+    42: {
+        id: '0x21ff756ca0cfcc5fff488ad67babadffee0c4149000000000000000000000240',
+        address: '0x21ff756ca0cfcc5fff488ad67babadffee0c4149',
+    },
+    99: {
+        id: 'staBal3Id',
+        address: '0x06df3b2bbb68adc8b0e302443692037ed9f91b42',
+    },
+};
+
+export const WETHSTABAL3: {
+    [chainId: number]: { id: string; address: string };
+} = {
+    42: {
+        id: '0x6be79a54f119dbf9e8ebd9ded8c5bd49205bc62d00020000000000000000033c',
+        address: '0x6be79a54f119dbf9e8ebd9ded8c5bd49205bc62d',
+    },
+    99: {
+        id: 'weightedWethStaBal3Id',
+        address: 'weightedWethStaBal3',
+    },
 };
 
 export const EMPTY_SWAPINFO: SwapInfo = {

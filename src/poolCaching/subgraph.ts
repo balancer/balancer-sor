@@ -34,6 +34,16 @@ export async function fetchSubgraphPools(
           principalToken
           baseToken
           swapEnabled
+          wrappedIndex
+          mainIndex
+          lowerTarget
+          upperTarget
+          priceRateProviders {
+            address
+            token{
+              address
+            }
+          }
         }
       }
     `;

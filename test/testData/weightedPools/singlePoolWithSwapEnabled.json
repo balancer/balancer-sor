@@ -1,0 +1,38 @@
+{
+    "pools": [
+        {
+            "id": "weightedBalWeth",
+            "publicSwap": true,
+            "swapFee": "0.01",
+            "swapEnabled": true,
+            "tokens": [
+                {
+                    "address": "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
+                    "balance": "100000.000000",
+                    "decimals": 18,
+                    "weight": "50",
+                    "id": "weightedBalWeth-0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
+                    "symbol": "staBal3",
+                    "priceRate": "1"
+                },
+                {
+                    "address": "0xba100000625a3754423978a60c9317c58a424e3d",
+                    "balance": "20000000.78213445",
+                    "decimals": 18,
+                    "weight": "50",
+                    "id": "weightedBalWeth-0xba100000625a3754423978a60c9317c58a424e3d",
+                    "symbol": "BAL",
+                    "priceRate": "1"
+                }
+            ],
+            "tokensList": [
+                "0xba100000625a3754423978a60c9317c58a424e3d",
+                "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2"
+            ],
+            "totalWeight": "100",
+            "totalShares": "100",
+            "poolType": "Weighted",
+            "address": "weightedBalWeth"
+        }
+    ]
+}

@@ -283,7 +283,7 @@ function testSwapAmountsForDecimals(
 }
 
 // Helper to sum all amounts traded by swaps
-function getTotalSwapAmount(
+export function getTotalSwapAmount(
     swapType: SwapTypes,
     swapInfo: SwapInfo
 ): OldBigNumber {
@@ -352,9 +352,10 @@ export async function getFullSwap(
     costOutputToken: BigNumber,
     gasPrice: BigNumber,
     provider: JsonRpcProvider,
-    swapGas: BigNumber = BigNumber.from('100000')
+    swapGas: BigNumber = BigNumber.from('100000'),
+    chainId = 1
 ): Promise<SwapInfo> {
-    const sor = new sorv2.SOR(provider, 1, null, cloneDeep(pools));
+    const sor = new sorv2.SOR(provider, chainId, null, cloneDeep(pools));
 
     let swapTypeCorrect = SwapTypes.SwapExactIn;
 
@@ -364,7 +365,7 @@ export async function getFullSwap(
         gasPrice.gt(0) && swapGas.gt(0)
             ? costOutputToken.div(gasPrice).div(swapGas).div(ONE).toString()
             : '0';
-    if (swapType === 'swapExactIn')
+    if (swapType === 'swapExactIn' || swapType === SwapTypes.SwapExactIn)
         await sor.swapCostCalculator.setNativeAssetPriceInToken(
             tokenOut,
             effectiveNativeAssetPrice

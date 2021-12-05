@@ -15,6 +15,7 @@ export enum PoolTypes {
     Stable,
     Element,
     MetaStable,
+    Linear,
 }
 
 export enum SwapPairType {
@@ -66,6 +67,14 @@ export interface SubgraphPoolBase {
     totalShares: string;
     tokens: SubgraphToken[];
     tokensList: string[];
+    priceRateProviders?: [
+        {
+            address: string;
+            token: {
+                address: string;
+            };
+        }
+    ];
 
     // Weighted & Element field
     totalWeight?: string;
@@ -78,6 +87,12 @@ export interface SubgraphPoolBase {
     unitSeconds?: number;
     principalToken?: string;
     baseToken?: string;
+
+    // Linear specific fields
+    mainIndex?: number;
+    wrappedIndex?: number;
+    lowerTarget?: string;
+    upperTarget?: string;
 }
 
 export type SubgraphToken = {
@@ -160,6 +175,7 @@ export interface PoolBase {
     id: string;
     address: string;
     tokensList: string[];
+    mainIndex?: number;
     setTypeForSwap: (type: SwapPairType) => void;
     parsePoolPairData: (tokenIn: string, tokenOut: string) => PoolPairBase;
     getNormalizedLiquidity: (poolPairData: PoolPairBase) => OldBigNumber;

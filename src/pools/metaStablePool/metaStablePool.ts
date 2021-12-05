@@ -281,6 +281,8 @@ export class MetaStablePool implements PoolBase {
         poolPairData: MetaStablePoolPairData,
         amount: OldBigNumber
     ): OldBigNumber {
+        const priceRateIn = formatFixed(poolPairData.tokenInPriceRate, 18);
+        const priceRateOut = formatFixed(poolPairData.tokenOutPriceRate, 18);
         const amountConverted = amount.times(
             formatFixed(poolPairData.tokenInPriceRate, 18)
         );
@@ -288,13 +290,15 @@ export class MetaStablePool implements PoolBase {
             amountConverted,
             poolPairData
         );
-        return result;
+        return result.div(priceRateIn).times(priceRateOut);
     }
 
     _spotPriceAfterSwapTokenInForExactTokenOut(
         poolPairData: MetaStablePoolPairData,
         amount: OldBigNumber
     ): OldBigNumber {
+        const priceRateIn = formatFixed(poolPairData.tokenInPriceRate, 18);
+        const priceRateOut = formatFixed(poolPairData.tokenOutPriceRate, 18);
         const amountConverted = amount.times(
             formatFixed(poolPairData.tokenOutPriceRate, 18)
         );
@@ -302,26 +306,32 @@ export class MetaStablePool implements PoolBase {
             amountConverted,
             poolPairData
         );
-        return result;
+        return result.div(priceRateIn).times(priceRateOut);
     }
 
     _derivativeSpotPriceAfterSwapExactTokenInForTokenOut(
         poolPairData: MetaStablePoolPairData,
         amount: OldBigNumber
     ): OldBigNumber {
+        const priceRateOut = formatFixed(poolPairData.tokenOutPriceRate, 18);
         return _derivativeSpotPriceAfterSwapExactTokenInForTokenOut(
             amount,
             poolPairData
-        );
+        ).times(priceRateOut);
     }
 
     _derivativeSpotPriceAfterSwapTokenInForExactTokenOut(
         poolPairData: MetaStablePoolPairData,
         amount: OldBigNumber
     ): OldBigNumber {
+        const priceRateIn = formatFixed(poolPairData.tokenInPriceRate, 18);
+        const priceRateOut = formatFixed(poolPairData.tokenOutPriceRate, 18);
         return _derivativeSpotPriceAfterSwapTokenInForExactTokenOut(
             amount,
             poolPairData
-        );
+        )
+            .div(priceRateIn)
+            .times(priceRateOut)
+            .times(priceRateOut);
     }
 }

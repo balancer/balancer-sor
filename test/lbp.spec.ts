@@ -31,8 +31,8 @@ describe(`Tests for LBP Pools.`, () => {
             } = require('./testData/lbpPools/singlePool.json');
             const pools = poolsFromFile.pools;
 
-            const tokenIn = DAI;
-            const tokenOut = USDC;
+            const tokenIn = DAI.address;
+            const tokenOut = USDC.address;
             const swapType = SwapTypes.SwapExactIn;
             const swapAmt = parseFixed('1', 18);
 
@@ -61,8 +61,8 @@ describe(`Tests for LBP Pools.`, () => {
             const pools = poolsFromFile.pools;
             // Set paused to true
             pools[0].swapEnabled = false;
-            const tokenIn = DAI;
-            const tokenOut = USDC;
+            const tokenIn = DAI.address;
+            const tokenOut = USDC.address;
             const swapType = SwapTypes.SwapExactIn;
             const swapAmt = parseFixed('1', 18);
 
