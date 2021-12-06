@@ -188,8 +188,6 @@ function checkDerivative_stable(
         amount,
         fee
     );
-    console.log('(inverse) incremental quotient: ', incrementalQuotient);
-    console.log('computed spot price:            ', der_ans);
     assert.approximately(
         Number(MathSol.divUpFixed(incrementalQuotient, der_ans)),
         Number(MathSol.ONE),
