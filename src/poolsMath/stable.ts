@@ -2,58 +2,6 @@ import { MathSol, BZERO } from './basicOperations';
 
 const AMP_PRECISION = BigInt(1e3);
 
-// PairType = 'token->token'
-// SwapType = 'swapExactIn'
-// Would it be better to call this _calcOutGivenIn?
-export function _exactTokenInForTokenOut(
-    amp: bigint,
-    balances: bigint[],
-    tokenIndexIn: number,
-    tokenIndexOut: number,
-    amountIn: bigint,
-    fee: bigint
-): bigint {
-    amountIn = subtractFee(amountIn, fee);
-    // Given that we need to have a greater final balance out, the invariant needs to be rounded up
-    const invariant = _calculateInvariant(amp, balances, true);
-
-    const initBalance = balances[tokenIndexIn];
-    balances[tokenIndexIn] = initBalance + amountIn;
-    const finalBalanceOut = _getTokenBalanceGivenInvariantAndAllOtherBalances(
-        amp,
-        balances,
-        invariant,
-        tokenIndexOut
-    );
-    return balances[tokenIndexOut] - finalBalanceOut - BigInt(1);
-}
-
-export function _tokenInForExactTokenOut(
-    amp: bigint,
-    balances: bigint[],
-    tokenIndexIn: number,
-    tokenIndexOut: number,
-    amountOut: bigint,
-    fee: bigint
-): bigint {
-    const invariant = _calculateInvariant(amp, balances, true);
-    balances[tokenIndexOut] = MathSol.sub(balances[tokenIndexOut], amountOut);
-
-    const finalBalanceIn = _getTokenBalanceGivenInvariantAndAllOtherBalances(
-        amp,
-        balances,
-        invariant,
-        tokenIndexIn
-    );
-
-    let amountIn = MathSol.add(
-        MathSol.sub(finalBalanceIn, balances[tokenIndexIn]),
-        BigInt(1)
-    );
-    amountIn = addFee(amountIn, fee);
-    return amountIn;
-}
-
 function _calculateInvariant(
     amp: bigint,
     balances: bigint[],
@@ -120,6 +68,343 @@ function _calculateInvariant(
     }
 
     throw new Error('Errors.STABLE_INVARIANT_DIDNT_CONVERGE');
+}
+
+// PairType = 'token->token'
+// SwapType = 'swapExactIn'
+export function _calcOutGivenIn(
+    amp: bigint,
+    balances: bigint[],
+    tokenIndexIn: number,
+    tokenIndexOut: number,
+    amountIn: bigint,
+    fee: bigint
+): bigint {
+    amountIn = subtractFee(amountIn, fee);
+    // Given that we need to have a greater final balance out, the invariant needs to be rounded up
+    const invariant = _calculateInvariant(amp, balances, true);
+
+    const initBalance = balances[tokenIndexIn];
+    balances[tokenIndexIn] = initBalance + amountIn;
+    const finalBalanceOut = _getTokenBalanceGivenInvariantAndAllOtherBalances(
+        amp,
+        balances,
+        invariant,
+        tokenIndexOut
+    );
+    return balances[tokenIndexOut] - finalBalanceOut - BigInt(1);
+}
+
+export function _calcInGivenOut(
+    amp: bigint,
+    balances: bigint[],
+    tokenIndexIn: number,
+    tokenIndexOut: number,
+    amountOut: bigint,
+    fee: bigint
+): bigint {
+    const invariant = _calculateInvariant(amp, balances, true);
+    balances[tokenIndexOut] = MathSol.sub(balances[tokenIndexOut], amountOut);
+
+    const finalBalanceIn = _getTokenBalanceGivenInvariantAndAllOtherBalances(
+        amp,
+        balances,
+        invariant,
+        tokenIndexIn
+    );
+
+    let amountIn = MathSol.add(
+        MathSol.sub(finalBalanceIn, balances[tokenIndexIn]),
+        BigInt(1)
+    );
+    amountIn = addFee(amountIn, fee);
+    return amountIn;
+}
+
+export function _calcBptOutGivenExactTokensIn(
+    amp: bigint,
+    balances: bigint[],
+    amountsIn: bigint[],
+    bptTotalSupply: bigint,
+    swapFeePercentage: bigint
+): bigint {
+    // BPT out, so we round down overall.
+
+    // First loop calculates the sum of all token balances, which will be used to calculate
+    // the current weights of each token, relative to this sum
+    let sumBalances = BigInt(0);
+    for (let i = 0; i < balances.length; i++) {
+        sumBalances = sumBalances + balances[i];
+    }
+
+    // Calculate the weighted balance ratio without considering fees
+    let balanceRatiosWithFee: bigint[] = new Array(amountsIn.length);
+    // The weighted sum of token balance ratios with fee
+    let invariantRatioWithFees = BigInt(0);
+    for (let i = 0; i < balances.length; i++) {
+        let currentWeight = MathSol.divDownFixed(balances[i], sumBalances);
+        balanceRatiosWithFee[i] = MathSol.divDownFixed(
+            balances[i] + amountsIn[i],
+            balances[i]
+        );
+        invariantRatioWithFees =
+            invariantRatioWithFees +
+            MathSol.mulDownFixed(balanceRatiosWithFee[i], currentWeight);
+    }
+
+    // Second loop calculates new amounts in, taking into account the fee on the percentage excess
+    let newBalances: bigint[] = new Array(balances.length);
+    for (let i = 0; i < balances.length; i++) {
+        let amountInWithoutFee: bigint;
+
+        // Check if the balance ratio is greater than the ideal ratio to charge fees or not
+        if (balanceRatiosWithFee[i] > invariantRatioWithFees) {
+            const nonTaxableAmount = MathSol.mulDownFixed(
+                balances[i],
+                invariantRatioWithFees - MathSol.ONE
+            );
+            const taxableAmount = amountsIn[i] - nonTaxableAmount;
+            // No need to use checked arithmetic for the swap fee, it is guaranteed to be lower than 50%
+            amountInWithoutFee =
+                nonTaxableAmount +
+                MathSol.mulDownFixed(
+                    taxableAmount,
+                    MathSol.ONE - swapFeePercentage
+                );
+        } else {
+            amountInWithoutFee = amountsIn[i];
+        }
+        newBalances[i] = balances[i] + amountInWithoutFee;
+    }
+
+    // Get current and new invariants, taking swap fees into account
+    const currentInvariant = _calculateInvariant(amp, balances, true);
+    const newInvariant = _calculateInvariant(amp, newBalances, false);
+    const invariantRatio = MathSol.divDownFixed(newInvariant, currentInvariant);
+
+    // If the invariant didn't increase for any reason, we simply don't mint BPT
+    if (invariantRatio > MathSol.ONE) {
+        return MathSol.mulDownFixed(
+            bptTotalSupply,
+            invariantRatio - MathSol.ONE
+        );
+    } else {
+        return BigInt(0);
+    }
+}
+
+export function _calcTokenInGivenExactBptOut(
+    amp: bigint,
+    balances: bigint[],
+    tokenIndexIn: number,
+    bptAmountOut: bigint,
+    bptTotalSupply: bigint,
+    fee: bigint
+): bigint {
+    // Token in, so we round up overall.
+    const currentInvariant = _calculateInvariant(amp, balances, true);
+    const newInvariant = MathSol.mulUpFixed(
+        MathSol.divUpFixed(
+            MathSol.add(bptTotalSupply, bptAmountOut),
+            bptTotalSupply
+        ),
+        currentInvariant
+    );
+
+    // Calculate amount in without fee.
+    const newBalanceTokenIndex =
+        _getTokenBalanceGivenInvariantAndAllOtherBalances(
+            amp,
+            balances,
+            newInvariant,
+            tokenIndexIn
+        );
+    const amountInWithoutFee = MathSol.sub(
+        newBalanceTokenIndex,
+        balances[tokenIndexIn]
+    );
+
+    // First calculate the sum of all token balances, which will be used to calculate
+    // the current weight of each token
+    let sumBalances = BigInt(0);
+    for (let i = 0; i < balances.length; i++) {
+        sumBalances = MathSol.add(sumBalances, balances[i]);
+    }
+
+    // We can now compute how much extra balance is being deposited
+    // and used in virtual swaps, and charge swap fees accordingly.
+    const currentWeight = MathSol.divDownFixed(
+        balances[tokenIndexIn],
+        sumBalances
+    );
+    const taxablePercentage = MathSol.complementFixed(currentWeight);
+    const taxableAmount = MathSol.mulUpFixed(
+        amountInWithoutFee,
+        taxablePercentage
+    );
+    const nonTaxableAmount = MathSol.sub(amountInWithoutFee, taxableAmount);
+
+    return MathSol.add(
+        nonTaxableAmount,
+        MathSol.divUpFixed(taxableAmount, MathSol.sub(MathSol.ONE, fee))
+    );
+}
+
+/*
+Flow of calculations:
+amountsTokenOut -> amountsOutProportional ->
+amountOutPercentageExcess -> amountOutBeforeFee -> newInvariant -> amountBPTIn
+*/
+export function _calcBptInGivenExactTokensOut(
+    amp: bigint,
+    balances: bigint[],
+    amountsOut: bigint[],
+    bptTotalSupply: bigint,
+    swapFeePercentage: bigint
+): bigint {
+    // BPT in, so we round up overall.
+
+    // First loop calculates the sum of all token balances, which will be used to calculate
+    // the current weights of each token relative to this sum
+    let sumBalances = BigInt(0);
+    for (let i = 0; i < balances.length; i++) {
+        sumBalances = sumBalances + balances[i];
+    }
+
+    // Calculate the weighted balance ratio without considering fees
+    let balanceRatiosWithoutFee: bigint[] = new Array(amountsOut.length);
+    let invariantRatioWithoutFees = BigInt(0);
+    for (let i = 0; i < balances.length; i++) {
+        const currentWeight = MathSol.divUpFixed(balances[i], sumBalances);
+        balanceRatiosWithoutFee[i] = MathSol.divUpFixed(
+            balances[i] - amountsOut[i],
+            balances[i]
+        );
+        invariantRatioWithoutFees =
+            invariantRatioWithoutFees +
+            MathSol.mulUpFixed(balanceRatiosWithoutFee[i], currentWeight);
+    }
+
+    // Second loop calculates new amounts in, taking into account the fee on the percentage excess
+    let newBalances: bigint[] = new Array(balances.length);
+    for (let i = 0; i < balances.length; i++) {
+        // Swap fees are typically charged on 'token in', but there is no 'token in' here, so we apply it to
+        // 'token out'. This results in slightly larger price impact.
+
+        let amountOutWithFee: bigint;
+        if (invariantRatioWithoutFees > balanceRatiosWithoutFee[i]) {
+            const nonTaxableAmount = MathSol.mulDownFixed(
+                balances[i],
+                MathSol.complementFixed(invariantRatioWithoutFees)
+            );
+            const taxableAmount = amountsOut[i] - nonTaxableAmount;
+            // No need to use checked arithmetic for the swap fee, it is guaranteed to be lower than 50%
+            amountOutWithFee =
+                nonTaxableAmount +
+                MathSol.divUpFixed(
+                    taxableAmount,
+                    MathSol.ONE - swapFeePercentage
+                );
+        } else {
+            amountOutWithFee = amountsOut[i];
+        }
+        newBalances[i] = balances[i] - amountOutWithFee;
+    }
+
+    // Get current and new invariants, taking into account swap fees
+    const currentInvariant = _calculateInvariant(amp, balances, true);
+    const newInvariant = _calculateInvariant(amp, newBalances, false);
+    const invariantRatio = MathSol.divUpFixed(newInvariant, currentInvariant);
+
+    // return amountBPTIn
+    return MathSol.mulUpFixed(
+        bptTotalSupply,
+        MathSol.complementFixed(invariantRatio)
+    );
+}
+
+export function _calcTokenOutGivenExactBptIn(
+    amp: bigint,
+    balances: bigint[],
+    tokenIndex: number,
+    bptAmountIn: bigint,
+    bptTotalSupply: bigint,
+    swapFeePercentage: bigint
+): bigint {
+    // Token out, so we round down overall.
+
+    // Get the current and new invariants. Since we need a bigger new invariant, we round the current one up.
+    const currentInvariant = _calculateInvariant(amp, balances, true);
+    const newInvariant = MathSol.mulUpFixed(
+        MathSol.divUpFixed(bptTotalSupply - bptAmountIn, bptTotalSupply),
+        currentInvariant
+    );
+
+    // Calculate amount out without fee
+    const newBalanceTokenIndex =
+        _getTokenBalanceGivenInvariantAndAllOtherBalances(
+            amp,
+            balances,
+            newInvariant,
+            tokenIndex
+        );
+    const amountOutWithoutFee = balances[tokenIndex] - newBalanceTokenIndex;
+
+    // First calculate the sum of all token balances, which will be used to calculate
+    // the current weight of each token
+    let sumBalances = BigInt(0);
+    for (let i = 0; i < balances.length; i++) {
+        sumBalances = sumBalances + balances[i];
+    }
+
+    // We can now compute how much excess balance is being withdrawn as a result of the virtual swaps, which result
+    // in swap fees.
+    const currentWeight = MathSol.divDownFixed(
+        balances[tokenIndex],
+        sumBalances
+    );
+    const taxablePercentage = MathSol.complementFixed(currentWeight);
+
+    // Swap fees are typically charged on 'token in', but there is no 'token in' here, so we apply it
+    // to 'token out'. This results in slightly larger price impact. Fees are rounded up.
+    const taxableAmount = MathSol.mulUpFixed(
+        amountOutWithoutFee,
+        taxablePercentage
+    );
+    const nonTaxableAmount = amountOutWithoutFee - taxableAmount;
+
+    // No need to use checked arithmetic for the swap fee, it is guaranteed to be lower than 50%
+    return (
+        nonTaxableAmount +
+        MathSol.mulDownFixed(taxableAmount, MathSol.ONE - swapFeePercentage)
+    );
+}
+
+export function _calcTokensOutGivenExactBptIn(
+    balances: bigint[],
+    bptAmountIn: bigint,
+    bptTotalSupply: bigint
+): bigint[] {
+    /**********************************************************************************************
+    // exactBPTInForTokensOut                                                                    //
+    // (per token)                                                                               //
+    // aO = tokenAmountOut             /        bptIn         \                                  //
+    // b = tokenBalance      a0 = b * | ---------------------  |                                 //
+    // bptIn = bptAmountIn             \     bptTotalSupply    /                                 //
+    // bpt = bptTotalSupply                                                                      //
+    **********************************************************************************************/
+
+    // Since we're computing an amount out, we round down overall. This means rounding down on both the
+    // multiplication and division.
+
+    const bptRatio = MathSol.divDownFixed(bptAmountIn, bptTotalSupply);
+
+    let amountsOut: bigint[] = new Array(balances.length);
+    for (let i = 0; i < balances.length; i++) {
+        amountsOut[i] = MathSol.mulDownFixed(balances[i], bptRatio);
+    }
+
+    return amountsOut;
 }
 
 function _getTokenBalanceGivenInvariantAndAllOtherBalances(
@@ -190,66 +475,6 @@ function addFee(amount: bigint, fee: bigint): bigint {
     return MathSol.divUpFixed(amount, MathSol.complementFixed(fee));
 }
 
-// Untested:
-/* 
-Flow of calculations:
-amountBPTOut -> newInvariant -> (amountInProportional, amountInAfterFee) ->
-amountInPercentageExcess -> amountIn
-*/
-export function _tokenInForExactBPTOut( // _calcTokenInGivenExactBptOut
-    amp: bigint,
-    balances: bigint[],
-    tokenIndexIn: number,
-    bptAmountOut: bigint,
-    bptTotalSupply: bigint,
-    fee: bigint
-): bigint {
-    // Token in, so we round up overall.
-    const currentInvariant = _calculateInvariant(amp, balances, true);
-    const newInvariant = MathSol.mulUpFixed(
-        MathSol.divUp(
-            MathSol.add(bptTotalSupply, bptAmountOut),
-            bptTotalSupply
-        ),
-        currentInvariant
-    );
-
-    // Calculate amount in without fee.
-    const newBalanceTokenIndex =
-        _getTokenBalanceGivenInvariantAndAllOtherBalances(
-            amp,
-            balances,
-            newInvariant,
-            tokenIndexIn
-        );
-    const amountInWithoutFee = MathSol.sub(
-        newBalanceTokenIndex,
-        balances[tokenIndexIn]
-    );
-
-    // First calculate the sum of all token balances, which will be used to calculate
-    // the current weight of each token
-    let sumBalances = BigInt(0);
-    for (let i = 0; i < balances.length; i++) {
-        sumBalances = MathSol.add(sumBalances, balances[i]);
-    }
-
-    // We can now compute how much extra balance is being deposited
-    // and used in virtual swaps, and charge swap fees accordingly.
-    const currentWeight = MathSol.divDown(balances[tokenIndexIn], sumBalances);
-    const taxablePercentage = MathSol.complementFixed(currentWeight);
-    const taxableAmount = MathSol.mulUpFixed(
-        amountInWithoutFee,
-        taxablePercentage
-    );
-    const nonTaxableAmount = MathSol.sub(amountInWithoutFee, taxableAmount);
-
-    return MathSol.add(
-        nonTaxableAmount,
-        MathSol.divUp(taxableAmount, MathSol.sub(MathSol.ONE, fee))
-    );
-}
-
 /////////
 /// SpotPriceAfterSwap
 /////////
@@ -272,7 +497,7 @@ export function _spotPriceAfterSwapExactTokenInForTokenOut(
     );
     balances[tokenIndexOut] = MathSol.sub(
         balances[tokenIndexOut],
-        _exactTokenInForTokenOut(
+        _calcOutGivenIn(
             amp,
             balancesCopy,
             tokenIndexIn,
@@ -307,7 +532,7 @@ export function _spotPriceAfterSwapTokenInForExactTokenOut(
     fee: bigint
 ): BigInt {
     const balancesCopy = [...balances];
-    let _in = _tokenInForExactTokenOut(
+    let _in = _calcInGivenOut(
         amp,
         balancesCopy,
         tokenIndexIn,

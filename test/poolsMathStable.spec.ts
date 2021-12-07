@@ -9,9 +9,9 @@ import { _poolDerivatives } from '../src/poolsMath/stable';
 
 describe('poolsMathStable: numeric functions using bigint', () => {
     context('stable pools', () => {
-        it('_exactTokenInForTokenOut', () => {
+        it('out given in', () => {
             const { result, SDKResult } = getBothValuesStable(
-                stable._exactTokenInForTokenOut,
+                stable._calcOutGivenIn,
                 SDK.StableMath._calcOutGivenIn,
                 1000,
                 [1000, 3000, 2000],
@@ -26,9 +26,9 @@ describe('poolsMathStable: numeric functions using bigint', () => {
                 'wrong result'
             );
         });
-        it('_tokenInForExactTokenOut', () => {
+        it('in given out', () => {
             const { result, SDKResult } = getBothValuesStable(
-                stable._tokenInForExactTokenOut,
+                stable._calcInGivenOut,
                 SDK.StableMath._calcInGivenOut,
                 1000,
                 [3000, 1000, 1000],
@@ -43,11 +43,48 @@ describe('poolsMathStable: numeric functions using bigint', () => {
                 'wrong result'
             );
         });
+        it('bpt out given in', () => {
+            const { result, SDKResult } = getBothValuesStableBPTOutGivenIn(
+                stable._calcBptOutGivenExactTokensIn,
+                SDK.StableMath._calcBptOutGivenExactTokensIn,
+                1000,
+                [3000, 1000, 1000],
+                [10, 20, 5],
+                1600,
+                0.01
+            );
+            assert.equal(
+                result.toString(),
+                SDKResult.toString(),
+                'wrong result'
+            );
+        });
+        it('in given bpt out', () => {
+            const { result, SDKResult } = getBothValuesStableInGivenBPTOut(
+                stable._calcTokenInGivenExactBptOut,
+                SDK.StableMath._calcTokenInGivenExactBptOut,
+                1000,
+                [3000, 1000, 1000],
+                0,
+                60,
+                1600,
+                0.01
+            );
+            assert.equal(
+                result.toString(),
+                SDKResult.toString(),
+                'wrong result'
+            );
+        });
+        // TO DO:
+        // _calcBptInGivenExactTokensOut
+        // _calcTokenOutGivenExactBptIn
+        // _calcTokensOutGivenExactBptIn
         it('_spotPriceAfterSwapExactTokenInForTokenOut', () => {
             const delta = 0.01;
             const error = 0.00001;
             checkDerivative_stable(
-                stable._exactTokenInForTokenOut,
+                stable._calcOutGivenIn,
                 stable._spotPriceAfterSwapExactTokenInForTokenOut,
                 10,
                 [15000, 30000, 10000],
@@ -60,7 +97,7 @@ describe('poolsMathStable: numeric functions using bigint', () => {
                 true
             );
             checkDerivative_stable(
-                stable._exactTokenInForTokenOut,
+                stable._calcOutGivenIn,
                 stable._spotPriceAfterSwapExactTokenInForTokenOut,
                 10,
                 [15000, 30000, 10000],
@@ -74,7 +111,7 @@ describe('poolsMathStable: numeric functions using bigint', () => {
             );
 
             checkDerivative_stable(
-                stable._tokenInForExactTokenOut,
+                stable._calcInGivenOut,
                 stable._spotPriceAfterSwapTokenInForExactTokenOut,
                 10,
                 [10000, 10000, 10000],
@@ -133,7 +170,87 @@ function getBothValuesStable(
     return { result, SDKResult };
 }
 
-// To do: basic debug of components
+function getBothValuesStableBPTOutGivenIn(
+    SORFunction: (
+        amp: bigint,
+        balances: bigint[],
+        amountsIn: bigint[],
+        bptTotalSupply: bigint,
+        swapFeePercentage: bigint
+    ) => bigint,
+    SDKFunction: (
+        amp: OldBigNumber,
+        balances: OldBigNumber[],
+        amountsIn: OldBigNumber[],
+        bptTotalSupply: OldBigNumber,
+        swapFeePercentage: OldBigNumber
+    ) => OldBigNumber,
+    amp: number,
+    balances: number[],
+    amountsIn: number[],
+    bptTotalSupply: number,
+    fee: number
+): { result: any; SDKResult: any } {
+    const result = SORFunction(
+        BigInt(amp),
+        balances.map((amount) => s(amount)),
+        amountsIn.map((amount) => s(amount)),
+        s(bptTotalSupply),
+        s(fee)
+    );
+    const SDKResult = SDKFunction(
+        bnum(amp),
+        balances.map((amount) => b(amount)),
+        amountsIn.map((amount) => b(amount)),
+        b(bptTotalSupply),
+        b(fee)
+    );
+    return { result, SDKResult };
+}
+
+function getBothValuesStableInGivenBPTOut(
+    SORFunction: (
+        amp: bigint,
+        balances: bigint[],
+        tokenIndexIn: number,
+        bptAmountOut: bigint,
+        bptTotalSupply: bigint,
+        fee: bigint
+    ) => bigint,
+    SDKFunction: (
+        amp: OldBigNumber,
+        balances: OldBigNumber[],
+        tokenIndexIn: number,
+        bptAmountOut: OldBigNumber,
+        bptTotalSupply: OldBigNumber,
+        fee: OldBigNumber
+    ) => OldBigNumber,
+    amp: number,
+    balances: number[],
+    tokenIndexIn: number,
+    bptAmountOut: number,
+    bptTotalSupply: number,
+    fee: number
+): { result: any; SDKResult: any } {
+    const result = SORFunction(
+        BigInt(amp),
+        balances.map((amount) => s(amount)),
+        tokenIndexIn,
+        s(bptAmountOut),
+        s(bptTotalSupply),
+        s(fee)
+    );
+    const SDKResult = SDKFunction(
+        bnum(amp),
+        balances.map((amount) => b(amount)),
+        tokenIndexIn,
+        b(bptAmountOut),
+        b(bptTotalSupply),
+        b(fee)
+    );
+    return { result, SDKResult };
+}
+
 function checkDerivative_stable(
     fn: any,
     der: any,
