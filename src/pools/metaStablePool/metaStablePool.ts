@@ -24,7 +24,7 @@ import {
     _derivativeSpotPriceAfterSwapExactTokenInForTokenOut,
     _derivativeSpotPriceAfterSwapTokenInForExactTokenOut,
 } from './metaStableMath';
-import { StablePoolPairData } from 'pools/stablePool/stablePool';
+import { StablePoolPairData } from '../stablePool/stablePool';
 
 type MetaStablePoolToken = Pick<
     SubgraphToken,
