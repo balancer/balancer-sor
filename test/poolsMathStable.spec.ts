@@ -3,9 +3,6 @@ import * as SDK from '@georgeroman/balancer-v2-pools';
 import { BigNumber as OldBigNumber, bnum } from '../src/utils/bignumber';
 import { assert } from 'chai';
 import { MathSol } from '../src/poolsMath/basicOperations';
-import { _poolDerivatives as _oldPoolDerivatives } from '../src/pools/stablePool/oldButUsefulStableMath';
-import { _poolDerivatives as _currentPoolDerivatives } from '../src/pools/stablePool/stableMath';
-import { _poolDerivatives } from '../src/poolsMath/stable';
 
 describe('poolsMathStable: numeric functions using bigint', () => {
     context('stable pools', () => {
@@ -43,8 +40,8 @@ describe('poolsMathStable: numeric functions using bigint', () => {
                 'wrong result'
             );
         });
-        it('bpt out given in', () => {
-            const { result, SDKResult } = getBothValuesStableBPTOutGivenIn(
+        it('bpt out given tokens in', () => {
+            const { result, SDKResult } = getBothValuesBPTGivenExactTokens(
                 stable._calcBptOutGivenExactTokensIn,
                 SDK.StableMath._calcBptOutGivenExactTokensIn,
                 1000,
@@ -60,7 +57,7 @@ describe('poolsMathStable: numeric functions using bigint', () => {
             );
         });
         it('in given bpt out', () => {
-            const { result, SDKResult } = getBothValuesStableInGivenBPTOut(
+            const { result, SDKResult } = getBothValuesTokenGivenBPT(
                 stable._calcTokenInGivenExactBptOut,
                 SDK.StableMath._calcTokenInGivenExactBptOut,
                 1000,
@@ -76,10 +73,54 @@ describe('poolsMathStable: numeric functions using bigint', () => {
                 'wrong result'
             );
         });
-        // TO DO:
-        // _calcBptInGivenExactTokensOut
-        // _calcTokenOutGivenExactBptIn
-        // _calcTokensOutGivenExactBptIn
+        it('bpt in given tokens out', () => {
+            const { result, SDKResult } = getBothValuesBPTGivenExactTokens(
+                stable._calcBptInGivenExactTokensOut,
+                SDK.StableMath._calcBptInGivenExactTokensOut,
+                1000,
+                [3000, 1000, 1000],
+                [10, 20, 5],
+                1600,
+                0.01
+            );
+            assert.equal(
+                result.toString(),
+                SDKResult.toString(),
+                'wrong result'
+            );
+        });
+        it('out given bpt in', () => {
+            const { result, SDKResult } = getBothValuesTokenGivenBPT(
+                stable._calcTokenOutGivenExactBptIn,
+                SDK.StableMath._calcTokenOutGivenExactBptIn,
+                1000,
+                [3000, 1000, 1000],
+                0,
+                60,
+                1600,
+                0.01
+            );
+            assert.equal(
+                result.toString(),
+                SDKResult.toString(),
+                'wrong result'
+            );
+        });
+        it('tokens out given bpt in', () => {
+            const { result, SDKResult } = getBothValuesTokensOutGivenBPTIn(
+                stable._calcTokensOutGivenExactBptIn,
+                SDK.StableMath._calcTokensOutGivenExactBptIn,
+                [3000, 1000, 1000],
+                60,
+                1600
+            );
+            assert.equal(
+                result.toString(),
+                SDKResult.toString(),
+                'wrong result'
+            );
+        });
+
         it('_spotPriceAfterSwapExactTokenInForTokenOut', () => {
             const delta = 0.01;
             const error = 0.00001;
@@ -170,50 +211,50 @@ function getBothValuesStable(
     return { result, SDKResult };
 }
 
-function getBothValuesStableBPTOutGivenIn(
+function getBothValuesBPTGivenExactTokens(
     SORFunction: (
         amp: bigint,
         balances: bigint[],
-        amountsIn: bigint[],
+        amounts: bigint[],
         bptTotalSupply: bigint,
         swapFeePercentage: bigint
     ) => bigint,
     SDKFunction: (
         amp: OldBigNumber,
         balances: OldBigNumber[],
-        amountsIn: OldBigNumber[],
+        amounts: OldBigNumber[],
         bptTotalSupply: OldBigNumber,
         swapFeePercentage: OldBigNumber
     ) => OldBigNumber,
     amp: number,
     balances: number[],
-    amountsIn: number[],
+    amounts: number[],
     bptTotalSupply: number,
     fee: number
 ): { result: any; SDKResult: any } {
     const result = SORFunction(
         BigInt(amp),
         balances.map((amount) => s(amount)),
-        amountsIn.map((amount) => s(amount)),
+        amounts.map((amount) => s(amount)),
         s(bptTotalSupply),
         s(fee)
     );
     const SDKResult = SDKFunction(
         bnum(amp),
         balances.map((amount) => b(amount)),
-        amountsIn.map((amount) => b(amount)),
+        amounts.map((amount) => b(amount)),
         b(bptTotalSupply),
         b(fee)
     );
     return { result, SDKResult };
 }
 
-function getBothValuesStableInGivenBPTOut(
+function getBothValuesTokenGivenBPT(
     SORFunction: (
         amp: bigint,
         balances: bigint[],
         tokenIndexIn: number,
-        bptAmountOut: bigint,
+        bptAmount: bigint,
         bptTotalSupply: bigint,
         fee: bigint
     ) => bigint,
@@ -221,14 +262,14 @@ function getBothValuesStableInGivenBPTOut(
         amp: OldBigNumber,
         balances: OldBigNumber[],
         tokenIndexIn: number,
-        bptAmountOut: OldBigNumber,
+        bptAmount: OldBigNumber,
         bptTotalSupply: OldBigNumber,
         fee: OldBigNumber
     ) => OldBigNumber,
     amp: number,
     balances: number[],
     tokenIndexIn: number,
-    bptAmountOut: number,
+    bptAmount: number,
     bptTotalSupply: number,
     fee: number
 ): { result: any; SDKResult: any } {
@@ -236,7 +277,7 @@ function getBothValuesStableInGivenBPTOut(
         BigInt(amp),
         balances.map((amount) => s(amount)),
         tokenIndexIn,
-        s(bptAmountOut),
+        s(bptAmount),
         s(bptTotalSupply),
         s(fee)
     );
@@ -244,9 +285,37 @@ function getBothValuesStableInGivenBPTOut(
         bnum(amp),
         balances.map((amount) => b(amount)),
         tokenIndexIn,
-        b(bptAmountOut),
+        b(bptAmount),
         b(bptTotalSupply),
         b(fee)
+    );
+    return { result, SDKResult };
+}
+
+function getBothValuesTokensOutGivenBPTIn(
+    SORFunction: (
+        balances: bigint[],
+        bptAmountIn: bigint,
+        bptTotalSupply: bigint
+    ) => bigint[],
+    SDKFunction: (
+        balances: OldBigNumber[],
+        bptAmountIn: OldBigNumber,
+        bptTotalSupply: OldBigNumber
+    ) => OldBigNumber[],
+    balances: number[],
+    bptAmountIn: number,
+    bptTotalSupply: number
+): { result: any; SDKResult: any } {
+    const result = SORFunction(
+        balances.map((amount) => s(amount)),
+        s(bptAmountIn),
+        s(bptTotalSupply)
+    );
+    const SDKResult = SDKFunction(
+        balances.map((amount) => b(amount)),
+        b(bptAmountIn),
+        b(bptTotalSupply)
     );
     return { result, SDKResult };
 }
@@ -265,13 +334,13 @@ function checkDerivative_stable(
     inverse = false
 ) {
     const amp = BigInt(num_amp);
-    const balances1 = num_balances.map((balance, i) => {
+    const balances1 = num_balances.map((balance) => {
         return s(balance);
     });
-    const balances2 = num_balances.map((balance, i) => {
+    const balances2 = num_balances.map((balance) => {
         return s(balance);
     });
-    const balances3 = num_balances.map((balance, i) => {
+    const balances3 = num_balances.map((balance) => {
         return s(balance);
     });
     const amount = s(num_amount);

@@ -138,11 +138,11 @@ export function _calcBptOutGivenExactTokensIn(
     }
 
     // Calculate the weighted balance ratio without considering fees
-    let balanceRatiosWithFee: bigint[] = new Array(amountsIn.length);
+    const balanceRatiosWithFee: bigint[] = new Array(amountsIn.length);
     // The weighted sum of token balance ratios with fee
     let invariantRatioWithFees = BigInt(0);
     for (let i = 0; i < balances.length; i++) {
-        let currentWeight = MathSol.divDownFixed(balances[i], sumBalances);
+        const currentWeight = MathSol.divDownFixed(balances[i], sumBalances);
         balanceRatiosWithFee[i] = MathSol.divDownFixed(
             balances[i] + amountsIn[i],
             balances[i]
@@ -153,7 +153,7 @@ export function _calcBptOutGivenExactTokensIn(
     }
 
     // Second loop calculates new amounts in, taking into account the fee on the percentage excess
-    let newBalances: bigint[] = new Array(balances.length);
+    const newBalances: bigint[] = new Array(balances.length);
     for (let i = 0; i < balances.length; i++) {
         let amountInWithoutFee: bigint;
 
@@ -272,7 +272,7 @@ export function _calcBptInGivenExactTokensOut(
     }
 
     // Calculate the weighted balance ratio without considering fees
-    let balanceRatiosWithoutFee: bigint[] = new Array(amountsOut.length);
+    const balanceRatiosWithoutFee: bigint[] = new Array(amountsOut.length);
     let invariantRatioWithoutFees = BigInt(0);
     for (let i = 0; i < balances.length; i++) {
         const currentWeight = MathSol.divUpFixed(balances[i], sumBalances);
@@ -286,7 +286,7 @@ export function _calcBptInGivenExactTokensOut(
     }
 
     // Second loop calculates new amounts in, taking into account the fee on the percentage excess
-    let newBalances: bigint[] = new Array(balances.length);
+    const newBalances: bigint[] = new Array(balances.length);
     for (let i = 0; i < balances.length; i++) {
         // Swap fees are typically charged on 'token in', but there is no 'token in' here, so we apply it to
         // 'token out'. This results in slightly larger price impact.
@@ -314,7 +314,7 @@ export function _calcBptInGivenExactTokensOut(
     // Get current and new invariants, taking into account swap fees
     const currentInvariant = _calculateInvariant(amp, balances, true);
     const newInvariant = _calculateInvariant(amp, newBalances, false);
-    const invariantRatio = MathSol.divUpFixed(newInvariant, currentInvariant);
+    const invariantRatio = MathSol.divDownFixed(newInvariant, currentInvariant);
 
     // return amountBPTIn
     return MathSol.mulUpFixed(
@@ -399,7 +399,7 @@ export function _calcTokensOutGivenExactBptIn(
 
     const bptRatio = MathSol.divDownFixed(bptAmountIn, bptTotalSupply);
 
-    let amountsOut: bigint[] = new Array(balances.length);
+    const amountsOut: bigint[] = new Array(balances.length);
     for (let i = 0; i < balances.length; i++) {
         amountsOut[i] = MathSol.mulDownFixed(balances[i], bptRatio);
     }
@@ -532,7 +532,7 @@ export function _spotPriceAfterSwapTokenInForExactTokenOut(
     fee: bigint
 ): BigInt {
     const balancesCopy = [...balances];
-    let _in = _calcInGivenOut(
+    const _in = _calcInGivenOut(
         amp,
         balancesCopy,
         tokenIndexIn,
@@ -566,35 +566,34 @@ export function _poolDerivatives(
     is_first_derivative: boolean,
     wrt_out: boolean
 ): bigint {
-    let totalCoins = balances.length;
-    let D = _calculateInvariant(amp, balances, true);
+    const totalCoins = balances.length;
+    const D = _calculateInvariant(amp, balances, true);
     let S = BigInt(0);
     for (let i = 0; i < totalCoins; i++) {
         if (i != tokenIndexIn && i != tokenIndexOut) {
             S += balances[i];
         }
     }
-    let x = balances[tokenIndexIn];
-    let y = balances[tokenIndexOut];
-    let a = amp * BigInt(totalCoins);
-    let b = a * (S - D) + D * AMP_PRECISION;
-    let twoaxy = BigInt(2) * a * x * y;
-    let partial_x = twoaxy + a * y * y + b * y;
-    let partial_y = twoaxy + a * x * x + b * x;
+    const x = balances[tokenIndexIn];
+    const y = balances[tokenIndexOut];
+    const a = amp * BigInt(totalCoins);
+    const b = a * (S - D) + D * AMP_PRECISION;
+    const twoaxy = BigInt(2) * a * x * y;
+    const partial_x = twoaxy + a * y * y + b * y;
+    const partial_y = twoaxy + a * x * x + b * x;
     let ans: bigint;
     if (is_first_derivative) {
         ans = MathSol.divUpFixed(partial_x, partial_y);
     } else {
         // Untested case:
-        let partial_xx = BigInt(2) * a * y;
-        let partial_yy = BigInt(2) * a * x;
-        let partial_xy = partial_xx + partial_yy + b; // AMP_PRECISION missing
-        let numerator: bigint;
-        numerator =
+        const partial_xx = BigInt(2) * a * y;
+        const partial_yy = BigInt(2) * a * x;
+        const partial_xy = partial_xx + partial_yy + b; // AMP_PRECISION missing
+        const numerator =
             BigInt(2) * partial_x * partial_y * partial_xy -
             partial_xx * partial_y * partial_y +
             partial_yy * partial_x * partial_x;
-        let denominator = partial_x * partial_x * partial_y;
+        const denominator = partial_x * partial_x * partial_y;
         ans = MathSol.divUpFixed(numerator, denominator); // change the order to directly use integer operations
         if (wrt_out) {
             ans = MathSol.mulUpFixed(
