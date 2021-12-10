@@ -1948,7 +1948,7 @@
             "swapFee": "0.001",
             "tokens": [
                 {
-                    "address": "0x21ff756ca0cfcc5fff488ad67babadffee0c4149",
+                    "address": "0x8fd162f338b770f7e879030830cde9173367f301",
                     "balance": "450",
                     "decimals": 18,
                     "priceRate": "1",
@@ -1963,7 +1963,7 @@
                 }
             ],
             "tokensList": [
-                "0x21ff756ca0cfcc5fff488ad67babadffee0c4149",
+                "0x8fd162f338b770f7e879030830cde9173367f301",
                 "0xdfcea9088c8a88a76ff74892c1457c17dfeef9c1"
             ],
             "totalShares": "13.416407864998469756",
@@ -14471,11 +14471,11 @@
             "wrappedIndex": 0
         },
         {
-            "address": "0x21ff756ca0cfcc5fff488ad67babadffee0c4149",
+            "address": "0x8fd162f338b770f7e879030830cde9173367f301",
             "amp": "400",
             "baseToken": "null",
             "expiryTime": 0,
-            "id": "0x21ff756ca0cfcc5fff488ad67babadffee0c4149000000000000000000000240",
+            "id": "0x8fd162f338b770f7e879030830cde9173367f3010000000000000000000004d8",
             "lowerTarget": "null",
             "mainIndex": 0,
             "poolType": "StablePhantom",
@@ -14484,7 +14484,7 @@
             "swapFee": "0.01",
             "tokens": [
                 {
-                    "address": "0x21ff756ca0cfcc5fff488ad67babadffee0c4149",
+                    "address": "0x8fd162f338b770f7e879030830cde9173367f301",
                     "balance": "5192296858515854.535602194932501075",
                     "decimals": 18,
                     "priceRate": "1",
@@ -14513,7 +14513,7 @@
                 }
             ],
             "tokensList": [
-                "0x21ff756ca0cfcc5fff488ad67babadffee0c4149",
+                "0x8fd162f338b770f7e879030830cde9173367f301",
                 "0x3d1b554f1b1d1b6108b601ff22fea9c90fdfe50d",
                 "0x6a8c3239695613c0710dc971310b36f9b81e115e",
                 "0xcd32a460b6fecd053582e43b07ed6e2c04e15369"

@@ -93,21 +93,11 @@ export async function getOnChainBalances(
             );
 
             multiPool.call(`${pool.id}.targets`, pool.address, 'getTargets');
-
-            if (pool.wrappedIndex !== undefined) {
-                // We want to find the priceRate provider for the wrappedToken
-                const wrappedToken = pool.tokensList[pool.wrappedIndex];
-                const provider = pool.priceRateProviders?.find((provider) =>
-                    isSameAddress(provider.token.address, wrappedToken)
-                );
-                if (provider !== undefined) {
-                    multiPool.call(
-                        `${pool.id}.rate`,
-                        provider.address,
-                        'getRate'
-                    );
-                }
-            }
+            multiPool.call(
+                `${pool.id}.rate`,
+                pool.address,
+                'getWrappedTokenRate'
+            );
         }
     });
 
