@@ -37,7 +37,7 @@ export const SUBGRAPH_URLS = {
     [Network.GOERLI]:
         'https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-goerli-v2',
     [Network.KOVAN]:
-        'https://api.thegraph.com/subgraphs/name/destiner/balancer-kovan-v2',
+        'https://api.thegraph.com/subgraphs/name/mendesfabio/balancer-kovan-v2',
     [Network.POLYGON]:
         'https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-polygon-v2',
     [Network.ARBITRUM]: `https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-arbitrum-v2`,
@@ -144,30 +144,30 @@ export const ADDRESSES = {
             decimals: 6,
             symbol: 'aUSDT',
         },
+        bUSDT: {
+            address: '0xe667d48618e71c2a02e4a1b66ed9def1426938b6',
+            decimals: 18,
+            symbol: 'bUSDT',
+        },
         aUSDC: {
             address: '0x0fbddc06a4720408a2f5eb78e62bc31ac6e2a3c4',
             decimals: 6,
             symbol: 'aUSDC',
         },
-        bUSDT: {
-            address: '0x6a8c3239695613c0710dc971310b36f9b81e115e',
-            decimals: 18,
-            symbol: 'bUSDT',
-        },
-        bDAI: {
-            address: '0xcd32a460b6fecd053582e43b07ed6e2c04e15369',
-            decimals: 18,
-            symbol: 'bDAI',
-        },
-        STABAL3: {
-            address: '0x21ff756ca0cfcc5fff488ad67babadffee0c4149',
-            decimals: 18,
-            symbol: 'STABAL3',
-        },
         DAI_from_AAVE: {
             address: '0xff795577d9ac8bd7d90ee22b6c1703490b6512fd',
             decimals: 18,
             symbol: 'DAI_from_AAVE',
+        },
+        bDAI: {
+            address: '0xfcccb77a946b6a3bd59d149f083b5bfbb8004d6d',
+            decimals: 18,
+            symbol: 'bDAI',
+        },
+        STABAL3: {
+            address: '0x8fd162f338b770f7e879030830cde9173367f301',
+            decimals: 18,
+            symbol: 'STABAL3',
         },
     },
     [Network.POLYGON]: {
@@ -595,9 +595,9 @@ async function simpleSwap() {
     // Update pools list with most recent onchain balances
     const queryOnChain = true;
     const tokenIn = ADDRESSES[networkId].STABAL3;
-    const tokenOut = ADDRESSES[networkId].aUSDC;
+    const tokenOut = ADDRESSES[networkId].DAI_from_AAVE;
     const swapType = SwapTypes.SwapExactIn;
-    const swapAmount = parseFixed('1000', 18);
+    const swapAmount = parseFixed('10', 18);
     const executeTrade = true;
 
     const provider = new JsonRpcProvider(PROVIDER_URLS[networkId]);
