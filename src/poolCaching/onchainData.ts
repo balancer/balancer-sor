@@ -1,6 +1,6 @@
 import { formatFixed } from '@ethersproject/bignumber';
 import { Provider } from '@ethersproject/providers';
-import { SubgraphPoolBase } from '../types';
+import { SubgraphPoolBase, PoolFilter } from '../types';
 import { isSameAddress } from '../utils';
 import { Multicaller } from '../utils/multicaller';
 
@@ -13,12 +13,12 @@ import elementPoolAbi from '../pools/elementPool/ConvergentCurvePool.json';
 import linearPoolAbi from '../pools/linearPool/linearPoolAbi.json';
 
 export async function getOnChainBalances(
-    subgraphPools: SubgraphPoolBase[],
+    subgraphPoolsOriginal: SubgraphPoolBase[],
     multiAddress: string,
     vaultAddress: string,
     provider: Provider
 ): Promise<SubgraphPoolBase[]> {
-    if (subgraphPools.length === 0) return subgraphPools;
+    if (subgraphPoolsOriginal.length === 0) return subgraphPoolsOriginal;
 
     const abis: any = Object.values(
         // Remove duplicate entries using their names
@@ -36,7 +36,16 @@ export async function getOnChainBalances(
 
     const multiPool = new Multicaller(multiAddress, provider, abis);
 
-    subgraphPools.forEach((pool) => {
+    const supportedPoolTypes: string[] = Object.values(PoolFilter);
+    const subgraphPools: SubgraphPoolBase[] = [];
+    subgraphPoolsOriginal.forEach((pool) => {
+        if (!supportedPoolTypes.includes(pool.poolType)) {
+            console.error(`Unknown pool type: ${pool.poolType} ${pool.id}`);
+            return;
+        }
+
+        subgraphPools.push(pool);
+
         multiPool.call(`${pool.id}.poolTokens`, vaultAddress, 'getPoolTokens', [
             pool.id,
         ]);
