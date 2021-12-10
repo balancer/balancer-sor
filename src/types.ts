@@ -66,14 +66,6 @@ export interface SubgraphPoolBase {
     totalShares: string;
     tokens: SubgraphToken[];
     tokensList: string[];
-    priceRateProviders?: [
-        {
-            address: string;
-            token: {
-                address: string;
-            };
-        }
-    ];
 
     // Weighted & Element field
     totalWeight?: string;
@@ -149,6 +141,8 @@ export enum PoolFilter {
     LBP = 'LiquidityBootstrapping',
     Investment = 'Investment',
     Element = 'Element',
+    Linear = 'Linear',
+    StablePhantom = 'StablePhantom',
 }
 
 export interface PoolBase {
