@@ -72,7 +72,12 @@ describe('linear pool tests', () => {
             const tokenIn = DAI;
             const tokenOut = aDAI;
             const poolSG = cloneDeep(singleLinear).pools[0];
-            testParsePool(poolSG, tokenIn, tokenOut, PairTypes.TokenToToken);
+            testParsePool(
+                poolSG,
+                tokenIn,
+                tokenOut,
+                PairTypes.MainTokenToWrappedToken
+            );
         });
 
         it(`should correctly parse wrappedToken > phantomBpt`, async () => {
@@ -113,14 +118,14 @@ describe('linear pool tests', () => {
                 SwapTypes.SwapExactIn
             );
 
-            expect(amount.toString()).to.eq('0');
+            expect(amount.toString()).to.eq('1485000000.122222221232222221');
 
             amount = pool.getLimitAmountSwap(
                 poolPairData,
                 SwapTypes.SwapExactOut
             );
 
-            expect(amount.toString()).to.eq('0');
+            expect(amount.toString()).to.eq('1485000000.122222221232222221');
         });
 
         it(`getLimitAmountSwap, SwapExactIn, TokenToBpt should return valid limit`, async () => {

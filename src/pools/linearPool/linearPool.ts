@@ -35,7 +35,8 @@ import {
 export enum PairTypes {
     BptToMainToken,
     MainTokenToBpt,
-    TokenToToken,
+    MainTokenToWrappedToken,
+    WrappedTokenToMainToken,
     BptToWrappedToken,
     WrappedTokenToBpt,
 }
@@ -155,7 +156,9 @@ export class LinearPool implements PoolBase {
                 pairType = PairTypes.WrappedTokenToBpt;
             else pairType = PairTypes.MainTokenToBpt;
         } else {
-            pairType = PairTypes.TokenToToken;
+            if (isSameAddress(tokenIn, this.tokens[this.wrappedIndex].address))
+                pairType = PairTypes.WrappedTokenToMainToken;
+            else pairType = PairTypes.MainTokenToWrappedToken;
         }
 
         // Get all token balances scaled to 18
@@ -261,7 +264,20 @@ export class LinearPool implements PoolBase {
 
                 // Returning Human scale
                 return limit;
-            } else return bnum(0); // LinearPool does not support TokenToToken
+            } else if (
+                linearPoolPairData.pairType ===
+                    PairTypes.MainTokenToWrappedToken ||
+                linearPoolPairData.pairType ===
+                    PairTypes.WrappedTokenToMainToken
+            ) {
+                const limit = bnum(
+                    poolPairData.balanceOut
+                        .mul(this.ALMOST_ONE)
+                        .div(ONE)
+                        .toString()
+                );
+                return scale(limit, -poolPairData.decimalsOut);
+            } else return bnum(0);
         } else {
             if (
                 linearPoolPairData.pairType === PairTypes.MainTokenToBpt ||
@@ -276,7 +292,11 @@ export class LinearPool implements PoolBase {
                 return scale(limit, -poolPairData.decimalsOut);
             } else if (
                 linearPoolPairData.pairType === PairTypes.BptToMainToken ||
-                linearPoolPairData.pairType === PairTypes.BptToWrappedToken
+                linearPoolPairData.pairType === PairTypes.BptToWrappedToken ||
+                linearPoolPairData.pairType ===
+                    PairTypes.MainTokenToWrappedToken ||
+                linearPoolPairData.pairType ===
+                    PairTypes.WrappedTokenToMainToken
             ) {
                 const limit = bnum(
                     poolPairData.balanceOut
@@ -285,7 +305,7 @@ export class LinearPool implements PoolBase {
                         .toString()
                 );
                 return scale(limit, -poolPairData.decimalsOut);
-            } else return bnum(0); // LinearPool does not support TokenToToken
+            } else return bnum(0);
         }
     }
 
@@ -317,7 +337,83 @@ export class LinearPool implements PoolBase {
                 amount,
                 exact
             );
-        } else return bnum(0); // LinearPool does not support TokenToToken
+        } else if (
+            poolPairData.pairType === PairTypes.MainTokenToWrappedToken
+        ) {
+            return this._exactMainTokenInForWrappedOut(
+                poolPairData,
+                amount,
+                exact
+            );
+        } else if (
+            poolPairData.pairType === PairTypes.WrappedTokenToMainToken
+        ) {
+            return this._exactWrappedTokenInForMainOut(
+                poolPairData,
+                amount,
+                exact
+            );
+        } else return bnum(0);
+    }
+
+    _exactWrappedTokenInForMainOut(
+        poolPairData: LinearPoolPairData,
+        amount: OldBigNumber,
+        exact: boolean
+    ): OldBigNumber {
+        try {
+            // All values should use 1e18 fixed point
+            // i.e. 1USDC => 1e18 not 1e6
+            const amtScaled = scale(amount, 18);
+
+            const amt = SDK.LinearMath._calcMainOutPerWrappedIn(
+                amtScaled,
+                bnum(poolPairData.mainBalanceScaled.toString()),
+                {
+                    fee: bnum(poolPairData.swapFee.toString()),
+                    rate: poolPairData.rate,
+                    lowerTarget: bnum(poolPairData.lowerTarget.toString()),
+                    upperTarget: bnum(poolPairData.upperTarget.toString()),
+                }
+            );
+            // return human readable number
+            // Using BigNumber.js decimalPlaces (dp), allows us to consider token decimal accuracy correctly,
+            // i.e. when using token with 2decimals 0.002 should be returned as 0
+            // Uses ROUND_DOWN mode (1)
+            return scale(amt, -18).dp(poolPairData.decimalsOut, 1);
+        } catch (err) {
+            return ZERO;
+        }
+    }
+
+    _exactMainTokenInForWrappedOut(
+        poolPairData: LinearPoolPairData,
+        amount: OldBigNumber,
+        exact: boolean
+    ): OldBigNumber {
+        try {
+            // All values should use 1e18 fixed point
+            // i.e. 1USDC => 1e18 not 1e6
+            const amtScaled = scale(amount, 18);
+
+            const amt = SDK.LinearMath._calcWrappedOutPerMainIn(
+                amtScaled,
+                bnum(poolPairData.mainBalanceScaled.toString()),
+                {
+                    fee: bnum(poolPairData.swapFee.toString()),
+                    rate: poolPairData.rate,
+                    lowerTarget: bnum(poolPairData.lowerTarget.toString()),
+                    upperTarget: bnum(poolPairData.upperTarget.toString()),
+                }
+            );
+            // return human readable number
+            // Using BigNumber.js decimalPlaces (dp), allows us to consider token decimal accuracy correctly,
+            // i.e. when using token with 2decimals 0.002 should be returned as 0
+            // Uses ROUND_DOWN mode (1)
+            return scale(amt, -18).dp(poolPairData.decimalsOut, 1);
+        } catch (err) {
+            return ZERO;
+        }
     }
 
     _exactMainTokenInForBPTOut(
@@ -475,7 +571,83 @@ export class LinearPool implements PoolBase {
                 amount,
                 exact
             );
+        } else if (
+            poolPairData.pairType === PairTypes.MainTokenToWrappedToken
+        ) {
+            return this._mainTokenInForExactWrappedOut(
+                poolPairData,
+                amount,
+                exact
+            );
+        } else if (
+            poolPairData.pairType === PairTypes.WrappedTokenToMainToken
+        ) {
+            return this._wrappedTokenInForExactMainOut(
+                poolPairData,
+                amount,
+                exact
+            );
         } else return bnum(0); // LinearPool does not support TokenToToken
+    }
+
+    _wrappedTokenInForExactMainOut(
+        poolPairData: LinearPoolPairData,
+        amount: OldBigNumber,
+        exact: boolean
+    ): OldBigNumber {
+        try {
+            // All values should use 1e18 fixed point
+            // i.e. 1USDC => 1e18 not 1e6
+            const amtScaled = scale(amount, 18);
+
+            const amt = SDK.LinearMath._calcWrappedInPerMainOut(
+                amtScaled,
+                bnum(poolPairData.mainBalanceScaled.toString()),
+                {
+                    fee: bnum(poolPairData.swapFee.toString()),
+                    rate: poolPairData.rate,
+                    lowerTarget: bnum(poolPairData.lowerTarget.toString()),
+                    upperTarget: bnum(poolPairData.upperTarget.toString()),
+                }
+            );
+            // return human readable number
+            // Using BigNumber.js decimalPlaces (dp), allows us to consider token decimal accuracy correctly,
+            // i.e. when using token with 2decimals 0.002 should be returned as 0
+            // Uses ROUND_DOWN mode (1)
+            return scale(amt, -18).dp(poolPairData.decimalsOut, 1);
+        } catch (err) {
+            return ZERO;
+        }
+    }
+
+    _mainTokenInForExactWrappedOut(
+        poolPairData: LinearPoolPairData,
+        amount: OldBigNumber,
+        exact: boolean
+    ): OldBigNumber {
+        try {
+            // All values should use 1e18 fixed point
+            // i.e. 1USDC => 1e18 not 1e6
+            const amtScaled = scale(amount, 18);
+
+            const amt = SDK.LinearMath._calcMainInPerWrappedOut(
+                amtScaled,
+                bnum(poolPairData.mainBalanceScaled.toString()),
+                {
+                    fee: bnum(poolPairData.swapFee.toString()),
+                    rate: poolPairData.rate,
+                    lowerTarget: bnum(poolPairData.lowerTarget.toString()),
+                    upperTarget: bnum(poolPairData.upperTarget.toString()),
+                }
+            );
+            // return human readable number
+            // Using BigNumber.js decimalPlaces (dp), allows us to consider token decimal accuracy correctly,
+            // i.e. when using token with 2decimals 0.002 should be returned as 0
+            // Uses ROUND_DOWN mode (1)
+            return scale(amt, -18).dp(poolPairData.decimalsOut, 1);
+        } catch (err) {
+            return ZERO;
+        }
     }
 
     _mainTokenInForExactBPTOut(
