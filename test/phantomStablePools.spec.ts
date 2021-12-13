@@ -3,7 +3,7 @@ import cloneDeep from 'lodash.clonedeep';
 import { JsonRpcProvider } from '@ethersproject/providers';
 import { parseFixed, BigNumber } from '@ethersproject/bignumber';
 import { getFullSwap, getTotalSwapAmount } from './lib/testHelpers';
-import { bnum } from '../src/utils/bignumber';
+import { BigNumber as OldBigNumber, bnum } from '../src/utils/bignumber';
 import { PhantomStablePool } from '../src/pools/phantomStablePool/phantomStablePool';
 import {
     WETH,
@@ -23,6 +23,78 @@ describe(`Tests for PhantomStable Pools.`, () => {
     /**
      PhantomStablePools use the same underlying maths, etc as normal Stable Pools.
     **/
+    context('limit amounts', () => {
+        context('swapExactIn', () => {
+            it(`TokenToToken should return valid limit`, async () => {
+                testLimit(
+                    LINEAR_ADAI.address,
+                    LINEAR_AUSDT.address,
+                    SwapTypes.SwapExactIn,
+                    [poolsFromFile.STABAL3[0] as SubgraphPoolBase],
+                    0,
+                    bnum('4755.30225811346514699')
+                );
+            });
+
+            it(`TokenToBpt should return valid limit`, async () => {
+                testLimit(
+                    LINEAR_ADAI.address,
+                    STABAL3PHANTOM.address,
+                    SwapTypes.SwapExactIn,
+                    [poolsFromFile.STABAL3[0] as SubgraphPoolBase],
+                    0,
+                    bnum('5140373889935150.990246172983176064')
+                );
+            });
+
+            it(`BptToToken should return valid limit`, async () => {
+                testLimit(
+                    STABAL3PHANTOM.address,
+                    LINEAR_ADAI.address, // '0xcd32a460b6fecd053582e43b07ed6e2c04e15369'
+                    SwapTypes.SwapExactIn,
+                    [poolsFromFile.STABAL3[0] as SubgraphPoolBase],
+                    0,
+                    bnum('4803.474925076888673063')
+                );
+            });
+        });
+
+        context('swapExactOut', () => {
+            it(`TokenToToken should return valid limit`, async () => {
+                testLimit(
+                    LINEAR_ADAI.address,
+                    LINEAR_AUSDT.address,
+                    SwapTypes.SwapExactOut,
+                    [poolsFromFile.STABAL3[0] as SubgraphPoolBase],
+                    0,
+                    bnum('4755.30225811346514699')
+                );
+            });
+
+            it(`TokenToBpt should return valid limit`, async () => {
+                testLimit(
+                    LINEAR_ADAI.address,
+                    STABAL3PHANTOM.address,
+                    SwapTypes.SwapExactOut,
+                    [poolsFromFile.STABAL3[0] as SubgraphPoolBase],
+                    0,
+                    bnum('5140373889935150.990246172983176064')
+                );
+            });
+
+            it(`BptToToken should return valid limit`, async () => {
+                testLimit(
+                    STABAL3PHANTOM.address,
+                    LINEAR_ADAI.address,
+                    SwapTypes.SwapExactOut,
+                    [poolsFromFile.STABAL3[0] as SubgraphPoolBase],
+                    0,
+                    bnum('4803.474925076888673063')
+                );
+            });
+        });
+    });
+
     it('Test removeBPT', () => {
         const metaStableBptSwapPool = PhantomStablePool.fromPool(
             cloneDeep(pool)
@@ -201,4 +273,26 @@ async function testFullSwap(
         'Total From SwapInfo Should Equal Swap Amount.'
     );
     return swapInfo.returnAmount.toString();
+}
+
+function testLimit(
+    tokenIn: string,
+    tokenOut: string,
+    swapType: SwapTypes,
+    pools: SubgraphPoolBase[],
+    poolIndex: number,
+    expectedAmt: OldBigNumber
+) {
+    const pool = PhantomStablePool.fromPool(cloneDeep(pools)[poolIndex]);
+    const poolPairData = pool.parsePoolPairData(tokenIn, tokenOut);
+    const limitAmt = pool.getLimitAmountSwap(poolPairData, swapType);
+    expect(limitAmt.toString()).to.eq(expectedAmt.toString());
+    // Always uses SDK so exact flag doesn't matter
+    // const evmAmount = pool._exactTokenInForTokenOut(
+    //     poolPairData,
+    //     limitAmt,
+    //     true
+    // );
+    // console.log(`LimtAmt: `, limitAmt.toString());
+    // console.log('Amt Out:', evmAmount.toString());
 }
