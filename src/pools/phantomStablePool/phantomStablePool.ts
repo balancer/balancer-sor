@@ -48,8 +48,7 @@ export class PhantomStablePool implements PoolBase {
     totalShares: BigNumber;
     tokens: PhantomStablePoolToken[];
     tokensList: string[];
-    MAX_IN_RATIO = parseFixed('0.3', 18);
-    MAX_OUT_RATIO = parseFixed('0.3', 18);
+    ALMOST_ONE = parseFixed('0.99', 18);
     // Used for VirutalBpt and can be removed if SG is updated with VirtualBpt value
     MAX_TOKEN_BALANCE = BigNumber.from('2').pow('112').sub('1');
 
@@ -205,24 +204,24 @@ export class PhantomStablePool implements PoolBase {
         poolPairData: PhantomStablePoolPairData,
         swapType: SwapTypes
     ): OldBigNumber {
-        // We multiply ratios by 10**-18 because we are in normalized space
-        // so 0.5 should be 0.5 and not 500000000000000000
-        // TODO: update bmath to use everything normalized
         // PoolPairData is using balances that have already been exchanged so need to convert back
         if (swapType === SwapTypes.SwapExactIn) {
-            return bnum(
-                formatFixed(
-                    poolPairData.balanceIn
-                        .mul(this.MAX_IN_RATIO)
-                        .div(poolPairData.tokenInPriceRate),
-                    poolPairData.decimalsIn
-                )
-            );
-        } else {
+            // Return max valid amount of tokenIn
+            // As an approx - use almost the total balance of token out as we can add any amount of tokenIn and expect some back
             return bnum(
                 formatFixed(
                     poolPairData.balanceOut
-                        .mul(this.MAX_OUT_RATIO)
+                        .mul(this.ALMOST_ONE)
+                        .div(poolPairData.tokenOutPriceRate),
+                    poolPairData.decimalsOut
+                )
+            );
+        } else {
+            // Return max amount of tokenOut - approx is almost all balance
+            return bnum(
+                formatFixed(
+                    poolPairData.balanceOut
+                        .mul(this.ALMOST_ONE)
                         .div(poolPairData.tokenOutPriceRate),
                     poolPairData.decimalsOut
                 )
