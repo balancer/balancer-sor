@@ -85,7 +85,7 @@ export async function getOnChainBalances(
             );
         } else if (pool.poolType === 'Element') {
             multiPool.call(`${pool.id}.swapFee`, pool.address, 'percentFee');
-        } else if (pool.poolType === 'Linear') {
+        } else if (pool.poolType === 'AaveLinear') {
             multiPool.call(
                 `${pool.id}.swapFee`,
                 pool.address,
@@ -158,7 +158,7 @@ export async function getOnChainBalances(
                 }
             }
 
-            if (subgraphPools[index].poolType === 'Linear') {
+            if (subgraphPools[index].poolType === 'AaveLinear') {
                 if (!onchainData.targets) {
                     console.error(`Linear Pool Missing Targets: ${poolId}`);
                     return;

@@ -40,7 +40,7 @@
                 "0x0000000000000000000000000000000000000002"
             ],
             "totalShares": "2000.000000",
-            "poolType": "Linear",
+            "poolType": "AaveLinear",
             "address": "0x0000000000000000000000000000000000000002",
             "wrappedIndex": 1,
             "mainIndex": 0,

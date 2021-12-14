@@ -54,7 +54,7 @@ export function parseNewPool(
         } else if (pool.poolType === 'Element') {
             newPool = ElementPool.fromPool(pool);
             newPool.setCurrentBlockTimestamp(currentBlockTimestamp);
-        } else if (pool.poolType === 'Linear')
+        } else if (pool.poolType === 'AaveLinear')
             newPool = LinearPool.fromPool(pool);
         else if (pool.poolType === 'StablePhantom')
             newPool = PhantomStablePool.fromPool(pool);

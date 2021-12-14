@@ -57,7 +57,7 @@
             "id": "0x3d1b554f1b1d1b6108b601ff22fea9c90fdfe50d00000000000000000000023d",
             "lowerTarget": "1900000000000000000000000",
             "mainIndex": 2,
-            "poolType": "Linear",
+            "poolType": "AaveLinear",
             "swapEnabled": true,
             "swapFee": "0.0001",
             "tokens": [
@@ -101,7 +101,7 @@
             "id": "0x6a8c3239695613c0710dc971310b36f9b81e115e00000000000000000000023e",
             "lowerTarget": "1900000000000000000000000",
             "mainIndex": 0,
-            "poolType": "Linear",
+            "poolType": "AaveLinear",
             "swapEnabled": true,
             "swapFee": "0.0001",
             "tokens": [
@@ -145,7 +145,7 @@
             "id": "0xcd32a460b6fecd053582e43b07ed6e2c04e1536900000000000000000000023c",
             "lowerTarget": "1900000000000000000000000",
             "mainIndex": 2,
-            "poolType": "Linear",
+            "poolType": "AaveLinear",
             "swapEnabled": true,
             "swapFee": "0.0001",
             "tokens": [
