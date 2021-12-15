@@ -1,0 +1,119 @@
+{
+    "tradeInfo": {
+        "SwapType": "n/a",
+        "TokenIn": "n/a",
+        "TokenOut": "n/a",
+        "NoPools": 4,
+        "SwapAmount": "n/a",
+        "GasPrice": "n/a",
+        "SwapAmountDecimals": "n/a",
+        "ReturnAmountDecimals": "n/a"
+    },
+    "phantomStablePool": [
+        {
+            "id": "0xebfed10e11dc08fcda1af1fda146945e8710f22e00000000000000000000007f",
+            "address": "0xebfed10e11dc08fcda1af1fda146945e8710f22e",
+            "swapFee": "0.0004",
+            "amp": "10",
+            "tokens": [
+                {
+                    "address": "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
+                    "balance": "10",
+                    "decimals": 18,
+                    "symbol": "WETH",
+                    "priceRate": "1",
+                    "weight": "0"
+                },
+                {
+                    "address": "0xebfed10e11dc08fcda1af1fda146945e8710f22e",
+                    "balance": "20",
+                    "decimals": 18,
+                    "symbol": "BPT",
+                    "priceRate": "0.5",
+                    "weight": "0"
+                },
+                {
+                    "address": "0xae7ab96520de3a18e5e111b5eaab095312d7fe84",
+                    "balance": "1000",
+                    "decimals": 18,
+                    "symbol": "stETH",
+                    "priceRate": "1",
+                    "weight": "0"
+                },
+                {
+                    "address": "0x9f8f72aa9304c8b593d555f12ef6589cc3a579a2",
+                    "balance": "200",
+                    "decimals": 18,
+                    "symbol": "MKR",
+                    "priceRate": "1.5",
+                    "weight": "0"
+                }
+            ],
+            "tokensList": [
+                "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
+                "0xebfed10e11dc08fcda1af1fda146945e8710f22e",
+                "0xae7ab96520de3a18e5e111b5eaab095312d7fe84",
+                "0x9f8f72aa9304c8b593d555f12ef6589cc3a579a2"
+            ],
+            "totalShares": "1000",
+            "poolType": "StablePhantom",
+            "swapEnabled": true
+        }
+    ],
+    "STABAL3": [
+        {
+            "address": "0x8fd162f338b770f7e879030830cde9173367f301",
+            "amp": "400",
+            "baseToken": "0",
+            "expiryTime": 0,
+            "id": "0x8fd162f338b770f7e879030830cde9173367f3010000000000000000000004d8",
+            "lowerTarget": "0",
+            "mainIndex": 0,
+            "poolType": "StablePhantom",
+            "principalToken": "0",
+            "swapEnabled": true,
+            "swapFee": "0.01",
+            "tokens": [
+                {
+                    "address": "0x8fd162f338b770f7e879030830cde9173367f301",
+                    "balance": "5192296858520354.535602194932501075",
+                    "decimals": 18,
+                    "priceRate": "1",
+                    "weight": "0"
+                },
+                {
+                    "address": "0x3d1b554f1b1d1b6108b601ff22fea9c90fdfe50d",
+                    "balance": "4817.7627626993040385",
+                    "decimals": 18,
+                    "priceRate": "1",
+                    "weight": "0"
+                },
+                {
+                    "address": "0x6a8c3239695613c0710dc971310b36f9b81e115e",
+                    "balance": "4803.335614256025401",
+                    "decimals": 18,
+                    "priceRate": "1",
+                    "weight": "0"
+                },
+                {
+                    "address": "0xcd32a460b6fecd053582e43b07ed6e2c04e15369",
+                    "balance": "4851.9948738150390637",
+                    "decimals": 18,
+                    "priceRate": "1",
+                    "weight": "0"
+                }
+            ],
+            "tokensList": [
+                "0x8fd162f338b770f7e879030830cde9173367f301",
+                "0x3d1b554f1b1d1b6108b601ff22fea9c90fdfe50d",
+                "0x6a8c3239695613c0710dc971310b36f9b81e115e",
+                "0xcd32a460b6fecd053582e43b07ed6e2c04e15369"
+            ],
+            "totalShares": "5192296858534827.628530496329220095",
+            "totalWeight": "0",
+            "unitSeconds": 0,
+            "upperTarget": "0",
+            "wrappedIndex": 0
+        }
+    ]
+}

@@ -1,0 +1,58 @@
+{
+    "pools": [
+        {
+            "address": "0x8fd162f338b770f7e879030830cde9173367f301",
+            "amp": "400",
+            "baseToken": "0",
+            "expiryTime": 0,
+            "id": "0x8fd162f338b770f7e879030830cde9173367f3010000000000000000000004d8",
+            "lowerTarget": "0",
+            "mainIndex": 0,
+            "poolType": "PhantomStable",
+            "principalToken": "0",
+            "swapEnabled": true,
+            "swapFee": "0.002",
+            "tokens": [
+                {
+                    "address": "0x8fd162f338b770f7e879030830cde9173367f301",
+                    "balance": "5192296858520354.535602194932501075",
+                    "decimals": 18,
+                    "priceRate": "1",
+                    "weight": "0"
+                },
+                {
+                    "address": "0x3d1b554f1b1d1b6108b601ff22fea9c90fdfe50d",
+                    "balance": "48170.7627626993040385",
+                    "decimals": 18,
+                    "priceRate": "1.5",
+                    "weight": "0"
+                },
+                {
+                    "address": "0x6a8c3239695613c0710dc971310b36f9b81e115e",
+                    "balance": "48030.335614256025401",
+                    "decimals": 18,
+                    "priceRate": "0.8",
+                    "weight": "0"
+                },
+                {
+                    "address": "0xcd32a460b6fecd053582e43b07ed6e2c04e15369",
+                    "balance": "48510.9948738150390637",
+                    "decimals": 18,
+                    "priceRate": "1",
+                    "weight": "0"
+                }
+            ],
+            "tokensList": [
+                "0x8fd162f338b770f7e879030830cde9173367f301",
+                "0x3d1b554f1b1d1b6108b601ff22fea9c90fdfe50d",
+                "0x6a8c3239695613c0710dc971310b36f9b81e115e",
+                "0xcd32a460b6fecd053582e43b07ed6e2c04e15369"
+            ],
+            "totalShares": "5192296858534827.628530496329220095",
+            "totalWeight": "0",
+            "unitSeconds": 0,
+            "upperTarget": "0",
+            "wrappedIndex": 0
+        }
+    ]
+}
