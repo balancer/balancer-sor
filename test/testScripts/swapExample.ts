@@ -599,10 +599,10 @@ async function simpleSwap() {
     // const poolsSource = require('../testData/testPools/gusdBug.json');
     // Update pools list with most recent onchain balances
     const queryOnChain = true;
-    const tokenIn = ADDRESSES[networkId].WETH;
-    const tokenOut = ADDRESSES[networkId].USDC;
+    const tokenIn = ADDRESSES[networkId].DAI_from_AAVE;
+    const tokenOut = ADDRESSES[networkId].USDC_from_AAVE;
     const swapType = SwapTypes.SwapExactIn;
-    const swapAmount = parseFixed('1', 18);
+    const swapAmount = parseFixed('100', 18);
     const executeTrade = true;
 
     const provider = new JsonRpcProvider(PROVIDER_URLS[networkId]);

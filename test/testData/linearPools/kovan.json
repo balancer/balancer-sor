@@ -55,7 +55,7 @@
         {
             "address": "0x3d1b554f1b1d1b6108b601ff22fea9c90fdfe50d",
             "id": "0x3d1b554f1b1d1b6108b601ff22fea9c90fdfe50d00000000000000000000023d",
-            "lowerTarget": "1900000000000000000000000",
+            "lowerTarget": "0",
             "mainIndex": 2,
             "poolType": "AaveLinear",
             "swapEnabled": true,
@@ -99,7 +99,7 @@
         {
             "address": "0x6a8c3239695613c0710dc971310b36f9b81e115e",
             "id": "0x6a8c3239695613c0710dc971310b36f9b81e115e00000000000000000000023e",
-            "lowerTarget": "1900000000000000000000000",
+            "lowerTarget": "1000",
             "mainIndex": 0,
             "poolType": "AaveLinear",
             "swapEnabled": true,
@@ -143,7 +143,7 @@
         {
             "address": "0xcd32a460b6fecd053582e43b07ed6e2c04e15369",
             "id": "0xcd32a460b6fecd053582e43b07ed6e2c04e1536900000000000000000000023c",
-            "lowerTarget": "1900000000000000000000000",
+            "lowerTarget": "0",
             "mainIndex": 2,
             "poolType": "AaveLinear",
             "swapEnabled": true,

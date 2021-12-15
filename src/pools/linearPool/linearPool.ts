@@ -3,7 +3,7 @@ import { bnum, scale, ZERO } from '../../utils/bignumber';
 import { BigNumber as OldBigNumber } from '../../utils/bignumber';
 import { WeiPerEther as ONE } from '@ethersproject/constants';
 import { isSameAddress } from '../../utils';
-import * as SDK from '@georgeroman/balancer-v2-pools';
+import * as SDK from 'sdk-latest';
 import {
     PoolBase,
     PoolTypes,
@@ -165,8 +165,11 @@ export class LinearPool implements PoolBase {
         const allBalancesScaled = this.tokens.map(({ balance }) =>
             parseFixed(balance, 18)
         );
+        const priceRate = this.tokens[this.wrappedIndex].priceRate;
         const mainBalanceScaled = allBalancesScaled[this.mainIndex];
-        const wrappedBalanceScaled = allBalancesScaled[this.wrappedIndex];
+        const wrappedBalanceScaled = allBalancesScaled[this.wrappedIndex]
+            .mul(parseFixed(priceRate, 18))
+            .div(ONE);
         const bptBalanceScaled = allBalancesScaled[this.bptIndex];
         // https://github.com/balancer-labs/balancer-v2-monorepo/blob/88a14eb623f6a22ef3f1afc5a8c49ebfa7eeceed/pkg/pool-linear/contracts/LinearPool.sol#L247
         // VirtualBPTSupply must be used for the maths
@@ -190,7 +193,7 @@ export class LinearPool implements PoolBase {
                 this.wrappedDecimals
             ),
             wrappedDecimals: this.wrappedDecimals,
-            rate: scale(bnum(this.tokens[this.wrappedIndex].priceRate), 18),
+            rate: scale(bnum(priceRate), 18),
             lowerTarget: this.lowerTarget,
             upperTarget: this.upperTarget,
             mainBalanceScaled,
@@ -249,7 +252,6 @@ export class LinearPool implements PoolBase {
                     bnum(linearPoolPairData.bptBalanceScaled.toString()),
                     {
                         fee: bnum(poolPairData.swapFee.toString()),
-                        rate: linearPoolPairData.rate,
                         lowerTarget: bnum(
                             linearPoolPairData.lowerTarget.toString()
                         ),
@@ -371,7 +373,6 @@ export class LinearPool implements PoolBase {
                 bnum(poolPairData.mainBalanceScaled.toString()),
                 {
                     fee: bnum(poolPairData.swapFee.toString()),
-                    rate: poolPairData.rate,
                     lowerTarget: bnum(poolPairData.lowerTarget.toString()),
                     upperTarget: bnum(poolPairData.upperTarget.toString()),
                 }
@@ -401,7 +402,6 @@ export class LinearPool implements PoolBase {
                 bnum(poolPairData.mainBalanceScaled.toString()),
                 {
                     fee: bnum(poolPairData.swapFee.toString()),
-                    rate: poolPairData.rate,
                     lowerTarget: bnum(poolPairData.lowerTarget.toString()),
                     upperTarget: bnum(poolPairData.upperTarget.toString()),
                 }
@@ -434,7 +434,6 @@ export class LinearPool implements PoolBase {
                     bnum(poolPairData.virtualBptSupply.toString()),
                     {
                         fee: bnum(poolPairData.swapFee.toString()),
-                        rate: poolPairData.rate,
                         lowerTarget: bnum(poolPairData.lowerTarget.toString()),
                         upperTarget: bnum(poolPairData.upperTarget.toString()),
                     }
@@ -470,7 +469,6 @@ export class LinearPool implements PoolBase {
                     bnum(poolPairData.virtualBptSupply.toString()),
                     {
                         fee: bnum(poolPairData.swapFee.toString()),
-                        rate: poolPairData.rate,
                         lowerTarget: bnum(poolPairData.lowerTarget.toString()),
                         upperTarget: bnum(poolPairData.upperTarget.toString()),
                     }
@@ -503,7 +501,6 @@ export class LinearPool implements PoolBase {
                 bnum(poolPairData.virtualBptSupply.toString()),
                 {
                     fee: bnum(poolPairData.swapFee.toString()),
-                    rate: poolPairData.rate,
                     lowerTarget: bnum(poolPairData.lowerTarget.toString()),
                     upperTarget: bnum(poolPairData.upperTarget.toString()),
                 }
@@ -535,7 +532,6 @@ export class LinearPool implements PoolBase {
                 bnum(poolPairData.virtualBptSupply.toString()),
                 {
                     fee: bnum(poolPairData.swapFee.toString()),
-                    rate: poolPairData.rate,
                     lowerTarget: bnum(poolPairData.lowerTarget.toString()),
                     upperTarget: bnum(poolPairData.upperTarget.toString()),
                 }
@@ -605,7 +601,6 @@ export class LinearPool implements PoolBase {
                 bnum(poolPairData.mainBalanceScaled.toString()),
                 {
                     fee: bnum(poolPairData.swapFee.toString()),
-                    rate: poolPairData.rate,
                     lowerTarget: bnum(poolPairData.lowerTarget.toString()),
                     upperTarget: bnum(poolPairData.upperTarget.toString()),
                 }
@@ -635,7 +630,6 @@ export class LinearPool implements PoolBase {
                 bnum(poolPairData.mainBalanceScaled.toString()),
                 {
                     fee: bnum(poolPairData.swapFee.toString()),
-                    rate: poolPairData.rate,
                     lowerTarget: bnum(poolPairData.lowerTarget.toString()),
                     upperTarget: bnum(poolPairData.upperTarget.toString()),
                 }
@@ -669,7 +663,6 @@ export class LinearPool implements PoolBase {
                     bnum(poolPairData.virtualBptSupply.toString()),
                     {
                         fee: bnum(poolPairData.swapFee.toString()),
-                        rate: poolPairData.rate,
                         lowerTarget: bnum(poolPairData.lowerTarget.toString()),
                         upperTarget: bnum(poolPairData.upperTarget.toString()),
                     }
@@ -704,7 +697,6 @@ export class LinearPool implements PoolBase {
                     bnum(poolPairData.virtualBptSupply.toString()),
                     {
                         fee: bnum(poolPairData.swapFee.toString()),
-                        rate: poolPairData.rate,
                         lowerTarget: bnum(poolPairData.lowerTarget.toString()),
                         upperTarget: bnum(poolPairData.upperTarget.toString()),
                     }
@@ -738,7 +730,6 @@ export class LinearPool implements PoolBase {
                 bnum(poolPairData.virtualBptSupply.toString()),
                 {
                     fee: bnum(poolPairData.swapFee.toString()),
-                    rate: poolPairData.rate,
                     lowerTarget: bnum(poolPairData.lowerTarget.toString()),
                     upperTarget: bnum(poolPairData.upperTarget.toString()),
                 }
@@ -770,7 +761,6 @@ export class LinearPool implements PoolBase {
                 bnum(poolPairData.virtualBptSupply.toString()),
                 {
                     fee: bnum(poolPairData.swapFee.toString()),
-                    rate: poolPairData.rate,
                     lowerTarget: bnum(poolPairData.lowerTarget.toString()),
                     upperTarget: bnum(poolPairData.upperTarget.toString()),
                 }

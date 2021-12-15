@@ -63,8 +63,9 @@
         "typescript": "^4.3.5"
     },
     "dependencies": {
-        "@georgeroman/balancer-v2-pools": "^0.0.7",
-        "isomorphic-fetch": "^2.2.1"
+        "@georgeroman/balancer-v2-pools": "0.0.7",
+        "isomorphic-fetch": "^2.2.1",
+        "sdk-latest": "npm:@georgeroman/balancer-v2-pools"
     },
     "peerDependencies": {
         "@ethersproject/abi": "^5.4.1",
