@@ -152,7 +152,7 @@ describe('linear pool tests', () => {
                 SwapTypes.SwapExactIn,
                 singleLinear.pools,
                 0,
-                bnum('2435042129339820.944893716608291347')
+                bnum('2434913944417925.620330674866547508')
             );
         });
 
