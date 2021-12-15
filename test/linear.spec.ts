@@ -128,7 +128,7 @@ describe('linear pool tests', () => {
             expect(amount.toString()).to.eq('1485000000.122222221232222221');
         });
 
-        it(`getLimitAmountSwap, SwapExactIn, TokenToBpt should return valid limit`, async () => {
+        it(`debug getLimitAmountSwap, SwapExactIn, TokenToBpt should return valid limit`, async () => {
             const tokenIn = DAI.address;
             const tokenOut = bDAI.address;
             const swapType = SwapTypes.SwapExactIn;
@@ -141,7 +141,7 @@ describe('linear pool tests', () => {
                 swapType,
                 pools,
                 poolIndex,
-                bnum(formatFixed(MAX_TOKEN_BALANCE, 18))
+                bnum('8138925365362304138472.897007980246347837')
             );
         });
 
@@ -152,7 +152,7 @@ describe('linear pool tests', () => {
                 SwapTypes.SwapExactIn,
                 singleLinear.pools,
                 0,
-                bnum('2434913944417925.620330674866547508')
+                bnum('937.8947355124653801')
             );
         });
 

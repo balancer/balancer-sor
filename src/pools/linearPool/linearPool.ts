@@ -215,10 +215,20 @@ export class LinearPool implements PoolBase {
     ): OldBigNumber {
         // Needs to return human scaled numbers
         const linearPoolPairData = poolPairData as LinearPoolPairData;
+        const balanceOutHuman = scale(
+            bnum(poolPairData.balanceOut.toString()),
+            -poolPairData.decimalsOut
+        );
 
         if (swapType === SwapTypes.SwapExactIn) {
-            if (
-                linearPoolPairData.pairType === PairTypes.MainTokenToBpt ||
+            if (linearPoolPairData.pairType === PairTypes.MainTokenToBpt) {
+                return _mainTokenInForExactBPTOut(
+                    balanceOutHuman,
+                    linearPoolPairData
+                )
+                    .times(bnum(this.ALMOST_ONE.toString()))
+                    .div(bnum(ONE.toString()));
+            } else if (
                 linearPoolPairData.pairType === PairTypes.WrappedTokenToBpt
             ) {
                 // Swapping to BPT allows for a very large amount so using pre-minted amount as estimation
@@ -228,11 +238,6 @@ export class LinearPool implements PoolBase {
             ) {
                 // Limit is amount of BPT in for pool balance of tokenOut
                 // Amount must be in human scale
-                const balanceOutHuman = scale(
-                    bnum(poolPairData.balanceOut.toString()),
-                    -poolPairData.decimalsOut
-                );
-
                 const limit = _BPTInForExactMainTokenOut(
                     balanceOutHuman,
                     linearPoolPairData
