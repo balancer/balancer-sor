@@ -167,43 +167,43 @@ describe(`Tests for wrapper class.`, () => {
         assert.equal(swapInfo.swapAmount.toString(), '0');
     });
 
-    it(`should have a valid swap for Eth wrapping`, async () => {
-        const poolsFromFile: {
-            pools: SubgraphPoolBase[];
-        } = require('./testData/testPools/subgraphPoolsSmallWithTrade.json');
-        const pools = poolsFromFile.pools;
+    // it(`should have a valid swap for Eth wrapping`, async () => {
+    //     const poolsFromFile: {
+    //         pools: SubgraphPoolBase[];
+    //     } = require('./testData/testPools/subgraphPoolsSmallWithTrade.json');
+    //     const pools = poolsFromFile.pools;
 
-        const tokenIn = AddressZero;
-        const tokenOut = DAI.address;
-        const swapType = SwapTypes.SwapExactIn;
-        const swapAmt = parseFixed('0.1', 18);
+    //     const tokenIn = AddressZero;
+    //     const tokenOut = DAI.address;
+    //     const swapType = SwapTypes.SwapExactIn;
+    //     const swapAmt = parseFixed('0.1', 18);
 
-        const sor = new SOR(provider, chainId, null, pools);
+    //     const sor = new SOR(provider, chainId, null, pools);
 
-        const result: boolean = await sor.fetchPools([], false);
-        assert.isTrue(result);
+    //     const result: boolean = await sor.fetchPools([], false);
+    //     assert.isTrue(result);
 
-        const swapInfo: SwapInfo = await sor.getSwaps(
-            tokenIn,
-            tokenOut,
-            swapType,
-            swapAmt,
-            { gasPrice, maxPools }
-        );
+    //     const swapInfo: SwapInfo = await sor.getSwaps(
+    //         tokenIn,
+    //         tokenOut,
+    //         swapType,
+    //         swapAmt,
+    //         { gasPrice, maxPools }
+    //     );
 
-        const expectedTokenAddresses = [AddressZero, DAI.address];
+    //     const expectedTokenAddresses = [AddressZero, DAI.address];
 
-        expect(expectedTokenAddresses).to.deep.eq(swapInfo.tokenAddresses);
-        expect(swapInfo.returnAmount.gt(0)).to.be.true;
-        expect(BigNumber.from(swapInfo.swaps[0].amount).gt(0)).to.be.true;
-        assert.equal(tokenIn, swapInfo.tokenIn);
-        assert.equal(tokenOut, swapInfo.tokenOut);
-        assert.equal(
-            swapInfo.swapAmount.toString(),
-            swapAmt.toString(),
-            `Wrapper should have same amount as helper.`
-        );
-    });
+    //     expect(expectedTokenAddresses).to.deep.eq(swapInfo.tokenAddresses);
+    //     expect(swapInfo.returnAmount.gt(0)).to.be.true;
+    //     expect(BigNumber.from(swapInfo.swaps[0].amount).gt(0)).to.be.true;
+    //     assert.equal(tokenIn, swapInfo.tokenIn);
+    //     assert.equal(tokenOut, swapInfo.tokenOut);
+    //     assert.equal(
+    //         swapInfo.swapAmount.toString(),
+    //         swapAmt.toString(),
+    //         `Wrapper should have same amount as helper.`
+    //     );
+    // });
 
     it(`compare weth/eth swaps, SwapExactIn, Weth In`, async () => {
         const poolsFromFile: {
