@@ -252,9 +252,9 @@ export class PhantomStablePool implements PoolBase {
                 BigNumber.from(amtScaled.toString()),
                 poolPairData.swapFee
             );
-            const amountConverted = bnum(amtWithFee.toString()).times(
-                formatFixed(poolPairData.tokenInPriceRate, 18)
-            );
+            const amountConverted = bnum(amtWithFee.toString())
+                .times(formatFixed(poolPairData.tokenInPriceRate, 18))
+                .dp(0);
 
             let amt: OldBigNumber;
 
@@ -321,9 +321,9 @@ export class PhantomStablePool implements PoolBase {
             // All values should use 1e18 fixed point
             // i.e. 1USDC => 1e18 not 1e6
             const amtScaled = scale(amount, 18);
-            const amountConverted = amtScaled.times(
-                formatFixed(poolPairData.tokenOutPriceRate, 18)
-            );
+            const amountConverted = amtScaled
+                .times(formatFixed(poolPairData.tokenOutPriceRate, 18))
+                .dp(0);
 
             let amt: OldBigNumber;
 

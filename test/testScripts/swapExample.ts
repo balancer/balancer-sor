@@ -27,8 +27,8 @@ export const PROVIDER_URLS = {
     [Network.MAINNET]: `https://mainnet.infura.io/v3/${process.env.INFURA}`,
     [Network.GOERLI]: `https://goerli.infura.io/v3/${process.env.INFURA}`,
     [Network.KOVAN]: `https://kovan.infura.io/v3/${process.env.INFURA}`,
-    [Network.POLYGON]: `https://rpc-mainnet.matic.network`,
-    [Network.ARBITRUM]: `https://arb1.arbitrum.io/rpc`,
+    [Network.POLYGON]: `https://polygon-mainnet.infura.io/v3/${process.env.INFURA}`,
+    [Network.ARBITRUM]: `https://arbitrum-mainnet.infura.io/v3/${process.env.INFURA}`,
 };
 
 export const SUBGRAPH_URLS = {
@@ -37,7 +37,7 @@ export const SUBGRAPH_URLS = {
     [Network.GOERLI]:
         'https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-goerli-v2',
     [Network.KOVAN]:
-        'https://api.thegraph.com/subgraphs/name/destiner/balancer-kovan-v2',
+        'https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-kovan-v2',
     [Network.POLYGON]:
         'https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-polygon-v2',
     [Network.ARBITRUM]: `https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-arbitrum-v2`,
@@ -144,30 +144,35 @@ export const ADDRESSES = {
             decimals: 6,
             symbol: 'aUSDT',
         },
+        bUSDT: {
+            address: '0xe667d48618e71c2a02e4a1b66ed9def1426938b6',
+            decimals: 18,
+            symbol: 'bUSDT',
+        },
+        USDC_from_AAVE: {
+            address: '0xe22da380ee6b445bb8273c81944adeb6e8450422',
+            decimals: 6,
+            symbol: 'USDC_from_AAVE',
+        },
         aUSDC: {
             address: '0x0fbddc06a4720408a2f5eb78e62bc31ac6e2a3c4',
             decimals: 6,
             symbol: 'aUSDC',
         },
-        bUSDT: {
-            address: '0x6a8c3239695613c0710dc971310b36f9b81e115e',
-            decimals: 18,
-            symbol: 'bUSDT',
-        },
-        bDAI: {
-            address: '0xcd32a460b6fecd053582e43b07ed6e2c04e15369',
-            decimals: 18,
-            symbol: 'bDAI',
-        },
-        STABAL3: {
-            address: '0x21ff756ca0cfcc5fff488ad67babadffee0c4149',
-            decimals: 18,
-            symbol: 'STABAL3',
-        },
         DAI_from_AAVE: {
             address: '0xff795577d9ac8bd7d90ee22b6c1703490b6512fd',
             decimals: 18,
             symbol: 'DAI_from_AAVE',
+        },
+        bDAI: {
+            address: '0xfcccb77a946b6a3bd59d149f083b5bfbb8004d6d',
+            decimals: 18,
+            symbol: 'bDAI',
+        },
+        STABAL3: {
+            address: '0x8fd162f338b770f7e879030830cde9173367f301',
+            decimals: 18,
+            symbol: 'STABAL3',
         },
     },
     [Network.POLYGON]: {
@@ -594,7 +599,7 @@ async function simpleSwap() {
     // const poolsSource = require('../testData/testPools/gusdBug.json');
     // Update pools list with most recent onchain balances
     const queryOnChain = true;
-    const tokenIn = ADDRESSES[networkId].BAL;
+    const tokenIn = ADDRESSES[networkId].WETH;
     const tokenOut = ADDRESSES[networkId].USDC;
     const swapType = SwapTypes.SwapExactIn;
     const swapAmount = parseFixed('1', 18);

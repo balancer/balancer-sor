@@ -37,6 +37,12 @@ export class SOR {
         forceRefresh: false,
     };
 
+    /**
+     * @param {Provider} provider - Provider.
+     * @param {number} chainId - Id of chain.
+     * @param {string | null} poolsSource - Pass Subgraph URL used to retrieve pools or null to use initialPools.
+     * @param {SubgraphPoolBase[]} initialPools - Can be set with initial pools to use.
+     */
     constructor(
         public provider: Provider,
         public chainId: number,
@@ -57,13 +63,12 @@ export class SOR {
         return this.poolCacher.getPools();
     }
 
-    /*
-    Saves updated pools data to internal onChainBalanceCache.
-    If isOnChain is true will retrieve all required onChain data. (false is advised to only be used for testing)
-    If poolsData is passed as parameter - uses this as pools source.
-    If poolsData was passed in to constructor - uses this as pools source.
-    If pools url was passed in to constructor - uses this to fetch pools source.
-    */
+    /**
+     * fetchPools Retrieves pools information and saves to internal pools cache.
+     * @param {SubgraphPoolBase[]} poolsData - If empty pools will be fetched from source in constructor. If pools passed they will be used as pools source.
+     * @param {boolean} isOnChain - If isOnChain is true will retrieve all required onChain data. (false is advised to only be used for testing)
+     * @returns {boolean} True if pools fetched successfully, False if not.
+     */
     async fetchPools(
         poolsData: SubgraphPoolBase[] = [],
         isOnChain = true
@@ -71,6 +76,14 @@ export class SOR {
         return this.poolCacher.fetchPools(poolsData, isOnChain);
     }
 
+    /**
+     * getSwaps Retrieve information for best swap tokenIn>tokenOut.
+     * @param {string} tokenIn - Address of tokenIn.
+     * @param {string} tokenOut - Address of tokenOut.
+     * @param {SwapTypes} swapType - SwapExactIn where the amount of tokens in (sent to the Pool) is known or SwapExactOut where the amount of tokens out (received from the Pool) is known.
+     * @param {BigNumberish} swapAmount - Either amountIn or amountOut depending on the `swapType` value.
+     * @returns {SwapInfo} Swap information including return amount and swaps structure to be submitted to Vault.
+     */
     async getSwaps(
         tokenIn: string,
         tokenOut: string,
@@ -133,7 +146,14 @@ export class SOR {
 
         return swapInfo;
     }
-
+    /**
+     * getCostOfSwapInToken Calculates and saves price of a swap in outputToken denomination. Used to determine if extra swaps are cost effective.
+     * @param {string} outputToken - Address of outputToken.
+     * @param {number} outputTokenDecimals - Decimals of outputToken.
+     * @param {BigNumber} gasPrice - Gas price used to calculate cost.
+     * @param {BigNumber} swapGas - Gas cost of a swap. Default=35000.
+     * @returns {BigNumber} Price of a swap in outputToken denomination.
+     */
     async getCostOfSwapInToken(
         outputToken: string,
         outputTokenDecimals: number,

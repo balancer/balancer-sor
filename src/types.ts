@@ -66,14 +66,6 @@ export interface SubgraphPoolBase {
     totalShares: string;
     tokens: SubgraphToken[];
     tokensList: string[];
-    priceRateProviders?: [
-        {
-            address: string;
-            token: {
-                address: string;
-            };
-        }
-    ];
 
     // Weighted & Element field
     totalWeight?: string;
