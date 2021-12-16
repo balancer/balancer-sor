@@ -456,17 +456,21 @@ function toNominal(amount: BigNumber, params: BigNumber[]): BigNumber {
     const fee = params[0];
     const lowerTarget = params[2];
     const upperTarget = params[3];
-    if (amount.lt(bnum(1).minus(fee).times(lowerTarget))) {
-        return amount.div(bnum(1).minus(fee));
-    } else if (amount.lt(upperTarget.minus(fee.times(lowerTarget)))) {
-        return amount.plus(fee.times(lowerTarget));
+    if (amount.lt(lowerTarget)) {
+        const fees = lowerTarget.minus(amount).times(fee);
+        const result = amount.minus(fees);
+        if (result.lt(0)) {
+            console.log('negative nominal balance');
+            return bnum(0).minus(result);
+        }
+        return result;
+    } else if (amount.lt(upperTarget)) {
+        return amount;
     } else {
-        return amount
-            .plus(lowerTarget.plus(upperTarget).times(fee))
-            .div(bnum(1).plus(fee));
+        const fees = amount.minus(upperTarget).times(fee);
+        return amount.minus(fees);
     }
 }
-
 function leftDerivativeToNominal(
     amount: BigNumber,
     params: BigNumber[]
@@ -476,12 +480,12 @@ function leftDerivativeToNominal(
     const upperTarget = params[3];
     const oneMinusFee = bnum(1).minus(fee);
     const onePlusFee = bnum(1).plus(fee);
-    if (amount.lte(oneMinusFee.times(lowerTarget))) {
-        return bnum(1).div(oneMinusFee);
-    } else if (amount.lte(upperTarget.minus(fee.times(lowerTarget)))) {
+    if (amount.lte(lowerTarget)) {
+        return onePlusFee;
+    } else if (amount.lte(upperTarget)) {
         return bnum(1);
     } else {
-        return bnum(1).div(onePlusFee);
+        return oneMinusFee;
     }
 }
 
@@ -494,30 +498,28 @@ function rightDerivativeToNominal(
     const upperTarget = params[3];
     const oneMinusFee = bnum(1).minus(fee);
     const onePlusFee = bnum(1).plus(fee);
-    if (amount.lt(oneMinusFee.times(lowerTarget))) {
-        return bnum(1).div(oneMinusFee);
-    } else if (amount.lt(upperTarget.minus(fee.times(lowerTarget)))) {
+    if (amount.lt(lowerTarget)) {
+        return onePlusFee;
+    } else if (amount.lt(upperTarget)) {
         return bnum(1);
     } else {
-        return bnum(1).div(onePlusFee);
+        return oneMinusFee;
     }
 }
-
 function fromNominal(nominal: BigNumber, params: BigNumber[]): BigNumber {
     const fee = params[0];
     const lowerTarget = params[2];
     const upperTarget = params[3];
+    const oneMinusFee = bnum(1).minus(fee);
+    const onePlusFee = bnum(1).plus(fee);
     if (nominal.lt(lowerTarget)) {
-        return nominal.times(bnum(1).minus(fee));
+        return nominal.plus(lowerTarget.times(fee)).div(onePlusFee);
     } else if (nominal.lt(upperTarget)) {
-        return nominal.minus(fee.times(lowerTarget));
+        return nominal;
     } else {
-        return nominal
-            .times(bnum(1).plus(fee))
-            .minus(fee.times(lowerTarget.plus(upperTarget)));
+        return nominal.minus(upperTarget.times(fee)).div(oneMinusFee);
     }
 }
-
 function leftDerivativeFromNominal(
     amount: BigNumber,
     params: BigNumber[]
@@ -525,12 +527,14 @@ function leftDerivativeFromNominal(
     const fee = params[0];
     const lowerTarget = params[2];
     const upperTarget = params[3];
+    const oneMinusFee = bnum(1).minus(fee);
+    const onePlusFee = bnum(1).plus(fee);
     if (amount.lte(lowerTarget)) {
-        return bnum(1).minus(fee);
+        return bnum(1).div(onePlusFee);
     } else if (amount.lte(upperTarget)) {
         return bnum(1);
     } else {
-        return bnum(1).plus(fee);
+        return bnum(1).div(oneMinusFee);
     }
 }
 
@@ -541,11 +545,13 @@ function rightDerivativeFromNominal(
     const fee = params[0];
     const lowerTarget = params[2];
     const upperTarget = params[3];
+    const oneMinusFee = bnum(1).minus(fee);
+    const onePlusFee = bnum(1).plus(fee);
     if (amount.lt(lowerTarget)) {
-        return bnum(1).minus(fee);
+        return bnum(1).div(onePlusFee);
     } else if (amount.lt(upperTarget)) {
         return bnum(1);
     } else {
-        return bnum(1).plus(fee);
+        return bnum(1).div(oneMinusFee);
     }
 }
