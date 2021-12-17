@@ -121,10 +121,10 @@ describe('poolsMathStable: numeric functions using bigint', () => {
             );
         });
 
-        it('_spotPriceAfterSwapExactTokenInForTokenOut', () => {
+        it('spotPriceTokenToken', () => {
             const delta = 0.01;
             const error = 0.00001;
-            checkDerivative_stable(
+            checkDerivative_TokToTok(
                 stable._calcOutGivenIn,
                 stable._spotPriceAfterSwapExactTokenInForTokenOut,
                 10,
@@ -137,7 +137,7 @@ describe('poolsMathStable: numeric functions using bigint', () => {
                 error,
                 true
             );
-            checkDerivative_stable(
+            checkDerivative_TokToTok(
                 stable._calcOutGivenIn,
                 stable._spotPriceAfterSwapExactTokenInForTokenOut,
                 10,
@@ -151,7 +151,7 @@ describe('poolsMathStable: numeric functions using bigint', () => {
                 true
             );
 
-            checkDerivative_stable(
+            checkDerivative_TokToTok(
                 stable._calcInGivenOut,
                 stable._spotPriceAfterSwapTokenInForExactTokenOut,
                 10,
@@ -163,6 +163,59 @@ describe('poolsMathStable: numeric functions using bigint', () => {
                 delta,
                 error,
                 false
+            );
+        });
+
+        it('spotPriceTokenBPT', () => {
+            const delta = 0.01;
+            const error = 0.00001;
+            checkDerivative_ExactTokenBPT(
+                stable._calcBptOutGivenExactTokensIn,
+                stable._spotPriceAfterSwapExactTokenInForBPTOut,
+                10,
+                [15000, 30000, 10000],
+                10000,
+                1,
+                100,
+                delta,
+                error,
+                true
+            );
+            checkDerivative_ExactTokenBPT(
+                stable._calcBptInGivenExactTokensOut,
+                stable._spotPriceAfterSwapBPTInForExactTokenOut,
+                10,
+                [15000, 30000, 10000],
+                10000,
+                1,
+                100,
+                delta,
+                error,
+                false
+            );
+            checkDerivative_exactBPTToken(
+                stable._calcTokenInGivenExactBptOut,
+                stable._spotPriceAfterSwapTokenInForExactBPTOut,
+                10,
+                [2000, 1000, 1000],
+                0,
+                1,
+                10000,
+                0.0001,
+                0.0001,
+                false
+            );
+            checkDerivative_exactBPTToken(
+                stable._calcTokenOutGivenExactBptIn,
+                stable._spotPriceAfterSwapExactBPTInForTokenOut,
+                10,
+                [2000, 1000, 1000],
+                0,
+                1,
+                10000,
+                0.0001,
+                0.0001,
+                true
             );
         });
     });
@@ -320,7 +373,7 @@ function getBothValuesTokensOutGivenBPTIn(
     return { result, SDKResult };
 }
 
-function checkDerivative_stable(
+function checkDerivative_TokToTok(
     fn: any,
     der: any,
     num_amp: number,
@@ -374,6 +427,114 @@ function checkDerivative_stable(
         amount,
         fee
     );
+    assert.approximately(
+        Number(MathSol.divUpFixed(incrementalQuotient, der_ans)),
+        Number(MathSol.ONE),
+        Number(error),
+        'wrong result'
+    );
+}
+
+function checkDerivative_ExactTokenBPT(
+    fn: any,
+    der: any,
+    num_amp: number,
+    num_balances: number[],
+    num_bptSupply: number,
+    tokenIndex: number,
+    num_amount: number,
+    num_delta: number,
+    num_error: number,
+    inverse = false
+) {
+    const amp = BigInt(num_amp);
+    const balances1 = num_balances.map((balance) => {
+        return s(balance);
+    });
+    const balances2 = num_balances.map((balance) => {
+        return s(balance);
+    });
+    const balances3 = num_balances.map((balance) => {
+        return s(balance);
+    });
+    const bptSupply = s(num_bptSupply);
+    const amount = s(num_amount);
+    const delta = s(num_delta);
+    const error = s(num_error);
+
+    const amounts = balances1.map((_value, index) =>
+        index == tokenIndex ? amount : BigInt(0)
+    );
+    const amountsPlusDelta = balances1.map((_value, index) =>
+        index == tokenIndex ? amount + delta : BigInt(0)
+    );
+
+    const val1 = fn(amp, balances1, amountsPlusDelta, bptSupply, BigInt(0));
+    const val2 = fn(amp, balances2, amounts, bptSupply, BigInt(0));
+    let incrementalQuotient = MathSol.divUpFixed(
+        MathSol.sub(val1, val2),
+        delta
+    );
+    if (inverse)
+        incrementalQuotient = MathSol.divUpFixed(
+            MathSol.ONE,
+            incrementalQuotient
+        );
+    const der_ans = der(amp, balances3, tokenIndex, bptSupply, amount);
+    assert.approximately(
+        Number(MathSol.divUpFixed(incrementalQuotient, der_ans)),
+        Number(MathSol.ONE),
+        Number(error),
+        'wrong result'
+    );
+}
+
+function checkDerivative_exactBPTToken(
+    fn: any,
+    der: any,
+    num_amp: number,
+    num_balances: number[],
+    tokenIndex: number,
+    num_amount: number,
+    num_bptSupply: number,
+    num_delta: number,
+    num_error: number,
+    inverse = false
+) {
+    const amp = BigInt(num_amp);
+    const balances1 = num_balances.map((balance) => {
+        return s(balance);
+    });
+    const balances2 = num_balances.map((balance) => {
+        return s(balance);
+    });
+    const balances3 = num_balances.map((balance) => {
+        return s(balance);
+    });
+    const bptSupply = s(num_bptSupply);
+    const amount = s(num_amount);
+    const delta = s(num_delta);
+    const error = s(num_error);
+
+    const val1 = fn(
+        amp,
+        balances1,
+        tokenIndex,
+        amount + delta,
+        bptSupply,
+        BigInt(0)
+    );
+    const val2 = fn(amp, balances2, tokenIndex, amount, bptSupply, BigInt(0));
+    let incrementalQuotient = MathSol.divUpFixed(
+        MathSol.sub(val1, val2),
+        delta
+    );
+    if (inverse)
+        incrementalQuotient = MathSol.divUpFixed(
+            MathSol.ONE,
+            incrementalQuotient
+        );
+    const der_ans = der(amp, balances3, tokenIndex, bptSupply, amount);
     assert.approximately(
         Number(MathSol.divUpFixed(incrementalQuotient, der_ans)),
         Number(MathSol.ONE),

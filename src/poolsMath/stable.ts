@@ -558,6 +558,143 @@ export function _spotPriceAfterSwapTokenInForExactTokenOut(
     return ans;
 }
 
+// PairType = 'token->BPT'
+// SwapType = 'swapExactIn'
+export function _spotPriceAfterSwapExactTokenInForBPTOut(
+    amp: bigint,
+    balances: bigint[],
+    tokenIndexIn: number,
+    bptTotalSupply: bigint,
+    amountIn: bigint
+    // assuming zero fee
+): bigint {
+    balances[tokenIndexIn] = balances[tokenIndexIn] + amountIn;
+    // working
+    const amountsIn = balances.map((_value, index) =>
+        index == tokenIndexIn ? amountIn : BigInt(0)
+    );
+    const finalBPTSupply =
+        bptTotalSupply +
+        _calcBptOutGivenExactTokensIn(
+            amp,
+            balances,
+            amountsIn,
+            bptTotalSupply,
+            BigInt(0)
+        );
+    let ans = _poolDerivativesBPT(
+        amp,
+        balances,
+        finalBPTSupply,
+        tokenIndexIn,
+        true,
+        true,
+        false
+    );
+    ans = MathSol.divUpFixed(MathSol.ONE, ans);
+    return ans;
+}
+
+// PairType = 'token->BPT'
+// SwapType = 'swapExactOut'
+export function _spotPriceAfterSwapTokenInForExactBPTOut(
+    amp: bigint,
+    balances: bigint[],
+    tokenIndexIn: number,
+    bptTotalSupply: bigint,
+    amountOut: bigint
+    // assuming zero fee
+): bigint {
+    const balancesCopy = [...balances];
+    const _in = _calcTokenInGivenExactBptOut(
+        amp,
+        balancesCopy,
+        tokenIndexIn,
+        amountOut,
+        bptTotalSupply,
+        BigInt(0)
+    );
+    balances[tokenIndexIn] = balances[tokenIndexIn] + _in;
+    let ans = _poolDerivativesBPT(
+        amp,
+        balances,
+        bptTotalSupply + amountOut,
+        tokenIndexIn,
+        true,
+        true,
+        true
+    );
+    ans = MathSol.divUpFixed(MathSol.ONE, ans); // ONE.div(ans.times(feeFactor));
+    return ans;
+}
+
+// PairType = 'BPT->token'
+// SwapType = 'swapExactIn'
+export function _spotPriceAfterSwapExactBPTInForTokenOut(
+    amp: bigint,
+    balances: bigint[],
+    tokenIndexOut: number,
+    bptTotalSupply: bigint,
+    amountIn: bigint
+    // assuming zero fee
+): bigint {
+    // balances copy not necessary?
+    const _out = _calcTokenOutGivenExactBptIn(
+        amp,
+        balances,
+        tokenIndexOut,
+        amountIn,
+        bptTotalSupply,
+        BigInt(0)
+    );
+    balances[tokenIndexOut] = balances[tokenIndexOut] - _out;
+    const bptTotalSupplyAfter = MathSol.sub(bptTotalSupply, amountIn);
+    const ans = _poolDerivativesBPT(
+        amp,
+        balances,
+        bptTotalSupplyAfter,
+        tokenIndexOut,
+        true,
+        false,
+        false
+    );
+    return ans;
+}
+
+// PairType = 'BPT->token'
+// SwapType = 'swapExactOut'
+export function _spotPriceAfterSwapBPTInForExactTokenOut(
+    amp: bigint,
+    balances: bigint[],
+    tokenIndexOut: number,
+    bptTotalSupply: bigint,
+    amountOut: bigint
+): bigint {
+    balances[tokenIndexOut] = MathSol.sub(balances[tokenIndexOut], amountOut);
+    const amountsOut = balances.map((_value, index) =>
+        index == tokenIndexOut ? amountOut : BigInt(0)
+    );
+    const bptTotalSupplyAfter =
+        bptTotalSupply -
+        _calcBptInGivenExactTokensOut(
+            amp,
+            balances,
+            amountsOut,
+            bptTotalSupply,
+            BigInt(0)
+        );
+    const ans = _poolDerivativesBPT(
+        amp,
+        balances,
+        bptTotalSupplyAfter,
+        tokenIndexOut,
+        true,
+        false,
+        true
+    );
+    return ans;
+}
+
 export function _poolDerivatives(
     amp: bigint,
     balances: bigint[],
@@ -602,5 +739,66 @@ export function _poolDerivatives(
             );
         }
     }
+    return ans;
+}
+
+export function _poolDerivativesBPT(
+    amp: bigint,
+    balances: bigint[],
+    bptSupply: bigint,
+    tokenIndexIn: number,
+    is_first_derivative: boolean,
+    is_BPT_out: boolean,
+    wrt_out: boolean
+): bigint {
+    const totalCoins = balances.length;
+    const D = _calculateInvariant(amp, balances, true);
+    let S = BigInt(0);
+    let D_P = D / BigInt(totalCoins);
+    for (let i = 0; i < totalCoins; i++) {
+        if (i != tokenIndexIn) {
+            S = S + balances[i];
+            D_P = (D_P * D) / (BigInt(totalCoins) * balances[i]);
+        }
+    }
+    const x = balances[tokenIndexIn];
+    const alpha = amp * BigInt(totalCoins);
+    const beta = alpha * S; // units = 10 ** 21
+    const gamma = BigInt(AMP_PRECISION) - alpha;
+    const partial_x = BigInt(2) * alpha * x + beta + gamma * D;
+    const minus_partial_D =
+        D_P * BigInt(totalCoins + 1) * AMP_PRECISION - gamma * x;
+    const partial_D = -minus_partial_D;
+    const ans = MathSol.divUpFixed(
+        (partial_x * bptSupply) / minus_partial_D,
+        D
+    );
+    /*
+    if (is_first_derivative) {
+        ans = MathSol.divUpFixed((partial_x * bptSupply) / minus_partial_D, D);
+    } else {
+        let partial_xx = bnum(2).times(alpha);
+        let partial_xD = gamma;
+        let n_times_nplusone = totalCoins * (totalCoins + 1);
+        let partial_DD = bnum(0).minus( D_P.times(n_times_nplusone).div(D) );
+        if (is_BPT_out) {
+            let term1 = partial_xx.times(partial_D).div( partial_x.pow(2) );
+            let term2 = bnum(2).times(partial_xD).div(partial_x);
+            let term3 = partial_DD.div(partial_D);
+            ans = (term1.minus(term2).plus(term3)).times(D).div(bptSupply)
+            if (wrt_out) {
+                let D_prime = bnum(0).minus( partial_x.div(partial_D) );
+                ans = ans.div( D_prime ).times(D).div(bptSupply);
+            }
+        } else {
+            ans = bnum(2).times(partial_xD).div(partial_D).minus(
+                partial_DD.times(partial_x).div(partial_D.pow(2)) ).minus(
+                partial_xx.div(partial_x) );
+            if (wrt_out) {
+                ans = ans.times(partial_x).div(minus_partial_D).times(bptSupply).div(D);
+            }
+        }
+    }
+*/
     return ans;
 }
