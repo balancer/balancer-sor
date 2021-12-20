@@ -3,7 +3,20 @@ import { bnum, scale, ZERO } from '../../utils/bignumber';
 import { BigNumber as OldBigNumber } from '../../utils/bignumber';
 import { WeiPerEther as ONE } from '@ethersproject/constants';
 import { isSameAddress } from '../../utils';
-import * as SDK from 'sdk-latest';
+import {
+    _calcBptInPerWrappedOut,
+    _calcMainOutPerWrappedIn,
+    _calcWrappedOutPerMainIn,
+    _calcBptOutPerMainIn,
+    _calcMainOutPerBptIn,
+    _calcBptOutPerWrappedIn,
+    _calcWrappedOutPerBptIn,
+    _calcWrappedInPerMainOut,
+    _calcMainInPerWrappedOut,
+    _calcMainInPerBptOut,
+    _calcBptInPerMainOut,
+    _calcWrappedInPerBptOut,
+} from './exactMaths';
 import {
     PoolBase,
     PoolTypes,
@@ -250,7 +263,7 @@ export class LinearPool implements PoolBase {
                 linearPoolPairData.pairType === PairTypes.BptToWrappedToken
             ) {
                 // Limit is amount of BPT in for pool balance of tokenOut
-                const limit = SDK.LinearMath._calcBptInPerWrappedOut(
+                const limit = _calcBptInPerWrappedOut(
                     bnum(poolPairData.balanceOut.toString()),
                     bnum(linearPoolPairData.mainBalanceScaled.toString()),
                     bnum(linearPoolPairData.wrappedBalanceScaled.toString()),
@@ -373,7 +386,7 @@ export class LinearPool implements PoolBase {
             // i.e. 1USDC => 1e18 not 1e6
             const amtScaled = scale(amount, 18);
 
-            const amt = SDK.LinearMath._calcMainOutPerWrappedIn(
+            const amt = _calcMainOutPerWrappedIn(
                 amtScaled,
                 bnum(poolPairData.mainBalanceScaled.toString()),
                 {
@@ -402,7 +415,7 @@ export class LinearPool implements PoolBase {
             // i.e. 1USDC => 1e18 not 1e6
             const amtScaled = scale(amount, 18);
 
-            const amt = SDK.LinearMath._calcWrappedOutPerMainIn(
+            const amt = _calcWrappedOutPerMainIn(
                 amtScaled,
                 bnum(poolPairData.mainBalanceScaled.toString()),
                 {
@@ -432,7 +445,7 @@ export class LinearPool implements PoolBase {
                 // i.e. 1USDC => 1e18 not 1e6
                 const amtScaled = scale(amount, 18);
 
-                const amt = SDK.LinearMath._calcBptOutPerMainIn(
+                const amt = _calcBptOutPerMainIn(
                     amtScaled,
                     bnum(poolPairData.mainBalanceScaled.toString()),
                     bnum(poolPairData.wrappedBalanceScaled.toString()),
@@ -467,7 +480,7 @@ export class LinearPool implements PoolBase {
                 // i.e. 1USDC => 1e18 not 1e6
                 const amtScaled = scale(amount, 18);
 
-                const amt = SDK.LinearMath._calcMainOutPerBptIn(
+                const amt = _calcMainOutPerBptIn(
                     amtScaled,
                     bnum(poolPairData.mainBalanceScaled.toString()),
                     bnum(poolPairData.wrappedBalanceScaled.toString()),
@@ -499,7 +512,7 @@ export class LinearPool implements PoolBase {
             // i.e. 1USDC => 1e18 not 1e6
             const amtScaled = scale(amount, 18);
 
-            const amt = SDK.LinearMath._calcBptOutPerWrappedIn(
+            const amt = _calcBptOutPerWrappedIn(
                 amtScaled,
                 bnum(poolPairData.mainBalanceScaled.toString()),
                 bnum(poolPairData.wrappedBalanceScaled.toString()),
@@ -530,7 +543,7 @@ export class LinearPool implements PoolBase {
             // i.e. 1USDC => 1e18 not 1e6
             const amtScaled = scale(amount, 18);
 
-            const amt = SDK.LinearMath._calcWrappedOutPerBptIn(
+            const amt = _calcWrappedOutPerBptIn(
                 amtScaled,
                 bnum(poolPairData.mainBalanceScaled.toString()),
                 bnum(poolPairData.wrappedBalanceScaled.toString()),
@@ -601,7 +614,7 @@ export class LinearPool implements PoolBase {
             // i.e. 1USDC => 1e18 not 1e6
             const amtScaled = scale(amount, 18);
 
-            const amt = SDK.LinearMath._calcWrappedInPerMainOut(
+            const amt = _calcWrappedInPerMainOut(
                 amtScaled,
                 bnum(poolPairData.mainBalanceScaled.toString()),
                 {
@@ -630,7 +643,7 @@ export class LinearPool implements PoolBase {
             // i.e. 1USDC => 1e18 not 1e6
             const amtScaled = scale(amount, 18);
 
-            const amt = SDK.LinearMath._calcMainInPerWrappedOut(
+            const amt = _calcMainInPerWrappedOut(
                 amtScaled,
                 bnum(poolPairData.mainBalanceScaled.toString()),
                 {
@@ -661,7 +674,7 @@ export class LinearPool implements PoolBase {
                 const amtScaled = scale(amount, 18);
                 // in = main
                 // out = BPT
-                const amt = SDK.LinearMath._calcMainInPerBptOut(
+                const amt = _calcMainInPerBptOut(
                     amtScaled,
                     bnum(poolPairData.mainBalanceScaled.toString()),
                     bnum(poolPairData.wrappedBalanceScaled.toString()),
@@ -695,7 +708,7 @@ export class LinearPool implements PoolBase {
                 // i.e. 1USDC => 1e18 not 1e6
                 const amtScaled = scale(amount, 18);
 
-                const amt = SDK.LinearMath._calcBptInPerMainOut(
+                const amt = _calcBptInPerMainOut(
                     amtScaled,
                     bnum(poolPairData.mainBalanceScaled.toString()),
                     bnum(poolPairData.wrappedBalanceScaled.toString()),
@@ -728,7 +741,7 @@ export class LinearPool implements PoolBase {
             // i.e. 1USDC => 1e18 not 1e6
             const amtScaled = scale(amount, 18);
 
-            const amt = SDK.LinearMath._calcWrappedInPerBptOut(
+            const amt = _calcWrappedInPerBptOut(
                 amtScaled,
                 bnum(poolPairData.mainBalanceScaled.toString()),
                 bnum(poolPairData.wrappedBalanceScaled.toString()),
@@ -759,7 +772,7 @@ export class LinearPool implements PoolBase {
             // i.e. 1USDC => 1e18 not 1e6
             const amtScaled = scale(amount, 18);
 
-            const amt = SDK.LinearMath._calcBptInPerWrappedOut(
+            const amt = _calcBptInPerWrappedOut(
                 amtScaled,
                 bnum(poolPairData.mainBalanceScaled.toString()),
                 bnum(poolPairData.wrappedBalanceScaled.toString()),
