@@ -289,43 +289,39 @@ function _calcInvariantDown(
     );
 }
 
-export function _toNominal(amount: bigint, params: Params): bigint {
-    if (
-        amount <
-        MathSol.mulUpFixed(MathSol.ONE - params.fee, params.lowerTarget)
-    ) {
-        return MathSol.divUpFixed(amount, MathSol.ONE - params.fee);
-    } else if (
-        amount <
-        params.upperTarget - MathSol.mulUpFixed(params.fee, params.lowerTarget)
-    ) {
-        return amount + MathSol.mulUpFixed(params.fee, params.lowerTarget);
-    } else {
-        return (
-            amount +
-            MathSol.divUpFixed(
-                MathSol.mulUpFixed(
-                    params.lowerTarget + params.upperTarget,
-                    params.fee
-                ),
-                MathSol.ONE + params.fee
-            )
+function _toNominal(real: bigint, params: Params): bigint {
+    // Fees are always rounded down: either direction would work but we need to be consistent, and rounding down
+    // uses less gas.
+    if (real < params.lowerTarget) {
+        const fees = MathSol.mulDownFixed(
+            params.lowerTarget - real,
+            params.fee
         );
+        return MathSol.sub(real, fees);
+    } else if (real <= params.upperTarget) {
+        return real;
+    } else {
+        const fees = MathSol.mulDownFixed(
+            real - params.upperTarget,
+            params.fee
+        );
+        return MathSol.sub(real, fees);
     }
 }
 
-export function _fromNominal(nominal: bigint, params: Params): bigint {
+function _fromNominal(nominal: bigint, params: Params): bigint {
+    // Since real = nominal + fees, rounding down fees is equivalent to rounding down real.
     if (nominal < params.lowerTarget) {
-        return MathSol.mulUpFixed(nominal, MathSol.ONE - params.fee);
-    } else if (nominal < params.upperTarget) {
-        return nominal - MathSol.mulUpFixed(params.fee, params.lowerTarget);
+        return MathSol.divDownFixed(
+            nominal + MathSol.mulDownFixed(params.fee, params.lowerTarget),
+            MathSol.ONE + params.fee
+        );
+    } else if (nominal <= params.upperTarget) {
+        return nominal;
     } else {
-        return (
-            MathSol.mulUpFixed(nominal, MathSol.ONE + params.fee) -
-            MathSol.mulUpFixed(
-                params.fee,
-                params.lowerTarget + params.upperTarget
-            )
+        return MathSol.divDownFixed(
+            nominal - MathSol.mulDownFixed(params.fee, params.upperTarget),
+            MathSol.ONE - params.fee
         );
     }
 }
