@@ -3,6 +3,9 @@ import { MathSol } from '../src/poolsMath/basicOperations';
 import { assert } from 'chai';
 
 describe('poolsMathLinear', function () {
+    // For swap outcome functions:
+    // Test cases copied from smart contract tests, therefore rate is always 1.
+    // But we should also test different rates.
     describe('init', () => {
         const params = {
             fee: s(0.01),
@@ -15,7 +18,7 @@ describe('poolsMathLinear', function () {
         const wrappedBalance = s(0);
         const bptSupply = s(0);
 
-        it('debug given main in within lower and upper', async () => {
+        it('given main in within lower and upper', async () => {
             const mainIn = s(5);
             const result = linear._calcBptOutPerMainIn(
                 mainIn,
@@ -27,7 +30,7 @@ describe('poolsMathLinear', function () {
             verify(result, s(5), 0);
         });
 
-        it('debug given main in over upper', async () => {
+        it('given main in over upper', async () => {
             const mainIn = s(400);
             const result = linear._calcBptOutPerMainIn(
                 mainIn,
@@ -515,6 +518,90 @@ describe('poolsMathLinear', function () {
             });
         });
     });
+
+    describe('spot prices', () => {
+        const delta = 0.01;
+        const error = 0.00001;
+        const params = {
+            fee: s(0.04),
+            rate: s(1.2),
+            lowerTarget: s(1000),
+            upperTarget: s(2000),
+        };
+        const mainBalanceTest = [500, 1400, 8000];
+        it('BptOutPerMainIn', () => {
+            for (let mainBalance of mainBalanceTest) {
+                for (let amount of [70, 700]) {
+                    checkDerivative(
+                        linear._calcBptOutPerMainIn,
+                        linear._spotPriceAfterSwapBptOutPerMainIn,
+                        amount,
+                        mainBalance,
+                        8000, // wrappedBalance
+                        3500, // bptSupply
+                        params,
+                        delta,
+                        error,
+                        true
+                    );
+                }
+            }
+        });
+        it('MainInPerBptOut', () => {
+            for (let mainBalance of mainBalanceTest) {
+                for (let amount of [70, 7000]) {
+                    checkDerivative(
+                        linear._calcMainInPerBptOut,
+                        linear._spotPriceAfterSwapMainInPerBptOut,
+                        amount,
+                        mainBalance,
+                        8000, // wrappedBalance
+                        3500, // bptSupply
+                        params,
+                        delta,
+                        error,
+                        false
+                    );
+                }
+            }
+        });
+        it('MainOutPerBptIn', () => {
+            for (let mainBalance of mainBalanceTest) {
+                for (let amount of [70, 150]) {
+                    checkDerivative(
+                        linear._calcMainOutPerBptIn,
+                        linear._spotPriceAfterSwapMainOutPerBptIn,
+                        amount,
+                        mainBalance,
+                        8000, // wrappedBalance
+                        3500, // bptSupply
+                        params,
+                        delta,
+                        error,
+                        true
+                    );
+                }
+            }
+        });
+        it('BptInPerMainOut', () => {
+            for (let mainBalance of mainBalanceTest) {
+                for (let amount of [70, 420]) {
+                    checkDerivative(
+                        linear._calcBptInPerMainOut,
+                        linear._spotPriceAfterSwapBptInPerMainOut,
+                        amount,
+                        mainBalance,
+                        8000, // wrappedBalance
+                        3500, // bptSupply
+                        params,
+                        delta,
+                        error,
+                        false
+                    );
+                }
+            }
+        });
+    });
 });
 
 function s(a: number): bigint {
@@ -526,6 +613,83 @@ function verify(result: bigint, expected: bigint, error: number): void {
         Number(MathSol.divUpFixed(result, expected)) / 10 ** 18,
         1,
         error,
+        'wrong result'
+    );
+}
+
+function checkDerivative(
+    fn: (
+        mainIn: bigint,
+        mainBalance: bigint,
+        wrappedBalance: bigint,
+        bptSupply: bigint,
+        params: {
+            fee: bigint;
+            rate: bigint;
+            lowerTarget: bigint;
+            upperTarget: bigint;
+        }
+    ) => bigint,
+    derivative: (
+        mainIn: bigint,
+        mainBalance: bigint,
+        wrappedBalance: bigint,
+        bptSupply: bigint,
+        params: {
+            fee: bigint;
+            rate: bigint;
+            lowerTarget: bigint;
+            upperTarget: bigint;
+        }
+    ) => bigint,
+    num_amount: number,
+    num_mainBalance: number,
+    num_wrappedBalance: number,
+    num_bptSupply: number,
+    params: {
+        fee: bigint;
+        rate: bigint;
+        lowerTarget: bigint;
+        upperTarget: bigint;
+    },
+    num_delta: number,
+    num_error: number,
+    inverse: boolean
+) {
+    const amount = s(num_amount);
+    const mainBalance = s(num_mainBalance);
+    const wrappedBalance = s(num_wrappedBalance);
+    const bptSupply = s(num_bptSupply);
+    const delta = s(num_delta);
+    const error = s(num_error);
+    const val1 = fn(
+        amount + delta,
+        mainBalance,
+        wrappedBalance,
+        bptSupply,
+        params
+    );
+    const val2 = fn(amount, mainBalance, wrappedBalance, bptSupply, params);
+    let incrementalQuotient = MathSol.divUpFixed(
+        MathSol.sub(val1, val2),
+        delta
+    );
+    if (inverse)
+        incrementalQuotient = MathSol.divUpFixed(
+            MathSol.ONE,
+            incrementalQuotient
+        );
+    const der_ans = derivative(
+        amount,
+        mainBalance,
+        wrappedBalance,
+        bptSupply,
+        params
+    );
+    assert.approximately(
+        Number(MathSol.divUpFixed(incrementalQuotient, der_ans)),
+        Number(MathSol.ONE),
+        Number(error),
         'wrong result'
     );
 }

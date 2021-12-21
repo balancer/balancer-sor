@@ -289,43 +289,6 @@ function _calcInvariantDown(
     );
 }
 
-function _toNominal(real: bigint, params: Params): bigint {
-    // Fees are always rounded down: either direction would work but we need to be consistent, and rounding down
-    // uses less gas.
-    if (real < params.lowerTarget) {
-        const fees = MathSol.mulDownFixed(
-            params.lowerTarget - real,
-            params.fee
-        );
-        return MathSol.sub(real, fees);
-    } else if (real <= params.upperTarget) {
-        return real;
-    } else {
-        const fees = MathSol.mulDownFixed(
-            real - params.upperTarget,
-            params.fee
-        );
-        return MathSol.sub(real, fees);
-    }
-}
-
-function _fromNominal(nominal: bigint, params: Params): bigint {
-    // Since real = nominal + fees, rounding down fees is equivalent to rounding down real.
-    if (nominal < params.lowerTarget) {
-        return MathSol.divDownFixed(
-            nominal + MathSol.mulDownFixed(params.fee, params.lowerTarget),
-            MathSol.ONE + params.fee
-        );
-    } else if (nominal <= params.upperTarget) {
-        return nominal;
-    } else {
-        return MathSol.divDownFixed(
-            nominal - MathSol.mulDownFixed(params.fee, params.upperTarget),
-            MathSol.ONE - params.fee
-        );
-    }
-}
-
 export function _calcTokensOutGivenExactBptIn(
     balances: bigint[],
     bptAmountIn: bigint,
@@ -353,4 +316,196 @@ export function _calcTokensOutGivenExactBptIn(
         }
     }
     return amountsOut;
+}
+
+/////////
+/// SpotPriceAfterSwap
+/////////
+
+// PairType = 'token->BPT'
+// SwapType = 'swapExactIn'
+export function _spotPriceAfterSwapBptOutPerMainIn(
+    mainIn: bigint,
+    mainBalance: bigint,
+    wrappedBalance: bigint,
+    bptSupply: bigint,
+    params: Params
+): bigint {
+    const finalMainBalance = mainIn + mainBalance;
+    const previousNominalMain = _toNominal(mainBalance, params);
+    const invariant = _calcInvariantDown(
+        previousNominalMain,
+        wrappedBalance,
+        params
+    );
+    let poolFactor = MathSol.ONE;
+    if (bptSupply != BigInt(0)) {
+        poolFactor = MathSol.divUpFixed(invariant, bptSupply);
+    }
+    return MathSol.divUpFixed(
+        poolFactor,
+        rightDerivativeToNominal(finalMainBalance, params)
+    );
+}
+
+// PairType = 'token->BPT'
+// SwapType = 'swapExactOut'
+export function _spotPriceAfterSwapMainInPerBptOut(
+    bptOut: bigint,
+    mainBalance: bigint,
+    wrappedBalance: bigint,
+    bptSupply: bigint,
+    params: Params
+): bigint {
+    const previousNominalMain = _toNominal(mainBalance, params);
+    const invariant = _calcInvariantDown(
+        previousNominalMain,
+        wrappedBalance,
+        params
+    );
+    let poolFactor = MathSol.ONE;
+    if (bptSupply != BigInt(0)) {
+        poolFactor = MathSol.divUpFixed(invariant, bptSupply);
+    }
+    const deltaNominalMain = MathSol.mulUpFixed(bptOut, poolFactor);
+    const afterNominalMain = previousNominalMain + deltaNominalMain;
+    return MathSol.mulUpFixed(
+        poolFactor,
+        rightDerivativeFromNominal(afterNominalMain, params)
+    );
+}
+
+// PairType = 'BPT->token'
+// SwapType = 'swapExactIn'
+export function _spotPriceAfterSwapMainOutPerBptIn(
+    bptIn: bigint,
+    mainBalance: bigint,
+    wrappedBalance: bigint,
+    bptSupply: bigint,
+    params: Params
+): bigint {
+    const previousNominalMain = _toNominal(mainBalance, params);
+    const invariant = _calcInvariantDown(
+        previousNominalMain,
+        wrappedBalance,
+        params
+    );
+    const poolFactor = MathSol.divDownFixed(invariant, bptSupply);
+    const deltaNominalMain = MathSol.mulDownFixed(bptIn, poolFactor);
+    const afterNominalMain = MathSol.sub(previousNominalMain, deltaNominalMain);
+    return MathSol.divUpFixed(
+        MathSol.ONE,
+        MathSol.mulUpFixed(
+            poolFactor,
+            leftDerivativeFromNominal(afterNominalMain, params)
+        )
+    );
+}
+
+// PairType = 'BPT->token'
+// SwapType = 'swapExactOut'
+export function _spotPriceAfterSwapBptInPerMainOut(
+    mainOut: bigint,
+    mainBalance: bigint,
+    wrappedBalance: bigint,
+    bptSupply: bigint,
+    params: Params
+): bigint {
+    const finalMainBalance = MathSol.sub(mainBalance, mainOut);
+    const previousNominalMain = _toNominal(mainBalance, params);
+    const invariant = _calcInvariantDown(
+        previousNominalMain,
+        wrappedBalance,
+        params
+    );
+    const poolFactor = MathSol.divUpFixed(invariant, bptSupply);
+    return MathSol.divUpFixed(
+        leftDerivativeToNominal(finalMainBalance, params),
+        poolFactor
+    );
+}
+
+function _toNominal(real: bigint, params: Params): bigint {
+    // Fees are always rounded down: either direction would work but we need to be consistent, and rounding down
+    // uses less gas.
+    if (real < params.lowerTarget) {
+        const fees = MathSol.mulDownFixed(
+            params.lowerTarget - real,
+            params.fee
+        );
+        return MathSol.sub(real, fees);
+    } else if (real <= params.upperTarget) {
+        return real;
+    } else {
+        const fees = MathSol.mulDownFixed(
+            real - params.upperTarget,
+            params.fee
+        );
+        return MathSol.sub(real, fees);
+    }
+}
+
+function leftDerivativeToNominal(amount: bigint, params: Params): bigint {
+    const oneMinusFee = MathSol.complementFixed(params.fee);
+    const onePlusFee = MathSol.ONE + params.fee;
+    if (amount <= params.lowerTarget) {
+        return onePlusFee;
+    } else if (amount <= params.upperTarget) {
+        return MathSol.ONE;
+    } else {
+        return oneMinusFee;
+    }
+}
+
+function rightDerivativeToNominal(amount: bigint, params: Params): bigint {
+    const oneMinusFee = MathSol.complementFixed(params.fee);
+    const onePlusFee = MathSol.ONE + params.fee;
+    if (amount < params.lowerTarget) {
+        return onePlusFee;
+    } else if (amount < params.upperTarget) {
+        return MathSol.ONE;
+    } else {
+        return oneMinusFee;
+    }
+}
+
+function _fromNominal(nominal: bigint, params: Params): bigint {
+    // Since real = nominal + fees, rounding down fees is equivalent to rounding down real.
+    if (nominal < params.lowerTarget) {
+        return MathSol.divDownFixed(
+            nominal + MathSol.mulDownFixed(params.fee, params.lowerTarget),
+            MathSol.ONE + params.fee
+        );
+    } else if (nominal <= params.upperTarget) {
+        return nominal;
+    } else {
+        return MathSol.divDownFixed(
+            nominal - MathSol.mulDownFixed(params.fee, params.upperTarget),
+            MathSol.ONE - params.fee
+        );
+    }
+}
+
+function leftDerivativeFromNominal(amount: bigint, params: Params): bigint {
+    const oneMinusFee = MathSol.complementFixed(params.fee);
+    const onePlusFee = MathSol.ONE + params.fee;
+    if (amount <= params.lowerTarget) {
+        return MathSol.divUpFixed(MathSol.ONE, onePlusFee);
+    } else if (amount <= params.upperTarget) {
+        return MathSol.ONE;
+    } else {
+        return MathSol.divUpFixed(MathSol.ONE, oneMinusFee);
+    }
+}
+
+function rightDerivativeFromNominal(amount: bigint, params: Params): bigint {
+    const oneMinusFee = MathSol.complementFixed(params.fee);
+    const onePlusFee = MathSol.ONE + params.fee;
+    if (amount < params.lowerTarget) {
+        return MathSol.divUpFixed(MathSol.ONE, onePlusFee);
+    } else if (amount < params.upperTarget) {
+        return MathSol.ONE;
+    } else {
+        return MathSol.divUpFixed(MathSol.ONE, oneMinusFee);
+    }
 }
