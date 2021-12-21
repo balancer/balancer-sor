@@ -46,7 +46,10 @@ export class PoolCacher {
             } else {
                 // Retrieve from URL if set otherwise use data passed in constructor
                 if (this.poolsUrl !== null) {
-                    newPools = await fetchSubgraphPools(this.poolsUrl);
+                    newPools = await fetchSubgraphPools(
+                        this.poolsUrl,
+                        this.chainId
+                    );
                 } else {
                     newPools = this.pools;
                 }

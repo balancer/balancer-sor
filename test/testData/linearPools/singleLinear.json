@@ -1,0 +1,51 @@
+{
+    "pools": [
+        {
+            "id": "linear2id",
+            "publicSwap": true,
+            "swapFee": "0.01",
+            "swapEnabled": true,
+            "tokens": [
+                {
+                    "address": "0x6b175474e89094c44da98b954eedeac495271d0f",
+                    "balance": "1500000000.123456789123456789",
+                    "decimals": 18,
+                    "id": "linear2id-0x6b175474e89094c44da98b954eedeac495271d0f",
+                    "symbol": "DAI",
+                    "priceRate": "1",
+                    "weight": null
+                },
+                {
+                    "address": "0xfc1e690f61efd961294b3e1ce3313fbd8aa4f85d",
+                    "balance": "1500000000.123456789123456789",
+                    "decimals": 18,
+                    "id": "linear2id-0xfc1e690f61efd961294b3e1ce3313fbd8aa4f85d",
+                    "symbol": "aDAI",
+                    "priceRate": "1.1",
+                    "weight": null
+                },
+                {
+                    "address": "0x0000000000000000000000000000000000000002",
+                    "balance": "5192296858532827.628530496329220095",
+                    "decimals": 18,
+                    "id": "linear2id-0x0000000000000000000000000000000000000002",
+                    "symbol": "bDAI",
+                    "priceRate": "1",
+                    "weight": null
+                }
+            ],
+            "tokensList": [
+                "0x6b175474e89094c44da98b954eedeac495271d0f",
+                "0xfc1e690f61efd961294b3e1ce3313fbd8aa4f85d",
+                "0x0000000000000000000000000000000000000002"
+            ],
+            "totalShares": "2000.000000",
+            "poolType": "AaveLinear",
+            "address": "0x0000000000000000000000000000000000000002",
+            "wrappedIndex": 1,
+            "mainIndex": 0,
+            "lowerTarget": "1000.000000",
+            "upperTarget": "1500.000000"
+        }
+    ]
+}

@@ -22,8 +22,8 @@ describe(`RouteProposer.`, () => {
             pools: SubgraphPoolBase[];
         } = require('./testData/testPools/subgraphPoolsSmallWithTrade.json');
         const pools = poolsFromFile.pools;
-        const tokenIn = WETH;
-        const tokenOut = DAI;
+        const tokenIn = WETH.address;
+        const tokenOut = DAI.address;
         const swapType = SwapTypes.SwapExactIn;
 
         const routeProposer = new RouteProposer();

@@ -1,0 +1,2688 @@
+{
+    "pools": [
+        {
+            "id": "0x0481d726c3d25250a8963221945ed93b8a5315a9",
+            "publicSwap": true,
+            "swapFee": "0.01",
+            "tokens": [
+                {
+                    "address": "0x0000000000085d4780b73119b644ae5ecd22b376",
+                    "balance": "0",
+                    "decimals": 18,
+                    "weight": "12.5",
+                    "id": "0x0481d726c3d25250a8963221945ed93b8a5315a9-0x0000000000085d4780b73119b644ae5ecd22b376",
+                    "symbol": "TUSD"
+                },
+                {
+                    "address": "0x6b175474e89094c44da98b954eedeac495271d0f",
+                    "balance": "0",
+                    "decimals": 18,
+                    "weight": "12.5",
+                    "id": "0x0481d726c3d25250a8963221945ed93b8a5315a9-0x6b175474e89094c44da98b954eedeac495271d0f",
+                    "symbol": "DAI"
+                },
+                {
+                    "address": "0x9cb2f26a23b8d89973f08c957c4d7cdf75cd341c",
+                    "balance": "0",
+                    "decimals": 6,
+                    "weight": "12.5",
+                    "id": "0x0481d726c3d25250a8963221945ed93b8a5315a9-0x9cb2f26a23b8d89973f08c957c4d7cdf75cd341c",
+                    "symbol": "DZAR"
+                },
+                {
+                    "address": "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+                    "balance": "0",
+                    "decimals": 6,
+                    "weight": "12.5",
+                    "id": "0x0481d726c3d25250a8963221945ed93b8a5315a9-0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+                    "symbol": "USDC"
+                }
+            ],
+            "tokensList": [
+                "0x9cb2f26a23b8d89973f08c957c4d7cdf75cd341c",
+                "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+                "0x0000000000085d4780b73119b644ae5ecd22b376",
+                "0x6b175474e89094c44da98b954eedeac495271d0f"
+            ],
+            "totalWeight": "50",
+            "totalShares": "100",
+            "poolType": "Weighted",
+            "address": "0x0481d726c3d25250a8963221945ed93b8a5315a9"
+        },
+        {
+            "id": "0x05e671f4c857d02f42d837e64e6ec50b27819261",
+            "publicSwap": true,
+            "swapFee": "0.00001",
+            "tokens": [
+                {
+                    "address": "0x992a780fdeda7a24c52526e027dfef90cddc685f",
+                    "balance": "1759746.779799554202855538",
+                    "decimals": 18,
+                    "weight": "5",
+                    "id": "0x05e671f4c857d02f42d837e64e6ec50b27819261-0x992a780fdeda7a24c52526e027dfef90cddc685f",
+                    "symbol": "STAC"
+                },
+                {
+                    "address": "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
+                    "balance": "4.745718205810660901",
+                    "decimals": 18,
+                    "weight": "5",
+                    "id": "0x05e671f4c857d02f42d837e64e6ec50b27819261-0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
+                    "symbol": "WETH"
+                },
+                {
+                    "address": "0xe343245de92181bc06ba5cd1152c705a2c5f3e2f",
+                    "balance": "3572839.162868059506954938",
+                    "decimals": 18,
+                    "weight": "40",
+                    "id": "0x05e671f4c857d02f42d837e64e6ec50b27819261-0xe343245de92181bc06ba5cd1152c705a2c5f3e2f",
+                    "symbol": "STA"
+                }
+            ],
+            "tokensList": [
+                "0xe343245de92181bc06ba5cd1152c705a2c5f3e2f",
+                "0x992a780fdeda7a24c52526e027dfef90cddc685f",
+                "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2"
+            ],
+            "totalWeight": "50",
+            "totalShares": "100",
+            "poolType": "Weighted",
+            "address": "0x05e671f4c857d02f42d837e64e6ec50b27819261"
+        },
+        {
+            "id": "0x07d13ed39ee291c1506675ff42f9b2b6b50e2d3e",
+            "publicSwap": true,
+            "swapFee": "0.0099",
+            "tokens": [
+                {
+                    "address": "0x2260fac5e5542a773aa44fbcfedf7c193bc2c599",
+                    "balance": "0.04408397",
+                    "decimals": 8,
+                    "weight": "10",
+                    "id": "0x07d13ed39ee291c1506675ff42f9b2b6b50e2d3e-0x2260fac5e5542a773aa44fbcfedf7c193bc2c599",
+                    "symbol": "WBTC"
+                },
+                {
+                    "address": "0x514910771af9ca656af840dff83e8264ecf986ca",
+                    "balance": "25.197461401226657195",
+                    "decimals": 18,
+                    "weight": "2.5",
+                    "id": "0x07d13ed39ee291c1506675ff42f9b2b6b50e2d3e-0x514910771af9ca656af840dff83e8264ecf986ca",
+                    "symbol": "LINK"
+                },
+                {
+                    "address": "0x5d3a536e4d6dbd6114cc1ead35777bab948e3643",
+                    "balance": "9548.45375841",
+                    "decimals": 8,
+                    "weight": "5",
+                    "id": "0x07d13ed39ee291c1506675ff42f9b2b6b50e2d3e-0x5d3a536e4d6dbd6114cc1ead35777bab948e3643",
+                    "symbol": "cDAI"
+                },
+                {
+                    "address": "0x9f8f72aa9304c8b593d555f12ef6589cc3a579a2",
+                    "balance": "0.290098892394657353",
+                    "decimals": 18,
+                    "weight": "2.5",
+                    "id": "0x07d13ed39ee291c1506675ff42f9b2b6b50e2d3e-0x9f8f72aa9304c8b593d555f12ef6589cc3a579a2",
+                    "symbol": "MKR"
+                },
+                {
+                    "address": "0xbbbbca6a901c926f240b89eacb641d8aec7aeafd",
+                    "balance": "1467.388467898486830904",
+                    "decimals": 18,
+                    "weight": "1.5",
+                    "id": "0x07d13ed39ee291c1506675ff42f9b2b6b50e2d3e-0xbbbbca6a901c926f240b89eacb641d8aec7aeafd",
+                    "symbol": "LRC"
+                },
+                {
+                    "address": "0xc011a73ee8576fb46f5e1c5751ca3b9fe0af2a6f",
+                    "balance": "103.786015755319428771",
+                    "decimals": 18,
+                    "weight": "2",
+                    "id": "0x07d13ed39ee291c1506675ff42f9b2b6b50e2d3e-0xc011a73ee8576fb46f5e1c5751ca3b9fe0af2a6f",
+                    "symbol": "SNX"
+                },
+                {
+                    "address": "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
+                    "balance": "4.892527075485292715",
+                    "decimals": 18,
+                    "weight": "25",
+                    "id": "0x07d13ed39ee291c1506675ff42f9b2b6b50e2d3e-0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
+                    "symbol": "WETH"
+                },
+                {
+                    "address": "0xdd974d5c2e2928dea5f71b9825b8b646686bd200",
+                    "balance": "85.692607860702857064",
+                    "decimals": 18,
+                    "weight": "1.5",
+                    "id": "0x07d13ed39ee291c1506675ff42f9b2b6b50e2d3e-0xdd974d5c2e2928dea5f71b9825b8b646686bd200",
+                    "symbol": "KNC"
+                }
+            ],
+            "tokensList": [
+                "0xbbbbca6a901c926f240b89eacb641d8aec7aeafd",
+                "0xdd974d5c2e2928dea5f71b9825b8b646686bd200",
+                "0xc011a73ee8576fb46f5e1c5751ca3b9fe0af2a6f",
+                "0x514910771af9ca656af840dff83e8264ecf986ca",
+                "0x9f8f72aa9304c8b593d555f12ef6589cc3a579a2",
+                "0x5d3a536e4d6dbd6114cc1ead35777bab948e3643",
+                "0x2260fac5e5542a773aa44fbcfedf7c193bc2c599",
+                "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2"
+            ],
+            "totalWeight": "50",
+            "totalShares": "100",
+            "poolType": "Weighted",
+            "address": "0x07d13ed39ee291c1506675ff42f9b2b6b50e2d3e"
+        },
+        {
+            "id": "0x09574f862d32794b8636cfb9c98e6597be049c4b",
+            "publicSwap": true,
+            "swapFee": "0.025",
+            "tokens": [
+                {
+                    "address": "0xb4efd85c19999d84251304bda99e90b92300bd93",
+                    "balance": "214.493636767039993106",
+                    "decimals": 18,
+                    "weight": "40",
+                    "id": "0x09574f862d32794b8636cfb9c98e6597be049c4b-0xb4efd85c19999d84251304bda99e90b92300bd93",
+                    "symbol": "RPL"
+                },
+                {
+                    "address": "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
+                    "balance": "0.623961701439066309",
+                    "decimals": 18,
+                    "weight": "10",
+                    "id": "0x09574f862d32794b8636cfb9c98e6597be049c4b-0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
+                    "symbol": "WETH"
+                }
+            ],
+            "tokensList": [
+                "0xb4efd85c19999d84251304bda99e90b92300bd93",
+                "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2"
+            ],
+            "totalWeight": "50",
+            "totalShares": "100",
+            "poolType": "Weighted",
+            "address": "0x09574f862d32794b8636cfb9c98e6597be049c4b"
+        },
+        {
+            "id": "0x10fd0adaf5de39ddd81165d770367fde8883157d",
+            "publicSwap": true,
+            "swapFee": "0.01",
+            "tokens": [
+                {
+                    "address": "0x2260fac5e5542a773aa44fbcfedf7c193bc2c599",
+                    "balance": "0",
+                    "decimals": 8,
+                    "weight": "25",
+                    "id": "0x10fd0adaf5de39ddd81165d770367fde8883157d-0x2260fac5e5542a773aa44fbcfedf7c193bc2c599",
+                    "symbol": "WBTC"
+                },
+                {
+                    "address": "0xcf8f9555d55ce45a3a33a81d6ef99a2a2e71dee2",
+                    "balance": "0",
+                    "decimals": 18,
+                    "weight": "25",
+                    "id": "0x10fd0adaf5de39ddd81165d770367fde8883157d-0xcf8f9555d55ce45a3a33a81d6ef99a2a2e71dee2",
+                    "symbol": "CBIX7"
+                }
+            ],
+            "tokensList": [
+                "0x2260fac5e5542a773aa44fbcfedf7c193bc2c599",
+                "0xcf8f9555d55ce45a3a33a81d6ef99a2a2e71dee2"
+            ],
+            "totalWeight": "50",
+            "totalShares": "100",
+            "poolType": "Weighted",
+            "address": "0x10fd0adaf5de39ddd81165d770367fde8883157d"
+        },
+        {
+            "id": "0x12d6b6e24fdd9849abd42afd8f5775d36084a828",
+            "publicSwap": true,
+            "swapFee": "0.0029",
+            "tokens": [
+                {
+                    "address": "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+                    "balance": "0.108984",
+                    "decimals": 6,
+                    "weight": "20",
+                    "id": "0x12d6b6e24fdd9849abd42afd8f5775d36084a828-0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+                    "symbol": "USDC"
+                },
+                {
+                    "address": "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
+                    "balance": "0.00054434209240766",
+                    "decimals": 18,
+                    "weight": "20",
+                    "id": "0x12d6b6e24fdd9849abd42afd8f5775d36084a828-0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
+                    "symbol": "WETH"
+                },
+                {
+                    "address": "0xea5f88e54d982cbb0c441cde4e79bc305e5b43bc",
+                    "balance": "439.921699598818736873",
+                    "decimals": 18,
+                    "weight": "10",
+                    "id": "0x12d6b6e24fdd9849abd42afd8f5775d36084a828-0xea5f88e54d982cbb0c441cde4e79bc305e5b43bc",
+                    "symbol": "PARETO"
+                }
+            ],
+            "tokensList": [
+                "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+                "0xea5f88e54d982cbb0c441cde4e79bc305e5b43bc",
+                "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2"
+            ],
+            "totalWeight": "50",
+            "totalShares": "100",
+            "poolType": "Weighted",
+            "address": "0x12d6b6e24fdd9849abd42afd8f5775d36084a828"
+        },
+        {
+            "id": "0x165a50bc092f6870dc111c349bae5fc35147ac86",
+            "publicSwap": true,
+            "swapFee": "0.003",
+            "tokens": [
+                {
+                    "address": "0x6b175474e89094c44da98b954eedeac495271d0f",
+                    "balance": "12.274777029505746542",
+                    "decimals": 18,
+                    "weight": "4",
+                    "id": "0x165a50bc092f6870dc111c349bae5fc35147ac86-0x6b175474e89094c44da98b954eedeac495271d0f",
+                    "symbol": "DAI"
+                },
+                {
+                    "address": "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
+                    "balance": "0.092270379282110205",
+                    "decimals": 18,
+                    "weight": "6",
+                    "id": "0x165a50bc092f6870dc111c349bae5fc35147ac86-0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
+                    "symbol": "WETH"
+                }
+            ],
+            "tokensList": [
+                "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
+                "0x6b175474e89094c44da98b954eedeac495271d0f"
+            ],
+            "totalWeight": "10",
+            "totalShares": "100",
+            "poolType": "Weighted",
+            "address": "0x165a50bc092f6870dc111c349bae5fc35147ac86"
+        },
+        {
+            "id": "0x172bf7381a344453184f62a82c4aa78cec56cc2b",
+            "publicSwap": true,
+            "swapFee": "0.0029",
+            "tokens": [
+                {
+                    "address": "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
+                    "balance": "0.064066966780406273",
+                    "decimals": 18,
+                    "weight": "25",
+                    "id": "0x172bf7381a344453184f62a82c4aa78cec56cc2b-0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
+                    "symbol": "WETH"
+                },
+                {
+                    "address": "0xdd974d5c2e2928dea5f71b9825b8b646686bd200",
+                    "balance": "18.371401640457823649",
+                    "decimals": 18,
+                    "weight": "25",
+                    "id": "0x172bf7381a344453184f62a82c4aa78cec56cc2b-0xdd974d5c2e2928dea5f71b9825b8b646686bd200",
+                    "symbol": "KNC"
+                }
+            ],
+            "tokensList": [
+                "0xdd974d5c2e2928dea5f71b9825b8b646686bd200",
+                "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2"
+            ],
+            "totalWeight": "50",
+            "totalShares": "100",
+            "poolType": "Weighted",
+            "address": "0x172bf7381a344453184f62a82c4aa78cec56cc2b"
+        },
+        {
+            "id": "0x1b09173a0ffbad1cb7670b1a640013c0facfb71f",
+            "publicSwap": true,
+            "swapFee": "0.01",
+            "tokens": [
+                {
+                    "address": "0x2260fac5e5542a773aa44fbcfedf7c193bc2c599",
+                    "balance": "1.57696782",
+                    "decimals": 8,
+                    "weight": "10",
+                    "id": "0x1b09173a0ffbad1cb7670b1a640013c0facfb71f-0x2260fac5e5542a773aa44fbcfedf7c193bc2c599",
+                    "symbol": "WBTC"
+                },
+                {
+                    "address": "0x6b175474e89094c44da98b954eedeac495271d0f",
+                    "balance": "13930.95009693777029887",
+                    "decimals": 18,
+                    "weight": "10",
+                    "id": "0x1b09173a0ffbad1cb7670b1a640013c0facfb71f-0x6b175474e89094c44da98b954eedeac495271d0f",
+                    "symbol": "DAI"
+                },
+                {
+                    "address": "0x992a780fdeda7a24c52526e027dfef90cddc685f",
+                    "balance": "23466198.95409238725350881",
+                    "decimals": 18,
+                    "weight": "10",
+                    "id": "0x1b09173a0ffbad1cb7670b1a640013c0facfb71f-0x992a780fdeda7a24c52526e027dfef90cddc685f",
+                    "symbol": "STAC"
+                },
+                {
+                    "address": "0x9f8f72aa9304c8b593d555f12ef6589cc3a579a2",
+                    "balance": "40.992115882384247652",
+                    "decimals": 18,
+                    "weight": "10",
+                    "id": "0x1b09173a0ffbad1cb7670b1a640013c0facfb71f-0x9f8f72aa9304c8b593d555f12ef6589cc3a579a2",
+                    "symbol": "MKR"
+                },
+                {
+                    "address": "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
+                    "balance": "67.111840170327433509",
+                    "decimals": 18,
+                    "weight": "10",
+                    "id": "0x1b09173a0ffbad1cb7670b1a640013c0facfb71f-0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
+                    "symbol": "WETH"
+                }
+            ],
+            "tokensList": [
+                "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
+                "0x2260fac5e5542a773aa44fbcfedf7c193bc2c599",
+                "0x9f8f72aa9304c8b593d555f12ef6589cc3a579a2",
+                "0x6b175474e89094c44da98b954eedeac495271d0f",
+                "0x992a780fdeda7a24c52526e027dfef90cddc685f"
+            ],
+            "totalWeight": "50",
+            "totalShares": "100",
+            "poolType": "Weighted",
+            "address": "0x1b09173a0ffbad1cb7670b1a640013c0facfb71f"
+        },
+        {
+            "id": "0x247ff2b322df7439b78898375be7cdadca11cf17",
+            "publicSwap": true,
+            "swapFee": "0.0025",
+            "tokens": [
+                {
+                    "address": "0x6b175474e89094c44da98b954eedeac495271d0f",
+                    "balance": "0",
+                    "decimals": 18,
+                    "weight": "5",
+                    "id": "0x247ff2b322df7439b78898375be7cdadca11cf17-0x6b175474e89094c44da98b954eedeac495271d0f",
+                    "symbol": "DAI"
+                },
+                {
+                    "address": "0x9f8f72aa9304c8b593d555f12ef6589cc3a579a2",
+                    "balance": "0",
+                    "decimals": 18,
+                    "weight": "10",
+                    "id": "0x247ff2b322df7439b78898375be7cdadca11cf17-0x9f8f72aa9304c8b593d555f12ef6589cc3a579a2",
+                    "symbol": "MKR"
+                },
+                {
+                    "address": "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
+                    "balance": "0",
+                    "decimals": 18,
+                    "weight": "5",
+                    "id": "0x247ff2b322df7439b78898375be7cdadca11cf17-0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
+                    "symbol": "WETH"
+                }
+            ],
+            "tokensList": [
+                "0x9f8f72aa9304c8b593d555f12ef6589cc3a579a2",
+                "0x6b175474e89094c44da98b954eedeac495271d0f",
+                "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2"
+            ],
+            "totalWeight": "20",
+            "totalShares": "100",
+            "poolType": "Weighted",
+            "address": "0x247ff2b322df7439b78898375be7cdadca11cf17"
+        },
+        {
+            "id": "0x24f598f7df68f663bcac6f94bec005a48570d7a4",
+            "publicSwap": true,
+            "swapFee": "0.0025",
+            "tokens": [
+                {
+                    "address": "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
+                    "balance": "138.747143748769899641",
+                    "decimals": 18,
+                    "weight": "2",
+                    "id": "0x24f598f7df68f663bcac6f94bec005a48570d7a4-0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
+                    "symbol": "WETH"
+                },
+                {
+                    "address": "0xe41d2489571d322189246dafa5ebde1f4699f498",
+                    "balance": "238812.101391248740143271",
+                    "decimals": 18,
+                    "weight": "6",
+                    "id": "0x24f598f7df68f663bcac6f94bec005a48570d7a4-0xe41d2489571d322189246dafa5ebde1f4699f498",
+                    "symbol": "ZRX"
+                }
+            ],
+            "tokensList": [
+                "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
+                "0xe41d2489571d322189246dafa5ebde1f4699f498"
+            ],
+            "totalWeight": "8",
+            "totalShares": "100",
+            "poolType": "Weighted",
+            "address": "0x24f598f7df68f663bcac6f94bec005a48570d7a4"
+        },
+        {
+            "id": "0x254d519110d215fb657c621afc7d4b76ce2c0265",
+            "publicSwap": true,
+            "swapFee": "0.01",
+            "tokens": [
+                {
+                    "address": "0x9cb2f26a23b8d89973f08c957c4d7cdf75cd341c",
+                    "balance": "0",
+                    "decimals": 6,
+                    "weight": "25",
+                    "id": "0x254d519110d215fb657c621afc7d4b76ce2c0265-0x9cb2f26a23b8d89973f08c957c4d7cdf75cd341c",
+                    "symbol": "DZAR"
+                },
+                {
+                    "address": "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+                    "balance": "0",
+                    "decimals": 6,
+                    "weight": "25",
+                    "id": "0x254d519110d215fb657c621afc7d4b76ce2c0265-0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+                    "symbol": "USDC"
+                }
+            ],
+            "tokensList": [
+                "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+                "0x9cb2f26a23b8d89973f08c957c4d7cdf75cd341c"
+            ],
+            "totalWeight": "50",
+            "totalShares": "100",
+            "poolType": "Weighted",
+            "address": "0x254d519110d215fb657c621afc7d4b76ce2c0265"
+        },
+        {
+            "id": "0x29f55de880d4dcae40ba3e63f16407a31b4d44ee",
+            "publicSwap": true,
+            "swapFee": "0.008",
+            "tokens": [
+                {
+                    "address": "0x0d8775f648430679a709e98d2b0cb6250d2887ef",
+                    "balance": "3770.43125992004586995",
+                    "decimals": 18,
+                    "weight": "3",
+                    "id": "0x29f55de880d4dcae40ba3e63f16407a31b4d44ee-0x0d8775f648430679a709e98d2b0cb6250d2887ef",
+                    "symbol": "BAT"
+                },
+                {
+                    "address": "0x1985365e9f78359a9b6ad760e32412f4a445e862",
+                    "balance": "61.315369304551821243",
+                    "decimals": 18,
+                    "weight": "3",
+                    "id": "0x29f55de880d4dcae40ba3e63f16407a31b4d44ee-0x1985365e9f78359a9b6ad760e32412f4a445e862",
+                    "symbol": "REP"
+                },
+                {
+                    "address": "0x6b175474e89094c44da98b954eedeac495271d0f",
+                    "balance": "753.477429351494249055",
+                    "decimals": 18,
+                    "weight": "3",
+                    "id": "0x29f55de880d4dcae40ba3e63f16407a31b4d44ee-0x6b175474e89094c44da98b954eedeac495271d0f",
+                    "symbol": "DAI"
+                },
+                {
+                    "address": "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
+                    "balance": "10.111967328317043234",
+                    "decimals": 18,
+                    "weight": "8",
+                    "id": "0x29f55de880d4dcae40ba3e63f16407a31b4d44ee-0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
+                    "symbol": "WETH"
+                },
+                {
+                    "address": "0xe41d2489571d322189246dafa5ebde1f4699f498",
+                    "balance": "2232.708231367150095187",
+                    "decimals": 18,
+                    "weight": "3",
+                    "id": "0x29f55de880d4dcae40ba3e63f16407a31b4d44ee-0xe41d2489571d322189246dafa5ebde1f4699f498",
+                    "symbol": "ZRX"
+                }
+            ],
+            "tokensList": [
+                "0xe41d2489571d322189246dafa5ebde1f4699f498",
+                "0x0d8775f648430679a709e98d2b0cb6250d2887ef",
+                "0x1985365e9f78359a9b6ad760e32412f4a445e862",
+                "0x6b175474e89094c44da98b954eedeac495271d0f",
+                "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2"
+            ],
+            "totalWeight": "20",
+            "totalShares": "100",
+            "poolType": "Weighted",
+            "address": "0x29f55de880d4dcae40ba3e63f16407a31b4d44ee"
+        },
+        {
+            "id": "0x2a498804b8ee42ef7b773646a7e70ad6b19dfc28",
+            "publicSwap": true,
+            "swapFee": "0.01",
+            "tokens": [
+                {
+                    "address": "0x57ab1ec28d129707052df4df418d58a2d46d5f51",
+                    "balance": "1138.105129839896073504",
+                    "decimals": 18,
+                    "weight": "5",
+                    "id": "0x2a498804b8ee42ef7b773646a7e70ad6b19dfc28-0x57ab1ec28d129707052df4df418d58a2d46d5f51",
+                    "symbol": "sUSD"
+                },
+                {
+                    "address": "0x9cb2f26a23b8d89973f08c957c4d7cdf75cd341c",
+                    "balance": "194883.169682",
+                    "decimals": 6,
+                    "weight": "45",
+                    "id": "0x2a498804b8ee42ef7b773646a7e70ad6b19dfc28-0x9cb2f26a23b8d89973f08c957c4d7cdf75cd341c",
+                    "symbol": "DZAR"
+                }
+            ],
+            "tokensList": [
+                "0x57ab1ec28d129707052df4df418d58a2d46d5f51",
+                "0x9cb2f26a23b8d89973f08c957c4d7cdf75cd341c"
+            ],
+            "totalWeight": "50",
+            "totalShares": "100",
+            "poolType": "Weighted",
+            "address": "0x2a498804b8ee42ef7b773646a7e70ad6b19dfc28"
+        },
+        {
+            "id": "0x2dbd24322757d2e28de4230b1ca5b88e49a76979",
+            "publicSwap": true,
+            "swapFee": "0.01",
+            "tokens": [
+                {
+                    "address": "0x2260fac5e5542a773aa44fbcfedf7c193bc2c599",
+                    "balance": "0.00425992",
+                    "decimals": 8,
+                    "weight": "7.5",
+                    "id": "0x2dbd24322757d2e28de4230b1ca5b88e49a76979-0x2260fac5e5542a773aa44fbcfedf7c193bc2c599",
+                    "symbol": "WBTC"
+                },
+                {
+                    "address": "0x4f3afec4e5a3f2a6a1a411def7d7dfe50ee057bf",
+                    "balance": "0.559861212",
+                    "decimals": 9,
+                    "weight": "6.25",
+                    "id": "0x2dbd24322757d2e28de4230b1ca5b88e49a76979-0x4f3afec4e5a3f2a6a1a411def7d7dfe50ee057bf",
+                    "symbol": "DGX"
+                },
+                {
+                    "address": "0x514910771af9ca656af840dff83e8264ecf986ca",
+                    "balance": "9.88417866675729769",
+                    "decimals": 18,
+                    "weight": "7.5",
+                    "id": "0x2dbd24322757d2e28de4230b1ca5b88e49a76979-0x514910771af9ca656af840dff83e8264ecf986ca",
+                    "symbol": "LINK"
+                },
+                {
+                    "address": "0x6b175474e89094c44da98b954eedeac495271d0f",
+                    "balance": "31.985554772389188202",
+                    "decimals": 18,
+                    "weight": "6.25",
+                    "id": "0x2dbd24322757d2e28de4230b1ca5b88e49a76979-0x6b175474e89094c44da98b954eedeac495271d0f",
+                    "symbol": "DAI"
+                },
+                {
+                    "address": "0x9cb2f26a23b8d89973f08c957c4d7cdf75cd341c",
+                    "balance": "617.869915",
+                    "decimals": 6,
+                    "weight": "6.25",
+                    "id": "0x2dbd24322757d2e28de4230b1ca5b88e49a76979-0x9cb2f26a23b8d89973f08c957c4d7cdf75cd341c",
+                    "symbol": "DZAR"
+                },
+                {
+                    "address": "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+                    "balance": "31.486417",
+                    "decimals": 6,
+                    "weight": "6.25",
+                    "id": "0x2dbd24322757d2e28de4230b1ca5b88e49a76979-0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+                    "symbol": "USDC"
+                },
+                {
+                    "address": "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
+                    "balance": "0.252805870493122787",
+                    "decimals": 18,
+                    "weight": "10",
+                    "id": "0x2dbd24322757d2e28de4230b1ca5b88e49a76979-0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
+                    "symbol": "WETH"
+                }
+            ],
+            "tokensList": [
+                "0x9cb2f26a23b8d89973f08c957c4d7cdf75cd341c",
+                "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+                "0x6b175474e89094c44da98b954eedeac495271d0f",
+                "0x4f3afec4e5a3f2a6a1a411def7d7dfe50ee057bf",
+                "0x2260fac5e5542a773aa44fbcfedf7c193bc2c599",
+                "0x514910771af9ca656af840dff83e8264ecf986ca",
+                "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2"
+            ],
+            "totalWeight": "50",
+            "totalShares": "100",
+            "poolType": "Weighted",
+            "address": "0x2dbd24322757d2e28de4230b1ca5b88e49a76979"
+        },
+        {
+            "id": "0x2feb4a6322432cbe44dc54a4959ac141ece53d7c",
+            "publicSwap": true,
+            "swapFee": "0.0001",
+            "tokens": [
+                {
+                    "address": "0x4da9b813057d04baef4e5800e36083717b4a0341",
+                    "balance": "1002.78121659684504815",
+                    "decimals": 18,
+                    "weight": "1",
+                    "id": "0x2feb4a6322432cbe44dc54a4959ac141ece53d7c-0x4da9b813057d04baef4e5800e36083717b4a0341",
+                    "symbol": "aTUSD"
+                },
+                {
+                    "address": "0x625ae63000f46200499120b906716420bd059240",
+                    "balance": "1003.558055824321493924",
+                    "decimals": 18,
+                    "weight": "1",
+                    "id": "0x2feb4a6322432cbe44dc54a4959ac141ece53d7c-0x625ae63000f46200499120b906716420bd059240",
+                    "symbol": "aSUSD"
+                },
+                {
+                    "address": "0x6ee0f7bb50a54ab5253da0667b0dc2ee526c30a8",
+                    "balance": "1002.470245489998811434",
+                    "decimals": 18,
+                    "weight": "1",
+                    "id": "0x2feb4a6322432cbe44dc54a4959ac141ece53d7c-0x6ee0f7bb50a54ab5253da0667b0dc2ee526c30a8",
+                    "symbol": "aBUSD"
+                },
+                {
+                    "address": "0x71fc860f7d3a592a4a98740e39db31d25db65ae8",
+                    "balance": "1012.727586",
+                    "decimals": 6,
+                    "weight": "1",
+                    "id": "0x2feb4a6322432cbe44dc54a4959ac141ece53d7c-0x71fc860f7d3a592a4a98740e39db31d25db65ae8",
+                    "symbol": "aUSDT"
+                },
+                {
+                    "address": "0x9ba00d6856a4edf4665bca2c2309936572473b7e",
+                    "balance": "992.69706",
+                    "decimals": 6,
+                    "weight": "1",
+                    "id": "0x2feb4a6322432cbe44dc54a4959ac141ece53d7c-0x9ba00d6856a4edf4665bca2c2309936572473b7e",
+                    "symbol": "aUSDC"
+                },
+                {
+                    "address": "0xfc1e690f61efd961294b3e1ce3313fbd8aa4f85d",
+                    "balance": "1002.463918964626016668",
+                    "decimals": 18,
+                    "weight": "1",
+                    "id": "0x2feb4a6322432cbe44dc54a4959ac141ece53d7c-0xfc1e690f61efd961294b3e1ce3313fbd8aa4f85d",
+                    "symbol": "aDAI"
+                }
+            ],
+            "tokensList": [
+                "0xfc1e690f61efd961294b3e1ce3313fbd8aa4f85d",
+                "0x71fc860f7d3a592a4a98740e39db31d25db65ae8",
+                "0x9ba00d6856a4edf4665bca2c2309936572473b7e",
+                "0x625ae63000f46200499120b906716420bd059240",
+                "0x4da9b813057d04baef4e5800e36083717b4a0341",
+                "0x6ee0f7bb50a54ab5253da0667b0dc2ee526c30a8"
+            ],
+            "totalWeight": "6",
+            "totalShares": "100",
+            "poolType": "Weighted",
+            "address": "0x2feb4a6322432cbe44dc54a4959ac141ece53d7c"
+        },
+        {
+            "id": "0x364b12e8f821edd4a8d7bc3ad545e4021ef2afe6",
+            "publicSwap": true,
+            "swapFee": "0.05",
+            "tokens": [
+                {
+                    "address": "0xb4efd85c19999d84251304bda99e90b92300bd93",
+                    "balance": "181.483190643771416425",
+                    "decimals": 18,
+                    "weight": "40",
+                    "id": "0x364b12e8f821edd4a8d7bc3ad545e4021ef2afe6-0xb4efd85c19999d84251304bda99e90b92300bd93",
+                    "symbol": "RPL"
+                },
+                {
+                    "address": "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
+                    "balance": "0.514393781205352807",
+                    "decimals": 18,
+                    "weight": "10",
+                    "id": "0x364b12e8f821edd4a8d7bc3ad545e4021ef2afe6-0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
+                    "symbol": "WETH"
+                }
+            ],
+            "tokensList": [
+                "0xb4efd85c19999d84251304bda99e90b92300bd93",
+                "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2"
+            ],
+            "totalWeight": "50",
+            "totalShares": "100",
+            "poolType": "Weighted",
+            "address": "0x364b12e8f821edd4a8d7bc3ad545e4021ef2afe6"
+        },
+        {
+            "id": "0x39ee0f29253017d69909b7286caf8c080e9d6da2",
+            "publicSwap": true,
+            "swapFee": "0.0099",
+            "tokens": [
+                {
+                    "address": "0x27054b13b1b798b345b591a4d22e6562d47ea75a",
+                    "balance": "1618006.2659",
+                    "decimals": 4,
+                    "weight": "7",
+                    "id": "0x39ee0f29253017d69909b7286caf8c080e9d6da2-0x27054b13b1b798b345b591a4d22e6562d47ea75a",
+                    "symbol": "AST"
+                },
+                {
+                    "address": "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
+                    "balance": "79.205377994038322795",
+                    "decimals": 18,
+                    "weight": "3",
+                    "id": "0x39ee0f29253017d69909b7286caf8c080e9d6da2-0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
+                    "symbol": "WETH"
+                }
+            ],
+            "tokensList": [
+                "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
+                "0x27054b13b1b798b345b591a4d22e6562d47ea75a"
+            ],
+            "totalWeight": "10",
+            "totalShares": "100",
+            "poolType": "Weighted",
+            "address": "0x39ee0f29253017d69909b7286caf8c080e9d6da2"
+        },
+        {
+            "id": "0x4b47b11c353f0056c73a87fefccb6c43dc0d8065",
+            "publicSwap": true,
+            "swapFee": "0.001",
+            "tokens": [
+                {
+                    "address": "0x6b175474e89094c44da98b954eedeac495271d0f",
+                    "balance": "100.635152452773970596",
+                    "decimals": 18,
+                    "weight": "10",
+                    "id": "0x4b47b11c353f0056c73a87fefccb6c43dc0d8065-0x6b175474e89094c44da98b954eedeac495271d0f",
+                    "symbol": "DAI"
+                },
+                {
+                    "address": "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
+                    "balance": "2.021383606725669115",
+                    "decimals": 18,
+                    "weight": "40",
+                    "id": "0x4b47b11c353f0056c73a87fefccb6c43dc0d8065-0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
+                    "symbol": "WETH"
+                }
+            ],
+            "tokensList": [
+                "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
+                "0x6b175474e89094c44da98b954eedeac495271d0f"
+            ],
+            "totalWeight": "50",
+            "totalShares": "100",
+            "poolType": "Weighted",
+            "address": "0x4b47b11c353f0056c73a87fefccb6c43dc0d8065"
+        },
+        {
+            "id": "0x510432e28fa9fe26df6c505104d1d66ff1f66839",
+            "publicSwap": true,
+            "swapFee": "0.001",
+            "tokens": [
+                {
+                    "address": "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+                    "balance": "101.128874",
+                    "decimals": 6,
+                    "weight": "10",
+                    "id": "0x510432e28fa9fe26df6c505104d1d66ff1f66839-0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+                    "symbol": "USDC"
+                },
+                {
+                    "address": "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
+                    "balance": "2.024280334764487791",
+                    "decimals": 18,
+                    "weight": "40",
+                    "id": "0x510432e28fa9fe26df6c505104d1d66ff1f66839-0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
+                    "symbol": "WETH"
+                }
+            ],
+            "tokensList": [
+                "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
+                "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48"
+            ],
+            "totalWeight": "50",
+            "totalShares": "100",
+            "poolType": "Weighted",
+            "address": "0x510432e28fa9fe26df6c505104d1d66ff1f66839"
+        },
+        {
+            "id": "0x53b89ce35928dda346c574d9105a5479cb87231c",
+            "publicSwap": true,
+            "swapFee": "0.005",
+            "tokens": [
+                {
+                    "address": "0x6b175474e89094c44da98b954eedeac495271d0f",
+                    "balance": "11544.143390826587204613",
+                    "decimals": 18,
+                    "weight": "7",
+                    "id": "0x53b89ce35928dda346c574d9105a5479cb87231c-0x6b175474e89094c44da98b954eedeac495271d0f",
+                    "symbol": "DAI"
+                },
+                {
+                    "address": "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
+                    "balance": "24.53165080740134193",
+                    "decimals": 18,
+                    "weight": "3",
+                    "id": "0x53b89ce35928dda346c574d9105a5479cb87231c-0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
+                    "symbol": "WETH"
+                }
+            ],
+            "tokensList": [
+                "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
+                "0x6b175474e89094c44da98b954eedeac495271d0f"
+            ],
+            "totalWeight": "10",
+            "totalShares": "100",
+            "poolType": "Weighted",
+            "address": "0x53b89ce35928dda346c574d9105a5479cb87231c"
+        },
+        {
+            "id": "0x57755f7dec33320bca83159c26e93751bfd30fbe",
+            "publicSwap": true,
+            "swapFee": "0.0005",
+            "tokens": [
+                {
+                    "address": "0x6b175474e89094c44da98b954eedeac495271d0f",
+                    "balance": "472.446035241861225027",
+                    "decimals": 18,
+                    "weight": "5",
+                    "id": "0x57755f7dec33320bca83159c26e93751bfd30fbe-0x6b175474e89094c44da98b954eedeac495271d0f",
+                    "symbol": "DAI"
+                },
+                {
+                    "address": "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+                    "balance": "476.256712",
+                    "decimals": 6,
+                    "weight": "5",
+                    "id": "0x57755f7dec33320bca83159c26e93751bfd30fbe-0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+                    "symbol": "USDC"
+                }
+            ],
+            "tokensList": [
+                "0x6b175474e89094c44da98b954eedeac495271d0f",
+                "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48"
+            ],
+            "totalWeight": "10",
+            "totalShares": "100",
+            "poolType": "Weighted",
+            "address": "0x57755f7dec33320bca83159c26e93751bfd30fbe"
+        },
+        {
+            "id": "0x585846fafae6740c2dc68c64f8c6b32a77c1cc94",
+            "publicSwap": true,
+            "swapFee": "0.0125",
+            "tokens": [
+                {
+                    "address": "0xb4efd85c19999d84251304bda99e90b92300bd93",
+                    "balance": "179.467782814596214149",
+                    "decimals": 18,
+                    "weight": "40",
+                    "id": "0x585846fafae6740c2dc68c64f8c6b32a77c1cc94-0xb4efd85c19999d84251304bda99e90b92300bd93",
+                    "symbol": "RPL"
+                },
+                {
+                    "address": "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
+                    "balance": "0.529026199864499819",
+                    "decimals": 18,
+                    "weight": "10",
+                    "id": "0x585846fafae6740c2dc68c64f8c6b32a77c1cc94-0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
+                    "symbol": "WETH"
+                }
+            ],
+            "tokensList": [
+                "0xb4efd85c19999d84251304bda99e90b92300bd93",
+                "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2"
+            ],
+            "totalWeight": "50",
+            "totalShares": "100",
+            "poolType": "Weighted",
+            "address": "0x585846fafae6740c2dc68c64f8c6b32a77c1cc94"
+        },
+        {
+            "id": "0x5dab55b276301951a6efd857be05a82b018c3196",
+            "publicSwap": true,
+            "swapFee": "0.0015",
+            "tokens": [
+                {
+                    "address": "0x93ed3fbe21207ec2e8f2d3c3de6e058cb73bc04d",
+                    "balance": "850",
+                    "decimals": 18,
+                    "weight": "8.5",
+                    "id": "0x5dab55b276301951a6efd857be05a82b018c3196-0x93ed3fbe21207ec2e8f2d3c3de6e058cb73bc04d",
+                    "symbol": "PNK"
+                },
+                {
+                    "address": "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
+                    "balance": "0.0144",
+                    "decimals": 18,
+                    "weight": "1.5",
+                    "id": "0x5dab55b276301951a6efd857be05a82b018c3196-0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
+                    "symbol": "WETH"
+                }
+            ],
+            "tokensList": [
+                "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
+                "0x93ed3fbe21207ec2e8f2d3c3de6e058cb73bc04d"
+            ],
+            "totalWeight": "10",
+            "totalShares": "100",
+            "poolType": "Weighted",
+            "address": "0x5dab55b276301951a6efd857be05a82b018c3196"
+        },
+        {
+            "id": "0x60e6b01456fc55de0d893487c7c9cd0851c97064",
+            "publicSwap": true,
+            "swapFee": "0.0025",
+            "tokens": [
+                {
+                    "address": "0x04fa0d235c4abf4bcf4787af4cf447de572ef828",
+                    "balance": "6162.132423471301727665",
+                    "decimals": 18,
+                    "weight": "8",
+                    "id": "0x60e6b01456fc55de0d893487c7c9cd0851c97064-0x04fa0d235c4abf4bcf4787af4cf447de572ef828",
+                    "symbol": "UMA"
+                },
+                {
+                    "address": "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
+                    "balance": "10.581806068178528985",
+                    "decimals": 18,
+                    "weight": "2",
+                    "id": "0x60e6b01456fc55de0d893487c7c9cd0851c97064-0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
+                    "symbol": "WETH"
+                }
+            ],
+            "tokensList": [
+                "0x04fa0d235c4abf4bcf4787af4cf447de572ef828",
+                "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2"
+            ],
+            "totalWeight": "10",
+            "totalShares": "100",
+            "poolType": "Weighted",
+            "address": "0x60e6b01456fc55de0d893487c7c9cd0851c97064"
+        },
+        {
+            "id": "0x622a71fdae6428d015052cf991816f70bb6a4a01",
+            "publicSwap": true,
+            "swapFee": "0.0005",
+            "tokens": [
+                {
+                    "address": "0x39aa39c021dfbae8fac545936693ac917d5e7563",
+                    "balance": "915.39886868",
+                    "decimals": 8,
+                    "weight": "5",
+                    "id": "0x622a71fdae6428d015052cf991816f70bb6a4a01-0x39aa39c021dfbae8fac545936693ac917d5e7563",
+                    "symbol": "cUSDC"
+                },
+                {
+                    "address": "0x5d3a536e4d6dbd6114cc1ead35777bab948e3643",
+                    "balance": "930.33262743",
+                    "decimals": 8,
+                    "weight": "5",
+                    "id": "0x622a71fdae6428d015052cf991816f70bb6a4a01-0x5d3a536e4d6dbd6114cc1ead35777bab948e3643",
+                    "symbol": "cDAI"
+                }
+            ],
+            "tokensList": [
+                "0x39aa39c021dfbae8fac545936693ac917d5e7563",
+                "0x5d3a536e4d6dbd6114cc1ead35777bab948e3643"
+            ],
+            "totalWeight": "10",
+            "totalShares": "100",
+            "poolType": "Weighted",
+            "address": "0x622a71fdae6428d015052cf991816f70bb6a4a01"
+        },
+        {
+            "id": "0x64cd4c11b70f0ad9dccdf873a51e7f278b7fed0a",
+            "publicSwap": true,
+            "swapFee": "0.002",
+            "tokens": [
+                {
+                    "address": "0x408e41876cccdc0f92210600ef50372656052a38",
+                    "balance": "0",
+                    "decimals": 18,
+                    "weight": "30",
+                    "id": "0x64cd4c11b70f0ad9dccdf873a51e7f278b7fed0a-0x408e41876cccdc0f92210600ef50372656052a38",
+                    "symbol": "REN"
+                },
+                {
+                    "address": "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
+                    "balance": "0",
+                    "decimals": 18,
+                    "weight": "10",
+                    "id": "0x64cd4c11b70f0ad9dccdf873a51e7f278b7fed0a-0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
+                    "symbol": "WETH"
+                }
+            ],
+            "tokensList": [
+                "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
+                "0x408e41876cccdc0f92210600ef50372656052a38"
+            ],
+            "totalWeight": "40",
+            "totalShares": "100",
+            "poolType": "Weighted",
+            "address": "0x64cd4c11b70f0ad9dccdf873a51e7f278b7fed0a"
+        },
+        {
+            "id": "0x69306157a2191ede35cbb9c4aac72a112b5557c4",
+            "publicSwap": true,
+            "swapFee": "0.01",
+            "tokens": [
+                {
+                    "address": "0x0d8775f648430679a709e98d2b0cb6250d2887ef",
+                    "balance": "5578.186661512268874961",
+                    "decimals": 18,
+                    "weight": "8",
+                    "id": "0x69306157a2191ede35cbb9c4aac72a112b5557c4-0x0d8775f648430679a709e98d2b0cb6250d2887ef",
+                    "symbol": "BAT"
+                },
+                {
+                    "address": "0x9cb2f26a23b8d89973f08c957c4d7cdf75cd341c",
+                    "balance": "21305.532077",
+                    "decimals": 6,
+                    "weight": "8",
+                    "id": "0x69306157a2191ede35cbb9c4aac72a112b5557c4-0x9cb2f26a23b8d89973f08c957c4d7cdf75cd341c",
+                    "symbol": "DZAR"
+                },
+                {
+                    "address": "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
+                    "balance": "7.188042341109280848",
+                    "decimals": 18,
+                    "weight": "10",
+                    "id": "0x69306157a2191ede35cbb9c4aac72a112b5557c4-0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
+                    "symbol": "WETH"
+                },
+                {
+                    "address": "0xdd974d5c2e2928dea5f71b9825b8b646686bd200",
+                    "balance": "1700.613101971618194892",
+                    "decimals": 18,
+                    "weight": "8",
+                    "id": "0x69306157a2191ede35cbb9c4aac72a112b5557c4-0xdd974d5c2e2928dea5f71b9825b8b646686bd200",
+                    "symbol": "KNC"
+                },
+                {
+                    "address": "0xe41d2489571d322189246dafa5ebde1f4699f498",
+                    "balance": "3202.379622262621680661",
+                    "decimals": 18,
+                    "weight": "8",
+                    "id": "0x69306157a2191ede35cbb9c4aac72a112b5557c4-0xe41d2489571d322189246dafa5ebde1f4699f498",
+                    "symbol": "ZRX"
+                },
+                {
+                    "address": "0xf629cbd94d3791c9250152bd8dfbdf380e2a3b9c",
+                    "balance": "6140.991070167523535188",
+                    "decimals": 18,
+                    "weight": "8",
+                    "id": "0x69306157a2191ede35cbb9c4aac72a112b5557c4-0xf629cbd94d3791c9250152bd8dfbdf380e2a3b9c",
+                    "symbol": "ENJ"
+                }
+            ],
+            "tokensList": [
+                "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
+                "0x0d8775f648430679a709e98d2b0cb6250d2887ef",
+                "0xf629cbd94d3791c9250152bd8dfbdf380e2a3b9c",
+                "0xdd974d5c2e2928dea5f71b9825b8b646686bd200",
+                "0xe41d2489571d322189246dafa5ebde1f4699f498",
+                "0x9cb2f26a23b8d89973f08c957c4d7cdf75cd341c"
+            ],
+            "totalWeight": "50",
+            "totalShares": "100",
+            "poolType": "Weighted",
+            "address": "0x69306157a2191ede35cbb9c4aac72a112b5557c4"
+        },
+        {
+            "id": "0x6af60fde043bebb5e1eb6b51b36cc91fb21d5fdc",
+            "publicSwap": true,
+            "swapFee": "0.025",
+            "tokens": [],
+            "tokensList": [],
+            "totalWeight": "0",
+            "totalShares": "100",
+            "poolType": "Weighted",
+            "address": "0x6af60fde043bebb5e1eb6b51b36cc91fb21d5fdc"
+        },
+        {
+            "id": "0x6cff7b12a9e3481b70d1c1a6e70ee674f5b9906b",
+            "publicSwap": true,
+            "swapFee": "0.003",
+            "tokens": [
+                {
+                    "address": "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+                    "balance": "0.63",
+                    "decimals": 6,
+                    "weight": "49",
+                    "id": "0x6cff7b12a9e3481b70d1c1a6e70ee674f5b9906b-0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+                    "symbol": "USDC"
+                },
+                {
+                    "address": "0xea5f88e54d982cbb0c441cde4e79bc305e5b43bc",
+                    "balance": "629.99999999999999997",
+                    "decimals": 18,
+                    "weight": "1",
+                    "id": "0x6cff7b12a9e3481b70d1c1a6e70ee674f5b9906b-0xea5f88e54d982cbb0c441cde4e79bc305e5b43bc",
+                    "symbol": "PARETO"
+                }
+            ],
+            "tokensList": [
+                "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+                "0xea5f88e54d982cbb0c441cde4e79bc305e5b43bc"
+            ],
+            "totalWeight": "50",
+            "totalShares": "100",
+            "poolType": "Weighted",
+            "address": "0x6cff7b12a9e3481b70d1c1a6e70ee674f5b9906b"
+        },
+        {
+            "id": "0x70f1c87b22d7371c68e3ea64870833a2a64cf8b3",
+            "publicSwap": true,
+            "swapFee": "0.006",
+            "tokens": [
+                {
+                    "address": "0x0d8775f648430679a709e98d2b0cb6250d2887ef",
+                    "balance": "456860.145220125293344783",
+                    "decimals": 18,
+                    "weight": "4",
+                    "id": "0x70f1c87b22d7371c68e3ea64870833a2a64cf8b3-0x0d8775f648430679a709e98d2b0cb6250d2887ef",
+                    "symbol": "BAT"
+                },
+                {
+                    "address": "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
+                    "balance": "686.899200105051034238",
+                    "decimals": 18,
+                    "weight": "6",
+                    "id": "0x70f1c87b22d7371c68e3ea64870833a2a64cf8b3-0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
+                    "symbol": "WETH"
+                }
+            ],
+            "tokensList": [
+                "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
+                "0x0d8775f648430679a709e98d2b0cb6250d2887ef"
+            ],
+            "totalWeight": "10",
+            "totalShares": "100",
+            "poolType": "Weighted",
+            "address": "0x70f1c87b22d7371c68e3ea64870833a2a64cf8b3"
+        },
+        {
+            "id": "0x75286e183d923a5f52f52be205e358c5c9101b09",
+            "publicSwap": true,
+            "swapFee": "0.0029",
+            "tokens": [
+                {
+                    "address": "0x0327112423f3a68efdf1fcf402f6c5cb9f7c33fd",
+                    "balance": "1.750714011559317608",
+                    "decimals": 18,
+                    "weight": "32.5",
+                    "id": "0x75286e183d923a5f52f52be205e358c5c9101b09-0x0327112423f3a68efdf1fcf402f6c5cb9f7c33fd",
+                    "symbol": "BTC++"
+                },
+                {
+                    "address": "0x6b175474e89094c44da98b954eedeac495271d0f",
+                    "balance": "4812.748445272788936511",
+                    "decimals": 18,
+                    "weight": "10",
+                    "id": "0x75286e183d923a5f52f52be205e358c5c9101b09-0x6b175474e89094c44da98b954eedeac495271d0f",
+                    "symbol": "DAI"
+                },
+                {
+                    "address": "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+                    "balance": "3656.936401",
+                    "decimals": 6,
+                    "weight": "7.5",
+                    "id": "0x75286e183d923a5f52f52be205e358c5c9101b09-0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+                    "symbol": "USDC"
+                }
+            ],
+            "tokensList": [
+                "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+                "0x6b175474e89094c44da98b954eedeac495271d0f",
+                "0x0327112423f3a68efdf1fcf402f6c5cb9f7c33fd"
+            ],
+            "totalWeight": "50",
+            "totalShares": "100",
+            "poolType": "Weighted",
+            "address": "0x75286e183d923a5f52f52be205e358c5c9101b09"
+        },
+        {
+            "id": "0x7f0b4d22b8a9abe2ae9ea1077fe1ab77dc7283a3",
+            "publicSwap": true,
+            "swapFee": "0.003",
+            "tokens": [
+                {
+                    "address": "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+                    "balance": "537.493963",
+                    "decimals": 6,
+                    "weight": "7",
+                    "id": "0x7f0b4d22b8a9abe2ae9ea1077fe1ab77dc7283a3-0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+                    "symbol": "USDC"
+                },
+                {
+                    "address": "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
+                    "balance": "1.150620685690608088",
+                    "decimals": 18,
+                    "weight": "3",
+                    "id": "0x7f0b4d22b8a9abe2ae9ea1077fe1ab77dc7283a3-0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
+                    "symbol": "WETH"
+                }
+            ],
+            "tokensList": [
+                "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
+                "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48"
+            ],
+            "totalWeight": "10",
+            "totalShares": "100",
+            "poolType": "Weighted",
+            "address": "0x7f0b4d22b8a9abe2ae9ea1077fe1ab77dc7283a3"
+        },
+        {
+            "id": "0x7f3bc8cc642fb8633ef58560802643935f8b3682",
+            "publicSwap": true,
+            "swapFee": "0.0099",
+            "tokens": [
+                {
+                    "address": "0x7c5a0ce9267ed19b22f8cae653f198e3e8daf098",
+                    "balance": "1",
+                    "decimals": 18,
+                    "weight": "5",
+                    "id": "0x7f3bc8cc642fb8633ef58560802643935f8b3682-0x7c5a0ce9267ed19b22f8cae653f198e3e8daf098",
+                    "symbol": "SAN"
+                },
+                {
+                    "address": "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+                    "balance": "1",
+                    "decimals": 6,
+                    "weight": "30",
+                    "id": "0x7f3bc8cc642fb8633ef58560802643935f8b3682-0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+                    "symbol": "USDC"
+                },
+                {
+                    "address": "0xea5f88e54d982cbb0c441cde4e79bc305e5b43bc",
+                    "balance": "1",
+                    "decimals": 18,
+                    "weight": "5",
+                    "id": "0x7f3bc8cc642fb8633ef58560802643935f8b3682-0xea5f88e54d982cbb0c441cde4e79bc305e5b43bc",
+                    "symbol": "PARETO"
+                },
+                {
+                    "address": "0xf1290473e210b2108a85237fbcd7b6eb42cc654f",
+                    "balance": "1",
+                    "decimals": 18,
+                    "weight": "5",
+                    "id": "0x7f3bc8cc642fb8633ef58560802643935f8b3682-0xf1290473e210b2108a85237fbcd7b6eb42cc654f",
+                    "symbol": "HEDG"
+                }
+            ],
+            "tokensList": [
+                "0xea5f88e54d982cbb0c441cde4e79bc305e5b43bc",
+                "0x7c5a0ce9267ed19b22f8cae653f198e3e8daf098",
+                "0xf1290473e210b2108a85237fbcd7b6eb42cc654f",
+                "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48"
+            ],
+            "totalWeight": "45",
+            "totalShares": "100",
+            "poolType": "Weighted",
+            "address": "0x7f3bc8cc642fb8633ef58560802643935f8b3682"
+        },
+        {
+            "id": "0x8f44990d76ca83c96d71a1773a8e76396e055fbb",
+            "publicSwap": true,
+            "swapFee": "0.01",
+            "tokens": [
+                {
+                    "address": "0x6b175474e89094c44da98b954eedeac495271d0f",
+                    "balance": "0",
+                    "decimals": 18,
+                    "weight": "12.5",
+                    "id": "0x8f44990d76ca83c96d71a1773a8e76396e055fbb-0x6b175474e89094c44da98b954eedeac495271d0f",
+                    "symbol": "DAI"
+                },
+                {
+                    "address": "0x9cb2f26a23b8d89973f08c957c4d7cdf75cd341c",
+                    "balance": "0",
+                    "decimals": 6,
+                    "weight": "12.5",
+                    "id": "0x8f44990d76ca83c96d71a1773a8e76396e055fbb-0x9cb2f26a23b8d89973f08c957c4d7cdf75cd341c",
+                    "symbol": "DZAR"
+                },
+                {
+                    "address": "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+                    "balance": "0",
+                    "decimals": 6,
+                    "weight": "12.5",
+                    "id": "0x8f44990d76ca83c96d71a1773a8e76396e055fbb-0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+                    "symbol": "USDC"
+                },
+                {
+                    "address": "0xae38b81459d74a8c16eaa968c792207603d84480",
+                    "balance": "0",
+                    "decimals": 18,
+                    "weight": "12.5",
+                    "id": "0x8f44990d76ca83c96d71a1773a8e76396e055fbb-0xae38b81459d74a8c16eaa968c792207603d84480",
+                    "symbol": "sUSD"
+                }
+            ],
+            "tokensList": [
+                "0xae38b81459d74a8c16eaa968c792207603d84480",
+                "0x9cb2f26a23b8d89973f08c957c4d7cdf75cd341c",
+                "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+                "0x6b175474e89094c44da98b954eedeac495271d0f"
+            ],
+            "totalWeight": "50",
+            "totalShares": "100",
+            "poolType": "Weighted",
+            "address": "0x8f44990d76ca83c96d71a1773a8e76396e055fbb"
+        },
+        {
+            "id": "0x95f0aa355f4251291e6413dd0174488f0ca8d2db",
+            "publicSwap": true,
+            "swapFee": "0.002",
+            "tokens": [
+                {
+                    "address": "0x514910771af9ca656af840dff83e8264ecf986ca",
+                    "balance": "3993.276893860521143521",
+                    "decimals": 18,
+                    "weight": "15",
+                    "id": "0x95f0aa355f4251291e6413dd0174488f0ca8d2db-0x514910771af9ca656af840dff83e8264ecf986ca",
+                    "symbol": "LINK"
+                },
+                {
+                    "address": "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
+                    "balance": "25.526661947148070108",
+                    "decimals": 18,
+                    "weight": "5",
+                    "id": "0x95f0aa355f4251291e6413dd0174488f0ca8d2db-0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
+                    "symbol": "WETH"
+                }
+            ],
+            "tokensList": [
+                "0x514910771af9ca656af840dff83e8264ecf986ca",
+                "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2"
+            ],
+            "totalWeight": "20",
+            "totalShares": "100",
+            "poolType": "Weighted",
+            "address": "0x95f0aa355f4251291e6413dd0174488f0ca8d2db"
+        },
+        {
+            "id": "0x987d7cc04652710b74fff380403f5c02f82e290a",
+            "publicSwap": true,
+            "swapFee": "0.002",
+            "tokens": [
+                {
+                    "address": "0x9f8f72aa9304c8b593d555f12ef6589cc3a579a2",
+                    "balance": "5696.30647592740542041",
+                    "decimals": 18,
+                    "weight": "15",
+                    "id": "0x987d7cc04652710b74fff380403f5c02f82e290a-0x9f8f72aa9304c8b593d555f12ef6589cc3a579a2",
+                    "symbol": "MKR"
+                },
+                {
+                    "address": "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
+                    "balance": "3203.951920629754536209",
+                    "decimals": 18,
+                    "weight": "5",
+                    "id": "0x987d7cc04652710b74fff380403f5c02f82e290a-0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
+                    "symbol": "WETH"
+                }
+            ],
+            "tokensList": [
+                "0x9f8f72aa9304c8b593d555f12ef6589cc3a579a2",
+                "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2"
+            ],
+            "totalWeight": "20",
+            "totalShares": "100",
+            "poolType": "Weighted",
+            "address": "0x987d7cc04652710b74fff380403f5c02f82e290a"
+        },
+        {
+            "id": "0x9891832633a83634765952b051bc7fef36714a46",
+            "publicSwap": true,
+            "swapFee": "0.002",
+            "tokens": [
+                {
+                    "address": "0x2260fac5e5542a773aa44fbcfedf7c193bc2c599",
+                    "balance": "15.11112037",
+                    "decimals": 8,
+                    "weight": "12.5",
+                    "id": "0x9891832633a83634765952b051bc7fef36714a46-0x2260fac5e5542a773aa44fbcfedf7c193bc2c599",
+                    "symbol": "WBTC"
+                },
+                {
+                    "address": "0x3212b29e33587a00fb1c83346f5dbfa69a458923",
+                    "balance": "15.25328588",
+                    "decimals": 8,
+                    "weight": "12.5",
+                    "id": "0x9891832633a83634765952b051bc7fef36714a46-0x3212b29e33587a00fb1c83346f5dbfa69a458923",
+                    "symbol": "imBTC"
+                },
+                {
+                    "address": "0x5228a22e72ccc52d415ecfd199f99d0665e7733b",
+                    "balance": "15.228289829628021832",
+                    "decimals": 18,
+                    "weight": "12.5",
+                    "id": "0x9891832633a83634765952b051bc7fef36714a46-0x5228a22e72ccc52d415ecfd199f99d0665e7733b",
+                    "symbol": "pBTC"
+                },
+                {
+                    "address": "0xfe18be6b3bd88a2d2a7f928d00292e7a9963cfc6",
+                    "balance": "15.191632221530338664",
+                    "decimals": 18,
+                    "weight": "12.5",
+                    "id": "0x9891832633a83634765952b051bc7fef36714a46-0xfe18be6b3bd88a2d2a7f928d00292e7a9963cfc6",
+                    "symbol": "sBTC"
+                }
+            ],
+            "tokensList": [
+                "0x2260fac5e5542a773aa44fbcfedf7c193bc2c599",
+                "0x5228a22e72ccc52d415ecfd199f99d0665e7733b",
+                "0x3212b29e33587a00fb1c83346f5dbfa69a458923",
+                "0xfe18be6b3bd88a2d2a7f928d00292e7a9963cfc6"
+            ],
+            "totalWeight": "50",
+            "totalShares": "100",
+            "poolType": "Weighted",
+            "address": "0x9891832633a83634765952b051bc7fef36714a46"
+        },
+        {
+            "id": "0x9b208194acc0a8ccb2a8dcafeacfbb7dcc093f81",
+            "publicSwap": true,
+            "swapFee": "0.0007",
+            "tokens": [
+                {
+                    "address": "0x6b175474e89094c44da98b954eedeac495271d0f",
+                    "balance": "116494.379919916204016549",
+                    "decimals": 18,
+                    "weight": "17.5",
+                    "id": "0x9b208194acc0a8ccb2a8dcafeacfbb7dcc093f81-0x6b175474e89094c44da98b954eedeac495271d0f",
+                    "symbol": "DAI"
+                },
+                {
+                    "address": "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+                    "balance": "83896.755132",
+                    "decimals": 6,
+                    "weight": "12.5",
+                    "id": "0x9b208194acc0a8ccb2a8dcafeacfbb7dcc093f81-0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+                    "symbol": "USDC"
+                },
+                {
+                    "address": "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
+                    "balance": "661.680410086349227084",
+                    "decimals": 18,
+                    "weight": "20",
+                    "id": "0x9b208194acc0a8ccb2a8dcafeacfbb7dcc093f81-0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
+                    "symbol": "WETH"
+                }
+            ],
+            "tokensList": [
+                "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+                "0x6b175474e89094c44da98b954eedeac495271d0f",
+                "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2"
+            ],
+            "totalWeight": "50",
+            "totalShares": "100",
+            "poolType": "Weighted",
+            "address": "0x9b208194acc0a8ccb2a8dcafeacfbb7dcc093f81"
+        },
+        {
+            "id": "0xa29f5e42760aa987214844e5db9ac4a8e16ca969",
+            "publicSwap": true,
+            "swapFee": "0.1",
+            "tokens": [
+                {
+                    "address": "0x2260fac5e5542a773aa44fbcfedf7c193bc2c599",
+                    "balance": "0.0089983",
+                    "decimals": 8,
+                    "weight": "5",
+                    "id": "0xa29f5e42760aa987214844e5db9ac4a8e16ca969-0x2260fac5e5542a773aa44fbcfedf7c193bc2c599",
+                    "symbol": "WBTC"
+                },
+                {
+                    "address": "0x6b175474e89094c44da98b954eedeac495271d0f",
+                    "balance": "79.802850683701322399",
+                    "decimals": 18,
+                    "weight": "5",
+                    "id": "0xa29f5e42760aa987214844e5db9ac4a8e16ca969-0x6b175474e89094c44da98b954eedeac495271d0f",
+                    "symbol": "DAI"
+                }
+            ],
+            "tokensList": [
+                "0x2260fac5e5542a773aa44fbcfedf7c193bc2c599",
+                "0x6b175474e89094c44da98b954eedeac495271d0f"
+            ],
+            "totalWeight": "10",
+            "totalShares": "100",
+            "poolType": "Weighted",
+            "address": "0xa29f5e42760aa987214844e5db9ac4a8e16ca969"
+        },
+        {
+            "id": "0xa71f8151661c98678d89a4a463629ff7dd030c3b",
+            "publicSwap": true,
+            "swapFee": "0.1",
+            "tokens": [
+                {
+                    "address": "0xb4efd85c19999d84251304bda99e90b92300bd93",
+                    "balance": "190.5151239459422434",
+                    "decimals": 18,
+                    "weight": "40",
+                    "id": "0xa71f8151661c98678d89a4a463629ff7dd030c3b-0xb4efd85c19999d84251304bda99e90b92300bd93",
+                    "symbol": "RPL"
+                },
+                {
+                    "address": "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
+                    "balance": "0.561657409408353581",
+                    "decimals": 18,
+                    "weight": "10",
+                    "id": "0xa71f8151661c98678d89a4a463629ff7dd030c3b-0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
+                    "symbol": "WETH"
+                }
+            ],
+            "tokensList": [
+                "0xb4efd85c19999d84251304bda99e90b92300bd93",
+                "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2"
+            ],
+            "totalWeight": "50",
+            "totalShares": "100",
+            "poolType": "Weighted",
+            "address": "0xa71f8151661c98678d89a4a463629ff7dd030c3b"
+        },
+        {
+            "id": "0xa74485e5f668bba37b5c044c386b363f4cbd7c8c",
+            "publicSwap": true,
+            "swapFee": "0.002",
+            "tokens": [
+                {
+                    "address": "0x0ba45a8b5d5575935b8158a88c631e9f9c95a2e5",
+                    "balance": "102.898765284709388633",
+                    "decimals": 18,
+                    "weight": "30",
+                    "id": "0xa74485e5f668bba37b5c044c386b363f4cbd7c8c-0x0ba45a8b5d5575935b8158a88c631e9f9c95a2e5",
+                    "symbol": "TRB"
+                },
+                {
+                    "address": "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
+                    "balance": "0.803152764550647347",
+                    "decimals": 18,
+                    "weight": "10",
+                    "id": "0xa74485e5f668bba37b5c044c386b363f4cbd7c8c-0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
+                    "symbol": "WETH"
+                }
+            ],
+            "tokensList": [
+                "0x0ba45a8b5d5575935b8158a88c631e9f9c95a2e5",
+                "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2"
+            ],
+            "totalWeight": "40",
+            "totalShares": "100",
+            "poolType": "Weighted",
+            "address": "0xa74485e5f668bba37b5c044c386b363f4cbd7c8c"
+        },
+        {
+            "id": "0xa8e4faa056c7f1c41f5838a896daa091dea93901",
+            "publicSwap": true,
+            "swapFee": "0.005",
+            "tokens": [
+                {
+                    "address": "0xc011a73ee8576fb46f5e1c5751ca3b9fe0af2a6f",
+                    "balance": "13.600490796341824681",
+                    "decimals": 18,
+                    "weight": "7",
+                    "id": "0xa8e4faa056c7f1c41f5838a896daa091dea93901-0xc011a73ee8576fb46f5e1c5751ca3b9fe0af2a6f",
+                    "symbol": "SNX"
+                },
+                {
+                    "address": "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
+                    "balance": "0.022059191017228818",
+                    "decimals": 18,
+                    "weight": "3",
+                    "id": "0xa8e4faa056c7f1c41f5838a896daa091dea93901-0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
+                    "symbol": "WETH"
+                }
+            ],
+            "tokensList": [
+                "0xc011a73ee8576fb46f5e1c5751ca3b9fe0af2a6f",
+                "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2"
+            ],
+            "totalWeight": "10",
+            "totalShares": "100",
+            "poolType": "Weighted",
+            "address": "0xa8e4faa056c7f1c41f5838a896daa091dea93901"
+        },
+        {
+            "id": "0xb6f10037acbf7012860b658fbfc35aa55d8de883",
+            "publicSwap": true,
+            "swapFee": "0.01",
+            "tokens": [
+                {
+                    "address": "0x2260fac5e5542a773aa44fbcfedf7c193bc2c599",
+                    "balance": "0",
+                    "decimals": 8,
+                    "weight": "12.5",
+                    "id": "0xb6f10037acbf7012860b658fbfc35aa55d8de883-0x2260fac5e5542a773aa44fbcfedf7c193bc2c599",
+                    "symbol": "WBTC"
+                },
+                {
+                    "address": "0x514910771af9ca656af840dff83e8264ecf986ca",
+                    "balance": "0",
+                    "decimals": 18,
+                    "weight": "12.5",
+                    "id": "0xb6f10037acbf7012860b658fbfc35aa55d8de883-0x514910771af9ca656af840dff83e8264ecf986ca",
+                    "symbol": "LINK"
+                },
+                {
+                    "address": "0x9cb2f26a23b8d89973f08c957c4d7cdf75cd341c",
+                    "balance": "0",
+                    "decimals": 6,
+                    "weight": "12.5",
+                    "id": "0xb6f10037acbf7012860b658fbfc35aa55d8de883-0x9cb2f26a23b8d89973f08c957c4d7cdf75cd341c",
+                    "symbol": "DZAR"
+                },
+                {
+                    "address": "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
+                    "balance": "0",
+                    "decimals": 18,
+                    "weight": "12.5",
+                    "id": "0xb6f10037acbf7012860b658fbfc35aa55d8de883-0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
+                    "symbol": "WETH"
+                }
+            ],
+            "tokensList": [
+                "0x9cb2f26a23b8d89973f08c957c4d7cdf75cd341c",
+                "0x2260fac5e5542a773aa44fbcfedf7c193bc2c599",
+                "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
+                "0x514910771af9ca656af840dff83e8264ecf986ca"
+            ],
+            "totalWeight": "50",
+            "totalShares": "100",
+            "poolType": "Weighted",
+            "address": "0xb6f10037acbf7012860b658fbfc35aa55d8de883"
+        },
+        {
+            "id": "0xbc1902b1a219930c06361b07d57c6312fc7b10c6",
+            "publicSwap": true,
+            "swapFee": "0.004",
+            "tokens": [
+                {
+                    "address": "0x2260fac5e5542a773aa44fbcfedf7c193bc2c599",
+                    "balance": "0.00961212",
+                    "decimals": 8,
+                    "weight": "4",
+                    "id": "0xbc1902b1a219930c06361b07d57c6312fc7b10c6-0x2260fac5e5542a773aa44fbcfedf7c193bc2c599",
+                    "symbol": "WBTC"
+                },
+                {
+                    "address": "0x6b175474e89094c44da98b954eedeac495271d0f",
+                    "balance": "21.228385966279105059",
+                    "decimals": 18,
+                    "weight": "1",
+                    "id": "0xbc1902b1a219930c06361b07d57c6312fc7b10c6-0x6b175474e89094c44da98b954eedeac495271d0f",
+                    "symbol": "DAI"
+                }
+            ],
+            "tokensList": [
+                "0x6b175474e89094c44da98b954eedeac495271d0f",
+                "0x2260fac5e5542a773aa44fbcfedf7c193bc2c599"
+            ],
+            "totalWeight": "5",
+            "totalShares": "100",
+            "poolType": "Weighted",
+            "address": "0xbc1902b1a219930c06361b07d57c6312fc7b10c6"
+        },
+        {
+            "id": "0xc0b2b0c5376cb2e6f73b473a7caa341542f707ce",
+            "publicSwap": true,
+            "swapFee": "0.01",
+            "tokens": [
+                {
+                    "address": "0x2260fac5e5542a773aa44fbcfedf7c193bc2c599",
+                    "balance": "5.29052243",
+                    "decimals": 8,
+                    "weight": "6.25",
+                    "id": "0xc0b2b0c5376cb2e6f73b473a7caa341542f707ce-0x2260fac5e5542a773aa44fbcfedf7c193bc2c599",
+                    "symbol": "WBTC"
+                },
+                {
+                    "address": "0x514910771af9ca656af840dff83e8264ecf986ca",
+                    "balance": "12199.338234272057573355",
+                    "decimals": 18,
+                    "weight": "6.25",
+                    "id": "0xc0b2b0c5376cb2e6f73b473a7caa341542f707ce-0x514910771af9ca656af840dff83e8264ecf986ca",
+                    "symbol": "LINK"
+                },
+                {
+                    "address": "0x57ab1ec28d129707052df4df418d58a2d46d5f51",
+                    "balance": "46348.645352048875913418",
+                    "decimals": 18,
+                    "weight": "6.25",
+                    "id": "0xc0b2b0c5376cb2e6f73b473a7caa341542f707ce-0x57ab1ec28d129707052df4df418d58a2d46d5f51",
+                    "symbol": "sUSD"
+                },
+                {
+                    "address": "0x6b175474e89094c44da98b954eedeac495271d0f",
+                    "balance": "46631.318202194787909471",
+                    "decimals": 18,
+                    "weight": "6.25",
+                    "id": "0xc0b2b0c5376cb2e6f73b473a7caa341542f707ce-0x6b175474e89094c44da98b954eedeac495271d0f",
+                    "symbol": "DAI"
+                },
+                {
+                    "address": "0x9cb2f26a23b8d89973f08c957c4d7cdf75cd341c",
+                    "balance": "891571.090645",
+                    "decimals": 6,
+                    "weight": "6.25",
+                    "id": "0xc0b2b0c5376cb2e6f73b473a7caa341542f707ce-0x9cb2f26a23b8d89973f08c957c4d7cdf75cd341c",
+                    "symbol": "DZAR"
+                },
+                {
+                    "address": "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+                    "balance": "46491.236619",
+                    "decimals": 6,
+                    "weight": "6.25",
+                    "id": "0xc0b2b0c5376cb2e6f73b473a7caa341542f707ce-0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+                    "symbol": "USDC"
+                },
+                {
+                    "address": "0xc011a73ee8576fb46f5e1c5751ca3b9fe0af2a6f",
+                    "balance": "59586.140619122698632809",
+                    "decimals": 18,
+                    "weight": "6.25",
+                    "id": "0xc0b2b0c5376cb2e6f73b473a7caa341542f707ce-0xc011a73ee8576fb46f5e1c5751ca3b9fe0af2a6f",
+                    "symbol": "SNX"
+                },
+                {
+                    "address": "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
+                    "balance": "231.911744558380521856",
+                    "decimals": 18,
+                    "weight": "6.25",
+                    "id": "0xc0b2b0c5376cb2e6f73b473a7caa341542f707ce-0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
+                    "symbol": "WETH"
+                }
+            ],
+            "tokensList": [
+                "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
+                "0x2260fac5e5542a773aa44fbcfedf7c193bc2c599",
+                "0x514910771af9ca656af840dff83e8264ecf986ca",
+                "0xc011a73ee8576fb46f5e1c5751ca3b9fe0af2a6f",
+                "0x6b175474e89094c44da98b954eedeac495271d0f",
+                "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+                "0x57ab1ec28d129707052df4df418d58a2d46d5f51",
+                "0x9cb2f26a23b8d89973f08c957c4d7cdf75cd341c"
+            ],
+            "totalWeight": "50",
+            "totalShares": "100",
+            "poolType": "Weighted",
+            "address": "0xc0b2b0c5376cb2e6f73b473a7caa341542f707ce"
+        },
+        {
+            "id": "0xc7296300cb533dc8e43c48d73e32c588b47396d4",
+            "publicSwap": true,
+            "swapFee": "0.0005",
+            "tokens": [
+                {
+                    "address": "0x57755f7dec33320bca83159c26e93751bfd30fbe",
+                    "balance": "0",
+                    "decimals": 18,
+                    "weight": "5",
+                    "id": "0xc7296300cb533dc8e43c48d73e32c588b47396d4-0x57755f7dec33320bca83159c26e93751bfd30fbe",
+                    "symbol": "BPT"
+                },
+                {
+                    "address": "0x622a71fdae6428d015052cf991816f70bb6a4a01",
+                    "balance": "0",
+                    "decimals": 18,
+                    "weight": "5",
+                    "id": "0xc7296300cb533dc8e43c48d73e32c588b47396d4-0x622a71fdae6428d015052cf991816f70bb6a4a01",
+                    "symbol": "BPT"
+                }
+            ],
+            "tokensList": [
+                "0x622a71fdae6428d015052cf991816f70bb6a4a01",
+                "0x57755f7dec33320bca83159c26e93751bfd30fbe"
+            ],
+            "totalWeight": "10",
+            "totalShares": "100",
+            "poolType": "Weighted",
+            "address": "0xc7296300cb533dc8e43c48d73e32c588b47396d4"
+        },
+        {
+            "id": "0xcf6a51106f1ab4889a462c34cf31933ed5298df3",
+            "publicSwap": true,
+            "swapFee": "0.01",
+            "tokens": [
+                {
+                    "address": "0x2260fac5e5542a773aa44fbcfedf7c193bc2c599",
+                    "balance": "0",
+                    "decimals": 8,
+                    "weight": "10",
+                    "id": "0xcf6a51106f1ab4889a462c34cf31933ed5298df3-0x2260fac5e5542a773aa44fbcfedf7c193bc2c599",
+                    "symbol": "WBTC"
+                },
+                {
+                    "address": "0x2987252148e34863612ac7f4ef3260de0c2a68f7",
+                    "balance": "0",
+                    "decimals": 18,
+                    "weight": "10",
+                    "id": "0xcf6a51106f1ab4889a462c34cf31933ed5298df3-0x2987252148e34863612ac7f4ef3260de0c2a68f7",
+                    "symbol": "SNX"
+                },
+                {
+                    "address": "0x514910771af9ca656af840dff83e8264ecf986ca",
+                    "balance": "0",
+                    "decimals": 18,
+                    "weight": "10",
+                    "id": "0xcf6a51106f1ab4889a462c34cf31933ed5298df3-0x514910771af9ca656af840dff83e8264ecf986ca",
+                    "symbol": "LINK"
+                },
+                {
+                    "address": "0x9cb2f26a23b8d89973f08c957c4d7cdf75cd341c",
+                    "balance": "0",
+                    "decimals": 6,
+                    "weight": "10",
+                    "id": "0xcf6a51106f1ab4889a462c34cf31933ed5298df3-0x9cb2f26a23b8d89973f08c957c4d7cdf75cd341c",
+                    "symbol": "DZAR"
+                },
+                {
+                    "address": "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
+                    "balance": "0",
+                    "decimals": 18,
+                    "weight": "10",
+                    "id": "0xcf6a51106f1ab4889a462c34cf31933ed5298df3-0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
+                    "symbol": "WETH"
+                }
+            ],
+            "tokensList": [
+                "0x9cb2f26a23b8d89973f08c957c4d7cdf75cd341c",
+                "0x2987252148e34863612ac7f4ef3260de0c2a68f7",
+                "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
+                "0x2260fac5e5542a773aa44fbcfedf7c193bc2c599",
+                "0x514910771af9ca656af840dff83e8264ecf986ca"
+            ],
+            "totalWeight": "50",
+            "totalShares": "100",
+            "poolType": "Weighted",
+            "address": "0xcf6a51106f1ab4889a462c34cf31933ed5298df3"
+        },
+        {
+            "id": "0xd262e43273ca96214bb02b4036a1f24ad9806739",
+            "publicSwap": true,
+            "swapFee": "0.002",
+            "tokens": [
+                {
+                    "address": "0x9f8f72aa9304c8b593d555f12ef6589cc3a579a2",
+                    "balance": "76.054034875503819842",
+                    "decimals": 18,
+                    "weight": "5",
+                    "id": "0xd262e43273ca96214bb02b4036a1f24ad9806739-0x9f8f72aa9304c8b593d555f12ef6589cc3a579a2",
+                    "symbol": "MKR"
+                },
+                {
+                    "address": "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
+                    "balance": "384.996018041080186598",
+                    "decimals": 18,
+                    "weight": "15",
+                    "id": "0xd262e43273ca96214bb02b4036a1f24ad9806739-0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
+                    "symbol": "WETH"
+                }
+            ],
+            "tokensList": [
+                "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
+                "0x9f8f72aa9304c8b593d555f12ef6589cc3a579a2"
+            ],
+            "totalWeight": "20",
+            "totalShares": "100",
+            "poolType": "Weighted",
+            "address": "0xd262e43273ca96214bb02b4036a1f24ad9806739"
+        },
+        {
+            "id": "0xd3891ffc9cc5e64859c4ef08d0b86043b4473622",
+            "publicSwap": true,
+            "swapFee": "0.0025",
+            "tokens": [
+                {
+                    "address": "0x57ab1ec28d129707052df4df418d58a2d46d5f51",
+                    "balance": "0",
+                    "decimals": 18,
+                    "weight": "7.5",
+                    "id": "0xd3891ffc9cc5e64859c4ef08d0b86043b4473622-0x57ab1ec28d129707052df4df418d58a2d46d5f51",
+                    "symbol": "sUSD"
+                },
+                {
+                    "address": "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+                    "balance": "0",
+                    "decimals": 6,
+                    "weight": "7.5",
+                    "id": "0xd3891ffc9cc5e64859c4ef08d0b86043b4473622-0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+                    "symbol": "USDC"
+                },
+                {
+                    "address": "0xc011a73ee8576fb46f5e1c5751ca3b9fe0af2a6f",
+                    "balance": "0",
+                    "decimals": 18,
+                    "weight": "7.5",
+                    "id": "0xd3891ffc9cc5e64859c4ef08d0b86043b4473622-0xc011a73ee8576fb46f5e1c5751ca3b9fe0af2a6f",
+                    "symbol": "SNX"
+                }
+            ],
+            "tokensList": [
+                "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+                "0xc011a73ee8576fb46f5e1c5751ca3b9fe0af2a6f",
+                "0x57ab1ec28d129707052df4df418d58a2d46d5f51"
+            ],
+            "totalWeight": "22.5",
+            "totalShares": "100",
+            "poolType": "Weighted",
+            "address": "0xd3891ffc9cc5e64859c4ef08d0b86043b4473622"
+        },
+        {
+            "id": "0xd3d8f65ecd0b6917cb1543cbeb1cc920ce0c769c",
+            "publicSwap": true,
+            "swapFee": "0.01",
+            "tokens": [
+                {
+                    "address": "0x2260fac5e5542a773aa44fbcfedf7c193bc2c599",
+                    "balance": "0",
+                    "decimals": 8,
+                    "weight": "4.25",
+                    "id": "0xd3d8f65ecd0b6917cb1543cbeb1cc920ce0c769c-0x2260fac5e5542a773aa44fbcfedf7c193bc2c599",
+                    "symbol": "WBTC"
+                },
+                {
+                    "address": "0x514910771af9ca656af840dff83e8264ecf986ca",
+                    "balance": "0",
+                    "decimals": 18,
+                    "weight": "4.25",
+                    "id": "0xd3d8f65ecd0b6917cb1543cbeb1cc920ce0c769c-0x514910771af9ca656af840dff83e8264ecf986ca",
+                    "symbol": "LINK"
+                },
+                {
+                    "address": "0x57ab1ec28d129707052df4df418d58a2d46d5f51",
+                    "balance": "0",
+                    "decimals": 18,
+                    "weight": "5.5",
+                    "id": "0xd3d8f65ecd0b6917cb1543cbeb1cc920ce0c769c-0x57ab1ec28d129707052df4df418d58a2d46d5f51",
+                    "symbol": "sUSD"
+                },
+                {
+                    "address": "0x6b175474e89094c44da98b954eedeac495271d0f",
+                    "balance": "0",
+                    "decimals": 18,
+                    "weight": "5.5",
+                    "id": "0xd3d8f65ecd0b6917cb1543cbeb1cc920ce0c769c-0x6b175474e89094c44da98b954eedeac495271d0f",
+                    "symbol": "DAI"
+                },
+                {
+                    "address": "0x9cb2f26a23b8d89973f08c957c4d7cdf75cd341c",
+                    "balance": "0",
+                    "decimals": 6,
+                    "weight": "16.5",
+                    "id": "0xd3d8f65ecd0b6917cb1543cbeb1cc920ce0c769c-0x9cb2f26a23b8d89973f08c957c4d7cdf75cd341c",
+                    "symbol": "DZAR"
+                },
+                {
+                    "address": "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+                    "balance": "0",
+                    "decimals": 6,
+                    "weight": "5.5",
+                    "id": "0xd3d8f65ecd0b6917cb1543cbeb1cc920ce0c769c-0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+                    "symbol": "USDC"
+                },
+                {
+                    "address": "0xc011a73ee8576fb46f5e1c5751ca3b9fe0af2a6f",
+                    "balance": "0",
+                    "decimals": 18,
+                    "weight": "4.25",
+                    "id": "0xd3d8f65ecd0b6917cb1543cbeb1cc920ce0c769c-0xc011a73ee8576fb46f5e1c5751ca3b9fe0af2a6f",
+                    "symbol": "SNX"
+                },
+                {
+                    "address": "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
+                    "balance": "0",
+                    "decimals": 18,
+                    "weight": "4.25",
+                    "id": "0xd3d8f65ecd0b6917cb1543cbeb1cc920ce0c769c-0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
+                    "symbol": "WETH"
+                }
+            ],
+            "tokensList": [
+                "0x9cb2f26a23b8d89973f08c957c4d7cdf75cd341c",
+                "0xc011a73ee8576fb46f5e1c5751ca3b9fe0af2a6f",
+                "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
+                "0x2260fac5e5542a773aa44fbcfedf7c193bc2c599",
+                "0x514910771af9ca656af840dff83e8264ecf986ca",
+                "0x57ab1ec28d129707052df4df418d58a2d46d5f51",
+                "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+                "0x6b175474e89094c44da98b954eedeac495271d0f"
+            ],
+            "totalWeight": "50",
+            "totalShares": "100",
+            "poolType": "Weighted",
+            "address": "0xd3d8f65ecd0b6917cb1543cbeb1cc920ce0c769c"
+        },
+        {
+            "id": "0xd4dbf96db2fdf8ed40296d8d104b371adf7dee12",
+            "publicSwap": true,
+            "swapFee": "0.0025",
+            "tokens": [
+                {
+                    "address": "0x0327112423f3a68efdf1fcf402f6c5cb9f7c33fd",
+                    "balance": "17.40452269966535486",
+                    "decimals": 18,
+                    "weight": "8",
+                    "id": "0xd4dbf96db2fdf8ed40296d8d104b371adf7dee12-0x0327112423f3a68efdf1fcf402f6c5cb9f7c33fd",
+                    "symbol": "BTC++"
+                },
+                {
+                    "address": "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
+                    "balance": "196.450737696703603525",
+                    "decimals": 18,
+                    "weight": "2",
+                    "id": "0xd4dbf96db2fdf8ed40296d8d104b371adf7dee12-0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
+                    "symbol": "WETH"
+                }
+            ],
+            "tokensList": [
+                "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
+                "0x0327112423f3a68efdf1fcf402f6c5cb9f7c33fd"
+            ],
+            "totalWeight": "10",
+            "totalShares": "100",
+            "poolType": "Weighted",
+            "address": "0xd4dbf96db2fdf8ed40296d8d104b371adf7dee12"
+        },
+        {
+            "id": "0xd59bf8773f89e0dde3ec745aebeae0da2b4af66f",
+            "publicSwap": true,
+            "swapFee": "0.005",
+            "tokens": [
+                {
+                    "address": "0xc011a72400e58ecd99ee497cf89e3775d4bd732f",
+                    "balance": "0",
+                    "decimals": 18,
+                    "weight": "7",
+                    "id": "0xd59bf8773f89e0dde3ec745aebeae0da2b4af66f-0xc011a72400e58ecd99ee497cf89e3775d4bd732f",
+                    "symbol": "SNX"
+                },
+                {
+                    "address": "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
+                    "balance": "0",
+                    "decimals": 18,
+                    "weight": "3",
+                    "id": "0xd59bf8773f89e0dde3ec745aebeae0da2b4af66f-0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
+                    "symbol": "WETH"
+                }
+            ],
+            "tokensList": [
+                "0xc011a72400e58ecd99ee497cf89e3775d4bd732f",
+                "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2"
+            ],
+            "totalWeight": "10",
+            "totalShares": "100",
+            "poolType": "Weighted",
+            "address": "0xd59bf8773f89e0dde3ec745aebeae0da2b4af66f"
+        },
+        {
+            "id": "0xd6f0d319b2cce75123bf63e2c2bd8ba1f7d6b37a",
+            "publicSwap": true,
+            "swapFee": "0.01",
+            "tokens": [
+                {
+                    "address": "0x2260fac5e5542a773aa44fbcfedf7c193bc2c599",
+                    "balance": "3.91350477",
+                    "decimals": 8,
+                    "weight": "10",
+                    "id": "0xd6f0d319b2cce75123bf63e2c2bd8ba1f7d6b37a-0x2260fac5e5542a773aa44fbcfedf7c193bc2c599",
+                    "symbol": "WBTC"
+                },
+                {
+                    "address": "0x514910771af9ca656af840dff83e8264ecf986ca",
+                    "balance": "9103.459635853738148408",
+                    "decimals": 18,
+                    "weight": "10",
+                    "id": "0xd6f0d319b2cce75123bf63e2c2bd8ba1f7d6b37a-0x514910771af9ca656af840dff83e8264ecf986ca",
+                    "symbol": "LINK"
+                },
+                {
+                    "address": "0x9cb2f26a23b8d89973f08c957c4d7cdf75cd341c",
+                    "balance": "660639.377497",
+                    "decimals": 6,
+                    "weight": "10",
+                    "id": "0xd6f0d319b2cce75123bf63e2c2bd8ba1f7d6b37a-0x9cb2f26a23b8d89973f08c957c4d7cdf75cd341c",
+                    "symbol": "DZAR"
+                },
+                {
+                    "address": "0xc011a73ee8576fb46f5e1c5751ca3b9fe0af2a6f",
+                    "balance": "44269.434365453796490754",
+                    "decimals": 18,
+                    "weight": "10",
+                    "id": "0xd6f0d319b2cce75123bf63e2c2bd8ba1f7d6b37a-0xc011a73ee8576fb46f5e1c5751ca3b9fe0af2a6f",
+                    "symbol": "SNX"
+                },
+                {
+                    "address": "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
+                    "balance": "172.313555880504093211",
+                    "decimals": 18,
+                    "weight": "10",
+                    "id": "0xd6f0d319b2cce75123bf63e2c2bd8ba1f7d6b37a-0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
+                    "symbol": "WETH"
+                }
+            ],
+            "tokensList": [
+                "0x9cb2f26a23b8d89973f08c957c4d7cdf75cd341c",
+                "0xc011a73ee8576fb46f5e1c5751ca3b9fe0af2a6f",
+                "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
+                "0x2260fac5e5542a773aa44fbcfedf7c193bc2c599",
+                "0x514910771af9ca656af840dff83e8264ecf986ca"
+            ],
+            "totalWeight": "50",
+            "totalShares": "100",
+            "poolType": "Weighted",
+            "address": "0xd6f0d319b2cce75123bf63e2c2bd8ba1f7d6b37a"
+        },
+        {
+            "id": "0xd83ed0b5344604c70d8adad0f7f65b150e9448a8",
+            "publicSwap": true,
+            "swapFee": "0.005",
+            "tokens": [
+                {
+                    "address": "0xc011a72400e58ecd99ee497cf89e3775d4bd732f",
+                    "balance": "0",
+                    "decimals": 18,
+                    "weight": "3",
+                    "id": "0xd83ed0b5344604c70d8adad0f7f65b150e9448a8-0xc011a72400e58ecd99ee497cf89e3775d4bd732f",
+                    "symbol": "SNX"
+                },
+                {
+                    "address": "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
+                    "balance": "0",
+                    "decimals": 18,
+                    "weight": "7",
+                    "id": "0xd83ed0b5344604c70d8adad0f7f65b150e9448a8-0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
+                    "symbol": "WETH"
+                }
+            ],
+            "tokensList": [
+                "0xc011a72400e58ecd99ee497cf89e3775d4bd732f",
+                "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2"
+            ],
+            "totalWeight": "10",
+            "totalShares": "100",
+            "poolType": "Weighted",
+            "address": "0xd83ed0b5344604c70d8adad0f7f65b150e9448a8"
+        },
+        {
+            "id": "0xe5d1fab0c5596ef846dcc0958d6d0b20e1ec4498",
+            "publicSwap": true,
+            "swapFee": "0.002",
+            "tokens": [
+                {
+                    "address": "0x6b175474e89094c44da98b954eedeac495271d0f",
+                    "balance": "51324.339933095568148032",
+                    "decimals": 18,
+                    "weight": "5",
+                    "id": "0xe5d1fab0c5596ef846dcc0958d6d0b20e1ec4498-0x6b175474e89094c44da98b954eedeac495271d0f",
+                    "symbol": "DAI"
+                },
+                {
+                    "address": "0x9f8f72aa9304c8b593d555f12ef6589cc3a579a2",
+                    "balance": "150.407134879951590163",
+                    "decimals": 18,
+                    "weight": "5",
+                    "id": "0xe5d1fab0c5596ef846dcc0958d6d0b20e1ec4498-0x9f8f72aa9304c8b593d555f12ef6589cc3a579a2",
+                    "symbol": "MKR"
+                },
+                {
+                    "address": "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
+                    "balance": "253.780609924807506905",
+                    "decimals": 18,
+                    "weight": "5",
+                    "id": "0xe5d1fab0c5596ef846dcc0958d6d0b20e1ec4498-0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
+                    "symbol": "WETH"
+                }
+            ],
+            "tokensList": [
+                "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
+                "0x9f8f72aa9304c8b593d555f12ef6589cc3a579a2",
+                "0x6b175474e89094c44da98b954eedeac495271d0f"
+            ],
+            "totalWeight": "15",
+            "totalShares": "100",
+            "poolType": "Weighted",
+            "address": "0xe5d1fab0c5596ef846dcc0958d6d0b20e1ec4498"
+        },
+        {
+            "id": "0xeba4dd6771c3e8ba3f168e47d052819abcc87cb2",
+            "publicSwap": true,
+            "swapFee": "0.01",
+            "tokens": [
+                {
+                    "address": "0x57ab1ec28d129707052df4df418d58a2d46d5f51",
+                    "balance": "22949.655911883059134802",
+                    "decimals": 18,
+                    "weight": "12.5",
+                    "id": "0xeba4dd6771c3e8ba3f168e47d052819abcc87cb2-0x57ab1ec28d129707052df4df418d58a2d46d5f51",
+                    "symbol": "sUSD"
+                },
+                {
+                    "address": "0x6b175474e89094c44da98b954eedeac495271d0f",
+                    "balance": "22913.195143642067994761",
+                    "decimals": 18,
+                    "weight": "12.5",
+                    "id": "0xeba4dd6771c3e8ba3f168e47d052819abcc87cb2-0x6b175474e89094c44da98b954eedeac495271d0f",
+                    "symbol": "DAI"
+                },
+                {
+                    "address": "0x9cb2f26a23b8d89973f08c957c4d7cdf75cd341c",
+                    "balance": "441122.612836",
+                    "decimals": 6,
+                    "weight": "12.5",
+                    "id": "0xeba4dd6771c3e8ba3f168e47d052819abcc87cb2-0x9cb2f26a23b8d89973f08c957c4d7cdf75cd341c",
+                    "symbol": "DZAR"
+                },
+                {
+                    "address": "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+                    "balance": "23023.832383",
+                    "decimals": 6,
+                    "weight": "12.5",
+                    "id": "0xeba4dd6771c3e8ba3f168e47d052819abcc87cb2-0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+                    "symbol": "USDC"
+                }
+            ],
+            "tokensList": [
+                "0x57ab1ec28d129707052df4df418d58a2d46d5f51",
+                "0x9cb2f26a23b8d89973f08c957c4d7cdf75cd341c",
+                "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+                "0x6b175474e89094c44da98b954eedeac495271d0f"
+            ],
+            "totalWeight": "50",
+            "totalShares": "100",
+            "poolType": "Weighted",
+            "address": "0xeba4dd6771c3e8ba3f168e47d052819abcc87cb2"
+        },
+        {
+            "id": "0xec577a919fca1b682f584a50b1048331ef0f30dd",
+            "publicSwap": true,
+            "swapFee": "0.0015",
+            "tokens": [
+                {
+                    "address": "0x57ab1ec28d129707052df4df418d58a2d46d5f51",
+                    "balance": "40.922535314646906116",
+                    "decimals": 18,
+                    "weight": "8",
+                    "id": "0xec577a919fca1b682f584a50b1048331ef0f30dd-0x57ab1ec28d129707052df4df418d58a2d46d5f51",
+                    "symbol": "sUSD"
+                },
+                {
+                    "address": "0x5e74c9036fb86bd7ecdcb084a0673efc32ea31cb",
+                    "balance": "0.20000846913976137",
+                    "decimals": 18,
+                    "weight": "8",
+                    "id": "0xec577a919fca1b682f584a50b1048331ef0f30dd-0x5e74c9036fb86bd7ecdcb084a0673efc32ea31cb",
+                    "symbol": "sETH"
+                },
+                {
+                    "address": "0x6b175474e89094c44da98b954eedeac495271d0f",
+                    "balance": "40.049151501521405007",
+                    "decimals": 18,
+                    "weight": "8",
+                    "id": "0xec577a919fca1b682f584a50b1048331ef0f30dd-0x6b175474e89094c44da98b954eedeac495271d0f",
+                    "symbol": "DAI"
+                },
+                {
+                    "address": "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+                    "balance": "39.77068",
+                    "decimals": 6,
+                    "weight": "8",
+                    "id": "0xec577a919fca1b682f584a50b1048331ef0f30dd-0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+                    "symbol": "USDC"
+                },
+                {
+                    "address": "0xc011a73ee8576fb46f5e1c5751ca3b9fe0af2a6f",
+                    "balance": "50.701652398090835781",
+                    "decimals": 18,
+                    "weight": "8",
+                    "id": "0xec577a919fca1b682f584a50b1048331ef0f30dd-0xc011a73ee8576fb46f5e1c5751ca3b9fe0af2a6f",
+                    "symbol": "SNX"
+                },
+                {
+                    "address": "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
+                    "balance": "0.198135452123684992",
+                    "decimals": 18,
+                    "weight": "8",
+                    "id": "0xec577a919fca1b682f584a50b1048331ef0f30dd-0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
+                    "symbol": "WETH"
+                }
+            ],
+            "tokensList": [
+                "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
+                "0x5e74c9036fb86bd7ecdcb084a0673efc32ea31cb",
+                "0xc011a73ee8576fb46f5e1c5751ca3b9fe0af2a6f",
+                "0x6b175474e89094c44da98b954eedeac495271d0f",
+                "0x57ab1ec28d129707052df4df418d58a2d46d5f51",
+                "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48"
+            ],
+            "totalWeight": "48",
+            "totalShares": "100",
+            "poolType": "Weighted",
+            "address": "0xec577a919fca1b682f584a50b1048331ef0f30dd"
+        },
+        {
+            "id": "0xf218fe414c6b1c6b42e79b7690f1509a634baad5",
+            "publicSwap": true,
+            "swapFee": "0.012",
+            "tokens": [
+                {
+                    "address": "0x107c4504cd79c5d2696ea0030a8dd4e92601b82e",
+                    "balance": "289573.996619002821844506",
+                    "decimals": 18,
+                    "weight": "25",
+                    "id": "0xf218fe414c6b1c6b42e79b7690f1509a634baad5-0x107c4504cd79c5d2696ea0030a8dd4e92601b82e",
+                    "symbol": "BLT"
+                },
+                {
+                    "address": "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
+                    "balance": "35.000569410032539013",
+                    "decimals": 18,
+                    "weight": "25",
+                    "id": "0xf218fe414c6b1c6b42e79b7690f1509a634baad5-0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
+                    "symbol": "WETH"
+                }
+            ],
+            "tokensList": [
+                "0x107c4504cd79c5d2696ea0030a8dd4e92601b82e",
+                "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2"
+            ],
+            "totalWeight": "50",
+            "totalShares": "100",
+            "poolType": "Weighted",
+            "address": "0xf218fe414c6b1c6b42e79b7690f1509a634baad5"
+        },
+        {
+            "id": "0xf218fe414c6b1c6b42e79b7690f1509a634baad6",
+            "publicSwap": true,
+            "swapFee": "0.012",
+            "tokens": [
+                {
+                    "address": "0x985dd3d42de1e256d09e1c10f112bccb8015ad41",
+                    "balance": "9999999999.1111111",
+                    "decimals": 18,
+                    "weight": "25",
+                    "id": "0xf218fe414c6b1c6b42e79b7690f1509a634baad6-0x985dd3d42de1e256d09e1c10f112bccb8015ad41",
+                    "symbol": "OCEAN"
+                },
+                {
+                    "address": "0x6b175474e89094c44da98b954eedeac495271d0f",
+                    "balance": "8888888888.1111111",
+                    "decimals": 18,
+                    "weight": "25",
+                    "id": "0xf218fe414c6b1c6b42e79b7690f1509a634baad6-0x6b175474e89094c44da98b954eedeac495271d0f",
+                    "symbol": "DAI"
+                }
+            ],
+            "tokensList": [
+                "0x985dd3d42de1e256d09e1c10f112bccb8015ad41",
+                "0x6b175474e89094c44da98b954eedeac495271d0f"
+            ],
+            "totalWeight": "50",
+            "totalShares": "100",
+            "poolType": "Weighted",
+            "address": "0xf218fe414c6b1c6b42e79b7690f1509a634baad6"
+        },
+        {
+            "id": "0xf218fe414c6b1c6b42e79b7690f1509a634baad7",
+            "publicSwap": true,
+            "swapFee": "0.012",
+            "tokens": [
+                {
+                    "address": "0x985dd3d42de1e256d09e1c10f112bccb8015ad41",
+                    "balance": "9999999999.2222222",
+                    "decimals": 18,
+                    "weight": "25",
+                    "id": "0xf218fe414c6b1c6b42e79b7690f1509a634baad7-0x985dd3d42de1e256d09e1c10f112bccb8015ad41",
+                    "symbol": "OCEAN"
+                },
+                {
+                    "address": "0x960b236a07cf122663c4303350609a66a7b288c0",
+                    "balance": "8888888888.2222222",
+                    "decimals": 18,
+                    "weight": "25",
+                    "id": "0xf218fe414c6b1c6b42e79b7690f1509a634baad7-0x960b236a07cf122663c4303350609a66a7b288c0",
+                    "symbol": "ANT"
+                }
+            ],
+            "tokensList": [
+                "0x985dd3d42de1e256d09e1c10f112bccb8015ad41",
+                "0x960b236a07cf122663c4303350609a66a7b288c0"
+            ],
+            "totalWeight": "50",
+            "totalShares": "100",
+            "poolType": "Weighted",
+            "address": "0xf218fe414c6b1c6b42e79b7690f1509a634baad7"
+        },
+        {
+            "id": "0xf218fe414c6b1c6b42e79b7690f1509a634baad8",
+            "publicSwap": true,
+            "swapFee": "0.012",
+            "tokens": [
+                {
+                    "address": "0x985dd3d42de1e256d09e1c10f112bccb8015ad41",
+                    "balance": "9999999999.3333333",
+                    "decimals": 18,
+                    "weight": "25",
+                    "id": "0xf218fe414c6b1c6b42e79b7690f1509a634baad8-0x985dd3d42de1e256d09e1c10f112bccb8015ad41",
+                    "symbol": "OCEAN"
+                },
+                {
+                    "address": "0x9f8f72aa9304c8b593d555f12ef6589cc3a579a2",
+                    "balance": "8888888888.3333333",
+                    "decimals": 18,
+                    "weight": "25",
+                    "id": "0xf218fe414c6b1c6b42e79b7690f1509a634baad8-0x9f8f72aa9304c8b593d555f12ef6589cc3a579a2",
+                    "symbol": "MKR"
+                }
+            ],
+            "tokensList": [
+                "0x985dd3d42de1e256d09e1c10f112bccb8015ad41",
+                "0x9f8f72aa9304c8b593d555f12ef6589cc3a579a2"
+            ],
+            "totalWeight": "50",
+            "totalShares": "100",
+            "poolType": "Weighted",
+            "address": "0xf218fe414c6b1c6b42e79b7690f1509a634baad8"
+        },
+        {
+            "id": "0xf218fe414c6b1c6b42e79b7690f1509a634baad9",
+            "publicSwap": true,
+            "swapFee": "0.012",
+            "tokens": [
+                {
+                    "address": "0x985dd3d42de1e256d09e1c10f112bccb8015ad41",
+                    "balance": "9999999999.3333333",
+                    "decimals": 18,
+                    "weight": "25",
+                    "id": "0xf218fe414c6b1c6b42e79b7690f1509a634baad9-0x985dd3d42de1e256d09e1c10f112bccb8015ad41",
+                    "symbol": "OCEAN"
+                },
+                {
+                    "address": "0x9f8f72aa9304c8b593d555f12ef6589cc3a579a1",
+                    "balance": "8888888888.3333333",
+                    "decimals": 18,
+                    "weight": "25",
+                    "id": "0xf218fe414c6b1c6b42e79b7690f1509a634baad9-0x9f8f72aa9304c8b593d555f12ef6589cc3a579a1",
+                    "symbol": "TEST1"
+                },
+                {
+                    "address": "0x9f8f72aa9304c8b593d555f12ef6589cc3a579a3",
+                    "balance": "88.3333333",
+                    "decimals": 18,
+                    "weight": "25",
+                    "id": "0xf218fe414c6b1c6b42e79b7690f1509a634baad9-0x9f8f72aa9304c8b593d555f12ef6589cc3a579a3",
+                    "symbol": "TEST2"
+                }
+            ],
+            "tokensList": [
+                "0x985dd3d42de1e256d09e1c10f112bccb8015ad41",
+                "0x9f8f72aa9304c8b593d555f12ef6589cc3a579a1",
+                "0x9f8f72aa9304c8b593d555f12ef6589cc3a579a3"
+            ],
+            "totalWeight": "75",
+            "totalShares": "100",
+            "poolType": "Weighted",
+            "address": "0xf218fe414c6b1c6b42e79b7690f1509a634baad9"
+        },
+        {
+            "id": "0xf218fe414c6b1c6b42e79b7690f1509a634baad0",
+            "publicSwap": true,
+            "swapFee": "0.012",
+            "tokens": [
+                {
+                    "address": "0x985dd3d42de1e256d09e1c10f112bccb8015ad41",
+                    "balance": "9999999999.3333333",
+                    "decimals": 18,
+                    "weight": "25",
+                    "id": "0xf218fe414c6b1c6b42e79b7690f1509a634baad0-0x985dd3d42de1e256d09e1c10f112bccb8015ad41",
+                    "symbol": "OCEAN"
+                },
+                {
+                    "address": "0x9f8f72aa9304c8b593d555f12ef6589cc3a579a3",
+                    "balance": "88.3333333",
+                    "decimals": 18,
+                    "weight": "25",
+                    "id": "0xf218fe414c6b1c6b42e79b7690f1509a634baad0-0x9f8f72aa9304c8b593d555f12ef6589cc3a579a3",
+                    "symbol": "TEST2"
+                },
+                {
+                    "address": "0x9f8f72aa9304c8b593d555f12ef6589cc3a579a4",
+                    "balance": "8888888888.3333333",
+                    "decimals": 18,
+                    "weight": "25",
+                    "id": "0xf218fe414c6b1c6b42e79b7690f1509a634baad0-0x9f8f72aa9304c8b593d555f12ef6589cc3a579a4",
+                    "symbol": "TEST3"
+                }
+            ],
+            "tokensList": [
+                "0x985dd3d42de1e256d09e1c10f112bccb8015ad41",
+                "0x9f8f72aa9304c8b593d555f12ef6589cc3a579a3",
+                "0x9f8f72aa9304c8b593d555f12ef6589cc3a579a4"
+            ],
+            "totalWeight": "75",
+            "totalShares": "100",
+            "poolType": "Weighted",
+            "address": "0xf218fe414c6b1c6b42e79b7690f1509a634baad0"
+        },
+        {
+            "id": "linearUSDC",
+            "publicSwap": true,
+            "swapFee": "0.01",
+            "tokens": [
+                {
+                    "address": "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+                    "balance": "1500000000.000000",
+                    "decimals": 6,
+                    "id": "linearUSDC-0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+                    "symbol": "USDC"
+                },
+                {
+                    "address": "0x9ba00d6856a4edf4665bca2c2309936572473b7e",
+                    "balance": "1500000000.000000",
+                    "decimals": 6,
+                    "id": "linearUSDC-0x9ba00d6856a4edf4665bca2c2309936572473b7e",
+                    "symbol": "aUSDC",
+                    "priceRate": "1.1"
+                },
+                {
+                    "address": "0x0000000000000000000000000000000000000001",
+                    "balance": "5192296858532827.628530496329220095",
+                    "decimals": 6,
+                    "id": "linearUSDC-0x0000000000000000000000000000000000000001",
+                    "symbol": "bUSDC"
+                }
+            ],
+            "tokensList": [
+                "0x39aa39c021dfbae8fac545936693ac917d5e7563",
+                "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+                "0x0000000000000000000000000000000000000001"
+            ],
+            "totalShares": "2000.000000",
+            "poolType": "AaveLinear",
+            "address": "0x0000000000000000000000000000000000000001",
+            "wrappedIndex": 1,
+            "lowerTarget": "1000.000000",
+            "upperTarget": "1500.000000"
+        },
+        {
+            "id": "linearDAI",
+            "publicSwap": true,
+            "swapFee": "0.01",
+            "tokens": [
+                {
+                    "address": "0x6b175474e89094c44da98b954eedeac495271d0f",
+                    "balance": "1500000000.123456789123456789",
+                    "decimals": 18,
+                    "id": "linearDAI-0x6b175474e89094c44da98b954eedeac495271d0f",
+                    "symbol": "DAI"
+                },
+                {
+                    "address": "0xfc1e690f61efd961294b3e1ce3313fbd8aa4f85d",
+                    "balance": "1500000000.123456789123456789",
+                    "decimals": 18,
+                    "id": "linearDAI-0xfc1e690f61efd961294b3e1ce3313fbd8aa4f85d",
+                    "symbol": "aDAI",
+                    "priceRate": "1.1"
+                },
+                {
+                    "address": "0x0000000000000000000000000000000000000002",
+                    "balance": "5192296858532827.628530496329220095",
+                    "decimals": 18,
+                    "id": "linearDAI-0x0000000000000000000000000000000000000002",
+                    "symbol": "bDAI"
+                }
+            ],
+            "tokensList": [
+                "0x6b175474e89094c44da98b954eedeac495271d0f",
+                "0xfc1e690f61efd961294b3e1ce3313fbd8aa4f85d",
+                "0x0000000000000000000000000000000000000002"
+            ],
+            "totalShares": "2000.000000",
+            "poolType": "AaveLinear",
+            "address": "0x0000000000000000000000000000000000000002",
+            "wrappedIndex": 1,
+            "lowerTarget": "1000.000000",
+            "upperTarget": "1500.000000"
+        },
+        {
+            "id": "staBal3Id",
+            "address": "0x06df3b2bbb68adc8b0e302443692037ed9f91b42",
+            "swapFee": "0.0004",
+            "amp": "10",
+            "tokens": [
+                {
+                    "address": "0x0000000000000000000000000000000000000001",
+                    "balance": "2000000000000000",
+                    "decimals": "18",
+                    "symbol": "bUSDC",
+                    "priceRate": "1"
+                },
+                {
+                    "address": "0x0000000000000000000000000000000000000002",
+                    "balance": "200000000000000",
+                    "decimals": "18",
+                    "symbol": "bDAI",
+                    "priceRate": "1"
+                }
+            ],
+            "tokensList": [
+                "0x0000000000000000000000000000000000000001",
+                "0x0000000000000000000000000000000000000002"
+            ],
+            "totalShares": "10",
+            "poolType": "MetaStable"
+        }
+    ]
+}

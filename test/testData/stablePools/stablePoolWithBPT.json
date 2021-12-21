@@ -1,0 +1,41 @@
+{
+    "pools": [
+        {
+            "id": "0xebfed10e11dc08fcda1af1fda146945e8710f22e00000000000000000000007f",
+            "address": "0xebfed10e11dc08fcda1af1fda146945e8710f22e",
+            "swapFee": "0.01",
+            "swapEnabled": true,
+            "amp": "10",
+            "tokens": [
+                {
+                    "address": "0x6b175474e89094c44da98b954eedeac495271d0f",
+                    "balance": "2000000000000000",
+                    "decimals": 18
+                },
+                {
+                    "address": "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+                    "balance": "1400000000000000",
+                    "decimals": 6
+                },
+                {
+                    "address": "0xdac17f958d2ee523a2206206994597c13d831ec7",
+                    "balance": "1500000000000000",
+                    "decimals": 6
+                },
+                {
+                    "address": "0xebfed10e11dc08fcda1af1fda146945e8710f22e",
+                    "balance": "4000000000000000",
+                    "decimals": 18
+                }
+            ],
+            "tokensList": [
+                "0x6b175474e89094c44da98b954eedeac495271d0f",
+                "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+                "0xdac17f958d2ee523a2206206994597c13d831ec7",
+                "0xebfed10e11dc08fcda1af1fda146945e8710f22e"
+            ],
+            "totalShares": "4000000000000000",
+            "poolType": "Stable"
+        }
+    ]
+}

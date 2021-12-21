@@ -2,6 +2,7 @@ import { BigNumber, parseFixed } from '@ethersproject/bignumber';
 import { Zero } from '@ethersproject/constants';
 import { SwapTypes, NewPath } from '../types';
 import { getOutputAmountSwap } from '../pools';
+import { bnum, ZERO, BigNumber as OldBigNumber } from '../utils/bignumber';
 
 export function calculatePathLimits(
     paths: NewPath[],
@@ -12,7 +13,6 @@ export function calculatePathLimits(
         // Original parsedPoolPairForPath here but this has already been done.
         path.limitAmount = getLimitAmountSwapForPath(path, swapType);
         // if (path.limitAmount.isNaN()) throw 'path.limitAmount.isNaN';
-        // console.log(path.limitAmount.toNumber())
         maxLiquidityAvailable = maxLiquidityAvailable.add(path.limitAmount);
     });
     const sortedPaths = paths.sort((a, b) => {
@@ -26,99 +26,72 @@ export function getLimitAmountSwapForPath(
     swapType: SwapTypes
 ): BigNumber {
     const poolPairData = path.poolPairData;
-    if (poolPairData.length == 1) {
-        if (swapType === SwapTypes.SwapExactIn) {
-            return parseFixed(
-                path.pools[0]
-                    .getLimitAmountSwap(poolPairData[0], swapType)
-                    .dp(poolPairData[0].decimalsIn)
-                    .toString(),
-                poolPairData[0].decimalsIn
+    let limit: OldBigNumber;
+    if (swapType === SwapTypes.SwapExactIn) {
+        limit = path.pools[poolPairData.length - 1].getLimitAmountSwap(
+            poolPairData[poolPairData.length - 1],
+            SwapTypes.SwapExactIn
+        );
+
+        for (let i = poolPairData.length - 2; i >= 0; i--) {
+            const poolLimitExactIn = path.pools[i].getLimitAmountSwap(
+                poolPairData[i],
+                SwapTypes.SwapExactIn
             );
-        } else {
-            return parseFixed(
-                path.pools[0]
-                    .getLimitAmountSwap(poolPairData[0], swapType)
-                    .dp(poolPairData[0].decimalsOut)
-                    .toString(),
-                poolPairData[0].decimalsOut
+            const poolLimitExactOut = path.pools[i].getLimitAmountSwap(
+                poolPairData[i],
+                SwapTypes.SwapExactOut
             );
+            if (poolLimitExactOut.lte(limit)) {
+                limit = poolLimitExactIn;
+            } else {
+                const pulledLimit = getOutputAmountSwap(
+                    path.pools[i],
+                    path.poolPairData[i],
+                    SwapTypes.SwapExactOut,
+                    limit
+                );
+                limit = OldBigNumber.min(pulledLimit, poolLimitExactIn);
+            }
         }
-    } else if (poolPairData.length == 2) {
-        if (swapType === SwapTypes.SwapExactIn) {
-            const limitAmountSwap1 = path.pools[0].getLimitAmountSwap(
-                poolPairData[0],
-                swapType
-            );
-            const limitAmountSwap2 = path.pools[1].getLimitAmountSwap(
-                poolPairData[1],
-                swapType
-            );
-            const limitOutputAmountSwap1 = getOutputAmountSwap(
-                path.pools[0],
-                path.poolPairData[0],
-                swapType,
-                limitAmountSwap1
-            );
-            if (limitOutputAmountSwap1.gt(limitAmountSwap2))
-                if (limitAmountSwap2.isZero())
-                    // This means second hop is limiting the path
-                    return Zero;
-                // this is necessary to avoid return NaN
-                else
-                    return parseFixed(
-                        getOutputAmountSwap(
-                            path.pools[0],
-                            path.poolPairData[0],
-                            SwapTypes.SwapExactOut,
-                            limitAmountSwap2
-                        )
-                            .dp(poolPairData[0].decimalsIn)
-                            .toString(),
-                        poolPairData[0].decimalsIn
-                    );
-            // This means first hop is limiting the path
-            else
-                return parseFixed(
-                    limitAmountSwap1.toString(),
-                    poolPairData[0].decimalsIn
-                );
-        } else {
-            const limitAmountSwap1 = path.pools[0].getLimitAmountSwap(
-                poolPairData[0],
-                swapType
-            );
-            const limitAmountSwap2 = path.pools[1].getLimitAmountSwap(
-                poolPairData[1],
-                swapType
-            );
-            const limitOutputAmountSwap2 = getOutputAmountSwap(
-                path.pools[1],
-                path.poolPairData[1],
-                swapType,
-                limitAmountSwap2
-            );
-            if (limitOutputAmountSwap2.gt(limitAmountSwap1))
-                // This means first hop is limiting the path
-                return parseFixed(
-                    getOutputAmountSwap(
-                        path.pools[1],
-                        path.poolPairData[1],
-                        SwapTypes.SwapExactIn,
-                        limitAmountSwap1
-                    )
-                        .dp(poolPairData[1].decimalsOut)
-                        .toString(),
-                    poolPairData[1].decimalsOut
-                );
-            // This means second hop is limiting the path
-            else
-                return parseFixed(
-                    limitAmountSwap2.dp(poolPairData[1].decimalsOut).toString(),
-                    poolPairData[1].decimalsOut
-                );
-        }
+        if (limit.isZero()) return Zero;
+        const result = parseFixed(
+            limit.dp(poolPairData[0].decimalsIn).toString(),
+            poolPairData[0].decimalsIn
+        );
+        return result;
     } else {
-        throw new Error('Path with more than 2 swaps not supported');
+        limit = path.pools[0].getLimitAmountSwap(
+            poolPairData[0],
+            SwapTypes.SwapExactOut
+        );
+        for (let i = 1; i < poolPairData.length; i++) {
+            const poolLimitExactIn = path.pools[i].getLimitAmountSwap(
+                poolPairData[i],
+                SwapTypes.SwapExactIn
+            );
+            const poolLimitExactOut = path.pools[i].getLimitAmountSwap(
+                poolPairData[i],
+                SwapTypes.SwapExactOut
+            );
+            if (poolLimitExactIn.lte(limit)) {
+                limit = poolLimitExactOut;
+            } else {
+                const pushedLimit = getOutputAmountSwap(
+                    path.pools[i],
+                    path.poolPairData[i],
+                    SwapTypes.SwapExactIn,
+                    limit
+                );
+                limit = OldBigNumber.min(pushedLimit, poolLimitExactOut);
+            }
+        }
+        if (limit.isZero()) return Zero;
+        return parseFixed(
+            limit
+                .dp(poolPairData[poolPairData.length - 1].decimalsOut)
+                .toString(),
+            poolPairData[poolPairData.length - 1].decimalsOut
+        );
     }
 }
