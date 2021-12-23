@@ -1,41 +1,9 @@
 // Tests costOutputToken
 import { expect } from 'chai';
 import { BigNumber } from '@ethersproject/bignumber';
-import { calculateTotalSwapCost, SwapCostCalculator } from '../src/swapCost';
+import { SwapCostCalculator } from '../src/swapCostCalculator';
 import { DAI, MKR, USDC, WETH } from './lib/constants';
 import { MockTokenPriceService } from './lib/mockTokenPriceService';
-
-describe('calculateTotalSwapCost', () => {
-    it('should return correct total swap cost', async () => {
-        const gasPriceWei = BigNumber.from('30000000000'); // 30GWEI
-        const swapGas = BigNumber.from('100000');
-        const tokenPriceWei = BigNumber.from('352480995000000000');
-
-        const totalSwapCost = calculateTotalSwapCost(
-            tokenPriceWei,
-            swapGas,
-            gasPriceWei
-        );
-
-        const expectedTotalSwapCost = BigNumber.from('1057442985000000');
-        expect(expectedTotalSwapCost).to.eql(totalSwapCost);
-    });
-
-    it('should return correct total swap cost', async () => {
-        const gasPriceWei = BigNumber.from('30000000000'); // 30GWEI
-        const swapGas = BigNumber.from('100000');
-        const tokenPriceWei = BigNumber.from('240000000000000000000');
-
-        const totalSwapCost = calculateTotalSwapCost(
-            tokenPriceWei,
-            swapGas,
-            gasPriceWei
-        );
-
-        const expectedTotalSwapCost = BigNumber.from('720000000000000000');
-        expect(expectedTotalSwapCost).to.eql(totalSwapCost);
-    });
-});
 
 describe('Test SwapCostCalculator', () => {
     describe('convertGasCostToToken', () => {
