@@ -1,3 +1,5 @@
+import { mockTokenPriceService } from './lib/mockTokenPriceService';
+
 require('dotenv').config();
 import { expect } from 'chai';
 import { JsonRpcProvider } from '@ethersproject/providers';
@@ -36,7 +38,13 @@ describe(`Tests for LBP Pools.`, () => {
             const swapType = SwapTypes.SwapExactIn;
             const swapAmt = parseFixed('1', 18);
 
-            const sor = new SOR(provider, chainId, null, pools);
+            const sor = new SOR(
+                provider,
+                chainId,
+                mockTokenPriceService,
+                null,
+                pools
+            );
 
             const fetchSuccess = await sor.fetchPools([], false);
             expect(fetchSuccess).to.be.true;
@@ -66,7 +74,13 @@ describe(`Tests for LBP Pools.`, () => {
             const swapType = SwapTypes.SwapExactIn;
             const swapAmt = parseFixed('1', 18);
 
-            const sor = new SOR(provider, chainId, null, pools);
+            const sor = new SOR(
+                provider,
+                chainId,
+                mockTokenPriceService,
+                null,
+                pools
+            );
 
             const fetchSuccess = await sor.fetchPools([], false);
             expect(fetchSuccess).to.be.true;

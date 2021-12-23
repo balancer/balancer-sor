@@ -1,4 +1,6 @@
 // Example showing SOR with Vault batchSwap and Subgraph pool data, run using: $ TS_NODE_PROJECT='tsconfig.testing.json' ts-node ./test/testScripts/swapExample.ts
+import { mockTokenPriceService } from '../lib/mockTokenPriceService';
+
 require('dotenv').config();
 import {
     BigNumber,
@@ -244,7 +246,12 @@ async function getSwap(
     swapType: SwapTypes,
     swapAmount: BigNumberish
 ): Promise<SwapInfo> {
-    const sor = new SOR(provider, networkId, poolsSource);
+    const sor = new SOR(
+        provider,
+        networkId,
+        mockTokenPriceService,
+        poolsSource
+    );
 
     // Will get onChain data for pools list
     await sor.fetchPools([], queryOnChain);

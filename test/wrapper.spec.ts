@@ -1,4 +1,6 @@
 // TS_NODE_PROJECT='tsconfig.testing.json' npx mocha -r ts-node/register test/wrapper.spec.ts
+import { mockTokenPriceService } from './lib/mockTokenPriceService';
+
 require('dotenv').config();
 import { BigNumber, parseFixed } from '@ethersproject/bignumber';
 import { AddressZero, Zero } from '@ethersproject/constants';
@@ -23,7 +25,7 @@ const poolsUrl = `https://ipfs.fleek.co/ipns/balancer-team-bucket.storage.fleek.
 
 describe(`Tests for wrapper class.`, () => {
     it(`Should set constructor variables`, () => {
-        const sor = new SOR(provider, chainId, poolsUrl);
+        const sor = new SOR(provider, chainId, mockTokenPriceService, poolsUrl);
         assert.equal(provider, sor.provider);
     });
 
@@ -32,7 +34,7 @@ describe(`Tests for wrapper class.`, () => {
         const tokenOut = DAI.address;
         const swapType = SwapTypes.SwapExactIn;
         const swapAmt = Zero;
-        const sor = new SOR(provider, chainId, poolsUrl);
+        const sor = new SOR(provider, chainId, mockTokenPriceService, poolsUrl);
         const swaps: SwapInfo = await sor.getSwaps(
             tokenIn,
             tokenOut,
@@ -54,7 +56,13 @@ describe(`Tests for wrapper class.`, () => {
         const swapType = SwapTypes.SwapExactIn;
         const swapAmt = parseFixed('0.1', 18);
 
-        const sor = new SOR(provider, chainId, null, pools);
+        const sor = new SOR(
+            provider,
+            chainId,
+            mockTokenPriceService,
+            null,
+            pools
+        );
 
         const result: boolean = await sor.fetchPools([], false);
         assert.isTrue(result);
@@ -102,7 +110,13 @@ describe(`Tests for wrapper class.`, () => {
         const swapType = SwapTypes.SwapExactIn;
         const swapAmt = parseFixed('0.1', 18);
 
-        const sor = new SOR(provider, chainId, null, pools);
+        const sor = new SOR(
+            provider,
+            chainId,
+            mockTokenPriceService,
+            null,
+            pools
+        );
 
         const result: boolean = await sor.fetchPools([], false);
         assert.isTrue(result);
@@ -142,7 +156,13 @@ describe(`Tests for wrapper class.`, () => {
         const swapType = SwapTypes.SwapExactIn;
         const swapAmt = parseFixed('0.1', 18);
 
-        const sor = new SOR(provider, chainId, null, pools);
+        const sor = new SOR(
+            provider,
+            chainId,
+            mockTokenPriceService,
+            null,
+            pools
+        );
 
         const result: boolean = await sor.fetchPools([], false);
         assert.isTrue(result);
@@ -217,7 +237,13 @@ describe(`Tests for wrapper class.`, () => {
         const swapType = SwapTypes.SwapExactIn;
         const swapAmt = parseFixed('0.1', 18);
 
-        const sor = new SOR(provider, chainId, null, pools);
+        const sor = new SOR(
+            provider,
+            chainId,
+            mockTokenPriceService,
+            null,
+            pools
+        );
 
         let result: boolean = await sor.fetchPools([], false);
         assert.isTrue(result);
@@ -281,7 +307,13 @@ describe(`Tests for wrapper class.`, () => {
         const swapType = SwapTypes.SwapExactIn;
         const swapAmt = parseFixed('0.1', 6);
 
-        const sor = new SOR(provider, chainId, null, pools);
+        const sor = new SOR(
+            provider,
+            chainId,
+            mockTokenPriceService,
+            null,
+            pools
+        );
 
         let result: boolean = await sor.fetchPools([], false);
         assert.isTrue(result);
@@ -344,7 +376,13 @@ describe(`Tests for wrapper class.`, () => {
         const swapType = SwapTypes.SwapExactOut;
         const swapAmt = parseFixed('0.1', 6);
 
-        const sor = new SOR(provider, chainId, null, pools);
+        const sor = new SOR(
+            provider,
+            chainId,
+            mockTokenPriceService,
+            null,
+            pools
+        );
 
         let result: boolean = await sor.fetchPools([], false);
         assert.isTrue(result);
@@ -403,7 +441,13 @@ describe(`Tests for wrapper class.`, () => {
         const swapType = SwapTypes.SwapExactOut;
         const swapAmt = parseFixed('0.1', 18);
 
-        const sor = new SOR(provider, chainId, null, pools);
+        const sor = new SOR(
+            provider,
+            chainId,
+            mockTokenPriceService,
+            null,
+            pools
+        );
 
         let result: boolean = await sor.fetchPools([], false);
         assert.isTrue(result);

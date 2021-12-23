@@ -22,6 +22,7 @@ import { assert, expect } from 'chai';
 import WeightedTokens from '../testData/eligibleTokens.json';
 import StableTokens from '../testData/stableTokens.json';
 import { WeiPerEther as ONE, Zero } from '@ethersproject/constants';
+import { mockTokenPriceService } from './mockTokenPriceService';
 
 export interface TradeInfo {
     SwapType: string;
@@ -355,7 +356,13 @@ export async function getFullSwap(
     swapGas: BigNumber = BigNumber.from('100000'),
     chainId = 1
 ): Promise<SwapInfo> {
-    const sor = new sorv2.SOR(provider, chainId, null, cloneDeep(pools));
+    const sor = new sorv2.SOR(
+        provider,
+        chainId,
+        mockTokenPriceService,
+        null,
+        cloneDeep(pools)
+    );
 
     let swapTypeCorrect = SwapTypes.SwapExactIn;
 

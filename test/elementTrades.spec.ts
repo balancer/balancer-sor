@@ -6,6 +6,8 @@ File saved at: ./testData/elementPools/testTrades.json
 Code to generate test vectors:
 https://github.com/element-fi/elf-contracts/blob/main/scripts/load-sim-data.sh
 */
+import { mockTokenPriceService } from './lib/mockTokenPriceService';
+
 require('dotenv').config();
 import { expect, assert } from 'chai';
 import { JsonRpcProvider } from '@ethersproject/providers';
@@ -99,7 +101,13 @@ describe(`Tests against Element generated test trade file.`, () => {
                     : '0x0000000000000000000000000000000000000001';
             const swapAmt = parseFixed(trade.input.amount_in.toString(), 18);
 
-            const sor = new SOR(provider, chainId, null, poolsFromFile);
+            const sor = new SOR(
+                provider,
+                chainId,
+                mockTokenPriceService,
+                null,
+                poolsFromFile
+            );
 
             const fetchSuccess = await sor.fetchPools([], false);
             expect(fetchSuccess).to.be.true;
