@@ -8,7 +8,7 @@ import { formatSwaps } from './formatSwaps';
 import { PoolCacher } from './poolCaching';
 import { RouteProposer } from './routeProposal';
 import { filterPoolsByType } from './routeProposal/filtering';
-import { SwapCostCalculator } from './swapCost';
+import { SwapCostCalculator } from './swapCostCalculator';
 import { getLidoStaticSwaps, isLidoStableSwap } from './pools/lido';
 import { isSameAddress } from './utils';
 import { EMPTY_SWAPINFO } from './constants';

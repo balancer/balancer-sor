@@ -1,6 +1,6 @@
 import { TokenPriceService } from '../../src';
 
-class MockTokenPriceService implements TokenPriceService {
+export class MockTokenPriceService implements TokenPriceService {
     constructor(private nativeAssetPriceInToken: string = '0') {}
 
     public setTokenPrice(nativeAssetPriceInToken: string) {
