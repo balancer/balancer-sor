@@ -2,7 +2,7 @@ import { BigNumber } from '@ethersproject/bignumber';
 import { WeiPerEther as ONE, Zero } from '@ethersproject/constants';
 import { bnum, scale } from '../utils/bignumber';
 import { WETHADDR } from '../constants';
-import { getTokenPriceInNativeAsset } from './coingecko';
+import { TokenPriceService } from '../types';
 
 export function calculateTotalSwapCost(
     tokenPriceWei: BigNumber,
@@ -22,7 +22,10 @@ export class SwapCostCalculator {
         };
     }
 
-    constructor(private chainId: number) {
+    constructor(
+        private chainId: number,
+        private readonly tokenPriceService: TokenPriceService
+    ) {
         this.initializeCache();
     }
 
@@ -45,16 +48,10 @@ export class SwapCostCalculator {
         if (cachedTokenPrice) return cachedTokenPrice;
 
         try {
-            // Query Coingecko first and only check decimals
-            // if we get a valid response to avoid unnecessary queries
-            const ethPerToken = await getTokenPriceInNativeAsset(
-                this.chainId,
-                tokenAddress
-            );
-
-            // Coingecko returns price of token in terms of ETH
-            // We want the price of 1 ETH in terms of the token base units
-            const ethPriceInToken = bnum(1).div(bnum(ethPerToken)).toString();
+            const ethPriceInToken =
+                await this.tokenPriceService.getNativeAssetPriceInToken(
+                    tokenAddress
+                );
 
             this.setNativeAssetPriceInToken(tokenAddress, ethPriceInToken);
             return ethPriceInToken;

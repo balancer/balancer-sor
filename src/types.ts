@@ -191,3 +191,12 @@ export interface PoolBase {
 export interface WeightedPool extends PoolBase {
     totalWeight: string;
 }
+
+export interface TokenPriceService {
+    /**
+     * This should return the price of the native asset (ETH) in the token defined by tokenAddress.
+     * Example: BAL = $20 USD, ETH = $4,000 USD, then 1 ETH = 200 BAL. This function would return 200.
+     * @param tokenAddress
+     */
+    getNativeAssetPriceInToken(tokenAddress: string): Promise<string>;
+}

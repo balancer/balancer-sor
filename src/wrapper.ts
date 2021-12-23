@@ -20,6 +20,7 @@ import {
     Swap,
     SubgraphPoolBase,
     SwapOptions,
+    TokenPriceService,
 } from './types';
 import { Zero } from '@ethersproject/constants';
 
@@ -40,12 +41,14 @@ export class SOR {
     /**
      * @param {Provider} provider - Provider.
      * @param {number} chainId - Id of chain.
+     * @param {TokenPriceService} tokenPriceService - Generic service that fetches token prices from an external price feed. Used in calculating swap cost.
      * @param {string | null} poolsSource - Pass Subgraph URL used to retrieve pools or null to use initialPools.
      * @param {SubgraphPoolBase[]} initialPools - Can be set with initial pools to use.
      */
     constructor(
         public provider: Provider,
         public chainId: number,
+        tokenPriceService: TokenPriceService,
         poolsSource: string | null,
         initialPools: SubgraphPoolBase[] = []
     ) {
@@ -56,7 +59,10 @@ export class SOR {
             initialPools
         );
         this.routeProposer = new RouteProposer();
-        this.swapCostCalculator = new SwapCostCalculator(chainId);
+        this.swapCostCalculator = new SwapCostCalculator(
+            chainId,
+            tokenPriceService
+        );
     }
 
     getPools(): SubgraphPoolBase[] {
