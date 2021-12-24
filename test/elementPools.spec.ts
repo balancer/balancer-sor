@@ -1,7 +1,7 @@
-import { mockTokenPriceService } from './lib/mockTokenPriceService';
-
+// eslint-disable-next-line @typescript-eslint/no-var-requires
 require('dotenv').config();
 import { expect } from 'chai';
+import { mockTokenPriceService } from './lib/mockTokenPriceService';
 import { JsonRpcProvider } from '@ethersproject/providers';
 import { SOR } from '../src';
 import {
@@ -17,6 +17,7 @@ import {
     ElementPoolPairData,
 } from '../src/pools/elementPool/elementPool';
 import { parseFixed } from '@ethersproject/bignumber';
+import { MockPoolDataService } from './lib/mockPoolDataService';
 
 const gasPrice = parseFixed('30', 9);
 const maxPools = 4;
@@ -171,12 +172,11 @@ describe(`Tests for Element Pools.`, () => {
         const sor = new SOR(
             provider,
             chainId,
-            mockTokenPriceService,
-            null,
-            pools
+            new MockPoolDataService(pools),
+            mockTokenPriceService
         );
 
-        const fetchSuccess = await sor.fetchPools([], false);
+        const fetchSuccess = await sor.fetchPools();
         expect(fetchSuccess).to.be.true;
 
         if (!pools[0].expiryTime) throw Error('Invalid pool data');
@@ -211,12 +211,11 @@ describe(`Tests for Element Pools.`, () => {
         const sor = new SOR(
             provider,
             chainId,
-            mockTokenPriceService,
-            null,
-            pools
+            new MockPoolDataService(pools),
+            mockTokenPriceService
         );
 
-        const fetchSuccess = await sor.fetchPools([], false);
+        const fetchSuccess = await sor.fetchPools();
         expect(fetchSuccess).to.be.true;
 
         if (!pools[0].expiryTime) throw Error('Invalid pool data');
@@ -251,12 +250,11 @@ describe(`Tests for Element Pools.`, () => {
         const sor = new SOR(
             provider,
             chainId,
-            mockTokenPriceService,
-            null,
-            pools
+            new MockPoolDataService(pools),
+            mockTokenPriceService
         );
 
-        const fetchSuccess = await sor.fetchPools([], false);
+        const fetchSuccess = await sor.fetchPools();
         expect(fetchSuccess).to.be.true;
 
         if (!pools[0].expiryTime) throw Error('Invalid pool data');
@@ -291,12 +289,11 @@ describe(`Tests for Element Pools.`, () => {
         const sor = new SOR(
             provider,
             chainId,
-            mockTokenPriceService,
-            null,
-            pools
+            new MockPoolDataService(pools),
+            mockTokenPriceService
         );
 
-        const fetchSuccess = await sor.fetchPools([], false);
+        const fetchSuccess = await sor.fetchPools();
         expect(fetchSuccess).to.be.true;
 
         if (!pools[0].expiryTime) throw Error('Invalid pool data');

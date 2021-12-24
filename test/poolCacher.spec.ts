@@ -32,7 +32,7 @@ describe('PoolCacher', () => {
             });
             const fetchSuccess = await poolCache.fetchPools();
             expect(fetchSuccess).to.be.false;
-            expect(poolCache.isInitialized).to.be.false;
+            expect(poolCache.finishedFetching).to.be.false;
         });
 
         it(`should fetch with NO scaling`, async () => {
@@ -42,7 +42,7 @@ describe('PoolCacher', () => {
 
             expect(fetchSuccess).to.be.true;
 
-            expect(poolCache.isInitialized).to.be.true;
+            expect(poolCache.finishedFetching).to.be.true;
             expect(poolCache.getPools()[1].tokens[1].balance).to.eq(
                 pools[1].tokens[1].balance
             );
@@ -59,7 +59,7 @@ describe('PoolCacher', () => {
             // First fetch uses data passed as constructor
             let fetchSuccess = await poolCache.fetchPools();
             expect(fetchSuccess).to.be.true;
-            expect(poolCache.isInitialized).to.be.true;
+            expect(poolCache.finishedFetching).to.be.true;
             expect(pools).not.deep.equal(newPools.pools);
             expect(pools).deep.equal(poolCache.getPools());
 
@@ -67,7 +67,7 @@ describe('PoolCacher', () => {
             // Second fetch uses newPools
             fetchSuccess = await poolCache.fetchPools();
             expect(fetchSuccess).to.be.true;
-            expect(poolCache.isInitialized).to.be.true;
+            expect(poolCache.finishedFetching).to.be.true;
             expect(newPools.pools).to.not.deep.equal(pools);
             expect(poolCache.getPools()).to.not.deep.equal(pools);
             expect(poolCache.getPools()).to.deep.equal(newPools.pools);

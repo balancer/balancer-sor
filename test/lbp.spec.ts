@@ -7,6 +7,7 @@ import { SOR } from '../src';
 import { SwapInfo, SwapTypes, SubgraphPoolBase } from '../src/types';
 import { parseFixed } from '@ethersproject/bignumber';
 import { DAI, USDC } from './lib/constants';
+import { MockPoolDataService } from './lib/mockPoolDataService';
 
 const gasPrice = parseFixed('30', 9);
 const maxPools = 4;
@@ -41,12 +42,11 @@ describe(`Tests for LBP Pools.`, () => {
             const sor = new SOR(
                 provider,
                 chainId,
-                mockTokenPriceService,
-                null,
-                pools
+                new MockPoolDataService(pools),
+                mockTokenPriceService
             );
 
-            const fetchSuccess = await sor.fetchPools([], false);
+            const fetchSuccess = await sor.fetchPools();
             expect(fetchSuccess).to.be.true;
 
             const swapInfo: SwapInfo = await sor.getSwaps(
@@ -77,12 +77,11 @@ describe(`Tests for LBP Pools.`, () => {
             const sor = new SOR(
                 provider,
                 chainId,
-                mockTokenPriceService,
-                null,
-                pools
+                new MockPoolDataService(pools),
+                mockTokenPriceService
             );
 
-            const fetchSuccess = await sor.fetchPools([], false);
+            const fetchSuccess = await sor.fetchPools();
             expect(fetchSuccess).to.be.true;
 
             const swapInfo: SwapInfo = await sor.getSwaps(

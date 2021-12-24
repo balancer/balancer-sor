@@ -1,3 +1,7 @@
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+import { MockPoolDataService } from './lib/mockPoolDataService';
+
+require('dotenv').config();
 /*
 npx mocha -r ts-node/register test/elementTrades.spec.ts
 
@@ -7,8 +11,6 @@ Code to generate test vectors:
 https://github.com/element-fi/elf-contracts/blob/main/scripts/load-sim-data.sh
 */
 import { mockTokenPriceService } from './lib/mockTokenPriceService';
-
-require('dotenv').config();
 import { expect, assert } from 'chai';
 import { JsonRpcProvider } from '@ethersproject/providers';
 import { SOR, SwapInfo, SwapTypes } from '../src';
@@ -104,12 +106,11 @@ describe(`Tests against Element generated test trade file.`, () => {
             const sor = new SOR(
                 provider,
                 chainId,
-                mockTokenPriceService,
-                null,
-                poolsFromFile
+                new MockPoolDataService(poolsFromFile),
+                mockTokenPriceService
             );
 
-            const fetchSuccess = await sor.fetchPools([], false);
+            const fetchSuccess = await sor.fetchPools();
             expect(fetchSuccess).to.be.true;
 
             const swapInfo: SwapInfo = await sor.getSwaps(
