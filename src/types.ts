@@ -200,3 +200,7 @@ export interface TokenPriceService {
      */
     getNativeAssetPriceInToken(tokenAddress: string): Promise<string>;
 }
+
+export interface PoolDataService {
+    getPools(): Promise<SubgraphPoolBase[]>;
+}
