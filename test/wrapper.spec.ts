@@ -10,7 +10,7 @@ import { JsonRpcProvider } from '@ethersproject/providers';
 import { assert, expect } from 'chai';
 import { SOR } from '../src';
 import { SwapInfo, SwapTypes, PoolFilter, SubgraphPoolBase } from '../src';
-import { DAI, USDC, WETH } from './lib/constants';
+import { DAI, sorConfigEth, USDC, WETH } from './lib/constants';
 import {
     MockPoolDataService,
     mockPoolDataService,
@@ -26,13 +26,12 @@ const provider = new JsonRpcProvider(
 );
 const gasPrice = parseFixed('30', 9);
 const maxPools = 4;
-const chainId = 1;
 
 describe(`Tests for wrapper class.`, () => {
     it(`Should set constructor variables`, () => {
         const sor = new SOR(
             provider,
-            chainId,
+            sorConfigEth,
             mockPoolDataService,
             mockTokenPriceService
         );
@@ -46,7 +45,7 @@ describe(`Tests for wrapper class.`, () => {
         const swapAmt = Zero;
         const sor = new SOR(
             provider,
-            chainId,
+            sorConfigEth,
             mockPoolDataService,
             mockTokenPriceService
         );
@@ -70,7 +69,7 @@ describe(`Tests for wrapper class.`, () => {
 
         const sor = new SOR(
             provider,
-            chainId,
+            sorConfigEth,
             new MockPoolDataService(pools),
             mockTokenPriceService
         );
@@ -119,7 +118,7 @@ describe(`Tests for wrapper class.`, () => {
 
         const sor = new SOR(
             provider,
-            chainId,
+            sorConfigEth,
             new MockPoolDataService(pools),
             mockTokenPriceService
         );
@@ -160,7 +159,7 @@ describe(`Tests for wrapper class.`, () => {
 
         const sor = new SOR(
             provider,
-            chainId,
+            sorConfigEth,
             new MockPoolDataService(pools),
             mockTokenPriceService
         );
@@ -236,7 +235,7 @@ describe(`Tests for wrapper class.`, () => {
 
         const sor = new SOR(
             provider,
-            chainId,
+            sorConfigEth,
             new MockPoolDataService(pools),
             mockTokenPriceService
         );
@@ -301,7 +300,7 @@ describe(`Tests for wrapper class.`, () => {
 
         const sor = new SOR(
             provider,
-            chainId,
+            sorConfigEth,
             new MockPoolDataService(pools),
             mockTokenPriceService
         );
@@ -366,7 +365,7 @@ describe(`Tests for wrapper class.`, () => {
 
         const sor = new SOR(
             provider,
-            chainId,
+            sorConfigEth,
             new MockPoolDataService(pools),
             mockTokenPriceService
         );
@@ -427,7 +426,7 @@ describe(`Tests for wrapper class.`, () => {
 
         const sor = new SOR(
             provider,
-            chainId,
+            sorConfigEth,
             new MockPoolDataService(pools),
             mockTokenPriceService
         );

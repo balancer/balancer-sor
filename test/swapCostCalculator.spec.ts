@@ -2,7 +2,7 @@
 import { expect } from 'chai';
 import { BigNumber } from '@ethersproject/bignumber';
 import { SwapCostCalculator } from '../src/swapCostCalculator';
-import { DAI, MKR, USDC, WETH } from './lib/constants';
+import { DAI, MKR, sorConfigEth, USDC, WETH } from './lib/constants';
 import { MockTokenPriceService } from './lib/mockTokenPriceService';
 
 describe('Test SwapCostCalculator', () => {
@@ -12,7 +12,7 @@ describe('Test SwapCostCalculator', () => {
             const swapGas = BigNumber.from('100000');
             const costExpected = BigNumber.from('0');
 
-            const cost = await new SwapCostCalculator(1, {
+            const cost = await new SwapCostCalculator(sorConfigEth, {
                 getNativeAssetPriceInToken(): Promise<string> {
                     throw new Error('unrecognized token');
                 },
@@ -29,7 +29,7 @@ describe('Test SwapCostCalculator', () => {
             const swapCostInDAI = BigNumber.from('12000000000000000000');
 
             const cost = await new SwapCostCalculator(
-                1,
+                sorConfigEth,
                 new MockTokenPriceService(ethPrice.div(daiPrice).toString())
             ).convertGasCostToToken(
                 DAI.address,
@@ -49,7 +49,7 @@ describe('Test SwapCostCalculator', () => {
             const swapCostInUSDC = BigNumber.from('12000000');
 
             const cost = await new SwapCostCalculator(
-                1,
+                sorConfigEth,
                 new MockTokenPriceService(ethPrice.div(usdcPrice).toString())
             ).convertGasCostToToken(
                 USDC.address,
@@ -69,7 +69,7 @@ describe('Test SwapCostCalculator', () => {
             const swapCostInMKR = BigNumber.from('3000000000000000'); //0.003
 
             const cost = await new SwapCostCalculator(
-                1,
+                sorConfigEth,
                 new MockTokenPriceService(ethPrice.div(mkrPrice).toString())
             ).convertGasCostToToken(
                 MKR.address,
@@ -86,7 +86,7 @@ describe('Test SwapCostCalculator', () => {
             const swapGas = BigNumber.from('100000');
 
             const cost = await new SwapCostCalculator(
-                1,
+                sorConfigEth,
                 new MockTokenPriceService('1')
             ).convertGasCostToToken(
                 WETH.address,

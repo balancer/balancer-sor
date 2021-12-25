@@ -1,5 +1,7 @@
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 require('dotenv').config();
+
+import { sorConfigEth } from './lib/constants';
 import { MockPoolDataService } from './lib/mockPoolDataService';
 import { mockTokenPriceService } from './lib/mockTokenPriceService';
 import { expect } from 'chai';
@@ -88,7 +90,7 @@ describe(`Tests for Lido USD routes.`, () => {
 
             const sor = new SOR(
                 provider,
-                chainId,
+                sorConfigEth,
                 new MockPoolDataService(pools),
                 mockTokenPriceService
             );
@@ -162,7 +164,7 @@ describe(`Tests for Lido USD routes.`, () => {
 
             const sor = new SOR(
                 provider,
-                chainId,
+                sorConfigEth,
                 new MockPoolDataService(pools),
                 mockTokenPriceService
             );
@@ -234,7 +236,7 @@ describe(`Tests for Lido USD routes.`, () => {
 
             const sor = new SOR(
                 provider,
-                chainId,
+                sorConfigEth,
                 new MockPoolDataService(pools),
                 mockTokenPriceService
             );
@@ -304,7 +306,7 @@ describe(`Tests for Lido USD routes.`, () => {
 
             const sor = new SOR(
                 provider,
-                chainId,
+                sorConfigEth,
                 new MockPoolDataService(pools),
                 mockTokenPriceService
             );
@@ -379,7 +381,7 @@ describe(`Tests for Lido USD routes.`, () => {
 
             const sor = new SOR(
                 provider,
-                chainId,
+                sorConfigEth,
                 new MockPoolDataService(pools),
                 mockTokenPriceService
             );
@@ -421,7 +423,7 @@ describe(`Tests for Lido USD routes.`, () => {
 
             const sor = new SOR(
                 provider,
-                chainId,
+                sorConfigEth,
                 new MockPoolDataService(pools),
                 mockTokenPriceService
             );
@@ -466,7 +468,7 @@ describe(`Tests for Lido USD routes.`, () => {
 
             const sor = new SOR(
                 provider,
-                chainId,
+                sorConfigEth,
                 new MockPoolDataService(pools),
                 mockTokenPriceService
             );
@@ -508,7 +510,7 @@ describe(`Tests for Lido USD routes.`, () => {
 
             const sor = new SOR(
                 provider,
-                chainId,
+                sorConfigEth,
                 new MockPoolDataService(pools),
                 mockTokenPriceService
             );
@@ -552,7 +554,7 @@ describe(`Tests for Lido USD routes.`, () => {
 
             const sor = new SOR(
                 provider,
-                chainId,
+                sorConfigEth,
                 new MockPoolDataService(pools),
                 mockTokenPriceService
             );
@@ -603,7 +605,7 @@ describe(`Tests for Lido USD routes.`, () => {
 
             const sor = new SOR(
                 provider,
-                chainId,
+                sorConfigEth,
                 new MockPoolDataService(pools),
                 mockTokenPriceService
             );
@@ -654,7 +656,7 @@ describe(`Tests for Lido USD routes.`, () => {
 
             const sor = new SOR(
                 provider,
-                chainId,
+                sorConfigEth,
                 new MockPoolDataService(pools),
                 mockTokenPriceService
             );
@@ -705,7 +707,7 @@ describe(`Tests for Lido USD routes.`, () => {
 
             const sor = new SOR(
                 provider,
-                chainId,
+                sorConfigEth,
                 new MockPoolDataService(pools),
                 mockTokenPriceService
             );
@@ -758,7 +760,7 @@ describe(`Tests for Lido USD routes.`, () => {
 
             const sor = new SOR(
                 provider,
-                chainId,
+                sorConfigEth,
                 new MockPoolDataService(pools),
                 mockTokenPriceService
             );
@@ -809,7 +811,7 @@ describe(`Tests for Lido USD routes.`, () => {
 
             const sor = new SOR(
                 provider,
-                chainId,
+                sorConfigEth,
                 new MockPoolDataService(pools),
                 mockTokenPriceService
             );
@@ -860,7 +862,7 @@ describe(`Tests for Lido USD routes.`, () => {
 
             const sor = new SOR(
                 provider,
-                chainId,
+                sorConfigEth,
                 new MockPoolDataService(pools),
                 mockTokenPriceService
             );
@@ -912,7 +914,7 @@ describe(`Tests for Lido USD routes.`, () => {
 
             const sor = new SOR(
                 provider,
-                chainId,
+                sorConfigEth,
                 new MockPoolDataService(pools),
                 mockTokenPriceService
             );

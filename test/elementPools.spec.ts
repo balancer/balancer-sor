@@ -1,5 +1,7 @@
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 require('dotenv').config();
+
+import { sorConfigEth } from './lib/constants';
 import { expect } from 'chai';
 import { mockTokenPriceService } from './lib/mockTokenPriceService';
 import { JsonRpcProvider } from '@ethersproject/providers';
@@ -21,7 +23,6 @@ import { MockPoolDataService } from './lib/mockPoolDataService';
 
 const gasPrice = parseFixed('30', 9);
 const maxPools = 4;
-const chainId = 1;
 const provider = new JsonRpcProvider(
     `https://mainnet.infura.io/v3/${process.env.INFURA}`
 );
@@ -31,6 +32,7 @@ describe(`Tests for Element Pools.`, () => {
     it(`tests getLimitAmountSwap SwapExactOut`, async () => {
         const poolsFromFile: {
             pools: SubgraphPoolBase[];
+            // eslint-disable-next-line @typescript-eslint/no-var-requires
         } = require('./testData/elementPools/elementFinanceTest1.json');
         const pool = poolsFromFile.pools[0];
         const swapType = SwapTypes.SwapExactOut;
@@ -74,6 +76,7 @@ describe(`Tests for Element Pools.`, () => {
     it(`tests getLimitAmountSwap SwapExactIn, within expiry`, async () => {
         const poolsFromFile: {
             pools: SubgraphPoolBase[];
+            // eslint-disable-next-line @typescript-eslint/no-var-requires
         } = require('./testData/elementPools/elementFinanceTest1.json');
         const pool = poolsFromFile.pools[0];
         const swapType = SwapTypes.SwapExactIn;
@@ -118,6 +121,7 @@ describe(`Tests for Element Pools.`, () => {
     it(`tests getLimitAmountSwap SwapExactIn, outwith expiry`, async () => {
         const poolsFromFile: {
             pools: SubgraphPoolBase[];
+            // eslint-disable-next-line @typescript-eslint/no-var-requires
         } = require('./testData/elementPools/elementFinanceTest1.json');
         const pool = poolsFromFile.pools[0];
         const swapType = SwapTypes.SwapExactIn;
@@ -162,6 +166,7 @@ describe(`Tests for Element Pools.`, () => {
     it(`Full Swap - swapExactIn Direct Pool, Within Expiry`, async () => {
         const poolsFromFile: {
             pools: SubgraphPoolBase[];
+            // eslint-disable-next-line @typescript-eslint/no-var-requires
         } = require('./testData/elementPools/elementFinanceTest1.json');
         const pools = poolsFromFile.pools;
         const tokenIn = '0x0000000000000000000000000000000000000001';
@@ -171,7 +176,7 @@ describe(`Tests for Element Pools.`, () => {
 
         const sor = new SOR(
             provider,
-            chainId,
+            sorConfigEth,
             new MockPoolDataService(pools),
             mockTokenPriceService
         );
@@ -201,6 +206,7 @@ describe(`Tests for Element Pools.`, () => {
     it(`Full Swap - swapExactIn Direct Pool, Outwith Expiry`, async () => {
         const poolsFromFile: {
             pools: SubgraphPoolBase[];
+            // eslint-disable-next-line @typescript-eslint/no-var-requires
         } = require('./testData/elementPools/elementFinanceTest1.json');
         const pools = poolsFromFile.pools;
         const tokenIn = '0x0000000000000000000000000000000000000001';
@@ -210,7 +216,7 @@ describe(`Tests for Element Pools.`, () => {
 
         const sor = new SOR(
             provider,
-            chainId,
+            sorConfigEth,
             new MockPoolDataService(pools),
             mockTokenPriceService
         );
@@ -240,6 +246,7 @@ describe(`Tests for Element Pools.`, () => {
     it(`Full Swap - swapExactOut Direct Pool, Within Expiry`, async () => {
         const poolsFromFile: {
             pools: SubgraphPoolBase[];
+            // eslint-disable-next-line @typescript-eslint/no-var-requires
         } = require('./testData/elementPools/elementFinanceTest1.json');
         const pools = poolsFromFile.pools;
         const tokenIn = '0x0000000000000000000000000000000000000001';
@@ -249,7 +256,7 @@ describe(`Tests for Element Pools.`, () => {
 
         const sor = new SOR(
             provider,
-            chainId,
+            sorConfigEth,
             new MockPoolDataService(pools),
             mockTokenPriceService
         );
@@ -279,6 +286,7 @@ describe(`Tests for Element Pools.`, () => {
     it(`Full Swap - swapExactOut Direct Pool, Outwith Expiry`, async () => {
         const poolsFromFile: {
             pools: SubgraphPoolBase[];
+            // eslint-disable-next-line @typescript-eslint/no-var-requires
         } = require('./testData/elementPools/elementFinanceTest1.json');
         const pools = poolsFromFile.pools;
         const tokenIn = '0x0000000000000000000000000000000000000001';
@@ -288,7 +296,7 @@ describe(`Tests for Element Pools.`, () => {
 
         const sor = new SOR(
             provider,
-            chainId,
+            sorConfigEth,
             new MockPoolDataService(pools),
             mockTokenPriceService
         );

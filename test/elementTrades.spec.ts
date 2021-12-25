@@ -1,7 +1,6 @@
 // eslint-disable-next-line @typescript-eslint/no-var-requires
-import { MockPoolDataService } from './lib/mockPoolDataService';
-
 require('dotenv').config();
+
 /*
 npx mocha -r ts-node/register test/elementTrades.spec.ts
 
@@ -16,13 +15,14 @@ import { JsonRpcProvider } from '@ethersproject/providers';
 import { SOR, SwapInfo, SwapTypes } from '../src';
 import { calcRelativeDiffBn } from './lib/testHelpers';
 import { PoolFilter, SubgraphPoolBase } from '../src/types';
+import { MockPoolDataService } from './lib/mockPoolDataService';
+import { sorConfigEth } from './lib/constants';
 
 import testTrades from './testData/elementPools/testTrades.json';
 import { parseFixed } from '@ethersproject/bignumber';
 
 const gasPrice = parseFixed('30', 9);
 const maxPools = 4;
-const chainId = 1;
 const provider = new JsonRpcProvider(
     `https://mainnet.infura.io/v3/${process.env.INFURA}`
 );
@@ -105,7 +105,7 @@ describe(`Tests against Element generated test trade file.`, () => {
 
             const sor = new SOR(
                 provider,
-                chainId,
+                sorConfigEth,
                 new MockPoolDataService(poolsFromFile),
                 mockTokenPriceService
             );

@@ -16,7 +16,7 @@ import {
 } from '../src/pools/stablePool/stablePool';
 import { BPTForTokensZeroPriceImpact } from '../src/frontendHelpers/stableHelpers';
 import { parseFixed } from '@ethersproject/bignumber';
-import { BAL, DAI, USDC, USDT } from './lib/constants';
+import { BAL, DAI, sorConfigEth, USDC, USDT } from './lib/constants';
 import { Zero } from '@ethersproject/constants';
 import { MockPoolDataService } from './lib/mockPoolDataService';
 
@@ -32,7 +32,6 @@ const multihopPoolsFromFile: {
 
 const gasPrice = parseFixed('30', 9);
 const maxPools = 4;
-const chainId = 1;
 const provider = new JsonRpcProvider(
     `https://mainnet.infura.io/v3/${process.env.INFURA}`
 );
@@ -139,7 +138,7 @@ describe(`Tests for Stable Pools.`, () => {
 
             const sor = new SOR(
                 provider,
-                chainId,
+                sorConfigEth,
                 new MockPoolDataService(pools),
                 mockTokenPriceService
             );
@@ -167,7 +166,7 @@ describe(`Tests for Stable Pools.`, () => {
 
             const sor = new SOR(
                 provider,
-                chainId,
+                sorConfigEth,
                 new MockPoolDataService(pools),
                 mockTokenPriceService
             );
@@ -195,7 +194,7 @@ describe(`Tests for Stable Pools.`, () => {
 
             const sor = new SOR(
                 provider,
-                chainId,
+                sorConfigEth,
                 new MockPoolDataService(pools),
                 mockTokenPriceService
             );
@@ -234,7 +233,7 @@ describe(`Tests for Stable Pools.`, () => {
 
             const sor = new SOR(
                 provider,
-                chainId,
+                sorConfigEth,
                 new MockPoolDataService(pools),
                 mockTokenPriceService
             );
@@ -275,7 +274,7 @@ describe(`Tests for Stable Pools.`, () => {
 
             const sor = new SOR(
                 provider,
-                chainId,
+                sorConfigEth,
                 new MockPoolDataService(pools),
                 mockTokenPriceService
             );
@@ -323,7 +322,7 @@ describe(`Tests for Stable Pools.`, () => {
 
             const sor = new SOR(
                 provider,
-                chainId,
+                sorConfigEth,
                 new MockPoolDataService(pools),
                 mockTokenPriceService
             );
