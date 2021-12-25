@@ -1,6 +1,15 @@
 import { BigNumber } from '@ethersproject/bignumber';
 import { BigNumber as OldBigNumber } from './utils/bignumber';
 
+export interface SorConfig {
+    chainId: number;
+    weth: string;
+    vault: string;
+    staBal3Pool?: { id: string; address: string };
+    wethStaBal3?: { id: string; address: string };
+    usdcConnectingPool?: { id: string; usdc: string };
+}
+
 export type NoNullableField<T> = {
     [P in keyof T]: NonNullable<T[P]>;
 };

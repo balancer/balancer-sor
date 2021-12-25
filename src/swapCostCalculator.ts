@@ -1,19 +1,18 @@
 import { BigNumber } from '@ethersproject/bignumber';
 import { WeiPerEther as ONE, Zero } from '@ethersproject/constants';
 import { bnum, scale } from './utils/bignumber';
-import { WETHADDR } from './constants';
-import { TokenPriceService } from './types';
+import { SorConfig, TokenPriceService } from './types';
 
 export class SwapCostCalculator {
     private readonly tokenPriceCache: Record<string, string>;
 
     constructor(
-        private readonly chainId: number,
+        config: SorConfig,
         private readonly tokenPriceService: TokenPriceService
     ) {
         this.tokenPriceCache = {
             AddressZero: '1',
-            [WETHADDR[this.chainId].toLowerCase()]: '1',
+            [config.weth.toLowerCase()]: '1',
         };
     }
 

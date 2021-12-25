@@ -6,10 +6,18 @@ import {
     parseToPoolsDict,
 } from './filtering';
 import { calculatePathLimits } from './pathLimits';
-import { SwapOptions, SwapTypes, NewPath, SubgraphPoolBase } from '../types';
+import {
+    SwapOptions,
+    SwapTypes,
+    NewPath,
+    SubgraphPoolBase,
+    SorConfig,
+} from '../types';
 
 export class RouteProposer {
     cache: Record<string, { paths: NewPath[] }> = {};
+
+    constructor(private readonly config: SorConfig) {}
 
     /**
      * Given a list of pools and a desired input/output, returns a set of possible paths to route through
@@ -19,8 +27,7 @@ export class RouteProposer {
         tokenOut: string,
         swapType: SwapTypes,
         pools: SubgraphPoolBase[],
-        swapOptions: SwapOptions,
-        chainId: number
+        swapOptions: SwapOptions
     ): NewPath[] {
         if (pools.length === 0) return [];
 
@@ -57,7 +64,7 @@ export class RouteProposer {
             tokenOut,
             poolsAllDict,
             poolsFilteredDict,
-            chainId
+            this.config
         );
 
         const pathsUsingStaBal = getPathsUsingStaBalPool(
@@ -65,7 +72,7 @@ export class RouteProposer {
             tokenOut,
             poolsAllDict,
             poolsFilteredDict,
-            chainId
+            this.config
         );
 
         const combinedPathData = pathData

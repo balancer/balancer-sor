@@ -22,6 +22,7 @@ import {
     SwapOptions,
     TokenPriceService,
     PoolDataService,
+    SorConfig,
 } from './types';
 import { Zero } from '@ethersproject/constants';
 
@@ -41,20 +42,20 @@ export class SOR {
 
     /**
      * @param {Provider} provider - Provider.
-     * @param {number} chainId - Id of chain.
+     * @param {SorConfig} config - Chain specific configuration for the SOR.
      * @param {PoolDataService} poolDataService - Generic service that fetches pool data from an external data source.
      * @param {TokenPriceService} tokenPriceService - Generic service that fetches token prices from an external price feed. Used in calculating swap cost.
      */
     constructor(
         public provider: Provider,
-        public chainId: number,
+        private readonly config: SorConfig,
         poolDataService: PoolDataService,
         tokenPriceService: TokenPriceService
     ) {
         this.poolCacher = new PoolCacher(poolDataService);
-        this.routeProposer = new RouteProposer();
+        this.routeProposer = new RouteProposer(config);
         this.swapCostCalculator = new SwapCostCalculator(
-            chainId,
+            config,
             tokenPriceService
         );
     }
@@ -103,15 +104,15 @@ export class SOR {
             swapType,
             tokenIn,
             tokenOut,
-            this.chainId,
+            this.config,
             BigNumber.from(swapAmount)
         );
 
         let swapInfo: SwapInfo;
-        if (isLidoStableSwap(this.chainId, tokenIn, tokenOut)) {
+        if (isLidoStableSwap(this.config.chainId, tokenIn, tokenOut)) {
             swapInfo = await getLidoStaticSwaps(
                 filteredPools,
-                this.chainId,
+                this.config.chainId,
                 wrappedInfo.tokenIn.addressForSwaps,
                 wrappedInfo.tokenOut.addressForSwaps,
                 swapType,
@@ -131,12 +132,7 @@ export class SOR {
 
         if (swapInfo.returnAmount.isZero()) return swapInfo;
 
-        swapInfo = setWrappedInfo(
-            swapInfo,
-            swapType,
-            wrappedInfo,
-            this.chainId
-        );
+        swapInfo = setWrappedInfo(swapInfo, swapType, wrappedInfo, this.config);
 
         return swapInfo;
     }
@@ -179,8 +175,7 @@ export class SOR {
             tokenOut,
             swapType,
             pools,
-            swapOptions,
-            this.chainId
+            swapOptions
         );
 
         if (paths.length == 0) return cloneDeep(EMPTY_SWAPINFO);

@@ -13,6 +13,7 @@ import {
     SwapV2,
     PoolTypes,
     NewPath,
+    SorConfig,
 } from '../../src';
 import { bnum } from '../../src/utils/bignumber';
 import * as fs from 'fs';
@@ -23,6 +24,7 @@ import StableTokens from '../testData/stableTokens.json';
 import { WeiPerEther as ONE, Zero } from '@ethersproject/constants';
 import { mockTokenPriceService } from './mockTokenPriceService';
 import { MockPoolDataService } from './mockPoolDataService';
+import { sorConfigTest } from './constants';
 
 export interface TradeInfo {
     SwapType: string;
@@ -354,11 +356,11 @@ export async function getFullSwap(
     gasPrice: BigNumber,
     provider: JsonRpcProvider,
     swapGas: BigNumber = BigNumber.from('100000'),
-    chainId = 1
+    config: SorConfig = sorConfigTest
 ): Promise<SwapInfo> {
     const sor = new sorv2.SOR(
         provider,
-        chainId,
+        config,
         new MockPoolDataService(pools),
         mockTokenPriceService
     );
