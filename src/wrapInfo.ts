@@ -1,11 +1,10 @@
 import { BigNumber } from '@ethersproject/bignumber';
 import { Provider } from '@ethersproject/providers';
 import { AddressZero, WeiPerEther as ONE } from '@ethersproject/constants';
-
 import { Lido, getStEthRate } from './pools/lido';
 import {
     TokensToUnbuttonWrapperMap,
-    getUnderlyingToWrapper,
+    getWrapperRate as getUnbuttonWrapperRate,
 } from './wrappers/unbutton';
 import { WETHADDR } from './constants';
 import { SwapTypes, SwapInfo } from './types';
@@ -100,12 +99,7 @@ export async function getWrappedInfo(
     if (tokensToUBWrapperMap[tokenIn]) {
         tokenInForSwaps = tokensToUBWrapperMap[tokenIn];
         tokenInWrapType = WrapTypes.Unbutton;
-        tokenInRate = await getUnderlyingToWrapper(
-            provider,
-            chainId,
-            tokenInForSwaps,
-            ONE
-        );
+        tokenInRate = await getUnbuttonWrapperRate(provider, tokenInForSwaps);
         if (swapType === SwapTypes.SwapExactIn)
             swapAmountForSwaps = swapAmount.mul(tokenInRate).div(ONE);
     }
@@ -114,12 +108,7 @@ export async function getWrappedInfo(
     if (tokensToUBWrapperMap[tokenOut]) {
         tokenOutForSwaps = tokensToUBWrapperMap[tokenOut];
         tokenOutWrapType = WrapTypes.Unbutton;
-        tokenOutRate = await getUnderlyingToWrapper(
-            provider,
-            chainId,
-            tokenOutForSwaps,
-            ONE
-        );
+        tokenOutRate = await getUnbuttonWrapperRate(provider, tokenOutForSwaps);
         if (swapType === SwapTypes.SwapExactOut)
             swapAmountForSwaps = swapAmount.mul(tokenOutRate).div(ONE);
     }

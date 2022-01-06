@@ -1,6 +1,7 @@
 import { BigNumber } from '@ethersproject/bignumber';
 import { Provider } from '@ethersproject/providers';
 import { Contract } from '@ethersproject/contracts';
+import { WeiPerEther as ONE } from '@ethersproject/constants';
 
 // The unbutton ERC-20 wrapper is a generic wrapper which wraps any rebasing token
 // into a fixed balance version.
@@ -21,11 +22,11 @@ export const TokensToUnbuttonWrapperMap = {
     },
 };
 
-export async function getUnderlyingToWrapper(
+// Returns the current wrapper exchange rate,
+// ie) number of wrapper tokens for 1e18 (ONE) underlying token
+export async function getWrapperRate(
     provider: Provider,
-    chainId: number,
-    wrapperAddress: string,
-    amount: BigNumber
+    wrapperAddress: string
 ): Promise<BigNumber> {
     const ubWrapper = new Contract(
         wrapperAddress,
@@ -34,5 +35,5 @@ export async function getUnderlyingToWrapper(
         ],
         provider
     );
-    return ubWrapper.underlyingToWrapper(amount);
+    return ubWrapper.underlyingToWrapper(ONE);
 }
