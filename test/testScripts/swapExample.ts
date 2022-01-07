@@ -82,6 +82,17 @@ export const PROVIDER_URLS = {
     [Network.ARBITRUM]: `https://arbitrum-mainnet.infura.io/v3/${process.env.INFURA}`,
 };
 
+export const MULTIADDR: { [chainId: number]: string } = {
+    1: '0xeefba1e63905ef1d7acba5a8513c70307c1ce441',
+    3: '0x53c43764255c17bd724f74c4ef150724ac50a3ed',
+    4: '0x42ad527de7d4e9d9d011ac45b31d8551f8fe9821',
+    5: '0x3b2A02F22fCbc872AF77674ceD303eb269a46ce3',
+    42: '0x2cc8688C5f75E365aaEEb4ea8D6a480405A48D2A',
+    137: '0xa1B2b503959aedD81512C37e9dce48164ec6a94d',
+    42161: '0x269ff446d9892c9e19082564df3f5e8741e190a1',
+    99: '0xeefba1e63905ef1d7acba5a8513c70307c1ce441',
+};
+
 export const SUBGRAPH_URLS = {
     [Network.MAINNET]:
         'https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-v2',
@@ -661,10 +672,14 @@ export async function simpleSwap() {
     // console.log(JSON.stringify(subgraphPools));
     // console.log(`-------`);
 
-    const subgraphPoolDataService = new SubgraphPoolDataService(
-        networkId,
-        SUBGRAPH_URLS[networkId]
-    );
+    const subgraphPoolDataService = new SubgraphPoolDataService({
+        chainId: networkId,
+        vaultAddress: vaultAddr,
+        multiAddress: MULTIADDR[networkId],
+        provider,
+        subgraphUrl: SUBGRAPH_URLS[networkId],
+        onchain: true,
+    });
 
     // Use the mock pool data service if you want to use pool data from a file.
     // const poolsSource = require('../testData/testPools/gusdBug.json');
