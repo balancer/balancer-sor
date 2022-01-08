@@ -6,7 +6,12 @@ import { BigNumber as OldBigNumber, scale } from '../src/utils/bignumber';
 import { bnum } from '../src/utils/bignumber';
 import * as linearMath from '../src/pools/linearPool/linearMath';
 import { LinearPoolPairData } from '../src/pools/linearPool/linearPool';
-import * as SDK from 'sdk-latest'; //'@georgeroman/balancer-v2-pools';
+import {
+    _calcBptOutPerMainIn,
+    _calcMainOutPerBptIn,
+    _calcMainInPerBptOut,
+    _calcBptInPerMainOut,
+} from '../src/pools/linearPool/exactMaths';
 
 describe('linearMath', () => {
     const params = {
@@ -29,7 +34,7 @@ describe('linearMath', () => {
                 linearMath._exactMainTokenInForBPTOut,
                 poolPairData,
                 100,
-                SDK.LinearMath._calcBptOutPerMainIn(
+                _calcBptOutPerMainIn(
                     b(100),
                     b(10000),
                     b(110), // this includes the rate
@@ -50,7 +55,7 @@ describe('linearMath', () => {
                 linearMath._exactMainTokenInForBPTOut,
                 poolPairData,
                 1300,
-                SDK.LinearMath._calcBptOutPerMainIn(
+                _calcBptOutPerMainIn(
                     b(1300),
                     b(900),
                     b(110),
@@ -74,7 +79,7 @@ describe('linearMath', () => {
                 linearMath._mainTokenInForExactBPTOut,
                 poolPairData,
                 100,
-                SDK.LinearMath._calcMainInPerBptOut(
+                _calcMainInPerBptOut(
                     b(100),
                     b(900),
                     b(110),
@@ -88,7 +93,7 @@ describe('linearMath', () => {
                 linearMath._mainTokenInForExactBPTOut,
                 poolPairData,
                 5000,
-                SDK.LinearMath._calcMainInPerBptOut(
+                _calcMainInPerBptOut(
                     b(5000),
                     b(900),
                     b(110),
@@ -112,7 +117,7 @@ describe('linearMath', () => {
                 linearMath._BPTInForExactMainTokenOut,
                 poolPairData,
                 200,
-                SDK.LinearMath._calcBptInPerMainOut(
+                _calcBptInPerMainOut(
                     b(200),
                     b(900),
                     b(110),
@@ -133,7 +138,7 @@ describe('linearMath', () => {
                 linearMath._BPTInForExactMainTokenOut,
                 poolPairData,
                 1600,
-                SDK.LinearMath._calcBptInPerMainOut(
+                _calcBptInPerMainOut(
                     b(1600),
                     b(2500),
                     b(110),
@@ -147,7 +152,7 @@ describe('linearMath', () => {
                 linearMath._BPTInForExactMainTokenOut,
                 poolPairData,
                 800,
-                SDK.LinearMath._calcBptInPerMainOut(
+                _calcBptInPerMainOut(
                     b(800),
                     b(2500),
                     b(110),
@@ -171,7 +176,7 @@ describe('linearMath', () => {
                 linearMath._exactBPTInForMainTokenOut,
                 poolPairData,
                 200,
-                SDK.LinearMath._calcMainOutPerBptIn(
+                _calcMainOutPerBptIn(
                     b(200),
                     b(2500),
                     b(110),
@@ -185,7 +190,7 @@ describe('linearMath', () => {
                 linearMath._exactBPTInForMainTokenOut,
                 poolPairData,
                 5000,
-                SDK.LinearMath._calcMainOutPerBptIn(
+                _calcMainOutPerBptIn(
                     b(5000),
                     b(2500),
                     b(110),
