@@ -1,16 +1,16 @@
 {
     "pools": [
         {
-            "address": "0x21ff756ca0cfcc5fff488ad67babadffee0c4149",
+            "address": "0x8fd162f338b770f7e879030830cde9173367f301",
             "amp": "400",
-            "id": "0x21ff756ca0cfcc5fff488ad67babadffee0c4149000000000000000000000240",
+            "id": "0x8fd162f338b770f7e879030830cde9173367f3010000000000000000000004d8",
             "mainIndex": 0,
             "poolType": "StablePhantom",
             "swapEnabled": true,
             "swapFee": "0.01",
             "tokens": [
                 {
-                    "address": "0x21ff756ca0cfcc5fff488ad67babadffee0c4149",
+                    "address": "0x8fd162f338b770f7e879030830cde9173367f301",
                     "balance": "5192296858520354.535602194932501075",
                     "decimals": 18,
                     "priceRate": "1",
@@ -43,7 +43,7 @@
                 }
             ],
             "tokensList": [
-                "0x21ff756ca0cfcc5fff488ad67babadffee0c4149",
+                "0x8fd162f338b770f7e879030830cde9173367f301",
                 "0x3d1b554f1b1d1b6108b601ff22fea9c90fdfe50d",
                 "0x6a8c3239695613c0710dc971310b36f9b81e115e",
                 "0xcd32a460b6fecd053582e43b07ed6e2c04e15369"
@@ -55,9 +55,9 @@
         {
             "address": "0x3d1b554f1b1d1b6108b601ff22fea9c90fdfe50d",
             "id": "0x3d1b554f1b1d1b6108b601ff22fea9c90fdfe50d00000000000000000000023d",
-            "lowerTarget": "1900000000000000000000000",
+            "lowerTarget": "0",
             "mainIndex": 2,
-            "poolType": "Linear",
+            "poolType": "AaveLinear",
             "swapEnabled": true,
             "swapFee": "0.0001",
             "tokens": [
@@ -99,9 +99,9 @@
         {
             "address": "0x6a8c3239695613c0710dc971310b36f9b81e115e",
             "id": "0x6a8c3239695613c0710dc971310b36f9b81e115e00000000000000000000023e",
-            "lowerTarget": "1900000000000000000000000",
+            "lowerTarget": "1000",
             "mainIndex": 0,
-            "poolType": "Linear",
+            "poolType": "AaveLinear",
             "swapEnabled": true,
             "swapFee": "0.0001",
             "tokens": [
@@ -143,9 +143,9 @@
         {
             "address": "0xcd32a460b6fecd053582e43b07ed6e2c04e15369",
             "id": "0xcd32a460b6fecd053582e43b07ed6e2c04e1536900000000000000000000023c",
-            "lowerTarget": "1900000000000000000000000",
+            "lowerTarget": "0",
             "mainIndex": 2,
-            "poolType": "Linear",
+            "poolType": "AaveLinear",
             "swapEnabled": true,
             "swapFee": "0.0001",
             "tokens": [

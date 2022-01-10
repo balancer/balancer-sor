@@ -50,9 +50,13 @@ export const STABAL3POOL: {
 } = {
     // TO DO - Add Mainnet info
     // TO DO - Add for Polygon for staBAL3 pairs
+    1: {
+        id: '0x7b50775383d3d6f0215a8f290f2c9e2eebbeceb20000000000000000000000fe',
+        address: '0x7b50775383d3d6f0215a8f290f2c9e2eebbeceb2',
+    },
     42: {
-        id: '0x21ff756ca0cfcc5fff488ad67babadffee0c4149000000000000000000000240',
-        address: '0x21ff756ca0cfcc5fff488ad67babadffee0c4149',
+        id: '0x8fd162f338b770f7e879030830cde9173367f3010000000000000000000004d8',
+        address: '0x8fd162f338b770f7e879030830cde9173367f301',
     },
     99: {
         id: 'staBal3Id',

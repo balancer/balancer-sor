@@ -2,76 +2,54 @@
     {
         "inputs": [
             {
-                "components": [
-                    {
-                        "internalType": "contract IVault",
-                        "name": "vault",
-                        "type": "address"
-                    },
-                    {
-                        "internalType": "string",
-                        "name": "name",
-                        "type": "string"
-                    },
-                    {
-                        "internalType": "string",
-                        "name": "symbol",
-                        "type": "string"
-                    },
-                    {
-                        "internalType": "contract IERC20",
-                        "name": "mainToken",
-                        "type": "address"
-                    },
-                    {
-                        "internalType": "contract IERC20",
-                        "name": "wrappedToken",
-                        "type": "address"
-                    },
-                    {
-                        "internalType": "uint256",
-                        "name": "lowerTarget",
-                        "type": "uint256"
-                    },
-                    {
-                        "internalType": "uint256",
-                        "name": "upperTarget",
-                        "type": "uint256"
-                    },
-                    {
-                        "internalType": "uint256",
-                        "name": "swapFeePercentage",
-                        "type": "uint256"
-                    },
-                    {
-                        "internalType": "uint256",
-                        "name": "pauseWindowDuration",
-                        "type": "uint256"
-                    },
-                    {
-                        "internalType": "uint256",
-                        "name": "bufferPeriodDuration",
-                        "type": "uint256"
-                    },
-                    {
-                        "internalType": "contract IRateProvider",
-                        "name": "wrappedTokenRateProvider",
-                        "type": "address"
-                    },
-                    {
-                        "internalType": "uint256",
-                        "name": "wrappedTokenRateCacheDuration",
-                        "type": "uint256"
-                    },
-                    {
-                        "internalType": "address",
-                        "name": "owner",
-                        "type": "address"
-                    }
-                ],
-                "internalType": "struct LinearPool.NewPoolParams",
-                "name": "params",
-                "type": "tuple"
+                "internalType": "contract IVault",
+                "name": "vault",
+                "type": "address"
+            },
+            {
+                "internalType": "string",
+                "name": "name",
+                "type": "string"
+            },
+            {
+                "internalType": "string",
+                "name": "symbol",
+                "type": "string"
+            },
+            {
+                "internalType": "contract IERC20",
+                "name": "mainToken",
+                "type": "address"
+            },
+            {
+                "internalType": "contract IERC20",
+                "name": "wrappedToken",
+                "type": "address"
+            },
+            {
+                "internalType": "uint256",
+                "name": "upperTarget",
+                "type": "uint256"
+            },
+            {
+                "internalType": "uint256",
+                "name": "swapFeePercentage",
+                "type": "uint256"
+            },
+            {
+                "internalType": "uint256",
+                "name": "pauseWindowDuration",
+                "type": "uint256"
+            },
+            {
+                "internalType": "uint256",
+                "name": "bufferPeriodDuration",
+                "type": "uint256"
+            },
+            {
+                "internalType": "address",
+                "name": "owner",
+                "type": "address"
             }
         ],
         "stateMutability": "nonpayable",
@@ -132,6 +110,12 @@
         "anonymous": false,
         "inputs": [
             {
+                "indexed": true,
+                "internalType": "contract IERC20",
+                "name": "token",
+                "type": "address"
+            },
+            {
                 "indexed": false,
                 "internalType": "uint256",
                 "name": "lowerTarget",
@@ -170,38 +154,6 @@
             }
         ],
         "name": "Transfer",
-        "type": "event"
-    },
-    {
-        "anonymous": false,
-        "inputs": [
-            {
-                "indexed": true,
-                "internalType": "contract IRateProvider",
-                "name": "provider",
-                "type": "address"
-            },
-            {
-                "indexed": false,
-                "internalType": "uint256",
-                "name": "cacheDuration",
-                "type": "uint256"
-            }
-        ],
-        "name": "WrappedTokenRateProviderSet",
-        "type": "event"
-    },
-    {
-        "anonymous": false,
-        "inputs": [
-            {
-                "indexed": false,
-                "internalType": "uint256",
-                "name": "rate",
-                "type": "uint256"
-            }
-        ],
-        "name": "WrappedTokenRateUpdated",
         "type": "event"
     },
     {
@@ -513,6 +465,19 @@
     },
     {
         "inputs": [],
+        "name": "getVirtualSupply",
+        "outputs": [
+            {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [],
         "name": "getWrappedIndex",
         "outputs": [
             {
@@ -539,35 +504,12 @@
     },
     {
         "inputs": [],
-        "name": "getWrappedTokenRateCache",
+        "name": "getWrappedTokenRate",
         "outputs": [
             {
                 "internalType": "uint256",
-                "name": "rate",
-                "type": "uint256"
-            },
-            {
-                "internalType": "uint256",
-                "name": "duration",
-                "type": "uint256"
-            },
-            {
-                "internalType": "uint256",
-                "name": "expires",
-                "type": "uint256"
-            }
-        ],
-        "stateMutability": "view",
-        "type": "function"
-    },
-    {
-        "inputs": [],
-        "name": "getWrappedTokenRateProvider",
-        "outputs": [
-            {
-                "internalType": "contract IRateProvider",
                 "name": "",
-                "type": "address"
+                "type": "uint256"
             }
         ],
         "stateMutability": "view",
@@ -822,7 +764,7 @@
                 "type": "uint256"
             }
         ],
-        "stateMutability": "nonpayable",
+        "stateMutability": "view",
         "type": "function"
     },
     {
@@ -919,7 +861,7 @@
                 "type": "uint256[]"
             }
         ],
-        "stateMutability": "view",
+        "stateMutability": "nonpayable",
         "type": "function"
     },
     {
@@ -973,7 +915,7 @@
                 "type": "uint256[]"
             }
         ],
-        "stateMutability": "view",
+        "stateMutability": "nonpayable",
         "type": "function"
     },
     {
@@ -1024,29 +966,16 @@
         "inputs": [
             {
                 "internalType": "uint256",
-                "name": "lowerTarget",
+                "name": "newLowerTarget",
                 "type": "uint256"
             },
             {
                 "internalType": "uint256",
-                "name": "upperTarget",
+                "name": "newUpperTarget",
                 "type": "uint256"
             }
         ],
         "name": "setTargets",
-        "outputs": [],
-        "stateMutability": "nonpayable",
-        "type": "function"
-    },
-    {
-        "inputs": [
-            {
-                "internalType": "uint256",
-                "name": "duration",
-                "type": "uint256"
-            }
-        ],
-        "name": "setWrappedTokenRateCacheDuration",
         "outputs": [],
         "stateMutability": "nonpayable",
         "type": "function"
@@ -1127,13 +1056,6 @@
                 "type": "bool"
             }
         ],
-        "stateMutability": "nonpayable",
-        "type": "function"
-    },
-    {
-        "inputs": [],
-        "name": "updateWrappedTokenRateCache",
-        "outputs": [],
         "stateMutability": "nonpayable",
         "type": "function"
     }

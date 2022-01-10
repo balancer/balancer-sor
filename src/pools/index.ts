@@ -39,26 +39,33 @@ export function parseNewPool(
         | LinearPool
         | MetaStablePool
         | PhantomStablePool;
-    if (
-        pool.poolType === 'Weighted' ||
-        pool.poolType === 'LiquidityBootstrapping' ||
-        pool.poolType === 'Investment'
-    ) {
-        newPool = WeightedPool.fromPool(pool);
-    } else if (pool.poolType === 'Stable') {
-        newPool = StablePool.fromPool(pool);
-    } else if (pool.poolType === 'MetaStable') {
-        newPool = MetaStablePool.fromPool(pool);
-    } else if (pool.poolType === 'Element') {
-        newPool = ElementPool.fromPool(pool);
-        newPool.setCurrentBlockTimestamp(currentBlockTimestamp);
-    } else if (pool.poolType === 'Linear') newPool = LinearPool.fromPool(pool);
-    else if (pool.poolType === 'StablePhantom')
-        newPool = PhantomStablePool.fromPool(pool);
-    else {
-        console.error(
-            `Unknown pool type or type field missing: ${pool.poolType} ${pool.id}`
-        );
+
+    try {
+        if (
+            pool.poolType === 'Weighted' ||
+            pool.poolType === 'LiquidityBootstrapping' ||
+            pool.poolType === 'Investment'
+        ) {
+            newPool = WeightedPool.fromPool(pool);
+        } else if (pool.poolType === 'Stable') {
+            newPool = StablePool.fromPool(pool);
+        } else if (pool.poolType === 'MetaStable') {
+            newPool = MetaStablePool.fromPool(pool);
+        } else if (pool.poolType === 'Element') {
+            newPool = ElementPool.fromPool(pool);
+            newPool.setCurrentBlockTimestamp(currentBlockTimestamp);
+        } else if (pool.poolType === 'AaveLinear')
+            newPool = LinearPool.fromPool(pool);
+        else if (pool.poolType === 'StablePhantom')
+            newPool = PhantomStablePool.fromPool(pool);
+        else {
+            console.error(
+                `Unknown pool type or type field missing: ${pool.poolType} ${pool.id}`
+            );
+            return undefined;
+        }
+    } catch (err) {
+        console.error(`parseNewPool: ${err.message}`);
         return undefined;
     }
     return newPool;

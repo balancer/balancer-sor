@@ -681,15 +681,15 @@ describe('Tests pools filtering and path processing', () => {
             tokenIn,
             tokenOut
         );
-        assert.equal(maxLiquidityAvailable.toString(), '457979953739398700000');
+        assert.equal(maxLiquidityAvailable.toString(), '600000000000000000000');
         assert.equal(pathsSorted.length, 2);
         assert.equal(
             pathsSorted[0].limitAmount.toString(),
-            '228989976869699350000'
+            '300000000000000000000'
         );
         assert.equal(
             pathsSorted[1].limitAmount.toString(),
-            '228989976869699350000'
+            '300000000000000000000'
         );
 
         const [swaps, total] = getBestPaths(

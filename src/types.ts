@@ -139,6 +139,10 @@ export enum PoolFilter {
     Stable = 'Stable',
     MetaStable = 'MetaStable',
     LBP = 'LiquidityBootstrapping',
+    Investment = 'Investment',
+    Element = 'Element',
+    AaveLinear = 'AaveLinear',
+    StablePhantom = 'StablePhantom',
 }
 
 export interface PoolBase {

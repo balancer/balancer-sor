@@ -1,29 +1,31 @@
 import { formatFixed } from '@ethersproject/bignumber';
 import { Provider } from '@ethersproject/providers';
-import { SubgraphPoolBase } from '../types';
+import { SubgraphPoolBase, PoolFilter } from '../types';
 import { isSameAddress } from '../utils';
 import { Multicaller } from '../utils/multicaller';
 
 // TODO: decide whether we want to trim these ABIs down to the relevant functions
 import vaultAbi from '../abi/Vault.json';
+import aTokenRateProvider from '../abi/StaticATokenRateProvider.json';
 import weightedPoolAbi from '../pools/weightedPool/weightedPoolAbi.json';
 import stablePoolAbi from '../pools/stablePool/stablePoolAbi.json';
 import elementPoolAbi from '../pools/elementPool/ConvergentCurvePool.json';
 import linearPoolAbi from '../pools/linearPool/linearPoolAbi.json';
 
 export async function getOnChainBalances(
-    subgraphPools: SubgraphPoolBase[],
+    subgraphPoolsOriginal: SubgraphPoolBase[],
     multiAddress: string,
     vaultAddress: string,
     provider: Provider
 ): Promise<SubgraphPoolBase[]> {
-    if (subgraphPools.length === 0) return subgraphPools;
+    if (subgraphPoolsOriginal.length === 0) return subgraphPoolsOriginal;
 
     const abis: any = Object.values(
         // Remove duplicate entries using their names
         Object.fromEntries(
             [
                 ...vaultAbi,
+                ...aTokenRateProvider,
                 ...weightedPoolAbi,
                 ...stablePoolAbi,
                 ...elementPoolAbi,
@@ -34,7 +36,16 @@ export async function getOnChainBalances(
 
     const multiPool = new Multicaller(multiAddress, provider, abis);
 
-    subgraphPools.forEach((pool) => {
+    const supportedPoolTypes: string[] = Object.values(PoolFilter);
+    const subgraphPools: SubgraphPoolBase[] = [];
+    subgraphPoolsOriginal.forEach((pool) => {
+        if (!supportedPoolTypes.includes(pool.poolType)) {
+            console.error(`Unknown pool type: ${pool.poolType} ${pool.id}`);
+            return;
+        }
+
+        subgraphPools.push(pool);
+
         multiPool.call(`${pool.id}.poolTokens`, vaultAddress, 'getPoolTokens', [
             pool.id,
         ]);
@@ -74,7 +85,7 @@ export async function getOnChainBalances(
             );
         } else if (pool.poolType === 'Element') {
             multiPool.call(`${pool.id}.swapFee`, pool.address, 'percentFee');
-        } else if (pool.poolType === 'Linear') {
+        } else if (pool.poolType === 'AaveLinear') {
             multiPool.call(
                 `${pool.id}.swapFee`,
                 pool.address,
@@ -83,9 +94,9 @@ export async function getOnChainBalances(
 
             multiPool.call(`${pool.id}.targets`, pool.address, 'getTargets');
             multiPool.call(
-                `${pool.id}.wrappedTokenRateCache`,
+                `${pool.id}.rate`,
                 pool.address,
-                'getWrappedTokenRateCache'
+                'getWrappedTokenRate'
             );
         }
     });
@@ -101,7 +112,7 @@ export async function getOnChainBalances(
                 tokens: string[];
                 balances: string[];
             };
-            wrappedTokenRateCache?: string;
+            rate?: string;
         }
     >;
 
@@ -116,6 +127,7 @@ export async function getOnChainBalances(
                     tokens: string[];
                     balances: string[];
                 };
+                rate?: string;
             }
         >;
     } catch (err) {
@@ -146,7 +158,7 @@ export async function getOnChainBalances(
                 }
             }
 
-            if (subgraphPools[index].poolType === 'Linear') {
+            if (subgraphPools[index].poolType === 'AaveLinear') {
                 if (!onchainData.targets) {
                     console.error(`Linear Pool Missing Targets: ${poolId}`);
                     return;
@@ -161,23 +173,19 @@ export async function getOnChainBalances(
                     );
                 }
 
-                if (!onchainData.wrappedTokenRateCache) {
+                const wrappedIndex = subgraphPools[index].wrappedIndex;
+                if (
+                    wrappedIndex === undefined ||
+                    onchainData.rate === undefined
+                ) {
                     console.error(
-                        `Linear Pool Missing WrappedTokenRateCache: ${poolId}`
+                        `Linear Pool Missing WrappedIndex or PriceRate: ${poolId}`
                     );
                     return;
-                } else {
-                    const wrappedIndex = subgraphPools[index].wrappedIndex;
-                    if (wrappedIndex === undefined) {
-                        console.error(
-                            `Linear Pool Missing WrappedIndex: ${poolId}`
-                        );
-                        return;
-                    }
-
-                    subgraphPools[index].tokens[wrappedIndex].priceRate =
-                        formatFixed(onchainData.wrappedTokenRateCache[0], 18);
                 }
+                // Update priceRate of wrappedToken
+                subgraphPools[index].tokens[wrappedIndex].priceRate =
+                    formatFixed(onchainData.rate, 18);
             }
 
             subgraphPools[index].swapFee = formatFixed(swapFee, 18);
