@@ -6,7 +6,6 @@ import {
     ZERO,
 } from '../../utils/bignumber';
 import { isSameAddress } from '../../utils';
-import * as SDK from '@georgeroman/balancer-v2-pools';
 import {
     PoolBase,
     PoolTypes,
@@ -18,8 +17,8 @@ import {
     NoNullableField,
 } from '../../types';
 import {
-    _exactTokenInForTokenOut,
-    _tokenInForExactTokenOut,
+    _calcOutGivenIn,
+    _calcInGivenOut,
     _spotPriceAfterSwapExactTokenInForTokenOut,
     _spotPriceAfterSwapTokenInForExactTokenOut,
     _derivativeSpotPriceAfterSwapExactTokenInForTokenOut,
@@ -180,64 +179,63 @@ export class WeightedPool implements PoolBase {
     // Using BigNumber.js decimalPlaces (dp), allows us to consider token decimal accuracy correctly,
     // i.e. when using token with 2decimals 0.002 should be returned as 0
     // Uses ROUND_DOWN mode (1)
+    // calcOutGivenIn
     _exactTokenInForTokenOut(
         poolPairData: WeightedPoolPairData,
         amount: OldBigNumber,
         exact: boolean
     ): OldBigNumber {
-        if (exact) {
-            try {
-                // poolPair balances are normalised so must be scaled before use
-                const amt = SDK.WeightedMath._calcOutGivenIn(
-                    bnum(poolPairData.balanceIn.toString()),
-                    bnum(poolPairData.weightIn.toString()),
-                    bnum(poolPairData.balanceOut.toString()),
-                    bnum(poolPairData.weightOut.toString()),
-                    scale(amount, poolPairData.decimalsIn),
-                    bnum(poolPairData.swapFee.toString())
-                );
-                // return normalised amount
-                return scale(amt, -poolPairData.decimalsOut);
-            } catch (err) {
-                return ZERO;
-            }
+        if (amount.isNaN()) return amount;
+
+        try {
+            const amt = _calcOutGivenIn(
+                poolPairData.balanceIn.toBigInt(),
+                poolPairData.weightIn.toBigInt(),
+                poolPairData.balanceOut.toBigInt(),
+                poolPairData.weightOut.toBigInt(),
+                parseFixed(
+                    amount.dp(poolPairData.decimalsIn, 1).toString(),
+                    poolPairData.decimalsIn
+                ).toBigInt(),
+                poolPairData.swapFee.toBigInt()
+            );
+            // return human scaled
+            const amtOldBn = bnum(amt.toString());
+            return scale(amtOldBn, -poolPairData.decimalsOut);
+        } catch (err) {
+            return ZERO;
         }
-        return _exactTokenInForTokenOut(amount, poolPairData).dp(
-            poolPairData.decimalsOut,
-            1
-        );
     }
 
     // Using BigNumber.js decimalPlaces (dp), allows us to consider token decimal accuracy correctly,
     // i.e. when using token with 2decimals 0.002 should be returned as 0
     // Uses ROUND_UP mode (0)
+    // calcInGivenOut
     _tokenInForExactTokenOut(
         poolPairData: WeightedPoolPairData,
         amount: OldBigNumber,
         exact: boolean
     ): OldBigNumber {
-        if (exact) {
-            try {
-                // poolPair balances are normalised so must be scaled before use
-                const amt = SDK.WeightedMath._calcInGivenOut(
-                    bnum(poolPairData.balanceIn.toString()),
-                    bnum(poolPairData.weightIn.toString()),
-                    bnum(poolPairData.balanceOut.toString()),
-                    bnum(poolPairData.weightOut.toString()),
-                    scale(amount, poolPairData.decimalsOut),
-                    bnum(poolPairData.swapFee.toString())
-                );
+        if (amount.isNaN()) return amount;
 
-                // return normalised amount
-                return scale(amt, -poolPairData.decimalsIn);
-            } catch (err) {
-                return ZERO;
-            }
+        try {
+            const amt = _calcInGivenOut(
+                poolPairData.balanceIn.toBigInt(),
+                poolPairData.weightIn.toBigInt(),
+                poolPairData.balanceOut.toBigInt(),
+                poolPairData.weightOut.toBigInt(),
+                parseFixed(
+                    amount.dp(poolPairData.decimalsOut, 1).toString(),
+                    poolPairData.decimalsOut
+                ).toBigInt(),
+                poolPairData.swapFee.toBigInt()
+            );
+            // return human scaled
+            const amtOldBn = bnum(amt.toString());
+            return scale(amtOldBn, -poolPairData.decimalsIn);
+        } catch (err) {
+            return ZERO;
         }
-        return _tokenInForExactTokenOut(amount, poolPairData).dp(
-            poolPairData.decimalsIn,
-            0
-        );
     }
 
     _spotPriceAfterSwapExactTokenInForTokenOut(

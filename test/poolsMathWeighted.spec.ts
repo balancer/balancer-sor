@@ -1,4 +1,4 @@
-import * as weighted from '../src/poolsMath/weighted';
+import * as weighted from '../src/pools/weightedPool/weightedMath';
 import * as SDK from '@georgeroman/balancer-v2-pools';
 import { BigNumber as OldBigNumber, bnum } from '../src/utils/bignumber';
 import { assert } from 'chai';
@@ -6,9 +6,9 @@ import { MathSol } from '../src/poolsMath/basicOperations';
 
 describe('poolsMath: numeric functions using bigint', () => {
     context('weighted pools', () => {
-        it('_exactTokenInForTokenOut', () => {
+        it('_calcOutGivenIn', () => {
             const { result, SDKResult } = getBothValuesWeighted(
-                weighted._exactTokenInForTokenOut,
+                weighted._calcOutGivenIn,
                 SDK.WeightedMath._calcOutGivenIn,
                 1000,
                 1,
@@ -24,9 +24,9 @@ describe('poolsMath: numeric functions using bigint', () => {
             );
         });
 
-        it('_tokenInForExactTokenOut', () => {
+        it('_calcInGivenOut', () => {
             const { result, SDKResult } = getBothValuesWeighted(
-                weighted._tokenInForExactTokenOut,
+                weighted._calcInGivenOut,
                 SDK.WeightedMath._calcInGivenOut,
                 1000,
                 1,
@@ -44,8 +44,8 @@ describe('poolsMath: numeric functions using bigint', () => {
 
         it('_spotPriceAfterSwapExactTokenInForTokenOut', () => {
             checkDerivative_weighted(
-                weighted._exactTokenInForTokenOut,
-                weighted._spotPriceAfterSwapExactTokenInForTokenOut,
+                weighted._calcOutGivenIn,
+                weighted._spotPriceAfterSwapExactTokenInForTokenOutBigInt,
                 1000,
                 1,
                 7000,
@@ -59,8 +59,8 @@ describe('poolsMath: numeric functions using bigint', () => {
         });
         it('_spotPriceAfterSwapTokenInForExactTokenOut', () => {
             checkDerivative_weighted(
-                weighted._tokenInForExactTokenOut,
-                weighted._spotPriceAfterSwapTokenInForExactTokenOut,
+                weighted._calcInGivenOut,
+                weighted._spotPriceAfterSwapTokenInForExactTokenOutBigInt,
                 1000,
                 1,
                 7000,
