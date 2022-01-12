@@ -5,10 +5,10 @@ import { BigNumber as OldBigNumber } from './utils/bignumber';
 import { getBestPaths } from './router';
 import { getWrappedInfo, setWrappedInfo } from './wrapInfo';
 import { formatSwaps } from './formatSwaps';
-import { PoolCacher } from './poolCaching';
+import { PoolCacher } from './poolCacher';
 import { RouteProposer } from './routeProposal';
 import { filterPoolsByType } from './routeProposal/filtering';
-import { SwapCostCalculator } from './swapCost';
+import { SwapCostCalculator } from './swapCostCalculator';
 import { getLidoStaticSwaps, isLidoStableSwap } from './pools/lido';
 import { isSameAddress } from './utils';
 import { EMPTY_SWAPINFO } from './constants';
@@ -20,13 +20,16 @@ import {
     Swap,
     SubgraphPoolBase,
     SwapOptions,
+    TokenPriceService,
+    PoolDataService,
+    SorConfig,
 } from './types';
 import { Zero } from '@ethersproject/constants';
 
 export class SOR {
-    poolCacher: PoolCacher;
-    private routeProposer: RouteProposer;
-    swapCostCalculator: SwapCostCalculator;
+    private readonly poolCacher: PoolCacher;
+    private readonly routeProposer: RouteProposer;
+    readonly swapCostCalculator: SwapCostCalculator;
 
     private readonly defaultSwapOptions: SwapOptions = {
         gasPrice: parseFixed('50', 9),
@@ -39,24 +42,22 @@ export class SOR {
 
     /**
      * @param {Provider} provider - Provider.
-     * @param {number} chainId - Id of chain.
-     * @param {string | null} poolsSource - Pass Subgraph URL used to retrieve pools or null to use initialPools.
-     * @param {SubgraphPoolBase[]} initialPools - Can be set with initial pools to use.
+     * @param {SorConfig} config - Chain specific configuration for the SOR.
+     * @param {PoolDataService} poolDataService - Generic service that fetches pool data from an external data source.
+     * @param {TokenPriceService} tokenPriceService - Generic service that fetches token prices from an external price feed. Used in calculating swap cost.
      */
     constructor(
         public provider: Provider,
-        public chainId: number,
-        poolsSource: string | null,
-        initialPools: SubgraphPoolBase[] = []
+        private readonly config: SorConfig,
+        poolDataService: PoolDataService,
+        tokenPriceService: TokenPriceService
     ) {
-        this.poolCacher = new PoolCacher(
-            provider,
-            chainId,
-            poolsSource,
-            initialPools
+        this.poolCacher = new PoolCacher(poolDataService);
+        this.routeProposer = new RouteProposer(config);
+        this.swapCostCalculator = new SwapCostCalculator(
+            config,
+            tokenPriceService
         );
-        this.routeProposer = new RouteProposer();
-        this.swapCostCalculator = new SwapCostCalculator(chainId);
     }
 
     getPools(): SubgraphPoolBase[] {
@@ -65,15 +66,10 @@ export class SOR {
 
     /**
      * fetchPools Retrieves pools information and saves to internal pools cache.
-     * @param {SubgraphPoolBase[]} poolsData - If empty pools will be fetched from source in constructor. If pools passed they will be used as pools source.
-     * @param {boolean} isOnChain - If isOnChain is true will retrieve all required onChain data. (false is advised to only be used for testing)
      * @returns {boolean} True if pools fetched successfully, False if not.
      */
-    async fetchPools(
-        poolsData: SubgraphPoolBase[] = [],
-        isOnChain = true
-    ): Promise<boolean> {
-        return this.poolCacher.fetchPools(poolsData, isOnChain);
+    async fetchPools(): Promise<boolean> {
+        return this.poolCacher.fetchPools();
     }
 
     /**
@@ -91,8 +87,7 @@ export class SOR {
         swapAmount: BigNumberish,
         swapOptions?: Partial<SwapOptions>
     ): Promise<SwapInfo> {
-        if (!this.poolCacher.finishedFetchingOnChain)
-            return cloneDeep(EMPTY_SWAPINFO);
+        if (!this.poolCacher.finishedFetching) return cloneDeep(EMPTY_SWAPINFO);
 
         // Set any unset options to their defaults
         const options: SwapOptions = {
@@ -109,15 +104,15 @@ export class SOR {
             swapType,
             tokenIn,
             tokenOut,
-            this.chainId,
+            this.config,
             BigNumber.from(swapAmount)
         );
 
         let swapInfo: SwapInfo;
-        if (isLidoStableSwap(this.chainId, tokenIn, tokenOut)) {
+        if (isLidoStableSwap(this.config.chainId, tokenIn, tokenOut)) {
             swapInfo = await getLidoStaticSwaps(
                 filteredPools,
-                this.chainId,
+                this.config.chainId,
                 wrappedInfo.tokenIn.addressForSwaps,
                 wrappedInfo.tokenOut.addressForSwaps,
                 swapType,
@@ -137,12 +132,7 @@ export class SOR {
 
         if (swapInfo.returnAmount.isZero()) return swapInfo;
 
-        swapInfo = setWrappedInfo(
-            swapInfo,
-            swapType,
-            wrappedInfo,
-            this.chainId
-        );
+        swapInfo = setWrappedInfo(swapInfo, swapType, wrappedInfo, this.config);
 
         return swapInfo;
     }
@@ -185,8 +175,7 @@ export class SOR {
             tokenOut,
             swapType,
             pools,
-            swapOptions,
-            this.chainId
+            swapOptions
         );
 
         if (paths.length == 0) return cloneDeep(EMPTY_SWAPINFO);

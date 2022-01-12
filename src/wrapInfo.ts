@@ -1,10 +1,12 @@
 import { BigNumber } from '@ethersproject/bignumber';
 import { Provider } from '@ethersproject/providers';
 import { AddressZero, WeiPerEther as ONE } from '@ethersproject/constants';
-
 import { Lido, getStEthRate } from './pools/lido';
-import { WETHADDR } from './constants';
-import { SwapTypes, SwapInfo } from './types';
+import { SwapTypes, SwapInfo, SorConfig } from './types';
+import {
+    TokensToUnbuttonWrapperMap,
+    getWrapperRate as getUnbuttonWrapperRate,
+} from './wrappers/unbutton';
 import { isSameAddress } from './utils';
 
 export interface WrappedInfo {
@@ -23,8 +25,9 @@ export interface TokenInfo {
 
 export enum WrapTypes {
     None,
-    ETH,
-    stETH,
+    ETH, // ETH -> WETH
+    stETH, // stETH -> wSTETH
+    Unbutton, // [rebasing Token] -> ubToken
 }
 
 export async function getWrappedInfo(
@@ -32,7 +35,7 @@ export async function getWrappedInfo(
     swapType: SwapTypes,
     tokenIn: string,
     tokenOut: string,
-    chainId: number,
+    config: SorConfig,
     swapAmount: BigNumber
 ): Promise<WrappedInfo> {
     // The Subgraph returns tokens in lower case format so we must match this
@@ -40,7 +43,6 @@ export async function getWrappedInfo(
     tokenOut = tokenOut.toLowerCase();
 
     let swapAmountForSwaps = swapAmount;
-
     let tokenInForSwaps = tokenIn;
     let tokenInWrapType = WrapTypes.None;
     let tokenOutForSwaps = tokenOut;
@@ -48,33 +50,70 @@ export async function getWrappedInfo(
     let tokenInRate = ONE;
     let tokenOutRate = ONE;
 
+    //--------------------------------------------------------------------------
+    // ETH/WETH
+
     // Handle ETH wrapping
     if (tokenIn === AddressZero) {
-        tokenInForSwaps = WETHADDR[chainId].toLowerCase();
+        tokenInForSwaps = config.weth.toLowerCase();
         tokenInWrapType = WrapTypes.ETH;
     }
+
+    // Handle WETH unwrapping
     if (tokenOut === AddressZero) {
-        tokenOutForSwaps = WETHADDR[chainId].toLowerCase();
+        tokenOutForSwaps = config.weth.toLowerCase();
         tokenOutWrapType = WrapTypes.ETH;
     }
 
+    //--------------------------------------------------------------------------
+    // stETH/wstETH
+
     // Handle stETH wrapping
-    if (tokenIn === Lido.stETH[chainId]) {
-        tokenInForSwaps = Lido.wstETH[chainId];
+    if (tokenIn === Lido.stETH[config.chainId]) {
+        tokenInForSwaps = Lido.wstETH[config.chainId];
         tokenInWrapType = WrapTypes.stETH;
-        const rate = await getStEthRate(provider, chainId);
+        const rate = await getStEthRate(provider, config.chainId);
         tokenInRate = rate;
         if (swapType === SwapTypes.SwapExactIn)
             swapAmountForSwaps = swapAmount.mul(rate).div(ONE);
     }
-    if (tokenOut === Lido.stETH[chainId]) {
-        tokenOutForSwaps = Lido.wstETH[chainId];
+
+    // Handle wstETH unwrapping
+    if (tokenOut === Lido.stETH[config.chainId]) {
+        tokenOutForSwaps = Lido.wstETH[config.chainId];
         tokenOutWrapType = WrapTypes.stETH;
-        const rate = await getStEthRate(provider, chainId);
+        const rate = await getStEthRate(provider, config.chainId);
         tokenOutRate = rate;
         if (swapType === SwapTypes.SwapExactOut)
             swapAmountForSwaps = swapAmount.mul(rate).div(ONE);
     }
+
+    //--------------------------------------------------------------------------
+    // ubTokens
+
+    // Gets a list of all the tokens and their unbutton wrappers
+    const tokensToUBWrapperMap =
+        TokensToUnbuttonWrapperMap[config.chainId] || {};
+
+    // Handle token unbutton wrapping
+    if (tokensToUBWrapperMap[tokenIn]) {
+        tokenInForSwaps = tokensToUBWrapperMap[tokenIn];
+        tokenInWrapType = WrapTypes.Unbutton;
+        tokenInRate = await getUnbuttonWrapperRate(provider, tokenInForSwaps);
+        if (swapType === SwapTypes.SwapExactIn)
+            swapAmountForSwaps = swapAmount.mul(tokenInRate).div(ONE);
+    }
+
+    // Handle unbutton token unwrapping
+    if (tokensToUBWrapperMap[tokenOut]) {
+        tokenOutForSwaps = tokensToUBWrapperMap[tokenOut];
+        tokenOutWrapType = WrapTypes.Unbutton;
+        tokenOutRate = await getUnbuttonWrapperRate(provider, tokenOutForSwaps);
+        if (swapType === SwapTypes.SwapExactOut)
+            swapAmountForSwaps = swapAmount.mul(tokenOutRate).div(ONE);
+    }
+
+    //--------------------------------------------------------------------------
 
     return {
         swapAmountOriginal: swapAmount,
@@ -98,44 +137,62 @@ export function setWrappedInfo(
     swapInfo: SwapInfo,
     swapType: SwapTypes,
     wrappedInfo: WrappedInfo,
-    chainId: number
+    config: SorConfig
 ): SwapInfo {
     if (swapInfo.swaps.length === 0) return swapInfo;
 
     swapInfo.tokenIn = wrappedInfo.tokenIn.addressOriginal;
     swapInfo.tokenOut = wrappedInfo.tokenOut.addressOriginal;
 
+    swapInfo.swapAmountForSwaps = swapInfo.swapAmount;
+    swapInfo.returnAmountFromSwaps = swapInfo.returnAmount;
+
+    // No wrapping required
+    if (
+        wrappedInfo.tokenIn.wrapType === WrapTypes.None &&
+        wrappedInfo.tokenOut.wrapType === WrapTypes.None
+    ) {
+        return swapInfo;
+    }
+
+    //--------------------------------------------------------------------------
+    // Wrappers which are 1:1 (ETH/WETH), ie UnscaledWrappers
+    // Replace weth with ZERO/ETH in assets for Vault to handle ETH directly
     if (
         wrappedInfo.tokenIn.wrapType === WrapTypes.ETH ||
         wrappedInfo.tokenOut.wrapType === WrapTypes.ETH
     ) {
-        // replace weth with ZERO/ETH in assets for Vault to handle ETH directly
         swapInfo.tokenAddresses = swapInfo.tokenAddresses.map((addr) =>
-            isSameAddress(addr, WETHADDR[chainId]) ? AddressZero : addr
+            isSameAddress(addr, config.weth) ? AddressZero : addr
         );
     }
 
-    // Handle stETH swap amount scaling
+    //--------------------------------------------------------------------------
+    // Wrappers which are NOT 1:1 (stETH/wstETH, AMPL/WAMPL, all ubTokens etc)
+    // ie ScaledWrappers
+
+    const isScaledWrapper = (wrapType) =>
+        wrapType === WrapTypes.stETH || wrapType === WrapTypes.Unbutton;
+
+    // Scaling required for wrappers which don't scale 1:1 with the underlying token
+    // swap amount and return amounts are scaled if swap type is SwapExact
+
+    // Handle swap amount scaling
     if (
-        (wrappedInfo.tokenIn.wrapType === WrapTypes.stETH &&
+        (isScaledWrapper(wrappedInfo.tokenIn.wrapType) &&
             swapType === SwapTypes.SwapExactIn) ||
-        (wrappedInfo.tokenOut.wrapType === WrapTypes.stETH &&
+        (isScaledWrapper(wrappedInfo.tokenOut.wrapType) &&
             swapType === SwapTypes.SwapExactOut)
     ) {
-        swapInfo.swapAmountForSwaps = wrappedInfo.swapAmountForSwaps;
         swapInfo.swapAmount = wrappedInfo.swapAmountOriginal;
-    } else {
-        // Should be same when standard tokens and swapAmount should already be scaled
-        swapInfo.swapAmountForSwaps = swapInfo.swapAmount;
+        swapInfo.swapAmountForSwaps = wrappedInfo.swapAmountForSwaps;
     }
 
-    // Return amount from swaps will only be different if token has an exchangeRate
-    swapInfo.returnAmountFromSwaps = swapInfo.returnAmount;
-
-    // SwapExactIn, stETH out, returnAmount is stETH amount out, returnAmountForSwaps is wstETH amount out
+    // Handle return amount scaling
+    // SwapExactIn, unwrapped out, returnAmount is unwrapped amount out, returnAmountForSwaps is wrapped amount out
     if (
         swapType === SwapTypes.SwapExactIn &&
-        wrappedInfo.tokenOut.wrapType === WrapTypes.stETH
+        isScaledWrapper(wrappedInfo.tokenOut.wrapType)
     ) {
         swapInfo.returnAmount = swapInfo.returnAmount
             .mul(ONE)
@@ -147,10 +204,10 @@ export function setWrappedInfo(
                 .div(wrappedInfo.tokenOut.rate);
     }
 
-    // SwapExactOut, stETH in, returnAmount us stETH amount in, returnAmountForSwaps is wstETH amount in
+    // SwapExactOut, unwrapped in, returnAmount us unwrapped amount in, returnAmountForSwaps is wrapped amount in
     if (
         swapType === SwapTypes.SwapExactOut &&
-        wrappedInfo.tokenIn.wrapType === WrapTypes.stETH
+        isScaledWrapper(wrappedInfo.tokenIn.wrapType)
     ) {
         swapInfo.returnAmount = swapInfo.returnAmount
             .mul(ONE)
@@ -161,5 +218,6 @@ export function setWrappedInfo(
                 .mul(ONE)
                 .div(wrappedInfo.tokenIn.rate);
     }
+
     return swapInfo;
 }

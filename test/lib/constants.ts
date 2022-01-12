@@ -1,7 +1,51 @@
+import { SorConfig } from '../../src';
+
 export interface TestToken {
     address: string;
     decimals: number;
 }
+
+export const sorConfigTest = {
+    chainId: 99,
+    weth: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2',
+    vault: '0xeefba1e63905ef1d7acba5a8513c70307c1ce441',
+    usdcConnectingPool: {
+        id: 'usdcConnecting',
+        usdc: '0x2791bca1f2de4661ed88a30c99a7a9449aa84174',
+    },
+    staBal3Pool: {
+        id: 'staBal3Id',
+        address: '0x06df3b2bbb68adc8b0e302443692037ed9f91b42',
+    },
+    wethStaBal3: {
+        id: 'weightedWethStaBal3Id',
+        address: 'weightedWethStaBal3',
+    },
+};
+
+export const sorConfigEth: SorConfig = {
+    chainId: 1,
+    weth: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2',
+    vault: '0xeefba1e63905ef1d7acba5a8513c70307c1ce441',
+    staBal3Pool: {
+        id: '0x7b50775383d3d6f0215a8f290f2c9e2eebbeceb20000000000000000000000fe',
+        address: '0x7b50775383d3d6f0215a8f290f2c9e2eebbeceb2',
+    },
+};
+
+export const sorConfigKovan: SorConfig = {
+    chainId: 42,
+    weth: '0xdFCeA9088c8A88A76FF74892C1457C17dfeef9C1',
+    vault: '0xBA12222222228d8Ba445958a75a0704d566BF2C8',
+    staBal3Pool: {
+        id: '0x8fd162f338b770f7e879030830cde9173367f3010000000000000000000004d8',
+        address: '0x8fd162f338b770f7e879030830cde9173367f301',
+    },
+    wethStaBal3: {
+        id: '0x6be79a54f119dbf9e8ebd9ded8c5bd49205bc62d00020000000000000000033c',
+        address: '0x6be79a54f119dbf9e8ebd9ded8c5bd49205bc62d',
+    },
+};
 
 export const WETH: TestToken = {
     address: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2'.toLowerCase(),

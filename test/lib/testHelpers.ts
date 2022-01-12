@@ -1,7 +1,6 @@
 import { BigNumber } from '@ethersproject/bignumber';
 import { JsonRpcProvider } from '@ethersproject/providers';
 import { BigNumber as OldBigNumber } from 'bignumber.js';
-import cloneDeep from 'lodash.clonedeep';
 import * as sorv2 from '../../src';
 import {
     SubgraphPoolBase,
@@ -14,7 +13,8 @@ import {
     SwapV2,
     PoolTypes,
     NewPath,
-} from '../../src/types';
+    SorConfig,
+} from '../../src';
 import { bnum } from '../../src/utils/bignumber';
 import * as fs from 'fs';
 import { assert, expect } from 'chai';
@@ -22,6 +22,9 @@ import { assert, expect } from 'chai';
 import WeightedTokens from '../testData/eligibleTokens.json';
 import StableTokens from '../testData/stableTokens.json';
 import { WeiPerEther as ONE, Zero } from '@ethersproject/constants';
+import { mockTokenPriceService } from './mockTokenPriceService';
+import { MockPoolDataService } from './mockPoolDataService';
+import { sorConfigTest } from './constants';
 
 export interface TradeInfo {
     SwapType: string;
@@ -353,9 +356,14 @@ export async function getFullSwap(
     gasPrice: BigNumber,
     provider: JsonRpcProvider,
     swapGas: BigNumber = BigNumber.from('100000'),
-    chainId = 1
+    config: SorConfig = sorConfigTest
 ): Promise<SwapInfo> {
-    const sor = new sorv2.SOR(provider, chainId, null, cloneDeep(pools));
+    const sor = new sorv2.SOR(
+        provider,
+        config,
+        new MockPoolDataService(pools),
+        mockTokenPriceService
+    );
 
     let swapTypeCorrect = SwapTypes.SwapExactIn;
 
@@ -378,7 +386,7 @@ export async function getFullSwap(
         );
     }
 
-    const isFetched = await sor.fetchPools([], false);
+    const isFetched = await sor.fetchPools();
     assert(isFetched, 'Pools should be fetched in wrapper');
 
     const swapInfo: SwapInfo = await sor.getSwaps(

@@ -1,14 +1,17 @@
+// eslint-disable-next-line @typescript-eslint/no-var-requires
 require('dotenv').config();
+
+import { mockTokenPriceService } from './lib/mockTokenPriceService';
 import { expect } from 'chai';
 import { JsonRpcProvider } from '@ethersproject/providers';
 import { SOR } from '../src';
 import { SwapInfo, SwapTypes, SubgraphPoolBase } from '../src/types';
 import { parseFixed } from '@ethersproject/bignumber';
-import { DAI, USDC } from './lib/constants';
+import { DAI, sorConfigEth, USDC } from './lib/constants';
+import { MockPoolDataService } from './lib/mockPoolDataService';
 
 const gasPrice = parseFixed('30', 9);
 const maxPools = 4;
-const chainId = 1;
 const provider = new JsonRpcProvider(
     `https://mainnet.infura.io/v3/${process.env.INFURA}`
 );
@@ -28,6 +31,7 @@ describe(`Tests for LBP Pools.`, () => {
         it(`Full Swap - swapExactIn, Swaps not paused so should have route`, async () => {
             const poolsFromFile: {
                 pools: SubgraphPoolBase[];
+                // eslint-disable-next-line @typescript-eslint/no-var-requires
             } = require('./testData/lbpPools/singlePool.json');
             const pools = poolsFromFile.pools;
 
@@ -36,9 +40,14 @@ describe(`Tests for LBP Pools.`, () => {
             const swapType = SwapTypes.SwapExactIn;
             const swapAmt = parseFixed('1', 18);
 
-            const sor = new SOR(provider, chainId, null, pools);
+            const sor = new SOR(
+                provider,
+                sorConfigEth,
+                new MockPoolDataService(pools),
+                mockTokenPriceService
+            );
 
-            const fetchSuccess = await sor.fetchPools([], false);
+            const fetchSuccess = await sor.fetchPools();
             expect(fetchSuccess).to.be.true;
 
             const swapInfo: SwapInfo = await sor.getSwaps(
@@ -57,6 +66,7 @@ describe(`Tests for LBP Pools.`, () => {
         it(`Full Swap - swapExactIn, Swaps paused so should have no route`, async () => {
             const poolsFromFile: {
                 pools: SubgraphPoolBase[];
+                // eslint-disable-next-line @typescript-eslint/no-var-requires
             } = require('./testData/lbpPools/singlePool.json');
             const pools = poolsFromFile.pools;
             // Set paused to true
@@ -66,9 +76,14 @@ describe(`Tests for LBP Pools.`, () => {
             const swapType = SwapTypes.SwapExactIn;
             const swapAmt = parseFixed('1', 18);
 
-            const sor = new SOR(provider, chainId, null, pools);
+            const sor = new SOR(
+                provider,
+                sorConfigEth,
+                new MockPoolDataService(pools),
+                mockTokenPriceService
+            );
 
-            const fetchSuccess = await sor.fetchPools([], false);
+            const fetchSuccess = await sor.fetchPools();
             expect(fetchSuccess).to.be.true;
 
             const swapInfo: SwapInfo = await sor.getSwaps(

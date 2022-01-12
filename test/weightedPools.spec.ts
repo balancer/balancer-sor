@@ -1,3 +1,4 @@
+// eslint-disable-next-line @typescript-eslint/no-var-requires
 require('dotenv').config();
 import { expect } from 'chai';
 import { SwapTypes, PoolTypes, SubgraphPoolBase } from '../src/types';
@@ -14,6 +15,7 @@ describe(`Tests for Weighted Pools.`, () => {
         it(`tests getLimitAmountSwap SwapExactIn`, async () => {
             const poolsFromFile: {
                 pools: SubgraphPoolBase[];
+                // eslint-disable-next-line @typescript-eslint/no-var-requires
             } = require('./testData/weightedPools/singlePool.json');
             const pool = poolsFromFile.pools[0];
             const swapType = SwapTypes.SwapExactIn;
@@ -53,6 +55,7 @@ describe(`Tests for Weighted Pools.`, () => {
         it(`tests getLimitAmountSwap SwapExactOut`, async () => {
             const poolsFromFile: {
                 pools: SubgraphPoolBase[];
+                // eslint-disable-next-line @typescript-eslint/no-var-requires
             } = require('./testData/weightedPools/singlePool.json');
             const pool = poolsFromFile.pools[0];
             const swapType = SwapTypes.SwapExactOut;

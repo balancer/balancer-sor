@@ -12,6 +12,7 @@ import {
     LINEAR_AUSDT,
     STABAL3PHANTOM,
     LINEAR_ADAI,
+    sorConfigKovan,
 } from './lib/constants';
 import poolsFromFile from './testData/phantomStablePools/phantomStablePool.json';
 import { SubgraphPoolBase, SwapTypes } from '../src';
@@ -225,8 +226,6 @@ describe(`Tests for PhantomStable Pools.`, () => {
     });
 });
 
-const chainId = 42;
-
 async function testFullSwap(
     tokenIn: string,
     tokenOut: string,
@@ -256,7 +255,7 @@ async function testFullSwap(
         gasPrice,
         provider,
         swapGas,
-        chainId
+        sorConfigKovan
     );
 
     const totalSwapAmount = getTotalSwapAmount(swapType, swapInfo);
