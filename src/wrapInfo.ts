@@ -2,12 +2,11 @@ import { BigNumber } from '@ethersproject/bignumber';
 import { Provider } from '@ethersproject/providers';
 import { AddressZero, WeiPerEther as ONE } from '@ethersproject/constants';
 import { Lido, getStEthRate } from './pools/lido';
+import { SwapTypes, SwapInfo, SorConfig } from './types';
 import {
     TokensToUnbuttonWrapperMap,
     getWrapperRate as getUnbuttonWrapperRate,
 } from './wrappers/unbutton';
-import { WETHADDR } from './constants';
-import { SwapTypes, SwapInfo } from './types';
 import { isSameAddress } from './utils';
 
 export interface WrappedInfo {
@@ -36,7 +35,7 @@ export async function getWrappedInfo(
     swapType: SwapTypes,
     tokenIn: string,
     tokenOut: string,
-    chainId: number,
+    config: SorConfig,
     swapAmount: BigNumber
 ): Promise<WrappedInfo> {
     // The Subgraph returns tokens in lower case format so we must match this
@@ -56,13 +55,13 @@ export async function getWrappedInfo(
 
     // Handle ETH wrapping
     if (tokenIn === AddressZero) {
-        tokenInForSwaps = WETHADDR[chainId].toLowerCase();
+        tokenInForSwaps = config.weth.toLowerCase();
         tokenInWrapType = WrapTypes.ETH;
     }
 
     // Handle WETH unwrapping
     if (tokenOut === AddressZero) {
-        tokenOutForSwaps = WETHADDR[chainId].toLowerCase();
+        tokenOutForSwaps = config.weth.toLowerCase();
         tokenOutWrapType = WrapTypes.ETH;
     }
 
@@ -70,20 +69,20 @@ export async function getWrappedInfo(
     // stETH/wstETH
 
     // Handle stETH wrapping
-    if (tokenIn === Lido.stETH[chainId]) {
-        tokenInForSwaps = Lido.wstETH[chainId];
+    if (tokenIn === Lido.stETH[config.chainId]) {
+        tokenInForSwaps = Lido.wstETH[config.chainId];
         tokenInWrapType = WrapTypes.stETH;
-        const rate = await getStEthRate(provider, chainId);
+        const rate = await getStEthRate(provider, config.chainId);
         tokenInRate = rate;
         if (swapType === SwapTypes.SwapExactIn)
             swapAmountForSwaps = swapAmount.mul(rate).div(ONE);
     }
 
     // Handle wstETH unwrapping
-    if (tokenOut === Lido.stETH[chainId]) {
-        tokenOutForSwaps = Lido.wstETH[chainId];
+    if (tokenOut === Lido.stETH[config.chainId]) {
+        tokenOutForSwaps = Lido.wstETH[config.chainId];
         tokenOutWrapType = WrapTypes.stETH;
-        const rate = await getStEthRate(provider, chainId);
+        const rate = await getStEthRate(provider, config.chainId);
         tokenOutRate = rate;
         if (swapType === SwapTypes.SwapExactOut)
             swapAmountForSwaps = swapAmount.mul(rate).div(ONE);
@@ -93,7 +92,8 @@ export async function getWrappedInfo(
     // ubTokens
 
     // Gets a list of all the tokens and their unbutton wrappers
-    const tokensToUBWrapperMap = TokensToUnbuttonWrapperMap[chainId] || {};
+    const tokensToUBWrapperMap =
+        TokensToUnbuttonWrapperMap[config.chainId] || {};
 
     // Handle token unbutton wrapping
     if (tokensToUBWrapperMap[tokenIn]) {
@@ -137,7 +137,7 @@ export function setWrappedInfo(
     swapInfo: SwapInfo,
     swapType: SwapTypes,
     wrappedInfo: WrappedInfo,
-    chainId: number
+    config: SorConfig
 ): SwapInfo {
     if (swapInfo.swaps.length === 0) return swapInfo;
 
@@ -163,7 +163,7 @@ export function setWrappedInfo(
         wrappedInfo.tokenOut.wrapType === WrapTypes.ETH
     ) {
         swapInfo.tokenAddresses = swapInfo.tokenAddresses.map((addr) =>
-            isSameAddress(addr, WETHADDR[chainId]) ? AddressZero : addr
+            isSameAddress(addr, config.weth) ? AddressZero : addr
         );
     }
 

@@ -1,8 +1,14 @@
 // TS_NODE_PROJECT='tsconfig.testing.json' npx mocha -r ts-node/register test/staBalPaths.spec.ts
+// eslint-disable-next-line @typescript-eslint/no-var-requires
 require('dotenv').config();
 import { expect } from 'chai';
 import cloneDeep from 'lodash.clonedeep';
-import { PoolDictionary, SwapPairType, SubgraphPoolBase } from '../src/types';
+import {
+    PoolDictionary,
+    SwapPairType,
+    SubgraphPoolBase,
+    SorConfig,
+} from '../src';
 import {
     filterPoolsOfInterest,
     getPathsUsingStaBalPool,
@@ -11,19 +17,16 @@ import {
     filterHopPools,
     parseToPoolsDict,
 } from '../src/routeProposal/filtering';
-import { STABAL3POOL, USDCCONNECTINGPOOL } from '../src/constants';
 import staBalPools from './testData/staBal/staBalPools.json';
 import { checkPath } from './lib/testHelpers';
-import { BAL, TUSD, MKR } from './lib/constants';
+import { BAL, TUSD, MKR, sorConfigTest, sorConfigEth } from './lib/constants';
 
 const maxPools = 4;
-const chainId = 99;
 
 describe(`staBalPaths.`, () => {
     it(`should be no USDC connecting pool for mainnet`, () => {
         const tokenIn = TUSD.address;
         const tokenOut = BAL.address;
-        const chainId = 1;
         const correctPoolIds = [];
 
         itCreatesCorrectPath(
@@ -31,7 +34,7 @@ describe(`staBalPaths.`, () => {
             tokenOut,
             cloneDeep(staBalPools.pools),
             correctPoolIds,
-            chainId
+            sorConfigEth
         );
     });
 
@@ -46,8 +49,7 @@ describe(`staBalPaths.`, () => {
                 tokenIn,
                 tokenOut,
                 cloneDeep(staBalPools.pools),
-                correctPoolIds,
-                chainId
+                correctPoolIds
             );
 
             // Returns multihop path: TUSD2>[staBalPair2]>staBAL>[staBalPair1]>TUSD
@@ -80,8 +82,7 @@ describe(`staBalPaths.`, () => {
                 tokenIn,
                 tokenOut,
                 cloneDeep(staBalPools.pools),
-                correctPoolIds,
-                chainId
+                correctPoolIds
             );
         });
     });
@@ -102,8 +103,7 @@ describe(`staBalPaths.`, () => {
                     tokenIn,
                     tokenOut,
                     cloneDeep(staBalPools.pools),
-                    correctPoolIds,
-                    chainId
+                    correctPoolIds
                 );
             });
 
@@ -112,13 +112,12 @@ describe(`staBalPaths.`, () => {
                     tokenIn,
                     tokenOut,
                     cloneDeep(staBalPools.pools),
-                    ['staBalPair1', 'usdcConnecting', 'balPool'],
-                    chainId
+                    ['staBalPair1', 'usdcConnecting', 'balPool']
                 );
 
                 // Hop out as it is USDC > tokenOut
                 const mostLiquidPool = getHighestLiquidityPool(
-                    USDCCONNECTINGPOOL[chainId].usdc,
+                    sorConfigTest.usdcConnectingPool.usdc,
                     tokenOut,
                     SwapPairType.HopOut,
                     poolsAll
@@ -132,18 +131,21 @@ describe(`staBalPaths.`, () => {
                     tokenIn,
                     tokenOut,
                     cloneDeep(staBalPools.pools),
-                    ['staBalPair1', 'usdcConnecting', 'balPool'],
-                    chainId
+                    ['staBalPair1', 'usdcConnecting', 'balPool']
                 );
 
                 const staBalPoolIdIn = 'staBalPair1';
                 const staBalPoolIn = poolsOfInterest[staBalPoolIdIn];
-                const hopTokenStaBal = STABAL3POOL[chainId].address;
+                const hopTokenStaBal = sorConfigTest.staBal3Pool.address;
                 const usdcConnectingPool =
-                    poolsAll[USDCCONNECTINGPOOL[chainId].id];
+                    poolsAll[sorConfigTest.usdcConnectingPool.id];
 
                 const multihopPath = createPath(
-                    [tokenIn, hopTokenStaBal, USDCCONNECTINGPOOL[chainId].usdc],
+                    [
+                        tokenIn,
+                        hopTokenStaBal,
+                        sorConfigTest.usdcConnectingPool.usdc,
+                    ],
                     [staBalPoolIn, usdcConnectingPool]
                 );
 
@@ -152,7 +154,7 @@ describe(`staBalPaths.`, () => {
                     poolsAll,
                     multihopPath,
                     tokenIn,
-                    USDCCONNECTINGPOOL[chainId].usdc
+                    sorConfigTest.usdcConnectingPool.usdc
                 );
             });
         });
@@ -166,8 +168,7 @@ describe(`staBalPaths.`, () => {
                     tokenIn,
                     tokenOut,
                     cloneDeep(staBalPools.pools),
-                    correctPoolIds,
-                    chainId
+                    correctPoolIds
                 );
             });
         });
@@ -190,8 +191,7 @@ describe(`staBalPaths.`, () => {
                     tokenIn,
                     tokenOut,
                     cloneDeep(staBalPools.pools),
-                    correctPoolIds,
-                    chainId
+                    correctPoolIds
                 );
             });
 
@@ -200,14 +200,13 @@ describe(`staBalPaths.`, () => {
                     tokenIn,
                     tokenOut,
                     cloneDeep(staBalPools.pools),
-                    ['balPool', 'usdcConnecting', 'staBalPair1'],
-                    chainId
+                    ['balPool', 'usdcConnecting', 'staBalPair1']
                 );
 
                 // Hop in as it is tokenIn > USDC
                 const mostLiquidPool = getHighestLiquidityPool(
                     tokenIn,
-                    USDCCONNECTINGPOOL[chainId].usdc,
+                    sorConfigTest.usdcConnectingPool.usdc,
                     SwapPairType.HopIn,
                     poolsAll
                 );
@@ -226,8 +225,7 @@ describe(`staBalPaths.`, () => {
                     tokenIn,
                     tokenOut,
                     cloneDeep(staBalPools.pools),
-                    correctPoolIds,
-                    chainId
+                    correctPoolIds
                 );
             });
         });
@@ -239,7 +237,7 @@ function itCreatesCorrectPath(
     tokenOut: string,
     pools: SubgraphPoolBase[],
     expectedPoolIds: string[],
-    chainId = 99
+    config: SorConfig = sorConfigTest
 ): [PoolDictionary, string[], PoolDictionary] {
     const poolsAll = parseToPoolsDict(pools, 0);
 
@@ -255,7 +253,7 @@ function itCreatesCorrectPath(
         tokenOut,
         poolsAll,
         poolsOfInterest,
-        chainId
+        config
     );
 
     if (expectedPoolIds.length === 0) {

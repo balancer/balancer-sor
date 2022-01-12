@@ -1,4 +1,9 @@
+// eslint-disable-next-line @typescript-eslint/no-var-requires
 require('dotenv').config();
+
+import { sorConfigEth } from './lib/constants';
+import { MockPoolDataService } from './lib/mockPoolDataService';
+import { mockTokenPriceService } from './lib/mockTokenPriceService';
 import { expect } from 'chai';
 import cloneDeep from 'lodash.clonedeep';
 import { AddressZero, WeiPerEther as ONE } from '@ethersproject/constants';
@@ -28,6 +33,7 @@ const {
     pools,
 }: {
     pools: SubgraphPoolBase[];
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
 } = require('./testData/lido/staticPools.json');
 
 // npx mocha -r ts-node/register test/lido.spec.ts
@@ -82,8 +88,13 @@ describe(`Tests for Lido USD routes.`, () => {
             const swapAmt = parseFixed('1', 18);
             const priceRate = await getStEthRate(provider, chainId);
 
-            const sor = new SOR(provider, chainId, null, pools);
-            const fetchSuccess = await sor.fetchPools([], false);
+            const sor = new SOR(
+                provider,
+                sorConfigEth,
+                new MockPoolDataService(pools),
+                mockTokenPriceService
+            );
+            const fetchSuccess = await sor.fetchPools();
             expect(fetchSuccess).to.be.true;
 
             const swapInfostEth: SwapInfo = await sor.getSwaps(
@@ -151,8 +162,13 @@ describe(`Tests for Lido USD routes.`, () => {
             const swapAmt = parseFixed('1', 6);
             const priceRate = await getStEthRate(provider, chainId);
 
-            const sor = new SOR(provider, chainId, null, pools);
-            const fetchSuccess = await sor.fetchPools([], false);
+            const sor = new SOR(
+                provider,
+                sorConfigEth,
+                new MockPoolDataService(pools),
+                mockTokenPriceService
+            );
+            const fetchSuccess = await sor.fetchPools();
             expect(fetchSuccess).to.be.true;
 
             const swapInfostEth: SwapInfo = await sor.getSwaps(
@@ -218,8 +234,13 @@ describe(`Tests for Lido USD routes.`, () => {
             const swapAmt = parseFixed('1', 18);
             const priceRate = await getStEthRate(provider, chainId);
 
-            const sor = new SOR(provider, chainId, null, pools);
-            const fetchSuccess = await sor.fetchPools([], false);
+            const sor = new SOR(
+                provider,
+                sorConfigEth,
+                new MockPoolDataService(pools),
+                mockTokenPriceService
+            );
+            const fetchSuccess = await sor.fetchPools();
             expect(fetchSuccess).to.be.true;
 
             const swapInfostEth: SwapInfo = await sor.getSwaps(
@@ -283,8 +304,13 @@ describe(`Tests for Lido USD routes.`, () => {
             const swapAmt = parseFixed('1', 18);
             const priceRate = await getStEthRate(provider, chainId);
 
-            const sor = new SOR(provider, chainId, null, pools);
-            const fetchSuccess = await sor.fetchPools([], false);
+            const sor = new SOR(
+                provider,
+                sorConfigEth,
+                new MockPoolDataService(pools),
+                mockTokenPriceService
+            );
+            const fetchSuccess = await sor.fetchPools();
             expect(fetchSuccess).to.be.true;
 
             const swapInfostEth: SwapInfo = await sor.getSwaps(
@@ -353,8 +379,13 @@ describe(`Tests for Lido USD routes.`, () => {
             const swapType = SwapTypes.SwapExactIn;
             const swapAmt = parseFixed('1', 18);
 
-            const sor = new SOR(provider, chainId, null, pools);
-            const fetchSuccess = await sor.fetchPools([], false);
+            const sor = new SOR(
+                provider,
+                sorConfigEth,
+                new MockPoolDataService(pools),
+                mockTokenPriceService
+            );
+            const fetchSuccess = await sor.fetchPools();
             expect(fetchSuccess).to.be.true;
 
             const swapInfo: SwapInfo = await sor.getSwaps(
@@ -390,8 +421,13 @@ describe(`Tests for Lido USD routes.`, () => {
             const swapType = SwapTypes.SwapExactOut;
             const swapAmt = parseFixed('1', 18);
 
-            const sor = new SOR(provider, chainId, null, pools);
-            const fetchSuccess = await sor.fetchPools([], false);
+            const sor = new SOR(
+                provider,
+                sorConfigEth,
+                new MockPoolDataService(pools),
+                mockTokenPriceService
+            );
+            const fetchSuccess = await sor.fetchPools();
             expect(fetchSuccess).to.be.true;
 
             const swapInfo: SwapInfo = await sor.getSwaps(
@@ -430,8 +466,13 @@ describe(`Tests for Lido USD routes.`, () => {
             const swapType = SwapTypes.SwapExactIn;
             const swapAmt = parseFixed('1', 18);
 
-            const sor = new SOR(provider, chainId, null, pools);
-            const fetchSuccess = await sor.fetchPools([], false);
+            const sor = new SOR(
+                provider,
+                sorConfigEth,
+                new MockPoolDataService(pools),
+                mockTokenPriceService
+            );
+            const fetchSuccess = await sor.fetchPools();
             expect(fetchSuccess).to.be.true;
 
             const swapInfo: SwapInfo = await sor.getSwaps(
@@ -467,8 +508,13 @@ describe(`Tests for Lido USD routes.`, () => {
             const swapType = SwapTypes.SwapExactOut;
             const swapAmt = parseFixed('1', 18);
 
-            const sor = new SOR(provider, chainId, null, pools);
-            const fetchSuccess = await sor.fetchPools([], false);
+            const sor = new SOR(
+                provider,
+                sorConfigEth,
+                new MockPoolDataService(pools),
+                mockTokenPriceService
+            );
+            const fetchSuccess = await sor.fetchPools();
             expect(fetchSuccess).to.be.true;
 
             const swapInfo: SwapInfo = await sor.getSwaps(
@@ -506,8 +552,13 @@ describe(`Tests for Lido USD routes.`, () => {
             const swapType = SwapTypes.SwapExactIn;
             const swapAmt = parseFixed('1', 6);
 
-            const sor = new SOR(provider, chainId, null, pools);
-            const fetchSuccess = await sor.fetchPools([], false);
+            const sor = new SOR(
+                provider,
+                sorConfigEth,
+                new MockPoolDataService(pools),
+                mockTokenPriceService
+            );
+            const fetchSuccess = await sor.fetchPools();
             expect(fetchSuccess).to.be.true;
 
             const swapInfo: SwapInfo = await sor.getSwaps(
@@ -552,8 +603,13 @@ describe(`Tests for Lido USD routes.`, () => {
             const swapType = SwapTypes.SwapExactOut;
             const swapAmt = parseFixed('1', 18);
 
-            const sor = new SOR(provider, chainId, null, pools);
-            const fetchSuccess = await sor.fetchPools([], false);
+            const sor = new SOR(
+                provider,
+                sorConfigEth,
+                new MockPoolDataService(pools),
+                mockTokenPriceService
+            );
+            const fetchSuccess = await sor.fetchPools();
             expect(fetchSuccess).to.be.true;
 
             const swapInfo: SwapInfo = await sor.getSwaps(
@@ -598,8 +654,13 @@ describe(`Tests for Lido USD routes.`, () => {
             const swapType = SwapTypes.SwapExactIn;
             const swapAmt = parseFixed('1', 18);
 
-            const sor = new SOR(provider, chainId, null, pools);
-            const fetchSuccess = await sor.fetchPools([], false);
+            const sor = new SOR(
+                provider,
+                sorConfigEth,
+                new MockPoolDataService(pools),
+                mockTokenPriceService
+            );
+            const fetchSuccess = await sor.fetchPools();
             expect(fetchSuccess).to.be.true;
 
             const swapInfo: SwapInfo = await sor.getSwaps(
@@ -644,8 +705,13 @@ describe(`Tests for Lido USD routes.`, () => {
             const swapType = SwapTypes.SwapExactOut;
             const swapAmt = parseFixed('1', 6);
 
-            const sor = new SOR(provider, chainId, null, pools);
-            const fetchSuccess = await sor.fetchPools([], false);
+            const sor = new SOR(
+                provider,
+                sorConfigEth,
+                new MockPoolDataService(pools),
+                mockTokenPriceService
+            );
+            const fetchSuccess = await sor.fetchPools();
             expect(fetchSuccess).to.be.true;
 
             const swapInfo: SwapInfo = await sor.getSwaps(
@@ -692,8 +758,13 @@ describe(`Tests for Lido USD routes.`, () => {
             const swapType = SwapTypes.SwapExactIn;
             const swapAmt = parseFixed('1', 6);
 
-            const sor = new SOR(provider, chainId, null, pools);
-            const fetchSuccess = await sor.fetchPools([], false);
+            const sor = new SOR(
+                provider,
+                sorConfigEth,
+                new MockPoolDataService(pools),
+                mockTokenPriceService
+            );
+            const fetchSuccess = await sor.fetchPools();
             expect(fetchSuccess).to.be.true;
 
             const swapInfo: SwapInfo = await sor.getSwaps(
@@ -738,8 +809,13 @@ describe(`Tests for Lido USD routes.`, () => {
             const swapType = SwapTypes.SwapExactOut;
             const swapAmt = parseFixed('1', 18);
 
-            const sor = new SOR(provider, chainId, null, pools);
-            const fetchSuccess = await sor.fetchPools([], false);
+            const sor = new SOR(
+                provider,
+                sorConfigEth,
+                new MockPoolDataService(pools),
+                mockTokenPriceService
+            );
+            const fetchSuccess = await sor.fetchPools();
             expect(fetchSuccess).to.be.true;
 
             const swapInfo: SwapInfo = await sor.getSwaps(
@@ -784,9 +860,14 @@ describe(`Tests for Lido USD routes.`, () => {
             const swapType = SwapTypes.SwapExactIn;
             const swapAmt = parseFixed('1', 18);
 
-            const sor = new SOR(provider, chainId, null, pools);
+            const sor = new SOR(
+                provider,
+                sorConfigEth,
+                new MockPoolDataService(pools),
+                mockTokenPriceService
+            );
 
-            const fetchSuccess = await sor.fetchPools([], false);
+            const fetchSuccess = await sor.fetchPools();
             expect(fetchSuccess).to.be.true;
 
             const swapInfo: SwapInfo = await sor.getSwaps(
@@ -831,8 +912,13 @@ describe(`Tests for Lido USD routes.`, () => {
             const swapType = SwapTypes.SwapExactOut;
             const swapAmt = parseFixed('1', 6);
 
-            const sor = new SOR(provider, chainId, null, pools);
-            const fetchSuccess = await sor.fetchPools([], false);
+            const sor = new SOR(
+                provider,
+                sorConfigEth,
+                new MockPoolDataService(pools),
+                mockTokenPriceService
+            );
+            const fetchSuccess = await sor.fetchPools();
             expect(fetchSuccess).to.be.true;
 
             const swapInfo: SwapInfo = await sor.getSwaps(

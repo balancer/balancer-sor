@@ -1,5 +1,9 @@
+// eslint-disable-next-line @typescript-eslint/no-var-requires
 require('dotenv').config();
+
+import { sorConfigEth } from './lib/constants';
 import { expect } from 'chai';
+import { mockTokenPriceService } from './lib/mockTokenPriceService';
 import { JsonRpcProvider } from '@ethersproject/providers';
 import { SOR } from '../src';
 import {
@@ -15,10 +19,10 @@ import {
     ElementPoolPairData,
 } from '../src/pools/elementPool/elementPool';
 import { parseFixed } from '@ethersproject/bignumber';
+import { MockPoolDataService } from './lib/mockPoolDataService';
 
 const gasPrice = parseFixed('30', 9);
 const maxPools = 4;
-const chainId = 1;
 const provider = new JsonRpcProvider(
     `https://mainnet.infura.io/v3/${process.env.INFURA}`
 );
@@ -28,6 +32,7 @@ describe(`Tests for Element Pools.`, () => {
     it(`tests getLimitAmountSwap SwapExactOut`, async () => {
         const poolsFromFile: {
             pools: SubgraphPoolBase[];
+            // eslint-disable-next-line @typescript-eslint/no-var-requires
         } = require('./testData/elementPools/elementFinanceTest1.json');
         const pool = poolsFromFile.pools[0];
         const swapType = SwapTypes.SwapExactOut;
@@ -71,6 +76,7 @@ describe(`Tests for Element Pools.`, () => {
     it(`tests getLimitAmountSwap SwapExactIn, within expiry`, async () => {
         const poolsFromFile: {
             pools: SubgraphPoolBase[];
+            // eslint-disable-next-line @typescript-eslint/no-var-requires
         } = require('./testData/elementPools/elementFinanceTest1.json');
         const pool = poolsFromFile.pools[0];
         const swapType = SwapTypes.SwapExactIn;
@@ -115,6 +121,7 @@ describe(`Tests for Element Pools.`, () => {
     it(`tests getLimitAmountSwap SwapExactIn, outwith expiry`, async () => {
         const poolsFromFile: {
             pools: SubgraphPoolBase[];
+            // eslint-disable-next-line @typescript-eslint/no-var-requires
         } = require('./testData/elementPools/elementFinanceTest1.json');
         const pool = poolsFromFile.pools[0];
         const swapType = SwapTypes.SwapExactIn;
@@ -159,6 +166,7 @@ describe(`Tests for Element Pools.`, () => {
     it(`Full Swap - swapExactIn Direct Pool, Within Expiry`, async () => {
         const poolsFromFile: {
             pools: SubgraphPoolBase[];
+            // eslint-disable-next-line @typescript-eslint/no-var-requires
         } = require('./testData/elementPools/elementFinanceTest1.json');
         const pools = poolsFromFile.pools;
         const tokenIn = '0x0000000000000000000000000000000000000001';
@@ -166,9 +174,14 @@ describe(`Tests for Element Pools.`, () => {
         const swapType = SwapTypes.SwapExactIn;
         const swapAmt = parseFixed('0.1', 18);
 
-        const sor = new SOR(provider, chainId, null, pools);
+        const sor = new SOR(
+            provider,
+            sorConfigEth,
+            new MockPoolDataService(pools),
+            mockTokenPriceService
+        );
 
-        const fetchSuccess = await sor.fetchPools([], false);
+        const fetchSuccess = await sor.fetchPools();
         expect(fetchSuccess).to.be.true;
 
         if (!pools[0].expiryTime) throw Error('Invalid pool data');
@@ -193,6 +206,7 @@ describe(`Tests for Element Pools.`, () => {
     it(`Full Swap - swapExactIn Direct Pool, Outwith Expiry`, async () => {
         const poolsFromFile: {
             pools: SubgraphPoolBase[];
+            // eslint-disable-next-line @typescript-eslint/no-var-requires
         } = require('./testData/elementPools/elementFinanceTest1.json');
         const pools = poolsFromFile.pools;
         const tokenIn = '0x0000000000000000000000000000000000000001';
@@ -200,9 +214,14 @@ describe(`Tests for Element Pools.`, () => {
         const swapType = SwapTypes.SwapExactIn;
         const swapAmt = parseFixed('0.1', 18);
 
-        const sor = new SOR(provider, chainId, null, pools);
+        const sor = new SOR(
+            provider,
+            sorConfigEth,
+            new MockPoolDataService(pools),
+            mockTokenPriceService
+        );
 
-        const fetchSuccess = await sor.fetchPools([], false);
+        const fetchSuccess = await sor.fetchPools();
         expect(fetchSuccess).to.be.true;
 
         if (!pools[0].expiryTime) throw Error('Invalid pool data');
@@ -227,6 +246,7 @@ describe(`Tests for Element Pools.`, () => {
     it(`Full Swap - swapExactOut Direct Pool, Within Expiry`, async () => {
         const poolsFromFile: {
             pools: SubgraphPoolBase[];
+            // eslint-disable-next-line @typescript-eslint/no-var-requires
         } = require('./testData/elementPools/elementFinanceTest1.json');
         const pools = poolsFromFile.pools;
         const tokenIn = '0x0000000000000000000000000000000000000001';
@@ -234,9 +254,14 @@ describe(`Tests for Element Pools.`, () => {
         const swapType = SwapTypes.SwapExactOut;
         const swapAmt = parseFixed('777', 18);
 
-        const sor = new SOR(provider, chainId, null, pools);
+        const sor = new SOR(
+            provider,
+            sorConfigEth,
+            new MockPoolDataService(pools),
+            mockTokenPriceService
+        );
 
-        const fetchSuccess = await sor.fetchPools([], false);
+        const fetchSuccess = await sor.fetchPools();
         expect(fetchSuccess).to.be.true;
 
         if (!pools[0].expiryTime) throw Error('Invalid pool data');
@@ -261,6 +286,7 @@ describe(`Tests for Element Pools.`, () => {
     it(`Full Swap - swapExactOut Direct Pool, Outwith Expiry`, async () => {
         const poolsFromFile: {
             pools: SubgraphPoolBase[];
+            // eslint-disable-next-line @typescript-eslint/no-var-requires
         } = require('./testData/elementPools/elementFinanceTest1.json');
         const pools = poolsFromFile.pools;
         const tokenIn = '0x0000000000000000000000000000000000000001';
@@ -268,9 +294,14 @@ describe(`Tests for Element Pools.`, () => {
         const swapType = SwapTypes.SwapExactOut;
         const swapAmt = parseFixed('777', 18);
 
-        const sor = new SOR(provider, chainId, null, pools);
+        const sor = new SOR(
+            provider,
+            sorConfigEth,
+            new MockPoolDataService(pools),
+            mockTokenPriceService
+        );
 
-        const fetchSuccess = await sor.fetchPools([], false);
+        const fetchSuccess = await sor.fetchPools();
         expect(fetchSuccess).to.be.true;
 
         if (!pools[0].expiryTime) throw Error('Invalid pool data');

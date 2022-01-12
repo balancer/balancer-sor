@@ -1,16 +1,16 @@
 import { formatFixed } from '@ethersproject/bignumber';
 import { Provider } from '@ethersproject/providers';
-import { SubgraphPoolBase, PoolFilter } from '../types';
-import { isSameAddress } from '../utils';
-import { Multicaller } from '../utils/multicaller';
+import { isSameAddress } from '../../src/utils';
 
 // TODO: decide whether we want to trim these ABIs down to the relevant functions
-import vaultAbi from '../abi/Vault.json';
-import aTokenRateProvider from '../abi/StaticATokenRateProvider.json';
-import weightedPoolAbi from '../pools/weightedPool/weightedPoolAbi.json';
-import stablePoolAbi from '../pools/stablePool/stablePoolAbi.json';
-import elementPoolAbi from '../pools/elementPool/ConvergentCurvePool.json';
-import linearPoolAbi from '../pools/linearPool/linearPoolAbi.json';
+import vaultAbi from '../../src/abi/Vault.json';
+import aTokenRateProvider from '../../src/abi/StaticATokenRateProvider.json';
+import weightedPoolAbi from '../../src/pools/weightedPool/weightedPoolAbi.json';
+import stablePoolAbi from '../../src/pools/stablePool/stablePoolAbi.json';
+import elementPoolAbi from '../../src/pools/elementPool/ConvergentCurvePool.json';
+import linearPoolAbi from '../../src/pools/linearPool/linearPoolAbi.json';
+import { PoolFilter, SubgraphPoolBase } from '../../src';
+import { Multicaller } from './multicaller';
 
 export async function getOnChainBalances(
     subgraphPoolsOriginal: SubgraphPoolBase[],

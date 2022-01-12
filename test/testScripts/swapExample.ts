@@ -1,4 +1,5 @@
 // Example showing SOR with Vault batchSwap and Subgraph pool data, run using: $ TS_NODE_PROJECT='tsconfig.testing.json' ts-node ./test/testScripts/swapExample.ts
+
 require('dotenv').config();
 import {
     BigNumber,
@@ -10,10 +11,20 @@ import { JsonRpcProvider } from '@ethersproject/providers';
 import { Wallet } from '@ethersproject/wallet';
 import { Contract } from '@ethersproject/contracts';
 import { AddressZero, MaxUint256 } from '@ethersproject/constants';
-import { SOR, SwapInfo, SwapTypes } from '../../src';
+import {
+    PoolDataService,
+    SOR,
+    SorConfig,
+    SwapInfo,
+    SwapTypes,
+    TokenPriceService,
+} from '../../src';
 import vaultArtifact from '../../src/abi/Vault.json';
 import relayerAbi from '../abi/BatchRelayer.json';
 import erc20abi from '../abi/ERC20.json';
+import { CoingeckoTokenPriceService } from '../lib/coingeckoTokenPriceService';
+import { SubgraphPoolDataService } from '../lib/subgraphPoolDataService';
+import { mockPoolDataService } from '../lib/mockPoolDataService';
 
 export enum Network {
     MAINNET = 1,
@@ -23,12 +34,63 @@ export enum Network {
     ARBITRUM = 42161,
 }
 
+export const SOR_CONFIG: Record<Network, SorConfig> = {
+    [Network.MAINNET]: {
+        chainId: Network.MAINNET, //1
+        vault: '0xBA12222222228d8Ba445958a75a0704d566BF2C8',
+        weth: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2',
+        staBal3Pool: {
+            id: '0x7b50775383d3d6f0215a8f290f2c9e2eebbeceb20000000000000000000000fe',
+            address: '0x7b50775383d3d6f0215a8f290f2c9e2eebbeceb2',
+        },
+    },
+    [Network.KOVAN]: {
+        chainId: Network.KOVAN, //42
+        vault: '0xBA12222222228d8Ba445958a75a0704d566BF2C8',
+        weth: '0xdFCeA9088c8A88A76FF74892C1457C17dfeef9C1',
+        staBal3Pool: {
+            id: '0x8fd162f338b770f7e879030830cde9173367f3010000000000000000000004d8',
+            address: '0x8fd162f338b770f7e879030830cde9173367f301',
+        },
+        wethStaBal3: {
+            id: '0x6be79a54f119dbf9e8ebd9ded8c5bd49205bc62d00020000000000000000033c',
+            address: '0x6be79a54f119dbf9e8ebd9ded8c5bd49205bc62d',
+        },
+    },
+    [Network.GOERLI]: {
+        chainId: Network.GOERLI, //5
+        vault: '0x65748E8287Ce4B9E6D83EE853431958851550311',
+        weth: '0x9A1000D492d40bfccbc03f413A48F5B6516Ec0Fd',
+    },
+    [Network.POLYGON]: {
+        chainId: Network.POLYGON, //137
+        vault: '0xBA12222222228d8Ba445958a75a0704d566BF2C8',
+        weth: '0x0d500B1d8E8eF31E21C99d1Db9A6444d3ADf1270',
+    },
+    [Network.ARBITRUM]: {
+        chainId: Network.ARBITRUM, //42161
+        vault: '0xBA12222222228d8Ba445958a75a0704d566BF2C8',
+        weth: '0x82aF49447D8a07e3bd95BD0d56f35241523fBab1',
+    },
+};
+
 export const PROVIDER_URLS = {
     [Network.MAINNET]: `https://mainnet.infura.io/v3/${process.env.INFURA}`,
     [Network.GOERLI]: `https://goerli.infura.io/v3/${process.env.INFURA}`,
     [Network.KOVAN]: `https://kovan.infura.io/v3/${process.env.INFURA}`,
     [Network.POLYGON]: `https://polygon-mainnet.infura.io/v3/${process.env.INFURA}`,
     [Network.ARBITRUM]: `https://arbitrum-mainnet.infura.io/v3/${process.env.INFURA}`,
+};
+
+export const MULTIADDR: { [chainId: number]: string } = {
+    1: '0xeefba1e63905ef1d7acba5a8513c70307c1ce441',
+    3: '0x53c43764255c17bd724f74c4ef150724ac50a3ed',
+    4: '0x42ad527de7d4e9d9d011ac45b31d8551f8fe9821',
+    5: '0x3b2A02F22fCbc872AF77674ceD303eb269a46ce3',
+    42: '0x2cc8688C5f75E365aaEEb4ea8D6a480405A48D2A',
+    137: '0xa1B2b503959aedD81512C37e9dce48164ec6a94d',
+    42161: '0x269ff446d9892c9e19082564df3f5e8741e190a1',
+    99: '0xeefba1e63905ef1d7acba5a8513c70307c1ce441',
 };
 
 export const SUBGRAPH_URLS = {
@@ -236,18 +298,17 @@ const vaultAddr = '0xBA12222222228d8Ba445958a75a0704d566BF2C8';
 
 async function getSwap(
     provider: JsonRpcProvider,
-    networkId: number,
-    poolsSource: string,
-    queryOnChain: boolean,
+    config: SorConfig,
+    poolDataService: PoolDataService,
+    tokenPriceService: TokenPriceService,
     tokenIn: { symbol: string; address: string; decimals: number },
     tokenOut: { symbol: string; address: string; decimals: number },
     swapType: SwapTypes,
     swapAmount: BigNumberish
 ): Promise<SwapInfo> {
-    const sor = new SOR(provider, networkId, poolsSource);
+    const sor = new SOR(provider, config, poolDataService, tokenPriceService);
 
-    // Will get onChain data for pools list
-    await sor.fetchPools([], queryOnChain);
+    await sor.fetchPools();
 
     // gasPrice is used by SOR as a factor to determine how many pools to swap against.
     // i.e. higher cost means more costly to trade against lots of different pools.
@@ -592,13 +653,10 @@ async function makeRelayerTrade(
     }
 }
 
-async function simpleSwap() {
+export async function simpleSwap() {
     const networkId = Network.KOVAN;
     // Pools source can be Subgraph URL or pools data set passed directly
-    const poolsSource = SUBGRAPH_URLS[networkId];
-    // const poolsSource = require('../testData/testPools/gusdBug.json');
     // Update pools list with most recent onchain balances
-    const queryOnChain = true;
     const tokenIn = ADDRESSES[networkId].DAI_from_AAVE;
     const tokenOut = ADDRESSES[networkId].USDC_from_AAVE;
     const swapType = SwapTypes.SwapExactIn;
@@ -614,11 +672,33 @@ async function simpleSwap() {
     // console.log(JSON.stringify(subgraphPools));
     // console.log(`-------`);
 
+    const subgraphPoolDataService = new SubgraphPoolDataService({
+        chainId: networkId,
+        vaultAddress: vaultAddr,
+        multiAddress: MULTIADDR[networkId],
+        provider,
+        subgraphUrl: SUBGRAPH_URLS[networkId],
+        onchain: true,
+    });
+
+    // Use the mock pool data service if you want to use pool data from a file.
+    // const poolsSource = require('../testData/testPools/gusdBug.json');
+    // mockPoolDataService.setPools(poolsSource);
+
+    const coingeckoTokenPriceService = new CoingeckoTokenPriceService(
+        networkId
+    );
+
+    // Use the mock token price service if you want to manually set the token price in native asset
+    //  mockTokenPriceService.setTokenPrice('0.001');
+
     const swapInfo = await getSwap(
         provider,
-        networkId,
-        poolsSource,
-        queryOnChain,
+        SOR_CONFIG[Network.KOVAN],
+        subgraphPoolDataService,
+        // mockPoolDataService,
+        coingeckoTokenPriceService,
+        // mockTokenPriceService,
         tokenIn,
         tokenOut,
         swapType,

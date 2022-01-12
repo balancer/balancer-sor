@@ -1,21 +1,24 @@
+// eslint-disable-next-line @typescript-eslint/no-var-requires
 require('dotenv').config();
+
+import { mockTokenPriceService } from './lib/mockTokenPriceService';
 import { expect } from 'chai';
 import cloneDeep from 'lodash.clonedeep';
 import { BigNumber, parseFixed } from '@ethersproject/bignumber';
 import { WeiPerEther as ONE } from '@ethersproject/constants';
 import { JsonRpcProvider } from '@ethersproject/providers';
 import { SOR } from '../src';
-import { SwapInfo, SwapTypes, PoolTypes, SubgraphPoolBase } from '../src/types';
+import { SwapInfo, SwapTypes, PoolTypes, SubgraphPoolBase } from '../src';
 import { bnum } from '../src/utils/bignumber';
 import {
     MetaStablePool,
     MetaStablePoolPairData,
 } from '../src/pools/metaStablePool/metaStablePool';
-import { BAL, USDC, WETH } from './lib/constants';
+import { BAL, sorConfigEth, USDC, WETH } from './lib/constants';
+import { MockPoolDataService } from './lib/mockPoolDataService';
 
 const gasPrice = parseFixed('30', 9);
 const maxPools = 4;
-const chainId = 1;
 const provider = new JsonRpcProvider(
     `https://mainnet.infura.io/v3/${process.env.INFURA}`
 );
@@ -32,8 +35,13 @@ async function getStableComparrison(
     swapType: SwapTypes,
     swapAmt: BigNumber
 ): Promise<SwapInfo> {
-    const sorStable = new SOR(provider, chainId, null, stablePools);
-    await sorStable.fetchPools([], false);
+    const sorStable = new SOR(
+        provider,
+        sorConfigEth,
+        new MockPoolDataService(stablePools),
+        mockTokenPriceService
+    );
+    await sorStable.fetchPools();
 
     const swapInfoStable: SwapInfo = await sorStable.getSwaps(
         tokenIn,
@@ -53,6 +61,7 @@ async function getStableComparrison(
 describe(`Tests for MetaStable Pools.`, () => {
     context('limit amounts', () => {
         it(`tests getLimitAmountSwap SwapExactIn`, async () => {
+            // eslint-disable-next-line @typescript-eslint/no-var-requires
             const poolsFromFile = require('./testData/metaStablePools/singlePool.json');
             const pool = cloneDeep(poolsFromFile.metaStablePool[0]);
             const swapType = SwapTypes.SwapExactIn;
@@ -110,6 +119,7 @@ describe(`Tests for MetaStable Pools.`, () => {
         });
 
         it(`tests getLimitAmountSwap SwapExactOut`, async () => {
+            // eslint-disable-next-line @typescript-eslint/no-var-requires
             const poolsFromFile = require('./testData/metaStablePools/singlePool.json');
             const pool = cloneDeep(poolsFromFile.metaStablePool[0]);
             const swapType = SwapTypes.SwapExactOut;
@@ -166,6 +176,7 @@ describe(`Tests for MetaStable Pools.`, () => {
 
     context('direct pool', () => {
         it(`Full Swap - swapExactIn No Route`, async () => {
+            // eslint-disable-next-line @typescript-eslint/no-var-requires
             const poolsFromFile = require('./testData/metaStablePools/singlePool.json');
             const pools: SubgraphPoolBase[] = cloneDeep(
                 poolsFromFile.metaStablePool
@@ -175,9 +186,14 @@ describe(`Tests for MetaStable Pools.`, () => {
             const swapType = SwapTypes.SwapExactIn;
             const swapAmt = parseFixed('1', 18);
 
-            const sor = new SOR(provider, chainId, null, pools);
+            const sor = new SOR(
+                provider,
+                sorConfigEth,
+                new MockPoolDataService(pools),
+                mockTokenPriceService
+            );
 
-            const fetchSuccess = await sor.fetchPools([], false);
+            const fetchSuccess = await sor.fetchPools();
             expect(fetchSuccess).to.be.true;
 
             const swapInfo: SwapInfo = await sor.getSwaps(
@@ -193,6 +209,7 @@ describe(`Tests for MetaStable Pools.`, () => {
         });
 
         it(`Full Swap - swapExactOut No Route`, async () => {
+            // eslint-disable-next-line @typescript-eslint/no-var-requires
             const poolsFromFile = require('./testData/metaStablePools/singlePool.json');
             const pools: SubgraphPoolBase[] = cloneDeep(
                 poolsFromFile.metaStablePool
@@ -202,9 +219,14 @@ describe(`Tests for MetaStable Pools.`, () => {
             const swapType = SwapTypes.SwapExactOut;
             const swapAmt = parseFixed('1', 18);
 
-            const sor = new SOR(provider, chainId, null, pools);
+            const sor = new SOR(
+                provider,
+                sorConfigEth,
+                new MockPoolDataService(pools),
+                mockTokenPriceService
+            );
 
-            const fetchSuccess = await sor.fetchPools([], false);
+            const fetchSuccess = await sor.fetchPools();
             expect(fetchSuccess).to.be.true;
 
             const swapInfo: SwapInfo = await sor.getSwaps(
@@ -220,6 +242,7 @@ describe(`Tests for MetaStable Pools.`, () => {
         });
 
         it(`Full Swap - swapExactIn, Token ETH >Token Meta`, async () => {
+            // eslint-disable-next-line @typescript-eslint/no-var-requires
             const poolsFromFile = require('./testData/metaStablePools/singlePool.json');
             const pools: SubgraphPoolBase[] = cloneDeep(
                 poolsFromFile.metaStablePool
@@ -231,9 +254,14 @@ describe(`Tests for MetaStable Pools.`, () => {
             const swapType = SwapTypes.SwapExactIn;
             const swapAmt = parseFixed('1', 18); // Would expect ~ 2 back
 
-            const sor = new SOR(provider, chainId, null, pools);
+            const sor = new SOR(
+                provider,
+                sorConfigEth,
+                new MockPoolDataService(pools),
+                mockTokenPriceService
+            );
 
-            const fetchSuccess = await sor.fetchPools([], false);
+            const fetchSuccess = await sor.fetchPools();
             expect(fetchSuccess).to.be.true;
 
             const swapInfo: SwapInfo = await sor.getSwaps(
@@ -289,6 +317,7 @@ describe(`Tests for MetaStable Pools.`, () => {
         }).timeout(10000);
 
         it(`Full Swap - swapExactIn, Token Meta > Token ETH`, async () => {
+            // eslint-disable-next-line @typescript-eslint/no-var-requires
             const poolsFromFile = require('./testData/metaStablePools/singlePool.json');
             const pools: SubgraphPoolBase[] = cloneDeep(
                 poolsFromFile.metaStablePool
@@ -299,9 +328,14 @@ describe(`Tests for MetaStable Pools.`, () => {
             const swapType = SwapTypes.SwapExactIn;
             const swapAmt = parseFixed('1', 18); // Would expect ~ 1 back
 
-            const sor = new SOR(provider, chainId, null, pools);
+            const sor = new SOR(
+                provider,
+                sorConfigEth,
+                new MockPoolDataService(pools),
+                mockTokenPriceService
+            );
 
-            const fetchSuccess = await sor.fetchPools([], false);
+            const fetchSuccess = await sor.fetchPools();
             expect(fetchSuccess).to.be.true;
 
             const swapInfo: SwapInfo = await sor.getSwaps(
@@ -354,6 +388,7 @@ describe(`Tests for MetaStable Pools.`, () => {
         }).timeout(10000);
 
         it(`Full Swap - swapExactOut, Token ETH >Token Meta`, async () => {
+            // eslint-disable-next-line @typescript-eslint/no-var-requires
             const poolsFromFile = require('./testData/metaStablePools/singlePool.json');
             const pools: SubgraphPoolBase[] = cloneDeep(
                 poolsFromFile.metaStablePool
@@ -364,9 +399,14 @@ describe(`Tests for MetaStable Pools.`, () => {
             const swapType = SwapTypes.SwapExactOut;
             const swapAmt = parseFixed('2', 18); // Would expect ~ 1 as input
 
-            const sor = new SOR(provider, chainId, null, pools);
+            const sor = new SOR(
+                provider,
+                sorConfigEth,
+                new MockPoolDataService(pools),
+                mockTokenPriceService
+            );
 
-            const fetchSuccess = await sor.fetchPools([], false);
+            const fetchSuccess = await sor.fetchPools();
             expect(fetchSuccess).to.be.true;
 
             const swapInfo: SwapInfo = await sor.getSwaps(
@@ -418,6 +458,7 @@ describe(`Tests for MetaStable Pools.`, () => {
         }).timeout(10000);
 
         it(`Full Swap - swapExactOut, Token Meta > Token ETH`, async () => {
+            // eslint-disable-next-line @typescript-eslint/no-var-requires
             const poolsFromFile = require('./testData/metaStablePools/singlePool.json');
             const pools: SubgraphPoolBase[] = cloneDeep(
                 poolsFromFile.metaStablePool
@@ -429,9 +470,14 @@ describe(`Tests for MetaStable Pools.`, () => {
             const swapType = SwapTypes.SwapExactOut;
             const swapAmt = parseFixed('2', 18); // Would expect ~ 4 as input
 
-            const sor = new SOR(provider, chainId, null, pools);
+            const sor = new SOR(
+                provider,
+                sorConfigEth,
+                new MockPoolDataService(pools),
+                mockTokenPriceService
+            );
 
-            const fetchSuccess = await sor.fetchPools([], false);
+            const fetchSuccess = await sor.fetchPools();
             expect(fetchSuccess).to.be.true;
 
             const swapInfo: SwapInfo = await sor.getSwaps(
@@ -489,6 +535,7 @@ describe(`Tests for MetaStable Pools.`, () => {
     context('multihop', () => {
         it(`Full Swap - swapExactIn, Token>Token`, async () => {
             // With meta token as hop the result in/out should be same as a normal stable pool
+            // eslint-disable-next-line @typescript-eslint/no-var-requires
             const poolsFromFile = require('./testData/metaStablePools/multihop.json');
             const pools: SubgraphPoolBase[] = cloneDeep(
                 poolsFromFile.metaStablePools
@@ -500,9 +547,14 @@ describe(`Tests for MetaStable Pools.`, () => {
             const swapType = SwapTypes.SwapExactIn;
             const swapAmt = parseFixed('77.723', 18);
 
-            const sor = new SOR(provider, chainId, null, pools);
+            const sor = new SOR(
+                provider,
+                sorConfigEth,
+                new MockPoolDataService(pools),
+                mockTokenPriceService
+            );
 
-            const fetchSuccess = await sor.fetchPools([], false);
+            const fetchSuccess = await sor.fetchPools();
             expect(fetchSuccess).to.be.true;
 
             const swapInfo: SwapInfo = await sor.getSwaps(
@@ -559,6 +611,7 @@ describe(`Tests for MetaStable Pools.`, () => {
 
         it(`Full Swap - swapExactOut, Token>Token`, async () => {
             // With meta token as hop the result in/out should be same as a normal stable pool
+            // eslint-disable-next-line @typescript-eslint/no-var-requires
             const poolsFromFile = require('./testData/metaStablePools/multihop.json');
             const pools: SubgraphPoolBase[] = cloneDeep(
                 poolsFromFile.metaStablePools
@@ -570,9 +623,14 @@ describe(`Tests for MetaStable Pools.`, () => {
             const swapType = SwapTypes.SwapExactOut;
             const swapAmt = parseFixed('77.8', 18);
 
-            const sor = new SOR(provider, chainId, null, pools);
+            const sor = new SOR(
+                provider,
+                sorConfigEth,
+                new MockPoolDataService(pools),
+                mockTokenPriceService
+            );
 
-            const fetchSuccess = await sor.fetchPools([], false);
+            const fetchSuccess = await sor.fetchPools();
             expect(fetchSuccess).to.be.true;
 
             const swapInfo: SwapInfo = await sor.getSwaps(

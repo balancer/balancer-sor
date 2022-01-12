@@ -9,15 +9,10 @@ import {
     PoolFilter,
     PoolTypes,
     PoolPairBase,
+    SorConfig,
 } from '../types';
 import { MetaStablePool } from '../pools/metaStablePool/metaStablePool';
 import { ZERO } from '../utils/bignumber';
-import {
-    USDCCONNECTINGPOOL,
-    STABAL3POOL,
-    WETHSTABAL3,
-    WETHADDR,
-} from '../constants';
 import { parseNewPool } from '../pools';
 import { Zero } from '@ethersproject/constants';
 
@@ -225,10 +220,10 @@ export function getLinearStaBal3Paths(
     tokenOut: string,
     poolsAllDict: PoolDictionary,
     poolsFilteredDict: PoolDictionary,
-    chainId: number
+    config: SorConfig
 ): NewPath[] {
     // This is the top level Metastable pool containing bUSDC/bDAI/bUSDT
-    const staBal3PoolInfo = STABAL3POOL[chainId];
+    const staBal3PoolInfo = config.staBal3Pool;
     if (!staBal3PoolInfo) return [];
     const staBal3Pool: MetaStablePool = poolsAllDict[
         staBal3PoolInfo.id
@@ -291,13 +286,13 @@ export function getLinearStaBal3Paths(
 
         // Creates a path through most liquid WETH/TokenOut pool via WETH/staBal3 connecting pool
         // staBal3Bpt>[staBal3Bpt-WETH]>WETH>[WETH-TokenOut]>TokenOut
-        const wethStaBal3Info = WETHSTABAL3[chainId];
+        const wethStaBal3Info = config.wethStaBal3;
         if (!wethStaBal3Info) return pathsUsingLinear;
         const wethStaBal3Pool = poolsAllDict[wethStaBal3Info.id];
         if (!wethStaBal3Pool) return pathsUsingLinear;
 
         const wethTokenOutPath = getMostLiquidPath(
-            [staBal3Pool.address, WETHADDR[chainId], tokenOut],
+            [staBal3Pool.address, config.weth, tokenOut],
             1,
             [wethStaBal3Pool],
             poolsFilteredDict,
@@ -334,13 +329,13 @@ export function getLinearStaBal3Paths(
 
         // Creates a path through most liquid WETH paired pool and staBal3/WETH pool
         // TokenIn>[WETH-TokenIn]>WETH>[staBal3Bpt-WETH]>staBal3Bpt>
-        const wethStaBal3Info = WETHSTABAL3[chainId];
+        const wethStaBal3Info = config.wethStaBal3;
         if (!wethStaBal3Info) return pathsUsingLinear;
         const wethStaBal3Pool = poolsAllDict[wethStaBal3Info.id];
         if (!wethStaBal3Pool) return pathsUsingLinear;
 
         const tokenInWethPath = getMostLiquidPath(
-            [tokenIn, WETHADDR[chainId], staBal3Pool.address],
+            [tokenIn, config.weth, staBal3Pool.address],
             0,
             [wethStaBal3Pool],
             poolsFilteredDict,
@@ -530,17 +525,17 @@ export function getPathsUsingStaBalPool(
     tokenOut: string,
     poolsAll: PoolDictionary,
     poolsFiltered: PoolDictionary,
-    chainId: number
+    config: SorConfig
 ): NewPath[] {
     // This will be the USDC/staBAL Connecting pool used in Polygon
-    const usdcConnectingPoolInfo = USDCCONNECTINGPOOL[chainId];
+    const usdcConnectingPoolInfo = config.usdcConnectingPool;
     if (!usdcConnectingPoolInfo) return [];
 
     const usdcConnectingPool = poolsAll[usdcConnectingPoolInfo.id];
-    if (!usdcConnectingPool) return [];
-
     // staBal BPT token is the hop token between token and USDC connecting pool
-    const hopTokenStaBal = STABAL3POOL[chainId].address;
+    const hopTokenStaBal = config.staBal3Pool?.address;
+
+    if (!usdcConnectingPool || !hopTokenStaBal) return [];
 
     // Finds the best metastable Pool with tokenIn/staBal3Bpt or returns null if doesn't exist
     const metastablePoolIdIn = getHighestLiquidityPool(
