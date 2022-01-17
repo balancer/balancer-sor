@@ -141,7 +141,7 @@ describe('linear pool tests', () => {
                 swapType,
                 pools,
                 poolIndex,
-                bnum('8138925365362304138472.897007980246347837')
+                bnum('8138925365362304138472.897010550433213647')
             );
         });
 
@@ -152,7 +152,7 @@ describe('linear pool tests', () => {
                 SwapTypes.SwapExactIn,
                 singleLinear.pools,
                 0,
-                bnum('937.8947355124653801')
+                bnum('937.89473235457065896')
             );
         });
 
@@ -612,7 +612,8 @@ describe('linear pool tests', () => {
                         parseFixed('25.001542', aUSDT.decimals),
                         kovanPools.pools
                     );
-                    expect(returnAmount).to.eq('25002051893909811321');
+                    expect(returnAmount).to.eq('25002051893909811319');
+                    // Note - before BigInt this was passing with 25002051893909811321
                 });
 
                 it('WrappedToken>BPT, SwapExactOut', async () => {

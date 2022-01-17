@@ -1,4 +1,4 @@
-import * as linear from '../src/poolsMath/linear';
+import * as linear from '../src/pools/linearPool/linearMath';
 import { MathSol } from '../src/poolsMath/basicOperations';
 import { assert } from 'chai';
 
