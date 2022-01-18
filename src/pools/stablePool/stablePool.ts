@@ -17,7 +17,6 @@ import {
     SubgraphPoolBase,
     SubgraphToken,
 } from '../../types';
-import * as SDK from '@georgeroman/balancer-v2-pools';
 import {
     _invariant,
     _spotPriceAfterSwapExactTokenInForTokenOut,
@@ -25,6 +24,7 @@ import {
     _derivativeSpotPriceAfterSwapExactTokenInForTokenOut,
     _derivativeSpotPriceAfterSwapTokenInForExactTokenOut,
 } from './stableMath';
+import { _calcOutGivenIn, _calcInGivenOut } from './stableMathBigInt';
 
 type StablePoolToken = Pick<SubgraphToken, 'address' | 'balance' | 'decimals'>;
 
@@ -189,24 +189,26 @@ export class StablePool implements PoolBase {
         try {
             // All values should use 1e18 fixed point
             // i.e. 1USDC => 1e18 not 1e6
-            const amtScaled = scale(amount, 18);
+            const amtScaled = parseFixed(amount.dp(18).toString(), 18);
 
-            const amt = SDK.StableMath._calcOutGivenIn(
-                bnum(this.amp.toString()),
+            const amt = _calcOutGivenIn(
+                this.amp.toBigInt(),
                 poolPairData.allBalancesScaled.map((balance) =>
-                    bnum(balance.toString())
+                    balance.toBigInt()
                 ),
                 poolPairData.tokenIndexIn,
                 poolPairData.tokenIndexOut,
-                amtScaled,
-                bnum(poolPairData.swapFee.toString())
+                amtScaled.toBigInt(),
+                poolPairData.swapFee.toBigInt()
             );
-
             // return normalised amount
             // Using BigNumber.js decimalPlaces (dp), allows us to consider token decimal accuracy correctly,
             // i.e. when using token with 2decimals 0.002 should be returned as 0
             // Uses ROUND_DOWN mode (1)
-            return scale(amt, -18).dp(poolPairData.decimalsOut, 1);
+            return scale(bnum(amt.toString()), -18).dp(
+                poolPairData.decimalsOut,
+                1
+            );
         } catch (err) {
             console.error(`_evmoutGivenIn: ${err.message}`);
             return ZERO;
@@ -221,24 +223,26 @@ export class StablePool implements PoolBase {
         try {
             // All values should use 1e18 fixed point
             // i.e. 1USDC => 1e18 not 1e6
-            const amtScaled = scale(amount, 18);
+            const amtScaledBn = parseFixed(amount.dp(18).toString(), 18);
 
-            const amt = SDK.StableMath._calcInGivenOut(
-                bnum(this.amp.toString()),
+            const amt = _calcInGivenOut(
+                this.amp.toBigInt(),
                 poolPairData.allBalancesScaled.map((balance) =>
-                    bnum(balance.toString())
+                    balance.toBigInt()
                 ),
                 poolPairData.tokenIndexIn,
                 poolPairData.tokenIndexOut,
-                amtScaled,
-                bnum(poolPairData.swapFee.toString())
+                amtScaledBn.toBigInt(),
+                poolPairData.swapFee.toBigInt()
             );
-
             // return normalised amount
             // Using BigNumber.js decimalPlaces (dp), allows us to consider token decimal accuracy correctly,
             // i.e. when using token with 2decimals 0.002 should be returned as 0
             // Uses ROUND_UP mode (0)
-            return scale(amt, -18).dp(poolPairData.decimalsIn, 0);
+            return scale(bnum(amt.toString()), -18).dp(
+                poolPairData.decimalsIn,
+                0
+            );
         } catch (err) {
             console.error(`_evminGivenOut: ${err.message}`);
             return ZERO;

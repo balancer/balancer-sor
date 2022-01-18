@@ -1,4 +1,4 @@
-import * as stable from '../src/pools/stablePool/stable';
+import * as stable from '../src/pools/stablePool/stableMathBigInt';
 import * as SDK from '@georgeroman/balancer-v2-pools';
 import { BigNumber as OldBigNumber, bnum } from '../src/utils/bignumber';
 import { assert } from 'chai';
