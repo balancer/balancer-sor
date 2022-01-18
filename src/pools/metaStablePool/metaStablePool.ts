@@ -23,7 +23,7 @@ import {
     _spotPriceAfterSwapTokenInForExactTokenOut,
     _derivativeSpotPriceAfterSwapExactTokenInForTokenOut,
     _derivativeSpotPriceAfterSwapTokenInForExactTokenOut,
-} from './metaStableMath';
+} from '../stablePool/stableMath';
 import { StablePoolPairData } from 'pools/stablePool/stablePool';
 
 type MetaStablePoolToken = Pick<
