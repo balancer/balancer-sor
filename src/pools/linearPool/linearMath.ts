@@ -1,7 +1,7 @@
 import { BigNumber as linear } from '../../utils/bignumber';
 import { bnum } from '../../utils/bignumber';
 import { formatFixed } from '@ethersproject/bignumber';
-import { MathSol } from '../../poolsMath/basicOperations';
+import { MathSol } from '../../utils/basicOperations';
 
 import { LinearPoolPairData } from './linearPool';
 

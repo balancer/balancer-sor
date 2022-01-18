@@ -2,7 +2,7 @@ import * as weighted from '../src/pools/weightedPool/weightedMath';
 import * as SDK from '@georgeroman/balancer-v2-pools';
 import { BigNumber as OldBigNumber, bnum } from '../src/utils/bignumber';
 import { assert } from 'chai';
-import { MathSol } from '../src/poolsMath/basicOperations';
+import { MathSol } from '../src/utils/basicOperations';
 
 describe('poolsMath: numeric functions using bigint', () => {
     context('weighted pools', () => {

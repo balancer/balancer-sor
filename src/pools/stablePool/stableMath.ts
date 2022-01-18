@@ -184,7 +184,7 @@ export function _tokenInForExactTokenOut(
 }
 
 //This function calcuates the analytical solution to find the balance required
-export function _solveAnalyticalBalance(
+function _solveAnalyticalBalance(
     sum: OldBigNumber,
     inv: OldBigNumber,
     amp: BigNumber,
@@ -222,7 +222,7 @@ export function _solveAnalyticalBalance(
 ////  These functions have been added exclusively for the SORv2
 //////////////////////
 
-export function _poolDerivatives(
+function _poolDerivatives(
     amp: BigNumber,
     balances: OldBigNumber[],
     tokenIndexIn: number,
@@ -430,7 +430,7 @@ Flow of calculations:
 amountBPTOut -> newInvariant -> (amountInProportional, amountInAfterFee) ->
 amountInPercentageExcess -> amountIn
 */
-export function _tokenInForExactBPTOut(
+function _tokenInForExactBPTOut(
     amount: OldBigNumber,
     poolPairData: StablePoolPairData
 ): OldBigNumber {
@@ -514,7 +514,7 @@ function _getTokenBalanceGivenInvariantAndAllOtherBalances(
     return _solveAnalyticalBalance(sum, inv, amp, nPowN, p);
 }
 
-export function _poolDerivativesBPT(
+function _poolDerivativesBPT(
     amp: BigNumber,
     balances: OldBigNumber[],
     bptSupply: OldBigNumber,

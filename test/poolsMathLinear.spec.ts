@@ -1,5 +1,5 @@
 import * as linear from '../src/pools/linearPool/linearMath';
-import { MathSol } from '../src/poolsMath/basicOperations';
+import { MathSol } from '../src/utils/basicOperations';
 import { assert } from 'chai';
 
 describe('poolsMathLinear', function () {

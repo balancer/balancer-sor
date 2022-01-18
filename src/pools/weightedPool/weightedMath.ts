@@ -1,7 +1,7 @@
 import { formatFixed } from '@ethersproject/bignumber';
 import { BigNumber as OldBigNumber, bnum } from '../../utils/bignumber';
 import { WeightedPoolPairData } from './weightedPool';
-import { MathSol } from '../../poolsMath/basicOperations';
+import { MathSol } from '../../utils/basicOperations';
 
 // The following function are BigInt versions implemented by Sergio.
 // BigInt was requested from integrators as it is more efficient.
