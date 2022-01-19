@@ -334,11 +334,7 @@ export function EVMgetOutputAmountSwap(
             pool.poolType === PoolTypes.Linear
         ) {
             // Will accept/return normalised values
-            returnAmount = pool._exactTokenInForTokenOut(
-                poolPairData,
-                amount,
-                true
-            );
+            returnAmount = pool._exactTokenInForTokenOut(poolPairData, amount);
         } else if (pool.poolType === PoolTypes.Element) {
             // TODO this will just be part of above once maths available
             returnAmount = getOutputAmountSwap(
@@ -358,11 +354,7 @@ export function EVMgetOutputAmountSwap(
             pool.poolType === PoolTypes.MetaStable ||
             pool.poolType === PoolTypes.Linear
         ) {
-            returnAmount = pool._tokenInForExactTokenOut(
-                poolPairData,
-                amount,
-                true
-            );
+            returnAmount = pool._tokenInForExactTokenOut(poolPairData, amount);
         } else if (pool.poolType === PoolTypes.Element) {
             // TODO this will just be part of above once maths available
             returnAmount = getOutputAmountSwap(

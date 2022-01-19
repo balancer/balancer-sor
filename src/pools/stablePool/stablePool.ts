@@ -178,8 +178,7 @@ export class StablePool implements PoolBase {
 
     _exactTokenInForTokenOut(
         poolPairData: StablePoolPairData,
-        amount: OldBigNumber,
-        exact: boolean
+        amount: OldBigNumber
     ): OldBigNumber {
         try {
             // All values should use 1e18 fixed point
@@ -212,8 +211,7 @@ export class StablePool implements PoolBase {
 
     _tokenInForExactTokenOut(
         poolPairData: StablePoolPairData,
-        amount: OldBigNumber,
-        exact: boolean
+        amount: OldBigNumber
     ): OldBigNumber {
         try {
             // All values should use 1e18 fixed point

@@ -182,8 +182,7 @@ export class WeightedPool implements PoolBase {
     // calcOutGivenIn
     _exactTokenInForTokenOut(
         poolPairData: WeightedPoolPairData,
-        amount: OldBigNumber,
-        exact: boolean
+        amount: OldBigNumber
     ): OldBigNumber {
         if (amount.isNaN()) return amount;
 
@@ -213,8 +212,7 @@ export class WeightedPool implements PoolBase {
     // calcInGivenOut
     _tokenInForExactTokenOut(
         poolPairData: WeightedPoolPairData,
-        amount: OldBigNumber,
-        exact: boolean
+        amount: OldBigNumber
     ): OldBigNumber {
         if (amount.isNaN()) return amount;
 

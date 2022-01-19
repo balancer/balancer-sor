@@ -239,8 +239,7 @@ export class PhantomStablePool implements PoolBase {
 
     _exactTokenInForTokenOut(
         poolPairData: PhantomStablePoolPairData,
-        amount: OldBigNumber,
-        exact: boolean
+        amount: OldBigNumber
     ): OldBigNumber {
         try {
             // All values should use 1e18 fixed point
@@ -304,8 +303,7 @@ export class PhantomStablePool implements PoolBase {
 
     _tokenInForExactTokenOut(
         poolPairData: PhantomStablePoolPairData,
-        amount: OldBigNumber,
-        exact: boolean
+        amount: OldBigNumber
     ): OldBigNumber {
         try {
             // All values should use 1e18 fixed point

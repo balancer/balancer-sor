@@ -166,13 +166,11 @@ function getSwapOutcomes(
 ): { a1: OldBigNumber; a2: OldBigNumber } {
     const a1 = phantomStablePool._exactTokenInForTokenOut(
         poolPairData,
-        bnum(amount),
-        true
+        bnum(amount)
     );
     const a2 = phantomStablePool._tokenInForExactTokenOut(
         poolPairData,
-        bnum(amount),
-        true
+        bnum(amount)
     );
     return { a1, a2 };
 }
@@ -227,13 +225,11 @@ function incrementalQuotientExactTokenInForTokenOut(
 ): OldBigNumber {
     const f1 = phantomStablePool._exactTokenInForTokenOut(
         poolPairData,
-        bnum(amount + delta),
-        true
+        bnum(amount + delta)
     );
     const f0 = phantomStablePool._exactTokenInForTokenOut(
         poolPairData,
-        bnum(amount),
-        true
+        bnum(amount)
     );
     const incrementalQuotient = f1.minus(f0).div(delta);
     return incrementalQuotient;
@@ -247,13 +243,11 @@ function incrementalQuotientTokenInForExactTokenOut(
 ): OldBigNumber {
     const f1 = phantomStablePool._tokenInForExactTokenOut(
         poolPairData,
-        bnum(amount + delta),
-        true
+        bnum(amount + delta)
     );
     const f0 = phantomStablePool._tokenInForExactTokenOut(
         poolPairData,
-        bnum(amount),
-        true
+        bnum(amount)
     );
     const incrementalQuotient = f1.minus(f0).div(delta);
     return incrementalQuotient;

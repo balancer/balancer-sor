@@ -228,8 +228,7 @@ export class LinearPool implements PoolBase {
                     poolPairData,
                     balanceOutHuman
                         .times(this.ALMOST_ONE.toString())
-                        .div(ONE.toString()),
-                    true
+                        .div(ONE.toString())
                 );
             } else if (
                 linearPoolPairData.pairType === PairTypes.WrappedTokenToBpt
@@ -245,8 +244,7 @@ export class LinearPool implements PoolBase {
                     linearPoolPairData,
                     balanceOutHuman
                         .times(this.ALMOST_ONE.toString())
-                        .div(ONE.toString()),
-                    true
+                        .div(ONE.toString())
                 );
             } else if (
                 linearPoolPairData.pairType === PairTypes.BptToWrappedToken
@@ -255,8 +253,7 @@ export class LinearPool implements PoolBase {
                     poolPairData,
                     balanceOutHuman
                         .times(this.ALMOST_ONE.toString())
-                        .div(ONE.toString()),
-                    true
+                        .div(ONE.toString())
                 );
                 // Returning Human scale
                 return limit;
@@ -314,48 +311,30 @@ export class LinearPool implements PoolBase {
 
     _exactTokenInForTokenOut(
         poolPairData: LinearPoolPairData,
-        amount: OldBigNumber,
-        exact: boolean
+        amount: OldBigNumber
     ): OldBigNumber {
         if (poolPairData.pairType === PairTypes.MainTokenToBpt) {
-            return this._exactMainTokenInForBPTOut(poolPairData, amount, exact);
+            return this._exactMainTokenInForBPTOut(poolPairData, amount);
         } else if (poolPairData.pairType === PairTypes.BptToMainToken) {
-            return this._exactBPTInForMainTokenOut(poolPairData, amount, exact);
+            return this._exactBPTInForMainTokenOut(poolPairData, amount);
         } else if (poolPairData.pairType === PairTypes.WrappedTokenToBpt) {
-            return this._exactWrappedTokenInForBPTOut(
-                poolPairData,
-                amount,
-                exact
-            );
+            return this._exactWrappedTokenInForBPTOut(poolPairData, amount);
         } else if (poolPairData.pairType === PairTypes.BptToWrappedToken) {
-            return this._exactBPTInForWrappedTokenOut(
-                poolPairData,
-                amount,
-                exact
-            );
+            return this._exactBPTInForWrappedTokenOut(poolPairData, amount);
         } else if (
             poolPairData.pairType === PairTypes.MainTokenToWrappedToken
         ) {
-            return this._exactMainTokenInForWrappedOut(
-                poolPairData,
-                amount,
-                exact
-            );
+            return this._exactMainTokenInForWrappedOut(poolPairData, amount);
         } else if (
             poolPairData.pairType === PairTypes.WrappedTokenToMainToken
         ) {
-            return this._exactWrappedTokenInForMainOut(
-                poolPairData,
-                amount,
-                exact
-            );
+            return this._exactWrappedTokenInForMainOut(poolPairData, amount);
         } else return bnum(0);
     }
 
     _exactWrappedTokenInForMainOut(
         poolPairData: LinearPoolPairData,
-        amount: OldBigNumber,
-        exact: boolean
+        amount: OldBigNumber
     ): OldBigNumber {
         try {
             // All values should use 1e18 fixed point
@@ -387,8 +366,7 @@ export class LinearPool implements PoolBase {
 
     _exactMainTokenInForWrappedOut(
         poolPairData: LinearPoolPairData,
-        amount: OldBigNumber,
-        exact: boolean
+        amount: OldBigNumber
     ): OldBigNumber {
         try {
             // All values should use 1e18 fixed point
@@ -420,8 +398,7 @@ export class LinearPool implements PoolBase {
 
     _exactMainTokenInForBPTOut(
         poolPairData: LinearPoolPairData,
-        amount: OldBigNumber,
-        exact: boolean
+        amount: OldBigNumber
     ): OldBigNumber {
         try {
             // All values should use 1e18 fixed point
@@ -455,8 +432,7 @@ export class LinearPool implements PoolBase {
 
     _exactBPTInForMainTokenOut(
         poolPairData: LinearPoolPairData,
-        amount: OldBigNumber,
-        exact: boolean
+        amount: OldBigNumber
     ): OldBigNumber {
         try {
             // All values should use 1e18 fixed point
@@ -490,8 +466,7 @@ export class LinearPool implements PoolBase {
 
     _exactWrappedTokenInForBPTOut(
         poolPairData: LinearPoolPairData,
-        amount: OldBigNumber,
-        exact: boolean
+        amount: OldBigNumber
     ): OldBigNumber {
         try {
             // All values should use 1e18 fixed point
@@ -527,8 +502,7 @@ export class LinearPool implements PoolBase {
 
     _exactBPTInForWrappedTokenOut(
         poolPairData: LinearPoolPairData,
-        amount: OldBigNumber,
-        exact: boolean
+        amount: OldBigNumber
     ): OldBigNumber {
         try {
             // All values should use 1e18 fixed point
@@ -566,48 +540,30 @@ export class LinearPool implements PoolBase {
 
     _tokenInForExactTokenOut(
         poolPairData: LinearPoolPairData,
-        amount: OldBigNumber,
-        exact: boolean
+        amount: OldBigNumber
     ): OldBigNumber {
         if (poolPairData.pairType === PairTypes.MainTokenToBpt) {
-            return this._mainTokenInForExactBPTOut(poolPairData, amount, exact);
+            return this._mainTokenInForExactBPTOut(poolPairData, amount);
         } else if (poolPairData.pairType === PairTypes.BptToMainToken) {
-            return this._BPTInForExactMainTokenOut(poolPairData, amount, exact);
+            return this._BPTInForExactMainTokenOut(poolPairData, amount);
         } else if (poolPairData.pairType === PairTypes.WrappedTokenToBpt) {
-            return this._wrappedTokenInForExactBPTOut(
-                poolPairData,
-                amount,
-                exact
-            );
+            return this._wrappedTokenInForExactBPTOut(poolPairData, amount);
         } else if (poolPairData.pairType === PairTypes.BptToWrappedToken) {
-            return this._BPTInForExactWrappedTokenOut(
-                poolPairData,
-                amount,
-                exact
-            );
+            return this._BPTInForExactWrappedTokenOut(poolPairData, amount);
         } else if (
             poolPairData.pairType === PairTypes.MainTokenToWrappedToken
         ) {
-            return this._mainTokenInForExactWrappedOut(
-                poolPairData,
-                amount,
-                exact
-            );
+            return this._mainTokenInForExactWrappedOut(poolPairData, amount);
         } else if (
             poolPairData.pairType === PairTypes.WrappedTokenToMainToken
         ) {
-            return this._wrappedTokenInForExactMainOut(
-                poolPairData,
-                amount,
-                exact
-            );
+            return this._wrappedTokenInForExactMainOut(poolPairData, amount);
         } else return bnum(0); // LinearPool does not support TokenToToken
     }
 
     _wrappedTokenInForExactMainOut(
         poolPairData: LinearPoolPairData,
-        amount: OldBigNumber,
-        exact: boolean
+        amount: OldBigNumber
     ): OldBigNumber {
         try {
             // All values should use 1e18 fixed point
@@ -639,8 +595,7 @@ export class LinearPool implements PoolBase {
 
     _mainTokenInForExactWrappedOut(
         poolPairData: LinearPoolPairData,
-        amount: OldBigNumber,
-        exact: boolean
+        amount: OldBigNumber
     ): OldBigNumber {
         try {
             // All values should use 1e18 fixed point
@@ -672,8 +627,7 @@ export class LinearPool implements PoolBase {
 
     _mainTokenInForExactBPTOut(
         poolPairData: LinearPoolPairData,
-        amount: OldBigNumber,
-        exact: boolean
+        amount: OldBigNumber
     ): OldBigNumber {
         try {
             // All values should use 1e18 fixed point
@@ -708,8 +662,7 @@ export class LinearPool implements PoolBase {
 
     _BPTInForExactMainTokenOut(
         poolPairData: LinearPoolPairData,
-        amount: OldBigNumber,
-        exact: boolean
+        amount: OldBigNumber
     ): OldBigNumber {
         try {
             // All values should use 1e18 fixed point
@@ -744,8 +697,7 @@ export class LinearPool implements PoolBase {
 
     _wrappedTokenInForExactBPTOut(
         poolPairData: LinearPoolPairData,
-        amount: OldBigNumber,
-        exact: boolean
+        amount: OldBigNumber
     ): OldBigNumber {
         try {
             // All values should use 1e18 fixed point
@@ -783,8 +735,7 @@ export class LinearPool implements PoolBase {
 
     _BPTInForExactWrappedTokenOut(
         poolPairData: LinearPoolPairData,
-        amount: OldBigNumber,
-        exact: boolean
+        amount: OldBigNumber
     ): OldBigNumber {
         try {
             // All values should use 1e18 fixed point
