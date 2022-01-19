@@ -153,7 +153,6 @@ export class PhantomStablePool implements PoolBase {
         }
 
         const bptIndex = this.tokensList.indexOf(this.address);
-        const inv = phantomStableMath._invariant(this.amp, allBalances);
 
         // VirtualBPTSupply must be used for the maths
         // TO DO - SG should be updated to so that totalShares should return VirtualSupply
@@ -171,7 +170,6 @@ export class PhantomStablePool implements PoolBase {
             tokenOut: tokenOut,
             balanceIn: parseFixed(balanceIn, decimalsIn),
             balanceOut: parseFixed(balanceOut, decimalsOut),
-            invariant: inv,
             swapFee: this.swapFee,
             allBalances,
             allBalancesScaled,

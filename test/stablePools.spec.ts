@@ -62,7 +62,6 @@ describe(`Tests for Stable Pools.`, () => {
                     parseFixed(pool.tokens[0].balance, 18),
                     parseFixed(pool.tokens[1].balance, 18),
                 ],
-                invariant: bnum(0),
                 tokenIndexIn: 0,
                 tokenIndexOut: 1,
             };
@@ -105,7 +104,6 @@ describe(`Tests for Stable Pools.`, () => {
                 amp: BigNumber.from(pool.amp as string),
                 allBalances: [],
                 allBalancesScaled: [],
-                invariant: bnum(0),
                 tokenIndexIn: 0,
                 tokenIndexOut: 1,
             };

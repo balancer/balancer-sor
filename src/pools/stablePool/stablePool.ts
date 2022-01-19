@@ -18,7 +18,6 @@ import {
     SubgraphToken,
 } from '../../types';
 import {
-    _invariant,
     _spotPriceAfterSwapExactTokenInForTokenOut,
     _spotPriceAfterSwapTokenInForExactTokenOut,
     _derivativeSpotPriceAfterSwapExactTokenInForTokenOut,
@@ -31,7 +30,6 @@ type StablePoolToken = Pick<SubgraphToken, 'address' | 'balance' | 'decimals'>;
 export type StablePoolPairData = PoolPairBase & {
     allBalances: OldBigNumber[];
     allBalancesScaled: BigNumber[]; // EVM Maths uses everything in 1e18 upscaled format and this avoids repeated scaling
-    invariant: OldBigNumber;
     amp: BigNumber;
     tokenIndexIn: number;
     tokenIndexOut: number;
@@ -110,8 +108,6 @@ export class StablePool implements PoolBase {
             parseFixed(balance, 18)
         );
 
-        const inv = _invariant(this.amp, allBalances);
-
         const poolPairData: StablePoolPairData = {
             id: this.id,
             address: this.address,
@@ -120,10 +116,9 @@ export class StablePool implements PoolBase {
             tokenOut: tokenOut,
             balanceIn: parseFixed(balanceIn, decimalsIn),
             balanceOut: parseFixed(balanceOut, decimalsOut),
-            invariant: inv,
             swapFee: this.swapFee,
             allBalances,
-            allBalancesScaled,
+            allBalancesScaled, // TO DO - Change to BigInt??
             amp: this.amp,
             tokenIndexIn: tokenIndexIn,
             tokenIndexOut: tokenIndexOut,
@@ -223,7 +218,7 @@ export class StablePool implements PoolBase {
         try {
             // All values should use 1e18 fixed point
             // i.e. 1USDC => 1e18 not 1e6
-            const amtScaledBn = parseFixed(amount.dp(18).toString(), 18);
+            const amtScaled = parseFixed(amount.dp(18).toString(), 18);
 
             const amt = _calcInGivenOut(
                 this.amp.toBigInt(),
@@ -232,7 +227,7 @@ export class StablePool implements PoolBase {
                 ),
                 poolPairData.tokenIndexIn,
                 poolPairData.tokenIndexOut,
-                amtScaledBn.toBigInt(),
+                amtScaled.toBigInt(),
                 poolPairData.swapFee.toBigInt()
             );
             // return normalised amount
