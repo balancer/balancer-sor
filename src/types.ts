@@ -25,6 +25,7 @@ export enum PoolTypes {
     Element,
     MetaStable,
     Linear,
+    Gyro2,
 }
 
 export enum SwapPairType {
