@@ -1,3 +1,6 @@
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+require('dotenv').config();
+
 /*
 npx mocha -r ts-node/register test/elementTrades.spec.ts
 
@@ -6,19 +9,20 @@ File saved at: ./testData/elementPools/testTrades.json
 Code to generate test vectors:
 https://github.com/element-fi/elf-contracts/blob/main/scripts/load-sim-data.sh
 */
-require('dotenv').config();
+import { mockTokenPriceService } from './lib/mockTokenPriceService';
 import { expect, assert } from 'chai';
 import { JsonRpcProvider } from '@ethersproject/providers';
 import { SOR, SwapInfo, SwapTypes } from '../src';
 import { calcRelativeDiffBn } from './lib/testHelpers';
 import { PoolFilter, SubgraphPoolBase } from '../src/types';
+import { MockPoolDataService } from './lib/mockPoolDataService';
+import { sorConfigEth } from './lib/constants';
 
 import testTrades from './testData/elementPools/testTrades.json';
 import { parseFixed } from '@ethersproject/bignumber';
 
 const gasPrice = parseFixed('30', 9);
 const maxPools = 4;
-const chainId = 1;
 const provider = new JsonRpcProvider(
     `https://mainnet.infura.io/v3/${process.env.INFURA}`
 );
@@ -99,9 +103,14 @@ describe(`Tests against Element generated test trade file.`, () => {
                     : '0x0000000000000000000000000000000000000001';
             const swapAmt = parseFixed(trade.input.amount_in.toString(), 18);
 
-            const sor = new SOR(provider, chainId, null, poolsFromFile);
+            const sor = new SOR(
+                provider,
+                sorConfigEth,
+                new MockPoolDataService(poolsFromFile),
+                mockTokenPriceService
+            );
 
-            const fetchSuccess = await sor.fetchPools([], false);
+            const fetchSuccess = await sor.fetchPools();
             expect(fetchSuccess).to.be.true;
 
             const swapInfo: SwapInfo = await sor.getSwaps(

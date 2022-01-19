@@ -1,5 +1,7 @@
 import fetch from 'isomorphic-fetch';
-import { SubgraphPoolBase } from '../types';
+import { PoolDataService, SubgraphPoolBase } from '../../src';
+import { getOnChainBalances } from './onchainData';
+import { Provider } from '@ethersproject/providers';
 
 const queryWithLinear = `
       {
@@ -79,21 +81,39 @@ export const Query: { [chainId: number]: string } = {
     42161: queryWithLinear,
 };
 
-// Returns all public pools
-export async function fetchSubgraphPools(
-    subgraphUrl: string,
-    chainId = 1
-): Promise<SubgraphPoolBase[]> {
-    const response = await fetch(subgraphUrl, {
-        method: 'POST',
-        headers: {
-            Accept: 'application/json',
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ query: Query[chainId] }),
-    });
+export class SubgraphPoolDataService implements PoolDataService {
+    constructor(
+        private readonly config: {
+            chainId: number;
+            multiAddress: string;
+            vaultAddress: string;
+            subgraphUrl: string;
+            provider: Provider;
+            onchain: boolean;
+        }
+    ) {}
 
-    const { data } = await response.json();
+    public async getPools(): Promise<SubgraphPoolBase[]> {
+        const response = await fetch(this.config.subgraphUrl, {
+            method: 'POST',
+            headers: {
+                Accept: 'application/json',
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ query: Query[this.config.chainId] }),
+        });
 
-    return data.pools ?? [];
+        const { data } = await response.json();
+
+        if (this.config.onchain) {
+            return getOnChainBalances(
+                data.pools ?? [],
+                this.config.multiAddress,
+                this.config.vaultAddress,
+                this.config.provider
+            );
+        }
+
+        return data.pools ?? [];
+    }
 }

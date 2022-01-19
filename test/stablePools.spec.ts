@@ -1,10 +1,14 @@
-// TS_NODE_PROJECT='tsconfig.testing.json' npx mocha -r ts-node/register test/stablePools.spec.ts
+// eslint-disable-next-line @typescript-eslint/no-var-requires
 require('dotenv').config();
+
+import cloneDeep from 'lodash.clonedeep';
+// TS_NODE_PROJECT='tsconfig.testing.json' npx mocha -r ts-node/register test/stablePools.spec.ts
+import { mockTokenPriceService } from './lib/mockTokenPriceService';
 import { expect } from 'chai';
 import { BigNumber } from '@ethersproject/bignumber';
 import { JsonRpcProvider } from '@ethersproject/providers';
 import { SOR } from '../src';
-import { SwapInfo, SwapTypes, PoolTypes, SubgraphPoolBase } from '../src/types';
+import { SwapInfo, SwapTypes, PoolTypes, SubgraphPoolBase } from '../src';
 import { bnum } from '../src/utils/bignumber';
 import {
     StablePool,
@@ -12,12 +16,22 @@ import {
 } from '../src/pools/stablePool/stablePool';
 import { BPTForTokensZeroPriceImpact } from '../src/frontendHelpers/stableHelpers';
 import { parseFixed } from '@ethersproject/bignumber';
-import { BAL, DAI, USDC, USDT } from './lib/constants';
+import { BAL, DAI, sorConfigEth, USDC, USDT } from './lib/constants';
 import { Zero } from '@ethersproject/constants';
+import { MockPoolDataService } from './lib/mockPoolDataService';
+
+const poolsFromFile: {
+    pools: SubgraphPoolBase[];
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+} = require('./testData/stablePools/singlePool.json');
+
+const multihopPoolsFromFile: {
+    pools: SubgraphPoolBase[];
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+} = require('./testData/stablePools/multihop.json');
 
 const gasPrice = parseFixed('30', 9);
 const maxPools = 4;
-const chainId = 1;
 const provider = new JsonRpcProvider(
     `https://mainnet.infura.io/v3/${process.env.INFURA}`
 );
@@ -25,10 +39,9 @@ const provider = new JsonRpcProvider(
 describe(`Tests for Stable Pools.`, () => {
     context('limit amounts', () => {
         it(`tests getLimitAmountSwap SwapExactIn`, async () => {
-            const poolsFromFile: {
-                pools: SubgraphPoolBase[];
-            } = require('./testData/stablePools/singlePool.json');
-            const pool = poolsFromFile.pools[0];
+            const pools = cloneDeep(poolsFromFile.pools);
+            const pool = pools[0];
+
             const swapType = SwapTypes.SwapExactIn;
 
             // Max out uses standard V2 limits
@@ -73,10 +86,8 @@ describe(`Tests for Stable Pools.`, () => {
         });
 
         it(`tests getLimitAmountSwap SwapExactOut`, async () => {
-            const poolsFromFile: {
-                pools: SubgraphPoolBase[];
-            } = require('./testData/stablePools/singlePool.json');
-            const pool = poolsFromFile.pools[0];
+            const pools = cloneDeep(poolsFromFile.pools);
+            const pool = pools[0];
             const swapType = SwapTypes.SwapExactOut;
 
             // Max out uses standard V2 limits
@@ -117,17 +128,19 @@ describe(`Tests for Stable Pools.`, () => {
 
     context('direct pool', () => {
         it(`Full Swap - swapExactIn No Route`, async () => {
-            const poolsFromFile: {
-                pools: SubgraphPoolBase[];
-            } = require('./testData/stablePools/singlePool.json');
-            const pools = poolsFromFile.pools;
+            const pools = cloneDeep(poolsFromFile.pools);
             const tokenIn = BAL.address;
             const tokenOut = USDC.address;
             const swapType = SwapTypes.SwapExactIn;
             const swapAmt = parseFixed('1', 18);
 
-            const sor = new SOR(provider, chainId, null, pools);
-            const fetchSuccess = await sor.fetchPools([], false);
+            const sor = new SOR(
+                provider,
+                sorConfigEth,
+                new MockPoolDataService(pools),
+                mockTokenPriceService
+            );
+            const fetchSuccess = await sor.fetchPools();
             expect(fetchSuccess).to.be.true;
 
             const swapInfo: SwapInfo = await sor.getSwaps(
@@ -143,17 +156,19 @@ describe(`Tests for Stable Pools.`, () => {
         });
 
         it(`Full Swap - swapExactOut No Route`, async () => {
-            const poolsFromFile: {
-                pools: SubgraphPoolBase[];
-            } = require('./testData/stablePools/singlePool.json');
-            const pools = poolsFromFile.pools;
+            const pools = cloneDeep(poolsFromFile.pools);
             const tokenIn = BAL.address;
             const tokenOut = USDC.address;
             const swapType = SwapTypes.SwapExactOut;
             const swapAmt = parseFixed('1', 18);
 
-            const sor = new SOR(provider, chainId, null, pools);
-            const fetchSuccess = await sor.fetchPools([], false);
+            const sor = new SOR(
+                provider,
+                sorConfigEth,
+                new MockPoolDataService(pools),
+                mockTokenPriceService
+            );
+            const fetchSuccess = await sor.fetchPools();
             expect(fetchSuccess).to.be.true;
 
             const swapInfo: SwapInfo = await sor.getSwaps(
@@ -169,17 +184,19 @@ describe(`Tests for Stable Pools.`, () => {
         });
 
         it(`Full Swap - swapExactIn, Token>Token`, async () => {
-            const poolsFromFile: {
-                pools: SubgraphPoolBase[];
-            } = require('./testData/stablePools/singlePool.json');
-            const pools = poolsFromFile.pools;
+            const pools = cloneDeep(poolsFromFile.pools);
             const tokenIn = DAI.address;
             const tokenOut = USDC.address;
             const swapType = SwapTypes.SwapExactIn;
             const swapAmt = parseFixed('1', 18);
 
-            const sor = new SOR(provider, chainId, null, pools);
-            const fetchSuccess = await sor.fetchPools([], false);
+            const sor = new SOR(
+                provider,
+                sorConfigEth,
+                new MockPoolDataService(pools),
+                mockTokenPriceService
+            );
+            const fetchSuccess = await sor.fetchPools();
             expect(fetchSuccess).to.be.true;
 
             const swapInfo: SwapInfo = await sor.getSwaps(
@@ -206,17 +223,19 @@ describe(`Tests for Stable Pools.`, () => {
         });
 
         it(`Full Swap - swapExactOut, Token>Token`, async () => {
-            const poolsFromFile: {
-                pools: SubgraphPoolBase[];
-            } = require('./testData/stablePools/singlePool.json');
-            const pools = poolsFromFile.pools;
+            const pools = cloneDeep(poolsFromFile.pools);
             const tokenIn = USDC.address;
             const tokenOut = USDT.address;
             const swapType = SwapTypes.SwapExactOut;
             const swapAmt = parseFixed('1', 6);
 
-            const sor = new SOR(provider, chainId, null, pools);
-            const fetchSuccess = await sor.fetchPools([], false);
+            const sor = new SOR(
+                provider,
+                sorConfigEth,
+                new MockPoolDataService(pools),
+                mockTokenPriceService
+            );
+            const fetchSuccess = await sor.fetchPools();
             expect(fetchSuccess).to.be.true;
 
             const swapInfo: SwapInfo = await sor.getSwaps(
@@ -245,17 +264,19 @@ describe(`Tests for Stable Pools.`, () => {
 
     context('multihop', () => {
         it(`Full Swap - swapExactIn, Token>Token`, async () => {
-            const poolsFromFile: {
-                pools: SubgraphPoolBase[];
-            } = require('./testData/stablePools/multihop.json');
-            const pools = poolsFromFile.pools;
+            const pools = cloneDeep(multihopPoolsFromFile.pools);
             const tokenIn = DAI.address;
             const tokenOut = USDT.address;
             const swapType = SwapTypes.SwapExactIn;
             const swapAmt = parseFixed('23.45', 18);
 
-            const sor = new SOR(provider, chainId, null, pools);
-            const fetchSuccess = await sor.fetchPools([], false);
+            const sor = new SOR(
+                provider,
+                sorConfigEth,
+                new MockPoolDataService(pools),
+                mockTokenPriceService
+            );
+            const fetchSuccess = await sor.fetchPools();
             expect(fetchSuccess).to.be.true;
 
             const swapInfo: SwapInfo = await sor.getSwaps(
@@ -269,7 +290,9 @@ describe(`Tests for Stable Pools.`, () => {
             expect(swapInfo.returnAmount.toString()).eq('23533631');
             expect(swapInfo.swaps.length).eq(2);
             expect(swapInfo.swaps[0].amount.toString()).eq(swapAmt.toString());
-            expect(swapInfo.swaps[0].poolId).eq(poolsFromFile.pools[0].id);
+            expect(swapInfo.swaps[0].poolId).eq(
+                multihopPoolsFromFile.pools[0].id
+            );
             expect(swapInfo.tokenAddresses[swapInfo.swaps[0].assetInIndex]).eq(
                 tokenIn
             );
@@ -277,7 +300,9 @@ describe(`Tests for Stable Pools.`, () => {
                 USDC.address
             );
             expect(swapInfo.swaps[1].amount.toString()).eq('0'); // Should be 0 for multihop
-            expect(swapInfo.swaps[1].poolId).eq(poolsFromFile.pools[1].id);
+            expect(swapInfo.swaps[1].poolId).eq(
+                multihopPoolsFromFile.pools[1].id
+            );
             expect(swapInfo.tokenAddresses[swapInfo.swaps[1].assetInIndex]).eq(
                 USDC.address
             );
@@ -287,17 +312,19 @@ describe(`Tests for Stable Pools.`, () => {
         });
 
         it(`Full Swap - swapExactOut, Token>Token`, async () => {
-            const poolsFromFile: {
-                pools: SubgraphPoolBase[];
-            } = require('./testData/stablePools/multihop.json');
-            const pools = poolsFromFile.pools;
+            const pools = cloneDeep(multihopPoolsFromFile.pools);
             const tokenIn = USDT.address;
             const tokenOut = DAI.address;
             const swapType = SwapTypes.SwapExactOut;
             const swapAmt = parseFixed('17.77', 18);
 
-            const sor = new SOR(provider, chainId, null, pools);
-            const fetchSuccess = await sor.fetchPools([], false);
+            const sor = new SOR(
+                provider,
+                sorConfigEth,
+                new MockPoolDataService(pools),
+                mockTokenPriceService
+            );
+            const fetchSuccess = await sor.fetchPools();
             expect(fetchSuccess).to.be.true;
 
             const swapInfo: SwapInfo = await sor.getSwaps(
@@ -312,7 +339,9 @@ describe(`Tests for Stable Pools.`, () => {
             expect(swapInfo.returnAmount.toString()).eq('18089532');
             expect(swapInfo.swaps.length).eq(2);
             expect(swapInfo.swaps[0].amount.toString()).eq(swapAmt.toString());
-            expect(swapInfo.swaps[0].poolId).eq(poolsFromFile.pools[0].id);
+            expect(swapInfo.swaps[0].poolId).eq(
+                multihopPoolsFromFile.pools[0].id
+            );
             expect(swapInfo.tokenAddresses[swapInfo.swaps[0].assetInIndex]).eq(
                 USDC.address
             );
@@ -320,7 +349,9 @@ describe(`Tests for Stable Pools.`, () => {
                 tokenOut
             );
             expect(swapInfo.swaps[1].amount.toString()).eq('0'); // Should be 0 for multihop
-            expect(swapInfo.swaps[1].poolId).eq(poolsFromFile.pools[1].id);
+            expect(swapInfo.swaps[1].poolId).eq(
+                multihopPoolsFromFile.pools[1].id
+            );
             expect(swapInfo.tokenAddresses[swapInfo.swaps[1].assetInIndex]).eq(
                 tokenIn
             );

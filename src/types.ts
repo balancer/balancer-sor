@@ -1,6 +1,15 @@
 import { BigNumber } from '@ethersproject/bignumber';
 import { BigNumber as OldBigNumber } from './utils/bignumber';
 
+export interface SorConfig {
+    chainId: number;
+    weth: string;
+    vault: string;
+    staBal3Pool?: { id: string; address: string };
+    wethStaBal3?: { id: string; address: string };
+    usdcConnectingPool?: { id: string; usdc: string };
+}
+
 export type NoNullableField<T> = {
     [P in keyof T]: NonNullable<T[P]>;
 };
@@ -188,4 +197,17 @@ export interface PoolBase {
 
 export interface WeightedPool extends PoolBase {
     totalWeight: string;
+}
+
+export interface TokenPriceService {
+    /**
+     * This should return the price of the native asset (ETH) in the token defined by tokenAddress.
+     * Example: BAL = $20 USD, ETH = $4,000 USD, then 1 ETH = 200 BAL. This function would return 200.
+     * @param tokenAddress
+     */
+    getNativeAssetPriceInToken(tokenAddress: string): Promise<string>;
+}
+
+export interface PoolDataService {
+    getPools(): Promise<SubgraphPoolBase[]>;
 }

@@ -6,12 +6,11 @@ import { JsonRpcProvider } from '@ethersproject/providers';
 
 import { formatSwaps } from '../src/formatSwaps';
 import { getWrappedInfo, setWrappedInfo } from '../src/wrapInfo';
-import { WETHADDR } from '../src/constants';
 import { Lido } from '../src/pools/lido';
 import { Swap, SwapInfo, SwapTypes, SwapV2 } from '../src/types';
 import { bnum } from '../src/utils/bignumber';
 import testSwaps from './testData/swapsForFormatting.json';
-import { BAL, DAI, GUSD, USDC, WETH } from './lib/constants';
+import { BAL, DAI, GUSD, sorConfigEth, USDC, WETH } from './lib/constants';
 
 const marketSp = '7';
 
@@ -1342,14 +1341,14 @@ describe(`Tests for Helpers.`, () => {
             };
 
             const swapInfo: SwapInfo = {
-                tokenAddresses: [WETHADDR[chainId], BAL.address],
+                tokenAddresses: [sorConfigEth.weth, BAL.address],
                 swaps: [swap, swap], // Doesn't need valid swaps for this
                 swapAmount,
                 swapAmountForSwaps: Zero, // This isn't set until after setWrappedInfo
                 returnAmount,
                 returnAmountConsideringFees: returnAmount,
                 returnAmountFromSwaps: Zero, // This isn't set until after setWrappedInfo
-                tokenIn: WETHADDR[chainId],
+                tokenIn: sorConfigEth.weth,
                 tokenOut: BAL.address,
                 marketSp: Zero.toString(),
             };
@@ -1359,7 +1358,7 @@ describe(`Tests for Helpers.`, () => {
                 swapType,
                 tokenIn,
                 tokenOut,
-                chainId,
+                sorConfigEth,
                 swapAmount
             );
 
@@ -1367,7 +1366,7 @@ describe(`Tests for Helpers.`, () => {
                 swapInfo,
                 swapType,
                 wrappedInfo,
-                chainId
+                sorConfigEth
             );
 
             expect(swapInfoUpdated.tokenAddresses).to.deep.eq([
@@ -1408,14 +1407,14 @@ describe(`Tests for Helpers.`, () => {
             };
 
             const swapInfo: SwapInfo = {
-                tokenAddresses: [WETHADDR[chainId], BAL.address],
+                tokenAddresses: [sorConfigEth.weth, BAL.address],
                 swaps: [swap, swap], // Doesn't need valid swaps for this
                 swapAmount,
                 swapAmountForSwaps: Zero, // This isn't set until after setWrappedInfo
                 returnAmount,
                 returnAmountConsideringFees: returnAmount,
                 returnAmountFromSwaps: Zero, // This isn't set until after setWrappedInfo
-                tokenIn: WETHADDR[chainId],
+                tokenIn: sorConfigEth.weth,
                 tokenOut: BAL.address,
                 marketSp: Zero.toString(),
             };
@@ -1425,7 +1424,7 @@ describe(`Tests for Helpers.`, () => {
                 swapType,
                 tokenIn,
                 tokenOut,
-                chainId,
+                sorConfigEth,
                 swapAmount
             );
 
@@ -1433,7 +1432,7 @@ describe(`Tests for Helpers.`, () => {
                 swapInfo,
                 swapType,
                 wrappedInfo,
-                chainId
+                sorConfigEth
             );
 
             expect(swapInfoUpdated.tokenAddresses).to.deep.eq([
@@ -1474,7 +1473,7 @@ describe(`Tests for Helpers.`, () => {
             };
 
             const swapInfo: SwapInfo = {
-                tokenAddresses: [BAL.address, WETHADDR[chainId]],
+                tokenAddresses: [BAL.address, sorConfigEth.weth],
                 swaps: [swap, swap], // Doesn't need valid swaps for this
                 swapAmount,
                 swapAmountForSwaps: Zero, // This isn't set until after setWrappedInfo
@@ -1482,7 +1481,7 @@ describe(`Tests for Helpers.`, () => {
                 returnAmountFromSwaps: Zero, // This isn't set until after setWrappedInfo
                 returnAmountConsideringFees: returnAmount,
                 tokenIn: BAL.address,
-                tokenOut: WETHADDR[chainId],
+                tokenOut: sorConfigEth.weth,
                 marketSp: Zero.toString(),
             };
 
@@ -1491,7 +1490,7 @@ describe(`Tests for Helpers.`, () => {
                 swapType,
                 tokenIn,
                 tokenOut,
-                chainId,
+                sorConfigEth,
                 swapAmount
             );
 
@@ -1499,7 +1498,7 @@ describe(`Tests for Helpers.`, () => {
                 swapInfo,
                 swapType,
                 wrappedInfo,
-                chainId
+                sorConfigEth
             );
 
             expect(swapInfoUpdated.tokenAddresses).to.deep.eq([
@@ -1540,7 +1539,7 @@ describe(`Tests for Helpers.`, () => {
             };
 
             const swapInfo: SwapInfo = {
-                tokenAddresses: [BAL.address, WETHADDR[chainId]],
+                tokenAddresses: [BAL.address, sorConfigEth.weth],
                 swaps: [swap, swap], // Doesn't need valid swaps for this
                 swapAmount,
                 swapAmountForSwaps: Zero, // This isn't set until after setWrappedInfo
@@ -1548,7 +1547,7 @@ describe(`Tests for Helpers.`, () => {
                 returnAmountFromSwaps: Zero, // This isn't set until after setWrappedInfo
                 returnAmountConsideringFees: returnAmount,
                 tokenIn: BAL.address,
-                tokenOut: WETHADDR[chainId],
+                tokenOut: sorConfigEth.weth,
                 marketSp: Zero.toString(),
             };
 
@@ -1557,7 +1556,7 @@ describe(`Tests for Helpers.`, () => {
                 swapType,
                 tokenIn,
                 tokenOut,
-                chainId,
+                sorConfigEth,
                 swapAmount
             );
 
@@ -1565,7 +1564,7 @@ describe(`Tests for Helpers.`, () => {
                 swapInfo,
                 swapType,
                 wrappedInfo,
-                chainId
+                sorConfigEth
             );
 
             expect(swapInfoUpdated.tokenAddresses).to.deep.eq([
@@ -1623,7 +1622,7 @@ describe(`Tests for Helpers.`, () => {
                 swapType,
                 tokenIn,
                 tokenOut,
-                chainId,
+                sorConfigEth,
                 swapAmount
             );
 
@@ -1631,7 +1630,7 @@ describe(`Tests for Helpers.`, () => {
                 swapInfo,
                 swapType,
                 wrappedInfo,
-                chainId
+                sorConfigEth
             );
 
             expect(swapInfoUpdated.tokenAddresses).to.deep.eq([
@@ -1691,7 +1690,7 @@ describe(`Tests for Helpers.`, () => {
                 swapType,
                 tokenIn,
                 tokenOut,
-                chainId,
+                sorConfigEth,
                 swapAmount
             );
 
@@ -1699,7 +1698,7 @@ describe(`Tests for Helpers.`, () => {
                 swapInfo,
                 swapType,
                 wrappedInfo,
-                chainId
+                sorConfigEth
             );
 
             expect(swapInfoUpdated.tokenAddresses).to.deep.eq([
@@ -1759,7 +1758,7 @@ describe(`Tests for Helpers.`, () => {
                 swapType,
                 tokenIn,
                 tokenOut,
-                chainId,
+                sorConfigEth,
                 swapAmount
             );
 
@@ -1767,7 +1766,7 @@ describe(`Tests for Helpers.`, () => {
                 swapInfo,
                 swapType,
                 wrappedInfo,
-                chainId
+                sorConfigEth
             );
 
             expect(swapInfoUpdated.tokenAddresses).to.deep.eq([
@@ -1830,7 +1829,7 @@ describe(`Tests for Helpers.`, () => {
                 swapType,
                 tokenIn,
                 tokenOut,
-                chainId,
+                sorConfigEth,
                 swapAmount
             );
 
@@ -1838,7 +1837,7 @@ describe(`Tests for Helpers.`, () => {
                 swapInfo,
                 swapType,
                 wrappedInfo,
-                chainId
+                sorConfigEth
             );
 
             expect(swapInfoUpdated.tokenAddresses).to.deep.eq([
@@ -1885,7 +1884,7 @@ describe(`Tests for Helpers.`, () => {
             };
 
             const swapInfo: SwapInfo = {
-                tokenAddresses: [Lido.wstETH[chainId], WETHADDR[chainId]],
+                tokenAddresses: [Lido.wstETH[chainId], sorConfigEth.weth],
                 swaps: [swap, swap], // Doesn't need valid swaps for this
                 swapAmount,
                 swapAmountForSwaps: Zero, // This isn't set until after setWrappedInfo
@@ -1893,7 +1892,7 @@ describe(`Tests for Helpers.`, () => {
                 returnAmountFromSwaps: Zero, // This isn't set until after setWrappedInfo
                 returnAmountConsideringFees: returnAmount,
                 tokenIn: Lido.wstETH[chainId],
-                tokenOut: WETHADDR[chainId],
+                tokenOut: sorConfigEth.weth,
                 marketSp: Zero.toString(),
             };
 
@@ -1902,7 +1901,7 @@ describe(`Tests for Helpers.`, () => {
                 swapType,
                 tokenIn,
                 tokenOut,
-                chainId,
+                sorConfigEth,
                 swapAmount
             );
 
@@ -1910,7 +1909,7 @@ describe(`Tests for Helpers.`, () => {
                 swapInfo,
                 swapType,
                 wrappedInfo,
-                chainId
+                sorConfigEth
             );
 
             expect(swapInfoUpdated.tokenAddresses).to.deep.eq([
