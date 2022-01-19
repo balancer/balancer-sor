@@ -4,14 +4,19 @@ import cloneDeep from 'lodash.clonedeep';
 import { BigNumber, parseFixed } from '@ethersproject/bignumber';
 import { WeiPerEther as ONE } from '@ethersproject/constants';
 import { JsonRpcProvider } from '@ethersproject/providers';
-import { SOR } from '../src';
-import { SwapInfo, SwapTypes, PoolTypes, SubgraphPoolBase } from '../src/types';
+import { SOR, SwapInfo, SwapTypes, PoolTypes, SubgraphPoolBase } from '../src';
 import { bnum } from '../src/utils/bignumber';
 import {
     MetaStablePool,
     MetaStablePoolPairData,
 } from '../src/pools/metaStablePool/metaStablePool';
 import { BAL, USDC, WETH } from './lib/constants';
+import poolsFromFile from './testData/metaStablePools/singlePool.json';
+import poolsFromFileMultihop from './testData/metaStablePools/multihop.json';
+
+const randomETH = '0x42d6622dece394b54999fbd73d108123806f6a18';
+const baseToken = '0x0000000000000000000000000000000000011111';
+const metaToken = '0x0000000000000000000000000000000000022222';
 
 const gasPrice = parseFixed('30', 9);
 const maxPools = 4;
@@ -19,11 +24,6 @@ const chainId = 1;
 const provider = new JsonRpcProvider(
     `https://mainnet.infura.io/v3/${process.env.INFURA}`
 );
-
-// const BPT = '0xebfed10e11dc08fcda1af1fda146945e8710f22e';
-const stETH = '0xae7ab96520de3a18e5e111b5eaab095312d7fe84';
-const randomETH = '0x42d6622dece394b54999fbd73d108123806f6a18';
-// const PTSP = '0x5f304f6cf88dc76b414f301e05adfb5a429e8b67';
 
 async function getStableComparrison(
     stablePools: SubgraphPoolBase[],
@@ -53,7 +53,6 @@ async function getStableComparrison(
 describe(`Tests for MetaStable Pools.`, () => {
     context('limit amounts', () => {
         it(`tests getLimitAmountSwap SwapExactIn`, async () => {
-            const poolsFromFile = require('./testData/metaStablePools/singlePool.json');
             const pool = cloneDeep(poolsFromFile.metaStablePool[0]);
             const swapType = SwapTypes.SwapExactIn;
 
@@ -96,7 +95,6 @@ describe(`Tests for MetaStable Pools.`, () => {
                     parseFixed(pool.tokens[0].balance, 18),
                     parseFixed(pool.tokens[1].balance, 18),
                 ],
-                invariant: bnum(0),
                 tokenIndexIn: 0,
                 tokenIndexOut: 1,
                 tokenInPriceRate: parseFixed(pool.tokens[0].priceRate, 18),
@@ -110,7 +108,6 @@ describe(`Tests for MetaStable Pools.`, () => {
         });
 
         it(`tests getLimitAmountSwap SwapExactOut`, async () => {
-            const poolsFromFile = require('./testData/metaStablePools/singlePool.json');
             const pool = cloneDeep(poolsFromFile.metaStablePool[0]);
             const swapType = SwapTypes.SwapExactOut;
 
@@ -147,7 +144,6 @@ describe(`Tests for MetaStable Pools.`, () => {
                 amp: BigNumber.from(pool.amp),
                 allBalances: [],
                 allBalancesScaled: [],
-                invariant: bnum(0),
                 tokenIndexIn: 0,
                 tokenIndexOut: 1,
                 tokenInPriceRate: parseFixed(pool.tokens[0].priceRate, 18),
@@ -166,7 +162,6 @@ describe(`Tests for MetaStable Pools.`, () => {
 
     context('direct pool', () => {
         it(`Full Swap - swapExactIn No Route`, async () => {
-            const poolsFromFile = require('./testData/metaStablePools/singlePool.json');
             const pools: SubgraphPoolBase[] = cloneDeep(
                 poolsFromFile.metaStablePool
             );
@@ -193,7 +188,6 @@ describe(`Tests for MetaStable Pools.`, () => {
         });
 
         it(`Full Swap - swapExactOut No Route`, async () => {
-            const poolsFromFile = require('./testData/metaStablePools/singlePool.json');
             const pools: SubgraphPoolBase[] = cloneDeep(
                 poolsFromFile.metaStablePool
             );
@@ -219,14 +213,13 @@ describe(`Tests for MetaStable Pools.`, () => {
             expect(swapInfo.swaps.length).eq(0);
         });
 
-        it(`Full Swap - swapExactIn, Token ETH >Token Meta`, async () => {
-            const poolsFromFile = require('./testData/metaStablePools/singlePool.json');
+        it(`Full Swap - swapExactIn, Base>Meta`, async () => {
             const pools: SubgraphPoolBase[] = cloneDeep(
                 poolsFromFile.metaStablePool
             );
-            const tokenIn = WETH.address;
+            const tokenIn = baseToken;
             const tokenInPriceRate = ONE;
-            const tokenOut = stETH;
+            const tokenOut = metaToken;
             const tokenOutPriceRate = ONE.div(2);
             const swapType = SwapTypes.SwapExactIn;
             const swapAmt = parseFixed('1', 18); // Would expect ~ 2 back
@@ -243,9 +236,7 @@ describe(`Tests for MetaStable Pools.`, () => {
                 swapAmt,
                 { gasPrice, maxPools }
             );
-
             const stablePools: SubgraphPoolBase[] = poolsFromFile.stablePool;
-
             const swapInfoStable = await getStableComparrison(
                 stablePools,
                 tokenIn,
@@ -254,6 +245,7 @@ describe(`Tests for MetaStable Pools.`, () => {
                 swapAmt.mul(tokenInPriceRate).div(ONE)
             );
 
+            expect(swapInfo.returnAmount.gt(0)).to.be.true;
             expect(swapInfoStable.tokenAddresses).to.deep.eq(
                 swapInfo.tokenAddresses
             );
@@ -288,14 +280,13 @@ describe(`Tests for MetaStable Pools.`, () => {
             });
         }).timeout(10000);
 
-        it(`Full Swap - swapExactIn, Token Meta > Token ETH`, async () => {
-            const poolsFromFile = require('./testData/metaStablePools/singlePool.json');
+        it(`Full Swap - swapExactIn, Meta>Base`, async () => {
             const pools: SubgraphPoolBase[] = cloneDeep(
                 poolsFromFile.metaStablePool
             );
-            const tokenIn = stETH;
+            const tokenIn = metaToken;
             const tokenInPriceRate = ONE.div(2);
-            const tokenOut = WETH.address;
+            const tokenOut = baseToken;
             const swapType = SwapTypes.SwapExactIn;
             const swapAmt = parseFixed('1', 18); // Would expect ~ 1 back
 
@@ -323,6 +314,7 @@ describe(`Tests for MetaStable Pools.`, () => {
                 swapAmt.mul(tokenInPriceRate).div(ONE)
             );
 
+            expect(swapInfo.returnAmount.gt(0)).to.be.true;
             expect(swapInfoStable.tokenAddresses).to.deep.eq(
                 swapInfo.tokenAddresses
             );
@@ -353,13 +345,12 @@ describe(`Tests for MetaStable Pools.`, () => {
             });
         }).timeout(10000);
 
-        it(`Full Swap - swapExactOut, Token ETH >Token Meta`, async () => {
-            const poolsFromFile = require('./testData/metaStablePools/singlePool.json');
+        it(`Full Swap - swapExactOut, Base>Meta`, async () => {
             const pools: SubgraphPoolBase[] = cloneDeep(
                 poolsFromFile.metaStablePool
             );
-            const tokenIn = WETH.address;
-            const tokenOut = stETH;
+            const tokenIn = baseToken;
+            const tokenOut = metaToken;
             const tokenOutPriceRate = ONE.div(2);
             const swapType = SwapTypes.SwapExactOut;
             const swapAmt = parseFixed('2', 18); // Would expect ~ 1 as input
@@ -387,6 +378,7 @@ describe(`Tests for MetaStable Pools.`, () => {
                 swapAmt.mul(tokenOutPriceRate).div(ONE)
             );
 
+            expect(swapInfo.returnAmount.gt(0)).to.be.true;
             expect(swapInfoStable.tokenAddresses).to.deep.eq(
                 swapInfo.tokenAddresses
             );
@@ -417,14 +409,13 @@ describe(`Tests for MetaStable Pools.`, () => {
             });
         }).timeout(10000);
 
-        it(`Full Swap - swapExactOut, Token Meta > Token ETH`, async () => {
-            const poolsFromFile = require('./testData/metaStablePools/singlePool.json');
+        it(`Full Swap - swapExactOut, Meta>Base`, async () => {
             const pools: SubgraphPoolBase[] = cloneDeep(
                 poolsFromFile.metaStablePool
             );
-            const tokenIn = stETH;
+            const tokenIn = metaToken;
             const tokenInPriceRate = ONE.div(2);
-            const tokenOut = WETH.address;
+            const tokenOut = baseToken;
             const tokenOutPriceRate = ONE;
             const swapType = SwapTypes.SwapExactOut;
             const swapAmt = parseFixed('2', 18); // Would expect ~ 4 as input
@@ -452,6 +443,7 @@ describe(`Tests for MetaStable Pools.`, () => {
                 swapAmt.mul(tokenOutPriceRate).div(ONE)
             );
 
+            expect(swapInfo.returnAmount.gt(0)).to.be.true;
             expect(swapInfoStable.tokenAddresses).to.deep.eq(
                 swapInfo.tokenAddresses
             );
@@ -489,9 +481,8 @@ describe(`Tests for MetaStable Pools.`, () => {
     context('multihop', () => {
         it(`Full Swap - swapExactIn, Token>Token`, async () => {
             // With meta token as hop the result in/out should be same as a normal stable pool
-            const poolsFromFile = require('./testData/metaStablePools/multihop.json');
             const pools: SubgraphPoolBase[] = cloneDeep(
-                poolsFromFile.metaStablePools
+                poolsFromFileMultihop.metaStablePools
             );
             const tokenIn = WETH.address;
             const tokenInPriceRate = ONE;
@@ -513,7 +504,8 @@ describe(`Tests for MetaStable Pools.`, () => {
                 { gasPrice, maxPools }
             );
 
-            const stablePools: SubgraphPoolBase[] = poolsFromFile.stablePools;
+            const stablePools: SubgraphPoolBase[] =
+                poolsFromFileMultihop.stablePools;
             // Same as stable with
             const swapInfoStable = await getStableComparrison(
                 stablePools,
@@ -523,6 +515,7 @@ describe(`Tests for MetaStable Pools.`, () => {
                 swapAmt.mul(tokenInPriceRate).div(ONE)
             );
 
+            expect(swapInfo.returnAmount.gt(0)).to.be.true;
             expect(swapInfoStable.tokenAddresses).to.deep.eq(
                 swapInfo.tokenAddresses
             );
@@ -559,9 +552,8 @@ describe(`Tests for MetaStable Pools.`, () => {
 
         it(`Full Swap - swapExactOut, Token>Token`, async () => {
             // With meta token as hop the result in/out should be same as a normal stable pool
-            const poolsFromFile = require('./testData/metaStablePools/multihop.json');
             const pools: SubgraphPoolBase[] = cloneDeep(
-                poolsFromFile.metaStablePools
+                poolsFromFileMultihop.metaStablePools
             );
             const tokenIn = WETH.address;
             const tokenInPriceRate = ONE;
@@ -583,7 +575,8 @@ describe(`Tests for MetaStable Pools.`, () => {
                 { gasPrice, maxPools }
             );
 
-            const stablePools: SubgraphPoolBase[] = poolsFromFile.stablePools;
+            const stablePools: SubgraphPoolBase[] =
+                poolsFromFileMultihop.stablePools;
 
             // Same as stable with
             const swapInfoStable = await getStableComparrison(
@@ -594,6 +587,7 @@ describe(`Tests for MetaStable Pools.`, () => {
                 swapAmt.mul(tokenInPriceRate).div(ONE)
             );
 
+            expect(swapInfo.returnAmount.gt(0)).to.be.true;
             expect(swapInfoStable.tokenAddresses).to.deep.eq(
                 swapInfo.tokenAddresses
             );

@@ -15,25 +15,28 @@
             "address": "0xebfed10e11dc08fcda1af1fda146945e8710f22e",
             "swapFee": "0.0004",
             "amp": "10",
+            "swapEnabled": true,
             "tokens": [
                 {
-                    "address": "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
+                    "address": "0x0000000000000000000000000000000000011111",
                     "balance": "10",
                     "decimals": 18,
                     "symbol": "WETH",
-                    "priceRate": "1"
+                    "priceRate": "1",
+                    "weight": null
                 },
                 {
-                    "address": "0xae7ab96520de3a18e5e111b5eaab095312d7fe84",
+                    "address": "0x0000000000000000000000000000000000022222",
                     "balance": "20",
                     "decimals": 18,
-                    "symbol": "stETH",
-                    "priceRate": "0.5"
+                    "symbol": "wstETH",
+                    "priceRate": "0.5",
+                    "weight": null
                 }
             ],
             "tokensList": [
-                "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
-                "0xae7ab96520de3a18e5e111b5eaab095312d7fe84"
+                "0x0000000000000000000000000000000000011111",
+                "0x0000000000000000000000000000000000022222"
             ],
             "totalShares": "10",
             "poolType": "MetaStable"
@@ -45,23 +48,28 @@
             "address": "0xebfed10e11dc08fcda1af1fda146945e8710f22e",
             "swapFee": "0.0004",
             "amp": "10",
+            "swapEnabled": true,
             "tokens": [
                 {
-                    "address": "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
+                    "address": "0x0000000000000000000000000000000000011111",
                     "balance": "10",
                     "decimals": 18,
-                    "symbol": "WETH"
+                    "symbol": "WETH",
+                    "weight": null,
+                    "priceRate": "1"
                 },
                 {
-                    "address": "0xae7ab96520de3a18e5e111b5eaab095312d7fe84",
+                    "address": "0x0000000000000000000000000000000000022222",
                     "balance": "10",
                     "decimals": 18,
-                    "symbol": "stETH"
+                    "symbol": "wstETH",
+                    "weight": null,
+                    "priceRate": "1"
                 }
             ],
             "tokensList": [
-                "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
-                "0xae7ab96520de3a18e5e111b5eaab095312d7fe84"
+                "0x0000000000000000000000000000000000011111",
+                "0x0000000000000000000000000000000000022222"
             ],
             "totalShares": "10",
             "poolType": "Stable"

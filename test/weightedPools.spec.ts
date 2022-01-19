@@ -1,20 +1,18 @@
 require('dotenv').config();
 import { expect } from 'chai';
-import { SwapTypes, PoolTypes, SubgraphPoolBase } from '../src/types';
+import { SwapTypes, PoolTypes } from '../src/types';
 import { bnum } from '../src/utils/bignumber';
 import {
     WeightedPool,
     WeightedPoolPairData,
 } from '../src/pools/weightedPool/weightedPool';
 import { parseFixed } from '@ethersproject/bignumber';
+import poolsFromFile from './testData/weightedPools/singlePool.json';
 
 // npx mocha -r ts-node/register test/weightedPools.spec.ts
 describe(`Tests for Weighted Pools.`, () => {
     context('limit amounts', () => {
         it(`tests getLimitAmountSwap SwapExactIn`, async () => {
-            const poolsFromFile: {
-                pools: SubgraphPoolBase[];
-            } = require('./testData/weightedPools/singlePool.json');
             const pool = poolsFromFile.pools[0];
             const swapType = SwapTypes.SwapExactIn;
 
@@ -51,9 +49,6 @@ describe(`Tests for Weighted Pools.`, () => {
         });
 
         it(`tests getLimitAmountSwap SwapExactOut`, async () => {
-            const poolsFromFile: {
-                pools: SubgraphPoolBase[];
-            } = require('./testData/weightedPools/singlePool.json');
             const pool = poolsFromFile.pools[0];
             const swapType = SwapTypes.SwapExactOut;
 
