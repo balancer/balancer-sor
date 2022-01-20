@@ -86,7 +86,7 @@ export function getOutputAmountSwap(
         ) {
             return ZERO;
         } else {
-            return pool._exactTokenInForTokenOut(poolPairData, amount, false);
+            return pool._exactTokenInForTokenOut(poolPairData, amount);
         }
     } else {
         if (poolPairData.balanceOut.isZero()) {
@@ -98,7 +98,7 @@ export function getOutputAmountSwap(
         ) {
             return INFINITY;
         } else {
-            return pool._tokenInForExactTokenOut(poolPairData, amount, false);
+            return pool._tokenInForExactTokenOut(poolPairData, amount);
         }
     }
     throw Error('Unsupported swap');

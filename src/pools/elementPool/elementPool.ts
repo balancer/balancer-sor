@@ -211,8 +211,7 @@ export class ElementPool implements PoolBase {
 
     _exactTokenInForTokenOut(
         poolPairData: ElementPoolPairData,
-        amount: OldBigNumber,
-        exact: boolean
+        amount: OldBigNumber
     ): OldBigNumber {
         poolPairData.currentBlockTimestamp = this.currentBlockTimestamp;
         return _exactTokenInForTokenOut(amount, poolPairData);
@@ -220,8 +219,7 @@ export class ElementPool implements PoolBase {
 
     _tokenInForExactTokenOut(
         poolPairData: ElementPoolPairData,
-        amount: OldBigNumber,
-        exact: boolean
+        amount: OldBigNumber
     ): OldBigNumber {
         poolPairData.currentBlockTimestamp = this.currentBlockTimestamp;
         return _tokenInForExactTokenOut(amount, poolPairData);

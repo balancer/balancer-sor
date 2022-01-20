@@ -1,195 +1,528 @@
-import { BigNumber } from '../../utils/bignumber';
+import { BigNumber as OldBigNumber } from '../../utils/bignumber';
 import { bnum } from '../../utils/bignumber';
 import { formatFixed } from '@ethersproject/bignumber';
+import { MathSol } from '../../utils/basicOperations';
 
 import { LinearPoolPairData } from './linearPool';
 
-/////////
-/// Swap functions
-/////////
+type Params = {
+    fee: bigint;
+    rate: bigint;
+    lowerTarget: bigint;
+    upperTarget: bigint;
+};
 
-// PairType = 'token->token'
-// SwapType = 'swapExactIn'
-export function _exactTokenInForTokenOut(
-    amount: BigNumber,
-    poolPairData: LinearPoolPairData
-): BigNumber {
-    // This is not expected to be used by SOR
-    // but could still be implemented
-    throw new Error('Function not implemented.');
-}
+export function _calcBptOutPerMainIn(
+    mainIn: bigint,
+    mainBalance: bigint,
+    wrappedBalance: bigint,
+    bptSupply: bigint,
+    params: Params
+): bigint {
+    // Amount out, so we round down overall.
 
-// PairType = 'token->token'
-// SwapType = 'swapExactOut'
-export function _tokenInForExactTokenOut(
-    amount: BigNumber,
-    poolPairData: LinearPoolPairData
-): BigNumber {
-    // This is not expected to be used by SOR
-    // but could still be implemented
-    throw new Error('Function not implemented.');
-}
-
-// PairType = 'token->BPT'
-// SwapType = 'swapExactIn'
-export function _exactMainTokenInForBPTOut(
-    amount: BigNumber,
-    poolPairData: LinearPoolPairData
-): BigNumber {
-    const mainIn = bnum(amount.toString());
-    const mainBalance = bnum(
-        formatFixed(poolPairData.balanceIn, poolPairData.decimalsIn)
-    );
-    const wrappedBalance = bnum(
-        formatFixed(
-            poolPairData.wrappedBalance.toString(),
-            poolPairData.wrappedDecimals
-        )
-    );
-    const virtualBptSupply = bnum(
-        formatFixed(poolPairData.virtualBptSupply, 18)
-    );
-    const params: BigNumber[] = [
-        bnum(formatFixed(poolPairData.swapFee, 18)),
-        bnum(formatFixed(poolPairData.rate.toString(), 18)),
-        bnum(formatFixed(poolPairData.lowerTarget.toString(), 18)),
-        bnum(formatFixed(poolPairData.upperTarget.toString(), 18)),
-    ];
-
-    if (virtualBptSupply.eq(0)) {
-        return toNominal(mainIn, params);
+    if (bptSupply == BigInt(0)) {
+        return _toNominal(mainIn, params);
     }
 
-    const previousNominalMain = toNominal(mainBalance, params);
-    const afterNominalMain = toNominal(mainBalance.plus(mainIn), params);
-    const deltaNominalMain = afterNominalMain.minus(previousNominalMain);
-    const invariant = calcInvariant(
+    const previousNominalMain = _toNominal(mainBalance, params);
+    const afterNominalMain = _toNominal(mainBalance + mainIn, params);
+    const deltaNominalMain = afterNominalMain - previousNominalMain;
+    const invariant = _calcInvariantUp(
         previousNominalMain,
         wrappedBalance,
         params
     );
-    const bptOut = virtualBptSupply.times(deltaNominalMain).div(invariant);
-    return bptOut;
+    return MathSol.divDownFixed(
+        MathSol.mulDownFixed(bptSupply, deltaNominalMain),
+        invariant
+    );
 }
 
-// PairType = 'token->BPT'
-// SwapType = 'swapExactOut'
-export function _mainTokenInForExactBPTOut(
-    amount: BigNumber,
-    poolPairData: LinearPoolPairData
-): BigNumber {
-    const bptOut = bnum(amount.toString());
-    const virtualBptSupply = bnum(
-        formatFixed(poolPairData.virtualBptSupply, 18)
-    );
-    const mainBalance = bnum(
-        formatFixed(poolPairData.balanceIn, poolPairData.decimalsIn)
-    );
-    const wrappedBalance = bnum(
-        formatFixed(
-            poolPairData.wrappedBalance.toString(),
-            poolPairData.wrappedDecimals
-        )
-    );
-    const params: BigNumber[] = [
-        bnum(formatFixed(poolPairData.swapFee, 18)),
-        bnum(formatFixed(poolPairData.rate.toString(), 18)),
-        bnum(formatFixed(poolPairData.lowerTarget.toString(), 18)),
-        bnum(formatFixed(poolPairData.upperTarget.toString(), 18)),
-    ];
-
-    if (virtualBptSupply.eq(0)) {
-        return fromNominal(bptOut, params);
-    }
-    const previousNominalMain = toNominal(mainBalance, params);
-    const invariant = calcInvariant(
+export function _calcBptInPerMainOut(
+    mainOut: bigint,
+    mainBalance: bigint,
+    wrappedBalance: bigint,
+    bptSupply: bigint,
+    params: Params
+): bigint {
+    // Amount in, so we round up overall.
+    const previousNominalMain = _toNominal(mainBalance, params);
+    const afterNominalMain = _toNominal(mainBalance - mainOut, params);
+    const deltaNominalMain = previousNominalMain - afterNominalMain;
+    const invariant = _calcInvariantDown(
         previousNominalMain,
         wrappedBalance,
         params
     );
-    const deltaNominalMain = bptOut.times(invariant).div(virtualBptSupply);
-    const afterNominalMain = previousNominalMain.plus(deltaNominalMain);
-    const newMainBalance = fromNominal(afterNominalMain, params);
-    const mainIn = newMainBalance.minus(mainBalance);
-    return mainIn;
+    return MathSol.divUpFixed(
+        MathSol.mulUpFixed(bptSupply, deltaNominalMain),
+        invariant
+    );
+}
+
+export function _calcBptInPerWrappedOut(
+    wrappedOut: bigint,
+    mainBalance: bigint,
+    wrappedBalance: bigint,
+    bptSupply: bigint,
+    params: Params
+): bigint {
+    // Amount in, so we round up overall.
+    const nominalMain = _toNominal(mainBalance, params);
+    const previousInvariant = _calcInvariantUp(
+        nominalMain,
+        wrappedBalance,
+        params
+    );
+    const newWrappedBalance = wrappedBalance - wrappedOut;
+    const newInvariant = _calcInvariantDown(
+        nominalMain,
+        newWrappedBalance,
+        params
+    );
+    const newBptBalance = MathSol.divDownFixed(
+        MathSol.mulDownFixed(bptSupply, newInvariant),
+        previousInvariant
+    );
+    return bptSupply - newBptBalance;
+}
+
+export function _calcWrappedOutPerMainIn(
+    mainIn: bigint,
+    mainBalance: bigint,
+    params: Params
+): bigint {
+    // Amount out, so we round down overall.
+    const previousNominalMain = _toNominal(mainBalance, params);
+    const afterNominalMain = _toNominal(mainBalance + mainIn, params);
+    const deltaNominalMain = afterNominalMain - previousNominalMain;
+    return MathSol.divDownFixed(deltaNominalMain, params.rate);
+}
+
+export function _calcWrappedInPerMainOut(
+    mainOut: bigint,
+    mainBalance: bigint,
+    params: Params
+): bigint {
+    // Amount in, so we round up overall.
+    const previousNominalMain = _toNominal(mainBalance, params);
+    const afterNominalMain = _toNominal(mainBalance - mainOut, params);
+    const deltaNominalMain = previousNominalMain - afterNominalMain;
+    return MathSol.divUpFixed(deltaNominalMain, params.rate);
+}
+
+export function _calcMainInPerBptOut(
+    bptOut: bigint,
+    mainBalance: bigint,
+    wrappedBalance: bigint,
+    bptSupply: bigint,
+    params: Params
+): bigint {
+    // Amount in, so we round up overall.
+    if (bptSupply == BigInt(0)) {
+        return _fromNominal(bptOut, params);
+    }
+    const previousNominalMain = _toNominal(mainBalance, params);
+    const invariant = _calcInvariantUp(
+        previousNominalMain,
+        wrappedBalance,
+        params
+    );
+    const deltaNominalMain = MathSol.divUpFixed(
+        MathSol.mulUpFixed(invariant, bptOut),
+        bptSupply
+    );
+    const afterNominalMain = previousNominalMain + deltaNominalMain;
+    const newMainBalance = _fromNominal(afterNominalMain, params);
+    return newMainBalance - mainBalance;
+}
+
+export function _calcMainOutPerBptIn(
+    bptIn: bigint,
+    mainBalance: bigint,
+    wrappedBalance: bigint,
+    bptSupply: bigint,
+    params: Params
+): bigint {
+    // Amount out, so we round down overall.
+    const previousNominalMain = _toNominal(mainBalance, params);
+    const invariant = _calcInvariantDown(
+        previousNominalMain,
+        wrappedBalance,
+        params
+    );
+    const deltaNominalMain = MathSol.divDownFixed(
+        MathSol.mulDownFixed(invariant, bptIn),
+        bptSupply
+    );
+    const afterNominalMain = previousNominalMain - deltaNominalMain;
+    const newMainBalance = _fromNominal(afterNominalMain, params);
+    return mainBalance - newMainBalance;
+}
+
+export function _calcMainOutPerWrappedIn(
+    wrappedIn: bigint,
+    mainBalance: bigint,
+    params: Params
+): bigint {
+    // Amount out, so we round down overall.
+    const previousNominalMain = _toNominal(mainBalance, params);
+    const deltaNominalMain = MathSol.mulDownFixed(wrappedIn, params.rate);
+    const afterNominalMain = previousNominalMain - deltaNominalMain;
+    const newMainBalance = _fromNominal(afterNominalMain, params);
+    return mainBalance - newMainBalance;
+}
+
+export function _calcMainInPerWrappedOut(
+    wrappedOut: bigint,
+    mainBalance: bigint,
+    params: Params
+): bigint {
+    // Amount in, so we round up overall.
+    const previousNominalMain = _toNominal(mainBalance, params);
+    const deltaNominalMain = MathSol.mulUpFixed(wrappedOut, params.rate);
+    const afterNominalMain = previousNominalMain + deltaNominalMain;
+    const newMainBalance = _fromNominal(afterNominalMain, params);
+    return newMainBalance - mainBalance;
+}
+
+export function _calcBptOutPerWrappedIn(
+    wrappedIn: bigint,
+    mainBalance: bigint,
+    wrappedBalance: bigint,
+    bptSupply: bigint,
+    params: Params
+): bigint {
+    // Amount out, so we round down overall.
+    if (bptSupply == BigInt(0)) {
+        // Return nominal DAI
+        return MathSol.mulDownFixed(wrappedIn, params.rate);
+    }
+
+    const nominalMain = _toNominal(mainBalance, params);
+    const previousInvariant = _calcInvariantUp(
+        nominalMain,
+        wrappedBalance,
+        params
+    );
+    const newWrappedBalance = wrappedBalance + wrappedIn;
+    const newInvariant = _calcInvariantDown(
+        nominalMain,
+        newWrappedBalance,
+        params
+    );
+    const newBptBalance = MathSol.divDownFixed(
+        MathSol.mulDownFixed(bptSupply, newInvariant),
+        previousInvariant
+    );
+    return newBptBalance - bptSupply;
+}
+
+export function _calcWrappedInPerBptOut(
+    bptOut: bigint,
+    mainBalance: bigint,
+    wrappedBalance: bigint,
+    bptSupply: bigint,
+    params: Params
+): bigint {
+    // Amount in, so we round up overall.
+    if (bptSupply == BigInt(0)) {
+        // Return nominal DAI
+        return MathSol.divUpFixed(bptOut, params.rate);
+    }
+
+    const nominalMain = _toNominal(mainBalance, params);
+    const previousInvariant = _calcInvariantUp(
+        nominalMain,
+        wrappedBalance,
+        params
+    );
+    const newBptBalance = bptSupply + bptOut;
+    const newWrappedBalance = MathSol.divUpFixed(
+        MathSol.mulUpFixed(
+            MathSol.divUpFixed(newBptBalance, bptSupply),
+            previousInvariant
+        ) - nominalMain,
+        params.rate
+    );
+    return newWrappedBalance - wrappedBalance;
+}
+
+export function _calcWrappedOutPerBptIn(
+    bptIn: bigint,
+    mainBalance: bigint,
+    wrappedBalance: bigint,
+    bptSupply: bigint,
+    params: Params
+): bigint {
+    // Amount out, so we round down overall.
+    const nominalMain = _toNominal(mainBalance, params);
+    const previousInvariant = _calcInvariantUp(
+        nominalMain,
+        wrappedBalance,
+        params
+    );
+    const newBptBalance = bptSupply - bptIn;
+    const newWrappedBalance = MathSol.divUpFixed(
+        MathSol.mulUpFixed(
+            MathSol.divUpFixed(newBptBalance, bptSupply),
+            previousInvariant
+        ) - nominalMain,
+        params.rate
+    );
+    return wrappedBalance - newWrappedBalance;
+}
+
+function _calcInvariantUp(
+    nominalMainBalance: bigint,
+    wrappedBalance: bigint,
+    params: Params
+): bigint {
+    return nominalMainBalance + MathSol.mulUpFixed(wrappedBalance, params.rate);
+}
+
+function _calcInvariantDown(
+    nominalMainBalance: bigint,
+    wrappedBalance: bigint,
+    params: Params
+): bigint {
+    return (
+        nominalMainBalance + MathSol.mulDownFixed(wrappedBalance, params.rate)
+    );
+}
+
+function _toNominal(real: bigint, params: Params): bigint {
+    // Fees are always rounded down: either direction would work but we need to be consistent, and rounding down
+    // uses less gas.
+    if (real < params.lowerTarget) {
+        const fees = MathSol.mulDownFixed(
+            params.lowerTarget - real,
+            params.fee
+        );
+        return MathSol.sub(real, fees);
+    } else if (real <= params.upperTarget) {
+        return real;
+    } else {
+        const fees = MathSol.mulDownFixed(
+            real - params.upperTarget,
+            params.fee
+        );
+        return MathSol.sub(real, fees);
+    }
+}
+
+function _fromNominal(nominal: bigint, params: Params): bigint {
+    // Since real = nominal + fees, rounding down fees is equivalent to rounding down real.
+    if (nominal < params.lowerTarget) {
+        return MathSol.divDownFixed(
+            nominal + MathSol.mulDownFixed(params.fee, params.lowerTarget),
+            MathSol.ONE + params.fee
+        );
+    } else if (nominal <= params.upperTarget) {
+        return nominal;
+    } else {
+        return MathSol.divDownFixed(
+            nominal - MathSol.mulDownFixed(params.fee, params.upperTarget),
+            MathSol.ONE - params.fee
+        );
+    }
+}
+
+function leftDerivativeToNominalBigInt(amount: bigint, params: Params): bigint {
+    const oneMinusFee = MathSol.complementFixed(params.fee);
+    const onePlusFee = MathSol.ONE + params.fee;
+    if (amount <= params.lowerTarget) {
+        return onePlusFee;
+    } else if (amount <= params.upperTarget) {
+        return MathSol.ONE;
+    } else {
+        return oneMinusFee;
+    }
+}
+
+function rightDerivativeToNominalBigInt(
+    amount: bigint,
+    params: Params
+): bigint {
+    const oneMinusFee = MathSol.complementFixed(params.fee);
+    const onePlusFee = MathSol.ONE + params.fee;
+    if (amount < params.lowerTarget) {
+        return onePlusFee;
+    } else if (amount < params.upperTarget) {
+        return MathSol.ONE;
+    } else {
+        return oneMinusFee;
+    }
+}
+
+function leftDerivativeFromNominalBigInt(
+    amount: bigint,
+    params: Params
+): bigint {
+    const oneMinusFee = MathSol.complementFixed(params.fee);
+    const onePlusFee = MathSol.ONE + params.fee;
+    if (amount <= params.lowerTarget) {
+        return MathSol.divUpFixed(MathSol.ONE, onePlusFee);
+    } else if (amount <= params.upperTarget) {
+        return MathSol.ONE;
+    } else {
+        return MathSol.divUpFixed(MathSol.ONE, oneMinusFee);
+    }
+}
+
+function rightDerivativeFromNominalBigInt(
+    amount: bigint,
+    params: Params
+): bigint {
+    const oneMinusFee = MathSol.complementFixed(params.fee);
+    const onePlusFee = MathSol.ONE + params.fee;
+    if (amount < params.lowerTarget) {
+        return MathSol.divUpFixed(MathSol.ONE, onePlusFee);
+    } else if (amount < params.upperTarget) {
+        return MathSol.ONE;
+    } else {
+        return MathSol.divUpFixed(MathSol.ONE, oneMinusFee);
+    }
+}
+
+export function _calcTokensOutGivenExactBptIn(
+    balances: bigint[],
+    bptAmountIn: bigint,
+    bptTotalSupply: bigint,
+    bptIndex: number
+): bigint[] {
+    /**********************************************************************************************
+    // exactBPTInForTokensOut                                                                    //
+    // (per token)                                                                               //
+    // aO = tokenAmountOut             /        bptIn         \                                  //
+    // b = tokenBalance      a0 = b * | ---------------------  |                                 //
+    // bptIn = bptAmountIn             \     bptTotalSupply    /                                 //
+    // bpt = bptTotalSupply                                                                      //
+    **********************************************************************************************/
+
+    // Since we're computing an amount out, we round down overall. This means rounding down on both the
+    // multiplication and division.
+
+    const bptRatio = MathSol.divDownFixed(bptAmountIn, bptTotalSupply);
+    const amountsOut: bigint[] = new Array(balances.length);
+    for (let i = 0; i < balances.length; i++) {
+        // BPT is skipped as those tokens are not the LPs, but rather the preminted and undistributed amount.
+        if (i != bptIndex) {
+            amountsOut[i] = MathSol.mulDownFixed(balances[i], bptRatio);
+        }
+    }
+    return amountsOut;
+}
+
+/////////
+/// SpotPriceAfterSwap
+/////////
+
+// PairType = 'token->BPT'
+// SwapType = 'swapExactIn'
+export function _spotPriceAfterSwapBptOutPerMainIn(
+    mainIn: bigint,
+    mainBalance: bigint,
+    wrappedBalance: bigint,
+    bptSupply: bigint,
+    params: Params
+): bigint {
+    const finalMainBalance = mainIn + mainBalance;
+    const previousNominalMain = _toNominal(mainBalance, params);
+    const invariant = _calcInvariantDown(
+        previousNominalMain,
+        wrappedBalance,
+        params
+    );
+    let poolFactor = MathSol.ONE;
+    if (bptSupply != BigInt(0)) {
+        poolFactor = MathSol.divUpFixed(invariant, bptSupply);
+    }
+    return MathSol.divUpFixed(
+        poolFactor,
+        rightDerivativeToNominalBigInt(finalMainBalance, params)
+    );
+}
+
+// PairType = 'token->BPT'
+// SwapType = 'swapExactOut'
+export function _spotPriceAfterSwapMainInPerBptOut(
+    bptOut: bigint,
+    mainBalance: bigint,
+    wrappedBalance: bigint,
+    bptSupply: bigint,
+    params: Params
+): bigint {
+    const previousNominalMain = _toNominal(mainBalance, params);
+    const invariant = _calcInvariantDown(
+        previousNominalMain,
+        wrappedBalance,
+        params
+    );
+    let poolFactor = MathSol.ONE;
+    if (bptSupply != BigInt(0)) {
+        poolFactor = MathSol.divUpFixed(invariant, bptSupply);
+    }
+    const deltaNominalMain = MathSol.mulUpFixed(bptOut, poolFactor);
+    const afterNominalMain = previousNominalMain + deltaNominalMain;
+    return MathSol.mulUpFixed(
+        poolFactor,
+        rightDerivativeFromNominalBigInt(afterNominalMain, params)
+    );
 }
 
 // PairType = 'BPT->token'
 // SwapType = 'swapExactIn'
-export function _BPTInForExactMainTokenOut(
-    amount: BigNumber,
-    poolPairData: LinearPoolPairData
-): BigNumber {
-    const mainOut = bnum(amount.toString());
-    const mainBalance = bnum(
-        formatFixed(poolPairData.balanceOut, poolPairData.decimalsOut)
-    );
-    const wrappedBalance = bnum(
-        formatFixed(
-            poolPairData.wrappedBalance.toString(),
-            poolPairData.wrappedDecimals
-        )
-    );
-    const virtualBptSupply = bnum(
-        formatFixed(poolPairData.virtualBptSupply, 18)
-    );
-    const params: BigNumber[] = [
-        bnum(formatFixed(poolPairData.swapFee, 18)),
-        bnum(formatFixed(poolPairData.rate.toString(), 18)),
-        bnum(formatFixed(poolPairData.lowerTarget.toString(), 18)),
-        bnum(formatFixed(poolPairData.upperTarget.toString(), 18)),
-    ];
-
-    const previousNominalMain = toNominal(mainBalance, params);
-    const afterNominalMain = toNominal(mainBalance.minus(mainOut), params);
-    const deltaNominalMain = previousNominalMain.minus(afterNominalMain);
-    const invariant = calcInvariant(
+export function _spotPriceAfterSwapMainOutPerBptIn(
+    bptIn: bigint,
+    mainBalance: bigint,
+    wrappedBalance: bigint,
+    bptSupply: bigint,
+    params: Params
+): bigint {
+    const previousNominalMain = _toNominal(mainBalance, params);
+    const invariant = _calcInvariantDown(
         previousNominalMain,
         wrappedBalance,
         params
     );
-    const bptIn = virtualBptSupply.times(deltaNominalMain.div(invariant));
-    return bptIn;
+    const poolFactor = MathSol.divDownFixed(invariant, bptSupply);
+    const deltaNominalMain = MathSol.mulDownFixed(bptIn, poolFactor);
+    const afterNominalMain = MathSol.sub(previousNominalMain, deltaNominalMain);
+    return MathSol.divUpFixed(
+        MathSol.ONE,
+        MathSol.mulUpFixed(
+            poolFactor,
+            leftDerivativeFromNominalBigInt(afterNominalMain, params)
+        )
+    );
 }
 
 // PairType = 'BPT->token'
 // SwapType = 'swapExactOut'
-export function _exactBPTInForMainTokenOut(
-    amount: BigNumber,
-    poolPairData: LinearPoolPairData
-): BigNumber {
-    const bptIn = bnum(amount.toString());
-    const mainBalance = bnum(
-        formatFixed(poolPairData.balanceOut, poolPairData.decimalsOut)
-    );
-    const wrappedBalance = bnum(
-        formatFixed(
-            poolPairData.wrappedBalance.toString(),
-            poolPairData.wrappedDecimals
-        )
-    );
-    const virtualBptSupply = bnum(
-        formatFixed(poolPairData.virtualBptSupply, 18)
-    );
-    const params: BigNumber[] = [
-        bnum(formatFixed(poolPairData.swapFee, 18)),
-        bnum(formatFixed(poolPairData.rate.toString(), 18)),
-        bnum(formatFixed(poolPairData.lowerTarget.toString(), 18)),
-        bnum(formatFixed(poolPairData.upperTarget.toString(), 18)),
-    ];
-
-    const previousNominalMain = toNominal(mainBalance, params);
-    const invariant = calcInvariant(
+export function _spotPriceAfterSwapBptInPerMainOut(
+    mainOut: bigint,
+    mainBalance: bigint,
+    wrappedBalance: bigint,
+    bptSupply: bigint,
+    params: Params
+): bigint {
+    const finalMainBalance = MathSol.sub(mainBalance, mainOut);
+    const previousNominalMain = _toNominal(mainBalance, params);
+    const invariant = _calcInvariantDown(
         previousNominalMain,
         wrappedBalance,
         params
     );
-    const deltaNominalMain = invariant.times(bptIn).div(virtualBptSupply);
-    const afterNominalMain = previousNominalMain.minus(deltaNominalMain);
-    const newMainBalance = fromNominal(afterNominalMain, params);
-    const mainOut = mainBalance.minus(newMainBalance);
-    return mainOut;
+    const poolFactor = MathSol.divUpFixed(invariant, bptSupply);
+    return MathSol.divUpFixed(
+        leftDerivativeToNominalBigInt(finalMainBalance, params),
+        poolFactor
+    );
 }
+
+//////////////////
 
 /////////
 /// SpotPriceAfterSwap
@@ -200,7 +533,7 @@ export function _exactBPTInForMainTokenOut(
 export function _spotPriceAfterSwapExactTokenInForTokenOut(
     amount,
     poolPairData
-): BigNumber {
+): OldBigNumber {
     // This is not expected to be used by SOR
     // but could still be implemented
     throw new Error('Function not implemented.');
@@ -211,7 +544,7 @@ export function _spotPriceAfterSwapExactTokenInForTokenOut(
 export function _spotPriceAfterSwapTokenInForExactTokenOut(
     amount,
     poolPairData
-): BigNumber {
+): OldBigNumber {
     // This is not expected to be used by SOR
     // but could still be implemented
     throw new Error('Function not implemented.');
@@ -220,9 +553,9 @@ export function _spotPriceAfterSwapTokenInForExactTokenOut(
 // PairType = 'token->BPT'
 // SwapType = 'swapExactIn'
 export function _spotPriceAfterSwapExactTokenInForBPTOut(
-    amount: BigNumber,
+    amount: OldBigNumber,
     poolPairData: LinearPoolPairData
-): BigNumber {
+): OldBigNumber {
     const mainIn = bnum(amount.toString());
     const mainBalance = bnum(
         formatFixed(poolPairData.balanceIn, poolPairData.decimalsIn)
@@ -237,7 +570,7 @@ export function _spotPriceAfterSwapExactTokenInForBPTOut(
     const virtualBptSupply = bnum(
         formatFixed(poolPairData.virtualBptSupply, 18)
     );
-    const params: BigNumber[] = [
+    const params: OldBigNumber[] = [
         bnum(formatFixed(poolPairData.swapFee, 18)),
         bnum(formatFixed(poolPairData.rate.toString(), 18)),
         bnum(formatFixed(poolPairData.lowerTarget.toString(), 18)),
@@ -260,9 +593,9 @@ export function _spotPriceAfterSwapExactTokenInForBPTOut(
 // PairType = 'token->BPT'
 // SwapType = 'swapExactOut'
 export function _spotPriceAfterSwapTokenInForExactBPTOut(
-    amount: BigNumber,
+    amount: OldBigNumber,
     poolPairData: LinearPoolPairData
-): BigNumber {
+): OldBigNumber {
     const bptOut = bnum(amount.toString());
     const virtualBptSupply = bnum(
         formatFixed(poolPairData.virtualBptSupply, 18)
@@ -276,7 +609,7 @@ export function _spotPriceAfterSwapTokenInForExactBPTOut(
             poolPairData.wrappedDecimals
         )
     );
-    const params: BigNumber[] = [
+    const params: OldBigNumber[] = [
         bnum(formatFixed(poolPairData.swapFee, 18)),
         bnum(formatFixed(poolPairData.rate.toString(), 18)),
         bnum(formatFixed(poolPairData.lowerTarget.toString(), 18)),
@@ -303,9 +636,9 @@ export function _spotPriceAfterSwapTokenInForExactBPTOut(
 // PairType = 'BPT->token'
 // SwapType = 'swapExactIn'
 export function _spotPriceAfterSwapExactBPTInForTokenOut(
-    amount: BigNumber,
+    amount: OldBigNumber,
     poolPairData: LinearPoolPairData
-): BigNumber {
+): OldBigNumber {
     const bptIn = bnum(amount.toString());
     const mainBalance = bnum(
         formatFixed(poolPairData.balanceOut, poolPairData.decimalsOut)
@@ -319,7 +652,7 @@ export function _spotPriceAfterSwapExactBPTInForTokenOut(
     const virtualBptSupply = bnum(
         formatFixed(poolPairData.virtualBptSupply, 18)
     );
-    const params: BigNumber[] = [
+    const params: OldBigNumber[] = [
         bnum(formatFixed(poolPairData.swapFee, 18)),
         bnum(formatFixed(poolPairData.rate.toString(), 18)),
         bnum(formatFixed(poolPairData.lowerTarget.toString(), 18)),
@@ -343,9 +676,9 @@ export function _spotPriceAfterSwapExactBPTInForTokenOut(
 // PairType = 'BPT->token'
 // SwapType = 'swapExactOut'
 export function _spotPriceAfterSwapBPTInForExactTokenOut(
-    amount: BigNumber,
+    amount: OldBigNumber,
     poolPairData: LinearPoolPairData
-): BigNumber {
+): OldBigNumber {
     const mainOut = bnum(amount.toString());
     const mainBalance = bnum(
         formatFixed(poolPairData.balanceOut, poolPairData.decimalsOut)
@@ -360,7 +693,7 @@ export function _spotPriceAfterSwapBPTInForExactTokenOut(
         formatFixed(poolPairData.virtualBptSupply, 18)
     );
     const finalMainBalance = mainBalance.minus(mainOut);
-    const params: BigNumber[] = [
+    const params: OldBigNumber[] = [
         bnum(formatFixed(poolPairData.swapFee, 18)),
         bnum(formatFixed(poolPairData.rate.toString(), 18)),
         bnum(formatFixed(poolPairData.lowerTarget.toString(), 18)),
@@ -390,7 +723,7 @@ export function _spotPriceAfterSwapBPTInForExactTokenOut(
 export function _derivativeSpotPriceAfterSwapExactTokenInForTokenOut(
     amount,
     poolPairData
-): BigNumber {
+): OldBigNumber {
     // This is not expected to be used by SOR
     // but could still be implemented
     throw new Error('Function not implemented.');
@@ -401,7 +734,7 @@ export function _derivativeSpotPriceAfterSwapExactTokenInForTokenOut(
 export function _derivativeSpotPriceAfterSwapTokenInForExactTokenOut(
     amount,
     poolPairData
-): BigNumber {
+): OldBigNumber {
     // This is not expected to be used by SOR
     // but could still be implemented
     throw new Error('Function not implemented.');
@@ -412,7 +745,7 @@ export function _derivativeSpotPriceAfterSwapTokenInForExactTokenOut(
 export function _derivativeSpotPriceAfterSwapExactTokenInForBPTOut(
     amount,
     poolPairData
-): BigNumber {
+): OldBigNumber {
     return bnum(0);
 }
 
@@ -421,7 +754,7 @@ export function _derivativeSpotPriceAfterSwapExactTokenInForBPTOut(
 export function _derivativeSpotPriceAfterSwapTokenInForExactBPTOut(
     amount,
     poolPairData
-): BigNumber {
+): OldBigNumber {
     return bnum(0);
 }
 
@@ -430,7 +763,7 @@ export function _derivativeSpotPriceAfterSwapTokenInForExactBPTOut(
 export function _derivativeSpotPriceAfterSwapExactBPTInForTokenOut(
     amount,
     poolPairData
-): BigNumber {
+): OldBigNumber {
     return bnum(0);
 }
 
@@ -439,20 +772,20 @@ export function _derivativeSpotPriceAfterSwapExactBPTInForTokenOut(
 export function _derivativeSpotPriceAfterSwapBPTInForExactTokenOut(
     amount,
     poolPairData
-): BigNumber {
+): OldBigNumber {
     return bnum(0);
 }
 
 function calcInvariant(
-    nominalMainBalance: BigNumber,
-    wrappedBalance: BigNumber,
-    params: BigNumber[]
-): BigNumber {
+    nominalMainBalance: OldBigNumber,
+    wrappedBalance: OldBigNumber,
+    params: OldBigNumber[]
+): OldBigNumber {
     const rate = params[1];
     return nominalMainBalance.plus(wrappedBalance.times(rate));
 }
 
-function toNominal(amount: BigNumber, params: BigNumber[]): BigNumber {
+function toNominal(amount: OldBigNumber, params: OldBigNumber[]): OldBigNumber {
     const fee = params[0];
     const lowerTarget = params[2];
     const upperTarget = params[3];
@@ -471,10 +804,11 @@ function toNominal(amount: BigNumber, params: BigNumber[]): BigNumber {
         return amount.minus(fees);
     }
 }
+
 function leftDerivativeToNominal(
-    amount: BigNumber,
-    params: BigNumber[]
-): BigNumber {
+    amount: OldBigNumber,
+    params: OldBigNumber[]
+): OldBigNumber {
     const fee = params[0];
     const lowerTarget = params[2];
     const upperTarget = params[3];
@@ -490,9 +824,9 @@ function leftDerivativeToNominal(
 }
 
 function rightDerivativeToNominal(
-    amount: BigNumber,
-    params: BigNumber[]
-): BigNumber {
+    amount: OldBigNumber,
+    params: OldBigNumber[]
+): OldBigNumber {
     const fee = params[0];
     const lowerTarget = params[2];
     const upperTarget = params[3];
@@ -506,7 +840,11 @@ function rightDerivativeToNominal(
         return oneMinusFee;
     }
 }
-function fromNominal(nominal: BigNumber, params: BigNumber[]): BigNumber {
+
+function fromNominal(
+    nominal: OldBigNumber,
+    params: OldBigNumber[]
+): OldBigNumber {
     const fee = params[0];
     const lowerTarget = params[2];
     const upperTarget = params[3];
@@ -521,9 +859,9 @@ function fromNominal(nominal: BigNumber, params: BigNumber[]): BigNumber {
     }
 }
 function leftDerivativeFromNominal(
-    amount: BigNumber,
-    params: BigNumber[]
-): BigNumber {
+    amount: OldBigNumber,
+    params: OldBigNumber[]
+): OldBigNumber {
     const fee = params[0];
     const lowerTarget = params[2];
     const upperTarget = params[3];
@@ -539,9 +877,9 @@ function leftDerivativeFromNominal(
 }
 
 function rightDerivativeFromNominal(
-    amount: BigNumber,
-    params: BigNumber[]
-): BigNumber {
+    amount: OldBigNumber,
+    params: OldBigNumber[]
+): OldBigNumber {
     const fee = params[0];
     const lowerTarget = params[2];
     const upperTarget = params[3];

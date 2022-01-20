@@ -29,12 +29,13 @@ const poolStaBal = Lido.StaticPools.staBal[chainId];
 const poolWethDai = Lido.StaticPools.wethDai[chainId];
 const poolLido = Lido.StaticPools.wstEthWeth[chainId];
 
+import poolsFromFile from './testData/lido/staticPools.json';
+
 const {
     pools,
 }: {
     pools: SubgraphPoolBase[];
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-} = require('./testData/lido/staticPools.json');
+} = poolsFromFile;
 
 // npx mocha -r ts-node/register test/lido.spec.ts
 describe(`Tests for Lido USD routes.`, () => {

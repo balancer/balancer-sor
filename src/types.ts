@@ -171,13 +171,11 @@ export interface PoolBase {
     updateTokenBalanceForPool: (token: string, newBalance: BigNumber) => void;
     _exactTokenInForTokenOut: (
         poolPairData: PoolPairBase,
-        amount: OldBigNumber,
-        exact: boolean
+        amount: OldBigNumber
     ) => OldBigNumber;
     _tokenInForExactTokenOut: (
         poolPairData: PoolPairBase,
-        amount: OldBigNumber,
-        exact: boolean
+        amount: OldBigNumber
     ) => OldBigNumber;
     _spotPriceAfterSwapExactTokenInForTokenOut: (
         poolPairData: PoolPairBase,
