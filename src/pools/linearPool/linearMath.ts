@@ -1,4 +1,4 @@
-import { BigNumber as linear } from '../../utils/bignumber';
+import { BigNumber as OldBigNumber } from '../../utils/bignumber';
 import { bnum } from '../../utils/bignumber';
 import { formatFixed } from '@ethersproject/bignumber';
 import { MathSol } from '../../utils/basicOperations';
@@ -533,7 +533,7 @@ export function _spotPriceAfterSwapBptInPerMainOut(
 export function _spotPriceAfterSwapExactTokenInForTokenOut(
     amount,
     poolPairData
-): linear {
+): OldBigNumber {
     // This is not expected to be used by SOR
     // but could still be implemented
     throw new Error('Function not implemented.');
@@ -544,7 +544,7 @@ export function _spotPriceAfterSwapExactTokenInForTokenOut(
 export function _spotPriceAfterSwapTokenInForExactTokenOut(
     amount,
     poolPairData
-): linear {
+): OldBigNumber {
     // This is not expected to be used by SOR
     // but could still be implemented
     throw new Error('Function not implemented.');
@@ -553,9 +553,9 @@ export function _spotPriceAfterSwapTokenInForExactTokenOut(
 // PairType = 'token->BPT'
 // SwapType = 'swapExactIn'
 export function _spotPriceAfterSwapExactTokenInForBPTOut(
-    amount: linear,
+    amount: OldBigNumber,
     poolPairData: LinearPoolPairData
-): linear {
+): OldBigNumber {
     const mainIn = bnum(amount.toString());
     const mainBalance = bnum(
         formatFixed(poolPairData.balanceIn, poolPairData.decimalsIn)
@@ -570,7 +570,7 @@ export function _spotPriceAfterSwapExactTokenInForBPTOut(
     const virtualBptSupply = bnum(
         formatFixed(poolPairData.virtualBptSupply, 18)
     );
-    const params: linear[] = [
+    const params: OldBigNumber[] = [
         bnum(formatFixed(poolPairData.swapFee, 18)),
         bnum(formatFixed(poolPairData.rate.toString(), 18)),
         bnum(formatFixed(poolPairData.lowerTarget.toString(), 18)),
@@ -593,9 +593,9 @@ export function _spotPriceAfterSwapExactTokenInForBPTOut(
 // PairType = 'token->BPT'
 // SwapType = 'swapExactOut'
 export function _spotPriceAfterSwapTokenInForExactBPTOut(
-    amount: linear,
+    amount: OldBigNumber,
     poolPairData: LinearPoolPairData
-): linear {
+): OldBigNumber {
     const bptOut = bnum(amount.toString());
     const virtualBptSupply = bnum(
         formatFixed(poolPairData.virtualBptSupply, 18)
@@ -609,7 +609,7 @@ export function _spotPriceAfterSwapTokenInForExactBPTOut(
             poolPairData.wrappedDecimals
         )
     );
-    const params: linear[] = [
+    const params: OldBigNumber[] = [
         bnum(formatFixed(poolPairData.swapFee, 18)),
         bnum(formatFixed(poolPairData.rate.toString(), 18)),
         bnum(formatFixed(poolPairData.lowerTarget.toString(), 18)),
@@ -636,9 +636,9 @@ export function _spotPriceAfterSwapTokenInForExactBPTOut(
 // PairType = 'BPT->token'
 // SwapType = 'swapExactIn'
 export function _spotPriceAfterSwapExactBPTInForTokenOut(
-    amount: linear,
+    amount: OldBigNumber,
     poolPairData: LinearPoolPairData
-): linear {
+): OldBigNumber {
     const bptIn = bnum(amount.toString());
     const mainBalance = bnum(
         formatFixed(poolPairData.balanceOut, poolPairData.decimalsOut)
@@ -652,7 +652,7 @@ export function _spotPriceAfterSwapExactBPTInForTokenOut(
     const virtualBptSupply = bnum(
         formatFixed(poolPairData.virtualBptSupply, 18)
     );
-    const params: linear[] = [
+    const params: OldBigNumber[] = [
         bnum(formatFixed(poolPairData.swapFee, 18)),
         bnum(formatFixed(poolPairData.rate.toString(), 18)),
         bnum(formatFixed(poolPairData.lowerTarget.toString(), 18)),
@@ -676,9 +676,9 @@ export function _spotPriceAfterSwapExactBPTInForTokenOut(
 // PairType = 'BPT->token'
 // SwapType = 'swapExactOut'
 export function _spotPriceAfterSwapBPTInForExactTokenOut(
-    amount: linear,
+    amount: OldBigNumber,
     poolPairData: LinearPoolPairData
-): linear {
+): OldBigNumber {
     const mainOut = bnum(amount.toString());
     const mainBalance = bnum(
         formatFixed(poolPairData.balanceOut, poolPairData.decimalsOut)
@@ -693,7 +693,7 @@ export function _spotPriceAfterSwapBPTInForExactTokenOut(
         formatFixed(poolPairData.virtualBptSupply, 18)
     );
     const finalMainBalance = mainBalance.minus(mainOut);
-    const params: linear[] = [
+    const params: OldBigNumber[] = [
         bnum(formatFixed(poolPairData.swapFee, 18)),
         bnum(formatFixed(poolPairData.rate.toString(), 18)),
         bnum(formatFixed(poolPairData.lowerTarget.toString(), 18)),
@@ -723,7 +723,7 @@ export function _spotPriceAfterSwapBPTInForExactTokenOut(
 export function _derivativeSpotPriceAfterSwapExactTokenInForTokenOut(
     amount,
     poolPairData
-): linear {
+): OldBigNumber {
     // This is not expected to be used by SOR
     // but could still be implemented
     throw new Error('Function not implemented.');
@@ -734,7 +734,7 @@ export function _derivativeSpotPriceAfterSwapExactTokenInForTokenOut(
 export function _derivativeSpotPriceAfterSwapTokenInForExactTokenOut(
     amount,
     poolPairData
-): linear {
+): OldBigNumber {
     // This is not expected to be used by SOR
     // but could still be implemented
     throw new Error('Function not implemented.');
@@ -745,7 +745,7 @@ export function _derivativeSpotPriceAfterSwapTokenInForExactTokenOut(
 export function _derivativeSpotPriceAfterSwapExactTokenInForBPTOut(
     amount,
     poolPairData
-): linear {
+): OldBigNumber {
     return bnum(0);
 }
 
@@ -754,7 +754,7 @@ export function _derivativeSpotPriceAfterSwapExactTokenInForBPTOut(
 export function _derivativeSpotPriceAfterSwapTokenInForExactBPTOut(
     amount,
     poolPairData
-): linear {
+): OldBigNumber {
     return bnum(0);
 }
 
@@ -763,7 +763,7 @@ export function _derivativeSpotPriceAfterSwapTokenInForExactBPTOut(
 export function _derivativeSpotPriceAfterSwapExactBPTInForTokenOut(
     amount,
     poolPairData
-): linear {
+): OldBigNumber {
     return bnum(0);
 }
 
@@ -772,20 +772,20 @@ export function _derivativeSpotPriceAfterSwapExactBPTInForTokenOut(
 export function _derivativeSpotPriceAfterSwapBPTInForExactTokenOut(
     amount,
     poolPairData
-): linear {
+): OldBigNumber {
     return bnum(0);
 }
 
 function calcInvariant(
-    nominalMainBalance: linear,
-    wrappedBalance: linear,
-    params: linear[]
-): linear {
+    nominalMainBalance: OldBigNumber,
+    wrappedBalance: OldBigNumber,
+    params: OldBigNumber[]
+): OldBigNumber {
     const rate = params[1];
     return nominalMainBalance.plus(wrappedBalance.times(rate));
 }
 
-function toNominal(amount: linear, params: linear[]): linear {
+function toNominal(amount: OldBigNumber, params: OldBigNumber[]): OldBigNumber {
     const fee = params[0];
     const lowerTarget = params[2];
     const upperTarget = params[3];
@@ -805,7 +805,10 @@ function toNominal(amount: linear, params: linear[]): linear {
     }
 }
 
-function leftDerivativeToNominal(amount: linear, params: linear[]): linear {
+function leftDerivativeToNominal(
+    amount: OldBigNumber,
+    params: OldBigNumber[]
+): OldBigNumber {
     const fee = params[0];
     const lowerTarget = params[2];
     const upperTarget = params[3];
@@ -820,7 +823,10 @@ function leftDerivativeToNominal(amount: linear, params: linear[]): linear {
     }
 }
 
-function rightDerivativeToNominal(amount: linear, params: linear[]): linear {
+function rightDerivativeToNominal(
+    amount: OldBigNumber,
+    params: OldBigNumber[]
+): OldBigNumber {
     const fee = params[0];
     const lowerTarget = params[2];
     const upperTarget = params[3];
@@ -835,7 +841,10 @@ function rightDerivativeToNominal(amount: linear, params: linear[]): linear {
     }
 }
 
-function fromNominal(nominal: linear, params: linear[]): linear {
+function fromNominal(
+    nominal: OldBigNumber,
+    params: OldBigNumber[]
+): OldBigNumber {
     const fee = params[0];
     const lowerTarget = params[2];
     const upperTarget = params[3];
@@ -849,7 +858,10 @@ function fromNominal(nominal: linear, params: linear[]): linear {
         return nominal.minus(upperTarget.times(fee)).div(oneMinusFee);
     }
 }
-function leftDerivativeFromNominal(amount: linear, params: linear[]): linear {
+function leftDerivativeFromNominal(
+    amount: OldBigNumber,
+    params: OldBigNumber[]
+): OldBigNumber {
     const fee = params[0];
     const lowerTarget = params[2];
     const upperTarget = params[3];
@@ -864,7 +876,10 @@ function leftDerivativeFromNominal(amount: linear, params: linear[]): linear {
     }
 }
 
-function rightDerivativeFromNominal(amount: linear, params: linear[]): linear {
+function rightDerivativeFromNominal(
+    amount: OldBigNumber,
+    params: OldBigNumber[]
+): OldBigNumber {
     const fee = params[0];
     const lowerTarget = params[2];
     const upperTarget = params[3];
