@@ -242,6 +242,7 @@ export class PhantomStablePool implements PoolBase {
         amount: OldBigNumber
     ): OldBigNumber {
         try {
+            if (amount.isZero()) return ZERO;
             // All values should use 1e18 fixed point
             // i.e. 1USDC => 1e18 not 1e6
             // In Phantom Pools every time there is a swap (token per token, bpt per token or token per bpt), we substract the fee from the amount in
@@ -306,6 +307,7 @@ export class PhantomStablePool implements PoolBase {
         amount: OldBigNumber
     ): OldBigNumber {
         try {
+            if (amount.isZero()) return ZERO;
             // All values should use 1e18 fixed point
             // i.e. 1USDC => 1e18 not 1e6
             const amountConvertedEvm = parseFixed(amount.dp(18).toString(), 18)

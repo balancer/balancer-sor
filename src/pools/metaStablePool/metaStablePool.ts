@@ -201,6 +201,7 @@ export class MetaStablePool implements PoolBase {
         amount: OldBigNumber
     ): OldBigNumber {
         try {
+            if (amount.isZero()) return ZERO;
             // All values should use 1e18 fixed point
             // i.e. 1USDC => 1e18 not 1e6
             const amountConvertedEvm = parseFixed(amount.dp(18).toString(), 18)
@@ -234,6 +235,7 @@ export class MetaStablePool implements PoolBase {
         amount: OldBigNumber
     ): OldBigNumber {
         try {
+            if (amount.isZero()) return ZERO;
             // All values should use 1e18 fixed point
             // i.e. 1USDC => 1e18 not 1e6
             const amountConvertedEvm = parseFixed(amount.dp(18).toString(), 18)
