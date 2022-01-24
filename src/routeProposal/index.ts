@@ -59,6 +59,7 @@ export class RouteProposer {
             poolsFilteredDict
         );
 
+        // This must be changed to getBoostedPaths
         const pathsUsingLinear: NewPath[] = getLinearStaBal3Paths(
             tokenIn,
             tokenOut,

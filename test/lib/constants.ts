@@ -17,6 +17,14 @@ export const sorConfigTest = {
         id: 'staBal3Id',
         address: '0x06df3b2bbb68adc8b0e302443692037ed9f91b42',
     },
+    BBausd: {
+        id: '0x8fd162f338b770f7e879030830cde9173367f3010000000000000000000004d8',
+        address: '0x8fd162f338b770f7e879030830cde9173367f301',
+    },
+    wethBBausd: {
+        id: 'weightedWeth-BBausd',
+        address: '0x0000000000000000000000000000000000000004',
+    },
     wethStaBal3: {
         id: 'weightedWethStaBal3Id',
         address: 'weightedWethStaBal3',
