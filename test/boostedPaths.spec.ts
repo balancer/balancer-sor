@@ -38,7 +38,7 @@ import {
 import boostedPools from './testData/boostedPools/multipleBoosted.json';
 
 const maxPools = 10;
-describe('Multiple boosted pools, path creation test', () => {
+describe('multiple boosted pools, path creation test', () => {
     context('Case with no linear pools', () => {
         it('TUSD-BAL', () => {
             const tokenIn = TUSD.address;
@@ -102,6 +102,7 @@ describe('Multiple boosted pools, path creation test', () => {
                 if (reverse) tokens.reverse();
                 for (const tokenIn of tokens[0]) {
                     for (const tokenOut of tokens[1]) {
+                        console.log('getPaths begins');
                         const [, , paths] = getPaths(
                             tokenIn,
                             tokenOut,
@@ -146,7 +147,6 @@ function getPaths(
         tokenIn,
         tokenOut,
         poolsAll,
-        poolsFilteredDict,
         sorConfigTest
     );
     for (const path of boostedPaths) {

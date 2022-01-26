@@ -214,49 +214,137 @@ export function getBoostedPaths(
     tokenIn: string,
     tokenOut: string,
     poolsAllDict: PoolDictionary,
-    poolsFilteredDict: PoolDictionary,
     config: SorConfig
 ): NewPath[] {
+    tokenIn = tokenIn.toLowerCase();
+    tokenOut = tokenOut.toLowerCase();
+    // Should we consider the case (config.BBausd && !config.wethBBausd) ?
+    if (!config.BBausd || !config.wethBBausd) return [];
     // To do: ensure that no duplicate paths are sent to the second part of the SOR.
-    const [semiPathsInToWeth, semiPathsInToBBausd] = getSemiPaths(
-        tokenIn.toLowerCase(),
-        true,
-        poolsAllDict,
-        config
+
+    const weth = config.weth.toLowerCase();
+    const bbausd = config.BBausd.address.toLowerCase();
+
+    const linearPoolsTokenIn = getLinearPools(tokenIn, poolsAllDict);
+    const linearPoolsTokenOut = getLinearPools(tokenOut, poolsAllDict);
+
+    const wethPoolsDict = getPoolsWith(weth, poolsAllDict);
+    // This avoids duplicate paths when weth is a token to trade
+    delete wethPoolsDict[config.wethBBausd.id];
+    const bbausdPoolsDict = getPoolsWith(bbausd, poolsAllDict);
+    delete bbausdPoolsDict[config.wethBBausd.id];
+    const semiPathsInToWeth: NewPath[] = getSemiPaths(
+        tokenIn,
+        linearPoolsTokenIn,
+        wethPoolsDict,
+        weth
     );
-    const [semiPathsWethToOut, semiPathsBBausdToOut] = getSemiPaths(
-        tokenOut.toLowerCase(),
-        false,
-        poolsAllDict,
-        config
+    const semiPathsInToBBausd: NewPath[] = getSemiPaths(
+        tokenIn,
+        linearPoolsTokenIn,
+        bbausdPoolsDict,
+        bbausd
+    );
+    const semiPathsOutToWeth: NewPath[] = getSemiPaths(
+        tokenOut,
+        linearPoolsTokenOut,
+        wethPoolsDict,
+        weth
+    );
+    const semiPathsOutToBBausd: NewPath[] = getSemiPaths(
+        tokenOut,
+        linearPoolsTokenOut,
+        bbausdPoolsDict,
+        bbausd
+    );
+    const semiPathsWethToOut = semiPathsOutToWeth.map((path) =>
+        reversePath(path)
+    );
+    const semiPathsBBausdToOut = semiPathsOutToBBausd.map((path) =>
+        reversePath(path)
     );
     const paths1 = combineSemiPaths(semiPathsInToWeth, semiPathsWethToOut);
     const paths2 = combineSemiPaths(semiPathsInToBBausd, semiPathsBBausdToOut);
-    let paths = paths1.concat(paths2);
 
-    if (config.wethBBausd && config.BBausd) {
-        const WethBBausdPool = poolsAllDict[config.wethBBausd.id];
-        const WethBBausdPath = createPath(
-            [config.weth, config.BBausd.address],
-            [WethBBausdPool]
-        );
-        const BBausdWethPath = createPath(
-            [config.BBausd.address, config.weth],
-            [WethBBausdPool]
-        );
-        const paths3 = combineSemiPaths(
-            semiPathsInToWeth,
-            semiPathsBBausdToOut,
-            WethBBausdPath
-        );
-        const paths4 = combineSemiPaths(
-            semiPathsInToBBausd,
-            semiPathsWethToOut,
-            BBausdWethPath
-        );
-        paths = paths.concat(paths3, paths4);
-    }
+    const WethBBausdPool = poolsAllDict[config.wethBBausd.id];
+    const WethBBausdPath = createPath(
+        [config.weth, config.BBausd.address],
+        [WethBBausdPool]
+    );
+    const BBausdWethPath = createPath(
+        [config.BBausd.address, config.weth],
+        [WethBBausdPool]
+    );
+    const paths3 = combineSemiPaths(
+        semiPathsInToWeth,
+        semiPathsBBausdToOut,
+        WethBBausdPath
+    );
+    const paths4 = combineSemiPaths(
+        semiPathsInToBBausd,
+        semiPathsWethToOut,
+        BBausdWethPath
+    );
+    const paths = paths1.concat(paths2, paths3, paths4);
     return paths;
+}
+
+function getLinearPools(
+    token: string,
+    poolsAllDict: PoolDictionary
+): PoolDictionary {
+    const linearPools: PoolDictionary = {};
+    for (const id in poolsAllDict) {
+        const pool = poolsAllDict[id];
+        const tokensList = pool.tokensList.map((address) =>
+            address.toLowerCase()
+        );
+        if (tokensList.includes(token) && pool.poolType == PoolTypes.Linear) {
+            linearPools[id] = pool;
+        }
+    }
+    return linearPools;
+}
+
+function getPoolsWith(token: string, poolsDict: PoolDictionary) {
+    const poolsWithToken: PoolDictionary = {};
+    for (const id in poolsDict) {
+        const pool = poolsDict[id];
+        const tokensList = pool.tokensList.map((address) =>
+            address.toLowerCase()
+        );
+        if (tokensList.includes(token)) {
+            poolsWithToken[id] = pool;
+        }
+    }
+    return poolsWithToken;
+}
+
+function getSemiPaths(
+    token: string,
+    linearPoolstoken: PoolDictionary,
+    poolsDict: PoolDictionary,
+    toToken: string
+): NewPath[] {
+    if (token == toToken) return [getEmptyPath()];
+    let semiPaths = searchConnectionsTo(token, poolsDict, toToken);
+    for (const id in linearPoolstoken) {
+        const linearPool = linearPoolstoken[id];
+        const simpleLinearPath = createPath(
+            [token, linearPool.address],
+            [linearPool]
+        );
+        const connections = searchConnectionsTo(
+            linearPool.address,
+            poolsDict,
+            toToken
+        );
+        const newSemiPaths = connections.map((connection) =>
+            composePaths([simpleLinearPath, connection])
+        );
+        semiPaths = semiPaths.concat(newSemiPaths);
+    }
+    return semiPaths;
 }
 
 function combineSemiPaths(
@@ -278,126 +366,53 @@ function combineSemiPaths(
     return paths;
 }
 
-function getSemiPaths(
+function searchConnectionsTo(
     token: string,
-    isTokenIn: boolean,
-    poolsAllDict: PoolDictionary,
-    config: SorConfig
-): [semiPathsWeth: NewPath[], semiPathsBBausd: NewPath[]] {
-    let semiPathsWeth: NewPath[] = [];
-    let semiPathsBBausd: NewPath[] = [];
-    const linearPoolsWithThisToken: PoolDictionary = {};
-
-    for (const id in poolsAllDict) {
-        const pool = poolsAllDict[id];
+    poolsDict: PoolDictionary,
+    toToken: string
+): NewPath[] {
+    // this assumes that every pool in poolsDict contains toToken
+    const connections: NewPath[] = [];
+    for (const id in poolsDict) {
+        const pool = poolsDict[id];
         const tokensList = pool.tokensList.map((address) =>
             address.toLowerCase()
         );
         if (tokensList.includes(token)) {
-            if (pool.poolType == PoolTypes.Linear) {
-                linearPoolsWithThisToken[id] = pool;
-            }
+            const connection = createPath([token, toToken], [pool]);
+            connections.push(connection);
         }
     }
-
-    if (token == config.weth.toLowerCase()) {
-        semiPathsWeth.push(getEmptyPath());
-    } else if (token == config.BBausd?.address.toLowerCase()) {
-        semiPathsBBausd.push(getEmptyPath());
-    } else {
-        const [directConnectionsWeth, directConnectionsBBausd] =
-            searchConnections(token, isTokenIn, poolsAllDict, config);
-        semiPathsWeth = directConnectionsWeth;
-        semiPathsBBausd = directConnectionsBBausd;
-
-        for (const id in linearPoolsWithThisToken) {
-            const linearBpt = linearPoolsWithThisToken[id].address;
-            const linearPool = linearPoolsWithThisToken[id];
-            const [linearBptConnectionsWeth, linearBptConnectionsBBausd] =
-                searchConnections(linearBpt, isTokenIn, poolsAllDict, config);
-            let newConnectionsBBausd: NewPath[];
-            let newConnectionsWeth: NewPath[];
-            if (isTokenIn) {
-                const linearPart = createPath([token, linearBpt], [linearPool]);
-                newConnectionsBBausd = linearBptConnectionsBBausd.map(
-                    (connection) => composePaths([linearPart, connection])
-                );
-                newConnectionsWeth = linearBptConnectionsWeth.map(
-                    (connection) => composePaths([linearPart, connection])
-                );
-            } else {
-                const linearPart = createPath([linearBpt, token], [linearPool]);
-                newConnectionsBBausd = linearBptConnectionsBBausd.map(
-                    (connection) => composePaths([connection, linearPart])
-                );
-                newConnectionsWeth = linearBptConnectionsWeth.map(
-                    (connection) => composePaths([connection, linearPart])
-                );
-            }
-            semiPathsWeth = concat(semiPathsWeth, newConnectionsWeth);
-            semiPathsBBausd = concat(semiPathsBBausd, newConnectionsBBausd);
-        }
-    }
-    return [semiPathsWeth, semiPathsBBausd];
+    return connections;
 }
 
-function searchConnections(
-    token: string,
-    isTokenIn: boolean,
-    poolsAllDict: PoolDictionary,
-    config: SorConfig
-): [NewPath[], NewPath[]] {
-    const poolsWithThisToken: PoolDictionary = {};
-    for (const id in poolsAllDict) {
-        const pool = poolsAllDict[id];
-        const tokensList = pool.tokensList.map((address) =>
-            address.toLowerCase()
-        );
-        if (tokensList.includes(token)) {
-            poolsWithThisToken[id] = pool;
-        }
+function reversePath(path: NewPath): NewPath {
+    let swaps = path.swaps.map((swap) => reverseSwap(swap));
+    swaps = swaps.reverse();
+    const poolPairData = path.poolPairData.reverse();
+    const pools = path.pools.reverse();
+    let id = '';
+    for (const pool of pools) {
+        id += pool.address;
     }
-    const connectionsWeth: NewPath[] = [];
-    const connectionsBBausd: NewPath[] = [];
-    for (const id in poolsWithThisToken) {
-        const tokensList = poolsWithThisToken[id].tokensList.map((address) =>
-            address.toLowerCase()
-        );
-        if (tokensList.includes(config.weth.toLowerCase())) {
-            let semipath: NewPath;
-            if (isTokenIn)
-                semipath = createPath(
-                    [token, config.weth],
-                    [poolsWithThisToken[id]]
-                );
-            else
-                semipath = createPath(
-                    [config.weth, token],
-                    [poolsWithThisToken[id]]
-                );
-            connectionsWeth.push(semipath);
-        }
-        if (
-            config.BBausd &&
-            poolsWithThisToken[id].tokensList.includes(
-                config.BBausd.address.toLowerCase()
-            )
-        ) {
-            let semipath: NewPath;
-            if (isTokenIn)
-                semipath = createPath(
-                    [token, config.BBausd.address],
-                    [poolsWithThisToken[id]]
-                );
-            else
-                semipath = createPath(
-                    [config.BBausd.address, token],
-                    [poolsWithThisToken[id]]
-                );
-            connectionsBBausd.push(semipath);
-        }
-    }
-    return [connectionsWeth, connectionsBBausd];
+    const result: NewPath = {
+        id: id,
+        swaps: swaps,
+        poolPairData: poolPairData,
+        limitAmount: Zero, // this is expected to be computed later
+        pools: pools,
+    };
+    return result;
+}
+
+function reverseSwap(swap: Swap): Swap {
+    return {
+        pool: swap.pool,
+        tokenIn: swap.tokenOut,
+        tokenOut: swap.tokenIn,
+        tokenInDecimals: swap.tokenOutDecimals,
+        tokenOutDecimals: swap.tokenInDecimals,
+    };
 }
 
 function getEmptyPath(): NewPath {
