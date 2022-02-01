@@ -94,6 +94,9 @@ export interface SubgraphPoolBase {
     wrappedIndex?: number;
     lowerTarget?: string;
     upperTarget?: string;
+
+    // Gyro2 specific field
+    priceBounds?: PriceBoundData;
 }
 
 export type SubgraphToken = {
@@ -214,3 +217,10 @@ export interface TokenPriceService {
 export interface PoolDataService {
     getPools(): Promise<SubgraphPoolBase[]>;
 }
+
+export type PriceBoundData = {
+    lowerBound: string;
+    upperBound: string;
+    tokenInAddress: string;
+    tokenOutAddress: string;
+};

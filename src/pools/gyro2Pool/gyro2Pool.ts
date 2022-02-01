@@ -1,6 +1,8 @@
 import { getAddress } from '@ethersproject/address';
+import { WeiPerEther as ONE } from '@ethersproject/constants';
 import { parseFixed, formatFixed, BigNumber } from '@ethersproject/bignumber';
 import { BigNumber as OldBigNumber, bnum } from '../../utils/bignumber';
+
 import {
     PoolBase,
     PoolPairBase,
@@ -9,6 +11,7 @@ import {
     SubgraphToken,
     SwapTypes,
     SubgraphPoolBase,
+    PriceBoundData,
 } from 'types';
 import { isSameAddress } from '../../utils';
 import {
@@ -19,8 +22,10 @@ import {
     _calculateNewSpotPrice,
     _reduceFee,
     _addFee,
+    _derivativeSpotPriceAfterSwapExactTokenInForTokenOut,
+    _derivativeSpotPriceAfterSwapTokenInForExactTokenOut,
+    _getNormalizedLiquidity,
 } from './gyro2Math';
-import { WeiPerEther as ONE } from '@ethersproject/constants';
 
 export type Gyro2PoolPairData = PoolPairBase & {
     sqrtAlpha: BigNumber;
@@ -32,7 +37,6 @@ export type Gyro2PoolToken = Pick<
     'address' | 'balance' | 'decimals'
 >;
 
-// TODO: getNormalizedLiquidity, _derivativeSpotPriceAfterSwapExactTokenInForTokenOut, _derivativeSpotPriceAfterSwapTokenInForExactTokenOut implementations
 export class Gyro2Pool implements PoolBase {
     poolType: PoolTypes = PoolTypes.Gyro2;
     swapPairType: SwapPairType;
@@ -42,19 +46,28 @@ export class Gyro2Pool implements PoolBase {
     tokens: Gyro2PoolToken[];
     swapFee: BigNumber;
     totalShares: BigNumber;
+    priceBounds: PriceBoundData;
 
     // Max In/Out Ratios
     MAX_IN_RATIO = parseFixed('0.3', 18);
     MAX_OUT_RATIO = parseFixed('0.3', 18);
 
     static fromPool(pool: SubgraphPoolBase): Gyro2Pool {
+        if (!pool.priceBounds) throw new Error('Gyro2Pool missing priceBounds');
+        const addresses = pool.tokens.map((t) => t.address);
+        if (!addresses.includes(pool.priceBounds.tokenInAddress))
+            throw new Error('Gyro2Pool priceBounds tokenIn not in tokens');
+        if (!addresses.includes(pool.priceBounds.tokenOutAddress))
+            throw new Error('Gyro2Pool priceBounds tokenOut not in tokens');
+
         return new Gyro2Pool(
             pool.id,
             pool.address,
             pool.swapFee,
             pool.totalShares,
-            pool.tokens,
-            pool.tokensList
+            pool.tokens as Gyro2PoolToken[],
+            pool.tokensList,
+            pool.priceBounds as PriceBoundData
         );
     }
 
@@ -64,7 +77,8 @@ export class Gyro2Pool implements PoolBase {
         swapFee: string,
         totalShares: string,
         tokens: Gyro2PoolToken[],
-        tokensList: string[]
+        tokensList: string[],
+        priceBounds: PriceBoundData
     ) {
         this.id = id;
         this.address = address;
@@ -72,6 +86,7 @@ export class Gyro2Pool implements PoolBase {
         this.totalShares = parseFixed(totalShares, 18);
         this.tokens = tokens;
         this.tokensList = tokensList;
+        this.priceBounds = priceBounds;
     }
 
     setTypeForSwap(type: SwapPairType): void {
@@ -95,6 +110,20 @@ export class Gyro2Pool implements PoolBase {
         const balanceOut = tO.balance;
         const decimalsOut = tO.decimals;
 
+        const sqrtAlpha =
+            tI.address === this.priceBounds.tokenInAddress
+                ? parseFixed(this.priceBounds.lowerBound, 18).pow(1 / 2)
+                : ONE.div(parseFixed(this.priceBounds.upperBound, 18)).pow(
+                      1 / 2
+                  );
+
+        const sqrtBeta =
+            tI.address === this.priceBounds.tokenInAddress
+                ? parseFixed(this.priceBounds.upperBound, 18).pow(1 / 2)
+                : ONE.div(parseFixed(this.priceBounds.lowerBound, 18)).pow(
+                      1 / 2
+                  );
+
         // TODO: sqrtAlpha, sqrtBeta to be added
         const poolPairData: Gyro2PoolPairData = {
             id: this.id,
@@ -107,13 +136,33 @@ export class Gyro2Pool implements PoolBase {
             balanceIn: parseFixed(balanceIn, decimalsIn),
             balanceOut: parseFixed(balanceOut, decimalsOut),
             swapFee: this.swapFee,
+            sqrtAlpha,
+            sqrtBeta,
         };
 
         return poolPairData;
     }
 
-    // getNormalizedLiquidity(poolPairData: Gyro2PoolPairData): OldBigNumber {
-    // }
+    getNormalizedLiquidity(poolPairData: Gyro2PoolPairData): OldBigNumber {
+        const balances = [poolPairData.balanceIn, poolPairData.balanceOut];
+        const invariant = _calculateInvariant(
+            balances,
+            poolPairData.sqrtAlpha,
+            poolPairData.sqrtBeta
+        );
+        const [virtualParamIn] = _findVirtualParams(
+            invariant,
+            poolPairData.sqrtAlpha,
+            poolPairData.sqrtBeta
+        );
+        const normalisedLiquidity = _getNormalizedLiquidity(
+            balances,
+            virtualParamIn,
+            poolPairData.swapFee
+        );
+
+        return bnum(formatFixed(normalisedLiquidity, poolPairData.decimalsOut));
+    }
 
     getLimitAmountSwap(
         poolPairData: PoolPairBase,
@@ -155,13 +204,13 @@ export class Gyro2Pool implements PoolBase {
         exact: boolean
     ): OldBigNumber {
         const balances = [poolPairData.balanceIn, poolPairData.balanceOut];
-        const currentInvariant = _calculateInvariant(
+        const invariant = _calculateInvariant(
             balances,
             poolPairData.sqrtAlpha,
             poolPairData.sqrtBeta
         );
         const [virtualParamIn, virtualParamOut] = _findVirtualParams(
-            currentInvariant,
+            invariant,
             poolPairData.sqrtAlpha,
             poolPairData.sqrtBeta
         );
@@ -174,7 +223,7 @@ export class Gyro2Pool implements PoolBase {
             inAmountLessFee,
             virtualParamIn,
             virtualParamOut,
-            currentInvariant
+            invariant
         );
 
         return bnum(formatFixed(outAmount, poolPairData.decimalsOut));
@@ -185,27 +234,29 @@ export class Gyro2Pool implements PoolBase {
         amount: OldBigNumber,
         exact: boolean
     ): OldBigNumber {
+        const outAmount = parseFixed(
+            amount.toString(),
+            poolPairData.decimalsOut
+        );
         const balances = [poolPairData.balanceIn, poolPairData.balanceOut];
-        const currentInvariant = _calculateInvariant(
+        const invariant = _calculateInvariant(
             balances,
             poolPairData.sqrtAlpha,
             poolPairData.sqrtBeta
         );
         const [virtualParamIn, virtualParamOut] = _findVirtualParams(
-            currentInvariant,
+            invariant,
             poolPairData.sqrtAlpha,
             poolPairData.sqrtBeta
         );
-
         const inAmountLessFee = _calcInGivenOut(
             poolPairData.balanceIn,
             poolPairData.balanceOut,
-            parseFixed(amount.toString(), poolPairData.decimalsOut),
+            outAmount,
             virtualParamIn,
             virtualParamOut,
-            currentInvariant
+            invariant
         );
-
         const inAmount = _addFee(inAmountLessFee, poolPairData.swapFee);
 
         return bnum(formatFixed(inAmount, poolPairData.decimalsIn));
@@ -215,29 +266,35 @@ export class Gyro2Pool implements PoolBase {
         poolPairData: Gyro2PoolPairData,
         amount: OldBigNumber
     ): OldBigNumber {
-        // Compute the reserve balances of the two assets after the swap (say x and y). This should include any fees.
-        const inAmount = parseFixed(amount.toString(), poolPairData.decimalsIn);
-
-        const outAmount = parseFixed(
-            this._exactTokenInForTokenOut(
-                poolPairData,
-                amount,
-                false
-            ).toString(),
-            poolPairData.decimalsOut
-        );
-
-        const newBalances = [
-            poolPairData.balanceIn.add(inAmount),
-            poolPairData.balanceOut.sub(outAmount),
-        ];
-
-        const newSpotPrice = _calculateNewSpotPrice(
-            newBalances,
+        const balances = [poolPairData.balanceIn, poolPairData.balanceOut];
+        const invariant = _calculateInvariant(
+            balances,
             poolPairData.sqrtAlpha,
             poolPairData.sqrtBeta
         );
-
+        const [virtualParamIn, virtualParamOut] = _findVirtualParams(
+            invariant,
+            poolPairData.sqrtAlpha,
+            poolPairData.sqrtBeta
+        );
+        const inAmount = parseFixed(amount.toString(), poolPairData.decimalsIn);
+        const inAmountLessFee = _reduceFee(inAmount, poolPairData.swapFee);
+        const outAmount = _calcOutGivenIn(
+            poolPairData.balanceIn,
+            poolPairData.balanceOut,
+            inAmountLessFee,
+            virtualParamIn,
+            virtualParamOut,
+            invariant
+        );
+        const newSpotPrice = _calculateNewSpotPrice(
+            balances,
+            inAmount,
+            outAmount,
+            virtualParamIn,
+            virtualParamOut,
+            poolPairData.swapFee
+        );
         return bnum(formatFixed(newSpotPrice, poolPairData.decimalsIn));
     }
 
@@ -245,42 +302,114 @@ export class Gyro2Pool implements PoolBase {
         poolPairData: Gyro2PoolPairData,
         amount: OldBigNumber
     ): OldBigNumber {
-        // Compute the reserve balances of the two assets after the swap (say x and y). This should include any fees.
         const outAmount = parseFixed(
             amount.toString(),
             poolPairData.decimalsOut
         );
-
-        const inAmount = parseFixed(
-            this._tokenInForExactTokenOut(
-                poolPairData,
-                amount,
-                false
-            ).toString(),
-            poolPairData.decimalsIn
-        );
-
-        const newBalances = [
-            poolPairData.balanceIn.add(inAmount),
-            poolPairData.balanceOut.sub(outAmount),
-        ];
-
-        const newSpotPrice = _calculateNewSpotPrice(
-            newBalances,
+        const balances = [poolPairData.balanceIn, poolPairData.balanceOut];
+        const invariant = _calculateInvariant(
+            balances,
             poolPairData.sqrtAlpha,
             poolPairData.sqrtBeta
+        );
+        const [virtualParamIn, virtualParamOut] = _findVirtualParams(
+            invariant,
+            poolPairData.sqrtAlpha,
+            poolPairData.sqrtBeta
+        );
+        const inAmountLessFee = _calcInGivenOut(
+            poolPairData.balanceIn,
+            poolPairData.balanceOut,
+            outAmount,
+            virtualParamIn,
+            virtualParamOut,
+            invariant
+        );
+        const inAmount = _addFee(inAmountLessFee, poolPairData.swapFee);
+        const newSpotPrice = _calculateNewSpotPrice(
+            balances,
+            inAmount,
+            outAmount,
+            virtualParamIn,
+            virtualParamOut,
+            poolPairData.swapFee
         );
 
         return bnum(formatFixed(newSpotPrice, poolPairData.decimalsIn));
     }
 
-    // _derivativeSpotPriceAfterSwapExactTokenInForTokenOut(
-    //     poolPairData: Gyro2PoolPairData,
-    //     amount: OldBigNumber
-    // ): OldBigNumber {}
+    _derivativeSpotPriceAfterSwapExactTokenInForTokenOut(
+        poolPairData: Gyro2PoolPairData,
+        amount: OldBigNumber
+    ): OldBigNumber {
+        const balances = [poolPairData.balanceIn, poolPairData.balanceOut];
+        const invariant = _calculateInvariant(
+            balances,
+            poolPairData.sqrtAlpha,
+            poolPairData.sqrtBeta
+        );
+        const [virtualParamIn, virtualParamOut] = _findVirtualParams(
+            invariant,
+            poolPairData.sqrtAlpha,
+            poolPairData.sqrtBeta
+        );
+        const inAmount = parseFixed(amount.toString(), poolPairData.decimalsIn);
+        const inAmountLessFee = _reduceFee(inAmount, poolPairData.swapFee);
+        const outAmount = _calcOutGivenIn(
+            poolPairData.balanceIn,
+            poolPairData.balanceOut,
+            inAmountLessFee,
+            virtualParamIn,
+            virtualParamOut,
+            invariant
+        );
+        const derivative = _derivativeSpotPriceAfterSwapExactTokenInForTokenOut(
+            balances,
+            outAmount,
+            virtualParamOut
+        );
 
-    // _derivativeSpotPriceAfterSwapTokenInForExactTokenOut(
-    //     poolPairData: Gyro2PoolPairData,
-    //     amount: OldBigNumber
-    // ): OldBigNumber {}
+        return bnum(formatFixed(derivative, poolPairData.decimalsIn));
+    }
+
+    _derivativeSpotPriceAfterSwapTokenInForExactTokenOut(
+        poolPairData: Gyro2PoolPairData,
+        amount: OldBigNumber
+    ): OldBigNumber {
+        const outAmount = parseFixed(
+            amount.toString(),
+            poolPairData.decimalsOut
+        );
+        const balances = [poolPairData.balanceIn, poolPairData.balanceOut];
+        const invariant = _calculateInvariant(
+            balances,
+            poolPairData.sqrtAlpha,
+            poolPairData.sqrtBeta
+        );
+        const [virtualParamIn, virtualParamOut] = _findVirtualParams(
+            invariant,
+            poolPairData.sqrtAlpha,
+            poolPairData.sqrtBeta
+        );
+        const inAmountLessFee = _calcInGivenOut(
+            poolPairData.balanceIn,
+            poolPairData.balanceOut,
+            outAmount,
+            virtualParamIn,
+            virtualParamOut,
+            invariant
+        );
+        const inAmount = _addFee(inAmountLessFee, poolPairData.swapFee);
+
+        const derivative = _derivativeSpotPriceAfterSwapTokenInForExactTokenOut(
+            balances,
+            inAmount,
+            virtualParamIn,
+            outAmount,
+            virtualParamOut,
+            poolPairData.swapFee
+        );
+
+        return bnum(formatFixed(derivative, poolPairData.decimalsIn));
+    }
 }
