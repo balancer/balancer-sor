@@ -1,17 +1,34 @@
-import { BigNumber } from '@ethersproject/bignumber';
+import { BigNumber, parseFixed } from '@ethersproject/bignumber';
 import { WeiPerEther as ONE } from '@ethersproject/constants';
 import bn from 'bignumber.js';
 
 // Swap limits: amounts swapped may not be larger than this percentage of total balance.
-const _MAX_IN_RATIO: BigNumber = BigNumber.from(0.3);
-const _MAX_OUT_RATIO: BigNumber = BigNumber.from(0.3);
+
+const _MAX_IN_RATIO: BigNumber = parseFixed('0.3', 18);
+const _MAX_OUT_RATIO: BigNumber = parseFixed('0.3', 18);
 
 // Helpers
-function _squareRoot(value: BigNumber): BigNumber {
+export function _squareRoot(value: BigNumber): BigNumber {
     return BigNumber.from(
         new bn(value.mul(ONE).toString()).sqrt().toFixed().split('.')[0]
     );
 }
+
+export function _normalizeBalances(
+    balances: BigNumber[],
+    decimalsIn: number,
+    decimalsOut: number
+): BigNumber[] {
+    const scalingFactors = [
+        parseFixed('1', decimalsIn),
+        parseFixed('1', decimalsOut),
+    ];
+
+    return balances.map((bal, index) =>
+        bal.mul(ONE).div(scalingFactors[index])
+    );
+}
+
 /////////
 /// Fee calculations
 /////////
@@ -180,24 +197,24 @@ export function _calculateNewSpotPrice(
     swapFee: BigNumber
 ): BigNumber {
     /**********************************************************************************************
-      // dX = incrX  = amountIn  > 0                                                               //
-      // dY = incrY  = amountOut < 0                                                               //
-      // x = balanceIn             x' = x +  virtualParamX                                         //
-      // y = balanceOut            y' = y +  virtualParamY                                         //
-      // s = swapFee                                                                               //
-      // L  = inv.Liq                1   /     x' + (1 - s) * dx        \                          //
-      //                     p_y =  --- |   --------------------------  |                          //
-      // x' = virtIn                1-s  \         y' + dy              /                          //
-      // y' = virtOut                                                                              //
-      // Note that dy < 0 < dx.                                                                    //
-      **********************************************************************************************/
+        // dX = incrX  = amountIn  > 0                                                               //
+        // dY = incrY  = amountOut < 0                                                               //
+        // x = balanceIn             x' = x +  virtualParamX                                         //
+        // y = balanceOut            y' = y +  virtualParamY                                         //
+        // s = swapFee                                                                               //
+        // L  = inv.Liq                1   /     x' + (1 - s) * dx        \                          //
+        //                     p_y =  --- |   --------------------------  |                          //
+        // x' = virtIn                1-s  \         y' + dy              /                          //
+        // y' = virtOut                                                                              //
+        // Note that dy < 0 < dx.                                                                    //
+        **********************************************************************************************/
 
     const afterFeeMultiplier = ONE.sub(swapFee); // 1 - s
     const virtIn = balances[0].add(virtualParamIn); // x + virtualParamX = x'
-    const numerator = virtIn.add(afterFeeMultiplier.mul(inAmount)); // x' + (1 - s) * dx
+    const numerator = virtIn.add(afterFeeMultiplier.mul(inAmount).div(ONE)); // x' + (1 - s) * dx
     const virtOut = balances[1].add(virtualParamOut); // y + virtualParamY = y'
-    const denominator = afterFeeMultiplier.mul(virtOut.sub(outAmount)); // (1 - s) * (y' + dy)
-    const newSpotPrice = numerator.div(denominator);
+    const denominator = afterFeeMultiplier.mul(virtOut.sub(outAmount)).div(ONE); // (1 - s) * (y' + dy)
+    const newSpotPrice = numerator.mul(ONE).div(denominator);
 
     return newSpotPrice;
 }
@@ -237,8 +254,8 @@ export function _derivativeSpotPriceAfterSwapExactTokenInForTokenOut(
 export function _derivativeSpotPriceAfterSwapTokenInForExactTokenOut(
     balances: BigNumber[],
     inAmount: BigNumber,
-    virtualParamIn: BigNumber,
     outAmount: BigNumber,
+    virtualParamIn: BigNumber,
     virtualParamOut: BigNumber,
     swapFee: BigNumber
 ): BigNumber {
