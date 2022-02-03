@@ -9,7 +9,7 @@ import {
     getBoostedPaths,
 } from '../src/routeProposal/filtering';
 import { calculatePathLimits } from '../src/routeProposal/pathLimits';
-import { checkPath } from './lib/testHelpers';
+import { simpleCheckPath } from './lib/testHelpers';
 import {
     DAI,
     aDAI,
@@ -17,7 +17,6 @@ import {
     USDC,
     bUSDC,
     BAL,
-    STABAL3PHANTOM,
     TestToken,
     MKR,
     GUSD,
@@ -32,6 +31,7 @@ import {
     AAVE_USDT,
     sorConfigTest,
     sorConfigKovan,
+    bbaUSD,
 } from './lib/constants';
 
 // Multiple boosted pools
@@ -43,19 +43,27 @@ describe('multiple boosted pools, path creation test', () => {
         it('TUSD-BAL', () => {
             const tokenIn = TUSD.address;
             const tokenOut = BAL.address;
-            const [, , paths] = getPaths(
+            const [paths, , boostedPaths] = getPaths(
                 tokenIn,
                 tokenOut,
                 SwapTypes.SwapExactIn,
                 boostedPools.pools,
                 maxPools
             );
+            assert.isTrue(
+                simpleCheckPath(
+                    paths[1],
+                    ['weightedTusdWeth', 'weightedWeth-BBausd', 'bbaUSD-BAL'],
+                    [TUSD.address, WETH.address, bbaUSD.address, BAL.address]
+                )
+            );
+            assert.equal(boostedPaths.length, 2);
             assert.equal(paths.length, 4);
         });
         it('BAL-TUSD', () => {
             const tokenIn = BAL.address;
             const tokenOut = TUSD.address;
-            const [, , paths] = getPaths(
+            const [paths, , boostedPaths] = getPaths(
                 tokenIn,
                 tokenOut,
                 SwapTypes.SwapExactIn,
@@ -69,7 +77,7 @@ describe('multiple boosted pools, path creation test', () => {
         it('DAI-BAL', () => {
             const tokenIn = DAI.address;
             const tokenOut = BAL.address;
-            const [, , paths] = getPaths(
+            const [paths, , boostedPaths] = getPaths(
                 tokenIn,
                 tokenOut,
                 SwapTypes.SwapExactIn,
@@ -81,7 +89,7 @@ describe('multiple boosted pools, path creation test', () => {
         it('BAL-DAI', () => {
             const tokenIn = BAL.address;
             const tokenOut = DAI.address;
-            const [, , paths] = getPaths(
+            const [paths, , boostedPaths] = getPaths(
                 tokenIn,
                 tokenOut,
                 SwapTypes.SwapExactIn,
@@ -91,19 +99,18 @@ describe('multiple boosted pools, path creation test', () => {
             assert.equal(paths.length, 4);
         });
     });
-    context('BBausd and Weth to Dai', () => {
+    context('bbausd and Weth to Dai', () => {
         it('four combinations', () => {
             const binaryOption = [true, false];
             for (const reverse of binaryOption) {
                 const tokens = [
-                    [WETH.address, sorConfigTest.BBausd.address],
+                    [WETH.address, sorConfigTest.bbausd.address],
                     [DAI.address],
                 ];
                 if (reverse) tokens.reverse();
                 for (const tokenIn of tokens[0]) {
                     for (const tokenOut of tokens[1]) {
-                        console.log('getPaths begins');
-                        const [, , paths] = getPaths(
+                        const [paths, , boostedPaths] = getPaths(
                             tokenIn,
                             tokenOut,
                             SwapTypes.SwapExactIn,
@@ -111,12 +118,21 @@ describe('multiple boosted pools, path creation test', () => {
                             maxPools
                         );
                         assert.equal(paths.length, 2);
+                        if (
+                            tokenIn == WETH.address ||
+                            tokenOut == WETH.address
+                        ) {
+                            assert.equal(boostedPaths.length, 2);
+                        } else {
+                            assert.equal(boostedPaths.length, 0);
+                        }
                     }
                 }
             }
         });
     });
-    // To do: more thorough tests should be applied to verify correctness of paths
+    // To do: consider the case WETH to bbaUSD,
+    // verify correctness of some more paths using simpleCheckPath
 });
 
 function getPaths(
@@ -149,12 +165,6 @@ function getPaths(
         poolsAll,
         sorConfigTest
     );
-    for (const path of boostedPaths) {
-        console.log('Path begins');
-        for (const swap of path.swaps) {
-            console.log(swap.tokenIn, ' ', swap.tokenOut);
-        }
-    }
     pathData = pathData.concat(boostedPaths);
     const [paths] = calculatePathLimits(pathData, swapType);
     return [paths, poolsAll, boostedPaths];

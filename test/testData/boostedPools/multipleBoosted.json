@@ -3,7 +3,7 @@
         {
             "address": "0x8fd162f338b770f7e879030830cde9173367f301",
             "amp": "400",
-            "id": "0x8fd162f338b770f7e879030830cde9173367f3010000000000000000000004d8",
+            "id": "bbaUSD-Pool",
             "mainIndex": 0,
             "poolType": "StablePhantom",
             "swapEnabled": true,
@@ -14,7 +14,7 @@
                     "balance": "5192296858520354.535602194932501075",
                     "decimals": 18,
                     "priceRate": "1",
-                    "symbol": "BB-aUSD",
+                    "symbol": "bbaUSD",
                     "weight": null
                 },
                 {
@@ -22,7 +22,7 @@
                     "balance": "4817.7627626993040385",
                     "decimals": 18,
                     "priceRate": "1",
-                    "symbol": "BB-AUSDC",
+                    "symbol": "bbaUSDC",
                     "weight": null
                 },
                 {
@@ -30,7 +30,7 @@
                     "balance": "4803.335614256025401",
                     "decimals": 18,
                     "priceRate": "1",
-                    "symbol": "BB-AUSDT",
+                    "symbol": "bbaUSDT",
                     "weight": null
                 },
                 {
@@ -38,7 +38,7 @@
                     "balance": "4851.9948738150390637",
                     "decimals": 18,
                     "priceRate": "1",
-                    "symbol": "BB-ADAI",
+                    "symbol": "bbaDAI",
                     "weight": null
                 }
             ],
@@ -74,7 +74,7 @@
                     "balance": "5192296858529909.865767797025181595",
                     "decimals": 18,
                     "priceRate": "1",
-                    "symbol": "BB-aUSDC",
+                    "symbol": "bbaUSDC",
                     "weight": null
                 },
                 {
@@ -118,7 +118,7 @@
                     "balance": "5192296858529924.23290923961439575",
                     "decimals": 18,
                     "priceRate": "1",
-                    "symbol": "BB-aUSDT",
+                    "symbol": "bbaUSDT",
                     "weight": null
                 },
                 {
@@ -162,7 +162,7 @@
                     "balance": "5192296858529875.633656681290156395",
                     "decimals": 18,
                     "priceRate": "1",
-                    "symbol": "BB-aDAI",
+                    "symbol": "bbaDAI",
                     "weight": null
                 },
                 {
@@ -250,7 +250,7 @@
                     "balance": "4817.7627626993040385",
                     "decimals": 18,
                     "priceRate": "1.2",
-                    "symbol": "BB-aUSD",
+                    "symbol": "bbaUSD",
                     "weight": null
                 },
                 {
@@ -274,7 +274,7 @@
         {
             "address": "0x0000000000000000000000000000000000000003",
             "amp": "400",
-            "id": "0x0000000000000000000000000000000000000003000000000000000000000003",
+            "id": "BBaUSD-TUSD",
             "mainIndex": 0,
             "poolType": "StablePhantom",
             "swapEnabled": true,
@@ -293,11 +293,11 @@
                     "balance": "4817.7627626993040385",
                     "decimals": 18,
                     "priceRate": "1.2",
-                    "symbol": "BB-aUSD",
+                    "symbol": "bbaUSD",
                     "weight": null
                 },
                 {
-                    "address": "0x0000000000085d4780B73119b644AE5ecd22b376",
+                    "address": "0x0000000000085d4780b73119b644ae5ecd22b376",
                     "balance": "4803.335614256025401",
                     "decimals": 18,
                     "priceRate": "1",
@@ -308,7 +308,7 @@
             "tokensList": [
                 "0x0000000000000000000000000000000000000003",
                 "0x8fd162f338b770f7e879030830cde9173367f301",
-                "0x0000000000085d4780B73119b644AE5ecd22b376"
+                "0x0000000000085d4780b73119b644ae5ecd22b376"
             ],
             "totalShares": "14473.092928301396719020",
             "totalWeight": "0",
@@ -317,7 +317,7 @@
         {
             "address": "0x0000000000000000000000000000000000000013",
             "amp": "400",
-            "id": "0x0000000000000000000000000000000000000013000000000000000000000013",
+            "id": "bbaUSD-BAL",
             "mainIndex": 0,
             "poolType": "StablePhantom",
             "swapEnabled": true,
@@ -328,7 +328,7 @@
                     "balance": "5192296858520354.535602194932501075",
                     "decimals": 18,
                     "priceRate": "1",
-                    "symbol": "BBaUSD-BAL",
+                    "symbol": "bbaUSD-BAL",
                     "weight": null
                 },
                 {
@@ -336,7 +336,7 @@
                     "balance": "4817.7627626993040385",
                     "decimals": 18,
                     "priceRate": "1.2",
-                    "symbol": "BB-aUSD",
+                    "symbol": "bbaUSD",
                     "weight": null
                 },
                 {
@@ -380,7 +380,7 @@
                     "decimals": 18,
                     "weight": "50",
                     "id": "weightedWeth-BBausd-0x8fd162f338b770f7e879030830cde9173367f301",
-                    "symbol": "BB-aUSD",
+                    "symbol": "bbaUSD",
                     "priceRate": "1"
                 }
             ],
@@ -443,17 +443,17 @@
                     "priceRate": "1"
                 },
                 {
-                    "address": "0x0000000000085d4780B73119b644AE5ecd22b376",
+                    "address": "0x0000000000085d4780b73119b644ae5ecd22b376",
                     "balance": "20000000.78213445",
                     "decimals": 18,
                     "weight": "50",
-                    "id": "weightedTusdWeth-0x0000000000085d4780B73119b644AE5ecd22b376",
+                    "id": "weightedTusdWeth-0x0000000000085d4780b73119b644ae5ecd22b376",
                     "symbol": "TUSD",
                     "priceRate": "1"
                 }
             ],
             "tokensList": [
-                "0x0000000000085d4780B73119b644AE5ecd22b376",
+                "0x0000000000085d4780b73119b644ae5ecd22b376",
                 "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2"
             ],
             "totalWeight": "100",

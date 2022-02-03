@@ -15,8 +15,8 @@ import {
 import {
     filterPoolsOfInterest,
     filterHopPools,
-    getLinearStaBal3Paths,
     parseToPoolsDict,
+    getBoostedPaths,
 } from '../src/routeProposal/filtering';
 import { calculatePathLimits } from '../src/routeProposal/pathLimits';
 import { LinearPool, PairTypes } from '../src/pools/linearPool/linearPool';
@@ -28,7 +28,7 @@ import {
     USDC,
     bUSDC,
     BAL,
-    STABAL3PHANTOM,
+    bbaUSD,
     TestToken,
     MKR,
     GUSD,
@@ -128,7 +128,7 @@ describe('linear pool tests', () => {
             expect(amount.toString()).to.eq('1485000000.122222221232222221');
         });
 
-        it(`debug getLimitAmountSwap, SwapExactIn, TokenToBpt should return valid limit`, async () => {
+        it(`getLimitAmountSwap, SwapExactIn, TokenToBpt should return valid limit`, async () => {
             const tokenIn = DAI.address;
             const tokenOut = bDAI.address;
             const swapType = SwapTypes.SwapExactIn;
@@ -194,35 +194,39 @@ describe('linear pool tests', () => {
 
     context('Considering Linear Paths Only', () => {
         context('Using Single Linear Pool', () => {
+            const config = {
+                chainId: 99,
+                weth: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2',
+                vault: '0xeefba1e63905ef1d7acba5a8513c70307c1ce441',
+            };
             it('getPathsUsingLinearPool return empty paths', () => {
                 const tokenIn = DAI.address;
                 const tokenOut = USDC.address;
                 const maxPools = 4;
-
-                const [, , pathsUsingLinear] = getPaths(
+                const [, , boostedPaths] = getPaths(
                     tokenIn,
                     tokenOut,
                     SwapTypes.SwapExactIn,
                     singleLinear.pools,
-                    maxPools
+                    maxPools,
+                    config
                 );
-                expect(pathsUsingLinear).to.be.empty;
+                expect(boostedPaths).to.be.empty;
             });
 
             it('getPathsUsingLinearPool return empty paths', () => {
                 const tokenIn = DAI.address;
                 const tokenOut = USDC.address;
                 const maxPools = 4;
-
-                const [, , pathsUsingLinear] = getPaths(
+                const [, , boostedPaths] = getPaths(
                     tokenIn,
                     tokenOut,
                     SwapTypes.SwapExactIn,
                     singleLinear.pools,
-                    maxPools
+                    maxPools,
+                    config
                 );
-
-                expect(pathsUsingLinear).to.be.empty;
+                expect(boostedPaths).to.be.empty;
             });
         });
 
@@ -233,7 +237,7 @@ describe('linear pool tests', () => {
                 const tokenOut = bTUSD.address;
                 const maxPools = 4;
 
-                const [allPaths, poolsAllDict, pathsUsingLinear] = getPaths(
+                const [allPaths, poolsAllDict, boostedPaths] = getPaths(
                     tokenIn,
                     tokenOut,
                     SwapTypes.SwapExactIn,
@@ -241,7 +245,7 @@ describe('linear pool tests', () => {
                     maxPools
                 );
 
-                expect(pathsUsingLinear).to.be.empty;
+                expect(boostedPaths).to.be.empty;
                 expect(allPaths.length).to.equal(1);
                 checkPath(
                     ['linearTUSD'],
@@ -257,7 +261,7 @@ describe('linear pool tests', () => {
                 const tokenOut = USDC.address;
                 const maxPools = 4;
 
-                const [allPaths, , pathsUsingLinear] = getPaths(
+                const [allPaths, , boostedPaths] = getPaths(
                     tokenIn,
                     tokenOut,
                     SwapTypes.SwapExactIn,
@@ -265,18 +269,18 @@ describe('linear pool tests', () => {
                     maxPools
                 );
 
-                expect(pathsUsingLinear).to.be.empty;
+                expect(boostedPaths).to.be.empty;
                 expect(allPaths).to.be.empty;
             });
         });
 
         context('Stable<>Token with no staBal or WETH paired pool', () => {
-            it('Stable>Token, getPathsUsingLinearPool return empty paths', async () => {
+            it('Stable>Token, getBoostedPaths return empty paths', async () => {
                 const tokenIn = MKR.address;
                 const tokenOut = DAI.address;
                 const maxPools = 10;
 
-                const [, , pathsUsingLinear] = getPaths(
+                const [, , boostedPaths] = getPaths(
                     tokenIn,
                     tokenOut,
                     SwapTypes.SwapExactIn,
@@ -284,15 +288,15 @@ describe('linear pool tests', () => {
                     maxPools
                 );
 
-                assert.equal(pathsUsingLinear.length, 0);
+                assert.equal(boostedPaths.length, 0);
             });
 
-            it('Token>Stable, getPathsUsingLinearPool return empty paths', async () => {
+            it('Token>Stable, getBoostedPaths return empty paths', async () => {
                 const tokenIn = USDC.address;
                 const tokenOut = MKR.address;
                 const maxPools = 10;
 
-                const [, , pathsUsingLinear] = getPaths(
+                const [, , boostedPaths] = getPaths(
                     tokenIn,
                     tokenOut,
                     SwapTypes.SwapExactIn,
@@ -300,48 +304,66 @@ describe('linear pool tests', () => {
                     maxPools
                 );
 
-                assert.equal(pathsUsingLinear.length, 0);
+                assert.equal(boostedPaths.length, 0);
             });
         });
 
-        context('getPathsUsingLinearPools - stable pair', () => {
-            it('should return 1 valid linear path', async () => {
+        context('getBoostedPaths - stable pair', () => {
+            it('should return 3 valid paths', async () => {
                 const tokenIn = DAI.address;
                 const tokenOut = USDC.address;
                 const maxPools = 10;
 
-                const [, poolsAllDict, pathsUsingLinear] = getPaths(
+                const [, poolsAllDict, boostedPaths] = getPaths(
                     tokenIn,
                     tokenOut,
                     SwapTypes.SwapExactIn,
                     smallLinear.pools,
                     maxPools
                 );
-
-                assert.equal(pathsUsingLinear.length, 1);
-                checkPath(
-                    ['linearDAI', 'staBal3Id', 'linearUSDC'],
-                    poolsAllDict,
-                    pathsUsingLinear[0],
-                    tokenIn,
-                    tokenOut
-                );
+                assert.equal(boostedPaths.length, 3);
+                const expectedPoolsIdsArray = [
+                    ['linearDAI', 'bbaUSD-Pool', 'linearUSDC'],
+                    // eslint-disable-next-line prettier/prettier
+                    [
+                        'weightedDaiWeth',
+                        'weightedWeth-BBausd',
+                        'bbaUSD-Pool',
+                        'linearUSDC',
+                    ],
+                    // eslint-disable-next-line prettier/prettier
+                    [
+                        'linearDAI',
+                        'bbaUSD-Pool',
+                        'weightedWeth-BBausd',
+                        'weightedUsdcWeth',
+                    ],
+                ];
+                for (let i = 0; i < 3; i++) {
+                    checkPath(
+                        expectedPoolsIdsArray[i],
+                        poolsAllDict,
+                        boostedPaths[i],
+                        tokenIn,
+                        tokenOut
+                    );
+                }
             });
 
             it('tokenIn and tokenOut belong to same linear pool should have standard single hop path', async () => {
-                const tokenOut = DAI.address;
                 const tokenIn = aDAI.address;
+                const tokenOut = DAI.address;
                 const maxPools = 10;
 
-                const [allPaths, poolsAllDict, pathsUsingLinear] = getPaths(
+                const [allPaths, poolsAllDict, boostedPaths] = getPaths(
                     tokenIn,
                     tokenOut,
                     SwapTypes.SwapExactIn,
                     smallLinear.pools,
                     maxPools
                 );
-                expect(pathsUsingLinear).to.be.empty;
-                assert.equal(allPaths.length, 1);
+                assert.equal(boostedPaths.length, 1);
+                assert.equal(allPaths.length, 2);
                 checkPath(
                     ['linearDAI'],
                     poolsAllDict,
@@ -367,26 +389,19 @@ describe('linear pool tests', () => {
                     smallLinear.pools,
                     maxPools
                 );
-
-                assert.equal(paths.length, 3);
-                checkPath(
-                    ['linearDAI', 'staBal3Id', 'linearUSDC'],
-                    poolAllDict,
-                    paths[0],
-                    tokenIn,
-                    tokenOut
-                );
+                // boosted paths for DAI/USDC were tested in a previous case
+                assert.equal(paths.length, 5);
                 checkPath(
                     ['weightedDaiWeth', 'weightedUsdcWeth'],
                     poolAllDict,
-                    paths[1],
+                    paths[3],
                     tokenIn,
                     tokenOut
                 );
                 checkPath(
                     ['weightedDaiUsdc'],
                     poolAllDict,
-                    paths[2],
+                    paths[4],
                     tokenIn,
                     tokenOut
                 );
@@ -432,15 +447,17 @@ describe('linear pool tests', () => {
                     maxPools
                 );
 
-                assert.equal(paths.length, 1);
+                assert.equal(paths.length, 2);
                 // TokenIn>[weightedBalStaBal3]>bDAI>[staBAL3]>staBal3>[linearDAI]>DAI
                 checkPath(
-                    ['staBal3Gusd', 'staBal3Id', 'linearDAI'],
+                    ['bbaUsdGusd', 'bbaUSD-Pool', 'linearDAI'],
                     poolsAllDict,
                     paths[0],
                     tokenIn,
                     tokenOut
                 );
+                // The other path id is:
+                // bbaUsdGusdweightedWeth-BBausdweightedDaiWeth
             });
 
             it('should return 1 valid linear paths', async () => {
@@ -455,16 +472,17 @@ describe('linear pool tests', () => {
                     smallLinear.pools,
                     maxPools
                 );
-
-                assert.equal(paths.length, 1);
+                assert.equal(paths.length, 2);
                 // TokenIn>[linearUSDC]>bUSDC>[staBAL3]>staBal3>[staBal3Gusd]>TokenOut
                 checkPath(
-                    ['linearUSDC', 'staBal3Id', 'staBal3Gusd'],
+                    ['linearUSDC', 'bbaUSD-Pool', 'bbaUsdGusd'],
                     poolsAllDict,
                     paths[0],
                     tokenIn,
                     tokenOut
                 );
+                // The other path id is:
+                // weightedUsdcWethweightedWeth-BBausdbbaUsdGusd
             });
         });
     });
@@ -487,8 +505,8 @@ describe('linear pool tests', () => {
             checkPath(
                 [
                     'linearUSDC',
-                    'staBal3Id',
-                    'weightedWethStaBal3Id',
+                    'bbaUSD-Pool',
+                    'weightedWeth-BBausd',
                     'weightedBalWeth',
                 ],
                 poolsAllDict,
@@ -523,8 +541,8 @@ describe('linear pool tests', () => {
             checkPath(
                 [
                     'weightedBalWeth',
-                    'weightedWethStaBal3Id',
-                    'staBal3Id',
+                    'weightedWeth-BBausd',
+                    'bbaUSD-Pool',
                     'linearUSDC',
                 ],
                 poolsAllDict,
@@ -740,7 +758,7 @@ describe('linear pool tests', () => {
                 pools[3].tokens[0].priceRate = '1.151626716671767642';
                 const returnAmount = await testFullSwap(
                     DAI.address,
-                    STABAL3PHANTOM.address,
+                    bbaUSD.address,
                     SwapTypes.SwapExactIn,
                     parseFixed('1', DAI.decimals),
                     pools,
@@ -752,9 +770,9 @@ describe('linear pool tests', () => {
             it('USDT>staBAL3, SwapExactOut', async () => {
                 const returnAmount = await testFullSwap(
                     USDT.address,
-                    STABAL3PHANTOM.address,
+                    bbaUSD.address,
                     SwapTypes.SwapExactOut,
-                    parseFixed('1', STABAL3PHANTOM.decimals),
+                    parseFixed('1', bbaUSD.decimals),
                     kovanPools.pools,
                     sorConfigKovan
                 );
@@ -763,10 +781,10 @@ describe('linear pool tests', () => {
 
             it('staBAL3>USDT, SwapExactIn', async () => {
                 const returnAmount = await testFullSwap(
-                    STABAL3PHANTOM.address,
+                    bbaUSD.address,
                     USDT.address,
                     SwapTypes.SwapExactIn,
-                    parseFixed('1', STABAL3PHANTOM.decimals),
+                    parseFixed('1', bbaUSD.decimals),
                     kovanPools.pools,
                     sorConfigKovan
                 );
@@ -775,7 +793,7 @@ describe('linear pool tests', () => {
 
             it('staBAL3>USDT, SwapExactOut', async () => {
                 const returnAmount = await testFullSwap(
-                    STABAL3PHANTOM.address,
+                    bbaUSD.address,
                     USDT.address,
                     SwapTypes.SwapExactOut,
                     parseFixed('1', USDT.decimals),
@@ -788,7 +806,7 @@ describe('linear pool tests', () => {
             // it('aUSDT>staBAL3, SwapExactIn', async () => {
             //     const returnAmount = await testFullSwap(
             //         aUSDT.address,
-            //         STABAL3PHANTOM.address,
+            //         bbaUSD.address,
             //         SwapTypes.SwapExactIn,
             //         parseFixed('1', aUSDT.decimals),
             //         kovanPools.pools,
@@ -816,7 +834,8 @@ function getPaths(
     tokenOut: string,
     swapType: SwapTypes,
     pools: SubgraphPoolBase[],
-    maxPools: number
+    maxPools: number,
+    config?: SorConfig
 ): [NewPath[], PoolDictionary, NewPath[]] {
     const poolsAll = parseToPoolsDict(cloneDeep(pools), 0);
 
@@ -834,17 +853,11 @@ function getPaths(
         hopTokens,
         poolsFilteredDict
     );
-
-    const pathsUsingLinear = getLinearStaBal3Paths(
-        tokenIn,
-        tokenOut,
-        poolsAll,
-        poolsFilteredDict,
-        sorConfigTest
-    );
-    pathData = pathData.concat(pathsUsingLinear);
+    const conf = config || sorConfigTest;
+    const boostedPaths = getBoostedPaths(tokenIn, tokenOut, poolsAll, conf);
+    pathData = pathData.concat(boostedPaths);
     const [paths] = calculatePathLimits(pathData, swapType);
-    return [paths, poolsAll, pathsUsingLinear];
+    return [paths, poolsAll, boostedPaths];
 }
 
 async function testFullSwap(

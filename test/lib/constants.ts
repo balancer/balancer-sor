@@ -7,7 +7,7 @@ export interface TestToken {
 
 export const sorConfigTest = {
     chainId: 99,
-    weth: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2',
+    weth: '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2',
     vault: '0xeefba1e63905ef1d7acba5a8513c70307c1ce441',
     usdcConnectingPool: {
         id: 'usdcConnecting',
@@ -17,7 +17,7 @@ export const sorConfigTest = {
         id: 'staBal3Id',
         address: '0x06df3b2bbb68adc8b0e302443692037ed9f91b42',
     },
-    BBausd: {
+    bbausd: {
         id: '0x8fd162f338b770f7e879030830cde9173367f3010000000000000000000004d8',
         address: '0x8fd162f338b770f7e879030830cde9173367f301',
     },
@@ -33,7 +33,7 @@ export const sorConfigTest = {
 
 export const sorConfigEth: SorConfig = {
     chainId: 1,
-    weth: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2',
+    weth: '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2',
     vault: '0xeefba1e63905ef1d7acba5a8513c70307c1ce441',
     staBal3Pool: {
         id: '0x7b50775383d3d6f0215a8f290f2c9e2eebbeceb20000000000000000000000fe',
@@ -56,7 +56,7 @@ export const sorConfigKovan: SorConfig = {
 };
 
 export const WETH: TestToken = {
-    address: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2'.toLowerCase(),
+    address: '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2'.toLowerCase(),
     decimals: 18,
 };
 export const DAI: TestToken = {
@@ -139,6 +139,11 @@ export const LINEAR_ADAI: TestToken = {
 };
 
 export const STABAL3PHANTOM: TestToken = {
+    address: '0x8fd162f338b770f7e879030830cde9173367f301',
+    decimals: 18,
+};
+
+export const bbaUSD: TestToken = {
     address: '0x8fd162f338b770f7e879030830cde9173367f301',
     decimals: 18,
 };

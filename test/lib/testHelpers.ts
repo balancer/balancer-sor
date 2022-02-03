@@ -14,6 +14,7 @@ import {
     PoolTypes,
     NewPath,
     SorConfig,
+    PoolBase,
 } from '../../src';
 import { bnum } from '../../src/utils/bignumber';
 import * as fs from 'fs';
@@ -464,4 +465,23 @@ export function checkPath(
     // TokenIn/Out should be first and last of path
     expect(path.swaps[0].tokenIn).to.eq(tokenIn);
     expect(path.swaps[path.swaps.length - 1].tokenOut).to.eq(tokenOut);
+}
+
+/*
+Checks path for:
+- tokens chain
+- pools chain
+*/
+export function simpleCheckPath(
+    path: NewPath,
+    poolsIds: string[],
+    tokens: string[]
+): boolean {
+    for (let i = 0; i < path.swaps.length; i++) {
+        if (poolsIds[i] !== path.pools[i].id) return false;
+        if (tokens[i] !== path.swaps[i].tokenIn.toLowerCase()) return false;
+        if (tokens[i + 1] !== path.swaps[i].tokenOut.toLowerCase())
+            return false;
+    }
+    return true;
 }

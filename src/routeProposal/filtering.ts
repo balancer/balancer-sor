@@ -16,6 +16,7 @@ import { ZERO } from '../utils/bignumber';
 import { parseNewPool } from '../pools';
 import { Zero } from '@ethersproject/constants';
 import { concat } from 'lodash';
+import path from 'path';
 
 export const filterPoolsByType = (
     pools: SubgraphPoolBase[],
@@ -208,7 +209,34 @@ export function filterHopPools(
 }
 
 /*
-Return paths using boosted pools
+Returns paths using boosted pools.
+Relevant paths using boosted pools have length greater than 2, so we need
+a separate algorithm to create those paths.
+We consider two central tokens: WETH and bbaUSD (which is the BPT of aave boosted-stable
+pool). We want to consider paths in which token_in and token_out are connected
+(each of them) to either WETH or bbaUSD. Here for a token A to be "connected" to 
+a token B means that it satisfies one of the following:
+(a) A is B.
+(b) A and B belong to the same pool.
+(c) A has a linear pool whose BPT belongs to a pool jointly with B.
+For the case of LBPs we will probably consider extra connections.
+
+Thus for token_in and token_out we generate every semipath connecting them
+to one of the central tokens. After that we combine semipaths to form
+paths from token_in to token_out. We expect to have a central pool
+WETH/bbaUSD. We use this pool to combine a semipath connecting to WETH with a 
+semipath connecting to bbaUSD.
+
+  Issues
+  
+  a) when trading DAI/USDC, this finds the path 
+  DAI-bbaDAI-bbaUSD-bbaUSDC-USDC instead of directly
+  DAI-bbaDAI-bbaUSDC-USDC
+  Possible solution: add a patch to combineSemiPaths for the case where 
+  the end pool of the first semipath matches the first pool of the second one.
+
+  b) For DAI/aDAI it finds complicated paths through bbaUSD pool 
+  (to do, just in case: inspect those paths)
 */
 export function getBoostedPaths(
     tokenIn: string,
@@ -218,21 +246,27 @@ export function getBoostedPaths(
 ): NewPath[] {
     tokenIn = tokenIn.toLowerCase();
     tokenOut = tokenOut.toLowerCase();
-    // Should we consider the case (config.BBausd && !config.wethBBausd) ?
-    if (!config.BBausd || !config.wethBBausd) return [];
+    // We assume consistency between config and poolsAllDict.
+    // If they are not consistent, there will be errors.
+    if (!config.bbausd) return [];
     // To do: ensure that no duplicate paths are sent to the second part of the SOR.
 
     const weth = config.weth.toLowerCase();
-    const bbausd = config.BBausd.address.toLowerCase();
+    const bbausd = config.bbausd.address.toLowerCase();
 
+    // getLinearPools could receive an array of tokens so that we search
+    // over poolsAllDict once instead of twice. Similarly for getPoolsWith.
+    // This is a matter of code simplicity vs. efficiency
     const linearPoolsTokenIn = getLinearPools(tokenIn, poolsAllDict);
     const linearPoolsTokenOut = getLinearPools(tokenOut, poolsAllDict);
 
     const wethPoolsDict = getPoolsWith(weth, poolsAllDict);
-    // This avoids duplicate paths when weth is a token to trade
-    delete wethPoolsDict[config.wethBBausd.id];
     const bbausdPoolsDict = getPoolsWith(bbausd, poolsAllDict);
-    delete bbausdPoolsDict[config.wethBBausd.id];
+    if (config.wethBBausd) {
+        // This avoids duplicate paths when weth is a token to trade
+        delete wethPoolsDict[config.wethBBausd.id];
+        delete bbausdPoolsDict[config.wethBBausd.id];
+    }
     const semiPathsInToWeth: NewPath[] = getSemiPaths(
         tokenIn,
         linearPoolsTokenIn,
@@ -263,16 +297,26 @@ export function getBoostedPaths(
     const semiPathsBBausdToOut = semiPathsOutToBBausd.map((path) =>
         reversePath(path)
     );
-    const paths1 = combineSemiPaths(semiPathsInToWeth, semiPathsWethToOut);
-    const paths2 = combineSemiPaths(semiPathsInToBBausd, semiPathsBBausdToOut);
-
+    // Here we assume that every short path (short means length 1 and 2) is included
+    // in filterHopPools. This should include things like DAI->bbfDAI->WETH or
+    // BAL->WETH->TUSD, WETH->bbaUSD, etc.
+    const paths1 = removeShortPaths(
+        combineSemiPaths(semiPathsInToWeth, semiPathsWethToOut)
+    );
+    const paths2 = removeShortPaths(
+        combineSemiPaths(semiPathsInToBBausd, semiPathsBBausdToOut)
+    );
+    if (!config.wethBBausd) {
+        const paths = paths1.concat(paths2);
+        return paths;
+    }
     const WethBBausdPool = poolsAllDict[config.wethBBausd.id];
     const WethBBausdPath = createPath(
-        [config.weth, config.BBausd.address],
+        [config.weth, config.bbausd.address],
         [WethBBausdPool]
     );
     const BBausdWethPath = createPath(
-        [config.BBausd.address, config.weth],
+        [config.bbausd.address, config.weth],
         [WethBBausdPool]
     );
     const paths3 = combineSemiPaths(
@@ -360,9 +404,12 @@ function combineSemiPaths(
     }
     for (const semiPathIn of semiPathsIn) {
         for (const semiPathOut of semiPathsOut) {
-            paths.push(composePaths([semiPathIn, semiPathOut]));
+            const path = composeSimplifyPath(semiPathIn, semiPathOut);
+            if (path) paths.push(path);
+            // paths.push(composePaths([semiPathIn, semiPathOut]));
         }
     }
+
     return paths;
 }
 
@@ -386,23 +433,18 @@ function searchConnectionsTo(
     return connections;
 }
 
+function removeShortPaths(paths: NewPath[]): NewPath[] {
+    // return paths;
+    const answer = paths.filter((path) => path.swaps.length > 2);
+    return answer;
+}
+
 function reversePath(path: NewPath): NewPath {
-    let swaps = path.swaps.map((swap) => reverseSwap(swap));
-    swaps = swaps.reverse();
-    const poolPairData = path.poolPairData.reverse();
+    if (path.pools.length == 0) return getEmptyPath();
     const pools = path.pools.reverse();
-    let id = '';
-    for (const pool of pools) {
-        id += pool.address;
-    }
-    const result: NewPath = {
-        id: id,
-        swaps: swaps,
-        poolPairData: poolPairData,
-        limitAmount: Zero, // this is expected to be computed later
-        pools: pools,
-    };
-    return result;
+    const tokens = path.swaps.map((swap) => swap.tokenOut).reverse();
+    tokens.push(path.swaps[0].tokenIn);
+    return createPath(tokens, pools);
 }
 
 function reverseSwap(swap: Swap): Swap {
@@ -855,4 +897,29 @@ export function parseToPoolsDict(
             .map((pool) => [pool.id, parseNewPool(pool, timestamp)])
             .filter(([, pool]) => pool !== undefined)
     );
+}
+
+function composeSimplifyPath(semiPathIn: NewPath, semiPathOut: NewPath) {
+    let path: NewPath;
+    if (semiPathIn.pools[semiPathIn.pools.length - 1] == semiPathOut.pools[0]) {
+        const newPoolsIn = semiPathIn.pools.slice(0, -1);
+        const newTokensIn = semiPathIn.swaps.map((swap) => swap.tokenIn);
+        const tokensOut = semiPathOut.swaps.map((swap) => swap.tokenOut);
+        path = createPath(
+            newTokensIn.concat(tokensOut),
+            newPoolsIn.concat(semiPathOut.pools)
+        );
+        for (const leftPool of newPoolsIn) {
+            for (const rightPool of semiPathOut.pools) {
+                if (leftPool == rightPool) {
+                    console.log('leftPool: ', leftPool);
+                    console.log('rightPool: ', rightPool);
+                    return null;
+                }
+            }
+        }
+    } else {
+        path = composePaths([semiPathIn, semiPathOut]);
+    }
+    return path;
 }
