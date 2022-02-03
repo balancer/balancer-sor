@@ -12,7 +12,7 @@ import { MathSol, BZERO } from '../../utils/basicOperations';
 
 const AMP_PRECISION = BigInt(1e3);
 
-function _calculateInvariant(
+export function _calculateInvariant(
     amp: bigint,
     balances: bigint[],
     roundUp: boolean
@@ -88,11 +88,13 @@ export function _calcOutGivenIn(
     tokenIndexIn: number,
     tokenIndexOut: number,
     amountIn: bigint,
-    fee: bigint
+    fee: bigint,
+    invariant?: bigint
 ): bigint {
+    balances = [...balances];
     amountIn = subtractFee(amountIn, fee);
     // Given that we need to have a greater final balance out, the invariant needs to be rounded up
-    const invariant = _calculateInvariant(amp, balances, true);
+    if (!invariant) invariant = _calculateInvariant(amp, balances, true);
 
     const initBalance = balances[tokenIndexIn];
     balances[tokenIndexIn] = initBalance + amountIn;
@@ -111,9 +113,11 @@ export function _calcInGivenOut(
     tokenIndexIn: number,
     tokenIndexOut: number,
     amountOut: bigint,
-    fee: bigint
+    fee: bigint,
+    invariant?: bigint
 ): bigint {
-    const invariant = _calculateInvariant(amp, balances, true);
+    balances = [...balances];
+    if (!invariant) invariant = _calculateInvariant(amp, balances, true);
     balances[tokenIndexOut] = MathSol.sub(balances[tokenIndexOut], amountOut);
 
     const finalBalanceIn = _getTokenBalanceGivenInvariantAndAllOtherBalances(
@@ -136,8 +140,10 @@ export function _calcBptOutGivenExactTokensIn(
     balances: bigint[],
     amountsIn: bigint[],
     bptTotalSupply: bigint,
-    swapFeePercentage: bigint
+    swapFeePercentage: bigint,
+    invariant?: bigint
 ): bigint {
+    if (!invariant) invariant = _calculateInvariant(amp, balances, true);
     // BPT out, so we round down overall.
 
     // First loop calculates the sum of all token balances, which will be used to calculate
@@ -209,8 +215,10 @@ export function _calcTokenInGivenExactBptOut(
     tokenIndexIn: number,
     bptAmountOut: bigint,
     bptTotalSupply: bigint,
-    fee: bigint
+    fee: bigint,
+    invariant?: bigint
 ): bigint {
+    if (!invariant) invariant = _calculateInvariant(amp, balances, true);
     // Token in, so we round up overall.
     const currentInvariant = _calculateInvariant(amp, balances, true);
     const newInvariant = MathSol.mulUpFixed(
@@ -270,8 +278,10 @@ export function _calcBptInGivenExactTokensOut(
     balances: bigint[],
     amountsOut: bigint[],
     bptTotalSupply: bigint,
-    swapFeePercentage: bigint
+    swapFeePercentage: bigint,
+    invariant?: bigint
 ): bigint {
+    if (!invariant) invariant = _calculateInvariant(amp, balances, true);
     // BPT in, so we round up overall.
 
     // First loop calculates the sum of all token balances, which will be used to calculate
@@ -339,8 +349,10 @@ export function _calcTokenOutGivenExactBptIn(
     tokenIndex: number,
     bptAmountIn: bigint,
     bptTotalSupply: bigint,
-    swapFeePercentage: bigint
+    swapFeePercentage: bigint,
+    invariant?: bigint
 ): bigint {
+    if (!invariant) invariant = _calculateInvariant(amp, balances, true);
     // Token out, so we round down overall.
 
     // Get the current and new invariants. Since we need a bigger new invariant, we round the current one up.
@@ -476,12 +488,12 @@ function _getTokenBalanceGivenInvariantAndAllOtherBalances(
     throw new Error('Errors.STABLE_GET_BALANCE_DIDNT_CONVERGE');
 }
 
-function subtractFee(amount: bigint, fee: bigint): bigint {
+export function subtractFee(amount: bigint, fee: bigint): bigint {
     const feeAmount = MathSol.mulUpFixed(amount, fee);
     return amount - feeAmount;
 }
 
-function addFee(amount: bigint, fee: bigint): bigint {
+export function addFee(amount: bigint, fee: bigint): bigint {
     return MathSol.divUpFixed(amount, MathSol.complementFixed(fee));
 }
 
