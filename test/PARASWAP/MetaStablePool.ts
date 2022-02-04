@@ -7,7 +7,12 @@ import { parseFixed } from '@ethersproject/bignumber';
 abstract class BaseGeneralPool extends BasePool {
     // Swap Hooks
 
-    // Modification: this is inspired from the function onSwap which is in the original contract
+    /*
+    scaling factors should include rate:
+    scalingFactors: pool.tokens.map(({ decimals, priceRate }) =>
+        MathSol.mulDownFixed(getTokenScalingFactor(decimals), priceRate)
+    )
+    */
     onSell(
         amounts: bigint[],
         balances: bigint[],

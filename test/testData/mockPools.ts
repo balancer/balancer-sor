@@ -85,15 +85,15 @@ export const mockMetaStablePool: SubgraphPoolBase = {
     tokens: [
         {
             address: '0x7f39c581f595b53c5cb19bd0b3f8da6c935e2ca0',
-            balance: '64800.391125299548713594',
+            balance: '64687.912179455269362021',
             decimals: 18,
-            priceRate: '1.059341232782523912',
+            priceRate: '1.059476679173831906',
             weight: null,
             // symbol: 'wstETH',
         },
         {
             address: '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2',
-            balance: '65871.692323225494357767',
+            balance: '65538.790734445642079549',
             decimals: 18,
             priceRate: '1',
             weight: null,
@@ -104,7 +104,7 @@ export const mockMetaStablePool: SubgraphPoolBase = {
         '0x7f39c581f595b53c5cb19bd0b3f8da6c935e2ca0',
         '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2',
     ],
-    totalShares: '132677.763673884891996606',
+    totalShares: '132261.48105540353130896',
 };
 
 export const mockPhantomStablePool: SubgraphPoolBase = {

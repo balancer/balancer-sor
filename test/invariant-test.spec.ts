@@ -263,6 +263,12 @@ describe(`Testing invariant`, () => {
                     psPairData.amp
                 );
 
+                /*
+                MockPool using real values from onChain Data.
+                Used queryBatchSwap call to find vault deltas: 777000000000000000000, -733563956569874227512
+                733563956569874227512 - SDK amount matches
+                733563956569874227512
+                */
                 console.log(sdkAmtsOut.toString());
                 console.log(psAmtsOut.toString());
                 expect(sdkAmtsOut[0]).to.not.eq(BZERO);
