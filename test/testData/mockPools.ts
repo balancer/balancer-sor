@@ -74,6 +74,39 @@ export const mockStablePool: SubgraphPoolBase = {
     wrappedIndex: 0,
 };
 
+export const mockMetaStablePool: SubgraphPoolBase = {
+    address: '0x32296969ef14eb0c6d29669c550d4a0449130230',
+    amp: '50',
+    id: '0x32296969ef14eb0c6d29669c550d4a0449130230000200000000000000000080',
+    mainIndex: 0,
+    poolType: 'MetaStable',
+    swapEnabled: true,
+    swapFee: '0.0004',
+    tokens: [
+        {
+            address: '0x7f39c581f595b53c5cb19bd0b3f8da6c935e2ca0',
+            balance: '64800.391125299548713594',
+            decimals: 18,
+            priceRate: '1.059341232782523912',
+            weight: null,
+            // symbol: 'wstETH',
+        },
+        {
+            address: '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2',
+            balance: '65871.692323225494357767',
+            decimals: 18,
+            priceRate: '1',
+            weight: null,
+            // symbol: 'WETH',
+        },
+    ],
+    tokensList: [
+        '0x7f39c581f595b53c5cb19bd0b3f8da6c935e2ca0',
+        '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2',
+    ],
+    totalShares: '132677.763673884891996606',
+};
+
 export const mockPhantomStablePool: SubgraphPoolBase = {
     address: '0x7b50775383d3d6f0215a8f290f2c9e2eebbeceb2',
     amp: '570',
