@@ -3,7 +3,6 @@ require('dotenv').config();
 
 import { expect } from 'chai';
 import cloneDeep from 'lodash.clonedeep';
-import { performance, PerformanceObserver } from 'perf_hooks';
 import { parseFixed } from '@ethersproject/bignumber';
 import { bnum } from '../src/utils/bignumber';
 import {
@@ -13,17 +12,23 @@ import {
     mockPhantomStablePool,
     mockLinearPool,
 } from './testData/mockPools';
+import { poolToEvm } from './PARASWAP/utils';
 import { WeightedPool } from '../src/pools/weightedPool/weightedPool';
 import { StablePool } from '../src/pools/stablePool/stablePool';
 import { MetaStablePool } from '../src/pools/metaStablePool/metaStablePool';
 import { PhantomStablePool } from '../src/pools/phantomStablePool/phantomStablePool';
 import { LinearPool } from '../src/pools/linearPool/linearPool';
 import { WeightedPool as WeightedPoolSdk } from './SDK/WeightedPool';
+import { WeightedPool as WeightedPoolPs } from './PARASWAP/WeightedPool';
 import { StablePool as StablePoolSdk } from './SDK/StablePool';
+import { StablePool as StablePoolPs } from './PARASWAP/StablePool';
 import { MetaStablePool as MetaStablePoolSdk } from './SDK/MetaStablePool';
 import { PhantomStablePool as PhantomStableSdk } from './SDK/PhantomStablePool';
 import { LinearPool as LinearSdk } from './SDK/LinearPool';
 import { SubgraphPoolBase } from '../src';
+import { WeightedPoolHelper } from './PARASWAP/utils';
+import { StablePoolHelper } from './PARASWAP/utils';
+import { BZERO } from '../src/utils/basicOperations';
 
 const WETH = '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2';
 const wstETH = '0x7f39c581f595b53c5cb19bd0b3f8da6c935e2ca0';
@@ -34,19 +39,11 @@ const bbausdt = '0x2bbf681cc4eb09218bee85ea2a5d3d13fa40fc0c';
 const bbadai = '0x804cdb9116a10bb78768d3252355a1b18067bf8f';
 const bbausd = '0x7b50775383d3d6f0215a8f290f2c9e2eebbeceb2';
 
-const amounts = [
-    parseFixed('1', 18).toBigInt(),
-    parseFixed('10', 18).toBigInt(),
-    parseFixed('100', 18).toBigInt(),
-    parseFixed('1000', 18).toBigInt(),
-    parseFixed('10000', 18).toBigInt(),
-];
-
 // TS_NODE_PROJECT='tsconfig.testing.json' npx mocha -r ts-node/register test/invariant-test.spec.ts
 describe(`Testing invariant`, () => {
     context('weightedPool', () => {
         context('_calcOutGivenIn', () => {
-            it(`token>token`, () => {
+            it(`SOR vs SDK, token>token`, () => {
                 const tokenIn = USDC;
                 const tokenOut = WETH;
 
@@ -62,6 +59,45 @@ describe(`Testing invariant`, () => {
                     WeightedPool,
                     WeightedPoolSdk
                 );
+            });
+
+            it(`Paraswap vs SDK, token>token`, () => {
+                const tokenIn = USDC;
+                const tokenOut = WETH;
+                const amountsIn = [
+                    parseFixed('1', 6).toBigInt(),
+                    parseFixed('777', 6).toBigInt(),
+                ];
+
+                const sdkPairData = WeightedPoolSdk.parsePoolPairDataBigInt(
+                    cloneDeep(mockWeightedPool),
+                    tokenIn,
+                    tokenOut
+                );
+                const sdkAmtsOut = WeightedPoolSdk.calcOutGivenIn(
+                    sdkPairData,
+                    amountsIn
+                );
+                const evmPool = poolToEvm(cloneDeep(mockWeightedPool));
+                const psPairData = WeightedPoolHelper.parsePoolPairDataBigInt(
+                    cloneDeep(evmPool),
+                    tokenIn,
+                    tokenOut
+                );
+                const weightPoolPs = new WeightedPoolPs();
+                const psAmtsOut = weightPoolPs.onSell(
+                    amountsIn,
+                    psPairData.balanceIn,
+                    psPairData.balanceOut,
+                    psPairData.scalingFactorTokenIn,
+                    psPairData.scalingFactorTokenOut,
+                    psPairData.weightIn,
+                    psPairData.weightOut,
+                    psPairData.fee
+                );
+
+                expect(sdkAmtsOut[0]).to.not.eq(BZERO);
+                expect(sdkAmtsOut).to.deep.eq(psAmtsOut);
             });
         });
 
@@ -104,6 +140,46 @@ describe(`Testing invariant`, () => {
                     StablePool,
                     StablePoolSdk
                 );
+            });
+
+            it(`Paraswap vs SDK, token>token`, () => {
+                const tokenIn = DAI;
+                const tokenOut = USDC;
+                const amountsIn = [
+                    parseFixed('1', 18).toBigInt(),
+                    parseFixed('777', 18).toBigInt(),
+                ];
+
+                const sdkPairData = StablePoolSdk.parsePoolPairDataBigInt(
+                    cloneDeep(mockStablePool),
+                    tokenIn,
+                    tokenOut
+                );
+                const sdkAmtsOut = StablePoolSdk.calcOutGivenIn(
+                    sdkPairData,
+                    cloneDeep(amountsIn)
+                );
+                const evmPool = poolToEvm(cloneDeep(mockStablePool));
+                const psPairData = StablePoolHelper.parsePoolPairDataBigInt(
+                    cloneDeep(evmPool),
+                    tokenIn,
+                    tokenOut
+                );
+                const stablePoolPs = new StablePoolPs();
+                const psAmtsOut = stablePoolPs.onSell(
+                    amountsIn,
+                    psPairData.balances,
+                    psPairData.tokenIndexIn,
+                    psPairData.tokenIndexOut,
+                    psPairData.scalingFactors,
+                    psPairData.fee,
+                    psPairData.amp
+                );
+
+                console.log(sdkAmtsOut.toString());
+                console.log(psAmtsOut.toString());
+                expect(sdkAmtsOut[0]).to.not.eq(BZERO);
+                expect(sdkAmtsOut).to.deep.eq(psAmtsOut);
             });
         });
 
@@ -367,72 +443,6 @@ describe(`Testing invariant`, () => {
     });
 });
 
-function compare(
-    testFn,
-    testArgs,
-    amtIndex,
-    invariantFn,
-    invariantArgs,
-    isBenchmark = false
-) {
-    const resultsWithInvariant: BigInt[] = [];
-    amounts.forEach((amt) => {
-        testArgs[amtIndex] = amt;
-        const result = testFn.apply(this, testArgs);
-        resultsWithInvariant.push(result);
-    });
-
-    const resultsWithoutInvariant: BigInt[] = [];
-    const invariant = invariantFn.apply(this, invariantArgs);
-    const testArgsClone = cloneDeep(testArgs);
-    testArgsClone.push(invariant);
-    amounts.forEach((amt) => {
-        testArgsClone[amtIndex] = amt;
-        const result = testFn.apply(this, testArgsClone);
-        resultsWithoutInvariant.push(result);
-    });
-
-    console.log(resultsWithInvariant.toString());
-    console.log(resultsWithoutInvariant.toString());
-
-    expect(resultsWithInvariant).to.deep.eq(resultsWithoutInvariant);
-    if (isBenchmark)
-        benchmark(testFn, testArgs, amtIndex, invariantFn, invariantArgs);
-}
-
-function benchmark(testFn, testArgs, amtIndex, invariantFn, invariantArgs) {
-    const amt = parseFixed('1000', 18).toBigInt();
-    testArgs[amtIndex] = amt;
-    let iterations = 1000000;
-
-    performance.mark('start');
-    while (iterations--) {
-        testFn.apply(this, testArgs);
-    }
-    performance.mark('end');
-
-    iterations = 1000000;
-
-    performance.mark('startSecond');
-    const invariant = invariantFn.apply(this, invariantArgs);
-    const testArgsClone = cloneDeep(testArgs);
-    testArgsClone.push(invariant);
-    while (iterations--) {
-        testFn.apply(this, testArgsClone);
-    }
-    performance.mark('endSecond');
-
-    const obs = new PerformanceObserver((list, observer) => {
-        console.log(list.getEntries()); // [0]);
-        performance.clearMarks();
-        observer.disconnect();
-    });
-    obs.observe({ entryTypes: ['measure'] });
-
-    performance.measure('NoOptimisation', 'start', 'end');
-    performance.measure('WithOptimisation', 'startSecond', 'endSecond');
-}
-
 function compareSorSdk(
     pool: SubgraphPoolBase,
     tokenIn: string,
@@ -467,4 +477,27 @@ function compareSorSdk(
     expect(parseFixed(sorAmtOut.toString(), tokenOutDecimals).toString()).to.eq(
         sdkAmtOut[0].toString()
     );
+}
+
+function compareParaswapSdk(
+    pool: SubgraphPoolBase,
+    tokenIn: string,
+    tokenOut: string,
+    amounts: bigint[],
+    sdkPoolClass,
+    sdkFunction,
+    paraswapClass
+) {
+    const sdkPairData = sdkPoolClass.parsePoolPairDataBigInt(
+        cloneDeep(pool),
+        tokenIn,
+        tokenOut
+    );
+    const sdkAmtsOut = sdkFunction(sdkPairData, amounts);
+
+    const evmPool = poolToEvm(cloneDeep(pool));
+    const psAmtsOut = paraswapClass.onSell();
+    // expect(parseFixed(sorAmtOut.toString(), tokenOutDecimals).toString()).to.eq(
+    //     sdkAmtOut[1].toString()
+    // );
 }

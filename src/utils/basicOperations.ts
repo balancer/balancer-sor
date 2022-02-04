@@ -1,7 +1,7 @@
 export const BZERO = BigInt(0);
 export const BONE = BigInt(1);
 
-const _require = (b: boolean, message: string) => {
+export const _require = (b: boolean, message: string) => {
     if (!b) throw new Error(message);
 };
 

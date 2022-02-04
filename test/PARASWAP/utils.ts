@@ -1,8 +1,11 @@
 import { parseFixed } from '@ethersproject/bignumber';
 import { WeiPerEther as ONE } from '@ethersproject/constants';
+import { getAddress } from '@ethersproject/address';
 
 import { BZERO } from '../../src/utils/basicOperations';
 import { SubgraphPoolBase } from '../../src';
+import { isSameAddress } from '../../src/utils';
+import { getTokenScalingFactor } from '../SDK/utils';
 
 export type Token = {
     address: string;
@@ -84,4 +87,91 @@ export function poolToEvm(pool: SubgraphPoolBase): PoolBase {
         lowerTarget,
         upperTarget,
     };
+}
+
+export type WeightedPoolPairDataBigInt = {
+    balanceIn: bigint;
+    balanceOut: bigint;
+    weightIn: bigint;
+    weightOut: bigint;
+    fee: bigint;
+    scalingFactorTokenIn: bigint;
+    scalingFactorTokenOut: bigint;
+};
+
+export class WeightedPoolHelper {
+    static parsePoolPairDataBigInt(
+        pool: PoolBase,
+        tokenIn: string,
+        tokenOut: string
+    ): WeightedPoolPairDataBigInt {
+        if (!pool.totalWeight) throw 'Pool does not contain totalWeight';
+
+        const tI = pool.tokens.find((t) => isSameAddress(t.address, tokenIn));
+        const tO = pool.tokens.find((t) => isSameAddress(t.address, tokenOut));
+
+        if (!tI) throw `Token In Doesn't Exist`;
+        if (!tO) throw `Token Out Doesn't Exist`;
+
+        const poolPairData: WeightedPoolPairDataBigInt = {
+            balanceIn: tI.balance,
+            weightIn: tI.weight,
+            balanceOut: tO.balance,
+            weightOut: tO.weight,
+            fee: pool.swapFee,
+            scalingFactorTokenIn: getTokenScalingFactor(tI.decimals),
+            scalingFactorTokenOut: getTokenScalingFactor(tO.decimals),
+        };
+
+        return poolPairData;
+    }
+}
+
+export type StablePoolPairDataBigInt = {
+    amp: bigint;
+    balances: bigint[];
+    tokenIndexIn: number;
+    tokenIndexOut: number;
+    fee: bigint;
+    scalingFactors: bigint[];
+};
+
+export class StablePoolHelper {
+    static getTokenData(
+        token: string,
+        tokens: Token[]
+    ): {
+        index: number;
+    } {
+        const index = tokens.findIndex(
+            (t) => getAddress(t.address) === getAddress(token)
+        );
+        if (index < 0) throw Error('Token missing');
+
+        return {
+            index,
+        };
+    }
+
+    static parsePoolPairDataBigInt(
+        pool: PoolBase,
+        tokenIn: string,
+        tokenOut: string
+    ): StablePoolPairDataBigInt {
+        const tI = StablePoolHelper.getTokenData(tokenIn, pool.tokens);
+        const tO = StablePoolHelper.getTokenData(tokenOut, pool.tokens);
+
+        const poolPairData: StablePoolPairDataBigInt = {
+            amp: pool.amp,
+            balances: pool.tokens.map(({ balance }) => balance),
+            tokenIndexIn: tI.index,
+            tokenIndexOut: tO.index,
+            fee: pool.swapFee,
+            scalingFactors: pool.tokens.map(({ decimals }) =>
+                getTokenScalingFactor(decimals)
+            ),
+        };
+
+        return poolPairData;
+    }
 }
