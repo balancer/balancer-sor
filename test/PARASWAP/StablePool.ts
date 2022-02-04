@@ -1,6 +1,101 @@
-import { BaseGeneralPool } from './balancer-v2-pool';
+import { BasePool } from './balancer-v2-pool';
 import { MathSol, BZERO } from '../../src/utils/basicOperations';
 
+abstract class BaseGeneralPool extends BasePool {
+    // Swap Hooks
+
+    // Modification: this is inspired from the function onSwap which is in the original contract
+    onSell(
+        amounts: bigint[],
+        balances: bigint[],
+        indexIn: number,
+        indexOut: number,
+        _scalingFactors: bigint[],
+        _swapFeePercentage: bigint,
+        _amplificationParameter: bigint
+    ): bigint[] {
+        // _validateIndexes(indexIn, indexOut, _getTotalTokens());
+        // uint256[] memory scalingFactors = _scalingFactors();
+        return this._swapGivenIn(
+            amounts,
+            balances,
+            indexIn,
+            indexOut,
+            _scalingFactors,
+            _swapFeePercentage,
+            _amplificationParameter
+        );
+    }
+
+    _swapGivenIn(
+        tokenAmountsIn: bigint[],
+        balances: bigint[],
+        indexIn: number,
+        indexOut: number,
+        scalingFactors: bigint[],
+        _swapFeePercentage: bigint,
+        _amplificationParameter: bigint
+    ): bigint[] {
+        // Fees are subtracted before scaling, to reduce the complexity of the rounding direction analysis.
+        const tokenAmountsInWithFee = tokenAmountsIn.map((a) =>
+            this._subtractSwapFeeAmount(a, _swapFeePercentage)
+        );
+        const balancesUpscaled = this._upscaleArray(balances, scalingFactors);
+        const tokenAmountsInScaled = tokenAmountsInWithFee.map((a) =>
+            this._upscale(a, scalingFactors[indexIn])
+        );
+
+        const amountsOut = this._onSwapGivenIn(
+            tokenAmountsInScaled,
+            balancesUpscaled,
+            indexIn,
+            indexOut,
+            _amplificationParameter
+        );
+
+        // amountOut tokens are exiting the Pool, so we round down.
+        return amountsOut.map((a) =>
+            this._downscaleDown(a, scalingFactors[indexOut])
+        );
+    }
+
+    /*
+     * @dev Called when a swap with the Pool occurs, where the amount of tokens entering the Pool is known.
+     *
+     * Returns the amount of tokens that will be taken from the Pool in return.
+     *
+     * All amounts inside `swapRequest` and `balances` are upscaled. The swap fee has already been deducted from
+     * `swapRequest.amount`.
+     *
+     * The return value is also considered upscaled, and will be downscaled (rounding down) before returning it to the
+     * Vault.
+     */
+    abstract _onSwapGivenIn(
+        tokenAmountsIn: bigint[],
+        balances: bigint[],
+        indexIn: number,
+        indexOut: number,
+        _amplificationParameter: bigint
+    ): bigint[];
+}
+
+export class StablePool extends BaseGeneralPool {
+    _onSwapGivenIn(
+        tokenAmountsIn: bigint[],
+        balances: bigint[],
+        indexIn: number,
+        indexOut: number,
+        _amplificationParameter: bigint
+    ): bigint[] {
+        return StableMath._calcOutGivenIn(
+            _amplificationParameter,
+            balances,
+            indexIn,
+            indexOut,
+            tokenAmountsIn
+        );
+    }
+}
 class StableMath {
     static _AMP_PRECISION = BigInt(1e3);
 
@@ -190,23 +285,5 @@ class StableMath {
         }
 
         throw new Error('Errors.STABLE_GET_BALANCE_DIDNT_CONVERGE');
-    }
-}
-
-export class StablePool extends BaseGeneralPool {
-    _onSwapGivenIn(
-        tokenAmountsIn: bigint[],
-        balances: bigint[],
-        indexIn: number,
-        indexOut: number,
-        _amplificationParameter: bigint
-    ): bigint[] {
-        return StableMath._calcOutGivenIn(
-            _amplificationParameter,
-            balances,
-            indexIn,
-            indexOut,
-            tokenAmountsIn
-        );
     }
 }

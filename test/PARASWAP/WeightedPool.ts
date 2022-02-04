@@ -1,5 +1,78 @@
-import { BaseMinimalSwapInfoPool } from './balancer-v2-pool';
+import { BasePool } from './balancer-v2-pool';
 import { MathSol, _require } from '../../src/utils/basicOperations';
+
+abstract class BaseMinimalSwapInfoPool extends BasePool {
+    // Swap Hooks
+
+    // Modification: this is inspired from the function onSwap which is in the original contract
+    onSell(
+        tokenAmountsIn: bigint[],
+        balanceTokenIn: bigint,
+        balanceTokenOut: bigint,
+        _scalingFactorTokenIn: bigint,
+        _scalingFactorTokenOut: bigint,
+        _weightIn: bigint,
+        _weightOut: bigint,
+        _swapFeePercentage: bigint
+    ): bigint[] {
+        // uint256 _scalingFactorTokenIn = _scalingFactor(request.tokenIn);
+        // uint256 _scalingFactorTokenOut = _scalingFactor(request.tokenOut);
+
+        // Fees are subtracted before scaling, to reduce the complexity of the rounding direction analysis.
+        const tokenAmountsInWithFee = tokenAmountsIn.map((a) =>
+            this._subtractSwapFeeAmount(a, _swapFeePercentage)
+        );
+
+        // All token amounts are upscaled.
+        balanceTokenIn = this._upscale(balanceTokenIn, _scalingFactorTokenIn);
+        balanceTokenOut = this._upscale(
+            balanceTokenOut,
+            _scalingFactorTokenOut
+        );
+        const tokenAmountsInScaled = tokenAmountsInWithFee.map((a) =>
+            this._upscale(a, _scalingFactorTokenIn)
+        );
+
+        const amountsOut = this._onSwapGivenIn(
+            tokenAmountsInScaled,
+            balanceTokenIn,
+            balanceTokenOut,
+            _weightIn,
+            _weightOut
+        );
+
+        // amountOut tokens are exiting the Pool, so we round down.
+        return amountsOut.map((a) =>
+            this._downscaleDown(a, _scalingFactorTokenOut)
+        );
+    }
+
+    abstract _onSwapGivenIn(
+        tokenAmountsIn: bigint[],
+        currentBalanceTokenIn: bigint,
+        currentBalanceTokenOut: bigint,
+        _weightIn: bigint,
+        _weightOut: bigint
+    ): bigint[];
+}
+
+export class WeightedPool extends BaseMinimalSwapInfoPool {
+    _onSwapGivenIn(
+        tokenAmountsIn: bigint[],
+        currentBalanceTokenIn: bigint,
+        currentBalanceTokenOut: bigint,
+        _weightIn: bigint,
+        _weightOut: bigint
+    ): bigint[] {
+        return WeightedMath._calcOutGivenIn(
+            currentBalanceTokenIn,
+            _weightIn,
+            currentBalanceTokenOut,
+            _weightOut,
+            tokenAmountsIn
+        );
+    }
+}
 
 export class WeightedMath {
     static _MAX_IN_RATIO = BigInt(300000000000000000);
@@ -45,23 +118,5 @@ export class WeightedMath {
                 MathSol.complementFixed(power)
             );
         });
-    }
-}
-
-export class WeightedPool extends BaseMinimalSwapInfoPool {
-    _onSwapGivenIn(
-        tokenAmountsIn: bigint[],
-        currentBalanceTokenIn: bigint,
-        currentBalanceTokenOut: bigint,
-        _weightIn: bigint,
-        _weightOut: bigint
-    ): bigint[] {
-        return WeightedMath._calcOutGivenIn(
-            currentBalanceTokenIn,
-            _weightIn,
-            currentBalanceTokenOut,
-            _weightOut,
-            tokenAmountsIn
-        );
     }
 }
