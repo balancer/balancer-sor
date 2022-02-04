@@ -96,7 +96,7 @@ export class StablePool extends BaseGeneralPool {
         );
     }
 }
-class StableMath {
+export class StableMath {
     static _AMP_PRECISION = BigInt(1e3);
 
     static _calculateInvariant(

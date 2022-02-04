@@ -23,11 +23,15 @@ import { WeightedPool as WeightedPoolPs } from './PARASWAP/WeightedPool';
 import { StablePool as StablePoolSdk } from './SDK/StablePool';
 import { StablePool as StablePoolPs } from './PARASWAP/StablePool';
 import { MetaStablePool as MetaStablePoolSdk } from './SDK/MetaStablePool';
+import { MetaStablePool as MetaStablePoolPs } from './PARASWAP/MetaStablePool';
 import { PhantomStablePool as PhantomStableSdk } from './SDK/PhantomStablePool';
 import { LinearPool as LinearSdk } from './SDK/LinearPool';
 import { SubgraphPoolBase } from '../src';
-import { WeightedPoolHelper } from './PARASWAP/utils';
-import { StablePoolHelper } from './PARASWAP/utils';
+import {
+    WeightedPoolHelper,
+    StablePoolHelper,
+    MetaStablePoolHelper,
+} from './PARASWAP/utils';
 import { BZERO } from '../src/utils/basicOperations';
 
 const WETH = '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2';
@@ -222,6 +226,47 @@ describe(`Testing invariant`, () => {
                     MetaStablePool,
                     MetaStablePoolSdk
                 );
+            });
+
+            it(`Paraswap vs SDK, token>token`, () => {
+                const tokenIn = WETH;
+                const tokenOut = wstETH;
+                const amountsIn = [
+                    parseFixed('1', 18).toBigInt(),
+                    parseFixed('777', 18).toBigInt(),
+                ];
+
+                const sdkPairData = MetaStablePoolSdk.parsePoolPairDataBigInt(
+                    cloneDeep(mockMetaStablePool),
+                    tokenIn,
+                    tokenOut
+                );
+                const sdkAmtsOut = MetaStablePoolSdk.calcOutGivenIn(
+                    sdkPairData,
+                    cloneDeep(amountsIn)
+                );
+                const evmPool = poolToEvm(cloneDeep(mockMetaStablePool));
+                // TO DO !!!!!!!
+                const psPairData = MetaStablePoolHelper.parsePoolPairDataBigInt(
+                    cloneDeep(evmPool),
+                    tokenIn,
+                    tokenOut
+                );
+                const metaStablePoolPs = new MetaStablePoolPs();
+                const psAmtsOut = metaStablePoolPs.onSell(
+                    amountsIn,
+                    psPairData.balances,
+                    psPairData.tokenIndexIn,
+                    psPairData.tokenIndexOut,
+                    psPairData.scalingFactors,
+                    psPairData.fee,
+                    psPairData.amp
+                );
+
+                console.log(sdkAmtsOut.toString());
+                console.log(psAmtsOut.toString());
+                expect(sdkAmtsOut[0]).to.not.eq(BZERO);
+                expect(sdkAmtsOut).to.deep.eq(psAmtsOut);
             });
         });
 

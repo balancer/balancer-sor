@@ -2,10 +2,13 @@ import { parseFixed } from '@ethersproject/bignumber';
 import { WeiPerEther as ONE } from '@ethersproject/constants';
 import { getAddress } from '@ethersproject/address';
 
-import { BZERO } from '../../src/utils/basicOperations';
+import { BZERO, MathSol } from '../../src/utils/basicOperations';
 import { SubgraphPoolBase } from '../../src';
 import { isSameAddress } from '../../src/utils';
-import { getTokenScalingFactor } from '../SDK/utils';
+
+function getTokenScalingFactor(tokenDecimals: number): bigint {
+    return BigInt(1e18) * BigInt(10) ** BigInt(18 - tokenDecimals);
+}
 
 export type Token = {
     address: string;
@@ -169,6 +172,55 @@ export class StablePoolHelper {
             fee: pool.swapFee,
             scalingFactors: pool.tokens.map(({ decimals }) =>
                 getTokenScalingFactor(decimals)
+            ),
+        };
+
+        return poolPairData;
+    }
+}
+
+export type MetaStablePoolPairDataBigInt = {
+    amp: bigint;
+    balances: bigint[];
+    tokenIndexIn: number;
+    tokenIndexOut: number;
+    fee: bigint;
+    scalingFactors: bigint[];
+};
+
+export class MetaStablePoolHelper {
+    static getTokenData(
+        token: string,
+        tokens: Token[]
+    ): {
+        index: number;
+    } {
+        const index = tokens.findIndex(
+            (t) => getAddress(t.address) === getAddress(token)
+        );
+        if (index < 0) throw Error('Token missing');
+
+        return {
+            index,
+        };
+    }
+
+    static parsePoolPairDataBigInt(
+        pool: PoolBase,
+        tokenIn: string,
+        tokenOut: string
+    ): StablePoolPairDataBigInt {
+        const tI = StablePoolHelper.getTokenData(tokenIn, pool.tokens);
+        const tO = StablePoolHelper.getTokenData(tokenOut, pool.tokens);
+
+        const poolPairData: StablePoolPairDataBigInt = {
+            amp: pool.amp,
+            balances: pool.tokens.map(({ balance }) => balance),
+            tokenIndexIn: tI.index,
+            tokenIndexOut: tO.index,
+            fee: pool.swapFee,
+            scalingFactors: pool.tokens.map(({ decimals, priceRate }) =>
+                MathSol.mulDownFixed(getTokenScalingFactor(decimals), priceRate)
             ),
         };
 
