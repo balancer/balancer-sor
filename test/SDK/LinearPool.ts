@@ -1,6 +1,7 @@
 import { getAddress } from '@ethersproject/address';
 import { parseFixed, BigNumber } from '@ethersproject/bignumber';
 import { SubgraphPoolBase, SubgraphToken } from '../../src/';
+import { BZERO } from '../../src/utils/basicOperations';
 import { isSameAddress } from '../../src/utils';
 import {
     upscaleAmounts,
@@ -114,7 +115,7 @@ export class LinearPool {
         const poolPairData: LinearPoolPairDataBigInt = {
             pairType,
             balances: allBalancesScaled,
-            amountIn: BigInt(0),
+            amountIn: BZERO,
             fee: parseFixed(pool.swapFee, 18).toBigInt(),
             wrappedBalance: allBalancesScaled[pool.wrappedIndex],
             mainBalance: allBalancesScaled[pool.mainIndex],
@@ -176,9 +177,9 @@ export class LinearPool {
                         //     poolPairData.pairType === PairTypes.WrappedTokenToMainToken
                         // ) {
                         //     amt = LinearPool._exactWrappedTokenInForMainOut(poolPairData, amount);
-                    } else amt = BigInt(0);
+                    } else amt = BZERO;
                 } catch (err) {
-                    amt = BigInt(0);
+                    amt = BZERO;
                 }
                 amountsOut.push(amt);
             }
@@ -220,9 +221,9 @@ export class LinearPool {
                             poolPairData,
                             amountOut
                         );
-                    } else amt = BigInt(0);
+                    } else amt = BZERO;
                 } catch (err) {
-                    amt = BigInt(0);
+                    amt = BZERO;
                 }
                 amountsIn.push(amt);
             }
@@ -249,7 +250,7 @@ export class LinearPool {
                 }
             );
         } catch (err) {
-            return BigInt(0);
+            return BZERO;
         }
     }
 
@@ -271,7 +272,7 @@ export class LinearPool {
                 }
             );
         } catch (err) {
-            return BigInt(0);
+            return BZERO;
         }
     }
 
@@ -293,7 +294,7 @@ export class LinearPool {
                 }
             );
         } catch (err) {
-            return BigInt(0);
+            return BZERO;
         }
     }
 
@@ -315,7 +316,7 @@ export class LinearPool {
                 }
             );
         } catch (err) {
-            return BigInt(0);
+            return BZERO;
         }
     }
 }

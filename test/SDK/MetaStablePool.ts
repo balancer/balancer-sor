@@ -2,6 +2,7 @@ import { getAddress } from '@ethersproject/address';
 import { parseFixed } from '@ethersproject/bignumber';
 import { WeiPerEther as ONE } from '@ethersproject/constants';
 import { SubgraphPoolBase, SubgraphToken } from '../../src';
+import { BZERO } from '../../src/utils/basicOperations';
 import {
     upscaleAmounts,
     downscaleDownAmounts,
@@ -74,7 +75,7 @@ export class MetaStablePool {
             balances: allBalancesScaled,
             tokenIndexIn: tI.index,
             tokenIndexOut: tO.index,
-            amountIn: BigInt(0),
+            amountIn: BZERO,
             fee: parseFixed(pool.swapFee, 18).toBigInt(),
             tokenInScalingFactor: tI.scalingFactor,
             tokenOutScalingFactor: tO.scalingFactor,
@@ -117,7 +118,7 @@ export class MetaStablePool {
                     );
                     amt = (amt * BigInt(1e18)) / poolPairData.tokenOutPriceRate;
                 } catch (err) {
-                    amt = BigInt(0);
+                    amt = BZERO;
                 }
                 amountsOut.push(amt);
             }
@@ -161,7 +162,7 @@ export class MetaStablePool {
                     );
                     amt = (amt * BigInt(1e18)) / poolPairData.tokenInPriceRate;
                 } catch (err) {
-                    amt = BigInt(0);
+                    amt = BZERO;
                 }
                 amountsIn.push(amt);
             }

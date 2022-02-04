@@ -2,6 +2,7 @@ import { getAddress } from '@ethersproject/address';
 import { BigNumber, parseFixed } from '@ethersproject/bignumber';
 import { WeiPerEther as ONE } from '@ethersproject/constants';
 import { SubgraphPoolBase, SubgraphToken } from '../../src';
+import { BZERO } from '../../src/utils/basicOperations';
 import { isSameAddress } from '../../src/utils';
 import {
     upscaleAmounts,
@@ -117,7 +118,7 @@ export class PhantomStablePool {
             balances: allBalancesScaled,
             tokenIndexIn: tI.index,
             tokenIndexOut: tO.index,
-            amountIn: BigInt(0),
+            amountIn: BZERO,
             fee: parseFixed(pool.swapFee, 18).toBigInt(),
             virtualBptSupply,
             tokenInPriceRate: tI.priceRate,
@@ -160,13 +161,13 @@ export class PhantomStablePool {
                             poolPairData.tokenIndexIn,
                             poolPairData.tokenIndexOut,
                             amountInWithFee,
-                            BigInt(0),
+                            BZERO,
                             invariant
                         );
                     } else if (poolPairData.pairType === PairTypes.TokenToBpt) {
                         const amountsInBigInt = Array(
                             poolPairData.balances.length
-                        ).fill(BigInt(0));
+                        ).fill(BZERO);
                         amountsInBigInt[poolPairData.tokenIndexIn] =
                             amountInWithFee;
 
@@ -175,7 +176,7 @@ export class PhantomStablePool {
                             poolPairData.balances,
                             amountsInBigInt,
                             poolPairData.virtualBptSupply,
-                            BigInt(0),
+                            BZERO,
                             invariant
                         );
                     } else if (poolPairData.pairType === PairTypes.BptToToken) {
@@ -185,15 +186,15 @@ export class PhantomStablePool {
                             poolPairData.tokenIndexOut,
                             amountInWithFee,
                             poolPairData.virtualBptSupply,
-                            BigInt(0),
+                            BZERO,
                             invariant
                         );
                     } else {
-                        return BigInt(0);
+                        return BZERO;
                     }
                     amt = (amt * BigInt(1e18)) / poolPairData.tokenOutPriceRate;
                 } catch (err) {
-                    amt = BigInt(0);
+                    amt = BZERO;
                 }
                 amountsOut.push(amt);
             }
@@ -233,7 +234,7 @@ export class PhantomStablePool {
                             poolPairData.tokenIndexIn,
                             poolPairData.tokenIndexOut,
                             amtOut,
-                            BigInt(0),
+                            BZERO,
                             invariant
                         );
                     } else if (poolPairData.pairType === PairTypes.TokenToBpt) {
@@ -243,13 +244,13 @@ export class PhantomStablePool {
                             poolPairData.tokenIndexIn,
                             amtOut,
                             poolPairData.virtualBptSupply,
-                            BigInt(0),
+                            BZERO,
                             invariant
                         );
                     } else if (poolPairData.pairType === PairTypes.BptToToken) {
                         const amountsOutBigInt = Array(
                             poolPairData.balances.length
-                        ).fill(BigInt(0));
+                        ).fill(BZERO);
                         amountsOutBigInt[poolPairData.tokenIndexOut] = amtOut;
 
                         amt = StableMath._calcBptInGivenExactTokensOut(
@@ -257,10 +258,10 @@ export class PhantomStablePool {
                             poolPairData.balances,
                             amountsOutBigInt,
                             poolPairData.virtualBptSupply,
-                            BigInt(0),
+                            BZERO,
                             invariant
                         );
-                    } else return BigInt(0);
+                    } else return BZERO;
 
                     // In Phantom Pools every time there is a swap (token per token, bpt per token or token per bpt), we substract the fee from the amount in
                     const returnEvmWithRate =
@@ -271,7 +272,7 @@ export class PhantomStablePool {
                         poolPairData.fee
                     );
                 } catch (err) {
-                    amt = BigInt(0);
+                    amt = BZERO;
                 }
                 amountsIn.push(amt);
             }
