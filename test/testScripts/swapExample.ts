@@ -150,6 +150,21 @@ export const ADDRESSES = {
             decimals: 18,
             symbol: 'wSTETH',
         },
+        bbadai: {
+            address: '0x804cdb9116a10bb78768d3252355a1b18067bf8f',
+            decimals: 18,
+            symbol: 'bbadai',
+        },
+        bbausdt: {
+            address: '0x2bbf681cc4eb09218bee85ea2a5d3d13fa40fc0c',
+            decimals: 18,
+            symbol: 'bbausdt',
+        },
+        bbausd: {
+            address: '0x7b50775383d3d6f0215a8f290f2c9e2eebbeceb2',
+            decimals: 18,
+            symbol: 'bbausd',
+        },
     },
     [Network.KOVAN]: {
         // Visit https://balancer-faucet.on.fleek.co/#/faucet for test tokens
@@ -304,11 +319,12 @@ async function getSwap(
     tokenIn: { symbol: string; address: string; decimals: number },
     tokenOut: { symbol: string; address: string; decimals: number },
     swapType: SwapTypes,
-    swapAmount: BigNumberish
+    swapAmount: BigNumberish,
+    sor: SOR
 ): Promise<SwapInfo> {
-    const sor = new SOR(provider, config, poolDataService, tokenPriceService);
+    // const sor = new SOR(provider, config, poolDataService, tokenPriceService);
 
-    await sor.fetchPools();
+    // await sor.fetchPools();
 
     // gasPrice is used by SOR as a factor to determine how many pools to swap against.
     // i.e. higher cost means more costly to trade against lots of different pools.
@@ -318,14 +334,14 @@ async function getSwap(
 
     // This calculates the cost to make a swap which is used as an input to sor to allow it to make gas efficient recommendations.
     // Note - tokenOut for SwapExactIn, tokenIn for SwapExactOut
-    const outputToken =
-        swapType === SwapTypes.SwapExactOut ? tokenIn : tokenOut;
-    const cost = await sor.getCostOfSwapInToken(
-        outputToken.address,
-        outputToken.decimals,
-        gasPrice,
-        BigNumber.from('35000')
-    );
+    // const outputToken =
+    //     swapType === SwapTypes.SwapExactOut ? tokenIn : tokenOut;
+    // const cost = await sor.getCostOfSwapInToken(
+    //     outputToken.address,
+    //     outputToken.decimals,
+    //     gasPrice,
+    //     BigNumber.from('35000')
+    // );
     const swapInfo: SwapInfo = await sor.getSwaps(
         tokenIn.address,
         tokenOut.address,
@@ -353,7 +369,7 @@ async function getSwap(
         returnDecimals
     );
 
-    const costToSwapScaled = formatFixed(cost, returnDecimals);
+    // const costToSwapScaled = formatFixed(cost, returnDecimals);
 
     const swapTypeStr =
         swapType === SwapTypes.SwapExactIn ? 'SwapExactIn' : 'SwapExactOut';
@@ -362,11 +378,11 @@ async function getSwap(
     console.log(
         `Token Out: ${tokenOut.symbol}, Amt: ${amtOutScaled.toString()}`
     );
-    console.log(`Cost to swap: ${costToSwapScaled.toString()}`);
-    console.log(`Return Considering Fees: ${returnWithFeesScaled.toString()}`);
-    console.log(`Swaps:`);
-    console.log(swapInfo.swaps);
-    console.log(swapInfo.tokenAddresses);
+    // console.log(`Cost to swap: ${costToSwapScaled.toString()}`);
+    // console.log(`Return Considering Fees: ${returnWithFeesScaled.toString()}`);
+    // console.log(`Swaps:`);
+    // console.log(swapInfo.swaps);
+    // console.log(swapInfo.tokenAddresses);
 
     return swapInfo;
 }
@@ -654,13 +670,13 @@ async function makeRelayerTrade(
 }
 
 export async function simpleSwap() {
-    const networkId = Network.KOVAN;
+    const networkId = Network.MAINNET;
     // Pools source can be Subgraph URL or pools data set passed directly
     // Update pools list with most recent onchain balances
-    const tokenIn = ADDRESSES[networkId].DAI_from_AAVE;
-    const tokenOut = ADDRESSES[networkId].USDC_from_AAVE;
+    const tokenIn = ADDRESSES[networkId].BAL;
+    const tokenOut = ADDRESSES[networkId].DAI;
     const swapType = SwapTypes.SwapExactIn;
-    const swapAmount = parseFixed('100', 18);
+    const swapAmount = parseFixed('777', 18);
     const executeTrade = true;
 
     const provider = new JsonRpcProvider(PROVIDER_URLS[networkId]);
@@ -692,26 +708,72 @@ export async function simpleSwap() {
     // Use the mock token price service if you want to manually set the token price in native asset
     //  mockTokenPriceService.setTokenPrice('0.001');
 
-    const swapInfo = await getSwap(
+    const sor = new SOR(
         provider,
-        SOR_CONFIG[Network.KOVAN],
+        SOR_CONFIG[networkId],
         subgraphPoolDataService,
-        // mockPoolDataService,
-        coingeckoTokenPriceService,
-        // mockTokenPriceService,
-        tokenIn,
-        tokenOut,
-        swapType,
-        swapAmount
+        coingeckoTokenPriceService
     );
+    await sor.fetchPools();
 
-    if (executeTrade) {
-        if ([tokenIn, tokenOut].includes(ADDRESSES[networkId].STETH)) {
-            console.log('RELAYER SWAP');
-            await makeRelayerTrade(provider, swapInfo, swapType, networkId);
-        } else {
-            console.log('VAULT SWAP');
-            await makeTrade(provider, swapInfo, swapType);
+    const swaps = [
+        // {
+        //     tokenIn: ADDRESSES[networkId].bbadai,
+        //     tokenOut: ADDRESSES[networkId].bbausdt,
+        //     amount: parseFixed('1', 18),
+        // },
+        {
+            tokenIn: ADDRESSES[networkId].bbadai,
+            tokenOut: ADDRESSES[networkId].bbausdt,
+            amount: parseFixed('1023', 18),
+        },
+        // {
+        //     tokenIn: ADDRESSES[networkId].bbadai,
+        //     tokenOut: ADDRESSES[networkId].bbausd,
+        //     amount: parseFixed('1', 18),
+        // },
+        {
+            tokenIn: ADDRESSES[networkId].bbadai,
+            tokenOut: ADDRESSES[networkId].bbausd,
+            amount: parseFixed('1023', 18),
+        },
+        // {
+        //     tokenIn: ADDRESSES[networkId].bbausd,
+        //     tokenOut: ADDRESSES[networkId].bbadai,
+        //     amount: parseFixed('1', 18),
+        // },
+        {
+            tokenIn: ADDRESSES[networkId].bbausd,
+            tokenOut: ADDRESSES[networkId].bbadai,
+            amount: parseFixed('1023', 18),
+        },
+    ];
+
+    for (let i = 0; i < swaps.length; i++) {
+        const swap = swaps[i];
+
+        const swapInfo = await getSwap(
+            provider,
+            SOR_CONFIG[Network.KOVAN],
+            subgraphPoolDataService,
+            // mockPoolDataService,
+            coingeckoTokenPriceService,
+            // mockTokenPriceService,
+            swap.tokenIn,
+            swap.tokenOut,
+            swapType,
+            swap.amount,
+            sor
+        );
+
+        if (executeTrade) {
+            if ([tokenIn, tokenOut].includes(ADDRESSES[networkId].STETH)) {
+                console.log('RELAYER SWAP');
+                await makeRelayerTrade(provider, swapInfo, swapType, networkId);
+            } else {
+                console.log('VAULT SWAP');
+                await makeTrade(provider, swapInfo, swapType);
+            }
         }
     }
 }

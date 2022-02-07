@@ -91,6 +91,12 @@ export function _calcOutGivenIn(
     fee: bigint,
     invariant?: bigint
 ): bigint {
+    console.log(amp.toString());
+    console.log(balances.toString());
+    console.log(tokenIndexIn.toString());
+    console.log(tokenIndexOut.toString());
+    console.log(amountIn.toString());
+    console.log(fee.toString());
     balances = [...balances];
     amountIn = subtractFee(amountIn, fee);
     // Given that we need to have a greater final balance out, the invariant needs to be rounded up

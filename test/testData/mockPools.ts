@@ -109,7 +109,7 @@ export const mockMetaStablePool: SubgraphPoolBase = {
 
 export const mockPhantomStablePool: SubgraphPoolBase = {
     address: '0x7b50775383d3d6f0215a8f290f2c9e2eebbeceb2',
-    amp: '570',
+    amp: '1472',
     id: '0x7b50775383d3d6f0215a8f290f2c9e2eebbeceb20000000000000000000000fe',
     poolType: 'StablePhantom',
     swapEnabled: true,
@@ -117,15 +117,15 @@ export const mockPhantomStablePool: SubgraphPoolBase = {
     tokens: [
         {
             address: '0x2bbf681cc4eb09218bee85ea2a5d3d13fa40fc0c',
-            balance: '31589094.14791003113253038',
+            balance: '44993851.276928146353847691',
             decimals: 18,
-            priceRate: '1.00318187622469646',
+            priceRate: '1.003436047509453891',
             //symbol: 'bb-a-USDT',
             weight: null,
         },
         {
             address: '0x7b50775383d3d6f0215a8f290f2c9e2eebbeceb2',
-            balance: '5192296737534476.373997683867737572',
+            balance: '5192296704617509.822468291663719254',
             decimals: 18,
             priceRate: '1',
             //symbol: 'bb-a-USD',
@@ -133,17 +133,17 @@ export const mockPhantomStablePool: SubgraphPoolBase = {
         },
         {
             address: '0x804cdb9116a10bb78768d3252355a1b18067bf8f',
-            balance: '44446740.361978764766626035',
+            balance: '49861493.627951012184783498',
             decimals: 18,
-            priceRate: '1.002602295420743903',
+            priceRate: '1.002933802725311697',
             //symbol: 'bb-a-DAI',
             weight: null,
         },
         {
             address: '0x9210f1204b5a24742eba12f710636d76240df3d0',
-            balance: '45197987.208443171410482381',
+            balance: '59355329.676218736093494672',
             decimals: 18,
-            priceRate: '1.002920135341277692',
+            priceRate: '1.003205110414688713',
             //symbol: 'bb-a-USDC',
             weight: null,
         },
@@ -154,7 +154,7 @@ export const mockPhantomStablePool: SubgraphPoolBase = {
         '0x804cdb9116a10bb78768d3252355a1b18067bf8f',
         '0x9210f1204b5a24742eba12f710636d76240df3d0',
     ],
-    totalShares: '121000351.254532812461482523',
+    totalShares: '153917317.806062204665500841',
     totalWeight: '0',
 };
 

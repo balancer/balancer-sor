@@ -25,12 +25,14 @@ import { StablePool as StablePoolPs } from './PARASWAP/StablePool';
 import { MetaStablePool as MetaStablePoolSdk } from './SDK/MetaStablePool';
 import { MetaStablePool as MetaStablePoolPs } from './PARASWAP/MetaStablePool';
 import { PhantomStablePool as PhantomStableSdk } from './SDK/PhantomStablePool';
+import { PhantomStablePool as PhantomStablePoolPs } from './PARASWAP/PhantomStablePool';
 import { LinearPool as LinearSdk } from './SDK/LinearPool';
 import { SubgraphPoolBase } from '../src';
 import {
     WeightedPoolHelper,
     StablePoolHelper,
     MetaStablePoolHelper,
+    PhantomStablePoolHelper,
 } from './PARASWAP/utils';
 import { BZERO } from '../src/utils/basicOperations';
 
@@ -246,7 +248,7 @@ describe(`Testing invariant`, () => {
                     cloneDeep(amountsIn)
                 );
                 const evmPool = poolToEvm(cloneDeep(mockMetaStablePool));
-                // TO DO !!!!!!!
+                // This parsing includes rate in scaling factors
                 const psPairData = MetaStablePoolHelper.parsePoolPairDataBigInt(
                     cloneDeep(evmPool),
                     tokenIn,
@@ -318,6 +320,56 @@ describe(`Testing invariant`, () => {
                     );
                 });
 
+                it(`Paraswap vs SDK, token>token`, () => {
+                    const tokenIn = bbadai;
+                    const tokenOut = bbausdt;
+                    const amountsIn = [
+                        parseFixed('1', 18).toBigInt(),
+                        parseFixed('1023', 18).toBigInt(),
+                    ];
+
+                    const sdkPairData =
+                        PhantomStableSdk.parsePoolPairDataBigInt(
+                            cloneDeep(mockPhantomStablePool),
+                            tokenIn,
+                            tokenOut
+                        );
+                    const sdkAmtsOut = PhantomStableSdk.calcOutGivenIn(
+                        sdkPairData,
+                        cloneDeep(amountsIn)
+                    );
+                    const evmPool = poolToEvm(cloneDeep(mockPhantomStablePool));
+                    // This parsing includes rate in scaling factors
+                    const psPairData =
+                        PhantomStablePoolHelper.parsePoolPairDataBigInt(
+                            cloneDeep(evmPool),
+                            tokenIn,
+                            tokenOut
+                        );
+
+                    const phantomStablePoolPs = new PhantomStablePoolPs();
+                    const psAmtsOut = phantomStablePoolPs.onSell(
+                        amountsIn,
+                        psPairData.tokens,
+                        psPairData.balances,
+                        psPairData.tokenIndexIn,
+                        psPairData.tokenIndexOut,
+                        psPairData.bptIndex,
+                        psPairData.scalingFactors,
+                        psPairData.fee,
+                        psPairData.amp
+                    );
+
+                    /*
+                    MockPool using real values from onChain Data.
+                    Used queryBatchSwap call to find vault deltas: 1023000000000000000000,-1022399151333072469408
+                    */
+                    console.log(sdkAmtsOut.toString());
+                    console.log(psAmtsOut.toString());
+                    expect(sdkAmtsOut[0]).to.not.eq(BZERO);
+                    expect(sdkAmtsOut).to.deep.eq(psAmtsOut);
+                });
+
                 it(`token>bpt`, () => {
                     const tokenIn = bbadai;
                     const tokenOut = bbausd;
@@ -336,6 +388,56 @@ describe(`Testing invariant`, () => {
                     );
                 });
 
+                it(`Paraswap vs SDK, token>bpt`, () => {
+                    const tokenIn = bbadai;
+                    const tokenOut = bbausd;
+                    const amountsIn = [
+                        parseFixed('1', 18).toBigInt(),
+                        parseFixed('1023', 18).toBigInt(),
+                    ];
+
+                    const sdkPairData =
+                        PhantomStableSdk.parsePoolPairDataBigInt(
+                            cloneDeep(mockPhantomStablePool),
+                            tokenIn,
+                            tokenOut
+                        );
+                    const sdkAmtsOut = PhantomStableSdk.calcOutGivenIn(
+                        sdkPairData,
+                        cloneDeep(amountsIn)
+                    );
+                    const evmPool = poolToEvm(cloneDeep(mockPhantomStablePool));
+                    // This parsing includes rate in scaling factors
+                    const psPairData =
+                        PhantomStablePoolHelper.parsePoolPairDataBigInt(
+                            cloneDeep(evmPool),
+                            tokenIn,
+                            tokenOut
+                        );
+                    const metaStablePoolPs = new PhantomStablePoolPs();
+                    const psAmtsOut = metaStablePoolPs.onSell(
+                        amountsIn,
+                        psPairData.tokens,
+                        psPairData.balances,
+                        psPairData.tokenIndexIn,
+                        psPairData.tokenIndexOut,
+                        psPairData.bptIndex,
+                        psPairData.scalingFactors,
+                        psPairData.fee,
+                        psPairData.amp
+                    );
+
+                    /*
+                    MockPool using real values from onChain Data.
+                    Used queryBatchSwap call to find vault deltas: 1023000000000000000000,-1020812001962720918272
+                    (1020.810329084016699455)
+                    */
+                    console.log(sdkAmtsOut.toString());
+                    console.log(psAmtsOut.toString());
+                    expect(sdkAmtsOut[0]).to.not.eq(BZERO);
+                    expect(sdkAmtsOut).to.deep.eq(psAmtsOut);
+                });
+
                 it(`bpt>token`, () => {
                     const tokenIn = bbausd;
                     const tokenOut = bbadai;
@@ -352,6 +454,56 @@ describe(`Testing invariant`, () => {
                         PhantomStablePool,
                         PhantomStableSdk
                     );
+                });
+
+                it(`Paraswap vs SDK, bpt>token`, () => {
+                    const tokenIn = bbausd;
+                    const tokenOut = bbadai;
+                    const amountsIn = [
+                        parseFixed('1', 18).toBigInt(),
+                        parseFixed('1023', 18).toBigInt(),
+                    ];
+
+                    const sdkPairData =
+                        PhantomStableSdk.parsePoolPairDataBigInt(
+                            cloneDeep(mockPhantomStablePool),
+                            tokenIn,
+                            tokenOut
+                        );
+                    const sdkAmtsOut = PhantomStableSdk.calcOutGivenIn(
+                        sdkPairData,
+                        cloneDeep(amountsIn)
+                    );
+                    const evmPool = poolToEvm(cloneDeep(mockPhantomStablePool));
+                    // This parsing includes rate in scaling factors
+                    const psPairData =
+                        PhantomStablePoolHelper.parsePoolPairDataBigInt(
+                            cloneDeep(evmPool),
+                            tokenIn,
+                            tokenOut
+                        );
+                    const metaStablePoolPs = new PhantomStablePoolPs();
+                    const psAmtsOut = metaStablePoolPs.onSell(
+                        amountsIn,
+                        psPairData.tokens,
+                        psPairData.balances,
+                        psPairData.tokenIndexIn,
+                        psPairData.tokenIndexOut,
+                        psPairData.bptIndex,
+                        psPairData.scalingFactors,
+                        psPairData.fee,
+                        psPairData.amp
+                    );
+
+                    /*
+                    MockPool using real values from onChain Data.
+                    Used queryBatchSwap call to find vault deltas: 1023000000000000000000,-1025172173977726185664
+                    (1025.173854004505107673)
+                    */
+                    console.log(sdkAmtsOut.toString());
+                    console.log(psAmtsOut.toString());
+                    expect(sdkAmtsOut[0]).to.not.eq(BZERO);
+                    expect(sdkAmtsOut).to.deep.eq(psAmtsOut);
                 });
             });
 
