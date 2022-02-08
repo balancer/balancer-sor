@@ -12,7 +12,7 @@ import {
     mockPhantomStablePool,
     mockLinearPool,
 } from './testData/mockPools';
-import { poolToEvm } from './PARASWAP/utils';
+import { poolToEvm } from './PARASWAP-BACKUP/utils';
 import { WeightedPool } from '../src/pools/weightedPool/weightedPool';
 import { StablePool } from '../src/pools/stablePool/stablePool';
 import { MetaStablePool } from '../src/pools/metaStablePool/metaStablePool';
@@ -27,13 +27,15 @@ import { MetaStablePool as MetaStablePoolPs } from './PARASWAP/MetaStablePool';
 import { PhantomStablePool as PhantomStableSdk } from './SDK/PhantomStablePool';
 import { PhantomStablePool as PhantomStablePoolPs } from './PARASWAP/PhantomStablePool';
 import { LinearPool as LinearSdk } from './SDK/LinearPool';
+import { LinearPool as LinearPoolPs } from './PARASWAP/LinearPool';
 import { SubgraphPoolBase } from '../src';
 import {
     WeightedPoolHelper,
     StablePoolHelper,
     MetaStablePoolHelper,
     PhantomStablePoolHelper,
-} from './PARASWAP/utils';
+    LinearPoolHelper,
+} from './PARASWAP-BACKUP/utils';
 import { BZERO } from '../src/utils/basicOperations';
 
 const WETH = '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2';
@@ -625,6 +627,52 @@ describe(`Testing invariant`, () => {
                 );
             });
 
+            it(`Paraswap vs SDK, main>bpt`, () => {
+                const tokenIn = USDT;
+                const tokenOut = bbausdt;
+                const amountsIn = [
+                    parseFixed('1', 18).toBigInt(),
+                    parseFixed('1023', 18).toBigInt(),
+                ];
+
+                const sdkPairData = LinearSdk.parsePoolPairDataBigInt(
+                    cloneDeep(mockLinearPool),
+                    tokenIn,
+                    tokenOut
+                );
+                const sdkAmtsOut = LinearSdk.calcOutGivenIn(
+                    sdkPairData,
+                    cloneDeep(amountsIn)
+                );
+                const evmPool = poolToEvm(cloneDeep(mockLinearPool));
+                // This parsing includes rate in scaling factors
+                const psPairData = LinearPoolHelper.parsePoolPairDataBigInt(
+                    cloneDeep(evmPool),
+                    tokenIn,
+                    tokenOut
+                );
+                const linearPoolPs = new LinearPoolPs();
+
+                const psAmtsOut = linearPoolPs.onSell(
+                    amountsIn,
+                    psPairData.tokens,
+                    psPairData.balances,
+                    psPairData.tokenIndexIn,
+                    psPairData.tokenIndexOut,
+                    psPairData.bptIndex,
+                    psPairData.wrappedIndex,
+                    psPairData.mainIndex,
+                    psPairData.scalingFactors,
+                    psPairData.fee,
+                    psPairData.lowerTarget,
+                    psPairData.upperTarget
+                );
+                console.log(sdkAmtsOut.toString());
+                console.log(psAmtsOut.toString());
+                expect(sdkAmtsOut[0]).to.not.eq(BZERO);
+                expect(sdkAmtsOut).to.deep.eq(psAmtsOut);
+            });
+
             it(`bpt>main`, () => {
                 const tokenIn = bbausdt;
                 const tokenOut = USDT;
@@ -641,6 +689,52 @@ describe(`Testing invariant`, () => {
                     LinearPool,
                     LinearSdk
                 );
+            });
+
+            it(`Paraswap vs SDK, bpt>main`, () => {
+                const tokenIn = bbausdt;
+                const tokenOut = USDT;
+                const amountsIn = [
+                    parseFixed('1', 18).toBigInt(),
+                    parseFixed('1023', 18).toBigInt(),
+                ];
+
+                const sdkPairData = LinearSdk.parsePoolPairDataBigInt(
+                    cloneDeep(mockLinearPool),
+                    tokenIn,
+                    tokenOut
+                );
+                const sdkAmtsOut = LinearSdk.calcOutGivenIn(
+                    sdkPairData,
+                    cloneDeep(amountsIn)
+                );
+                const evmPool = poolToEvm(cloneDeep(mockLinearPool));
+                // This parsing includes rate in scaling factors
+                const psPairData = LinearPoolHelper.parsePoolPairDataBigInt(
+                    cloneDeep(evmPool),
+                    tokenIn,
+                    tokenOut
+                );
+                const linearPoolPs = new LinearPoolPs();
+
+                const psAmtsOut = linearPoolPs.onSell(
+                    amountsIn,
+                    psPairData.tokens,
+                    psPairData.balances,
+                    psPairData.tokenIndexIn,
+                    psPairData.tokenIndexOut,
+                    psPairData.bptIndex,
+                    psPairData.wrappedIndex,
+                    psPairData.mainIndex,
+                    psPairData.scalingFactors,
+                    psPairData.fee,
+                    psPairData.lowerTarget,
+                    psPairData.upperTarget
+                );
+                console.log(sdkAmtsOut.toString());
+                console.log(psAmtsOut.toString());
+                expect(sdkAmtsOut[0]).to.not.eq(BZERO);
+                expect(sdkAmtsOut).to.deep.eq(psAmtsOut);
             });
         });
     });

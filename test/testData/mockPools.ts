@@ -185,7 +185,7 @@ export const mockLinearPool: SubgraphPoolBase = {
             address: '0xf8fd466f12e236f4c96f7cce6c79eadb819abf58',
             balance: '26494309.048291',
             decimals: 6,
-            priceRate: '1',
+            priceRate: '1.079415891477585681',
             // symbol: 'aUSDT',
             weight: null,
         },

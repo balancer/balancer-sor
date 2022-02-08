@@ -1,5 +1,5 @@
-import { BasePool } from './balancer-v2-pool';
-import { MathSol, _require } from '../../src/utils/basicOperations';
+import { BasePool } from './BasePool';
+import { MathSol, _require } from './basicOperations';
 
 abstract class BaseMinimalSwapInfoPool extends BasePool {
     // Swap Hooks

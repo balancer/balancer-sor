@@ -1,8 +1,8 @@
-import { isSameAddress } from '../../src/utils';
-import * as StableMath from '../../src/pools/stablePool/stableMathBigInt';
-import { BZERO } from '../../src/utils/basicOperations';
 import { BigNumber } from '@ethersproject/bignumber';
 import { BasePool } from './BasePool';
+import { isSameAddress } from './utils';
+import * as StableMath from './StableMath';
+import { BZERO } from './basicOperations';
 
 enum PairTypes {
     BptToToken,
@@ -11,9 +11,15 @@ enum PairTypes {
 }
 
 export class PhantomStablePool extends BasePool {
+    // This is the maximum token amount the Vault can hold. In regular operation, the total BPT supply remains constant
+    // and equal to _INITIAL_BPT_SUPPLY, but most of it remains in the Pool, waiting to be exchanged for tokens. The
+    // actual amount of BPT in circulation is the total supply minus the amount held by the Pool, and is known as the
+    // 'virtual supply'.
     static MAX_TOKEN_BALANCE = BigNumber.from('2').pow('112').sub('1');
+
     /*
     scaling factors should include rate:
+    i.e.
     scalingFactors: pool.tokens.map(({ decimals, priceRate }) =>
         MathSol.mulDownFixed(getTokenScalingFactor(decimals), priceRate)
     )
@@ -25,9 +31,9 @@ export class PhantomStablePool extends BasePool {
         indexIn: number,
         indexOut: number,
         bptIndex: number,
-        _scalingFactors: bigint[],
-        _swapFeePercentage: bigint,
-        _amplificationParameter: bigint
+        scalingFactors: bigint[],
+        swapFeePercentage: bigint,
+        amplificationParameter: bigint
     ): bigint[] {
         return this._swapGivenIn(
             amounts,
@@ -36,22 +42,25 @@ export class PhantomStablePool extends BasePool {
             indexIn,
             indexOut,
             bptIndex,
-            _scalingFactors,
-            _swapFeePercentage,
-            _amplificationParameter
+            scalingFactors,
+            swapFeePercentage,
+            amplificationParameter
         );
     }
 
-    // Remove BPT from Balances and update indices
+    // StablePool's `_onSwapGivenIn` and `_onSwapGivenOut` handlers are meant to process swaps between Pool tokens.
+    // Since one of the Pool's tokens is the preminted BPT, we neeed to a) handle swaps where that tokens is involved
+    // separately (as they are effectively single-token joins or exits), and b) remove BPT from the balances array when
+    // processing regular swaps before delegating those to StablePool's handler.
     static removeBPT(
         balances: bigint[],
         tokenIndexIn: number,
         tokenIndexOut: number,
         bptIndex: number
     ): {
-        balances;
-        indexIn;
-        indexOut;
+        balances: bigint[];
+        indexIn: number;
+        indexOut: number;
     } {
         if (bptIndex != -1) {
             balances.splice(bptIndex, 1);
@@ -73,8 +82,8 @@ export class PhantomStablePool extends BasePool {
         indexOut: number,
         bptIndex: number,
         scalingFactors: bigint[],
-        _swapFeePercentage: bigint,
-        _amplificationParameter: bigint
+        swapFeePercentage: bigint,
+        amplificationParameter: bigint
     ): bigint[] {
         // Phantom pools allow trading between token and pool BPT
         let pairType: PairTypes;
@@ -88,7 +97,7 @@ export class PhantomStablePool extends BasePool {
 
         // Fees are subtracted before scaling, to reduce the complexity of the rounding direction analysis.
         const tokenAmountsInWithFee = tokenAmountsIn.map((a) =>
-            this._subtractSwapFeeAmount(a, _swapFeePercentage)
+            this._subtractSwapFeeAmount(a, swapFeePercentage)
         );
         const balancesUpscaled = this._upscaleArray(balances, scalingFactors);
         const tokenAmountsInScaled = tokenAmountsInWithFee.map((a) =>
@@ -112,7 +121,7 @@ export class PhantomStablePool extends BasePool {
             droppedBpt.balances,
             droppedBpt.indexIn,
             droppedBpt.indexOut,
-            _amplificationParameter,
+            amplificationParameter,
             virtualBptSupply,
             pairType
         );
@@ -124,15 +133,10 @@ export class PhantomStablePool extends BasePool {
     }
 
     /*
-     * @dev Called when a swap with the Pool occurs, where the amount of tokens entering the Pool is known.
-     *
-     * Returns the amount of tokens that will be taken from the Pool in return.
-     *
-     * All amounts inside `swapRequest` and `balances` are upscaled. The swap fee has already been deducted from
-     * `swapRequest.amount`.
-     *
-     * The return value is also considered upscaled, and will be downscaled (rounding down) before returning it to the
-     * Vault.
+     Called when a swap with the Pool occurs, where the amount of tokens entering the Pool is known.
+     All amounts are upscaled.
+     Swap fee is already deducted.
+     The return value is also considered upscaled, and should be downscaled (rounding down)
      */
     _onSwapGivenIn(
         tokenAmountsIn: bigint[],
@@ -163,7 +167,6 @@ export class PhantomStablePool extends BasePool {
                         balances,
                         amountsInBigInt,
                         virtualBptSupply,
-                        BZERO,
                         invariant
                     );
                 } catch (err) {
@@ -181,7 +184,6 @@ export class PhantomStablePool extends BasePool {
                         indexOut,
                         amountIn,
                         virtualBptSupply,
-                        BZERO,
                         invariant
                     );
                 } catch (err) {
@@ -199,7 +201,6 @@ export class PhantomStablePool extends BasePool {
                         indexIn,
                         indexOut,
                         amountIn,
-                        BZERO,
                         invariant
                     );
                 } catch (err) {

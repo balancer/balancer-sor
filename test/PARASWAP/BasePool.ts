@@ -1,4 +1,4 @@
-import { MathSol } from '../../src/utils/basicOperations';
+import { MathSol } from './basicOperations';
 
 export class BasePool {
     _subtractSwapFeeAmount(amount: bigint, _swapFeePercentage: bigint): bigint {

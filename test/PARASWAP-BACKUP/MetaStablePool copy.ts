@@ -2,8 +2,15 @@ import { BasePool } from './BasePool';
 import * as StableMath from './StableMath';
 import { BZERO } from './basicOperations';
 
-export class StablePool extends BasePool {
-    // Modification: this is inspired from the function onSwap which is in the original contract
+export class MetaStablePool extends BasePool {
+    // StablePool suitable for assets with proportional prices (i.e. with slow-changing exchange rates between them).
+
+    /*
+    scaling factors should include rate:
+    scalingFactors: pool.tokens.map(({ decimals, priceRate }) =>
+        MathSol.mulDownFixed(getTokenScalingFactor(decimals), priceRate)
+    )
+    */
     onSell(
         amounts: bigint[],
         balances: bigint[],
@@ -55,7 +62,6 @@ export class StablePool extends BasePool {
             this._downscaleDown(a, scalingFactors[indexOut])
         );
     }
-
     /*
     Called when a swap with the Pool occurs, where the amount of tokens entering the Pool is known.
     All amounts are upscaled.
