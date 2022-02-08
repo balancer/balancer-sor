@@ -12,22 +12,22 @@ import {
     mockPhantomStablePool,
     mockLinearPool,
 } from './testData/mockPools';
-import { poolToEvm } from './PARASWAP-BACKUP/utils';
+import { poolToEvm } from './PARASWAP-HELPERS/utils';
 import { WeightedPool } from '../src/pools/weightedPool/weightedPool';
 import { StablePool } from '../src/pools/stablePool/stablePool';
 import { MetaStablePool } from '../src/pools/metaStablePool/metaStablePool';
 import { PhantomStablePool } from '../src/pools/phantomStablePool/phantomStablePool';
 import { LinearPool } from '../src/pools/linearPool/linearPool';
 import { WeightedPool as WeightedPoolSdk } from './SDK/WeightedPool';
-import { WeightedPool as WeightedPoolPs } from './PARASWAP/WeightedPool';
+import { WeightedPool as WeightedPoolPs } from './PARASWAP-CORE/WeightedPool';
 import { StablePool as StablePoolSdk } from './SDK/StablePool';
-import { StablePool as StablePoolPs } from './PARASWAP/StablePool';
+import { StablePool as StablePoolPs } from './PARASWAP-CORE/StablePool';
 import { MetaStablePool as MetaStablePoolSdk } from './SDK/MetaStablePool';
-import { MetaStablePool as MetaStablePoolPs } from './PARASWAP/MetaStablePool';
+import { MetaStablePool as MetaStablePoolPs } from './PARASWAP-CORE/MetaStablePool';
 import { PhantomStablePool as PhantomStableSdk } from './SDK/PhantomStablePool';
-import { PhantomStablePool as PhantomStablePoolPs } from './PARASWAP/PhantomStablePool';
+import { PhantomStablePool as PhantomStablePoolPs } from './PARASWAP-CORE/PhantomStablePool';
 import { LinearPool as LinearSdk } from './SDK/LinearPool';
-import { LinearPool as LinearPoolPs } from './PARASWAP/LinearPool';
+import { LinearPool as LinearPoolPs } from './PARASWAP-CORE/LinearPool';
 import { SubgraphPoolBase } from '../src';
 import {
     WeightedPoolHelper,
@@ -35,7 +35,7 @@ import {
     MetaStablePoolHelper,
     PhantomStablePoolHelper,
     LinearPoolHelper,
-} from './PARASWAP-BACKUP/utils';
+} from './PARASWAP-HELPERS/utils';
 import { BZERO } from '../src/utils/basicOperations';
 
 const WETH = '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2';

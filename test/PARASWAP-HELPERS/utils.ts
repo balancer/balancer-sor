@@ -1,7 +1,7 @@
 import { parseFixed } from '@ethersproject/bignumber';
 import { WeiPerEther as ONE } from '@ethersproject/constants';
 import { getAddress } from '@ethersproject/address';
-import { BZERO, MathSol } from '../PARASWAP/basicOperations';
+import { BZERO, MathSol } from '../PARASWAP-CORE/basicOperations';
 import { SubgraphPoolBase } from '../../src';
 
 export const isSameAddress = (address1: string, address2: string): boolean =>
