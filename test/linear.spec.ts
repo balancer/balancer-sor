@@ -41,8 +41,9 @@ import {
     aUSDT,
     KOVAN_BAL,
     AAVE_USDT,
-    sorConfigTest,
+    sorConfigTestBoosted,
     sorConfigKovan,
+    sorConfigFullKovan,
 } from './lib/constants';
 
 // Single Linear pool DAI/aDAI/bDAI
@@ -51,6 +52,8 @@ import singleLinear from './testData/linearPools/singleLinear.json';
 import smallLinear from './testData/linearPools/smallLinear.json';
 import kovanPools from './testData/linearPools/kovan.json';
 import fullKovanPools from './testData/linearPools/fullKovan.json';
+import { getOutputAmountSwapForPath } from '../src/router/helpersClass';
+import { checkBestPath } from './boostedPaths.spec';
 
 describe('linear pool tests', () => {
     context('parsePoolPairData', () => {
@@ -569,7 +572,8 @@ describe('linear pool tests', () => {
                         LINEAR_AUSDT.address,
                         SwapTypes.SwapExactIn,
                         parseFixed('25.001542', USDT.decimals),
-                        kovanPools.pools
+                        kovanPools.pools,
+                        sorConfigKovan
                     );
                     expect(returnAmount).to.eq('25004552099099202302');
                 });
@@ -580,7 +584,8 @@ describe('linear pool tests', () => {
                         LINEAR_AUSDT.address,
                         SwapTypes.SwapExactOut,
                         parseFixed('0.981028', LINEAR_AUSDT.decimals),
-                        kovanPools.pools
+                        kovanPools.pools,
+                        sorConfigKovan
                     );
                     expect(returnAmount).to.eq('980910');
                 });
@@ -591,7 +596,8 @@ describe('linear pool tests', () => {
                         USDT.address,
                         SwapTypes.SwapExactIn,
                         parseFixed('26.0872140', LINEAR_AUSDT.decimals),
-                        kovanPools.pools
+                        kovanPools.pools,
+                        sorConfigKovan
                     );
                     expect(returnAmount).to.eq('26084073');
                 });
@@ -602,7 +608,8 @@ describe('linear pool tests', () => {
                         USDT.address,
                         SwapTypes.SwapExactOut,
                         parseFixed('71.204293', USDT.decimals),
-                        kovanPools.pools
+                        kovanPools.pools,
+                        sorConfigKovan
                     );
                     expect(returnAmount).to.eq('71212865750361503175');
                 });
@@ -615,7 +622,8 @@ describe('linear pool tests', () => {
                         LINEAR_ADAI.address,
                         SwapTypes.SwapExactIn,
                         parseFixed('491.23098', DAI.decimals),
-                        pools
+                        pools,
+                        sorConfigKovan
                     );
                     expect(returnAmount).to.eq('491230979220188637567');
                 });
@@ -628,7 +636,8 @@ describe('linear pool tests', () => {
                         LINEAR_AUSDT.address,
                         SwapTypes.SwapExactIn,
                         parseFixed('25.001542', aUSDT.decimals),
-                        kovanPools.pools
+                        kovanPools.pools,
+                        sorConfigKovan
                     );
                     expect(returnAmount).to.eq('25002051893909811321');
                 });
@@ -639,7 +648,8 @@ describe('linear pool tests', () => {
                         LINEAR_AUSDT.address,
                         SwapTypes.SwapExactOut,
                         parseFixed('0.981028', LINEAR_AUSDT.decimals),
-                        kovanPools.pools
+                        kovanPools.pools,
+                        sorConfigKovan
                     );
                     expect(returnAmount).to.eq('981007');
                 });
@@ -650,7 +660,8 @@ describe('linear pool tests', () => {
                         aUSDT.address,
                         SwapTypes.SwapExactIn,
                         parseFixed('26.0872140', LINEAR_AUSDT.decimals),
-                        kovanPools.pools
+                        kovanPools.pools,
+                        sorConfigKovan
                     );
                     expect(returnAmount).to.eq('26086681');
                 });
@@ -661,7 +672,8 @@ describe('linear pool tests', () => {
                         aUSDT.address,
                         SwapTypes.SwapExactOut,
                         parseFixed('71.204293', aUSDT.decimals),
-                        kovanPools.pools
+                        kovanPools.pools,
+                        sorConfigKovan
                     );
                     expect(returnAmount).to.eq('71205745000000000000');
                 });
@@ -706,23 +718,36 @@ describe('linear pool tests', () => {
                     SwapTypes.SwapExactIn,
                     parseFixed('7.21', AAVE_USDT.decimals),
                     fullKovanPools.pools,
-                    sorConfigKovan
+                    sorConfigFullKovan
                 );
                 // 6605808981785744500
                 expect(returnAmount).to.eq('6606146264948964392');
             });
 
             it('BAL>USDT, SwapExactIn', async () => {
+                const tokenIn = KOVAN_BAL;
+                const tokenOut = AAVE_USDT;
                 const returnAmount = await testFullSwap(
-                    KOVAN_BAL.address,
-                    AAVE_USDT.address,
+                    tokenIn.address,
+                    tokenOut.address,
                     SwapTypes.SwapExactIn,
                     parseFixed('10.8248', KOVAN_BAL.decimals),
                     fullKovanPools.pools,
-                    sorConfigKovan
+                    sorConfigFullKovan
                 );
-                // 11062044
-                expect(returnAmount).to.eq('11061470');
+                expect(returnAmount).to.eq('70169832');
+                // from worse path: 11061470
+                assert(
+                    checkBestPath(
+                        tokenIn,
+                        tokenOut,
+                        SwapTypes.SwapExactIn,
+                        10.8248,
+                        fullKovanPools.pools,
+                        sorConfigFullKovan
+                    ),
+                    'SOR path is not the best one'
+                );
             });
 
             it('USDT>BAL, SwapExactOut', async () => {
@@ -732,7 +757,7 @@ describe('linear pool tests', () => {
                     SwapTypes.SwapExactOut,
                     parseFixed('0.652413919893769122', KOVAN_BAL.decimals),
                     fullKovanPools.pools,
-                    sorConfigKovan
+                    sorConfigFullKovan
                 );
                 expect(returnAmount).to.eq('702055');
             });
@@ -744,11 +769,10 @@ describe('linear pool tests', () => {
                     SwapTypes.SwapExactOut,
                     parseFixed('71.990116', AAVE_USDT.decimals),
                     fullKovanPools.pools,
-                    sorConfigKovan
+                    sorConfigFullKovan
                 );
-
-                // 81894035538462519296
-                expect(returnAmount).to.eq('81899098582251741376');
+                // from worse path: 81899098582251741376
+                expect(returnAmount).to.eq('653098636918112');
             });
         });
 
@@ -853,20 +877,20 @@ function getPaths(
         hopTokens,
         poolsFilteredDict
     );
-    const conf = config || sorConfigTest;
+    const conf = config || sorConfigTestBoosted;
     const boostedPaths = getBoostedPaths(tokenIn, tokenOut, poolsAll, conf);
     pathData = pathData.concat(boostedPaths);
     const [paths] = calculatePathLimits(pathData, swapType);
     return [paths, poolsAll, boostedPaths];
 }
 
-async function testFullSwap(
+export async function testFullSwap(
     tokenIn: string,
     tokenOut: string,
     swapType: SwapTypes,
     swapAmount: BigNumber,
     pools: SubgraphPoolBase[],
-    config: SorConfig = sorConfigTest
+    config: SorConfig = sorConfigTestBoosted
 ) {
     const returnAmountDecimals = 18; // TO DO Remove?
     const maxPools = 4;

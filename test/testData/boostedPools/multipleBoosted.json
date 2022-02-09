@@ -79,7 +79,7 @@
                 },
                 {
                     "address": "0xe22da380ee6b445bb8273c81944adeb6e8450422",
-                    "balance": "0",
+                    "balance": "100000",
                     "decimals": 6,
                     "priceRate": "1",
                     "symbol": "USDC",
@@ -107,7 +107,7 @@
             "tokens": [
                 {
                     "address": "0xdac17f958d2ee523a2206206994597c13d831ec7",
-                    "balance": "100.060001",
+                    "balance": "10000.060001",
                     "decimals": 6,
                     "priceRate": "1",
                     "symbol": "USDT",
@@ -142,7 +142,7 @@
         },
         {
             "address": "0xcd32a460b6fecd053582e43b07ed6e2c04e15369",
-            "id": "0xcd32a460b6fecd053582e43b07ed6e2c04e1536900000000000000000000023c",
+            "id": "AaveLinearDai",
             "lowerTarget": "0",
             "mainIndex": 2,
             "poolType": "AaveLinear",
@@ -167,7 +167,7 @@
                 },
                 {
                     "address": "0x6b175474e89094c44da98b954eedeac495271d0f",
-                    "balance": "0",
+                    "balance": "10000",
                     "decimals": 18,
                     "priceRate": "1",
                     "symbol": "DAI",
@@ -186,7 +186,7 @@
         },
         {
             "address": "0x0000000000000000000000000000000000000000",
-            "id": "0x0000000000000000000000000000000000000000000000000000000000000000",
+            "id": "FuseLinearDai",
             "lowerTarget": "0",
             "mainIndex": 2,
             "poolType": "FuseLinear",
@@ -206,12 +206,12 @@
                     "balance": "5192296858529875.633656681290156395",
                     "decimals": 18,
                     "priceRate": "1",
-                    "symbol": "BB-fDAI",
+                    "symbol": "bbfDAI",
                     "weight": null
                 },
                 {
                     "address": "0x6b175474e89094c44da98b954eedeac495271d0f",
-                    "balance": "0",
+                    "balance": "100000",
                     "decimals": 18,
                     "priceRate": "1",
                     "symbol": "DAI",
@@ -231,7 +231,7 @@
         {
             "address": "0x0000000000000000000000000000000000000002",
             "amp": "400",
-            "id": "0x0000000000000000000000000000000000000002000000000000000000000002",
+            "id": "bbaUSD-bbfDAI",
             "mainIndex": 0,
             "poolType": "StablePhantom",
             "swapEnabled": true,

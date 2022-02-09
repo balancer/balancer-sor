@@ -16,7 +16,6 @@ import { ZERO } from '../utils/bignumber';
 import { parseNewPool } from '../pools';
 import { Zero } from '@ethersproject/constants';
 import { concat } from 'lodash';
-import path from 'path';
 
 export const filterPoolsByType = (
     pools: SubgraphPoolBase[],
@@ -298,8 +297,7 @@ export function getBoostedPaths(
         reversePath(path)
     );
     // Here we assume that every short path (short means length 1 and 2) is included
-    // in filterHopPools. This should include things like DAI->bbfDAI->WETH or
-    // BAL->WETH->TUSD, WETH->bbaUSD, etc.
+    // in filterHopPools.
     const paths1 = removeShortPaths(
         combineSemiPaths(semiPathsInToWeth, semiPathsWethToOut)
     );
@@ -319,15 +317,19 @@ export function getBoostedPaths(
         [config.bbausd.address, config.weth],
         [WethBBausdPool]
     );
-    const paths3 = combineSemiPaths(
-        semiPathsInToWeth,
-        semiPathsBBausdToOut,
-        WethBBausdPath
+    const paths3 = removeShortPaths(
+        combineSemiPaths(
+            semiPathsInToWeth,
+            semiPathsBBausdToOut,
+            WethBBausdPath
+        )
     );
-    const paths4 = combineSemiPaths(
-        semiPathsInToBBausd,
-        semiPathsWethToOut,
-        BBausdWethPath
+    const paths4 = removeShortPaths(
+        combineSemiPaths(
+            semiPathsInToBBausd,
+            semiPathsWethToOut,
+            BBausdWethPath
+        )
     );
     const paths = paths1.concat(paths2, paths3, paths4);
     return paths;
@@ -406,7 +408,6 @@ function combineSemiPaths(
         for (const semiPathOut of semiPathsOut) {
             const path = composeSimplifyPath(semiPathIn, semiPathOut);
             if (path) paths.push(path);
-            // paths.push(composePaths([semiPathIn, semiPathOut]));
         }
     }
 
@@ -690,6 +691,12 @@ export function createPath(tokens: string[], pools: PoolBase[]): NewPath {
     for (let i = 0; i < pools.length; i++) {
         tI = tokens[i];
         tO = tokens[i + 1];
+        /* console.log(i);
+        console.log(pools.length);
+        console.log(pools);
+        console.log(tokens);
+        console.log(pools[i]);
+        console.log(pools[i].id);*/
         const poolPair = pools[i].parsePoolPairData(tI, tO);
         poolPairData.push(poolPair);
         id = id + poolPair.id;
@@ -912,8 +919,6 @@ function composeSimplifyPath(semiPathIn: NewPath, semiPathOut: NewPath) {
         for (const leftPool of newPoolsIn) {
             for (const rightPool of semiPathOut.pools) {
                 if (leftPool == rightPool) {
-                    console.log('leftPool: ', leftPool);
-                    console.log('rightPool: ', rightPool);
                     return null;
                 }
             }

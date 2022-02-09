@@ -9,6 +9,12 @@ export const sorConfigTest = {
     chainId: 99,
     weth: '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2',
     vault: '0xeefba1e63905ef1d7acba5a8513c70307c1ce441',
+};
+
+export const sorConfigTestStaBal = {
+    chainId: 99,
+    weth: '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2',
+    vault: '0xeefba1e63905ef1d7acba5a8513c70307c1ce441',
     usdcConnectingPool: {
         id: 'usdcConnecting',
         usdc: '0x2791bca1f2de4661ed88a30c99a7a9449aa84174',
@@ -17,6 +23,16 @@ export const sorConfigTest = {
         id: 'staBal3Id',
         address: '0x06df3b2bbb68adc8b0e302443692037ed9f91b42',
     },
+    wethStaBal3: {
+        id: 'weightedWethStaBal3Id',
+        address: 'weightedWethStaBal3',
+    },
+};
+
+export const sorConfigTestBoosted = {
+    chainId: 99,
+    weth: '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2',
+    vault: '0xeefba1e63905ef1d7acba5a8513c70307c1ce441',
     bbausd: {
         id: '0x8fd162f338b770f7e879030830cde9173367f3010000000000000000000004d8',
         address: '0x8fd162f338b770f7e879030830cde9173367f301',
@@ -25,17 +41,13 @@ export const sorConfigTest = {
         id: 'weightedWeth-BBausd',
         address: '0x0000000000000000000000000000000000000004',
     },
-    wethStaBal3: {
-        id: 'weightedWethStaBal3Id',
-        address: 'weightedWethStaBal3',
-    },
 };
 
 export const sorConfigEth: SorConfig = {
     chainId: 1,
     weth: '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2',
     vault: '0xeefba1e63905ef1d7acba5a8513c70307c1ce441',
-    staBal3Pool: {
+    bbausd: {
         id: '0x7b50775383d3d6f0215a8f290f2c9e2eebbeceb20000000000000000000000fe',
         address: '0x7b50775383d3d6f0215a8f290f2c9e2eebbeceb2',
     },
@@ -43,13 +55,23 @@ export const sorConfigEth: SorConfig = {
 
 export const sorConfigKovan: SorConfig = {
     chainId: 42,
-    weth: '0xdFCeA9088c8A88A76FF74892C1457C17dfeef9C1',
+    weth: '0xdFCeA9088c8A88A76FF74892C1457C17dfeef9C1'.toLowerCase(),
     vault: '0xBA12222222228d8Ba445958a75a0704d566BF2C8',
-    staBal3Pool: {
+    bbausd: {
         id: '0x8fd162f338b770f7e879030830cde9173367f3010000000000000000000004d8',
         address: '0x8fd162f338b770f7e879030830cde9173367f301',
     },
-    wethStaBal3: {
+};
+
+export const sorConfigFullKovan: SorConfig = {
+    chainId: 42,
+    weth: '0xdFCeA9088c8A88A76FF74892C1457C17dfeef9C1'.toLowerCase(),
+    vault: '0xBA12222222228d8Ba445958a75a0704d566BF2C8',
+    bbausd: {
+        id: '0x8fd162f338b770f7e879030830cde9173367f3010000000000000000000004d8',
+        address: '0x8fd162f338b770f7e879030830cde9173367f301',
+    },
+    wethBBausd: {
         id: '0x6be79a54f119dbf9e8ebd9ded8c5bd49205bc62d00020000000000000000033c',
         address: '0x6be79a54f119dbf9e8ebd9ded8c5bd49205bc62d',
     },
@@ -77,6 +99,10 @@ export const bUSDC: TestToken = {
 };
 export const BAL: TestToken = {
     address: '0xba100000625a3754423978a60c9317c58a424e3D'.toLowerCase(),
+    decimals: 18,
+};
+export const bbaDAI: TestToken = {
+    address: '0xcd32a460b6fecd053582e43b07ed6e2c04e15369',
     decimals: 18,
 };
 export const bDAI: TestToken = {
