@@ -22,14 +22,12 @@ import {
     aDAI,
     bbaDAI,
     USDC,
-    bUSDC,
     BAL,
     TestToken,
     MKR,
     GUSD,
     WETH,
     TUSD,
-    bTUSD,
     USDT,
     LINEAR_AUSDT,
     LINEAR_ADAI,
@@ -37,7 +35,6 @@ import {
     KOVAN_BAL,
     AAVE_USDT,
     sorConfigTestBoosted,
-    sorConfigKovan,
     bbaUSD,
 } from './lib/constants';
 
@@ -234,12 +231,17 @@ describe('multiple boosted pools, path creation test', () => {
                 ),
                 'SOR path is not the best one'
             );
-            /*
             assert(
-                checkBestPath(BAL, WETH, SwapTypes.SwapExactIn, 910000.23098),
+                checkBestPath(
+                    BAL,
+                    WETH,
+                    SwapTypes.SwapExactIn,
+                    910000.23098,
+                    boostedPools.pools,
+                    sorConfigTestBoosted
+                ),
                 'SOR path is not the best one'
             );
-            */
         });
     });
 });
@@ -313,7 +315,13 @@ export async function checkBestPath(
             bnumSwapAmount,
             tokenIn.decimals
         );
-        if (!bestOutcome || outcome.toNumber() > bestOutcome.toNumber()) {
+        if (
+            !bestOutcome ||
+            (swapType == SwapTypes.SwapExactIn &&
+                outcome.toNumber() > bestOutcome.toNumber()) ||
+            (swapType == SwapTypes.SwapExactOut &&
+                outcome.toNumber() < bestOutcome.toNumber())
+        ) {
             bestPath = path;
             bestOutcome = outcome;
         }
@@ -349,5 +357,6 @@ export async function checkBestPath(
             areEqual = false;
         }
     }
+    console.log(swapInfo.swaps.length);
     return areEqual;
 }

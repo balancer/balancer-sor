@@ -164,11 +164,6 @@ export const LINEAR_ADAI: TestToken = {
     decimals: 18,
 };
 
-export const STABAL3PHANTOM: TestToken = {
-    address: '0x8fd162f338b770f7e879030830cde9173367f301',
-    decimals: 18,
-};
-
 export const bbaUSD: TestToken = {
     address: '0x8fd162f338b770f7e879030830cde9173367f301',
     decimals: 18,
