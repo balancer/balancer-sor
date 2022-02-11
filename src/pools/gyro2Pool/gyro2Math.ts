@@ -83,7 +83,7 @@ export function _calculateInvariant(
     return invariant;
 }
 
-function _calculateQuadraticTerms(
+export function _calculateQuadraticTerms(
     balances: BigNumber[],
     sqrtAlpha: BigNumber,
     sqrtBeta: BigNumber
@@ -97,7 +97,7 @@ function _calculateQuadraticTerms(
     return [a, mb, mc];
 }
 
-function _calculateQuadratic(
+export function _calculateQuadratic(
     a: BigNumber,
     mb: BigNumber,
     mc: BigNumber
@@ -288,7 +288,9 @@ export function _derivativeSpotPriceAfterSwapTokenInForExactTokenOut(
     return derivative;
 }
 
-// Normalized Liquidity
+// /////////
+// ///  Normalized Liquidity
+// /////////
 export function _getNormalizedLiquidity(
     balances: BigNumber[],
     virtualParamIn: BigNumber,

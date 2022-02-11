@@ -26,6 +26,7 @@ export enum PoolTypes {
     MetaStable,
     Linear,
     Gyro2,
+    // Gyro3,
 }
 
 export enum SwapPairType {
@@ -96,7 +97,10 @@ export interface SubgraphPoolBase {
     upperTarget?: string;
 
     // Gyro2 specific field
-    priceBounds?: PriceBoundData;
+    gyro2PriceBounds?: Gyro2PriceBounds;
+
+    // // Gyro3 specific field
+    // gyro3PriceBounds?: Gyro3PriceBounds;
 }
 
 export type SubgraphToken = {
@@ -218,9 +222,14 @@ export interface PoolDataService {
     getPools(): Promise<SubgraphPoolBase[]>;
 }
 
-export type PriceBoundData = {
+export type Gyro2PriceBounds = {
     lowerBound: string;
     upperBound: string;
     tokenInAddress: string;
     tokenOutAddress: string;
 };
+
+// export type Gyro3PriceBounds = {
+//     alpha: string; // Assume symmetric price bounds for Gyro 3 pool
+//     // (The price range for any asset pair is equal to [alpha, 1/alpha])
+// };

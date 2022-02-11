@@ -11,8 +11,8 @@ import {
     SubgraphToken,
     SwapTypes,
     SubgraphPoolBase,
-    PriceBoundData,
-} from 'types';
+    Gyro2PriceBounds,
+} from '../../types';
 import { isSameAddress } from '../../utils';
 import {
     _squareRoot,
@@ -48,16 +48,22 @@ export class Gyro2Pool implements PoolBase {
     tokens: Gyro2PoolToken[];
     swapFee: BigNumber;
     totalShares: BigNumber;
-    priceBounds: PriceBoundData;
+    priceBounds: Gyro2PriceBounds;
 
     // Max In/Out Ratios
     MAX_IN_RATIO = parseFixed('0.3', 18);
     MAX_OUT_RATIO = parseFixed('0.3', 18);
 
     static fromPool(pool: SubgraphPoolBase): Gyro2Pool {
-        if (!pool.priceBounds) throw new Error('Gyro2Pool missing priceBounds');
-        const tokenInAddress = pool.priceBounds.tokenInAddress;
-        const tokenOutAddress = pool.priceBounds.tokenOutAddress;
+        if (!pool.gyro2PriceBounds)
+            throw new Error('Pool missing gyro2PriceBounds');
+
+        const { lowerBound, upperBound } = pool.gyro2PriceBounds;
+        if (Number(lowerBound) <= 0 || Number(upperBound) <= 0)
+            throw new Error('Invalid price bounds in gyro2PriceBounds');
+
+        const tokenInAddress = pool.gyro2PriceBounds.tokenInAddress;
+        const tokenOutAddress = pool.gyro2PriceBounds.tokenOutAddress;
 
         const tokenInIndex = pool.tokens.findIndex(
             (t) => getAddress(t.address) === getAddress(tokenInAddress)
@@ -79,7 +85,7 @@ export class Gyro2Pool implements PoolBase {
             pool.totalShares,
             pool.tokens as Gyro2PoolToken[],
             pool.tokensList,
-            pool.priceBounds as PriceBoundData
+            pool.gyro2PriceBounds as Gyro2PriceBounds
         );
     }
 
@@ -90,7 +96,7 @@ export class Gyro2Pool implements PoolBase {
         totalShares: string,
         tokens: Gyro2PoolToken[],
         tokensList: string[],
-        priceBounds: PriceBoundData
+        priceBounds: Gyro2PriceBounds
     ) {
         this.id = id;
         this.address = address;
@@ -140,7 +146,6 @@ export class Gyro2Pool implements PoolBase {
                   ONE.mul(ONE).div(parseFixed(this.priceBounds.lowerBound, 18))
               );
 
-        // TODO: sqrtAlpha, sqrtBeta to be added
         const poolPairData: Gyro2PoolPairData = {
             id: this.id,
             address: this.address,
@@ -221,8 +226,7 @@ export class Gyro2Pool implements PoolBase {
 
     _exactTokenInForTokenOut(
         poolPairData: Gyro2PoolPairData,
-        amount: OldBigNumber,
-        exact: boolean
+        amount: OldBigNumber
     ): OldBigNumber {
         const balances = [poolPairData.balanceIn, poolPairData.balanceOut];
         const normalizedBalances = _normalizeBalances(
@@ -257,8 +261,7 @@ export class Gyro2Pool implements PoolBase {
 
     _tokenInForExactTokenOut(
         poolPairData: Gyro2PoolPairData,
-        amount: OldBigNumber,
-        exact: boolean
+        amount: OldBigNumber
     ): OldBigNumber {
         const outAmount = parseFixed(
             amount.toString(),
