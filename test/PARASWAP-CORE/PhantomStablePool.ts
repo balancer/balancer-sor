@@ -10,6 +10,18 @@ enum PairTypes {
     TokenToToken,
 }
 
+/*
+/**
+ * StablePool with preminted BPT and rate providers for each token, allowing for e.g. wrapped tokens with a known
+ * price ratio, such as Compound's cTokens.
+ * BPT is preminted on Pool initialization and registered as one of the Pool's tokens, allowing for swaps to behave as
+ * single-token joins or exits (by swapping a token for BPT). Regular joins and exits are disabled, since no BPT is
+ * minted or burned after initialization.
+ * Preminted BPT is sometimes called Phantom BPT, as the preminted BPT (which is deposited in the Vault as balance of
+ * the Pool) doesn't belong to any entity until transferred out of the Pool. The Pool's arithmetic behaves as if it
+ * didn't exist, and the BPT total supply is not a useful value: we rely on the 'virtual supply' (how much BPT is
+ * actually owned by some entity) instead.
+ */
 export class PhantomStablePool extends BasePool {
     // This is the maximum token amount the Vault can hold. In regular operation, the total BPT supply remains constant
     // and equal to _INITIAL_BPT_SUPPLY, but most of it remains in the Pool, waiting to be exchanged for tokens. The

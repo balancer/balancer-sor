@@ -2,6 +2,11 @@ import { BasePool } from './BasePool';
 import * as StableMath from './StableMath';
 import { BZERO } from './basicOperations';
 
+/*
+Stable Pools are designed specifically for assets that are expected to consistently trade at near parity, such as different varieties of stablecoins or synthetics. 
+Stable Pools use Stable Math (based on StableSwap, popularized by Curve) which allows for significantly larger trades before encountering substantial price impact, 
+vastly increasing capital efficiency for like-kind swaps.
+*/
 export class StablePool extends BasePool {
     // Modification: this is inspired from the function onSwap which is in the original contract
     onSell(

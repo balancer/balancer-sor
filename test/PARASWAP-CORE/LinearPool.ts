@@ -13,6 +13,14 @@ export enum PairTypes {
     WrappedTokenToBpt,
 }
 
+/*
+Linear (Boosted) Pools are designed to facilitate trades between stablecoins while simultaneously forwarding much of the pool's 
+liquidity to external protocols, such as Aave. 
+One of the key features that makes trades through Boosted Pools so simple is the use of Phantom BPT. Normally when a Liquidity 
+Provider joins/exits a pool, the pool mints/burns pool tokens as needed. This is gas intensive and requires users to execute a join or exit. 
+In pools that use Phantom BPT, however, all pool tokens are minted at the time of pool creation and are held by the pool itself. 
+With Phantom BPT, Liquidity Providers use a swap (or more likely a batchSwap) to trade to or from a pool token to join or exit, respectively. 
+*/
 export class LinearPool extends BasePool {
     // This is the maximum token amount the Vault can hold. In regular operation, the total BPT supply remains constant
     // and equal to _INITIAL_BPT_SUPPLY, but most of it remains in the Pool, waiting to be exchanged for tokens. The
