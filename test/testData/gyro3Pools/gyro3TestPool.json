@@ -1,0 +1,57 @@
+{
+    "tradeInfo": {
+        "SwapType": "n/a",
+        "TokenIn": "n/a",
+        "TokenOut": "n/a",
+        "NoPools": 1,
+        "SwapAmount": "n/a",
+        "GasPrice": "n/a",
+        "SwapAmountDecimals": "n/a",
+        "ReturnAmountDecimals": "n/a"
+    },
+    "pools": [
+        {
+            "id": "0xebfed10e11dc08fcda1af1fda146945e8710f22e0000000000000000000000ff",
+            "address": "0xebfed10e11dc08fcda1af1fda146945e8710f22e",
+            "swapFee": "0.003",
+            "tokens": [
+                {
+                    "address": "0x6b175474e89094c44da98b954eedeac495271d0f",
+                    "balance": "82934",
+                    "decimals": 18,
+                    "symbol": "DAI",
+                    "weight": null,
+                    "priceRate": "1"
+                },
+                {
+                    "address": "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+                    "balance": "81485",
+                    "decimals": 18,
+                    "weight": null,
+                    "priceRate": "1",
+                    "symbol": "USDC"
+                },
+                {
+                    "address": "0xdac17f958d2ee523a2206206994597c13d831ec7",
+                    "balance": "83119",
+                    "decimals": 18,
+                    "weight": "5",
+                    "priceRate": "1",
+                    "symbol": "USDT"
+                }
+            ],
+            "tokensList": [
+                "0x6b175474e89094c44da98b954eedeac495271d0f",
+                "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+                "0xdac17f958d2ee523a2206206994597c13d831ec7"
+            ],
+            "totalWeight": "15",
+            "totalShares": "100",
+            "poolType": "Gyro3Pool",
+            "swapEnabled": true,
+            "gyro3PriceBounds": {
+                "alpha": "0.987"
+            }
+        }
+    ]
+}
