@@ -2,48 +2,119 @@
     {
         "inputs": [
             {
-                "internalType": "contract IVault",
-                "name": "vault",
-                "type": "address"
-            },
-            {
-                "internalType": "string",
-                "name": "name",
-                "type": "string"
-            },
-            {
-                "internalType": "string",
-                "name": "symbol",
-                "type": "string"
-            },
-            {
-                "internalType": "contract IERC20[]",
-                "name": "tokens",
-                "type": "address[]"
-            },
-            {
-                "internalType": "uint256",
-                "name": "amplificationParameter",
-                "type": "uint256"
-            },
-            {
-                "internalType": "uint256",
-                "name": "swapFee",
-                "type": "uint256"
-            },
-            {
-                "internalType": "uint256",
-                "name": "emergencyPeriod",
-                "type": "uint256"
-            },
-            {
-                "internalType": "uint256",
-                "name": "emergencyPeriodCheckExtension",
-                "type": "uint256"
+                "components": [
+                    {
+                        "internalType": "contract IVault",
+                        "name": "vault",
+                        "type": "address"
+                    },
+                    {
+                        "internalType": "string",
+                        "name": "name",
+                        "type": "string"
+                    },
+                    {
+                        "internalType": "string",
+                        "name": "symbol",
+                        "type": "string"
+                    },
+                    {
+                        "internalType": "contract IERC20[]",
+                        "name": "tokens",
+                        "type": "address[]"
+                    },
+                    {
+                        "internalType": "contract IRateProvider[]",
+                        "name": "rateProviders",
+                        "type": "address[]"
+                    },
+                    {
+                        "internalType": "uint256[]",
+                        "name": "priceRateCacheDuration",
+                        "type": "uint256[]"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "amplificationParameter",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "swapFeePercentage",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "pauseWindowDuration",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "bufferPeriodDuration",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "bool",
+                        "name": "oracleEnabled",
+                        "type": "bool"
+                    },
+                    {
+                        "internalType": "address",
+                        "name": "owner",
+                        "type": "address"
+                    }
+                ],
+                "internalType": "struct MetaStablePool.NewPoolParams",
+                "name": "params",
+                "type": "tuple"
             }
         ],
         "stateMutability": "nonpayable",
         "type": "constructor"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "startValue",
+                "type": "uint256"
+            },
+            {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "endValue",
+                "type": "uint256"
+            },
+            {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "startTime",
+                "type": "uint256"
+            },
+            {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "endTime",
+                "type": "uint256"
+            }
+        ],
+        "name": "AmpUpdateStarted",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "currentValue",
+                "type": "uint256"
+            }
+        ],
+        "name": "AmpUpdateStopped",
+        "type": "event"
     },
     {
         "anonymous": false,
@@ -76,11 +147,68 @@
             {
                 "indexed": false,
                 "internalType": "bool",
-                "name": "active",
+                "name": "enabled",
                 "type": "bool"
             }
         ],
-        "name": "EmergencyPeriodChanged",
+        "name": "OracleEnabledChanged",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": false,
+                "internalType": "bool",
+                "name": "paused",
+                "type": "bool"
+            }
+        ],
+        "name": "PausedStateChanged",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": true,
+                "internalType": "contract IERC20",
+                "name": "token",
+                "type": "address"
+            },
+            {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "rate",
+                "type": "uint256"
+            }
+        ],
+        "name": "PriceRateCacheUpdated",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": true,
+                "internalType": "contract IERC20",
+                "name": "token",
+                "type": "address"
+            },
+            {
+                "indexed": true,
+                "internalType": "contract IRateProvider",
+                "name": "provider",
+                "type": "address"
+            },
+            {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "cacheDuration",
+                "type": "uint256"
+            }
+        ],
+        "name": "PriceRateProviderSet",
         "type": "event"
     },
     {
@@ -89,11 +217,11 @@
             {
                 "indexed": false,
                 "internalType": "uint256",
-                "name": "swapFee",
+                "name": "swapFeePercentage",
                 "type": "uint256"
             }
         ],
-        "name": "SwapFeeChanged",
+        "name": "SwapFeePercentageChanged",
         "type": "event"
     },
     {
@@ -120,6 +248,19 @@
         ],
         "name": "Transfer",
         "type": "event"
+    },
+    {
+        "inputs": [],
+        "name": "DOMAIN_SEPARATOR",
+        "outputs": [
+            {
+                "internalType": "bytes32",
+                "name": "",
+                "type": "bytes32"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
     },
     {
         "inputs": [
@@ -198,7 +339,7 @@
                 "type": "uint8"
             }
         ],
-        "stateMutability": "pure",
+        "stateMutability": "view",
         "type": "function"
     },
     {
@@ -214,7 +355,7 @@
                 "type": "uint256"
             }
         ],
-        "name": "decreaseApproval",
+        "name": "decreaseAllowance",
         "outputs": [
             {
                 "internalType": "bool",
@@ -227,11 +368,47 @@
     },
     {
         "inputs": [],
+        "name": "enableOracle",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "bytes4",
+                "name": "selector",
+                "type": "bytes4"
+            }
+        ],
+        "name": "getActionId",
+        "outputs": [
+            {
+                "internalType": "bytes32",
+                "name": "",
+                "type": "bytes32"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [],
         "name": "getAmplificationParameter",
         "outputs": [
             {
                 "internalType": "uint256",
-                "name": "",
+                "name": "value",
+                "type": "uint256"
+            },
+            {
+                "internalType": "bool",
+                "name": "isUpdating",
+                "type": "bool"
+            },
+            {
+                "internalType": "uint256",
+                "name": "precision",
                 "type": "uint256"
             }
         ],
@@ -253,21 +430,148 @@
     },
     {
         "inputs": [],
-        "name": "getEmergencyPeriod",
+        "name": "getLargestSafeQueryWindow",
         "outputs": [
             {
-                "internalType": "bool",
-                "name": "active",
-                "type": "bool"
-            },
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+            }
+        ],
+        "stateMutability": "pure",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "getLastInvariant",
+        "outputs": [
             {
                 "internalType": "uint256",
-                "name": "endDate",
+                "name": "lastInvariant",
                 "type": "uint256"
             },
             {
                 "internalType": "uint256",
-                "name": "checkEndDate",
+                "name": "lastInvariantAmp",
+                "type": "uint256"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "enum IPriceOracle.Variable",
+                "name": "variable",
+                "type": "uint8"
+            }
+        ],
+        "name": "getLatest",
+        "outputs": [
+            {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "getOracleMiscData",
+        "outputs": [
+            {
+                "internalType": "int256",
+                "name": "logInvariant",
+                "type": "int256"
+            },
+            {
+                "internalType": "int256",
+                "name": "logTotalSupply",
+                "type": "int256"
+            },
+            {
+                "internalType": "uint256",
+                "name": "oracleSampleCreationTimestamp",
+                "type": "uint256"
+            },
+            {
+                "internalType": "uint256",
+                "name": "oracleIndex",
+                "type": "uint256"
+            },
+            {
+                "internalType": "bool",
+                "name": "oracleEnabled",
+                "type": "bool"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "getOwner",
+        "outputs": [
+            {
+                "internalType": "address",
+                "name": "",
+                "type": "address"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "components": [
+                    {
+                        "internalType": "enum IPriceOracle.Variable",
+                        "name": "variable",
+                        "type": "uint8"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "ago",
+                        "type": "uint256"
+                    }
+                ],
+                "internalType": "struct IPriceOracle.OracleAccumulatorQuery[]",
+                "name": "queries",
+                "type": "tuple[]"
+            }
+        ],
+        "name": "getPastAccumulators",
+        "outputs": [
+            {
+                "internalType": "int256[]",
+                "name": "results",
+                "type": "int256[]"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "getPausedState",
+        "outputs": [
+            {
+                "internalType": "bool",
+                "name": "paused",
+                "type": "bool"
+            },
+            {
+                "internalType": "uint256",
+                "name": "pauseWindowEndTime",
+                "type": "uint256"
+            },
+            {
+                "internalType": "uint256",
+                "name": "bufferPeriodEndTime",
                 "type": "uint256"
             }
         ],
@@ -288,6 +592,35 @@
         "type": "function"
     },
     {
+        "inputs": [
+            {
+                "internalType": "contract IERC20",
+                "name": "token",
+                "type": "address"
+            }
+        ],
+        "name": "getPriceRateCache",
+        "outputs": [
+            {
+                "internalType": "uint256",
+                "name": "rate",
+                "type": "uint256"
+            },
+            {
+                "internalType": "uint256",
+                "name": "duration",
+                "type": "uint256"
+            },
+            {
+                "internalType": "uint256",
+                "name": "expires",
+                "type": "uint256"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
         "inputs": [],
         "name": "getRate",
         "outputs": [
@@ -302,7 +635,82 @@
     },
     {
         "inputs": [],
-        "name": "getSwapFee",
+        "name": "getRateProviders",
+        "outputs": [
+            {
+                "internalType": "contract IRateProvider[]",
+                "name": "providers",
+                "type": "address[]"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "uint256",
+                "name": "index",
+                "type": "uint256"
+            }
+        ],
+        "name": "getSample",
+        "outputs": [
+            {
+                "internalType": "int256",
+                "name": "logPairPrice",
+                "type": "int256"
+            },
+            {
+                "internalType": "int256",
+                "name": "accLogPairPrice",
+                "type": "int256"
+            },
+            {
+                "internalType": "int256",
+                "name": "logBptPrice",
+                "type": "int256"
+            },
+            {
+                "internalType": "int256",
+                "name": "accLogBptPrice",
+                "type": "int256"
+            },
+            {
+                "internalType": "int256",
+                "name": "logInvariant",
+                "type": "int256"
+            },
+            {
+                "internalType": "int256",
+                "name": "accLogInvariant",
+                "type": "int256"
+            },
+            {
+                "internalType": "uint256",
+                "name": "timestamp",
+                "type": "uint256"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "getScalingFactors",
+        "outputs": [
+            {
+                "internalType": "uint256[]",
+                "name": "",
+                "type": "uint256[]"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "getSwapFeePercentage",
         "outputs": [
             {
                 "internalType": "uint256",
@@ -311,6 +719,55 @@
             }
         ],
         "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "components": [
+                    {
+                        "internalType": "enum IPriceOracle.Variable",
+                        "name": "variable",
+                        "type": "uint8"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "secs",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "ago",
+                        "type": "uint256"
+                    }
+                ],
+                "internalType": "struct IPriceOracle.OracleAverageQuery[]",
+                "name": "queries",
+                "type": "tuple[]"
+            }
+        ],
+        "name": "getTimeWeightedAverage",
+        "outputs": [
+            {
+                "internalType": "uint256[]",
+                "name": "results",
+                "type": "uint256[]"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "getTotalSamples",
+        "outputs": [
+            {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+            }
+        ],
+        "stateMutability": "pure",
         "type": "function"
     },
     {
@@ -335,11 +792,11 @@
             },
             {
                 "internalType": "uint256",
-                "name": "amount",
+                "name": "addedValue",
                 "type": "uint256"
             }
         ],
-        "name": "increaseApproval",
+        "name": "increaseAllowance",
         "outputs": [
             {
                 "internalType": "bool",
@@ -366,6 +823,25 @@
     {
         "inputs": [
             {
+                "internalType": "address",
+                "name": "owner",
+                "type": "address"
+            }
+        ],
+        "name": "nonces",
+        "outputs": [
+            {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
                 "internalType": "bytes32",
                 "name": "poolId",
                 "type": "bytes32"
@@ -382,12 +858,12 @@
             },
             {
                 "internalType": "uint256[]",
-                "name": "currentBalances",
+                "name": "balances",
                 "type": "uint256[]"
             },
             {
                 "internalType": "uint256",
-                "name": "latestBlockNumberUsed",
+                "name": "lastChangeBlock",
                 "type": "uint256"
             },
             {
@@ -405,12 +881,12 @@
         "outputs": [
             {
                 "internalType": "uint256[]",
-                "name": "",
+                "name": "amountsOut",
                 "type": "uint256[]"
             },
             {
                 "internalType": "uint256[]",
-                "name": "",
+                "name": "dueProtocolFeeAmounts",
                 "type": "uint256[]"
             }
         ],
@@ -436,12 +912,12 @@
             },
             {
                 "internalType": "uint256[]",
-                "name": "currentBalances",
+                "name": "balances",
                 "type": "uint256[]"
             },
             {
                 "internalType": "uint256",
-                "name": "latestBlockNumberUsed",
+                "name": "lastChangeBlock",
                 "type": "uint256"
             },
             {
@@ -459,12 +935,12 @@
         "outputs": [
             {
                 "internalType": "uint256[]",
-                "name": "",
+                "name": "amountsIn",
                 "type": "uint256[]"
             },
             {
                 "internalType": "uint256[]",
-                "name": "",
+                "name": "dueProtocolFeeAmounts",
                 "type": "uint256[]"
             }
         ],
@@ -502,7 +978,7 @@
                     },
                     {
                         "internalType": "uint256",
-                        "name": "latestBlockNumberUsed",
+                        "name": "lastChangeBlock",
                         "type": "uint256"
                     },
                     {
@@ -522,7 +998,7 @@
                     }
                 ],
                 "internalType": "struct IPoolSwapStructs.SwapRequest",
-                "name": "swapRequest",
+                "name": "request",
                 "type": "tuple"
             },
             {
@@ -549,7 +1025,126 @@
                 "type": "uint256"
             }
         ],
-        "stateMutability": "view",
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "components": [
+                    {
+                        "internalType": "enum IVault.SwapKind",
+                        "name": "kind",
+                        "type": "uint8"
+                    },
+                    {
+                        "internalType": "contract IERC20",
+                        "name": "tokenIn",
+                        "type": "address"
+                    },
+                    {
+                        "internalType": "contract IERC20",
+                        "name": "tokenOut",
+                        "type": "address"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "amount",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "bytes32",
+                        "name": "poolId",
+                        "type": "bytes32"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "lastChangeBlock",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "address",
+                        "name": "from",
+                        "type": "address"
+                    },
+                    {
+                        "internalType": "address",
+                        "name": "to",
+                        "type": "address"
+                    },
+                    {
+                        "internalType": "bytes",
+                        "name": "userData",
+                        "type": "bytes"
+                    }
+                ],
+                "internalType": "struct IPoolSwapStructs.SwapRequest",
+                "name": "request",
+                "type": "tuple"
+            },
+            {
+                "internalType": "uint256",
+                "name": "balanceTokenIn",
+                "type": "uint256"
+            },
+            {
+                "internalType": "uint256",
+                "name": "balanceTokenOut",
+                "type": "uint256"
+            }
+        ],
+        "name": "onSwap",
+        "outputs": [
+            {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+            }
+        ],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "owner",
+                "type": "address"
+            },
+            {
+                "internalType": "address",
+                "name": "spender",
+                "type": "address"
+            },
+            {
+                "internalType": "uint256",
+                "name": "value",
+                "type": "uint256"
+            },
+            {
+                "internalType": "uint256",
+                "name": "deadline",
+                "type": "uint256"
+            },
+            {
+                "internalType": "uint8",
+                "name": "v",
+                "type": "uint8"
+            },
+            {
+                "internalType": "bytes32",
+                "name": "r",
+                "type": "bytes32"
+            },
+            {
+                "internalType": "bytes32",
+                "name": "s",
+                "type": "bytes32"
+            }
+        ],
+        "name": "permit",
+        "outputs": [],
+        "stateMutability": "nonpayable",
         "type": "function"
     },
     {
@@ -571,12 +1166,12 @@
             },
             {
                 "internalType": "uint256[]",
-                "name": "currentBalances",
+                "name": "balances",
                 "type": "uint256[]"
             },
             {
                 "internalType": "uint256",
-                "name": "latestBlockNumberUsed",
+                "name": "lastChangeBlock",
                 "type": "uint256"
             },
             {
@@ -625,12 +1220,12 @@
             },
             {
                 "internalType": "uint256[]",
-                "name": "currentBalances",
+                "name": "balances",
                 "type": "uint256[]"
             },
             {
                 "internalType": "uint256",
-                "name": "latestBlockNumberUsed",
+                "name": "lastChangeBlock",
                 "type": "uint256"
             },
             {
@@ -663,12 +1258,48 @@
     {
         "inputs": [
             {
+                "internalType": "contract IERC20",
+                "name": "token",
+                "type": "address"
+            },
+            {
+                "internalType": "bytes",
+                "name": "poolConfig",
+                "type": "bytes"
+            }
+        ],
+        "name": "setAssetManagerPoolConfig",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
                 "internalType": "bool",
-                "name": "active",
+                "name": "paused",
                 "type": "bool"
             }
         ],
-        "name": "setEmergencyPeriod",
+        "name": "setPaused",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "contract IERC20",
+                "name": "token",
+                "type": "address"
+            },
+            {
+                "internalType": "uint256",
+                "name": "duration",
+                "type": "uint256"
+            }
+        ],
+        "name": "setPriceRateCacheDuration",
         "outputs": [],
         "stateMutability": "nonpayable",
         "type": "function"
@@ -677,11 +1308,36 @@
         "inputs": [
             {
                 "internalType": "uint256",
-                "name": "swapFee",
+                "name": "swapFeePercentage",
                 "type": "uint256"
             }
         ],
-        "name": "setSwapFee",
+        "name": "setSwapFeePercentage",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "uint256",
+                "name": "rawEndValue",
+                "type": "uint256"
+            },
+            {
+                "internalType": "uint256",
+                "name": "endTime",
+                "type": "uint256"
+            }
+        ],
+        "name": "startAmplificationParameterUpdate",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "stopAmplificationParameterUpdate",
         "outputs": [],
         "stateMutability": "nonpayable",
         "type": "function"
@@ -762,6 +1418,19 @@
                 "type": "bool"
             }
         ],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "contract IERC20",
+                "name": "token",
+                "type": "address"
+            }
+        ],
+        "name": "updatePriceRateCache",
+        "outputs": [],
         "stateMutability": "nonpayable",
         "type": "function"
     }

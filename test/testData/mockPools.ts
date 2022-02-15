@@ -1,4 +1,5 @@
 import { SubgraphPoolBase } from '../../src';
+import { SubgraphPoolBase as SubgraphPoolBasePs } from '../PARASWAP-CORE/types';
 
 export const mockWeightedPool: SubgraphPoolBase = {
     address: '0x96646936b91d6b9d7d0c47c496afbf3d6ec7b6f8',
@@ -202,3 +203,139 @@ export const mockLinearPool: SubgraphPoolBase = {
     lowerTarget: '2900000',
     upperTarget: '3100000',
 };
+
+export const mockVirtualPools: SubgraphPoolBasePs[] = [
+    {
+        address: '0x7b50775383d3d6f0215a8f290f2c9e2eebbeceb2',
+        id: '0x7b50775383d3d6f0215a8f290f2c9e2eebbeceb20000000000000000000000fe',
+        poolType: 'StablePhantom',
+        // amp: '1472',
+        // swapEnabled: true,
+        // swapFee: '0.00001',
+        tokens: [
+            {
+                address: '0x2bbf681cc4eb09218bee85ea2a5d3d13fa40fc0c',
+                decimals: 18,
+                // balance: '44993851.276928146353847691',
+                // priceRate: '1.003436047509453891',
+                //symbol: 'bb-a-USDT',
+                // weight: null,
+            },
+            {
+                address: '0x7b50775383d3d6f0215a8f290f2c9e2eebbeceb2',
+                decimals: 18,
+                // balance: '5192296704617509.822468291663719254',
+                // priceRate: '1',
+                // //symbol: 'bb-a-USD',
+                // weight: null,
+            },
+            {
+                address: '0x804cdb9116a10bb78768d3252355a1b18067bf8f',
+                decimals: 18,
+                // balance: '49861493.627951012184783498',
+                // priceRate: '1.002933802725311697',
+                // //symbol: 'bb-a-DAI',
+                // weight: null,
+            },
+            {
+                address: '0x9210f1204b5a24742eba12f710636d76240df3d0',
+                decimals: 18,
+                // balance: '59355329.676218736093494672',
+                // priceRate: '1.003205110414688713',
+                // //symbol: 'bb-a-USDC',
+                // weight: null,
+            },
+        ],
+        // tokensList: [
+        //     '0x2bbf681cc4eb09218bee85ea2a5d3d13fa40fc0c',
+        //     '0x7b50775383d3d6f0215a8f290f2c9e2eebbeceb2',
+        //     '0x804cdb9116a10bb78768d3252355a1b18067bf8f',
+        //     '0x9210f1204b5a24742eba12f710636d76240df3d0',
+        // ],
+        // totalShares: '153917317.806062204665500841',
+        // totalWeight: '0',
+    },
+    {
+        id: '0x2bbf681cc4eb09218bee85ea2a5d3d13fa40fc0c0000000000000000000000fd',
+        address: '0x2bbf681cc4eb09218bee85ea2a5d3d13fa40fc0c',
+        poolType: 'AaveLinear',
+        tokens: [
+            {
+                address: '0x2bbf681cc4eb09218bee85ea2a5d3d13fa40fc0c',
+                decimals: 18,
+                //symbol: 'bb-a-USDT',
+            },
+            {
+                address: '0xdac17f958d2ee523a2206206994597c13d831ec7',
+                decimals: 6,
+                //symbol: 'USDT',
+            },
+            {
+                address: '0xf8fd466f12e236f4c96f7cce6c79eadb819abf58',
+                decimals: 6,
+                //symbol: 'aUSDT',
+            },
+        ],
+    },
+    {
+        id: '0x804cdb9116a10bb78768d3252355a1b18067bf8f0000000000000000000000fb',
+        address: '0x804cdb9116a10bb78768d3252355a1b18067bf8f',
+        poolType: 'AaveLinear',
+        tokens: [
+            {
+                address: '0x02d60b84491589974263d922d9cc7a3152618ef6',
+                decimals: 18,
+                //symbol: 'aDAI',
+            },
+            {
+                address: '0x6b175474e89094c44da98b954eedeac495271d0f',
+                decimals: 18,
+                //symbol: 'DAI',
+            },
+            {
+                address: '0x804cdb9116a10bb78768d3252355a1b18067bf8f',
+                decimals: 18,
+                //symbol: 'bb-a-DAI',
+            },
+        ],
+    },
+    {
+        id: '0x9210f1204b5a24742eba12f710636d76240df3d00000000000000000000000fc',
+        address: '0x9210f1204b5a24742eba12f710636d76240df3d0',
+        poolType: 'AaveLinear',
+        tokens: [
+            {
+                address: '0x9210f1204b5a24742eba12f710636d76240df3d0',
+                decimals: 18,
+                //symbol: 'bb-a-USDC',
+            },
+            {
+                address: '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48',
+                decimals: 6,
+                //symbol: 'USDC',
+            },
+            {
+                address: '0xd093fa4fb80d09bb30817fdcd442d4d02ed3e5de',
+                decimals: 6,
+                // symbol: 'aUSDC',
+            },
+        ],
+    },
+    {
+        address: '0x32296969ef14eb0c6d29669c550d4a0449130230',
+        id: '0x32296969ef14eb0c6d29669c550d4a0449130230000200000000000000000080',
+        poolType: 'MetaStable',
+        tokens: [
+            {
+                address: '0x7f39c581f595b53c5cb19bd0b3f8da6c935e2ca0',
+                decimals: 18,
+                // symbol: 'wstETH',
+            },
+            {
+                address: '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2',
+                decimals: 18,
+                // symbol: 'WETH',
+            },
+        ],
+    },
+];
