@@ -458,6 +458,74 @@
             ],
             "totalWeight": "100",
             "totalShares": "10000"
+        },
+        {
+            "address": "0x0000000000000000000000000000000000000010",
+            "id": "LBPweightedTusdOhm",
+            "poolType": "LiquidityBootstrapping",
+            "publicSwap": true,
+            "swapFee": "0.01",
+            "swapEnabled": true,
+            "tokens": [
+                {
+                    "address": "0x0000000000000000000000000000000000000009",
+                    "balance": "1000000.000000",
+                    "decimals": 18,
+                    "weight": "50",
+                    "id": "LBPweightedTusdOhm-0x0000000000000000000000000000000000000009",
+                    "symbol": "OHM",
+                    "priceRate": "1"
+                },
+                {
+                    "address": "0x0000000000085d4780b73119b644ae5ecd22b376",
+                    "balance": "20000000.78213445",
+                    "decimals": 18,
+                    "weight": "50",
+                    "id": "LBPweightedTusdOhm-0x0000000000085d4780b73119b644ae5ecd22b376",
+                    "symbol": "TUSD",
+                    "priceRate": "1"
+                }
+            ],
+            "tokensList": [
+                "0x0000000000085d4780b73119b644ae5ecd22b376",
+                "0x0000000000000000000000000000000000000009"
+            ],
+            "totalWeight": "100",
+            "totalShares": "10000"
+        },
+        {
+            "address": "0x0000000000000000000000000000000000000012",
+            "id": "LBPweightedWethQre",
+            "poolType": "LiquidityBootstrapping",
+            "publicSwap": true,
+            "swapFee": "0.01",
+            "swapEnabled": true,
+            "tokens": [
+                {
+                    "address": "0x0000000000000000000000000000000000000011",
+                    "balance": "1000000.000000",
+                    "decimals": 18,
+                    "weight": "50",
+                    "id": "LBPweightedWethQre-0x0000000000000000000000000000000000000011",
+                    "symbol": "QRE",
+                    "priceRate": "1"
+                },
+                {
+                    "address": "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
+                    "balance": "100000.000000",
+                    "decimals": 18,
+                    "weight": "50",
+                    "id": "LBPweightedWethQre-0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
+                    "symbol": "WETH",
+                    "priceRate": "1"
+                }
+            ],
+            "tokensList": [
+                "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
+                "0x0000000000000000000000000000000000000011"
+            ],
+            "totalWeight": "100",
+            "totalShares": "10000"
         }
     ]
 }

@@ -52,7 +52,6 @@ import singleLinear from './testData/linearPools/singleLinear.json';
 import smallLinear from './testData/linearPools/smallLinear.json';
 import kovanPools from './testData/linearPools/kovan.json';
 import fullKovanPools from './testData/linearPools/fullKovan.json';
-import { getOutputAmountSwapForPath } from '../src/router/helpersClass';
 import { checkBestPath } from './boostedPaths.spec';
 
 describe('linear pool tests', () => {
@@ -724,7 +723,7 @@ describe('linear pool tests', () => {
                 expect(returnAmount).to.eq('6606146264948964392');
             });
 
-            it('debug-1 BAL>USDT, SwapExactIn', async () => {
+            it('BAL>USDT, SwapExactIn', async () => {
                 const tokenIn = KOVAN_BAL;
                 const tokenOut = AAVE_USDT;
                 const returnAmount = await testFullSwap(

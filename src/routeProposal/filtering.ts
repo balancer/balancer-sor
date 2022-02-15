@@ -15,7 +15,6 @@ import { MetaStablePool } from '../pools/metaStablePool/metaStablePool';
 import { ZERO } from '../utils/bignumber';
 import { parseNewPool } from '../pools';
 import { Zero } from '@ethersproject/constants';
-import { concat } from 'lodash';
 
 export const filterPoolsByType = (
     pools: SubgraphPoolBase[],
@@ -208,9 +207,9 @@ export function filterHopPools(
 }
 
 /*
-Returns paths using boosted pools.
-Relevant paths using boosted pools have length greater than 2, so we need
-a separate algorithm to create those paths.
+Returns relevant paths using boosted pools, called "boosted paths".
+Boosted paths tipically have length greater than 2, so we need
+a separate algorithm to create them.
 We consider two central tokens: WETH and bbaUSD (which is the BPT of aave boosted-stable
 pool). We want to consider paths in which token_in and token_out are connected
 (each of them) to either WETH or bbaUSD. Here for a token A to be "connected" to 
@@ -218,7 +217,6 @@ a token B means that it satisfies one of the following:
 (a) A is B.
 (b) A and B belong to the same pool.
 (c) A has a linear pool whose BPT belongs to a pool jointly with B.
-For the case of LBPs we will probably consider extra connections.
 
 Thus for token_in and token_out we generate every semipath connecting them
 to one of the central tokens. After that we combine semipaths to form
@@ -226,17 +224,23 @@ paths from token_in to token_out. We expect to have a central pool
 WETH/bbaUSD. We use this pool to combine a semipath connecting to WETH with a 
 semipath connecting to bbaUSD.
 
-  Issues
+If either of token_in our token_out is a token being offered at an LBP, 
+we consider the boosted paths from the corresponding "raising token"
+composed with the LBP.
+
+Two issues that had to be addressed:
   
-  a) when trading DAI/USDC, this finds the path 
+  a) when trading for instance DAI/USDC, the algorithm described above finds 
+  the path whose tokens chain is
   DAI-bbaDAI-bbaUSD-bbaUSDC-USDC instead of directly
   DAI-bbaDAI-bbaUSDC-USDC
-  Possible solution: add a patch to combineSemiPaths for the case where 
-  the end pool of the first semipath matches the first pool of the second one.
 
-  b) For DAI/aDAI it finds complicated paths through bbaUSD pool 
-  (to do, just in case: inspect those paths)
+  b) For DAI/aDAI it finds a path through bbaUSD pool using twice Aave-DAI linear pool.
+
+  To deal with both of these we call the function composeSimplifyPath when
+  combining semipaths at combineSemiPaths function.
 */
+
 export function getBoostedPaths(
     tokenIn: string,
     tokenOut: string,
@@ -248,16 +252,25 @@ export function getBoostedPaths(
     // We assume consistency between config and poolsAllDict.
     // If they are not consistent, there will be errors.
     if (!config.bbausd) return [];
-    // To do: ensure that no duplicate paths are sent to the second part of the SOR.
 
     const weth = config.weth.toLowerCase();
     const bbausd = config.bbausd.address.toLowerCase();
+    // Letter 'i' in iTokenIn and iTokenOut stands for "internal",
+    // lacking of a better name for that so far.
+    const [lbpPathIn, iTokenIn] = getLBP(tokenIn, poolsAllDict, true, config);
+    // eslint-disable-next-line prettier/prettier
+    const [lbpPathOut, iTokenOut] = getLBP(
+        tokenOut,
+        poolsAllDict,
+        false,
+        config
+    );
 
     // getLinearPools could receive an array of tokens so that we search
-    // over poolsAllDict once instead of twice. Similarly for getPoolsWith.
-    // This is a matter of code simplicity vs. efficiency
-    const linearPoolsTokenIn = getLinearPools(tokenIn, poolsAllDict);
-    const linearPoolsTokenOut = getLinearPools(tokenOut, poolsAllDict);
+    // over poolsAllDict once instead of twice. Similarly for getPoolsWith
+    // and getLBP. This is a matter of code simplicity vs. efficiency.
+    const linearPoolsIn = getLinearPools(iTokenIn, poolsAllDict);
+    const linearPoolsOut = getLinearPools(iTokenOut, poolsAllDict);
 
     const wethPoolsDict = getPoolsWith(weth, poolsAllDict);
     const bbausdPoolsDict = getPoolsWith(bbausd, poolsAllDict);
@@ -267,26 +280,26 @@ export function getBoostedPaths(
         delete bbausdPoolsDict[config.wethBBausd.id];
     }
     const semiPathsInToWeth: NewPath[] = getSemiPaths(
-        tokenIn,
-        linearPoolsTokenIn,
+        iTokenIn,
+        linearPoolsIn,
         wethPoolsDict,
         weth
     );
     const semiPathsInToBBausd: NewPath[] = getSemiPaths(
-        tokenIn,
-        linearPoolsTokenIn,
+        iTokenIn,
+        linearPoolsIn,
         bbausdPoolsDict,
         bbausd
     );
     const semiPathsOutToWeth: NewPath[] = getSemiPaths(
-        tokenOut,
-        linearPoolsTokenOut,
+        iTokenOut,
+        linearPoolsOut,
         wethPoolsDict,
         weth
     );
     const semiPathsOutToBBausd: NewPath[] = getSemiPaths(
-        tokenOut,
-        linearPoolsTokenOut,
+        iTokenOut,
+        linearPoolsOut,
         bbausdPoolsDict,
         bbausd
     );
@@ -296,17 +309,13 @@ export function getBoostedPaths(
     const semiPathsBBausdToOut = semiPathsOutToBBausd.map((path) =>
         reversePath(path)
     );
-    // Here we assume that every short path (short means length 1 and 2) is included
-    // in filterHopPools.
-    const paths1 = removeShortPaths(
-        combineSemiPaths(semiPathsInToWeth, semiPathsWethToOut)
-    );
-    const paths2 = removeShortPaths(
-        combineSemiPaths(semiPathsInToBBausd, semiPathsBBausdToOut)
-    );
+
+    const paths1 = combineSemiPaths(semiPathsInToWeth, semiPathsWethToOut);
+    const paths2 = combineSemiPaths(semiPathsInToBBausd, semiPathsBBausdToOut);
     if (!config.wethBBausd) {
         const paths = paths1.concat(paths2);
-        return paths;
+        // Every short path (short means length 1 and 2) is included in filterHopPools.
+        return removeShortPaths(paths);
     }
     const WethBBausdPool = poolsAllDict[config.wethBBausd.id];
     const WethBBausdPath = createPath(
@@ -317,22 +326,26 @@ export function getBoostedPaths(
         [config.bbausd.address, config.weth],
         [WethBBausdPool]
     );
-    const paths3 = removeShortPaths(
-        combineSemiPaths(
-            semiPathsInToWeth,
-            semiPathsBBausdToOut,
-            WethBBausdPath
-        )
+    const paths3 = combineSemiPaths(
+        semiPathsInToWeth,
+        semiPathsBBausdToOut,
+        WethBBausdPath
     );
-    const paths4 = removeShortPaths(
-        combineSemiPaths(
-            semiPathsInToBBausd,
-            semiPathsWethToOut,
-            BBausdWethPath
-        )
+    const paths4 = combineSemiPaths(
+        semiPathsInToBBausd,
+        semiPathsWethToOut,
+        BBausdWethPath
     );
-    const paths = paths1.concat(paths2, paths3, paths4);
-    return paths;
+    let paths = paths1.concat(paths2, paths3, paths4);
+
+    // If there is a nontrivial LBP path, compose every path with the lbp paths
+    // in and out. One of them might be the empty path.
+    if (lbpPathIn.pools.length > 0 || lbpPathOut.pools.length > 0) {
+        paths = paths.map((path) =>
+            composePaths([lbpPathIn, path, lbpPathOut])
+        );
+    }
+    return removeShortPaths(paths);
 }
 
 function getLinearPools(
@@ -410,7 +423,6 @@ function combineSemiPaths(
             if (path) paths.push(path);
         }
     }
-
     return paths;
 }
 
@@ -691,12 +703,6 @@ export function createPath(tokens: string[], pools: PoolBase[]): NewPath {
     for (let i = 0; i < pools.length; i++) {
         tI = tokens[i];
         tO = tokens[i + 1];
-        /* console.log(i);
-        console.log(pools.length);
-        console.log(pools);
-        console.log(tokens);
-        console.log(pools[i]);
-        console.log(pools[i].id);*/
         const poolPair = pools[i].parsePoolPairData(tI, tO);
         poolPairData.push(poolPair);
         id = id + poolPair.id;
@@ -927,4 +933,34 @@ function composeSimplifyPath(semiPathIn: NewPath, semiPathOut: NewPath) {
         path = composePaths([semiPathIn, semiPathOut]);
     }
     return path;
+}
+
+function getLBP(
+    token: string,
+    poolsAllDict: PoolDictionary,
+    isInitial: boolean,
+    config: SorConfig
+): [NewPath, string] {
+    if (config.lbpRaisingTokens) {
+        if (config.lbpRaisingTokens.includes(token)) {
+            return [getEmptyPath(), token];
+        }
+    }
+    for (const id in poolsAllDict) {
+        const pool = poolsAllDict[id];
+        if (!pool.isLBP) continue;
+        const tokensList = pool.tokensList;
+        // We assume that the LBP has two tokens.
+        for (let i = 0; i < 2; i++) {
+            if (tokensList[i] == token) {
+                let path = createPath(
+                    [tokensList[i], tokensList[1 - i]],
+                    [pool]
+                );
+                if (!isInitial) path = reversePath(path);
+                return [path, tokensList[1 - i]];
+            }
+        }
+    }
+    return [getEmptyPath(), token];
 }

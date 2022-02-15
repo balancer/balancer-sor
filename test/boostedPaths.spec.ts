@@ -216,7 +216,7 @@ describe('multiple boosted pools, path creation test', () => {
             }
         });
     });
-    context('debug-best Verify that SOR chooses best path', () => {
+    context('Verify that SOR chooses best path', () => {
         it('swapExactIn case', async () => {
             // For small enough amounts, the best route must typically be
             // formed exclusively by only one path.
@@ -242,6 +242,136 @@ describe('multiple boosted pools, path creation test', () => {
                 ),
                 'SOR path is not the best one'
             );
+        });
+    });
+
+    context('LBP cases', () => {
+        it('OHM-BAL', () => {
+            const tokenIn = '0x0000000000000000000000000000000000000009';
+            const tokenOut = BAL.address;
+            const [paths, , boostedPaths] = getPaths(
+                tokenIn,
+                tokenOut,
+                SwapTypes.SwapExactIn,
+                boostedPools.pools,
+                maxPools,
+                sorConfigTestBoosted
+            );
+            assert.equal(
+                paths[0].id,
+                'LBPweightedTusdOhmweightedTusdWethweightedBalWeth'
+            );
+            assert.equal(
+                paths[3].id,
+                'LBPweightedTusdOhmBBaUSD-TUSDbbaUSD-BAL'
+            );
+            const OHM = tokenIn;
+            const tokensChains = [
+                [OHM, TUSD.address, WETH.address, bbaUSD.address, BAL.address],
+                [OHM, TUSD.address, bbaUSD.address, WETH.address, BAL.address],
+            ];
+            const poolsChains = [
+                [
+                    'LBPweightedTusdOhm',
+                    'weightedTusdWeth',
+                    'weightedWeth-BBausd',
+                    'bbaUSD-BAL',
+                ],
+                [
+                    'LBPweightedTusdOhm',
+                    'BBaUSD-TUSD',
+                    'weightedWeth-BBausd',
+                    'weightedBalWeth',
+                ],
+            ];
+            for (const path of paths) {
+                console.log(path.id);
+            }
+            for (let i = 0; i < 2; i++) {
+                assert.isTrue(
+                    // eslint-disable-next-line prettier/prettier
+                    simpleCheckPath(
+                        paths[i + 1],
+                        poolsChains[i],
+                        tokensChains[i]
+                    )
+                );
+            }
+            assert.equal(boostedPaths.length, 4);
+            assert.equal(paths.length, 4);
+        });
+        it('DAI-OHM', () => {
+            const tokenIn = DAI.address;
+            const tokenOut = '0x0000000000000000000000000000000000000009';
+            const [paths, , boostedPaths] = getPaths(
+                tokenIn,
+                tokenOut,
+                SwapTypes.SwapExactIn,
+                boostedPools.pools,
+                maxPools,
+                sorConfigTestBoosted
+            );
+            const tokensChains = [
+                [
+                    DAI.address,
+                    bbaDAI.address,
+                    bbaUSD.address,
+                    WETH.address,
+                    TUSD.address,
+                    tokenOut,
+                ],
+            ];
+            const poolsChains = [
+                [
+                    'AaveLinearDai',
+                    'bbaUSD-Pool',
+                    'weightedWeth-BBausd',
+                    'weightedTusdWeth',
+                    'LBPweightedTusdOhm',
+                ],
+            ];
+            assert.isTrue(
+                simpleCheckPath(paths[0], poolsChains[0], tokensChains[0])
+            );
+            assert.equal(
+                paths[1].id,
+                'FuseLinearDaibbaUSD-bbfDAIweightedWeth-BBausdweightedTusdWethLBPweightedTusdOhm'
+            );
+            assert.equal(
+                paths[2].id,
+                'FuseLinearDaibbaUSD-bbfDAIBBaUSD-TUSDLBPweightedTusdOhm'
+            );
+            assert.equal(
+                paths[3].id,
+                'AaveLinearDaibbaUSD-PoolBBaUSD-TUSDLBPweightedTusdOhm'
+            );
+            assert.equal(boostedPaths.length, 4);
+            assert.equal(paths.length, 4);
+        });
+        it('OHM-QRE', () => {
+            const tokenIn = '0x0000000000000000000000000000000000000009';
+            const tokenOut = '0x0000000000000000000000000000000000000011';
+            const [paths, , boostedPaths] = getPaths(
+                tokenIn,
+                tokenOut,
+                SwapTypes.SwapExactIn,
+                boostedPools.pools,
+                maxPools,
+                sorConfigTestBoosted
+            );
+            for (const path of paths) {
+                console.log(path.id);
+            }
+            assert.equal(
+                paths[0].id,
+                'LBPweightedTusdOhmweightedTusdWethLBPweightedWethQre'
+            );
+            assert.equal(
+                paths[1].id,
+                'LBPweightedTusdOhmBBaUSD-TUSDweightedWeth-BBausdLBPweightedWethQre'
+            );
+            assert.equal(boostedPaths.length, 2);
+            assert.equal(paths.length, 2);
         });
     });
 });
@@ -357,6 +487,5 @@ export async function checkBestPath(
             areEqual = false;
         }
     }
-    console.log(swapInfo.swaps.length);
     return areEqual;
 }

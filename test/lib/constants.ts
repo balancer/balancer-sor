@@ -41,6 +41,10 @@ export const sorConfigTestBoosted = {
         id: 'weightedWeth-BBausd',
         address: '0x0000000000000000000000000000000000000004',
     },
+    lbpRaisingTokens: [
+        '0x0000000000085d4780b73119b644ae5ecd22b376',
+        '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2',
+    ],
 };
 
 export const sorConfigEth: SorConfig = {
@@ -75,6 +79,12 @@ export const sorConfigFullKovan: SorConfig = {
         id: '0x6be79a54f119dbf9e8ebd9ded8c5bd49205bc62d00020000000000000000033c',
         address: '0x6be79a54f119dbf9e8ebd9ded8c5bd49205bc62d',
     },
+    lbpRaisingTokens: [
+        '0xdfcea9088c8a88a76ff74892c1457c17dfeef9c1',
+        '0xc2569dd7d0fd715b054fbf16e75b001e5c0c1115',
+        '0x41286bb1d3e870f3f750eb7e1c25d7e48c8a1ac7',
+        '0x04df6e4121c27713ed22341e7c7df330f56f289b',
+    ],
 };
 
 export const WETH: TestToken = {

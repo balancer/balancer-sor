@@ -41,12 +41,10 @@ export function parseNewPool(
         | PhantomStablePool;
 
     try {
-        if (
-            pool.poolType === 'Weighted' ||
-            pool.poolType === 'LiquidityBootstrapping' ||
-            pool.poolType === 'Investment'
-        ) {
-            newPool = WeightedPool.fromPool(pool);
+        if (pool.poolType === 'Weighted' || pool.poolType === 'Investment') {
+            newPool = WeightedPool.fromPool(pool, false);
+        } else if (pool.poolType === 'LiquidityBootstrapping') {
+            newPool = WeightedPool.fromPool(pool, true);
         } else if (pool.poolType === 'Stable') {
             newPool = StablePool.fromPool(pool);
         } else if (pool.poolType === 'MetaStable') {
