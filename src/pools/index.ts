@@ -4,6 +4,7 @@ import { MetaStablePool } from './metaStablePool/metaStablePool';
 import { LinearPool } from './linearPool/linearPool';
 import { ElementPool } from './elementPool/elementPool';
 import { PhantomStablePool } from './phantomStablePool/phantomStablePool';
+import { Gyro2Pool } from './gyro2Pool/gyro2Pool';
 import {
     BigNumber as OldBigNumber,
     INFINITY,
@@ -28,6 +29,7 @@ export function parseNewPool(
     | LinearPool
     | MetaStablePool
     | PhantomStablePool
+    | Gyro2Pool
     | undefined {
     // We're not interested in any pools which don't allow swapping
     if (!pool.swapEnabled) return undefined;
@@ -38,7 +40,8 @@ export function parseNewPool(
         | ElementPool
         | LinearPool
         | MetaStablePool
-        | PhantomStablePool;
+        | PhantomStablePool
+        | Gyro2Pool;
 
     try {
         if (
@@ -58,6 +61,8 @@ export function parseNewPool(
             newPool = LinearPool.fromPool(pool);
         else if (pool.poolType === 'StablePhantom')
             newPool = PhantomStablePool.fromPool(pool);
+        else if (pool.poolType === 'Gyro2Pool')
+            newPool = Gyro2Pool.fromPool(pool);
         else {
             console.error(
                 `Unknown pool type or type field missing: ${pool.poolType} ${pool.id}`

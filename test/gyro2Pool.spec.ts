@@ -1,13 +1,17 @@
+import 'dotenv/config';
 import { expect } from 'chai';
 import cloneDeep from 'lodash.clonedeep';
 import { formatFixed, parseFixed } from '@ethersproject/bignumber';
+import { JsonRpcProvider } from '@ethersproject/providers';
 import { bnum } from '../src/utils/bignumber';
-import { USDC, DAI } from './lib/constants';
-import { SwapTypes } from '../src';
+import { USDC, DAI, sorConfigEth } from './lib/constants';
+import { SwapTypes, SOR, SwapInfo } from '../src';
 // Add new PoolType
 import { Gyro2Pool } from '../src/pools/gyro2Pool/gyro2Pool';
 // Add new pool test data in Subgraph Schema format
 import testPools from './testData/gyro2Pools/gyro2TestPool.json';
+import { MockPoolDataService } from './lib/mockPoolDataService';
+import { mockTokenPriceService } from './lib/mockTokenPriceService';
 
 describe('Gyro2Pool tests USDC > DAI', () => {
     const testPool = cloneDeep(testPools).pools[0];
@@ -141,6 +145,55 @@ describe('Gyro2Pool tests USDC > DAI', () => {
                         amountOut
                     );
                 expect(derivative.toString()).to.eq('0.000000903885627537');
+            });
+        });
+
+        context('FullSwap', () => {
+            it(`Full Swap - swapExactIn, Token>Token`, async () => {
+                const pools = cloneDeep(testPools.pools);
+                const tokenIn = USDC.address;
+                const tokenOut = DAI.address;
+                const swapType = SwapTypes.SwapExactIn;
+                const swapAmt = parseFixed('13.5', 6);
+
+                const gasPrice = parseFixed('30', 9);
+                const maxPools = 4;
+                const provider = new JsonRpcProvider(
+                    `https://mainnet.infura.io/v3/${process.env.INFURA}`
+                );
+
+                const sor = new SOR(
+                    provider,
+                    sorConfigEth,
+                    new MockPoolDataService(pools),
+                    mockTokenPriceService
+                );
+                const fetchSuccess = await sor.fetchPools();
+                expect(fetchSuccess).to.be.true;
+
+                const swapInfo: SwapInfo = await sor.getSwaps(
+                    tokenIn,
+                    tokenOut,
+                    swapType,
+                    swapAmt,
+                    { gasPrice, maxPools }
+                );
+
+                console.log(`Return amt:`);
+                console.log(swapInfo.returnAmount.toString());
+                // This value is hard coded as sanity check if things unexpectedly change. Taken from V2 test run (with extra fee logic added).
+                // TO DO - expect(swapInfo.returnAmount.toString()).eq('999603');
+                expect(swapInfo.swaps.length).eq(1);
+                expect(swapInfo.swaps[0].amount.toString()).eq(
+                    swapAmt.toString()
+                );
+                expect(swapInfo.swaps[0].poolId).eq(testPools.pools[0].id);
+                expect(
+                    swapInfo.tokenAddresses[swapInfo.swaps[0].assetInIndex]
+                ).eq(tokenIn);
+                expect(
+                    swapInfo.tokenAddresses[swapInfo.swaps[0].assetOutIndex]
+                ).eq(tokenOut);
             });
         });
     });
