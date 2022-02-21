@@ -13,6 +13,7 @@ import {
     _calculateQuadratic,
     _calculateQuadraticTerms,
     _findVirtualParams,
+    _normalizeBalances,
 } from '../src/pools/gyro2Pool/gyro2Math';
 
 describe('gyro2Math tests', () => {
@@ -38,8 +39,13 @@ describe('gyro2Math tests', () => {
 
     context('invariant and virtual parameters', () => {
         it(`should correctly calculate invariant`, async () => {
-            const [a, mb, mc] = _calculateQuadraticTerms(
+            const normalizedBalances = _normalizeBalances(
                 [poolPairData.balanceIn, poolPairData.balanceOut],
+                poolPairData.decimalsIn,
+                poolPairData.decimalsOut
+            );
+            const [a, mb, mc] = _calculateQuadraticTerms(
+                normalizedBalances,
                 poolPairData.sqrtAlpha,
                 poolPairData.sqrtBeta
             );

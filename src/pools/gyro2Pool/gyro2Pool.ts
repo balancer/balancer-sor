@@ -244,12 +244,12 @@ export class Gyro2Pool implements PoolBase {
             poolPairData.sqrtAlpha,
             poolPairData.sqrtBeta
         );
-        const inAmount = parseFixed(amount.toString(), poolPairData.decimalsIn);
+        const inAmount = parseFixed(amount.toString(), 18);
         const inAmountLessFee = _reduceFee(inAmount, poolPairData.swapFee);
 
         const outAmount = _calcOutGivenIn(
-            poolPairData.balanceIn,
-            poolPairData.balanceOut,
+            normalizedBalances[0],
+            normalizedBalances[1],
             inAmountLessFee,
             virtualParamIn,
             virtualParamOut,
@@ -263,10 +263,7 @@ export class Gyro2Pool implements PoolBase {
         poolPairData: Gyro2PoolPairData,
         amount: OldBigNumber
     ): OldBigNumber {
-        const outAmount = parseFixed(
-            amount.toString(),
-            poolPairData.decimalsOut
-        );
+        const outAmount = parseFixed(amount.toString(), 18);
         const balances = [poolPairData.balanceIn, poolPairData.balanceOut];
         const normalizedBalances = _normalizeBalances(
             balances,
@@ -284,8 +281,8 @@ export class Gyro2Pool implements PoolBase {
             poolPairData.sqrtBeta
         );
         const inAmountLessFee = _calcInGivenOut(
-            poolPairData.balanceIn,
-            poolPairData.balanceOut,
+            normalizedBalances[0],
+            normalizedBalances[1],
             outAmount,
             virtualParamIn,
             virtualParamOut,
@@ -316,11 +313,11 @@ export class Gyro2Pool implements PoolBase {
             poolPairData.sqrtAlpha,
             poolPairData.sqrtBeta
         );
-        const inAmount = parseFixed(amount.toString(), poolPairData.decimalsIn);
+        const inAmount = parseFixed(amount.toString(), 18);
         const inAmountLessFee = _reduceFee(inAmount, poolPairData.swapFee);
         const outAmount = _calcOutGivenIn(
-            poolPairData.balanceIn,
-            poolPairData.balanceOut,
+            normalizedBalances[0],
+            normalizedBalances[1],
             inAmountLessFee,
             virtualParamIn,
             virtualParamOut,
@@ -341,10 +338,7 @@ export class Gyro2Pool implements PoolBase {
         poolPairData: Gyro2PoolPairData,
         amount: OldBigNumber
     ): OldBigNumber {
-        const outAmount = parseFixed(
-            amount.toString(),
-            poolPairData.decimalsOut
-        );
+        const outAmount = parseFixed(amount.toString(), 18);
         const balances = [poolPairData.balanceIn, poolPairData.balanceOut];
         const normalizedBalances = _normalizeBalances(
             balances,
@@ -362,8 +356,8 @@ export class Gyro2Pool implements PoolBase {
             poolPairData.sqrtBeta
         );
         const inAmountLessFee = _calcInGivenOut(
-            poolPairData.balanceIn,
-            poolPairData.balanceOut,
+            normalizedBalances[0],
+            normalizedBalances[1],
             outAmount,
             virtualParamIn,
             virtualParamOut,
@@ -402,11 +396,11 @@ export class Gyro2Pool implements PoolBase {
             poolPairData.sqrtAlpha,
             poolPairData.sqrtBeta
         );
-        const inAmount = parseFixed(amount.toString(), poolPairData.decimalsIn);
+        const inAmount = parseFixed(amount.toString(), 18);
         const inAmountLessFee = _reduceFee(inAmount, poolPairData.swapFee);
         const outAmount = _calcOutGivenIn(
-            poolPairData.balanceIn,
-            poolPairData.balanceOut,
+            normalizedBalances[0],
+            normalizedBalances[1],
             inAmountLessFee,
             virtualParamIn,
             virtualParamOut,
@@ -425,10 +419,7 @@ export class Gyro2Pool implements PoolBase {
         poolPairData: Gyro2PoolPairData,
         amount: OldBigNumber
     ): OldBigNumber {
-        const outAmount = parseFixed(
-            amount.toString(),
-            poolPairData.decimalsOut
-        );
+        const outAmount = parseFixed(amount.toString(), 18);
         const balances = [poolPairData.balanceIn, poolPairData.balanceOut];
         const normalizedBalances = _normalizeBalances(
             balances,
@@ -446,8 +437,8 @@ export class Gyro2Pool implements PoolBase {
             poolPairData.sqrtBeta
         );
         const inAmountLessFee = _calcInGivenOut(
-            poolPairData.balanceIn,
-            poolPairData.balanceOut,
+            normalizedBalances[0],
+            normalizedBalances[1],
             outAmount,
             virtualParamIn,
             virtualParamOut,
