@@ -243,12 +243,12 @@ export class Gyro3Pool implements PoolBase {
 
         const virtualOffsetInOut = invariant.mul(this.root3Alpha).div(ONE);
 
-        const inAmount = parseFixed(amount.toString(), poolPairData.decimalsIn);
+        const inAmount = parseFixed(amount.toString(), 18);
         const inAmountLessFee = _reduceFee(inAmount, poolPairData.swapFee);
 
         const outAmount = _calcOutGivenIn(
-            poolPairData.balanceIn,
-            poolPairData.balanceOut,
+            normalizedBalances[0],
+            normalizedBalances[1],
             inAmountLessFee,
             virtualOffsetInOut
         );
@@ -260,10 +260,7 @@ export class Gyro3Pool implements PoolBase {
         poolPairData: Gyro3PoolPairData,
         amount: OldBigNumber
     ): OldBigNumber {
-        const outAmount = parseFixed(
-            amount.toString(),
-            poolPairData.decimalsOut
-        );
+        const outAmount = parseFixed(amount.toString(), 18);
         const balances = [
             poolPairData.balanceIn,
             poolPairData.balanceOut,
@@ -284,8 +281,8 @@ export class Gyro3Pool implements PoolBase {
         const virtualOffsetInOut = invariant.mul(this.root3Alpha).div(ONE);
 
         const inAmountLessFee = _calcInGivenOut(
-            poolPairData.balanceIn,
-            poolPairData.balanceOut,
+            normalizedBalances[0],
+            normalizedBalances[1],
             outAmount,
             virtualOffsetInOut
         );
@@ -317,12 +314,12 @@ export class Gyro3Pool implements PoolBase {
 
         const virtualOffsetInOut = invariant.mul(this.root3Alpha).div(ONE);
 
-        const inAmount = parseFixed(amount.toString(), poolPairData.decimalsIn);
+        const inAmount = parseFixed(amount.toString(), 18);
         const inAmountLessFee = _reduceFee(inAmount, poolPairData.swapFee);
 
         const outAmount = _calcOutGivenIn(
-            poolPairData.balanceIn,
-            poolPairData.balanceOut,
+            normalizedBalances[0],
+            normalizedBalances[1],
             inAmountLessFee,
             virtualOffsetInOut
         );
@@ -341,10 +338,7 @@ export class Gyro3Pool implements PoolBase {
         poolPairData: Gyro3PoolPairData,
         amount: OldBigNumber
     ): OldBigNumber {
-        const outAmount = parseFixed(
-            amount.toString(),
-            poolPairData.decimalsOut
-        );
+        const outAmount = parseFixed(amount.toString(), 18);
         const balances = [
             poolPairData.balanceIn,
             poolPairData.balanceOut,
@@ -365,8 +359,8 @@ export class Gyro3Pool implements PoolBase {
         const virtualOffsetInOut = invariant.mul(this.root3Alpha).div(ONE);
 
         const inAmountLessFee = _calcInGivenOut(
-            poolPairData.balanceIn,
-            poolPairData.balanceOut,
+            normalizedBalances[0],
+            normalizedBalances[1],
             outAmount,
             virtualOffsetInOut
         );
@@ -406,12 +400,12 @@ export class Gyro3Pool implements PoolBase {
 
         const virtualOffsetInOut = invariant.mul(this.root3Alpha).div(ONE);
 
-        const inAmount = parseFixed(amount.toString(), poolPairData.decimalsIn);
+        const inAmount = parseFixed(amount.toString(), 18);
         const inAmountLessFee = _reduceFee(inAmount, poolPairData.swapFee);
 
         const outAmount = _calcOutGivenIn(
-            poolPairData.balanceIn,
-            poolPairData.balanceOut,
+            normalizedBalances[0],
+            normalizedBalances[1],
             inAmountLessFee,
             virtualOffsetInOut
         );
@@ -428,10 +422,7 @@ export class Gyro3Pool implements PoolBase {
         poolPairData: Gyro3PoolPairData,
         amount: OldBigNumber
     ): OldBigNumber {
-        const outAmount = parseFixed(
-            amount.toString(),
-            poolPairData.decimalsOut
-        );
+        const outAmount = parseFixed(amount.toString(), 18);
         const balances = [
             poolPairData.balanceIn,
             poolPairData.balanceOut,
@@ -452,8 +443,8 @@ export class Gyro3Pool implements PoolBase {
         const virtualOffsetInOut = invariant.mul(this.root3Alpha).div(ONE);
 
         const inAmountLessFee = _calcInGivenOut(
-            poolPairData.balanceIn,
-            poolPairData.balanceOut,
+            normalizedBalances[0],
+            normalizedBalances[1],
             outAmount,
             virtualOffsetInOut
         );

@@ -11,6 +11,7 @@ import {
     _calculateCubicStartingPoint,
     _calculateCubicTerms,
     _runNewtonIteration,
+    _normalizeBalances,
 } from '../src/pools/gyro3Pool/gyro3Math';
 
 describe('gyro3Math tests', () => {
@@ -21,12 +22,20 @@ describe('gyro3Math tests', () => {
 
     context('Calculate Invariant', () => {
         it(`should correctly calculate the terms of the cubic expression`, async () => {
-            const [a, mb, mc, md] = _calculateCubicTerms(
+            const normalizedBalances = _normalizeBalances(
                 [
                     poolPairData.balanceIn,
                     poolPairData.balanceOut,
                     poolPairData.balanceTertiary,
                 ],
+                [
+                    poolPairData.decimalsIn,
+                    poolPairData.decimalsOut,
+                    poolPairData.decimalsTertiary,
+                ]
+            );
+            const [a, mb, mc, md] = _calculateCubicTerms(
+                normalizedBalances,
                 pool.root3Alpha
             );
 
