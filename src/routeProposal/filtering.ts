@@ -255,6 +255,7 @@ export function getBoostedPaths(
 
     const weth = config.weth.toLowerCase();
     const bbausd = config.bbausd.address.toLowerCase();
+
     // Letter 'i' in iTokenIn and iTokenOut stands for "internal",
     // lacking of a better name for that so far.
     const [lbpPathIn, iTokenIn] = getLBP(tokenIn, poolsAllDict, true, config);
@@ -266,7 +267,7 @@ export function getBoostedPaths(
         config
     );
 
-    // getLinearPools could receive an array of tokens so that we search
+    // getLinearPools might instead receive an array of tokens so that we search
     // over poolsAllDict once instead of twice. Similarly for getPoolsWith
     // and getLBP. This is a matter of code simplicity vs. efficiency.
     const linearPoolsIn = getLinearPools(iTokenIn, poolsAllDict);
@@ -312,32 +313,29 @@ export function getBoostedPaths(
 
     const paths1 = combineSemiPaths(semiPathsInToWeth, semiPathsWethToOut);
     const paths2 = combineSemiPaths(semiPathsInToBBausd, semiPathsBBausdToOut);
-    if (!config.wethBBausd) {
-        const paths = paths1.concat(paths2);
-        // Every short path (short means length 1 and 2) is included in filterHopPools.
-        return removeShortPaths(paths);
+    let paths = paths1.concat(paths2);
+    if (config.wethBBausd) {
+        const WethBBausdPool = poolsAllDict[config.wethBBausd.id];
+        const WethBBausdPath = createPath(
+            [config.weth, config.bbausd.address],
+            [WethBBausdPool]
+        );
+        const BBausdWethPath = createPath(
+            [config.bbausd.address, config.weth],
+            [WethBBausdPool]
+        );
+        const paths3 = combineSemiPaths(
+            semiPathsInToWeth,
+            semiPathsBBausdToOut,
+            WethBBausdPath
+        );
+        const paths4 = combineSemiPaths(
+            semiPathsInToBBausd,
+            semiPathsWethToOut,
+            BBausdWethPath
+        );
+        paths = paths.concat(paths3, paths4);
     }
-    const WethBBausdPool = poolsAllDict[config.wethBBausd.id];
-    const WethBBausdPath = createPath(
-        [config.weth, config.bbausd.address],
-        [WethBBausdPool]
-    );
-    const BBausdWethPath = createPath(
-        [config.bbausd.address, config.weth],
-        [WethBBausdPool]
-    );
-    const paths3 = combineSemiPaths(
-        semiPathsInToWeth,
-        semiPathsBBausdToOut,
-        WethBBausdPath
-    );
-    const paths4 = combineSemiPaths(
-        semiPathsInToBBausd,
-        semiPathsWethToOut,
-        BBausdWethPath
-    );
-    let paths = paths1.concat(paths2, paths3, paths4);
-
     // If there is a nontrivial LBP path, compose every path with the lbp paths
     // in and out. One of them might be the empty path.
     if (lbpPathIn.pools.length > 0 || lbpPathOut.pools.length > 0) {
@@ -345,6 +343,7 @@ export function getBoostedPaths(
             composePaths([lbpPathIn, path, lbpPathOut])
         );
     }
+    // Every short path (short means length 1 and 2) is included in filterHopPools.
     return removeShortPaths(paths);
 }
 
@@ -944,23 +943,26 @@ function getLBP(
     if (config.lbpRaisingTokens) {
         if (config.lbpRaisingTokens.includes(token)) {
             return [getEmptyPath(), token];
-        }
-    }
-    for (const id in poolsAllDict) {
-        const pool = poolsAllDict[id];
-        if (!pool.isLBP) continue;
-        const tokensList = pool.tokensList;
-        // We assume that the LBP has two tokens.
-        for (let i = 0; i < 2; i++) {
-            if (tokensList[i] == token) {
-                let path = createPath(
-                    [tokensList[i], tokensList[1 - i]],
-                    [pool]
-                );
-                if (!isInitial) path = reversePath(path);
-                return [path, tokensList[1 - i]];
+        } else {
+            for (const id in poolsAllDict) {
+                const pool = poolsAllDict[id];
+                if (!pool.isLBP) continue;
+                const tokensList = pool.tokensList;
+                // We assume that the LBP has two tokens.
+                for (let i = 0; i < 2; i++) {
+                    if (tokensList[i] == token) {
+                        const theOtherToken = tokensList[1 - i];
+                        let path = createPath(
+                            [tokensList[i], theOtherToken],
+                            [pool]
+                        );
+                        if (!isInitial) path = reversePath(path);
+                        if (config.lbpRaisingTokens.includes(theOtherToken))
+                            return [path, theOtherToken];
+                    }
+                }
             }
+            return [getEmptyPath(), token];
         }
-    }
-    return [getEmptyPath(), token];
+    } else return [getEmptyPath(), token];
 }
