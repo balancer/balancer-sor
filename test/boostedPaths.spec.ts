@@ -185,6 +185,7 @@ describe('multiple boosted pools, path creation test', () => {
     context('bbausd and Weth to Dai', () => {
         it('four combinations', () => {
             const binaryOption = [true, false];
+            if (!sorConfigTestBoosted.bbausd) return;
             for (const reverse of binaryOption) {
                 const tokens = [
                     [WETH.address, sorConfigTestBoosted.bbausd.address],
@@ -372,6 +373,39 @@ describe('multiple boosted pools, path creation test', () => {
             );
             assert.equal(boostedPaths.length, 2);
             assert.equal(paths.length, 2);
+        });
+        it('Test correctness in absence of LBP raising info at config', () => {
+            const sorConfigNoLbpRaising = cloneDeep(sorConfigTestBoosted);
+            delete sorConfigNoLbpRaising['lbpRaisingTokens'];
+            const sorConfigNoRaisingTusd = cloneDeep(sorConfigNoLbpRaising);
+            sorConfigNoRaisingTusd['lbpRaisingTokens'] = [
+                '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2',
+            ];
+            const tokenIn = TUSD.address;
+            const tokenOut = BAL.address;
+            const pathsCases: NewPath[][] = [];
+            const sorConfigCases: SorConfig[] = [
+                sorConfigTestBoosted,
+                sorConfigNoLbpRaising,
+                sorConfigNoRaisingTusd,
+            ];
+            for (let i = 0; i < 3; i++) {
+                const [paths] = getPaths(
+                    tokenIn,
+                    tokenOut,
+                    SwapTypes.SwapExactIn,
+                    boostedPools.pools,
+                    maxPools,
+                    sorConfigCases[i]
+                );
+                pathsCases.push(paths);
+            }
+            assert.equal(pathsCases[0].length, pathsCases[1].length);
+            assert.equal(pathsCases[0].length, pathsCases[2].length);
+            for (let i = 0; i < pathsCases[0].length; i++) {
+                assert.equal(pathsCases[0][i].id, pathsCases[1][i].id);
+                assert.equal(pathsCases[0][i].id, pathsCases[2][i].id);
+            }
         });
     });
 });
