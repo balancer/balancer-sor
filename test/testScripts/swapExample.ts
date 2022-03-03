@@ -150,6 +150,26 @@ export const ADDRESSES = {
             decimals: 18,
             symbol: 'wSTETH',
         },
+        bbausd: {
+            address: '0x7b50775383d3d6f0215a8f290f2c9e2eebbeceb2',
+            decimals: 18,
+            symbol: 'bbausd',
+        },
+        bbausdc: {
+            address: '0x9210F1204b5a24742Eba12f710636D76240dF3d0',
+            decimals: 18,
+            symbol: 'bbausdc',
+        },
+        waDAI: {
+            address: '0x02d60b84491589974263d922d9cc7a3152618ef6',
+            decimals: 18,
+            symbol: 'waDAI',
+        },
+        waUSDC: {
+            address: '0xd093fa4fb80d09bb30817fdcd442d4d02ed3e5de',
+            decimals: 6,
+            symbol: 'waUSDC',
+        },
     },
     [Network.KOVAN]: {
         // Visit https://balancer-faucet.on.fleek.co/#/faucet for test tokens
@@ -654,13 +674,13 @@ async function makeRelayerTrade(
 }
 
 export async function simpleSwap() {
-    const networkId = Network.KOVAN;
+    const networkId = Network.MAINNET;
     // Pools source can be Subgraph URL or pools data set passed directly
     // Update pools list with most recent onchain balances
-    const tokenIn = ADDRESSES[networkId].DAI_from_AAVE;
-    const tokenOut = ADDRESSES[networkId].USDC_from_AAVE;
+    const tokenIn = ADDRESSES[networkId].bbausd;
+    const tokenOut = ADDRESSES[networkId].waDAI;
     const swapType = SwapTypes.SwapExactIn;
-    const swapAmount = parseFixed('100', 18);
+    const swapAmount = parseFixed('1000000', 18);
     const executeTrade = true;
 
     const provider = new JsonRpcProvider(PROVIDER_URLS[networkId]);
@@ -694,7 +714,7 @@ export async function simpleSwap() {
 
     const swapInfo = await getSwap(
         provider,
-        SOR_CONFIG[Network.KOVAN],
+        SOR_CONFIG[networkId],
         subgraphPoolDataService,
         // mockPoolDataService,
         coingeckoTokenPriceService,

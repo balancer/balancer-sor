@@ -263,26 +263,14 @@ export class LinearPool implements PoolBase {
                 linearPoolPairData.pairType === PairTypes.BptToWrappedToken
             ) {
                 // Limit is amount of BPT in for pool balance of tokenOut
-                const limit = _calcBptInPerWrappedOut(
-                    bnum(poolPairData.balanceOut.toString()),
-                    bnum(linearPoolPairData.mainBalanceScaled.toString()),
-                    bnum(linearPoolPairData.wrappedBalanceScaled.toString()),
-                    bnum(linearPoolPairData.bptBalanceScaled.toString()),
-                    {
-                        fee: bnum(poolPairData.swapFee.toString()),
-                        lowerTarget: bnum(
-                            linearPoolPairData.lowerTarget.toString()
-                        ),
-                        upperTarget: bnum(
-                            linearPoolPairData.upperTarget.toString()
-                        ),
-                    }
-                )
-                    .times(bnum(this.ALMOST_ONE.toString()))
-                    .div(bnum(ONE.toString()))
-                    .div(bnum(ONE.toString()));
-
                 // Returning Human scale
+                const limit = this._BPTInForExactWrappedTokenOut(
+                    linearPoolPairData,
+                    balanceOutHuman
+                        .times(this.ALMOST_ONE.toString())
+                        .div(ONE.toString()),
+                    true
+                );
                 return limit;
             } else if (
                 linearPoolPairData.pairType ===
@@ -523,11 +511,14 @@ export class LinearPool implements PoolBase {
                     upperTarget: bnum(poolPairData.upperTarget.toString()),
                 }
             );
+            const amtWithRate = amt
+                .times(poolPairData.rate)
+                .div(bnum(ONE.toString()));
             // return human readable number
             // Using BigNumber.js decimalPlaces (dp), allows us to consider token decimal accuracy correctly,
             // i.e. when using token with 2decimals 0.002 should be returned as 0
             // Uses ROUND_DOWN mode (1)
-            return scale(amt, -18).dp(poolPairData.decimalsOut, 1);
+            return scale(amtWithRate, -18).dp(poolPairData.decimalsOut, 1);
         } catch (err) {
             return ZERO;
         }
@@ -554,11 +545,12 @@ export class LinearPool implements PoolBase {
                     upperTarget: bnum(poolPairData.upperTarget.toString()),
                 }
             );
+            const amtWithoutRate = amt.div(poolPairData.rate);
             // return human readable number
             // Using BigNumber.js decimalPlaces (dp), allows us to consider token decimal accuracy correctly,
             // i.e. when using token with 2decimals 0.002 should be returned as 0
             // Uses ROUND_DOWN mode (1)
-            return scale(amt, -18).dp(poolPairData.decimalsOut, 1);
+            return amtWithoutRate.dp(poolPairData.decimalsOut, 1);
         } catch (err) {
             return ZERO;
         }
@@ -752,11 +744,13 @@ export class LinearPool implements PoolBase {
                     upperTarget: bnum(poolPairData.upperTarget.toString()),
                 }
             );
+
+            const amtWithRate = amt.div(poolPairData.rate);
             // return human readable number
             // Using BigNumber.js decimalPlaces (dp), allows us to consider token decimal accuracy correctly,
             // i.e. when using token with 2decimals 0.002 should be returned as 0
-            // Uses ROUND_DOWN mode (1)
-            return scale(amt, -18).dp(poolPairData.decimalsOut, 1);
+            // Uses ROUND_UP mode (0)
+            return amtWithRate.dp(poolPairData.decimalsIn, 0);
         } catch (err) {
             return ZERO;
         }
@@ -783,11 +777,15 @@ export class LinearPool implements PoolBase {
                     upperTarget: bnum(poolPairData.upperTarget.toString()),
                 }
             );
+            const amtWithRate = amt
+                .times(poolPairData.rate)
+                .div(bnum(ONE.toString()));
+
             // return human readable number
             // Using BigNumber.js decimalPlaces (dp), allows us to consider token decimal accuracy correctly,
             // i.e. when using token with 2decimals 0.002 should be returned as 0
-            // Uses ROUND_DOWN mode (1)
-            return scale(amt, -18).dp(poolPairData.decimalsOut, 1);
+            // Uses ROUND_UP mode (0)
+            return scale(amtWithRate, -18).dp(poolPairData.decimalsIn, 0);
         } catch (err) {
             return ZERO;
         }
