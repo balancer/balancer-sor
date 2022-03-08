@@ -9,7 +9,7 @@ import {
     PhantomStablePoolPairData,
 } from '../src/pools/phantomStablePool/phantomStablePool';
 import * as phantomStableMath from '../src/pools/phantomStablePool/phantomStableMath';
-import { STABAL3PHANTOM, LINEAR_AUSDT, LINEAR_AUSDC } from './lib/constants';
+import { bbaUSD, LINEAR_AUSDT, LINEAR_AUSDC } from './lib/constants';
 
 describe('phantomStable pools tests', () => {
     // For the moment we tolerate a moderate relative error until
@@ -77,7 +77,7 @@ describe('phantomStable pools tests', () => {
 
         it('phantomStable BPT -> token', () => {
             const poolPairData = phantomStablePool.parsePoolPairData(
-                STABAL3PHANTOM.address,
+                bbaUSD.address,
                 LINEAR_AUSDC.address
             );
             const priceRateOut = bnum(
@@ -119,7 +119,7 @@ describe('phantomStable pools tests', () => {
         it('phantomStable token -> BPT', () => {
             const poolPairData = phantomStablePool.parsePoolPairData(
                 LINEAR_AUSDC.address,
-                STABAL3PHANTOM.address
+                bbaUSD.address
             );
             const { a1, a2 } = getSwapOutcomes(
                 phantomStablePool,

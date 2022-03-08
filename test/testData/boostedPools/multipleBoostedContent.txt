@@ -1,0 +1,27 @@
+Pools by BPT name, or pair of tokens:
+
+BB-aUSDC
+BB-aUSDT
+BB-aDAI
+BB-aUSD
+
+BB-fDAI
+BBaUSD-BBfDAI [3]
+
+BBaUSD-TUSD [2] (StablePhantom)
+BBaUSD-BAL      (StablePhantom)
+
+WETH-BBaUSD [1] (weighted) 
+BAL-WETH        (weighted)
+TUSD-WETH       (weighted)
+______
+
+path examples:
+
+TUSD > [2] > bbaUSD > [1] > WETH > [balWethPool] > BAL 
+
+TUSD > [TusdWethPool] > WETH > [balWethPool] > BAL 
+
+DAI > [2] > bbfDai > [3] > bbaUSD > [1] > weth > [balWethPool] > Bal
+
+

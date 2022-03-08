@@ -49,11 +49,12 @@ export class WeightedPool implements PoolBase {
     tokensList: string[];
     MAX_IN_RATIO = parseFixed('0.3', 18);
     MAX_OUT_RATIO = parseFixed('0.3', 18);
+    isLBP = false;
 
-    static fromPool(pool: SubgraphPoolBase): WeightedPool {
+    static fromPool(pool: SubgraphPoolBase, isLBP?: boolean): WeightedPool {
         if (!pool.totalWeight)
             throw new Error('WeightedPool missing totalWeight');
-        return new WeightedPool(
+        const weightedPool = new WeightedPool(
             pool.id,
             pool.address,
             pool.swapFee,
@@ -62,6 +63,8 @@ export class WeightedPool implements PoolBase {
             pool.tokens as WeightedPoolToken[],
             pool.tokensList
         );
+        if (isLBP) weightedPool.isLBP = true;
+        return weightedPool;
     }
 
     constructor(

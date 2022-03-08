@@ -11,7 +11,6 @@ import {
     PoolPairBase,
     SorConfig,
 } from '../types';
-import { MetaStablePool } from '../pools/metaStablePool/metaStablePool';
 import { ZERO } from '../utils/bignumber';
 import { parseNewPool } from '../pools';
 import { Zero } from '@ethersproject/constants';
@@ -203,219 +202,271 @@ export function filterHopPools(
             paths.push(path);
         }
     }
-
     return [filteredPoolsOfInterest, paths];
 }
 
 /*
-Return paths through StaBal3 Linear pools.
-Paths can be created for any token that is paired to staBAL3 
-or WETH via a WETH/staBAL3 connecting pool
-LinearStable <> LinearStable: LinearStableIn>[LINEARPOOL_IN]>bStable_IN>[staBAL3]>bStable_OUT>[LINEARPOOL_OUT]>LinearStableOut
-LinearStable <> token paired to staBAL3: LinearStableIn>[LINEARPOOL]>bStable>[staBAL3]>staBal3>[staBal3-TokenOut]>TokenOut
-LinearStable <> token paired to WETH: LinearStableIn>[LINEARPOOL]>bStable>[staBAL3]>staBal3>[staBal3-WETH]>WETH>[WETH-TokenOut]>TokenOut
+Returns relevant paths using boosted pools, called "boosted paths".
+Boosted paths tipically have length greater than 2, so we need
+a separate algorithm to create them.
+We consider two central tokens: WETH and bbaUSD (which is the BPT of aave boosted-stable
+pool). We want to consider paths in which token_in and token_out are connected
+(each of them) to either WETH or bbaUSD. Here for a token A to be "connected" to 
+a token B means that it satisfies one of the following:
+(a) A is B.
+(b) A and B belong to the same pool.
+(c) A has a linear pool whose BPT belongs to a pool jointly with B.
+
+Thus for token_in and token_out we generate every semipath connecting them
+to one of the central tokens. After that we combine semipaths to form
+paths from token_in to token_out. We expect to have a central pool
+WETH/bbaUSD. We use this pool to combine a semipath connecting to WETH with a 
+semipath connecting to bbaUSD.
+
+If either of token_in our token_out is a token being offered at an LBP, 
+we consider the boosted paths from the corresponding "raising token"
+composed with the LBP.
+
+Two issues that had to be addressed:
+  
+  a) when trading for instance DAI/USDC, the algorithm described above finds 
+  the path whose tokens chain is
+  DAI-bbaDAI-bbaUSD-bbaUSDC-USDC instead of directly
+  DAI-bbaDAI-bbaUSDC-USDC
+
+  b) For DAI/aDAI it finds a path through bbaUSD pool using twice Aave-DAI linear pool.
+
+  To deal with both of these we call the function composeSimplifyPath when
+  combining semipaths at combineSemiPaths function.
 */
-export function getLinearStaBal3Paths(
+
+export function getBoostedPaths(
     tokenIn: string,
     tokenOut: string,
     poolsAllDict: PoolDictionary,
-    poolsFilteredDict: PoolDictionary,
     config: SorConfig
 ): NewPath[] {
-    // This is the top level Metastable pool containing bUSDC/bDAI/bUSDT
-    const staBal3PoolInfo = config.staBal3Pool;
-    if (!staBal3PoolInfo) return [];
-    const staBal3Pool: MetaStablePool = poolsAllDict[
-        staBal3PoolInfo.id
-    ] as MetaStablePool;
+    tokenIn = tokenIn.toLowerCase();
+    tokenOut = tokenOut.toLowerCase();
+    // We assume consistency between config and poolsAllDict.
+    // If they are not consistent, there will be errors.
+    if (!config.bbausd) return [];
 
-    if (!staBal3Pool) return [];
+    const weth = config.weth.toLowerCase();
+    const bbausd = config.bbausd.address.toLowerCase();
 
-    if (
-        tokenIn === staBal3PoolInfo.address ||
-        tokenOut === staBal3PoolInfo.address
-    )
-        return [];
-
-    // Find Linear Pools that are connected to staBal3
-    const linearStaBal3Pools = getLinearStaBal3Pools(poolsAllDict, staBal3Pool);
-    // Find Linear Pools that have tokenIn/Out as main token
-    const linearPoolIn = getPoolWithMainToken(linearStaBal3Pools, tokenIn);
-    const linearPoolOut = getPoolWithMainToken(linearStaBal3Pools, tokenOut);
-
-    const pathsUsingLinear: NewPath[] = [];
-
-    // If neither of tokenIn and tokenOut have linear pools, return an empty array.
-    if (!linearPoolIn && !linearPoolOut) return [];
-    // If both tokenIn and tokenOut belong to linear pools
-    else if (linearPoolIn && linearPoolOut) {
-        // tokenIn/tokenOut belong to same Linear Pool and don't need routed via staBAL3
-        if (linearPoolIn.id === linearPoolOut.id) return [];
-
-        // TokenIn>[LINEARPOOL_IN]>BPT_IN>[staBAL3]>BPT_OUT>[LINEARPOOL_OUT]>TokenOut
-        const linearPathway = createPath(
-            [tokenIn, linearPoolIn.address, linearPoolOut.address, tokenOut],
-            [linearPoolIn, staBal3Pool, linearPoolOut]
-        );
-        pathsUsingLinear.push(linearPathway);
-        return pathsUsingLinear;
-    } else if (linearPoolIn && !linearPoolOut) {
-        // Creates first part of path: TokenIn>[LINEARPOOL]>bStable>[staBAL3]>staBal3Bpt
-        const linearPathway = createPath(
-            [tokenIn, linearPoolIn.address, staBal3Pool.address],
-            [linearPoolIn, staBal3Pool]
-        );
-
-        // Creates a path through most liquid staBal3/Token pool
-        // staBal3Bpt>[staBal3Bpt-TokenOut]>TokenOut
-        const staBal3TokenOutPath = getMostLiquidPath(
-            [staBal3Pool.address, tokenOut],
-            0,
-            [],
-            poolsFilteredDict,
-            SwapPairType.HopOut
-        );
-
-        if (staBal3TokenOutPath.swaps) {
-            const shortPath = composePaths([
-                linearPathway,
-                staBal3TokenOutPath,
-            ]);
-            pathsUsingLinear.push(shortPath);
-        }
-
-        // Creates a path through most liquid WETH/TokenOut pool via WETH/staBal3 connecting pool
-        // staBal3Bpt>[staBal3Bpt-WETH]>WETH>[WETH-TokenOut]>TokenOut
-        const wethStaBal3Info = config.wethStaBal3;
-        if (!wethStaBal3Info) return pathsUsingLinear;
-        const wethStaBal3Pool = poolsAllDict[wethStaBal3Info.id];
-        if (!wethStaBal3Pool) return pathsUsingLinear;
-
-        const wethTokenOutPath = getMostLiquidPath(
-            [staBal3Pool.address, config.weth, tokenOut],
-            1,
-            [wethStaBal3Pool],
-            poolsFilteredDict,
-            SwapPairType.HopOut
-        );
-
-        if (wethTokenOutPath.swaps) {
-            const longPath = composePaths([linearPathway, wethTokenOutPath]);
-            pathsUsingLinear.push(longPath);
-        }
-
-        return pathsUsingLinear;
-    } else {
-        // here we have the condition (!linearPoolIn && linearPoolOut)
-        // Creates second part of path: staBal3Bpt>[staBAL3]>bStable>[LINEARPOOL]>TokenOut
-        const linearPathway = createPath(
-            [staBal3Pool.address, linearPoolOut.address, tokenOut],
-            [staBal3Pool, linearPoolOut]
-        );
-
-        // Creates a path through most liquid staBal3/Token pool
-        // TokenIn>[TokenIn-staBal3Bpt]>staBal3Bpt
-        const tokenInStaBal3Path = getMostLiquidPath(
-            [tokenIn, staBal3Pool.address],
-            0,
-            [],
-            poolsFilteredDict,
-            SwapPairType.HopIn
-        );
-        if (tokenInStaBal3Path.swaps) {
-            const shortPath = composePaths([tokenInStaBal3Path, linearPathway]);
-            pathsUsingLinear.push(shortPath);
-        }
-
-        // Creates a path through most liquid WETH paired pool and staBal3/WETH pool
-        // TokenIn>[WETH-TokenIn]>WETH>[staBal3Bpt-WETH]>staBal3Bpt>
-        const wethStaBal3Info = config.wethStaBal3;
-        if (!wethStaBal3Info) return pathsUsingLinear;
-        const wethStaBal3Pool = poolsAllDict[wethStaBal3Info.id];
-        if (!wethStaBal3Pool) return pathsUsingLinear;
-
-        const tokenInWethPath = getMostLiquidPath(
-            [tokenIn, config.weth, staBal3Pool.address],
-            0,
-            [wethStaBal3Pool],
-            poolsFilteredDict,
-            SwapPairType.HopIn
-        );
-
-        if (tokenInWethPath.swaps) {
-            const longPath = composePaths([tokenInWethPath, linearPathway]);
-            pathsUsingLinear.push(longPath);
-        }
-
-        return pathsUsingLinear;
-    }
-}
-
-/*
-Returns Linear pools that are part of staBal3
-*/
-function getLinearStaBal3Pools(
-    pools: PoolDictionary,
-    staBal3Pool: PoolBase
-): PoolDictionary {
-    const linearStaBal3Pools = {};
-    for (const id in pools) {
-        if (pools[id].poolType === PoolTypes.Linear) {
-            // Check if pool is part of staBal3
-            if (staBal3Pool.tokensList.includes(pools[id].address))
-                linearStaBal3Pools[id] = pools[id];
-        }
-    }
-
-    return linearStaBal3Pools;
-}
-
-function getPoolWithMainToken(pools: PoolDictionary, token: string): PoolBase {
-    let pool;
-    for (const id in pools) {
-        const mainIndex = pools[id].mainIndex;
-        if (mainIndex !== undefined) {
-            // TO DO
-            // Currently maths doesn't support wrapped tokens (TBC if there is a workaround)
-            // This means we can only support main token
-            // See Linear https://linear.app/balancer/issue/SOR-26/finalise-wrappedtoken-support
-            // If can workaround then replace below with: if (pools[id].tokensList.includes(token.toLowerCase()))
-            if (pools[id].tokensList[mainIndex] === token.toLowerCase())
-                return pools[id];
-        }
-    }
-    return pool;
-}
-
-/*
-Creates a path for a set of token hops with one unknown pool.
-Finds most liquid pool for tokenIn/tokenOut where tokenInIndex is position of tokenIn in tokens array.
-*/
-function getMostLiquidPath(
-    tokens: string[],
-    tokenInIndex: number,
-    pathPools: PoolBase[],
-    pools: PoolDictionary,
-    swapPairType: SwapPairType
-): NewPath {
-    const tokenIn = tokens[tokenInIndex];
-    const tokenOut = tokens[tokenInIndex + 1];
-
-    // Finds pool with highest liquidity for tokenIn/Out
-    const mostLiquidPool = getHighestLiquidityPool(
-        tokenIn.toLowerCase(),
-        tokenOut.toLowerCase(),
-        swapPairType,
-        pools
+    // Letter 'i' in iTokenIn and iTokenOut stands for "internal",
+    // lacking of a better name for that so far.
+    const [lbpPathIn, iTokenIn] = getLBP(tokenIn, poolsAllDict, true, config);
+    // eslint-disable-next-line prettier/prettier
+    const [lbpPathOut, iTokenOut] = getLBP(
+        tokenOut,
+        poolsAllDict,
+        false,
+        config
     );
-    // If there is a paired pool create a path
-    if (mostLiquidPool === null) return {} as NewPath;
 
-    // Add most liquid pool to array in correct hop position
-    pathPools.splice(tokenInIndex, 0, pools[mostLiquidPool]);
+    // getLinearPools might instead receive an array of tokens so that we search
+    // over poolsAllDict once instead of twice. Similarly for getPoolsWith
+    // and getLBP. This is a matter of code simplicity vs. efficiency.
+    const linearPoolsIn = getLinearPools(iTokenIn, poolsAllDict);
+    const linearPoolsOut = getLinearPools(iTokenOut, poolsAllDict);
 
-    const path = createPath(tokens, pathPools);
-    return path;
+    const wethPoolsDict = getPoolsWith(weth, poolsAllDict);
+    const bbausdPoolsDict = getPoolsWith(bbausd, poolsAllDict);
+    if (config.wethBBausd) {
+        // This avoids duplicate paths when weth is a token to trade
+        delete wethPoolsDict[config.wethBBausd.id];
+        delete bbausdPoolsDict[config.wethBBausd.id];
+    }
+    const semiPathsInToWeth: NewPath[] = getSemiPaths(
+        iTokenIn,
+        linearPoolsIn,
+        wethPoolsDict,
+        weth
+    );
+    const semiPathsInToBBausd: NewPath[] = getSemiPaths(
+        iTokenIn,
+        linearPoolsIn,
+        bbausdPoolsDict,
+        bbausd
+    );
+    const semiPathsOutToWeth: NewPath[] = getSemiPaths(
+        iTokenOut,
+        linearPoolsOut,
+        wethPoolsDict,
+        weth
+    );
+    const semiPathsOutToBBausd: NewPath[] = getSemiPaths(
+        iTokenOut,
+        linearPoolsOut,
+        bbausdPoolsDict,
+        bbausd
+    );
+    const semiPathsWethToOut = semiPathsOutToWeth.map((path) =>
+        reversePath(path)
+    );
+    const semiPathsBBausdToOut = semiPathsOutToBBausd.map((path) =>
+        reversePath(path)
+    );
+
+    const paths1 = combineSemiPaths(semiPathsInToWeth, semiPathsWethToOut);
+    const paths2 = combineSemiPaths(semiPathsInToBBausd, semiPathsBBausdToOut);
+    let paths = paths1.concat(paths2);
+    if (config.wethBBausd) {
+        const WethBBausdPool = poolsAllDict[config.wethBBausd.id];
+        const WethBBausdPath = createPath(
+            [config.weth, config.bbausd.address],
+            [WethBBausdPool]
+        );
+        const BBausdWethPath = createPath(
+            [config.bbausd.address, config.weth],
+            [WethBBausdPool]
+        );
+        const paths3 = combineSemiPaths(
+            semiPathsInToWeth,
+            semiPathsBBausdToOut,
+            WethBBausdPath
+        );
+        const paths4 = combineSemiPaths(
+            semiPathsInToBBausd,
+            semiPathsWethToOut,
+            BBausdWethPath
+        );
+        paths = paths.concat(paths3, paths4);
+    }
+    // If there is a nontrivial LBP path, compose every path with the lbp paths
+    // in and out. One of them might be the empty path.
+    if (lbpPathIn.pools.length > 0 || lbpPathOut.pools.length > 0) {
+        paths = paths.map((path) =>
+            composePaths([lbpPathIn, path, lbpPathOut])
+        );
+    }
+    // Every short path (short means length 1 and 2) is included in filterHopPools.
+    return removeShortPaths(paths);
+}
+
+function getLinearPools(
+    token: string,
+    poolsAllDict: PoolDictionary
+): PoolDictionary {
+    const linearPools: PoolDictionary = {};
+    for (const id in poolsAllDict) {
+        const pool = poolsAllDict[id];
+        const tokensList = pool.tokensList.map((address) =>
+            address.toLowerCase()
+        );
+        if (tokensList.includes(token) && pool.poolType == PoolTypes.Linear) {
+            linearPools[id] = pool;
+        }
+    }
+    return linearPools;
+}
+
+function getPoolsWith(token: string, poolsDict: PoolDictionary) {
+    const poolsWithToken: PoolDictionary = {};
+    for (const id in poolsDict) {
+        const pool = poolsDict[id];
+        const tokensList = pool.tokensList.map((address) =>
+            address.toLowerCase()
+        );
+        if (tokensList.includes(token)) {
+            poolsWithToken[id] = pool;
+        }
+    }
+    return poolsWithToken;
+}
+
+function getSemiPaths(
+    token: string,
+    linearPoolstoken: PoolDictionary,
+    poolsDict: PoolDictionary,
+    toToken: string
+): NewPath[] {
+    if (token == toToken) return [getEmptyPath()];
+    let semiPaths = searchConnectionsTo(token, poolsDict, toToken);
+    for (const id in linearPoolstoken) {
+        const linearPool = linearPoolstoken[id];
+        const simpleLinearPath = createPath(
+            [token, linearPool.address],
+            [linearPool]
+        );
+        const connections = searchConnectionsTo(
+            linearPool.address,
+            poolsDict,
+            toToken
+        );
+        const newSemiPaths = connections.map((connection) =>
+            composePaths([simpleLinearPath, connection])
+        );
+        semiPaths = semiPaths.concat(newSemiPaths);
+    }
+    return semiPaths;
+}
+
+function combineSemiPaths(
+    semiPathsIn: NewPath[],
+    semiPathsOut: NewPath[],
+    intermediatePath?: NewPath
+): NewPath[] {
+    const paths: NewPath[] = [];
+    if (intermediatePath) {
+        semiPathsIn = semiPathsIn.map((semiPathIn) =>
+            composePaths([semiPathIn, intermediatePath])
+        );
+    }
+    for (const semiPathIn of semiPathsIn) {
+        for (const semiPathOut of semiPathsOut) {
+            const path = composeSimplifyPath(semiPathIn, semiPathOut);
+            if (path) paths.push(path);
+        }
+    }
+    return paths;
+}
+
+function searchConnectionsTo(
+    token: string,
+    poolsDict: PoolDictionary,
+    toToken: string
+): NewPath[] {
+    // this assumes that every pool in poolsDict contains toToken
+    const connections: NewPath[] = [];
+    for (const id in poolsDict) {
+        const pool = poolsDict[id];
+        const tokensList = pool.tokensList.map((address) =>
+            address.toLowerCase()
+        );
+        if (tokensList.includes(token)) {
+            const connection = createPath([token, toToken], [pool]);
+            connections.push(connection);
+        }
+    }
+    return connections;
+}
+
+function removeShortPaths(paths: NewPath[]): NewPath[] {
+    // return paths;
+    const answer = paths.filter((path) => path.swaps.length > 2);
+    return answer;
+}
+
+function reversePath(path: NewPath): NewPath {
+    if (path.pools.length == 0) return getEmptyPath();
+    const pools = path.pools.reverse();
+    const tokens = path.swaps.map((swap) => swap.tokenOut).reverse();
+    tokens.push(path.swaps[0].tokenIn);
+    return createPath(tokens, pools);
+}
+
+function getEmptyPath(): NewPath {
+    const emptyPath: NewPath = {
+        id: '',
+        swaps: [],
+        poolPairData: [],
+        limitAmount: Zero, // logically this should be infinity, but no practical difference expected
+        pools: [],
+    };
+    return emptyPath;
 }
 
 // Creates a path with pools.length hops
@@ -636,4 +687,60 @@ export function parseToPoolsDict(
             .map((pool) => [pool.id, parseNewPool(pool, timestamp)])
             .filter(([, pool]) => pool !== undefined)
     );
+}
+
+function composeSimplifyPath(semiPathIn: NewPath, semiPathOut: NewPath) {
+    let path: NewPath;
+    if (semiPathIn.pools[semiPathIn.pools.length - 1] == semiPathOut.pools[0]) {
+        const newPoolsIn = semiPathIn.pools.slice(0, -1);
+        const newTokensIn = semiPathIn.swaps.map((swap) => swap.tokenIn);
+        const tokensOut = semiPathOut.swaps.map((swap) => swap.tokenOut);
+        path = createPath(
+            newTokensIn.concat(tokensOut),
+            newPoolsIn.concat(semiPathOut.pools)
+        );
+        for (const leftPool of newPoolsIn) {
+            for (const rightPool of semiPathOut.pools) {
+                if (leftPool == rightPool) {
+                    return null;
+                }
+            }
+        }
+    } else {
+        path = composePaths([semiPathIn, semiPathOut]);
+    }
+    return path;
+}
+
+function getLBP(
+    token: string,
+    poolsAllDict: PoolDictionary,
+    isInitial: boolean,
+    config: SorConfig
+): [NewPath, string] {
+    if (config.lbpRaisingTokens) {
+        if (config.lbpRaisingTokens.includes(token)) {
+            return [getEmptyPath(), token];
+        } else {
+            for (const id in poolsAllDict) {
+                const pool = poolsAllDict[id];
+                if (!pool.isLBP) continue;
+                const tokensList = pool.tokensList;
+                // We assume that the LBP has two tokens.
+                for (let i = 0; i < 2; i++) {
+                    if (tokensList[i] == token) {
+                        const theOtherToken = tokensList[1 - i];
+                        let path = createPath(
+                            [tokensList[i], theOtherToken],
+                            [pool]
+                        );
+                        if (!isInitial) path = reversePath(path);
+                        if (config.lbpRaisingTokens.includes(theOtherToken))
+                            return [path, theOtherToken];
+                    }
+                }
+            }
+            return [getEmptyPath(), token];
+        }
+    } else return [getEmptyPath(), token];
 }

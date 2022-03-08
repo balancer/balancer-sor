@@ -3,11 +3,14 @@ import { BigNumber as OldBigNumber } from './utils/bignumber';
 
 export interface SorConfig {
     chainId: number;
-    weth: string;
     vault: string;
+    weth: string;
+    bbausd?: { id: string; address: string };
+    wethBBausd?: { id: string; address: string };
     staBal3Pool?: { id: string; address: string };
     wethStaBal3?: { id: string; address: string };
     usdcConnectingPool?: { id: string; usdc: string };
+    lbpRaisingTokens?: string[];
 }
 
 export type NoNullableField<T> = {
@@ -169,6 +172,7 @@ export interface PoolBase {
     address: string;
     tokensList: string[];
     mainIndex?: number;
+    isLBP?: boolean;
     setTypeForSwap: (type: SwapPairType) => void;
     parsePoolPairData: (tokenIn: string, tokenOut: string) => PoolPairBase;
     getNormalizedLiquidity: (poolPairData: PoolPairBase) => OldBigNumber;

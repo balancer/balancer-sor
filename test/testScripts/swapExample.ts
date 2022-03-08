@@ -39,7 +39,7 @@ export const SOR_CONFIG: Record<Network, SorConfig> = {
         chainId: Network.MAINNET, //1
         vault: '0xBA12222222228d8Ba445958a75a0704d566BF2C8',
         weth: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2',
-        staBal3Pool: {
+        bbausd: {
             id: '0x7b50775383d3d6f0215a8f290f2c9e2eebbeceb20000000000000000000000fe',
             address: '0x7b50775383d3d6f0215a8f290f2c9e2eebbeceb2',
         },
@@ -654,11 +654,11 @@ async function makeRelayerTrade(
 }
 
 export async function simpleSwap() {
-    const networkId = Network.KOVAN;
+    const networkId = Network.MAINNET;
     // Pools source can be Subgraph URL or pools data set passed directly
     // Update pools list with most recent onchain balances
-    const tokenIn = ADDRESSES[networkId].DAI_from_AAVE;
-    const tokenOut = ADDRESSES[networkId].USDC_from_AAVE;
+    const tokenIn = ADDRESSES[networkId].DAI;
+    const tokenOut = ADDRESSES[networkId].USDC;
     const swapType = SwapTypes.SwapExactIn;
     const swapAmount = parseFixed('100', 18);
     const executeTrade = true;
@@ -694,7 +694,7 @@ export async function simpleSwap() {
 
     const swapInfo = await getSwap(
         provider,
-        SOR_CONFIG[Network.KOVAN],
+        SOR_CONFIG[networkId],
         subgraphPoolDataService,
         // mockPoolDataService,
         coingeckoTokenPriceService,

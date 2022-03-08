@@ -1,18 +1,18 @@
 {
     "pools": [
         {
-            "id": "weightedWethStaBal3Id",
+            "id": "weightedWeth-BBausd",
             "publicSwap": true,
             "swapFee": "0.01",
             "swapEnabled": true,
             "tokens": [
                 {
-                    "address": "0x06df3b2bbb68adc8b0e302443692037ed9f91b42",
+                    "address": "0x8fd162f338b770f7e879030830cde9173367f301",
                     "balance": "20000000",
                     "decimals": 18,
                     "weight": "50",
-                    "id": "weightedWethStaBal3Id-0x06df3b2bbb68adc8b0e302443692037ed9f91b42",
-                    "symbol": "staBal3",
+                    "id": "weightedWeth-BBausd-0x8fd162f338b770f7e879030830cde9173367f301",
+                    "symbol": "bbaUSD",
                     "priceRate": "1"
                 },
                 {
@@ -20,7 +20,7 @@
                     "balance": "10000.12345",
                     "decimals": 18,
                     "weight": "50",
-                    "id": "weightedWethStaBal3Id-0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
+                    "id": "weightedWeth-BBausd-0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
                     "symbol": "WETH",
                     "priceRate": "1"
                 }
@@ -32,7 +32,7 @@
             "totalWeight": "100",
             "totalShares": "1000000",
             "poolType": "Weighted",
-            "address": "weightedWethStaBal3"
+            "address": "0x0000000000000000000000000000000000000004"
         },
         {
             "id": "weightedUsdcWeth",
@@ -278,8 +278,8 @@
             "upperTarget": "150000.000000"
         },
         {
-            "id": "staBal3Id",
-            "address": "0x06df3b2bbb68adc8b0e302443692037ed9f91b42",
+            "id": "bbaUSD-Pool",
+            "address": "0x8fd162f338b770f7e879030830cde9173367f301",
             "swapFee": "0.0004",
             "swapEnabled": true,
             "amp": "10",
@@ -309,10 +309,10 @@
                     "weight": null
                 },
                 {
-                    "address": "0x06df3b2bbb68adc8b0e302443692037ed9f91b42",
+                    "address": "0x8fd162f338b770f7e879030830cde9173367f301",
                     "balance": "1500000000000000",
                     "decimals": 18,
-                    "symbol": "staBal3",
+                    "symbol": "bbaUSD",
                     "priceRate": "1",
                     "weight": null
                 }
@@ -321,23 +321,23 @@
                 "0x0000000000000000000000000000000000000001",
                 "0x0000000000000000000000000000000000000002",
                 "0x0000000000000000000000000000000000000003",
-                "0x06df3b2bbb68adc8b0e302443692037ed9f91b42"
+                "0x8fd162f338b770f7e879030830cde9173367f301"
             ],
             "totalShares": "10000000",
-            "poolType": "MetaStable"
+            "poolType": "StablePhantom"
         },
         {
-            "id": "staBal3Gusd",
+            "id": "bbaUsdGusd",
             "address": "0xebfed10e11dc08fcda1af1fda146945e8710f22e",
             "swapFee": "0.0004",
             "swapEnabled": true,
             "amp": "10",
             "tokens": [
                 {
-                    "address": "0x06df3b2bbb68adc8b0e302443692037ed9f91b42",
+                    "address": "0x8fd162f338b770f7e879030830cde9173367f301",
                     "balance": "100000000",
                     "decimals": 18,
-                    "symbol": "staBal3",
+                    "symbol": "bbaUSD",
                     "priceRate": "1",
                     "weight": null
                 },
@@ -351,7 +351,7 @@
                 }
             ],
             "tokensList": [
-                "0x06df3b2bbb68adc8b0e302443692037ed9f91b42",
+                "0x8fd162f338b770f7e879030830cde9173367f301",
                 "0x056fd409e1d7a124bd7017459dfea2f387b6d5cd"
             ],
             "totalShares": "10",
@@ -369,7 +369,7 @@
                     "decimals": 18,
                     "weight": "50",
                     "id": "weightedBalWeth-0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
-                    "symbol": "staBal3",
+                    "symbol": "WETH",
                     "priceRate": "1"
                 },
                 {
