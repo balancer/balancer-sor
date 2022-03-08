@@ -638,8 +638,7 @@ describe('linear pool tests', () => {
                         kovanPools.pools,
                         sorConfigKovan
                     );
-                    expect(returnAmount).to.eq('25002051893909811319');
-                    // Note - before BigInt this was passing with 25002051893909811321
+                    expect(returnAmount).to.eq('25019071730792915900');
                 });
 
                 it('WrappedToken>BPT, SwapExactOut', async () => {
@@ -651,7 +650,7 @@ describe('linear pool tests', () => {
                         kovanPools.pools,
                         sorConfigKovan
                     );
-                    expect(returnAmount).to.eq('981007');
+                    expect(returnAmount).to.eq('980341');
                 });
 
                 it('BPT>WrappedToken, SwapExactIn', async () => {
@@ -663,10 +662,10 @@ describe('linear pool tests', () => {
                         kovanPools.pools,
                         sorConfigKovan
                     );
-                    expect(returnAmount).to.eq('26086681');
+                    expect(returnAmount).to.eq('26068935');
                 });
 
-                it('BPT>MainToken, SwapExactOut', async () => {
+                it('BPT>WrappedToken, SwapExactOut', async () => {
                     const returnAmount = await testFullSwap(
                         LINEAR_AUSDT.address,
                         aUSDT.address,
@@ -675,7 +674,7 @@ describe('linear pool tests', () => {
                         kovanPools.pools,
                         sorConfigKovan
                     );
-                    expect(returnAmount).to.eq('71205745000000000000');
+                    expect(returnAmount).to.eq('71254217604154012028');
                 });
             });
         });

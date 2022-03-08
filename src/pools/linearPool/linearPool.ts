@@ -471,12 +471,8 @@ export class LinearPool implements PoolBase {
         try {
             // All values should use 1e18 fixed point
             // i.e. 1USDC => 1e18 not 1e6
-            const amtNoRate = parseFixed(amount.toString(), 18)
-                .mul(ONE)
-                .div(poolPairData.rate);
-
             const amt = _calcBptOutPerWrappedIn(
-                amtNoRate.toBigInt(),
+                parseFixed(amount.toString(), 18).toBigInt(),
                 poolPairData.mainBalanceScaled.toBigInt(),
                 poolPairData.wrappedBalanceScaled.toBigInt(),
                 poolPairData.virtualBptSupply.toBigInt(),
@@ -487,7 +483,6 @@ export class LinearPool implements PoolBase {
                     rate: poolPairData.rate.toBigInt(),
                 }
             );
-            // return human readable number
             // Using BigNumber.js decimalPlaces (dp), allows us to consider token decimal accuracy correctly,
             // i.e. when using token with 2decimals 0.002 should be returned as 0
             // Uses ROUND_DOWN mode (1)
@@ -521,15 +516,11 @@ export class LinearPool implements PoolBase {
                     rate: poolPairData.rate.toBigInt(),
                 }
             );
-
-            const amtWithRate = BigNumber.from(amt)
-                .mul(poolPairData.rate)
-                .div(ONE);
             // return human readable number
             // Using BigNumber.js decimalPlaces (dp), allows us to consider token decimal accuracy correctly,
             // i.e. when using token with 2decimals 0.002 should be returned as 0
             // Uses ROUND_DOWN mode (1)
-            return scale(bnum(amtWithRate.toString()), -18).dp(
+            return scale(bnum(amt.toString()), -18).dp(
                 poolPairData.decimalsOut,
                 1
             );
@@ -716,17 +707,13 @@ export class LinearPool implements PoolBase {
                     rate: poolPairData.rate.toBigInt(),
                 }
             );
-
-            const amtWithRate = BigNumber.from(amt)
-                .mul(poolPairData.rate)
-                .div(ONE);
             // return human readable number
             // Using BigNumber.js decimalPlaces (dp), allows us to consider token decimal accuracy correctly,
             // i.e. when using token with 2decimals 0.002 should be returned as 0
-            // Uses ROUND_DOWN mode (1)
-            return scale(bnum(amtWithRate.toString()), -18).dp(
-                poolPairData.decimalsOut,
-                1
+            // Uses ROUND_UP mode (0)
+            return scale(bnum(amt.toString()), -18).dp(
+                poolPairData.decimalsIn,
+                0
             );
         } catch (err) {
             return ZERO;
@@ -740,12 +727,9 @@ export class LinearPool implements PoolBase {
         try {
             // All values should use 1e18 fixed point
             // i.e. 1USDC => 1e18 not 1e6
-            const amtNoRate = parseFixed(amount.toString(), 18)
-                .mul(ONE)
-                .div(poolPairData.rate);
-
             const amt = _calcBptInPerWrappedOut(
-                amtNoRate.toBigInt(),
+                // amtNoRate.toBigInt(),
+                parseFixed(amount.toString(), 18).toBigInt(),
                 poolPairData.mainBalanceScaled.toBigInt(),
                 poolPairData.wrappedBalanceScaled.toBigInt(),
                 poolPairData.virtualBptSupply.toBigInt(),
@@ -759,10 +743,10 @@ export class LinearPool implements PoolBase {
             // return human readable number
             // Using BigNumber.js decimalPlaces (dp), allows us to consider token decimal accuracy correctly,
             // i.e. when using token with 2decimals 0.002 should be returned as 0
-            // Uses ROUND_DOWN mode (1)
+            // Uses ROUND_UP mode (0)
             return scale(bnum(amt.toString()), -18).dp(
-                poolPairData.decimalsOut,
-                1
+                poolPairData.decimalsIn,
+                0
             );
         } catch (err) {
             return ZERO;
