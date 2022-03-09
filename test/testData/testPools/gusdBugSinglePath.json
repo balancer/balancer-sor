@@ -19,6 +19,7 @@
             "poolType": "Stable",
             "principalToken": null,
             "swapFee": "0.005",
+            "swapEnabled": true,
             "tokens": [
                 {
                     "address": "0x04df6e4121c27713ed22341e7c7df330f56f289b",
@@ -71,6 +72,7 @@
             "poolType": "Weighted",
             "principalToken": null,
             "swapFee": "0.03",
+            "swapEnabled": true,
             "tokens": [
                 {
                     "address": "0x22ee6c3b011facc530dd01fe94c58919344d6db5",

@@ -39,7 +39,7 @@ export const SOR_CONFIG: Record<Network, SorConfig> = {
         chainId: Network.MAINNET, //1
         vault: '0xBA12222222228d8Ba445958a75a0704d566BF2C8',
         weth: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2',
-        staBal3Pool: {
+        bbausd: {
             id: '0x7b50775383d3d6f0215a8f290f2c9e2eebbeceb20000000000000000000000fe',
             address: '0x7b50775383d3d6f0215a8f290f2c9e2eebbeceb2',
         },
@@ -677,10 +677,10 @@ export async function simpleSwap() {
     const networkId = Network.MAINNET;
     // Pools source can be Subgraph URL or pools data set passed directly
     // Update pools list with most recent onchain balances
-    const tokenIn = ADDRESSES[networkId].bbausd;
-    const tokenOut = ADDRESSES[networkId].waDAI;
-    const swapType = SwapTypes.SwapExactIn;
-    const swapAmount = parseFixed('1000000', 18);
+    const tokenIn = ADDRESSES[networkId].bbausdc;
+    const tokenOut = ADDRESSES[networkId].waUSDC;
+    const swapType = SwapTypes.SwapExactOut;
+    const swapAmount = parseFixed('10', 6);
     const executeTrade = true;
 
     const provider = new JsonRpcProvider(PROVIDER_URLS[networkId]);

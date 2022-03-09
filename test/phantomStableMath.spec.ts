@@ -9,7 +9,7 @@ import {
     PhantomStablePoolPairData,
 } from '../src/pools/phantomStablePool/phantomStablePool';
 import * as phantomStableMath from '../src/pools/phantomStablePool/phantomStableMath';
-import { STABAL3PHANTOM, LINEAR_AUSDT, LINEAR_AUSDC } from './lib/constants';
+import { bbaUSD, LINEAR_AUSDT, LINEAR_AUSDC } from './lib/constants';
 
 describe('phantomStable pools tests', () => {
     // For the moment we tolerate a moderate relative error until
@@ -77,7 +77,7 @@ describe('phantomStable pools tests', () => {
 
         it('phantomStable BPT -> token', () => {
             const poolPairData = phantomStablePool.parsePoolPairData(
-                STABAL3PHANTOM.address,
+                bbaUSD.address,
                 LINEAR_AUSDC.address
             );
             const priceRateOut = bnum(
@@ -119,7 +119,7 @@ describe('phantomStable pools tests', () => {
         it('phantomStable token -> BPT', () => {
             const poolPairData = phantomStablePool.parsePoolPairData(
                 LINEAR_AUSDC.address,
-                STABAL3PHANTOM.address
+                bbaUSD.address
             );
             const { a1, a2 } = getSwapOutcomes(
                 phantomStablePool,
@@ -166,13 +166,11 @@ function getSwapOutcomes(
 ): { a1: OldBigNumber; a2: OldBigNumber } {
     const a1 = phantomStablePool._exactTokenInForTokenOut(
         poolPairData,
-        bnum(amount),
-        true
+        bnum(amount)
     );
     const a2 = phantomStablePool._tokenInForExactTokenOut(
         poolPairData,
-        bnum(amount),
-        true
+        bnum(amount)
     );
     return { a1, a2 };
 }
@@ -227,13 +225,11 @@ function incrementalQuotientExactTokenInForTokenOut(
 ): OldBigNumber {
     const f1 = phantomStablePool._exactTokenInForTokenOut(
         poolPairData,
-        bnum(amount + delta),
-        true
+        bnum(amount + delta)
     );
     const f0 = phantomStablePool._exactTokenInForTokenOut(
         poolPairData,
-        bnum(amount),
-        true
+        bnum(amount)
     );
     const incrementalQuotient = f1.minus(f0).div(delta);
     return incrementalQuotient;
@@ -247,13 +243,11 @@ function incrementalQuotientTokenInForExactTokenOut(
 ): OldBigNumber {
     const f1 = phantomStablePool._tokenInForExactTokenOut(
         poolPairData,
-        bnum(amount + delta),
-        true
+        bnum(amount + delta)
     );
     const f0 = phantomStablePool._tokenInForExactTokenOut(
         poolPairData,
-        bnum(amount),
-        true
+        bnum(amount)
     );
     const incrementalQuotient = f1.minus(f0).div(delta);
     return incrementalQuotient;

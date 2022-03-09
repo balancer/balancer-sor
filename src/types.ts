@@ -3,11 +3,14 @@ import { BigNumber as OldBigNumber } from './utils/bignumber';
 
 export interface SorConfig {
     chainId: number;
-    weth: string;
     vault: string;
+    weth: string;
+    bbausd?: { id: string; address: string };
+    wethBBausd?: { id: string; address: string };
     staBal3Pool?: { id: string; address: string };
     wethStaBal3?: { id: string; address: string };
     usdcConnectingPool?: { id: string; usdc: string };
+    lbpRaisingTokens?: string[];
 }
 
 export type NoNullableField<T> = {
@@ -25,6 +28,8 @@ export enum PoolTypes {
     Element,
     MetaStable,
     Linear,
+    Gyro2,
+    Gyro3,
 }
 
 export enum SwapPairType {
@@ -93,6 +98,12 @@ export interface SubgraphPoolBase {
     wrappedIndex?: number;
     lowerTarget?: string;
     upperTarget?: string;
+
+    // Gyro2 specific field
+    gyro2PriceBounds?: Gyro2PriceBounds;
+
+    // Gyro3 specific field
+    gyro3PriceBounds?: Gyro3PriceBounds;
 }
 
 export type SubgraphToken = {
@@ -161,6 +172,7 @@ export interface PoolBase {
     address: string;
     tokensList: string[];
     mainIndex?: number;
+    isLBP?: boolean;
     setTypeForSwap: (type: SwapPairType) => void;
     parsePoolPairData: (tokenIn: string, tokenOut: string) => PoolPairBase;
     getNormalizedLiquidity: (poolPairData: PoolPairBase) => OldBigNumber;
@@ -171,13 +183,11 @@ export interface PoolBase {
     updateTokenBalanceForPool: (token: string, newBalance: BigNumber) => void;
     _exactTokenInForTokenOut: (
         poolPairData: PoolPairBase,
-        amount: OldBigNumber,
-        exact: boolean
+        amount: OldBigNumber
     ) => OldBigNumber;
     _tokenInForExactTokenOut: (
         poolPairData: PoolPairBase,
-        amount: OldBigNumber,
-        exact: boolean
+        amount: OldBigNumber
     ) => OldBigNumber;
     _spotPriceAfterSwapExactTokenInForTokenOut: (
         poolPairData: PoolPairBase,
@@ -213,3 +223,15 @@ export interface TokenPriceService {
 export interface PoolDataService {
     getPools(): Promise<SubgraphPoolBase[]>;
 }
+
+export type Gyro2PriceBounds = {
+    lowerBound: string;
+    upperBound: string;
+    tokenInAddress: string;
+    tokenOutAddress: string;
+};
+
+export type Gyro3PriceBounds = {
+    alpha: string; // Assume symmetric price bounds for Gyro 3 pool
+    // (The price range for any asset pair is equal to [alpha, 1/alpha])
+};

@@ -19,7 +19,13 @@ import {
 } from '../src/routeProposal/filtering';
 import staBalPools from './testData/staBal/staBalPools.json';
 import { checkPath } from './lib/testHelpers';
-import { BAL, TUSD, MKR, sorConfigTest, sorConfigEth } from './lib/constants';
+import {
+    BAL,
+    TUSD,
+    MKR,
+    sorConfigTestStaBal,
+    sorConfigEth,
+} from './lib/constants';
 
 const maxPools = 4;
 
@@ -117,7 +123,7 @@ describe(`staBalPaths.`, () => {
 
                 // Hop out as it is USDC > tokenOut
                 const mostLiquidPool = getHighestLiquidityPool(
-                    sorConfigTest.usdcConnectingPool.usdc,
+                    sorConfigTestStaBal.usdcConnectingPool.usdc,
                     tokenOut,
                     SwapPairType.HopOut,
                     poolsAll
@@ -136,15 +142,15 @@ describe(`staBalPaths.`, () => {
 
                 const staBalPoolIdIn = 'staBalPair1';
                 const staBalPoolIn = poolsOfInterest[staBalPoolIdIn];
-                const hopTokenStaBal = sorConfigTest.staBal3Pool.address;
+                const hopTokenStaBal = sorConfigTestStaBal.staBal3Pool.address;
                 const usdcConnectingPool =
-                    poolsAll[sorConfigTest.usdcConnectingPool.id];
+                    poolsAll[sorConfigTestStaBal.usdcConnectingPool.id];
 
                 const multihopPath = createPath(
                     [
                         tokenIn,
                         hopTokenStaBal,
-                        sorConfigTest.usdcConnectingPool.usdc,
+                        sorConfigTestStaBal.usdcConnectingPool.usdc,
                     ],
                     [staBalPoolIn, usdcConnectingPool]
                 );
@@ -154,7 +160,7 @@ describe(`staBalPaths.`, () => {
                     poolsAll,
                     multihopPath,
                     tokenIn,
-                    sorConfigTest.usdcConnectingPool.usdc
+                    sorConfigTestStaBal.usdcConnectingPool.usdc
                 );
             });
         });
@@ -206,7 +212,7 @@ describe(`staBalPaths.`, () => {
                 // Hop in as it is tokenIn > USDC
                 const mostLiquidPool = getHighestLiquidityPool(
                     tokenIn,
-                    sorConfigTest.usdcConnectingPool.usdc,
+                    sorConfigTestStaBal.usdcConnectingPool.usdc,
                     SwapPairType.HopIn,
                     poolsAll
                 );
@@ -237,7 +243,7 @@ function itCreatesCorrectPath(
     tokenOut: string,
     pools: SubgraphPoolBase[],
     expectedPoolIds: string[],
-    config: SorConfig = sorConfigTest
+    config: SorConfig = sorConfigTestStaBal
 ): [PoolDictionary, string[], PoolDictionary] {
     const poolsAll = parseToPoolsDict(pools, 0);
 

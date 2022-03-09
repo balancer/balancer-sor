@@ -1,12 +1,7 @@
 import { BigNumber, formatFixed, parseFixed } from '@ethersproject/bignumber';
 import { WeiPerEther as ONE } from '@ethersproject/constants';
 import { isSameAddress } from '../../utils';
-import {
-    BigNumber as OldBigNumber,
-    bnum,
-    scale,
-    ZERO,
-} from '../../utils/bignumber';
+import { BigNumber as OldBigNumber, bnum, ZERO } from '../../utils/bignumber';
 import {
     PoolBase,
     PoolTypes,
@@ -16,14 +11,16 @@ import {
     SubgraphToken,
 } from '../../types';
 import { getAddress } from '@ethersproject/address';
-import * as SDK from '@georgeroman/balancer-v2-pools';
 import {
-    _invariant,
     _spotPriceAfterSwapExactTokenInForTokenOut,
     _spotPriceAfterSwapTokenInForExactTokenOut,
     _derivativeSpotPriceAfterSwapExactTokenInForTokenOut,
     _derivativeSpotPriceAfterSwapTokenInForExactTokenOut,
-} from './metaStableMath';
+} from '../stablePool/stableMath';
+import {
+    _calcOutGivenIn,
+    _calcInGivenOut,
+} from '../stablePool/stableMathBigInt';
 import { StablePoolPairData } from 'pools/stablePool/stablePool';
 
 type MetaStablePoolToken = Pick<
@@ -124,8 +121,6 @@ export class MetaStablePool implements PoolBase {
             parseFixed(balance, 18).mul(parseFixed(priceRate, 18)).div(ONE)
         );
 
-        const inv = _invariant(this.amp, allBalances);
-
         const poolPairData: MetaStablePoolPairData = {
             id: this.id,
             address: this.address,
@@ -134,7 +129,6 @@ export class MetaStablePool implements PoolBase {
             tokenOut: tokenOut,
             balanceIn: parseFixed(balanceIn, decimalsIn),
             balanceOut: parseFixed(balanceOut, decimalsOut),
-            invariant: inv,
             swapFee: this.swapFee,
             allBalances,
             allBalancesScaled,
@@ -204,35 +198,32 @@ export class MetaStablePool implements PoolBase {
 
     _exactTokenInForTokenOut(
         poolPairData: MetaStablePoolPairData,
-        amount: OldBigNumber,
-        exact: boolean
+        amount: OldBigNumber
     ): OldBigNumber {
         try {
+            if (amount.isZero()) return ZERO;
             // All values should use 1e18 fixed point
             // i.e. 1USDC => 1e18 not 1e6
-            const amtScaled = scale(amount, 18);
-            const amountConverted = amtScaled.times(
-                formatFixed(poolPairData.tokenInPriceRate, 18)
-            );
+            const amountConvertedEvm = parseFixed(amount.dp(18).toString(), 18)
+                .mul(poolPairData.tokenInPriceRate)
+                .div(ONE);
 
-            const amt = SDK.StableMath._calcOutGivenIn(
-                bnum(this.amp.toString()),
+            const returnEvm = _calcOutGivenIn(
+                this.amp.toBigInt(),
                 poolPairData.allBalancesScaled.map((balance) =>
-                    bnum(balance.toString())
+                    balance.toBigInt()
                 ),
                 poolPairData.tokenIndexIn,
                 poolPairData.tokenIndexOut,
-                amountConverted,
-                bnum(poolPairData.swapFee.toString())
+                amountConvertedEvm.toBigInt(),
+                poolPairData.swapFee.toBigInt()
             );
-            // return normalised amount
-            // Using BigNumber.js decimalPlaces (dp), allows us to consider token decimal accuracy correctly,
-            // i.e. when using token with 2decimals 0.002 should be returned as 0
-            // Uses ROUND_DOWN mode (1)
-            return scale(
-                amt.div(formatFixed(poolPairData.tokenOutPriceRate, 18)),
-                -18
-            ).dp(poolPairData.decimalsOut, 1);
+
+            const returnEvmWithRate = BigNumber.from(returnEvm)
+                .mul(ONE)
+                .div(poolPairData.tokenOutPriceRate);
+
+            return bnum(formatFixed(returnEvmWithRate, 18));
         } catch (err) {
             console.error(`_evmoutGivenIn: ${err.message}`);
             return ZERO;
@@ -241,36 +232,32 @@ export class MetaStablePool implements PoolBase {
 
     _tokenInForExactTokenOut(
         poolPairData: MetaStablePoolPairData,
-        amount: OldBigNumber,
-        exact: boolean
+        amount: OldBigNumber
     ): OldBigNumber {
         try {
+            if (amount.isZero()) return ZERO;
             // All values should use 1e18 fixed point
             // i.e. 1USDC => 1e18 not 1e6
-            const amtScaled = scale(amount, 18);
-            const amountConverted = amtScaled.times(
-                formatFixed(poolPairData.tokenOutPriceRate, 18)
-            );
+            const amountConvertedEvm = parseFixed(amount.dp(18).toString(), 18)
+                .mul(poolPairData.tokenOutPriceRate)
+                .div(ONE);
 
-            const amt = SDK.StableMath._calcInGivenOut(
-                bnum(this.amp.toString()),
+            const returnEvm = _calcInGivenOut(
+                this.amp.toBigInt(),
                 poolPairData.allBalancesScaled.map((balance) =>
-                    bnum(balance.toString())
+                    balance.toBigInt()
                 ),
                 poolPairData.tokenIndexIn,
                 poolPairData.tokenIndexOut,
-                amountConverted,
-                bnum(poolPairData.swapFee.toString())
+                amountConvertedEvm.toBigInt(),
+                poolPairData.swapFee.toBigInt()
             );
 
-            // return normalised amount
-            // Using BigNumber.js decimalPlaces (dp), allows us to consider token decimal accuracy correctly,
-            // i.e. when using token with 2decimals 0.002 should be returned as 0
-            // Uses ROUND_UP mode (0)
-            return scale(
-                amt.div(formatFixed(poolPairData.tokenInPriceRate, 18)),
-                -18
-            ).dp(poolPairData.decimalsIn, 0);
+            const returnEvmWithRate = BigNumber.from(returnEvm)
+                .mul(ONE)
+                .div(poolPairData.tokenInPriceRate);
+
+            return bnum(formatFixed(returnEvmWithRate, 18));
         } catch (err) {
             console.error(`_evminGivenOut: ${err.message}`);
             return ZERO;

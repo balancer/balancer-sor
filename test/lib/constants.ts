@@ -9,6 +9,12 @@ export const sorConfigTest = {
     chainId: 99,
     weth: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2',
     vault: '0xeefba1e63905ef1d7acba5a8513c70307c1ce441',
+};
+
+export const sorConfigTestStaBal = {
+    chainId: 99,
+    weth: '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2',
+    vault: '0xeefba1e63905ef1d7acba5a8513c70307c1ce441',
     usdcConnectingPool: {
         id: 'usdcConnecting',
         usdc: '0x2791bca1f2de4661ed88a30c99a7a9449aa84174',
@@ -23,11 +29,29 @@ export const sorConfigTest = {
     },
 };
 
+export const sorConfigTestBoosted: SorConfig = {
+    chainId: 99,
+    weth: '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2',
+    vault: '0xeefba1e63905ef1d7acba5a8513c70307c1ce441',
+    bbausd: {
+        id: '0x8fd162f338b770f7e879030830cde9173367f3010000000000000000000004d8',
+        address: '0x8fd162f338b770f7e879030830cde9173367f301',
+    },
+    wethBBausd: {
+        id: 'weightedWeth-BBausd',
+        address: '0x0000000000000000000000000000000000000004',
+    },
+    lbpRaisingTokens: [
+        '0x0000000000085d4780b73119b644ae5ecd22b376',
+        '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2',
+    ],
+};
+
 export const sorConfigEth: SorConfig = {
     chainId: 1,
     weth: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2',
     vault: '0xeefba1e63905ef1d7acba5a8513c70307c1ce441',
-    staBal3Pool: {
+    bbausd: {
         id: '0x7b50775383d3d6f0215a8f290f2c9e2eebbeceb20000000000000000000000fe',
         address: '0x7b50775383d3d6f0215a8f290f2c9e2eebbeceb2',
     },
@@ -37,14 +61,30 @@ export const sorConfigKovan: SorConfig = {
     chainId: 42,
     weth: '0xdFCeA9088c8A88A76FF74892C1457C17dfeef9C1',
     vault: '0xBA12222222228d8Ba445958a75a0704d566BF2C8',
-    staBal3Pool: {
+    bbausd: {
         id: '0x8fd162f338b770f7e879030830cde9173367f3010000000000000000000004d8',
         address: '0x8fd162f338b770f7e879030830cde9173367f301',
     },
-    wethStaBal3: {
+};
+
+export const sorConfigFullKovan: SorConfig = {
+    chainId: 42,
+    weth: '0xdFCeA9088c8A88A76FF74892C1457C17dfeef9C1',
+    vault: '0xBA12222222228d8Ba445958a75a0704d566BF2C8',
+    bbausd: {
+        id: '0x8fd162f338b770f7e879030830cde9173367f3010000000000000000000004d8',
+        address: '0x8fd162f338b770f7e879030830cde9173367f301',
+    },
+    wethBBausd: {
         id: '0x6be79a54f119dbf9e8ebd9ded8c5bd49205bc62d00020000000000000000033c',
         address: '0x6be79a54f119dbf9e8ebd9ded8c5bd49205bc62d',
     },
+    lbpRaisingTokens: [
+        '0xdfcea9088c8a88a76ff74892c1457c17dfeef9c1',
+        '0xc2569dd7d0fd715b054fbf16e75b001e5c0c1115',
+        '0x41286bb1d3e870f3f750eb7e1c25d7e48c8a1ac7',
+        '0x04df6e4121c27713ed22341e7c7df330f56f289b',
+    ],
 };
 
 export const WETH: TestToken = {
@@ -69,6 +109,10 @@ export const bUSDC: TestToken = {
 };
 export const BAL: TestToken = {
     address: '0xba100000625a3754423978a60c9317c58a424e3D'.toLowerCase(),
+    decimals: 18,
+};
+export const bbaDAI: TestToken = {
+    address: '0xcd32a460b6fecd053582e43b07ed6e2c04e15369',
     decimals: 18,
 };
 export const bDAI: TestToken = {
@@ -130,7 +174,7 @@ export const LINEAR_ADAI: TestToken = {
     decimals: 18,
 };
 
-export const STABAL3PHANTOM: TestToken = {
+export const bbaUSD: TestToken = {
     address: '0x8fd162f338b770f7e879030830cde9173367f301',
     decimals: 18,
 };
