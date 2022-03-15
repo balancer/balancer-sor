@@ -101,21 +101,19 @@ export function filterHopPools(
 ): [PoolDictionary, NewPath[]] {
     const filteredPoolsOfInterest: PoolDictionary = {};
     const paths: NewPath[] = [];
-    let firstPoolLoop = true;
 
-    // No multihop pool but still need to create paths for direct pools
-    if (hopTokens.length === 0) {
-        for (const id in poolsOfInterest) {
-            if (poolsOfInterest[id].swapPairType !== SwapPairType.Direct) {
-                continue;
-            }
-
-            const path = createPath([tokenIn, tokenOut], [poolsOfInterest[id]]);
-            paths.push(path);
-            filteredPoolsOfInterest[id] = poolsOfInterest[id];
+    // Create direct paths
+    for (const id in poolsOfInterest) {
+        if (poolsOfInterest[id].swapPairType !== SwapPairType.Direct) {
+            continue;
         }
+
+        const path = createPath([tokenIn, tokenOut], [poolsOfInterest[id]]);
+        paths.push(path);
+        filteredPoolsOfInterest[id] = poolsOfInterest[id];
     }
 
+    // Create paths with two hops
     for (let i = 0; i < hopTokens.length; i++) {
         let highestNormalizedLiquidityFirst = ZERO; // Aux variable to find pool with most liquidity for pair (tokenIn -> hopToken)
         let highestNormalizedLiquidityFirstPoolId: string | undefined; // Aux variable to find pool with most liquidity for pair (tokenIn -> hopToken)
@@ -124,18 +122,6 @@ export function filterHopPools(
 
         for (const id in poolsOfInterest) {
             const pool = poolsOfInterest[id];
-
-            // We don't consider direct pools for the multihop but we do add it's path
-            if (pool.swapPairType === SwapPairType.Direct) {
-                // First loop of all pools we add paths to list
-                if (firstPoolLoop) {
-                    const path = createPath([tokenIn, tokenOut], [pool]);
-                    paths.push(path);
-                    filteredPoolsOfInterest[id] = pool;
-                }
-                continue;
-            }
-
             const tokenListSet = new Set(pool.tokensList);
 
             // If pool doesn't have hopTokens[i] then ignore
@@ -180,8 +166,6 @@ export function filterHopPools(
                 continue;
             }
         }
-
-        firstPoolLoop = false;
 
         if (
             highestNormalizedLiquidityFirstPoolId &&
