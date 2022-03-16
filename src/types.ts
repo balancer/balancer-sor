@@ -144,6 +144,10 @@ export interface PoolPairDictionary {
     [tokenInOut: string]: PoolPairBase;
 }
 
+export interface hopDictionary {
+    [hopToken: string]: Set<string>; // the set of pool ids
+}
+
 export interface NewPath {
     id: string; // pool address if direct path, contactenation of pool addresses if multihop
     swaps: Swap[];
