@@ -620,7 +620,6 @@ export function getHighestLiquidityPool(
     let highestNormalizedLiquidityPoolId: string | null = null;
     for (const id in poolsOfInterest) {
         const pool = poolsOfInterest[id];
-        if (swapPairType != pool.swapPairType) continue;
         const tokenListSet = new Set(pool.tokensList);
 
         // If pool doesn't have tokenIn or tokenOut then ignore

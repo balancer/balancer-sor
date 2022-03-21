@@ -485,3 +485,10 @@ export function simpleCheckPath(
     }
     return true;
 }
+
+export function poolsCheckPath(path: NewPath, poolsIds: string[]): boolean {
+    for (let i = 0; i < path.swaps.length; i++) {
+        if (poolsIds[i] !== path.pools[i].id) return false;
+    }
+    return true;
+}
