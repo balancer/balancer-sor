@@ -33,10 +33,7 @@ export function _calcBptOutPerMainIn(
         wrappedBalance,
         params
     );
-    return MathSol.divDownFixed(
-        MathSol.mulDownFixed(bptSupply, deltaNominalMain),
-        invariant
-    );
+    return MathSol.divDown(MathSol.mul(bptSupply, deltaNominalMain), invariant);
 }
 
 export function _calcBptInPerMainOut(
@@ -55,10 +52,7 @@ export function _calcBptInPerMainOut(
         wrappedBalance,
         params
     );
-    return MathSol.divUpFixed(
-        MathSol.mulUpFixed(bptSupply, deltaNominalMain),
-        invariant
-    );
+    return MathSol.divUp(MathSol.mul(bptSupply, deltaNominalMain), invariant);
 }
 
 export function _calcBptInPerWrappedOut(
@@ -81,8 +75,8 @@ export function _calcBptInPerWrappedOut(
         newWrappedBalance,
         params
     );
-    const newBptBalance = MathSol.divDownFixed(
-        MathSol.mulDownFixed(bptSupply, newInvariant),
+    const newBptBalance = MathSol.divDown(
+        MathSol.mul(bptSupply, newInvariant),
         previousInvariant
     );
     return bptSupply - newBptBalance;
@@ -129,8 +123,8 @@ export function _calcMainInPerBptOut(
         wrappedBalance,
         params
     );
-    const deltaNominalMain = MathSol.divUpFixed(
-        MathSol.mulUpFixed(invariant, bptOut),
+    const deltaNominalMain = MathSol.divUp(
+        MathSol.mul(invariant, bptOut),
         bptSupply
     );
     const afterNominalMain = previousNominalMain + deltaNominalMain;
@@ -152,8 +146,8 @@ export function _calcMainOutPerBptIn(
         wrappedBalance,
         params
     );
-    const deltaNominalMain = MathSol.divDownFixed(
-        MathSol.mulDownFixed(invariant, bptIn),
+    const deltaNominalMain = MathSol.divDown(
+        MathSol.mul(invariant, bptIn),
         bptSupply
     );
     const afterNominalMain = previousNominalMain - deltaNominalMain;
@@ -212,8 +206,8 @@ export function _calcBptOutPerWrappedIn(
         newWrappedBalance,
         params
     );
-    const newBptBalance = MathSol.divDownFixed(
-        MathSol.mulDownFixed(bptSupply, newInvariant),
+    const newBptBalance = MathSol.divDown(
+        MathSol.mul(bptSupply, newInvariant),
         previousInvariant
     );
     return newBptBalance - bptSupply;
@@ -240,12 +234,13 @@ export function _calcWrappedInPerBptOut(
     );
     const newBptBalance = bptSupply + bptOut;
     const newWrappedBalance = MathSol.divUpFixed(
-        MathSol.mulUpFixed(
-            MathSol.divUpFixed(newBptBalance, bptSupply),
-            previousInvariant
+        MathSol.divUp(
+            MathSol.mul(newBptBalance, previousInvariant),
+            bptSupply
         ) - nominalMain,
         params.rate
     );
+
     return newWrappedBalance - wrappedBalance;
 }
 
@@ -265,12 +260,13 @@ export function _calcWrappedOutPerBptIn(
     );
     const newBptBalance = bptSupply - bptIn;
     const newWrappedBalance = MathSol.divUpFixed(
-        MathSol.mulUpFixed(
-            MathSol.divUpFixed(newBptBalance, bptSupply),
-            previousInvariant
+        MathSol.divUp(
+            MathSol.mul(newBptBalance, previousInvariant),
+            bptSupply
         ) - nominalMain,
         params.rate
     );
+
     return wrappedBalance - newWrappedBalance;
 }
 
