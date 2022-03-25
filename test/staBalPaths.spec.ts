@@ -5,7 +5,6 @@ import { config, expect } from 'chai';
 import cloneDeep from 'lodash.clonedeep';
 import {
     PoolDictionary,
-    SwapPairType,
     SubgraphPoolBase,
     SorConfig,
     NewPath,
@@ -123,7 +122,6 @@ describe(`staBalPaths.`, () => {
                 const mostLiquidPool = getHighestLiquidityPool(
                     sorConfigTestStaBal.usdcConnectingPool.usdc,
                     tokenOut,
-                    SwapPairType.HopOut,
                     poolsAll
                 );
 
@@ -211,7 +209,6 @@ describe(`staBalPaths.`, () => {
                 const mostLiquidPool = getHighestLiquidityPool(
                     tokenIn,
                     sorConfigTestStaBal.usdcConnectingPool.usdc,
-                    SwapPairType.HopIn,
                     poolsAll
                 );
 

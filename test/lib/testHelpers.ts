@@ -6,15 +6,12 @@ import {
     SubgraphPoolBase,
     Swap,
     PoolDictionary,
-    SwapPairType,
     SwapTypes,
     SwapInfo,
     PoolFilter,
     SwapV2,
-    PoolTypes,
     NewPath,
     SorConfig,
-    PoolBase,
 } from '../../src';
 import { bnum } from '../../src/utils/bignumber';
 import * as fs from 'fs';
@@ -314,35 +311,6 @@ export function calcRelativeDiffBn(
         expected.sub(actual).mul(1000000).div(expected).abs().toNumber() /
         1000000
     );
-}
-
-export function countPoolSwapPairTypes(
-    poolsOfInterestDictionary: PoolDictionary
-): [number, number, number, number, number] {
-    let noDirect = 0,
-        noHopIn = 0,
-        noHopOut = 0,
-        noWeighted = 0,
-        noStable = 0;
-    for (const k in poolsOfInterestDictionary) {
-        if (poolsOfInterestDictionary[k].swapPairType === SwapPairType.Direct)
-            noDirect++;
-        else if (
-            poolsOfInterestDictionary[k].swapPairType === SwapPairType.HopIn
-        )
-            noHopIn++;
-        else if (
-            poolsOfInterestDictionary[k].swapPairType === SwapPairType.HopOut
-        )
-            noHopOut++;
-
-        if (poolsOfInterestDictionary[k].poolType === PoolTypes.Weighted)
-            noWeighted++;
-        else if (poolsOfInterestDictionary[k].poolType === PoolTypes.Stable)
-            noStable++;
-    }
-
-    return [noDirect, noHopIn, noHopOut, noWeighted, noStable];
 }
 
 export async function getFullSwap(

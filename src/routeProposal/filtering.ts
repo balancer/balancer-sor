@@ -2,7 +2,6 @@ import cloneDeep from 'lodash.clonedeep';
 import {
     SubgraphPoolBase,
     PoolDictionary,
-    SwapPairType,
     NewPath,
     Swap,
     PoolBase,
@@ -447,7 +446,6 @@ export function createPath(tokens: string[], pools: PoolBase[]): NewPath {
 export function getHighestLiquidityPool(
     tokenIn: string,
     tokenOut: string,
-    swapPairType: SwapPairType,
     poolsOfInterest: PoolDictionary
 ): string | null {
     let highestNormalizedLiquidity = ZERO;
@@ -529,14 +527,12 @@ export function getPathsUsingStaBalPool(
     const metastablePoolIdIn = getHighestLiquidityPool(
         tokenIn,
         hopTokenStaBal,
-        SwapPairType.HopIn,
         poolsFiltered
     );
     // Finds the best metastable Pool with tokenOut/staBal3Bpt or returns null if doesn't exist
     const metastablePoolIdOut = getHighestLiquidityPool(
         hopTokenStaBal,
         tokenOut,
-        SwapPairType.HopOut,
         poolsFiltered
     );
 
@@ -557,7 +553,6 @@ export function getPathsUsingStaBalPool(
         const mostLiquidLastPool = getHighestLiquidityPool(
             usdcConnectingPoolInfo.usdc,
             tokenOut,
-            SwapPairType.HopOut,
             poolsFiltered
         );
         // No USDC>tokenOut pool so return empty path
@@ -581,7 +576,6 @@ export function getPathsUsingStaBalPool(
         const mostLiquidFirstPool = getHighestLiquidityPool(
             tokenIn,
             usdcConnectingPoolInfo.usdc,
-            SwapPairType.HopIn,
             poolsFiltered
         );
         // No tokenIn>USDC pool so return empty path

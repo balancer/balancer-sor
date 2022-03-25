@@ -5,7 +5,6 @@ import { BigNumber as OldBigNumber, bnum, ZERO } from '../../utils/bignumber';
 import {
     PoolBase,
     PoolTypes,
-    SwapPairType,
     SwapTypes,
     SubgraphPoolBase,
     SubgraphToken,
@@ -42,7 +41,6 @@ export type PhantomStablePoolPairData = MetaStablePoolPairData & {
 
 export class PhantomStablePool implements PoolBase {
     poolType: PoolTypes = PoolTypes.MetaStable;
-    swapPairType: SwapPairType;
     id: string;
     address: string;
     amp: BigNumber;
@@ -102,10 +100,6 @@ export class PhantomStablePool implements PoolBase {
         this.totalShares = parseFixed(totalShares, 18);
         this.tokens = tokens;
         this.tokensList = tokensList;
-    }
-
-    setTypeForSwap(type: SwapPairType): void {
-        this.swapPairType = type;
     }
 
     parsePoolPairData(

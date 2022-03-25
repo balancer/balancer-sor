@@ -11,7 +11,6 @@ import { isSameAddress } from '../../utils';
 import {
     PoolBase,
     PoolTypes,
-    SwapPairType,
     PoolPairBase,
     SwapTypes,
     SubgraphPoolBase,
@@ -37,7 +36,6 @@ export type StablePoolPairData = PoolPairBase & {
 
 export class StablePool implements PoolBase {
     poolType: PoolTypes = PoolTypes.Stable;
-    swapPairType: SwapPairType;
     id: string;
     address: string;
     amp: BigNumber;
@@ -79,10 +77,6 @@ export class StablePool implements PoolBase {
         this.totalShares = parseFixed(totalShares, 18);
         this.tokens = tokens;
         this.tokensList = tokensList;
-    }
-
-    setTypeForSwap(type: SwapPairType): void {
-        this.swapPairType = type;
     }
 
     parsePoolPairData(tokenIn: string, tokenOut: string): StablePoolPairData {

@@ -32,12 +32,6 @@ export enum PoolTypes {
     Gyro3,
 }
 
-export enum SwapPairType {
-    Direct,
-    HopIn,
-    HopOut,
-}
-
 export interface SwapOptions {
     gasPrice: BigNumber;
     swapGas: BigNumber;
@@ -171,13 +165,11 @@ export enum PoolFilter {
 
 export interface PoolBase {
     poolType: PoolTypes;
-    swapPairType: SwapPairType;
     id: string;
     address: string;
     tokensList: string[];
     mainIndex?: number;
     isLBP?: boolean;
-    setTypeForSwap: (type: SwapPairType) => void;
     parsePoolPairData: (tokenIn: string, tokenOut: string) => PoolPairBase;
     getNormalizedLiquidity: (poolPairData: PoolPairBase) => OldBigNumber;
     getLimitAmountSwap: (
