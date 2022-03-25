@@ -2,7 +2,7 @@ import {
     getPathsUsingStaBalPool,
     parseToPoolsDict,
     getBoostedPaths,
-    filterPoolsOfInterest2,
+    filterPoolsOfInterest,
     producePaths,
 } from './filtering';
 import { calculatePathLimits } from './pathLimits';
@@ -45,7 +45,7 @@ export class RouteProposer {
 
         const poolsAllDict = parseToPoolsDict(pools, swapOptions.timestamp);
 
-        const [directPools, hopsIn, hopsOut] = filterPoolsOfInterest2(
+        const [directPools, hopsIn, hopsOut] = filterPoolsOfInterest(
             poolsAllDict,
             tokenIn,
             tokenOut,

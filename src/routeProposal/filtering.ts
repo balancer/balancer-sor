@@ -25,76 +25,10 @@ export const filterPoolsByType = (
 };
 
 /*
-The main purpose of this function is to:
-- filter to  allPools to pools that have:
-    - TokenIn & TokenOut, i.e. a direct swap pool
-    - TokenIn & !TokenOut, i.e. a hop pool with only TokenIn
-    - !TokenIn & TokenOut, i.e. a hop pool with only TokenOut
-- find list of hop tokens, i.e. tokens that join hop pools
-*/
-export function filterPoolsOfInterest(
-    allPools: PoolDictionary,
-    tokenIn: string,
-    tokenOut: string,
-    maxPools: number
-): [PoolDictionary, string[]] {
-    // This will include pools with tokenIn and/or tokenOut only
-    const poolsFilteredDictionary: PoolDictionary = {};
-
-    // If pool contains token add all its tokens to direct list
-    // Multi-hop trades: we find the best pools that connect tokenIn and tokenOut through a multi-hop (intermediate) token
-    // First: we get all tokens that can be used to be traded with tokenIn excluding
-    // tokens that are in pools that already contain tokenOut (in which case multi-hop is not necessary)
-    let tokenInPairedTokens: Set<string> = new Set();
-    let tokenOutPairedTokens: Set<string> = new Set();
-
-    Object.keys(allPools).forEach((id) => {
-        const pool = allPools[id];
-        const tokenListSet = new Set(pool.tokensList);
-        const containsTokenIn = tokenListSet.has(tokenIn.toLowerCase());
-        const containsTokenOut = tokenListSet.has(tokenOut.toLowerCase());
-
-        // This is a direct pool as has both tokenIn and tokenOut
-        if (containsTokenIn && containsTokenOut) {
-            pool.setTypeForSwap(SwapPairType.Direct);
-            poolsFilteredDictionary[pool.id] = pool;
-            return;
-        }
-
-        if (maxPools > 1) {
-            if (containsTokenIn && !containsTokenOut) {
-                tokenInPairedTokens = new Set([
-                    ...tokenInPairedTokens,
-                    ...tokenListSet,
-                ]);
-                pool.setTypeForSwap(SwapPairType.HopIn);
-                poolsFilteredDictionary[pool.id] = pool;
-            } else if (!containsTokenIn && containsTokenOut) {
-                tokenOutPairedTokens = new Set([
-                    ...tokenOutPairedTokens,
-                    ...tokenListSet,
-                ]);
-                pool.setTypeForSwap(SwapPairType.HopOut);
-                poolsFilteredDictionary[pool.id] = pool;
-            }
-        }
-    });
-
-    // We find the intersection of the two previous sets so we can trade tokenIn for tokenOut with 1 multi-hop
-    const hopTokensSet = [...tokenInPairedTokens].filter((x) =>
-        tokenOutPairedTokens.has(x)
-    );
-
-    // Transform set into Array
-    const hopTokens = [...hopTokensSet];
-    return [poolsFilteredDictionary, hopTokens];
-}
-
-/*
 The purpose of this function is to build dictionaries of direct pools 
 and plausible hop pools.
 */
-export function filterPoolsOfInterest2(
+export function filterPoolsOfInterest(
     allPools: PoolDictionary,
     tokenIn: string,
     tokenOut: string,
@@ -207,106 +141,6 @@ export function producePaths(
         }
     }
     return paths;
-}
-
-/*
-Find the most liquid pool for each hop (i.e. tokenIn->hopToken & hopToken->tokenOut).
-Creates paths for each pool of interest (multi & direct pools).
-*/
-export function filterHopPools(
-    tokenIn: string,
-    tokenOut: string,
-    hopTokens: string[],
-    poolsOfInterest: PoolDictionary
-): [PoolDictionary, NewPath[]] {
-    const filteredPoolsOfInterest: PoolDictionary = {};
-    const paths: NewPath[] = [];
-
-    // Create direct paths
-    for (const id in poolsOfInterest) {
-        if (poolsOfInterest[id].swapPairType !== SwapPairType.Direct) {
-            continue;
-        }
-
-        const path = createPath([tokenIn, tokenOut], [poolsOfInterest[id]]);
-        paths.push(path);
-        filteredPoolsOfInterest[id] = poolsOfInterest[id];
-    }
-
-    // Create paths with two hops
-    for (let i = 0; i < hopTokens.length; i++) {
-        let highestNormalizedLiquidityFirst = ZERO; // Aux variable to find pool with most liquidity for pair (tokenIn -> hopToken)
-        let highestNormalizedLiquidityFirstPoolId: string | undefined; // Aux variable to find pool with most liquidity for pair (tokenIn -> hopToken)
-        let highestNormalizedLiquiditySecond = ZERO; // Aux variable to find pool with most liquidity for pair (hopToken -> tokenOut)
-        let highestNormalizedLiquiditySecondPoolId: string | undefined; // Aux variable to find pool with most liquidity for pair (hopToken -> tokenOut)
-
-        for (const id in poolsOfInterest) {
-            const pool = poolsOfInterest[id];
-            const tokenListSet = new Set(pool.tokensList);
-
-            // If pool doesn't have hopTokens[i] then ignore
-            if (!tokenListSet.has(hopTokens[i])) continue;
-
-            if (pool.swapPairType === SwapPairType.HopIn) {
-                const poolPairData = pool.parsePoolPairData(
-                    tokenIn,
-                    hopTokens[i]
-                );
-                // const normalizedLiquidity = pool.getNormalizedLiquidity(tokenIn, hopTokens[i]);
-                const normalizedLiquidity =
-                    pool.getNormalizedLiquidity(poolPairData);
-                // Cannot be strictly greater otherwise highestNormalizedLiquidityPoolId = 0 if hopTokens[i] balance is 0 in this pool.
-                if (
-                    normalizedLiquidity.isGreaterThanOrEqualTo(
-                        highestNormalizedLiquidityFirst
-                    )
-                ) {
-                    highestNormalizedLiquidityFirst = normalizedLiquidity;
-                    highestNormalizedLiquidityFirstPoolId = id;
-                }
-            } else if (pool.swapPairType === SwapPairType.HopOut) {
-                const poolPairData = pool.parsePoolPairData(
-                    hopTokens[i],
-                    tokenOut
-                );
-                // const normalizedLiquidity = pool.getNormalizedLiquidity(hopTokens[i], tokenOut);
-                const normalizedLiquidity =
-                    pool.getNormalizedLiquidity(poolPairData);
-                // Cannot be strictly greater otherwise highestNormalizedLiquidityPoolId = 0 if hopTokens[i] balance is 0 in this pool.
-                if (
-                    normalizedLiquidity.isGreaterThanOrEqualTo(
-                        highestNormalizedLiquiditySecond
-                    )
-                ) {
-                    highestNormalizedLiquiditySecond = normalizedLiquidity;
-                    highestNormalizedLiquiditySecondPoolId = id;
-                }
-            } else {
-                // Unknown type
-                continue;
-            }
-        }
-
-        if (
-            highestNormalizedLiquidityFirstPoolId &&
-            highestNormalizedLiquiditySecondPoolId
-        ) {
-            filteredPoolsOfInterest[highestNormalizedLiquidityFirstPoolId] =
-                poolsOfInterest[highestNormalizedLiquidityFirstPoolId];
-            filteredPoolsOfInterest[highestNormalizedLiquiditySecondPoolId] =
-                poolsOfInterest[highestNormalizedLiquiditySecondPoolId];
-
-            const path = createPath(
-                [tokenIn, hopTokens[i], tokenOut],
-                [
-                    poolsOfInterest[highestNormalizedLiquidityFirstPoolId],
-                    poolsOfInterest[highestNormalizedLiquiditySecondPoolId],
-                ]
-            );
-            paths.push(path);
-        }
-    }
-    return [filteredPoolsOfInterest, paths];
 }
 
 /*
@@ -446,7 +280,7 @@ export function getBoostedPaths(
             composePaths([lbpPathIn, path, lbpPathOut])
         );
     }
-    // Every short path (short means length 1 and 2) is included in filterHopPools.
+    // Every short path (short means length 1 and 2) is included in producePaths.
     return removeShortPaths(paths);
 }
 
