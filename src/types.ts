@@ -180,6 +180,10 @@ export interface PoolBase {
         poolPairData: PoolPairBase,
         swapType: SwapTypes
     ) => OldBigNumber;
+    /**
+     * @param {string} token - Address of token.
+     * @param {BigNumber} newBalance - New balance of token. EVM scaled.
+     */
     updateTokenBalanceForPool: (token: string, newBalance: BigNumber) => void;
     _exactTokenInForTokenOut: (
         poolPairData: PoolPairBase,
