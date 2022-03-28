@@ -682,7 +682,6 @@ export class LinearPool implements PoolBase {
                 0
             );
         } catch (err) {
-            console.log('OUCH?', err);
             return ZERO;
         }
     }
