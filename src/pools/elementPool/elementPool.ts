@@ -5,7 +5,6 @@ import { BigNumber as OldBigNumber, bnum } from '../../utils/bignumber';
 import {
     PoolBase,
     PoolTypes,
-    SwapPairType,
     PoolPairBase,
     SwapTypes,
     SubgraphPoolBase,
@@ -35,7 +34,6 @@ export type ElementPoolPairData = PoolPairBase & {
 
 export class ElementPool implements PoolBase {
     poolType: PoolTypes = PoolTypes.Element;
-    swapPairType: SwapPairType;
     id: string;
     address: string;
     swapFee: BigNumber;
@@ -99,10 +97,6 @@ export class ElementPool implements PoolBase {
 
     setCurrentBlockTimestamp(timestamp: number): void {
         this.currentBlockTimestamp = timestamp;
-    }
-
-    setTypeForSwap(type: SwapPairType): void {
-        this.swapPairType = type;
     }
 
     parsePoolPairData(tokenIn: string, tokenOut: string): ElementPoolPairData {

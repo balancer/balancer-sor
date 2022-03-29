@@ -1,9 +1,9 @@
 import {
-    filterPoolsOfInterest,
-    filterHopPools,
     getPathsUsingStaBalPool,
     parseToPoolsDict,
     getBoostedPaths,
+    filterPoolsOfInterest,
+    producePaths,
 } from './filtering';
 import { calculatePathLimits } from './pathLimits';
 import {
@@ -45,18 +45,20 @@ export class RouteProposer {
 
         const poolsAllDict = parseToPoolsDict(pools, swapOptions.timestamp);
 
-        const [poolsFilteredDict, hopTokens] = filterPoolsOfInterest(
+        const [directPools, hopsIn, hopsOut] = filterPoolsOfInterest(
             poolsAllDict,
             tokenIn,
             tokenOut,
             swapOptions.maxPools
         );
 
-        const [, pathData] = filterHopPools(
+        const pathData = producePaths(
             tokenIn,
             tokenOut,
-            hopTokens,
-            poolsFilteredDict
+            directPools,
+            hopsIn,
+            hopsOut,
+            poolsAllDict
         );
 
         const boostedPaths = getBoostedPaths(
@@ -70,7 +72,7 @@ export class RouteProposer {
             tokenIn,
             tokenOut,
             poolsAllDict,
-            poolsFilteredDict,
+            poolsAllDict,
             this.config
         );
 

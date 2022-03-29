@@ -11,10 +11,10 @@ import {
     PoolTypes,
     SubgraphPoolBase,
     SorConfig,
+    SwapOptions,
+    PoolFilter,
 } from '../src';
 import {
-    filterPoolsOfInterest,
-    filterHopPools,
     parseToPoolsDict,
     getBoostedPaths,
 } from '../src/routeProposal/filtering';
@@ -53,6 +53,7 @@ import smallLinear from './testData/linearPools/smallLinear.json';
 import kovanPools from './testData/linearPools/kovan.json';
 import fullKovanPools from './testData/linearPools/fullKovan.json';
 import { checkBestPath } from './boostedPaths.spec';
+import { RouteProposer } from '../src/routeProposal';
 
 describe('linear pool tests', () => {
     context('parsePoolPairData', () => {
@@ -861,25 +862,26 @@ function getPaths(
     config?: SorConfig
 ): [NewPath[], PoolDictionary, NewPath[]] {
     const poolsAll = parseToPoolsDict(cloneDeep(pools), 0);
-
-    const [poolsFilteredDict, hopTokens] = filterPoolsOfInterest(
-        poolsAll,
-        tokenIn,
-        tokenOut,
-        maxPools
-    );
-
-    let pathData: NewPath[] = [];
-    [, pathData] = filterHopPools(
-        tokenIn,
-        tokenOut,
-        hopTokens,
-        poolsFilteredDict
-    );
     const conf = config || sorConfigTestBoosted;
+    const routeProposer = new RouteProposer(conf);
+    const swapOptions: SwapOptions = {
+        gasPrice: BigNumber.from(0),
+        swapGas: BigNumber.from(0),
+        timestamp: 0,
+        maxPools: 10,
+        poolTypeFilter: PoolFilter.All,
+        forceRefresh: true,
+    };
+
+    const paths = routeProposer.getCandidatePaths(
+        tokenIn,
+        tokenOut,
+        swapType,
+        pools,
+        swapOptions
+    );
+
     const boostedPaths = getBoostedPaths(tokenIn, tokenOut, poolsAll, conf);
-    pathData = pathData.concat(boostedPaths);
-    const [paths] = calculatePathLimits(pathData, swapType);
     return [paths, poolsAll, boostedPaths];
 }
 

@@ -6,7 +6,6 @@ import { isSameAddress } from '../../utils';
 import {
     PoolBase,
     PoolTypes,
-    SwapPairType,
     PoolPairBase,
     SwapTypes,
     SubgraphPoolBase,
@@ -68,7 +67,6 @@ export type LinearPoolPairData = PoolPairBase & {
 
 export class LinearPool implements PoolBase {
     poolType: PoolTypes = PoolTypes.Linear;
-    swapPairType: SwapPairType;
     id: string;
     address: string;
     swapFee: BigNumber;
@@ -134,10 +132,6 @@ export class LinearPool implements PoolBase {
         this.wrappedDecimals = this.tokens[this.wrappedIndex].decimals;
         this.lowerTarget = parseFixed(lowerTarget, 18); // Wrapped token will have same decimals as underlying
         this.upperTarget = parseFixed(upperTarget, 18);
-    }
-
-    setTypeForSwap(type: SwapPairType): void {
-        this.swapPairType = type;
     }
 
     parsePoolPairData(tokenIn: string, tokenOut: string): LinearPoolPairData {
