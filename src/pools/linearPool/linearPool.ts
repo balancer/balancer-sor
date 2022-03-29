@@ -1,4 +1,4 @@
-import { BigNumber, parseFixed } from '@ethersproject/bignumber';
+import { BigNumber, parseFixed, formatFixed } from '@ethersproject/bignumber';
 import { bnum, scale, ZERO } from '../../utils/bignumber';
 import { BigNumber as OldBigNumber } from '../../utils/bignumber';
 import { WeiPerEther as ONE } from '@ethersproject/constants';
@@ -300,7 +300,8 @@ export class LinearPool implements PoolBase {
     updateTokenBalanceForPool(token: string, newBalance: BigNumber): void {
         const T = this.tokens.find((t) => isSameAddress(t.address, token));
         if (!T) throw Error('Pool does not contain this token');
-        T.balance = newBalance.toString();
+        // Converts to human scaled number and saves.
+        T.balance = formatFixed(newBalance, T.decimals);
     }
 
     _exactTokenInForTokenOut(
@@ -675,7 +676,6 @@ export class LinearPool implements PoolBase {
                 0
             );
         } catch (err) {
-            console.log('OUCH?', err);
             return ZERO;
         }
     }
