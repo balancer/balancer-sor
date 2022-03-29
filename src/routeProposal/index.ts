@@ -108,18 +108,20 @@ export class RouteProposer {
     ): NewPath[] {
         if (Object.keys(poolsAllDict).length === 0) return [];
 
-        const [poolsFilteredDict, hopTokens] = filterPoolsOfInterest(
+        const [directPools, hopsIn, hopsOut] = filterPoolsOfInterest(
             poolsAllDict,
             tokenIn,
             tokenOut,
             maxPools
         );
 
-        const [, pathData] = filterHopPools(
+        const pathData = producePaths(
             tokenIn,
             tokenOut,
-            hopTokens,
-            poolsFilteredDict
+            directPools,
+            hopsIn,
+            hopsOut,
+            poolsAllDict
         );
 
         const boostedPaths = getBoostedPaths(
