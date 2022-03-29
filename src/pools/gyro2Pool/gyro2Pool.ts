@@ -7,7 +7,6 @@ import {
     PoolBase,
     PoolPairBase,
     PoolTypes,
-    SwapPairType,
     SubgraphToken,
     SwapTypes,
     SubgraphPoolBase,
@@ -41,7 +40,6 @@ export type Gyro2PoolToken = Pick<
 
 export class Gyro2Pool implements PoolBase {
     poolType: PoolTypes = PoolTypes.Gyro2;
-    swapPairType: SwapPairType;
     id: string;
     address: string;
     tokensList: string[];
@@ -105,10 +103,6 @@ export class Gyro2Pool implements PoolBase {
         this.tokens = tokens;
         this.tokensList = tokensList;
         this.priceBounds = priceBounds;
-    }
-
-    setTypeForSwap(type: SwapPairType): void {
-        this.swapPairType = type;
     }
 
     parsePoolPairData(tokenIn: string, tokenOut: string): Gyro2PoolPairData {

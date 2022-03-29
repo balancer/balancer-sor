@@ -1,4 +1,4 @@
-import { BigNumber, parseFixed } from '@ethersproject/bignumber';
+import { BigNumber, parseFixed, formatFixed } from '@ethersproject/bignumber';
 import { bnum, scale, ZERO } from '../../utils/bignumber';
 import { BigNumber as OldBigNumber } from '../../utils/bignumber';
 import { WeiPerEther as ONE } from '@ethersproject/constants';
@@ -6,7 +6,6 @@ import { isSameAddress } from '../../utils';
 import {
     PoolBase,
     PoolTypes,
-    SwapPairType,
     PoolPairBase,
     SwapTypes,
     SubgraphPoolBase,
@@ -68,7 +67,6 @@ export type LinearPoolPairData = PoolPairBase & {
 
 export class LinearPool implements PoolBase {
     poolType: PoolTypes = PoolTypes.Linear;
-    swapPairType: SwapPairType;
     id: string;
     address: string;
     swapFee: BigNumber;
@@ -134,10 +132,6 @@ export class LinearPool implements PoolBase {
         this.wrappedDecimals = this.tokens[this.wrappedIndex].decimals;
         this.lowerTarget = parseFixed(lowerTarget, 18); // Wrapped token will have same decimals as underlying
         this.upperTarget = parseFixed(upperTarget, 18);
-    }
-
-    setTypeForSwap(type: SwapPairType): void {
-        this.swapPairType = type;
     }
 
     parsePoolPairData(tokenIn: string, tokenOut: string): LinearPoolPairData {
@@ -306,7 +300,8 @@ export class LinearPool implements PoolBase {
     updateTokenBalanceForPool(token: string, newBalance: BigNumber): void {
         const T = this.tokens.find((t) => isSameAddress(t.address, token));
         if (!T) throw Error('Pool does not contain this token');
-        T.balance = newBalance.toString();
+        // Converts to human scaled number and saves.
+        T.balance = formatFixed(newBalance, T.decimals);
     }
 
     _exactTokenInForTokenOut(
@@ -681,7 +676,6 @@ export class LinearPool implements PoolBase {
                 0
             );
         } catch (err) {
-            console.log('OUCH?', err);
             return ZERO;
         }
     }

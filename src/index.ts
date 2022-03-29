@@ -7,4 +7,6 @@ export {
     queryBatchSwapTokensOut,
 } from './frontendHelpers/queryBatchSwapHelpers';
 export * from './types';
+export { formatSequence, getTokenAddressesForSwap } from './formatSwaps';
+export { RouteProposer } from './routeProposal';
 export { parseToPoolsDict } from './routeProposal/filtering';
