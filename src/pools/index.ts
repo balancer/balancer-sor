@@ -52,10 +52,7 @@ export function parseNewPool(
         } else if (pool.poolType === 'Element') {
             newPool = ElementPool.fromPool(pool);
             newPool.setCurrentBlockTimestamp(currentBlockTimestamp);
-        } else if (
-            pool.poolType.toString().includes('Linear') ||
-            pool.poolType === 'ERC4626Linear'
-        )
+        } else if (pool.poolType.toString().includes('Linear'))
             newPool = LinearPool.fromPool(pool);
         else if (pool.poolType === 'StablePhantom')
             newPool = PhantomStablePool.fromPool(pool);
