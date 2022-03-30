@@ -288,6 +288,21 @@ export const ADDRESSES = {
             decimals: 18,
             symbol: 'DAI',
         },
+        STETH: {
+            address: '0xae7ab96520de3a18e5e111b5eaab095312d7fe84',
+            decimals: 18,
+            symbol: 'STETH',
+        },
+        stUSD_PLUS: {
+            address: '0x5a5c6aa6164750b530b8f7658b827163b3549a4d',
+            decimals: 6,
+            symbol: 'stUSD+',
+        },
+        bstUSD_PLUS: {
+            address: '0x1aafc31091d93c3ff003cff5d2d8f7ba2e728425',
+            decimals: 18,
+            symbol: 'bstUSD+',
+        },
     },
     [Network.ARBITRUM]: {
         WETH: {
@@ -674,13 +689,13 @@ async function makeRelayerTrade(
 }
 
 export async function simpleSwap() {
-    const networkId = Network.MAINNET;
+    const networkId = Network.POLYGON;
     // Pools source can be Subgraph URL or pools data set passed directly
     // Update pools list with most recent onchain balances
-    const tokenIn = ADDRESSES[networkId].bbausdc;
-    const tokenOut = ADDRESSES[networkId].waUSDC;
-    const swapType = SwapTypes.SwapExactOut;
-    const swapAmount = parseFixed('10', 6);
+    const tokenIn = ADDRESSES[networkId].bstUSD_PLUS;
+    const tokenOut = ADDRESSES[networkId].BAL;
+    const swapType = SwapTypes.SwapExactIn;
+    const swapAmount = parseFixed('0.1', 18);
     const executeTrade = true;
 
     const provider = new JsonRpcProvider(PROVIDER_URLS[networkId]);
