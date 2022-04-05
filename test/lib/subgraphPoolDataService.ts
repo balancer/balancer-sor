@@ -77,7 +77,7 @@ export const Query: { [chainId: number]: string } = {
     4: queryWithLinear,
     5: queryWithLinear,
     42: queryWithLinear,
-    137: queryWithOutLinear,
+    137: queryWithLinear,
     42161: queryWithLinear,
 };
 
