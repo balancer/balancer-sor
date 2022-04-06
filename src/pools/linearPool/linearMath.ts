@@ -647,7 +647,7 @@ export function _spotPriceAfterSwapWrappedInPerBptOut(
     );
     return MathSol.divUpFixed(
         previousInvariant,
-        MathSol.mul(bptSupply, params.rate)
+        MathSol.mulUpFixed(bptSupply, params.rate)
     );
 }
 
@@ -678,4 +678,4 @@ export function _spotPriceAfterSwapBptInPerWrappedOut(
 
 // Derivative of spot price is always zero, except at the target break points,
 // where it is infinity in some sense. But we ignore this pathology, return zero
-// and expect good behaviour at the optimization of amounts algorithm.
+// and expect good behaviour at the optimization algorithm.
