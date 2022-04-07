@@ -24,18 +24,18 @@ import {
     _calcBptOutPerWrappedIn,
     _calcWrappedInPerBptOut,
     _calcWrappedOutPerBptIn,
-    _spotPriceAfterSwapExactTokenInForTokenOut,
-    _spotPriceAfterSwapExactTokenInForBPTOut,
-    _spotPriceAfterSwapExactBPTInForTokenOut,
-    _spotPriceAfterSwapTokenInForExactTokenOut,
-    _spotPriceAfterSwapTokenInForExactBPTOut,
-    _spotPriceAfterSwapBPTInForExactTokenOut,
-    _derivativeSpotPriceAfterSwapExactTokenInForTokenOut,
-    _derivativeSpotPriceAfterSwapExactTokenInForBPTOut,
-    _derivativeSpotPriceAfterSwapExactBPTInForTokenOut,
-    _derivativeSpotPriceAfterSwapTokenInForExactTokenOut,
-    _derivativeSpotPriceAfterSwapTokenInForExactBPTOut,
-    _derivativeSpotPriceAfterSwapBPTInForExactTokenOut,
+    _spotPriceAfterSwapBptOutPerMainIn,
+    _spotPriceAfterSwapMainOutPerBptIn,
+    _spotPriceAfterSwapBptOutPerWrappedIn,
+    _spotPriceAfterSwapWrappedOutPerBptIn,
+    _spotPriceAfterSwapWrappedOutPerMainIn,
+    _spotPriceAfterSwapMainOutPerWrappedIn,
+    _spotPriceAfterSwapMainInPerBptOut,
+    _spotPriceAfterSwapBptInPerMainOut,
+    _spotPriceAfterSwapWrappedInPerBptOut,
+    _spotPriceAfterSwapBptInPerWrappedOut,
+    _spotPriceAfterSwapMainInPerWrappedOut,
+    _spotPriceAfterSwapWrappedInPerMainOut,
 } from './linearMath';
 
 export enum PairTypes {
@@ -339,6 +339,8 @@ export class LinearPool implements PoolBase {
             const amt = _calcMainOutPerWrappedIn(
                 amtScaled.toBigInt(),
                 poolPairData.mainBalanceScaled.toBigInt(),
+                poolPairData.wrappedBalanceScaled.toBigInt(),
+                poolPairData.virtualBptSupply.toBigInt(),
                 {
                     fee: poolPairData.swapFee.toBigInt(),
                     lowerTarget: poolPairData.lowerTarget.toBigInt(),
@@ -371,6 +373,8 @@ export class LinearPool implements PoolBase {
             const amt = _calcWrappedOutPerMainIn(
                 amtScaled.toBigInt(),
                 poolPairData.mainBalanceScaled.toBigInt(),
+                poolPairData.wrappedBalanceScaled.toBigInt(),
+                poolPairData.virtualBptSupply.toBigInt(),
                 {
                     fee: poolPairData.swapFee.toBigInt(),
                     lowerTarget: poolPairData.lowerTarget.toBigInt(),
@@ -559,6 +563,8 @@ export class LinearPool implements PoolBase {
             const amt = _calcWrappedInPerMainOut(
                 amtScaled.toBigInt(),
                 poolPairData.mainBalanceScaled.toBigInt(),
+                poolPairData.wrappedBalanceScaled.toBigInt(),
+                poolPairData.virtualBptSupply.toBigInt(),
                 {
                     fee: poolPairData.swapFee.toBigInt(),
                     lowerTarget: poolPairData.lowerTarget.toBigInt(),
@@ -591,6 +597,8 @@ export class LinearPool implements PoolBase {
             const amt = _calcMainInPerWrappedOut(
                 amtScaled.toBigInt(),
                 poolPairData.mainBalanceScaled.toBigInt(),
+                poolPairData.wrappedBalanceScaled.toBigInt(),
+                poolPairData.virtualBptSupply.toBigInt(),
                 {
                     fee: poolPairData.swapFee.toBigInt(),
                     lowerTarget: poolPairData.lowerTarget.toBigInt(),
@@ -747,169 +755,167 @@ export class LinearPool implements PoolBase {
         }
     }
 
+    // SPOT PRICES AFTER SWAP
+
     _spotPriceAfterSwapExactTokenInForTokenOut(
         poolPairData: LinearPoolPairData,
         amount: OldBigNumber
     ): OldBigNumber {
-        // For now we used the main token eqn for wrapped token as that maths isn't written and estimate should be ok for limited available paths
-        if (
-            poolPairData.pairType === PairTypes.MainTokenToBpt ||
-            poolPairData.pairType === PairTypes.WrappedTokenToBpt
-        ) {
-            return this._spotPriceAfterSwapExactTokenInForBPTOut(
-                poolPairData,
-                amount
+        const bigintAmount = parseFixed(amount.toString(), 18).toBigInt();
+        const mainBalance = poolPairData.mainBalanceScaled.toBigInt();
+        const wrappedBalance = poolPairData.wrappedBalanceScaled.toBigInt();
+        const bptSupply = poolPairData.virtualBptSupply.toBigInt();
+        const params = {
+            fee: poolPairData.swapFee.toBigInt(),
+            lowerTarget: poolPairData.lowerTarget.toBigInt(),
+            upperTarget: poolPairData.upperTarget.toBigInt(),
+            rate: poolPairData.rate.toBigInt(),
+        };
+        let result: bigint;
+        if (poolPairData.pairType === PairTypes.MainTokenToBpt) {
+            result = _spotPriceAfterSwapBptOutPerMainIn(
+                bigintAmount,
+                mainBalance,
+                wrappedBalance,
+                bptSupply,
+                params
+            );
+        } else if (poolPairData.pairType === PairTypes.BptToMainToken) {
+            result = _spotPriceAfterSwapMainOutPerBptIn(
+                bigintAmount,
+                mainBalance,
+                wrappedBalance,
+                bptSupply,
+                params
+            );
+        } else if (poolPairData.pairType === PairTypes.WrappedTokenToBpt) {
+            result = _spotPriceAfterSwapBptOutPerWrappedIn(
+                bigintAmount,
+                mainBalance,
+                wrappedBalance,
+                bptSupply,
+                params
+            );
+        } else if (poolPairData.pairType === PairTypes.BptToWrappedToken) {
+            result = _spotPriceAfterSwapWrappedOutPerBptIn(
+                bigintAmount,
+                mainBalance,
+                wrappedBalance,
+                bptSupply,
+                params
             );
         } else if (
-            poolPairData.pairType === PairTypes.BptToMainToken ||
-            poolPairData.pairType === PairTypes.BptToWrappedToken
+            poolPairData.pairType === PairTypes.MainTokenToWrappedToken
         ) {
-            return this._spotPriceAfterSwapExactBPTInForTokenOut(
-                poolPairData,
-                amount
+            result = _spotPriceAfterSwapWrappedOutPerMainIn(
+                bigintAmount,
+                mainBalance,
+                wrappedBalance,
+                bptSupply,
+                params
             );
-        } else
-            return _spotPriceAfterSwapExactTokenInForTokenOut(
-                amount,
-                poolPairData
+        } else if (
+            poolPairData.pairType === PairTypes.WrappedTokenToMainToken
+        ) {
+            result = _spotPriceAfterSwapMainOutPerWrappedIn(
+                bigintAmount,
+                mainBalance,
+                wrappedBalance,
+                bptSupply,
+                params
             );
-    }
-
-    _spotPriceAfterSwapExactTokenInForBPTOut(
-        poolPairData: LinearPoolPairData,
-        amount: OldBigNumber
-    ): OldBigNumber {
-        return _spotPriceAfterSwapExactTokenInForBPTOut(amount, poolPairData);
-    }
-
-    _spotPriceAfterSwapExactBPTInForTokenOut(
-        poolPairData: LinearPoolPairData,
-        amount: OldBigNumber
-    ): OldBigNumber {
-        return _spotPriceAfterSwapExactBPTInForTokenOut(amount, poolPairData);
+        } else return bnum(0);
+        return scale(bnum(result.toString()), -18).dp(
+            poolPairData.decimalsOut,
+            0
+        );
     }
 
     _spotPriceAfterSwapTokenInForExactTokenOut(
         poolPairData: LinearPoolPairData,
         amount: OldBigNumber
     ): OldBigNumber {
-        // For now we used the main token eqn for wrapped token as that maths isn't written and estimate should be ok for limited available paths
-        if (
-            poolPairData.pairType === PairTypes.MainTokenToBpt ||
-            poolPairData.pairType === PairTypes.WrappedTokenToBpt
-        ) {
-            return this._spotPriceAfterSwapTokenInForExactBPTOut(
-                poolPairData,
-                amount
+        const bigintAmount = parseFixed(amount.toString(), 18).toBigInt();
+        const mainBalance = poolPairData.mainBalanceScaled.toBigInt();
+        const wrappedBalance = poolPairData.wrappedBalanceScaled.toBigInt();
+        const bptSupply = poolPairData.virtualBptSupply.toBigInt();
+        const params = {
+            fee: poolPairData.swapFee.toBigInt(),
+            lowerTarget: poolPairData.lowerTarget.toBigInt(),
+            upperTarget: poolPairData.upperTarget.toBigInt(),
+            rate: poolPairData.rate.toBigInt(),
+        };
+        let result: bigint;
+        if (poolPairData.pairType === PairTypes.MainTokenToBpt) {
+            result = _spotPriceAfterSwapMainInPerBptOut(
+                bigintAmount,
+                mainBalance,
+                wrappedBalance,
+                bptSupply,
+                params
+            );
+        } else if (poolPairData.pairType === PairTypes.BptToMainToken) {
+            result = _spotPriceAfterSwapBptInPerMainOut(
+                bigintAmount,
+                mainBalance,
+                wrappedBalance,
+                bptSupply,
+                params
+            );
+        } else if (poolPairData.pairType === PairTypes.WrappedTokenToBpt) {
+            result = _spotPriceAfterSwapWrappedInPerBptOut(
+                bigintAmount,
+                mainBalance,
+                wrappedBalance,
+                bptSupply,
+                params
+            );
+        } else if (poolPairData.pairType === PairTypes.BptToWrappedToken) {
+            result = _spotPriceAfterSwapBptInPerWrappedOut(
+                bigintAmount,
+                mainBalance,
+                wrappedBalance,
+                bptSupply,
+                params
             );
         } else if (
-            poolPairData.pairType === PairTypes.BptToMainToken ||
-            poolPairData.pairType === PairTypes.BptToWrappedToken
+            poolPairData.pairType === PairTypes.MainTokenToWrappedToken
         ) {
-            return this._spotPriceAfterSwapBPTInForExactTokenOut(
-                poolPairData,
-                amount
+            result = _spotPriceAfterSwapMainInPerWrappedOut(
+                bigintAmount,
+                mainBalance,
+                wrappedBalance,
+                bptSupply,
+                params
             );
-        } else
-            return _spotPriceAfterSwapTokenInForExactTokenOut(
-                amount,
-                poolPairData
+        } else if (
+            poolPairData.pairType === PairTypes.WrappedTokenToMainToken
+        ) {
+            result = _spotPriceAfterSwapWrappedInPerMainOut(
+                bigintAmount,
+                mainBalance,
+                wrappedBalance,
+                bptSupply,
+                params
             );
-    }
-
-    _spotPriceAfterSwapTokenInForExactBPTOut(
-        poolPairData: LinearPoolPairData,
-        amount: OldBigNumber
-    ): OldBigNumber {
-        return _spotPriceAfterSwapTokenInForExactBPTOut(amount, poolPairData);
-    }
-
-    _spotPriceAfterSwapBPTInForExactTokenOut(
-        poolPairData: LinearPoolPairData,
-        amount: OldBigNumber
-    ): OldBigNumber {
-        return _spotPriceAfterSwapBPTInForExactTokenOut(amount, poolPairData);
+        } else return bnum(0);
+        return scale(bnum(result.toString()), -18).dp(
+            poolPairData.decimalsOut,
+            0
+        );
     }
 
     _derivativeSpotPriceAfterSwapExactTokenInForTokenOut(
         poolPairData: LinearPoolPairData,
         amount: OldBigNumber
     ): OldBigNumber {
-        if (poolPairData.pairType === PairTypes.MainTokenToBpt) {
-            return this._derivativeSpotPriceAfterSwapExactTokenInForBPTOut(
-                poolPairData,
-                amount
-            );
-        } else if (poolPairData.pairType === PairTypes.BptToMainToken) {
-            return this._derivativeSpotPriceAfterSwapExactBPTInForTokenOut(
-                poolPairData,
-                amount
-            );
-        } else
-            return _derivativeSpotPriceAfterSwapExactTokenInForTokenOut(
-                amount,
-                poolPairData
-            );
-    }
-
-    _derivativeSpotPriceAfterSwapExactTokenInForBPTOut(
-        poolPairData: LinearPoolPairData,
-        amount: OldBigNumber
-    ): OldBigNumber {
-        return _derivativeSpotPriceAfterSwapExactTokenInForBPTOut(
-            amount,
-            poolPairData
-        );
-    }
-
-    _derivativeSpotPriceAfterSwapExactBPTInForTokenOut(
-        poolPairData: LinearPoolPairData,
-        amount: OldBigNumber
-    ): OldBigNumber {
-        return _derivativeSpotPriceAfterSwapExactBPTInForTokenOut(
-            amount,
-            poolPairData
-        );
+        return bnum(0);
     }
 
     _derivativeSpotPriceAfterSwapTokenInForExactTokenOut(
         poolPairData: LinearPoolPairData,
         amount: OldBigNumber
     ): OldBigNumber {
-        if (poolPairData.pairType === PairTypes.MainTokenToBpt) {
-            return this._derivativeSpotPriceAfterSwapTokenInForExactBPTOut(
-                poolPairData,
-                amount
-            );
-        } else if (poolPairData.pairType === PairTypes.BptToMainToken) {
-            return this._derivativeSpotPriceAfterSwapBPTInForExactTokenOut(
-                poolPairData,
-                amount
-            );
-        } else
-            return _derivativeSpotPriceAfterSwapTokenInForExactTokenOut(
-                amount,
-                poolPairData
-            );
-    }
-
-    _derivativeSpotPriceAfterSwapTokenInForExactBPTOut(
-        poolPairData: LinearPoolPairData,
-        amount: OldBigNumber
-    ): OldBigNumber {
-        return _derivativeSpotPriceAfterSwapTokenInForExactBPTOut(
-            amount,
-            poolPairData
-        );
-    }
-
-    _derivativeSpotPriceAfterSwapBPTInForExactTokenOut(
-        poolPairData: LinearPoolPairData,
-        amount: OldBigNumber
-    ): OldBigNumber {
-        return _derivativeSpotPriceAfterSwapBPTInForExactTokenOut(
-            amount,
-            poolPairData
-        );
+        return bnum(0);
     }
 }

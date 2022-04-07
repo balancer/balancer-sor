@@ -117,6 +117,8 @@ describe('poolsMathLinear', function () {
                     const result = linear._calcWrappedOutPerMainIn(
                         mainIn,
                         mainBalance,
+                        wrappedBalance,
+                        bptSupply,
                         params
                     );
                     verify(result, s(10.1), 0);
@@ -127,6 +129,8 @@ describe('poolsMathLinear', function () {
                     const result = linear._calcMainInPerWrappedOut(
                         wrappedOut,
                         mainBalance,
+                        wrappedBalance,
+                        bptSupply,
                         params
                     );
                     verify(result, s(10), 0);
@@ -139,6 +143,8 @@ describe('poolsMathLinear', function () {
                     const result = linear._calcWrappedInPerMainOut(
                         mainOut,
                         mainBalance,
+                        wrappedBalance,
+                        bptSupply,
                         params
                     );
                     verify(result, s(10.1), 0);
@@ -149,6 +155,8 @@ describe('poolsMathLinear', function () {
                     const result = linear._calcMainOutPerWrappedIn(
                         wrappedIn,
                         mainBalance,
+                        wrappedBalance,
+                        bptSupply,
                         params
                     );
                     verify(result, s(10), 0);
@@ -273,6 +281,8 @@ describe('poolsMathLinear', function () {
                     const result = linear._calcWrappedOutPerMainIn(
                         mainIn,
                         mainBalance,
+                        wrappedBalance,
+                        bptSupply,
                         params
                     );
                     verify(result, s(20), 0);
@@ -283,6 +293,8 @@ describe('poolsMathLinear', function () {
                     const result = linear._calcMainInPerWrappedOut(
                         wrappedOut,
                         mainBalance,
+                        wrappedBalance,
+                        bptSupply,
                         params
                     );
                     verify(result, s(20), 0);
@@ -295,6 +307,8 @@ describe('poolsMathLinear', function () {
                     const result = linear._calcWrappedInPerMainOut(
                         mainOut,
                         mainBalance,
+                        wrappedBalance,
+                        bptSupply,
                         params
                     );
                     verify(result, s(20), 0);
@@ -305,6 +319,8 @@ describe('poolsMathLinear', function () {
                     const result = linear._calcMainOutPerWrappedIn(
                         wrappedIn,
                         mainBalance,
+                        wrappedBalance,
+                        bptSupply,
                         params
                     );
                     verify(result, s(20), 0);
@@ -429,6 +445,8 @@ describe('poolsMathLinear', function () {
                     const result = linear._calcWrappedOutPerMainIn(
                         mainIn,
                         mainBalance,
+                        wrappedBalance,
+                        bptSupply,
                         params
                     );
                     verify(result, s(49.5), 0);
@@ -439,6 +457,8 @@ describe('poolsMathLinear', function () {
                     const result = linear._calcMainInPerWrappedOut(
                         wrappedOut,
                         mainBalance,
+                        wrappedBalance,
+                        bptSupply,
                         params
                     );
                     verify(result, s(50), 0);
@@ -451,6 +471,8 @@ describe('poolsMathLinear', function () {
                     const result = linear._calcWrappedInPerMainOut(
                         mainOut,
                         mainBalance,
+                        wrappedBalance,
+                        bptSupply,
                         params
                     );
                     verify(result, s(54.6), 0);
@@ -461,6 +483,8 @@ describe('poolsMathLinear', function () {
                     const result = linear._calcMainOutPerWrappedIn(
                         wrappedIn,
                         mainBalance,
+                        wrappedBalance,
+                        bptSupply,
                         params
                     );
                     verify(result, s(55), 0);
@@ -528,10 +552,11 @@ describe('poolsMathLinear', function () {
             lowerTarget: s(1000),
             upperTarget: s(2000),
         };
-        const mainBalanceTest = [500, 1400, 8000];
+        const mainBalanceTest = [500, 950, 1050, 1400, 1950, 2050, 8000];
+        // main<>bpt
         it('BptOutPerMainIn', () => {
-            for (let mainBalance of mainBalanceTest) {
-                for (let amount of [70, 700]) {
+            for (const mainBalance of mainBalanceTest) {
+                for (const amount of [50, 70, 150, 300, 700, 1000, 2000]) {
                     checkDerivative(
                         linear._calcBptOutPerMainIn,
                         linear._spotPriceAfterSwapBptOutPerMainIn,
@@ -547,12 +572,52 @@ describe('poolsMathLinear', function () {
                 }
             }
         });
-        it('MainInPerBptOut', () => {
-            for (let mainBalance of mainBalanceTest) {
-                for (let amount of [70, 7000]) {
+        it('MainOutPerBptIn', () => {
+            for (const mainBalance of mainBalanceTest) {
+                for (const amount of [50, 70, 150, 300, 700, 1000, 2000]) {
                     checkDerivative(
-                        linear._calcMainInPerBptOut,
-                        linear._spotPriceAfterSwapMainInPerBptOut,
+                        linear._calcMainOutPerBptIn,
+                        linear._spotPriceAfterSwapMainOutPerBptIn,
+                        amount,
+                        mainBalance,
+                        100, // wrappedBalance
+                        3500, // bptSupply
+                        params,
+                        delta,
+                        error,
+                        true
+                    );
+                }
+            }
+        });
+        it('MainInPerBptOut', () => {
+            // missing test case: bptSupply = 0
+            for (const mainBalance of mainBalanceTest) {
+                for (const amount of [50, 70, 150, 300, 700, 1000, 2000]) {
+                    for (const bptSupply of [3500]) {
+                        checkDerivative(
+                            linear._calcMainInPerBptOut,
+                            linear._spotPriceAfterSwapMainInPerBptOut,
+                            amount,
+                            mainBalance,
+                            8000, // wrappedBalance
+                            bptSupply,
+                            params,
+                            delta,
+                            error,
+                            false
+                        );
+                    }
+                }
+            }
+        });
+        it('BptInPerMainOut', () => {
+            for (const mainBalance of mainBalanceTest) {
+                for (const amount of [50, 70, 150, 300, 700, 1000, 2000]) {
+                    if (amount > mainBalance) continue;
+                    checkDerivative(
+                        linear._calcBptInPerMainOut,
+                        linear._spotPriceAfterSwapBptInPerMainOut,
                         amount,
                         mainBalance,
                         8000, // wrappedBalance
@@ -565,12 +630,13 @@ describe('poolsMathLinear', function () {
                 }
             }
         });
-        it('MainOutPerBptIn', () => {
-            for (let mainBalance of mainBalanceTest) {
-                for (let amount of [70, 150]) {
+        // main<>wrapped
+        it('WrappedOutPerMainIn', () => {
+            for (const mainBalance of mainBalanceTest) {
+                for (const amount of [50, 70, 150, 300, 700, 1000, 2000]) {
                     checkDerivative(
-                        linear._calcMainOutPerBptIn,
-                        linear._spotPriceAfterSwapMainOutPerBptIn,
+                        linear._calcWrappedOutPerMainIn,
+                        linear._spotPriceAfterSwapWrappedOutPerMainIn,
                         amount,
                         mainBalance,
                         8000, // wrappedBalance
@@ -583,12 +649,124 @@ describe('poolsMathLinear', function () {
                 }
             }
         });
-        it('BptInPerMainOut', () => {
-            for (let mainBalance of mainBalanceTest) {
-                for (let amount of [70, 420]) {
+        it('MainOutPerWrappedIn', () => {
+            for (const mainBalance of mainBalanceTest) {
+                for (const amount of [50, 70, 150, 300, 700, 1000, 2000]) {
                     checkDerivative(
-                        linear._calcBptInPerMainOut,
-                        linear._spotPriceAfterSwapBptInPerMainOut,
+                        linear._calcMainOutPerWrappedIn,
+                        linear._spotPriceAfterSwapMainOutPerWrappedIn,
+                        amount,
+                        mainBalance,
+                        8000, // wrappedBalance
+                        3500, // bptSupply
+                        params,
+                        delta,
+                        error,
+                        true
+                    );
+                }
+            }
+        });
+        it('WrappedInPerMainOut', () => {
+            for (const mainBalance of mainBalanceTest) {
+                for (const amount of [50, 70, 150, 300, 700, 1000, 2000]) {
+                    if (amount > mainBalance) continue;
+                    checkDerivative(
+                        linear._calcWrappedInPerMainOut,
+                        linear._spotPriceAfterSwapWrappedInPerMainOut,
+                        amount,
+                        mainBalance,
+                        8000, // wrappedBalance
+                        3500, // bptSupply
+                        params,
+                        delta,
+                        error,
+                        false
+                    );
+                }
+            }
+        });
+        it('MainInPerWrappedOut', () => {
+            for (const mainBalance of mainBalanceTest) {
+                for (const amount of [50, 70, 150, 300, 700, 1000, 2000]) {
+                    checkDerivative(
+                        linear._calcMainInPerWrappedOut,
+                        linear._spotPriceAfterSwapMainInPerWrappedOut,
+                        amount,
+                        mainBalance,
+                        8000, // wrappedBalance
+                        3500, // bptSupply
+                        params,
+                        delta,
+                        error,
+                        false
+                    );
+                }
+            }
+        });
+        // bpt<>wrapped
+        it('WrappedOutPerBptIn', () => {
+            for (const mainBalance of mainBalanceTest) {
+                for (const amount of [50, 70, 150, 300, 700, 1000, 2000]) {
+                    checkDerivative(
+                        linear._calcWrappedOutPerBptIn,
+                        linear._spotPriceAfterSwapWrappedOutPerBptIn,
+                        amount,
+                        mainBalance,
+                        8000, // wrappedBalance
+                        3500, // bptSupply
+                        params,
+                        delta,
+                        error,
+                        true
+                    );
+                }
+            }
+        });
+        it('BptOutPerWrappedIn', () => {
+            for (const mainBalance of mainBalanceTest) {
+                for (const amount of [50, 70, 150, 300, 700, 1000, 2000]) {
+                    checkDerivative(
+                        linear._calcBptOutPerWrappedIn,
+                        linear._spotPriceAfterSwapBptOutPerWrappedIn,
+                        amount,
+                        mainBalance,
+                        8000, // wrappedBalance
+                        3500, // bptSupply
+                        params,
+                        delta,
+                        error,
+                        true
+                    );
+                }
+            }
+        });
+        it('WrappedInPerBptOut', () => {
+            for (const mainBalance of mainBalanceTest) {
+                for (const amount of [50, 70, 150, 300, 700, 1000, 2000]) {
+                    for (const bptSupply of [0, 3500]) {
+                        checkDerivative(
+                            linear._calcWrappedInPerBptOut,
+                            linear._spotPriceAfterSwapWrappedInPerBptOut,
+                            amount,
+                            mainBalance,
+                            8000, // wrappedBalance
+                            bptSupply,
+                            params,
+                            delta,
+                            error,
+                            false
+                        );
+                    }
+                }
+            }
+        });
+        it('BptInPerWrappedOut', () => {
+            for (const mainBalance of mainBalanceTest) {
+                for (const amount of [50, 70, 150, 300, 700, 1000, 2000]) {
+                    checkDerivative(
+                        linear._calcBptInPerWrappedOut,
+                        linear._spotPriceAfterSwapBptInPerWrappedOut,
                         amount,
                         mainBalance,
                         8000, // wrappedBalance
