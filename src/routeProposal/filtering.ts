@@ -183,6 +183,9 @@ export function getBoostedPaths(
     poolsAllDict: PoolDictionary,
     config: SorConfig
 ): NewPath[] {
+    const phantomStablePools = getPhantomStablePools(poolsAllDict);
+    if (Object.keys(phantomStablePools).length === 0) return [];
+
     tokenIn = tokenIn.toLowerCase();
     tokenOut = tokenOut.toLowerCase();
     // We assume consistency between config and poolsAllDict.
@@ -190,97 +193,131 @@ export function getBoostedPaths(
     if (!config.bbausd) return [];
 
     const weth = config.weth.toLowerCase();
-    const bbausd = config.bbausd.address.toLowerCase();
+    let allPaths: NewPath[] = [];
+    for (const id in phantomStablePools) {
+        // const phantomAddr = config.bbausd.address.toLowerCase();
+        const phantomAddr = poolsAllDict[id].address.toLowerCase();
+        console.log(phantomAddr);
 
-    // Letter 'i' in iTokenIn and iTokenOut stands for "internal",
-    // lacking of a better name for that so far.
-    const [lbpPathIn, iTokenIn] = getLBP(tokenIn, poolsAllDict, true, config);
-    // eslint-disable-next-line prettier/prettier
-    const [lbpPathOut, iTokenOut] = getLBP(
-        tokenOut,
-        poolsAllDict,
-        false,
-        config
-    );
+        // Letter 'i' in iTokenIn and iTokenOut stands for "internal",
+        // lacking of a better name for that so far.
+        const [lbpPathIn, iTokenIn] = getLBP(
+            tokenIn,
+            poolsAllDict,
+            true,
+            config
+        );
+        // eslint-disable-next-line prettier/prettier
+        const [lbpPathOut, iTokenOut] = getLBP(
+            tokenOut,
+            poolsAllDict,
+            false,
+            config
+        );
 
-    // getLinearPools might instead receive an array of tokens so that we search
-    // over poolsAllDict once instead of twice. Similarly for getPoolsWith
-    // and getLBP. This is a matter of code simplicity vs. efficiency.
-    const linearPoolsIn = getLinearPools(iTokenIn, poolsAllDict);
-    const linearPoolsOut = getLinearPools(iTokenOut, poolsAllDict);
+        // getLinearPools might instead receive an array of tokens so that we search
+        // over poolsAllDict once instead of twice. Similarly for getPoolsWith
+        // and getLBP. This is a matter of code simplicity vs. efficiency.
+        const linearPoolsIn = getLinearPools(iTokenIn, poolsAllDict);
+        const linearPoolsOut = getLinearPools(iTokenOut, poolsAllDict);
 
-    const wethPoolsDict = getPoolsWith(weth, poolsAllDict);
-    const bbausdPoolsDict = getPoolsWith(bbausd, poolsAllDict);
-    if (config.wethBBausd) {
-        // This avoids duplicate paths when weth is a token to trade
-        delete wethPoolsDict[config.wethBBausd.id];
-        delete bbausdPoolsDict[config.wethBBausd.id];
-    }
-    const semiPathsInToWeth: NewPath[] = getSemiPaths(
-        iTokenIn,
-        linearPoolsIn,
-        wethPoolsDict,
-        weth
-    );
-    const semiPathsInToBBausd: NewPath[] = getSemiPaths(
-        iTokenIn,
-        linearPoolsIn,
-        bbausdPoolsDict,
-        bbausd
-    );
-    const semiPathsOutToWeth: NewPath[] = getSemiPaths(
-        iTokenOut,
-        linearPoolsOut,
-        wethPoolsDict,
-        weth
-    );
-    const semiPathsOutToBBausd: NewPath[] = getSemiPaths(
-        iTokenOut,
-        linearPoolsOut,
-        bbausdPoolsDict,
-        bbausd
-    );
-    const semiPathsWethToOut = semiPathsOutToWeth.map((path) =>
-        reversePath(path)
-    );
-    const semiPathsBBausdToOut = semiPathsOutToBBausd.map((path) =>
-        reversePath(path)
-    );
+        const wethPoolsDict = getPoolsWith(weth, poolsAllDict);
+        const poolWithPhantomBptDict = getPoolsWith(phantomAddr, poolsAllDict);
+        if (config.wethBBausd) {
+            // This avoids duplicate paths when weth is a token to trade
+            delete wethPoolsDict[config.wethBBausd.id];
+            delete poolWithPhantomBptDict[config.wethBBausd.id];
+        }
+        const semiPathsInToWeth: NewPath[] = getSemiPaths(
+            iTokenIn,
+            linearPoolsIn,
+            wethPoolsDict,
+            weth
+        );
+        const semiPathsInToPhantom: NewPath[] = getSemiPaths(
+            iTokenIn,
+            linearPoolsIn,
+            poolWithPhantomBptDict,
+            phantomAddr
+        );
+        const semiPathsOutToWeth: NewPath[] = getSemiPaths(
+            iTokenOut,
+            linearPoolsOut,
+            wethPoolsDict,
+            weth
+        );
+        const semiPathsOutToPhantom: NewPath[] = getSemiPaths(
+            iTokenOut,
+            linearPoolsOut,
+            poolWithPhantomBptDict,
+            phantomAddr
+        );
+        const semiPathsWethToOut = semiPathsOutToWeth.map((path) =>
+            reversePath(path)
+        );
+        const semiPathsPhantomToOut = semiPathsOutToPhantom.map((path) =>
+            reversePath(path)
+        );
 
-    const paths1 = combineSemiPaths(semiPathsInToWeth, semiPathsWethToOut);
-    const paths2 = combineSemiPaths(semiPathsInToBBausd, semiPathsBBausdToOut);
-    let paths = paths1.concat(paths2);
-    if (config.wethBBausd) {
-        const WethBBausdPool = poolsAllDict[config.wethBBausd.id];
-        const WethBBausdPath = createPath(
-            [config.weth, config.bbausd.address],
-            [WethBBausdPool]
+        const paths1 = combineSemiPaths(semiPathsInToWeth, semiPathsWethToOut);
+        const paths2 = combineSemiPaths(
+            semiPathsInToPhantom,
+            semiPathsPhantomToOut
         );
-        const BBausdWethPath = createPath(
-            [config.bbausd.address, config.weth],
-            [WethBBausdPool]
-        );
-        const paths3 = combineSemiPaths(
-            semiPathsInToWeth,
-            semiPathsBBausdToOut,
-            WethBBausdPath
-        );
-        const paths4 = combineSemiPaths(
-            semiPathsInToBBausd,
-            semiPathsWethToOut,
-            BBausdWethPath
-        );
-        paths = paths.concat(paths3, paths4);
-    }
-    // If there is a nontrivial LBP path, compose every path with the lbp paths
-    // in and out. One of them might be the empty path.
-    if (lbpPathIn.pools.length > 0 || lbpPathOut.pools.length > 0) {
-        paths = paths.map((path) =>
-            composePaths([lbpPathIn, path, lbpPathOut])
-        );
+        let paths = paths1.concat(paths2);
+        // Finds paths for token>weth[wethBBaUSD]tokenOut
+        if (
+            config.wethBBausd &&
+            phantomAddr === config.bbausd.address.toLowerCase()
+        ) {
+            const WethBBausdPool = poolsAllDict[config.wethBBausd.id];
+            const WethBBausdPath = createPath(
+                [config.weth, phantomAddr],
+                [WethBBausdPool]
+            );
+            const BBausdWethPath = createPath(
+                [phantomAddr, config.weth],
+                [WethBBausdPool]
+            );
+            const paths3 = combineSemiPaths(
+                semiPathsInToWeth,
+                semiPathsPhantomToOut,
+                WethBBausdPath
+            );
+            const paths4 = combineSemiPaths(
+                semiPathsInToPhantom,
+                semiPathsWethToOut,
+                BBausdWethPath
+            );
+            paths = paths.concat(paths3, paths4);
+        }
+        // If there is a nontrivial LBP path, compose every path with the lbp paths
+        // in and out. One of them might be the empty path.
+        if (lbpPathIn.pools.length > 0 || lbpPathOut.pools.length > 0) {
+            paths = paths.map((path) =>
+                composePaths([lbpPathIn, path, lbpPathOut])
+            );
+        }
+        allPaths = allPaths.concat(removeShortPaths(paths));
     }
     // Every short path (short means length 1 and 2) is included in producePaths.
-    return removeShortPaths(paths);
+    return allPaths;
+}
+
+function getPhantomStablePools(poolsAllDict: PoolDictionary): PoolDictionary {
+    const phantomStablePools: PoolDictionary = {};
+    for (const id in poolsAllDict) {
+        const pool = poolsAllDict[id];
+        const tokensList = pool.tokensList.map((address) =>
+            address.toLowerCase()
+        );
+        if (
+            pool.poolType === PoolTypes.MetaStable &&
+            tokensList.includes(pool.address.toLowerCase())
+        )
+            phantomStablePools[id] = pool;
+    }
+    return phantomStablePools;
 }
 
 function getLinearPools(
