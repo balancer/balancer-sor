@@ -144,21 +144,23 @@ export function producePaths(
 
 /*
 Returns relevant paths using boosted pools, called "boosted paths".
-Boosted paths tipically have length greater than 2, so we need
+Boosted paths typically have length greater than 2, so we need
 a separate algorithm to create them.
-We consider two central tokens: WETH and bbaUSD (which is the BPT of aave boosted-stable
-pool). We want to consider paths in which token_in and token_out are connected
-(each of them) to either WETH or bbaUSD. Here for a token A to be "connected" to 
-a token B means that it satisfies one of the following:
+We consider two central tokens: WETH and any phantomStable BPT. 
+We want to consider paths in which token_in and token_out are connected
+(each of them) to either of the central tokens. 
+Here for a token A to be "connected" to a token B means that it satisfies one of the following:
 (a) A is B.
 (b) A and B belong to the same pool.
 (c) A has a linear pool whose BPT belongs to a pool jointly with B.
 
-Thus for token_in and token_out we generate every semipath connecting them
-to one of the central tokens. After that we combine semipaths to form
-paths from token_in to token_out. We expect to have a central pool
-WETH/bbaUSD. We use this pool to combine a semipath connecting to WETH with a 
-semipath connecting to bbaUSD.
+A semipath is a path from token > central token.
+Thus for token_in and token_out we generate every semipath. 
+After that we combine semipaths to form paths from token_in to token_out. 
+
+For the special case where phantomStable BPT === bbaUSD. We expect to have a 
+central pool WETH/bbaUSD. We use this pool to combine a semipath connecting 
+to WETH with a semipath connecting to bbaUSD.
 
 If either of token_in our token_out is a token being offered at an LBP, 
 we consider the boosted paths from the corresponding "raising token"
@@ -176,132 +178,180 @@ Two issues that had to be addressed:
   To deal with both of these we call the function composeSimplifyPath when
   combining semipaths at combineSemiPaths function.
 */
-
 export function getBoostedPaths(
     tokenIn: string,
     tokenOut: string,
     poolsAllDict: PoolDictionary,
     config: SorConfig
 ): NewPath[] {
+    // Get phantom stable pools from all pool
+    // These pools are the `connectors` for Linear Pools
     const phantomStablePools = getPhantomStablePools(poolsAllDict);
+
     if (Object.keys(phantomStablePools).length === 0) return [];
 
-    tokenIn = tokenIn.toLowerCase();
-    tokenOut = tokenOut.toLowerCase();
-    // We assume consistency between config and poolsAllDict.
-    // If they are not consistent, there will be errors.
-    if (!config.bbausd) return [];
+    /*
+    If either of token_in or token_out is a token being offered at an LBP, 
+    we consider the boosted paths (according to the above explanation) from 
+    the corresponding "raising token", and compose those with the LBP to obtain 
+    the paths for this case.
+    */
+    const [lbpPathIn, iTokenIn] = getLBP(
+        tokenIn.toLowerCase(),
+        poolsAllDict,
+        true,
+        config
+    );
+    // eslint-disable-next-line prettier/prettier
+    const [lbpPathOut, iTokenOut] = getLBP(
+        tokenOut.toLowerCase(),
+        poolsAllDict,
+        false,
+        config
+    );
 
-    const weth = config.weth.toLowerCase();
-    let allPaths: NewPath[] = [];
+    // getLinearPools might instead receive an array of tokens so that we search
+    // over poolsAllDict once instead of twice. Similarly for getPoolsWith
+    // and getLBP. This is a matter of code simplicity vs. efficiency.
+    // Find Linear pools with tokenIn/Out
+    const linearPoolsIn = getLinearPools(iTokenIn, poolsAllDict);
+    const linearPoolsOut = getLinearPools(iTokenOut, poolsAllDict);
+
+    // Constructs paths via weth
+    const pathsThroughWeth = constructPathsThroughConnecting(
+        iTokenIn,
+        iTokenOut,
+        linearPoolsIn,
+        linearPoolsOut,
+        config.weth.toLowerCase(),
+        poolsAllDict,
+        config
+    );
+    // tokenIn > wethPool > tokenOut
+    let allPaths = pathsThroughWeth.fullPaths;
+
+    // Construct paths for each PhantomStable pool
     for (const id in phantomStablePools) {
-        // const phantomAddr = config.bbausd.address.toLowerCase();
         const phantomAddr = poolsAllDict[id].address.toLowerCase();
-        console.log(phantomAddr);
 
-        // Letter 'i' in iTokenIn and iTokenOut stands for "internal",
-        // lacking of a better name for that so far.
-        const [lbpPathIn, iTokenIn] = getLBP(
-            tokenIn,
+        // Constructs paths via phantomStable
+        const pathsInfoThroughPhantom = constructPathsThroughConnecting(
+            iTokenIn,
+            iTokenOut,
+            linearPoolsIn,
+            linearPoolsOut,
+            phantomAddr,
             poolsAllDict,
-            true,
-            config
-        );
-        // eslint-disable-next-line prettier/prettier
-        const [lbpPathOut, iTokenOut] = getLBP(
-            tokenOut,
-            poolsAllDict,
-            false,
             config
         );
 
-        // getLinearPools might instead receive an array of tokens so that we search
-        // over poolsAllDict once instead of twice. Similarly for getPoolsWith
-        // and getLBP. This is a matter of code simplicity vs. efficiency.
-        const linearPoolsIn = getLinearPools(iTokenIn, poolsAllDict);
-        const linearPoolsOut = getLinearPools(iTokenOut, poolsAllDict);
-
-        const wethPoolsDict = getPoolsWith(weth, poolsAllDict);
-        const poolWithPhantomBptDict = getPoolsWith(phantomAddr, poolsAllDict);
-        if (config.wethBBausd) {
-            // This avoids duplicate paths when weth is a token to trade
-            delete wethPoolsDict[config.wethBBausd.id];
-            delete poolWithPhantomBptDict[config.wethBBausd.id];
-        }
-        const semiPathsInToWeth: NewPath[] = getSemiPaths(
-            iTokenIn,
-            linearPoolsIn,
-            wethPoolsDict,
-            weth
-        );
-        const semiPathsInToPhantom: NewPath[] = getSemiPaths(
-            iTokenIn,
-            linearPoolsIn,
-            poolWithPhantomBptDict,
-            phantomAddr
-        );
-        const semiPathsOutToWeth: NewPath[] = getSemiPaths(
-            iTokenOut,
-            linearPoolsOut,
-            wethPoolsDict,
-            weth
-        );
-        const semiPathsOutToPhantom: NewPath[] = getSemiPaths(
-            iTokenOut,
-            linearPoolsOut,
-            poolWithPhantomBptDict,
-            phantomAddr
-        );
-        const semiPathsWethToOut = semiPathsOutToWeth.map((path) =>
-            reversePath(path)
-        );
-        const semiPathsPhantomToOut = semiPathsOutToPhantom.map((path) =>
-            reversePath(path)
-        );
-
-        const paths1 = combineSemiPaths(semiPathsInToWeth, semiPathsWethToOut);
-        const paths2 = combineSemiPaths(
-            semiPathsInToPhantom,
-            semiPathsPhantomToOut
-        );
-        let paths = paths1.concat(paths2);
-        // Finds paths for token>weth[wethBBaUSD]tokenOut
+        // Creates paths through bbausd/weth pool
+        // Only valid when phantom pool === bbausd
+        const pathsThroughBbausdWeth: NewPath[] = [];
         if (
             config.wethBBausd &&
+            config.bbausd &&
             phantomAddr === config.bbausd.address.toLowerCase()
         ) {
             const WethBBausdPool = poolsAllDict[config.wethBBausd.id];
+            // weth[bbausd/weth]bbausd
             const WethBBausdPath = createPath(
                 [config.weth, phantomAddr],
                 [WethBBausdPool]
             );
+            // bbausd[bbausd/weth]weth
             const BBausdWethPath = createPath(
                 [phantomAddr, config.weth],
                 [WethBBausdPool]
             );
+            // tokenIn > WETH > weth[bbausd/weth]bbausd >  phantomStable(bbausd) > tokenOut
             const paths3 = combineSemiPaths(
-                semiPathsInToWeth,
-                semiPathsPhantomToOut,
+                pathsThroughWeth.semiPathsIn,
+                pathsInfoThroughPhantom.semiPathsOut,
                 WethBBausdPath
             );
+            // tokenIn > phantomStable > bbausd[bbausd/weth]weth >  weth > tokenOut
             const paths4 = combineSemiPaths(
-                semiPathsInToPhantom,
-                semiPathsWethToOut,
+                pathsInfoThroughPhantom.semiPathsIn,
+                pathsThroughWeth.semiPathsOut,
                 BBausdWethPath
             );
-            paths = paths.concat(paths3, paths4);
+            pathsThroughBbausdWeth.push(...paths3, ...paths4);
         }
-        // If there is a nontrivial LBP path, compose every path with the lbp paths
-        // in and out. One of them might be the empty path.
-        if (lbpPathIn.pools.length > 0 || lbpPathOut.pools.length > 0) {
-            paths = paths.map((path) =>
-                composePaths([lbpPathIn, path, lbpPathOut])
-            );
-        }
-        allPaths = allPaths.concat(removeShortPaths(paths));
+        allPaths.push(
+            ...pathsInfoThroughPhantom.fullPaths,
+            ...pathsThroughBbausdWeth
+        );
+    }
+    // If there is a nontrivial LBP path, compose every path with the lbp paths
+    // in and out. One of them might be the empty path.
+    if (lbpPathIn.pools.length > 0 || lbpPathOut.pools.length > 0) {
+        allPaths = allPaths.map((path) =>
+            composePaths([lbpPathIn, path, lbpPathOut])
+        );
     }
     // Every short path (short means length 1 and 2) is included in producePaths.
-    return allPaths;
+    return removeShortPaths(allPaths);
+}
+
+/**
+ * Creates paths (length>2) from tokenIn to tokenOut via a connecting token.
+ * Here for a token to be "connected" to the connecting tokens it satisfies one of the following:
+ * (a) token is connectingToken.
+ * (b) token and connectingToken belong to the same pool. i.e. BAL, WETH - both belong to WETH/BAL weighted pool.
+ * (c) token has a pool whose BPT belongs to a pool jointly with connectingToken. i.e. DAI, bbaUSD - bDAI is in phantomStable with bbaUSD.
+ * A semipath is a path from token > connecting token.
+ * Thus for tokenIn and tokenOut we generate every semipath.
+ * After that we combine semipaths to form paths from token_in to token_out.
+ * @param tokenIn Token in address.
+ * @param tokenOut Token out address.
+ * @param poolsWithTokenIn Pools that contain tokenIn.
+ * @param poolsWithTokenOut Pools that contain tokenOut.
+ * @param connectingTokenAddr Address of connecting token.
+ * @param pools Dictionary of pools to consider.
+ * @param config Sor config.
+ * @returns Paths from tokenIn to tokenOut via pools with connecting token.
+ */
+function constructPathsThroughConnecting(
+    tokenIn: string,
+    tokenOut: string,
+    poolsWithTokenIn: PoolDictionary,
+    poolsWithTokenOut: PoolDictionary,
+    connectingTokenAddr: string, // connecting
+    pools: PoolDictionary,
+    config: SorConfig
+): { fullPaths: NewPath[]; semiPathsIn: NewPath[]; semiPathsOut: NewPath[] } {
+    // Find all pools with connecting token
+    const wethPoolsDict = getPoolsWith(connectingTokenAddr, pools);
+
+    if (config.wethBBausd) {
+        // This avoids duplicate paths when weth is a token to trade
+        delete wethPoolsDict[config.wethBBausd.id];
+    }
+    // Paths for tokenIn > connecting
+    const semiPathsInToWeth: NewPath[] = getSemiPaths(
+        tokenIn,
+        poolsWithTokenIn,
+        wethPoolsDict,
+        connectingTokenAddr
+    );
+    // Paths for tokenOut > connecting
+    const semiPathsOutToWeth: NewPath[] = getSemiPaths(
+        tokenOut,
+        poolsWithTokenOut,
+        wethPoolsDict,
+        connectingTokenAddr
+    );
+    // connecting > tokenOut
+    const semiPathsWethToOut = semiPathsOutToWeth.map((path) =>
+        reversePath(path)
+    );
+    // tokenIn > connecting > tokenOut
+    return {
+        fullPaths: combineSemiPaths(semiPathsInToWeth, semiPathsWethToOut),
+        semiPathsIn: semiPathsInToWeth,
+        semiPathsOut: semiPathsWethToOut,
+    };
 }
 
 function getPhantomStablePools(poolsAllDict: PoolDictionary): PoolDictionary {
