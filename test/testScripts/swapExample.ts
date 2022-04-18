@@ -303,6 +303,16 @@ export const ADDRESSES = {
             decimals: 18,
             symbol: 'bstUSD+',
         },
+        DHT: {
+            address: '0x8C92e38eCA8210f4fcBf17F0951b198Dd7668292',
+            decimals: 18,
+            symbol: 'DHT',
+        },
+        dUSD: {
+            address: '0xbAe28251B2a4E621aA7e20538c06DEe010Bc06DE',
+            decimals: 18,
+            symbol: 'dUSD',
+        },
     },
     [Network.ARBITRUM]: {
         WETH: {
@@ -692,8 +702,8 @@ export async function simpleSwap() {
     const networkId = Network.POLYGON;
     // Pools source can be Subgraph URL or pools data set passed directly
     // Update pools list with most recent onchain balances
-    const tokenIn = ADDRESSES[networkId].bstUSD_PLUS;
-    const tokenOut = ADDRESSES[networkId].BAL;
+    const tokenIn = ADDRESSES[networkId].DHT;
+    const tokenOut = ADDRESSES[networkId].dUSD;
     const swapType = SwapTypes.SwapExactIn;
     const swapAmount = parseFixed('0.1', 18);
     const executeTrade = true;
