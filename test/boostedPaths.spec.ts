@@ -36,10 +36,12 @@ import {
     AAVE_USDT,
     sorConfigTestBoosted,
     bbaUSD,
+    FEI,
 } from './lib/constants';
 
 // Multiple boosted pools
 import boostedPools from './testData/boostedPools/multipleBoosted.json';
+import genericBoostedPools from './testData/boostedPools/genericBoosted.json';
 import { BigNumber, parseFixed } from '@ethersproject/bignumber';
 import { getOutputAmountSwapForPath } from '../src/router/helpersClass';
 import { JsonRpcProvider } from '@ethersproject/providers';
@@ -407,6 +409,38 @@ describe('multiple boosted pools, path creation test', () => {
                 assert.equal(pathsCases[0][i].id, pathsCases[1][i].id);
                 assert.equal(pathsCases[0][i].id, pathsCases[2][i].id);
             }
+        });
+    });
+});
+
+describe('generic boosted pools, path creation test', () => {
+    context('debug', () => {
+        it('FEI-DAI', () => {
+            const tokenIn = FEI.address;
+            const tokenOut = DAI.address;
+            const [paths, , boostedPaths] = getPaths(
+                tokenIn,
+                tokenOut,
+                SwapTypes.SwapExactIn,
+                genericBoostedPools.pools,
+                maxPools,
+                sorConfigTestBoosted
+            );
+            const bbfFEIAddress = '0x0000000000000000000000000000000000111111';
+            const bbfDAIAddress = '0x0000000000000000000000000000000000000000';
+            const tokensChains = [
+                [FEI.address, bbfFEIAddress, bbfDAIAddress, DAI.address],
+            ];
+            const poolsChains = [
+                ['FuseLinearFei', 'bbfUSD-Pool', 'FuseLinearDai'],
+            ];
+            for (let i = 0; i < 1; i++) {
+                assert.isTrue(
+                    simpleCheckPath(paths[i], poolsChains[i], tokensChains[i])
+                );
+            }
+            assert.equal(boostedPaths.length, 1);
+            assert.equal(paths.length, 1);
         });
     });
 });
