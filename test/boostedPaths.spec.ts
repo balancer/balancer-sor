@@ -414,7 +414,7 @@ describe('multiple boosted pools, path creation test', () => {
 });
 
 describe('generic boosted pools, path creation test', () => {
-    context('debug', () => {
+    context('using only one boosted phantom stable', () => {
         it('FEI-DAI', () => {
             const tokenIn = FEI.address;
             const tokenOut = DAI.address;

@@ -322,35 +322,38 @@ function constructPathsThroughConnecting(
     config: SorConfig
 ): { fullPaths: NewPath[]; semiPathsIn: NewPath[]; semiPathsOut: NewPath[] } {
     // Find all pools with connecting token
-    const wethPoolsDict = getPoolsWith(connectingTokenAddr, pools);
+    const connectingTokenPoolsDict = getPoolsWith(connectingTokenAddr, pools);
 
     if (config.wethBBausd) {
         // This avoids duplicate paths when weth is a token to trade
-        delete wethPoolsDict[config.wethBBausd.id];
+        delete connectingTokenPoolsDict[config.wethBBausd.id];
     }
     // Paths for tokenIn > connecting
-    const semiPathsInToWeth: NewPath[] = getSemiPaths(
+    const semiPathsInToConnectingToken: NewPath[] = getSemiPaths(
         tokenIn,
         poolsWithTokenIn,
-        wethPoolsDict,
+        connectingTokenPoolsDict,
         connectingTokenAddr
     );
     // Paths for tokenOut > connecting
-    const semiPathsOutToWeth: NewPath[] = getSemiPaths(
+    const semiPathsOutToConnectingToken: NewPath[] = getSemiPaths(
         tokenOut,
         poolsWithTokenOut,
-        wethPoolsDict,
+        connectingTokenPoolsDict,
         connectingTokenAddr
     );
     // connecting > tokenOut
-    const semiPathsWethToOut = semiPathsOutToWeth.map((path) =>
-        reversePath(path)
+    const semiPathsConnectingTokenToOut = semiPathsOutToConnectingToken.map(
+        (path) => reversePath(path)
     );
     // tokenIn > connecting > tokenOut
     return {
-        fullPaths: combineSemiPaths(semiPathsInToWeth, semiPathsWethToOut),
-        semiPathsIn: semiPathsInToWeth,
-        semiPathsOut: semiPathsWethToOut,
+        fullPaths: combineSemiPaths(
+            semiPathsInToConnectingToken,
+            semiPathsConnectingTokenToOut
+        ),
+        semiPathsIn: semiPathsInToConnectingToken,
+        semiPathsOut: semiPathsConnectingTokenToOut,
     };
 }
 
@@ -403,14 +406,14 @@ function getPoolsWith(token: string, poolsDict: PoolDictionary) {
 
 function getSemiPaths(
     token: string,
-    linearPoolstoken: PoolDictionary,
+    linearPoolsDict: PoolDictionary,
     poolsDict: PoolDictionary,
     toToken: string
 ): NewPath[] {
     if (token == toToken) return [getEmptyPath()];
     let semiPaths = searchConnectionsTo(token, poolsDict, toToken);
-    for (const id in linearPoolstoken) {
-        const linearPool = linearPoolstoken[id];
+    for (const id in linearPoolsDict) {
+        const linearPool = linearPoolsDict[id];
         const simpleLinearPath = createPath(
             [token, linearPool.address],
             [linearPool]
