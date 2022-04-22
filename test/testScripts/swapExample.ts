@@ -313,6 +313,16 @@ export const ADDRESSES = {
             decimals: 6,
             symbol: 'USDT',
         },
+        DHT: {
+            address: '0x8C92e38eCA8210f4fcBf17F0951b198Dd7668292',
+            decimals: 18,
+            symbol: 'DHT',
+        },
+        dUSD: {
+            address: '0xbAe28251B2a4E621aA7e20538c06DEe010Bc06DE',
+            decimals: 18,
+            symbol: 'dUSD',
+        },
     },
     [Network.ARBITRUM]: {
         WETH: {
