@@ -303,6 +303,16 @@ export const ADDRESSES = {
             decimals: 18,
             symbol: 'bstUSD+',
         },
+        USD_PLUS: {
+            address: '0x5d9d8509c522a47d9285b9e4e9ec686e6a580850',
+            decimals: 6,
+            symbol: 'USD_PLUS',
+        },
+        USDT: {
+            address: '0xc2132D05D31c914a87C6611C10748AEb04B58e8F',
+            decimals: 6,
+            symbol: 'USDT',
+        },
         DHT: {
             address: '0x8C92e38eCA8210f4fcBf17F0951b198Dd7668292',
             decimals: 18,
@@ -702,10 +712,10 @@ export async function simpleSwap() {
     const networkId = Network.POLYGON;
     // Pools source can be Subgraph URL or pools data set passed directly
     // Update pools list with most recent onchain balances
-    const tokenIn = ADDRESSES[networkId].DHT;
-    const tokenOut = ADDRESSES[networkId].dUSD;
+    const tokenIn = ADDRESSES[networkId].DAI;
+    const tokenOut = ADDRESSES[networkId].USDT;
     const swapType = SwapTypes.SwapExactIn;
-    const swapAmount = parseFixed('0.1', 18);
+    const swapAmount = parseFixed('1', 18);
     const executeTrade = true;
 
     const provider = new JsonRpcProvider(PROVIDER_URLS[networkId]);
