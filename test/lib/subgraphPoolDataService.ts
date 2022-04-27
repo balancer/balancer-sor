@@ -5,8 +5,40 @@ import { Provider } from '@ethersproject/providers';
 
 const queryWithLinear = `
       {
-        pools: pools(
+        pool0: pools(
           first: 1000,
+          where: { swapEnabled: true },
+          orderBy: totalLiquidity,
+          orderDirection: desc
+        ) {
+          id
+          address
+          poolType
+          swapFee
+          totalShares
+          tokens {
+            address
+            balance
+            decimals
+            weight
+            priceRate
+          }
+          tokensList
+          totalWeight
+          amp
+          expiryTime
+          unitSeconds
+          principalToken
+          baseToken
+          swapEnabled
+          wrappedIndex
+          mainIndex
+          lowerTarget
+          upperTarget
+        }
+        pool1000: pools(
+          first: 1000,
+          skip: 1000,
           where: { swapEnabled: true },
           orderBy: totalLiquidity,
           orderDirection: desc
@@ -41,8 +73,36 @@ const queryWithLinear = `
 
 const queryWithOutLinear = `
       {
-        pools: pools(
+        pool0: pools(
           first: 1000,
+          where: { swapEnabled: true },
+          orderBy: totalLiquidity,
+          orderDirection: desc
+        ) {
+          id
+          address
+          poolType
+          swapFee
+          totalShares
+          tokens {
+            address
+            balance
+            decimals
+            weight
+            priceRate
+          }
+          tokensList
+          totalWeight
+          amp
+          expiryTime
+          unitSeconds
+          principalToken
+          baseToken
+          swapEnabled
+        }
+        pool1000: pools(
+          first: 1000,
+          skip: 1000,
           where: { swapEnabled: true },
           orderBy: totalLiquidity,
           orderDirection: desc
@@ -105,9 +165,11 @@ export class SubgraphPoolDataService implements PoolDataService {
 
         const { data } = await response.json();
 
+        const pools = [...data.pool0, ...data.pool1000];
+
         if (this.config.onchain) {
             return getOnChainBalances(
-                data.pools ?? [],
+                pools ?? [],
                 this.config.multiAddress,
                 this.config.vaultAddress,
                 this.config.provider

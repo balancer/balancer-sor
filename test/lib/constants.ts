@@ -193,3 +193,8 @@ export const AAVE_USDT: TestToken = {
     address: '0x13512979ade267ab5100878e2e0f485b568328a4',
     decimals: 6,
 };
+
+export const FEI: TestToken = {
+    address: '0x0000000000000000000000000000000000111113',
+    decimals: 18,
+};
