@@ -666,6 +666,49 @@
             ],
             "totalWeight": "100",
             "totalShares": "10000"
+        },
+        {
+            "address": "0x0000000000000000000000000000000000000014",
+            "amp": "400",
+            "id": "bbaUSD-bbfUSD",
+            "mainIndex": 0,
+            "poolType": "StablePhantom",
+            "swapEnabled": true,
+            "swapFee": "0.01",
+            "tokens": [
+                {
+                    "address": "0x0000000000000000000000000000000000000014",
+                    "balance": "5192296858520354.535602194932501075",
+                    "decimals": 18,
+                    "priceRate": "1",
+                    "symbol": "bbaUSD-bbfUSD",
+                    "weight": null
+                },
+                {
+                    "address": "0x8fd162f338b770f7e879030830cde9173367f301",
+                    "balance": "4817.7627626993040385",
+                    "decimals": 18,
+                    "priceRate": "1.2",
+                    "symbol": "bbaUSD",
+                    "weight": null
+                },
+                {
+                    "address": "0x0000000000000000000000000000000000311112",
+                    "balance": "4803.335614256025401",
+                    "decimals": 18,
+                    "priceRate": "1",
+                    "symbol": "bbfUSD",
+                    "weight": null
+                }
+            ],
+            "tokensList": [
+                "0x0000000000000000000000000000000000000014",
+                "0x8fd162f338b770f7e879030830cde9173367f301",
+                "0x0000000000000000000000000000000000311112"
+            ],
+            "totalShares": "14473.092928301396719020",
+            "totalWeight": "0",
+            "wrappedIndex": 0
         }
     ]
 }

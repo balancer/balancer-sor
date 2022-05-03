@@ -50,7 +50,7 @@ import { RouteProposer } from '../src/routeProposal';
 const maxPools = 10;
 describe('multiple boosted pools, path creation test', () => {
     context('Case with no linear pools', () => {
-        it('TUSD-BAL', () => {
+        it('debug TUSD-BAL', () => {
             const tokenIn = TUSD.address;
             const tokenOut = BAL.address;
             const [paths, , boostedPaths] = getPaths(
@@ -415,7 +415,7 @@ describe('multiple boosted pools, path creation test', () => {
 
 describe('generic boosted pools, path creation test', () => {
     context('using only one boosted phantom stable', () => {
-        it('FEI-DAI', () => {
+        it('debug2 FEI-DAI', () => {
             const tokenIn = FEI.address;
             const tokenOut = DAI.address;
             const [paths, , boostedPaths] = getPaths(

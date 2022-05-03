@@ -142,6 +142,196 @@ export function producePaths(
     return paths;
 }
 
+// We build a directed graph for the boosted pools.
+// Nodes are tokens and edges are triads: [pool.id, tokenIn, tokenOut].
+// The current criterion for inclunding a pool into this graph is the following:
+// (a) We include every linear pool.
+// (b) Among phantom pools, we include those that contain the pool token of a linear pool.
+// (c) Among phantom pools, we include those that contain the pool token of
+// a pool from the previous step.
+// (d) We include the pool weth/wsteth
+//
+// To build the paths using boosted pools we use the following algorithm.
+// Given a tokenIn and a tokenOut belonging to the graph, we want to find
+// all the connecting paths inside the graph, with the properties:
+// (a) They do not visit the same token twice
+// (b) They do not use the same pool twice in a row (since this
+//  would never be optimal).
+// These paths can be organized as a directed tree having tokenIn as a root.
+// We build this tree by adding at each step all the possible continuations for
+// each branch. When a branch reaches tokenOut, we write down the corresponding path.
+
+export function getBoostedGraph(
+    poolsAllDict: PoolDictionary
+): [string[], [string, string, string][], edgeDict] {
+    // TO DO: possibly make this function dependent on tokenIn and tokenOut
+    // and add to the graph those pools connecting them with WETH
+    // and LBPs when necessary.
+    const graphPoolsSet: Set<PoolBase> = new Set();
+    const linearPools: PoolBase[] = [];
+    const phantomPools: PoolBase[] = [];
+    for (const id in poolsAllDict) {
+        const pool = poolsAllDict[id];
+        if (pool.poolType == PoolTypes.Linear) {
+            linearPools.push(pool);
+            graphPoolsSet.add(pool);
+        } else {
+            // Here we asssume that phantom pools are exactly those that
+            // are not linear and have their pool token in their tokensList.
+            const tokensList = pool.tokensList.map((address) =>
+                address.toLowerCase()
+            );
+            if (tokensList.includes(pool.address.toLowerCase())) {
+                phantomPools.push(pool);
+            }
+        }
+    }
+    const linearPoolsAddresses = linearPools.map((pool) => pool.address);
+    const remainingPhantomPools: PoolBase[] = [];
+    for (const pool of phantomPools) {
+        for (const linearPoolAddress of linearPoolsAddresses) {
+            if (pool.tokensList.includes(linearPoolAddress)) {
+                graphPoolsSet.add(pool);
+            } else {
+                remainingPhantomPools.push(pool);
+            }
+        }
+    }
+    const secondStepPoolsSet = graphPoolsSet;
+    const secondStepPoolsAddresses = [...secondStepPoolsSet].map(
+        (pool) => pool.address
+    );
+    for (const pool of remainingPhantomPools) {
+        for (const secondStepPoolAddress of secondStepPoolsAddresses) {
+            if (pool.tokensList.includes(secondStepPoolAddress)) {
+                graphPoolsSet.add(pool);
+            }
+        }
+    }
+    const graphPools: PoolBase[] = [...graphPoolsSet];
+    // TO DO: add pool weth/wsteth
+    const [nodes, edges, edgeDict] = getNodesAndEdges(graphPools);
+    return [nodes, edges, edgeDict];
+}
+
+interface edgeDict {
+    [node: string]: [string, string, string][];
+}
+
+function getNodesAndEdges(
+    pools: PoolBase[]
+): [string[], [string, string, string][], edgeDict] {
+    const nodes: Set<string> = new Set();
+    const edges: [string, string, string][] = [];
+    const edgesFromNode: edgeDict = {};
+    for (const pool of pools) {
+        const n = pool.tokensList.length;
+        for (let i = 0; i < n; i++) {
+            nodes.add(pool.tokensList[i]);
+            if (!edgesFromNode[pool.tokensList[i]])
+                edgesFromNode[pool.tokensList[i]] = [];
+            for (let j = 0; j < n; j++) {
+                if (i == j) continue;
+                const edge: [string, string, string] = [
+                    pool.id,
+                    pool.tokensList[i],
+                    pool.tokensList[j],
+                ];
+                edges.push(edge);
+                edgesFromNode[pool.tokensList[i]].push(edge);
+            }
+        }
+    }
+    return [[...nodes], edges, edgesFromNode];
+}
+
+interface treeEdge {
+    edge: [string, string, string];
+    parentIndices: [number, number];
+    visitedNodes: string[];
+}
+
+export function getFlexBoostedPathsInfo(
+    tokenIn: string,
+    tokenOut: string,
+    nodes: string[],
+    edges: [string, string, string][],
+    edgesFromNode: edgeDict
+): [string[], string[]][] {
+    const pathsInfo: [string[], string[]][] = [];
+    const rootTreeEdge: treeEdge = {
+        edge: ['', '', tokenIn],
+        parentIndices: [-1, -1],
+        visitedNodes: [],
+    };
+    const treeEdges: treeEdge[][] = [[rootTreeEdge]];
+    let iterate = true;
+    while (iterate) {
+        const n = treeEdges.length; // number of tree edge layers so far
+        const newTreeEdges: treeEdge[] = [];
+        // adds every possible treeEdge for each treeEdge of the previous layer
+        for (let i = 0; i < treeEdges[n - 1].length; i++) {
+            const treeEdge = treeEdges[n - 1][i];
+            const token = treeEdge.edge[2];
+            const edgesFromToken = edgesFromNode[token];
+            for (const edge of edgesFromToken) {
+                // skip if the node was already visited
+                if (treeEdge.visitedNodes.includes(edge[2])) {
+                    continue;
+                }
+                // skip if the pool is the same
+                if (treeEdge.edge[0] == edge[0]) {
+                    continue;
+                }
+                if (edge[2] == tokenOut) {
+                    pathsInfo.push(getPathInfo(edge, treeEdge, treeEdges));
+                }
+                const newTreeEdge: treeEdge = {
+                    edge: edge,
+                    parentIndices: [n - 1, i],
+                    visitedNodes: treeEdge.visitedNodes.concat(edge[1]),
+                };
+                newTreeEdges.push(newTreeEdge);
+            }
+        }
+        if (newTreeEdges.length == 0) {
+            iterate = false;
+        } else treeEdges.push(newTreeEdges);
+    }
+    console.log('pathsInfo: ', pathsInfo);
+    return pathsInfo;
+}
+
+function getPathInfo(
+    edge: [string, string, string],
+    treeEdge: treeEdge,
+    treeEdges: treeEdge[][]
+): [string[], string[]] {
+    const pathEdges: [string, string, string][] = [edge];
+    pathEdges.unshift(treeEdge.edge);
+    let indices = treeEdge.parentIndices;
+    while (indices[0] !== -1) {
+        pathEdges.unshift(treeEdges[indices[0]][indices[1]].edge);
+        indices = treeEdges[indices[0]][indices[1]].parentIndices;
+    }
+    const pools = pathEdges.map((pathEdge) => pathEdge[0]);
+    pools.splice(0, 1);
+    const tokens = pathEdges.map((pathEdge) => pathEdge[2]);
+    return [tokens, pools];
+}
+
+export function pathsInfoToPaths(
+    poolsAllDict: PoolDictionary,
+    flexBoostedPathsInfo: [string[], string[]][]
+): NewPath[] {
+    const paths: NewPath[] = [];
+    for (const boostedPathsInfo of flexBoostedPathsInfo) {
+        const pools = boostedPathsInfo[1].map((id) => poolsAllDict[id]);
+        paths.push(createPath(boostedPathsInfo[0], pools));
+    }
+    return paths;
+}
+
 /*
 Returns relevant paths using boosted pools, called "boosted paths".
 Boosted paths typically have length greater than 2, so we need

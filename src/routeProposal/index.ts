@@ -4,6 +4,9 @@ import {
     getBoostedPaths,
     filterPoolsOfInterest,
     producePaths,
+    getBoostedGraph,
+    getFlexBoostedPathsInfo,
+    pathsInfoToPaths,
 } from './filtering';
 import { calculatePathLimits } from './pathLimits';
 import {
@@ -68,6 +71,21 @@ export class RouteProposer {
             poolsAllDict,
             this.config
         );
+
+        const [nodes, edges, edgesFromNode] = getBoostedGraph(poolsAllDict);
+        const flexBoostedPathsInfo = getFlexBoostedPathsInfo(
+            tokenIn,
+            tokenOut,
+            nodes,
+            edges,
+            edgesFromNode
+        );
+
+        const flexBoostedPaths: NewPath[] = pathsInfoToPaths(
+            poolsAllDict,
+            flexBoostedPathsInfo
+        );
+        console.log(flexBoostedPaths);
 
         const pathsUsingStaBal = getPathsUsingStaBalPool(
             tokenIn,
