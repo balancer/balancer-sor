@@ -65,7 +65,8 @@ export const optimizeSwapAmounts = (
                     ONE.minus(newSwapAmount.div(humanTotalSwapAmount))
                 );
             });
-            swapAmounts.push(newSwapAmount);
+
+            if (!newSwapAmount.isZero()) swapAmounts.push(newSwapAmount);
         }
 
         const { paths: selectedPaths, swapAmounts: bestAmounts } =
