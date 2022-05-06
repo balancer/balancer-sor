@@ -171,12 +171,6 @@ export function getBoostedGraph(
     poolsAllDict: PoolDictionary,
     config: SorConfig
 ): edgeDict {
-    // TO DO: hacer siguientes pasadas por los pooles.
-    // Todos, phantom, todos.
-    // En phantom van a entrar los bbausd, bbfusd, etc.
-    // En la última entran cosas como weighted bbfusd-WETH, y también
-    // si hubo LBP en la primera, incluyo el raising token.
-
     const wethAddress: string = config.weth; // .toLowerCase()
     const graphPoolsSet: Set<PoolBase> = new Set();
     const linearPools: PoolBase[] = [];
@@ -238,16 +232,15 @@ export function getBoostedGraph(
         }
     }
     const linearPoolsAddresses = linearPools.map((pool) => pool.address);
-    // const secondStepPoolsSet: Set<PoolBase> = new Set();
+    const secondStepPoolsSet: Set<PoolBase> = new Set();
     for (const pool of phantomPools) {
         for (const linearPoolAddress of linearPoolsAddresses) {
             if (pool.tokensList.includes(linearPoolAddress)) {
                 graphPoolsSet.add(pool);
-                // secondStepPoolsSet.add(pool);
+                secondStepPoolsSet.add(pool);
             }
         }
     }
-    const secondStepPoolsSet = graphPoolsSet;
     const secondStepPoolsAddresses = [...secondStepPoolsSet].map(
         (pool) => pool.address
     ); // does this have duplicates?
@@ -282,14 +275,10 @@ interface edgeDict {
 }
 
 function getNodesAndEdges(pools: PoolBase[]): edgeDict {
-    // [string[], [string, string, string][], edgeDict] {
-    // const nodes: Set<string> = new Set();
-    // const edges: [string, string, string][] = [];
     const edgesFromNode: edgeDict = {};
     for (const pool of pools) {
         const n = pool.tokensList.length;
         for (let i = 0; i < n; i++) {
-            // nodes.add(pool.tokensList[i]);
             if (!edgesFromNode[pool.tokensList[i]])
                 edgesFromNode[pool.tokensList[i]] = [];
             for (let j = 0; j < n; j++) {
@@ -299,12 +288,10 @@ function getNodesAndEdges(pools: PoolBase[]): edgeDict {
                     pool.tokensList[i],
                     pool.tokensList[j],
                 ];
-                // edges.push(edge);
                 edgesFromNode[pool.tokensList[i]].push(edge);
             }
         }
     }
-    // return [[...nodes], edges, edgesFromNode];
     return edgesFromNode;
 }
 

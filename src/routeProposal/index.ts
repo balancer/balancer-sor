@@ -4,7 +4,6 @@ import {
     getBoostedPaths,
     filterPoolsOfInterest,
     producePaths,
-    getBoostedGraph,
     getFlexBoostedPaths,
 } from './filtering';
 import { calculatePathLimits } from './pathLimits';
