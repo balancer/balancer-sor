@@ -17,6 +17,7 @@ import {
 import {
     parseToPoolsDict,
     getBoostedPaths,
+    getFlexBoostedPaths,
 } from '../src/routeProposal/filtering';
 import { calculatePathLimits } from '../src/routeProposal/pathLimits';
 import { LinearPool, PairTypes } from '../src/pools/linearPool/linearPool';
@@ -721,7 +722,7 @@ describe('linear pool tests', () => {
                     sorConfigFullKovan
                 );
                 // 6605808981785744500
-                expect(returnAmount).to.eq('6606146264948964392');
+                expect(returnAmount).to.eq('20111716378263652638');
             });
 
             it('BAL>USDT, SwapExactIn', async () => {
@@ -759,10 +760,10 @@ describe('linear pool tests', () => {
                     fullKovanPools.pools,
                     sorConfigFullKovan
                 );
-                expect(returnAmount).to.eq('702055');
+                expect(returnAmount).to.eq('221067');
             });
 
-            it('BAL>USDT, SwapExactOut', async () => {
+            it('debug BAL>USDT, SwapExactOut', async () => {
                 const returnAmount = await testFullSwap(
                     KOVAN_BAL.address,
                     AAVE_USDT.address,

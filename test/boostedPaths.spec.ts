@@ -13,6 +13,7 @@ import {
 import {
     parseToPoolsDict,
     getBoostedPaths,
+    getFlexBoostedPaths,
 } from '../src/routeProposal/filtering';
 import { bnum } from '../src/utils/bignumber';
 import { calculatePathLimits } from '../src/routeProposal/pathLimits';
@@ -50,7 +51,7 @@ import { RouteProposer } from '../src/routeProposal';
 const maxPools = 10;
 describe('multiple boosted pools, path creation test', () => {
     context('Case with no linear pools', () => {
-        it('debug TUSD-BAL', () => {
+        it('TUSD-BAL', () => {
             const tokenIn = TUSD.address;
             const tokenOut = BAL.address;
             const [paths, , boostedPaths] = getPaths(
@@ -187,7 +188,7 @@ describe('multiple boosted pools, path creation test', () => {
     });
     context('bbausd and Weth to Dai', () => {
         it('four combinations', () => {
-            const binaryOption = [true, false];
+            const binaryOption = [false, true];
             if (!sorConfigTestBoosted.bbausd) return;
             for (const reverse of binaryOption) {
                 const tokens = [
@@ -261,13 +262,24 @@ describe('multiple boosted pools, path creation test', () => {
                 maxPools,
                 sorConfigTestBoosted
             );
+            console.log('paths ids');
+            console.log(paths[0].id);
+            console.log(paths[1].id);
             assert.equal(
-                paths[0].id,
+                boostedPaths[0].id,
+                'LBPweightedTusdOhmBBaUSD-TUSDbbaUSD-BAL'
+            );
+            assert.equal(
+                boostedPaths[1].id,
                 'LBPweightedTusdOhmweightedTusdWethweightedBalWeth'
             );
             assert.equal(
-                paths[3].id,
-                'LBPweightedTusdOhmBBaUSD-TUSDbbaUSD-BAL'
+                boostedPaths[2].id,
+                'LBPweightedTusdOhmBBaUSD-TUSDweightedWeth-BBausdweightedBalWeth'
+            );
+            assert.equal(
+                boostedPaths[3].id,
+                'LBPweightedTusdOhmweightedTusdWethweightedWeth-BBausdbbaUSD-BAL'
             );
             const OHM = tokenIn;
             const tokensChains = [
@@ -415,7 +427,7 @@ describe('multiple boosted pools, path creation test', () => {
 
 describe('generic boosted pools, path creation test', () => {
     context('using only one boosted phantom stable', () => {
-        it('debug2 FEI-DAI', () => {
+        it('FEI-DAI', () => {
             const tokenIn = FEI.address;
             const tokenOut = DAI.address;
             const [paths, , boostedPaths] = getPaths(
@@ -436,11 +448,15 @@ describe('generic boosted pools, path creation test', () => {
             ];
             for (let i = 0; i < 1; i++) {
                 assert.isTrue(
-                    simpleCheckPath(paths[i], poolsChains[i], tokensChains[i])
+                    simpleCheckPath(
+                        boostedPaths[i],
+                        poolsChains[i],
+                        tokensChains[i]
+                    )
                 );
             }
-            assert.equal(boostedPaths.length, 1);
-            assert.equal(paths.length, 1);
+            assert.equal(boostedPaths.length, 4);
+            assert.equal(paths.length, 4);
         });
     });
 });
@@ -482,7 +498,13 @@ function getPaths(
         swapOptions
     );
 
-    const boostedPaths = getBoostedPaths(tokenIn, tokenOut, poolsAll, config);
+    // const boostedPaths = getBoostedPaths(tokenIn, tokenOut, poolsAll, config);
+    const boostedPaths = getFlexBoostedPaths(
+        tokenIn,
+        tokenOut,
+        poolsAll,
+        config
+    );
     return [paths, poolsAll, boostedPaths];
 }
 

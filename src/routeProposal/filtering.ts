@@ -13,7 +13,8 @@ import {
 } from '../types';
 import { ZERO } from '../utils/bignumber';
 import { parseNewPool } from '../pools';
-import { Zero } from '@ethersproject/constants';
+import { WeiPerEther, Zero } from '@ethersproject/constants';
+import { config } from 'process';
 
 export const filterPoolsByType = (
     pools: SubgraphPoolBase[],
@@ -144,12 +145,15 @@ export function producePaths(
 
 // We build a directed graph for the boosted pools.
 // Nodes are tokens and edges are triads: [pool.id, tokenIn, tokenOut].
-// The current criterion for inclunding a pool into this graph is the following:
+// The current criterion for including a pool into this graph is the following:
 // (a) We include every linear pool.
 // (b) Among phantom pools, we include those that contain the pool token of a linear pool.
-// (c) Among phantom pools, we include those that contain the pool token of
+// (c) Among every pool, we include those that contain the pool token of
 // a pool from the previous step.
-// (d) We include the pool weth/wsteth
+// (d) We include connections of tokenIn and tokenOut to WETH.
+// (e) When tokenIn or tokenOut are tokens offered at an LBP, we also include
+// the LBPs and the connections of the corresponding raising tokens with WETH.
+// (f) We include the pool weth/wsteth
 //
 // To build the paths using boosted pools we use the following algorithm.
 // Given a tokenIn and a tokenOut belonging to the graph, we want to find
@@ -162,14 +166,26 @@ export function producePaths(
 // each branch. When a branch reaches tokenOut, we write down the corresponding path.
 
 export function getBoostedGraph(
-    poolsAllDict: PoolDictionary
-): [string[], [string, string, string][], edgeDict] {
-    // TO DO: possibly make this function dependent on tokenIn and tokenOut
-    // and add to the graph those pools connecting them with WETH
-    // and LBPs when necessary.
+    tokenIn: string,
+    tokenOut: string,
+    poolsAllDict: PoolDictionary,
+    config: SorConfig
+): edgeDict {
+    // TO DO: hacer siguientes pasadas por los pooles.
+    // Todos, phantom, todos.
+    // En phantom van a entrar los bbausd, bbfusd, etc.
+    // En la última entran cosas como weighted bbfusd-WETH, y también
+    // si hubo LBP en la primera, incluyo el raising token.
+
+    const wethAddress: string = config.weth; // .toLowerCase()
     const graphPoolsSet: Set<PoolBase> = new Set();
     const linearPools: PoolBase[] = [];
     const phantomPools: PoolBase[] = [];
+    const relevantRaisingTokens: string[] = [];
+    // Here we add all linear pools, take note of phantom pools,
+    // add pools with tokenIn or tokenOut with weth,
+    // add LBP pools with tokenIn or tokenOut and take note of the
+    // corresponding raising tokens.
     for (const id in poolsAllDict) {
         const pool = poolsAllDict[id];
         if (pool.poolType == PoolTypes.Linear) {
@@ -181,53 +197,99 @@ export function getBoostedGraph(
             const tokensList = pool.tokensList.map((address) =>
                 address.toLowerCase()
             );
-            if (tokensList.includes(pool.address.toLowerCase())) {
+            if (tokensList.includes(pool.address)) {
                 phantomPools.push(pool);
+            }
+            // adds pools having tokenIn or tokenOut with weth
+            if (
+                tokenIn != wethAddress &&
+                tokenOut != wethAddress &&
+                tokensList.includes(wethAddress)
+            ) {
+                if (
+                    tokensList.includes(tokenIn) ||
+                    tokensList.includes(tokenOut)
+                ) {
+                    graphPoolsSet.add(pool);
+                }
+            }
+            if (config.lbpRaisingTokens) {
+                if (pool.isLBP) {
+                    const raisingTokenIn: string | undefined = getRaisingToken(
+                        pool,
+                        config.lbpRaisingTokens,
+                        tokenIn
+                    );
+                    if (raisingTokenIn) {
+                        graphPoolsSet.add(pool);
+                        relevantRaisingTokens.push(raisingTokenIn);
+                    }
+                    const raisingTokenOut: string | undefined = getRaisingToken(
+                        pool,
+                        config.lbpRaisingTokens,
+                        tokenOut
+                    );
+                    if (raisingTokenOut) {
+                        graphPoolsSet.add(pool);
+                        relevantRaisingTokens.push(raisingTokenOut);
+                    }
+                }
             }
         }
     }
     const linearPoolsAddresses = linearPools.map((pool) => pool.address);
-    const remainingPhantomPools: PoolBase[] = [];
+    // const secondStepPoolsSet: Set<PoolBase> = new Set();
     for (const pool of phantomPools) {
         for (const linearPoolAddress of linearPoolsAddresses) {
             if (pool.tokensList.includes(linearPoolAddress)) {
                 graphPoolsSet.add(pool);
-            } else {
-                remainingPhantomPools.push(pool);
+                // secondStepPoolsSet.add(pool);
             }
         }
     }
     const secondStepPoolsSet = graphPoolsSet;
     const secondStepPoolsAddresses = [...secondStepPoolsSet].map(
         (pool) => pool.address
-    );
-    for (const pool of remainingPhantomPools) {
+    ); // does this have duplicates?
+    // Here we include every pool that has a pool token from the previous step
+    // and pools having relevant raising tokens and WETH.
+    for (const id in poolsAllDict) {
+        const pool = poolsAllDict[id];
         for (const secondStepPoolAddress of secondStepPoolsAddresses) {
             if (pool.tokensList.includes(secondStepPoolAddress)) {
                 graphPoolsSet.add(pool);
             }
         }
+        const tokensList = pool.tokensList;
+        for (const raisingToken of relevantRaisingTokens) {
+            if (
+                tokensList.includes(raisingToken) &&
+                tokensList.includes(wethAddress) &&
+                raisingToken !== wethAddress
+            ) {
+                graphPoolsSet.add(pool);
+            }
+        }
     }
     const graphPools: PoolBase[] = [...graphPoolsSet];
-    // TO DO: add pool weth/wsteth
-    const [nodes, edges, edgeDict] = getNodesAndEdges(graphPools);
-    return [nodes, edges, edgeDict];
+    // TO DO: add pool weth/wsteth when it exists
+    const edgeDict = getNodesAndEdges(graphPools);
+    return edgeDict;
 }
 
 interface edgeDict {
     [node: string]: [string, string, string][];
 }
 
-function getNodesAndEdges(
-    pools: PoolBase[]
-): [string[], [string, string, string][], edgeDict] {
-    const nodes: Set<string> = new Set();
-    const edges: [string, string, string][] = [];
+function getNodesAndEdges(pools: PoolBase[]): edgeDict {
+    // [string[], [string, string, string][], edgeDict] {
+    // const nodes: Set<string> = new Set();
+    // const edges: [string, string, string][] = [];
     const edgesFromNode: edgeDict = {};
     for (const pool of pools) {
         const n = pool.tokensList.length;
         for (let i = 0; i < n; i++) {
-            nodes.add(pool.tokensList[i]);
+            // nodes.add(pool.tokensList[i]);
             if (!edgesFromNode[pool.tokensList[i]])
                 edgesFromNode[pool.tokensList[i]] = [];
             for (let j = 0; j < n; j++) {
@@ -237,12 +299,13 @@ function getNodesAndEdges(
                     pool.tokensList[i],
                     pool.tokensList[j],
                 ];
-                edges.push(edge);
+                // edges.push(edge);
                 edgesFromNode[pool.tokensList[i]].push(edge);
             }
         }
     }
-    return [[...nodes], edges, edgesFromNode];
+    // return [[...nodes], edges, edgesFromNode];
+    return edgesFromNode;
 }
 
 interface treeEdge {
@@ -251,13 +314,19 @@ interface treeEdge {
     visitedNodes: string[];
 }
 
-export function getFlexBoostedPathsInfo(
+export function getFlexBoostedPaths(
     tokenIn: string,
     tokenOut: string,
-    nodes: string[],
-    edges: [string, string, string][],
-    edgesFromNode: edgeDict
-): [string[], string[]][] {
+    poolsAllDict: PoolDictionary,
+    config: SorConfig
+): NewPath[] {
+    const edgesFromNode = getBoostedGraph(
+        tokenIn,
+        tokenOut,
+        poolsAllDict,
+        config
+    );
+
     const pathsInfo: [string[], string[]][] = [];
     const rootTreeEdge: treeEdge = {
         edge: ['', '', tokenIn],
@@ -274,6 +343,7 @@ export function getFlexBoostedPathsInfo(
             const treeEdge = treeEdges[n - 1][i];
             const token = treeEdge.edge[2];
             const edgesFromToken = edgesFromNode[token];
+            if (!edgesFromToken) continue;
             for (const edge of edgesFromToken) {
                 // skip if the node was already visited
                 if (treeEdge.visitedNodes.includes(edge[2])) {
@@ -298,8 +368,7 @@ export function getFlexBoostedPathsInfo(
             iterate = false;
         } else treeEdges.push(newTreeEdges);
     }
-    console.log('pathsInfo: ', pathsInfo);
-    return pathsInfo;
+    return pathsInfoToPaths(pathsInfo, poolsAllDict);
 }
 
 function getPathInfo(
@@ -320,14 +389,17 @@ function getPathInfo(
     return [tokens, pools];
 }
 
-export function pathsInfoToPaths(
-    poolsAllDict: PoolDictionary,
-    flexBoostedPathsInfo: [string[], string[]][]
+function pathsInfoToPaths(
+    flexBoostedPathsInfo: [string[], string[]][],
+    poolsAllDict: PoolDictionary
 ): NewPath[] {
     const paths: NewPath[] = [];
-    for (const boostedPathsInfo of flexBoostedPathsInfo) {
-        const pools = boostedPathsInfo[1].map((id) => poolsAllDict[id]);
-        paths.push(createPath(boostedPathsInfo[0], pools));
+    for (const boostedPathInfo of flexBoostedPathsInfo) {
+        const pools = boostedPathInfo[1].map((id) => poolsAllDict[id]);
+        // ignore paths of length 1 and 2
+        if (pools.length > 2) {
+            paths.push(createPath(boostedPathInfo[0], pools));
+        }
     }
     return paths;
 }
@@ -954,4 +1026,34 @@ function getLBP(
             return [getEmptyPath(), token];
         }
     } else return [getEmptyPath(), token];
+}
+
+function containsRaisingToken(
+    tokensList: string[],
+    config: SorConfig
+): boolean {
+    let answer = false;
+    if (config.lbpRaisingTokens) {
+        for (const raisingToken of config.lbpRaisingTokens) {
+            if (tokensList.includes(raisingToken)) answer = true;
+        }
+    }
+    return answer;
+}
+
+function getRaisingToken(
+    pool: PoolBase,
+    lbpRaisingTokens: string[],
+    token: string
+): string | undefined {
+    let theOtherToken: string | undefined;
+    const tokensList = pool.tokensList;
+    if (tokensList.includes(token) && !lbpRaisingTokens.includes(token)) {
+        for (let i = 0; i < 2; i++) {
+            if (tokensList[i] == token) {
+                theOtherToken = tokensList[1 - i];
+            }
+        }
+    }
+    return theOtherToken;
 }
