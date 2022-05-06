@@ -17,7 +17,6 @@ import {
 import {
     parseToPoolsDict,
     getBoostedPaths,
-    getFlexBoostedPaths,
 } from '../src/routeProposal/filtering';
 import { calculatePathLimits } from '../src/routeProposal/pathLimits';
 import { LinearPool, PairTypes } from '../src/pools/linearPool/linearPool';

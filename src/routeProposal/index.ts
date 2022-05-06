@@ -1,10 +1,9 @@
 import {
     getPathsUsingStaBalPool,
     parseToPoolsDict,
-    getBoostedPaths,
     filterPoolsOfInterest,
     producePaths,
-    getFlexBoostedPaths,
+    getBoostedPaths,
 } from './filtering';
 import { calculatePathLimits } from './pathLimits';
 import {
@@ -63,7 +62,7 @@ export class RouteProposer {
             poolsAllDict
         );
 
-        const boostedPaths = getFlexBoostedPaths(
+        const boostedPaths = getBoostedPaths(
             tokenIn,
             tokenOut,
             poolsAllDict,

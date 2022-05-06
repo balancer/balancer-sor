@@ -13,7 +13,6 @@ import {
 import {
     parseToPoolsDict,
     getBoostedPaths,
-    getFlexBoostedPaths,
 } from '../src/routeProposal/filtering';
 import { bnum } from '../src/utils/bignumber';
 import { calculatePathLimits } from '../src/routeProposal/pathLimits';
@@ -499,12 +498,7 @@ function getPaths(
     );
 
     // const boostedPaths = getBoostedPaths(tokenIn, tokenOut, poolsAll, config);
-    const boostedPaths = getFlexBoostedPaths(
-        tokenIn,
-        tokenOut,
-        poolsAll,
-        config
-    );
+    const boostedPaths = getBoostedPaths(tokenIn, tokenOut, poolsAll, config);
     return [paths, poolsAll, boostedPaths];
 }
 
