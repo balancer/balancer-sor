@@ -14,6 +14,7 @@ import {
 import { ZERO } from '../utils/bignumber';
 import { parseNewPool } from '../pools';
 import { Zero } from '@ethersproject/constants';
+import { exit } from 'process';
 
 export const filterPoolsByType = (
     pools: SubgraphPoolBase[],
@@ -159,7 +160,7 @@ export function producePaths(
 // all the connecting paths inside the graph, with the properties:
 // (a) They do not visit the same token twice
 // (b) They do not use the same pool twice in a row (since this
-//  would never be optimal).
+// would never be optimal).
 // These paths can be organized as a directed tree having tokenIn as a root.
 // We build this tree by adding at each step all the possible continuations for
 // each branch. When a branch reaches tokenOut, we write down the corresponding path.
@@ -170,7 +171,7 @@ export function getBoostedGraph(
     poolsAllDict: PoolDictionary,
     config: SorConfig
 ): edgeDict {
-    const wethAddress: string = config.weth; // .toLowerCase()
+    const wethAddress: string = config.weth.toLowerCase();
     const graphPoolsSet: Set<PoolBase> = new Set();
     const linearPools: PoolBase[] = [];
     const phantomPools: PoolBase[] = [];
@@ -200,8 +201,9 @@ export function getBoostedGraph(
                 tokensList.includes(wethAddress)
             ) {
                 if (
-                    tokensList.includes(tokenIn) ||
-                    tokensList.includes(tokenOut)
+                    tokensList.length <= 3 &&
+                    (tokensList.includes(tokenIn) ||
+                        tokensList.includes(tokenOut))
                 ) {
                     graphPoolsSet.add(pool);
                 }
@@ -230,6 +232,7 @@ export function getBoostedGraph(
             }
         }
     }
+    if (linearPools.length == 0) return {};
     const linearPoolsAddresses = linearPools.map((pool) => pool.address);
     const secondStepPoolsSet: Set<PoolBase> = new Set();
     for (const pool of phantomPools) {
@@ -242,7 +245,7 @@ export function getBoostedGraph(
     }
     const secondStepPoolsAddresses = [...secondStepPoolsSet].map(
         (pool) => pool.address
-    ); // does this have duplicates?
+    );
     // Here we include every pool that has a pool token from the previous step
     // and pools having relevant raising tokens and WETH.
     for (const id in poolsAllDict) {
@@ -312,7 +315,6 @@ export function getBoostedPaths(
         poolsAllDict,
         config
     );
-
     const pathsInfo: [string[], string[]][] = [];
     const rootTreeEdge: treeEdge = {
         edge: ['', '', tokenIn],
@@ -331,12 +333,12 @@ export function getBoostedPaths(
             const edgesFromToken = edgesFromNode[token];
             if (!edgesFromToken) continue;
             for (const edge of edgesFromToken) {
-                // skip if the node was already visited
-                if (treeEdge.visitedNodes.includes(edge[2])) {
-                    continue;
-                }
-                // skip if the pool is the same
-                if (treeEdge.edge[0] == edge[0]) {
+                // skip if the node was already visited or
+                // if the pool is the one from the previous edge
+                if (
+                    treeEdge.visitedNodes.includes(edge[2]) ||
+                    treeEdge.edge[0] == edge[0]
+                ) {
                     continue;
                 }
                 if (edge[2] == tokenOut) {

@@ -762,7 +762,7 @@ describe('linear pool tests', () => {
                 expect(returnAmount).to.eq('221067');
             });
 
-            it('debug BAL>USDT, SwapExactOut', async () => {
+            it('BAL>USDT, SwapExactOut', async () => {
                 const returnAmount = await testFullSwap(
                     KOVAN_BAL.address,
                     AAVE_USDT.address,
