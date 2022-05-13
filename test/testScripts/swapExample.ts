@@ -263,6 +263,11 @@ export const ADDRESSES = {
             decimals: 18,
             symbol: 'MATIC',
         },
+        LINK: {
+            address: '0x53E0bca35eC356BD5ddDFebbD1Fc0fD03FaBad39',
+            decimals: 18,
+            symbol: 'LINK',
+        },
         BAL: {
             address: '0x9a71012b13ca4d3d0cdc72a177df3ef03b0e76a3',
             decimals: 18,
@@ -709,13 +714,13 @@ async function makeRelayerTrade(
 }
 
 export async function simpleSwap() {
-    const networkId = Network.POLYGON;
+    const networkId = Network.MAINNET;
     // Pools source can be Subgraph URL or pools data set passed directly
     // Update pools list with most recent onchain balances
     const tokenIn = ADDRESSES[networkId].DAI;
-    const tokenOut = ADDRESSES[networkId].USDT;
+    const tokenOut = ADDRESSES[networkId].WETH;
     const swapType = SwapTypes.SwapExactIn;
-    const swapAmount = parseFixed('1', 18);
+    const swapAmount = parseFixed('1000000', 18);
     const executeTrade = true;
 
     const provider = new JsonRpcProvider(PROVIDER_URLS[networkId]);
