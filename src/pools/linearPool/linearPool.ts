@@ -761,7 +761,10 @@ export class LinearPool implements PoolBase {
         poolPairData: LinearPoolPairData,
         amount: OldBigNumber
     ): OldBigNumber {
-        const bigintAmount = parseFixed(amount.toString(), 18).toBigInt();
+        const bigintAmount = parseFixed(
+            amount.dp(18).toString(),
+            18
+        ).toBigInt();
         const mainBalance = poolPairData.mainBalanceScaled.toBigInt();
         const wrappedBalance = poolPairData.wrappedBalanceScaled.toBigInt();
         const bptSupply = poolPairData.virtualBptSupply.toBigInt();
@@ -835,7 +838,10 @@ export class LinearPool implements PoolBase {
         poolPairData: LinearPoolPairData,
         amount: OldBigNumber
     ): OldBigNumber {
-        const bigintAmount = parseFixed(amount.toString(), 18).toBigInt();
+        const bigintAmount = parseFixed(
+            amount.dp(18).toString(),
+            18
+        ).toBigInt();
         const mainBalance = poolPairData.mainBalanceScaled.toBigInt();
         const wrappedBalance = poolPairData.wrappedBalanceScaled.toBigInt();
         const bptSupply = poolPairData.virtualBptSupply.toBigInt();
