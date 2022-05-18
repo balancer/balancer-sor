@@ -147,6 +147,9 @@ export function setWrappedInfo(
     swapInfo.swapAmountForSwaps = swapInfo.swapAmount;
     swapInfo.returnAmountFromSwaps = swapInfo.returnAmount;
 
+    swapInfo.tokenInForSwaps = wrappedInfo.tokenIn.addressForSwaps;
+    swapInfo.tokenOutFromSwaps = wrappedInfo.tokenOut.addressForSwaps;
+
     // No wrapping required
     if (
         wrappedInfo.tokenIn.wrapType === WrapTypes.None &&

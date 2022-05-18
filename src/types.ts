@@ -121,12 +121,14 @@ export interface SwapInfo {
     tokenAddresses: string[];
     swaps: SwapV2[];
     swapAmount: BigNumber;
-    swapAmountForSwaps?: BigNumber; // Used with stETH/wstETH
+    swapAmountForSwaps: BigNumber; // Used with stETH/wstETH
     returnAmount: BigNumber;
-    returnAmountFromSwaps?: BigNumber; // Used with stETH/wstETH
+    returnAmountFromSwaps: BigNumber; // Used with stETH/wstETH
     returnAmountConsideringFees: BigNumber;
     tokenIn: string;
+    tokenInForSwaps?: string; // Used with stETH/wstETH
     tokenOut: string;
+    tokenOutFromSwaps?: string; // Used with stETH/wstETH
     marketSp: string;
 }
 

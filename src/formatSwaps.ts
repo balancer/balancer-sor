@@ -120,7 +120,9 @@ export function formatSwaps(
 
     const swapInfo: SwapInfo = {
         swapAmount,
+        swapAmountForSwaps: swapAmount,
         returnAmount,
+        returnAmountFromSwaps: returnAmount,
         returnAmountConsideringFees,
         swaps,
         tokenAddresses,
