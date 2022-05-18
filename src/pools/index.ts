@@ -44,12 +44,10 @@ export function parseNewPool(
         | Gyro2Pool;
 
     try {
-        if (
-            pool.poolType === 'Weighted' ||
-            pool.poolType === 'LiquidityBootstrapping' ||
-            pool.poolType === 'Investment'
-        ) {
-            newPool = WeightedPool.fromPool(pool);
+        if (pool.poolType === 'Weighted' || pool.poolType === 'Investment') {
+            newPool = WeightedPool.fromPool(pool, false);
+        } else if (pool.poolType === 'LiquidityBootstrapping') {
+            newPool = WeightedPool.fromPool(pool, true);
         } else if (pool.poolType === 'Stable') {
             newPool = StablePool.fromPool(pool);
         } else if (pool.poolType === 'MetaStable') {
@@ -57,7 +55,7 @@ export function parseNewPool(
         } else if (pool.poolType === 'Element') {
             newPool = ElementPool.fromPool(pool);
             newPool.setCurrentBlockTimestamp(currentBlockTimestamp);
-        } else if (pool.poolType === 'AaveLinear')
+        } else if (pool.poolType.toString().includes('Linear'))
             newPool = LinearPool.fromPool(pool);
         else if (pool.poolType === 'StablePhantom')
             newPool = PhantomStablePool.fromPool(pool);
@@ -91,7 +89,7 @@ export function getOutputAmountSwap(
         ) {
             return ZERO;
         } else {
-            return pool._exactTokenInForTokenOut(poolPairData, amount, false);
+            return pool._exactTokenInForTokenOut(poolPairData, amount);
         }
     } else {
         if (poolPairData.balanceOut.isZero()) {
@@ -103,7 +101,7 @@ export function getOutputAmountSwap(
         ) {
             return INFINITY;
         } else {
-            return pool._tokenInForExactTokenOut(poolPairData, amount, false);
+            return pool._tokenInForExactTokenOut(poolPairData, amount);
         }
     }
     throw Error('Unsupported swap');

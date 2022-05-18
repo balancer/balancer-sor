@@ -39,7 +39,7 @@ export const SOR_CONFIG: Record<Network, SorConfig> = {
         chainId: Network.MAINNET, //1
         vault: '0xBA12222222228d8Ba445958a75a0704d566BF2C8',
         weth: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2',
-        staBal3Pool: {
+        bbausd: {
             id: '0x7b50775383d3d6f0215a8f290f2c9e2eebbeceb20000000000000000000000fe',
             address: '0x7b50775383d3d6f0215a8f290f2c9e2eebbeceb2',
         },
@@ -150,6 +150,26 @@ export const ADDRESSES = {
             decimals: 18,
             symbol: 'wSTETH',
         },
+        bbausd: {
+            address: '0x7b50775383d3d6f0215a8f290f2c9e2eebbeceb2',
+            decimals: 18,
+            symbol: 'bbausd',
+        },
+        bbausdc: {
+            address: '0x9210F1204b5a24742Eba12f710636D76240dF3d0',
+            decimals: 18,
+            symbol: 'bbausdc',
+        },
+        waDAI: {
+            address: '0x02d60b84491589974263d922d9cc7a3152618ef6',
+            decimals: 18,
+            symbol: 'waDAI',
+        },
+        waUSDC: {
+            address: '0xd093fa4fb80d09bb30817fdcd442d4d02ed3e5de',
+            decimals: 6,
+            symbol: 'waUSDC',
+        },
     },
     [Network.KOVAN]: {
         // Visit https://balancer-faucet.on.fleek.co/#/faucet for test tokens
@@ -243,6 +263,11 @@ export const ADDRESSES = {
             decimals: 18,
             symbol: 'MATIC',
         },
+        LINK: {
+            address: '0x53E0bca35eC356BD5ddDFebbD1Fc0fD03FaBad39',
+            decimals: 18,
+            symbol: 'LINK',
+        },
         BAL: {
             address: '0x9a71012b13ca4d3d0cdc72a177df3ef03b0e76a3',
             decimals: 18,
@@ -267,6 +292,41 @@ export const ADDRESSES = {
             address: '0x8f3cf7ad23cd3cadbd9735aff958023239c6a063',
             decimals: 18,
             symbol: 'DAI',
+        },
+        STETH: {
+            address: '0xae7ab96520de3a18e5e111b5eaab095312d7fe84',
+            decimals: 18,
+            symbol: 'STETH',
+        },
+        stUSD_PLUS: {
+            address: '0x5a5c6aa6164750b530b8f7658b827163b3549a4d',
+            decimals: 6,
+            symbol: 'stUSD+',
+        },
+        bstUSD_PLUS: {
+            address: '0x1aafc31091d93c3ff003cff5d2d8f7ba2e728425',
+            decimals: 18,
+            symbol: 'bstUSD+',
+        },
+        USD_PLUS: {
+            address: '0x5d9d8509c522a47d9285b9e4e9ec686e6a580850',
+            decimals: 6,
+            symbol: 'USD_PLUS',
+        },
+        USDT: {
+            address: '0xc2132D05D31c914a87C6611C10748AEb04B58e8F',
+            decimals: 6,
+            symbol: 'USDT',
+        },
+        DHT: {
+            address: '0x8C92e38eCA8210f4fcBf17F0951b198Dd7668292',
+            decimals: 18,
+            symbol: 'DHT',
+        },
+        dUSD: {
+            address: '0xbAe28251B2a4E621aA7e20538c06DEe010Bc06DE',
+            decimals: 18,
+            symbol: 'dUSD',
         },
     },
     [Network.ARBITRUM]: {
@@ -654,13 +714,13 @@ async function makeRelayerTrade(
 }
 
 export async function simpleSwap() {
-    const networkId = Network.KOVAN;
+    const networkId = Network.MAINNET;
     // Pools source can be Subgraph URL or pools data set passed directly
     // Update pools list with most recent onchain balances
-    const tokenIn = ADDRESSES[networkId].DAI_from_AAVE;
-    const tokenOut = ADDRESSES[networkId].USDC_from_AAVE;
+    const tokenIn = ADDRESSES[networkId].DAI;
+    const tokenOut = ADDRESSES[networkId].WETH;
     const swapType = SwapTypes.SwapExactIn;
-    const swapAmount = parseFixed('100', 18);
+    const swapAmount = parseFixed('1000000', 18);
     const executeTrade = true;
 
     const provider = new JsonRpcProvider(PROVIDER_URLS[networkId]);
@@ -694,7 +754,7 @@ export async function simpleSwap() {
 
     const swapInfo = await getSwap(
         provider,
-        SOR_CONFIG[Network.KOVAN],
+        SOR_CONFIG[networkId],
         subgraphPoolDataService,
         // mockPoolDataService,
         coingeckoTokenPriceService,

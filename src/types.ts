@@ -3,11 +3,14 @@ import { BigNumber as OldBigNumber } from './utils/bignumber';
 
 export interface SorConfig {
     chainId: number;
-    weth: string;
     vault: string;
+    weth: string;
+    bbausd?: { id: string; address: string };
+    wethBBausd?: { id: string; address: string };
     staBal3Pool?: { id: string; address: string };
     wethStaBal3?: { id: string; address: string };
     usdcConnectingPool?: { id: string; usdc: string };
+    lbpRaisingTokens?: string[];
 }
 
 export type NoNullableField<T> = {
@@ -27,12 +30,6 @@ export enum PoolTypes {
     Linear,
     Gyro2,
     Gyro3,
-}
-
-export enum SwapPairType {
-    Direct,
-    HopIn,
-    HopOut,
 }
 
 export interface SwapOptions {
@@ -124,12 +121,14 @@ export interface SwapInfo {
     tokenAddresses: string[];
     swaps: SwapV2[];
     swapAmount: BigNumber;
-    swapAmountForSwaps?: BigNumber; // Used with stETH/wstETH
+    swapAmountForSwaps: BigNumber; // Used with stETH/wstETH
     returnAmount: BigNumber;
-    returnAmountFromSwaps?: BigNumber; // Used with stETH/wstETH
+    returnAmountFromSwaps: BigNumber; // Used with stETH/wstETH
     returnAmountConsideringFees: BigNumber;
     tokenIn: string;
+    tokenInForSwaps?: string; // Used with stETH/wstETH
     tokenOut: string;
+    tokenOutFromSwaps?: string; // Used with stETH/wstETH
     marketSp: string;
 }
 
@@ -139,6 +138,10 @@ export interface PoolDictionary {
 
 export interface PoolPairDictionary {
     [tokenInOut: string]: PoolPairBase;
+}
+
+export interface hopDictionary {
+    [hopToken: string]: Set<string>; // the set of pool ids
 }
 
 export interface NewPath {
@@ -160,32 +163,34 @@ export enum PoolFilter {
     Element = 'Element',
     AaveLinear = 'AaveLinear',
     StablePhantom = 'StablePhantom',
+    ERC4626Linear = 'ERC4626Linear',
 }
 
 export interface PoolBase {
     poolType: PoolTypes;
-    swapPairType: SwapPairType;
     id: string;
     address: string;
     tokensList: string[];
     mainIndex?: number;
-    setTypeForSwap: (type: SwapPairType) => void;
+    isLBP?: boolean;
     parsePoolPairData: (tokenIn: string, tokenOut: string) => PoolPairBase;
     getNormalizedLiquidity: (poolPairData: PoolPairBase) => OldBigNumber;
     getLimitAmountSwap: (
         poolPairData: PoolPairBase,
         swapType: SwapTypes
     ) => OldBigNumber;
+    /**
+     * @param {string} token - Address of token.
+     * @param {BigNumber} newBalance - New balance of token. EVM scaled.
+     */
     updateTokenBalanceForPool: (token: string, newBalance: BigNumber) => void;
     _exactTokenInForTokenOut: (
         poolPairData: PoolPairBase,
-        amount: OldBigNumber,
-        exact: boolean
+        amount: OldBigNumber
     ) => OldBigNumber;
     _tokenInForExactTokenOut: (
         poolPairData: PoolPairBase,
-        amount: OldBigNumber,
-        exact: boolean
+        amount: OldBigNumber
     ) => OldBigNumber;
     _spotPriceAfterSwapExactTokenInForTokenOut: (
         poolPairData: PoolPairBase,

@@ -138,7 +138,7 @@ describe('Tests full swaps against known values', () => {
         // These test should highlight any changes in maths that may unexpectedly change result
         assert.equal(
             swapInfo.returnAmount.toString(),
-            '2932407280899120',
+            '2932409883691685',
             'V2 sanity check.'
         );
     }).timeout(10000);
@@ -183,7 +183,7 @@ describe('Tests full swaps against known values', () => {
             swapInfo.tokenAddresses[swapInfo.swaps[0].assetOutIndex],
             USDC.address
         );
-        assert.equal(swapInfo.swaps[0].amount, '89882277269017451');
+        assert.equal(swapInfo.swaps[0].amount, '89883768143240164');
         assert.equal(
             swapInfo.swaps[1].poolId,
             '0x57755f7dec33320bca83159c26e93751bfd30fbe'
@@ -196,7 +196,7 @@ describe('Tests full swaps against known values', () => {
             swapInfo.tokenAddresses[swapInfo.swaps[1].assetOutIndex],
             USDC.address
         );
-        assert.equal(swapInfo.swaps[1].amount, '10117722730982549');
+        assert.equal(swapInfo.swaps[1].amount, '10116231856759836');
     }).timeout(10000);
 
     it('should full swap weighted swapExactOut', async () => {
@@ -233,7 +233,7 @@ describe('Tests full swaps against known values', () => {
         });
 
         // The expected test results are from previous version
-        assert.equal(swapInfo.returnAmount.toString(), '99251606996029317');
+        assert.equal(swapInfo.returnAmount.toString(), '99251606996075153');
         assert.equal(swapInfo.swaps.length, 2);
         assert.equal(
             swapInfo.swaps[0].poolId,
@@ -247,7 +247,7 @@ describe('Tests full swaps against known values', () => {
             swapInfo.tokenAddresses[swapInfo.swaps[0].assetOutIndex],
             USDC.address
         );
-        assert.equal(swapInfo.swaps[0].amount, '89884');
+        assert.equal(swapInfo.swaps[0].amount, '89880');
         assert.equal(
             swapInfo.swaps[1].poolId,
             '0x57755f7dec33320bca83159c26e93751bfd30fbe'
@@ -260,7 +260,7 @@ describe('Tests full swaps against known values', () => {
             swapInfo.tokenAddresses[swapInfo.swaps[1].assetOutIndex],
             USDC.address
         );
-        assert.equal(swapInfo.swaps[1].amount, '10116');
+        assert.equal(swapInfo.swaps[1].amount, '10120');
         // assert.equal(marketSp.toString(), '0.9924950453298881'); // TODO Different method to V1 so find diff result 0.9925374301712606
     }).timeout(10000);
 
@@ -423,7 +423,7 @@ describe('Tests full swaps against known values', () => {
             swapInfo.tokenAddresses[swapInfo.swaps[0].assetOutIndex],
             USDC.address
         );
-        assert.equal(swapInfo.swaps[0].amount, '692168081518784406');
+        assert.equal(swapInfo.swaps[0].amount, '692256505473431402');
         assert.equal(
             swapInfo.swaps[1].poolId,
             '0x57755f7dec33320bca83159c26e93751bfd30fbe'
@@ -436,7 +436,7 @@ describe('Tests full swaps against known values', () => {
             swapInfo.tokenAddresses[swapInfo.swaps[1].assetOutIndex],
             USDC.address
         );
-        assert.equal(swapInfo.swaps[1].amount, '77831918481215594');
+        assert.equal(swapInfo.swaps[1].amount, '77743494526568598');
     }).timeout(10000);
 
     it('should full swap stable & weighted swapExactOut', async () => {
@@ -552,7 +552,7 @@ describe('Tests full swaps against known values', () => {
         assert.equal(swapInfo.swaps.length, 2, 'Should have 1 multiswap.');
         assert.equal(
             swapInfo.returnAmount.toString(),
-            '94899465593646237',
+            '94899467033284976',
             'Amount should match previous result.'
         );
     }).timeout(10000);
@@ -638,7 +638,7 @@ describe('Tests full swaps against known values', () => {
         // These test should highlight any changes in maths that may unexpectedly change result
         assert.equal(
             swapInfo.returnAmount.toString(),
-            '703',
+            '701',
             'V2 sanity check.'
         );
         assert.equal(swapInfo.swaps.length, 2, 'Should have 1 multiswap.');
@@ -685,7 +685,7 @@ describe('Tests full swaps against known values', () => {
         // These test should highlight any changes in maths that may unexpectedly change result
         assert.equal(
             swapInfo.returnAmount.toString(),
-            '10394',
+            '10392',
             'V2 sanity check.'
         );
         assert.equal(swapInfo.swaps.length, 1, 'Should have 1 multiswap.');

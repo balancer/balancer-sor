@@ -28,7 +28,7 @@ import { Zero } from '@ethersproject/constants';
 
 export class SOR {
     private readonly poolCacher: PoolCacher;
-    private readonly routeProposer: RouteProposer;
+    public readonly routeProposer: RouteProposer;
     readonly swapCostCalculator: SwapCostCalculator;
 
     private readonly defaultSwapOptions: SwapOptions = {

@@ -22,6 +22,17 @@ const getTokenAddresses = (swaps: Swap[][]): string[] => {
 };
 
 /**
+ * @returns an array of deduplicated token addresses used in the provided swaps
+ */
+export const getTokenAddressesForSwap = (swaps: Swap[]): string[] => {
+    const tokenAddressesSet: Set<string> = new Set(
+        swaps.flatMap((swap): [string, string] => [swap.tokenIn, swap.tokenOut])
+    );
+
+    return [...tokenAddressesSet];
+};
+
+/**
  * @dev Assumes that intermediate swaps have been properly formatted using the zero sentinel value
  * @returns the total amount of tokens used in the described batchSwap
  */
@@ -38,7 +49,7 @@ const getTotalSwapAmount = (swaps: SwapV2[]) => {
  * @param tokenAddresses - an array of all the token address which are involved in the batchSwap
  * @returns
  */
-const formatSequence = (
+export const formatSequence = (
     swapKind: SwapTypes,
     sequence: Swap[],
     tokenAddresses: string[]
@@ -109,7 +120,9 @@ export function formatSwaps(
 
     const swapInfo: SwapInfo = {
         swapAmount,
+        swapAmountForSwaps: swapAmount,
         returnAmount,
+        returnAmountFromSwaps: returnAmount,
         returnAmountConsideringFees,
         swaps,
         tokenAddresses,

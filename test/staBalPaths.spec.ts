@@ -1,25 +1,35 @@
 // TS_NODE_PROJECT='tsconfig.testing.json' npx mocha -r ts-node/register test/staBalPaths.spec.ts
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 require('dotenv').config();
-import { expect } from 'chai';
+import { config, expect } from 'chai';
 import cloneDeep from 'lodash.clonedeep';
 import {
     PoolDictionary,
-    SwapPairType,
     SubgraphPoolBase,
     SorConfig,
+    NewPath,
+    PoolFilter,
+    SwapOptions,
+    SwapTypes,
 } from '../src';
 import {
-    filterPoolsOfInterest,
     getPathsUsingStaBalPool,
     createPath,
     getHighestLiquidityPool,
-    filterHopPools,
     parseToPoolsDict,
+    getBoostedPaths,
 } from '../src/routeProposal/filtering';
 import staBalPools from './testData/staBal/staBalPools.json';
-import { checkPath } from './lib/testHelpers';
-import { BAL, TUSD, MKR, sorConfigTest, sorConfigEth } from './lib/constants';
+import { checkPath, poolsCheckPath, simpleCheckPath } from './lib/testHelpers';
+import {
+    BAL,
+    TUSD,
+    MKR,
+    sorConfigTestStaBal,
+    sorConfigEth,
+} from './lib/constants';
+import { BigNumber } from '@ethersproject/bignumber';
+import { RouteProposer } from '../src/routeProposal';
 
 const maxPools = 4;
 
@@ -45,30 +55,23 @@ describe(`staBalPaths.`, () => {
             // We expect no staBalPaths as the path already exists as multihop
             const correctPoolIds = [];
 
-            const [poolsFiltered, hopTokens, poolsAll] = itCreatesCorrectPath(
+            itCreatesCorrectPath(
                 tokenIn,
                 tokenOut,
                 cloneDeep(staBalPools.pools),
                 correctPoolIds
             );
 
-            // Returns multihop path: TUSD2>[staBalPair2]>staBAL>[staBalPair1]>TUSD
-            const [, pathData] = filterHopPools(
+            const [pathData] = getPaths(
                 tokenIn,
                 tokenOut,
-                hopTokens,
-                poolsFiltered
+                SwapTypes.SwapExactIn,
+                cloneDeep(staBalPools.pools),
+                10,
+                sorConfigTestStaBal
             );
-
             expect(pathData.length).to.eq(1);
-
-            checkPath(
-                ['staBalPair2', 'staBalPair1'],
-                poolsAll,
-                pathData[0],
-                tokenIn,
-                tokenOut
-            );
+            poolsCheckPath(pathData[0], ['staBalPair2', 'staBalPair1']);
         });
     });
 
@@ -108,7 +111,7 @@ describe(`staBalPaths.`, () => {
             });
 
             it('should use the most liquid tokenOut-USDC pool', () => {
-                const [, , poolsAll] = itCreatesCorrectPath(
+                const poolsAll = itCreatesCorrectPath(
                     tokenIn,
                     tokenOut,
                     cloneDeep(staBalPools.pools),
@@ -117,9 +120,8 @@ describe(`staBalPaths.`, () => {
 
                 // Hop out as it is USDC > tokenOut
                 const mostLiquidPool = getHighestLiquidityPool(
-                    sorConfigTest.usdcConnectingPool.usdc,
+                    sorConfigTestStaBal.usdcConnectingPool.usdc,
                     tokenOut,
-                    SwapPairType.HopOut,
                     poolsAll
                 );
 
@@ -127,7 +129,7 @@ describe(`staBalPaths.`, () => {
             });
 
             it(`should create a valid multihop path`, () => {
-                const [poolsOfInterest, , poolsAll] = itCreatesCorrectPath(
+                const poolsAll = itCreatesCorrectPath(
                     tokenIn,
                     tokenOut,
                     cloneDeep(staBalPools.pools),
@@ -135,16 +137,16 @@ describe(`staBalPaths.`, () => {
                 );
 
                 const staBalPoolIdIn = 'staBalPair1';
-                const staBalPoolIn = poolsOfInterest[staBalPoolIdIn];
-                const hopTokenStaBal = sorConfigTest.staBal3Pool.address;
+                const staBalPoolIn = poolsAll[staBalPoolIdIn];
+                const hopTokenStaBal = sorConfigTestStaBal.staBal3Pool.address;
                 const usdcConnectingPool =
-                    poolsAll[sorConfigTest.usdcConnectingPool.id];
+                    poolsAll[sorConfigTestStaBal.usdcConnectingPool.id];
 
                 const multihopPath = createPath(
                     [
                         tokenIn,
                         hopTokenStaBal,
-                        sorConfigTest.usdcConnectingPool.usdc,
+                        sorConfigTestStaBal.usdcConnectingPool.usdc,
                     ],
                     [staBalPoolIn, usdcConnectingPool]
                 );
@@ -154,7 +156,7 @@ describe(`staBalPaths.`, () => {
                     poolsAll,
                     multihopPath,
                     tokenIn,
-                    sorConfigTest.usdcConnectingPool.usdc
+                    sorConfigTestStaBal.usdcConnectingPool.usdc
                 );
             });
         });
@@ -196,7 +198,7 @@ describe(`staBalPaths.`, () => {
             });
 
             it('should use the most liquid tokenIn-USDC pool', () => {
-                const [, , poolsAll] = itCreatesCorrectPath(
+                const poolsAll = itCreatesCorrectPath(
                     tokenIn,
                     tokenOut,
                     cloneDeep(staBalPools.pools),
@@ -206,8 +208,7 @@ describe(`staBalPaths.`, () => {
                 // Hop in as it is tokenIn > USDC
                 const mostLiquidPool = getHighestLiquidityPool(
                     tokenIn,
-                    sorConfigTest.usdcConnectingPool.usdc,
-                    SwapPairType.HopIn,
+                    sorConfigTestStaBal.usdcConnectingPool.usdc,
                     poolsAll
                 );
 
@@ -237,33 +238,55 @@ function itCreatesCorrectPath(
     tokenOut: string,
     pools: SubgraphPoolBase[],
     expectedPoolIds: string[],
-    config: SorConfig = sorConfigTest
-): [PoolDictionary, string[], PoolDictionary] {
+    config: SorConfig = sorConfigTestStaBal
+): PoolDictionary {
     const poolsAll = parseToPoolsDict(pools, 0);
-
-    const [poolsOfInterest, hopTokens] = filterPoolsOfInterest(
-        poolsAll,
-        tokenIn,
-        tokenOut,
-        maxPools
-    );
 
     const paths = getPathsUsingStaBalPool(
         tokenIn,
         tokenOut,
         poolsAll,
-        poolsOfInterest,
+        poolsAll,
         config
     );
 
     if (expectedPoolIds.length === 0) {
         expect(paths.length).to.eq(0);
-        return [poolsOfInterest, hopTokens, poolsAll];
+        return poolsAll;
     }
 
     expect(paths.length).to.eq(1);
+    poolsCheckPath(paths[0], expectedPoolIds);
+    return poolsAll;
+}
 
-    checkPath(expectedPoolIds, poolsAll, paths[0], tokenIn, tokenOut);
+function getPaths(
+    tokenIn: string,
+    tokenOut: string,
+    swapType: SwapTypes,
+    pools: SubgraphPoolBase[],
+    maxPools: number,
+    config: SorConfig
+): [NewPath[], PoolDictionary, NewPath[]] {
+    const poolsAll = parseToPoolsDict(cloneDeep(pools), 0);
+    const routeProposer = new RouteProposer(config);
+    const swapOptions: SwapOptions = {
+        gasPrice: BigNumber.from(0),
+        swapGas: BigNumber.from(0),
+        timestamp: 0,
+        maxPools: 10,
+        poolTypeFilter: PoolFilter.All,
+        forceRefresh: true,
+    };
 
-    return [poolsOfInterest, hopTokens, poolsAll];
+    const paths = routeProposer.getCandidatePaths(
+        tokenIn,
+        tokenOut,
+        swapType,
+        pools,
+        swapOptions
+    );
+
+    const boostedPaths = getBoostedPaths(tokenIn, tokenOut, poolsAll, config);
+    return [paths, poolsAll, boostedPaths];
 }

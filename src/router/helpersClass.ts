@@ -336,11 +336,7 @@ export function EVMgetOutputAmountSwap(
             );
         } else if (pool.poolType in PoolTypes) {
             // Will accept/return normalised values
-            returnAmount = pool._exactTokenInForTokenOut(
-                poolPairData,
-                amount,
-                true
-            );
+            returnAmount = pool._exactTokenInForTokenOut(poolPairData, amount);
         } else {
             throw Error('Unsupported swap');
         }
@@ -355,11 +351,7 @@ export function EVMgetOutputAmountSwap(
             );
         } else if (pool.poolType in PoolTypes) {
             // Will accept/return normalised values
-            returnAmount = pool._tokenInForExactTokenOut(
-                poolPairData,
-                amount,
-                true
-            );
+            returnAmount = pool._tokenInForExactTokenOut(poolPairData, amount);
         } else {
             throw Error('Unsupported swap');
         }
@@ -385,4 +377,24 @@ export function EVMgetOutputAmountSwap(
     );
 
     return returnAmount;
+}
+
+export function takeToPrecision18(
+    amount: BigNumber,
+    decimals: number
+): BigNumber {
+    for (let i = 0; i < 18 - decimals; i++) {
+        amount = amount.mul(10);
+    }
+    return amount;
+}
+
+export function restorePrecision(
+    amount: BigNumber,
+    decimals: number
+): BigNumber {
+    for (let i = 0; i < 18 - decimals; i++) {
+        amount = amount.div(10);
+    }
+    return amount;
 }

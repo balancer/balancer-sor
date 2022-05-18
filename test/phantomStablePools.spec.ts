@@ -10,7 +10,7 @@ import {
     MKR,
     stETH,
     LINEAR_AUSDT,
-    STABAL3PHANTOM,
+    bbaUSD,
     LINEAR_ADAI,
     sorConfigKovan,
 } from './lib/constants';
@@ -40,7 +40,7 @@ describe(`Tests for PhantomStable Pools.`, () => {
             it(`TokenToBpt should return valid limit`, async () => {
                 testLimit(
                     LINEAR_ADAI.address,
-                    STABAL3PHANTOM.address,
+                    bbaUSD.address,
                     SwapTypes.SwapExactIn,
                     [poolsFromFile.STABAL3[0] as SubgraphPoolBase],
                     0,
@@ -50,7 +50,7 @@ describe(`Tests for PhantomStable Pools.`, () => {
 
             it(`BptToToken should return valid limit`, async () => {
                 testLimit(
-                    STABAL3PHANTOM.address,
+                    bbaUSD.address,
                     LINEAR_ADAI.address, // '0xcd32a460b6fecd053582e43b07ed6e2c04e15369'
                     SwapTypes.SwapExactIn,
                     [poolsFromFile.STABAL3[0] as SubgraphPoolBase],
@@ -75,7 +75,7 @@ describe(`Tests for PhantomStable Pools.`, () => {
             it(`TokenToBpt should return valid limit`, async () => {
                 testLimit(
                     LINEAR_ADAI.address,
-                    STABAL3PHANTOM.address,
+                    bbaUSD.address,
                     SwapTypes.SwapExactOut,
                     [poolsFromFile.STABAL3[0] as SubgraphPoolBase],
                     0,
@@ -85,7 +85,7 @@ describe(`Tests for PhantomStable Pools.`, () => {
 
             it(`BptToToken should return valid limit`, async () => {
                 testLimit(
-                    STABAL3PHANTOM.address,
+                    bbaUSD.address,
                     LINEAR_ADAI.address,
                     SwapTypes.SwapExactOut,
                     [poolsFromFile.STABAL3[0] as SubgraphPoolBase],
@@ -169,7 +169,7 @@ describe(`Tests for PhantomStable Pools.`, () => {
             it('Token>BPT, SwapExactIn', async () => {
                 const returnAmount = await testFullSwap(
                     LINEAR_AUSDT.address,
-                    STABAL3PHANTOM.address,
+                    bbaUSD.address,
                     SwapTypes.SwapExactIn,
                     parseFixed('0.010001000098489046', 18),
                     [pool]
@@ -179,7 +179,7 @@ describe(`Tests for PhantomStable Pools.`, () => {
 
             it('BPT>Token, SwapExactIn', async () => {
                 const returnAmount = await testFullSwap(
-                    STABAL3PHANTOM.address,
+                    bbaUSD.address,
                     LINEAR_AUSDT.address,
                     SwapTypes.SwapExactIn,
                     parseFixed('401.873', 18),
@@ -204,7 +204,7 @@ describe(`Tests for PhantomStable Pools.`, () => {
             it('Token>BPT, SwapExactOut', async () => {
                 const returnAmount = await testFullSwap(
                     LINEAR_AUSDT.address,
-                    STABAL3PHANTOM.address,
+                    bbaUSD.address,
                     SwapTypes.SwapExactOut,
                     parseFixed('654.98', 18),
                     [pool]
@@ -214,7 +214,7 @@ describe(`Tests for PhantomStable Pools.`, () => {
 
             it('BPT>Token, SwapExactIn', async () => {
                 const returnAmount = await testFullSwap(
-                    STABAL3PHANTOM.address,
+                    bbaUSD.address,
                     LINEAR_AUSDT.address,
                     SwapTypes.SwapExactOut,
                     parseFixed('0.007321', 18),

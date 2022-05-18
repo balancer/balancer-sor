@@ -1,4 +1,5 @@
 import 'dotenv/config';
+// TS_NODE_PROJECT='tsconfig.testing.json' npx mocha -r ts-node/register test/gyro2Pool.spec.ts
 import { expect } from 'chai';
 import cloneDeep from 'lodash.clonedeep';
 import { formatFixed, parseFixed } from '@ethersproject/bignumber';

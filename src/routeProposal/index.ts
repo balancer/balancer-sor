@@ -1,9 +1,9 @@
 import {
-    filterPoolsOfInterest,
-    filterHopPools,
-    getLinearStaBal3Paths,
     getPathsUsingStaBalPool,
     parseToPoolsDict,
+    getBoostedPaths,
+    filterPoolsOfInterest,
+    producePaths,
 } from './filtering';
 import { calculatePathLimits } from './pathLimits';
 import {
@@ -12,6 +12,7 @@ import {
     NewPath,
     SubgraphPoolBase,
     SorConfig,
+    PoolDictionary,
 } from '../types';
 
 export class RouteProposer {
@@ -45,25 +46,26 @@ export class RouteProposer {
 
         const poolsAllDict = parseToPoolsDict(pools, swapOptions.timestamp);
 
-        const [poolsFilteredDict, hopTokens] = filterPoolsOfInterest(
+        const [directPools, hopsIn, hopsOut] = filterPoolsOfInterest(
             poolsAllDict,
             tokenIn,
             tokenOut,
             swapOptions.maxPools
         );
 
-        const [, pathData] = filterHopPools(
+        const pathData = producePaths(
             tokenIn,
             tokenOut,
-            hopTokens,
-            poolsFilteredDict
+            directPools,
+            hopsIn,
+            hopsOut,
+            poolsAllDict
         );
 
-        const pathsUsingLinear: NewPath[] = getLinearStaBal3Paths(
+        const boostedPaths = getBoostedPaths(
             tokenIn,
             tokenOut,
             poolsAllDict,
-            poolsFilteredDict,
             this.config
         );
 
@@ -71,12 +73,12 @@ export class RouteProposer {
             tokenIn,
             tokenOut,
             poolsAllDict,
-            poolsFilteredDict,
+            poolsAllDict,
             this.config
         );
 
         const combinedPathData = pathData
-            .concat(...pathsUsingLinear)
+            .concat(...boostedPaths)
             .concat(...pathsUsingStaBal);
         const [paths] = calculatePathLimits(combinedPathData, swapType);
 
@@ -85,6 +87,52 @@ export class RouteProposer {
                 paths: paths,
             };
 
+        return paths;
+    }
+
+    /**
+     * Given a pool dictionary and a desired input/output, returns a set of possible paths to route through.
+     * @param {string} tokenIn - Address of tokenIn
+     * @param {string} tokenOut - Address of tokenOut
+     * @param {SwapTypes} swapType - SwapExactIn where the amount of tokens in (sent to the Pool) is known or SwapExactOut where the amount of tokens out (received from the Pool) is known.
+     * @param {PoolDictionary} poolsAllDict - Dictionary of pools.
+     * @param {number }maxPools - Maximum number of pools to hop through.
+     * @returns {NewPath[]} Array of possible paths sorted by liquidity.
+     */
+    getCandidatePathsFromDict(
+        tokenIn: string,
+        tokenOut: string,
+        swapType: SwapTypes,
+        poolsAllDict: PoolDictionary,
+        maxPools: number
+    ): NewPath[] {
+        if (Object.keys(poolsAllDict).length === 0) return [];
+
+        const [directPools, hopsIn, hopsOut] = filterPoolsOfInterest(
+            poolsAllDict,
+            tokenIn,
+            tokenOut,
+            maxPools
+        );
+
+        const pathData = producePaths(
+            tokenIn,
+            tokenOut,
+            directPools,
+            hopsIn,
+            hopsOut,
+            poolsAllDict
+        );
+
+        const boostedPaths = getBoostedPaths(
+            tokenIn,
+            tokenOut,
+            poolsAllDict,
+            this.config
+        );
+
+        const combinedPathData = pathData.concat(...boostedPaths);
+        const [paths] = calculatePathLimits(combinedPathData, swapType);
         return paths;
     }
 }

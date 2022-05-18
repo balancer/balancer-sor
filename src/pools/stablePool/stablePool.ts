@@ -11,27 +11,24 @@ import { isSameAddress } from '../../utils';
 import {
     PoolBase,
     PoolTypes,
-    SwapPairType,
     PoolPairBase,
     SwapTypes,
     SubgraphPoolBase,
     SubgraphToken,
 } from '../../types';
-import * as SDK from '@georgeroman/balancer-v2-pools';
 import {
-    _invariant,
     _spotPriceAfterSwapExactTokenInForTokenOut,
     _spotPriceAfterSwapTokenInForExactTokenOut,
     _derivativeSpotPriceAfterSwapExactTokenInForTokenOut,
     _derivativeSpotPriceAfterSwapTokenInForExactTokenOut,
 } from './stableMath';
+import { _calcOutGivenIn, _calcInGivenOut } from './stableMathBigInt';
 
 type StablePoolToken = Pick<SubgraphToken, 'address' | 'balance' | 'decimals'>;
 
 export type StablePoolPairData = PoolPairBase & {
     allBalances: OldBigNumber[];
     allBalancesScaled: BigNumber[]; // EVM Maths uses everything in 1e18 upscaled format and this avoids repeated scaling
-    invariant: OldBigNumber;
     amp: BigNumber;
     tokenIndexIn: number;
     tokenIndexOut: number;
@@ -39,7 +36,6 @@ export type StablePoolPairData = PoolPairBase & {
 
 export class StablePool implements PoolBase {
     poolType: PoolTypes = PoolTypes.Stable;
-    swapPairType: SwapPairType;
     id: string;
     address: string;
     amp: BigNumber;
@@ -83,10 +79,6 @@ export class StablePool implements PoolBase {
         this.tokensList = tokensList;
     }
 
-    setTypeForSwap(type: SwapPairType): void {
-        this.swapPairType = type;
-    }
-
     parsePoolPairData(tokenIn: string, tokenOut: string): StablePoolPairData {
         const tokenIndexIn = this.tokens.findIndex(
             (t) => getAddress(t.address) === getAddress(tokenIn)
@@ -110,8 +102,6 @@ export class StablePool implements PoolBase {
             parseFixed(balance, 18)
         );
 
-        const inv = _invariant(this.amp, allBalances);
-
         const poolPairData: StablePoolPairData = {
             id: this.id,
             address: this.address,
@@ -120,10 +110,9 @@ export class StablePool implements PoolBase {
             tokenOut: tokenOut,
             balanceIn: parseFixed(balanceIn, decimalsIn),
             balanceOut: parseFixed(balanceOut, decimalsOut),
-            invariant: inv,
             swapFee: this.swapFee,
             allBalances,
-            allBalancesScaled,
+            allBalancesScaled, // TO DO - Change to BigInt??
             amp: this.amp,
             tokenIndexIn: tokenIndexIn,
             tokenIndexOut: tokenIndexOut,
@@ -183,30 +172,32 @@ export class StablePool implements PoolBase {
 
     _exactTokenInForTokenOut(
         poolPairData: StablePoolPairData,
-        amount: OldBigNumber,
-        exact: boolean
+        amount: OldBigNumber
     ): OldBigNumber {
         try {
+            if (amount.isZero()) return ZERO;
             // All values should use 1e18 fixed point
             // i.e. 1USDC => 1e18 not 1e6
-            const amtScaled = scale(amount, 18);
+            const amtScaled = parseFixed(amount.dp(18).toString(), 18);
 
-            const amt = SDK.StableMath._calcOutGivenIn(
-                bnum(this.amp.toString()),
+            const amt = _calcOutGivenIn(
+                this.amp.toBigInt(),
                 poolPairData.allBalancesScaled.map((balance) =>
-                    bnum(balance.toString())
+                    balance.toBigInt()
                 ),
                 poolPairData.tokenIndexIn,
                 poolPairData.tokenIndexOut,
-                amtScaled,
-                bnum(poolPairData.swapFee.toString())
+                amtScaled.toBigInt(),
+                poolPairData.swapFee.toBigInt()
             );
-
             // return normalised amount
             // Using BigNumber.js decimalPlaces (dp), allows us to consider token decimal accuracy correctly,
             // i.e. when using token with 2decimals 0.002 should be returned as 0
             // Uses ROUND_DOWN mode (1)
-            return scale(amt, -18).dp(poolPairData.decimalsOut, 1);
+            return scale(bnum(amt.toString()), -18).dp(
+                poolPairData.decimalsOut,
+                1
+            );
         } catch (err) {
             console.error(`_evmoutGivenIn: ${err.message}`);
             return ZERO;
@@ -215,30 +206,32 @@ export class StablePool implements PoolBase {
 
     _tokenInForExactTokenOut(
         poolPairData: StablePoolPairData,
-        amount: OldBigNumber,
-        exact: boolean
+        amount: OldBigNumber
     ): OldBigNumber {
         try {
+            if (amount.isZero()) return ZERO;
             // All values should use 1e18 fixed point
             // i.e. 1USDC => 1e18 not 1e6
-            const amtScaled = scale(amount, 18);
+            const amtScaled = parseFixed(amount.dp(18).toString(), 18);
 
-            const amt = SDK.StableMath._calcInGivenOut(
-                bnum(this.amp.toString()),
+            const amt = _calcInGivenOut(
+                this.amp.toBigInt(),
                 poolPairData.allBalancesScaled.map((balance) =>
-                    bnum(balance.toString())
+                    balance.toBigInt()
                 ),
                 poolPairData.tokenIndexIn,
                 poolPairData.tokenIndexOut,
-                amtScaled,
-                bnum(poolPairData.swapFee.toString())
+                amtScaled.toBigInt(),
+                poolPairData.swapFee.toBigInt()
             );
-
             // return normalised amount
             // Using BigNumber.js decimalPlaces (dp), allows us to consider token decimal accuracy correctly,
             // i.e. when using token with 2decimals 0.002 should be returned as 0
             // Uses ROUND_UP mode (0)
-            return scale(amt, -18).dp(poolPairData.decimalsIn, 0);
+            return scale(bnum(amt.toString()), -18).dp(
+                poolPairData.decimalsIn,
+                0
+            );
         } catch (err) {
             console.error(`_evminGivenOut: ${err.message}`);
             return ZERO;
