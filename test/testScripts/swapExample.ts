@@ -99,7 +99,7 @@ export const SUBGRAPH_URLS = {
     [Network.GOERLI]:
         'https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-goerli-v2',
     [Network.KOVAN]:
-        'https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-kovan-v2',
+        'https://api.thegraph.com/subgraphs/name/mendesfabio/balancer-kovan-v2',
     [Network.POLYGON]:
         'https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-polygon-v2',
     [Network.ARBITRUM]: `https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-arbitrum-v2`,
@@ -255,6 +255,16 @@ export const ADDRESSES = {
             address: '0x8fd162f338b770f7e879030830cde9173367f301',
             decimals: 18,
             symbol: 'STABAL3',
+        },
+        GYRO1: {
+            address: '0x11fb9071e69628d804bf0b197cc61eeacd4aaecf',
+            decimals: 18,
+            symbol: 'GYRO1',
+        },
+        GYRO2: {
+            address: '0x4ea2110a3e277b10c9b098f61d72f58efa8655db',
+            decimals: 18,
+            symbol: 'GYRO2',
         },
     },
     [Network.POLYGON]: {
@@ -714,13 +724,13 @@ async function makeRelayerTrade(
 }
 
 export async function simpleSwap() {
-    const networkId = Network.MAINNET;
+    const networkId = Network.KOVAN;
     // Pools source can be Subgraph URL or pools data set passed directly
     // Update pools list with most recent onchain balances
-    const tokenIn = ADDRESSES[networkId].DAI;
-    const tokenOut = ADDRESSES[networkId].WETH;
+    const tokenIn = ADDRESSES[networkId].GYRO1;
+    const tokenOut = ADDRESSES[networkId].GYRO2;
     const swapType = SwapTypes.SwapExactIn;
-    const swapAmount = parseFixed('1000000', 18);
+    const swapAmount = parseFixed('1', 18);
     const executeTrade = true;
 
     const provider = new JsonRpcProvider(PROVIDER_URLS[networkId]);

@@ -98,6 +98,12 @@ export async function getOnChainBalances(
                 pool.address,
                 'getWrappedTokenRate'
             );
+        } else if (pool.poolType.toString().includes('Gyro')) {
+            multiPool.call(
+                `${pool.id}.swapFee`,
+                pool.address,
+                'getSwapFeePercentage'
+            );
         }
     });
 

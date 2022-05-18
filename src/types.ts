@@ -164,6 +164,8 @@ export enum PoolFilter {
     AaveLinear = 'AaveLinear',
     StablePhantom = 'StablePhantom',
     ERC4626Linear = 'ERC4626Linear',
+    Gyro2 = 'Gyro2',
+    Gyro3 = 'Gyro3',
 }
 
 export interface PoolBase {

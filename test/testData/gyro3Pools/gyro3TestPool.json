@@ -47,7 +47,7 @@
             ],
             "totalWeight": "15",
             "totalShares": "100",
-            "poolType": "Gyro3Pool",
+            "poolType": "Gyro3",
             "swapEnabled": true,
             "gyro3PriceBounds": {
                 "alpha": "0.987"

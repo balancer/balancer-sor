@@ -38,7 +38,7 @@
             ],
             "totalWeight": "15",
             "totalShares": "100",
-            "poolType": "Gyro2Pool",
+            "poolType": "Gyro2",
             "swapEnabled": true,
             "gyro2PriceBounds": {
                 "lowerBound": "0.999",

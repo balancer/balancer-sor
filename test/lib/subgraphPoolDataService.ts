@@ -35,6 +35,8 @@ const queryWithLinear = `
           mainIndex
           lowerTarget
           upperTarget
+          gyro2PriceBounds
+          gyro3PriceBounds
         }
         pool1000: pools(
           first: 1000,
@@ -67,6 +69,8 @@ const queryWithLinear = `
           mainIndex
           lowerTarget
           upperTarget
+          gyro2PriceBounds
+          gyro3PriceBounds
         }
       }
     `;
