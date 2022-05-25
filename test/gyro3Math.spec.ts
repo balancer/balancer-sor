@@ -1,6 +1,6 @@
 import { expect } from 'chai';
 import cloneDeep from 'lodash.clonedeep';
-import { formatFixed, parseFixed } from '@ethersproject/bignumber';
+import { formatFixed, parseFixed, BigNumber } from '@ethersproject/bignumber';
 import { USDC, DAI } from './lib/constants';
 // Add new PoolType
 import { Gyro3Pool } from '../src/pools/gyro3Pool/gyro3Pool';
@@ -14,8 +14,14 @@ import {
     _normalizeBalances,
 } from '../src/pools/gyro3Pool/gyro3Math';
 
+function updatePoolParams(pool) {
+    pool.root3Alpha = BigNumber.from(pool.root3Alpha);
+}
+
 describe('gyro3Math tests', () => {
-    const testPool = cloneDeep(testPools).pools[0];
+    const testPool: any = cloneDeep(testPools).pools[0];
+    updatePoolParams(testPool);
+
     const pool = Gyro3Pool.fromPool(testPool);
 
     const poolPairData = pool.parsePoolPairData(USDC.address, DAI.address);
@@ -39,11 +45,9 @@ describe('gyro3Math tests', () => {
                 pool.root3Alpha
             );
 
-            expect(formatFixed(a, 18)).to.equal('0.013000000000000127');
-            expect(formatFixed(mb, 18)).to.equal('245387.995391323689889516');
-            expect(formatFixed(mc, 18)).to.equal(
-                '20335328582.7366683195765956'
-            );
+            expect(formatFixed(a, 18)).to.equal('0.013000000252593788');
+            expect(formatFixed(mb, 18)).to.equal('245387.995349457123073152');
+            expect(formatFixed(mc, 18)).to.equal('20335328581.001924952');
             expect(formatFixed(md, 18)).to.equal('561707977531810.0');
         });
 
@@ -140,15 +144,3 @@ describe('gyro3Math tests', () => {
         });
     });
 });
-
-// a = 0.013000000000000127
-// mb = 245387.995391323689889516
-// mc = 20335328582.7366683195765956
-// md = 561707977531810.0
-
-// l0 = 18937948.911434007702525325
-// l1 = 18,958,673.94622423087229328
-// l2 = 18,958,628.782372398581970363
-// l3 = 18,958,628.782157684771854429
-// l4 = 18,958,628.782157684767400291
-// lFinal = 18958628.782157684762946293

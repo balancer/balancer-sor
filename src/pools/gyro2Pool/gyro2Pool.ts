@@ -10,7 +10,6 @@ import {
     SubgraphToken,
     SwapTypes,
     SubgraphPoolBase,
-    Gyro2PriceBounds,
 } from '../../types';
 import { isSameAddress } from '../../utils';
 import {
@@ -46,35 +45,18 @@ export class Gyro2Pool implements PoolBase {
     tokens: Gyro2PoolToken[];
     swapFee: BigNumber;
     totalShares: BigNumber;
-    priceBounds: Gyro2PriceBounds;
+    sqrtAlpha: BigNumber;
+    sqrtBeta: BigNumber;
 
     // Max In/Out Ratios
     MAX_IN_RATIO = parseFixed('0.3', 18);
     MAX_OUT_RATIO = parseFixed('0.3', 18);
 
     static fromPool(pool: SubgraphPoolBase): Gyro2Pool {
-        if (!pool.gyro2PriceBounds)
-            throw new Error('Pool missing gyro2PriceBounds');
-
-        const { lowerBound, upperBound } = pool.gyro2PriceBounds;
-        if (Number(lowerBound) <= 0 || Number(upperBound) <= 0)
-            throw new Error('Invalid price bounds in gyro2PriceBounds');
-
-        const tokenInAddress = pool.gyro2PriceBounds.tokenInAddress;
-        const tokenOutAddress = pool.gyro2PriceBounds.tokenOutAddress;
-
-        const tokenInIndex = pool.tokens.findIndex(
-            (t) => getAddress(t.address) === getAddress(tokenInAddress)
-        );
-        const tokenOutIndex = pool.tokens.findIndex(
-            (t) => getAddress(t.address) === getAddress(tokenOutAddress)
-        );
-
-        if (tokenInIndex < 0)
-            throw new Error('Gyro2Pool priceBounds tokenIn not in tokens');
-
-        if (tokenOutIndex < 0)
-            throw new Error('Gyro2Pool priceBounds tokenOut not in tokens');
+        if (!pool.sqrtAlpha || !pool.sqrtBeta)
+            throw new Error(
+                'Pool missing Gyro2 sqrtAlpha and/or sqrtBeta params'
+            );
 
         return new Gyro2Pool(
             pool.id,
@@ -83,7 +65,8 @@ export class Gyro2Pool implements PoolBase {
             pool.totalShares,
             pool.tokens as Gyro2PoolToken[],
             pool.tokensList,
-            pool.gyro2PriceBounds as Gyro2PriceBounds
+            pool.sqrtAlpha,
+            pool.sqrtBeta
         );
     }
 
@@ -94,7 +77,8 @@ export class Gyro2Pool implements PoolBase {
         totalShares: string,
         tokens: Gyro2PoolToken[],
         tokensList: string[],
-        priceBounds: Gyro2PriceBounds
+        sqrtAlpha: BigNumber,
+        sqrtBeta: BigNumber
     ) {
         this.id = id;
         this.address = address;
@@ -102,7 +86,8 @@ export class Gyro2Pool implements PoolBase {
         this.totalShares = parseFixed(totalShares, 18);
         this.tokens = tokens;
         this.tokensList = tokensList;
-        this.priceBounds = priceBounds;
+        this.sqrtAlpha = sqrtAlpha;
+        this.sqrtBeta = sqrtBeta;
     }
 
     parsePoolPairData(tokenIn: string, tokenOut: string): Gyro2PoolPairData {
@@ -122,23 +107,7 @@ export class Gyro2Pool implements PoolBase {
         const balanceOut = tO.balance;
         const decimalsOut = tO.decimals;
 
-        const sqrtAlpha = isSameAddress(
-            tI.address,
-            this.priceBounds.tokenInAddress
-        )
-            ? _squareRoot(parseFixed(this.priceBounds.lowerBound, 18))
-            : _squareRoot(
-                  ONE.mul(ONE).div(parseFixed(this.priceBounds.upperBound, 18))
-              );
-
-        const sqrtBeta = isSameAddress(
-            tI.address,
-            this.priceBounds.tokenInAddress
-        )
-            ? _squareRoot(parseFixed(this.priceBounds.upperBound, 18))
-            : _squareRoot(
-                  ONE.mul(ONE).div(parseFixed(this.priceBounds.lowerBound, 18))
-              );
+        const tokenInIsToken0 = tokenInIndex === 0;
 
         const poolPairData: Gyro2PoolPairData = {
             id: this.id,
@@ -151,8 +120,12 @@ export class Gyro2Pool implements PoolBase {
             balanceIn: parseFixed(balanceIn, decimalsIn),
             balanceOut: parseFixed(balanceOut, decimalsOut),
             swapFee: this.swapFee,
-            sqrtAlpha,
-            sqrtBeta,
+            sqrtAlpha: tokenInIsToken0
+                ? this.sqrtAlpha
+                : ONE.mul(ONE).div(this.sqrtBeta),
+            sqrtBeta: tokenInIsToken0
+                ? this.sqrtBeta
+                : ONE.mul(ONE).div(this.sqrtAlpha),
         };
 
         return poolPairData;

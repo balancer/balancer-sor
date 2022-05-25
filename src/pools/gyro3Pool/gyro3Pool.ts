@@ -10,7 +10,6 @@ import {
     SubgraphToken,
     SwapTypes,
     SubgraphPoolBase,
-    Gyro3PriceBounds,
 } from '../../types';
 import { isSameAddress } from '../../utils';
 import {
@@ -59,12 +58,10 @@ export class Gyro3Pool implements PoolBase {
     }
 
     static fromPool(pool: SubgraphPoolBase): Gyro3Pool {
-        if (!pool.gyro3PriceBounds)
-            throw new Error('Pool missing gyro3PriceBounds');
+        if (!pool.root3Alpha) throw new Error('Pool missing root3Alpha');
 
-        const { alpha } = pool.gyro3PriceBounds;
-        if (!(Number(alpha) > 0 && Number(alpha) < 1))
-            throw new Error('Invalid alpha price bound in gyro3PriceBounds');
+        if (!(pool.root3Alpha.gt(0) && pool.root3Alpha.lt(ONE)))
+            throw new Error('Invalid root3Alpha parameter');
 
         if (pool.tokens.length !== 3)
             throw new Error('Gyro3Pool must contain three tokens only');
@@ -76,7 +73,7 @@ export class Gyro3Pool implements PoolBase {
             pool.totalShares,
             pool.tokens as Gyro3PoolToken[],
             pool.tokensList,
-            pool.gyro3PriceBounds as Gyro3PriceBounds
+            pool.root3Alpha
         );
     }
 
@@ -87,7 +84,7 @@ export class Gyro3Pool implements PoolBase {
         totalShares: string,
         tokens: Gyro3PoolToken[],
         tokensList: string[],
-        priceBounds: Gyro3PriceBounds
+        root3Alpha: BigNumber
     ) {
         this.id = id;
         this.address = address;
@@ -95,12 +92,6 @@ export class Gyro3Pool implements PoolBase {
         this.totalShares = parseFixed(totalShares, 18);
         this.tokens = tokens;
         this.tokensList = tokensList;
-
-        const root3Alpha = parseFixed(
-            Math.pow(Number(priceBounds.alpha), 1 / 3).toString(),
-            18
-        );
-
         this.root3Alpha = root3Alpha;
     }
 

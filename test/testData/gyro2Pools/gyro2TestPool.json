@@ -40,12 +40,8 @@
             "totalShares": "100",
             "poolType": "Gyro2",
             "swapEnabled": true,
-            "gyro2PriceBounds": {
-                "lowerBound": "0.999",
-                "upperBound": "1.001",
-                "tokenInAddress": "0x6b175474e89094c44da98b954eedeac495271d0f",
-                "tokenOutAddress": "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48"
-            }
+            "sqrtAlpha": "999499874900000000",
+            "sqrtBeta": "1000499875000000000"
         }
     ]
 }

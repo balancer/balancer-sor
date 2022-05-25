@@ -2,7 +2,7 @@ import 'dotenv/config';
 // TS_NODE_PROJECT='tsconfig.testing.json' npx mocha -r ts-node/register test/gyro2Pool.spec.ts
 import { expect } from 'chai';
 import cloneDeep from 'lodash.clonedeep';
-import { formatFixed, parseFixed } from '@ethersproject/bignumber';
+import { formatFixed, parseFixed, BigNumber } from '@ethersproject/bignumber';
 import { JsonRpcProvider } from '@ethersproject/providers';
 import { bnum } from '../src/utils/bignumber';
 import { USDC, DAI, sorConfigEth } from './lib/constants';
@@ -15,7 +15,9 @@ import { MockPoolDataService } from './lib/mockPoolDataService';
 import { mockTokenPriceService } from './lib/mockTokenPriceService';
 
 describe('Gyro2Pool tests USDC > DAI', () => {
-    const testPool = cloneDeep(testPools).pools[0];
+    const testPool: any = cloneDeep(testPools).pools[0];
+    updatePoolParams(testPool);
+
     const pool = Gyro2Pool.fromPool(testPool);
 
     const poolPairData = pool.parsePoolPairData(USDC.address, DAI.address);
@@ -76,7 +78,7 @@ describe('Gyro2Pool tests USDC > DAI', () => {
                 pool.getNormalizedLiquidity(poolPairData);
 
             expect(Number(normalizedLiquidity.toString())).to.be.approximately(
-                2252709.0423891,
+                2252709.0984593313,
                 0.00001
             );
         });
@@ -86,7 +88,7 @@ describe('Gyro2Pool tests USDC > DAI', () => {
                 pool.getNormalizedLiquidity(poolPairData2);
 
             expect(Number(normalizedLiquidity.toString())).to.be.approximately(
-                2252944.2752,
+                2252944.3314978145,
                 0.00001
             );
         });
@@ -101,7 +103,7 @@ describe('Gyro2Pool tests USDC > DAI', () => {
                     poolPairData,
                     amountIn
                 );
-                expect(amountOut.toString()).to.eq('13.379816829921106482');
+                expect(amountOut.toString()).to.eq('13.379816831223949756');
             });
             it('should correctly calculate newSpotPrice', async () => {
                 const newSpotPrice =
@@ -109,7 +111,7 @@ describe('Gyro2Pool tests USDC > DAI', () => {
                         poolPairData,
                         amountIn
                     );
-                expect(newSpotPrice.toString()).to.eq('1.008988469289267733');
+                expect(newSpotPrice.toString()).to.eq('1.008988469190824523');
             });
             it('should correctly calculate derivative of spot price function at newSpotPrice', async () => {
                 const derivative =
@@ -117,7 +119,7 @@ describe('Gyro2Pool tests USDC > DAI', () => {
                         poolPairData,
                         amountIn
                     );
-                expect(derivative.toString()).to.eq('0.000000895794710891');
+                expect(derivative.toString()).to.eq('0.000000895794688507');
             });
         });
 
@@ -129,7 +131,7 @@ describe('Gyro2Pool tests USDC > DAI', () => {
                     poolPairData,
                     amountOut
                 );
-                expect(amountIn.toString()).to.eq('45.977973900999006919');
+                expect(amountIn.toString()).to.eq('45.977973896503961218');
             });
             it('should correctly calculate newSpotPrice', async () => {
                 const newSpotPrice =
@@ -137,7 +139,7 @@ describe('Gyro2Pool tests USDC > DAI', () => {
                         poolPairData,
                         amountOut
                     );
-                expect(newSpotPrice.toString()).to.eq('1.009017563096232974');
+                expect(newSpotPrice.toString()).to.eq('1.00901756299705875');
             });
             it('should correctly calculate derivative of spot price function at newSpotPrice', async () => {
                 const derivative =
@@ -145,13 +147,14 @@ describe('Gyro2Pool tests USDC > DAI', () => {
                         poolPairData,
                         amountOut
                     );
-                expect(derivative.toString()).to.eq('0.000000903885627537');
+                expect(derivative.toString()).to.eq('0.000000903885604863');
             });
         });
 
         context('FullSwap', () => {
             it(`Full Swap - swapExactIn, Token>Token`, async () => {
-                const pools = cloneDeep(testPools.pools);
+                const pools: any = cloneDeep(testPools.pools);
+                pools.forEach(updatePoolParams);
                 const tokenIn = USDC.address;
                 const tokenOut = DAI.address;
                 const swapType = SwapTypes.SwapExactIn;
@@ -199,3 +202,8 @@ describe('Gyro2Pool tests USDC > DAI', () => {
         });
     });
 });
+
+function updatePoolParams(pool) {
+    pool.sqrtAlpha = BigNumber.from(pool.sqrtAlpha);
+    pool.sqrtBeta = BigNumber.from(pool.sqrtBeta);
+}
