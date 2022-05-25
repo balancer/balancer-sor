@@ -40,8 +40,8 @@
             "totalShares": "100",
             "poolType": "Gyro2",
             "swapEnabled": true,
-            "sqrtAlpha": "999499874900000000",
-            "sqrtBeta": "1000499875000000000"
+            "sqrtAlpha": "0.9994998749",
+            "sqrtBeta": "1.000499875"
         }
     ]
 }

@@ -14,13 +14,8 @@ import {
     _normalizeBalances,
 } from '../src/pools/gyro3Pool/gyro3Math';
 
-function updatePoolParams(pool) {
-    pool.root3Alpha = BigNumber.from(pool.root3Alpha);
-}
-
 describe('gyro3Math tests', () => {
     const testPool: any = cloneDeep(testPools).pools[0];
-    updatePoolParams(testPool);
 
     const pool = Gyro3Pool.fromPool(testPool);
 

@@ -15,9 +15,7 @@ import { MockPoolDataService } from './lib/mockPoolDataService';
 import { mockTokenPriceService } from './lib/mockTokenPriceService';
 
 describe('Gyro2Pool tests USDC > DAI', () => {
-    const testPool: any = cloneDeep(testPools).pools[0];
-    updatePoolParams(testPool);
-
+    const testPool = cloneDeep(testPools).pools[0];
     const pool = Gyro2Pool.fromPool(testPool);
 
     const poolPairData = pool.parsePoolPairData(USDC.address, DAI.address);
@@ -154,7 +152,6 @@ describe('Gyro2Pool tests USDC > DAI', () => {
         context('FullSwap', () => {
             it(`Full Swap - swapExactIn, Token>Token`, async () => {
                 const pools: any = cloneDeep(testPools.pools);
-                pools.forEach(updatePoolParams);
                 const tokenIn = USDC.address;
                 const tokenOut = DAI.address;
                 const swapType = SwapTypes.SwapExactIn;
@@ -202,8 +199,3 @@ describe('Gyro2Pool tests USDC > DAI', () => {
         });
     });
 });
-
-function updatePoolParams(pool) {
-    pool.sqrtAlpha = BigNumber.from(pool.sqrtAlpha);
-    pool.sqrtBeta = BigNumber.from(pool.sqrtBeta);
-}

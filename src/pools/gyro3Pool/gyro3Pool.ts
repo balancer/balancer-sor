@@ -60,7 +60,10 @@ export class Gyro3Pool implements PoolBase {
     static fromPool(pool: SubgraphPoolBase): Gyro3Pool {
         if (!pool.root3Alpha) throw new Error('Pool missing root3Alpha');
 
-        if (!(pool.root3Alpha.gt(0) && pool.root3Alpha.lt(ONE)))
+        if (
+            parseFixed(pool.root3Alpha, 18).lte(0) ||
+            parseFixed(pool.root3Alpha, 18).gte(ONE)
+        )
             throw new Error('Invalid root3Alpha parameter');
 
         if (pool.tokens.length !== 3)
@@ -84,7 +87,7 @@ export class Gyro3Pool implements PoolBase {
         totalShares: string,
         tokens: Gyro3PoolToken[],
         tokensList: string[],
-        root3Alpha: BigNumber
+        root3Alpha: string
     ) {
         this.id = id;
         this.address = address;
@@ -92,7 +95,7 @@ export class Gyro3Pool implements PoolBase {
         this.totalShares = parseFixed(totalShares, 18);
         this.tokens = tokens;
         this.tokensList = tokensList;
-        this.root3Alpha = root3Alpha;
+        this.root3Alpha = parseFixed(root3Alpha, 18);
     }
 
     parsePoolPairData(tokenIn: string, tokenOut: string): Gyro3PoolPairData {

@@ -94,11 +94,11 @@ export interface SubgraphPoolBase {
     upperTarget?: string;
 
     // Gyro2 specific field
-    sqrtAlpha?: BigNumber;
-    sqrtBeta?: BigNumber;
+    sqrtAlpha?: string;
+    sqrtBeta?: string;
 
     // Gyro3 specific field
-    root3Alpha?: BigNumber;
+    root3Alpha?: string;
 }
 
 export type SubgraphToken = {

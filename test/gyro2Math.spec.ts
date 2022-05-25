@@ -19,7 +19,6 @@ import {
 describe('gyro2Math tests', () => {
     const testPool: any = cloneDeep(testPools).pools[0];
     const pool = Gyro2Pool.fromPool(testPool);
-    updatePoolParams(testPool);
 
     const poolPairData = pool.parsePoolPairData(USDC.address, DAI.address);
 
@@ -72,8 +71,3 @@ describe('gyro2Math tests', () => {
         });
     });
 });
-
-function updatePoolParams(pool) {
-    pool.sqrtAlpha = BigNumber.from(pool.sqrtAlpha);
-    pool.sqrtBeta = BigNumber.from(pool.sqrtBeta);
-}

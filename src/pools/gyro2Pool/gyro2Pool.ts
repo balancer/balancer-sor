@@ -77,8 +77,8 @@ export class Gyro2Pool implements PoolBase {
         totalShares: string,
         tokens: Gyro2PoolToken[],
         tokensList: string[],
-        sqrtAlpha: BigNumber,
-        sqrtBeta: BigNumber
+        sqrtAlpha: string,
+        sqrtBeta: string
     ) {
         this.id = id;
         this.address = address;
@@ -86,8 +86,8 @@ export class Gyro2Pool implements PoolBase {
         this.totalShares = parseFixed(totalShares, 18);
         this.tokens = tokens;
         this.tokensList = tokensList;
-        this.sqrtAlpha = sqrtAlpha;
-        this.sqrtBeta = sqrtBeta;
+        this.sqrtAlpha = parseFixed(sqrtAlpha, 18);
+        this.sqrtBeta = parseFixed(sqrtBeta, 18);
     }
 
     parsePoolPairData(tokenIn: string, tokenOut: string): Gyro2PoolPairData {

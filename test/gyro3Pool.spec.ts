@@ -11,7 +11,6 @@ import testPools from './testData/gyro3Pools/gyro3TestPool.json';
 
 describe('Gyro3Pool tests USDC > DAI', () => {
     const testPool: any = cloneDeep(testPools).pools[0];
-    updatePoolParams(testPool);
     const pool = Gyro3Pool.fromPool(testPool);
 
     const poolPairData = pool.parsePoolPairData(USDT.address, USDC.address);
@@ -121,7 +120,3 @@ describe('Gyro3Pool tests USDC > DAI', () => {
         });
     });
 });
-
-function updatePoolParams(pool) {
-    pool.root3Alpha = BigNumber.from(pool.root3Alpha);
-}
