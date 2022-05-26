@@ -165,7 +165,14 @@ export class SubgraphPoolDataService implements PoolDataService {
 
         const { data } = await response.json();
 
-        const pools = [...data.pool0, ...data.pool1000];
+        const pools = [...data.pool0, ...data.pool1000].filter((p) => {
+            return (
+                p.id ===
+                    '0x96646936b91d6b9d7d0c47c496afbf3d6ec7b6f8000200000000000000000019' ||
+                p.id ===
+                    '0x06df3b2bbb68adc8b0e302443692037ed9f91b42000000000000000000000063'
+            );
+        });
 
         if (this.config.onchain) {
             return getOnChainBalances(
