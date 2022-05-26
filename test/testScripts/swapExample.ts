@@ -99,7 +99,7 @@ export const SUBGRAPH_URLS = {
     [Network.GOERLI]:
         'https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-goerli-v2',
     [Network.KOVAN]:
-        'https://api.thegraph.com/subgraphs/name/mendesfabio/balancer-kovan-v2',
+        'https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-kovan-v2-beta',
     [Network.POLYGON]:
         'https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-polygon-v2',
     [Network.ARBITRUM]: `https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-arbitrum-v2`,
@@ -256,15 +256,25 @@ export const ADDRESSES = {
             decimals: 18,
             symbol: 'STABAL3',
         },
-        GYRO1: {
+        GYRO2_TEST1: {
+            address: '0x8176d96e1b3115a9422fd47adc2e78248bed36c9',
+            decimals: 18,
+            symbol: 'GYRO2_TEST1',
+        },
+        GYRO2_TEST2: {
+            address: '0xe5a9422a0b774eefe8cb66dea034a7e7b73a3df3',
+            decimals: 18,
+            symbol: 'GYRO2_TEST2',
+        },
+        GYRO3_TEST1: {
             address: '0x11fb9071e69628d804bf0b197cc61eeacd4aaecf',
             decimals: 18,
-            symbol: 'GYRO1',
+            symbol: 'GYRO3_TEST1',
         },
-        GYRO2: {
+        GYRO3_TEST2: {
             address: '0x4ea2110a3e277b10c9b098f61d72f58efa8655db',
             decimals: 18,
-            symbol: 'GYRO2',
+            symbol: 'GYRO3_TEST2',
         },
     },
     [Network.POLYGON]: {
@@ -432,11 +442,21 @@ async function getSwap(
     console.log(
         `Token Out: ${tokenOut.symbol}, Amt: ${amtOutScaled.toString()}`
     );
-    console.log(`Cost to swap: ${costToSwapScaled.toString()}`);
-    console.log(`Return Considering Fees: ${returnWithFeesScaled.toString()}`);
     console.log(`Swaps:`);
     console.log(swapInfo.swaps);
     console.log(swapInfo.tokenAddresses);
+
+    console.log(
+        `${
+            swapType === SwapTypes.SwapExactIn
+                ? swapAmount.toString()
+                : swapInfo.returnAmount.toString()
+        },${
+            swapType === SwapTypes.SwapExactIn
+                ? swapInfo.returnAmount.toString()
+                : swapAmount.toString()
+        } SOR Result`
+    );
 
     return swapInfo;
 }
@@ -512,10 +532,10 @@ async function makeTrade(
     );
     const deadline = MaxUint256;
 
-    console.log(funds);
-    console.log(swapInfo.tokenAddresses);
-    console.log(limits);
-    console.log('Swapping...');
+    // console.log(funds);
+    // console.log(swapInfo.tokenAddresses);
+    // console.log(limits);
+    // console.log('Swapping...');
 
     const overRides = {};
     // overRides['gasLimit'] = '200000';
@@ -531,7 +551,12 @@ async function makeTrade(
         swapInfo.tokenAddresses,
         funds
     );
-    console.log(deltas.toString());
+
+    console.log(
+        `${deltas[0].toString()},${
+            deltas[1].toString().split('-')[1]
+        } QueryBatchSwap (EVM Result)`
+    );
 
     // const tx = await vaultContract
     //     .connect(wallet)
@@ -727,10 +752,10 @@ export async function simpleSwap() {
     const networkId = Network.KOVAN;
     // Pools source can be Subgraph URL or pools data set passed directly
     // Update pools list with most recent onchain balances
-    const tokenIn = ADDRESSES[networkId].GYRO1;
-    const tokenOut = ADDRESSES[networkId].GYRO2;
-    const swapType = SwapTypes.SwapExactIn;
-    const swapAmount = parseFixed('1', 18);
+    const tokenIn = ADDRESSES[networkId].GYRO2_TEST1;
+    const tokenOut = ADDRESSES[networkId].GYRO2_TEST2;
+    const swapType = SwapTypes.SwapExactOut;
+    const swapAmount = parseFixed('0.0000000000001', 18);
     const executeTrade = true;
 
     const provider = new JsonRpcProvider(PROVIDER_URLS[networkId]);
@@ -780,7 +805,7 @@ export async function simpleSwap() {
             console.log('RELAYER SWAP');
             await makeRelayerTrade(provider, swapInfo, swapType, networkId);
         } else {
-            console.log('VAULT SWAP');
+            // console.log('VAULT SWAP');
             await makeTrade(provider, swapInfo, swapType);
         }
     }
