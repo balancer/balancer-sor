@@ -266,8 +266,11 @@ export function getBoostedGraph(
             }
         }
     }
+    // add pool weth/wsteth when it exists
+    if (config.wETHwstETH) {
+        graphPoolsSet.add(poolsAllDict[config.wETHwstETH.id]);
+    }
     const graphPools: PoolBase[] = [...graphPoolsSet];
-    // TO DO: add pool weth/wsteth when it exists
     const edgeDict = getNodesAndEdges(graphPools);
     return edgeDict;
 }

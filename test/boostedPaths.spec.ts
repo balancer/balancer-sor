@@ -15,7 +15,6 @@ import {
     getBoostedPaths,
 } from '../src/routeProposal/filtering';
 import { bnum } from '../src/utils/bignumber';
-import { calculatePathLimits } from '../src/routeProposal/pathLimits';
 import { getFullSwap, simpleCheckPath } from './lib/testHelpers';
 import {
     DAI,
@@ -35,6 +34,7 @@ import {
     KOVAN_BAL,
     AAVE_USDT,
     sorConfigTestBoosted,
+    sorConfigGenericBoostedPools2,
     bbaUSD,
     FEI,
 } from './lib/constants';
@@ -42,6 +42,7 @@ import {
 // Multiple boosted pools
 import boostedPools from './testData/boostedPools/multipleBoosted.json';
 import genericBoostedPools from './testData/boostedPools/genericBoosted.json';
+import genericBoostedPools2 from './testData/boostedPools/genericBoosted2.json';
 import { BigNumber, parseFixed } from '@ethersproject/bignumber';
 import { getOutputAmountSwapForPath } from '../src/router/helpersClass';
 import { JsonRpcProvider } from '@ethersproject/providers';
@@ -456,6 +457,63 @@ describe('generic boosted pools, path creation test', () => {
             }
             assert.equal(boostedPaths.length, 4);
             assert.equal(paths.length, 4);
+        });
+    });
+});
+
+describe('generic boosted pools with wstETH, path creation test', () => {
+    context('...', () => {
+        it('FEI-bbaUSD', () => {
+            const tokenIn = FEI.address;
+            const tokenOut = bbaUSD.address;
+            const [paths, , boostedPaths] = getPaths(
+                tokenIn,
+                tokenOut,
+                SwapTypes.SwapExactIn,
+                genericBoostedPools2.pools,
+                maxPools,
+                sorConfigGenericBoostedPools2
+            );
+            const pathIds = [
+                'FuseLinearFeibbfUSD-PoolweightedWstETH-BBfusdweightedWstETH-BBausd',
+                'FuseLinearFeibbfUSD-PoolbbaUSD-bbfUSD',
+                'FuseLinearFeibbfUSD-PoolbbaUSD-bbfDAI',
+                'FuseLinearFeibbfUSD-PoolFuseLinearDaiAaveLinearDaibbaUSD-Pool',
+            ];
+            for (let i = 0; i < 4; i++) {
+                assert.equal(paths[i].id, pathIds[i], 'unexpected path');
+            }
+            assert.equal(boostedPaths.length, 4);
+            assert.equal(paths.length, 4);
+        });
+        it('FEI-BAL', () => {
+            const tokenIn = FEI.address;
+            const tokenOut = BAL.address;
+            const [paths, , boostedPaths] = getPaths(
+                tokenIn,
+                tokenOut,
+                SwapTypes.SwapExactIn,
+                genericBoostedPools2.pools,
+                maxPools,
+                sorConfigGenericBoostedPools2
+            );
+            const pathsIds = [
+                'FuseLinearFeibbfUSD-PoolweightedWstETH-BBfusdwETH-wstETHweightedBalWeth',
+                'FuseLinearFeibbfUSD-PoolweightedWstETH-BBfusdweightedWstETH-BBausdbbaUSD-BAL',
+                'FuseLinearFeibbfUSD-PoolbbaUSD-bbfUSDweightedWstETH-BBausdwETH-wstETHweightedBalWeth',
+                'FuseLinearFeibbfUSD-PoolbbaUSD-bbfUSDbbaUSD-BAL',
+                'FuseLinearFeibbfUSD-PoolbbaUSD-bbfDAIbbaUSD-bbfUSDweightedWstETH-BBfusdwETH-wstETHweightedBalWeth',
+                'FuseLinearFeibbfUSD-PoolbbaUSD-bbfDAIweightedWstETH-BBausdwETH-wstETHweightedBalWeth',
+                'FuseLinearFeibbfUSD-PoolbbaUSD-bbfDAIbbaUSD-BAL',
+                'FuseLinearFeibbfUSD-PoolFuseLinearDaiAaveLinearDaibbaUSD-PoolweightedWstETH-BBausdwETH-wstETHweightedBalWeth',
+                'FuseLinearFeibbfUSD-PoolFuseLinearDaiAaveLinearDaibbaUSD-PoolbbaUSD-bbfUSDweightedWstETH-BBfusdwETH-wstETHweightedBalWeth',
+                'FuseLinearFeibbfUSD-PoolFuseLinearDaiAaveLinearDaibbaUSD-PoolbbaUSD-BAL',
+            ];
+            for (let i = 0; i < 10; i++) {
+                assert.equal(paths[i].id, pathsIds[i], 'unexpected path');
+            }
+            assert.equal(boostedPaths.length, 10);
+            assert.equal(paths.length, 10);
         });
     });
 });
