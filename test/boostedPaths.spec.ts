@@ -34,7 +34,7 @@ import {
     KOVAN_BAL,
     AAVE_USDT,
     sorConfigTestBoosted,
-    sorConfigGenericBoostedPools2,
+    sorConfigBoostedPoolsWithWstETH,
     bbaUSD,
     FEI,
 } from './lib/constants';
@@ -42,7 +42,7 @@ import {
 // Multiple boosted pools
 import boostedPools from './testData/boostedPools/multipleBoosted.json';
 import genericBoostedPools from './testData/boostedPools/genericBoosted.json';
-import genericBoostedPools2 from './testData/boostedPools/genericBoosted2.json';
+import boostedPoolsWithWstETH from './testData/boostedPools/boostedPoolsWithWstETH.json';
 import { BigNumber, parseFixed } from '@ethersproject/bignumber';
 import { getOutputAmountSwapForPath } from '../src/router/helpersClass';
 import { JsonRpcProvider } from '@ethersproject/providers';
@@ -470,9 +470,9 @@ describe('generic boosted pools with wstETH, path creation test', () => {
                 tokenIn,
                 tokenOut,
                 SwapTypes.SwapExactIn,
-                genericBoostedPools2.pools,
+                boostedPoolsWithWstETH.pools,
                 maxPools,
-                sorConfigGenericBoostedPools2
+                sorConfigBoostedPoolsWithWstETH
             );
             const pathIds = [
                 'FuseLinearFeibbfUSD-PoolweightedWstETH-BBfusdweightedWstETH-BBausd',
@@ -493,9 +493,9 @@ describe('generic boosted pools with wstETH, path creation test', () => {
                 tokenIn,
                 tokenOut,
                 SwapTypes.SwapExactIn,
-                genericBoostedPools2.pools,
+                boostedPoolsWithWstETH.pools,
                 maxPools,
-                sorConfigGenericBoostedPools2
+                sorConfigBoostedPoolsWithWstETH
             );
             const pathsIds = [
                 'FuseLinearFeibbfUSD-PoolweightedWstETH-BBfusdwETH-wstETHweightedBalWeth',
