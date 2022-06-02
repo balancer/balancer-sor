@@ -176,9 +176,20 @@ export class StablePool implements PoolBase {
     ): OldBigNumber {
         try {
             if (amount.isZero()) return ZERO;
+
+            const amtWithFeeEvm = this.subtractSwapFeeAmount(
+                parseFixed(
+                    amount.dp(poolPairData.decimalsIn).toString(),
+                    poolPairData.decimalsIn
+                ),
+                poolPairData.swapFee
+            );
+
             // All values should use 1e18 fixed point
             // i.e. 1USDC => 1e18 not 1e6
-            const amtScaled = parseFixed(amount.dp(18).toString(), 18);
+            const amtScaled = amtWithFeeEvm.mul(
+                10 ** (18 - poolPairData.decimalsIn)
+            );
 
             const amt = _calcOutGivenIn(
                 this.amp.toBigInt(),
@@ -188,8 +199,9 @@ export class StablePool implements PoolBase {
                 poolPairData.tokenIndexIn,
                 poolPairData.tokenIndexOut,
                 amtScaled.toBigInt(),
-                poolPairData.swapFee.toBigInt()
+                BigInt(0)
             );
+
             // return normalised amount
             // Using BigNumber.js decimalPlaces (dp), allows us to consider token decimal accuracy correctly,
             // i.e. when using token with 2decimals 0.002 should be returned as 0
@@ -278,5 +290,11 @@ export class StablePool implements PoolBase {
             amount,
             poolPairData
         );
+    }
+
+    subtractSwapFeeAmount(amount: BigNumber, swapFee: BigNumber): BigNumber {
+        // https://github.com/balancer-labs/balancer-v2-monorepo/blob/c18ff2686c61a8cbad72cdcfc65e9b11476fdbc3/pkg/pool-utils/contracts/BasePool.sol#L466
+        const feeAmount = amount.mul(swapFee).add(ONE.sub(1)).div(ONE);
+        return amount.sub(feeAmount);
     }
 }

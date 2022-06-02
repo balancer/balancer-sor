@@ -90,13 +90,6 @@ export function _calcOutGivenIn(
     amountIn: bigint,
     fee: bigint
 ): bigint {
-    console.log(amp);
-    console.log(balances.toString());
-    console.log(tokenIndexIn);
-    console.log(tokenIndexOut);
-    console.log(amountIn);
-    console.log(fee);
-    // LOOKS OK
     amountIn = subtractFee(amountIn, fee);
     // Given that we need to have a greater final balance out, the invariant needs to be rounded up
     const invariant = _calculateInvariant(amp, balances, true);
