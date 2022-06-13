@@ -47,6 +47,28 @@ export const sorConfigTestBoosted: SorConfig = {
     ],
 };
 
+export const sorConfigBoostedPoolsWithWstETH: SorConfig = {
+    chainId: 99,
+    weth: '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2',
+    vault: '0xeefba1e63905ef1d7acba5a8513c70307c1ce441',
+    bbausd: {
+        id: '0x8fd162f338b770f7e879030830cde9173367f3010000000000000000000004d8',
+        address: '0x8fd162f338b770f7e879030830cde9173367f301',
+    },
+    wethBBausd: {
+        id: 'weightedWeth-BBausd',
+        address: '0x0000000000000000000000000000000000000004',
+    },
+    wETHwstETH: {
+        id: 'wETH-wstETH',
+        address: '0x0000000000000000000000000000000000222222',
+    },
+    lbpRaisingTokens: [
+        '0x0000000000085d4780b73119b644ae5ecd22b376',
+        '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2',
+    ],
+};
+
 export const sorConfigEth: SorConfig = {
     chainId: 1,
     weth: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2',
