@@ -7,7 +7,7 @@ const queryWithLinear = `
       {
         pool0: pools(
           first: 1000,
-          where: { swapEnabled: true },
+          where: { swapEnabled: true, totalShares_gt: "0" },
           orderBy: totalLiquidity,
           orderDirection: desc
         ) {
@@ -39,7 +39,7 @@ const queryWithLinear = `
         pool1000: pools(
           first: 1000,
           skip: 1000,
-          where: { swapEnabled: true },
+          where: { swapEnabled: true, totalShares_gt: "0" },
           orderBy: totalLiquidity,
           orderDirection: desc
         ) {
@@ -75,7 +75,7 @@ const queryWithOutLinear = `
       {
         pool0: pools(
           first: 1000,
-          where: { swapEnabled: true },
+          where: { swapEnabled: true, totalShares_gt: "0" },
           orderBy: totalLiquidity,
           orderDirection: desc
         ) {
@@ -103,7 +103,7 @@ const queryWithOutLinear = `
         pool1000: pools(
           first: 1000,
           skip: 1000,
-          where: { swapEnabled: true },
+          where: { swapEnabled: true, totalShares_gt: "0" },
           orderBy: totalLiquidity,
           orderDirection: desc
         ) {

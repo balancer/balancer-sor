@@ -499,19 +499,19 @@
         },
         {
             "address": "0x0000000000000000000000000000000000000004",
-            "id": "weightedWeth-BBausd",
+            "id": "weightedWstETH-BBausd",
             "poolType": "Weighted",
             "publicSwap": true,
             "swapFee": "0.01",
             "swapEnabled": true,
             "tokens": [
                 {
-                    "address": "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
+                    "address": "0x0000000000000000000000000000000000911111",
                     "balance": "100000.000000",
                     "decimals": 18,
                     "weight": "50",
-                    "id": "weightedWeth-BBausd-0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
-                    "symbol": "WETH",
+                    "id": "weightedWstETH-BBausd-0x0000000000000000000000000000000000911111",
+                    "symbol": "wstETH",
                     "priceRate": "1"
                 },
                 {
@@ -519,14 +519,48 @@
                     "balance": "20000000.78213445",
                     "decimals": 18,
                     "weight": "50",
-                    "id": "weightedWeth-BBausd-0x8fd162f338b770f7e879030830cde9173367f301",
+                    "id": "weightedWstETH-BBausd-0x8fd162f338b770f7e879030830cde9173367f301",
                     "symbol": "bbaUSD",
                     "priceRate": "1"
                 }
             ],
             "tokensList": [
                 "0x8fd162f338b770f7e879030830cde9173367f301",
-                "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2"
+                "0x0000000000000000000000000000000000911111"
+            ],
+            "totalWeight": "100",
+            "totalShares": "10000"
+        },
+        {
+            "address": "0x0000000000000000000000000000000000000004",
+            "id": "weightedWstETH-BBfusd",
+            "poolType": "Weighted",
+            "publicSwap": true,
+            "swapFee": "0.01",
+            "swapEnabled": true,
+            "tokens": [
+                {
+                    "address": "0x0000000000000000000000000000000000911111",
+                    "balance": "100000.000000",
+                    "decimals": 18,
+                    "weight": "50",
+                    "id": "weightedWstETH-BBfusd-0x0000000000000000000000000000000000911111",
+                    "symbol": "wstETH",
+                    "priceRate": "1"
+                },
+                {
+                    "address": "0x0000000000000000000000000000000000311112",
+                    "balance": "20000000.78213445",
+                    "decimals": 18,
+                    "weight": "50",
+                    "id": "weightedWstETH-BBfusd-0x0000000000000000000000000000000000311112",
+                    "symbol": "bbfUSD",
+                    "priceRate": "1"
+                }
+            ],
+            "tokensList": [
+                "0x0000000000000000000000000000000000911111",
+                "0x0000000000000000000000000000000000311112"
             ],
             "totalWeight": "100",
             "totalShares": "10000"
@@ -705,6 +739,49 @@
                 "0x0000000000000000000000000000000000000014",
                 "0x8fd162f338b770f7e879030830cde9173367f301",
                 "0x0000000000000000000000000000000000311112"
+            ],
+            "totalShares": "14473.092928301396719020",
+            "totalWeight": "0",
+            "wrappedIndex": 0
+        },
+        {
+            "address": "0x0000000000000000000000000000000000222222",
+            "amp": "400",
+            "id": "wETH-wstETH",
+            "mainIndex": 0,
+            "poolType": "StablePhantom",
+            "swapEnabled": true,
+            "swapFee": "0.01",
+            "tokens": [
+                {
+                    "address": "0x0000000000000000000000000000000000222222",
+                    "balance": "5192296858520354.535602194932501075",
+                    "decimals": 18,
+                    "priceRate": "1",
+                    "symbol": "wETHwstETH",
+                    "weight": null
+                },
+                {
+                    "address": "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
+                    "balance": "4817.7627626993040385",
+                    "decimals": 18,
+                    "priceRate": "1",
+                    "symbol": "wETH",
+                    "weight": null
+                },
+                {
+                    "address": "0x0000000000000000000000000000000000911111",
+                    "balance": "4803.335614256025401",
+                    "decimals": 18,
+                    "priceRate": "1",
+                    "symbol": "wstETH",
+                    "weight": null
+                }
+            ],
+            "tokensList": [
+                "0x0000000000000000000000000000000000222222",
+                "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
+                "0x0000000000000000000000000000000000911111"
             ],
             "totalShares": "14473.092928301396719020",
             "totalWeight": "0",

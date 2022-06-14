@@ -1,9 +1,9 @@
 import {
     getPathsUsingStaBalPool,
     parseToPoolsDict,
-    getBoostedPaths,
     filterPoolsOfInterest,
     producePaths,
+    getBoostedPaths,
 } from './filtering';
 import { calculatePathLimits } from './pathLimits';
 import {
@@ -86,7 +86,6 @@ export class RouteProposer {
             {
                 paths: paths,
             };
-
         return paths;
     }
 

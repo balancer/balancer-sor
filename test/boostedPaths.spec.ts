@@ -15,7 +15,6 @@ import {
     getBoostedPaths,
 } from '../src/routeProposal/filtering';
 import { bnum } from '../src/utils/bignumber';
-import { calculatePathLimits } from '../src/routeProposal/pathLimits';
 import { getFullSwap, simpleCheckPath } from './lib/testHelpers';
 import {
     DAI,
@@ -35,6 +34,7 @@ import {
     KOVAN_BAL,
     AAVE_USDT,
     sorConfigTestBoosted,
+    sorConfigBoostedPoolsWithWstETH,
     bbaUSD,
     FEI,
 } from './lib/constants';
@@ -42,6 +42,7 @@ import {
 // Multiple boosted pools
 import boostedPools from './testData/boostedPools/multipleBoosted.json';
 import genericBoostedPools from './testData/boostedPools/genericBoosted.json';
+import boostedPoolsWithWstETH from './testData/boostedPools/boostedPoolsWithWstETH.json';
 import { BigNumber, parseFixed } from '@ethersproject/bignumber';
 import { getOutputAmountSwapForPath } from '../src/router/helpersClass';
 import { JsonRpcProvider } from '@ethersproject/providers';
@@ -187,7 +188,7 @@ describe('multiple boosted pools, path creation test', () => {
     });
     context('bbausd and Weth to Dai', () => {
         it('four combinations', () => {
-            const binaryOption = [true, false];
+            const binaryOption = [false, true];
             if (!sorConfigTestBoosted.bbausd) return;
             for (const reverse of binaryOption) {
                 const tokens = [
@@ -261,13 +262,24 @@ describe('multiple boosted pools, path creation test', () => {
                 maxPools,
                 sorConfigTestBoosted
             );
+            console.log('paths ids');
+            console.log(paths[0].id);
+            console.log(paths[1].id);
             assert.equal(
-                paths[0].id,
+                boostedPaths[0].id,
+                'LBPweightedTusdOhmBBaUSD-TUSDbbaUSD-BAL'
+            );
+            assert.equal(
+                boostedPaths[1].id,
                 'LBPweightedTusdOhmweightedTusdWethweightedBalWeth'
             );
             assert.equal(
-                paths[3].id,
-                'LBPweightedTusdOhmBBaUSD-TUSDbbaUSD-BAL'
+                boostedPaths[2].id,
+                'LBPweightedTusdOhmBBaUSD-TUSDweightedWeth-BBausdweightedBalWeth'
+            );
+            assert.equal(
+                boostedPaths[3].id,
+                'LBPweightedTusdOhmweightedTusdWethweightedWeth-BBausdbbaUSD-BAL'
             );
             const OHM = tokenIn;
             const tokensChains = [
@@ -436,11 +448,72 @@ describe('generic boosted pools, path creation test', () => {
             ];
             for (let i = 0; i < 1; i++) {
                 assert.isTrue(
-                    simpleCheckPath(paths[i], poolsChains[i], tokensChains[i])
+                    simpleCheckPath(
+                        boostedPaths[i],
+                        poolsChains[i],
+                        tokensChains[i]
+                    )
                 );
             }
-            assert.equal(boostedPaths.length, 1);
-            assert.equal(paths.length, 1);
+            assert.equal(boostedPaths.length, 4);
+            assert.equal(paths.length, 4);
+        });
+    });
+});
+
+describe('generic boosted pools with wstETH, path creation test', () => {
+    context('...', () => {
+        it('FEI-bbaUSD', () => {
+            const tokenIn = FEI.address;
+            const tokenOut = bbaUSD.address;
+            const [paths, , boostedPaths] = getPaths(
+                tokenIn,
+                tokenOut,
+                SwapTypes.SwapExactIn,
+                boostedPoolsWithWstETH.pools,
+                maxPools,
+                sorConfigBoostedPoolsWithWstETH
+            );
+            const pathIds = [
+                'FuseLinearFeibbfUSD-PoolweightedWstETH-BBfusdweightedWstETH-BBausd',
+                'FuseLinearFeibbfUSD-PoolbbaUSD-bbfUSD',
+                'FuseLinearFeibbfUSD-PoolbbaUSD-bbfDAI',
+                'FuseLinearFeibbfUSD-PoolFuseLinearDaiAaveLinearDaibbaUSD-Pool',
+            ];
+            for (let i = 0; i < 4; i++) {
+                assert.equal(paths[i].id, pathIds[i], 'unexpected path');
+            }
+            assert.equal(boostedPaths.length, 4);
+            assert.equal(paths.length, 4);
+        });
+        it('FEI-BAL', () => {
+            const tokenIn = FEI.address;
+            const tokenOut = BAL.address;
+            const [paths, , boostedPaths] = getPaths(
+                tokenIn,
+                tokenOut,
+                SwapTypes.SwapExactIn,
+                boostedPoolsWithWstETH.pools,
+                maxPools,
+                sorConfigBoostedPoolsWithWstETH
+            );
+            const pathsIds = [
+                'FuseLinearFeibbfUSD-PoolweightedWstETH-BBfusdwETH-wstETHweightedBalWeth',
+                'FuseLinearFeibbfUSD-PoolweightedWstETH-BBfusdweightedWstETH-BBausdbbaUSD-BAL',
+                'FuseLinearFeibbfUSD-PoolbbaUSD-bbfUSDweightedWstETH-BBausdwETH-wstETHweightedBalWeth',
+                'FuseLinearFeibbfUSD-PoolbbaUSD-bbfUSDbbaUSD-BAL',
+                'FuseLinearFeibbfUSD-PoolbbaUSD-bbfDAIbbaUSD-bbfUSDweightedWstETH-BBfusdwETH-wstETHweightedBalWeth',
+                'FuseLinearFeibbfUSD-PoolbbaUSD-bbfDAIweightedWstETH-BBausdwETH-wstETHweightedBalWeth',
+                'FuseLinearFeibbfUSD-PoolbbaUSD-bbfDAIbbaUSD-BAL',
+                'FuseLinearFeibbfUSD-PoolFuseLinearDaiAaveLinearDaibbaUSD-PoolweightedWstETH-BBausdwETH-wstETHweightedBalWeth',
+                'FuseLinearFeibbfUSD-PoolFuseLinearDaiAaveLinearDaibbaUSD-PoolbbaUSD-bbfUSDweightedWstETH-BBfusdwETH-wstETHweightedBalWeth',
+                'FuseLinearFeibbfUSD-PoolFuseLinearDaiAaveLinearDaibbaUSD-PoolbbaUSD-BAL',
+            ];
+            for (let i = 0; i < 10; i++) {
+                assert.equal(paths[i].id, pathsIds[i], 'unexpected path');
+            }
+            assert.equal(boostedPaths.length, 10);
+            assert.equal(paths.length, 10);
         });
     });
 });
@@ -482,6 +555,7 @@ function getPaths(
         swapOptions
     );
 
+    // const boostedPaths = getBoostedPaths(tokenIn, tokenOut, poolsAll, config);
     const boostedPaths = getBoostedPaths(tokenIn, tokenOut, poolsAll, config);
     return [paths, poolsAll, boostedPaths];
 }
