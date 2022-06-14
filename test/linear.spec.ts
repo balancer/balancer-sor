@@ -721,7 +721,7 @@ describe('linear pool tests', () => {
                     sorConfigFullKovan
                 );
                 // 6605808981785744500
-                expect(returnAmount).to.eq('20111716378263652638');
+                expect(returnAmount).to.eq('6606146264948964392');
             });
 
             it('BAL>USDT, SwapExactIn', async () => {
@@ -759,7 +759,7 @@ describe('linear pool tests', () => {
                     fullKovanPools.pools,
                     sorConfigFullKovan
                 );
-                expect(returnAmount).to.eq('221067');
+                expect(returnAmount).to.eq('702055');
             });
 
             it('BAL>USDT, SwapExactOut', async () => {
