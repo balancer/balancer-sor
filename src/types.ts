@@ -10,7 +10,6 @@ export interface SorConfig {
     staBal3Pool?: { id: string; address: string };
     wethStaBal3?: { id: string; address: string };
     usdcConnectingPool?: { id: string; usdc: string };
-    wETHwstETH?: { id: string; address: string };
     lbpRaisingTokens?: string[];
 }
 
