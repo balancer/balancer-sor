@@ -234,7 +234,7 @@ export class StablePool implements PoolBase {
             // i.e. 1USDC => 1e18 not 1e6
             const amtScaled = parseFixed(amount.dp(18).toString(), 18);
 
-            const amt = _calcInGivenOut(
+            let amt = _calcInGivenOut(
                 this.amp.toBigInt(),
                 poolPairData.allBalancesScaled.map((balance) =>
                     balance.toBigInt()
@@ -242,16 +242,20 @@ export class StablePool implements PoolBase {
                 poolPairData.tokenIndexIn,
                 poolPairData.tokenIndexOut,
                 amtScaled.toBigInt(),
-                poolPairData.swapFee.toBigInt()
+                BigInt(0)
             );
-            // return normalised amount
-            // Using BigNumber.js decimalPlaces (dp), allows us to consider token decimal accuracy correctly,
-            // i.e. when using token with 2decimals 0.002 should be returned as 0
-            // Uses ROUND_UP mode (0)
-            return scale(bnum(amt.toString()), -18).dp(
-                poolPairData.decimalsIn,
-                0
+
+            console.log('amt before fee: ', amt);
+
+            // this is downscaleUp
+            const scaleFactor = BigInt(10 ** (18 - poolPairData.decimalsIn));
+            amt = (amt + scaleFactor - BigInt(1)) / scaleFactor;
+
+            const amtWithFee = this.addSwapFeeAmount(
+                BigNumber.from(amt),
+                poolPairData.swapFee
             );
+            return bnum(amtWithFee.toString());
         } catch (err) {
             console.error(`_evminGivenOut: ${err.message}`);
             return ZERO;
@@ -296,5 +300,11 @@ export class StablePool implements PoolBase {
         // https://github.com/balancer-labs/balancer-v2-monorepo/blob/c18ff2686c61a8cbad72cdcfc65e9b11476fdbc3/pkg/pool-utils/contracts/BasePool.sol#L466
         const feeAmount = amount.mul(swapFee).add(ONE.sub(1)).div(ONE);
         return amount.sub(feeAmount);
+    }
+
+    addSwapFeeAmount(amount: BigNumber, swapFee: BigNumber): BigNumber {
+        // https://github.com/balancer-labs/balancer-v2-monorepo/blob/c18ff2686c61a8cbad72cdcfc65e9b11476fdbc3/pkg/pool-utils/contracts/BasePool.sol#L458
+        const feeAmount = ONE.sub(swapFee);
+        return amount.mul(ONE).add(feeAmount.sub(1)).div(feeAmount);
     }
 }
