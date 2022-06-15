@@ -206,14 +206,6 @@ export class StablePool implements PoolBase {
             // Using BigNumber.js decimalPlaces (dp), allows us to consider token decimal accuracy correctly,
             // i.e. when using token with 2decimals 0.002 should be returned as 0
             // Uses ROUND_DOWN mode (1)
-            console.log(
-                `STABLE: ${amount.toString()}  ${scale(
-                    bnum(amt.toString()),
-                    -18
-                )
-                    .dp(poolPairData.decimalsOut, 1)
-                    .toString()}`
-            );
             return scale(bnum(amt.toString()), -18).dp(
                 poolPairData.decimalsOut,
                 1
@@ -245,8 +237,6 @@ export class StablePool implements PoolBase {
                 BigInt(0)
             );
 
-            console.log('amt before fee: ', amt);
-
             // this is downscaleUp
             const scaleFactor = BigInt(10 ** (18 - poolPairData.decimalsIn));
             amt = (amt + scaleFactor - BigInt(1)) / scaleFactor;
@@ -255,7 +245,9 @@ export class StablePool implements PoolBase {
                 BigNumber.from(amt),
                 poolPairData.swapFee
             );
-            return bnum(amtWithFee.toString());
+            return bnum(amtWithFee.toString()).div(
+                10 ** poolPairData.decimalsIn
+            );
         } catch (err) {
             console.error(`_evminGivenOut: ${err.message}`);
             return ZERO;

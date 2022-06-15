@@ -249,7 +249,7 @@ describe(`Tests for Stable Pools.`, () => {
             console.log(`Return amt:`);
             console.log(swapInfo.returnAmount.toString());
             // This value is hard coded as sanity check if things unexpectedly change. Taken from V2 test run (with extra fee logic added).
-            expect(swapInfo.returnAmount.toString()).eq('1000401');
+            expect(swapInfo.returnAmount.toString()).eq('1000402');
             expect(swapInfo.swaps.length).eq(1);
             expect(swapInfo.swaps[0].amount.toString()).eq(swapAmt.toString());
             expect(swapInfo.swaps[0].poolId).eq(poolsFromFile.pools[0].id);
@@ -336,7 +336,7 @@ describe(`Tests for Stable Pools.`, () => {
             );
 
             // This value is hard coded as sanity check if things unexpectedly change. Taken from V2 test run (with extra fee logic added).
-            expect(swapInfo.returnAmount.toString()).eq('18089532');
+            expect(swapInfo.returnAmount.toString()).eq('18089534');
             expect(swapInfo.swaps.length).eq(2);
             expect(swapInfo.swaps[0].amount.toString()).eq(swapAmt.toString());
             expect(swapInfo.swaps[0].poolId).eq(

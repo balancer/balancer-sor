@@ -236,6 +236,8 @@ export class PhantomStablePool implements PoolBase {
         amount: OldBigNumber
     ): OldBigNumber {
         try {
+            // This code assumes that decimalsIn and decimalsOut is 18
+
             if (amount.isZero()) return ZERO;
             // All values should use 1e18 fixed point
             // i.e. 1USDC => 1e18 not 1e6
@@ -301,6 +303,8 @@ export class PhantomStablePool implements PoolBase {
         amount: OldBigNumber
     ): OldBigNumber {
         try {
+            // This code assumes that decimalsIn and decimalsOut is 18
+
             if (amount.isZero()) return ZERO;
             // All values should use 1e18 fixed point
             // i.e. 1USDC => 1e18 not 1e6
@@ -331,7 +335,7 @@ export class PhantomStablePool implements PoolBase {
                     poolPairData.allBalancesScaled.map((b) => b.toBigInt()),
                     amountsOutBigInt,
                     poolPairData.virtualBptSupply.toBigInt(),
-                    BigInt(0) // Fee is handled above
+                    BigInt(0) // Fee is handled below
                 );
             } else {
                 returnEvm = _calcInGivenOut(
@@ -340,7 +344,7 @@ export class PhantomStablePool implements PoolBase {
                     poolPairData.tokenIndexIn,
                     poolPairData.tokenIndexOut,
                     amountConvertedEvm.toBigInt(),
-                    BigInt(0) // Fee is handled above
+                    BigInt(0) // Fee is handled below
                 );
             }
             // In Phantom Pools every time there is a swap (token per token, bpt per token or token per bpt), we substract the fee from the amount in

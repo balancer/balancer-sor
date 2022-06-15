@@ -160,6 +160,11 @@ export const ADDRESSES = {
             decimals: 18,
             symbol: 'bbausdc',
         },
+        bbadai: {
+            address: '0x804cdb9116a10bb78768d3252355a1b18067bf8f',
+            decimals: 18,
+            symbol: 'bb-a-dai',
+        },
         waDAI: {
             address: '0x02d60b84491589974263d922d9cc7a3152618ef6',
             decimals: 18,
@@ -717,10 +722,10 @@ export async function simpleSwap() {
     const networkId = Network.MAINNET;
     // Pools source can be Subgraph URL or pools data set passed directly
     // Update pools list with most recent onchain balances
-    const tokenIn = ADDRESSES[networkId].USDC;
-    const tokenOut = ADDRESSES[networkId].DAI;
-    const swapType = SwapTypes.SwapExactIn;
-    const swapAmount = parseFixed('1829.912438', 6);
+    const tokenIn = ADDRESSES[networkId].DAI;
+    const tokenOut = ADDRESSES[networkId].USDC;
+    const swapType = SwapTypes.SwapExactOut;
+    const swapAmount = parseFixed('10.912438', 6);
     const executeTrade = true;
 
     const provider = new JsonRpcProvider(PROVIDER_URLS[networkId]);
