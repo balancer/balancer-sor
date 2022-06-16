@@ -14,7 +14,6 @@ import {
 import { ZERO } from '../utils/bignumber';
 import { parseNewPool } from '../pools';
 import { Zero } from '@ethersproject/constants';
-import { exit } from 'process';
 
 export const filterPoolsByType = (
     pools: SubgraphPoolBase[],
@@ -209,10 +208,13 @@ export function getBoostedGraph(
                 }
             }
             if (config.lbpRaisingTokens) {
+                const raisingTokens = config.lbpRaisingTokens.map((address) =>
+                    address.toLowerCase()
+                );
                 if (pool.isLBP) {
                     const raisingTokenIn: string | undefined = getRaisingToken(
                         pool,
-                        config.lbpRaisingTokens,
+                        raisingTokens,
                         tokenIn
                     );
                     if (raisingTokenIn) {
@@ -221,7 +223,7 @@ export function getBoostedGraph(
                     }
                     const raisingTokenOut: string | undefined = getRaisingToken(
                         pool,
-                        config.lbpRaisingTokens,
+                        raisingTokens,
                         tokenOut
                     );
                     if (raisingTokenOut) {
