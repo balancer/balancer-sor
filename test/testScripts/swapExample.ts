@@ -39,10 +39,6 @@ export const SOR_CONFIG: Record<Network, SorConfig> = {
         chainId: Network.MAINNET, //1
         vault: '0xBA12222222228d8Ba445958a75a0704d566BF2C8',
         weth: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2',
-        bbausd: {
-            id: '0x7b50775383d3d6f0215a8f290f2c9e2eebbeceb20000000000000000000000fe',
-            address: '0x7b50775383d3d6f0215a8f290f2c9e2eebbeceb2',
-        },
     },
     [Network.KOVAN]: {
         chainId: Network.KOVAN, //42
@@ -51,10 +47,6 @@ export const SOR_CONFIG: Record<Network, SorConfig> = {
         staBal3Pool: {
             id: '0x8fd162f338b770f7e879030830cde9173367f3010000000000000000000004d8',
             address: '0x8fd162f338b770f7e879030830cde9173367f301',
-        },
-        wethStaBal3: {
-            id: '0x6be79a54f119dbf9e8ebd9ded8c5bd49205bc62d00020000000000000000033c',
-            address: '0x6be79a54f119dbf9e8ebd9ded8c5bd49205bc62d',
         },
     },
     [Network.GOERLI]: {
@@ -717,10 +709,10 @@ export async function simpleSwap() {
     const networkId = Network.MAINNET;
     // Pools source can be Subgraph URL or pools data set passed directly
     // Update pools list with most recent onchain balances
-    const tokenIn = ADDRESSES[networkId].bbausd;
-    const tokenOut = ADDRESSES[networkId].waDAI;
+    const tokenIn = ADDRESSES[networkId].DAI;
+    const tokenOut = ADDRESSES[networkId].USDC;
     const swapType = SwapTypes.SwapExactIn;
-    const swapAmount = parseFixed('3000000', 18);
+    const swapAmount = parseFixed('30000', 18);
     const executeTrade = true;
 
     const provider = new JsonRpcProvider(PROVIDER_URLS[networkId]);

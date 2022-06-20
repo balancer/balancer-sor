@@ -302,9 +302,7 @@ describe('Tests pools filtering and path processing', () => {
                 id: '0x7b50775383d3d6f0215a8f290f2c9e2eebbeceb20000000000000000000000fe',
                 address: '0x7b50775383d3d6f0215a8f290f2c9e2eebbeceb2',
             },
-            wethBBausd: undefined,
             staBal3Pool: undefined,
-            wethStaBal3: undefined,
             wETHwstETH: undefined,
             lbpRaisingTokens: [
                 '0x6B175474E89094C44Da98b954EedeAC495271d0F',
