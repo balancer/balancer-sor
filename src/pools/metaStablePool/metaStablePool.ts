@@ -20,7 +20,7 @@ import {
     _calcOutGivenIn,
     _calcInGivenOut,
 } from '../stablePool/stableMathBigInt';
-import { StablePoolPairData } from 'pools/stablePool/stablePool';
+import { StablePoolPairData } from '../stablePool/stablePool';
 
 type MetaStablePoolToken = Pick<
     SubgraphToken,
