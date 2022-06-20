@@ -1,5 +1,5 @@
-// TS_NODE_PROJECT='tsconfig.testing.json' npx mocha -r ts-node/register test/linear.spec.ts
-import { assert, expect } from 'chai';
+// TS_NODE_PROJECT='tsconfig.testing.json' npx mocha -r ts-node/register test/boostedPaths.spec.ts
+import { assert } from 'chai';
 import cloneDeep from 'lodash.clonedeep';
 import {
     PoolDictionary,
@@ -18,23 +18,12 @@ import { bnum } from '../src/utils/bignumber';
 import { getFullSwap, simpleCheckPath } from './lib/testHelpers';
 import {
     DAI,
-    aDAI,
     bbaDAI,
-    USDC,
     BAL,
     TestToken,
-    MKR,
-    GUSD,
     WETH,
     TUSD,
-    USDT,
-    LINEAR_AUSDT,
-    LINEAR_ADAI,
-    aUSDT,
-    KOVAN_BAL,
-    AAVE_USDT,
     sorConfigTestBoosted,
-    sorConfigBoostedPoolsWithWstETH,
     bbaUSD,
     FEI,
 } from './lib/constants';
@@ -472,7 +461,7 @@ describe('generic boosted pools with wstETH, path creation test', () => {
                 SwapTypes.SwapExactIn,
                 boostedPoolsWithWstETH.pools,
                 maxPools,
-                sorConfigBoostedPoolsWithWstETH
+                sorConfigTestBoosted
             );
             const pathIds = [
                 'FuseLinearFeibbfUSD-PoolweightedWstETH-BBfusdweightedWstETH-BBausd',
@@ -495,7 +484,7 @@ describe('generic boosted pools with wstETH, path creation test', () => {
                 SwapTypes.SwapExactIn,
                 boostedPoolsWithWstETH.pools,
                 maxPools,
-                sorConfigBoostedPoolsWithWstETH
+                sorConfigTestBoosted
             );
             const pathsIds = [
                 'FuseLinearFeibbfUSD-PoolweightedWstETH-BBfusdwETH-wstETHweightedBalWeth',
