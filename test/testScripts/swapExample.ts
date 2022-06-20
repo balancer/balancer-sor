@@ -717,10 +717,10 @@ export async function simpleSwap() {
     const networkId = Network.MAINNET;
     // Pools source can be Subgraph URL or pools data set passed directly
     // Update pools list with most recent onchain balances
-    const tokenIn = ADDRESSES[networkId].DAI;
-    const tokenOut = ADDRESSES[networkId].WETH;
+    const tokenIn = ADDRESSES[networkId].bbausd;
+    const tokenOut = ADDRESSES[networkId].waDAI;
     const swapType = SwapTypes.SwapExactIn;
-    const swapAmount = parseFixed('1000000', 18);
+    const swapAmount = parseFixed('3000000', 18);
     const executeTrade = true;
 
     const provider = new JsonRpcProvider(PROVIDER_URLS[networkId]);
