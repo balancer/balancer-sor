@@ -152,6 +152,11 @@ export const ADDRESSES = {
             decimals: 18,
             symbol: 'bbausdc',
         },
+        bbadai: {
+            address: '0x804cdb9116a10bb78768d3252355a1b18067bf8f',
+            decimals: 18,
+            symbol: 'bb-a-dai',
+        },
         waDAI: {
             address: '0x02d60b84491589974263d922d9cc7a3152618ef6',
             decimals: 18,

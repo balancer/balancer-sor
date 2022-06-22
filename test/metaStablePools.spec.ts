@@ -488,15 +488,22 @@ describe(`Tests for MetaStable Pools.`, () => {
             );
             expect(swapInfoStable.tokenIn).to.deep.eq(swapInfo.tokenIn);
             expect(swapInfoStable.tokenOut).to.deep.eq(swapInfo.tokenOut);
-            expect(swapInfoStable.returnAmount.toString()).eq(
-                swapInfo.returnAmount.mul(tokenInPriceRate).div(ONE).toString()
-            );
-            expect(swapInfoStable.returnAmountConsideringFees.toString()).eq(
-                swapInfo.returnAmountConsideringFees
-                    .mul(tokenInPriceRate)
-                    .div(ONE)
-                    .toString()
-            );
+            expect(
+                almostEqual(
+                    swapInfoStable.returnAmount,
+                    swapInfo.returnAmount.mul(tokenInPriceRate).div(ONE)
+                ),
+                'they are not almost equal'
+            ).eq(true);
+            expect(
+                almostEqual(
+                    swapInfoStable.returnAmountConsideringFees,
+                    swapInfo.returnAmountConsideringFees
+                        .mul(tokenInPriceRate)
+                        .div(ONE)
+                ),
+                'they are not almost equal'
+            ).eq(true);
             expect(swapInfoStable.swaps.length).eq(swapInfo.swaps.length);
             swapInfoStable.swaps.forEach((swapStable, i) => {
                 expect(swapStable.poolId).eq(swapInfo.swaps[i].poolId);
@@ -750,3 +757,8 @@ describe(`Tests for MetaStable Pools.`, () => {
         // });
     });
 });
+
+function almostEqual(arg1: BigNumber, arg2: BigNumber): boolean {
+    const diff = arg1.sub(arg2).toBigInt();
+    return diff == BigInt(0) || diff == BigInt(1) || diff == BigInt(-1);
+}

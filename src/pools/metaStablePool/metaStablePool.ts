@@ -20,7 +20,7 @@ import {
     _calcOutGivenIn,
     _calcInGivenOut,
 } from '../stablePool/stableMathBigInt';
-import { StablePoolPairData } from 'pools/stablePool/stablePool';
+import { StablePoolPairData } from '../stablePool/stablePool';
 
 type MetaStablePoolToken = Pick<
     SubgraphToken,
@@ -198,22 +198,31 @@ export class MetaStablePool implements PoolBase {
             if (amount.isZero()) return ZERO;
             // All values should use 1e18 fixed point
             // i.e. 1USDC => 1e18 not 1e6
-            const amountConvertedEvm = parseFixed(amount.dp(18).toString(), 18)
+
+            const amtWithFee = this.subtractSwapFeeAmount(
+                parseFixed(
+                    amount.dp(poolPairData.decimalsIn).toString(),
+                    poolPairData.decimalsIn
+                ),
+                poolPairData.swapFee
+            );
+
+            const amountConverted = amtWithFee
                 .mul(poolPairData.tokenInPriceRate)
                 .div(ONE);
 
-            const returnEvm = _calcOutGivenIn(
+            const returnAmt = _calcOutGivenIn(
                 this.amp.toBigInt(),
                 poolPairData.allBalancesScaled.map((balance) =>
                     balance.toBigInt()
                 ),
                 poolPairData.tokenIndexIn,
                 poolPairData.tokenIndexOut,
-                amountConvertedEvm.toBigInt(),
-                poolPairData.swapFee.toBigInt()
+                amountConverted.toBigInt(),
+                BigInt(0)
             );
 
-            const returnEvmWithRate = BigNumber.from(returnEvm)
+            const returnEvmWithRate = BigNumber.from(returnAmt)
                 .mul(ONE)
                 .div(poolPairData.tokenOutPriceRate);
 
@@ -230,28 +239,50 @@ export class MetaStablePool implements PoolBase {
     ): OldBigNumber {
         try {
             if (amount.isZero()) return ZERO;
+            const decimalsIn = poolPairData.decimalsIn;
+            const decimalsOut = poolPairData.decimalsOut;
+
             // All values should use 1e18 fixed point
             // i.e. 1USDC => 1e18 not 1e6
-            const amountConvertedEvm = parseFixed(amount.dp(18).toString(), 18)
-                .mul(poolPairData.tokenOutPriceRate)
-                .div(ONE);
+            const scalingFactorIn =
+                poolPairData.tokenInPriceRate.toBigInt() *
+                BigInt(10 ** (18 - decimalsIn));
 
-            const returnEvm = _calcInGivenOut(
+            const scalingFactorOut =
+                poolPairData.tokenOutPriceRate.toBigInt() *
+                BigInt(10 ** (18 - decimalsOut));
+
+            // eslint-disable-next-line prettier/prettier
+            const amountBigInt = BigInt(
+                amount
+                    .times(10 ** decimalsOut)
+                    .dp(0)
+                    .toString()
+            );
+            const amountConverted =
+                (amountBigInt * scalingFactorOut) / BigInt(10 ** 18);
+
+            const returnAmount = _calcInGivenOut(
                 this.amp.toBigInt(),
                 poolPairData.allBalancesScaled.map((balance) =>
                     balance.toBigInt()
                 ),
                 poolPairData.tokenIndexIn,
                 poolPairData.tokenIndexOut,
-                amountConvertedEvm.toBigInt(),
-                poolPairData.swapFee.toBigInt()
+                amountConverted,
+                BigInt(0)
             );
 
-            const returnEvmWithRate = BigNumber.from(returnEvm)
-                .mul(ONE)
-                .div(poolPairData.tokenInPriceRate);
+            const returnAmountConverted =
+                (returnAmount * BigInt(10 ** 18)) / scalingFactorIn;
 
-            return bnum(formatFixed(returnEvmWithRate, 18));
+            const returnAmtWithFee = this.addSwapFeeAmount(
+                BigNumber.from(returnAmountConverted),
+                poolPairData.swapFee
+            );
+            return bnum(returnAmtWithFee.toString()).div(
+                10 ** poolPairData.decimalsIn
+            );
         } catch (err) {
             console.error(`_evminGivenOut: ${err.message}`);
             return ZERO;
@@ -314,5 +345,17 @@ export class MetaStablePool implements PoolBase {
             .div(priceRateIn)
             .times(priceRateOut)
             .times(priceRateOut);
+    }
+
+    subtractSwapFeeAmount(amount: BigNumber, swapFee: BigNumber): BigNumber {
+        // https://github.com/balancer-labs/balancer-v2-monorepo/blob/c18ff2686c61a8cbad72cdcfc65e9b11476fdbc3/pkg/pool-utils/contracts/BasePool.sol#L466
+        const feeAmount = amount.mul(swapFee).add(ONE.sub(1)).div(ONE);
+        return amount.sub(feeAmount);
+    }
+
+    addSwapFeeAmount(amount: BigNumber, swapFee: BigNumber): BigNumber {
+        // https://github.com/balancer-labs/balancer-v2-monorepo/blob/c18ff2686c61a8cbad72cdcfc65e9b11476fdbc3/pkg/pool-utils/contracts/BasePool.sol#L458
+        const feeAmount = ONE.sub(swapFee);
+        return amount.mul(ONE).add(feeAmount.sub(1)).div(feeAmount);
     }
 }
