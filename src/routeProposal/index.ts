@@ -1,9 +1,9 @@
 import {
     getPathsUsingStaBalPool,
     parseToPoolsDict,
-    getBoostedPaths,
     filterPoolsOfInterest,
     producePaths,
+    getBoostedPaths,
 } from './filtering';
 import { calculatePathLimits } from './pathLimits';
 import {
@@ -30,6 +30,8 @@ export class RouteProposer {
         pools: SubgraphPoolBase[],
         swapOptions: SwapOptions
     ): NewPath[] {
+        tokenIn = tokenIn.toLowerCase();
+        tokenOut = tokenOut.toLowerCase();
         if (pools.length === 0) return [];
 
         // If token pair has been processed before that info can be reused to speed up execution
@@ -86,7 +88,6 @@ export class RouteProposer {
             {
                 paths: paths,
             };
-
         return paths;
     }
 
@@ -106,6 +107,8 @@ export class RouteProposer {
         poolsAllDict: PoolDictionary,
         maxPools: number
     ): NewPath[] {
+        tokenIn = tokenIn.toLowerCase();
+        tokenOut = tokenOut.toLowerCase();
         if (Object.keys(poolsAllDict).length === 0) return [];
 
         const [directPools, hopsIn, hopsOut] = filterPoolsOfInterest(
