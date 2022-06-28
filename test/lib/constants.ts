@@ -1,5 +1,7 @@
 import { SorConfig } from '../../src';
 
+export const vaultAddr = '0xBA12222222228d8Ba445958a75a0704d566BF2C8';
+
 export interface TestToken {
     address: string;
     decimals: number;

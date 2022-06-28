@@ -26,6 +26,7 @@
         "dist"
     ],
     "devDependencies": {
+        "@balancer-labs/typechain": "^1.0.0",
         "@ethersproject/abi": "^5.4.1",
         "@ethersproject/address": "^5.4.0",
         "@ethersproject/bignumber": "^5.4.2",
