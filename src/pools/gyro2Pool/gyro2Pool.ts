@@ -13,19 +13,16 @@ import {
 } from '../../types';
 import { isSameAddress } from '../../utils';
 import {
-    _squareRoot,
-    _normalizeBalances,
     _calculateInvariant,
     _calcOutGivenIn,
     _calcInGivenOut,
     _findVirtualParams,
     _calculateNewSpotPrice,
-    _reduceFee,
-    _addFee,
     _derivativeSpotPriceAfterSwapExactTokenInForTokenOut,
     _derivativeSpotPriceAfterSwapTokenInForExactTokenOut,
     _getNormalizedLiquidity,
 } from './gyro2Math';
+import { _normalizeBalances, _reduceFee, _addFee } from './helpers';
 
 export type Gyro2PoolPairData = PoolPairBase & {
     sqrtAlpha: BigNumber;

@@ -13,17 +13,16 @@ import {
 } from '../../types';
 import { isSameAddress } from '../../utils';
 import {
-    _normalizeBalances,
     _calculateInvariant,
     _calcOutGivenIn,
     _calcInGivenOut,
-    _reduceFee,
-    _addFee,
     _calculateNewSpotPrice,
     _derivativeSpotPriceAfterSwapExactTokenInForTokenOut,
     _derivativeSpotPriceAfterSwapTokenInForExactTokenOut,
     _getNormalizedLiquidity,
 } from './gyro3Math';
+
+import { _normalizeBalances, _reduceFee, _addFee } from './helpers';
 
 export type Gyro3PoolPairData = PoolPairBase & {
     balanceTertiary: BigNumber; // Balance of the unchanged asset
@@ -230,7 +229,6 @@ export class Gyro3Pool implements PoolBase {
         );
 
         const virtualOffsetInOut = invariant.mul(this.root3Alpha).div(ONE);
-
         const inAmount = parseFixed(amount.toString(), 18);
         const inAmountLessFee = _reduceFee(inAmount, poolPairData.swapFee);
 

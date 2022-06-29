@@ -1,46 +1,8 @@
-import { BigNumber, parseFixed } from '@ethersproject/bignumber';
+import { BigNumber } from '@ethersproject/bignumber';
 import { WeiPerEther as ONE } from '@ethersproject/constants';
-import bn from 'bignumber.js';
+import { _squareRoot, mulUp, divUp } from './helpers';
+import { _MAX_IN_RATIO, _MAX_OUT_RATIO } from './constants';
 
-// Swap limits: amounts swapped may not be larger than this percentage of total balance.
-
-const _MAX_IN_RATIO: BigNumber = parseFixed('0.3', 18);
-const _MAX_OUT_RATIO: BigNumber = parseFixed('0.3', 18);
-
-// Helpers
-export function _squareRoot(value: BigNumber): BigNumber {
-    return BigNumber.from(
-        new bn(value.mul(ONE).toString()).sqrt().toFixed().split('.')[0]
-    );
-}
-
-export function _normalizeBalances(
-    balances: BigNumber[],
-    decimalsIn: number,
-    decimalsOut: number
-): BigNumber[] {
-    const scalingFactors = [
-        parseFixed('1', decimalsIn),
-        parseFixed('1', decimalsOut),
-    ];
-
-    return balances.map((bal, index) =>
-        bal.mul(ONE).div(scalingFactors[index])
-    );
-}
-
-/////////
-/// Fee calculations
-/////////
-
-export function _reduceFee(amountIn: BigNumber, swapFee: BigNumber): BigNumber {
-    const feeAmount = amountIn.mul(swapFee).div(ONE);
-    return amountIn.sub(feeAmount);
-}
-
-export function _addFee(amountIn: BigNumber, swapFee: BigNumber): BigNumber {
-    return amountIn.mul(ONE).div(ONE.sub(swapFee));
-}
 /////////
 /// Virtual Parameter calculations
 /////////
@@ -108,6 +70,7 @@ export function _calculateQuadratic(
     // The minus sign in the radicand cancels out in this special case, so we add
     const radicand = bSquare.add(addTerm);
     const sqrResult = _squareRoot(radicand);
+
     // The minus sign in the numerator cancels out in this special case
     const numerator = mb.add(sqrResult);
     const invariant = numerator.mul(ONE).div(denominator);
@@ -146,8 +109,8 @@ export function _calcOutGivenIn(
 
     const virtIn = balanceIn.add(virtualParamIn);
     const denominator = virtIn.add(amountIn);
-    const invSquare = currentInvariant.mul(currentInvariant).div(ONE);
-    const subtrahend = invSquare.mul(ONE).div(denominator);
+    const invSquare = mulUp(currentInvariant, currentInvariant);
+    const subtrahend = divUp(invSquare, denominator);
     const virtOut = balanceOut.add(virtualParamOut);
     return virtOut.sub(subtrahend);
 }
@@ -178,8 +141,8 @@ export function _calcInGivenOut(
 
     const virtOut = balanceOut.add(virtualParamOut);
     const denominator = virtOut.sub(amountOut);
-    const invSquare = currentInvariant.mul(currentInvariant).div(ONE);
-    const term = invSquare.mul(ONE).div(denominator);
+    const invSquare = mulUp(currentInvariant, currentInvariant);
+    const term = divUp(invSquare, denominator);
     const virtIn = balanceIn.add(virtualParamIn);
     return term.sub(virtIn);
 }

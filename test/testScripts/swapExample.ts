@@ -257,12 +257,12 @@ export const ADDRESSES = {
             symbol: 'STABAL3',
         },
         GYRO2_TEST1: {
-            address: '0x8176d96e1b3115a9422fd47adc2e78248bed36c9',
+            address: '0x8021ae68696046c40daea1953bb8767a6f9fdd6f',
             decimals: 18,
             symbol: 'GYRO2_TEST1',
         },
         GYRO2_TEST2: {
-            address: '0xe5a9422a0b774eefe8cb66dea034a7e7b73a3df3',
+            address: '0xb2bb9bf1bf645fc19a8135074cff49224a5d2577',
             decimals: 18,
             symbol: 'GYRO2_TEST2',
         },
@@ -754,8 +754,8 @@ export async function simpleSwap() {
     // Update pools list with most recent onchain balances
     const tokenIn = ADDRESSES[networkId].GYRO2_TEST1;
     const tokenOut = ADDRESSES[networkId].GYRO2_TEST2;
-    const swapType = SwapTypes.SwapExactOut;
-    const swapAmount = parseFixed('0.0000000000001', 18);
+    const swapType = SwapTypes.SwapExactIn;
+    const swapAmount = parseFixed('100', 18);
     const executeTrade = true;
 
     const provider = new JsonRpcProvider(PROVIDER_URLS[networkId]);
