@@ -34,6 +34,16 @@ export function divUp(a: BigNumber, b: BigNumber) {
     return aInflated.sub(1).div(b).add(1);
 }
 
+export function mulDown(a: BigNumber, b: BigNumber) {
+    const product = a.mul(b);
+    return product.div(ONE);
+}
+
+export function divDown(a: BigNumber, b: BigNumber) {
+    const aInflated = a.mul(ONE);
+    return aInflated.div(b);
+}
+
 export function newtonSqrt(input: BigNumber, tolerance: BigNumber) {
     if (input.isZero()) {
         return BigNumber.from(0);

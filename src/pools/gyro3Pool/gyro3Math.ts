@@ -7,7 +7,14 @@ import {
     _INVARIANT_MIN_ITERATIONS,
     _INVARIANT_SHRINKING_FACTOR_PER_STEP,
 } from './constants';
-import { mulUp, divUp, newtonSqrt, _safeLargePow3ADown } from './helpers';
+import {
+    mulUp,
+    divUp,
+    mulDown,
+    divDown,
+    newtonSqrt,
+    _safeLargePow3ADown,
+} from './helpers';
 
 /////////
 /// Invariant Calculation
@@ -43,18 +50,16 @@ export function _calculateCubicTerms(
     balances: BigNumber[],
     root3Alpha: BigNumber
 ): [BigNumber, BigNumber, BigNumber, BigNumber] {
-    const alpha23: BigNumber = root3Alpha.mul(root3Alpha).div(ONE); // alpha to the power of (2/3)
-    const alpha = alpha23.mul(root3Alpha).div(ONE);
+    const alpha23: BigNumber = mulDown(root3Alpha, root3Alpha); // alpha to the power of (2/3)
+    const alpha = mulDown(alpha23, root3Alpha);
     const a = ONE.sub(alpha);
     const bterm = balances[0].add(balances[1]).add(balances[2]);
-    const mb = bterm.mul(root3Alpha).div(ONE).mul(root3Alpha).div(ONE);
-    const cterm = balances[0]
-        .mul(balances[1])
-        .div(ONE)
-        .add(balances[1].mul(balances[2]).div(ONE))
-        .add(balances[2].mul(balances[0]).div(ONE));
-    const mc = cterm.mul(root3Alpha).div(ONE);
-    const md = balances[0].mul(balances[1]).div(ONE).mul(balances[2]).div(ONE);
+    const mb = mulDown(mulDown(bterm, root3Alpha), root3Alpha);
+    const cterm = mulDown(balances[0], balances[1])
+        .add(mulDown(balances[1], balances[2]))
+        .add(mulDown(balances[2], balances[0]));
+    const mc = mulDown(cterm, root3Alpha);
+    const md = mulDown(mulDown(balances[0], balances[1]), balances[2]);
 
     return [a, mb, mc, md];
 }
@@ -159,26 +164,20 @@ export function _calcNewtonDelta(
     // Subtraction does not underflow since rootEst is chosen so that it's always above the (only) local minimum.
     let dfRootEst = BigNumber.from(0);
 
-    const rootEst2 = rootEst.mul(rootEst).div(ONE);
+    const rootEst2 = mulDown(rootEst, rootEst);
     dfRootEst = rootEst2.mul(3);
     dfRootEst = dfRootEst.sub(
-        dfRootEst
-            .mul(root3Alpha)
-            .div(ONE)
-            .mul(root3Alpha)
-            .div(ONE)
-            .mul(root3Alpha)
-            .div(ONE)
+        mulDown(mulDown(mulDown(dfRootEst, root3Alpha), root3Alpha), root3Alpha)
     );
-    dfRootEst = dfRootEst.sub(rootEst.mul(mb).div(ONE).mul(2)).sub(mc);
+    dfRootEst = dfRootEst.sub(mulDown(rootEst, mb).mul(2)).sub(mc);
 
     const deltaMinus = _safeLargePow3ADown(rootEst, root3Alpha, dfRootEst);
 
     // NB: We could order the operations here in much the same way we did above to reduce errors. But tests show
     // that this has no significant effect, and it would lead to more complex code.
-    let deltaPlus = rootEst.mul(rootEst).div(ONE).mul(mb).div(ONE);
-    deltaPlus = deltaPlus.add(rootEst.mul(mc).div(ONE)).mul(ONE).div(dfRootEst);
-    deltaPlus = deltaPlus.add(md.mul(ONE).div(dfRootEst));
+    let deltaPlus = mulDown(mulDown(rootEst, rootEst), mb);
+    deltaPlus = divDown(deltaPlus.add(mulDown(rootEst, mc)), dfRootEst);
+    deltaPlus = deltaPlus.add(divDown(md, dfRootEst));
 
     const deltaIsPos = deltaPlus.gte(deltaMinus);
     const deltaAbs = deltaIsPos
@@ -215,7 +214,7 @@ export function _calcOutGivenIn(
         // Note that -dz > 0 is what the trader receives.                                            //
         // We exploit the fact that this formula is symmetric up to virtualParam{X,Y,Z}.             //
         **********************************************************************************************/
-    if (amountIn.gt(balanceIn.mul(_MAX_IN_RATIO).div(ONE)))
+    if (amountIn.gt(mulDown(balanceIn, _MAX_IN_RATIO)))
         throw new Error('Swap Amount In Too Large');
 
     // The factors in total lead to a multiplicative "safety margin" between the employed virtual offsets
@@ -223,13 +222,13 @@ export function _calcOutGivenIn(
     // computation.
 
     const virtInOver = balanceIn.add(mulUp(virtualOffset, ONE.add(2)));
-    const virtOutUnder = balanceOut.add(virtualOffset.mul(ONE.sub(1)).div(ONE));
+    const virtOutUnder = balanceOut.add(mulDown(virtualOffset, ONE.sub(1)));
     const amountOut = virtOutUnder.mul(amountIn).div(virtInOver.add(amountIn));
 
     // Note that this in particular reverts if amountOut > balanceOut, i.e., if the out-amount would be more than
     // the balance.
 
-    if (amountOut.gt(balanceOut.mul(_MAX_OUT_RATIO).div(ONE)))
+    if (amountOut.gt(mulDown(balanceOut, _MAX_OUT_RATIO)))
         throw new Error('Resultant Swap Amount Out Too Large');
 
     return amountOut;
@@ -263,21 +262,21 @@ export function _calcInGivenOut(
 
     // Note that this in particular reverts if amountOut > balanceOut, i.e., if the trader tries to take more out of
     // the pool than is in it.
-    if (amountOut.gt(balanceOut.mul(_MAX_OUT_RATIO).div(ONE)))
+    if (amountOut.gt(mulDown(balanceOut, _MAX_OUT_RATIO)))
         throw new Error('Swap Amount Out Too Large');
 
     // The factors in total lead to a multiplicative "safety margin" between the employed virtual offsets
     // very slightly larger than 3e-18, compensating for the maximum multiplicative error in the invariant
     // computation.
     const virtInOver = balanceIn.add(mulUp(virtualOffset, ONE.add(2)));
-    const virtOutUnder = balanceOut.add(virtualOffset.mul(ONE.sub(1)).div(ONE));
+    const virtOutUnder = balanceOut.add(mulDown(virtualOffset, ONE.sub(1)));
 
     const amountIn = divUp(
         mulUp(virtInOver, amountOut),
         virtOutUnder.sub(amountOut)
     );
 
-    if (amountIn.gt(balanceIn.mul(_MAX_IN_RATIO).div(ONE)))
+    if (amountIn.gt(mulDown(balanceIn, _MAX_IN_RATIO)))
         throw new Error('Resultant Swap Amount In Too Large');
 
     return amountIn;
@@ -309,12 +308,12 @@ export function _calculateNewSpotPrice(
 
     const afterFeeMultiplier = ONE.sub(swapFee); // 1 - s
     const virtIn = balances[0].add(virtualOffsetInOut); // x + virtualOffsetInOut = x'
-    const numerator = virtIn.add(afterFeeMultiplier.mul(inAmount).div(ONE)); // x' + (1 - s) * dx
+    const numerator = virtIn.add(mulDown(afterFeeMultiplier, inAmount)); // x' + (1 - s) * dx
 
     const virtOut = balances[1].add(virtualOffsetInOut); // z + virtualOffsetInOut = y'
-    const denominator = afterFeeMultiplier.mul(virtOut.sub(outAmount)).div(ONE); // (1 - s) * (z' + dz)
+    const denominator = mulDown(afterFeeMultiplier, virtOut.sub(outAmount)); // (1 - s) * (z' + dz)
 
-    const newSpotPrice = numerator.mul(ONE).div(denominator);
+    const newSpotPrice = divDown(numerator, denominator);
 
     return newSpotPrice;
 }
@@ -345,7 +344,7 @@ export function _derivativeSpotPriceAfterSwapExactTokenInForTokenOut(
     const virtOut = balances[1].add(virtualOffsetInOut); // z' = z + virtualOffsetInOut
     const denominator = virtOut.sub(outAmount); // z' + dz
 
-    const derivative = TWO.mul(ONE).div(denominator);
+    const derivative = divDown(TWO, denominator);
 
     return derivative;
 }
@@ -374,15 +373,13 @@ export function _derivativeSpotPriceAfterSwapTokenInForExactTokenOut(
     const TWO = BigNumber.from(2).mul(ONE);
     const afterFeeMultiplier = ONE.sub(swapFee); // 1 - s
     const virtIn = balances[0].add(virtualOffsetInOut); // x + virtualOffsetInOut = x'
-    const numerator = virtIn.add(afterFeeMultiplier.mul(inAmount).div(ONE)); // x' + (1 - s) * dx
+    const numerator = virtIn.add(mulDown(afterFeeMultiplier, inAmount)); // x' + (1 - s) * dx
     const virtOut = balances[1].add(virtualOffsetInOut); // z + virtualOffsetInOut = z'
-    const denominator = virtOut
-        .sub(outAmount)
-        .mul(virtOut.sub(outAmount))
-        .div(ONE); // (z' + dz)^2
-    const factor = TWO.mul(ONE).div(afterFeeMultiplier); // 2 / (1 - s)
+    const denominator = mulDown(virtOut.sub(outAmount), virtOut.sub(outAmount));
+    // (z' + dz)^2
+    const factor = divDown(TWO, afterFeeMultiplier); // 2 / (1 - s)
 
-    const derivative = factor.mul(numerator.mul(ONE).div(denominator)).div(ONE);
+    const derivative = mulDown(factor, divDown(numerator, denominator));
 
     return derivative;
 }
@@ -407,7 +404,7 @@ export function _getNormalizedLiquidity(
 
     const virtIn = balances[0].add(virtualParamIn);
     const afterFeeMultiplier = ONE.sub(swapFee);
-    const normalizedLiquidity = virtIn.mul(ONE).div(afterFeeMultiplier);
+    const normalizedLiquidity = divDown(virtIn, afterFeeMultiplier);
 
     return normalizedLiquidity;
 }

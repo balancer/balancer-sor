@@ -1,6 +1,6 @@
 import { BigNumber } from '@ethersproject/bignumber';
 import { WeiPerEther as ONE } from '@ethersproject/constants';
-import { _squareRoot, mulUp, divUp } from './helpers';
+import { _sqrt, mulUp, divUp, mulDown, divDown } from './helpers';
 import { _MAX_IN_RATIO, _MAX_OUT_RATIO } from './constants';
 
 /////////
@@ -12,10 +12,7 @@ export function _findVirtualParams(
     sqrtAlpha: BigNumber,
     sqrtBeta: BigNumber
 ): [BigNumber, BigNumber] {
-    return [
-        invariant.mul(ONE).div(sqrtBeta),
-        invariant.mul(sqrtAlpha).div(ONE),
-    ];
+    return [divDown(invariant, sqrtBeta), mulDown(invariant, sqrtAlpha)];
 }
 
 /////////
@@ -38,9 +35,13 @@ export function _calculateInvariant(
         //                                          2 * a                               //
         //                                                                              //
         **********************************************************************************************/
-    const [a, mb, mc] = _calculateQuadraticTerms(balances, sqrtAlpha, sqrtBeta);
+    const [a, mb, bSquare, mc] = _calculateQuadraticTerms(
+        balances,
+        sqrtAlpha,
+        sqrtBeta
+    );
 
-    const invariant = _calculateQuadratic(a, mb, mc);
+    const invariant = _calculateQuadratic(a, mb, bSquare, mc);
 
     return invariant;
 }
@@ -49,31 +50,52 @@ export function _calculateQuadraticTerms(
     balances: BigNumber[],
     sqrtAlpha: BigNumber,
     sqrtBeta: BigNumber
-): [BigNumber, BigNumber, BigNumber] {
-    const a = ONE.sub(sqrtAlpha.mul(ONE).div(sqrtBeta));
-    const bterm0 = balances[1].mul(ONE).div(sqrtBeta);
-    const bterm1 = balances[0].mul(sqrtAlpha).div(ONE);
+): [BigNumber, BigNumber, BigNumber, BigNumber] {
+    const a = ONE.sub(divDown(sqrtAlpha, sqrtBeta));
+    const bterm0 = divDown(balances[1], sqrtBeta);
+    const bterm1 = mulDown(balances[0], sqrtAlpha);
     const mb = bterm0.add(bterm1);
-    const mc = balances[0].mul(balances[1]).div(ONE);
+    const mc = mulDown(balances[0], balances[1]);
 
-    return [a, mb, mc];
+    // For better fixed point precision, calculate in expanded form w/ re-ordering of multiplications
+    // b^2 = x^2 * alpha + x*y*2*sqrt(alpha/beta) + y^2 / beta
+    let bSquare = mulDown(
+        mulDown(mulDown(balances[0], balances[0]), sqrtAlpha),
+        sqrtAlpha
+    );
+    const bSq2 = divDown(
+        mulDown(
+            mulDown(mulDown(balances[0], balances[1]), ONE.mul(2)),
+            sqrtAlpha
+        ),
+        sqrtBeta
+    );
+
+    const bSq3 = divDown(
+        mulDown(balances[1], balances[1]),
+        mulUp(sqrtBeta, sqrtBeta)
+    );
+
+    bSquare = bSquare.add(bSq2).add(bSq3);
+
+    return [a, mb, bSquare, mc];
 }
 
 export function _calculateQuadratic(
     a: BigNumber,
     mb: BigNumber,
+    bSquare: BigNumber,
     mc: BigNumber
 ): BigNumber {
-    const denominator = a.mul(BigNumber.from(2));
-    const bSquare = mb.mul(mb).div(ONE);
-    const addTerm = a.mul(mc.mul(BigNumber.from(4))).div(ONE);
+    const denominator = mulUp(a, ONE.mul(2));
+    // order multiplications for fixed point precision
+    const addTerm = mulDown(mulDown(mc, ONE.mul(4)), a);
     // The minus sign in the radicand cancels out in this special case, so we add
     const radicand = bSquare.add(addTerm);
-    const sqrResult = _squareRoot(radicand);
-
+    const sqrResult = _sqrt(radicand, BigNumber.from(5));
     // The minus sign in the numerator cancels out in this special case
     const numerator = mb.add(sqrResult);
-    const invariant = numerator.mul(ONE).div(denominator);
+    const invariant = divDown(numerator, denominator);
 
     return invariant;
 }
@@ -88,8 +110,7 @@ export function _calcOutGivenIn(
     balanceOut: BigNumber,
     amountIn: BigNumber,
     virtualParamIn: BigNumber,
-    virtualParamOut: BigNumber,
-    currentInvariant: BigNumber
+    virtualParamOut: BigNumber
 ): BigNumber {
     /**********************************************************************************************
         // Described for X = `in' asset and Y = `out' asset, but equivalent for the other case       //
@@ -104,15 +125,26 @@ export function _calcOutGivenIn(
         // Note that -dy > 0 is what the trader receives.                                            //
         // We exploit the fact that this formula is symmetric up to virtualParam{X,Y}.               //
         **********************************************************************************************/
-    if (amountIn.gt(balanceIn.mul(_MAX_IN_RATIO).div(ONE)))
+    if (amountIn.gt(mulDown(balanceIn, _MAX_IN_RATIO)))
         throw new Error('Swap Amount Too Large');
 
-    const virtIn = balanceIn.add(virtualParamIn);
-    const denominator = virtIn.add(amountIn);
-    const invSquare = mulUp(currentInvariant, currentInvariant);
-    const subtrahend = divUp(invSquare, denominator);
-    const virtOut = balanceOut.add(virtualParamOut);
-    return virtOut.sub(subtrahend);
+    // The factors in total lead to a multiplicative "safety margin" between the employed virtual offsets
+    // very slightly larger than 3e-18.
+    const virtInOver = balanceIn.add(mulUp(virtualParamIn, ONE.add(2)));
+    const virtOutUnder = balanceOut.add(mulDown(virtualParamOut, ONE.sub(1)));
+
+    const amountOut = divDown(
+        mulDown(virtOutUnder, amountIn),
+        virtInOver.add(amountIn)
+    );
+
+    if (amountOut.gte(balanceOut)) throw new Error('ASSET_BOUNDS_EXCEEDED');
+
+    // This in particular ensures amountOut < balanceOut.
+    if (amountOut.gt(mulDown(balanceOut, _MAX_OUT_RATIO)))
+        throw new Error('MAX_OUT_RATIO');
+
+    return amountOut;
 }
 // SwapType = 'swapExactOut'
 export function _calcInGivenOut(
@@ -120,8 +152,7 @@ export function _calcInGivenOut(
     balanceOut: BigNumber,
     amountOut: BigNumber,
     virtualParamIn: BigNumber,
-    virtualParamOut: BigNumber,
-    currentInvariant: BigNumber
+    virtualParamOut: BigNumber
 ): BigNumber {
     /**********************************************************************************************
       // dX = incrX  = amountIn  > 0                                                               //
@@ -136,15 +167,23 @@ export function _calcInGivenOut(
       // Note that dy < 0 < dx.                                                                    //
       **********************************************************************************************/
 
-    if (amountOut.gt(balanceOut.mul(_MAX_OUT_RATIO).div(ONE)))
+    if (amountOut.gt(mulDown(balanceOut, _MAX_OUT_RATIO)))
         throw new Error('Swap Amount Too Large');
 
-    const virtOut = balanceOut.add(virtualParamOut);
-    const denominator = virtOut.sub(amountOut);
-    const invSquare = mulUp(currentInvariant, currentInvariant);
-    const term = divUp(invSquare, denominator);
-    const virtIn = balanceIn.add(virtualParamIn);
-    return term.sub(virtIn);
+    // The factors in total lead to a multiplicative "safety margin" between the employed virtual offsets
+    // very slightly larger than 3e-18.
+    const virtInOver = balanceIn.add(mulUp(virtualParamIn, ONE.add(2)));
+    const virtOutUnder = balanceOut.add(mulDown(virtualParamOut, ONE.sub(1)));
+
+    const amountIn = divUp(
+        mulUp(virtInOver, amountOut),
+        virtOutUnder.sub(amountOut)
+    );
+
+    if (amountIn.gt(mulDown(balanceIn, _MAX_IN_RATIO)))
+        throw new Error('Max_IN_RATIO');
+
+    return amountIn;
 }
 
 // /////////
@@ -174,10 +213,10 @@ export function _calculateNewSpotPrice(
 
     const afterFeeMultiplier = ONE.sub(swapFee); // 1 - s
     const virtIn = balances[0].add(virtualParamIn); // x + virtualParamX = x'
-    const numerator = virtIn.add(afterFeeMultiplier.mul(inAmount).div(ONE)); // x' + (1 - s) * dx
+    const numerator = virtIn.add(mulDown(afterFeeMultiplier, inAmount)); // x' + (1 - s) * dx
     const virtOut = balances[1].add(virtualParamOut); // y + virtualParamY = y'
-    const denominator = afterFeeMultiplier.mul(virtOut.sub(outAmount)).div(ONE); // (1 - s) * (y' + dy)
-    const newSpotPrice = numerator.mul(ONE).div(denominator);
+    const denominator = mulDown(afterFeeMultiplier, virtOut.sub(outAmount)); // (1 - s) * (y' + dy)
+    const newSpotPrice = divDown(numerator, denominator);
 
     return newSpotPrice;
 }
@@ -208,7 +247,7 @@ export function _derivativeSpotPriceAfterSwapExactTokenInForTokenOut(
     const virtOut = balances[1].add(virtualParamOut); // y' = y + virtualParamY
     const denominator = virtOut.sub(outAmount); // y' + dy
 
-    const derivative = TWO.mul(ONE).div(denominator);
+    const derivative = divDown(TWO, denominator);
 
     return derivative;
 }
@@ -238,15 +277,12 @@ export function _derivativeSpotPriceAfterSwapTokenInForExactTokenOut(
     const TWO = BigNumber.from(2).mul(ONE);
     const afterFeeMultiplier = ONE.sub(swapFee); // 1 - s
     const virtIn = balances[0].add(virtualParamIn); // x + virtualParamX = x'
-    const numerator = virtIn.add(afterFeeMultiplier.mul(inAmount).div(ONE)); // x' + (1 - s) * dx
+    const numerator = virtIn.add(mulDown(afterFeeMultiplier, inAmount)); // x' + (1 - s) * dx
     const virtOut = balances[1].add(virtualParamOut); // y + virtualParamY = y'
-    const denominator = virtOut
-        .sub(outAmount)
-        .mul(virtOut.sub(outAmount))
-        .div(ONE); // (y' + dy)^2
-    const factor = TWO.mul(ONE).div(afterFeeMultiplier); // 2 / (1 - s)
+    const denominator = mulDown(virtOut.sub(outAmount), virtOut.sub(outAmount)); // (y' + dy)^2
+    const factor = divDown(TWO, afterFeeMultiplier); // 2 / (1 - s)
 
-    const derivative = factor.mul(numerator.mul(ONE).div(denominator)).div(ONE);
+    const derivative = mulDown(factor, divDown(numerator, denominator));
 
     return derivative;
 }
@@ -271,7 +307,7 @@ export function _getNormalizedLiquidity(
     const virtIn = balances[0].add(virtualParamIn);
     const afterFeeMultiplier = ONE.sub(swapFee);
 
-    const normalizedLiquidity = virtIn.mul(ONE).div(afterFeeMultiplier);
+    const normalizedLiquidity = divDown(virtIn, afterFeeMultiplier);
 
     return normalizedLiquidity;
 }

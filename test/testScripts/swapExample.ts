@@ -752,10 +752,10 @@ export async function simpleSwap() {
     const networkId = Network.KOVAN;
     // Pools source can be Subgraph URL or pools data set passed directly
     // Update pools list with most recent onchain balances
-    const tokenIn = ADDRESSES[networkId].GYRO2_TEST1;
-    const tokenOut = ADDRESSES[networkId].GYRO2_TEST2;
+    const tokenIn = ADDRESSES[networkId].GYRO3_TEST1;
+    const tokenOut = ADDRESSES[networkId].GYRO3_TEST2;
     const swapType = SwapTypes.SwapExactIn;
-    const swapAmount = parseFixed('100', 18);
+    const swapAmount = parseFixed('1', 18);
     const executeTrade = true;
 
     const provider = new JsonRpcProvider(PROVIDER_URLS[networkId]);

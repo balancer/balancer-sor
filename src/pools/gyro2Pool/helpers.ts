@@ -1,206 +1,118 @@
 import { BigNumber, parseFixed } from '@ethersproject/bignumber';
 import { WeiPerEther as ONE } from '@ethersproject/constants';
 import {
-    MAX_POW_RELATIVE_ERROR,
-    MILD_EXPONENT_BOUND,
-    LN_36_LOWER_BOUND,
-    LN_36_UPPER_BOUND,
-    a0,
-    a1,
-    a2,
-    a3,
-    a4,
-    a5,
-    a6,
-    a7,
-    a8,
-    a9,
-    a10,
-    a11,
-    x0,
-    x1,
-    x2,
-    x3,
-    x4,
-    x5,
-    x6,
-    x7,
-    x8,
-    x9,
-    x10,
-    x11,
+    SQRT_1E_NEG_1,
+    SQRT_1E_NEG_3,
+    SQRT_1E_NEG_5,
+    SQRT_1E_NEG_7,
+    SQRT_1E_NEG_9,
+    SQRT_1E_NEG_11,
+    SQRT_1E_NEG_13,
+    SQRT_1E_NEG_15,
+    SQRT_1E_NEG_17,
 } from './constants';
 
 // Helpers
-export function _squareRoot(input: BigNumber): BigNumber {
-    return powDown(input, ONE.div(2));
-}
 
-function powDown(a: BigNumber, b: BigNumber) {
-    const raw = logExpMathPow(a, b);
-    const maxError = mulUp(raw, MAX_POW_RELATIVE_ERROR).add(1);
-
-    if (raw.lt(maxError)) {
-        return BigNumber.from(0);
-    } else {
-        return raw.sub(maxError);
-    }
-}
-
-function logExpMathPow(x: BigNumber, y: BigNumber): BigNumber {
-    if (y.isZero()) {
-        return ONE;
-    }
-    if (x.isZero()) {
+export function _sqrt(input: BigNumber, tolerance: BigNumber) {
+    if (input.isZero()) {
         return BigNumber.from(0);
     }
+    let guess = _makeInitialGuess(input);
 
-    // Instead of computing x^y directly, we instead rely on the properties of logarithms and exponentiation to
-    // arrive at that result. In particular, exp(ln(x)) = x, and ln(x^y) = y * ln(x). This means
-    // x^y = exp(y * ln(x)).
+    // 7 iterations
+    for (let i of new Array(7).fill(0)) {
+        guess = guess.add(input.mul(ONE).div(guess)).div(2);
+    }
 
-    // The ln function takes a signed value, so we need to make sure x fits in the signed 256 bit range.
-    if (x.gte(BigNumber.from(2).pow(255)))
-        throw new Error('logExpMathPow error: Input out of bounds');
+    // Check in some epsilon range
+    // Check square is more or less correct
+    const guessSquared = guess.mul(guess).div(ONE);
 
-    if (y.gte(MILD_EXPONENT_BOUND))
-        throw new Error('logExpMathPow error: Exponent out of bounds');
+    if (
+        !(
+            guessSquared.lte(input.add(mulUp(guess, tolerance))) &&
+            guessSquared.gte(input.sub(mulUp(guess, tolerance)))
+        )
+    )
+        throw new Error('Gyro2Pool: _sqrt failed');
 
-    let logXTimesY = BigNumber.from(0);
-    let isPos = true;
-    if (x.gt(LN_36_LOWER_BOUND) && x.lt(LN_36_UPPER_BOUND)) {
-        const ln36A = _ln_36(x);
-        logXTimesY = ln36A.div(ONE).mul(y).add(ln36A.mod(ONE).mul(y).div(ONE));
+    return guess;
+}
+
+function _makeInitialGuess(input: BigNumber) {
+    if (input.gte(ONE)) {
+        return BigNumber.from(2)
+            .pow(_intLog2Halved(input.div(ONE)))
+            .mul(ONE);
     } else {
-        const [lnA, lnAPos] = _ln(x);
-        if (!lnAPos) isPos = false;
-        logXTimesY = lnA.mul(y);
-    }
-    logXTimesY = logXTimesY.div(ONE);
-
-    return exp(logXTimesY, isPos);
-}
-
-function _ln_36(x: BigNumber): BigNumber {
-    x = x.mul(ONE);
-    const ONE36 = ONE.mul(ONE);
-
-    const z = x.sub(ONE36).mul(ONE36).div(x.add(ONE36));
-    const zSquared = z.mul(z).div(ONE36);
-
-    let num = z;
-    let seriesSum = num;
-
-    for (let i = 3; i <= 15; i = i + 2) {
-        num = num.mul(zSquared).div(ONE36);
-        seriesSum = seriesSum.add(num.div(i));
-    }
-
-    return seriesSum.mul(2);
-}
-
-function _ln(a: BigNumber): [BigNumber, boolean] {
-    if (a.lt(ONE)) {
-        return [_ln(ONE.mul(ONE).div(a))[0], false];
-    }
-
-    let sum = BigNumber.from(0);
-
-    if (a.gte(a0.mul(ONE))) {
-        a = a.div(a0);
-        sum = sum.add(x0);
-    }
-
-    if (a.gte(a1.mul(ONE))) {
-        a = a.div(a1);
-        sum = sum.add(x1);
-    }
-
-    sum = sum.mul(100);
-    a = a.mul(100);
-    const ONE20 = ONE.mul(100);
-
-    [
-        [a2, x2],
-        [a3, x3],
-        [a4, x4],
-        [a5, x5],
-        [a6, x6],
-        [a7, x7],
-        [a8, x8],
-        [a9, x9],
-        [a10, x10],
-        [a11, x11],
-    ].forEach(([aNum, xNum]) => {
-        if (a.gte(aNum)) {
-            a = a.mul(ONE20).div(aNum);
-            sum = sum.add(xNum);
+        if (input.lte('10')) {
+            return SQRT_1E_NEG_17;
         }
-    });
-
-    const z = a.sub(ONE20).mul(ONE20).div(a.add(ONE20));
-    const zSquared = z.mul(z).div(ONE20);
-
-    let num = z;
-    let seriesSum = num;
-
-    for (let i = 3; i <= 11; i = i + 2) {
-        num = num.mul(zSquared).div(ONE20);
-        seriesSum = seriesSum.add(num.div(i));
+        if (input.lte('100')) {
+            return BigNumber.from('10000000000');
+        }
+        if (input.lte('1000')) {
+            return SQRT_1E_NEG_15;
+        }
+        if (input.lte('10000')) {
+            return BigNumber.from('100000000000');
+        }
+        if (input.lte('100000')) {
+            return SQRT_1E_NEG_13;
+        }
+        if (input.lte('1000000')) {
+            return BigNumber.from('1000000000000');
+        }
+        if (input.lte('10000000')) {
+            return SQRT_1E_NEG_11;
+        }
+        if (input.lte('100000000')) {
+            return BigNumber.from('10000000000000');
+        }
+        if (input.lte('1000000000')) {
+            return SQRT_1E_NEG_9;
+        }
+        if (input.lte('10000000000')) {
+            return BigNumber.from('100000000000000');
+        }
+        if (input.lte('100000000000')) {
+            return SQRT_1E_NEG_7;
+        }
+        if (input.lte('1000000000000')) {
+            return BigNumber.from('1000000000000000');
+        }
+        if (input.lte('10000000000000')) {
+            return SQRT_1E_NEG_5;
+        }
+        if (input.lte('100000000000000')) {
+            return BigNumber.from('10000000000000000');
+        }
+        if (input.lte('1000000000000000')) {
+            return SQRT_1E_NEG_3;
+        }
+        if (input.lte('10000000000000000')) {
+            return BigNumber.from('100000000000000000');
+        }
+        if (input.lte('100000000000000000')) {
+            return SQRT_1E_NEG_1;
+        }
+        return input;
     }
-
-    seriesSum = seriesSum.mul(2);
-
-    return [sum.add(seriesSum).div(100), true];
 }
 
-function exp(x: BigNumber, isPos: boolean) {
-    if (!isPos) {
-        return ONE.mul(ONE).div(exp(x, true));
-    }
+function _intLog2Halved(x: BigNumber) {
+    let n = 0;
 
-    let firstAN = BigNumber.from(0);
-    if (x.gte(x0)) {
-        x = x.sub(x0);
-        firstAN = a0;
-    } else if (x.gte(x1)) {
-        x = x.sub(x1);
-        firstAN = a1;
-    } else {
-        firstAN = BigNumber.from(1);
-    }
-
-    x = x.mul(100);
-    const ONE20 = ONE.mul(100);
-
-    let product = ONE20;
-
-    [
-        [a2, x2],
-        [a3, x3],
-        [a4, x4],
-        [a5, x5],
-        [a6, x6],
-        [a7, x7],
-        [a8, x8],
-        [a9, x9],
-    ].forEach(([aNum, xNum]) => {
-        if (x.gte(xNum)) {
-            x = x.sub(xNum);
-            product = product.mul(aNum).div(ONE20);
+    for (let i = 128; i >= 2; i = i / 2) {
+        const factor = BigNumber.from(2).pow(i);
+        if (x.gte(factor)) {
+            x = x.div(factor);
+            n += i / 2;
         }
-    });
-
-    let seriesSum = ONE20;
-    let term = x;
-    seriesSum = seriesSum.add(term);
-
-    for (let i = 2; i <= 12; i++) {
-        term = term.mul(x).div(ONE20).div(i);
-        seriesSum = seriesSum.add(term);
     }
 
-    return product.mul(seriesSum).div(ONE20).mul(firstAN).div(100);
+    return n;
 }
 
 export function mulUp(a: BigNumber, b: BigNumber) {
@@ -211,6 +123,16 @@ export function mulUp(a: BigNumber, b: BigNumber) {
 export function divUp(a: BigNumber, b: BigNumber) {
     const aInflated = a.mul(ONE);
     return aInflated.sub(1).div(b).add(1);
+}
+
+export function mulDown(a: BigNumber, b: BigNumber) {
+    const product = a.mul(b);
+    return product.div(ONE);
+}
+
+export function divDown(a: BigNumber, b: BigNumber) {
+    const aInflated = a.mul(ONE);
+    return aInflated.div(b);
 }
 
 export function _normalizeBalances(
