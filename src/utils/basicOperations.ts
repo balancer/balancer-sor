@@ -103,6 +103,7 @@ export class MathSol {
     }
 
     // Modification: Taken from the fixed point class
+    // Same as divDown in Smart Contract FixedPoint.sol
     static divDownFixed(a: bigint, b: bigint): bigint {
         _require(b != BZERO, 'Errors.ZERO_DIVISION');
         if (a == BZERO) {
@@ -146,11 +147,21 @@ export class MathSol {
         return this.add(raw, maxError);
     }
 
+    static powDown(x: bigint, y: bigint): bigint {
+        const raw = LogExpMath.pow(x, y);
+        const maxError = this.add(
+            this.mulUpFixed(raw, this.MAX_POW_RELATIVE_ERROR),
+            BONE
+        );
+        return this.sub(raw, maxError);
+    }
+
     // Modification: Taken from the fixed point class
     static complementFixed(x: bigint): bigint {
         return x < this.ONE ? this.ONE - x : BZERO;
     }
 
+    // This is the same as mulDown in Smart Contracts FixedPoint.sol
     static mulDownFixed(a: bigint, b: bigint): bigint {
         const product = a * b;
         _require(a == BZERO || product / a == b, 'Errors.MUL_OVERFLOW');
