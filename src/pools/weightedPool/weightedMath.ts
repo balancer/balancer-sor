@@ -188,6 +188,33 @@ export function _calcBptOutGivenExactTokensIn(
     }
 }
 
+export function _calcTokensOutGivenExactBptIn(
+    balances: bigint[],
+    bptAmountIn: bigint,
+    totalBPT: bigint
+): bigint[] {
+    /**********************************************************************************************
+    // exactBPTInForTokensOut                                                                    //
+    // (per token)                                                                               //
+    // aO = amountOut                  /        bptIn         \                                  //
+    // b = balance           a0 = b * | ---------------------  |                                 //
+    // bptIn = bptAmountIn             \       totalBPT       /                                  //
+    // bpt = totalBPT                                                                            //
+    **********************************************************************************************/
+
+    // Since we're computing an amount out, we round down overall. This means rounding down on both the
+    // multiplication and division.
+
+    const bptRatio = MathSol.divDownFixed(bptAmountIn, totalBPT);
+
+    const amountsOut = new Array<bigint>(balances.length);
+    for (let i = 0; i < balances.length; i++) {
+        amountsOut[i] = MathSol.mulDownFixed(balances[i], bptRatio);
+    }
+
+    return amountsOut;
+}
+
 // Invariant is used to collect protocol swap fees by comparing its value between two times.
 // So we can round always to the same direction. It is also used to initiate the BPT amount
 // and, because there is a minimum BPT, we round down the invariant.

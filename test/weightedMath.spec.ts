@@ -21,10 +21,21 @@ import {
     _calcBptOutGivenExactTokensIn,
     _calculateInvariant,
     _calcDueProtocolSwapFeeBptAmount,
+    _calcTokensOutGivenExactBptIn,
 } from '../src/pools/weightedPool/weightedMath';
 import { Contract } from '@ethersproject/contracts';
 
 dotenv.config();
+
+const { ALCHEMY_URL: jsonRpcUrl } = process.env;
+const rpcUrl = 'http://127.0.0.1:8545';
+const provider = new JsonRpcProvider(rpcUrl, 1);
+const vault = Vault__factory.connect(vaultAddr, provider);
+// mainnet balancer helpers contract
+const balancerHelpers = BalancerHelpers__factory.connect(
+    '0x5aDDCCa35b7A0D07C74063c48700C8590E87864E',
+    provider
+);
 
 describe('weightedMath tests', () => {
     // TO DO: add items using checkOutcome function
@@ -70,15 +81,6 @@ describe('weightedMath tests', () => {
     });
 
     context('_calcBptOutGivenExactTokensIn', () => {
-        const { ALCHEMY_URL: jsonRpcUrl } = process.env;
-        const rpcUrl = 'http://127.0.0.1:8545';
-        const provider = new JsonRpcProvider(rpcUrl, 1);
-        const vault = Vault__factory.connect(vaultAddr, provider);
-        // mainnet balancer helpers contract
-        const balancerHelpers = BalancerHelpers__factory.connect(
-            '0x5aDDCCa35b7A0D07C74063c48700C8590E87864E',
-            provider
-        );
         // Setup chain
         before(async function () {
             this.timeout(20000);
@@ -301,6 +303,344 @@ describe('weightedMath tests', () => {
         //     }).timeout(10000);
         // });
     });
+
+    context('_calcTokensOutGivenExactBptIn', () => {
+        // Setup chain
+        before(async function () {
+            this.timeout(20000);
+
+            await provider.send('hardhat_reset', [
+                {
+                    forking: {
+                        jsonRpcUrl,
+                        blockNumber: 14828550,
+                    },
+                },
+            ]);
+        });
+
+        context('testing against original maths', () => {
+            it('Pool with 18 decimal tokens', async () => {
+                const poolId =
+                    '0x90291319f1d4ea3ad4db0dd8fe9e12baf749e84500020000000000000000013c';
+                const poolInfo = await getPoolOnChain(poolId, vault, provider);
+                const amountBptIn = '7000000000000000000';
+                // UI was originally using this
+                const sdkResult =
+                    SDK.WeightedMath._calcTokensOutGivenExactBptIn(
+                        poolInfo.balances.map((a) => bnum(a.toString())),
+                        bnum(amountBptIn),
+                        bnum(poolInfo.totalSupply.toString())
+                    );
+                // bigint version of maths
+                const calculatedTokensOut = _calcTokensOutGivenExactBptIn(
+                    poolInfo.balances,
+                    BigInt(amountBptIn),
+                    poolInfo.totalSupply
+                );
+                expect(sdkResult[0].gt(0)).to.be.true;
+                expect(sdkResult.toString()).to.eq(
+                    calculatedTokensOut.toString()
+                );
+
+                // queryJoin against local fork
+                // This is failing, probably related to ProtocolFees (see below)
+                // const query = await queryJoin(
+                //     poolId,
+                //     amountsIn,
+                //     poolInfo.tokens,
+                //     balancerHelpers
+                // );
+                // expect(query.amountsIn.toString()).to.eq(amountsIn.toString());
+                // expect(query.bptOut.gt(0)).to.be.true;
+                // expect(query.bptOut.toString()).to.eq(
+                //     calculatedBptOut.toString()
+                // );
+            }).timeout(10000);
+
+            it('Pool with 6 decimal tokens', async () => {
+                // USDC/WETH
+                const poolId =
+                    '0x96646936b91d6b9d7d0c47c496afbf3d6ec7b6f8000200000000000000000019';
+                const poolInfo = await getPoolOnChain(poolId, vault, provider);
+                const scalingFactors = [
+                    '1000000000000000000000000000000',
+                    '1000000000000000000',
+                ];
+                const amountBptIn = '1234000000000000000000';
+                const scaledBalances = poolInfo.balances.map(
+                    (a, i) =>
+                        (BigInt(a) * BigInt(scalingFactors[i])) / BigInt(1e18)
+                );
+                // UI was originally using this
+                const sdkResult =
+                    SDK.WeightedMath._calcTokensOutGivenExactBptIn(
+                        poolInfo.balances.map((a) => bnum(a.toString())),
+                        bnum(amountBptIn),
+                        bnum(poolInfo.totalSupply.toString())
+                    );
+                const calculatedTokensOut = _calcTokensOutGivenExactBptIn(
+                    scaledBalances,
+                    BigInt(amountBptIn),
+                    poolInfo.totalSupply
+                );
+                const scaledTokensOut = calculatedTokensOut.map(
+                    (a, i) =>
+                        (BigInt(a) * BigInt(1e18)) / BigInt(scalingFactors[i])
+                );
+                expect(sdkResult[0].gt(0)).to.be.true;
+                expect(sdkResult.toString()).to.eq(scaledTokensOut.toString());
+
+                // queryJoin against local fork
+                // This is failing, probably related to ProtocolFees (see below)
+                // const query = await queryJoin(
+                //     poolId,
+                //     amountsIn,
+                //     poolInfo.tokens,
+                //     balancerHelpers
+                // );
+                // expect(query.amountsIn.toString()).to.eq(amountsIn.toString());
+                // expect(query.bptOut.gt(0)).to.be.true;
+                // expect(query.bptOut.toString()).to.eq(
+                //     calculatedBptOut.toString()
+                // );
+            }).timeout(10000);
+        });
+    });
+
+    // context('_calcTokenOutGivenExactBptIn', () => {
+    //     // Setup chain
+    //     before(async function () {
+    //         this.timeout(20000);
+
+    //         await provider.send('hardhat_reset', [
+    //             {
+    //                 forking: {
+    //                     jsonRpcUrl,
+    //                     blockNumber: 14828550,
+    //                 },
+    //             },
+    //         ]);
+    //     });
+
+    //     context('testing against original maths', () => {
+    //         it('Pool with 18 decimal tokens', async () => {
+    //             const poolId =
+    //                 '0x90291319f1d4ea3ad4db0dd8fe9e12baf749e84500020000000000000000013c';
+    //             const poolInfo = await getPoolOnChain(poolId, vault, provider);
+    //             const amountsIn = [
+    //                 '7000000000000000000',
+    //                 '1000000000000000000',
+    //             ];
+    //             // UI was originally using this
+    //             const sdkResult =
+    //                 SDK.WeightedMath._calcTokenOutGivenExactBptIn(
+    //                     poolInfo.balances.map((a) => bnum(a.toString())),
+    //                     poolInfo.normalizedWeights.map((a) =>
+    //                         bnum(a.toString())
+    //                     ),
+    //                     amountsIn.map((a) => bnum(a)),
+    //                     bnum(poolInfo.totalSupply.toString()),
+    //                     bnum(poolInfo.swapFee.toString())
+    //                 );
+    //             // bigint version of maths
+    //             const calculatedBptOut = _calcBptOutGivenExactTokensIn(
+    //                 poolInfo.balances,
+    //                 poolInfo.normalizedWeights,
+    //                 amountsIn.map((a) => BigInt(a)),
+    //                 poolInfo.totalSupply,
+    //                 poolInfo.swapFee
+    //             );
+    //             expect(sdkResult.gt(0)).to.be.true;
+    //             expect(sdkResult.toString()).to.eq(calculatedBptOut.toString());
+
+    //             // queryJoin against local fork
+    //             // This is failing, probably related to ProtocolFees (see below)
+    //             // const query = await queryJoin(
+    //             //     poolId,
+    //             //     amountsIn,
+    //             //     poolInfo.tokens,
+    //             //     balancerHelpers
+    //             // );
+    //             // expect(query.amountsIn.toString()).to.eq(amountsIn.toString());
+    //             // expect(query.bptOut.gt(0)).to.be.true;
+    //             // expect(query.bptOut.toString()).to.eq(
+    //             //     calculatedBptOut.toString()
+    //             // );
+    //         }).timeout(10000);
+
+    //         it('Pool with 6 decimal tokens', async () => {
+    //             // USDC/WETH
+    //             const poolId =
+    //                 '0x96646936b91d6b9d7d0c47c496afbf3d6ec7b6f8000200000000000000000019';
+    //             const poolInfo = await getPoolOnChain(poolId, vault, provider);
+    //             const scalingFactors = [
+    //                 '1000000000000000000000000000000',
+    //                 '1000000000000000000',
+    //             ];
+    //             const amountsIn = ['1234000000', '1000000000000000000'];
+    //             const amountsInScaled: bigint[] = amountsIn.map(
+    //                 (a, i) =>
+    //                     (BigInt(a) * BigInt(scalingFactors[i])) / BigInt(1e18)
+    //             );
+    //             const scaledBalances = poolInfo.balances.map(
+    //                 (a, i) =>
+    //                     (BigInt(a) * BigInt(scalingFactors[i])) / BigInt(1e18)
+    //             );
+    //             // UI was originally using this
+    //             const sdkResult =
+    //                 SDK.WeightedMath._calcTokenOutGivenExactBptIn(
+    //                     poolInfo.balances.map((a) => bnum(a.toString())),
+    //                     poolInfo.normalizedWeights.map((a) =>
+    //                         bnum(a.toString())
+    //                     ),
+    //                     amountsIn.map((a) => bnum(a)),
+    //                     bnum(poolInfo.totalSupply.toString()),
+    //                     bnum(poolInfo.swapFee.toString())
+    //                 );
+    //             const calculatedBptOut = _calcBptOutGivenExactTokensIn(
+    //                 scaledBalances,
+    //                 poolInfo.normalizedWeights,
+    //                 amountsInScaled,
+    //                 poolInfo.totalSupply,
+    //                 poolInfo.swapFee
+    //             );
+    //             expect(sdkResult.gt(0)).to.be.true;
+    //             expect(sdkResult.toString()).to.eq(calculatedBptOut.toString());
+
+    //             // queryJoin against local fork
+    //             // This is failing, probably related to ProtocolFees (see below)
+    //             // const query = await queryJoin(
+    //             //     poolId,
+    //             //     amountsIn,
+    //             //     poolInfo.tokens,
+    //             //     balancerHelpers
+    //             // );
+    //             // expect(query.amountsIn.toString()).to.eq(amountsIn.toString());
+    //             // expect(query.bptOut.gt(0)).to.be.true;
+    //             // expect(query.bptOut.toString()).to.eq(
+    //             //     calculatedBptOut.toString()
+    //             // );
+    //         }).timeout(10000);
+    //     });
+    // });
+
+    // context('_calcBptInGivenExactTokensOut', () => {
+    //     // Setup chain
+    //     before(async function () {
+    //         this.timeout(20000);
+
+    //         await provider.send('hardhat_reset', [
+    //             {
+    //                 forking: {
+    //                     jsonRpcUrl,
+    //                     blockNumber: 14828550,
+    //                 },
+    //             },
+    //         ]);
+    //     });
+
+    //     context('testing against original maths', () => {
+    //         it('Pool with 18 decimal tokens', async () => {
+    //             const poolId =
+    //                 '0x90291319f1d4ea3ad4db0dd8fe9e12baf749e84500020000000000000000013c';
+    //             const poolInfo = await getPoolOnChain(poolId, vault, provider);
+    //             const amountsIn = [
+    //                 '7000000000000000000',
+    //                 '1000000000000000000',
+    //             ];
+    //             // UI was originally using this
+    //             const sdkResult =
+    //                 SDK.WeightedMath._calcBptInGivenExactTokensOut(
+    //                     poolInfo.balances.map((a) => bnum(a.toString())),
+    //                     poolInfo.normalizedWeights.map((a) =>
+    //                         bnum(a.toString())
+    //                     ),
+    //                     amountsIn.map((a) => bnum(a)),
+    //                     bnum(poolInfo.totalSupply.toString()),
+    //                     bnum(poolInfo.swapFee.toString())
+    //                 );
+    //             // bigint version of maths
+    //             const calculatedBptOut = _calcBptOutGivenExactTokensIn(
+    //                 poolInfo.balances,
+    //                 poolInfo.normalizedWeights,
+    //                 amountsIn.map((a) => BigInt(a)),
+    //                 poolInfo.totalSupply,
+    //                 poolInfo.swapFee
+    //             );
+    //             expect(sdkResult.gt(0)).to.be.true;
+    //             expect(sdkResult.toString()).to.eq(calculatedBptOut.toString());
+
+    //             // queryJoin against local fork
+    //             // This is failing, probably related to ProtocolFees (see below)
+    //             // const query = await queryJoin(
+    //             //     poolId,
+    //             //     amountsIn,
+    //             //     poolInfo.tokens,
+    //             //     balancerHelpers
+    //             // );
+    //             // expect(query.amountsIn.toString()).to.eq(amountsIn.toString());
+    //             // expect(query.bptOut.gt(0)).to.be.true;
+    //             // expect(query.bptOut.toString()).to.eq(
+    //             //     calculatedBptOut.toString()
+    //             // );
+    //         }).timeout(10000);
+
+    //         it('Pool with 6 decimal tokens', async () => {
+    //             // USDC/WETH
+    //             const poolId =
+    //                 '0x96646936b91d6b9d7d0c47c496afbf3d6ec7b6f8000200000000000000000019';
+    //             const poolInfo = await getPoolOnChain(poolId, vault, provider);
+    //             const scalingFactors = [
+    //                 '1000000000000000000000000000000',
+    //                 '1000000000000000000',
+    //             ];
+    //             const amountsIn = ['1234000000', '1000000000000000000'];
+    //             const amountsInScaled: bigint[] = amountsIn.map(
+    //                 (a, i) =>
+    //                     (BigInt(a) * BigInt(scalingFactors[i])) / BigInt(1e18)
+    //             );
+    //             const scaledBalances = poolInfo.balances.map(
+    //                 (a, i) =>
+    //                     (BigInt(a) * BigInt(scalingFactors[i])) / BigInt(1e18)
+    //             );
+    //             // UI was originally using this
+    //             const sdkResult =
+    //                 SDK.WeightedMath._calcBptInGivenExactTokensOut(
+    //                     poolInfo.balances.map((a) => bnum(a.toString())),
+    //                     poolInfo.normalizedWeights.map((a) =>
+    //                         bnum(a.toString())
+    //                     ),
+    //                     amountsIn.map((a) => bnum(a)),
+    //                     bnum(poolInfo.totalSupply.toString()),
+    //                     bnum(poolInfo.swapFee.toString())
+    //                 );
+    //             const calculatedBptOut = _calcBptOutGivenExactTokensIn(
+    //                 scaledBalances,
+    //                 poolInfo.normalizedWeights,
+    //                 amountsInScaled,
+    //                 poolInfo.totalSupply,
+    //                 poolInfo.swapFee
+    //             );
+    //             expect(sdkResult.gt(0)).to.be.true;
+    //             expect(sdkResult.toString()).to.eq(calculatedBptOut.toString());
+
+    //             // queryJoin against local fork
+    //             // This is failing, probably related to ProtocolFees (see below)
+    //             // const query = await queryJoin(
+    //             //     poolId,
+    //             //     amountsIn,
+    //             //     poolInfo.tokens,
+    //             //     balancerHelpers
+    //             // );
+    //             // expect(query.amountsIn.toString()).to.eq(amountsIn.toString());
+    //             // expect(query.bptOut.gt(0)).to.be.true;
+    //             // expect(query.bptOut.toString()).to.eq(
+    //             //     calculatedBptOut.toString()
+    //             // );
+    //         }).timeout(10000);
+    //     });
+    // });
 });
 
 async function queryJoin(
