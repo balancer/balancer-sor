@@ -5,6 +5,88 @@ const _require = (b: boolean, message: string) => {
     if (!b) throw new Error(message);
 };
 
+/**
+ * @dev Applies `scalingFactor` to `amount`, resulting in a larger or equal value depending on whether it needed
+ * scaling or not.
+ */
+export function _upscale(amount: bigint, scalingFactor: bigint): bigint {
+    // Upscale rounding wouldn't necessarily always go in the same direction: in a swap for example the balance of
+    // token in should be rounded up, and that of token out rounded down. This is the only place where we round in
+    // the same direction for all amounts, as the impact of this rounding is expected to be minimal (and there's no
+    // rounding error unless `_scalingFactor()` is overriden).
+    return MathSol.mulDownFixed(amount, scalingFactor);
+}
+
+/**
+ * @dev Same as `_upscale`, but for an entire array. This function does not return anything, but instead *mutates*
+ * the `amounts` array.
+ */
+export function _upscaleArray(
+    amounts: bigint[],
+    scalingFactors: bigint[]
+): bigint[] {
+    const upscaledAmounts = new Array<bigint>(amounts.length);
+    for (let i = 0; i < amounts.length; ++i) {
+        upscaledAmounts[i] = MathSol.mulDownFixed(
+            amounts[i],
+            scalingFactors[i]
+        );
+    }
+    return upscaledAmounts;
+}
+
+/**
+ * @dev Reverses the `scalingFactor` applied to `amount`, resulting in a smaller or equal value depending on
+ * whether it needed scaling or not. The result is rounded down.
+ */
+export function _downscaleDown(amount: bigint, scalingFactor: bigint): bigint {
+    return MathSol.divDownFixed(amount, scalingFactor);
+}
+
+/**
+ * @dev Same as `_downscaleDown`, but for an entire array. This function does not return anything, but instead
+ * *mutates* the `amounts` array.
+ */
+export function _downscaleDownArray(
+    amounts: bigint[],
+    scalingFactors: bigint[]
+): bigint[] {
+    const downscaledAmounts = new Array<bigint>(amounts.length);
+    for (let i = 0; i < amounts.length; ++i) {
+        downscaledAmounts[i] = MathSol.divDownFixed(
+            amounts[i],
+            scalingFactors[i]
+        );
+    }
+    return downscaledAmounts;
+}
+
+/**
+ * @dev Reverses the `scalingFactor` applied to `amount`, resulting in a smaller or equal value depending on
+ * whether it needed scaling or not. The result is rounded up.
+ */
+export function _downscaleUp(amount: bigint, scalingFactor: bigint): bigint {
+    return MathSol.divUpFixed(amount, scalingFactor);
+}
+
+/**
+ * @dev Same as `_downscaleUp`, but for an entire array. This function does not return anything, but instead
+ * *mutates* the `amounts` array.
+ */
+export function _downscaleUpArray(
+    amounts: bigint[],
+    scalingFactors: bigint[]
+): bigint[] {
+    const downscaledAmounts = new Array<bigint>(amounts.length);
+    for (let i = 0; i < amounts.length; ++i) {
+        downscaledAmounts[i] = MathSol.divUpFixed(
+            amounts[i],
+            scalingFactors[i]
+        );
+    }
+    return downscaledAmounts;
+}
+
 export class MathSol {
     /**
      * @dev Returns the addition of two unsigned integers of 256 bits, reverting on overflow.

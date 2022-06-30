@@ -12,6 +12,14 @@ import {
     WeightedPool__factory,
     Vault,
 } from '@balancer-labs/typechain';
+import {
+    _upscale,
+    _upscaleArray,
+    _downscaleDown,
+    _downscaleDownArray,
+    _downscaleUp,
+    _downscaleUpArray,
+} from '../src/utils/basicOperations';
 import { BigNumber as OldBigNumber } from '../src/utils/bignumber';
 import { bnum } from '../src/utils/bignumber';
 import { BAL, WETH, vaultAddr } from './lib/constants';
@@ -147,17 +155,17 @@ describe('weightedMath tests', () => {
                     '0x96646936b91d6b9d7d0c47c496afbf3d6ec7b6f8000200000000000000000019';
                 const poolInfo = await getPoolOnChain(poolId, vault, provider);
                 const scalingFactors = [
-                    '1000000000000000000000000000000',
-                    '1000000000000000000',
+                    BigInt('1000000000000000000000000000000'),
+                    BigInt('1000000000000000000'),
                 ];
                 const amountsIn = ['1234000000', '1000000000000000000'];
-                const amountsInScaled: bigint[] = amountsIn.map(
-                    (a, i) =>
-                        (BigInt(a) * BigInt(scalingFactors[i])) / BigInt(1e18)
+                const amountsInScaled = _upscaleArray(
+                    amountsIn.map((a) => BigInt(a)),
+                    scalingFactors
                 );
-                const scaledBalances = poolInfo.balances.map(
-                    (a, i) =>
-                        (BigInt(a) * BigInt(scalingFactors[i])) / BigInt(1e18)
+                const scaledBalances = _upscaleArray(
+                    poolInfo.balances,
+                    scalingFactors
                 );
                 // UI was originally using this
                 const sdkResult =
@@ -364,13 +372,13 @@ describe('weightedMath tests', () => {
                     '0x96646936b91d6b9d7d0c47c496afbf3d6ec7b6f8000200000000000000000019';
                 const poolInfo = await getPoolOnChain(poolId, vault, provider);
                 const scalingFactors = [
-                    '1000000000000000000000000000000',
-                    '1000000000000000000',
+                    BigInt('1000000000000000000000000000000'),
+                    BigInt('1000000000000000000'),
                 ];
                 const amountBptIn = '1234000000000000000000';
-                const scaledBalances = poolInfo.balances.map(
-                    (a, i) =>
-                        (BigInt(a) * BigInt(scalingFactors[i])) / BigInt(1e18)
+                const scaledBalances = _upscaleArray(
+                    poolInfo.balances,
+                    scalingFactors
                 );
                 // UI was originally using this
                 const sdkResult =
@@ -384,10 +392,11 @@ describe('weightedMath tests', () => {
                     BigInt(amountBptIn),
                     poolInfo.totalSupply
                 );
-                const scaledTokensOut = calculatedTokensOut.map(
-                    (a, i) =>
-                        (BigInt(a) * BigInt(1e18)) / BigInt(scalingFactors[i])
+                const scaledTokensOut = _downscaleDownArray(
+                    calculatedTokensOut,
+                    scalingFactors
                 );
+
                 expect(sdkResult[0].gt(0)).to.be.true;
                 expect(sdkResult.toString()).to.eq(scaledTokensOut.toString());
 
@@ -689,7 +698,6 @@ async function getPoolOnChain(
     const totalSupply = await poolContract.totalSupply();
     const normalizedWeights = await poolContract.getNormalizedWeights();
     const lastInvariant = await poolContract.getLastInvariant();
-    // const scalingFactors = await poolContract.getScalingFactors();
     const poolTokens = await vault.getPoolTokens(poolId);
     const feeCollectorAbi = [
         'function getSwapFeePercentage() public view returns (uint256)',
