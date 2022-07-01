@@ -215,6 +215,146 @@ export function _calcTokensOutGivenExactBptIn(
     return amountsOut;
 }
 
+export function _calcTokenOutGivenExactBptIn(
+    balance: bigint,
+    normalizedWeight: bigint,
+    bptAmountIn: bigint,
+    bptTotalSupply: bigint,
+    swapFeePercentage: bigint
+): bigint {
+    /*****************************************************************************************
+        // exactBPTInForTokenOut                                                                //
+        // a = amountOut                                                                        //
+        // b = balance                     /      /    totalBPT - bptIn       \    (1 / w)  \   //
+        // bptIn = bptAmountIn    a = b * |  1 - | --------------------------  | ^           |  //
+        // bpt = totalBPT                  \      \       totalBPT            /             /   //
+        // w = weight                                                                           //
+        *****************************************************************************************/
+
+    // Token out, so we round down overall. The multiplication rounds down, but the power rounds up (so the base
+    // rounds up). Because (totalBPT - bptIn) / totalBPT <= 1, the exponent rounds down.
+    // Calculate the factor by which the invariant will decrease after burning BPTAmountIn
+    const invariantRatio = MathSol.divUpFixed(
+        MathSol.sub(bptTotalSupply, bptAmountIn),
+        bptTotalSupply
+    );
+    // Calculate by how much the token balance has to decrease to match invariantRatio
+    const balanceRatio = MathSol.powUpFixed(
+        invariantRatio,
+        MathSol.divDownFixed(MathSol.ONE, normalizedWeight)
+    );
+
+    // Because of rounding up, balanceRatio can be greater than one. Using complement prevents reverts.
+    const amountOutWithoutFee = MathSol.mulDownFixed(
+        balance,
+        MathSol.complementFixed(balanceRatio)
+    );
+
+    // We can now compute how much excess balance is being withdrawn as a result of the virtual swaps, which result
+    // in swap fees.
+
+    // Swap fees are typically charged on 'token in', but there is no 'token in' here, so we apply it
+    // to 'token out'. This results in slightly larger price impact. Fees are rounded up.
+    const taxableAmount = MathSol.mulUpFixed(
+        amountOutWithoutFee,
+        MathSol.complementFixed(normalizedWeight)
+    );
+    const nonTaxableAmount = MathSol.sub(amountOutWithoutFee, taxableAmount);
+    const taxableAmountMinusFees = MathSol.mulUpFixed(
+        taxableAmount,
+        MathSol.complementFixed(swapFeePercentage)
+    );
+
+    return MathSol.add(nonTaxableAmount, taxableAmountMinusFees);
+}
+
+export function _calcBptInGivenExactTokensOut(
+    balances: bigint[],
+    normalizedWeights: bigint[],
+    amountsOut: bigint[],
+    bptTotalSupply: bigint,
+    swapFeePercentage: bigint
+): bigint {
+    // BPT in, so we round up overall.
+    const balanceRatiosWithoutFee = new Array<bigint>(amountsOut.length);
+
+    let invariantRatioWithoutFees = BZERO;
+    for (let i = 0; i < balances.length; i++) {
+        balanceRatiosWithoutFee[i] = MathSol.divUpFixed(
+            MathSol.sub(balances[i], amountsOut[i]),
+            balances[i]
+        );
+        invariantRatioWithoutFees = MathSol.add(
+            invariantRatioWithoutFees,
+            MathSol.mulUpFixed(balanceRatiosWithoutFee[i], normalizedWeights[i])
+        );
+    }
+
+    const invariantRatio = _computeExitExactTokensOutInvariantRatio(
+        balances,
+        normalizedWeights,
+        amountsOut,
+        balanceRatiosWithoutFee,
+        invariantRatioWithoutFees,
+        swapFeePercentage
+    );
+
+    return MathSol.mulUpFixed(
+        bptTotalSupply,
+        MathSol.complementFixed(invariantRatio)
+    );
+}
+
+/**
+ * @dev Intermediate function to avoid stack-too-deep errors.
+ */
+function _computeExitExactTokensOutInvariantRatio(
+    balances: bigint[],
+    normalizedWeights: bigint[],
+    amountsOut: bigint[],
+    balanceRatiosWithoutFee: bigint[],
+    invariantRatioWithoutFees: bigint,
+    swapFeePercentage: bigint
+): bigint {
+    let invariantRatio = MathSol.ONE;
+
+    for (let i = 0; i < balances.length; i++) {
+        // Swap fees are typically charged on 'token in', but there is no 'token in' here, so we apply it to
+        // 'token out'. This results in slightly larger price impact.
+
+        let amountOutWithFee;
+        if (invariantRatioWithoutFees > balanceRatiosWithoutFee[i]) {
+            const nonTaxableAmount = MathSol.mulDownFixed(
+                balances[i],
+                MathSol.complementFixed(invariantRatioWithoutFees)
+            );
+            const taxableAmount = MathSol.sub(amountsOut[i], nonTaxableAmount);
+            const taxableAmountPlusFees = MathSol.divUpFixed(
+                taxableAmount,
+                MathSol.complementFixed(swapFeePercentage)
+            );
+
+            amountOutWithFee = MathSol.add(
+                nonTaxableAmount,
+                taxableAmountPlusFees
+            );
+        } else {
+            amountOutWithFee = amountsOut[i];
+        }
+
+        const balanceRatio = MathSol.divDownFixed(
+            MathSol.sub(balances[i], amountOutWithFee),
+            balances[i]
+        );
+
+        invariantRatio = MathSol.mulDownFixed(
+            invariantRatio,
+            MathSol.powDown(balanceRatio, normalizedWeights[i])
+        );
+    }
+    return invariantRatio;
+}
+
 // Invariant is used to collect protocol swap fees by comparing its value between two times.
 // So we can round always to the same direction. It is also used to initiate the BPT amount
 // and, because there is a minimum BPT, we round down the invariant.
