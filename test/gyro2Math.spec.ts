@@ -7,14 +7,15 @@ import { Gyro2Pool } from '../src/pools/gyro2Pool/gyro2Pool';
 // Add new pool test data in Subgraph Schema format
 import testPools from './testData/gyro2Pools/gyro2TestPool.json';
 import {
-    _addFee,
-    _calculateInvariant,
-    _reduceFee,
     _calculateQuadratic,
     _calculateQuadraticTerms,
     _findVirtualParams,
-    _normalizeBalances,
 } from '../src/pools/gyro2Pool/gyro2Math';
+import {
+    _addFee,
+    _reduceFee,
+    _normalizeBalances,
+} from '../src/pools/gyro2Pool/helpers';
 
 describe('gyro2Math tests', () => {
     const testPool: any = cloneDeep(testPools).pools[0];
