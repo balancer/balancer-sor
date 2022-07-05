@@ -11,8 +11,8 @@ import {
     _calculateCubicStartingPoint,
     _calculateCubicTerms,
     _runNewtonIteration,
-    _normalizeBalances,
 } from '../src/pools/gyro3Pool/gyro3Math';
+import { _normalizeBalances } from '../src/pools/gyro3Pool/helpers';
 
 describe('gyro3Math tests', () => {
     const testPool: any = cloneDeep(testPools).pools[0];
@@ -53,7 +53,7 @@ describe('gyro3Math tests', () => {
 
             const l0 = _calculateCubicStartingPoint(a, mb, mc);
 
-            expect(formatFixed(l0, 18)).to.equal('18937948.911434007702525325');
+            expect(formatFixed(l0, 18)).to.equal('18937948.911434007702525329');
         });
 
         it(`should correctly calculate deltas for Newton method`, async () => {
@@ -69,11 +69,12 @@ describe('gyro3Math tests', () => {
                 mb,
                 mc,
                 md,
+                pool.root3Alpha,
                 rootEst0
             );
 
             expect(formatFixed(deltaAbs1, 18)).to.equal(
-                '20725.034790223169767955'
+                '20724.666415828607336826'
             );
             expect(deltaIsPos1).to.equal(true);
 
@@ -84,11 +85,12 @@ describe('gyro3Math tests', () => {
                 mb,
                 mc,
                 md,
+                pool.root3Alpha,
                 rootEst1
             );
 
             expect(formatFixed(deltaAbs2, 18)).to.equal(
-                '45.163851832290322917'
+                '45.530618963506481754'
             );
             expect(deltaIsPos2).to.equal(false);
 
@@ -99,10 +101,11 @@ describe('gyro3Math tests', () => {
                 mb,
                 mc,
                 md,
+                pool.root3Alpha,
                 rootEst2
             );
 
-            expect(formatFixed(deltaAbs3, 18)).to.equal('0.000214713810115934');
+            expect(formatFixed(deltaAbs3, 18)).to.equal('0.366985332320115631');
             expect(deltaIsPos3).to.equal(false);
 
             const rootEst3 = parseFixed('18958628.782157684771854429', 18);
@@ -112,10 +115,11 @@ describe('gyro3Math tests', () => {
                 mb,
                 mc,
                 md,
+                pool.root3Alpha,
                 rootEst3
             );
 
-            expect(formatFixed(deltaAbs4, 18)).to.equal('0.000000000004454138');
+            expect(formatFixed(deltaAbs4, 18)).to.equal('0.366770618526583671');
             expect(deltaIsPos4).to.equal(false);
 
             const rootEst4 = parseFixed('18958628.782157684767400291', 18);
@@ -125,16 +129,24 @@ describe('gyro3Math tests', () => {
                 mb,
                 mc,
                 md,
+                pool.root3Alpha,
                 rootEst4
             );
 
-            expect(formatFixed(deltaAbs5, 18)).to.equal('0.000000000004453998');
+            expect(formatFixed(deltaAbs5, 18)).to.equal('0.366770618522129533');
             expect(deltaIsPos5).to.equal(false);
 
-            const finalRootEst = _runNewtonIteration(a, mb, mc, md, rootEst0);
+            const finalRootEst = _runNewtonIteration(
+                a,
+                mb,
+                mc,
+                md,
+                pool.root3Alpha,
+                rootEst0
+            );
 
             expect(formatFixed(finalRootEst, 18)).to.equal(
-                '18958628.782157684762946293'
+                '18958628.415387052085178162'
             );
         });
     });

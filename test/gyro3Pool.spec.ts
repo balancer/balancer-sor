@@ -55,7 +55,7 @@ describe('Gyro3Pool tests USDC > DAI', () => {
                 pool.getNormalizedLiquidity(poolPairData);
 
             expect(normalizedLiquidity.toString()).to.equal(
-                '19016283.610415153991329405'
+                '19016283.61041515459756377'
             );
         });
     });
@@ -69,7 +69,7 @@ describe('Gyro3Pool tests USDC > DAI', () => {
                     poolPairData,
                     amountIn
                 );
-                expect(amountOut.toString()).to.eq('233.628220683475858449');
+                expect(amountOut.toString()).to.eq('233.628220683475857751');
             });
             it('should correctly calculate newSpotPrice', async () => {
                 const newSpotPrice =
@@ -97,7 +97,7 @@ describe('Gyro3Pool tests USDC > DAI', () => {
                     poolPairData,
                     amountOut
                 );
-                expect(amountIn.toString()).to.eq('4538.618912854584506276');
+                expect(amountIn.toString()).to.eq('4538.618912854584519788');
             });
 
             it('should correctly calculate newSpotPrice', async () => {
