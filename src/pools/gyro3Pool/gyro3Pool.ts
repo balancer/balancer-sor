@@ -13,17 +13,22 @@ import {
 } from '../../types';
 import { isSameAddress } from '../../utils';
 import {
-    _normalizeBalances,
     _calculateInvariant,
     _calcOutGivenIn,
     _calcInGivenOut,
-    _reduceFee,
-    _addFee,
     _calculateNewSpotPrice,
     _derivativeSpotPriceAfterSwapExactTokenInForTokenOut,
     _derivativeSpotPriceAfterSwapTokenInForExactTokenOut,
     _getNormalizedLiquidity,
 } from './gyro3Math';
+
+import {
+    _normalizeBalances,
+    _reduceFee,
+    _addFee,
+    mulDown,
+    divDown,
+} from './helpers';
 
 export type Gyro3PoolPairData = PoolPairBase & {
     balanceTertiary: BigNumber; // Balance of the unchanged asset
@@ -163,7 +168,7 @@ export class Gyro3Pool implements PoolBase {
             this.root3Alpha
         );
 
-        const virtualOffsetInOut = invariant.mul(this.root3Alpha).div(ONE);
+        const virtualOffsetInOut = mulDown(invariant, this.root3Alpha);
 
         const normalisedLiquidity = _getNormalizedLiquidity(
             normalizedBalances,
@@ -181,14 +186,14 @@ export class Gyro3Pool implements PoolBase {
         if (swapType === SwapTypes.SwapExactIn) {
             return bnum(
                 formatFixed(
-                    poolPairData.balanceIn.mul(this.MAX_IN_RATIO).div(ONE),
+                    mulDown(poolPairData.balanceIn, this.MAX_IN_RATIO),
                     poolPairData.decimalsIn
                 )
             );
         } else {
             return bnum(
                 formatFixed(
-                    poolPairData.balanceOut.mul(this.MAX_OUT_RATIO).div(ONE),
+                    mulDown(poolPairData.balanceOut, this.MAX_OUT_RATIO),
                     poolPairData.decimalsOut
                 )
             );
@@ -229,8 +234,7 @@ export class Gyro3Pool implements PoolBase {
             this.root3Alpha
         );
 
-        const virtualOffsetInOut = invariant.mul(this.root3Alpha).div(ONE);
-
+        const virtualOffsetInOut = mulDown(invariant, this.root3Alpha);
         const inAmount = parseFixed(amount.toString(), 18);
         const inAmountLessFee = _reduceFee(inAmount, poolPairData.swapFee);
 
@@ -270,7 +274,7 @@ export class Gyro3Pool implements PoolBase {
             this.root3Alpha
         );
 
-        const virtualOffsetInOut = invariant.mul(this.root3Alpha).div(ONE);
+        const virtualOffsetInOut = mulDown(invariant, this.root3Alpha);
 
         const inAmountLessFee = _calcInGivenOut(
             normalizedBalances[0],
@@ -304,7 +308,7 @@ export class Gyro3Pool implements PoolBase {
             this.root3Alpha
         );
 
-        const virtualOffsetInOut = invariant.mul(this.root3Alpha).div(ONE);
+        const virtualOffsetInOut = mulDown(invariant, this.root3Alpha);
 
         const inAmount = parseFixed(amount.toString(), 18);
         const inAmountLessFee = _reduceFee(inAmount, poolPairData.swapFee);
@@ -348,7 +352,7 @@ export class Gyro3Pool implements PoolBase {
             this.root3Alpha
         );
 
-        const virtualOffsetInOut = invariant.mul(this.root3Alpha).div(ONE);
+        const virtualOffsetInOut = mulDown(invariant, this.root3Alpha);
 
         const inAmountLessFee = _calcInGivenOut(
             normalizedBalances[0],
@@ -390,7 +394,7 @@ export class Gyro3Pool implements PoolBase {
             this.root3Alpha
         );
 
-        const virtualOffsetInOut = invariant.mul(this.root3Alpha).div(ONE);
+        const virtualOffsetInOut = mulDown(invariant, this.root3Alpha);
 
         const inAmount = parseFixed(amount.toString(), 18);
         const inAmountLessFee = _reduceFee(inAmount, poolPairData.swapFee);
@@ -432,7 +436,7 @@ export class Gyro3Pool implements PoolBase {
             this.root3Alpha
         );
 
-        const virtualOffsetInOut = invariant.mul(this.root3Alpha).div(ONE);
+        const virtualOffsetInOut = mulDown(invariant, this.root3Alpha);
 
         const inAmountLessFee = _calcInGivenOut(
             normalizedBalances[0],
