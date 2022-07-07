@@ -1,6 +1,7 @@
 import { expect } from 'chai';
 import cloneDeep from 'lodash.clonedeep';
 import { formatFixed, parseFixed, BigNumber } from '@ethersproject/bignumber';
+import { WeiPerEther as ONE } from '@ethersproject/constants';
 import { USDC, DAI } from './lib/constants';
 // Add new PoolType
 import { Gyro2Pool } from '../src/pools/gyro2Pool/gyro2Pool';
@@ -45,7 +46,7 @@ describe('gyro2Math tests', () => {
                 poolPairData.decimalsIn,
                 poolPairData.decimalsOut
             );
-            const [a, mb, mc] = _calculateQuadraticTerms(
+            const [a, mb, bSquare, mc] = _calculateQuadraticTerms(
                 normalizedBalances,
                 poolPairData.sqrtAlpha,
                 poolPairData.sqrtBeta
@@ -53,9 +54,12 @@ describe('gyro2Math tests', () => {
 
             expect(formatFixed(a, 18)).to.equal('0.00099950047470021');
             expect(formatFixed(mb, 18)).to.equal('2230.884220626971757449');
+            expect(formatFixed(bSquare, 18)).to.equal(
+                '4976844.405842411200429555'
+            );
             expect(formatFixed(mc, 18)).to.equal('1232000.0');
 
-            const L = _calculateQuadratic(a, mb, mc);
+            const L = _calculateQuadratic(a, mb, mb.mul(mb).div(ONE), mc);
 
             expect(formatFixed(L, 18)).to.equal('2232551.271501112084098627');
         });

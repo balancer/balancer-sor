@@ -101,7 +101,7 @@ describe('Gyro2Pool tests USDC > DAI', () => {
                     poolPairData,
                     amountIn
                 );
-                expect(amountOut.toString()).to.eq('13.379816831223949756');
+                expect(amountOut.toString()).to.eq('13.379816831223414577');
             });
             it('should correctly calculate newSpotPrice', async () => {
                 const newSpotPrice =
@@ -129,7 +129,7 @@ describe('Gyro2Pool tests USDC > DAI', () => {
                     poolPairData,
                     amountOut
                 );
-                expect(amountIn.toString()).to.eq('45.977973896503961218');
+                expect(amountIn.toString()).to.eq('45.977973896504501314');
             });
             it('should correctly calculate newSpotPrice', async () => {
                 const newSpotPrice =
