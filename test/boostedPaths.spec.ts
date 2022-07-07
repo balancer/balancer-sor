@@ -1,5 +1,5 @@
-// TS_NODE_PROJECT='tsconfig.testing.json' npx mocha -r ts-node/register test/linear.spec.ts
-import { assert, expect } from 'chai';
+// TS_NODE_PROJECT='tsconfig.testing.json' npx mocha -r ts-node/register test/boostedPaths.spec.ts
+import { assert } from 'chai';
 import cloneDeep from 'lodash.clonedeep';
 import {
     PoolDictionary,
@@ -15,26 +15,15 @@ import {
     getBoostedPaths,
 } from '../src/routeProposal/filtering';
 import { bnum } from '../src/utils/bignumber';
-import { calculatePathLimits } from '../src/routeProposal/pathLimits';
 import { getFullSwap, simpleCheckPath } from './lib/testHelpers';
 import {
     DAI,
-    aDAI,
     bbaDAI,
-    USDC,
     BAL,
     TestToken,
-    MKR,
-    GUSD,
     WETH,
     TUSD,
-    USDT,
-    LINEAR_AUSDT,
-    LINEAR_ADAI,
-    aUSDT,
-    KOVAN_BAL,
-    AAVE_USDT,
-    sorConfigTestBoosted,
+    sorConfigTest,
     bbaUSD,
     FEI,
 } from './lib/constants';
@@ -42,6 +31,7 @@ import {
 // Multiple boosted pools
 import boostedPools from './testData/boostedPools/multipleBoosted.json';
 import genericBoostedPools from './testData/boostedPools/genericBoosted.json';
+import boostedPoolsWithWstETH from './testData/boostedPools/boostedPoolsWithWstETH.json';
 import { BigNumber, parseFixed } from '@ethersproject/bignumber';
 import { getOutputAmountSwapForPath } from '../src/router/helpersClass';
 import { JsonRpcProvider } from '@ethersproject/providers';
@@ -59,7 +49,7 @@ describe('multiple boosted pools, path creation test', () => {
                 SwapTypes.SwapExactIn,
                 boostedPools.pools,
                 maxPools,
-                sorConfigTestBoosted
+                sorConfigTest
             );
             const tokensChains = [
                 [TUSD.address, WETH.address, BAL.address],
@@ -90,7 +80,7 @@ describe('multiple boosted pools, path creation test', () => {
                 SwapTypes.SwapExactIn,
                 boostedPools.pools,
                 maxPools,
-                sorConfigTestBoosted
+                sorConfigTest
             );
             assert.equal(paths.length, 4);
             assert.isTrue(checkNoDuplicate(paths));
@@ -106,7 +96,7 @@ describe('multiple boosted pools, path creation test', () => {
                 SwapTypes.SwapExactIn,
                 boostedPools.pools,
                 maxPools,
-                sorConfigTestBoosted
+                sorConfigTest
             );
             assert.equal(paths.length, 4);
             assert.isTrue(checkNoDuplicate(paths));
@@ -120,7 +110,7 @@ describe('multiple boosted pools, path creation test', () => {
                 SwapTypes.SwapExactIn,
                 boostedPools.pools,
                 maxPools,
-                sorConfigTestBoosted
+                sorConfigTest
             );
             assert.equal(paths.length, 4);
             const bbfDaiAddress = '0x0000000000000000000000000000000000000000';
@@ -179,7 +169,7 @@ describe('multiple boosted pools, path creation test', () => {
                 SwapTypes.SwapExactIn,
                 boostedPools.pools,
                 maxPools,
-                sorConfigTestBoosted
+                sorConfigTest
             );
             assert.equal(paths.length, 3);
             assert.equal(boostedPaths.length, 0);
@@ -187,11 +177,13 @@ describe('multiple boosted pools, path creation test', () => {
     });
     context('bbausd and Weth to Dai', () => {
         it('four combinations', () => {
-            const binaryOption = [true, false];
-            if (!sorConfigTestBoosted.bbausd) return;
+            const binaryOption = [false, true];
             for (const reverse of binaryOption) {
                 const tokens = [
-                    [WETH.address, sorConfigTestBoosted.bbausd.address],
+                    [
+                        WETH.address,
+                        '0x8fd162f338b770f7e879030830cde9173367f301',
+                    ],
                     [DAI.address],
                 ];
                 if (reverse) tokens.reverse();
@@ -203,7 +195,7 @@ describe('multiple boosted pools, path creation test', () => {
                             SwapTypes.SwapExactIn,
                             boostedPools.pools,
                             maxPools,
-                            sorConfigTestBoosted
+                            sorConfigTest
                         );
                         assert.equal(paths.length, 2);
                         assert.isTrue(checkNoDuplicate(paths));
@@ -231,7 +223,7 @@ describe('multiple boosted pools, path creation test', () => {
                     SwapTypes.SwapExactIn,
                     91.23098,
                     boostedPools.pools,
-                    sorConfigTestBoosted
+                    sorConfigTest
                 ),
                 'SOR path is not the best one'
             );
@@ -242,7 +234,7 @@ describe('multiple boosted pools, path creation test', () => {
                     SwapTypes.SwapExactIn,
                     910000.23098,
                     boostedPools.pools,
-                    sorConfigTestBoosted
+                    sorConfigTest
                 ),
                 'SOR path is not the best one'
             );
@@ -259,15 +251,26 @@ describe('multiple boosted pools, path creation test', () => {
                 SwapTypes.SwapExactIn,
                 boostedPools.pools,
                 maxPools,
-                sorConfigTestBoosted
+                sorConfigTest
+            );
+            console.log('paths ids');
+            console.log(paths[0].id);
+            console.log(paths[1].id);
+            assert.equal(
+                boostedPaths[0].id,
+                'LBPweightedTusdOhmBBaUSD-TUSDbbaUSD-BAL'
             );
             assert.equal(
-                paths[0].id,
+                boostedPaths[1].id,
                 'LBPweightedTusdOhmweightedTusdWethweightedBalWeth'
             );
             assert.equal(
-                paths[3].id,
-                'LBPweightedTusdOhmBBaUSD-TUSDbbaUSD-BAL'
+                boostedPaths[2].id,
+                'LBPweightedTusdOhmBBaUSD-TUSDweightedWeth-BBausdweightedBalWeth'
+            );
+            assert.equal(
+                boostedPaths[3].id,
+                'LBPweightedTusdOhmweightedTusdWethweightedWeth-BBausdbbaUSD-BAL'
             );
             const OHM = tokenIn;
             const tokensChains = [
@@ -313,7 +316,7 @@ describe('multiple boosted pools, path creation test', () => {
                 SwapTypes.SwapExactIn,
                 boostedPools.pools,
                 maxPools,
-                sorConfigTestBoosted
+                sorConfigTest
             );
             const tokensChains = [
                 [
@@ -361,7 +364,7 @@ describe('multiple boosted pools, path creation test', () => {
                 SwapTypes.SwapExactIn,
                 boostedPools.pools,
                 maxPools,
-                sorConfigTestBoosted
+                sorConfigTest
             );
             for (const path of paths) {
                 console.log(path.id);
@@ -378,7 +381,7 @@ describe('multiple boosted pools, path creation test', () => {
             assert.equal(paths.length, 2);
         });
         it('Test correctness in absence of LBP raising info at config', () => {
-            const sorConfigNoLbpRaising = cloneDeep(sorConfigTestBoosted);
+            const sorConfigNoLbpRaising = cloneDeep(sorConfigTest);
             delete sorConfigNoLbpRaising['lbpRaisingTokens'];
             const sorConfigNoRaisingTusd = cloneDeep(sorConfigNoLbpRaising);
             sorConfigNoRaisingTusd['lbpRaisingTokens'] = [
@@ -388,7 +391,7 @@ describe('multiple boosted pools, path creation test', () => {
             const tokenOut = BAL.address;
             const pathsCases: NewPath[][] = [];
             const sorConfigCases: SorConfig[] = [
-                sorConfigTestBoosted,
+                sorConfigTest,
                 sorConfigNoLbpRaising,
                 sorConfigNoRaisingTusd,
             ];
@@ -424,7 +427,7 @@ describe('generic boosted pools, path creation test', () => {
                 SwapTypes.SwapExactIn,
                 genericBoostedPools.pools,
                 maxPools,
-                sorConfigTestBoosted
+                sorConfigTest
             );
             const bbfFEIAddress = '0x0000000000000000000000000000000000111111';
             const bbfDAIAddress = '0x0000000000000000000000000000000000000000';
@@ -436,11 +439,72 @@ describe('generic boosted pools, path creation test', () => {
             ];
             for (let i = 0; i < 1; i++) {
                 assert.isTrue(
-                    simpleCheckPath(paths[i], poolsChains[i], tokensChains[i])
+                    simpleCheckPath(
+                        boostedPaths[i],
+                        poolsChains[i],
+                        tokensChains[i]
+                    )
                 );
             }
-            assert.equal(boostedPaths.length, 1);
-            assert.equal(paths.length, 1);
+            assert.equal(boostedPaths.length, 4);
+            assert.equal(paths.length, 4);
+        });
+    });
+});
+
+describe('generic boosted pools with wstETH, path creation test', () => {
+    context('...', () => {
+        it('FEI-bbaUSD', () => {
+            const tokenIn = FEI.address;
+            const tokenOut = bbaUSD.address;
+            const [paths, , boostedPaths] = getPaths(
+                tokenIn,
+                tokenOut,
+                SwapTypes.SwapExactIn,
+                boostedPoolsWithWstETH.pools,
+                maxPools,
+                sorConfigTest
+            );
+            const pathIds = [
+                'FuseLinearFeibbfUSD-PoolweightedWstETH-BBfusdweightedWstETH-BBausd',
+                'FuseLinearFeibbfUSD-PoolbbaUSD-bbfUSD',
+                'FuseLinearFeibbfUSD-PoolbbaUSD-bbfDAI',
+                'FuseLinearFeibbfUSD-PoolFuseLinearDaiAaveLinearDaibbaUSD-Pool',
+            ];
+            for (let i = 0; i < 4; i++) {
+                assert.equal(paths[i].id, pathIds[i], 'unexpected path');
+            }
+            assert.equal(boostedPaths.length, 4);
+            assert.equal(paths.length, 4);
+        });
+        it('FEI-BAL', () => {
+            const tokenIn = FEI.address;
+            const tokenOut = BAL.address;
+            const [paths, , boostedPaths] = getPaths(
+                tokenIn,
+                tokenOut,
+                SwapTypes.SwapExactIn,
+                boostedPoolsWithWstETH.pools,
+                maxPools,
+                sorConfigTest
+            );
+            const pathsIds = [
+                'FuseLinearFeibbfUSD-PoolweightedWstETH-BBfusdwETH-wstETHweightedBalWeth',
+                'FuseLinearFeibbfUSD-PoolweightedWstETH-BBfusdweightedWstETH-BBausdbbaUSD-BAL',
+                'FuseLinearFeibbfUSD-PoolbbaUSD-bbfUSDweightedWstETH-BBausdwETH-wstETHweightedBalWeth',
+                'FuseLinearFeibbfUSD-PoolbbaUSD-bbfUSDbbaUSD-BAL',
+                'FuseLinearFeibbfUSD-PoolbbaUSD-bbfDAIbbaUSD-bbfUSDweightedWstETH-BBfusdwETH-wstETHweightedBalWeth',
+                'FuseLinearFeibbfUSD-PoolbbaUSD-bbfDAIweightedWstETH-BBausdwETH-wstETHweightedBalWeth',
+                'FuseLinearFeibbfUSD-PoolbbaUSD-bbfDAIbbaUSD-BAL',
+                'FuseLinearFeibbfUSD-PoolFuseLinearDaiAaveLinearDaibbaUSD-PoolweightedWstETH-BBausdwETH-wstETHweightedBalWeth',
+                'FuseLinearFeibbfUSD-PoolFuseLinearDaiAaveLinearDaibbaUSD-PoolbbaUSD-bbfUSDweightedWstETH-BBfusdwETH-wstETHweightedBalWeth',
+                'FuseLinearFeibbfUSD-PoolFuseLinearDaiAaveLinearDaibbaUSD-PoolbbaUSD-BAL',
+            ];
+            for (let i = 0; i < 10; i++) {
+                assert.equal(paths[i].id, pathsIds[i], 'unexpected path');
+            }
+            assert.equal(boostedPaths.length, 10);
+            assert.equal(paths.length, 10);
         });
     });
 });
@@ -482,6 +546,7 @@ function getPaths(
         swapOptions
     );
 
+    // const boostedPaths = getBoostedPaths(tokenIn, tokenOut, poolsAll, config);
     const boostedPaths = getBoostedPaths(tokenIn, tokenOut, poolsAll, config);
     return [paths, poolsAll, boostedPaths];
 }

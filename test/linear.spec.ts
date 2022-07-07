@@ -18,7 +18,6 @@ import {
     parseToPoolsDict,
     getBoostedPaths,
 } from '../src/routeProposal/filtering';
-import { calculatePathLimits } from '../src/routeProposal/pathLimits';
 import { LinearPool, PairTypes } from '../src/pools/linearPool/linearPool';
 import { checkPath, getFullSwap, getTotalSwapAmount } from './lib/testHelpers';
 import {
@@ -32,7 +31,6 @@ import {
     TestToken,
     MKR,
     GUSD,
-    WETH,
     TUSD,
     bTUSD,
     USDT,
@@ -41,7 +39,7 @@ import {
     aUSDT,
     KOVAN_BAL,
     AAVE_USDT,
-    sorConfigTestBoosted,
+    sorConfigTest,
     sorConfigKovan,
     sorConfigFullKovan,
 } from './lib/constants';
@@ -721,13 +719,13 @@ describe('linear pool tests', () => {
                     sorConfigFullKovan
                 );
                 // 6605808981785744500
-                expect(returnAmount).to.eq('6606146264948964392');
+                expect(returnAmount).to.eq('20111716378263652638');
             });
 
             it('BAL>USDT, SwapExactIn', async () => {
                 const tokenIn = KOVAN_BAL;
                 const tokenOut = AAVE_USDT;
-                const returnAmount = await testFullSwap(
+                await testFullSwap(
                     tokenIn.address,
                     tokenOut.address,
                     SwapTypes.SwapExactIn,
@@ -759,7 +757,7 @@ describe('linear pool tests', () => {
                     fullKovanPools.pools,
                     sorConfigFullKovan
                 );
-                expect(returnAmount).to.eq('702055');
+                expect(returnAmount).to.eq('221067');
             });
 
             it('BAL>USDT, SwapExactOut', async () => {
@@ -862,7 +860,7 @@ function getPaths(
     config?: SorConfig
 ): [NewPath[], PoolDictionary, NewPath[]] {
     const poolsAll = parseToPoolsDict(cloneDeep(pools), 0);
-    const conf = config || sorConfigTestBoosted;
+    const conf = config || sorConfigTest;
     const routeProposer = new RouteProposer(conf);
     const swapOptions: SwapOptions = {
         gasPrice: BigNumber.from(0),
@@ -891,8 +889,8 @@ export async function testFullSwap(
     swapType: SwapTypes,
     swapAmount: BigNumber,
     pools: SubgraphPoolBase[],
-    config: SorConfig = sorConfigTestBoosted
-) {
+    config: SorConfig = sorConfigTest
+): Promise<string> {
     const returnAmountDecimals = 18; // TO DO Remove?
     const maxPools = 4;
     // const costOutputToken = BigNumber.from('1000000000000000000');

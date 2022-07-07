@@ -1,4 +1,4 @@
-// TS_NODE_PROJECT='tsconfig.testing.json' npx mocha -r ts-node/register test/filtersAndPaths.spec.ts
+// TS_NODE_PROJECT='tsconfig.testing.json' npx mocha -r ts-node/register test/candidatePaths.spec.ts
 import { assert } from 'chai';
 import { SwapTypes, PoolFilter, SwapOptions } from '../src/types';
 import { parseToPoolsDict } from '../src/routeProposal/filtering';
@@ -8,6 +8,8 @@ import testPools from './testData/filterTestPools.json';
 import { BigNumber } from '@ethersproject/bignumber';
 import { DAI, sorConfigTest, USDC, WETH } from './lib/constants';
 import { RouteProposer } from '../src/routeProposal';
+
+import pools_14717479 from './testData/boostedPools/pools_14717479.json';
 
 describe('Tests pools filtering and path processing', () => {
     it('should filter to only direct pools for maxPools = 1', () => {
@@ -285,6 +287,38 @@ describe('Tests pools filtering and path processing', () => {
             pathData[1].limitAmount.toString(),
             '300000000000000000000'
         );
+    });
+
+    it('lbp test', () => {
+        // This test was originally failing due to lbp token addresses
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const poolsDict = parseToPoolsDict(pools_14717479 as any, 0);
+
+        const config = {
+            chainId: 1,
+            vault: '0xBA12222222228d8Ba445958a75a0704d566BF2C8',
+            weth: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2',
+            bbausd: {
+                id: '0x7b50775383d3d6f0215a8f290f2c9e2eebbeceb20000000000000000000000fe',
+                address: '0x7b50775383d3d6f0215a8f290f2c9e2eebbeceb2',
+            },
+            staBal3Pool: undefined,
+            wETHwstETH: undefined,
+            lbpRaisingTokens: [
+                '0x6B175474E89094C44Da98b954EedeAC495271d0F',
+                '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48',
+                '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2',
+            ],
+        };
+        const routeProposer = new RouteProposer(config);
+        const paths = routeProposer.getCandidatePathsFromDict(
+            WETH.address,
+            USDC.address,
+            SwapTypes.SwapExactIn,
+            poolsDict,
+            4
+        );
+        assert.equal(paths.length, 50, 'Should have 50 paths');
     });
 });
 
