@@ -10,7 +10,8 @@
         "prepack": "yarn build",
         "test": "TS_NODE_PROJECT='tsconfig.testing.json' nyc mocha -r ts-node/register test/*.spec.ts",
         "coverage": "nyc report --reporter=text-lcov | coveralls",
-        "lint": "eslint ./src ./test --ext .ts --max-warnings 0"
+        "lint": "eslint ./src ./test --ext .ts --max-warnings 0",
+        "node": "npx hardhat node --fork $(grep ALCHEMY_URL .env | cut -d '=' -f2) --fork-block-number 14828550"
     },
     "husky": {
         "hooks": {
@@ -25,6 +26,7 @@
         "dist"
     ],
     "devDependencies": {
+        "@balancer-labs/typechain": "^1.0.0",
         "@ethersproject/abi": "^5.4.1",
         "@ethersproject/address": "^5.4.0",
         "@ethersproject/bignumber": "^5.4.2",
@@ -33,6 +35,7 @@
         "@ethersproject/providers": "^5.4.4",
         "@ethersproject/wallet": "^5.4.0",
         "@georgeroman/balancer-v2-pools": "0.0.7",
+        "@nomiclabs/hardhat-ethers": "^2.0.6",
         "@rollup/plugin-commonjs": "^20.0.0",
         "@rollup/plugin-json": "^4.1.0",
         "@rollup/plugin-node-resolve": "^13.0.4",
@@ -50,6 +53,7 @@
         "eslint": "^7.32.0",
         "eslint-plugin-mocha-no-only": "^1.1.1",
         "eslint-plugin-prettier": "^3.4.1",
+        "hardhat": "^2.9.9",
         "husky": "^4.2.1",
         "lodash.clonedeep": "^4.5.0",
         "lodash.set": "^4.3.2",
