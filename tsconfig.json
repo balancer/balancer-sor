@@ -21,5 +21,6 @@
         "src/pools/weightedPool/weightedPoolAbi.json",
         "src/pools/elementPool/ConvergentCurvePool.json",
         "src/pools/linearPool/linearPoolAbi.json"
-    ]
+    ],
+    "files": ["hardhat.config.js"]
 }

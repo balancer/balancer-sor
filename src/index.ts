@@ -17,3 +17,5 @@ export { MetaStablePool } from './pools/metaStablePool/metaStablePool';
 export { PhantomStablePool } from './pools/phantomStablePool/phantomStablePool';
 export { LinearPool } from './pools/linearPool/linearPool';
 export { getSpotPriceAfterSwapForPath } from './router/helpersClass';
+export * as WeightedMaths from './pools/weightedPool/weightedMath';
+export * as StableMaths from './pools/stablePool/stableMath';
