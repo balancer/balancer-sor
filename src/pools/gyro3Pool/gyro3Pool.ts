@@ -244,11 +244,6 @@ export class Gyro3Pool implements PoolBase {
             inAmountLessFee,
             virtualOffsetInOut
         );
-        console.log(
-            `!!!!!!! ${amount.toString()} ${bnum(
-                formatFixed(outAmount, 18)
-            ).toString()}`
-        );
         return bnum(formatFixed(outAmount, 18));
     }
 
