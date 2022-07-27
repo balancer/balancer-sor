@@ -1,6 +1,6 @@
 import { expect } from 'chai';
 import cloneDeep from 'lodash.clonedeep';
-import { formatFixed, parseFixed } from '@ethersproject/bignumber';
+import { formatFixed, parseFixed, BigNumber } from '@ethersproject/bignumber';
 import { bnum } from '../src/utils/bignumber';
 import { USDC, USDT } from './lib/constants';
 import { SwapTypes } from '../src';
@@ -10,7 +10,7 @@ import { Gyro3Pool } from '../src/pools/gyro3Pool/gyro3Pool';
 import testPools from './testData/gyro3Pools/gyro3TestPool.json';
 
 describe('Gyro3Pool tests USDC > DAI', () => {
-    const testPool = cloneDeep(testPools).pools[0];
+    const testPool: any = cloneDeep(testPools).pools[0];
     const pool = Gyro3Pool.fromPool(testPool);
 
     const poolPairData = pool.parsePoolPairData(USDT.address, USDC.address);
@@ -55,7 +55,7 @@ describe('Gyro3Pool tests USDC > DAI', () => {
                 pool.getNormalizedLiquidity(poolPairData);
 
             expect(normalizedLiquidity.toString()).to.equal(
-                '19016283.981512596845077192'
+                '19016283.61041515459756377'
             );
         });
     });
@@ -69,7 +69,7 @@ describe('Gyro3Pool tests USDC > DAI', () => {
                     poolPairData,
                     amountIn
                 );
-                expect(amountOut.toString()).to.eq('233.62822068392501182');
+                expect(amountOut.toString()).to.eq('233.628220683475857751');
             });
             it('should correctly calculate newSpotPrice', async () => {
                 const newSpotPrice =
@@ -77,7 +77,7 @@ describe('Gyro3Pool tests USDC > DAI', () => {
                         poolPairData,
                         amountIn
                     );
-                expect(newSpotPrice.toString()).to.eq('1.003120202974438177');
+                expect(newSpotPrice.toString()).to.eq('1.003120202976607933');
             });
             it('should correctly calculate derivative of spot price function at newSpotPrice', async () => {
                 const derivative =
@@ -85,7 +85,7 @@ describe('Gyro3Pool tests USDC > DAI', () => {
                         poolPairData,
                         amountIn
                     );
-                expect(derivative.toString()).to.eq('0.000000105499880184');
+                expect(derivative.toString()).to.eq('0.000000105499882243');
             });
         });
 
@@ -97,7 +97,7 @@ describe('Gyro3Pool tests USDC > DAI', () => {
                     poolPairData,
                     amountOut
                 );
-                expect(amountIn.toString()).to.eq('4538.618912825809655998');
+                expect(amountIn.toString()).to.eq('4538.618912854584519788');
             });
 
             it('should correctly calculate newSpotPrice', async () => {
@@ -106,7 +106,7 @@ describe('Gyro3Pool tests USDC > DAI', () => {
                         poolPairData,
                         amountOut
                     );
-                expect(newSpotPrice.toString()).to.eq('1.003574353766587852');
+                expect(newSpotPrice.toString()).to.eq('1.003574353777625146');
             });
 
             it('should correctly calculate derivative of spot price function at newSpotPrice', async () => {
@@ -115,7 +115,7 @@ describe('Gyro3Pool tests USDC > DAI', () => {
                         poolPairData,
                         amountOut
                     );
-                expect(derivative.toString()).to.eq('0.000000105900938637');
+                expect(derivative.toString()).to.eq('0.000000105900940706');
             });
         });
     });
