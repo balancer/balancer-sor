@@ -19,3 +19,5 @@ export { LinearPool } from './pools/linearPool/linearPool';
 export { PrimaryIssuePool } from './pools/PrimaryIssuePool/PrimaryIssuePool';
 export { SecondaryIssuePool } from './pools/SecondaryIssuePool/SecondaryIssuePool';
 export { getSpotPriceAfterSwapForPath } from './router/helpersClass';
+export * as WeightedMaths from './pools/weightedPool/weightedMath';
+export * as StableMaths from './pools/stablePool/stableMath';

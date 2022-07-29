@@ -35,6 +35,9 @@ const queryWithLinear = `
           mainIndex
           lowerTarget
           upperTarget
+          sqrtAlpha
+          sqrtBeta
+          root3Alpha
         }
         pool1000: pools(
           first: 1000,
@@ -67,6 +70,9 @@ const queryWithLinear = `
           mainIndex
           lowerTarget
           upperTarget
+          sqrtAlpha
+          sqrtBeta
+          root3Alpha
         }
       }
     `;

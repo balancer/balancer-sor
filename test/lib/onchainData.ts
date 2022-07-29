@@ -1,3 +1,4 @@
+import { JsonRpcProvider } from '@ethersproject/providers';
 import { formatFixed } from '@ethersproject/bignumber';
 import { Provider } from '@ethersproject/providers';
 import { isSameAddress } from '../../src/utils';
@@ -109,6 +110,12 @@ export async function getOnChainBalances(
             multiPool.call(`${pool.id}.cutoffTime`, pool.address, 'getIssueCutoffTime');
         } else if (pool.poolType.toString().includes('Secondary')){
             multiPool.call(`${pool.id}.secondaryOffer`, pool.address, 'getSecurityOffered');
+        } else if (pool.poolType.toString().includes('Gyro')) {
+            multiPool.call(
+                `${pool.id}.swapFee`,
+                pool.address,
+                'getSwapFeePercentage'
+            );
         }
     });
 
@@ -229,4 +236,28 @@ export async function getOnChainBalances(
     });
 
     return onChainPools;
+}
+
+/*
+PoolDataService to fetch onchain balances of Gyro3 pool.
+(Fetching all pools off a fork is too intensive)
+*/
+export class OnChainPoolDataService implements PoolDataService {
+    constructor(
+        private readonly config: {
+            multiAddress: string;
+            vaultAddress: string;
+            provider: JsonRpcProvider;
+            pools: SubgraphPoolBase[];
+        }
+    ) {}
+
+    public async getPools(): Promise<SubgraphPoolBase[]> {
+        return getOnChainBalances(
+            this.config.pools,
+            this.config.multiAddress,
+            this.config.vaultAddress,
+            this.config.provider
+        );
+    }
 }

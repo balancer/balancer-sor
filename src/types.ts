@@ -94,7 +94,8 @@ export interface SubgraphPoolBase {
     upperTarget?: string;
 
     // Gyro2 specific field
-    gyro2PriceBounds?: Gyro2PriceBounds;
+    sqrtAlpha?: string;
+    sqrtBeta?: string;
 
     // Gyro3 specific field
     gyro3PriceBounds?: Gyro3PriceBounds;
@@ -111,6 +112,7 @@ export interface SubgraphPoolBase {
 
     // Only Secondary pool
     secondaryOffer?: string;
+    root3Alpha?: string;
 }
 
 export type SubgraphToken = {
@@ -179,6 +181,8 @@ export enum PoolFilter {
     ERC4626Linear = 'ERC4626Linear',
     PrimaryIssuePool = 'PrimaryIssue',
     SecondaryIssuePool = 'SecondaryIssue',
+    Gyro2 = 'Gyro2',
+    Gyro3 = 'Gyro3',
 }
 
 export interface PoolBase {
@@ -241,15 +245,3 @@ export interface TokenPriceService {
 export interface PoolDataService {
     getPools(): Promise<SubgraphPoolBase[]>;
 }
-
-export type Gyro2PriceBounds = {
-    lowerBound: string;
-    upperBound: string;
-    tokenInAddress: string;
-    tokenOutAddress: string;
-};
-
-export type Gyro3PriceBounds = {
-    alpha: string; // Assume symmetric price bounds for Gyro 3 pool
-    // (The price range for any asset pair is equal to [alpha, 1/alpha])
-};

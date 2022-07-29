@@ -23,5 +23,6 @@
         "src/pools/linearPool/linearPoolAbi.json",
         "src/pools/PrimaryIssuePool/PrimaryIssuePoolAbi.json",
         "src/pools/SecondaryIssuePool/SecondaryIssuePoolAbi.json"
-    ]
+    ],
+    "files": ["hardhat.config.js"]
 }
