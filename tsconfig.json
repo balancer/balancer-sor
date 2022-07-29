@@ -20,6 +20,8 @@
         "src/pools/stablePool/stablePoolAbi.json",
         "src/pools/weightedPool/weightedPoolAbi.json",
         "src/pools/elementPool/ConvergentCurvePool.json",
-        "src/pools/linearPool/linearPoolAbi.json"
+        "src/pools/linearPool/linearPoolAbi.json",
+        "src/pools/PrimaryIssuePool/PrimaryIssuePoolAbi.json",
+        "src/pools/SecondaryIssuePool/SecondaryIssuePoolAbi.json"
     ]
 }

@@ -9,6 +9,8 @@ import weightedPoolAbi from '../../src/pools/weightedPool/weightedPoolAbi.json';
 import stablePoolAbi from '../../src/pools/stablePool/stablePoolAbi.json';
 import elementPoolAbi from '../../src/pools/elementPool/ConvergentCurvePool.json';
 import linearPoolAbi from '../../src/pools/linearPool/linearPoolAbi.json';
+import primaryPoolAbi from '../../src/pools/PrimaryIssuePool/PrimaryIssuePoolAbi.json';
+import secondaryPoolAbi from '../../src/pools/SecondaryIssuePool/SecondaryIssuePoolAbi.json';
 import { PoolFilter, SubgraphPoolBase } from '../../src';
 import { Multicaller } from './multicaller';
 
@@ -30,6 +32,8 @@ export async function getOnChainBalances(
                 ...stablePoolAbi,
                 ...elementPoolAbi,
                 ...linearPoolAbi,
+                ...primaryPoolAbi,
+                ...secondaryPoolAbi,
             ].map((row) => [row.name, row])
         )
     );
@@ -98,6 +102,13 @@ export async function getOnChainBalances(
                 pool.address,
                 'getWrappedTokenRate'
             );
+        } else if (pool.poolType.toString().includes('Primary')){
+            multiPool.call(`${pool.id}.openingPrice`, pool.address, 'getMinimumPrice');
+            multiPool.call(`${pool.id}.maxPrice`, pool.address, 'getMaximumPrice');
+            multiPool.call(`${pool.id}.securityOffered`, pool.address, 'getSecurityOffered');
+            multiPool.call(`${pool.id}.cutoffTime`, pool.address, 'getIssueCutoffTime');
+        } else if (pool.poolType.toString().includes('Secondary')){
+            multiPool.call(`${pool.id}.secondaryOffer`, pool.address, 'getSecurityOffered');
         }
     });
 
@@ -113,6 +124,11 @@ export async function getOnChainBalances(
                 balances: string[];
             };
             rate?: string;
+            openingPrice?: string;
+            maxPrice?: string;
+            securityOffered?: string;
+            cutoffTime?: string;
+            secondaryOffer?: string;
         }
     >;
 
@@ -128,6 +144,11 @@ export async function getOnChainBalances(
                     balances: string[];
                 };
                 rate?: string;
+                openingPrice?: string;
+                maxPrice?: string;
+                securityOffered?: string;
+                cutoffTime?: string;
+                secondaryOffer?: string;
             }
         >;
     } catch (err) {

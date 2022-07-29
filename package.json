@@ -60,7 +60,7 @@
         "pretty-quick": "^2.0.1",
         "rollup": "^2.56.3",
         "rollup-plugin-dts": "^4.0.0",
-        "ts-node": "^10.0.0",
+        "ts-node": "^10.8.1",
         "typescript": "^4.3.5"
     },
     "dependencies": {

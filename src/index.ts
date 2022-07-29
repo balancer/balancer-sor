@@ -16,4 +16,6 @@ export { StablePool } from './pools/stablePool/stablePool';
 export { MetaStablePool } from './pools/metaStablePool/metaStablePool';
 export { PhantomStablePool } from './pools/phantomStablePool/phantomStablePool';
 export { LinearPool } from './pools/linearPool/linearPool';
+export { PrimaryIssuePool } from './pools/PrimaryIssuePool/PrimaryIssuePool';
+export { SecondaryIssuePool } from './pools/SecondaryIssuePool/SecondaryIssuePool';
 export { getSpotPriceAfterSwapForPath } from './router/helpersClass';
