@@ -101,8 +101,8 @@ export interface SubgraphPoolBase {
     root3Alpha?: string;
 
     // Primary and Secondary issue pools
-    security: string;
-    currency: string;
+    security?: string;
+    currency?: string;
 
     // Only Primary pool
     openingPrice?: string;

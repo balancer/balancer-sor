@@ -19,12 +19,15 @@ import {
 
 type StablePoolToken = Pick<SubgraphToken, 'address' | 'balance' | 'decimals'>;
 
-export type StablePoolPairData = PoolPairBase & {
+export type SecondaryIssuePoolPairData = PoolPairBase & {
     allBalances: OldBigNumber[];
     allBalancesScaled: BigNumber[]; // EVM Maths uses everything in 1e18 upscaled format and this avoids repeated scaling
     amp: BigNumber;
     tokenIndexIn: number;
     tokenIndexOut: number;
+    security: string;
+    currency: string;
+    secondaryOffer: string;
 };
 
 export class SecondaryIssuePool implements PoolBase {
@@ -36,13 +39,24 @@ export class SecondaryIssuePool implements PoolBase {
     totalShares: BigNumber;
     tokens: StablePoolToken[];
     tokensList: string[];
+    security: string;
+    currency: string;
+    secondaryOffer: string;
     MAX_IN_RATIO = parseFixed('0.3', 18);
     MAX_OUT_RATIO = parseFixed('0.3', 18);
 
     static AMP_DECIMALS = 3;
 
     static fromPool(pool: SubgraphPoolBase): SecondaryIssuePool {
-        if (!pool.amp) throw new Error('StablePool missing amp factor');
+        if (!pool.amp) throw new Error('SecondaryIssuePool missing amp factor');
+
+        if (!pool.security)
+            throw new Error('SecondaryIssuePool missing "security"');
+        if (!pool.currency)
+            throw new Error('SecondaryIssuePool missing "currency"');
+        if (!pool.secondaryOffer)
+            throw new Error('SecondaryIssuePool missing "secondaryOffer"');
+
         return new SecondaryIssuePool(
             pool.id,
             pool.address,
@@ -50,7 +64,10 @@ export class SecondaryIssuePool implements PoolBase {
             pool.swapFee,
             pool.totalShares,
             pool.tokens,
-            pool.tokensList
+            pool.tokensList,
+            pool.security,
+            pool.currency,
+            pool.secondaryOffer
         );
     }
 
@@ -61,7 +78,10 @@ export class SecondaryIssuePool implements PoolBase {
         swapFee: string,
         totalShares: string,
         tokens: StablePoolToken[],
-        tokensList: string[]
+        tokensList: string[],
+        security: string,
+        currency: string,
+        secondaryOffer: string
     ) {
         this.id = id;
         this.address = address;
@@ -70,9 +90,15 @@ export class SecondaryIssuePool implements PoolBase {
         this.totalShares = parseFixed(totalShares, 18);
         this.tokens = tokens;
         this.tokensList = tokensList;
+        this.security = security;
+        this.currency = currency;
+        this.secondaryOffer = secondaryOffer;
     }
 
-    parsePoolPairData(tokenIn: string, tokenOut: string): StablePoolPairData {
+    parsePoolPairData(
+        tokenIn: string,
+        tokenOut: string
+    ): SecondaryIssuePoolPairData {
         const tokenIndexIn = this.tokens.findIndex(
             (t) => getAddress(t.address) === getAddress(tokenIn)
         );
@@ -95,7 +121,7 @@ export class SecondaryIssuePool implements PoolBase {
             parseFixed(balance, 18)
         );
 
-        const poolPairData: StablePoolPairData = {
+        const poolPairData: SecondaryIssuePoolPairData = {
             id: this.id,
             address: this.address,
             poolType: this.poolType,
@@ -111,12 +137,17 @@ export class SecondaryIssuePool implements PoolBase {
             tokenIndexOut: tokenIndexOut,
             decimalsIn: Number(decimalsIn),
             decimalsOut: Number(decimalsOut),
+            security: this.security,
+            currency: this.currency,
+            secondaryOffer: this.secondaryOffer,
         };
 
         return poolPairData;
     }
 
-    getNormalizedLiquidity(poolPairData: StablePoolPairData): OldBigNumber {
+    getNormalizedLiquidity(
+        poolPairData: SecondaryIssuePoolPairData
+    ): OldBigNumber {
         // This is an approximation as the actual normalized liquidity is a lot more complicated to calculate
         return bnum(
             formatFixed(
@@ -164,7 +195,7 @@ export class SecondaryIssuePool implements PoolBase {
     }
 
     _exactTokenInForTokenOut(
-        poolPairData: StablePoolPairData,
+        poolPairData: SecondaryIssuePoolPairData,
         amount: OldBigNumber
     ): OldBigNumber {
         try {
@@ -210,7 +241,7 @@ export class SecondaryIssuePool implements PoolBase {
     }
 
     _tokenInForExactTokenOut(
-        poolPairData: StablePoolPairData,
+        poolPairData: SecondaryIssuePoolPairData,
         amount: OldBigNumber
     ): OldBigNumber {
         try {
@@ -248,7 +279,7 @@ export class SecondaryIssuePool implements PoolBase {
     }
 
     _spotPriceAfterSwapExactTokenInForTokenOut(
-        poolPairData: StablePoolPairData,
+        poolPairData: SecondaryIssuePoolPairData,
         amount: OldBigNumber
     ): OldBigNumber {
         //return _spotPriceAfterSwapExactTokenInForTokenOut(amount, poolPairData);
@@ -256,7 +287,7 @@ export class SecondaryIssuePool implements PoolBase {
     }
 
     _spotPriceAfterSwapTokenInForExactTokenOut(
-        poolPairData: StablePoolPairData,
+        poolPairData: SecondaryIssuePoolPairData,
         amount: OldBigNumber
     ): OldBigNumber {
         //return _spotPriceAfterSwapTokenInForExactTokenOut(amount, poolPairData);
@@ -264,7 +295,7 @@ export class SecondaryIssuePool implements PoolBase {
     }
 
     _derivativeSpotPriceAfterSwapExactTokenInForTokenOut(
-        poolPairData: StablePoolPairData,
+        poolPairData: SecondaryIssuePoolPairData,
         amount: OldBigNumber
     ): OldBigNumber {
         /*return _derivativeSpotPriceAfterSwapExactTokenInForTokenOut(
@@ -275,7 +306,7 @@ export class SecondaryIssuePool implements PoolBase {
     }
 
     _derivativeSpotPriceAfterSwapTokenInForExactTokenOut(
-        poolPairData: StablePoolPairData,
+        poolPairData: SecondaryIssuePoolPairData,
         amount: OldBigNumber
     ): OldBigNumber {
         /*return _derivativeSpotPriceAfterSwapTokenInForExactTokenOut(
