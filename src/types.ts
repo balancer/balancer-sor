@@ -98,7 +98,7 @@ export interface SubgraphPoolBase {
     sqrtBeta?: string;
 
     // Gyro3 specific field
-    gyro3PriceBounds?: Gyro3PriceBounds;
+    root3Alpha?: string;
 
     // Primary and Secondary issue pools
     security: string;
@@ -106,13 +106,12 @@ export interface SubgraphPoolBase {
 
     // Only Primary pool
     openingPrice?: string;
-    maxPrice?:string;
+    maxPrice?: string;
     securityOffered?: string;
     cutoffTime?: string;
 
     // Only Secondary pool
     secondaryOffer?: string;
-    root3Alpha?: string;
 }
 
 export type SubgraphToken = {

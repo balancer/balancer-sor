@@ -184,7 +184,7 @@ export class PrimaryIssuePool implements PoolBase {
                 10 ** (18 - poolPairData.decimalsIn)
             );
 
-            const amt =0/*= _calcOutGivenIn(
+            const amt = 0; /*= _calcOutGivenIn(
                 this.amp.toBigInt(),
                 poolPairData.allBalancesScaled.map((balance) =>
                     balance.toBigInt()
@@ -219,7 +219,7 @@ export class PrimaryIssuePool implements PoolBase {
             // i.e. 1USDC => 1e18 not 1e6
             const amtScaled = parseFixed(amount.dp(18).toString(), 18);
 
-            let amt = 0 /*_calcInGivenOut(
+            let amt = 0; /*_calcInGivenOut(
                 this.amp.toBigInt(),
                 poolPairData.allBalancesScaled.map((balance) =>
                     balance.toBigInt()
@@ -252,7 +252,7 @@ export class PrimaryIssuePool implements PoolBase {
         amount: OldBigNumber
     ): OldBigNumber {
         //return _spotPriceAfterSwapExactTokenInForTokenOut(amount, poolPairData);
-        return amount
+        return amount;
     }
 
     _spotPriceAfterSwapTokenInForExactTokenOut(
@@ -260,7 +260,7 @@ export class PrimaryIssuePool implements PoolBase {
         amount: OldBigNumber
     ): OldBigNumber {
         //return _spotPriceAfterSwapTokenInForExactTokenOut(amount, poolPairData);
-        return amount
+        return amount;
     }
 
     _derivativeSpotPriceAfterSwapExactTokenInForTokenOut(
@@ -271,7 +271,7 @@ export class PrimaryIssuePool implements PoolBase {
             amount,
             poolPairData
         );*/
-        return amount
+        return amount;
     }
 
     _derivativeSpotPriceAfterSwapTokenInForExactTokenOut(
@@ -282,7 +282,7 @@ export class PrimaryIssuePool implements PoolBase {
             amount,
             poolPairData
         );*/
-        return amount
+        return amount;
     }
 
     subtractSwapFeeAmount(amount: BigNumber, swapFee: BigNumber): BigNumber {
