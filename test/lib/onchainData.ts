@@ -110,6 +110,8 @@ export async function getOnChainBalances(
                 'getSwapFeePercentage'
             );
         } else if (pool.poolType.toString().includes('Primary')) {
+            multiPool.call(`${pool.id}.security`, pool.address, 'getSecurity');
+            multiPool.call(`${pool.id}.currency`, pool.address, 'getCurrency');
             multiPool.call(
                 `${pool.id}.openingPrice`,
                 pool.address,
