@@ -146,7 +146,7 @@ export class PrimaryIssuePool implements PoolBase {
 
         // let pairType: PairTypes;
 
-        // if () { // TODO: Figure out pair type using token index
+        // if () { // TODO: Figure out pair type by comparing token addresses? (similar to linearPool.ts, Line 150)
         //     pairType = PairTypes.CashTokenToSecurityToken
         // } else {
         //     pairType = PairTypes.SecurityTokenToCashToken
@@ -235,7 +235,7 @@ export class PrimaryIssuePool implements PoolBase {
         try {
             if (amount.isZero()) return ZERO;
 
-            const isCashToken = true; // TODO: Add check later
+            const isCashToken = true; // TODO: Add check later (Line 149)
             // const isCashToken = poolPairData.pairType === PairTypes.CashTokenToSecurityToken
 
             const cashTokens = parseFixed(poolPairData.currency);
