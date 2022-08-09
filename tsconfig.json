@@ -21,8 +21,8 @@
         "src/pools/weightedPool/weightedPoolAbi.json",
         "src/pools/elementPool/ConvergentCurvePool.json",
         "src/pools/linearPool/linearPoolAbi.json",
-        "src/pools/PrimaryIssuePool/PrimaryIssuePoolAbi.json",
-        "src/pools/SecondaryIssuePool/SecondaryIssuePoolAbi.json"
+        "src/pools/primaryIssuePool/primaryIssuePoolAbi.json",
+        "src/pools/aecondaryIssuePool/secondaryIssuePoolAbi.json"
     ],
     "files": ["hardhat.config.js"]
 }

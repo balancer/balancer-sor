@@ -4,8 +4,8 @@ import { MetaStablePool } from './metaStablePool/metaStablePool';
 import { LinearPool } from './linearPool/linearPool';
 import { ElementPool } from './elementPool/elementPool';
 import { PhantomStablePool } from './phantomStablePool/phantomStablePool';
-import { PrimaryIssuePool } from './PrimaryIssuePool/PrimaryIssuePool';
-import { SecondaryIssuePool } from './SecondaryIssuePool/SecondaryIssuePool';
+import { PrimaryIssuePool } from './primaryIssuePool/primaryIssuePool';
+import { SecondaryIssuePool } from './secondaryIssuePool/secondaryIssuePool';
 import { Gyro2Pool } from './gyro2Pool/gyro2Pool';
 import { Gyro3Pool } from './gyro3Pool/gyro3Pool';
 import {

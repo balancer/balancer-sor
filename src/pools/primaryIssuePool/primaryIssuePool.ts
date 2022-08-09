@@ -17,62 +17,111 @@ import {
     SubgraphToken,
 } from '../../types';
 
-type StablePoolToken = Pick<SubgraphToken, 'address' | 'balance' | 'decimals'>;
+export enum PairTypes {
+    CashTokenToSecurityToken,
+    SecurityTokenToCashToken,
+}
 
-export type StablePoolPairData = PoolPairBase & {
+type PrimaryIssuePoolToken = Pick<
+    SubgraphToken,
+    'address' | 'balance' | 'decimals'
+>;
+
+export type PrimaryIssuePoolPairData = PoolPairBase & {
+    // pairType: PairTypes;
     allBalances: OldBigNumber[];
     allBalancesScaled: BigNumber[]; // EVM Maths uses everything in 1e18 upscaled format and this avoids repeated scaling
-    amp: BigNumber;
     tokenIndexIn: number;
     tokenIndexOut: number;
+    security: string;
+    currency: string;
+    openingPrice: string;
+    maxPrice: string;
+    securityOffered: string;
+    cutoffTime: string;
 };
 
-export class SecondaryIssuePool implements PoolBase {
-    poolType: PoolTypes = PoolTypes.Stable;
+export class PrimaryIssuePool implements PoolBase {
+    poolType: PoolTypes = PoolTypes.PrimaryIssuePool;
     id: string;
     address: string;
-    amp: BigNumber;
     swapFee: BigNumber;
     totalShares: BigNumber;
-    tokens: StablePoolToken[];
+    tokens: PrimaryIssuePoolToken[];
     tokensList: string[];
+
+    security: string;
+    currency: string;
+    openingPrice: string;
+    maxPrice: string;
+    securityOffered: string;
+    cutoffTime: string;
+
     MAX_IN_RATIO = parseFixed('0.3', 18);
     MAX_OUT_RATIO = parseFixed('0.3', 18);
 
-    static AMP_DECIMALS = 3;
+    static fromPool(pool: SubgraphPoolBase): PrimaryIssuePool {
+        if (!pool.security)
+            throw new Error('PrimaryIssuePool missing "security"');
+        if (!pool.currency)
+            throw new Error('PrimaryIssuePool missing "currency"');
+        if (!pool.openingPrice)
+            throw new Error('PrimaryIssuePool missing "openingPrice"');
+        if (!pool.maxPrice)
+            throw new Error('PrimaryIssuePool missing "maxPrice"');
+        if (!pool.securityOffered)
+            throw new Error('PrimaryIssuePool missing "securityOffered"');
+        if (!pool.cutoffTime)
+            throw new Error('PrimaryIssuePool missing "cutoffTime"');
 
-    static fromPool(pool: SubgraphPoolBase): SecondaryIssuePool {
-        if (!pool.amp) throw new Error('StablePool missing amp factor');
-        return new SecondaryIssuePool(
+        return new PrimaryIssuePool(
             pool.id,
             pool.address,
-            pool.amp,
             pool.swapFee,
             pool.totalShares,
             pool.tokens,
-            pool.tokensList
+            pool.tokensList,
+            pool.security,
+            pool.currency,
+            pool.openingPrice,
+            pool.maxPrice,
+            pool.securityOffered,
+            pool.cutoffTime
         );
     }
 
     constructor(
         id: string,
         address: string,
-        amp: string,
         swapFee: string,
         totalShares: string,
-        tokens: StablePoolToken[],
-        tokensList: string[]
+        tokens: PrimaryIssuePoolToken[],
+        tokensList: string[],
+        security: string,
+        currency: string,
+        openingPrice: string,
+        maxPrice: string,
+        securityOffered: string,
+        cutoffTime: string
     ) {
         this.id = id;
         this.address = address;
-        //this.amp = parseFixed(amp, StablePool.AMP_DECIMALS);
         this.swapFee = parseFixed(swapFee, 18);
         this.totalShares = parseFixed(totalShares, 18);
         this.tokens = tokens;
         this.tokensList = tokensList;
+        this.security = security;
+        this.currency = currency;
+        this.openingPrice = openingPrice;
+        this.maxPrice = maxPrice;
+        this.securityOffered = securityOffered;
+        this.cutoffTime = cutoffTime;
     }
 
-    parsePoolPairData(tokenIn: string, tokenOut: string): StablePoolPairData {
+    parsePoolPairData(
+        tokenIn: string,
+        tokenOut: string
+    ): PrimaryIssuePoolPairData {
         const tokenIndexIn = this.tokens.findIndex(
             (t) => getAddress(t.address) === getAddress(tokenIn)
         );
@@ -95,10 +144,19 @@ export class SecondaryIssuePool implements PoolBase {
             parseFixed(balance, 18)
         );
 
-        const poolPairData: StablePoolPairData = {
+        // let pairType: PairTypes;
+
+        // if () { // TODO: Figure out pair type by comparing token addresses? (similar to linearPool.ts, Line 150)
+        //     pairType = PairTypes.CashTokenToSecurityToken
+        // } else {
+        //     pairType = PairTypes.SecurityTokenToCashToken
+        // }
+
+        const poolPairData: PrimaryIssuePoolPairData = {
             id: this.id,
             address: this.address,
             poolType: this.poolType,
+            // pairType: pairType,
             tokenIn: tokenIn,
             tokenOut: tokenOut,
             balanceIn: parseFixed(balanceIn, decimalsIn),
@@ -106,21 +164,28 @@ export class SecondaryIssuePool implements PoolBase {
             swapFee: this.swapFee,
             allBalances,
             allBalancesScaled, // TO DO - Change to BigInt??
-            amp: this.amp,
             tokenIndexIn: tokenIndexIn,
             tokenIndexOut: tokenIndexOut,
             decimalsIn: Number(decimalsIn),
             decimalsOut: Number(decimalsOut),
+            security: this.security,
+            currency: this.currency,
+            openingPrice: this.openingPrice,
+            maxPrice: this.maxPrice,
+            securityOffered: this.securityOffered,
+            cutoffTime: this.cutoffTime,
         };
 
         return poolPairData;
     }
 
-    getNormalizedLiquidity(poolPairData: StablePoolPairData): OldBigNumber {
+    getNormalizedLiquidity(
+        poolPairData: PrimaryIssuePoolPairData
+    ): OldBigNumber {
         // This is an approximation as the actual normalized liquidity is a lot more complicated to calculate
         return bnum(
             formatFixed(
-                poolPairData.balanceOut.mul(poolPairData.amp),
+                // poolPairData.balanceOut.mul(poolPairData.amp),
                 poolPairData.decimalsOut //+ StablePool.AMP_DECIMALS
             )
         );
@@ -164,45 +229,40 @@ export class SecondaryIssuePool implements PoolBase {
     }
 
     _exactTokenInForTokenOut(
-        poolPairData: StablePoolPairData,
+        poolPairData: PrimaryIssuePoolPairData,
         amount: OldBigNumber
     ): OldBigNumber {
         try {
             if (amount.isZero()) return ZERO;
 
-            const amtWithFeeEvm = this.subtractSwapFeeAmount(
-                parseFixed(
-                    amount.dp(poolPairData.decimalsIn).toString(),
-                    poolPairData.decimalsIn
-                ),
-                poolPairData.swapFee
+            const isCashToken = true; // TODO: Add check later (Line 149)
+            // const isCashToken = poolPairData.pairType === PairTypes.CashTokenToSecurityToken
+
+            const cashTokens = parseFixed(poolPairData.currency);
+            const securityTokens = parseFixed(poolPairData.security);
+
+            let x: BigNumber, y: BigNumber;
+
+            if (isCashToken) {
+                x = cashTokens;
+                y = securityTokens;
+            } else {
+                x = securityTokens;
+                y = cashTokens;
+            }
+
+            // z = x' / ((x + x') / y)
+            // where,
+            // x' - tokens coming in
+            // x  - total amount of tokens of the same type as the tokens coming in
+            // y  - total amount of tokens of the other type
+            // z  - tokens going out
+
+            const tokensOut = amount.div(
+                x.add(amount.toString()).div(y).toString()
             );
 
-            // All values should use 1e18 fixed point
-            // i.e. 1USDC => 1e18 not 1e6
-            const amtScaled = amtWithFeeEvm.mul(
-                10 ** (18 - poolPairData.decimalsIn)
-            );
-
-            const amt = 0/*_calcOutGivenIn(
-                this.amp.toBigInt(),
-                poolPairData.allBalancesScaled.map((balance) =>
-                    balance.toBigInt()
-                ),
-                poolPairData.tokenIndexIn,
-                poolPairData.tokenIndexOut,
-                amtScaled.toBigInt(),
-                BigInt(0)
-            );*/
-
-            // return normalised amount
-            // Using BigNumber.js decimalPlaces (dp), allows us to consider token decimal accuracy correctly,
-            // i.e. when using token with 2decimals 0.002 should be returned as 0
-            // Uses ROUND_DOWN mode (1)
-            return scale(bnum(amt.toString()), -18).dp(
-                poolPairData.decimalsOut,
-                1
-            );
+            return bnum(tokensOut);
         } catch (err) {
             console.error(`_evmoutGivenIn: ${err.message}`);
             return ZERO;
@@ -210,37 +270,41 @@ export class SecondaryIssuePool implements PoolBase {
     }
 
     _tokenInForExactTokenOut(
-        poolPairData: StablePoolPairData,
+        poolPairData: PrimaryIssuePoolPairData,
         amount: OldBigNumber
     ): OldBigNumber {
         try {
             if (amount.isZero()) return ZERO;
-            // All values should use 1e18 fixed point
-            // i.e. 1USDC => 1e18 not 1e6
-            const amtScaled = parseFixed(amount.dp(18).toString(), 18);
 
-            let amt = 0/*_calcInGivenOut(
-                this.amp.toBigInt(),
-                poolPairData.allBalancesScaled.map((balance) =>
-                    balance.toBigInt()
-                ),
-                poolPairData.tokenIndexIn,
-                poolPairData.tokenIndexOut,
-                amtScaled.toBigInt(),
-                BigInt(0)
-            );*/
+            const isCashToken = true; // TODO: Add check later
+            // const isCashToken = poolPairData.pairType === PairTypes.CashTokenToSecurityToken
 
-            // this is downscaleUp
-            const scaleFactor = BigInt(10 ** (18 - poolPairData.decimalsIn));
-            amt = 0//(amt + scaleFactor - BigInt(1)) / scaleFactor;
+            const cashTokens = parseFixed(poolPairData.currency);
+            const securityTokens = parseFixed(poolPairData.security);
 
-            const amtWithFee = this.addSwapFeeAmount(
-                BigNumber.from(amt),
-                poolPairData.swapFee
-            );
-            return bnum(amtWithFee.toString()).div(
-                10 ** poolPairData.decimalsIn
-            );
+            let x: BigNumber, y: BigNumber;
+
+            if (isCashToken) {
+                x = cashTokens;
+                y = securityTokens;
+            } else {
+                x = securityTokens;
+                y = cashTokens;
+            }
+
+            // x' = xz / (y - z)
+            // where,
+            // x' - tokens coming in
+            // x  - total amount of tokens of the same type as the tokens coming in
+            // y  - total amount of tokens of the other type
+            // z  - tokens going out
+
+            const tokensIn = x
+                .mul(amount.toString())
+                .div(y.sub(amount.toString()))
+                .toString();
+
+            return bnum(tokensIn);
         } catch (err) {
             console.error(`_evminGivenOut: ${err.message}`);
             return ZERO;
@@ -248,41 +312,41 @@ export class SecondaryIssuePool implements PoolBase {
     }
 
     _spotPriceAfterSwapExactTokenInForTokenOut(
-        poolPairData: StablePoolPairData,
+        poolPairData: PrimaryIssuePoolPairData,
         amount: OldBigNumber
     ): OldBigNumber {
         //return _spotPriceAfterSwapExactTokenInForTokenOut(amount, poolPairData);
-        return amount
+        return amount;
     }
 
     _spotPriceAfterSwapTokenInForExactTokenOut(
-        poolPairData: StablePoolPairData,
+        poolPairData: PrimaryIssuePoolPairData,
         amount: OldBigNumber
     ): OldBigNumber {
         //return _spotPriceAfterSwapTokenInForExactTokenOut(amount, poolPairData);
-        return amount
+        return amount;
     }
 
     _derivativeSpotPriceAfterSwapExactTokenInForTokenOut(
-        poolPairData: StablePoolPairData,
+        poolPairData: PrimaryIssuePoolPairData,
         amount: OldBigNumber
     ): OldBigNumber {
         /*return _derivativeSpotPriceAfterSwapExactTokenInForTokenOut(
             amount,
             poolPairData
         );*/
-        return amount
+        return amount;
     }
 
     _derivativeSpotPriceAfterSwapTokenInForExactTokenOut(
-        poolPairData: StablePoolPairData,
+        poolPairData: PrimaryIssuePoolPairData,
         amount: OldBigNumber
     ): OldBigNumber {
         /*return _derivativeSpotPriceAfterSwapTokenInForExactTokenOut(
             amount,
             poolPairData
         );*/
-        return amount
+        return amount;
     }
 
     subtractSwapFeeAmount(amount: BigNumber, swapFee: BigNumber): BigNumber {
