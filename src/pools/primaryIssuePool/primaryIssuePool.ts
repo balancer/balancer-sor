@@ -28,7 +28,7 @@ type PrimaryIssuePoolToken = Pick<
 >;
 
 export type PrimaryIssuePoolPairData = PoolPairBase & {
-    // pairType: PairTypes;
+    pairType: PairTypes;
     allBalances: OldBigNumber[];
     allBalancesScaled: BigNumber[]; // EVM Maths uses everything in 1e18 upscaled format and this avoids repeated scaling
     tokenIndexIn: number;
@@ -122,6 +122,7 @@ export class PrimaryIssuePool implements PoolBase {
         tokenIn: string,
         tokenOut: string
     ): PrimaryIssuePoolPairData {
+        let pairType: PairTypes;
         const tokenIndexIn = this.tokens.findIndex(
             (t) => getAddress(t.address) === getAddress(tokenIn)
         );
@@ -142,21 +143,19 @@ export class PrimaryIssuePool implements PoolBase {
         const allBalances = this.tokens.map(({ balance }) => bnum(balance));
         const allBalancesScaled = this.tokens.map(({ balance }) =>
             parseFixed(balance, 18)
-        );
+        );        
 
-        // let pairType: PairTypes;
-
-        // if () { // TODO: Figure out pair type by comparing token addresses? (similar to linearPool.ts, Line 150)
-        //     pairType = PairTypes.CashTokenToSecurityToken
-        // } else {
-        //     pairType = PairTypes.SecurityTokenToCashToken
-        // }
-
+        if (isSameAddress(tokenIn, this.currency)) { 
+            pairType = PairTypes.CashTokenToSecurityToken            
+        } else {
+            pairType = PairTypes.SecurityTokenToCashToken
+        }
+        
         const poolPairData: PrimaryIssuePoolPairData = {
             id: this.id,
             address: this.address,
             poolType: this.poolType,
-            // pairType: pairType,
+            pairType: pairType,
             tokenIn: tokenIn,
             tokenOut: tokenOut,
             balanceIn: parseFixed(balanceIn, decimalsIn),
@@ -182,22 +181,13 @@ export class PrimaryIssuePool implements PoolBase {
     getNormalizedLiquidity(
         poolPairData: PrimaryIssuePoolPairData
     ): OldBigNumber {
-        // This is an approximation as the actual normalized liquidity is a lot more complicated to calculate
-        return bnum(
-            formatFixed(
-                // poolPairData.balanceOut.mul(poolPairData.amp),
-                poolPairData.decimalsOut //+ StablePool.AMP_DECIMALS
-            )
-        );
+        return bnum(0);
     }
 
     getLimitAmountSwap(
         poolPairData: PoolPairBase,
         swapType: SwapTypes
     ): OldBigNumber {
-        // We multiply ratios by 10**-18 because we are in normalized space
-        // so 0.5 should be 0.5 and not 500000000000000000
-        // TODO: update bmath to use everything normalized
         if (swapType === SwapTypes.SwapExactIn) {
             return bnum(
                 formatFixed(
@@ -217,7 +207,6 @@ export class PrimaryIssuePool implements PoolBase {
 
     // Updates the balance of a given token for the pool
     updateTokenBalanceForPool(token: string, newBalance: BigNumber): void {
-        // token is BPT
         if (this.address == token) {
             this.totalShares = newBalance;
         } else {
@@ -235,8 +224,7 @@ export class PrimaryIssuePool implements PoolBase {
         try {
             if (amount.isZero()) return ZERO;
 
-            const isCashToken = true; // TODO: Add check later (Line 149)
-            // const isCashToken = poolPairData.pairType === PairTypes.CashTokenToSecurityToken
+            const isCashToken = poolPairData.pairType === PairTypes.CashTokenToSecurityToken
 
             const cashTokens = parseFixed(poolPairData.currency);
             const securityTokens = parseFixed(poolPairData.security);
@@ -276,8 +264,7 @@ export class PrimaryIssuePool implements PoolBase {
         try {
             if (amount.isZero()) return ZERO;
 
-            const isCashToken = true; // TODO: Add check later
-            // const isCashToken = poolPairData.pairType === PairTypes.CashTokenToSecurityToken
+            const isCashToken = poolPairData.pairType === PairTypes.CashTokenToSecurityToken
 
             const cashTokens = parseFixed(poolPairData.currency);
             const securityTokens = parseFixed(poolPairData.security);
@@ -315,7 +302,7 @@ export class PrimaryIssuePool implements PoolBase {
         poolPairData: PrimaryIssuePoolPairData,
         amount: OldBigNumber
     ): OldBigNumber {
-        //return _spotPriceAfterSwapExactTokenInForTokenOut(amount, poolPairData);
+        //todo
         return amount;
     }
 
@@ -323,7 +310,7 @@ export class PrimaryIssuePool implements PoolBase {
         poolPairData: PrimaryIssuePoolPairData,
         amount: OldBigNumber
     ): OldBigNumber {
-        //return _spotPriceAfterSwapTokenInForExactTokenOut(amount, poolPairData);
+        //todo
         return amount;
     }
 
@@ -331,10 +318,7 @@ export class PrimaryIssuePool implements PoolBase {
         poolPairData: PrimaryIssuePoolPairData,
         amount: OldBigNumber
     ): OldBigNumber {
-        /*return _derivativeSpotPriceAfterSwapExactTokenInForTokenOut(
-            amount,
-            poolPairData
-        );*/
+        //todo
         return amount;
     }
 
@@ -342,22 +326,8 @@ export class PrimaryIssuePool implements PoolBase {
         poolPairData: PrimaryIssuePoolPairData,
         amount: OldBigNumber
     ): OldBigNumber {
-        /*return _derivativeSpotPriceAfterSwapTokenInForExactTokenOut(
-            amount,
-            poolPairData
-        );*/
+        //todo
         return amount;
     }
-
-    subtractSwapFeeAmount(amount: BigNumber, swapFee: BigNumber): BigNumber {
-        // https://github.com/balancer-labs/balancer-v2-monorepo/blob/c18ff2686c61a8cbad72cdcfc65e9b11476fdbc3/pkg/pool-utils/contracts/BasePool.sol#L466
-        const feeAmount = amount.mul(swapFee).add(ONE.sub(1)).div(ONE);
-        return amount.sub(feeAmount);
-    }
-
-    addSwapFeeAmount(amount: BigNumber, swapFee: BigNumber): BigNumber {
-        // https://github.com/balancer-labs/balancer-v2-monorepo/blob/c18ff2686c61a8cbad72cdcfc65e9b11476fdbc3/pkg/pool-utils/contracts/BasePool.sol#L458
-        const feeAmount = ONE.sub(swapFee);
-        return amount.mul(ONE).add(feeAmount.sub(1)).div(feeAmount);
-    }
+    
 }
