@@ -226,8 +226,8 @@ export class PrimaryIssuePool implements PoolBase {
 
             const isCashToken = poolPairData.pairType === PairTypes.CashTokenToSecurityToken
 
-            const cashTokens = parseFixed(poolPairData.currency);
-            const securityTokens = parseFixed(poolPairData.security);
+            const cashTokens = poolPairData.balanceIn;
+            const securityTokens = poolPairData.balanceOut;
 
             let x: BigNumber, y: BigNumber;
 
@@ -266,8 +266,8 @@ export class PrimaryIssuePool implements PoolBase {
 
             const isCashToken = poolPairData.pairType === PairTypes.CashTokenToSecurityToken
 
-            const cashTokens = parseFixed(poolPairData.currency);
-            const securityTokens = parseFixed(poolPairData.security);
+            const cashTokens = poolPairData.balanceIn;
+            const securityTokens = poolPairData.balanceOut;
 
             let x: BigNumber, y: BigNumber;
 
@@ -302,16 +302,78 @@ export class PrimaryIssuePool implements PoolBase {
         poolPairData: PrimaryIssuePoolPairData,
         amount: OldBigNumber
     ): OldBigNumber {
-        //todo
-        return amount;
+        try {
+            const isCashToken = poolPairData.pairType === PairTypes.CashTokenToSecurityToken
+
+            const cashTokens = poolPairData.balanceIn;
+            const securityTokens = poolPairData.balanceOut;
+
+            let x: BigNumber, y: BigNumber;
+
+            if (isCashToken) {
+                x = cashTokens;
+                y = securityTokens;
+            } else {
+                x = securityTokens;
+                y = cashTokens;
+            }
+
+            // sp = (x' + x)/(y - z)
+            // where,
+            // x' - tokens coming in
+            // x  - total amount of tokens of the same type as the tokens coming in
+            // y  - total amount of tokens of the other type
+            // z  - _exactTokenInForTokenOut
+            // p  - spot price
+
+            const spotPrice =
+                x.add(amount.toString()).div(y.sub(this._exactTokenInForTokenOut.toString())).toString();
+
+            return bnum(spotPrice);
+
+        } catch (err) {
+            console.error(`_evmoutGivenIn: ${err.message}`);
+            return ZERO;
+        }
     }
 
     _spotPriceAfterSwapTokenInForExactTokenOut(
         poolPairData: PrimaryIssuePoolPairData,
         amount: OldBigNumber
     ): OldBigNumber {
-        //todo
-        return amount;
+        try {
+            const isCashToken = poolPairData.pairType === PairTypes.CashTokenToSecurityToken
+
+            const cashTokens = poolPairData.balanceIn;
+            const securityTokens = poolPairData.balanceOut;
+
+            let x: BigNumber, y: BigNumber;
+
+            if (isCashToken) {
+                x = cashTokens;
+                y = securityTokens;
+            } else {
+                x = securityTokens;
+                y = cashTokens;
+            }
+            
+            // sp = (x + z)/(y - y')
+            // where,
+            // z - tokens coming in (_tokenInForExactTokenOut)
+            // x  - total amount of tokens of the same type as the tokens coming in
+            // y  - total amount of tokens of the other type
+            // y'  - total amount of tokens going out
+            // p  - spot price
+
+            const spotPrice =
+                x.add(this._tokenInForExactTokenOut.toString()).div(y.sub(amount.toString())).toString();
+
+            return bnum(spotPrice);
+
+        } catch (err) {
+            console.error(`_evmoutGivenIn: ${err.message}`);
+            return ZERO;
+        }
     }
 
     _derivativeSpotPriceAfterSwapExactTokenInForTokenOut(
