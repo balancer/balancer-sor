@@ -27,7 +27,10 @@ export function _upscaleArray(
 ): bigint[] {
     const upscaledAmounts = new Array<bigint>(amounts.length);
     for (let i = 0; i < amounts.length; ++i) {
-        upscaledAmounts[i] = MathSol.mul(amounts[i], scalingFactors[i]);
+        upscaledAmounts[i] = MathSol.mulDownFixed(
+            amounts[i],
+            scalingFactors[i]
+        );
     }
     return upscaledAmounts;
 }

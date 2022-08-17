@@ -28,8 +28,6 @@ import {
     _calcTokensOutGivenExactBptIn,
     _calcTokenOutGivenExactBptIn,
     _calcBptInGivenExactTokensOut,
-    _calcDueProtocolSwapFeeBptAmount,
-    _calculateInvariant,
 } from '../src/pools/weightedPool/weightedMath';
 import { Contract } from '@ethersproject/contracts';
 
@@ -115,10 +113,7 @@ describe('weightedMath tests', () => {
                 amountsIn.map((a) => BigInt(a)),
                 scalingFactors
             );
-            console.log('balances: ', balances);
-            console.log('scalingFactors: ', scalingFactors);
             const balancesScaled = _upscaleArray(balances, scalingFactors);
-            console.log('balancesScaled: ', balancesScaled);
             const sdkResult = SDK.WeightedMath._calcBptOutGivenExactTokensIn(
                 balancesScaled.map((a) => bnum(a.toString())),
                 normalizedWeights.map((a) => bnum(a.toString())),
@@ -139,16 +134,18 @@ describe('weightedMath tests', () => {
 
         // UI was previously using GeorgesSDK so we should at least match this
         context('testing against original SDK maths', () => {
-            it('debug Pool with 18 decimal tokens', async () => {
+            it('Pool with 18 decimal tokens', async () => {
                 const poolId =
                     '0x90291319f1d4ea3ad4db0dd8fe9e12baf749e84500020000000000000000013c';
                 const poolInfo = await getPoolOnChain(poolId, vault, provider);
-                const scalingFactors = [BigInt('1'), BigInt('1')];
+                const scalingFactors = [
+                    BigInt('1000000000000000000'),
+                    BigInt('1000000000000000000'),
+                ];
                 const amountsIn = [
                     BigInt('7000000000000000000'),
                     BigInt('1000000000000000000'),
                 ];
-                console.log('poolInfo.balances: ', poolInfo.balances);
                 compareToSdk(
                     scalingFactors,
                     poolInfo.balances,
@@ -164,7 +161,10 @@ describe('weightedMath tests', () => {
                 const poolId =
                     '0x96646936b91d6b9d7d0c47c496afbf3d6ec7b6f8000200000000000000000019';
                 const poolInfo = await getPoolOnChain(poolId, vault, provider);
-                const scalingFactors = [BigInt('1000000000000'), BigInt('1')];
+                const scalingFactors = [
+                    BigInt('1000000000000000000000000000000'),
+                    BigInt('1000000000000000000'),
+                ];
                 const amountsIn = [
                     BigInt('1234000000'),
                     BigInt('1000000000000000000'),
@@ -184,103 +184,110 @@ describe('weightedMath tests', () => {
         Testing maths against a queryJoin is failing.
         Needs further investigation but possible related to protocol fees which this has some initial code.
         */
-        /* context('testing with protocol fee', () => {
-            it('Pool with 6 decimal tokens', async () => {
-                // USDC/WETH
-                const poolId =
-                    '0x96646936b91d6b9d7d0c47c496afbf3d6ec7b6f8000200000000000000000019';
-                const poolInfo = await getPoolOnChain(poolId, vault, provider);
-                const assets = poolInfo.tokens;
-                const scalingFactors = ['1000000000000', '1'];
-                const amountsIn = ['1234000000', '1000000000000000000'];
-                const amountsInScaled: bigint[] = amountsIn.map(
-                    (a, i) =>
-                        (BigInt(a) * BigInt(scalingFactors[i])) / BigInt(1e18)
-                );
-                const scaledBalances = poolInfo.balances.map(
-                    (a, i) =>
-                        (BigInt(a) * BigInt(scalingFactors[i])) / BigInt(1e18)
-                );
-                // https://etherscan.io/address/0xce88686553686DA562CE7Cea497CE749DA109f9F#readContract
-                // getSwapFeePercentage
-                const protocolSwapFeePercentage = BigInt('500000000000000000');
-                // _beforeJoinExit
-                // Same as getInvariant
-                const preJoinExitInvariant = _calculateInvariant(
-                    poolInfo.normalizedWeights,
-                    scaledBalances
-                );
-                const toMint = _calcDueProtocolSwapFeeBptAmount(
-                    poolInfo.totalSupply,
-                    poolInfo.lastInvariant,
-                    preJoinExitInvariant,
-                    protocolSwapFeePercentage
-                );
-                const calculatedBptOut = _calcBptOutGivenExactTokensIn(
-                    scaledBalances,
-                    poolInfo.normalizedWeights,
-                    amountsInScaled,
-                    poolInfo.totalSupply + toMint,
-                    poolInfo.swapFee
-                );
-                // queryJoin against local fork
-                const query = await queryJoin(
-                    poolId,
-                    amountsIn,
-                    assets,
-                    balancerHelpers
-                );
-                expect(query.amountsIn.toString()).to.eq(amountsIn.toString());
-                expect(query.bptOut.toString()).to.eq(
-                    calculatedBptOut.toString()
-                );
-            }).timeout(10000);
-            it('Pool with 18 decimal tokens', async () => {
-                const poolId =
-                    '0x90291319f1d4ea3ad4db0dd8fe9e12baf749e84500020000000000000000013c';
-                const poolInfo = await getPoolOnChain(poolId, vault, provider);
-                const assets = poolInfo.tokens;
-                const amountsIn = [
-                    '7000000000000000000',
-                    '1000000000000000000',
-                ];
-                // https://etherscan.io/address/0xce88686553686DA562CE7Cea497CE749DA109f9F#readContract
-                // getSwapFeePercentage
-                const protocolSwapFeePercentage = BigInt('500000000000000000');
-                // _beforeJoinExit
-                // Same as getInvariant
-                const preJoinExitInvariant = _calculateInvariant(
-                    poolInfo.normalizedWeights,
-                    poolInfo.balances
-                );
-                const toMint = _calcDueProtocolSwapFeeBptAmount(
-                    poolInfo.totalSupply,
-                    poolInfo.lastInvariant,
-                    preJoinExitInvariant,
-                    protocolSwapFeePercentage
-                );
-                const calculatedBptOut = _calcBptOutGivenExactTokensIn(
-                    poolInfo.balances,
-                    poolInfo.normalizedWeights,
-                    amountsIn.map((a) => BigInt(a)),
-                    poolInfo.totalSupply + toMint,
-                    poolInfo.swapFee
-                );
-                // queryJoin against local fork
-                const query = await queryJoin(
-                    poolId,
-                    amountsIn,
-                    assets,
-                    balancerHelpers
-                );
-                expect(query.amountsIn.toString()).to.eq(amountsIn.toString());
-                expect(query.bptOut.gt(0)).to.be.true;
-                expect(query.bptOut.toString()).to.eq(
-                    calculatedBptOut.toString()
-                );
-            }).timeout(10000);
-        });*/
+        // context('testing with protocol fee', () => {
+        //     it('Pool with 6 decimal tokens', async () => {
+        //         // USDC/WETH
+        //         const poolId =
+        //             '0x96646936b91d6b9d7d0c47c496afbf3d6ec7b6f8000200000000000000000019';
+        //         const poolInfo = await getPoolOnChain(poolId, vault, provider);
+        //         const assets = poolInfo.tokens;
+        //         const scalingFactors = [
+        //             '1000000000000000000000000000000',
+        //             '1000000000000000000',
+        //         ];
+        //         const amountsIn = ['1234000000', '1000000000000000000'];
+        //         const amountsInScaled: bigint[] = amountsIn.map(
+        //             (a, i) =>
+        //                 (BigInt(a) * BigInt(scalingFactors[i])) / BigInt(1e18)
+        //         );
+        //         const scaledBalances = poolInfo.balances.map(
+        //             (a, i) =>
+        //                 (BigInt(a) * BigInt(scalingFactors[i])) / BigInt(1e18)
+        //         );
+        //         // https://etherscan.io/address/0xce88686553686DA562CE7Cea497CE749DA109f9F#readContract
+        //         // getSwapFeePercentage
+        //         const protocolSwapFeePercentage = BigInt('500000000000000000');
+
+        //         // _beforeJoinExit
+        //         // Same as getInvariant
+        //         const preJoinExitInvariant = _calculateInvariant(
+        //             poolInfo.normalizedWeights,
+        //             scaledBalances
+        //         );
+        //         const toMint = _calcDueProtocolSwapFeeBptAmount(
+        //             poolInfo.totalSupply,
+        //             poolInfo.lastInvariant,
+        //             preJoinExitInvariant,
+        //             protocolSwapFeePercentage
+        //         );
+        //         const calculatedBptOut = _calcBptOutGivenExactTokensIn(
+        //             scaledBalances,
+        //             poolInfo.normalizedWeights,
+        //             amountsInScaled,
+        //             poolInfo.totalSupply + toMint,
+        //             poolInfo.swapFee
+        //         );
+        //         // queryJoin against local fork
+        //         const query = await queryJoin(
+        //             poolId,
+        //             amountsIn,
+        //             assets,
+        //             balancerHelpers
+        //         );
+        //         expect(query.amountsIn.toString()).to.eq(amountsIn.toString());
+        //         expect(query.bptOut.toString()).to.eq(
+        //             calculatedBptOut.toString()
+        //         );
+        //     }).timeout(10000);
+
+        //     it('Pool with 18 decimal tokens', async () => {
+        //         const poolId =
+        //             '0x90291319f1d4ea3ad4db0dd8fe9e12baf749e84500020000000000000000013c';
+        //         const poolInfo = await getPoolOnChain(poolId, vault, provider);
+        //         const assets = poolInfo.tokens;
+        //         const amountsIn = [
+        //             '7000000000000000000',
+        //             '1000000000000000000',
+        //         ];
+        //         // https://etherscan.io/address/0xce88686553686DA562CE7Cea497CE749DA109f9F#readContract
+        //         // getSwapFeePercentage
+        //         const protocolSwapFeePercentage = BigInt('500000000000000000');
+
+        //         // _beforeJoinExit
+        //         // Same as getInvariant
+        //         const preJoinExitInvariant = _calculateInvariant(
+        //             poolInfo.normalizedWeights,
+        //             poolInfo.balances
+        //         );
+        //         const toMint = _calcDueProtocolSwapFeeBptAmount(
+        //             poolInfo.totalSupply,
+        //             poolInfo.lastInvariant,
+        //             preJoinExitInvariant,
+        //             protocolSwapFeePercentage
+        //         );
+        //         const calculatedBptOut = _calcBptOutGivenExactTokensIn(
+        //             poolInfo.balances,
+        //             poolInfo.normalizedWeights,
+        //             amountsIn.map((a) => BigInt(a)),
+        //             poolInfo.totalSupply + toMint,
+        //             poolInfo.swapFee
+        //         );
+        //         // queryJoin against local fork
+        //         const query = await queryJoin(
+        //             poolId,
+        //             amountsIn,
+        //             assets,
+        //             balancerHelpers
+        //         );
+        //         expect(query.amountsIn.toString()).to.eq(amountsIn.toString());
+        //         expect(query.bptOut.gt(0)).to.be.true;
+        //         expect(query.bptOut.toString()).to.eq(
+        //             calculatedBptOut.toString()
+        //         );
+        //     }).timeout(10000);
+        // });
     });
+
     context('_calcTokensOutGivenExactBptIn', () => {
         // Setup chain
         before(async function () {
@@ -323,7 +330,10 @@ describe('weightedMath tests', () => {
                 const poolId =
                     '0x90291319f1d4ea3ad4db0dd8fe9e12baf749e84500020000000000000000013c';
                 const poolInfo = await getPoolOnChain(poolId, vault, provider);
-                const scalingFactors = [BigInt('1'), BigInt('1')];
+                const scalingFactors = [
+                    BigInt('1000000000000000000'),
+                    BigInt('1000000000000000000'),
+                ];
                 const amountBptIn = BigInt('7000000000000000000');
                 compareToSdk(
                     scalingFactors,
@@ -338,7 +348,10 @@ describe('weightedMath tests', () => {
                 const poolId =
                     '0x96646936b91d6b9d7d0c47c496afbf3d6ec7b6f8000200000000000000000019';
                 const poolInfo = await getPoolOnChain(poolId, vault, provider);
-                const scalingFactors = [BigInt('1000000000000'), BigInt('1')];
+                const scalingFactors = [
+                    BigInt('1000000000000000000000000000000'),
+                    BigInt('1000000000000000000'),
+                ];
                 const amountBptIn = BigInt('1234000000000000000000');
                 compareToSdk(
                     scalingFactors,
@@ -398,7 +411,10 @@ describe('weightedMath tests', () => {
                 const poolId =
                     '0x90291319f1d4ea3ad4db0dd8fe9e12baf749e84500020000000000000000013c';
                 const poolInfo = await getPoolOnChain(poolId, vault, provider);
-                const scalingFactors = [BigInt('1'), BigInt('1')];
+                const scalingFactors = [
+                    BigInt('1000000000000000000'),
+                    BigInt('1000000000000000000'),
+                ];
                 const bptIn = BigInt('7000000000000000000');
                 compareToSdk(
                     scalingFactors[0],
@@ -415,7 +431,10 @@ describe('weightedMath tests', () => {
                 const poolId =
                     '0x96646936b91d6b9d7d0c47c496afbf3d6ec7b6f8000200000000000000000019';
                 const poolInfo = await getPoolOnChain(poolId, vault, provider);
-                const scalingFactors = [BigInt('1000000000000'), BigInt('1')];
+                const scalingFactors = [
+                    BigInt('1000000000000000000000000000000'),
+                    BigInt('1000000000000000000'),
+                ];
                 const bptIn = BigInt('123000000000000000000');
                 compareToSdk(
                     scalingFactors[0],
@@ -480,7 +499,10 @@ describe('weightedMath tests', () => {
                 const poolId =
                     '0x90291319f1d4ea3ad4db0dd8fe9e12baf749e84500020000000000000000013c';
                 const poolInfo = await getPoolOnChain(poolId, vault, provider);
-                const scalingFactors = [BigInt('1'), BigInt('1')];
+                const scalingFactors = [
+                    BigInt('1000000000000000000'),
+                    BigInt('1000000000000000000'),
+                ];
                 const amountsOut = [
                     BigInt('7000000000000000000'),
                     BigInt('1000000000000000000'),
@@ -500,7 +522,10 @@ describe('weightedMath tests', () => {
                 const poolId =
                     '0x96646936b91d6b9d7d0c47c496afbf3d6ec7b6f8000200000000000000000019';
                 const poolInfo = await getPoolOnChain(poolId, vault, provider);
-                const scalingFactors = [BigInt('1000000000000'), BigInt('1')];
+                const scalingFactors = [
+                    BigInt('1000000000000000000000000000000'),
+                    BigInt('1000000000000000000'),
+                ];
                 const amountsOut = [
                     BigInt('1234000000'),
                     BigInt('1000000000000000000'),
