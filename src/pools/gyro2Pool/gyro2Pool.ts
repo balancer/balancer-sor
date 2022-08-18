@@ -198,148 +198,164 @@ export class Gyro2Pool implements PoolBase {
         poolPairData: Gyro2PoolPairData,
         amount: OldBigNumber
     ): OldBigNumber {
-        const balances = [poolPairData.balanceIn, poolPairData.balanceOut];
-        const normalizedBalances = _normalizeBalances(
-            balances,
-            poolPairData.decimalsIn,
-            poolPairData.decimalsOut
-        );
-        const invariant = _calculateInvariant(
-            normalizedBalances,
-            poolPairData.sqrtAlpha,
-            poolPairData.sqrtBeta
-        );
-        const [virtualParamIn, virtualParamOut] = _findVirtualParams(
-            invariant,
-            poolPairData.sqrtAlpha,
-            poolPairData.sqrtBeta
-        );
-        const inAmount = parseFixed(amount.toString(), 18);
-        const inAmountLessFee = _reduceFee(inAmount, poolPairData.swapFee);
+        try {
+            const balances = [poolPairData.balanceIn, poolPairData.balanceOut];
+            const normalizedBalances = _normalizeBalances(
+                balances,
+                poolPairData.decimalsIn,
+                poolPairData.decimalsOut
+            );
+            const invariant = _calculateInvariant(
+                normalizedBalances,
+                poolPairData.sqrtAlpha,
+                poolPairData.sqrtBeta
+            );
+            const [virtualParamIn, virtualParamOut] = _findVirtualParams(
+                invariant,
+                poolPairData.sqrtAlpha,
+                poolPairData.sqrtBeta
+            );
+            const inAmount = parseFixed(amount.toString(), 18);
+            const inAmountLessFee = _reduceFee(inAmount, poolPairData.swapFee);
 
-        const outAmount = _calcOutGivenIn(
-            normalizedBalances[0],
-            normalizedBalances[1],
-            inAmountLessFee,
-            virtualParamIn,
-            virtualParamOut
-        );
+            const outAmount = _calcOutGivenIn(
+                normalizedBalances[0],
+                normalizedBalances[1],
+                inAmountLessFee,
+                virtualParamIn,
+                virtualParamOut
+            );
 
-        return bnum(formatFixed(outAmount, 18));
+            return bnum(formatFixed(outAmount, 18));
+        } catch (error) {
+            return bnum(0);
+        }
     }
 
     _tokenInForExactTokenOut(
         poolPairData: Gyro2PoolPairData,
         amount: OldBigNumber
     ): OldBigNumber {
-        const outAmount = parseFixed(amount.toString(), 18);
-        const balances = [poolPairData.balanceIn, poolPairData.balanceOut];
-        const normalizedBalances = _normalizeBalances(
-            balances,
-            poolPairData.decimalsIn,
-            poolPairData.decimalsOut
-        );
-        const invariant = _calculateInvariant(
-            normalizedBalances,
-            poolPairData.sqrtAlpha,
-            poolPairData.sqrtBeta
-        );
-        const [virtualParamIn, virtualParamOut] = _findVirtualParams(
-            invariant,
-            poolPairData.sqrtAlpha,
-            poolPairData.sqrtBeta
-        );
-        const inAmountLessFee = _calcInGivenOut(
-            normalizedBalances[0],
-            normalizedBalances[1],
-            outAmount,
-            virtualParamIn,
-            virtualParamOut
-        );
-        const inAmount = _addFee(inAmountLessFee, poolPairData.swapFee);
+        try {
+            const outAmount = parseFixed(amount.toString(), 18);
+            const balances = [poolPairData.balanceIn, poolPairData.balanceOut];
+            const normalizedBalances = _normalizeBalances(
+                balances,
+                poolPairData.decimalsIn,
+                poolPairData.decimalsOut
+            );
+            const invariant = _calculateInvariant(
+                normalizedBalances,
+                poolPairData.sqrtAlpha,
+                poolPairData.sqrtBeta
+            );
+            const [virtualParamIn, virtualParamOut] = _findVirtualParams(
+                invariant,
+                poolPairData.sqrtAlpha,
+                poolPairData.sqrtBeta
+            );
+            const inAmountLessFee = _calcInGivenOut(
+                normalizedBalances[0],
+                normalizedBalances[1],
+                outAmount,
+                virtualParamIn,
+                virtualParamOut
+            );
+            const inAmount = _addFee(inAmountLessFee, poolPairData.swapFee);
 
-        return bnum(formatFixed(inAmount, 18));
+            return bnum(formatFixed(inAmount, 18));
+        } catch (error) {
+            return bnum(0);
+        }
     }
 
     _spotPriceAfterSwapExactTokenInForTokenOut(
         poolPairData: Gyro2PoolPairData,
         amount: OldBigNumber
     ): OldBigNumber {
-        const balances = [poolPairData.balanceIn, poolPairData.balanceOut];
-        const normalizedBalances = _normalizeBalances(
-            balances,
-            poolPairData.decimalsIn,
-            poolPairData.decimalsOut
-        );
-        const invariant = _calculateInvariant(
-            normalizedBalances,
-            poolPairData.sqrtAlpha,
-            poolPairData.sqrtBeta
-        );
-        const [virtualParamIn, virtualParamOut] = _findVirtualParams(
-            invariant,
-            poolPairData.sqrtAlpha,
-            poolPairData.sqrtBeta
-        );
-        const inAmount = parseFixed(amount.toString(), 18);
-        const inAmountLessFee = _reduceFee(inAmount, poolPairData.swapFee);
-        const outAmount = _calcOutGivenIn(
-            normalizedBalances[0],
-            normalizedBalances[1],
-            inAmountLessFee,
-            virtualParamIn,
-            virtualParamOut
-        );
-        const newSpotPrice = _calculateNewSpotPrice(
-            normalizedBalances,
-            inAmount,
-            outAmount,
-            virtualParamIn,
-            virtualParamOut,
-            poolPairData.swapFee
-        );
-        return bnum(formatFixed(newSpotPrice, 18));
+        try {
+            const balances = [poolPairData.balanceIn, poolPairData.balanceOut];
+            const normalizedBalances = _normalizeBalances(
+                balances,
+                poolPairData.decimalsIn,
+                poolPairData.decimalsOut
+            );
+            const invariant = _calculateInvariant(
+                normalizedBalances,
+                poolPairData.sqrtAlpha,
+                poolPairData.sqrtBeta
+            );
+            const [virtualParamIn, virtualParamOut] = _findVirtualParams(
+                invariant,
+                poolPairData.sqrtAlpha,
+                poolPairData.sqrtBeta
+            );
+            const inAmount = parseFixed(amount.toString(), 18);
+            const inAmountLessFee = _reduceFee(inAmount, poolPairData.swapFee);
+            const outAmount = _calcOutGivenIn(
+                normalizedBalances[0],
+                normalizedBalances[1],
+                inAmountLessFee,
+                virtualParamIn,
+                virtualParamOut
+            );
+            const newSpotPrice = _calculateNewSpotPrice(
+                normalizedBalances,
+                inAmount,
+                outAmount,
+                virtualParamIn,
+                virtualParamOut,
+                poolPairData.swapFee
+            );
+            return bnum(formatFixed(newSpotPrice, 18));
+        } catch (error) {
+            return bnum(0);
+        }
     }
 
     _spotPriceAfterSwapTokenInForExactTokenOut(
         poolPairData: Gyro2PoolPairData,
         amount: OldBigNumber
     ): OldBigNumber {
-        const outAmount = parseFixed(amount.toString(), 18);
-        const balances = [poolPairData.balanceIn, poolPairData.balanceOut];
-        const normalizedBalances = _normalizeBalances(
-            balances,
-            poolPairData.decimalsIn,
-            poolPairData.decimalsOut
-        );
-        const invariant = _calculateInvariant(
-            normalizedBalances,
-            poolPairData.sqrtAlpha,
-            poolPairData.sqrtBeta
-        );
-        const [virtualParamIn, virtualParamOut] = _findVirtualParams(
-            invariant,
-            poolPairData.sqrtAlpha,
-            poolPairData.sqrtBeta
-        );
-        const inAmountLessFee = _calcInGivenOut(
-            normalizedBalances[0],
-            normalizedBalances[1],
-            outAmount,
-            virtualParamIn,
-            virtualParamOut
-        );
-        const inAmount = _addFee(inAmountLessFee, poolPairData.swapFee);
-        const newSpotPrice = _calculateNewSpotPrice(
-            normalizedBalances,
-            inAmount,
-            outAmount,
-            virtualParamIn,
-            virtualParamOut,
-            poolPairData.swapFee
-        );
+        try {
+            const outAmount = parseFixed(amount.toString(), 18);
+            const balances = [poolPairData.balanceIn, poolPairData.balanceOut];
+            const normalizedBalances = _normalizeBalances(
+                balances,
+                poolPairData.decimalsIn,
+                poolPairData.decimalsOut
+            );
+            const invariant = _calculateInvariant(
+                normalizedBalances,
+                poolPairData.sqrtAlpha,
+                poolPairData.sqrtBeta
+            );
+            const [virtualParamIn, virtualParamOut] = _findVirtualParams(
+                invariant,
+                poolPairData.sqrtAlpha,
+                poolPairData.sqrtBeta
+            );
+            const inAmountLessFee = _calcInGivenOut(
+                normalizedBalances[0],
+                normalizedBalances[1],
+                outAmount,
+                virtualParamIn,
+                virtualParamOut
+            );
+            const inAmount = _addFee(inAmountLessFee, poolPairData.swapFee);
+            const newSpotPrice = _calculateNewSpotPrice(
+                normalizedBalances,
+                inAmount,
+                outAmount,
+                virtualParamIn,
+                virtualParamOut,
+                poolPairData.swapFee
+            );
 
-        return bnum(formatFixed(newSpotPrice, 18));
+            return bnum(formatFixed(newSpotPrice, 18));
+        } catch (error) {
+            return bnum(0);
+        }
     }
 
     _derivativeSpotPriceAfterSwapExactTokenInForTokenOut(
