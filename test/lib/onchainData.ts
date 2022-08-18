@@ -71,7 +71,8 @@ export async function getOnChainBalances(
         } else if (
             pool.poolType === 'Stable' ||
             pool.poolType === 'MetaStable' ||
-            pool.poolType === 'StablePhantom'
+            pool.poolType === 'StablePhantom' ||
+            pool.poolType === 'ComposableStable'
         ) {
             // MetaStable & StablePhantom is the same as Stable for multicall purposes
             multiPool.call(
@@ -150,7 +151,8 @@ export async function getOnChainBalances(
             if (
                 subgraphPools[index].poolType === 'Stable' ||
                 subgraphPools[index].poolType === 'MetaStable' ||
-                subgraphPools[index].poolType === 'StablePhantom'
+                subgraphPools[index].poolType === 'StablePhantom' ||
+                subgraphPools[index].poolType === 'ComposableStable'
             ) {
                 if (!onchainData.amp) {
                     console.error(`Stable Pool Missing Amp: ${poolId}`);
