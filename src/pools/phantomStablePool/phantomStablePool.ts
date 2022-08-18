@@ -293,7 +293,7 @@ export class PhantomStablePool implements PoolBase {
             // Return human scaled
             return bnum(formatFixed(returnEvmWithRate, 18));
         } catch (err) {
-            console.error(`PhantomStable _evmoutGivenIn: ${err.message}`);
+            // console.error(`PhantomStable _evmoutGivenIn: ${err.message}`);
             return ZERO;
         }
     }
