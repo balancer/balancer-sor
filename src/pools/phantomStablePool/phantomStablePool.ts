@@ -49,8 +49,6 @@ export class PhantomStablePool implements PoolBase {
     tokens: PhantomStablePoolToken[];
     tokensList: string[];
     ALMOST_ONE = parseFixed('0.99', 18);
-    // Used for VirutalBpt and can be removed if SG is updated with VirtualBpt value
-    MAX_TOKEN_BALANCE = BigNumber.from('2').pow('112').sub('1');
 
     static AMP_DECIMALS = 3;
 
@@ -151,10 +149,7 @@ export class PhantomStablePool implements PoolBase {
         const bptIndex = this.tokensList.indexOf(this.address);
 
         // VirtualBPTSupply must be used for the maths
-        // TO DO - SG should be updated to so that totalShares should return VirtualSupply
-        const virtualBptSupply = this.MAX_TOKEN_BALANCE.sub(
-            allBalancesScaled[bptIndex]
-        );
+        const virtualBptSupply = this.totalShares;
 
         const poolPairData: PhantomStablePoolPairData = {
             id: this.id,
@@ -293,7 +288,7 @@ export class PhantomStablePool implements PoolBase {
             // Return human scaled
             return bnum(formatFixed(returnEvmWithRate, 18));
         } catch (err) {
-            console.error(`PhantomStable _evmoutGivenIn: ${err.message}`);
+            // console.error(`PhantomStable _evmoutGivenIn: ${err.message}`);
             return ZERO;
         }
     }

@@ -211,7 +211,7 @@ export class StablePool implements PoolBase {
                 1
             );
         } catch (err) {
-            console.error(`_evmoutGivenIn: ${err.message}`);
+            // console.error(`_evmoutGivenIn: ${err.message}`);
             return ZERO;
         }
     }
