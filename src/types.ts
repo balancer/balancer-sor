@@ -165,6 +165,7 @@ export enum PoolFilter {
     ERC4626Linear = 'ERC4626Linear',
     Gyro2 = 'Gyro2',
     Gyro3 = 'Gyro3',
+    ComposableStable = 'ComposableStable',
 }
 
 export interface PoolBase {
