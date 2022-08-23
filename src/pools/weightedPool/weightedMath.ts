@@ -260,12 +260,12 @@ export function _calcTokenOutGivenExactBptIn(
         MathSol.complementFixed(normalizedWeight)
     );
     const nonTaxableAmount = MathSol.sub(amountOutWithoutFee, taxableAmount);
-    const taxableAmountMinusFees = MathSol.mulUpFixed(
-        taxableAmount,
-        MathSol.complementFixed(swapFeePercentage)
+    const swapFee = MathSol.mulUpFixed(taxableAmount, swapFeePercentage);
+    const amountOut = MathSol.add(
+        nonTaxableAmount,
+        MathSol.sub(taxableAmount, swapFee)
     );
-
-    return MathSol.add(nonTaxableAmount, taxableAmountMinusFees);
+    return amountOut;
 }
 
 export function _calcBptInGivenExactTokensOut(

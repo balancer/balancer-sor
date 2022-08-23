@@ -228,7 +228,7 @@ export class MetaStablePool implements PoolBase {
 
             return bnum(formatFixed(returnEvmWithRate, 18));
         } catch (err) {
-            console.error(`_evmoutGivenIn: ${err.message}`);
+            // console.error(`_evmoutGivenIn: ${err.message}`);
             return ZERO;
         }
     }

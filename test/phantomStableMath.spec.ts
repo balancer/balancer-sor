@@ -1,4 +1,4 @@
-// TS_NODE_PROJECT='tsconfig.testing.json' npx mocha -r ts-node/register test/math.spec.ts
+// TS_NODE_PROJECT='tsconfig.testing.json' npx mocha -r ts-node/register test/phantomStableMath.spec.ts
 import { assert } from 'chai';
 import { formatFixed } from '@ethersproject/bignumber';
 import { BigNumber as OldBigNumber } from '../src/utils/bignumber';

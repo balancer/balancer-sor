@@ -1,4 +1,5 @@
 // TS_NODE_PROJECT='tsconfig.testing.json' npx mocha -r ts-node/register test/gyro2.integration.spec.ts
+
 import dotenv from 'dotenv';
 import { parseFixed } from '@ethersproject/bignumber';
 import { AddressZero } from '@ethersproject/constants';
@@ -24,6 +25,8 @@ dotenv.config();
  * - Run kovan node on terminal: yarn run node
  * TO DO - Change this test to mainnet once deployed.
  */
+
+/*
 const { ALCHEMY_URL: jsonRpcUrl } = process.env;
 const rpcUrl = 'http://127.0.0.1:8545';
 const provider = new JsonRpcProvider(rpcUrl, 42);
@@ -175,3 +178,4 @@ describe('gyro2 integration tests', () => {
         }).timeout(10000);
     });
 });
+*/
