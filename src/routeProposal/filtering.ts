@@ -15,6 +15,8 @@ import { ZERO } from '../utils/bignumber';
 import { parseNewPool } from '../pools';
 import { Zero } from '@ethersproject/constants';
 
+const BOOSTED_PATHS_MAX_LENGTH = 7;
+
 export const filterPoolsByType = (
     pools: SubgraphPoolBase[],
     poolTypeFilter: PoolFilter
@@ -163,6 +165,7 @@ export function producePaths(
 // These paths can be organized as a directed tree having tokenIn as a root.
 // We build this tree by adding at each step all the possible continuations for
 // each branch. When a branch reaches tokenOut, we write down the corresponding path.
+// We only allow paths up to length BOOSTED_PATHS_MAX_LENGTH = 7
 
 export function getBoostedGraph(
     tokenIn: string,
@@ -360,6 +363,7 @@ export function getBoostedPaths(
         if (newTreeEdges.length == 0) {
             iterate = false;
         } else treeEdges.push(newTreeEdges);
+        if (n == BOOSTED_PATHS_MAX_LENGTH) iterate = false;
     }
     return pathsInfoToPaths(pathsInfo, poolsAllDict);
 }
