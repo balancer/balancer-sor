@@ -15,6 +15,7 @@ import {
     SwapTypes,
     SubgraphPoolBase,
     SubgraphToken,
+    SubgraphSecondaryTrades,
 } from '../../types';
 
 export enum PairTypes {
@@ -37,6 +38,8 @@ export type SecondaryIssuePoolPairData = PoolPairBase & {
     security: string;
     currency: string;
     secondaryOffer: string;
+    amount: BigNumber;
+    price: BigNumber;
 };
 
 export class SecondaryIssuePool implements PoolBase {    
@@ -47,10 +50,12 @@ export class SecondaryIssuePool implements PoolBase {
     totalShares: BigNumber;
     tokens: SecondaryIssuePoolToken[];
     tokensList: string[];
-
+    
     security: string;
     currency: string;
     secondaryOffer: string;
+    amount: BigNumber;
+    price: BigNumber;
 
     MAX_IN_RATIO = parseFixed('0.3', 18);
     MAX_OUT_RATIO = parseFixed('0.3', 18);
@@ -62,7 +67,7 @@ export class SecondaryIssuePool implements PoolBase {
             throw new Error('SecondaryIssuePool missing "currency"');
         if (!pool.secondaryOffer)
             throw new Error('SecondaryIssuePool missing "secondaryOffer"');
-
+    
         return new SecondaryIssuePool(
             pool.id,
             pool.address,
@@ -72,7 +77,9 @@ export class SecondaryIssuePool implements PoolBase {
             pool.tokensList,
             pool.security,
             pool.currency,
-            pool.secondaryOffer
+            pool.secondaryOffer,
+            pool.amount,
+            pool.price
         );
     }
 
@@ -85,7 +92,9 @@ export class SecondaryIssuePool implements PoolBase {
         tokensList: string[],
         security: string,
         currency: string,
-        secondaryOffer: string
+        secondaryOffer: string,
+        amount: BigNumber,
+        price: BigNumber
     ) {
         this.id = id;
         this.address = address;
@@ -96,6 +105,8 @@ export class SecondaryIssuePool implements PoolBase {
         this.security = security;
         this.currency = currency;
         this.secondaryOffer = secondaryOffer;
+        this.amount = amount;
+        this.price = price;
     }
 
     parsePoolPairData(
@@ -150,6 +161,8 @@ export class SecondaryIssuePool implements PoolBase {
             security: this.security,
             currency: this.currency,
             secondaryOffer: this.secondaryOffer,
+            amount: this.amount,
+            price: this.price
         };
 
         return poolPairData;
@@ -204,31 +217,15 @@ export class SecondaryIssuePool implements PoolBase {
 
             const isCashToken = poolPairData.pairType === PairTypes.CashTokenToSecurityToken
 
-            const cashTokens = poolPairData.balanceIn;
-            const securityTokens = poolPairData.balanceOut;
-
-            let x: BigNumber, y: BigNumber;
-
+            let tokensOut: BigNumber;
+            
             if (isCashToken) {
-                x = cashTokens;
-                y = securityTokens;
+                tokensOut = poolPairData.price.div(poolPairData.balanceIn)
             } else {
-                x = securityTokens;
-                y = cashTokens;
+                tokensOut = poolPairData.price.mul(poolPairData.balanceIn)
             }
 
-            // z = x' / ((x + x') / y)
-            // where,
-            // x' - tokens coming in
-            // x  - total amount of tokens of the same type as the tokens coming in
-            // y  - total amount of tokens of the other type
-            // z  - tokens going out
-
-            const tokensOut = amount.div(
-                x.add(amount.toString()).div(y).toString()
-            );
-
-            return bnum(tokensOut);
+            return bnum(tokensOut.toString());
         } catch (err) {
             console.error(`_evmoutGivenIn: ${err.message}`);
             return ZERO;
@@ -244,32 +241,15 @@ export class SecondaryIssuePool implements PoolBase {
 
             const isCashToken = poolPairData.pairType === PairTypes.CashTokenToSecurityToken
 
-            const cashTokens = poolPairData.balanceIn;
-            const securityTokens = poolPairData.balanceOut;
-
-            let x: BigNumber, y: BigNumber;
-
+            let tokensIn: BigNumber;
+            
             if (isCashToken) {
-                x = cashTokens;
-                y = securityTokens;
+                tokensIn = poolPairData.balanceOut.div(poolPairData.price)
             } else {
-                x = securityTokens;
-                y = cashTokens;
+                tokensIn = poolPairData.balanceOut.mul(poolPairData.price)
             }
 
-            // x' = xz / (y - z)
-            // where,
-            // x' - tokens coming in
-            // x  - total amount of tokens of the same type as the tokens coming in
-            // y  - total amount of tokens of the other type
-            // z  - tokens going out
-
-            const tokensIn = x
-                .mul(amount.toString())
-                .div(y.sub(amount.toString()))
-                .toString();
-
-            return bnum(tokensIn);
+            return bnum(tokensIn.toString());
         } catch (err) {
             console.error(`_evminGivenOut: ${err.message}`);
             return ZERO;
@@ -345,8 +325,8 @@ export class SecondaryIssuePool implements PoolBase {
 
             const spotPrice =
                 x.add(this._tokenInForExactTokenOut.toString()).div(y.sub(amount.toString())).toString();
-
-            return bnum(spotPrice);
+            
+            return bnum(spotPrice.toString());
 
         } catch (err) {
             console.error(`_evmoutGivenIn: ${err.message}`);
