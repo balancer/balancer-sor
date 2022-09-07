@@ -239,18 +239,22 @@ export class PrimaryIssuePool implements PoolBase {
                 y = cashTokens;
             }
 
-            // z = x' / ((x + x') / y)
+            // z = y-(x*(y/(x + x')))
             // where,
             // x' - tokens coming in
             // x  - total amount of tokens of the same type as the tokens coming in
             // y  - total amount of tokens of the other type
             // z  - tokens going out
 
-            const tokensOut = amount.div(
-                x.add(amount.toString()).div(y).toString()
-            );
+            const tokensOut = poolPairData.balanceOut.sub(
+                                poolPairData.balanceIn.mul(
+                                    poolPairData.balanceOut.div(
+                                        poolPairData.balanceIn.add(amount.toString())
+                                    )
+                                )
+                            )
 
-            return bnum(tokensOut);
+            return bnum(tokensOut.toString());
         } catch (err) {
             console.error(`_evmoutGivenIn: ${err.message}`);
             return ZERO;
@@ -279,19 +283,22 @@ export class PrimaryIssuePool implements PoolBase {
                 y = cashTokens;
             }
 
-            // x' = xz / (y - z)
+            // z = y-(x*((x-x')/y)) 
             // where,
-            // x' - tokens coming in
-            // x  - total amount of tokens of the same type as the tokens coming in
+            // x' - tokens coming out
+            // x  - total amount of tokens of the same type as the tokens coming out
             // y  - total amount of tokens of the other type
-            // z  - tokens going out
+            // z  - tokens coming in
 
-            const tokensIn = x
-                .mul(amount.toString())
-                .div(y.sub(amount.toString()))
-                .toString();
+            const tokensIn = poolPairData.balanceIn.sub(
+                poolPairData.balanceOut.mul(
+                    poolPairData.balanceOut.sub(amount.toString()).div(
+                        poolPairData.balanceIn                        
+                    )
+                )
+            )
 
-            return bnum(tokensIn);
+            return bnum(tokensIn.toString());
         } catch (err) {
             console.error(`_evminGivenOut: ${err.message}`);
             return ZERO;
