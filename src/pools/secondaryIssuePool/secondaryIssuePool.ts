@@ -15,7 +15,6 @@ import {
     SwapTypes,
     SubgraphPoolBase,
     SubgraphToken,
-    SubgraphSecondaryTrades,
 } from '../../types';
 
 export enum PairTypes {
@@ -38,8 +37,8 @@ export type SecondaryIssuePoolPairData = PoolPairBase & {
     security: string;
     currency: string;
     secondaryOffer: string;
-    amount: BigNumber;
-    price: BigNumber;
+    bestBid: BigNumber;
+    bestOffer: BigNumber;
 };
 
 export class SecondaryIssuePool implements PoolBase {    
@@ -54,8 +53,8 @@ export class SecondaryIssuePool implements PoolBase {
     security: string;
     currency: string;
     secondaryOffer: string;
-    amount: BigNumber;
-    price: BigNumber;
+    bestBid: BigNumber;
+    bestOffer: BigNumber;
 
     MAX_IN_RATIO = parseFixed('0.3', 18);
     MAX_OUT_RATIO = parseFixed('0.3', 18);
@@ -78,8 +77,8 @@ export class SecondaryIssuePool implements PoolBase {
             pool.security,
             pool.currency,
             pool.secondaryOffer,
-            pool.amount,
-            pool.price
+            pool.bestUnfilledBid,
+            pool.bestUnfilledOffer
         );
     }
 
@@ -93,8 +92,8 @@ export class SecondaryIssuePool implements PoolBase {
         security: string,
         currency: string,
         secondaryOffer: string,
-        amount: BigNumber,
-        price: BigNumber
+        bestBid: BigNumber,
+        bestOffer: BigNumber
     ) {
         this.id = id;
         this.address = address;
@@ -105,8 +104,8 @@ export class SecondaryIssuePool implements PoolBase {
         this.security = security;
         this.currency = currency;
         this.secondaryOffer = secondaryOffer;
-        this.amount = amount;
-        this.price = price;
+        this.bestBid = bestBid;
+        this.bestOffer = bestOffer;
     }
 
     parsePoolPairData(
@@ -161,8 +160,8 @@ export class SecondaryIssuePool implements PoolBase {
             security: this.security,
             currency: this.currency,
             secondaryOffer: this.secondaryOffer,
-            amount: this.amount,
-            price: this.price
+            bestBid: this.bestBid,
+            bestOffer: this.bestOffer
         };
 
         return poolPairData;
@@ -220,9 +219,13 @@ export class SecondaryIssuePool implements PoolBase {
             let tokensOut: BigNumber;
             
             if (isCashToken) {
-                tokensOut = poolPairData.price.div(poolPairData.balanceIn)
+                //cash is sent in for purchase of security. 
+                //This function calculates security token sent out for best (lowest) offer price.
+                tokensOut = poolPairData.balanceIn.div(poolPairData.bestOffer)
             } else {
-                tokensOut = poolPairData.price.mul(poolPairData.balanceIn)
+                //security is sent in for sale against cash. 
+                //This function calculates cash token sent out for best (highest) bid price.
+                tokensOut = poolPairData.balanceIn.mul(poolPairData.bestBid)
             }
 
             return bnum(tokensOut.toString());
@@ -244,9 +247,13 @@ export class SecondaryIssuePool implements PoolBase {
             let tokensIn: BigNumber;
             
             if (isCashToken) {
-                tokensIn = poolPairData.balanceOut.div(poolPairData.price)
+                //cash is sent out after sale of security. 
+                //This function calculates security token to be sent in for best (highest) bid price.
+                tokensIn = poolPairData.balanceOut.div(poolPairData.bestBid)
             } else {
-                tokensIn = poolPairData.balanceOut.mul(poolPairData.price)
+                //security is sent out after purchase with cash. 
+                //This function calculates cash token to be sent in for best (lowest) offer price.
+                tokensIn = poolPairData.balanceOut.mul(poolPairData.bestOffer)
             }
 
             return bnum(tokensIn.toString());
