@@ -283,21 +283,19 @@ export class PrimaryIssuePool implements PoolBase {
                 y = cashTokens;
             }
 
-            // z = y-(x*((x-x')/y)) 
+            // z = (x*(y/(x-x')))-y
             // where,
             // x' - tokens coming out
             // x  - total amount of tokens of the same type as the tokens coming out
             // y  - total amount of tokens of the other type
             // z  - tokens coming in
 
-            const tokensIn = poolPairData.balanceIn.sub(
-                poolPairData.balanceOut.mul(
-                    poolPairData.balanceOut.sub(amount.toString()).div(
-                        poolPairData.balanceIn                        
-                    )
-                )
-            )
-
+            const tokensIn = poolPairData.balanceOut.mul(
+                                poolPairData.balanceIn.div(                        
+                                    poolPairData.balanceOut.sub(amount.toString())
+                                )
+                            ).sub(poolPairData.balanceIn)
+            
             return bnum(tokensIn.toString());
         } catch (err) {
             console.error(`_evminGivenOut: ${err.message}`);
