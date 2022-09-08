@@ -200,7 +200,7 @@ export function getBoostedGraph(
                 tokensList.includes(wethAddress)
             ) {
                 if (
-                    tokensList.length <= 3 &&
+                    tokensList.length <= 4 &&
                     (tokensList.includes(tokenIn) ||
                         tokensList.includes(tokenOut))
                 ) {

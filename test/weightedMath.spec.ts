@@ -12,12 +12,7 @@ import {
     WeightedPool__factory,
     Vault,
 } from '@balancer-labs/typechain';
-import {
-    _upscaleArray,
-    _downscaleDown,
-    _downscaleDownArray,
-    _upscale,
-} from '../src/utils/basicOperations';
+import { _upscaleArray, _upscale } from '../src/utils/basicOperations';
 import { BigNumber as OldBigNumber } from '../src/utils/bignumber';
 import { bnum } from '../src/utils/bignumber';
 import { BAL, WETH, vaultAddr } from './lib/constants';
