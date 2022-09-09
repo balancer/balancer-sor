@@ -1,8 +1,6 @@
 import { BigNumber } from '@ethersproject/bignumber';
 import { WeiPerEther as ONE } from '@ethersproject/constants';
 import {
-    _MAX_IN_RATIO,
-    _MAX_OUT_RATIO,
     _SAFE_LARGE_POW3_THRESHOLD,
     _INVARIANT_MIN_ITERATIONS,
     _INVARIANT_SHRINKING_FACTOR_PER_STEP,
@@ -214,8 +212,6 @@ export function _calcOutGivenIn(
         // Note that -dz > 0 is what the trader receives.                                            //
         // We exploit the fact that this formula is symmetric up to virtualParam{X,Y,Z}.             //
         **********************************************************************************************/
-    if (amountIn.gt(mulDown(balanceIn, _MAX_IN_RATIO)))
-        throw new Error('Swap Amount In Too Large');
 
     // The factors in total lead to a multiplicative "safety margin" between the employed virtual offsets
     // very slightly larger than 3e-18, compensating for the maximum multiplicative error in the invariant
@@ -225,11 +221,7 @@ export function _calcOutGivenIn(
     const virtOutUnder = balanceOut.add(mulDown(virtualOffset, ONE.sub(1)));
     const amountOut = virtOutUnder.mul(amountIn).div(virtInOver.add(amountIn));
 
-    // Note that this in particular reverts if amountOut > balanceOut, i.e., if the out-amount would be more than
-    // the balance.
-
-    if (amountOut.gt(mulDown(balanceOut, _MAX_OUT_RATIO)))
-        throw new Error('Resultant Swap Amount Out Too Large');
+    if (amountOut.gt(balanceOut)) throw new Error('ASSET_BOUNDS_EXCEEDED');
 
     return amountOut;
 }
@@ -262,8 +254,7 @@ export function _calcInGivenOut(
 
     // Note that this in particular reverts if amountOut > balanceOut, i.e., if the trader tries to take more out of
     // the pool than is in it.
-    if (amountOut.gt(mulDown(balanceOut, _MAX_OUT_RATIO)))
-        throw new Error('Swap Amount Out Too Large');
+    if (amountOut.gt(balanceOut)) throw new Error('ASSET_BOUNDS_EXCEEDED');
 
     // The factors in total lead to a multiplicative "safety margin" between the employed virtual offsets
     // very slightly larger than 3e-18, compensating for the maximum multiplicative error in the invariant
@@ -275,9 +266,6 @@ export function _calcInGivenOut(
         mulUp(virtInOver, amountOut),
         virtOutUnder.sub(amountOut)
     );
-
-    if (amountIn.gt(mulDown(balanceIn, _MAX_IN_RATIO)))
-        throw new Error('Resultant Swap Amount In Too Large');
 
     return amountIn;
 }
@@ -385,26 +373,24 @@ export function _derivativeSpotPriceAfterSwapTokenInForExactTokenOut(
 }
 
 // /////////
-// ///  Normalized Liquidity
+// ///  Normalized Liquidity measured with respect to the out-asset.
+// ///  NB This is the same function as for the 2-CLP because the marginal trading curve of the 3-CLP
+// ///  is a 2-CLP curve. We use different virtual offsets, of course.
 // /////////
-
 export function _getNormalizedLiquidity(
     balances: BigNumber[],
-    virtualParamIn: BigNumber,
-    swapFee: BigNumber
+    virtualParamOut: BigNumber
 ): BigNumber {
     /**********************************************************************************************
-        // x = balanceIn             x' = x +  virtualParamX                                         //
-        // s = swapFee                                                                               //
-        //                                                     1                                     //
-        //                             normalizedLiquidity =  ---  x'                                //
-        //                                                    1-s                                    //
-        // x' = virtIn                                                                               //
-        **********************************************************************************************/
+    // x = balanceOut             x' = x +  virtualParamOut                                      //
+    // s = swapFee                                                                               //
+    //                                                                                           //
+    //                             normalizedLiquidity = 0.5 * x'                                //
+    //                                                                                           //
+    // x' = virtOut                                                                              //
+    // Note that balances = [balanceIn, balanceOut, balanceTertiary].                            //
+    **********************************************************************************************/
 
-    const virtIn = balances[0].add(virtualParamIn);
-    const afterFeeMultiplier = ONE.sub(swapFee);
-    const normalizedLiquidity = divDown(virtIn, afterFeeMultiplier);
-
-    return normalizedLiquidity;
+    const virtOut = balances[1].add(virtualParamOut);
+    return virtOut.div(2);
 }
