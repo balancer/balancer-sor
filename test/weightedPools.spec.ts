@@ -110,14 +110,16 @@ describe(`Tests for Weighted Pools.`, () => {
                 tokenOut,
                 swapType,
                 pools,
-                swapAmount
+                swapAmount,
+                true
             );
             const swapInfo2 = await getSwapInfo(
                 tokenIn,
                 tokenOut,
                 swapType,
                 stablePool,
-                swapAmount
+                swapAmount,
+                true
             );
             assert.equal(swapInfo1.swaps.length, 3, 'Should have 3 swaps');
             assert.equal(swapInfo2.swaps.length, 1, 'Should have 1 swap');
@@ -137,14 +139,16 @@ describe(`Tests for Weighted Pools.`, () => {
                 tokenOut,
                 swapType,
                 pools,
-                swapAmount
+                swapAmount,
+                true
             );
             const swapInfo2 = await getSwapInfo(
                 tokenIn,
                 tokenOut,
                 swapType,
                 stablePool,
-                BigNumber.from(1264579692512)
+                BigNumber.from(1264579692512),
+                true
             );
             assert.equal(swapInfo1.swaps.length, 3, 'Should have 3 swaps');
             assert.equal(swapInfo2.swaps.length, 1, 'Should have 1 swap');
@@ -171,7 +175,8 @@ describe(`Tests for Weighted Pools.`, () => {
                 tokenOut,
                 swapType,
                 pools,
-                swapAmount
+                swapAmount,
+                true
             );
             assert.equal(swapInfo.swaps.length, 2, 'Should have 2 swaps');
             assert.equal(
@@ -191,7 +196,8 @@ describe(`Tests for Weighted Pools.`, () => {
                 tokenOut,
                 swapType,
                 pools,
-                swapAmount
+                swapAmount,
+                true
             );
             assert.equal(swapInfo.swaps.length, 2, 'Should have 2 swaps');
             assert.equal(swapInfo.returnAmount.toString(), '100000436582');
@@ -206,7 +212,8 @@ async function getSwapInfo(
     tokenOut: string,
     swapType: SwapTypes,
     pools: any,
-    swapAmount: BigNumber
+    swapAmount: BigNumber,
+    useBpts?: boolean
 ) {
     const provider = new JsonRpcProvider(
         `https://mainnet.infura.io/v3/${process.env.INFURA}`
@@ -231,7 +238,8 @@ async function getSwapInfo(
             maxPools,
             timestamp: 0,
             poolTypeFilter: PoolFilter.All,
-        }
+        },
+        useBpts
     );
     return swapInfo;
 }

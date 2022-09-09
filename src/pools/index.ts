@@ -18,7 +18,6 @@ import {
     SwapTypes,
     PoolPairBase,
     PoolTypes,
-    SubgraphToken,
 } from '../types';
 
 export function parseNewPool(
@@ -49,15 +48,6 @@ export function parseNewPool(
 
     try {
         if (pool.poolType === 'Weighted' || pool.poolType === 'Investment') {
-            const BptAsToken: SubgraphToken = {
-                address: pool.address,
-                balance: pool.totalShares,
-                decimals: 18,
-                priceRate: '1',
-                weight: '0',
-            };
-            pool.tokens.push(BptAsToken);
-            pool.tokensList.push(pool.address);
             newPool = WeightedPool.fromPool(pool, false);
         } else if (pool.poolType === 'LiquidityBootstrapping') {
             newPool = WeightedPool.fromPool(pool, true);

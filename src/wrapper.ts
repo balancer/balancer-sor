@@ -23,6 +23,7 @@ import {
     TokenPriceService,
     PoolDataService,
     SorConfig,
+    SubgraphToken,
 } from './types';
 import { Zero } from '@ethersproject/constants';
 
@@ -85,7 +86,8 @@ export class SOR {
         tokenOut: string,
         swapType: SwapTypes,
         swapAmount: BigNumberish,
-        swapOptions?: Partial<SwapOptions>
+        swapOptions?: Partial<SwapOptions>,
+        useBpts?: boolean
     ): Promise<SwapInfo> {
         if (!this.poolCacher.finishedFetching) return cloneDeep(EMPTY_SWAPINFO);
 
@@ -96,7 +98,24 @@ export class SOR {
         };
 
         const pools: SubgraphPoolBase[] = this.poolCacher.getPools();
-
+        if (useBpts) {
+            for (const pool of pools) {
+                if (
+                    pool.poolType === 'Weighted' ||
+                    pool.poolType === 'Investment'
+                ) {
+                    const BptAsToken: SubgraphToken = {
+                        address: pool.address,
+                        balance: pool.totalShares,
+                        decimals: 18,
+                        priceRate: '1',
+                        weight: '0',
+                    };
+                    pool.tokens.push(BptAsToken);
+                    pool.tokensList.push(pool.address);
+                }
+            }
+        }
         const filteredPools = filterPoolsByType(pools, options.poolTypeFilter);
 
         const wrappedInfo = await getWrappedInfo(
