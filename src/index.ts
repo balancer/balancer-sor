@@ -21,3 +21,4 @@ export { SecondaryIssuePool } from './pools/secondaryIssuePool/secondaryIssuePoo
 export { getSpotPriceAfterSwapForPath } from './router/helpersClass';
 export * as WeightedMaths from './pools/weightedPool/weightedMath';
 export * as StableMaths from './pools/stablePool/stableMath';
+export * as StableMathBigInt from './pools/stablePool/stableMathBigInt';

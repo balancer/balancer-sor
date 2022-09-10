@@ -66,7 +66,7 @@ export const MULTIADDR: { [chainId: number]: string } = {
 
 export const SUBGRAPH_URLS = {
     [Network.MAINNET]:
-        'https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-v2',
+        'https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-v2-beta',
     [Network.GOERLI]:
         //'https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-goerli-v2',
         'https://api.thegraph.com/subgraphs/name/verified-network/balancer',
@@ -149,6 +149,16 @@ export const ADDRESSES = {
             address: '0xd093fa4fb80d09bb30817fdcd442d4d02ed3e5de',
             decimals: 6,
             symbol: 'waUSDC',
+        },
+        bbausd2: {
+            address: '0x9b532ab955417afd0d012eb9f7389457cd0ea712',
+            decimals: 18,
+            symbol: 'bbausd2',
+        },
+        bbadai2: {
+            address: '0xae37d54ae477268b9997d4161b96b8200755935c',
+            decimals: 18,
+            symbol: 'bb-a-dai2',
         },
     },
     [Network.KOVAN]: {

@@ -25,8 +25,6 @@ import singleWeightedPool from './testData/weightedPools/singlePoolWithSwapEnabl
 import { WeightedPool } from '../src/pools/weightedPool/weightedPool';
 import {
     _calcBptOutGivenExactTokensIn,
-    _calculateInvariant,
-    _calcDueProtocolSwapFeeBptAmount,
     _calcTokensOutGivenExactBptIn,
     _calcTokenOutGivenExactBptIn,
     _calcBptInGivenExactTokensOut,
@@ -111,18 +109,18 @@ describe('weightedMath tests', () => {
             totalSupply: bigint,
             swapFee: bigint
         ) {
-            const sdkResult = SDK.WeightedMath._calcBptOutGivenExactTokensIn(
-                balances.map((a) => bnum(a.toString())),
-                normalizedWeights.map((a) => bnum(a.toString())),
-                amountsIn.map((a) => bnum(a.toString())),
-                bnum(totalSupply.toString()),
-                bnum(swapFee.toString())
-            );
             const amountsInScaled = _upscaleArray(
                 amountsIn.map((a) => BigInt(a)),
                 scalingFactors
             );
             const balancesScaled = _upscaleArray(balances, scalingFactors);
+            const sdkResult = SDK.WeightedMath._calcBptOutGivenExactTokensIn(
+                balancesScaled.map((a) => bnum(a.toString())),
+                normalizedWeights.map((a) => bnum(a.toString())),
+                amountsInScaled.map((a) => bnum(a.toString())),
+                bnum(totalSupply.toString()),
+                bnum(swapFee.toString())
+            );
             const calculatedBptOut = _calcBptOutGivenExactTokensIn(
                 balancesScaled,
                 normalizedWeights,
@@ -311,26 +309,20 @@ describe('weightedMath tests', () => {
             amountBptIn: bigint,
             totalSupply: bigint
         ) {
+            const balancesScaled = _upscaleArray(balances, scalingFactors);
             const sdkResult = SDK.WeightedMath._calcTokensOutGivenExactBptIn(
-                balances.map((a) => bnum(a.toString())),
+                balancesScaled.map((a) => bnum(a.toString())),
                 bnum(amountBptIn.toString()),
                 bnum(totalSupply.toString())
             );
 
-            const balancesScaled = _upscaleArray(balances, scalingFactors);
             const calculatedTokensOut = _calcTokensOutGivenExactBptIn(
                 balancesScaled,
                 amountBptIn,
                 totalSupply
             );
-            const calculatedTokensOutScaled = _downscaleDownArray(
-                calculatedTokensOut,
-                scalingFactors
-            );
             expect(sdkResult[0].gt(0)).to.be.true;
-            expect(sdkResult.toString()).to.eq(
-                calculatedTokensOutScaled.toString()
-            );
+            expect(sdkResult.toString()).to.eq(calculatedTokensOut.toString());
         }
 
         context('testing against original maths', () => {
@@ -394,15 +386,15 @@ describe('weightedMath tests', () => {
             totalSupply: bigint,
             swapFee: bigint
         ) {
+            const balanceScaled = _upscale(balance, scalingFactor);
             const sdkResult = SDK.WeightedMath._calcTokenOutGivenExactBptIn(
-                bnum(balance.toString()),
+                bnum(balanceScaled.toString()),
                 bnum(normalizedWeight.toString()),
                 bnum(bptAmountIn.toString()),
                 bnum(totalSupply.toString()),
                 bnum(swapFee.toString())
             );
 
-            const balanceScaled = _upscale(balance, scalingFactor);
             const tokenOut = _calcTokenOutGivenExactBptIn(
                 balanceScaled,
                 normalizedWeight,
@@ -410,9 +402,8 @@ describe('weightedMath tests', () => {
                 totalSupply,
                 swapFee
             );
-            const tokenOutScaled = _downscaleDown(tokenOut, scalingFactor);
             expect(sdkResult.gt(0)).to.be.true;
-            expect(sdkResult.toString()).to.eq(tokenOutScaled.toString());
+            expect(sdkResult.toString()).to.eq(tokenOut.toString());
         }
 
         context('testing against original maths', () => {
@@ -425,7 +416,6 @@ describe('weightedMath tests', () => {
                     BigInt('1000000000000000000'),
                 ];
                 const bptIn = BigInt('7000000000000000000');
-                // This is failing - looks like a rounding error
                 compareToSdk(
                     scalingFactors[0],
                     poolInfo.balances[0],
@@ -446,7 +436,6 @@ describe('weightedMath tests', () => {
                     BigInt('1000000000000000000'),
                 ];
                 const bptIn = BigInt('123000000000000000000');
-                // This is failing - looks like a rounding error
                 compareToSdk(
                     scalingFactors[0],
                     poolInfo.balances[0],
@@ -482,22 +471,22 @@ describe('weightedMath tests', () => {
             totalSupply: bigint,
             swapFee: bigint
         ) {
-            const sdkResult = SDK.WeightedMath._calcBptInGivenExactTokensOut(
-                balances.map((a) => bnum(a.toString())),
-                normalizedWeights.map((a) => bnum(a.toString())),
-                amountsOut.map((a) => bnum(a.toString())),
-                bnum(totalSupply.toString()),
-                bnum(swapFee.toString())
-            );
-            const amountsInScaled = _upscaleArray(
+            const balancesScaled = _upscaleArray(balances, scalingFactors);
+            const amountsOutScaled = _upscaleArray(
                 amountsOut.map((a) => BigInt(a)),
                 scalingFactors
             );
-            const balancesScaled = _upscaleArray(balances, scalingFactors);
+            const sdkResult = SDK.WeightedMath._calcBptInGivenExactTokensOut(
+                balancesScaled.map((a) => bnum(a.toString())),
+                normalizedWeights.map((a) => bnum(a.toString())),
+                amountsOutScaled.map((a) => bnum(a.toString())),
+                bnum(totalSupply.toString()),
+                bnum(swapFee.toString())
+            );
             const calculatedBptIn = _calcBptInGivenExactTokensOut(
                 balancesScaled,
                 normalizedWeights,
-                amountsInScaled,
+                amountsOutScaled,
                 totalSupply,
                 swapFee
             );

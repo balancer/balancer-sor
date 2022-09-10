@@ -318,7 +318,7 @@ describe('Tests pools filtering and path processing', () => {
             poolsDict,
             4
         );
-        assert.equal(paths.length, 50, 'Should have 50 paths');
+        assert.equal(paths.length, 34, 'Should have 34 paths');
     });
 });
 

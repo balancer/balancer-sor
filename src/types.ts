@@ -184,6 +184,7 @@ export enum PoolFilter {
     SecondaryIssuePool = 'SecondaryIssue',
     Gyro2 = 'Gyro2',
     Gyro3 = 'Gyro3',
+    ComposableStable = 'ComposableStable',
 }
 
 export interface PoolBase {
