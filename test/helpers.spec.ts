@@ -1351,6 +1351,7 @@ describe(`Tests for Helpers.`, () => {
                 tokenIn: sorConfigEth.weth,
                 tokenOut: BAL.address,
                 marketSp: Zero.toString(),
+                routes: [],
             };
 
             const wrappedInfo = await getWrappedInfo(
@@ -1417,6 +1418,7 @@ describe(`Tests for Helpers.`, () => {
                 tokenIn: sorConfigEth.weth,
                 tokenOut: BAL.address,
                 marketSp: Zero.toString(),
+                routes: [],
             };
 
             const wrappedInfo = await getWrappedInfo(
@@ -1483,6 +1485,7 @@ describe(`Tests for Helpers.`, () => {
                 tokenIn: BAL.address,
                 tokenOut: sorConfigEth.weth,
                 marketSp: Zero.toString(),
+                routes: [],
             };
 
             const wrappedInfo = await getWrappedInfo(
@@ -1549,6 +1552,7 @@ describe(`Tests for Helpers.`, () => {
                 tokenIn: BAL.address,
                 tokenOut: sorConfigEth.weth,
                 marketSp: Zero.toString(),
+                routes: [],
             };
 
             const wrappedInfo = await getWrappedInfo(
@@ -1615,6 +1619,7 @@ describe(`Tests for Helpers.`, () => {
                 tokenIn: Lido.wstETH[chainId],
                 tokenOut: tokenOut,
                 marketSp: Zero.toString(),
+                routes: [],
             };
 
             const wrappedInfo = await getWrappedInfo(
@@ -1683,6 +1688,7 @@ describe(`Tests for Helpers.`, () => {
                 tokenIn: Lido.wstETH[chainId],
                 tokenOut: tokenOut,
                 marketSp: Zero.toString(),
+                routes: [],
             };
 
             const wrappedInfo = await getWrappedInfo(
@@ -1751,6 +1757,7 @@ describe(`Tests for Helpers.`, () => {
                 tokenIn: tokenIn,
                 tokenOut: Lido.wstETH[chainId],
                 marketSp: Zero.toString(),
+                routes: [],
             };
 
             const wrappedInfo = await getWrappedInfo(
@@ -1822,6 +1829,7 @@ describe(`Tests for Helpers.`, () => {
                 tokenIn: tokenIn,
                 tokenOut: Lido.wstETH[chainId],
                 marketSp: Zero.toString(),
+                routes: [],
             };
 
             const wrappedInfo = await getWrappedInfo(
@@ -1894,6 +1902,7 @@ describe(`Tests for Helpers.`, () => {
                 tokenIn: Lido.wstETH[chainId],
                 tokenOut: sorConfigEth.weth,
                 marketSp: Zero.toString(),
+                routes: [],
             };
 
             const wrappedInfo = await getWrappedInfo(

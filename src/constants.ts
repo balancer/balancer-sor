@@ -14,4 +14,5 @@ export const EMPTY_SWAPINFO: SwapInfo = {
     returnAmountConsideringFees: Zero,
     returnAmountFromSwaps: Zero,
     marketSp: Zero.toString(),
+    routes: [],
 };
