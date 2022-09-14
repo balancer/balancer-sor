@@ -172,8 +172,7 @@ export class Gyro3Pool implements PoolBase {
 
         const normalisedLiquidity = _getNormalizedLiquidity(
             normalizedBalances,
-            virtualOffsetInOut,
-            poolPairData.swapFee
+            virtualOffsetInOut
         );
 
         return bnum(formatFixed(normalisedLiquidity, 18));
