@@ -146,15 +146,14 @@ export class Gyro2Pool implements PoolBase {
             poolPairData.sqrtAlpha,
             poolPairData.sqrtBeta
         );
-        const [virtualParamIn] = _findVirtualParams(
+        const [, virtualParamOut] = _findVirtualParams(
             invariant,
             poolPairData.sqrtAlpha,
             poolPairData.sqrtBeta
         );
         const normalisedLiquidity = _getNormalizedLiquidity(
             normalizedBalances,
-            virtualParamIn,
-            poolPairData.swapFee
+            virtualParamOut
         );
 
         return bnum(formatFixed(normalisedLiquidity, 18));

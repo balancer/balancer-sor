@@ -1,7 +1,6 @@
 import { BigNumber } from '@ethersproject/bignumber';
 import { WeiPerEther as ONE } from '@ethersproject/constants';
 import { _sqrt, mulUp, divUp, mulDown, divDown } from './helpers';
-import { _MAX_IN_RATIO, _MAX_OUT_RATIO } from './constants';
 
 /////////
 /// Virtual Parameter calculations
@@ -125,8 +124,6 @@ export function _calcOutGivenIn(
         // Note that -dy > 0 is what the trader receives.                                            //
         // We exploit the fact that this formula is symmetric up to virtualParam{X,Y}.               //
         **********************************************************************************************/
-    if (amountIn.gt(mulDown(balanceIn, _MAX_IN_RATIO)))
-        throw new Error('Swap Amount Too Large');
 
     // The factors in total lead to a multiplicative "safety margin" between the employed virtual offsets
     // very slightly larger than 3e-18.
@@ -138,11 +135,7 @@ export function _calcOutGivenIn(
         virtInOver.add(amountIn)
     );
 
-    if (amountOut.gte(balanceOut)) throw new Error('ASSET_BOUNDS_EXCEEDED');
-
-    // This in particular ensures amountOut < balanceOut.
-    if (amountOut.gt(mulDown(balanceOut, _MAX_OUT_RATIO)))
-        throw new Error('MAX_OUT_RATIO');
+    if (amountOut.gt(balanceOut)) throw new Error('ASSET_BOUNDS_EXCEEDED');
 
     return amountOut;
 }
@@ -167,8 +160,7 @@ export function _calcInGivenOut(
       // Note that dy < 0 < dx.                                                                    //
       **********************************************************************************************/
 
-    if (amountOut.gt(mulDown(balanceOut, _MAX_OUT_RATIO)))
-        throw new Error('Swap Amount Too Large');
+    if (amountOut.gt(balanceOut)) throw new Error('ASSET_BOUNDS_EXCEEDED');
 
     // The factors in total lead to a multiplicative "safety margin" between the employed virtual offsets
     // very slightly larger than 3e-18.
@@ -179,9 +171,6 @@ export function _calcInGivenOut(
         mulUp(virtInOver, amountOut),
         virtOutUnder.sub(amountOut)
     );
-
-    if (amountIn.gt(mulDown(balanceIn, _MAX_IN_RATIO)))
-        throw new Error('Max_IN_RATIO');
 
     return amountIn;
 }
@@ -288,26 +277,22 @@ export function _derivativeSpotPriceAfterSwapTokenInForExactTokenOut(
 }
 
 // /////////
-// ///  Normalized Liquidity
+// ///  Normalized Liquidity measured with respect to the in-asset.
 // /////////
 export function _getNormalizedLiquidity(
     balances: BigNumber[],
-    virtualParamIn: BigNumber,
-    swapFee: BigNumber
+    virtualParamOut: BigNumber
 ): BigNumber {
     /**********************************************************************************************
-        // x = balanceIn             x' = x +  virtualParamX                                         //
-        // s = swapFee                                                                               //
-        //                                                     1                                     //
-        //                             normalizedLiquidity =  ---  x'                                //
-        //                                                    1-s                                    //
-        // x' = virtIn                                                                               //
-        **********************************************************************************************/
+    // x = balanceOut             x' = x +  virtualParamOut                                      //
+    // s = swapFee                                                                               //
+    //                                                                                           //
+    //                             normalizedLiquidity =  0.5 * x'                               //
+    //                                                                                           //
+    // x' = virtOut                                                                              //
+    // Note that balances = [balanceIn, balanceOut].                                             //
+    **********************************************************************************************/
 
-    const virtIn = balances[0].add(virtualParamIn);
-    const afterFeeMultiplier = ONE.sub(swapFee);
-
-    const normalizedLiquidity = divDown(virtIn, afterFeeMultiplier);
-
-    return normalizedLiquidity;
+    const virtOut = balances[1].add(virtualParamOut);
+    return virtOut.div(2);
 }
