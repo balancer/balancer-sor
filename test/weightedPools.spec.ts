@@ -1,27 +1,31 @@
+// TS_NODE_PROJECT='tsconfig.testing.json' npx mocha -r ts-node/register test/weightedPools.spec.ts
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 require('dotenv').config();
 import { assert, expect } from 'chai';
-import { SwapTypes, PoolTypes, SwapInfo, PoolFilter } from '../src/types';
-import { bnum } from '../src/utils/bignumber';
-import {
-    WeightedPool,
-    WeightedPoolPairData,
-} from '../src/pools/weightedPool/weightedPool';
 import { BigNumber, parseFixed } from '@ethersproject/bignumber';
-import poolsFromFile from './testData/weightedPools/singlePool.json';
-import usingBPT from './testData/weightedPools/usingBPT.json';
-import cloneDeep from 'lodash.clonedeep';
 import { JsonRpcProvider } from '@ethersproject/providers';
-import * as sorv2 from '../src';
+import cloneDeep from 'lodash.clonedeep';
+
+import {
+    SOR,
+    SwapTypes,
+    PoolTypes,
+    SwapInfo,
+    PoolFilter,
+    bnum,
+    WeightedPool,
+} from '../src';
+import { WeightedPoolPairData } from '../src/pools/weightedPool/weightedPool';
 import { mockTokenPriceService } from './lib/mockTokenPriceService';
 import { MockPoolDataService } from './lib/mockPoolDataService';
-import { sorConfigTest } from './lib/constants';
+import { sorConfigTest, DAI, USDT } from './lib/constants';
 
-// npx mocha -r ts-node/register test/weightedPools.spec.ts
+import poolsList from './testData/weightedPools/joinExitPools.json';
+
 describe(`Tests for Weighted Pools.`, () => {
     context('limit amounts', () => {
         it(`tests getLimitAmountSwap SwapExactIn`, async () => {
-            const pool = poolsFromFile.pools[0];
+            const pool = poolsList.pools[0];
             const swapType = SwapTypes.SwapExactIn;
 
             // Max out uses standard V2 limits
@@ -58,7 +62,7 @@ describe(`Tests for Weighted Pools.`, () => {
         });
 
         it(`tests getLimitAmountSwap SwapExactOut`, async () => {
-            const pool = poolsFromFile.pools[0];
+            const pool = poolsList.pools[0];
             const swapType = SwapTypes.SwapExactOut;
 
             // Max out uses standard V2 limits
@@ -96,13 +100,11 @@ describe(`Tests for Weighted Pools.`, () => {
     });
 
     context('swaps using BPTs of weighted pools', () => {
-        const DAI_addres = '0x6b175474e89094c44da98b954eedeac495271d0f';
-        const USDT_address = '0xdac17f958d2ee523a2206206994597c13d831ec7';
         it('token->BPT, exact in', async () => {
-            const tokenIn = DAI_addres;
-            const tokenOut = USDT_address;
+            const tokenIn = DAI.address;
+            const tokenOut = USDT.address;
             const swapType = SwapTypes.SwapExactIn;
-            const pools = cloneDeep(usingBPT.pools);
+            const pools = cloneDeep(poolsList.pools);
             const stablePool = [pools[1]];
             const swapAmount = parseFixed('1280000', 18);
             const swapInfo1 = await getSwapInfo(
@@ -128,10 +130,10 @@ describe(`Tests for Weighted Pools.`, () => {
             assert.equal(swapInfo2.returnAmount.toString(), '1264579692512');
         });
         it('token->BPT, exact out', async () => {
-            const tokenIn = DAI_addres;
-            const tokenOut = USDT_address;
+            const tokenIn = DAI.address;
+            const tokenOut = USDT.address;
             const swapType = SwapTypes.SwapExactOut;
-            const pools = cloneDeep(usingBPT.pools);
+            const pools = cloneDeep(poolsList.pools);
             const stablePool = [pools[1]];
             const swapAmount = BigNumber.from(1264585520968);
             const swapInfo1 = await getSwapInfo(
@@ -164,10 +166,10 @@ describe(`Tests for Weighted Pools.`, () => {
             // between exact in and exact out formulas
         });
         it('BPT->token, exact in', async () => {
-            const tokenIn = USDT_address;
-            const tokenOut = DAI_addres;
+            const tokenIn = USDT.address;
+            const tokenOut = DAI.address;
             const swapType = SwapTypes.SwapExactIn;
-            const pools = cloneDeep(usingBPT.pools);
+            const pools = cloneDeep(poolsList.pools);
             pools.splice(1, 1); // removes the stable pool
             const swapAmount = parseFixed('100000', 6);
             const swapInfo = await getSwapInfo(
@@ -185,10 +187,10 @@ describe(`Tests for Weighted Pools.`, () => {
             );
         });
         it('BPT->token, exact out', async () => {
-            const tokenIn = USDT_address;
-            const tokenOut = DAI_addres;
+            const tokenIn = USDT.address;
+            const tokenOut = DAI.address;
             const swapType = SwapTypes.SwapExactOut;
-            const pools = cloneDeep(usingBPT.pools);
+            const pools = cloneDeep(poolsList.pools);
             pools.splice(1, 1); // removes the stable pool
             const swapAmount = BigNumber.from('94961515248180000000000');
             const swapInfo = await getSwapInfo(
@@ -220,7 +222,7 @@ async function getSwapInfo(
     );
     const maxPools = 4;
     const gasPrice = BigNumber.from('0');
-    const sor = new sorv2.SOR(
+    const sor = new SOR(
         provider,
         sorConfigTest,
         new MockPoolDataService(pools),
