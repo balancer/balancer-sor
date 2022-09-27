@@ -1,8 +1,8 @@
 {
     "pools": [
         {
-            "id": "weighted-pool-1",
-            "address": "0x0000000000000000000000000000000000000000",
+            "id": "0x5c6ee304399dbdb9c8ef030ab642b10820db8f56000200000000000000000014",
+            "address": "0x5c6ee304399dbdb9c8ef030ab642b10820db8f56",
             "swapFee": "0.002",
             "swapEnabled": true,
             "tokens": [
@@ -32,8 +32,8 @@
             "poolType": "Weighted"
         },
         {
-            "id": "stable-pool",
-            "address": "0xebfed10e11dc08fcda1af1fda146945e8710f22e",
+            "id": "0xc45d42f801105e861e86658648e3678ad7aa70f900010000000000000000011e",
+            "address": "0xc45d42f801105e861e86658648e3678ad7aa70f9",
             "swapFee": "0.0004",
             "swapEnabled": true,
             "amp": "10",
@@ -72,13 +72,13 @@
             "poolType": "Stable"
         },
         {
-            "id": "weighted-pool-using-a-BPT",
-            "address": " ",
+            "id": "0xf88278315a1d5ace3aaa41712f60602e069208e6000200000000000000000375",
+            "address": "0xf88278315a1d5ace3aaa41712f60602e069208e6",
             "swapFee": "0.002",
             "swapEnabled": true,
             "tokens": [
                 {
-                    "address": "0x0000000000000000000000000000000000000000",
+                    "address": "0x5c6ee304399dbdb9c8ef030ab642b10820db8f56",
                     "balance": "1000000",
                     "decimals": 18,
                     "weight": "5",
@@ -95,7 +95,7 @@
                 }
             ],
             "tokensList": [
-                "0x0000000000000000000000000000000000000000",
+                "0x5c6ee304399dbdb9c8ef030ab642b10820db8f56",
                 "0xdac17f958d2ee523a2206206994597c13d831ec7"
             ],
             "totalWeight": "10",

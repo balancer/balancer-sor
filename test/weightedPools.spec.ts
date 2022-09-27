@@ -21,6 +21,7 @@ import { MockPoolDataService } from './lib/mockPoolDataService';
 import { sorConfigTest, DAI, USDT } from './lib/constants';
 
 import poolsList from './testData/weightedPools/joinExitPools.json';
+import { someJoinExit } from './joinAndExit/joinAndExit';
 
 describe(`Tests for Weighted Pools.`, () => {
     context('limit amounts', () => {
@@ -107,7 +108,7 @@ describe(`Tests for Weighted Pools.`, () => {
             const pools = cloneDeep(poolsList.pools);
             const stablePool = [pools[1]];
             const swapAmount = parseFixed('1280000', 18);
-            const swapInfo1 = await getSwapInfo(
+            const swapWithJoinExit = await getSwapInfo(
                 tokenIn,
                 tokenOut,
                 swapType,
@@ -115,7 +116,7 @@ describe(`Tests for Weighted Pools.`, () => {
                 swapAmount,
                 true
             );
-            const swapInfo2 = await getSwapInfo(
+            const swapWithoutJoinExit = await getSwapInfo(
                 tokenIn,
                 tokenOut,
                 swapType,
@@ -123,11 +124,37 @@ describe(`Tests for Weighted Pools.`, () => {
                 swapAmount,
                 true
             );
-            assert.equal(swapInfo1.swaps.length, 3, 'Should have 3 swaps');
-            assert.equal(swapInfo2.swaps.length, 1, 'Should have 1 swap');
-            assert.equal(swapInfo1.returnAmount.toString(), '1264585520968');
+            assert.isTrue(
+                someJoinExit(
+                    swapWithJoinExit.swaps,
+                    swapWithJoinExit.tokenAddresses
+                )
+            );
+            assert.isFalse(
+                someJoinExit(
+                    swapWithoutJoinExit.swaps,
+                    swapWithoutJoinExit.tokenAddresses
+                )
+            );
+            assert.equal(
+                swapWithJoinExit.swaps.length,
+                3,
+                'Should have 3 swaps'
+            );
+            assert.equal(
+                swapWithoutJoinExit.swaps.length,
+                1,
+                'Should have 1 swap'
+            );
+            assert.equal(
+                swapWithJoinExit.returnAmount.toString(),
+                '1264585520968'
+            );
             // only using the stable pool returns a lower value:
-            assert.equal(swapInfo2.returnAmount.toString(), '1264579692512');
+            assert.equal(
+                swapWithoutJoinExit.returnAmount.toString(),
+                '1264579692512'
+            );
         });
         it('token->BPT, exact out', async () => {
             const tokenIn = DAI.address;
@@ -136,7 +163,7 @@ describe(`Tests for Weighted Pools.`, () => {
             const pools = cloneDeep(poolsList.pools);
             const stablePool = [pools[1]];
             const swapAmount = BigNumber.from(1264585520968);
-            const swapInfo1 = await getSwapInfo(
+            const swapWithJoinExit = await getSwapInfo(
                 tokenIn,
                 tokenOut,
                 swapType,
@@ -144,7 +171,7 @@ describe(`Tests for Weighted Pools.`, () => {
                 swapAmount,
                 true
             );
-            const swapInfo2 = await getSwapInfo(
+            const swapWithoutJoinExit = await getSwapInfo(
                 tokenIn,
                 tokenOut,
                 swapType,
@@ -152,14 +179,34 @@ describe(`Tests for Weighted Pools.`, () => {
                 BigNumber.from(1264579692512),
                 true
             );
-            assert.equal(swapInfo1.swaps.length, 3, 'Should have 3 swaps');
-            assert.equal(swapInfo2.swaps.length, 1, 'Should have 1 swap');
+            assert.isTrue(
+                someJoinExit(
+                    swapWithJoinExit.swaps,
+                    swapWithJoinExit.tokenAddresses
+                )
+            );
+            assert.isFalse(
+                someJoinExit(
+                    swapWithoutJoinExit.swaps,
+                    swapWithoutJoinExit.tokenAddresses
+                )
+            );
             assert.equal(
-                swapInfo1.returnAmount.toString(),
+                swapWithJoinExit.swaps.length,
+                3,
+                'Should have 3 swaps'
+            );
+            assert.equal(
+                swapWithoutJoinExit.swaps.length,
+                1,
+                'Should have 1 swap'
+            );
+            assert.equal(
+                swapWithJoinExit.returnAmount.toString(),
                 '1280000412490447883455427'
             );
             assert.equal(
-                swapInfo2.returnAmount.toString(),
+                swapWithoutJoinExit.returnAmount.toString(),
                 '1279999999999232865155148'
             );
             // approximate reversibility of amounts shows consistency
@@ -172,7 +219,7 @@ describe(`Tests for Weighted Pools.`, () => {
             const pools = cloneDeep(poolsList.pools);
             pools.splice(1, 1); // removes the stable pool
             const swapAmount = parseFixed('100000', 6);
-            const swapInfo = await getSwapInfo(
+            const swapWithJoinExit = await getSwapInfo(
                 tokenIn,
                 tokenOut,
                 swapType,
@@ -180,9 +227,19 @@ describe(`Tests for Weighted Pools.`, () => {
                 swapAmount,
                 true
             );
-            assert.equal(swapInfo.swaps.length, 2, 'Should have 2 swaps');
+            assert.isTrue(
+                someJoinExit(
+                    swapWithJoinExit.swaps,
+                    swapWithJoinExit.tokenAddresses
+                )
+            );
             assert.equal(
-                swapInfo.returnAmount.toString(),
+                swapWithJoinExit.swaps.length,
+                2,
+                'Should have 2 swaps'
+            );
+            assert.equal(
+                swapWithJoinExit.returnAmount.toString(),
                 '94961515248180000000000'
             );
         });
@@ -193,7 +250,7 @@ describe(`Tests for Weighted Pools.`, () => {
             const pools = cloneDeep(poolsList.pools);
             pools.splice(1, 1); // removes the stable pool
             const swapAmount = BigNumber.from('94961515248180000000000');
-            const swapInfo = await getSwapInfo(
+            const swapWithJoinExit = await getSwapInfo(
                 tokenIn,
                 tokenOut,
                 swapType,
@@ -201,8 +258,21 @@ describe(`Tests for Weighted Pools.`, () => {
                 swapAmount,
                 true
             );
-            assert.equal(swapInfo.swaps.length, 2, 'Should have 2 swaps');
-            assert.equal(swapInfo.returnAmount.toString(), '100000436582');
+            assert.isTrue(
+                someJoinExit(
+                    swapWithJoinExit.swaps,
+                    swapWithJoinExit.tokenAddresses
+                )
+            );
+            assert.equal(
+                swapWithJoinExit.swaps.length,
+                2,
+                'Should have 2 swaps'
+            );
+            assert.equal(
+                swapWithJoinExit.returnAmount.toString(),
+                '100000436582'
+            );
             // approximate reversibility of amounts shows consistency
             // between exact in and exact out formulas
         });
