@@ -203,6 +203,8 @@ export function getBoostedGraph(
                 tokensList.includes(wethAddress)
             ) {
                 if (
+                    // This is a heuristic condition that prevents the graph
+                    // from growing too large
                     tokensList.length <= 4 &&
                     (tokensList.includes(tokenIn) ||
                         tokensList.includes(tokenOut))
