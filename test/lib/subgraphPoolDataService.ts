@@ -185,3 +185,46 @@ export class SubgraphPoolDataService implements PoolDataService {
         return data.pools ?? [];
     }
 }
+
+export class SubgraphPoolDataServiceWithFilter implements PoolDataService {
+    constructor(
+        private readonly config: {
+            chainId: number;
+            multiAddress: string;
+            vaultAddress: string;
+            subgraphUrl: string;
+            provider: Provider;
+            onchain: boolean;
+            poolIds: string[];
+        }
+    ) {}
+
+    public async getPools(): Promise<SubgraphPoolBase[]> {
+        const response = await fetch(this.config.subgraphUrl, {
+            method: 'POST',
+            headers: {
+                Accept: 'application/json',
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ query: Query[this.config.chainId] }),
+        });
+
+        const { data } = await response.json();
+
+        const allPools = [...data.pool0, ...data.pool1000];
+        const pools = allPools.filter((p) =>
+            this.config.poolIds.includes(p.id)
+        );
+
+        if (this.config.onchain) {
+            return getOnChainBalances(
+                pools ?? [],
+                this.config.multiAddress,
+                this.config.vaultAddress,
+                this.config.provider
+            );
+        }
+
+        return pools ?? [];
+    }
+}

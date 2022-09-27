@@ -66,7 +66,7 @@ export const MULTIADDR: { [chainId: number]: string } = {
 
 export const SUBGRAPH_URLS = {
     [Network.MAINNET]:
-        'https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-v2-beta',
+        'https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-v2',
     [Network.GOERLI]:
         'https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-goerli-v2',
     [Network.KOVAN]:
