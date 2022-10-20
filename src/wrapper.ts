@@ -60,8 +60,8 @@ export class SOR {
         );
     }
 
-    getPools(): SubgraphPoolBase[] {
-        return this.poolCacher.getPools();
+    getPools(useBpts?: boolean): SubgraphPoolBase[] {
+        return this.poolCacher.getPools(useBpts);
     }
 
     /**

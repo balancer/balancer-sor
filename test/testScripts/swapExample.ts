@@ -67,13 +67,13 @@ export async function swap(): Promise<void> {
     const maxPools = 4;
     const tokenIn = ADDRESSES[networkId].WETH;
     const tokenOut = {
-        address: '0xc45D42f801105e861e86658648e3678aD7aa70f9',
+        address: '0x616e8bfa43f920657b3497dbf40d6b1a02d4608d', // auraBAL
         decimals: 18,
         symbol: 'BPT',
     };
     // ADDRESSES[networkId].USDC;
     const swapType: SwapTypes = SwapTypes.SwapExactIn;
-    const swapAmount = parseFixed('0.1', 18);
+    const swapAmount = parseFixed('18', 18);
 
     const sor = setUp(networkId, provider);
 
