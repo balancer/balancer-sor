@@ -253,9 +253,6 @@ describe('multiple boosted pools, path creation test', () => {
                 maxPools,
                 sorConfigTest
             );
-            console.log('paths ids');
-            console.log(paths[0].id);
-            console.log(paths[1].id);
             assert.equal(
                 boostedPaths[0].id,
                 'LBPweightedTusdOhmBBaUSD-TUSDbbaUSD-BAL'
@@ -291,9 +288,6 @@ describe('multiple boosted pools, path creation test', () => {
                     'weightedBalWeth',
                 ],
             ];
-            for (const path of paths) {
-                console.log(path.id);
-            }
             for (let i = 0; i < 2; i++) {
                 assert.isTrue(
                     // eslint-disable-next-line prettier/prettier
@@ -366,9 +360,6 @@ describe('multiple boosted pools, path creation test', () => {
                 maxPools,
                 sorConfigTest
             );
-            for (const path of paths) {
-                console.log(path.id);
-            }
             assert.equal(
                 paths[0].id,
                 'LBPweightedTusdOhmweightedTusdWethLBPweightedWethQre'
@@ -496,15 +487,13 @@ describe('generic boosted pools with wstETH, path creation test', () => {
                 'FuseLinearFeibbfUSD-PoolbbaUSD-bbfDAIbbaUSD-bbfUSDweightedWstETH-BBfusdwETH-wstETHweightedBalWeth',
                 'FuseLinearFeibbfUSD-PoolbbaUSD-bbfDAIweightedWstETH-BBausdwETH-wstETHweightedBalWeth',
                 'FuseLinearFeibbfUSD-PoolbbaUSD-bbfDAIbbaUSD-BAL',
-                'FuseLinearFeibbfUSD-PoolFuseLinearDaiAaveLinearDaibbaUSD-PoolweightedWstETH-BBausdwETH-wstETHweightedBalWeth',
-                'FuseLinearFeibbfUSD-PoolFuseLinearDaiAaveLinearDaibbaUSD-PoolbbaUSD-bbfUSDweightedWstETH-BBfusdwETH-wstETHweightedBalWeth',
                 'FuseLinearFeibbfUSD-PoolFuseLinearDaiAaveLinearDaibbaUSD-PoolbbaUSD-BAL',
             ];
-            for (let i = 0; i < 10; i++) {
+            for (let i = 0; i < 8; i++) {
                 assert.equal(paths[i].id, pathsIds[i], 'unexpected path');
             }
-            assert.equal(boostedPaths.length, 10);
-            assert.equal(paths.length, 10);
+            assert.equal(boostedPaths.length, 8);
+            assert.equal(paths.length, 8);
         });
     });
 });

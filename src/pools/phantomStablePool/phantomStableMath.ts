@@ -8,11 +8,6 @@ import {
 } from '../../utils/bignumber';
 import { PhantomStablePoolPairData } from './phantomStablePool';
 
-const MAX_TOKEN_BALANCE = bnum(2)
-    .pow(112)
-    .minus(1)
-    .div(10 ** 18);
-
 // All functions are adapted from the solidity ones to be found on:
 // https://github.com/balancer-labs/balancer-core-v2/blob/master/contracts/pools/stable/StableMath.sol
 
@@ -474,8 +469,7 @@ export function _exactBPTInForTokenOut(
     // we input zero the output should be zero
     if (amount.isZero()) return amount;
 
-    const { amp, allBalances, balanceIn, tokenIndexOut, decimalsIn, swapFee } =
-        poolPairData;
+    const { amp, allBalances, tokenIndexOut, swapFee } = poolPairData;
     const balances = [...allBalances];
     const bptAmountIn = amount;
 
@@ -486,10 +480,7 @@ export function _exactBPTInForTokenOut(
     // Get current invariant
     const currentInvariant = _invariant(amp, balances);
     // Calculate new invariant
-
-    const bnumBalanceIn = MAX_TOKEN_BALANCE.minus(
-        bnum(formatFixed(balanceIn, decimalsIn))
-    );
+    const bnumBalanceIn = bnum(formatFixed(poolPairData.virtualBptSupply, 18));
     const newInvariant = bnumBalanceIn
         .minus(bptAmountIn)
         .div(bnumBalanceIn)

@@ -76,7 +76,7 @@ describe('Gyro2Pool tests USDC > DAI', () => {
                 pool.getNormalizedLiquidity(poolPairData);
 
             expect(Number(normalizedLiquidity.toString())).to.be.approximately(
-                2252709.0984593313,
+                1116333.916257166990921337,
                 0.00001
             );
         });
@@ -86,7 +86,7 @@ describe('Gyro2Pool tests USDC > DAI', () => {
                 pool.getNormalizedLiquidity(poolPairData2);
 
             expect(Number(normalizedLiquidity.toString())).to.be.approximately(
-                2252944.3314978145,
+                1116217.358286598731855228,
                 0.00001
             );
         });

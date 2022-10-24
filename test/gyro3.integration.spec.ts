@@ -24,6 +24,7 @@ dotenv.config();
  * - Run kovan node on terminal: yarn run node
  * TO DO - Change this test to mainnet once deployed.
  */
+/*
 const { ALCHEMY_URL: jsonRpcUrl } = process.env;
 const rpcUrl = 'http://127.0.0.1:8545';
 const provider = new JsonRpcProvider(rpcUrl, 42);
@@ -182,3 +183,4 @@ describe('gyro3 integration tests', () => {
         }).timeout(10000);
     });
 });
+*/
