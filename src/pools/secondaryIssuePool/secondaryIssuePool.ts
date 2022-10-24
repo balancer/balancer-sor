@@ -283,7 +283,7 @@ export class SecondaryIssuePool implements PoolBase {
                 y = cashTokens;
             }
 
-            // sp = (x' + x)/(y - z)
+            // p = (x' + x)/(y - z)
             // where,
             // x' - tokens coming in
             // x  - total amount of tokens of the same type as the tokens coming in
@@ -322,7 +322,7 @@ export class SecondaryIssuePool implements PoolBase {
                 y = cashTokens;
             }
             
-            // sp = (x + z)/(y - y')
+            // p = (x + z)/(y - y')
             // where,
             // z - tokens coming in (_tokenInForExactTokenOut)
             // x  - total amount of tokens of the same type as the tokens coming in
@@ -345,16 +345,14 @@ export class SecondaryIssuePool implements PoolBase {
         poolPairData: SecondaryIssuePoolPairData,
         amount: OldBigNumber
     ): OldBigNumber {
-        //todo
-        return amount;
+        return bnum(0);
     }
 
     _derivativeSpotPriceAfterSwapTokenInForExactTokenOut(
         poolPairData: SecondaryIssuePoolPairData,
         amount: OldBigNumber
     ): OldBigNumber {
-        //todo
-        return amount;
+        return bnum(0);
     }
     
 }

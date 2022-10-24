@@ -385,16 +385,35 @@ export class PrimaryIssuePool implements PoolBase {
         poolPairData: PrimaryIssuePoolPairData,
         amount: OldBigNumber
     ): OldBigNumber {
-        //todo
-        return amount;
+        const Bi = parseFloat(
+            formatFixed(poolPairData.balanceIn, poolPairData.decimalsIn)
+        );
+        const Bo = parseFloat(
+            formatFixed(poolPairData.balanceOut, poolPairData.decimalsOut)
+        );
+        const Ai = amount.toNumber();
+        const f = parseFloat(formatFixed(poolPairData.swapFee, 18));
+        return bnum( 2 / (Bo * (Bi / (Ai + Bi - Ai * f))));
     }
 
     _derivativeSpotPriceAfterSwapTokenInForExactTokenOut(
         poolPairData: PrimaryIssuePoolPairData,
         amount: OldBigNumber
     ): OldBigNumber {
-        //todo
-        return amount;
+        const Bi = parseFloat(
+            formatFixed(poolPairData.balanceIn, poolPairData.decimalsIn)
+        );
+        const Bo = parseFloat(
+            formatFixed(poolPairData.balanceOut, poolPairData.decimalsOut)
+        );
+        const Ao = amount.toNumber();
+        const f = parseFloat(formatFixed(poolPairData.swapFee, 18));
+        return bnum(
+            -(
+                (Bi * (Bo / (-Ao + Bo)) * 2) /
+                ((Ao - Bo) ** 2 * (-1 + f) ** 2)
+            )
+        );
     }
     
 }
