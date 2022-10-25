@@ -583,7 +583,7 @@ export function _spotPriceAfterSwapExactBPTInForTokenOut(
     );
     const wo = parseFloat(formatFixed(poolPairData.weightOut, 18));
     const Aibpt = amount.toNumber();
-    const f = parseFloat(formatFixed(poolPairData.swapFee.toNumber()));
+    const f = parseFloat(formatFixed(poolPairData.swapFee));
     return bnum(
         ((1 - Aibpt / Bbpt) ** ((-1 + wo) / wo) *
             Bbpt *
