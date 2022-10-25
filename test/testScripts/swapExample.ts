@@ -81,7 +81,8 @@ export async function swap(): Promise<void> {
         tokenOut.address,
         swapType,
         swapAmount,
-        { gasPrice, maxPools }
+        { gasPrice, maxPools },
+        true
     );
 
     // Simulate the swap transaction

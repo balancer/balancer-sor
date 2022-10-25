@@ -18,7 +18,7 @@ const provider = new JsonRpcProvider(
     `https://mainnet.infura.io/v3/${process.env.INFURA}`
 );
 
-// npx mocha -r ts-node/register test/helpers.spec.ts
+// TS_NODE_PROJECT='tsconfig.testing.json' npx mocha -r ts-node/register test/helpers.spec.ts
 describe(`Tests for Helpers.`, () => {
     it(`Should format directhop swapExactIn`, () => {
         const swapAmount = parseFixed('1', 18);

@@ -60,8 +60,8 @@ export class SOR {
         );
     }
 
-    getPools(): SubgraphPoolBase[] {
-        return this.poolCacher.getPools();
+    getPools(useBpts?: boolean): SubgraphPoolBase[] {
+        return this.poolCacher.getPools(useBpts);
     }
 
     /**
@@ -71,6 +71,7 @@ export class SOR {
     async fetchPools(): Promise<boolean> {
         return this.poolCacher.fetchPools();
     }
+    /**
 
     /**
      * getSwaps Retrieve information for best swap tokenIn>tokenOut.
@@ -78,14 +79,17 @@ export class SOR {
      * @param {string} tokenOut - Address of tokenOut.
      * @param {SwapTypes} swapType - SwapExactIn where the amount of tokens in (sent to the Pool) is known or SwapExactOut where the amount of tokens out (received from the Pool) is known.
      * @param {BigNumberish} swapAmount - Either amountIn or amountOut depending on the `swapType` value.
-     * @returns {SwapInfo} Swap information including return amount and swaps structure to be submitted to Vault.
+     * @param swapOptions 
+     * @param useBpts Set to true to consider join/exit weighted pool paths (these will need formatted and submitted via Relayer)
+     * @returns Swap information including return amount and swaps structure to be submitted to Vault.
      */
     async getSwaps(
         tokenIn: string,
         tokenOut: string,
         swapType: SwapTypes,
         swapAmount: BigNumberish,
-        swapOptions?: Partial<SwapOptions>
+        swapOptions?: Partial<SwapOptions>,
+        useBpts?: boolean
     ): Promise<SwapInfo> {
         if (!this.poolCacher.finishedFetching) return cloneDeep(EMPTY_SWAPINFO);
 
@@ -95,8 +99,7 @@ export class SOR {
             ...swapOptions,
         };
 
-        const pools: SubgraphPoolBase[] = this.poolCacher.getPools();
-
+        const pools: SubgraphPoolBase[] = this.poolCacher.getPools(useBpts);
         const filteredPools = filterPoolsByType(pools, options.poolTypeFilter);
 
         const wrappedInfo = await getWrappedInfo(

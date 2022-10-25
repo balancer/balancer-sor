@@ -189,17 +189,18 @@ const testDir = `${__dirname}/testData/testPools/`;
 // Does not use OnChain balances as the pools were originally saved after a failure and snapshot should have balances, etc that caused issues.
 // Compare V1 vs V2 and V2 vs V2 with filter.
 // !!! Note - testFiles array must be manually updated to contain pools of interest.
-async function loopTests(file) {
-    it(`Compare Testing: ${file}`, async () => {
-        const testData = loadTestFile(`${testDir}/${file}.json`);
+describe('v1-v2-compare', () => {
+    async function loopTests(file) {
+        it(`Compare Testing: ${file}`, async () => {
+            const testData = loadTestFile(`${testDir}/${file}.json`);
 
-        if (!testData.tradeInfo) return;
+            if (!testData.tradeInfo) return;
 
-        await compareTest(file, provider, testData);
-        // assert(false);
-    }).timeout(10000);
-}
+            await compareTest(file, provider, testData);
+        }).timeout(10000);
+    }
 
-testFiles.forEach((file) => {
-    loopTests(file);
+    testFiles.forEach((file) => {
+        loopTests(file);
+    });
 });
