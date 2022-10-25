@@ -262,6 +262,7 @@ export const formatSwaps = (
                     swapAmount: amounts[i].toString(),
                     tokenInDecimals: path.poolPairData[i].decimalsIn,
                     tokenOutDecimals: path.poolPairData[i].decimalsOut,
+                    returnAmount: amounts[amounts.length - 1].toString(),
                 };
                 pathSwaps.push(swap);
             }
@@ -283,6 +284,7 @@ export const formatSwaps = (
                     swapAmount: amounts[1].toString(),
                     tokenInDecimals: path.poolPairData[n - 1 - i].decimalsIn,
                     tokenOutDecimals: path.poolPairData[n - 1 - i].decimalsOut,
+                    returnAmount: amounts[0].toString(),
                 };
                 pathSwaps.unshift(swap);
             }
