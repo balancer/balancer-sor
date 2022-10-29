@@ -160,6 +160,16 @@ export const ADDRESSES = {
             decimals: 18,
             symbol: 'bb-a-dai2',
         },
+        RPL: {
+            address: '0xD33526068D116cE69F19A9ee46F0bd304F21A51f',
+            decimals: 18,
+            symbol: 'RPL',
+        },
+        rETH: {
+            address: '0xae78736Cd615f374D3085123A210448E74Fc6393',
+            decimals: 18,
+            symbol: 'rETH',
+        },
     },
     [Network.KOVAN]: {
         // Visit https://balancer-faucet.on.fleek.co/#/faucet for test tokens

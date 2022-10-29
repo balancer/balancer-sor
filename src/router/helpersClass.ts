@@ -303,6 +303,12 @@ export function EVMgetOutputAmountSwap(
     swapType: SwapTypes,
     amount: OldBigNumber
 ): OldBigNumber {
+    //we recalculate the pool pair data since balance updates are not reflected immediately in cached poolPairData
+    poolPairData = pool.parsePoolPairData(
+        poolPairData.tokenIn,
+        poolPairData.tokenOut
+    );
+
     const { balanceIn, balanceOut, tokenIn, tokenOut } = poolPairData;
 
     let returnAmount: OldBigNumber;
@@ -356,12 +362,17 @@ export function EVMgetOutputAmountSwap(
             throw Error('Unsupported swap');
         }
     }
+
+    const amountIn = swapType === SwapTypes.SwapExactIn ? amount : returnAmount;
+    const amountOut =
+        swapType === SwapTypes.SwapExactIn ? returnAmount : amount;
+
     // Update balances of tokenIn and tokenOut
     pool.updateTokenBalanceForPool(
         tokenIn,
         balanceIn.add(
             parseFixed(
-                returnAmount.dp(poolPairData.decimalsIn).toString(),
+                amountIn.dp(poolPairData.decimalsIn).toString(),
                 poolPairData.decimalsIn
             )
         )
@@ -370,7 +381,7 @@ export function EVMgetOutputAmountSwap(
         tokenOut,
         balanceOut.sub(
             parseFixed(
-                amount.dp(poolPairData.decimalsOut).toString(),
+                amountOut.dp(poolPairData.decimalsOut).toString(),
                 poolPairData.decimalsOut
             )
         )
