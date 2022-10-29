@@ -28,6 +28,8 @@ export enum PoolTypes {
     Linear,
     Gyro2,
     Gyro3,
+    PrimaryIssuePool,
+    SecondaryIssuePool,
 }
 
 export interface SwapOptions {
@@ -98,6 +100,21 @@ export interface SubgraphPoolBase {
 
     // Gyro3 specific field
     root3Alpha?: string;
+
+    // Primary and Secondary issue pools
+    security?: string;
+    currency?: string;
+
+    // Only Primary pool
+    openingPrice?: string;
+    maxPrice?: string;
+    securityOffered?: string;
+    cutoffTime?: string;
+
+    // Only Secondary pool
+    secondaryOffer?: string;
+    bestUnfilledBid: BigNumber;
+    bestUnfilledOffer: BigNumber;
 }
 
 export type SubgraphToken = {
@@ -165,6 +182,8 @@ export enum PoolFilter {
     AaveLinear = 'AaveLinear',
     StablePhantom = 'StablePhantom',
     ERC4626Linear = 'ERC4626Linear',
+    PrimaryIssuePool = 'PrimaryIssue',
+    SecondaryIssuePool = 'SecondaryIssue',
     Gyro2 = 'Gyro2',
     Gyro3 = 'Gyro3',
     ComposableStable = 'ComposableStable',

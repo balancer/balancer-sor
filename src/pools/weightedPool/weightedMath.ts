@@ -643,7 +643,7 @@ export function _spotPriceAfterSwapTokenInForExactBPTOut(
 export function _derivativeSpotPriceAfterSwapExactTokenInForTokenOut(
     amount: OldBigNumber,
     poolPairData: WeightedPoolPairData
-): OldBigNumber {
+): OldBigNumber {                              
     const Bi = parseFloat(
         formatFixed(poolPairData.balanceIn, poolPairData.decimalsIn)
     );

@@ -68,7 +68,8 @@ export const SUBGRAPH_URLS = {
     [Network.MAINNET]:
         'https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-v2-beta',
     [Network.GOERLI]:
-        'https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-goerli-v2',
+        //'https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-goerli-v2',
+        'https://api.thegraph.com/subgraphs/name/verified-network/balancer',
     [Network.KOVAN]:
         'https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-kovan-v2',
     [Network.POLYGON]:

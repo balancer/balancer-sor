@@ -1,7 +1,7 @@
 {
     "compilerOptions": {
-        "module": "esnext",
-        "target": "es2016",
+        "module": "commonjs",
+        "target": "esnext",
         "declaration": true,
         "lib": ["es2019", "es2018.promise"],
         "outDir": "./dist/",
@@ -20,7 +20,9 @@
         "src/pools/stablePool/stablePoolAbi.json",
         "src/pools/weightedPool/weightedPoolAbi.json",
         "src/pools/elementPool/ConvergentCurvePool.json",
-        "src/pools/linearPool/linearPoolAbi.json"
+        "src/pools/linearPool/linearPoolAbi.json",
+        "src/pools/primaryIssuePool/primaryIssuePoolAbi.json",
+        "src/pools/aecondaryIssuePool/secondaryIssuePoolAbi.json"
     ],
     "files": ["hardhat.config.js"]
 }

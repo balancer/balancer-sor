@@ -4,6 +4,8 @@ import { MetaStablePool } from './metaStablePool/metaStablePool';
 import { LinearPool } from './linearPool/linearPool';
 import { ElementPool } from './elementPool/elementPool';
 import { PhantomStablePool } from './phantomStablePool/phantomStablePool';
+import { PrimaryIssuePool } from './primaryIssuePool/primaryIssuePool';
+import { SecondaryIssuePool } from './secondaryIssuePool/secondaryIssuePool';
 import { Gyro2Pool } from './gyro2Pool/gyro2Pool';
 import { Gyro3Pool } from './gyro3Pool/gyro3Pool';
 import {
@@ -30,6 +32,8 @@ export function parseNewPool(
     | LinearPool
     | MetaStablePool
     | PhantomStablePool
+    | PrimaryIssuePool
+    | SecondaryIssuePool
     | Gyro2Pool
     | Gyro3Pool
     | undefined {
@@ -43,6 +47,8 @@ export function parseNewPool(
         | LinearPool
         | MetaStablePool
         | PhantomStablePool
+        | PrimaryIssuePool
+        | SecondaryIssuePool
         | Gyro2Pool
         | Gyro3Pool;
 
@@ -65,6 +71,10 @@ export function parseNewPool(
             pool.poolType === 'ComposableStable'
         )
             newPool = PhantomStablePool.fromPool(pool);
+        else if (pool.poolType === 'PrimaryIssuePool')
+            newPool = PrimaryIssuePool.fromPool(pool);
+        else if (pool.poolType === 'SecondaryIssuePool')
+            newPool = SecondaryIssuePool.fromPool(pool);
         else if (pool.poolType === 'Gyro2') newPool = Gyro2Pool.fromPool(pool);
         else if (pool.poolType === 'Gyro3') newPool = Gyro3Pool.fromPool(pool);
         else {
