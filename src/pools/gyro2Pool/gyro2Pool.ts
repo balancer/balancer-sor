@@ -178,8 +178,10 @@ export class Gyro2Pool implements PoolBase {
             );
             const maxAmountInAssetInPool = mulDown(
                 invariant,
-                poolPairData.sqrtBeta.sub(poolPairData.sqrtAlpha)
-            ); // y+ = L * (sqrtBeta - sqrtAlpha)
+                divDown(ONE, poolPairData.sqrtAlpha).sub(
+                    divDown(ONE, poolPairData.sqrtBeta)
+                )
+            ); // x+ = L * (1/sqrtAlpha - 1/sqrtBeta)
             const limitAmountIn = maxAmountInAssetInPool.sub(
                 normalizedBalances[0]
             );
