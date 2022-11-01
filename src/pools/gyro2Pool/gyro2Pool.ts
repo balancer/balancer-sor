@@ -29,6 +29,7 @@ import {
     mulDown,
     divDown,
 } from './helpers';
+import { SWAP_LIMIT_FACTOR } from './constants';
 
 export type Gyro2PoolPairData = PoolPairBase & {
     sqrtAlpha: BigNumber;
@@ -160,20 +161,44 @@ export class Gyro2Pool implements PoolBase {
     }
 
     getLimitAmountSwap(
-        poolPairData: PoolPairBase,
+        poolPairData: Gyro2PoolPairData,
         swapType: SwapTypes
     ): OldBigNumber {
         if (swapType === SwapTypes.SwapExactIn) {
+            const balances = [poolPairData.balanceIn, poolPairData.balanceOut];
+            const normalizedBalances = _normalizeBalances(
+                balances,
+                poolPairData.decimalsIn,
+                poolPairData.decimalsOut
+            );
+            const invariant = _calculateInvariant(
+                normalizedBalances,
+                poolPairData.sqrtAlpha,
+                poolPairData.sqrtBeta
+            );
+            const maxAmountInAssetInPool = mulDown(
+                invariant,
+                divDown(ONE, poolPairData.sqrtAlpha).sub(
+                    divDown(ONE, poolPairData.sqrtBeta)
+                )
+            ); // x+ = L * (1/sqrtAlpha - 1/sqrtBeta)
+            const limitAmountIn = maxAmountInAssetInPool.sub(
+                normalizedBalances[0]
+            );
+            const limitAmountInPlusSwapFee = divDown(
+                limitAmountIn,
+                ONE.sub(poolPairData.swapFee)
+            );
             return bnum(
                 formatFixed(
-                    mulDown(poolPairData.balanceIn, this.MAX_IN_RATIO),
-                    poolPairData.decimalsIn
+                    mulDown(limitAmountInPlusSwapFee, SWAP_LIMIT_FACTOR),
+                    18
                 )
             );
         } else {
             return bnum(
                 formatFixed(
-                    mulDown(poolPairData.balanceOut, this.MAX_OUT_RATIO),
+                    mulDown(poolPairData.balanceOut, SWAP_LIMIT_FACTOR),
                     poolPairData.decimalsOut
                 )
             );

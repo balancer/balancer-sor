@@ -1,9 +1,4 @@
-import { BigNumber, parseFixed } from '@ethersproject/bignumber';
-
-// Swap limits: amounts swapped may not be larger than this percentage of total balance.
-
-export const _MAX_IN_RATIO: BigNumber = parseFixed('0.3', 18);
-export const _MAX_OUT_RATIO: BigNumber = parseFixed('0.3', 18);
+import { BigNumber } from '@ethersproject/bignumber';
 
 // SQRT constants
 
@@ -29,3 +24,6 @@ export const MIDDECIMAL = BigNumber.from(10).pow(9); // splits the fixed point d
 // less-than-ideal starting point, which is important when alpha is small.
 export const _INVARIANT_SHRINKING_FACTOR_PER_STEP = 8;
 export const _INVARIANT_MIN_ITERATIONS = 5;
+
+// Swap Limit factor
+export const SWAP_LIMIT_FACTOR = BigNumber.from('999999000000000000');
