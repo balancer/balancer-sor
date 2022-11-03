@@ -28,6 +28,7 @@ export enum PoolTypes {
     Linear,
     Gyro2,
     Gyro3,
+    GyroE,
 }
 
 export interface SwapOptions {
@@ -61,7 +62,6 @@ export interface Swap {
     maxPrice?: string;
     tokenInDecimals: number;
     tokenOutDecimals: number;
-    returnAmount?: string;
 }
 
 export interface SubgraphPoolBase {
@@ -92,12 +92,28 @@ export interface SubgraphPoolBase {
     lowerTarget?: string;
     upperTarget?: string;
 
-    // Gyro2 specific field
+    // Gyro2 specific fields
     sqrtAlpha?: string;
     sqrtBeta?: string;
 
     // Gyro3 specific field
     root3Alpha?: string;
+
+    // GyroE specific fields
+    alpha: string;
+    beta: string;
+    c: string;
+    s: string;
+    lambda: string;
+    tauAlphaX: string;
+    tauAlphaY: string;
+    tauBetaX: string;
+    tauBetaY: string;
+    u: string;
+    v: string;
+    w: string;
+    z: string;
+    dSq: string;
 }
 
 export type SubgraphToken = {
@@ -115,7 +131,6 @@ export interface SwapV2 {
     assetOutIndex: number;
     amount: string;
     userData: string;
-    returnAmount?: string;
 }
 
 export interface SwapInfo {
@@ -167,7 +182,7 @@ export enum PoolFilter {
     ERC4626Linear = 'ERC4626Linear',
     Gyro2 = 'Gyro2',
     Gyro3 = 'Gyro3',
-    ComposableStable = 'ComposableStable',
+    GyroE = 'GyroE',
 }
 
 export interface PoolBase {

@@ -38,6 +38,20 @@ const queryWithLinear = `
           sqrtAlpha
           sqrtBeta
           root3Alpha
+          alpha
+          beta
+          c
+          s
+          lambda
+          tauAlphaX
+          tauAlphaY
+          tauBetaX
+          tauBetaY
+          u
+          v
+          w
+          z
+          dSq
         }
         pool1000: pools(
           first: 1000,
@@ -73,6 +87,20 @@ const queryWithLinear = `
           sqrtAlpha
           sqrtBeta
           root3Alpha
+          alpha
+          beta
+          c
+          s
+          lambda
+          tauAlphaX
+          tauAlphaY
+          tauBetaX
+          tauBetaY
+          u
+          v
+          w
+          z
+          dSq
         }
       }
     `;
