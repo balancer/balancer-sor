@@ -30,6 +30,7 @@ export class SOR {
     private readonly poolCacher: PoolCacher;
     public readonly routeProposer: RouteProposer;
     readonly swapCostCalculator: SwapCostCalculator;
+    private useBpt: boolean;
 
     private readonly defaultSwapOptions: SwapOptions = {
         gasPrice: parseFixed('50', 9),
@@ -89,7 +90,7 @@ export class SOR {
         swapType: SwapTypes,
         swapAmount: BigNumberish,
         swapOptions?: Partial<SwapOptions>,
-        useBpts?: boolean
+        useBpts = false
     ): Promise<SwapInfo> {
         if (!this.poolCacher.finishedFetching) return cloneDeep(EMPTY_SWAPINFO);
 
@@ -98,7 +99,10 @@ export class SOR {
             ...this.defaultSwapOptions,
             ...swapOptions,
         };
-
+        if (this.useBpt !== useBpts) {
+            options.forceRefresh = true;
+            this.useBpt = useBpts;
+        }
         const pools: SubgraphPoolBase[] = this.poolCacher.getPools(useBpts);
         const filteredPools = filterPoolsByType(pools, options.poolTypeFilter);
 
