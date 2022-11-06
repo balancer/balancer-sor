@@ -62,7 +62,8 @@ export function parseNewPool(
             newPool = LinearPool.fromPool(pool);
         else if (
             pool.poolType === 'StablePhantom' ||
-            pool.poolType === 'ComposableStable'
+            pool.poolType === 'ComposableStable' ||
+            pool.poolType === 'HighAmpComposableStable'
         )
             newPool = PhantomStablePool.fromPool(pool);
         else if (pool.poolType === 'Gyro2') newPool = Gyro2Pool.fromPool(pool);
