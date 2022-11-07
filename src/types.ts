@@ -29,6 +29,7 @@ export enum PoolTypes {
     Gyro2,
     Gyro3,
     GyroE,
+    FxPool,
 }
 
 export interface SwapOptions {
@@ -99,22 +100,6 @@ export interface SubgraphPoolBase {
 
     // Gyro3 specific field
     root3Alpha?: string;
-
-    // GyroE specific fields
-    alpha?: string;
-    beta?: string;
-    c?: string;
-    s?: string;
-    lambda?: string;
-    tauAlphaX?: string;
-    tauAlphaY?: string;
-    tauBetaX?: string;
-    tauBetaY?: string;
-    u?: string;
-    v?: string;
-    w?: string;
-    z?: string;
-    dSq?: string;
 }
 
 export type SubgraphToken = {
@@ -185,7 +170,7 @@ export enum PoolFilter {
     ComposableStable = 'ComposableStable',
     Gyro2 = 'Gyro2',
     Gyro3 = 'Gyro3',
-    GyroE = 'GyroE',
+    ComposableStable = 'ComposableStable',
 }
 
 export interface PoolBase {
