@@ -132,8 +132,8 @@ export class GyroEPool implements PoolBase {
             pool.totalShares,
             pool.tokens as GyroEPoolToken[],
             pool.tokensList,
-            gyroEParams,
-            derivedGyroEParams
+            gyroEParams as GyroEParamsFromSubgraph,
+            derivedGyroEParams as DerivedGyroEParamsFromSubgraph
         );
     }
 

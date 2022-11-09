@@ -63,7 +63,10 @@ export function parseNewPool(
             newPool.setCurrentBlockTimestamp(currentBlockTimestamp);
         } else if (pool.poolType.toString().includes('Linear'))
             newPool = LinearPool.fromPool(pool);
-        else if (pool.poolType === 'StablePhantom')
+        else if (
+            pool.poolType === 'StablePhantom' ||
+            pool.poolType === 'ComposableStable'
+        )
             newPool = PhantomStablePool.fromPool(pool);
         else if (pool.poolType === 'Gyro2') newPool = Gyro2Pool.fromPool(pool);
         else if (pool.poolType === 'Gyro3') newPool = Gyro3Pool.fromPool(pool);
