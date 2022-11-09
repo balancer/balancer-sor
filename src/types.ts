@@ -175,6 +175,8 @@ export interface PoolBase {
     id: string;
     address: string;
     tokensList: string[];
+    tokens: { address: string; balance: string; decimals: number }[];
+    totalShares: BigNumber;
     mainIndex?: number;
     isLBP?: boolean;
     parsePoolPairData: (tokenIn: string, tokenOut: string) => PoolPairBase;
@@ -196,6 +198,8 @@ export interface PoolBase {
         poolPairData: PoolPairBase,
         amount: OldBigNumber
     ) => OldBigNumber;
+    _calcTokensOutGivenExactBptIn(bptAmountIn: BigNumber): BigNumber[];
+    _calcBptOutGivenExactTokensIn(amountsIn: BigNumber[]): BigNumber;
     _spotPriceAfterSwapExactTokenInForTokenOut: (
         poolPairData: PoolPairBase,
         amount: OldBigNumber

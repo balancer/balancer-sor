@@ -1,7 +1,7 @@
 import { BigNumber, parseFixed, formatFixed } from '@ethersproject/bignumber';
 import { bnum, scale, ZERO } from '../../utils/bignumber';
 import { BigNumber as OldBigNumber } from '../../utils/bignumber';
-import { WeiPerEther as ONE } from '@ethersproject/constants';
+import { WeiPerEther as ONE, Zero } from '@ethersproject/constants';
 import { isSameAddress } from '../../utils';
 import {
     PoolBase,
@@ -753,6 +753,16 @@ export class LinearPool implements PoolBase {
         } catch (err) {
             return ZERO;
         }
+    }
+
+    _calcTokensOutGivenExactBptIn(bptAmountIn: BigNumber): BigNumber[] {
+        // Linear Pool doesn't have Exit Pool implementation
+        return new Array(this.tokens.length).fill(Zero);
+    }
+
+    _calcBptOutGivenExactTokensIn(amountsIn: BigNumber[]): BigNumber {
+        // Linear Pool doesn't have Exit Pool implementation
+        return Zero;
     }
 
     // SPOT PRICES AFTER SWAP

@@ -1,5 +1,5 @@
 import { BigNumber, formatFixed, parseFixed } from '@ethersproject/bignumber';
-import { WeiPerEther as ONE } from '@ethersproject/constants';
+import { WeiPerEther as ONE, Zero } from '@ethersproject/constants';
 import { isSameAddress } from '../../utils';
 import { BigNumber as OldBigNumber, bnum } from '../../utils/bignumber';
 import {
@@ -217,6 +217,16 @@ export class ElementPool implements PoolBase {
     ): OldBigNumber {
         poolPairData.currentBlockTimestamp = this.currentBlockTimestamp;
         return _tokenInForExactTokenOut(amount, poolPairData);
+    }
+
+    _calcTokensOutGivenExactBptIn(bptAmountIn: BigNumber): BigNumber[] {
+        // Missing maths for this
+        return new Array(this.tokens.length).fill(Zero);
+    }
+
+    _calcBptOutGivenExactTokensIn(amountsIn: BigNumber[]): BigNumber {
+        // Missing maths for this
+        return Zero;
     }
 
     _spotPriceAfterSwapExactTokenInForTokenOut(
