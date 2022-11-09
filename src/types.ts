@@ -28,6 +28,7 @@ export enum PoolTypes {
     Linear,
     Gyro2,
     Gyro3,
+    Managed,
 }
 
 export interface SwapOptions {
@@ -74,7 +75,7 @@ export interface SubgraphPoolBase {
     tokens: SubgraphToken[];
     tokensList: string[];
 
-    // Weighted & Element field
+    // Weighted, Element & Managed field
     totalWeight?: string;
 
     // Stable specific fields
@@ -98,6 +99,11 @@ export interface SubgraphPoolBase {
 
     // Gyro3 specific field
     root3Alpha?: string;
+
+    // Managed pools specific fields
+    referenceBptPrices?: number[];
+    lowerBreakerRatio?: number;
+    upperBreakerRatio?: number;
 }
 
 export type SubgraphToken = {
