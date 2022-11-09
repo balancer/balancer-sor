@@ -59,7 +59,7 @@ describe('Gyro2Pool tests USDC > DAI', () => {
                 SwapTypes.SwapExactIn
             );
 
-            expect(amount.toString()).to.eq('1243.745084463437699999');
+            expect(amount.toString()).to.eq('1243.74395782517101711');
 
             amount = pool.getLimitAmountSwap(
                 poolPairData,
