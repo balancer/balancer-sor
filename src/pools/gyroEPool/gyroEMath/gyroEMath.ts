@@ -1,6 +1,7 @@
 import { BigNumber, formatFixed } from '@ethersproject/bignumber';
 import { WeiPerEther as ONE } from '@ethersproject/constants';
-import { MAX_BALANCES, MAX_INVARIANT, ONE_XP, SMALL } from './constants';
+import { MAX_BALANCES, MAX_INVARIANT } from './constants';
+import { ONE_XP, SMALL } from '../../gyroHelpers/constants';
 import {
     GyroEParams,
     DerivedGyroEParams,
@@ -21,7 +22,7 @@ import {
     mulDownXpToNpU,
     divXpU,
     sqrt,
-} from './gyroSignedFixedPoint';
+} from '../../gyroHelpers/gyroSignedFixedPoint';
 import {
     normalizedLiquidityXIn,
     normalizedLiquidityYIn,

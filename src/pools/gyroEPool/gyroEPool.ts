@@ -23,7 +23,7 @@ import {
     virtualOffset1,
 } from './gyroEMath/gyroEMathHelpers';
 import { isSameAddress } from '../../utils';
-import { mulDown, divDown } from './gyroEMath/gyroSignedFixedPoint';
+import { mulDown, divDown } from '../gyroHelpers/gyroSignedFixedPoint';
 import {
     calculateInvariantWithError,
     calcOutGivenIn,
@@ -34,7 +34,7 @@ import {
     calcDerivativeSpotPriceAfterSwapInGivenOut,
     calculateNormalizedLiquidity,
 } from './gyroEMath/gyroEMath';
-import { SWAP_LIMIT_FACTOR } from './gyroEMath/constants';
+import { SWAP_LIMIT_FACTOR } from '../gyroHelpers/constants';
 
 export type GyroEPoolPairData = PoolPairBase & {
     tokenInIsToken0: boolean;

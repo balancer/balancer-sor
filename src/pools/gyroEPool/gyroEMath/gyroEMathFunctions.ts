@@ -8,7 +8,7 @@ import {
     virtualOffset0,
     virtualOffset1,
 } from './gyroEMathHelpers';
-import { ONE_XP } from './constants';
+import { ONE_XP } from '../../gyroHelpers/constants';
 import {
     mulDown,
     divDown,
@@ -20,7 +20,7 @@ import {
     mulDownXpToNpU,
     divXpU,
     sqrt,
-} from './gyroSignedFixedPoint';
+} from '../../gyroHelpers/gyroSignedFixedPoint';
 import { calcXpXpDivLambdaLambda } from './gyroEMathHelpers';
 
 /////////

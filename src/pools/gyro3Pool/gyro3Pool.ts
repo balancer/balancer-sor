@@ -26,9 +26,8 @@ import {
     _normalizeBalances,
     _reduceFee,
     _addFee,
-    mulDown,
-    divDown,
-} from './helpers';
+} from '../gyroHelpers/helpers';
+import { mulDown } from '../gyroHelpers/gyroSignedFixedPoint';
 
 export type Gyro3PoolPairData = PoolPairBase & {
     balanceTertiary: BigNumber; // Balance of the unchanged asset

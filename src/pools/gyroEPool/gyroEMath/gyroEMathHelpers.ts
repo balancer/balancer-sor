@@ -1,6 +1,6 @@
 import { BigNumber, formatFixed, parseFixed } from '@ethersproject/bignumber';
 import { WeiPerEther as ONE } from '@ethersproject/constants';
-import { ONE_XP } from './constants';
+import { ONE_XP } from '../../gyroHelpers/constants';
 import {
     mulDown,
     divDown,
@@ -13,7 +13,7 @@ import {
     mulXpU,
     divXpU,
     sqrt,
-} from './gyroSignedFixedPoint';
+} from '../../gyroHelpers/gyroSignedFixedPoint';
 import { MAX_BALANCES } from './constants';
 
 /////////

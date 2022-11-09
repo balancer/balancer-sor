@@ -26,9 +26,8 @@ import {
     _normalizeBalances,
     _reduceFee,
     _addFee,
-    mulDown,
-    divDown,
-} from './helpers';
+} from '../gyroHelpers/helpers';
+import { mulDown, divDown } from '../gyroHelpers/gyroSignedFixedPoint';
 
 export type Gyro2PoolPairData = PoolPairBase & {
     sqrtAlpha: BigNumber;
@@ -136,11 +135,10 @@ export class Gyro2Pool implements PoolBase {
 
     getNormalizedLiquidity(poolPairData: Gyro2PoolPairData): OldBigNumber {
         const balances = [poolPairData.balanceIn, poolPairData.balanceOut];
-        const normalizedBalances = _normalizeBalances(
-            balances,
+        const normalizedBalances = _normalizeBalances(balances, [
             poolPairData.decimalsIn,
-            poolPairData.decimalsOut
-        );
+            poolPairData.decimalsOut,
+        ]);
         const invariant = _calculateInvariant(
             normalizedBalances,
             poolPairData.sqrtAlpha,
@@ -199,11 +197,10 @@ export class Gyro2Pool implements PoolBase {
     ): OldBigNumber {
         try {
             const balances = [poolPairData.balanceIn, poolPairData.balanceOut];
-            const normalizedBalances = _normalizeBalances(
-                balances,
+            const normalizedBalances = _normalizeBalances(balances, [
                 poolPairData.decimalsIn,
-                poolPairData.decimalsOut
-            );
+                poolPairData.decimalsOut,
+            ]);
             const invariant = _calculateInvariant(
                 normalizedBalances,
                 poolPairData.sqrtAlpha,
@@ -238,11 +235,10 @@ export class Gyro2Pool implements PoolBase {
         try {
             const outAmount = parseFixed(amount.toString(), 18);
             const balances = [poolPairData.balanceIn, poolPairData.balanceOut];
-            const normalizedBalances = _normalizeBalances(
-                balances,
+            const normalizedBalances = _normalizeBalances(balances, [
                 poolPairData.decimalsIn,
-                poolPairData.decimalsOut
-            );
+                poolPairData.decimalsOut,
+            ]);
             const invariant = _calculateInvariant(
                 normalizedBalances,
                 poolPairData.sqrtAlpha,
@@ -274,11 +270,10 @@ export class Gyro2Pool implements PoolBase {
     ): OldBigNumber {
         try {
             const balances = [poolPairData.balanceIn, poolPairData.balanceOut];
-            const normalizedBalances = _normalizeBalances(
-                balances,
+            const normalizedBalances = _normalizeBalances(balances, [
                 poolPairData.decimalsIn,
-                poolPairData.decimalsOut
-            );
+                poolPairData.decimalsOut,
+            ]);
             const invariant = _calculateInvariant(
                 normalizedBalances,
                 poolPairData.sqrtAlpha,
@@ -319,11 +314,10 @@ export class Gyro2Pool implements PoolBase {
         try {
             const outAmount = parseFixed(amount.toString(), 18);
             const balances = [poolPairData.balanceIn, poolPairData.balanceOut];
-            const normalizedBalances = _normalizeBalances(
-                balances,
+            const normalizedBalances = _normalizeBalances(balances, [
                 poolPairData.decimalsIn,
-                poolPairData.decimalsOut
-            );
+                poolPairData.decimalsOut,
+            ]);
             const invariant = _calculateInvariant(
                 normalizedBalances,
                 poolPairData.sqrtAlpha,
@@ -363,11 +357,10 @@ export class Gyro2Pool implements PoolBase {
     ): OldBigNumber {
         try {
             const balances = [poolPairData.balanceIn, poolPairData.balanceOut];
-            const normalizedBalances = _normalizeBalances(
-                balances,
+            const normalizedBalances = _normalizeBalances(balances, [
                 poolPairData.decimalsIn,
-                poolPairData.decimalsOut
-            );
+                poolPairData.decimalsOut,
+            ]);
             const invariant = _calculateInvariant(
                 normalizedBalances,
                 poolPairData.sqrtAlpha,
@@ -407,11 +400,10 @@ export class Gyro2Pool implements PoolBase {
         try {
             const outAmount = parseFixed(amount.toString(), 18);
             const balances = [poolPairData.balanceIn, poolPairData.balanceOut];
-            const normalizedBalances = _normalizeBalances(
-                balances,
+            const normalizedBalances = _normalizeBalances(balances, [
                 poolPairData.decimalsIn,
-                poolPairData.decimalsOut
-            );
+                poolPairData.decimalsOut,
+            ]);
             const invariant = _calculateInvariant(
                 normalizedBalances,
                 poolPairData.sqrtAlpha,
