@@ -2,11 +2,10 @@
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 require('dotenv').config();
 import { formatFixed } from '@ethersproject/bignumber';
-import BigNumber from 'bignumber.js';
 import { assert } from 'chai';
 import { SwapTypes, ManagedPool, bnum, OldBigNumber } from '../src';
 import { WeiPerEther as ONE } from '@ethersproject/constants';
-import singlePool from './testData/managedPools/singlePool.json';
+import singlePool from './testData/managedPools/singleManagedPool.json';
 
 describe(`Tests for Managed Pools.`, () => {
     context('limit amounts', () => {

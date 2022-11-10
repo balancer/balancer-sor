@@ -222,20 +222,29 @@ export class ManagedPool implements PoolBase {
         const balanceOut = bnum(
             formatFixed(poolPairData.balanceOut, poolPairData.decimalsOut)
         );
-        // Note: it might be good to work with "vault balance" for BPT
-        // retrieve BPT balance
-        // Maybe: determine the input token
         const n = this.tokens.length;
-        const lowerPriceLimits: number[] = [];
-        const upperPriceLimits: number[] = [];
         const totalWeight = this.totalWeight.div(ONE).toNumber();
         const S = bnum(formatFixed(this.totalShares, 18));
         // For each token
         // This assumes that BPT is at position 0
         const limitAmounts: OldBigNumber[] = [];
+        const isBptToToken = poolPairData.pairType == PairTypes.BptToToken;
+        const isTokenToBpt = poolPairData.pairType == PairTypes.BptToToken;
         for (let i = 1; i < n; i++) {
             const isTokenIn = this.tokens[i].address == poolPairData.tokenIn;
             const isTokenOut = this.tokens[i].address == poolPairData.tokenOut;
+            // When the corresponding breaker ratio is zero, it means there is no limit.
+            // We need to deal with this separately.
+            // This is untested yet: waiting for subgraph json structure.
+            if (
+                (this.lowerBreakerRatio == 0 &&
+                    (isTokenIn || (isBptToToken && !isTokenOut))) ||
+                (this.upperBreakerRatio == 0 &&
+                    (isTokenOut || (isTokenToBpt && !isTokenIn)))
+            ) {
+                limitAmounts.push(bnum(Infinity));
+                continue;
+            }
             const w = Number(this.tokens[i].weight) / totalWeight;
             //// compute price limits: lowerPriceLimit, upperPriceLimit
             const lowerPriceLimit =
@@ -244,16 +253,14 @@ export class ManagedPool implements PoolBase {
             const upperPriceLimit =
                 this.referenceBptPrices[i - 1] *
                 this.upperBreakerRatio ** (1 - w);
-            lowerPriceLimits.push(lowerPriceLimit);
-            upperPriceLimits.push(upperPriceLimit);
             let limitAmount: OldBigNumber = bnum(Infinity);
 
-            let balanceUpperLimit,
-                balanceLowerLimit,
-                supplyUpperLimit,
-                supplyLowerLimit,
-                limitAmountIn,
-                limitAmountOut: OldBigNumber;
+            let balanceUpperLimit: OldBigNumber;
+            let balanceLowerLimit: OldBigNumber;
+            let supplyUpperLimit: OldBigNumber;
+            let supplyLowerLimit: OldBigNumber;
+            let limitAmountIn: OldBigNumber;
+            let limitAmountOut: OldBigNumber;
             if (poolPairData.pairType == PairTypes.TokenToToken) {
                 if (isTokenIn) {
                     balanceUpperLimit = S.times(w).div(lowerPriceLimit);
