@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { getAddress } from '@ethersproject/address';
 import { BigNumber, formatFixed, parseFixed } from '@ethersproject/bignumber';
-import { WeiPerEther as ONE } from '@ethersproject/constants';
 import { OldBigNumber } from 'index';
 import {
     PoolBase,
@@ -14,11 +13,14 @@ import {
 import { isSameAddress } from 'utils';
 import { bnum } from 'utils/bignumber';
 import {
+    _derivativeSpotPriceAfterSwapExactTokenInForTokenOut,
+    _derivativeSpotPriceAfterSwapTokenInForExactTokenOut,
     _exactTokenInForTokenOut,
     _spotPriceAfterSwapExactTokenInForTokenOut,
     _spotPriceAfterSwapTokenInForExactTokenOut,
     _tokenInForExactTokenOut,
 } from './fxPoolMath';
+import { WeiPerEther as ONE } from '@ethersproject/constants';
 // import { takeToPrecision18 } from '../../router/helpersClass';
 
 type FxPoolToken = Pick<
@@ -48,6 +50,10 @@ export class FxPool implements PoolBase {
     lambda: BigNumber;
     delta: BigNumber;
     epsilon: BigNumber;
+
+    // Max In/Out Ratios
+    MAX_IN_RATIO = parseFixed('0.3', 18);
+    MAX_OUT_RATIO = parseFixed('0.3', 18);
 
     static fromPool(pool: SubgraphPoolBase): FxPool {
         // if (!pool.baseToken) throw new Error('FxPool missing baseToken');
@@ -154,32 +160,21 @@ export class FxPool implements PoolBase {
         poolPairData: FxPoolPairData,
         swapType: SwapTypes
     ): OldBigNumber {
-        // const MAX_OUT_RATIO = parseFixed('0.3', 18);
-        // if (swapType === SwapTypes.SwapExactIn) {
-        //     // "Ai < (Bi**(1-t)+Bo**(1-t))**(1/(1-t))-Bi" must hold in order for
-        //     // base of root to be non-negative
-        //     const Bi = parseFloat(
-        //         formatFixed(poolPairData.balanceIn, poolPairData.decimalsIn)
-        //     );
-        //     const Bo = parseFloat(
-        //         formatFixed(poolPairData.balanceOut, poolPairData.decimalsOut)
-        //     );
-        //     // const t = getTimeTillExpiry(
-        //     //     this.expiryTime,
-        //     //     this.currentBlockTimestamp,
-        //     //     this.unitSeconds
-        //     // );
-        //     return bnum((Bi ** (1 - t) + Bo ** (1 - t)) ** (1 / (1 - t)) - Bi);
-        // } else {
-        //     return bnum(
-        //         formatFixed(
-        //             poolPairData.balanceOut.mul(MAX_OUT_RATIO).div(ONE),
-        //             poolPairData.decimalsOut
-        //         )
-        //     );
-        // }
-
-        return bnum(0);
+        if (swapType === SwapTypes.SwapExactIn) {
+            return bnum(
+                formatFixed(
+                    poolPairData.balanceIn.mul(this.MAX_IN_RATIO).div(ONE),
+                    poolPairData.decimalsIn
+                )
+            );
+        } else {
+            return bnum(
+                formatFixed(
+                    poolPairData.balanceOut.mul(this.MAX_OUT_RATIO).div(ONE),
+                    poolPairData.decimalsOut
+                )
+            );
+        }
     }
 
     // Updates the balance of a given token for the pool
@@ -227,25 +222,19 @@ export class FxPool implements PoolBase {
         poolPairData: FxPoolPairData,
         amount: OldBigNumber
     ): OldBigNumber {
-        // @todo
-        // return _derivativeSpotPriceAfterSwapExactTokenInForTokenOut(
-        //     amount,
-        //     poolPairData
-        // );
-
-        return bnum(0);
+        return _derivativeSpotPriceAfterSwapExactTokenInForTokenOut(
+            amount,
+            poolPairData
+        );
     }
 
     _derivativeSpotPriceAfterSwapTokenInForExactTokenOut(
         poolPairData: FxPoolPairData,
         amount: OldBigNumber
     ): OldBigNumber {
-        // @todo
-        // return _derivativeSpotPriceAfterSwapTokenInForExactTokenOut(
-        //     amount,
-        //     poolPairData
-        // );
-
-        return bnum(0);
+        return _derivativeSpotPriceAfterSwapTokenInForExactTokenOut(
+            amount,
+            poolPairData
+        );
     }
 }

@@ -21,6 +21,7 @@ import {
 } from '../types';
 import { GyroEPool } from './gyroEPool/gyroEPool';
 
+// @todo add FxPool
 export function parseNewPool(
     pool: SubgraphPoolBase,
     currentBlockTimestamp = 0
