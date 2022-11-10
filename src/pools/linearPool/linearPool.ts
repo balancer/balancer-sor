@@ -761,7 +761,7 @@ export class LinearPool implements PoolBase {
     }
 
     _calcBptOutGivenExactTokensIn(amountsIn: BigNumber[]): BigNumber {
-        // Linear Pool doesn't have Exit Pool implementation
+        // Linear Pool doesn't have Join Pool implementation
         return Zero;
     }
 
