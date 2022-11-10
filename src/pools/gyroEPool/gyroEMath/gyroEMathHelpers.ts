@@ -56,11 +56,6 @@ export type QParams = {
 
 export function reduceFee(amountIn: BigNumber, swapFee: BigNumber): BigNumber {
     const feeAmount = mulDown(amountIn, swapFee);
-    console.log(
-        'REDUCE_FEE amounnt/fee amount ',
-        formatFixed(amountIn, 18),
-        formatFixed(feeAmount, 18)
-    );
     return amountIn.sub(feeAmount);
 }
 

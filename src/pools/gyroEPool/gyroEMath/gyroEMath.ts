@@ -120,20 +120,9 @@ export function calcOutGivenIn(
     const calcGiven = tokenInIsToken0 ? calcYGivenX : calcXGivenY;
 
     const balInNew = balances[ixIn].add(amountIn);
-    console.log('balances[ixIn]', formatFixed(balances[ixIn], 18));
-    console.log('balances[ixNew]', formatFixed(balInNew, 18));
-    console.log(
-        'DATA: ',
-        'tokenInIsToken0 ',
-        tokenInIsToken0,
-        'amountIn ',
-        formatFixed(amountIn, 18)
-    );
 
     checkAssetBounds(params, derived, invariant, balInNew, ixIn);
     const balOutNew = calcGiven(balInNew, params, derived, invariant);
-    console.log('balances[ixOut]', formatFixed(balances[ixOut], 18));
-    console.log('balOutNew', formatFixed(balOutNew, 18));
     const amountOut = balances[ixOut].sub(balOutNew);
     if (amountOut.lt(0)) {
         // Should never happen; check anyways to catch a numerical bug.
