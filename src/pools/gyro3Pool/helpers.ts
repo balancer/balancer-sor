@@ -2,8 +2,6 @@ import { BigNumber, parseFixed } from '@ethersproject/bignumber';
 import bn from 'bignumber.js';
 import { WeiPerEther as ONE } from '@ethersproject/constants';
 import {
-    _MAX_IN_RATIO,
-    _MAX_OUT_RATIO,
     SQRT_1E_NEG_1,
     SQRT_1E_NEG_3,
     SQRT_1E_NEG_5,
