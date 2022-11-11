@@ -110,18 +110,21 @@ function verifyPrices(
     const S = bnum(formatFixed(pool.totalShares, 18)).plus(bptDelta);
     const totalWeight = pool.totalWeight.div(ONE).toNumber();
     balancesDeltas.unshift(bnum(0));
-    const balances = pool.tokens.map((token, i) =>
+    /* const balances = pool.tokens.map((token, i) =>
         bnum(token.balance).plus(balancesDeltas[i])
     );
-    balances.splice(0, 1);
-    for (let i = 0; i < balances.length; i++) {
-        const w = Number(pool.tokens[i + 1].weight) / totalWeight;
-        const B = balances[i];
+    balances.splice(0, 1);*/
+    for (let i = 1; i < pool.tokens.length; i++) {
+        const w = Number(pool.tokens[i].weight) / totalWeight;
+        const B = bnum(pool.tokens[i].balance).plus(balancesDeltas[i]);
         const price = S.div(B).times(w);
-        const lowerLimit =
-            pool.referenceBptPrices[i] * pool.lowerBreakerRatio ** (1 - w);
-        const upperLimit =
-            pool.referenceBptPrices[i] * pool.upperBreakerRatio ** (1 - w);
+        const bptPrice = pool.tokens[i].circuitBreaker?.bptPrice as number;
+        const lowerBreakerRatio = pool.tokens[i].circuitBreaker
+            ?.lowerBoundPercentage as number;
+        const upperBreakerRatio = pool.tokens[i].circuitBreaker
+            ?.upperBoundPercentage as number;
+        const lowerLimit = bptPrice * lowerBreakerRatio ** (1 - w);
+        const upperLimit = bptPrice * upperBreakerRatio ** (1 - w);
         const priceNumber = price.toNumber();
         if (priceNumber < lowerLimit || priceNumber > upperLimit) {
             answer = false;

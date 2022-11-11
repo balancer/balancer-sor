@@ -37,8 +37,6 @@ import { BigNumber, formatFixed, parseFixed } from '@ethersproject/bignumber';
 import { WeiPerEther as ONE } from '@ethersproject/constants';
 import { takeToPrecision18 } from '../../router/helpersClass';
 import { MathSol } from '../../utils/basicOperations';
-import { max } from 'lodash';
-import { filterPoolsByType } from 'routeProposal/filtering';
 
 enum PairTypes {
     BptToToken,
@@ -48,7 +46,7 @@ enum PairTypes {
 
 export type ManagedPoolToken = Pick<
     NoNullableField<SubgraphToken>,
-    'address' | 'balance' | 'decimals' | 'weight'
+    'address' | 'balance' | 'decimals' | 'weight' | 'circuitBreaker'
 >;
 
 export type ManagedPoolPairData = PoolPairBase & {
@@ -68,19 +66,10 @@ export class ManagedPool implements PoolBase {
     tokensList: string[];
     MAX_IN_RATIO = parseFixed('0.3', 18);
     MAX_OUT_RATIO = parseFixed('0.3', 18);
-    referenceBptPrices: number[];
-    lowerBreakerRatio: number;
-    upperBreakerRatio: number;
 
     static fromPool(pool: SubgraphPoolBase): ManagedPool {
         if (!pool.totalWeight)
             throw new Error('ManagedPool missing totalWeight');
-        if (!pool.referenceBptPrices)
-            throw new Error('ManagedPool missing referenceBptPrices');
-        if (!pool.lowerBreakerRatio)
-            throw new Error('ManagedPool missing lowerBreakerRatio');
-        if (!pool.upperBreakerRatio)
-            throw new Error('ManagedPool missing upperBreakerRatio');
 
         const managedPool = new ManagedPool(
             pool.id,
@@ -89,10 +78,7 @@ export class ManagedPool implements PoolBase {
             pool.totalWeight,
             pool.totalShares,
             pool.tokens as ManagedPoolToken[],
-            pool.tokensList,
-            pool.referenceBptPrices,
-            pool.lowerBreakerRatio,
-            pool.upperBreakerRatio
+            pool.tokensList
         );
         return managedPool;
     }
@@ -104,10 +90,7 @@ export class ManagedPool implements PoolBase {
         totalWeight: string,
         totalShares: string,
         tokens: ManagedPoolToken[],
-        tokensList: string[],
-        referenceBptPrices: number[],
-        lowerBreakerRatio: number,
-        upperBreakerRatio: number
+        tokensList: string[]
     ) {
         this.id = id;
         this.address = address;
@@ -116,9 +99,6 @@ export class ManagedPool implements PoolBase {
         this.tokens = tokens;
         this.tokensList = tokensList;
         this.totalWeight = parseFixed(totalWeight, 18);
-        this.referenceBptPrices = referenceBptPrices;
-        this.lowerBreakerRatio = lowerBreakerRatio;
-        this.upperBreakerRatio = upperBreakerRatio;
     }
 
     parsePoolPairData(tokenIn: string, tokenOut: string): ManagedPoolPairData {
@@ -233,13 +213,24 @@ export class ManagedPool implements PoolBase {
         for (let i = 1; i < n; i++) {
             const isTokenIn = this.tokens[i].address == poolPairData.tokenIn;
             const isTokenOut = this.tokens[i].address == poolPairData.tokenOut;
+            const circuitBreaker = this.tokens[i].circuitBreaker;
+            let lowerBreakerRatio: number;
+            let upperBreakerRatio: number;
+            let referenceBptPrice: number;
+            if (circuitBreaker) {
+                lowerBreakerRatio = circuitBreaker.lowerBoundPercentage;
+                upperBreakerRatio = circuitBreaker.upperBoundPercentage;
+                referenceBptPrice = circuitBreaker.bptPrice;
+            } else {
+                throw new Error('token missing circuitBreaker info');
+            }
             // When the corresponding breaker ratio is zero, it means there is no limit.
             // We need to deal with this separately.
             // This is untested yet: waiting for subgraph json structure.
             if (
-                (this.lowerBreakerRatio == 0 &&
+                (lowerBreakerRatio == 0 &&
                     (isTokenIn || (isBptToToken && !isTokenOut))) ||
-                (this.upperBreakerRatio == 0 &&
+                (upperBreakerRatio == 0 &&
                     (isTokenOut || (isTokenToBpt && !isTokenIn)))
             ) {
                 limitAmounts.push(bnum(Infinity));
@@ -248,11 +239,9 @@ export class ManagedPool implements PoolBase {
             const w = Number(this.tokens[i].weight) / totalWeight;
             //// compute price limits: lowerPriceLimit, upperPriceLimit
             const lowerPriceLimit =
-                this.referenceBptPrices[i - 1] *
-                this.lowerBreakerRatio ** (1 - w);
+                referenceBptPrice * lowerBreakerRatio ** (1 - w);
             const upperPriceLimit =
-                this.referenceBptPrices[i - 1] *
-                this.upperBreakerRatio ** (1 - w);
+                referenceBptPrice * upperBreakerRatio ** (1 - w);
             let limitAmount: OldBigNumber = bnum(Infinity);
 
             let balanceUpperLimit: OldBigNumber;

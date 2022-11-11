@@ -22,7 +22,12 @@
                     "decimals": 18,
                     "weight": "0",
                     "priceRate": "1",
-                    "symbol": "BPT"
+                    "symbol": "BPT",
+                    "circuitBreaker": {
+                        "bptPrice": 1,
+                        "lowerBoundPercentage": 1,
+                        "upperBoundPercentage": 1
+                    }
                 },
                 {
                     "address": "0x0000000000000000000000000000000000000001",
@@ -30,7 +35,12 @@
                     "decimals": 18,
                     "weight": "5",
                     "priceRate": "1",
-                    "symbol": "ASSET1"
+                    "symbol": "ASSET1",
+                    "circuitBreaker": {
+                        "bptPrice": 0.8,
+                        "lowerBoundPercentage": 0.7,
+                        "upperBoundPercentage": 1.5
+                    }
                 },
                 {
                     "address": "0x0000000000000000000000000000000000000002",
@@ -38,7 +48,12 @@
                     "decimals": 6,
                     "weight": "10",
                     "priceRate": "1",
-                    "symbol": "ASSET2"
+                    "symbol": "ASSET2",
+                    "circuitBreaker": {
+                        "bptPrice": 3,
+                        "lowerBoundPercentage": 0.7,
+                        "upperBoundPercentage": 1.5
+                    }
                 },
                 {
                     "address": "0x0000000000000000000000000000000000000003",
@@ -46,7 +61,12 @@
                     "decimals": 6,
                     "weight": "15",
                     "priceRate": "1",
-                    "symbol": "ASSET3"
+                    "symbol": "ASSET3",
+                    "circuitBreaker": {
+                        "bptPrice": 4.6,
+                        "lowerBoundPercentage": 0.7,
+                        "upperBoundPercentage": 1.5
+                    }
                 }
             ],
             "tokensList": [
@@ -55,9 +75,6 @@
                 "0x0000000000000000000000000000000000000002",
                 "0x0000000000000000000000000000000000000003"
             ],
-            "referenceBptPrices": [0.8, 3, 4.6],
-            "lowerBreakerRatio": 0.7,
-            "upperBreakerRatio": 1.5,
             "totalWeight": "30",
             "totalShares": "100000",
             "poolType": "Managed"

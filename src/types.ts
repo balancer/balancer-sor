@@ -99,11 +99,6 @@ export interface SubgraphPoolBase {
 
     // Gyro3 specific field
     root3Alpha?: string;
-
-    // Managed pools specific fields
-    referenceBptPrices?: number[];
-    lowerBreakerRatio?: number;
-    upperBreakerRatio?: number;
 }
 
 export type SubgraphToken = {
@@ -113,6 +108,12 @@ export type SubgraphToken = {
     priceRate: string;
     // WeightedPool field
     weight: string | null;
+    // ManagedPool field
+    circuitBreaker?: {
+        bptPrice: number;
+        lowerBoundPercentage: number;
+        upperBoundPercentage: number;
+    };
 };
 
 export interface SwapV2 {
