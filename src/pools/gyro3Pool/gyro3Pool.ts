@@ -28,7 +28,7 @@ import {
     _addFee,
 } from '../gyroHelpers/helpers';
 import { mulDown, divDown } from '../gyroHelpers/gyroSignedFixedPoint';
-import { SWAP_LIMIT_FACTOR } from 'pools/gyroHelpers/constants';
+import { SWAP_LIMIT_FACTOR } from '../gyroHelpers/constants';
 
 export type Gyro3PoolPairData = PoolPairBase & {
     balanceTertiary: BigNumber; // Balance of the unchanged asset
