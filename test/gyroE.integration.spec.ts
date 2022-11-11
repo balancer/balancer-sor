@@ -33,49 +33,49 @@ const provider = new JsonRpcProvider(rpcUrl, 5);
 const vault = Vault__factory.connect(vaultAddr, provider);
 
 const gyroEPool: SubgraphPoolBase = {
-    id: '0x9e8a4e666206db7a7b40ce3f1adaba538f01d2cc00020000000000000000020b',
-    address: '0x9e8a4e666206db7a7b40ce3f1adaba538f01d2cc',
-    poolType: 'GyroCEMM',
-    swapFee: '0.09',
-    totalShares: '0.000590716337544254',
+    id: '0xe0711573a96806182c01ef6c349948edc6635b040002000000000000000002ab',
+    address: '0xe0711573a96806182c01ef6c349948edc6635b04',
+    poolType: 'GyroE',
+    swapFee: '0.0002',
+    totalShares: '0.001132693078136504',
     tokens: [
         {
-            address: '0x0a93a1dc80ce44618bbe75f941f8baadcbf495df',
-            balance: '100',
+            address: '0x2a7fa61d84db003a999bf4623942f235bff659a8',
+            balance: '1',
             decimals: 18,
             weight: null,
             priceRate: '1',
         },
         {
-            address: '0xdaba5b4979aea49c95fe7c829accfdd47d290797',
-            balance: '100',
-            decimals: 18,
+            address: '0x4ac0909d762f20dfee3efc6a5ce1029c78812648',
+            balance: '1',
+            decimals: 6,
             weight: null,
             priceRate: '1',
         },
     ],
     tokensList: [
-        '0x0a93a1dc80ce44618bbe75f941f8baadcbf495df',
-        '0xdaba5b4979aea49c95fe7c829accfdd47d290797',
+        '0x2a7fa61d84db003a999bf4623942f235bff659a8',
+        '0x4ac0909d762f20dfee3efc6a5ce1029c78812648',
     ],
     totalWeight: '0',
     swapEnabled: true,
     wrappedIndex: 0,
     mainIndex: 0,
-    alpha: '0.05000000000002029',
-    beta: '0.397316269897841178',
-    c: '0.9551573261744535',
-    s: '0.29609877111408056',
-    lambda: '748956.475',
-    tauAlphaX: '-0.9999999999864021682732182209025086',
-    tauAlphaY: '0.00000521494821273352387635736307999088',
-    tauBetaX: '0.9999999998525122532122146329641983',
-    tauBetaY: '0.00001717485123551095031292618834391386',
-    u: '0.5656418209561750212254168960022311',
-    v: '0.00000626352651807875756896296543790835',
-    w: '0.0000033825106624039795790200375365235',
-    z: '0.8246510353560980328453878643898328',
-    dSq: '1.000000000000000021408113917832164',
+    alpha: '0.98',
+    beta: '1.020408163265306122',
+    c: '0.707106781186547524',
+    s: '0.707106781186547524',
+    lambda: '2500',
+    tauAlphaX: '-0.9992168409687262363026689301701759',
+    tauAlphaY: '0.03956898690236155895758568963473897',
+    tauBetaX: '0.9992168409687262362685980644343916',
+    tauBetaY: '0.03956898690236155981796108700303143',
+    u: '0.9992168409687262351527623443756247',
+    v: '0.0395689869023615593429116906629895',
+    w: '0.0000000000000000004301876986841462313',
+    z: '-0.00000000000000000001703543286789219094',
+    dSq: '0.9999999999999999988662409334210612',
 };
 
 // Setup SOR with data services
@@ -114,9 +114,8 @@ let sor: SOR;
 
 describe('gyroE integration tests', () => {
     context('test swaps vs queryBatchSwap', () => {
-        const tokenIn = '0x0a93a1dc80ce44618bbe75f941f8baadcbf495df';
-        const tokenOut = '0xdaba5b4979aea49c95fe7c829accfdd47d290797';
-        const swapAmount = parseFixed('17.789', 18);
+        const tokenIn = '0x2a7fa61d84db003a999bf4623942f235bff659a8';
+        const tokenOut = '0x4ac0909d762f20dfee3efc6a5ce1029c78812648';
         const funds = {
             sender: AddressZero,
             recipient: AddressZero,
@@ -131,7 +130,7 @@ describe('gyroE integration tests', () => {
                 {
                     forking: {
                         jsonRpcUrl,
-                        blockNumber: 7922862,
+                        blockNumber: 7934310,
                     },
                 },
             ]);
@@ -148,7 +147,7 @@ describe('gyroE integration tests', () => {
                 tokenIn,
                 tokenOut,
                 swapType,
-                swapAmount
+                parseFixed('0.1', 18)
             );
 
             const queryResult = await vault.callStatic.queryBatchSwap(
@@ -172,7 +171,7 @@ describe('gyroE integration tests', () => {
                 tokenIn,
                 tokenOut,
                 swapType,
-                swapAmount
+                parseFixed('0.1', 6)
             );
 
             const queryResult = await vault.callStatic.queryBatchSwap(
