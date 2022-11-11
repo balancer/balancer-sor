@@ -169,6 +169,11 @@ export const ADDRESSES = {
             decimals: 18,
             symbol: 'rETH',
         },
+        auraBal: {
+            address: '0x616e8bfa43f920657b3497dbf40d6b1a02d4608d',
+            decimals: 18,
+            symbol: 'auraBal',
+        },
     },
     [Network.KOVAN]: {
         // Visit https://balancer-faucet.on.fleek.co/#/faucet for test tokens

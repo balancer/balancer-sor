@@ -27,7 +27,8 @@ import {
     _reduceFee,
     _addFee,
 } from '../gyroHelpers/helpers';
-import { mulDown } from '../gyroHelpers/gyroSignedFixedPoint';
+import { mulDown, divDown } from '../gyroHelpers/gyroSignedFixedPoint';
+import { SWAP_LIMIT_FACTOR } from 'pools/gyroHelpers/constants';
 
 export type Gyro3PoolPairData = PoolPairBase & {
     balanceTertiary: BigNumber; // Balance of the unchanged asset
@@ -178,20 +179,50 @@ export class Gyro3Pool implements PoolBase {
     }
 
     getLimitAmountSwap(
-        poolPairData: PoolPairBase,
+        poolPairData: Gyro3PoolPairData,
         swapType: SwapTypes
     ): OldBigNumber {
         if (swapType === SwapTypes.SwapExactIn) {
+            const balances = [
+                poolPairData.balanceIn,
+                poolPairData.balanceOut,
+                poolPairData.balanceTertiary,
+            ];
+            const decimals = [
+                poolPairData.decimalsIn,
+                poolPairData.decimalsOut,
+                poolPairData.decimalsTertiary,
+            ];
+            const normalizedBalances = _normalizeBalances(balances, decimals);
+            const invariant = _calculateInvariant(
+                normalizedBalances,
+                this.root3Alpha
+            );
+            const a = mulDown(invariant, this.root3Alpha);
+            const maxAmountInAssetInPool = divDown(
+                mulDown(
+                    normalizedBalances[0].add(a),
+                    normalizedBalances[1].add(a)
+                ),
+                a
+            ).sub(a); // (x + a)(y + a) / a - a
+            const limitAmountIn = maxAmountInAssetInPool.sub(
+                normalizedBalances[0]
+            );
+            const limitAmountInPlusSwapFee = divDown(
+                limitAmountIn,
+                ONE.sub(poolPairData.swapFee)
+            );
             return bnum(
                 formatFixed(
-                    mulDown(poolPairData.balanceIn, this.MAX_IN_RATIO),
-                    poolPairData.decimalsIn
+                    mulDown(limitAmountInPlusSwapFee, SWAP_LIMIT_FACTOR),
+                    18
                 )
             );
         } else {
             return bnum(
                 formatFixed(
-                    mulDown(poolPairData.balanceOut, this.MAX_OUT_RATIO),
+                    mulDown(poolPairData.balanceOut, SWAP_LIMIT_FACTOR),
                     poolPairData.decimalsOut
                 )
             );

@@ -1,11 +1,6 @@
 import { BigNumber } from '@ethersproject/bignumber';
 import { WeiPerEther as ONE } from '@ethersproject/constants';
-import {
-    _MAX_IN_RATIO,
-    _MAX_OUT_RATIO,
-    _SAFE_LARGE_POW3_THRESHOLD,
-    MIDDECIMAL,
-} from './constants';
+import { _SAFE_LARGE_POW3_THRESHOLD, MIDDECIMAL } from './constants';
 
 // Helpers
 export function _safeLargePow3ADown(
