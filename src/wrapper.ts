@@ -182,8 +182,7 @@ export class SOR {
             tokenOut,
             swapType,
             pools,
-            swapOptions,
-            this.config.chainId
+            swapOptions
         );
 
         if (paths.length == 0) return cloneDeep(EMPTY_SWAPINFO);
