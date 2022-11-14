@@ -1,6 +1,7 @@
+// TS_NODE_PROJECT='tsconfig.testing.json' npx mocha -r ts-node/register test/gyro3Pool.spec.ts
 import { expect } from 'chai';
 import cloneDeep from 'lodash.clonedeep';
-import { formatFixed, parseFixed, BigNumber } from '@ethersproject/bignumber';
+import { formatFixed, parseFixed } from '@ethersproject/bignumber';
 import { bnum } from '../src/utils/bignumber';
 import { USDC, USDT } from './lib/constants';
 import { SwapTypes } from '../src';
@@ -38,14 +39,14 @@ describe('Gyro3Pool tests USDC > DAI', () => {
                 SwapTypes.SwapExactIn
             );
 
-            expect(amount.toString()).to.eq('24935.7');
+            expect(amount.toString()).to.eq('82089.998821185751004412');
 
             amount = pool.getLimitAmountSwap(
                 poolPairData,
                 SwapTypes.SwapExactOut
             );
 
-            expect(amount.toString()).to.eq('24445.5');
+            expect(amount.toString()).to.eq('81484.918515');
         });
     });
 
