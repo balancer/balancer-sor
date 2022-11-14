@@ -28,7 +28,8 @@ export class RouteProposer {
         tokenOut: string,
         swapType: SwapTypes,
         pools: SubgraphPoolBase[],
-        swapOptions: SwapOptions
+        swapOptions: SwapOptions,
+        chainId = 1
     ): NewPath[] {
         tokenIn = tokenIn.toLowerCase();
         tokenOut = tokenOut.toLowerCase();
@@ -64,12 +65,15 @@ export class RouteProposer {
             poolsAllDict
         );
 
-        const boostedPaths = getBoostedPaths(
-            tokenIn,
-            tokenOut,
-            poolsAllDict,
-            this.config
-        );
+        let boostedPaths: NewPath[] = [];
+
+        if (chainId !== 137)
+            boostedPaths = getBoostedPaths(
+                tokenIn,
+                tokenOut,
+                poolsAllDict,
+                this.config
+            );
 
         const pathsUsingStaBal = getPathsUsingStaBalPool(
             tokenIn,
