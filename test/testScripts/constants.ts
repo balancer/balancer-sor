@@ -72,7 +72,7 @@ export const SUBGRAPH_URLS = {
     [Network.KOVAN]:
         'https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-kovan-v2',
     [Network.POLYGON]:
-        'https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-polygon-v2',
+        'https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-polygon-v2-beta',
     [Network.ARBITRUM]: `https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-arbitrum-v2`,
 };
 
@@ -331,6 +331,11 @@ export const ADDRESSES = {
             address: '0xbAe28251B2a4E621aA7e20538c06DEe010Bc06DE',
             decimals: 18,
             symbol: 'dUSD',
+        },
+        TUSD: {
+            address: '0x2e1AD108fF1D8C782fcBbB89AAd783aC49586756',
+            decimals: 18,
+            symbol: 'TUSD',
         },
     },
     [Network.ARBITRUM]: {
