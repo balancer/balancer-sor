@@ -332,6 +332,21 @@ export const ADDRESSES = {
             decimals: 18,
             symbol: 'dUSD',
         },
+        TUSD: {
+            address: '0x2e1ad108ff1d8c782fcbbb89aad783ac49586756',
+            decimals: 18,
+            symbol: 'TUSD',
+        },
+        TETUBAL: {
+            address: '0x7fC9E0Aa043787BFad28e29632AdA302C790Ce33',
+            decimals: 18,
+            symbol: 'TETUBAL',
+        },
+        WETHBAL: {
+            address: '0x3d468AB2329F296e1b9d8476Bb54Dd77D8c2320f',
+            decimals: 18,
+            symbol: 'WETHBAL',
+        },
         bbamUSD: {
             address: '0x48e6B98ef6329f8f0A30eBB8c7C960330d648085',
             decimals: 18,

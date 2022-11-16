@@ -65,10 +65,10 @@ export async function swap(): Promise<void> {
     const gasPrice = BigNumber.from('40000000000');
     // This determines the max no of pools the SOR will use to swap.
     const maxPools = 4;
-    const tokenIn = ADDRESSES[networkId].DAI;
-    const tokenOut = ADDRESSES[networkId].bbamUSD;
-    const swapType: SwapTypes = SwapTypes.SwapExactOut;
-    const swapAmount = parseFixed('10', 18);
+    const tokenIn = ADDRESSES[networkId].WETHBAL;
+    const tokenOut = ADDRESSES[networkId].TETUBAL;
+    const swapType: SwapTypes = SwapTypes.SwapExactIn;
+    const swapAmount = parseFixed('7', 18);
 
     const sor = setUp(networkId, provider);
 
