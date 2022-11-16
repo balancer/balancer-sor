@@ -1,6 +1,6 @@
 import { getAddress } from '@ethersproject/address';
 import { WeiPerEther as ONE } from '@ethersproject/constants';
-import { parseFixed, formatFixed, BigNumber } from '@ethersproject/bignumber';
+import { formatFixed, BigNumber } from '@ethersproject/bignumber';
 import { BigNumber as OldBigNumber, bnum } from '../../utils/bignumber';
 
 import {
@@ -22,7 +22,7 @@ import {
     virtualOffset0,
     virtualOffset1,
 } from './gyroEMath/gyroEMathHelpers';
-import { isSameAddress } from '../../utils';
+import { isSameAddress, safeParseFixed } from '../../utils';
 import { mulDown, divDown } from '../gyroHelpers/gyroSignedFixedPoint';
 import {
     calculateInvariantWithError,
@@ -74,10 +74,6 @@ export class GyroEPool implements PoolBase {
     totalShares: BigNumber;
     gyroEParams: GyroEParams;
     derivedGyroEParams: DerivedGyroEParams;
-
-    // Max In/Out Ratios
-    MAX_IN_RATIO = parseFixed('0.3', 18);
-    MAX_OUT_RATIO = parseFixed('0.3', 18);
 
     static fromPool(pool: SubgraphPoolBase): GyroEPool {
         const {
@@ -149,33 +145,33 @@ export class GyroEPool implements PoolBase {
     ) {
         this.id = id;
         this.address = address;
-        this.swapFee = parseFixed(swapFee, 18);
-        this.totalShares = parseFixed(totalShares, 18);
+        this.swapFee = safeParseFixed(swapFee, 18);
+        this.totalShares = safeParseFixed(totalShares, 18);
         this.tokens = tokens;
         this.tokensList = tokensList;
 
         this.gyroEParams = {
-            alpha: parseFixed(gyroEParams.alpha, 18),
-            beta: parseFixed(gyroEParams.beta, 18),
-            c: parseFixed(gyroEParams.c, 18),
-            s: parseFixed(gyroEParams.s, 18),
-            lambda: parseFixed(gyroEParams.lambda, 18),
+            alpha: safeParseFixed(gyroEParams.alpha, 18),
+            beta: safeParseFixed(gyroEParams.beta, 18),
+            c: safeParseFixed(gyroEParams.c, 18),
+            s: safeParseFixed(gyroEParams.s, 18),
+            lambda: safeParseFixed(gyroEParams.lambda, 18),
         };
 
         this.derivedGyroEParams = {
             tauAlpha: {
-                x: parseFixed(derivedGyroEParams.tauAlphaX, 38),
-                y: parseFixed(derivedGyroEParams.tauAlphaY, 38),
+                x: safeParseFixed(derivedGyroEParams.tauAlphaX, 38),
+                y: safeParseFixed(derivedGyroEParams.tauAlphaY, 38),
             },
             tauBeta: {
-                x: parseFixed(derivedGyroEParams.tauBetaX, 38),
-                y: parseFixed(derivedGyroEParams.tauBetaY, 38),
+                x: safeParseFixed(derivedGyroEParams.tauBetaX, 38),
+                y: safeParseFixed(derivedGyroEParams.tauBetaY, 38),
             },
-            u: parseFixed(derivedGyroEParams.u, 38),
-            v: parseFixed(derivedGyroEParams.v, 38),
-            w: parseFixed(derivedGyroEParams.w, 38),
-            z: parseFixed(derivedGyroEParams.z, 38),
-            dSq: parseFixed(derivedGyroEParams.dSq, 38),
+            u: safeParseFixed(derivedGyroEParams.u, 38),
+            v: safeParseFixed(derivedGyroEParams.v, 38),
+            w: safeParseFixed(derivedGyroEParams.w, 38),
+            z: safeParseFixed(derivedGyroEParams.z, 38),
+            dSq: safeParseFixed(derivedGyroEParams.dSq, 38),
         };
     }
 
@@ -206,8 +202,8 @@ export class GyroEPool implements PoolBase {
             tokenOut: tokenOut,
             decimalsIn: Number(decimalsIn),
             decimalsOut: Number(decimalsOut),
-            balanceIn: parseFixed(balanceIn, decimalsIn),
-            balanceOut: parseFixed(balanceOut, decimalsOut),
+            balanceIn: safeParseFixed(balanceIn, decimalsIn),
+            balanceOut: safeParseFixed(balanceOut, decimalsOut),
             swapFee: this.swapFee,
             tokenInIsToken0,
         };
@@ -347,7 +343,7 @@ export class GyroEPool implements PoolBase {
             x: currentInvariant.add(invErr.mul(2)),
             y: currentInvariant,
         };
-        const inAmount = parseFixed(amount.toString(), 18);
+        const inAmount = safeParseFixed(amount.toString(), 18);
         const inAmountLessFee = reduceFee(inAmount, poolPairData.swapFee);
         const outAmount = calcOutGivenIn(
             orderedNormalizedBalances,
@@ -382,7 +378,7 @@ export class GyroEPool implements PoolBase {
             x: currentInvariant.add(invErr.mul(2)),
             y: currentInvariant,
         };
-        const outAmount = parseFixed(amount.toString(), 18);
+        const outAmount = safeParseFixed(amount.toString(), 18);
 
         const inAmountLessFee = calcInGivenOut(
             orderedNormalizedBalances,
@@ -418,7 +414,7 @@ export class GyroEPool implements PoolBase {
             x: currentInvariant.add(invErr.mul(2)),
             y: currentInvariant,
         };
-        const inAmount = parseFixed(amount.toString(), 18);
+        const inAmount = safeParseFixed(amount.toString(), 18);
         const inAmountLessFee = reduceFee(inAmount, poolPairData.swapFee);
         const newSpotPrice = calcSpotPriceAfterSwapOutGivenIn(
             orderedNormalizedBalances,
@@ -454,7 +450,7 @@ export class GyroEPool implements PoolBase {
             x: currentInvariant.add(invErr.mul(2)),
             y: currentInvariant,
         };
-        const outAmount = parseFixed(amount.toString(), 18);
+        const outAmount = safeParseFixed(amount.toString(), 18);
         const newSpotPrice = calcSpotPriceAfterSwapInGivenOut(
             orderedNormalizedBalances,
             outAmount,
@@ -471,7 +467,7 @@ export class GyroEPool implements PoolBase {
         poolPairData: GyroEPoolPairData,
         amount: OldBigNumber
     ): OldBigNumber {
-        const inAmount = parseFixed(amount.toString(), 18);
+        const inAmount = safeParseFixed(amount.toString(), 18);
         const normalizedBalances = normalizeBalances(
             [poolPairData.balanceIn, poolPairData.balanceOut],
             [poolPairData.decimalsIn, poolPairData.decimalsOut]
@@ -529,7 +525,7 @@ export class GyroEPool implements PoolBase {
             x: currentInvariant.add(invErr.mul(2)),
             y: currentInvariant,
         };
-        const outAmount = parseFixed(amount.toString(), 18);
+        const outAmount = safeParseFixed(amount.toString(), 18);
         const derivative = calcDerivativeSpotPriceAfterSwapInGivenOut(
             [
                 orderedNormalizedBalances[0],
