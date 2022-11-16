@@ -72,7 +72,7 @@ export const SUBGRAPH_URLS = {
     [Network.KOVAN]:
         'https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-kovan-v2',
     [Network.POLYGON]:
-        'https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-polygon-v2-beta',
+        'https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-polygon-v2',
     [Network.ARBITRUM]: `https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-arbitrum-v2`,
 };
 
