@@ -333,7 +333,7 @@ export const ADDRESSES = {
             symbol: 'dUSD',
         },
         TUSD: {
-            address: '0x2e1ad108ff1d8c782fcbbb89aad783ac49586756',
+            address: '0x2e1AD108fF1D8C782fcBbB89AAd783aC49586756',
             decimals: 18,
             symbol: 'TUSD',
         },
