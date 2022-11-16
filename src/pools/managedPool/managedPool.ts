@@ -37,6 +37,7 @@ import { BigNumber, formatFixed, parseFixed } from '@ethersproject/bignumber';
 import { WeiPerEther as ONE } from '@ethersproject/constants';
 import { takeToPrecision18 } from '../../router/helpersClass';
 import { MathSol } from '../../utils/basicOperations';
+import cloneDeep from 'lodash.clonedeep';
 
 enum PairTypes {
     BptToToken,
@@ -194,26 +195,28 @@ export class ManagedPool implements PoolBase {
             );
         }
         // Compute maxByCircuitBreaker
-        // retrieve balances
-        const balances = this.tokens.map((token) => bnum(token.balance));
+        // retrieve tokens, exclude BPT
+        const tokens = cloneDeep(this.tokens);
+        const bptIndex = tokens.findIndex(
+            (token) => token.address == this.address
+        );
+        tokens.splice(bptIndex, 1);
+        const balances = tokens.map((token) => bnum(token.balance));
         const balanceIn = bnum(
             formatFixed(poolPairData.balanceIn, poolPairData.decimalsIn)
         );
         const balanceOut = bnum(
             formatFixed(poolPairData.balanceOut, poolPairData.decimalsOut)
         );
-        const n = this.tokens.length;
         const totalWeight = this.totalWeight.div(ONE).toNumber();
         const S = bnum(formatFixed(this.totalShares, 18));
-        // For each token
-        // This assumes that BPT is at position 0
         const limitAmounts: OldBigNumber[] = [];
         const isBptToToken = poolPairData.pairType == PairTypes.BptToToken;
         const isTokenToBpt = poolPairData.pairType == PairTypes.BptToToken;
-        for (let i = 1; i < n; i++) {
-            const isTokenIn = this.tokens[i].address == poolPairData.tokenIn;
-            const isTokenOut = this.tokens[i].address == poolPairData.tokenOut;
-            const circuitBreaker = this.tokens[i].circuitBreaker;
+        for (let i = 0; i < tokens.length; i++) {
+            const isTokenIn = tokens[i].address == poolPairData.tokenIn;
+            const isTokenOut = tokens[i].address == poolPairData.tokenOut;
+            const circuitBreaker = tokens[i].circuitBreaker;
             let lowerBreakerRatio: number;
             let upperBreakerRatio: number;
             let referenceBptPrice: number;
@@ -236,7 +239,7 @@ export class ManagedPool implements PoolBase {
                 limitAmounts.push(bnum(Infinity));
                 continue;
             }
-            const w = Number(this.tokens[i].weight) / totalWeight;
+            const w = Number(tokens[i].weight) / totalWeight;
             //// compute price limits: lowerPriceLimit, upperPriceLimit
             const lowerPriceLimit =
                 referenceBptPrice * lowerBreakerRatio ** (1 - w);

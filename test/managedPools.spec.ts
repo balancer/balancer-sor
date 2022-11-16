@@ -6,12 +6,14 @@ import { assert } from 'chai';
 import { SwapTypes, ManagedPool, bnum, OldBigNumber } from '../src';
 import { WeiPerEther as ONE } from '@ethersproject/constants';
 import singlePool from './testData/managedPools/singleManagedPool.json';
+import cloneDeep from 'lodash.clonedeep';
 
-describe(`Tests for Managed Pools.`, () => {
+describe(`debug Tests for Managed Pools.`, () => {
     context('limit amounts', () => {
+        // BPT index = 1
         it(`tokenToToken`, async () => {
             const pool = ManagedPool.fromPool(singlePool.pools[0]);
-            const tokenIn = pool.tokens[1].address;
+            const tokenIn = pool.tokens[0].address;
             const tokenOut = pool.tokens[2].address;
             const poolPairData = pool.parsePoolPairData(tokenIn, tokenOut);
 
@@ -40,8 +42,8 @@ describe(`Tests for Managed Pools.`, () => {
         });
         it(`bptToToken - exitSwap`, async () => {
             const pool = ManagedPool.fromPool(singlePool.pools[0]);
-            const tokenIn = pool.tokens[0].address;
-            const tokenOut = pool.tokens[1].address;
+            const tokenIn = pool.tokens[1].address;
+            const tokenOut = pool.tokens[0].address;
             const poolPairData = pool.parsePoolPairData(tokenIn, tokenOut);
 
             // swapExactIn
@@ -69,7 +71,7 @@ describe(`Tests for Managed Pools.`, () => {
         it(`tokenToBpt - joinSwap`, async () => {
             const pool = ManagedPool.fromPool(singlePool.pools[0]);
             const tokenIn = pool.tokens[2].address;
-            const tokenOut = pool.tokens[0].address;
+            const tokenOut = pool.tokens[1].address;
             const poolPairData = pool.parsePoolPairData(tokenIn, tokenOut);
 
             // swapExactIn
@@ -99,8 +101,6 @@ describe(`Tests for Managed Pools.`, () => {
     });
 });
 
-// is it possible that there is no restriction at one or both sides?
-// what are the values for lowerBreakerRatio or upperBreakerRatio in that case?
 function verifyPrices(
     pool: ManagedPool,
     bptDelta: OldBigNumber,
@@ -109,19 +109,17 @@ function verifyPrices(
     let answer = true;
     const S = bnum(formatFixed(pool.totalShares, 18)).plus(bptDelta);
     const totalWeight = pool.totalWeight.div(ONE).toNumber();
-    balancesDeltas.unshift(bnum(0));
-    /* const balances = pool.tokens.map((token, i) =>
-        bnum(token.balance).plus(balancesDeltas[i])
-    );
-    balances.splice(0, 1);*/
-    for (let i = 1; i < pool.tokens.length; i++) {
-        const w = Number(pool.tokens[i].weight) / totalWeight;
-        const B = bnum(pool.tokens[i].balance).plus(balancesDeltas[i]);
+    const tokens = cloneDeep(pool.tokens);
+    const bptIndex = tokens.findIndex((token) => token.address == pool.address);
+    tokens.splice(bptIndex, 1);
+    for (let i = 0; i < tokens.length; i++) {
+        const w = Number(tokens[i].weight) / totalWeight;
+        const B = bnum(tokens[i].balance).plus(balancesDeltas[i]);
         const price = S.div(B).times(w);
-        const bptPrice = pool.tokens[i].circuitBreaker?.bptPrice as number;
-        const lowerBreakerRatio = pool.tokens[i].circuitBreaker
+        const bptPrice = tokens[i].circuitBreaker?.bptPrice as number;
+        const lowerBreakerRatio = tokens[i].circuitBreaker
             ?.lowerBoundPercentage as number;
-        const upperBreakerRatio = pool.tokens[i].circuitBreaker
+        const upperBreakerRatio = tokens[i].circuitBreaker
             ?.upperBoundPercentage as number;
         const lowerLimit = bptPrice * lowerBreakerRatio ** (1 - w);
         const upperLimit = bptPrice * upperBreakerRatio ** (1 - w);

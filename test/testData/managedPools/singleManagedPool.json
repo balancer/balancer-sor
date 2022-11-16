@@ -17,19 +17,6 @@
             "swapEnabled": true,
             "tokens": [
                 {
-                    "address": "0x0000000000000000000000000000000000000000",
-                    "balance": "5192296858434827.628530496329220095",
-                    "decimals": 18,
-                    "weight": "0",
-                    "priceRate": "1",
-                    "symbol": "BPT",
-                    "circuitBreaker": {
-                        "bptPrice": 1,
-                        "lowerBoundPercentage": 1,
-                        "upperBoundPercentage": 1
-                    }
-                },
-                {
                     "address": "0x0000000000000000000000000000000000000001",
                     "balance": "20000.000000000000000000",
                     "decimals": 18,
@@ -40,6 +27,19 @@
                         "bptPrice": 0.8,
                         "lowerBoundPercentage": 0.7,
                         "upperBoundPercentage": 1.5
+                    }
+                },
+                {
+                    "address": "0x0000000000000000000000000000000000000000",
+                    "balance": "5192296858434827.628530496329220095",
+                    "decimals": 18,
+                    "weight": "0",
+                    "priceRate": "1",
+                    "symbol": "BPT",
+                    "circuitBreaker": {
+                        "bptPrice": 1,
+                        "lowerBoundPercentage": 1,
+                        "upperBoundPercentage": 1
                     }
                 },
                 {
