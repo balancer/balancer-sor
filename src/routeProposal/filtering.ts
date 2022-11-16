@@ -319,8 +319,6 @@ export function getBoostedPaths(
     poolsAllDict: PoolDictionary,
     config: SorConfig
 ): NewPath[] {
-    let maxPaths = BOOSTED_PATHS_MAX_LENGTH;
-    if (config.chainId === 137) maxPaths = 3;
     const edgesFromNode = getBoostedGraph(
         tokenIn,
         tokenOut,
@@ -367,7 +365,7 @@ export function getBoostedPaths(
         if (newTreeEdges.length == 0) {
             iterate = false;
         } else treeEdges.push(newTreeEdges);
-        if (n == maxPaths) iterate = false;
+        if (n == BOOSTED_PATHS_MAX_LENGTH) iterate = false;
     }
     return pathsInfoToPaths(pathsInfo, poolsAllDict);
 }
