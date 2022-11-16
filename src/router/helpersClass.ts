@@ -16,6 +16,8 @@ import {
 } from '../types';
 import { BigNumber, formatFixed, parseFixed } from '@ethersproject/bignumber';
 
+const MINIMUM_VALUE = bnum('0.000000000000000001');
+
 export function getHighestLimitAmountsForPaths(
     paths: NewPath[],
     maxPools: number
@@ -255,6 +257,7 @@ export function getDerivativeSpotPriceAfterSwapForPath(
             ans = ans.plus(newTerm);
         }
     }
+    if (ans.eq(bnum(0))) ans = MINIMUM_VALUE;
     return ans;
 }
 
