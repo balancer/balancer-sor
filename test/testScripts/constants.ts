@@ -332,6 +332,11 @@ export const ADDRESSES = {
             decimals: 18,
             symbol: 'dUSD',
         },
+        bbamUSD: {
+            address: '0x48e6B98ef6329f8f0A30eBB8c7C960330d648085',
+            decimals: 18,
+            symbol: 'bb-am-usd',
+        },
     },
     [Network.ARBITRUM]: {
         WETH: {
