@@ -16,7 +16,7 @@ import {
     _addFee,
     _reduceFee,
     _normalizeBalances,
-} from '../src/pools/gyro2Pool/helpers';
+} from '../src/pools/gyroHelpers/helpers';
 
 describe('gyro2Math tests', () => {
     const testPool: any = cloneDeep(testPools).pools[0];
@@ -43,8 +43,7 @@ describe('gyro2Math tests', () => {
         it(`should correctly calculate invariant`, async () => {
             const normalizedBalances = _normalizeBalances(
                 [poolPairData.balanceIn, poolPairData.balanceOut],
-                poolPairData.decimalsIn,
-                poolPairData.decimalsOut
+                [poolPairData.decimalsIn, poolPairData.decimalsOut]
             );
             const [a, mb, bSquare, mc] = _calculateQuadraticTerms(
                 normalizedBalances,

@@ -1,6 +1,6 @@
 import { getAddress } from '@ethersproject/address';
-import { WeiPerEther as ONE, Zero } from '@ethersproject/constants';
-import { parseFixed, formatFixed, BigNumber } from '@ethersproject/bignumber';
+import { WeiPerEther as ONE } from '@ethersproject/constants';
+import { formatFixed, BigNumber } from '@ethersproject/bignumber';
 import { BigNumber as OldBigNumber, bnum } from '../../utils/bignumber';
 
 import {
@@ -11,7 +11,7 @@ import {
     SwapTypes,
     SubgraphPoolBase,
 } from '../../types';
-import { isSameAddress } from '../../utils';
+import { isSameAddress, safeParseFixed } from '../../utils';
 import {
     _calculateInvariant,
     _calcOutGivenIn,
@@ -26,9 +26,9 @@ import {
     _normalizeBalances,
     _reduceFee,
     _addFee,
-    mulDown,
-    divDown,
-} from './helpers';
+} from '../gyroHelpers/helpers';
+import { mulDown, divDown } from '../gyroHelpers/gyroSignedFixedPoint';
+import { SWAP_LIMIT_FACTOR } from '../gyroHelpers/constants';
 
 export type Gyro3PoolPairData = PoolPairBase & {
     balanceTertiary: BigNumber; // Balance of the unchanged asset
@@ -50,10 +50,6 @@ export class Gyro3Pool implements PoolBase {
     totalShares: BigNumber;
     root3Alpha: BigNumber;
 
-    // Max In/Out Ratios
-    MAX_IN_RATIO = parseFixed('0.3', 18);
-    MAX_OUT_RATIO = parseFixed('0.3', 18);
-
     private static findToken(list, tokenAddress, error) {
         const token = list.find(
             (t) => getAddress(t.address) === getAddress(tokenAddress)
@@ -66,8 +62,8 @@ export class Gyro3Pool implements PoolBase {
         if (!pool.root3Alpha) throw new Error('Pool missing root3Alpha');
 
         if (
-            parseFixed(pool.root3Alpha, 18).lte(0) ||
-            parseFixed(pool.root3Alpha, 18).gte(ONE)
+            safeParseFixed(pool.root3Alpha, 18).lte(0) ||
+            safeParseFixed(pool.root3Alpha, 18).gte(ONE)
         )
             throw new Error('Invalid root3Alpha parameter');
 
@@ -96,11 +92,11 @@ export class Gyro3Pool implements PoolBase {
     ) {
         this.id = id;
         this.address = address;
-        this.swapFee = parseFixed(swapFee, 18);
-        this.totalShares = parseFixed(totalShares, 18);
+        this.swapFee = safeParseFixed(swapFee, 18);
+        this.totalShares = safeParseFixed(totalShares, 18);
         this.tokens = tokens;
         this.tokensList = tokensList;
-        this.root3Alpha = parseFixed(root3Alpha, 18);
+        this.root3Alpha = safeParseFixed(root3Alpha, 18);
     }
 
     parsePoolPairData(tokenIn: string, tokenOut: string): Gyro3PoolPairData {
@@ -141,9 +137,9 @@ export class Gyro3Pool implements PoolBase {
             decimalsIn: Number(decimalsIn),
             decimalsOut: Number(decimalsOut),
             decimalsTertiary: Number(decimalsTertiary),
-            balanceIn: parseFixed(balanceIn, decimalsIn),
-            balanceOut: parseFixed(balanceOut, decimalsOut),
-            balanceTertiary: parseFixed(balanceTertiary, decimalsTertiary),
+            balanceIn: safeParseFixed(balanceIn, decimalsIn),
+            balanceOut: safeParseFixed(balanceOut, decimalsOut),
+            balanceTertiary: safeParseFixed(balanceTertiary, decimalsTertiary),
             swapFee: this.swapFee,
         };
 
@@ -179,20 +175,50 @@ export class Gyro3Pool implements PoolBase {
     }
 
     getLimitAmountSwap(
-        poolPairData: PoolPairBase,
+        poolPairData: Gyro3PoolPairData,
         swapType: SwapTypes
     ): OldBigNumber {
         if (swapType === SwapTypes.SwapExactIn) {
+            const balances = [
+                poolPairData.balanceIn,
+                poolPairData.balanceOut,
+                poolPairData.balanceTertiary,
+            ];
+            const decimals = [
+                poolPairData.decimalsIn,
+                poolPairData.decimalsOut,
+                poolPairData.decimalsTertiary,
+            ];
+            const normalizedBalances = _normalizeBalances(balances, decimals);
+            const invariant = _calculateInvariant(
+                normalizedBalances,
+                this.root3Alpha
+            );
+            const a = mulDown(invariant, this.root3Alpha);
+            const maxAmountInAssetInPool = divDown(
+                mulDown(
+                    normalizedBalances[0].add(a),
+                    normalizedBalances[1].add(a)
+                ),
+                a
+            ).sub(a); // (x + a)(y + a) / a - a
+            const limitAmountIn = maxAmountInAssetInPool.sub(
+                normalizedBalances[0]
+            );
+            const limitAmountInPlusSwapFee = divDown(
+                limitAmountIn,
+                ONE.sub(poolPairData.swapFee)
+            );
             return bnum(
                 formatFixed(
-                    mulDown(poolPairData.balanceIn, this.MAX_IN_RATIO),
-                    poolPairData.decimalsIn
+                    mulDown(limitAmountInPlusSwapFee, SWAP_LIMIT_FACTOR),
+                    18
                 )
             );
         } else {
             return bnum(
                 formatFixed(
-                    mulDown(poolPairData.balanceOut, this.MAX_OUT_RATIO),
+                    mulDown(poolPairData.balanceOut, SWAP_LIMIT_FACTOR),
                     poolPairData.decimalsOut
                 )
             );
@@ -235,7 +261,7 @@ export class Gyro3Pool implements PoolBase {
             );
 
             const virtualOffsetInOut = mulDown(invariant, this.root3Alpha);
-            const inAmount = parseFixed(amount.toString(), 18);
+            const inAmount = safeParseFixed(amount.toString(), 18);
             const inAmountLessFee = _reduceFee(inAmount, poolPairData.swapFee);
 
             const outAmount = _calcOutGivenIn(
@@ -255,7 +281,7 @@ export class Gyro3Pool implements PoolBase {
         amount: OldBigNumber
     ): OldBigNumber {
         try {
-            const outAmount = parseFixed(amount.toString(), 18);
+            const outAmount = safeParseFixed(amount.toString(), 18);
             const balances = [
                 poolPairData.balanceIn,
                 poolPairData.balanceOut,
@@ -323,7 +349,7 @@ export class Gyro3Pool implements PoolBase {
 
             const virtualOffsetInOut = mulDown(invariant, this.root3Alpha);
 
-            const inAmount = parseFixed(amount.toString(), 18);
+            const inAmount = safeParseFixed(amount.toString(), 18);
             const inAmountLessFee = _reduceFee(inAmount, poolPairData.swapFee);
 
             const outAmount = _calcOutGivenIn(
@@ -351,7 +377,7 @@ export class Gyro3Pool implements PoolBase {
         amount: OldBigNumber
     ): OldBigNumber {
         try {
-            const outAmount = parseFixed(amount.toString(), 18);
+            const outAmount = safeParseFixed(amount.toString(), 18);
             const balances = [
                 poolPairData.balanceIn,
                 poolPairData.balanceOut,
@@ -417,7 +443,7 @@ export class Gyro3Pool implements PoolBase {
 
             const virtualOffsetInOut = mulDown(invariant, this.root3Alpha);
 
-            const inAmount = parseFixed(amount.toString(), 18);
+            const inAmount = safeParseFixed(amount.toString(), 18);
             const inAmountLessFee = _reduceFee(inAmount, poolPairData.swapFee);
 
             const outAmount = _calcOutGivenIn(
@@ -444,7 +470,7 @@ export class Gyro3Pool implements PoolBase {
         amount: OldBigNumber
     ): OldBigNumber {
         try {
-            const outAmount = parseFixed(amount.toString(), 18);
+            const outAmount = safeParseFixed(amount.toString(), 18);
             const balances = [
                 poolPairData.balanceIn,
                 poolPairData.balanceOut,

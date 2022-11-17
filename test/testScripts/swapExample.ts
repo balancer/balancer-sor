@@ -58,17 +58,17 @@ function setUp(networkId: Network, provider: JsonRpcProvider): SOR {
 }
 
 export async function swap(): Promise<void> {
-    const networkId = Network.MAINNET;
+    const networkId = Network.POLYGON;
     const provider = new JsonRpcProvider(PROVIDER_URLS[networkId]);
     // gasPrice is used by SOR as a factor to determine how many pools to swap against.
     // i.e. higher cost means more costly to trade against lots of different pools.
     const gasPrice = BigNumber.from('40000000000');
     // This determines the max no of pools the SOR will use to swap.
     const maxPools = 4;
-    const tokenIn = ADDRESSES[networkId].USDC;
-    const tokenOut = ADDRESSES[networkId].WETH;
-    const swapType: SwapTypes = SwapTypes.SwapExactOut;
-    const swapAmount = parseFixed('1.7', 18);
+    const tokenIn = ADDRESSES[networkId].USDT;
+    const tokenOut = ADDRESSES[networkId].USDC;
+    const swapType: SwapTypes = SwapTypes.SwapExactIn;
+    const swapAmount = parseFixed('100', 6);
 
     const sor = setUp(networkId, provider);
 
@@ -82,7 +82,7 @@ export async function swap(): Promise<void> {
         swapType,
         swapAmount,
         { gasPrice, maxPools },
-        true
+        false
     );
 
     // Simulate the swap transaction
