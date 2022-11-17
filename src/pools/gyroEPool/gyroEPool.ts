@@ -1,5 +1,5 @@
 import { getAddress } from '@ethersproject/address';
-import { WeiPerEther as ONE } from '@ethersproject/constants';
+import { WeiPerEther as ONE, Zero } from '@ethersproject/constants';
 import { formatFixed, BigNumber } from '@ethersproject/bignumber';
 import { BigNumber as OldBigNumber, bnum } from '../../utils/bignumber';
 
@@ -390,6 +390,16 @@ export class GyroEPool implements PoolBase {
         );
         const inAmount = addFee(inAmountLessFee, poolPairData.swapFee);
         return bnum(formatFixed(inAmount, 18));
+    }
+
+    _calcTokensOutGivenExactBptIn(bptAmountIn: BigNumber): BigNumber[] {
+        // Missing maths for this
+        return new Array(this.tokens.length).fill(Zero);
+    }
+
+    _calcBptOutGivenExactTokensIn(amountsIn: BigNumber[]): BigNumber {
+        // Missing maths for this
+        return Zero;
     }
 
     _spotPriceAfterSwapExactTokenInForTokenOut(
