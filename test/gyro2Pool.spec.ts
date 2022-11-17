@@ -149,53 +149,53 @@ describe('Gyro2Pool tests USDC > DAI', () => {
             });
         });
 
-        context('FullSwap', () => {
-            it(`Full Swap - swapExactIn, Token>Token`, async () => {
-                const pools: any = cloneDeep(testPools.pools);
-                const tokenIn = USDC.address;
-                const tokenOut = DAI.address;
-                const swapType = SwapTypes.SwapExactIn;
-                const swapAmt = parseFixed('13.5', 6);
+        // context('FullSwap', () => {
+        //     it(`Full Swap - swapExactIn, Token>Token`, async () => {
+        //         const pools: any = cloneDeep(testPools.pools);
+        //         const tokenIn = USDC.address;
+        //         const tokenOut = DAI.address;
+        //         const swapType = SwapTypes.SwapExactIn;
+        //         const swapAmt = parseFixed('13.5', 6);
 
-                const gasPrice = parseFixed('30', 9);
-                const maxPools = 4;
-                const provider = new JsonRpcProvider(
-                    `https://mainnet.infura.io/v3/${process.env.INFURA}`
-                );
+        //         const gasPrice = parseFixed('30', 9);
+        //         const maxPools = 4;
+        //         const provider = new JsonRpcProvider(
+        //             `https://mainnet.infura.io/v3/${process.env.INFURA}`
+        //         );
 
-                const sor = new SOR(
-                    provider,
-                    sorConfigEth,
-                    new MockPoolDataService(pools),
-                    mockTokenPriceService
-                );
-                const fetchSuccess = await sor.fetchPools();
-                expect(fetchSuccess).to.be.true;
+        //         const sor = new SOR(
+        //             provider,
+        //             sorConfigEth,
+        //             new MockPoolDataService(pools),
+        //             mockTokenPriceService
+        //         );
+        //         const fetchSuccess = await sor.fetchPools();
+        //         expect(fetchSuccess).to.be.true;
 
-                const swapInfo: SwapInfo = await sor.getSwaps(
-                    tokenIn,
-                    tokenOut,
-                    swapType,
-                    swapAmt,
-                    { gasPrice, maxPools }
-                );
+        //         const swapInfo: SwapInfo = await sor.getSwaps(
+        //             tokenIn,
+        //             tokenOut,
+        //             swapType,
+        //             swapAmt,
+        //             { gasPrice, maxPools }
+        //         );
 
-                console.log(`Return amt:`);
-                console.log(swapInfo.returnAmount.toString());
-                // This value is hard coded as sanity check if things unexpectedly change. Taken from V2 test run (with extra fee logic added).
-                // TO DO - expect(swapInfo.returnAmount.toString()).eq('999603');
-                expect(swapInfo.swaps.length).eq(1);
-                expect(swapInfo.swaps[0].amount.toString()).eq(
-                    swapAmt.toString()
-                );
-                expect(swapInfo.swaps[0].poolId).eq(testPools.pools[0].id);
-                expect(
-                    swapInfo.tokenAddresses[swapInfo.swaps[0].assetInIndex]
-                ).eq(tokenIn);
-                expect(
-                    swapInfo.tokenAddresses[swapInfo.swaps[0].assetOutIndex]
-                ).eq(tokenOut);
-            });
-        });
+        //         console.log(`Return amt:`);
+        //         console.log(swapInfo.returnAmount.toString());
+        //         // This value is hard coded as sanity check if things unexpectedly change. Taken from V2 test run (with extra fee logic added).
+        //         // TO DO - expect(swapInfo.returnAmount.toString()).eq('999603');
+        //         expect(swapInfo.swaps.length).eq(1);
+        //         expect(swapInfo.swaps[0].amount.toString()).eq(
+        //             swapAmt.toString()
+        //         );
+        //         expect(swapInfo.swaps[0].poolId).eq(testPools.pools[0].id);
+        //         expect(
+        //             swapInfo.tokenAddresses[swapInfo.swaps[0].assetInIndex]
+        //         ).eq(tokenIn);
+        //         expect(
+        //             swapInfo.tokenAddresses[swapInfo.swaps[0].assetOutIndex]
+        //         ).eq(tokenOut);
+        //     });
+        // });
     });
 });
