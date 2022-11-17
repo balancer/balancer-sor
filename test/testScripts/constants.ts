@@ -150,7 +150,7 @@ export const ADDRESSES = {
             symbol: 'waUSDC',
         },
         bbausd2: {
-            address: '0x9b532ab955417afd0d012eb9f7389457cd0ea712',
+            address: '0xA13a9247ea42D743238089903570127DdA72fE44',
             decimals: 18,
             symbol: 'bbausd2',
         },
@@ -158,6 +158,11 @@ export const ADDRESSES = {
             address: '0xae37d54ae477268b9997d4161b96b8200755935c',
             decimals: 18,
             symbol: 'bb-a-dai2',
+        },
+        bbausdt2: {
+            address: '0x2F4eb100552ef93840d5aDC30560E5513DFfFACb',
+            decimals: 18,
+            symbol: 'bb-a-usdt2',
         },
         RPL: {
             address: '0xD33526068D116cE69F19A9ee46F0bd304F21A51f',
@@ -333,7 +338,7 @@ export const ADDRESSES = {
             symbol: 'dUSD',
         },
         TUSD: {
-            address: '0x2e1ad108ff1d8c782fcbbb89aad783ac49586756',
+            address: '0x2e1AD108fF1D8C782fcBbB89AAd783aC49586756',
             decimals: 18,
             symbol: 'TUSD',
         },

@@ -19,6 +19,7 @@ import {
     PoolPairBase,
     PoolTypes,
 } from '../types';
+import { GyroEPool } from './gyroEPool/gyroEPool';
 
 export function parseNewPool(
     pool: SubgraphPoolBase,
@@ -32,6 +33,7 @@ export function parseNewPool(
     | PhantomStablePool
     | Gyro2Pool
     | Gyro3Pool
+    | GyroEPool
     | undefined {
     // We're not interested in any pools which don't allow swapping
     if (!pool.swapEnabled) return undefined;
@@ -44,7 +46,8 @@ export function parseNewPool(
         | MetaStablePool
         | PhantomStablePool
         | Gyro2Pool
-        | Gyro3Pool;
+        | Gyro3Pool
+        | GyroEPool;
 
     try {
         if (pool.poolType === 'Weighted' || pool.poolType === 'Investment') {
@@ -65,8 +68,9 @@ export function parseNewPool(
             pool.poolType === 'ComposableStable'
         )
             newPool = PhantomStablePool.fromPool(pool);
-        else if (pool.poolType === 'Gyro2') newPool = Gyro2Pool.fromPool(pool);
-        else if (pool.poolType === 'Gyro3') newPool = Gyro3Pool.fromPool(pool);
+        // else if (pool.poolType === 'Gyro2') newPool = Gyro2Pool.fromPool(pool);
+        // else if (pool.poolType === 'Gyro3') newPool = Gyro3Pool.fromPool(pool);
+        // else if (pool.poolType === 'GyroE') newPool = GyroEPool.fromPool(pool);
         else {
             console.error(
                 `Unknown pool type or type field missing: ${pool.poolType} ${pool.id}`

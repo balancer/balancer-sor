@@ -5,14 +5,14 @@ import {
     _INVARIANT_MIN_ITERATIONS,
     _INVARIANT_SHRINKING_FACTOR_PER_STEP,
 } from './constants';
+import { _safeLargePow3ADown } from './helpers';
 import {
     mulUp,
     divUp,
     mulDown,
     divDown,
-    newtonSqrt,
-    _safeLargePow3ADown,
-} from './helpers';
+    sqrt,
+} from '../gyroHelpers/gyroSignedFixedPoint';
 
 /////////
 /// Invariant Calculation
@@ -85,7 +85,7 @@ export function _calculateCubicStartingPoint(
 ): BigNumber {
     const radic = mulUp(mb, mb).add(mulUp(mulUp(a, mc), ONE.mul(3)));
     const lmin = divUp(mb, a.mul(3)).add(
-        divUp(newtonSqrt(radic, BigNumber.from(5)), a.mul(3))
+        divUp(sqrt(radic, BigNumber.from(5)), a.mul(3))
     );
     // This formula has been found experimentally. It is exact for alpha -> 1, where the factor is 1.5. All
     // factors > 1 are safe. For small alpha values, it is more efficient to fallback to a larger factor.
