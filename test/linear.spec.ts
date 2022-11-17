@@ -327,17 +327,17 @@ describe('linear pool tests', () => {
                     ['linearDAI', 'bbaUSD-Pool', 'linearUSDC'],
                     // eslint-disable-next-line prettier/prettier
                     [
-                        'weightedDaiWeth',
-                        'weightedWeth-BBausd',
-                        'bbaUSD-Pool',
-                        'linearUSDC',
-                    ],
-                    // eslint-disable-next-line prettier/prettier
-                    [
                         'linearDAI',
                         'bbaUSD-Pool',
                         'weightedWeth-BBausd',
                         'weightedUsdcWeth',
+                    ],
+                    // eslint-disable-next-line prettier/prettier
+                    [
+                        'weightedDaiWeth',
+                        'weightedWeth-BBausd',
+                        'bbaUSD-Pool',
+                        'linearUSDC',
                     ],
                 ];
                 for (let i = 0; i < 3; i++) {
@@ -718,8 +718,7 @@ describe('linear pool tests', () => {
                     fullKovanPools.pools,
                     sorConfigFullKovan
                 );
-                // 6605808981785744500
-                expect(returnAmount).to.eq('20111716378263652638');
+                expect(returnAmount).to.eq('6606146264948964392');
             });
 
             it('BAL>USDT, SwapExactIn', async () => {
@@ -757,7 +756,7 @@ describe('linear pool tests', () => {
                     fullKovanPools.pools,
                     sorConfigFullKovan
                 );
-                expect(returnAmount).to.eq('221067');
+                expect(returnAmount).to.eq('702055');
             });
 
             it('BAL>USDT, SwapExactOut', async () => {
@@ -769,8 +768,7 @@ describe('linear pool tests', () => {
                     fullKovanPools.pools,
                     sorConfigFullKovan
                 );
-                // from worse path: 81899098582251741376
-                expect(returnAmount).to.eq('653098636918112');
+                expect(returnAmount).to.eq('81899098582251741376');
             });
         });
 
