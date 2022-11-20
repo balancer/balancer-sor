@@ -34,7 +34,7 @@ export type StablePoolPairData = PoolPairBase & {
     tokenIndexOut: number;
 };
 
-export class StablePool implements PoolBase {
+export class StablePool implements PoolBase<StablePoolPairData> {
     poolType: PoolTypes = PoolTypes.Stable;
     id: string;
     address: string;

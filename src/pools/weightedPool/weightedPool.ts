@@ -55,7 +55,7 @@ export type WeightedPoolPairData = PoolPairBase & {
     weightOut: BigNumber;
 };
 
-export class WeightedPool implements PoolBase {
+export class WeightedPool implements PoolBase<WeightedPoolPairData> {
     poolType: PoolTypes = PoolTypes.Weighted;
     id: string;
     address: string;

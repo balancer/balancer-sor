@@ -188,51 +188,48 @@ export enum PoolFilter {
     GyroE = 'GyroE',
 }
 
-export interface PoolBase {
+export interface PoolBase<D extends PoolPairBase = PoolPairBase> {
     poolType: PoolTypes;
     id: string;
     address: string;
     tokensList: string[];
     mainIndex?: number;
     isLBP?: boolean;
-    parsePoolPairData: (tokenIn: string, tokenOut: string) => PoolPairBase;
-    getNormalizedLiquidity: (poolPairData: PoolPairBase) => OldBigNumber;
-    getLimitAmountSwap: (
-        poolPairData: PoolPairBase,
-        swapType: SwapTypes
-    ) => OldBigNumber;
+    parsePoolPairData: (tokenIn: string, tokenOut: string) => D;
+    getNormalizedLiquidity: (poolPairData: D) => OldBigNumber;
+    getLimitAmountSwap: (poolPairData: D, swapType: SwapTypes) => OldBigNumber;
     /**
      * @param {string} token - Address of token.
      * @param {BigNumber} newBalance - New balance of token. EVM scaled.
      */
     updateTokenBalanceForPool: (token: string, newBalance: BigNumber) => void;
     _exactTokenInForTokenOut: (
-        poolPairData: PoolPairBase,
+        poolPairData: D,
         amount: OldBigNumber
     ) => OldBigNumber;
     _tokenInForExactTokenOut: (
-        poolPairData: PoolPairBase,
+        poolPairData: D,
         amount: OldBigNumber
     ) => OldBigNumber;
     _spotPriceAfterSwapExactTokenInForTokenOut: (
-        poolPairData: PoolPairBase,
+        poolPairData: D,
         amount: OldBigNumber
     ) => OldBigNumber;
     _spotPriceAfterSwapTokenInForExactTokenOut: (
-        poolPairData: PoolPairBase,
+        poolPairData: D,
         amount: OldBigNumber
     ) => OldBigNumber;
     _derivativeSpotPriceAfterSwapExactTokenInForTokenOut: (
-        poolPairData: PoolPairBase,
+        poolPairData: D,
         amount: OldBigNumber
     ) => OldBigNumber;
     _derivativeSpotPriceAfterSwapTokenInForExactTokenOut: (
-        poolPairData: PoolPairBase,
+        poolPairData: D,
         amount: OldBigNumber
     ) => OldBigNumber;
 }
 
-export interface WeightedPool extends PoolBase {
+export interface WeightedPool<D extends PoolPairBase> extends PoolBase<D> {
     totalWeight: string;
 }
 

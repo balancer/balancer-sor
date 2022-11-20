@@ -64,7 +64,7 @@ type DerivedGyroEParamsFromSubgraph = {
     dSq: string;
 };
 
-export class GyroEPool implements PoolBase {
+export class GyroEPool implements PoolBase<GyroEPoolPairData> {
     poolType: PoolTypes = PoolTypes.GyroE;
     id: string;
     address: string;
