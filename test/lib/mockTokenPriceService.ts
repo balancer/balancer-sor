@@ -3,7 +3,7 @@ import { TokenPriceService } from '../../src';
 export class MockTokenPriceService implements TokenPriceService {
     constructor(private nativeAssetPriceInToken: string = '0') {}
 
-    public setTokenPrice(nativeAssetPriceInToken: string) {
+    public setTokenPrice(nativeAssetPriceInToken: string): void {
         this.nativeAssetPriceInToken = nativeAssetPriceInToken;
     }
 

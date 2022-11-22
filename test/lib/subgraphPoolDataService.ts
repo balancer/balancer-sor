@@ -105,66 +105,6 @@ const queryWithLinear = `
       }
     `;
 
-const queryWithOutLinear = `
-      {
-        pool0: pools(
-          first: 1000,
-          where: { swapEnabled: true, totalShares_gt: "0" },
-          orderBy: totalLiquidity,
-          orderDirection: desc
-        ) {
-          id
-          address
-          poolType
-          swapFee
-          totalShares
-          tokens {
-            address
-            balance
-            decimals
-            weight
-            priceRate
-          }
-          tokensList
-          totalWeight
-          amp
-          expiryTime
-          unitSeconds
-          principalToken
-          baseToken
-          swapEnabled
-        }
-        pool1000: pools(
-          first: 1000,
-          skip: 1000,
-          where: { swapEnabled: true, totalShares_gt: "0" },
-          orderBy: totalLiquidity,
-          orderDirection: desc
-        ) {
-          id
-          address
-          poolType
-          swapFee
-          totalShares
-          tokens {
-            address
-            balance
-            decimals
-            weight
-            priceRate
-          }
-          tokensList
-          totalWeight
-          amp
-          expiryTime
-          unitSeconds
-          principalToken
-          baseToken
-          swapEnabled
-        }
-      }
-    `;
-
 export const Query: { [chainId: number]: string } = {
     1: queryWithLinear,
     3: queryWithLinear,

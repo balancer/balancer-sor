@@ -757,8 +757,11 @@ export function _poolDerivativesBPT(
     balances: bigint[],
     bptSupply: bigint,
     tokenIndexIn: number,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     is_first_derivative: boolean,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     is_BPT_out: boolean,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     wrt_out: boolean
 ): bigint {
     const totalCoins = balances.length;
@@ -778,6 +781,7 @@ export function _poolDerivativesBPT(
     const partial_x = BigInt(2) * alpha * x + beta + gamma * D;
     const minus_partial_D =
         D_P * BigInt(totalCoins + 1) * AMP_PRECISION - gamma * x;
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const partial_D = -minus_partial_D;
     const ans = MathSol.divUpFixed(
         (partial_x * bptSupply) / minus_partial_D,
