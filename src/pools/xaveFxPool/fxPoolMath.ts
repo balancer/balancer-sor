@@ -536,7 +536,10 @@ export const spotPriceBeforeSwap = (
         parsedFxPoolData
     );
 
-    return bnum(outputAmountInNumeraire[0] / inputAmountInNumeraire);
+    return bnum(
+        (outputAmountInNumeraire[0] / inputAmountInNumeraire) *
+            parsedFxPoolData.baseTokenRate
+    );
 };
 
 // @todo test accuracy of decimals
