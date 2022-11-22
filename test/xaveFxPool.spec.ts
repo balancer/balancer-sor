@@ -59,7 +59,8 @@ describe('Test for fxPools', () => {
     });
 
     // @todo check with khidir
-    context.skip('limit amounts', () => {
+    // copied from the other implementations of the other project
+    context('limit amounts', () => {
         it(`getLimitAmountSwap, token to token`, async () => {
             // Test limit amounts against expected values
 
@@ -93,7 +94,9 @@ describe('Test for fxPools', () => {
     });
 
     context('Test Swaps', () => {
-        context.skip('class functions', () => {
+        // @todo check with khidir
+        // copied from the other implementations of the other project
+        context('class functions', () => {
             // @todo check with khidir
             it('getNormalizedLiquidity', async () => {
                 const poolData = testPools.pools[0];
@@ -168,6 +171,14 @@ describe('Test for fxPools', () => {
                 );
 
                 // expect(amountIn).to.eq(KNOWN_AMOUNT);
+
+                console.log(
+                    'spotPriceBeforeSwap: ',
+                    spotPriceBeforeSwap(
+                        scale(bnum('1'), 6),
+                        poolPairData
+                    ).toNumber()
+                );
 
                 console.log(`Amount in: ${amountIn}`);
 
