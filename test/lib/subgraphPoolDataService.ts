@@ -3,6 +3,7 @@ import { PoolDataService, SubgraphPoolBase } from '../../src';
 import { getOnChainBalances } from './onchainData';
 import { Provider } from '@ethersproject/providers';
 
+// @todo?
 const queryWithLinear = `
       {
         pool0: pools(

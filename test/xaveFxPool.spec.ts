@@ -1,92 +1,188 @@
-// TS_NODE_PROJECT='tsconfig.testing.json' npx mocha -r ts-node/register test/testTemplate.spec.ts
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+require('dotenv').config();
+
+// TS_NODE_PROJECT='tsconfig.testing.json' npx mocha -r ts-node/register test/xaveFxPool.spec.ts
 import { expect } from 'chai';
 import cloneDeep from 'lodash.clonedeep';
-import { parseFixed } from '@ethersproject/bignumber';
-import { bnum } from '../src/utils/bignumber';
-import { USDC, BAL } from './lib/constants';
-import { SwapTypes } from '../src';
-// Add new PoolType
-import { NewPool } from '../src/pools/newPoolType/NewPool';
-// Add new pool test data in Subgraph Schema format
-import testPools from './testData/newPoolType/pools.json';
+import { bnum, scale } from '../src/utils/bignumber';
 
-describe('new pool tests', () => {
+import { PoolTypes, SwapTypes } from '../src';
+// Add new PoolType
+import { FxPool } from '../src/pools/xaveFxPool/fxPool';
+// Add new pool test data in Subgraph Schema format
+import testPools from './testData/fxPool/fxPool.json';
+import { formatFixed, parseFixed } from '@ethersproject/bignumber';
+import { spotPriceBeforeSwap } from '../src/pools/xaveFxPool/fxPoolMath';
+
+// @todo mock reserves from the reserves that we have on the previous repo
+// @todo add tests for within beta
+// @todo add tests for outside beta
+// @todo add tests on the other function
+// @todo ask khidir about maxOut limit
+describe('Test for fxPools', () => {
     context('parsePoolPairData', () => {
         it(`should correctly parse token > token`, async () => {
             // It's useful to use tokens with <18 decimals for some tests to make sure scaling is ok
-            const tokenIn = USDC;
-            const tokenOut = BAL;
-            const poolSG = cloneDeep(testPools).pools[0];
-            const pool = NewPool.fromPool(poolSG);
-            const poolPairData = pool.parsePoolPairData(
-                tokenIn.address,
-                tokenOut.address
+            const poolData = testPools.pools[0];
+
+            const newPool = FxPool.fromPool(poolData);
+
+            const poolPairData = newPool.parsePoolPairData(
+                newPool.tokens[0].address, // tokenIn, USDC
+                newPool.tokens[1].address // tokenOut, XSGD
             );
 
-            // Tests that compare poolPairData to known results with correct number scaling, etc, i.e.:
-            expect(poolPairData.swapFee.toString()).to.eq(
-                parseFixed(poolSG.swapFee, 18).toString()
+            console.log(
+                `1 - ${newPool.tokens[0].address}, 2 - ${newPool.tokens[1].address}`
             );
-            expect(poolPairData.id).to.eq(poolSG.id);
+            console.log(poolPairData);
+
+            expect(poolPairData.id).to.eq(poolData.id);
+            expect(poolPairData.poolType).to.eq(PoolTypes.Fx);
+
+            expect(poolPairData.alpha._hex).to.eq(
+                parseFixed(poolData.alpha, 18)._hex
+            );
+            expect(poolPairData.beta._hex).to.eq(
+                parseFixed(poolData.beta, 18)._hex
+            );
+            expect(poolPairData.lambda._hex).to.eq(
+                parseFixed(poolData.lambda, 18)._hex
+            );
+            expect(poolPairData.delta._hex).to.eq(
+                parseFixed(poolData.delta, 18)._hex
+            );
+            expect(poolPairData.epsilon._hex).to.eq(
+                parseFixed(poolData.epsilon, 18)._hex
+            );
         });
-
-        // Add tests for any relevant token pairs, i.e. token<>BPT if available
     });
 
-    context('limit amounts', () => {
+    // @todo check with khidir
+    context.skip('limit amounts', () => {
         it(`getLimitAmountSwap, token to token`, async () => {
             // Test limit amounts against expected values
-            const tokenIn = USDC;
-            const tokenOut = BAL;
-            const poolSG = cloneDeep(testPools);
-            const pool = NewPool.fromPool(poolSG.pools[0]);
-            const poolPairData = pool.parsePoolPairData(tokenIn, tokenOut);
 
-            let amount = pool.getLimitAmountSwap(
+            const poolData = testPools.pools[0];
+            const newPool = FxPool.fromPool(poolData);
+            const poolPairData = newPool.parsePoolPairData(
+                newPool.tokens[0].address, // tokenIn
+                newPool.tokens[1].address // tokenOut
+            );
+
+            let amount = newPool.getLimitAmountSwap(
                 poolPairData,
                 SwapTypes.SwapExactIn
             );
 
-            expect(amount.toString()).to.eq('KNOWN_LIMIT');
+            // expect(amount.toString()).to.eq('KNOWN_LIMIT');
+            console.log('getLimitAmountSwap: SwapExactIn');
 
-            amount = pool.getLimitAmountSwap(
+            console.log(amount.toString());
+
+            amount = newPool.getLimitAmountSwap(
                 poolPairData,
                 SwapTypes.SwapExactOut
             );
 
-            expect(amount.toString()).to.eq('KNOWN_LIMIT');
+            console.log(amount);
+
+            console.log('getLimitAmountSwap: SwapExactOut');
+            // expect(amount.toString()).to.eq('KNOWN_LIMIT');
         });
     });
 
     context('Test Swaps', () => {
+        context.skip('class functions', () => {
+            // @todo check with khidir
+            it('getNormalizedLiquidity', async () => {
+                const poolData = testPools.pools[0];
+                const newPool = FxPool.fromPool(poolData);
+                const poolPairData = newPool.parsePoolPairData(
+                    newPool.tokens[0].address, // tokenIn, USDC
+                    newPool.tokens[1].address // tokenOut, XSGD
+                );
+
+                console.log(newPool.getNormalizedLiquidity(poolPairData));
+            });
+        });
+
         context('_exactTokenInForTokenOut', () => {
-            it('token>token', async () => {
-                const tokenIn = USDC;
-                const tokenOut = BAL;
-                const amountIn = bnum('HUMAN_AMT_IN');
-                const poolSG = cloneDeep(testPools);
-                const pool = NewPool.fromPool(poolSG.pools[0]);
-                const poolPairData = pool.parsePoolPairData(tokenIn, tokenOut);
-                const amountOut = pool._exactTokenInForTokenOut(
+            it('OriginSwap/_exactTokenInForTokenOut USDC > ? SGD', async () => {
+                const amountIn = bnum(parseFixed('100000', 6).toString());
+
+                console.log('AMOUNT IN :', amountIn);
+                const poolData = testPools.pools[0];
+                const newPool = FxPool.fromPool(poolData);
+
+                const poolPairData = newPool.parsePoolPairData(
+                    newPool.tokens[0].address, // tokenIn, USDC
+                    newPool.tokens[1].address // tokenOut, XSGD
+                );
+
+                console.log(
+                    'spotPriceBeforeSwap: ',
+                    spotPriceBeforeSwap(
+                        scale(bnum('1'), 6),
+                        poolPairData
+                    ).toNumber()
+                );
+
+                const amountOut = newPool._exactTokenInForTokenOut(
                     poolPairData,
                     amountIn
                 );
-                expect(amountOut).to.eq(KNOWN_AMOUNT);
+                console.log(
+                    `_exactTokenInForTokenOut Amount out: ${amountOut}`
+                );
+
+                console.log(
+                    `_spotPriceAfterSwapExactTokenInForTokenOut: ${newPool._spotPriceAfterSwapExactTokenInForTokenOut(
+                        poolPairData,
+                        amountIn
+                    )}`
+                );
+                console.log(
+                    `_derivativeSpotPriceAfterSwapExactTokenInForTokenOut: ${newPool._derivativeSpotPriceAfterSwapExactTokenInForTokenOut(
+                        poolPairData,
+                        amountIn
+                    )}`
+                );
+
+                // expect(amountOut).to.eq(KNOWN_AMOUNT);
             });
         });
+
         context('_tokenInForExactTokenOut', () => {
-            it('token>token', async () => {
-                const tokenIn = USDC;
-                const tokenOut = BAL;
-                const amountOut = bnum('HUMAN_AMT_OUT');
-                const poolSG = cloneDeep(testPools);
-                const pool = NewPool.fromPool(poolSG.pools[0]);
-                const poolPairData = pool.parsePoolPairData(tokenIn, tokenOut);
-                const amountIn = pool._tokenInForExactTokenOut(
+            it('TargetSwap / tokenInForExactTokenOut ? USDC > XSGD', async () => {
+                const amountOut = bnum(parseFixed('10000', 6).toString());
+                const poolData = testPools.pools[0];
+                const newPool = FxPool.fromPool(poolData);
+                const poolPairData = newPool.parsePoolPairData(
+                    newPool.tokens[0].address, // tokenIn, USDC
+                    newPool.tokens[1].address // tokenOut, XSGD
+                );
+                const amountIn = newPool._tokenInForExactTokenOut(
                     poolPairData,
                     amountOut
                 );
-                expect(amountIn).to.eq(KNOWN_AMOUNT);
+
+                // expect(amountIn).to.eq(KNOWN_AMOUNT);
+
+                console.log(`Amount in: ${amountIn}`);
+
+                console.log(
+                    `_spotPriceAfterSwapExactTokenInForTokenOut: ${newPool._spotPriceAfterSwapExactTokenInForTokenOut(
+                        poolPairData,
+                        amountOut
+                    )}`
+                );
+                console.log(
+                    `_derivativeSpotPriceAfterSwapExactTokenInForTokenOut: ${newPool._derivativeSpotPriceAfterSwapExactTokenInForTokenOut(
+                        poolPairData,
+                        amountOut
+                    )}`
+                );
             });
         });
     });

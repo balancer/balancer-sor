@@ -6,6 +6,8 @@ import { ElementPool } from './elementPool/elementPool';
 import { PhantomStablePool } from './phantomStablePool/phantomStablePool';
 import { Gyro2Pool } from './gyro2Pool/gyro2Pool';
 import { Gyro3Pool } from './gyro3Pool/gyro3Pool';
+import { FxPool } from './xaveFxPool/fxPool';
+
 import {
     BigNumber as OldBigNumber,
     INFINITY,
@@ -21,7 +23,6 @@ import {
 } from '../types';
 import { GyroEPool } from './gyroEPool/gyroEPool';
 
-// @todo add FxPool
 export function parseNewPool(
     pool: SubgraphPoolBase,
     currentBlockTimestamp = 0
@@ -35,6 +36,7 @@ export function parseNewPool(
     | Gyro2Pool
     | Gyro3Pool
     | GyroEPool
+    | FxPool
     | undefined {
     // We're not interested in any pools which don't allow swapping
     if (!pool.swapEnabled) return undefined;
@@ -49,6 +51,7 @@ export function parseNewPool(
         | Gyro2Pool
         | Gyro3Pool
         | GyroEPool;
+        | FxPool;
 
     try {
         if (pool.poolType === 'Weighted' || pool.poolType === 'Investment') {
@@ -72,6 +75,7 @@ export function parseNewPool(
         else if (pool.poolType === 'Gyro2') newPool = Gyro2Pool.fromPool(pool);
         else if (pool.poolType === 'Gyro3') newPool = Gyro3Pool.fromPool(pool);
         else if (pool.poolType === 'GyroE') newPool = GyroEPool.fromPool(pool);
+        else if (pool.poolType === 'Fx') newPool = FxPool.fromPool(pool);
         else {
             console.error(
                 `Unknown pool type or type field missing: ${pool.poolType} ${pool.id}`

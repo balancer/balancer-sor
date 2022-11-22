@@ -28,8 +28,7 @@ export enum PoolTypes {
     Linear,
     Gyro2,
     Gyro3,
-    GyroE,
-    FxPool,
+    Fx,
 }
 
 export interface SwapOptions {
@@ -109,6 +108,7 @@ export type SubgraphToken = {
     priceRate: string;
     // WeightedPool field
     weight: string | null;
+    fxRate?: string;
 };
 
 export interface SwapV2 {
@@ -171,6 +171,7 @@ export enum PoolFilter {
     Gyro2 = 'Gyro2',
     Gyro3 = 'Gyro3',
     ComposableStable = 'ComposableStable',
+    FxPool = 'FxPool',
 }
 
 export interface PoolBase {

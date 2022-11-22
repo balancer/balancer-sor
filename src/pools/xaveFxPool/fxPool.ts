@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { getAddress } from '@ethersproject/address';
 import { BigNumber, formatFixed, parseFixed } from '@ethersproject/bignumber';
-import { OldBigNumber } from 'index';
+import { BigNumber as OldBigNumber } from '../../utils/bignumber';
 import {
     PoolBase,
     PoolPairBase,
@@ -9,9 +9,9 @@ import {
     SubgraphPoolBase,
     SubgraphToken,
     SwapTypes,
-} from 'types';
-import { isSameAddress } from 'utils';
-import { bnum } from 'utils/bignumber';
+} from '../../types';
+import { isSameAddress } from '../../utils';
+import { bnum } from '../../utils/bignumber';
 import {
     _derivativeSpotPriceAfterSwapExactTokenInForTokenOut,
     _derivativeSpotPriceAfterSwapTokenInForExactTokenOut,
@@ -21,11 +21,10 @@ import {
     _tokenInForExactTokenOut,
 } from './fxPoolMath';
 import { WeiPerEther as ONE } from '@ethersproject/constants';
-// import { takeToPrecision18 } from '../../router/helpersClass';
 
 type FxPoolToken = Pick<
     SubgraphToken,
-    'address' | 'balance' | 'decimals' | 'priceRate'
+    'address' | 'balance' | 'decimals' | 'fxRate'
 >;
 
 // @todo check
@@ -35,10 +34,12 @@ export type FxPoolPairData = PoolPairBase & {
     lambda: BigNumber;
     delta: BigNumber;
     epsilon: BigNumber;
+    tokenInRate: BigNumber;
+    tokenOutRate: BigNumber;
 };
 
 export class FxPool implements PoolBase {
-    poolType: PoolTypes = PoolTypes.FxPool;
+    poolType: PoolTypes = PoolTypes.Fx;
     id: string;
     address: string;
     swapFee: BigNumber;
@@ -50,14 +51,14 @@ export class FxPool implements PoolBase {
     lambda: BigNumber;
     delta: BigNumber;
     epsilon: BigNumber;
+    tokenInRate: BigNumber;
+    tokenOutRate: BigNumber;
 
     // Max In/Out Ratios
     MAX_IN_RATIO = parseFixed('0.3', 18);
     MAX_OUT_RATIO = parseFixed('0.3', 18);
 
     static fromPool(pool: SubgraphPoolBase): FxPool {
-        // if (!pool.baseToken) throw new Error('FxPool missing baseToken');
-
         return new FxPool(
             pool.id,
             pool.address,
@@ -85,6 +86,8 @@ export class FxPool implements PoolBase {
         lambda: string,
         delta: string,
         epsilon: string
+        // tokenInRate: string,
+        // tokenOutRate: string
     ) {
         this.id = id;
         this.address = address;
@@ -93,16 +96,12 @@ export class FxPool implements PoolBase {
         this.tokens = tokens;
         this.tokensList = tokensList;
         // @todo check
-        this.alpha = parseFixed(alpha);
-        this.beta = parseFixed(beta);
-        this.lambda = parseFixed(lambda);
-        this.delta = parseFixed(delta);
-        this.epsilon = parseFixed(epsilon);
+        this.alpha = parseFixed(alpha, 18);
+        this.beta = parseFixed(beta, 18);
+        this.lambda = parseFixed(lambda, 18);
+        this.delta = parseFixed(delta, 18);
+        this.epsilon = parseFixed(epsilon, 18);
     }
-
-    // setCurrentBlockTimestamp(timestamp: number): void {
-    //     this.currentBlockTimestamp = timestamp;
-    // }
 
     parsePoolPairData(tokenIn: string, tokenOut: string): FxPoolPairData {
         const tokenIndexIn = this.tokens.findIndex(
@@ -116,12 +115,12 @@ export class FxPool implements PoolBase {
         const tokenIndexOut = this.tokens.findIndex(
             (t) => getAddress(t.address) === getAddress(tokenOut)
         );
+
         if (tokenIndexOut < 0) throw 'Pool does not contain tokenOut';
         const tO = this.tokens[tokenIndexOut];
         const balanceOut = tO.balance;
         const decimalsOut = tO.decimals;
 
-        // need base token?
         const poolPairData: FxPoolPairData = {
             id: this.id,
             address: this.address,
@@ -138,6 +137,8 @@ export class FxPool implements PoolBase {
             lambda: this.lambda,
             delta: this.delta,
             epsilon: this.epsilon,
+            tokenInRate: parseFixed(this.tokens[tokenIndexIn].fxRate!),
+            tokenOutRate: parseFixed(this.tokens[tokenIndexOut].fxRate!),
         };
 
         return poolPairData;
