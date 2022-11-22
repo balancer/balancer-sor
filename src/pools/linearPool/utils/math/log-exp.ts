@@ -86,7 +86,7 @@ export const pow = (x: BigNumber, y: BigNumber): BigNumber => {
 
     let logx_times_y: BigNumber;
     if (LN_36_LOWER_BOUND.lt(x) && x.lt(LN_36_UPPER_BOUND)) {
-        let ln_36_x = _ln_36(x);
+        const ln_36_x = _ln_36(x);
 
         // ln_36_x has 36 decimal places, so multiplying by y_int256 isn't as straightforward, since we can't just
         // bring y_int256 to 36 decimal places, as it might overflow. Instead, we perform two 18 decimal

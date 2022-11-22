@@ -9,6 +9,9 @@ import { compareTest } from './lib/compareHelper';
 import { getFullSwap, ResultParsed, TradeInfo } from './lib/testHelpers';
 
 import subgraphPoolsLarge from './testData/testPools/subgraphPoolsLarge.json';
+import subgraphPoolsDecimalsTest from './testData/testPools/subgraphPoolsDecimalsTest.json';
+import gusdBugSinglePath from './testData/testPools/gusdBugSinglePath.json';
+import gusdBug from './testData/testPools/gusdBug.json';
 import testPools from './testData/filterTestPools.json';
 import { WETH, DAI, USDC, MKR, WBTC } from './lib/constants';
 
@@ -366,9 +369,9 @@ describe('Tests full swaps against known values', () => {
 
     it('should full swap stable & weighted swapExactIn', async () => {
         const name = 'full swap stable & weighted swapExactIn';
-        const testPools = require('./testData/filterTestPools.json');
+        // const testPools = require('./testData/filterTestPools.json');
         const weighted: any = testPools.weightedOnly;
-        const allPools: any = testPools.stableOnly.concat(weighted);
+        const allPools = testPools.stableOnly.concat(weighted);
         const tokenIn = DAI.address;
         const tokenOut = USDC.address;
         const swapType = 'swapExactIn';
@@ -441,9 +444,9 @@ describe('Tests full swaps against known values', () => {
 
     it('should full swap stable & weighted swapExactOut', async () => {
         const name = 'full swap stable & weighted swapExactOut';
-        const testPools = require('./testData/filterTestPools.json');
+        // const testPools = require('./testData/filterTestPools.json');
         const weighted: any = testPools.weightedOnly;
-        const allPools: any = testPools.stableOnly.concat(weighted);
+        const allPools = testPools.stableOnly.concat(weighted);
         const tokenIn = DAI.address;
         const tokenOut = USDC.address;
         const swapType = 'swapExactOut';
@@ -519,7 +522,7 @@ describe('Tests full swaps against known values', () => {
     }).timeout(10000);
 
     it('WBTC>MKR2, swapExactIn', async () => {
-        const allPools = require('./testData/testPools/subgraphPoolsDecimalsTest.json');
+        const allPools: any = subgraphPoolsDecimalsTest;
         const amountIn = parseFixed('0.001', 8); // 0.00100000 WBTC
         const swapType = 'swapExactIn';
         const noPools = 4;
@@ -558,7 +561,7 @@ describe('Tests full swaps against known values', () => {
     }).timeout(10000);
 
     it('Full Multihop SOR, USDC>yUSD, swapExactIn', async () => {
-        const allPools = require('./testData/testPools/subgraphPoolsDecimalsTest.json');
+        const allPools = subgraphPoolsDecimalsTest;
         const amountIn = parseFixed('1', 6);
         const swapType = 'swapExactIn';
         const noPools = 4;
@@ -576,7 +579,7 @@ describe('Tests full swaps against known values', () => {
             ReturnAmountDecimals: 18,
         };
 
-        const testData = {
+        const testData: any = {
             pools: cloneDeep(allPools.pools),
             tradeInfo,
             v1Result: {} as ResultParsed,
@@ -597,7 +600,7 @@ describe('Tests full swaps against known values', () => {
     }).timeout(10000);
 
     it('Full Multihop SOR,  WBTC>MKR2, swapExactOut', async () => {
-        const allPools = require('./testData/testPools/subgraphPoolsDecimalsTest.json');
+        const allPools = subgraphPoolsDecimalsTest;
         const amountOut = parseFixed('0.001', 18);
         const swapType = 'swapExactOut';
         const noPools = 4;
@@ -615,7 +618,7 @@ describe('Tests full swaps against known values', () => {
             ReturnAmountDecimals: 8,
         };
 
-        const testData = {
+        const testData: any = {
             pools: cloneDeep(allPools.pools),
             tradeInfo,
             v1Result: {} as ResultParsed,
@@ -645,7 +648,7 @@ describe('Tests full swaps against known values', () => {
     }).timeout(10000);
 
     it('Full Multihop SOR, USDC>yUSD, swapExactOut', async () => {
-        const allPools = require('./testData/testPools/subgraphPoolsDecimalsTest.json');
+        const allPools = subgraphPoolsDecimalsTest;
         const amountOut = parseFixed('0.01', 18);
         const swapType = 'swapExactOut';
         const noPools = 4;
@@ -663,7 +666,7 @@ describe('Tests full swaps against known values', () => {
             ReturnAmountDecimals: 6,
         };
 
-        const testData = {
+        const testData: any = {
             pools: cloneDeep(allPools.pools),
             tradeInfo,
             v1Result: {} as ResultParsed,
@@ -696,7 +699,7 @@ describe('Tests full swaps against known values', () => {
         This was a path that was previously causing issues because of GUSD having 2 decimals.
         Before fix the wrapper would return swaps even when return amount was 0.
         */
-        const allPools = require('./testData/testPools/gusdBugSinglePath.json');
+        const allPools = gusdBugSinglePath;
         const amountOut = parseFixed('0.01', 18);
         const swapType = 'swapExactIn';
         const noPools = 4;
@@ -714,7 +717,7 @@ describe('Tests full swaps against known values', () => {
             ReturnAmountDecimals: 18,
         };
 
-        const testData = {
+        const testData: any = {
             pools: cloneDeep(allPools.pools),
             tradeInfo,
             v1Result: {} as ResultParsed,
@@ -744,7 +747,7 @@ describe('Tests full swaps against known values', () => {
         Before fix the wrapper would return a swap amount of 0 because it was routing a small amount via GUSD that was < two decimals.
         After fix the SOR should consider an alternative viable route with swap amount > 0.
         */
-        const allPools = require('./testData/testPools/gusdBug.json');
+        const allPools = gusdBug;
         const amountOut = parseFixed('0.01', 18);
         const swapType = 'swapExactIn';
         const noPools = 4;
@@ -762,7 +765,7 @@ describe('Tests full swaps against known values', () => {
             ReturnAmountDecimals: 18,
         };
 
-        const testData = {
+        const testData: any = {
             pools: cloneDeep(allPools.pools),
             tradeInfo,
             v1Result: {} as ResultParsed,

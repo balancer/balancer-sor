@@ -211,7 +211,7 @@ export class GyroEPool implements PoolBase {
         return poolPairData;
     }
 
-    getNormalizedLiquidity(poolPairData: GyroEPoolPairData) {
+    getNormalizedLiquidity(poolPairData: GyroEPoolPairData): OldBigNumber {
         const normalizedBalances = normalizeBalances(
             [poolPairData.balanceIn, poolPairData.balanceOut],
             [poolPairData.decimalsIn, poolPairData.decimalsOut]
