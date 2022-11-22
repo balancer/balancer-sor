@@ -7,7 +7,7 @@ export function _safeLargePow3ADown(
     l: BigNumber,
     root3Alpha: BigNumber,
     d: BigNumber
-) {
+): BigNumber {
     let ret = BigNumber.from(0);
     if (l.lte(_SAFE_LARGE_POW3_THRESHOLD)) {
         // Simple case where there is no overflow

@@ -7,9 +7,9 @@ export class Multicaller {
     private multiAddress: string;
     private provider: Provider;
     private interface: Interface;
-    public options: any = {};
-    private calls: [string, string, any][] = [];
-    private paths: any[] = [];
+    public options = {};
+    private calls: [string, string, unknown[] | undefined][] = [];
+    private paths: string[] = [];
 
     constructor(
         multiAddress: string,
@@ -27,7 +27,7 @@ export class Multicaller {
         path: string,
         address: string,
         functionName: string,
-        params?: any[]
+        params?: unknown[]
     ): Multicaller {
         this.calls.push([address, functionName, params]);
         this.paths.push(path);

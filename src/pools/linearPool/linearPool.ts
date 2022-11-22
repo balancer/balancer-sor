@@ -912,14 +912,18 @@ export class LinearPool implements PoolBase {
     }
 
     _derivativeSpotPriceAfterSwapExactTokenInForTokenOut(
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         poolPairData: LinearPoolPairData,
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         amount: OldBigNumber
     ): OldBigNumber {
         return bnum(0);
     }
 
     _derivativeSpotPriceAfterSwapTokenInForExactTokenOut(
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         poolPairData: LinearPoolPairData,
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         amount: OldBigNumber
     ): OldBigNumber {
         return bnum(0);

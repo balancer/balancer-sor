@@ -2,7 +2,7 @@ import { BigNumber, parseFixed } from '@ethersproject/bignumber';
 import { Zero } from '@ethersproject/constants';
 import { SwapTypes, NewPath } from '../types';
 import { getOutputAmountSwap } from '../pools';
-import { bnum, ZERO, BigNumber as OldBigNumber } from '../utils/bignumber';
+import { BigNumber as OldBigNumber } from '../utils/bignumber';
 
 export function calculatePathLimits(
     paths: NewPath[],

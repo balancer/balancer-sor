@@ -1,42 +1,15 @@
 // TS_NODE_PROJECT='tsconfig.testing.json' npx mocha -r ts-node/register test/weightedMath.spec.ts
 import dotenv from 'dotenv';
-import { assert, expect } from 'chai';
-import * as SDK from '@georgeroman/balancer-v2-pools';
-import { AddressZero } from '@ethersproject/constants';
-import { JsonRpcProvider } from '@ethersproject/providers';
-import { defaultAbiCoder } from '@ethersproject/abi';
-import {
-    BalancerHelpers__factory,
-    BalancerHelpers,
-    Vault__factory,
-    WeightedPool__factory,
-    Vault,
-} from '@balancer-labs/typechain';
-import { _upscaleArray, _upscale } from '../src/utils/basicOperations';
+import { assert } from 'chai';
 import { BigNumber as OldBigNumber } from '../src/utils/bignumber';
 import { bnum } from '../src/utils/bignumber';
-import { BAL, WETH, vaultAddr } from './lib/constants';
+import { BAL, WETH } from './lib/constants';
 import singleWeightedPool from './testData/weightedPools/singlePoolWithSwapEnabled.json';
 import { WeightedPool } from '../src/pools/weightedPool/weightedPool';
-import {
-    _calcBptOutGivenExactTokensIn,
-    _calcTokensOutGivenExactBptIn,
-    _calcTokenOutGivenExactBptIn,
-    _calcBptInGivenExactTokensOut,
-} from '../src/pools/weightedPool/weightedMath';
-import { Contract } from '@ethersproject/contracts';
 
 dotenv.config();
 
-const { ALCHEMY_URL: jsonRpcUrl } = process.env;
-const rpcUrl = 'http://127.0.0.1:8545';
-const provider = new JsonRpcProvider(rpcUrl, 1);
-const vault = Vault__factory.connect(vaultAddr, provider);
 // mainnet balancer helpers contract
-const balancerHelpers = BalancerHelpers__factory.connect(
-    '0x5aDDCCa35b7A0D07C74063c48700C8590E87864E',
-    provider
-);
 
 describe('weightedMath tests', () => {
     // TO DO: add items using checkOutcome function
@@ -538,113 +511,6 @@ describe('weightedMath tests', () => {
     // });
 });
 
-async function queryJoin(
-    poolId: string,
-    amountsIn: string[],
-    assets: string[],
-    balancerHelpers: BalancerHelpers
-) {
-    const EXACT_TOKENS_IN_FOR_BPT_OUT = 1;
-    const minimumBPT = '0';
-    const abi = ['uint256', 'uint256[]', 'uint256'];
-    const data = [EXACT_TOKENS_IN_FOR_BPT_OUT, amountsIn, minimumBPT];
-    const userDataEncoded = defaultAbiCoder.encode(abi, data);
-    const joinPoolRequest = {
-        assets,
-        maxAmountsIn: amountsIn,
-        userData: userDataEncoded,
-        fromInternalBalance: false,
-    };
-    const query = await balancerHelpers.queryJoin(
-        poolId,
-        AddressZero, // Not important for query
-        AddressZero,
-        joinPoolRequest
-    );
-    return query;
-}
-
-async function queryExit(
-    poolId: string,
-    bptIn: string,
-    assets: string[],
-    exitTokenIndex: number,
-    balancerHelpers: BalancerHelpers
-) {
-    // _calcTokenOutGivenExactBptIn
-    const EXACT_BPT_IN_FOR_ONE_TOKEN_OUT = 0;
-    const abi = ['uint256', 'uint256', 'uint256'];
-    const data = [EXACT_BPT_IN_FOR_ONE_TOKEN_OUT, bptIn, exitTokenIndex];
-    const userDataEncoded = defaultAbiCoder.encode(abi, data);
-    const exitPoolRequest = {
-        assets,
-        minAmountsOut: new Array<string>(assets.length).fill('0'),
-        userData: userDataEncoded,
-        toInternalBalance: false,
-    };
-    const query = await balancerHelpers.queryExit(
-        poolId,
-        AddressZero,
-        AddressZero,
-        exitPoolRequest
-    );
-    return query;
-}
-
-async function getPoolOnChain(
-    poolId: string,
-    vault: Vault,
-    provider: JsonRpcProvider,
-    print = false
-): Promise<{
-    poolId: string;
-    tokens: string[];
-    swapFee: bigint;
-    normalizedWeights: bigint[];
-    balances: bigint[];
-    totalSupply: bigint;
-    lastInvariant: bigint;
-}> {
-    const pool = await vault.getPool(poolId);
-    const poolContract = WeightedPool__factory.connect(pool[0], provider);
-    const swapFee = await poolContract.getSwapFeePercentage();
-    const totalSupply = await poolContract.totalSupply();
-    const normalizedWeights = await poolContract.getNormalizedWeights();
-    const lastInvariant = await poolContract.getLastInvariant();
-    const poolTokens = await vault.getPoolTokens(poolId);
-    const feeCollectorAbi = [
-        'function getSwapFeePercentage() public view returns (uint256)',
-    ];
-    const feesCollector = new Contract(
-        '0xce88686553686DA562CE7Cea497CE749DA109f9F',
-        feeCollectorAbi,
-        provider
-    );
-    const protocolSwapFee = await feesCollector.getSwapFeePercentage();
-
-    if (print) {
-        console.log(poolId);
-        console.log(pool[0]);
-        console.log(`SwapFee: `, swapFee.toString());
-        console.log(`totalSupply: `, totalSupply.toString());
-        console.log(`tokens`, poolTokens.tokens.toString());
-        console.log(`normalizedWeights: `, normalizedWeights.toString());
-        console.log(`balances: `, poolTokens.balances.toString());
-        console.log(`lastInvariant`, lastInvariant.toString());
-        console.log(`${protocolSwapFee.toString()}, protocolSwapFeePercentage`);
-    }
-
-    return {
-        poolId: poolId,
-        tokens: poolTokens.tokens,
-        swapFee: swapFee.toBigInt(),
-        normalizedWeights: normalizedWeights.map((w) => w.toBigInt()),
-        balances: poolTokens.balances.map((b) => b.toBigInt()),
-        totalSupply: totalSupply.toBigInt(),
-        lastInvariant: lastInvariant.toBigInt(),
-    };
-}
-
 function checkDerivative(
     fn: (
         poolPairData: any,
@@ -652,7 +518,7 @@ function checkDerivative(
         exact: boolean
     ) => OldBigNumber,
     der: (poolPairData: any, amount: OldBigNumber) => OldBigNumber,
-    poolPairData: any,
+    poolPairData: unknown,
     amount: number,
     delta: number,
     error: number,

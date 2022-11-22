@@ -14,7 +14,6 @@ import {
     virtualOffset1,
     Vector2,
 } from '../src/pools/gyroEPool/gyroEMath/gyroEMathHelpers';
-import { GyroEPool } from '../src/pools/gyroEPool/gyroEPool';
 
 const GYRO_E_PARAMS = {
     alpha: parseFixed('0.050000000000020290', 18),

@@ -41,19 +41,19 @@ export function calculateDerivedValues(p: GyroEParams): DerivedGyroEParams {
         )
     );
 
-    let tauAlpha: BigNumber[] = [];
+    const tauAlpha: BigNumber[] = [];
     tauAlpha.push(mul(mul(alpha, c).sub(s), dAlpha));
     tauAlpha.push(mul(c.add(mul(s, alpha)), div(dAlpha, lambda)));
 
-    let tauBeta: BigNumber[] = [];
+    const tauBeta: BigNumber[] = [];
 
     tauBeta.push(mul(mul(beta, c).sub(s), dBeta));
     tauBeta.push(mul(c.add(mul(s, beta)), div(dBeta, lambda)));
 
-    let w = mul(mul(s, c), tauBeta[1].sub(tauAlpha[1]));
-    let z = mul(mul(c, c), tauBeta[0]).add(mul(mul(s, s), tauAlpha[0]));
-    let u = mul(mul(s, c), tauBeta[0].sub(tauAlpha[0]));
-    let v = mul(mul(s, s), tauBeta[1]).add(mul(mul(c, c), tauAlpha[1]));
+    const w = mul(mul(s, c), tauBeta[1].sub(tauAlpha[1]));
+    const z = mul(mul(c, c), tauBeta[0]).add(mul(mul(s, s), tauAlpha[0]));
+    const u = mul(mul(s, c), tauBeta[0].sub(tauAlpha[0]));
+    const v = mul(mul(s, s), tauBeta[1]).add(mul(mul(c, c), tauAlpha[1]));
 
     const derived = {
         tauAlpha: {
@@ -80,14 +80,18 @@ function scale(bn: BigNumber, decimalsIn: number, decimalsOut: number) {
         .div(parseFixed('1', decimalsIn));
 }
 
-export function sqrtArbitraryDecimal(input: BigNumber, decimals: number) {
+export function sqrtArbitraryDecimal(
+    input: BigNumber,
+    decimals: number
+): BigNumber {
     if (input.isZero()) {
         return BigNumber.from(0);
     }
     let guess = input.gt(parseFixed('1', decimals)) ? input.div(2) : input;
 
     // 100 iterations
-    for (let i of new Array(100).fill(0)) {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    for (const i of new Array(100).fill(0)) {
         guess = guess
             .add(input.mul(parseFixed('1', decimals)).div(guess))
             .div(2);

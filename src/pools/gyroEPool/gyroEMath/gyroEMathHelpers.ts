@@ -1,4 +1,4 @@
-import { BigNumber, formatFixed, parseFixed } from '@ethersproject/bignumber';
+import { BigNumber, parseFixed } from '@ethersproject/bignumber';
 import { WeiPerEther as ONE } from '@ethersproject/constants';
 import { ONE_XP } from '../../gyroHelpers/constants';
 import {
@@ -81,7 +81,7 @@ export function balancesFromTokenInOut(
     balanceTokenIn: BigNumber,
     balanceTokenOut: BigNumber,
     tokenInIsToken0: boolean
-) {
+): [BigNumber, BigNumber] {
     return tokenInIsToken0
         ? [balanceTokenIn, balanceTokenOut]
         : [balanceTokenOut, balanceTokenIn];
@@ -96,7 +96,7 @@ export function calcAtAChi(
     y: BigNumber,
     p: GyroEParams,
     d: DerivedGyroEParams
-) {
+): BigNumber {
     const dSq2 = mulXpU(d.dSq, d.dSq);
 
     // (cx - sy) * (w/lambda + z) / lambda
@@ -129,7 +129,7 @@ export function calcInvariantSqrt(
     y: BigNumber,
     p: GyroEParams,
     d: DerivedGyroEParams
-) {
+): [BigNumber, BigNumber] {
     let val = calcMinAtxAChiySqPlusAtxSq(x, y, p, d).add(
         calc2AtxAtyAChixAChiy(x, y, p, d)
     );
@@ -151,7 +151,7 @@ function calcMinAtxAChiySqPlusAtxSq(
     termNp = termNp.sub(
         mulDownMagU(mulDownMagU(mulDownMagU(x, y), p.c.mul(2)), p.s)
     );
-    let termXp = mulXpU(d.u, d.u)
+    const termXp = mulXpU(d.u, d.u)
         .add(divDownMagU(mulXpU(d.u.mul(2), d.v), p.lambda))
         .add(divDownMagU(divDownMagU(mulXpU(d.v, d.v), p.lambda), p.lambda));
 
@@ -211,7 +211,10 @@ function calcMinAtyAChixSqPlusAtySq(
     return val;
 }
 
-export function calcAChiAChiInXp(p: GyroEParams, d: DerivedGyroEParams) {
+export function calcAChiAChiInXp(
+    p: GyroEParams,
+    d: DerivedGyroEParams
+): BigNumber {
     const dSq3 = mulXpU(mulXpU(d.dSq, d.dSq), d.dSq);
     let val = mulUpMagU(p.lambda, divXpU(mulXpU(d.u.mul(2), d.v), dSq3));
     val = val.add(
@@ -236,7 +239,7 @@ export function checkAssetBounds(
     invariant: Vector2,
     newBal: BigNumber,
     assetIndex: number
-) {
+): void {
     if (assetIndex === 0) {
         const xPlus = maxBalances0(params, derived, invariant);
         if (newBal.gt(MAX_BALANCES) || newBal.gt(xPlus))
@@ -283,7 +286,7 @@ export function calcYGivenX(
     params: GyroEParams,
     d: DerivedGyroEParams,
     r: Vector2
-) {
+): BigNumber {
     const ab: Vector2 = {
         x: virtualOffset0(params, d, r),
         y: virtualOffset1(params, d, r),
@@ -307,7 +310,7 @@ export function calcXGivenY(
     params: GyroEParams,
     d: DerivedGyroEParams,
     r: Vector2
-) {
+): BigNumber {
     const ba: Vector2 = {
         x: virtualOffset1(params, d, r),
         y: virtualOffset0(params, d, r),
@@ -492,7 +495,7 @@ export function mulA(params: GyroEParams, tp: Vector2): Vector2 {
     };
 }
 
-export function scalarProd(t1: Vector2, t2: Vector2) {
+export function scalarProd(t1: Vector2, t2: Vector2): BigNumber {
     const ret = mulDownMagU(t1.x, t2.x).add(mulDownMagU(t1.y, t2.y));
     return ret;
 }

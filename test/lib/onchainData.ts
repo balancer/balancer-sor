@@ -12,6 +12,7 @@ import elementPoolAbi from '../../src/pools/elementPool/ConvergentCurvePool.json
 import linearPoolAbi from '../../src/pools/linearPool/linearPoolAbi.json';
 import { PoolFilter, SubgraphPoolBase, PoolDataService } from '../../src';
 import { Multicaller } from './multicaller';
+import { Fragment, JsonFragment } from '@ethersproject/abi/lib/fragments';
 
 export async function getOnChainBalances(
     subgraphPoolsOriginal: SubgraphPoolBase[],
@@ -21,19 +22,20 @@ export async function getOnChainBalances(
 ): Promise<SubgraphPoolBase[]> {
     if (subgraphPoolsOriginal.length === 0) return subgraphPoolsOriginal;
 
-    const abis: any = Object.values(
-        // Remove duplicate entries using their names
-        Object.fromEntries(
-            [
-                ...vaultAbi,
-                ...aTokenRateProvider,
-                ...weightedPoolAbi,
-                ...stablePoolAbi,
-                ...elementPoolAbi,
-                ...linearPoolAbi,
-            ].map((row) => [row.name, row])
-        )
-    );
+    const abis: string | Array<Fragment | JsonFragment | string> =
+        Object.values(
+            // Remove duplicate entries using their names
+            Object.fromEntries(
+                [
+                    ...vaultAbi,
+                    ...aTokenRateProvider,
+                    ...weightedPoolAbi,
+                    ...stablePoolAbi,
+                    ...elementPoolAbi,
+                    ...linearPoolAbi,
+                ].map((row) => [row.name, row])
+            )
+        );
 
     const multiPool = new Multicaller(multiAddress, provider, abis);
 
