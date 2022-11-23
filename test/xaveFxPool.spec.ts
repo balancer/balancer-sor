@@ -1,20 +1,16 @@
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 require('dotenv').config();
-
 // TS_NODE_PROJECT='tsconfig.testing.json' npx mocha -r ts-node/register test/xaveFxPool.spec.ts
 import { expect } from 'chai';
-import cloneDeep from 'lodash.clonedeep';
 import { bnum, scale } from '../src/utils/bignumber';
-
 import { PoolTypes, SwapTypes } from '../src';
 // Add new PoolType
 import { FxPool } from '../src/pools/xaveFxPool/fxPool';
 // Add new pool test data in Subgraph Schema format
 import testPools from './testData/fxPool/fxPool.json';
-import { formatFixed, parseFixed } from '@ethersproject/bignumber';
+import { parseFixed } from '@ethersproject/bignumber';
 import { spotPriceBeforeSwap } from '../src/pools/xaveFxPool/fxPoolMath';
 
-// @todo mock reserves from the reserves that we have on the previous repo
 // @todo add tests for within beta
 // @todo add tests for outside beta
 // @todo add tests on the other function
@@ -89,7 +85,7 @@ describe('Test for fxPools', () => {
             console.log(amount);
 
             console.log('getLimitAmountSwap: SwapExactOut');
-            // expect(amount.toString()).to.eq('KNOWN_LIMIT');
+            // @todo add expected amount
         });
     });
 
@@ -152,7 +148,7 @@ describe('Test for fxPools', () => {
                     )}`
                 );
 
-                // expect(amountOut).to.eq(KNOWN_AMOUNT);
+                // @todo add expected for amountOut
             });
         });
 
@@ -170,6 +166,7 @@ describe('Test for fxPools', () => {
                     amountOut
                 );
 
+                //@todo add expected amountIn
                 // expect(amountIn).to.eq(KNOWN_AMOUNT);
 
                 console.log(
