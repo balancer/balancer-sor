@@ -63,6 +63,7 @@ export interface Swap {
     tokenInDecimals: number;
     tokenOutDecimals: number;
     returnAmount?: string;
+    swapFee?: string;
 }
 
 export interface SubgraphPoolBase {
@@ -147,6 +148,7 @@ export interface SwapInfo {
     tokenInForSwaps?: string; // Used with stETH/wstETH
     tokenOut: string;
     tokenOutFromSwaps?: string; // Used with stETH/wstETH
+    swapFees?: AmountDictionary;
     marketSp: string;
 }
 
@@ -158,8 +160,12 @@ export interface PoolPairDictionary {
     [tokenInOut: string]: PoolPairBase;
 }
 
-export interface hopDictionary {
+export interface HopDictionary {
     [hopToken: string]: Set<string>; // the set of pool ids
+}
+
+export interface AmountDictionary {
+    [token: string]: string;
 }
 
 export interface NewPath {

@@ -9,7 +9,7 @@ import {
     PoolTypes,
     PoolPairBase,
     SorConfig,
-    hopDictionary,
+    HopDictionary,
 } from '../types';
 import { ZERO } from '../utils/bignumber';
 import { parseNewPool } from '../pools';
@@ -34,10 +34,10 @@ export function filterPoolsOfInterest(
     tokenIn: string,
     tokenOut: string,
     maxPools: number
-): [PoolDictionary, hopDictionary, hopDictionary] {
+): [PoolDictionary, HopDictionary, HopDictionary] {
     const directPools: PoolDictionary = {};
-    const hopsIn: hopDictionary = {};
-    const hopsOut: hopDictionary = {};
+    const hopsIn: HopDictionary = {};
+    const hopsOut: HopDictionary = {};
 
     Object.keys(allPools).forEach((id) => {
         const pool = allPools[id];
@@ -72,8 +72,8 @@ export function producePaths(
     tokenIn: string,
     tokenOut: string,
     directPools: PoolDictionary,
-    hopsIn: hopDictionary,
-    hopsOut: hopDictionary,
+    hopsIn: HopDictionary,
+    hopsOut: HopDictionary,
     pools: PoolDictionary
 ): NewPath[] {
     const paths: NewPath[] = [];

@@ -4,7 +4,7 @@ import { BigNumber, formatFixed } from '@ethersproject/bignumber';
 import { Wallet } from '@ethersproject/wallet';
 import { Contract } from '@ethersproject/contracts';
 import { AddressZero, MaxUint256 } from '@ethersproject/constants';
-import { SOR, SwapInfo, SwapTypes } from '../../src';
+import { AmountDictionary, SOR, SwapInfo, SwapTypes } from '../../src';
 import { vaultAddr } from './constants';
 
 import erc20abi from '../abi/ERC20.json';
@@ -181,4 +181,10 @@ export async function printOutput(
     );
     console.log(`Cost to swap: ${costToSwapScaled.toString()}`);
     console.log(`Return Considering Fees: ${returnWithFeesScaled.toString()}`);
+    if (swapInfo.swapFees) {
+        console.log(`Swap fees: `);
+        for (const token of swapInfo.tokenAddresses) {
+            console.log(token, ': ', swapInfo.swapFees[token]);
+        }
+    }
 }

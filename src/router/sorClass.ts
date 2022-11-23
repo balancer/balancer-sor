@@ -7,7 +7,7 @@ import {
     ONE,
     INFINITY,
 } from '../utils/bignumber';
-import { SwapTypes, NewPath, Swap } from '../types';
+import { SwapTypes, NewPath, Swap, PoolBase, PoolPairBase } from '../types';
 import {
     getEffectivePriceSwapForPath,
     getSpotPriceAfterSwapForPath,
@@ -263,6 +263,7 @@ export const formatSwaps = (
                     tokenInDecimals: path.poolPairData[i].decimalsIn,
                     tokenOutDecimals: path.poolPairData[i].decimalsOut,
                     returnAmount: amounts[amounts.length - 1].toString(),
+                    swapFee: getSwapFee(amounts[i], path.poolPairData[i]),
                 };
                 pathSwaps.push(swap);
             }
@@ -285,6 +286,7 @@ export const formatSwaps = (
                     tokenInDecimals: path.poolPairData[n - 1 - i].decimalsIn,
                     tokenOutDecimals: path.poolPairData[n - 1 - i].decimalsOut,
                     returnAmount: amounts[0].toString(),
+                    swapFee: getSwapFee(amounts[0], path.poolPairData[i]),
                 };
                 pathSwaps.unshift(swap);
             }
@@ -726,3 +728,12 @@ export const calcTotalReturn = (
     });
     return totalReturn;
 };
+
+function getSwapFee(
+    amountIn: OldBigNumber,
+    poolPairData: PoolPairBase
+): string {
+    const feeRatio = bnum(formatFixed(poolPairData.swapFee, 18));
+    const feeAmount = amountIn.times(feeRatio);
+    return feeAmount.toString();
+}

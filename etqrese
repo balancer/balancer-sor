@@ -1,0 +1,60 @@
+[1mdiff --git a/src/router/sorClass.ts b/src/router/sorClass.ts[m
+[1mindex 1d9e381..9632900 100644[m
+[1m--- a/src/router/sorClass.ts[m
+[1m+++ b/src/router/sorClass.ts[m
+[36m@@ -7,7 +7,7 @@[m [mimport {[m
+     ONE,[m
+     INFINITY,[m
+ } from '../utils/bignumber';[m
+[31m-import { SwapTypes, NewPath, Swap } from '../types';[m
+[32m+[m[32mimport { SwapTypes, NewPath, Swap, PoolBase, PoolPairBase } from '../types';[m
+ import {[m
+     getEffectivePriceSwapForPath,[m
+     getSpotPriceAfterSwapForPath,[m
+[36m@@ -263,6 +263,12 @@[m [mexport const formatSwaps = ([m
+                     tokenInDecimals: path.poolPairData[i].decimalsIn,[m
+                     tokenOutDecimals: path.poolPairData[i].decimalsOut,[m
+                     returnAmount: amounts[amounts.length - 1].toString(),[m
+[32m+[m[32m                    swapFee: getSwapFee([m
+[32m+[m[32m                        path.pools[i],[m
+[32m+[m[32m                        amounts[i],[m
+[32m+[m[32m                        path.poolPairData[i],[m
+[32m+[m[32m                        SwapTypes.SwapExactIn[m
+[32m+[m[32m                    ),[m
+                 };[m
+                 pathSwaps.push(swap);[m
+             }[m
+[36m@@ -285,6 +291,12 @@[m [mexport const formatSwaps = ([m
+                     tokenInDecimals: path.poolPairData[n - 1 - i].decimalsIn,[m
+                     tokenOutDecimals: path.poolPairData[n - 1 - i].decimalsOut,[m
+                     returnAmount: amounts[0].toString(),[m
+[32m+[m[32m                    swapFee: getSwapFee([m
+[32m+[m[32m                        path.pools[i],[m
+[32m+[m[32m                        amounts[i],[m
+[32m+[m[32m                        path.poolPairData[i],[m
+[32m+[m[32m                        SwapTypes.SwapExactIn[m
+[32m+[m[32m                    ),[m
+                 };[m
+                 pathSwaps.unshift(swap);[m
+             }[m
+[36m@@ -726,3 +738,20 @@[m [mexport const calcTotalReturn = ([m
+     });[m
+     return totalReturn;[m
+ };[m
+[32m+[m
+[32m+[m[32mfunction getSwapFee([m
+[32m+[m[32m    pool: PoolBase,[m
+[32m+[m[32m    amount: OldBigNumber,[m
+[32m+[m[32m    poolPairData: PoolPairBase,[m
+[32m+[m[32m    swapType: SwapTypes[m
+[32m+[m[32m): string {[m
+[32m+[m[32m    const feeRatio = bnum(formatFixed(poolPairData.swapFee, 18));[m
+[32m+[m[32m    let feeAmount: OldBigNumber;[m
+[32m+[m[32m    if (swapType == SwapTypes.SwapExactIn) {[m
+[32m+[m[32m        feeAmount = amount.times(feeRatio);[m
+[32m+[m[32m    } else {[m
+[32m+[m[32m        // what do we need in this case?[m
+[32m+[m[32m        feeAmount = amount.times(feeRatio);[m
+[32m+[m[32m    }[m
+[32m+[m[32m    return feeAmount.toString();[m
+[32m+[m[32m}[m

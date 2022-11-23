@@ -2,7 +2,7 @@ import { BigNumber } from '@ethersproject/bignumber';
 import cloneDeep from 'lodash.clonedeep';
 import { bnum, scale } from './utils/bignumber';
 import { EMPTY_SWAPINFO } from './constants';
-import { SwapTypes, SwapV2, Swap, SwapInfo } from './types';
+import { SwapTypes, SwapV2, Swap, SwapInfo, AmountDictionary } from './types';
 import { Zero } from '@ethersproject/constants';
 
 /**
@@ -120,6 +120,7 @@ export function formatSwaps(
 
     const swapsClone = cloneDeep(swapsOriginal);
     const tokenAddresses = getTokenAddresses(swapsClone);
+    const swapFees = getSwapFees(swapsClone);
     const swaps: SwapV2[] = swapsClone.flatMap((sequence) =>
         formatSequence(swapType, sequence, tokenAddresses)
     );
@@ -140,8 +141,27 @@ export function formatSwaps(
         tokenAddresses,
         tokenIn,
         tokenOut,
+        swapFees,
         marketSp,
     };
 
     return swapInfo;
+}
+
+function getSwapFees(swaps: Swap[][]): AmountDictionary {
+    const amountDict: AmountDictionary = {};
+    for (const path of swaps) {
+        for (const swap of path) {
+            const token = swap.tokenIn;
+            if (amountDict[token]) {
+                // if a token appears more than once, we sum the values
+                const newValue = bnum(swap.swapFee as string);
+                const oldValue = bnum(amountDict[token]);
+                amountDict[token] = oldValue.plus(newValue).toString();
+            } else {
+                amountDict[token] = swap.swapFee as string;
+            }
+        }
+    }
+    return amountDict;
 }
