@@ -107,7 +107,7 @@ describe('Test for fxPools', () => {
         });
 
         context('_exactTokenInForTokenOut', () => {
-            it('OriginSwap/_exactTokenInForTokenOut USDC > ? SGD', async () => {
+            it('OriginSwap/_exactTokenInForTokenOut USDC > ? XSGD', async () => {
                 const amountIn = bnum(parseFixed('100000', 6).toString());
 
                 console.log('AMOUNT IN :', amountIn);
@@ -117,6 +117,50 @@ describe('Test for fxPools', () => {
                 const poolPairData = newPool.parsePoolPairData(
                     newPool.tokens[0].address, // tokenIn, USDC
                     newPool.tokens[1].address // tokenOut, XSGD
+                );
+
+                console.log(
+                    'spotPriceBeforeSwap: ',
+                    spotPriceBeforeSwap(
+                        scale(bnum('1'), 6),
+                        poolPairData
+                    ).toNumber()
+                );
+
+                const amountOut = newPool._exactTokenInForTokenOut(
+                    poolPairData,
+                    amountIn
+                );
+                console.log(
+                    `_exactTokenInForTokenOut Amount out: ${amountOut}`
+                );
+
+                console.log(
+                    `_spotPriceAfterSwapExactTokenInForTokenOut: ${newPool._spotPriceAfterSwapExactTokenInForTokenOut(
+                        poolPairData,
+                        amountIn
+                    )}`
+                );
+                console.log(
+                    `_derivativeSpotPriceAfterSwapExactTokenInForTokenOut: ${newPool._derivativeSpotPriceAfterSwapExactTokenInForTokenOut(
+                        poolPairData,
+                        amountIn
+                    )}`
+                );
+
+                // @todo add expected for amountOut
+            });
+
+            it.skip('OriginSwap/_exactTokenInForTokenOut XSGD > ? USDC', async () => {
+                const amountIn = bnum(parseFixed('100000', 6).toString());
+
+                console.log('AMOUNT IN :', amountIn);
+                const poolData = testPools.pools[0];
+                const newPool = FxPool.fromPool(poolData);
+
+                const poolPairData = newPool.parsePoolPairData(
+                    newPool.tokens[1].address, // tokenIn, XSGD
+                    newPool.tokens[0].address // tokenOut, USDC
                 );
 
                 console.log(
@@ -160,6 +204,46 @@ describe('Test for fxPools', () => {
                 const poolPairData = newPool.parsePoolPairData(
                     newPool.tokens[0].address, // tokenIn, USDC
                     newPool.tokens[1].address // tokenOut, XSGD
+                );
+                const amountIn = newPool._tokenInForExactTokenOut(
+                    poolPairData,
+                    amountOut
+                );
+
+                //@todo add expected amountIn
+                // expect(amountIn).to.eq(KNOWN_AMOUNT);
+
+                console.log(
+                    'spotPriceBeforeSwap: ',
+                    spotPriceBeforeSwap(
+                        scale(bnum('1'), 6),
+                        poolPairData
+                    ).toNumber()
+                );
+
+                console.log(`Amount in: ${amountIn}`);
+
+                console.log(
+                    `_spotPriceAfterSwapExactTokenInForTokenOut: ${newPool._spotPriceAfterSwapExactTokenInForTokenOut(
+                        poolPairData,
+                        amountOut
+                    )}`
+                );
+                console.log(
+                    `_derivativeSpotPriceAfterSwapExactTokenInForTokenOut: ${newPool._derivativeSpotPriceAfterSwapExactTokenInForTokenOut(
+                        poolPairData,
+                        amountOut
+                    )}`
+                );
+            });
+
+            it.skip('TargetSwap / tokenInForExactTokenOut ? XSGD > USDC', async () => {
+                const amountOut = bnum(parseFixed('10000', 6).toString());
+                const poolData = testPools.pools[0];
+                const newPool = FxPool.fromPool(poolData);
+                const poolPairData = newPool.parsePoolPairData(
+                    newPool.tokens[1].address, // tokenIn, XSGD
+                    newPool.tokens[0].address // tokenOut, USDC
                 );
                 const amountIn = newPool._tokenInForExactTokenOut(
                     poolPairData,
