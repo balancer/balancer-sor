@@ -133,16 +133,16 @@ const getParsedFxPoolData = (
         baseTokenRate: baseTokenRate,
         _oGLiq: baseReserves + usdcReserves,
         _nGLiq: baseReserves + usdcReserves,
-        _oBals: [baseReserves, usdcReserves],
+        _oBals: [usdcReserves, baseReserves],
         _nBals:
             poolPairData.tokenIn === TokenSymbol.USDC
                 ? [
-                      baseReserves - givenAmountInNumeraire,
                       usdcReserves + givenAmountInNumeraire,
+                      baseReserves - givenAmountInNumeraire,
                   ]
                 : [
-                      baseReserves + givenAmountInNumeraire,
                       usdcReserves - givenAmountInNumeraire,
+                      baseReserves + givenAmountInNumeraire,
                   ],
 
         givenAmountInNumeraire: givenAmountInNumeraire,
@@ -519,10 +519,9 @@ export const spotPriceBeforeSwap = (
     amount: OldBigNumber,
     poolPairData: FxPoolPairData
 ): OldBigNumber => {
-    const inputAmountInNumeraire = 1;
-    // @todo check
-    const parsedFxPoolData = getParsedFxPoolData(amount, poolPairData);
     // input amount 1 XSGD to get the output in USDC
+    const inputAmountInNumeraire = 1;
+    const parsedFxPoolData = getParsedFxPoolData(amount, poolPairData);
 
     const _oGLiq = parsedFxPoolData._oGLiq;
     const _nGLiq = parsedFxPoolData._nGLiq;
@@ -540,7 +539,9 @@ export const spotPriceBeforeSwap = (
     );
 
     return bnum(
-        (outputAmountInNumeraire[0] / inputAmountInNumeraire) *
+        ((Math.abs(outputAmountInNumeraire[0]) *
+            (1 - parsedFxPoolData.epsilon)) /
+            inputAmountInNumeraire) *
             parsedFxPoolData.baseTokenRate
     );
 };
@@ -577,9 +578,9 @@ export const _spotPriceAfterSwapExactTokenInForTokenOut = (
         console.log('oBal1after: ', oBals1after);
 
         console.log(
-            `oBals1after < minBetaLimit: ${
-                oBals1after < minBetaLimit
-            }, oBals0after > maxBetaLimit : ${oBals0after > maxBetaLimit}`
+            `oBals0after < minBetaLimit: ${
+                oBals0after < minBetaLimit
+            }, oBals1after > maxBetaLimit : ${oBals1after > maxBetaLimit}`
         );
 
         if (oBals1after < minBetaLimit && oBals0after > maxBetaLimit) {
@@ -600,7 +601,7 @@ export const _spotPriceAfterSwapExactTokenInForTokenOut = (
         const oBals1after = _nBals[0];
         console.log('oBal1after: ', oBals1after);
 
-        if (oBals0after < minBetaLimit && oBals1after > maxBetaLimit) {
+        if (oBals1after < minBetaLimit && oBals0after > maxBetaLimit) {
             console.log(
                 'spotPriceAfterOriginSwap token1 -> token0 : outside beta'
             );
@@ -651,12 +652,12 @@ export const _spotPriceAfterSwapTokenInForExactTokenOut = (
         console.log('oBal1after: ', oBals1after);
 
         console.log(
-            `oBals1after < minBetaLimit: ${
-                oBals1after < minBetaLimit
-            }, oBals0after > maxBetaLimit : ${oBals0after > maxBetaLimit}`
+            `oBals0after < minBetaLimit: ${
+                oBals0after < minBetaLimit
+            }, oBals1after > maxBetaLimit : ${oBals1after > maxBetaLimit}`
         );
 
-        if (oBals1after < minBetaLimit && oBals0after > maxBetaLimit) {
+        if (oBals0after < minBetaLimit && oBals1after > maxBetaLimit) {
             console.log(
                 'spotPriceAfterOriginSwap token0 -> token1 : outside beta'
             );
@@ -701,8 +702,8 @@ export const _derivativeSpotPriceAfterSwapExactTokenInForTokenOut = (
 ): OldBigNumber => {
     const x = spotPriceBeforeSwap(bnum('1'), poolPairData);
     const y = _spotPriceAfterSwapExactTokenInForTokenOut(poolPairData, amount);
-
-    return x.div(y);
+    const yMinusX = y.minus(x);
+    return yMinusX.div(x);
 };
 
 // @todo
@@ -713,5 +714,6 @@ export const _derivativeSpotPriceAfterSwapTokenInForExactTokenOut = (
     const x = spotPriceBeforeSwap(bnum('1'), poolPairData);
     const y = _spotPriceAfterSwapExactTokenInForTokenOut(poolPairData, amount);
 
-    return x.div(y);
+    const yMinusX = y.minus(x);
+    return yMinusX.div(x);
 };
