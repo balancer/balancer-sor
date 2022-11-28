@@ -56,7 +56,14 @@ const getParsedFxPoolData = (
     amount: OldBigNumber,
     poolPairData: FxPoolPairData
 ): ParsedFxPoolData => {
-    console.log(TokenSymbol.USDC);
+    console.log(
+        `Reserves for tokenIn in raw amount: ${
+            poolPairData.balanceIn.toNumber() / ONE_TO_THE_SIX_NUM
+        }, 
+         Reserves for tokenOut in raw amount: ${
+             poolPairData.balanceOut.toNumber() / ONE_TO_THE_SIX_NUM
+         }`
+    );
     // reserves are not in wei
     const baseReserves = isUSDC(poolPairData.tokenIn)
         ? viewNumeraireAmount(
@@ -546,7 +553,6 @@ export const spotPriceBeforeSwap = (
     );
 };
 
-// @todo test accuracy of decimals
 // spot price after origin swap
 export const _spotPriceAfterSwapExactTokenInForTokenOut = (
     poolPairData: FxPoolPairData,
@@ -554,9 +560,14 @@ export const _spotPriceAfterSwapExactTokenInForTokenOut = (
 ): OldBigNumber => {
     const parsedFxPoolData = getParsedFxPoolData(amount, poolPairData);
 
-    // const targetAmountInNumeraire = parsedFxPoolData.givenAmountInNumeraire;
+    console.log('_spotPriceAfterSwapExactTokenInForTokenOut');
+    console.log(parsedFxPoolData);
 
+    const targetAmountInNumeraire = parsedFxPoolData.givenAmountInNumeraire;
     const inputAmount = Number(amount.toString());
+    console.log(
+        `targetAmountInNumeraire: ${targetAmountInNumeraire}, inputAmount:${inputAmount}`
+    );
 
     const _oGLiq = parsedFxPoolData._oGLiq;
     const _nBals = parsedFxPoolData._nBals;
@@ -571,7 +582,7 @@ export const _spotPriceAfterSwapExactTokenInForTokenOut = (
         _nGLiq, // _nGLiq
         _oBals, // _oBals
         _nBals, // _nBals
-        1, // input amount
+        targetAmountInNumeraire, // input amount
         1, // output index,
         parsedFxPoolData
     );
@@ -632,7 +643,6 @@ export const _spotPriceAfterSwapExactTokenInForTokenOut = (
     }
 };
 
-// @todo test accuracy of decimals
 // spot price after target swap
 export const _spotPriceAfterSwapTokenInForExactTokenOut = (
     amount: OldBigNumber,
@@ -640,7 +650,7 @@ export const _spotPriceAfterSwapTokenInForExactTokenOut = (
 ): OldBigNumber => {
     const parsedFxPoolData = getParsedFxPoolData(amount, poolPairData);
 
-    // const targetAmountInNumeraire = parsedFxPoolData.givenAmountInNumeraire;
+    const targetAmountInNumeraire = parsedFxPoolData.givenAmountInNumeraire;
 
     const inputAmount = Number(amount.toString());
 
@@ -648,7 +658,6 @@ export const _spotPriceAfterSwapTokenInForExactTokenOut = (
     const _nBals = parsedFxPoolData._nBals;
     const currentRate = parsedFxPoolData.baseTokenRate;
 
-    // @todo test
     const beta = parsedFxPoolData.beta;
     const epsilon = parsedFxPoolData.epsilon;
 
@@ -660,11 +669,14 @@ export const _spotPriceAfterSwapTokenInForExactTokenOut = (
         _nGLiq, // _nGLiq
         _oBals, // _oBals
         _nBals, // _nBals
-        1, // input amount
+        targetAmountInNumeraire, // input amount
         1, // output index,
         parsedFxPoolData
     );
 
+    console.log(
+        `targetAmountInNumeraire: ${targetAmountInNumeraire}, inputAmount:${inputAmount}`
+    );
     const outputAmount = outputAfterTrade[0];
 
     const maxBetaLimit: number = (1 + beta) * 0.5 * _oGLiq;
