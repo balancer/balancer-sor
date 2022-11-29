@@ -548,7 +548,7 @@ export const spotPriceBeforeSwap = (
     return bnum(
         ((Math.abs(outputAmountInNumeraire[0]) *
             (1 - parsedFxPoolData.epsilon)) /
-            inputAmountInNumeraire) *
+            Math.abs(inputAmountInNumeraire)) *
             parsedFxPoolData.baseTokenRate
     );
 };
@@ -564,7 +564,8 @@ export const _spotPriceAfterSwapExactTokenInForTokenOut = (
     console.log(parsedFxPoolData);
 
     const targetAmountInNumeraire = parsedFxPoolData.givenAmountInNumeraire;
-    const inputAmount = Number(amount.toString());
+    const inputAmount =
+        Number(amount.toString()) / getBaseDecimals(poolPairData.decimalsIn);
     console.log(
         `targetAmountInNumeraire: ${targetAmountInNumeraire}, inputAmount:${inputAmount}`
     );
@@ -588,6 +589,8 @@ export const _spotPriceAfterSwapExactTokenInForTokenOut = (
     );
 
     const outputAmount = outputAfterTrade[0];
+
+    console.log(`input: ${inputAmount}, output: ${outputAmount}`);
 
     const maxBetaLimit: number = (1 + beta) * 0.5 * _oGLiq;
     console.log(`maxBetaLimit: ${maxBetaLimit}`);
@@ -612,7 +615,9 @@ export const _spotPriceAfterSwapExactTokenInForTokenOut = (
             console.log(
                 'spotPriceAfterOriginSwap token0 -> token1 : outside beta'
             );
-            return bnum((outputAmount / Math.abs(inputAmount)) * currentRate);
+            return bnum(
+                (Math.abs(outputAmount) / Math.abs(inputAmount)) * currentRate
+            );
         } else {
             console.log(
                 'spotPriceAfterOriginSwap token0 -> token1 : within beta'
@@ -630,7 +635,8 @@ export const _spotPriceAfterSwapExactTokenInForTokenOut = (
             console.log(
                 'spotPriceAfterOriginSwap token1 -> token0 : outside beta'
             );
-            const ratioOfOutputAndInput = Math.abs(outputAmount) / inputAmount;
+            const ratioOfOutputAndInput =
+                Math.abs(outputAmount) / Math.abs(inputAmount);
 
             return bnum(ratioOfOutputAndInput * currentRate);
         } else {
@@ -652,7 +658,8 @@ export const _spotPriceAfterSwapTokenInForExactTokenOut = (
 
     const targetAmountInNumeraire = parsedFxPoolData.givenAmountInNumeraire;
 
-    const inputAmount = Number(amount.toString());
+    const inputAmount =
+        Number(amount.toString()) / getBaseDecimals(poolPairData.decimalsIn);
 
     const _oGLiq = parsedFxPoolData._oGLiq;
     const _nBals = parsedFxPoolData._nBals;
@@ -679,6 +686,8 @@ export const _spotPriceAfterSwapTokenInForExactTokenOut = (
     );
     const outputAmount = outputAfterTrade[0];
 
+    console.log(`input: ${inputAmount}, output: ${outputAmount}`);
+
     const maxBetaLimit: number = (1 + beta) * 0.5 * _oGLiq;
     console.log(`maxBetaLimit: ${maxBetaLimit}`);
 
@@ -701,7 +710,9 @@ export const _spotPriceAfterSwapTokenInForExactTokenOut = (
             console.log(
                 'spotPriceAfterOriginSwap token0 -> token1 : outside beta'
             );
-            return bnum((outputAmount / Math.abs(inputAmount)) * currentRate);
+            return bnum(
+                (Math.abs(outputAmount) / Math.abs(inputAmount)) * currentRate
+            );
         } else {
             console.log(
                 'spotPriceAfterOriginSwap token0 -> token1 : within beta'
@@ -722,7 +733,8 @@ export const _spotPriceAfterSwapTokenInForExactTokenOut = (
             console.log(
                 'spotPriceAfterOriginSwap token1 -> token0 : outside beta'
             );
-            const ratioOfOutputAndInput = Math.abs(outputAmount) / inputAmount;
+            const ratioOfOutputAndInput =
+                Math.abs(outputAmount) / Math.abs(inputAmount);
 
             return bnum(ratioOfOutputAndInput * currentRate);
         } else {
