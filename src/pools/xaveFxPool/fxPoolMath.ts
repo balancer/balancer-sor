@@ -503,8 +503,8 @@ export function _tokenInForExactTokenOut(
         _nGLiq, // _nGLiq
         _oBals, // _oBals
         _nBals, // _nBals
-        targetAmountInNumeraire, // input amount
-        1, // output index
+        targetAmountInNumeraire,
+        0, // output index
         parsedFxPoolData
     );
 
