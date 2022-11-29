@@ -52,6 +52,7 @@ const isUSDC = (address: string) => {
     }
 };
 
+// everything is in order of USDC, base token
 const getParsedFxPoolData = (
     amount: OldBigNumber,
     poolPairData: FxPoolPairData
@@ -419,6 +420,7 @@ const enforceSwapInvariant = (
 };
 
 // Exported functions
+
 // origin swap
 export function _exactTokenInForTokenOut(
     amount: OldBigNumber,
@@ -455,7 +457,7 @@ export function _exactTokenInForTokenOut(
         _oBals, // _oBals
         _nBals, // _nBals
         targetAmountInNumeraire, // input amount
-        1, // output index,
+        isUSDC(poolPairData.tokenIn) ? 1 : 0, // if USDC return base token (index 1), else return 0 for USDC out
         parsedFxPoolData
     );
     console.log('calculate trade finish..');
@@ -476,6 +478,7 @@ export function _exactTokenInForTokenOut(
     }
 }
 
+// target swap
 export function _tokenInForExactTokenOut(
     amount: OldBigNumber,
     poolPairData: FxPoolPairData
@@ -504,7 +507,7 @@ export function _tokenInForExactTokenOut(
         _oBals, // _oBals
         _nBals, // _nBals
         targetAmountInNumeraire,
-        0, // output index
+        isUSDC(poolPairData.tokenIn) ? 0 : 1, // if USDC return 0 else return 1 for base token
         parsedFxPoolData
     );
 
@@ -541,7 +544,7 @@ export const spotPriceBeforeSwap = (
         _oBals, // _oBals
         _nBals, // _nBals
         1, // input amount
-        1, // output index,
+        0, // always output in USDC
         parsedFxPoolData
     );
 
@@ -584,7 +587,7 @@ export const _spotPriceAfterSwapExactTokenInForTokenOut = (
         _oBals, // _oBals
         _nBals, // _nBals
         targetAmountInNumeraire, // input amount
-        1, // output index,
+        isUSDC(poolPairData.tokenIn) ? 1 : 0, // if USDC return base token (index 1), else return 0 for USDC out
         parsedFxPoolData
     );
 
@@ -677,7 +680,7 @@ export const _spotPriceAfterSwapTokenInForExactTokenOut = (
         _oBals, // _oBals
         _nBals, // _nBals
         targetAmountInNumeraire, // input amount
-        1, // output index,
+        isUSDC(poolPairData.tokenIn) ? 0 : 1, // if USDC return 0 else return 1 for base token
         parsedFxPoolData
     );
 

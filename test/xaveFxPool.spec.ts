@@ -151,7 +151,7 @@ describe('Test for fxPools', () => {
                 // @todo add expected for amountOut
             });
 
-            it.skip('OriginSwap/_exactTokenInForTokenOut XSGD > ? USDC', async () => {
+            it('OriginSwap/_exactTokenInForTokenOut XSGD > ? USDC', async () => {
                 const amountIn = bnum(parseFixed('100000', 6).toString());
 
                 console.log('AMOUNT IN :', amountIn);
@@ -237,7 +237,7 @@ describe('Test for fxPools', () => {
                 );
             });
 
-            it.skip('TargetSwap / tokenInForExactTokenOut ? XSGD > USDC', async () => {
+            it('TargetSwap / tokenInForExactTokenOut ? XSGD > USDC', async () => {
                 const amountOut = bnum(parseFixed('10000', 6).toString());
                 const poolData = testPools.pools[0];
                 const newPool = FxPool.fromPool(poolData);
