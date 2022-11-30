@@ -32,7 +32,7 @@ export function calcSpotPriceYGivenX(
     params: GyroEParams,
     d: DerivedGyroEParams,
     r: Vector2
-) {
+): BigNumber {
     const ab: Vector2 = {
         x: virtualOffset0(params, d, r),
         y: virtualOffset1(params, d, r),
@@ -55,7 +55,7 @@ export function calcSpotPriceXGivenY(
     params: GyroEParams,
     d: DerivedGyroEParams,
     r: Vector2
-) {
+): BigNumber {
     const ba: Vector2 = {
         x: virtualOffset1(params, d, r),
         y: virtualOffset0(params, d, r),
@@ -168,7 +168,7 @@ export function normalizedLiquidityYIn(
     derived: DerivedGyroEParams,
     fee: BigNumber,
     rVec: Vector2
-) {
+): BigNumber {
     const { y0, c, s, lambda, b, ls, R } = setup(
         balances,
         params,
@@ -215,7 +215,7 @@ export function normalizedLiquidityXIn(
     derived: DerivedGyroEParams,
     fee: BigNumber,
     rVec: Vector2
-) {
+): BigNumber {
     const { x0, c, s, lambda, a, ls, R } = setup(
         balances,
         params,
@@ -262,7 +262,7 @@ export function dPyDXIn(
     derived: DerivedGyroEParams,
     fee: BigNumber,
     rVec: Vector2
-) {
+): BigNumber {
     const { x0, c, s, lambda, a, ls, R } = setup(
         balances,
         params,
@@ -307,7 +307,7 @@ export function dPxDYIn(
     derived: DerivedGyroEParams,
     fee: BigNumber,
     rVec: Vector2
-) {
+): BigNumber {
     const { y0, c, s, lambda, b, ls, R } = setup(
         balances,
         params,
@@ -352,7 +352,7 @@ export function dPxDXOut(
     derived: DerivedGyroEParams,
     fee: BigNumber,
     rVec: Vector2
-) {
+): BigNumber {
     const { x0, s, lambda, a, ls, R, f } = setup(
         balances,
         params,
@@ -384,7 +384,7 @@ export function dPyDYOut(
     derived: DerivedGyroEParams,
     fee: BigNumber,
     rVec: Vector2
-) {
+): BigNumber {
     const { y0, c, lambda, b, ls, R, f } = setup(
         balances,
         params,

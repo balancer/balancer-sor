@@ -1,4 +1,4 @@
-import { BigNumber, formatFixed } from '@ethersproject/bignumber';
+import { BigNumber } from '@ethersproject/bignumber';
 import { WeiPerEther as ONE } from '@ethersproject/constants';
 import { MAX_BALANCES, MAX_INVARIANT } from './constants';
 import { ONE_XP, SMALL } from '../../gyroHelpers/constants';
@@ -41,7 +41,7 @@ export function calculateNormalizedLiquidity(
     r: Vector2,
     fee: BigNumber,
     tokenInIsToken0: boolean
-) {
+): BigNumber {
     if (tokenInIsToken0) {
         return normalizedLiquidityXIn(balances, params, derived, fee, r);
     } else {
@@ -53,7 +53,7 @@ export function calculateInvariantWithError(
     balances: BigNumber[],
     params: GyroEParams,
     derived: DerivedGyroEParams
-) {
+): [BigNumber, BigNumber] {
     const [x, y] = balances;
 
     if (x.add(y).gt(MAX_BALANCES)) throw new Error('MAX ASSETS EXCEEDED');

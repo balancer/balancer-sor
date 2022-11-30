@@ -10,10 +10,12 @@ export default BigNumber;
 
 type BigNumberish = BigNumber | number | string;
 
-export const bn = (value: BigNumberish) => new BigNumber(value);
+export const bn = (value: BigNumberish): BigNumber => new BigNumber(value);
 
-export const scale = (value: BigNumberish, decimalPlaces: number) =>
+export const scale = (value: BigNumberish, decimalPlaces: number): BigNumber =>
     bn(value).times(bn(10).pow(decimalPlaces));
 
-export const scaleAll = (values: BigNumberish[], decimalPlaces: number) =>
-    values.map((x) => scale(x, decimalPlaces));
+export const scaleAll = (
+    values: BigNumberish[],
+    decimalPlaces: number
+): BigNumber[] => values.map((x) => scale(x, decimalPlaces));

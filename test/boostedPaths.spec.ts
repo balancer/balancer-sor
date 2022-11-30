@@ -255,19 +255,19 @@ describe('multiple boosted pools, path creation test', () => {
             );
             assert.equal(
                 boostedPaths[0].id,
-                'LBPweightedTusdOhmBBaUSD-TUSDbbaUSD-BAL'
-            );
-            assert.equal(
-                boostedPaths[1].id,
                 'LBPweightedTusdOhmweightedTusdWethweightedBalWeth'
             );
             assert.equal(
+                boostedPaths[1].id,
+                'LBPweightedTusdOhmBBaUSD-TUSDbbaUSD-BAL'
+            );
+            assert.equal(
                 boostedPaths[2].id,
-                'LBPweightedTusdOhmBBaUSD-TUSDweightedWeth-BBausdweightedBalWeth'
+                'LBPweightedTusdOhmweightedTusdWethweightedWeth-BBausdbbaUSD-BAL'
             );
             assert.equal(
                 boostedPaths[3].id,
-                'LBPweightedTusdOhmweightedTusdWethweightedWeth-BBausdbbaUSD-BAL'
+                'LBPweightedTusdOhmBBaUSD-TUSDweightedWeth-BBausdweightedBalWeth'
             );
             const OHM = tokenIn;
             const tokensChains = [

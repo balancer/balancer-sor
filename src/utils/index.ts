@@ -6,7 +6,7 @@ export const isSameAddress = (address1: string, address2: string): boolean =>
 
 /// Parses a fixed-point decimal string into a BigNumber
 /// If we do not have enough decimals to express the number, we truncate it
-export function safeParseFixed(value: string, decimals: number = 0): BigNumber {
+export function safeParseFixed(value: string, decimals = 0): BigNumber {
     const [integer, fraction] = value.split('.');
     if (!fraction) {
         return parseFixed(value, decimals);

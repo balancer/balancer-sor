@@ -91,7 +91,7 @@ export function buildTx(
     wallet: Wallet,
     swapInfo: SwapInfo,
     swapType: SwapTypes
-) {
+): any {
     const funds = {
         sender: wallet.address,
         recipient: wallet.address,

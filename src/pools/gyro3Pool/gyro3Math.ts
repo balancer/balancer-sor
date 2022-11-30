@@ -1,7 +1,6 @@
 import { BigNumber } from '@ethersproject/bignumber';
 import { WeiPerEther as ONE } from '@ethersproject/constants';
 import {
-    _SAFE_LARGE_POW3_THRESHOLD,
     _INVARIANT_MIN_ITERATIONS,
     _INVARIANT_SHRINKING_FACTOR_PER_STEP,
 } from './constants';

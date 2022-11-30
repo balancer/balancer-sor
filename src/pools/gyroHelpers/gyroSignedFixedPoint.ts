@@ -17,52 +17,52 @@ import {
 /// ARITHMETIC HELPERS
 /////////
 
-export function mulUp(a: BigNumber, b: BigNumber) {
+export function mulUp(a: BigNumber, b: BigNumber): BigNumber {
     const product = a.mul(b);
     return product.sub(1).div(ONE).add(1);
 }
 
-export function divUp(a: BigNumber, b: BigNumber) {
+export function divUp(a: BigNumber, b: BigNumber): BigNumber {
     const aInflated = a.mul(ONE);
     return aInflated.sub(1).div(b).add(1);
 }
 
-export function mulDown(a: BigNumber, b: BigNumber) {
+export function mulDown(a: BigNumber, b: BigNumber): BigNumber {
     const product = a.mul(b);
     return product.div(ONE);
 }
 
-export function divDown(a: BigNumber, b: BigNumber) {
+export function divDown(a: BigNumber, b: BigNumber): BigNumber {
     const aInflated = a.mul(ONE);
     return aInflated.div(b);
 }
 
-export function mulXpU(a: BigNumber, b: BigNumber) {
+export function mulXpU(a: BigNumber, b: BigNumber): BigNumber {
     return a.mul(b).div(ONE_XP);
 }
 
-export function divXpU(a: BigNumber, b: BigNumber) {
+export function divXpU(a: BigNumber, b: BigNumber): BigNumber {
     if (b.isZero()) throw new Error('ZERO DIVISION');
     return a.mul(ONE_XP).div(b);
 }
 
-export function mulDownMagU(a: BigNumber, b: BigNumber) {
+export function mulDownMagU(a: BigNumber, b: BigNumber): BigNumber {
     return a.mul(b).div(ONE);
 }
 
-export function divDownMagU(a: BigNumber, b: BigNumber) {
+export function divDownMagU(a: BigNumber, b: BigNumber): BigNumber {
     if (b.isZero()) throw new Error('ZERO DIVISION');
     return a.mul(ONE).div(b);
 }
 
-export function mulUpMagU(a: BigNumber, b: BigNumber) {
+export function mulUpMagU(a: BigNumber, b: BigNumber): BigNumber {
     const product = a.mul(b);
     if (product.gt(0)) return product.sub(1).div(ONE).add(1);
     else if (product.lt(0)) return product.add(1).div(ONE).sub(1);
     else return BigNumber.from(0);
 }
 
-export function divUpMagU(a: BigNumber, b: BigNumber) {
+export function divUpMagU(a: BigNumber, b: BigNumber): BigNumber {
     if (b.isZero()) throw new Error('ZERO DIVISION');
     if (b.lt(0)) {
         b = b.mul(-1);
@@ -76,7 +76,7 @@ export function divUpMagU(a: BigNumber, b: BigNumber) {
     }
 }
 
-export function mulUpXpToNpU(a: BigNumber, b: BigNumber) {
+export function mulUpXpToNpU(a: BigNumber, b: BigNumber): BigNumber {
     const TenPower19 = BigNumber.from(10).pow(19);
     const b1 = b.div(TenPower19);
     const b2 = b.isNegative()
@@ -89,7 +89,7 @@ export function mulUpXpToNpU(a: BigNumber, b: BigNumber) {
         : prod1.add(prod2.div(TenPower19)).sub(1).div(TenPower19).add(1);
 }
 
-export function mulDownXpToNpU(a: BigNumber, b: BigNumber) {
+export function mulDownXpToNpU(a: BigNumber, b: BigNumber): BigNumber {
     const TenPower19 = BigNumber.from(10).pow(19);
     const b1 = b.div(TenPower19);
     const b2 = b.isNegative()
@@ -106,14 +106,15 @@ export function mulDownXpToNpU(a: BigNumber, b: BigNumber) {
 /// SQUARE ROOT
 /////////
 
-export function sqrt(input: BigNumber, tolerance: BigNumber) {
+export function sqrt(input: BigNumber, tolerance: BigNumber): BigNumber {
     if (input.isZero()) {
         return BigNumber.from(0);
     }
     let guess = makeInitialGuess(input);
 
     // 7 iterations
-    for (let i of new Array(7).fill(0)) {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    for (const i of new Array(7).fill(0)) {
         guess = guess.add(input.mul(ONE).div(guess)).div(2);
     }
 

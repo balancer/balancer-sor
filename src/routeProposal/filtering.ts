@@ -151,9 +151,9 @@ export function producePaths(
 // (b) Among phantom pools, we include those that contain the pool token of a linear pool.
 // (c) Among every pool, we include those that contain the pool token of
 // a pool from the previous step.
-// (d) We include connections of tokenIn and tokenOut to WETH.
+// (d) We include connections of tokenIn and tokenOut to WETH (only highest liquidity for each).
 // (e) When tokenIn or tokenOut are tokens offered at an LBP, we also include
-// the LBPs and the connections of the corresponding raising tokens with WETH.
+// the LBPs and the corresponding highest liquidity connections of the raising tokens with WETH.
 // (f) We include the pool weth/wsteth
 //
 // To build the paths using boosted pools we use the following algorithm.
@@ -177,10 +177,9 @@ export function getBoostedGraph(
     const graphPoolsSet: Set<PoolBase> = new Set();
     const linearPools: PoolBase[] = [];
     const phantomPools: PoolBase[] = [];
-    const relevantRaisingTokens: string[] = [];
     // Here we add all linear pools, take note of phantom pools,
-    // add LBP pools with tokenIn or tokenOut and take note of the
-    // corresponding raising tokens.
+    // add LBP pools with tokenIn or tokenOut and their corresponding
+    // highest liquidity WETH connections
     for (const id in poolsAllDict) {
         const pool = poolsAllDict[id];
         if (pool.poolType == PoolTypes.Linear) {
@@ -207,7 +206,19 @@ export function getBoostedGraph(
                     );
                     if (raisingTokenIn) {
                         graphPoolsSet.add(pool);
-                        relevantRaisingTokens.push(raisingTokenIn);
+                        if (raisingTokenIn !== wethAddress) {
+                            const bestRaisingTokenInToWeth =
+                                getHighestLiquidityPool(
+                                    raisingTokenIn,
+                                    wethAddress,
+                                    poolsAllDict
+                                );
+                            if (bestRaisingTokenInToWeth) {
+                                graphPoolsSet.add(
+                                    poolsAllDict[bestRaisingTokenInToWeth]
+                                );
+                            }
+                        }
                     }
                     const raisingTokenOut: string | undefined = getRaisingToken(
                         pool,
@@ -216,7 +227,19 @@ export function getBoostedGraph(
                     );
                     if (raisingTokenOut) {
                         graphPoolsSet.add(pool);
-                        relevantRaisingTokens.push(raisingTokenOut);
+                        if (raisingTokenOut !== wethAddress) {
+                            const bestWethToRaisingTokenOut =
+                                getHighestLiquidityPool(
+                                    wethAddress,
+                                    raisingTokenOut,
+                                    poolsAllDict
+                                );
+                            if (bestWethToRaisingTokenOut) {
+                                graphPoolsSet.add(
+                                    poolsAllDict[bestWethToRaisingTokenOut]
+                                );
+                            }
+                        }
                     }
                 }
             }
@@ -254,21 +277,10 @@ export function getBoostedGraph(
         (pool) => pool.address
     );
     // Here we include every pool that has a pool token from the previous step
-    // and pools having relevant raising tokens and WETH.
     for (const id in poolsAllDict) {
         const pool = poolsAllDict[id];
         for (const secondStepPoolAddress of secondStepPoolsAddresses) {
             if (pool.tokensList.includes(secondStepPoolAddress)) {
-                graphPoolsSet.add(pool);
-            }
-        }
-        const tokensList = pool.tokensList;
-        for (const raisingToken of relevantRaisingTokens) {
-            if (
-                tokensList.includes(raisingToken) &&
-                tokensList.includes(wethAddress) &&
-                raisingToken !== wethAddress
-            ) {
                 graphPoolsSet.add(pool);
             }
         }

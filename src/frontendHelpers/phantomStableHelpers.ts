@@ -21,7 +21,7 @@ export function BPTForTokensZeroPriceImpact(
     fee: BigNumberish,
     rates: BigNumberish[]
 ): BigNumber {
-    const amountsAfterFee = amounts.map((amountIn, i) => {
+    const amountsAfterFee = amounts.map((amountIn) => {
         const amount = BigNumber.from(amountIn);
         const feeAmount = amount.mul(fee).div(ONE);
         return amount.sub(feeAmount);

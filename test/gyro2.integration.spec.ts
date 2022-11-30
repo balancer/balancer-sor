@@ -1,20 +1,6 @@
 // TS_NODE_PROJECT='tsconfig.testing.json' npx mocha -r ts-node/register test/gyro2.integration.spec.ts
 
 import dotenv from 'dotenv';
-import { parseFixed } from '@ethersproject/bignumber';
-import { AddressZero } from '@ethersproject/constants';
-import { expect } from 'chai';
-import { JsonRpcProvider } from '@ethersproject/providers';
-import { Vault__factory } from '@balancer-labs/typechain';
-import { vaultAddr } from './lib/constants';
-import {
-    SOR,
-    SubgraphPoolBase,
-    SwapTypes,
-    TokenPriceService,
-} from '../src/index';
-import { Network, MULTIADDR, SOR_CONFIG } from './testScripts/constants';
-import { OnChainPoolDataService } from './lib/onchainData';
 
 dotenv.config();
 
