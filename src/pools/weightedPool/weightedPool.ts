@@ -32,9 +32,10 @@ import {
     _spotPriceAfterSwapBPTInForExactTokenOut,
     _derivativeSpotPriceAfterSwapExactBPTInForTokenOut,
     _derivativeSpotPriceAfterSwapExactTokenInForBPTOut,
+    _calcTokensOutGivenExactBptIn,
 } from './weightedMath';
 import { BigNumber, formatFixed, parseFixed } from '@ethersproject/bignumber';
-import { WeiPerEther as ONE } from '@ethersproject/constants';
+import { WeiPerEther as ONE, Zero } from '@ethersproject/constants';
 import { takeToPrecision18 } from '../../router/helpersClass';
 import { MathSol } from '../../utils/basicOperations';
 
@@ -153,6 +154,12 @@ export class WeightedPool implements PoolBase {
         return poolPairData;
     }
 
+    getNormalizedWeights(): bigint[] {
+        return this.tokens.map((t) =>
+            parseFixed(t.weight, 18).mul(ONE).div(this.totalWeight).toBigInt()
+        );
+    }
+
     // Normalized liquidity is an abstract term that can be thought of the
     // inverse of the slippage. It is proportional to the token balances in the
     // pool but also depends on the shape of the invariant curve.
@@ -193,14 +200,13 @@ export class WeightedPool implements PoolBase {
     // Updates the balance of a given token for the pool
     updateTokenBalanceForPool(token: string, newBalance: BigNumber): void {
         // token is BPT
-        if (this.address == token) {
+        if (isSameAddress(this.address, token)) {
             this.totalShares = newBalance;
-        } else {
-            // token is underlying in the pool
-            const T = this.tokens.find((t) => isSameAddress(t.address, token));
-            if (!T) throw Error('Pool does not contain this token');
-            T.balance = formatFixed(newBalance, T.decimals);
         }
+        // token is underlying in the pool
+        const T = this.tokens.find((t) => isSameAddress(t.address, token));
+        if (!T) throw Error('Pool does not contain this token');
+        T.balance = formatFixed(newBalance, T.decimals);
     }
 
     // Using BigNumber.js decimalPlaces (dp), allows us to consider token decimal accuracy correctly,
@@ -319,6 +325,53 @@ export class WeightedPool implements PoolBase {
             return scale(bnum(returnAmt.toString()), -18);
         } catch (err) {
             return ZERO;
+        }
+    }
+
+    /**
+     * _calcTokensOutGivenExactBptIn
+     * @param bptAmountIn EVM scale.
+     * @returns EVM scale.
+     */
+    _calcTokensOutGivenExactBptIn(bptAmountIn: BigNumber): BigNumber[] {
+        // token balances are stored in human scale and must be EVM for maths
+        const balancesEvm = this.tokens
+            .filter((t) => !isSameAddress(t.address, this.address))
+            .map((t) => parseFixed(t.balance, t.decimals).toBigInt());
+        let returnAmt: bigint[];
+        try {
+            returnAmt = _calcTokensOutGivenExactBptIn(
+                balancesEvm,
+                bptAmountIn.toBigInt(),
+                this.totalShares.toBigInt()
+            );
+            return returnAmt.map((a) => BigNumber.from(a.toString()));
+        } catch (err) {
+            return new Array(balancesEvm.length).fill(ZERO);
+        }
+    }
+
+    /**
+     * _calcBptOutGivenExactTokensIn
+     * @param amountsIn EVM Scale
+     * @returns EVM Scale
+     */
+    _calcBptOutGivenExactTokensIn(amountsIn: BigNumber[]): BigNumber {
+        try {
+            // token balances are stored in human scale and must be EVM for maths
+            const balancesEvm = this.tokens
+                .filter((t) => !isSameAddress(t.address, this.address))
+                .map((t) => parseFixed(t.balance, t.decimals).toBigInt());
+            const bptAmountOut = _calcBptOutGivenExactTokensIn(
+                balancesEvm,
+                this.getNormalizedWeights(),
+                amountsIn.map((a) => a.toBigInt()),
+                this.totalShares.toBigInt(),
+                this.swapFee.toBigInt()
+            );
+            return BigNumber.from(bptAmountOut.toString());
+        } catch (err) {
+            return Zero;
         }
     }
 

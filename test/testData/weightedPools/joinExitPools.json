@@ -73,7 +73,7 @@
         },
         {
             "id": "weighted-pool-using-a-BPT",
-            "address": " ",
+            "address": "0x0000000000000000000000000000000000000001",
             "swapFee": "0.002",
             "swapEnabled": true,
             "tokens": [

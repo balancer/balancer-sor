@@ -1,5 +1,5 @@
 import { BigNumber, formatFixed, parseFixed } from '@ethersproject/bignumber';
-import { WeiPerEther as ONE } from '@ethersproject/constants';
+import { WeiPerEther as ONE, Zero } from '@ethersproject/constants';
 import { isSameAddress } from '../../utils';
 import { BigNumber as OldBigNumber, bnum, ZERO } from '../../utils/bignumber';
 import {
@@ -19,6 +19,8 @@ import {
 import {
     _calcOutGivenIn,
     _calcInGivenOut,
+    _calcBptOutGivenExactTokensIn,
+    _calcTokensOutGivenExactBptIn,
 } from '../stablePool/stableMathBigInt';
 import { StablePoolPairData } from '../stablePool/stablePool';
 
@@ -286,6 +288,65 @@ export class MetaStablePool implements PoolBase {
         } catch (err) {
             console.error(`_evminGivenOut: ${err.message}`);
             return ZERO;
+        }
+    }
+
+    /**
+     * _calcTokensOutGivenExactBptIn
+     * @param bptAmountIn EVM scale.
+     * @returns EVM scale.
+     */
+    _calcTokensOutGivenExactBptIn(bptAmountIn: BigNumber): BigNumber[] {
+        // token balances are stored in human scale and must be EVM for maths
+        // Must take priceRate into consideration
+        const balancesEvm = this.tokens
+            .filter((t) => !isSameAddress(t.address, this.address))
+            .map(({ balance, priceRate, decimals }) =>
+                parseFixed(balance, 18)
+                    .mul(parseFixed(priceRate, decimals))
+                    .div(ONE)
+                    .toBigInt()
+            );
+        let returnAmt: bigint[];
+        try {
+            returnAmt = _calcTokensOutGivenExactBptIn(
+                balancesEvm,
+                bptAmountIn.toBigInt(),
+                this.totalShares.toBigInt()
+            );
+            return returnAmt.map((a) => BigNumber.from(a.toString()));
+        } catch (err) {
+            return new Array(balancesEvm.length).fill(ZERO);
+        }
+    }
+
+    /**
+     * _calcBptOutGivenExactTokensIn
+     * @param amountsIn EVM Scale
+     * @returns EVM Scale
+     */
+    _calcBptOutGivenExactTokensIn(amountsIn: BigNumber[]): BigNumber {
+        try {
+            // token balances are stored in human scale and must be EVM for maths
+            // Must take priceRate into consideration
+            const balancesEvm = this.tokens
+                .filter((t) => !isSameAddress(t.address, this.address))
+                .map(({ balance, priceRate, decimals }) =>
+                    parseFixed(balance, 18)
+                        .mul(parseFixed(priceRate, decimals))
+                        .div(ONE)
+                        .toBigInt()
+                );
+            const bptAmountOut = _calcBptOutGivenExactTokensIn(
+                this.amp.toBigInt(),
+                balancesEvm,
+                amountsIn.map((a) => a.toBigInt()),
+                this.totalShares.toBigInt(),
+                BigInt(0)
+            );
+            return BigNumber.from(bptAmountOut.toString());
+        } catch (err) {
+            return Zero;
         }
     }
 
