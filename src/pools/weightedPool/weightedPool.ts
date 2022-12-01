@@ -165,8 +165,13 @@ export class WeightedPool implements PoolBase {
     // pool but also depends on the shape of the invariant curve.
     // As a standard, we define normalized liquidity in tokenOut
     getNormalizedLiquidity(poolPairData: WeightedPoolPairData): OldBigNumber {
-        // this should be different if tokenIn or tokenOut are the BPT
-        return bnum(
+        const derivativeSpotPriceAtZero =
+            this._derivativeSpotPriceAfterSwapExactTokenInForTokenOut(
+                poolPairData,
+                ZERO
+            );
+        const ans = bnum(1).div(derivativeSpotPriceAtZero);
+        const ansOld = bnum(
             formatFixed(
                 poolPairData.balanceOut
                     .mul(poolPairData.weightIn)
@@ -174,6 +179,10 @@ export class WeightedPool implements PoolBase {
                 poolPairData.decimalsOut
             )
         );
+        console.log(ans.toString());
+        console.log(ansOld.toString());
+        if (ans.isNaN()) return ZERO;
+        else return ans;
     }
 
     getLimitAmountSwap(
