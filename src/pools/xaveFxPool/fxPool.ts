@@ -216,7 +216,7 @@ export class FxPool implements PoolBase {
         poolPairData: FxPoolPairData,
         amount: OldBigNumber
     ): OldBigNumber {
-        return _spotPriceAfterSwapTokenInForExactTokenOut(amount, poolPairData);
+        return _spotPriceAfterSwapTokenInForExactTokenOut(poolPairData, amount);
     }
 
     _derivativeSpotPriceAfterSwapExactTokenInForTokenOut(

@@ -54,7 +54,6 @@ describe('Test for fxPools', () => {
         });
     });
 
-    // @todo check with khidir
     // copied from the other implementations of the other project
     context('limit amounts', () => {
         it(`getLimitAmountSwap, token to token`, async () => {
@@ -90,7 +89,6 @@ describe('Test for fxPools', () => {
     });
 
     context('Test Swaps', () => {
-        // @todo check with khidir
         // copied from the other implementations of the other project
         context('class functions', () => {
             // @todo check with khidir
@@ -107,7 +105,7 @@ describe('Test for fxPools', () => {
         });
 
         context('_exactTokenInForTokenOut', () => {
-            it('OriginSwap/_exactTokenInForTokenOut USDC > ? XSGD', async () => {
+            it.skip('OriginSwap/_exactTokenInForTokenOut USDC > ? XSGD', async () => {
                 const amountIn = bnum(parseFixed('100000', 6).toString());
 
                 console.log('AMOUNT IN :', amountIn);
@@ -152,7 +150,7 @@ describe('Test for fxPools', () => {
             });
 
             it('OriginSwap/_exactTokenInForTokenOut XSGD > ? USDC', async () => {
-                const amountIn = bnum(parseFixed('100000', 6).toString());
+                const amountIn = bnum(parseFixed('610000', 6).toString());
 
                 console.log('AMOUNT IN :', amountIn);
                 const poolData = testPools.pools[0];
@@ -197,14 +195,16 @@ describe('Test for fxPools', () => {
         });
 
         context('_tokenInForExactTokenOut', () => {
-            it('TargetSwap / tokenInForExactTokenOut ? USDC > XSGD', async () => {
-                const amountOut = bnum(parseFixed('10000', 6).toString());
+            // @todo double check spot price and derivative
+            it.skip('TargetSwap / tokenInForExactTokenOut ? USDC > XSGD', async () => {
+                const amountOut = bnum(parseFixed('610000', 6).toString());
                 const poolData = testPools.pools[0];
                 const newPool = FxPool.fromPool(poolData);
                 const poolPairData = newPool.parsePoolPairData(
                     newPool.tokens[0].address, // tokenIn, USDC
                     newPool.tokens[1].address // tokenOut, XSGD
                 );
+
                 const amountIn = newPool._tokenInForExactTokenOut(
                     poolPairData,
                     amountOut
@@ -238,7 +238,7 @@ describe('Test for fxPools', () => {
             });
 
             it('TargetSwap / tokenInForExactTokenOut ? XSGD > USDC', async () => {
-                const amountOut = bnum(parseFixed('10000', 6).toString());
+                const amountOut = bnum(parseFixed('610000', 6).toString());
                 const poolData = testPools.pools[0];
                 const newPool = FxPool.fromPool(poolData);
                 const poolPairData = newPool.parsePoolPairData(
@@ -264,13 +264,13 @@ describe('Test for fxPools', () => {
                 console.log(`Amount in: ${amountIn}`);
 
                 console.log(
-                    `_spotPriceAfterSwapExactTokenInForTokenOut: ${newPool._spotPriceAfterSwapExactTokenInForTokenOut(
+                    `_spotPriceAfterSwapExactTokenInForTokenOut: ${newPool._spotPriceAfterSwapTokenInForExactTokenOut(
                         poolPairData,
                         amountOut
                     )}`
                 );
                 console.log(
-                    `_derivativeSpotPriceAfterSwapExactTokenInForTokenOut: ${newPool._derivativeSpotPriceAfterSwapExactTokenInForTokenOut(
+                    `_derivativeSpotPriceAfterSwapExactTokenInForTokenOut: ${newPool._derivativeSpotPriceAfterSwapTokenInForExactTokenOut(
                         poolPairData,
                         amountOut
                     )}`

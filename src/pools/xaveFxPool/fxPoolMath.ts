@@ -52,10 +52,53 @@ const isUSDC = (address: string) => {
     }
 };
 
+const calculateGivenAmountInNumeraire = (
+    isOriginSwap: boolean,
+    poolPairData: FxPoolPairData,
+    amount: number
+) => {
+    let calculatedNumeraireAmount;
+
+    if (isOriginSwap) {
+        calculatedNumeraireAmount = isUSDC(poolPairData.tokenIn)
+            ? viewNumeraireAmount(
+                  amount,
+                  rateToNumber(poolPairData.tokenOutRate.toNumber()),
+                  getBaseDecimals(poolPairData.decimalsOut)
+              )
+            : viewNumeraireAmount(
+                  amount,
+                  rateToNumber(poolPairData.tokenInRate.toNumber()),
+                  getBaseDecimals(poolPairData.decimalsIn)
+              );
+
+        console.log('origin swap');
+    } else {
+        calculatedNumeraireAmount = isUSDC(poolPairData.tokenOut)
+            ? viewNumeraireAmount(
+                  amount,
+                  rateToNumber(poolPairData.tokenInRate.toNumber()),
+                  getBaseDecimals(poolPairData.decimalsIn)
+              )
+            : viewNumeraireAmount(
+                  amount,
+                  rateToNumber(poolPairData.tokenOutRate.toNumber()),
+                  getBaseDecimals(poolPairData.decimalsOut)
+              );
+
+        console.log('target swap');
+    }
+
+    console.log('calculated amount', calculatedNumeraireAmount);
+
+    return calculatedNumeraireAmount;
+};
+
 // everything is in order of USDC, base token
 const getParsedFxPoolData = (
     amount: OldBigNumber,
-    poolPairData: FxPoolPairData
+    poolPairData: FxPoolPairData,
+    isOriginSwap: boolean
 ): ParsedFxPoolData => {
     console.log(
         `Reserves for tokenIn in raw amount: ${
@@ -65,6 +108,7 @@ const getParsedFxPoolData = (
              poolPairData.balanceOut.toNumber() / ONE_TO_THE_SIX_NUM
          }`
     );
+
     // reserves are not in wei
     const baseReserves = isUSDC(poolPairData.tokenIn)
         ? viewNumeraireAmount(
@@ -106,29 +150,19 @@ const getParsedFxPoolData = (
         ? rateToNumber(poolPairData.tokenOutRate.toNumber())
         : rateToNumber(poolPairData.tokenInRate.toNumber());
 
-    const quoteTokenRate = isUSDC(poolPairData.tokenIn)
-        ? rateToNumber(poolPairData.tokenInRate.toNumber())
-        : rateToNumber(poolPairData.tokenOutRate.toNumber());
+    // const quoteTokenRate = isUSDC(poolPairData.tokenIn)
+    //     ? rateToNumber(poolPairData.tokenInRate.toNumber())
+    //     : rateToNumber(poolPairData.tokenOutRate.toNumber());
 
     console.log(`Basetoken rate: ${baseTokenRate}`);
 
     // given amount in or out converted to numeraire
     console.log('parsing amountsIn from: ', Number(amount.toString()));
-    const givenAmountInNumeraire = isUSDC(poolPairData.tokenIn)
-        ? Number(
-              viewNumeraireAmount(
-                  Number(amount.toString()),
-                  quoteTokenRate,
-                  getBaseDecimals(poolPairData.decimalsIn)
-              ).toString()
-          )
-        : Number(
-              viewNumeraireAmount(
-                  Number(amount.toString()),
-                  baseTokenRate,
-                  getBaseDecimals(poolPairData.decimalsIn)
-              ).toString()
-          );
+    const givenAmountInNumeraire = calculateGivenAmountInNumeraire(
+        isOriginSwap,
+        poolPairData,
+        Number(amount.toString())
+    );
 
     console.log(`givenAmountInNumeraire: ${givenAmountInNumeraire}`);
 
@@ -208,9 +242,10 @@ const viewNumeraireAmount = (
     rate: number,
     baseDecimals: number
 ) => {
-    // console.log('viewNumeraireAmount _amount(raw amount) : ', _amount);
+    console.log('viewNumeraireAmount _amount(raw amount) : ', _amount);
     const amount_ = (_amount * rate) / baseDecimals;
-    // console.log('viewNumeraireAmount _amount * rate : ', amount_);
+    // const amount_ = _amount * rate;
+    console.log('viewNumeraireAmount _amount * rate : ', amount_);
     return amount_;
 };
 
@@ -311,12 +346,14 @@ const calculateTrade = (
 
         const prevAmount = outputAmt_;
 
+        console.log('_omega in CalculateTrade', _omega * 1e18);
+        console.log('_psi in CalculateTrade', _psi * 1e18);
+
         outputAmt_ =
             _omega < _psi
                 ? -(_inputAmt + (_omega - _psi))
                 : -(_inputAmt + lambda * (_omega - _psi));
 
-        // @todo check
         if (
             outputAmt_ / ONE_TO_THE_THIRTEEN_NUM ==
             prevAmount / ONE_TO_THE_THIRTEEN_NUM
@@ -427,7 +464,7 @@ export function _exactTokenInForTokenOut(
     poolPairData: FxPoolPairData
 ): OldBigNumber {
     console.log('_exactTokenInForTokenOut amount going in: ', amount);
-    const parsedFxPoolData = getParsedFxPoolData(amount, poolPairData);
+    const parsedFxPoolData = getParsedFxPoolData(amount, poolPairData, true);
 
     const targetAmountInNumeraire = parsedFxPoolData.givenAmountInNumeraire;
 
@@ -484,8 +521,8 @@ export function _tokenInForExactTokenOut(
     poolPairData: FxPoolPairData
 ): OldBigNumber {
     // const amountIn = scale(amount, poolPairData.decimalsOut);
-    const parsedFxPoolData = getParsedFxPoolData(amount, poolPairData);
-    const targetAmountInNumeraire = parsedFxPoolData.givenAmountInNumeraire;
+    const parsedFxPoolData = getParsedFxPoolData(amount, poolPairData, false);
+    const targetAmountInNumeraire = -parsedFxPoolData.givenAmountInNumeraire;
 
     if (poolPairData.tokenIn === poolPairData.tokenOut) {
         viewRawAmount(
@@ -496,10 +533,17 @@ export function _tokenInForExactTokenOut(
         ); // must be the token out
     }
 
+    console.log('value going into calculate trade:', targetAmountInNumeraire);
+
     const _oGLiq = parsedFxPoolData._oGLiq;
     const _nGLiq = parsedFxPoolData._nGLiq;
     const _oBals = parsedFxPoolData._oBals;
     const _nBals = parsedFxPoolData._nBals;
+
+    console.log('_oGLiq before calculate trade:', _oGLiq);
+    console.log('_nGLiq before calculate trade:', _nGLiq);
+    console.log('_oBals before calculate trade:', _oBals);
+    console.log('_nBals before calculate trade:', _nBals);
 
     const _amt = calculateTrade(
         _oGLiq, // _oGLiq
@@ -521,7 +565,7 @@ export function _tokenInForExactTokenOut(
             Math.abs(_amtWithFee),
             rateToNumber(poolPairData.tokenInRate.toNumber()),
             getBaseDecimals(poolPairData.decimalsIn)
-        ); // must be the token out, @todo change token symbol type
+        ); // must be the token out
     }
 }
 
@@ -531,8 +575,10 @@ export const spotPriceBeforeSwap = (
 ): OldBigNumber => {
     // input amount 1 XSGD to get the output in USDC
     const inputAmountInNumeraire = 1;
-    const parsedFxPoolData = getParsedFxPoolData(amount, poolPairData);
+    const parsedFxPoolData = getParsedFxPoolData(amount, poolPairData, true);
 
+    console.log('spotPriceBeforeSwap');
+    console.log(parsedFxPoolData);
     const _oGLiq = parsedFxPoolData._oGLiq;
     const _nGLiq = parsedFxPoolData._nGLiq;
     const _oBals = parsedFxPoolData._oBals;
@@ -557,21 +603,23 @@ export const spotPriceBeforeSwap = (
 };
 
 // spot price after origin swap
+// @todo change inputAmount to reflect numeraire value. inputAmount now is in raw amount.
 export const _spotPriceAfterSwapExactTokenInForTokenOut = (
     poolPairData: FxPoolPairData,
     amount: OldBigNumber
 ): OldBigNumber => {
-    const parsedFxPoolData = getParsedFxPoolData(amount, poolPairData);
+    const parsedFxPoolData = getParsedFxPoolData(amount, poolPairData, true);
 
     console.log('_spotPriceAfterSwapExactTokenInForTokenOut');
     console.log(parsedFxPoolData);
 
     const targetAmountInNumeraire = parsedFxPoolData.givenAmountInNumeraire;
-    const inputAmount =
-        Number(amount.toString()) / getBaseDecimals(poolPairData.decimalsIn);
-    console.log(
-        `targetAmountInNumeraire: ${targetAmountInNumeraire}, inputAmount:${inputAmount}`
-    );
+    // const inputAmount =
+    //     Number(amount.toString()) / getBaseDecimals(poolPairData.decimalsIn);
+
+    // console.log(
+    //     `targetAmountInNumeraire: ${targetAmountInNumeraire}, inputAmount:${inputAmount}`
+    // );
 
     const _oGLiq = parsedFxPoolData._oGLiq;
     const _nBals = parsedFxPoolData._nBals;
@@ -593,7 +641,7 @@ export const _spotPriceAfterSwapExactTokenInForTokenOut = (
 
     const outputAmount = outputAfterTrade[0];
 
-    console.log(`input: ${inputAmount}, output: ${outputAmount}`);
+    console.log(`input: ${targetAmountInNumeraire}, output: ${outputAmount}`);
 
     const maxBetaLimit: number = (1 + beta) * 0.5 * _oGLiq;
     console.log(`maxBetaLimit: ${maxBetaLimit}`);
@@ -619,7 +667,9 @@ export const _spotPriceAfterSwapExactTokenInForTokenOut = (
                 'spotPriceAfterOriginSwap token0 -> token1 : outside beta'
             );
             return bnum(
-                (Math.abs(outputAmount) / Math.abs(inputAmount)) * currentRate
+                (Math.abs(outputAmount * (1 - epsilon)) /
+                    Math.abs(targetAmountInNumeraire)) *
+                    currentRate
             );
         } else {
             console.log(
@@ -639,7 +689,8 @@ export const _spotPriceAfterSwapExactTokenInForTokenOut = (
                 'spotPriceAfterOriginSwap token1 -> token0 : outside beta'
             );
             const ratioOfOutputAndInput =
-                Math.abs(outputAmount) / Math.abs(inputAmount);
+                Math.abs(outputAmount * (1 - epsilon)) /
+                Math.abs(targetAmountInNumeraire);
 
             return bnum(ratioOfOutputAndInput * currentRate);
         } else {
@@ -653,16 +704,17 @@ export const _spotPriceAfterSwapExactTokenInForTokenOut = (
 };
 
 // spot price after target swap
+// @todo change inputAmount to reflect numeraire value. inputAmount now is in raw amount.
 export const _spotPriceAfterSwapTokenInForExactTokenOut = (
-    amount: OldBigNumber,
-    poolPairData: FxPoolPairData
+    poolPairData: FxPoolPairData,
+    amount: OldBigNumber
 ): OldBigNumber => {
-    const parsedFxPoolData = getParsedFxPoolData(amount, poolPairData);
+    const parsedFxPoolData = getParsedFxPoolData(amount, poolPairData, false);
 
-    const targetAmountInNumeraire = parsedFxPoolData.givenAmountInNumeraire;
+    const targetAmountInNumeraire = -parsedFxPoolData.givenAmountInNumeraire;
 
-    const inputAmount =
-        Number(amount.toString()) / getBaseDecimals(poolPairData.decimalsIn);
+    // const inputAmount =
+    //     Number(amount.toString()) / getBaseDecimals(poolPairData.decimalsIn);
 
     const _oGLiq = parsedFxPoolData._oGLiq;
     const _nBals = parsedFxPoolData._nBals;
@@ -685,11 +737,15 @@ export const _spotPriceAfterSwapTokenInForExactTokenOut = (
     );
 
     console.log(
-        `targetAmountInNumeraire: ${targetAmountInNumeraire}, inputAmount:${inputAmount}`
+        `targetAmountInNumeraire: ${targetAmountInNumeraire}, inputAmount:${targetAmountInNumeraire}`
     );
     const outputAmount = outputAfterTrade[0];
 
-    console.log(`input: ${inputAmount}, output: ${outputAmount}`);
+    console.log(
+        `input: ${targetAmountInNumeraire}, output w/ epsilon: ${
+            outputAmount * 1.0005
+        }, output w/o epsilon: ${outputAmount}`
+    );
 
     const maxBetaLimit: number = (1 + beta) * 0.5 * _oGLiq;
     console.log(`maxBetaLimit: ${maxBetaLimit}`);
@@ -714,7 +770,9 @@ export const _spotPriceAfterSwapTokenInForExactTokenOut = (
                 'spotPriceAfterOriginSwap token0 -> token1 : outside beta'
             );
             return bnum(
-                (Math.abs(outputAmount) / Math.abs(inputAmount)) * currentRate
+                (Math.abs(targetAmountInNumeraire) /
+                    Math.abs(outputAmount * (1 + epsilon))) *
+                    currentRate
             );
         } else {
             console.log(
@@ -736,10 +794,12 @@ export const _spotPriceAfterSwapTokenInForExactTokenOut = (
             console.log(
                 'spotPriceAfterOriginSwap token1 -> token0 : outside beta'
             );
-            const ratioOfOutputAndInput =
-                Math.abs(outputAmount) / Math.abs(inputAmount);
 
-            return bnum(ratioOfOutputAndInput * currentRate);
+            return bnum(
+                (Math.abs(targetAmountInNumeraire) /
+                    Math.abs(outputAmount * (1 + epsilon))) *
+                    currentRate
+            );
         } else {
             console.log(
                 'spotPriceAfterOriginSwap token1 -> token0 : within beta'
@@ -750,6 +810,7 @@ export const _spotPriceAfterSwapTokenInForExactTokenOut = (
     }
 };
 
+// origin swap
 export const _derivativeSpotPriceAfterSwapExactTokenInForTokenOut = (
     amount: OldBigNumber,
     poolPairData: FxPoolPairData
@@ -760,12 +821,13 @@ export const _derivativeSpotPriceAfterSwapExactTokenInForTokenOut = (
     return yMinusX.div(x);
 };
 
+// target swap
 export const _derivativeSpotPriceAfterSwapTokenInForExactTokenOut = (
     amount: OldBigNumber,
     poolPairData: FxPoolPairData
 ): OldBigNumber => {
     const x = spotPriceBeforeSwap(bnum('1'), poolPairData);
-    const y = _spotPriceAfterSwapExactTokenInForTokenOut(poolPairData, amount);
+    const y = _spotPriceAfterSwapTokenInForExactTokenOut(poolPairData, amount);
 
     const yMinusX = y.minus(x);
     return yMinusX.div(x);
