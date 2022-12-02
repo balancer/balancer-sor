@@ -181,4 +181,5 @@ export async function printOutput(
     );
     console.log(`Cost to swap: ${costToSwapScaled.toString()}`);
     console.log(`Return Considering Fees: ${returnWithFeesScaled.toString()}`);
+    console.log('spot price: ', swapInfo.marketSp);
 }
