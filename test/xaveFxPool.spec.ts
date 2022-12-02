@@ -106,7 +106,7 @@ describe('Test for fxPools', () => {
 
         context('_exactTokenInForTokenOut', () => {
             it.skip('OriginSwap/_exactTokenInForTokenOut USDC > ? XSGD', async () => {
-                const amountIn = bnum(parseFixed('100000', 6).toString());
+                const amountIn = bnum(parseFixed('20000', 6).toString());
 
                 console.log('AMOUNT IN :', amountIn);
                 const poolData = testPools.pools[0];
@@ -149,8 +149,8 @@ describe('Test for fxPools', () => {
                 // @todo add expected for amountOut
             });
 
-            it('OriginSwap/_exactTokenInForTokenOut XSGD > ? USDC', async () => {
-                const amountIn = bnum(parseFixed('610000', 6).toString());
+            it.skip('OriginSwap/_exactTokenInForTokenOut XSGD > ? USDC', async () => {
+                const amountIn = bnum(parseFixed('200000', 6).toString());
 
                 console.log('AMOUNT IN :', amountIn);
                 const poolData = testPools.pools[0];
@@ -196,8 +196,8 @@ describe('Test for fxPools', () => {
 
         context('_tokenInForExactTokenOut', () => {
             // @todo double check spot price and derivative
-            it.skip('TargetSwap / tokenInForExactTokenOut ? USDC > XSGD', async () => {
-                const amountOut = bnum(parseFixed('610000', 6).toString());
+            it('TargetSwap / tokenInForExactTokenOut ? USDC > XSGD', async () => {
+                const amountOut = bnum(parseFixed('200000', 6).toString());
                 const poolData = testPools.pools[0];
                 const newPool = FxPool.fromPool(poolData);
                 const poolPairData = newPool.parsePoolPairData(
@@ -238,7 +238,7 @@ describe('Test for fxPools', () => {
             });
 
             it('TargetSwap / tokenInForExactTokenOut ? XSGD > USDC', async () => {
-                const amountOut = bnum(parseFixed('610000', 6).toString());
+                const amountOut = bnum(parseFixed('200000', 6).toString());
                 const poolData = testPools.pools[0];
                 const newPool = FxPool.fromPool(poolData);
                 const poolPairData = newPool.parsePoolPairData(
