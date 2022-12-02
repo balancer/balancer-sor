@@ -60,6 +60,8 @@ const calculateGivenAmountInNumeraire = (
     let calculatedNumeraireAmount;
 
     if (isOriginSwap) {
+        console.log('origin swap');
+        // tokenIn is given
         calculatedNumeraireAmount = isUSDC(poolPairData.tokenIn)
             ? viewNumeraireAmount(
                   amount,
@@ -71,22 +73,20 @@ const calculateGivenAmountInNumeraire = (
                   rateToNumber(poolPairData.tokenInRate.toNumber()),
                   getBaseDecimals(poolPairData.decimalsIn)
               );
-
-        console.log('origin swap');
     } else {
+        console.log('target swap');
+        // tokenOut is given
         calculatedNumeraireAmount = isUSDC(poolPairData.tokenOut)
             ? viewNumeraireAmount(
                   amount,
-                  rateToNumber(poolPairData.tokenInRate.toNumber()),
-                  getBaseDecimals(poolPairData.decimalsIn)
+                  rateToNumber(poolPairData.tokenOutRate.toNumber()),
+                  getBaseDecimals(poolPairData.decimalsOut)
               )
             : viewNumeraireAmount(
                   amount,
-                  rateToNumber(poolPairData.tokenOutRate.toNumber()),
-                  getBaseDecimals(poolPairData.decimalsOut)
+                  rateToNumber(poolPairData.tokenInRate.toNumber()),
+                  getBaseDecimals(poolPairData.decimalsIn)
               );
-
-        console.log('target swap');
     }
 
     console.log('calculated amount', calculatedNumeraireAmount);
