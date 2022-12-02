@@ -37,22 +37,27 @@ export function getEffectivePriceSwapForPath(
     path: NewPath,
     swapType: SwapTypes,
     amount: OldBigNumber,
-    inputDecimals: number
+    inputDecimals: number,
+    costReturnToken: BigNumber
 ): OldBigNumber {
     if (amount.lt(INFINITESIMAL)) {
         // Return spot price as code below would be 0/0 = undefined
         // or small_amount/0 or 0/small_amount which would cause bugs
         return getSpotPriceAfterSwapForPath(path, swapType, amount);
     }
-    const outputAmountSwap = getOutputAmountSwapForPath(
+
+    let outputAmountSwap = getOutputAmountSwapForPath(
         path,
         swapType,
         amount,
         inputDecimals
     );
+    const gasCost = bnum(costReturnToken.toString()).times(path.pools.length);
     if (swapType === SwapTypes.SwapExactIn) {
+        outputAmountSwap = outputAmountSwap.minus(gasCost);
         return amount.div(outputAmountSwap); // amountIn/AmountOut
     } else {
+        amount = amount.plus(gasCost);
         return outputAmountSwap.div(amount); // amountIn/AmountOut
     }
 }

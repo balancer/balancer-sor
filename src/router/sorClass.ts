@@ -75,7 +75,8 @@ export const optimizeSwapAmounts = (
                 swapType,
                 totalSwapAmount,
                 swapAmounts,
-                inputDecimals
+                inputDecimals,
+                costReturnToken
             );
         swapAmounts = bestAmounts;
 
@@ -144,13 +145,15 @@ const optimizePathDistribution = (
     swapType: SwapTypes,
     totalSwapAmount: BigNumber,
     initialSwapAmounts: OldBigNumber[],
-    inputDecimals: number
+    inputDecimals: number,
+    costReturnToken: BigNumber
 ): { paths: NewPath[]; swapAmounts: OldBigNumber[] } => {
     let [selectedPaths, exceedingAmounts] = getBestPathIds(
         allPaths,
         swapType,
         initialSwapAmounts,
-        inputDecimals
+        inputDecimals,
+        costReturnToken
     );
 
     let swapAmounts = initialSwapAmounts;
@@ -193,7 +196,8 @@ const optimizePathDistribution = (
             allPaths,
             swapType,
             swapAmounts,
-            inputDecimals
+            inputDecimals,
+            costReturnToken
         );
 
         if (newSelectedPaths.length === 0) break;
@@ -337,7 +341,8 @@ function getBestPathIds(
     originalPaths: NewPath[],
     swapType: SwapTypes,
     swapAmounts: OldBigNumber[],
-    inputDecimals: number
+    inputDecimals: number,
+    costReturnToken: BigNumber
 ): [NewPath[], OldBigNumber[]] {
     const selectedPaths: NewPath[] = [];
     const selectedPathExceedingAmounts: OldBigNumber[] = [];
@@ -363,7 +368,7 @@ function getBestPathIds(
                 // If path.limitAmount = swapAmount we set effectivePrice as
                 // Infinity because we know this path is maxed out and we want
                 // to select other paths that can still be improved on
-                let effectivePrice;
+                let effectivePrice: OldBigNumber;
                 if (
                     bnum(formatFixed(path.limitAmount, inputDecimals)).eq(
                         swapAmount
@@ -377,7 +382,8 @@ function getBestPathIds(
                         path,
                         swapType,
                         swapAmount,
-                        inputDecimals
+                        inputDecimals,
+                        costReturnToken
                     );
                 }
                 if (effectivePrice.lte(bestEffectivePrice)) {

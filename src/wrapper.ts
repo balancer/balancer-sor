@@ -34,7 +34,7 @@ export class SOR {
 
     private readonly defaultSwapOptions: SwapOptions = {
         gasPrice: parseFixed('50', 9),
-        swapGas: BigNumber.from('35000'),
+        swapGas: BigNumber.from('85000'),
         poolTypeFilter: PoolFilter.All,
         maxPools: 4,
         timestamp: Math.floor(Date.now() / 1000),
@@ -148,7 +148,7 @@ export class SOR {
      * @param {string} outputToken - Address of outputToken.
      * @param {number} outputTokenDecimals - Decimals of outputToken.
      * @param {BigNumber} gasPrice - Gas price used to calculate cost.
-     * @param {BigNumber} swapGas - Gas cost of a swap. Default=35000.
+     * @param {BigNumber} swapGas - Gas cost of a swap. Default=85000.
      * @returns {BigNumber} Price of a swap in outputToken denomination.
      */
     async getCostOfSwapInToken(
