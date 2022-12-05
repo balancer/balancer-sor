@@ -381,7 +381,7 @@ describe(`Tests for wrapper class.`, () => {
             { gasPrice, maxPools }
         );
 
-        const expectedTokenAddressesEth = [tokenInEth, tokenOut];
+        const expectedTokenAddressesEth = [tokenInEth, DAI.address, tokenOut];
 
         expect(expectedTokenAddressesEth).to.deep.eq(
             swapInfoEth.tokenAddresses
@@ -398,7 +398,7 @@ describe(`Tests for wrapper class.`, () => {
             { gasPrice, maxPools }
         );
 
-        const expectedTokenAddressesWeth = [tokenInWeth, tokenOut];
+        const expectedTokenAddressesWeth = [tokenInWeth, DAI.address, tokenOut];
 
         // Swaps/amts, etc should be same. Token list should be different
         expect(expectedTokenAddressesWeth).to.deep.eq(swapInfo.tokenAddresses);

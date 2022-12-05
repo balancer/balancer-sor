@@ -38,6 +38,7 @@ export function getEffectivePriceSwapForPath(
     swapType: SwapTypes,
     amount: OldBigNumber,
     inputDecimals: number,
+    outputDecimals: number,
     costReturnToken: BigNumber
 ): OldBigNumber {
     if (amount.lt(INFINITESIMAL)) {
@@ -52,9 +53,12 @@ export function getEffectivePriceSwapForPath(
         amount,
         inputDecimals
     );
-    const gasCost = bnum(costReturnToken.toString()).times(path.pools.length);
+    const gasCost = bnum(formatFixed(costReturnToken, outputDecimals)).times(
+        path.pools.length
+    );
     if (swapType === SwapTypes.SwapExactIn) {
         outputAmountSwap = outputAmountSwap.minus(gasCost);
+        if (outputAmountSwap.lte(ZERO)) return INFINITY;
         return amount.div(outputAmountSwap); // amountIn/AmountOut
     } else {
         amount = amount.plus(gasCost);

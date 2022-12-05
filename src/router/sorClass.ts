@@ -76,6 +76,7 @@ export const optimizeSwapAmounts = (
                 totalSwapAmount,
                 swapAmounts,
                 inputDecimals,
+                outputDecimals,
                 costReturnToken
             );
         swapAmounts = bestAmounts;
@@ -146,6 +147,7 @@ const optimizePathDistribution = (
     totalSwapAmount: BigNumber,
     initialSwapAmounts: OldBigNumber[],
     inputDecimals: number,
+    outputDecimals,
     costReturnToken: BigNumber
 ): { paths: NewPath[]; swapAmounts: OldBigNumber[] } => {
     let [selectedPaths, exceedingAmounts] = getBestPathIds(
@@ -153,6 +155,7 @@ const optimizePathDistribution = (
         swapType,
         initialSwapAmounts,
         inputDecimals,
+        outputDecimals,
         costReturnToken
     );
 
@@ -197,6 +200,7 @@ const optimizePathDistribution = (
             swapType,
             swapAmounts,
             inputDecimals,
+            outputDecimals,
             costReturnToken
         );
 
@@ -233,7 +237,6 @@ export const formatSwaps = (
             highestSwapAmt = swapAmount;
             largestSwapPath = path;
         }
-
         // // TODO: remove. To debug only!
         /*
         console.log(
@@ -342,6 +345,7 @@ function getBestPathIds(
     swapType: SwapTypes,
     swapAmounts: OldBigNumber[],
     inputDecimals: number,
+    outputDecimals: number,
     costReturnToken: BigNumber
 ): [NewPath[], OldBigNumber[]] {
     const selectedPaths: NewPath[] = [];
@@ -383,6 +387,7 @@ function getBestPathIds(
                         swapType,
                         swapAmount,
                         inputDecimals,
+                        outputDecimals,
                         costReturnToken
                     );
                 }
