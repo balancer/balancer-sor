@@ -8,7 +8,7 @@ import { PoolTypes, SwapTypes } from '../src';
 import { FxPool } from '../src/pools/xaveFxPool/fxPool';
 // Add new pool test data in Subgraph Schema format
 import testPools from './testData/fxPool/fxPool.json';
-import { parseFixed } from '@ethersproject/bignumber';
+import { formatFixed, parseFixed } from '@ethersproject/bignumber';
 import { spotPriceBeforeSwap } from '../src/pools/xaveFxPool/fxPoolMath';
 
 // @todo add tests for within beta
@@ -195,7 +195,6 @@ describe('Test for fxPools', () => {
         });
 
         context('_tokenInForExactTokenOut', () => {
-            // @todo double check spot price and derivative
             it('TargetSwap / tokenInForExactTokenOut ? USDC > XSGD', async () => {
                 const amountOut = bnum(parseFixed('200000', 6).toString());
                 const poolData = testPools.pools[0];
@@ -205,14 +204,11 @@ describe('Test for fxPools', () => {
                     newPool.tokens[1].address // tokenOut, XSGD
                 );
 
-                const amountIn = newPool._tokenInForExactTokenOut(
-                    poolPairData,
-                    amountOut
-                );
-
                 //@todo add expected amountIn
                 // expect(amountIn).to.eq(KNOWN_AMOUNT);
-
+                console.log(
+                    '=================================spotPriceBeforeSwap================================='
+                );
                 console.log(
                     'spotPriceBeforeSwap: ',
                     spotPriceBeforeSwap(
@@ -220,17 +216,35 @@ describe('Test for fxPools', () => {
                         poolPairData
                     ).toNumber()
                 );
+                console.log(
+                    '=================================TARGET SWAP================================='
+                );
 
-                console.log(`Amount in: ${amountIn}`);
+                const amountIn = newPool._tokenInForExactTokenOut(
+                    poolPairData,
+                    amountOut
+                );
 
                 console.log(
-                    `_spotPriceAfterSwapExactTokenInForTokenOut: ${newPool._spotPriceAfterSwapExactTokenInForTokenOut(
+                    `TargetSwap Results in Raw Amount: ${formatFixed(
+                        amountIn.toNumber(),
+                        poolPairData.decimalsIn
+                    )}`
+                );
+                console.log(
+                    '=================================_spotPriceAfterSwapTokenInForExactTokenOut================================='
+                );
+                console.log(
+                    `_spotPriceAfterSwapTokenInForExactTokenOut: ${newPool._spotPriceAfterSwapTokenInForExactTokenOut(
                         poolPairData,
                         amountOut
                     )}`
                 );
                 console.log(
-                    `_derivativeSpotPriceAfterSwapExactTokenInForTokenOut: ${newPool._derivativeSpotPriceAfterSwapExactTokenInForTokenOut(
+                    '=================================_derivativeSpotPriceAfterSwapTokenInForExactTokenOut================================='
+                );
+                console.log(
+                    `_derivativeSpotPriceAfterSwapTokenInForExactTokenOut: ${newPool._derivativeSpotPriceAfterSwapTokenInForExactTokenOut(
                         poolPairData,
                         amountOut
                     )}`
@@ -245,14 +259,12 @@ describe('Test for fxPools', () => {
                     newPool.tokens[1].address, // tokenIn, XSGD
                     newPool.tokens[0].address // tokenOut, USDC
                 );
-                const amountIn = newPool._tokenInForExactTokenOut(
-                    poolPairData,
-                    amountOut
-                );
 
                 //@todo add expected amountIn
                 // expect(amountIn).to.eq(KNOWN_AMOUNT);
-
+                console.log(
+                    '=================================spotPriceBeforeSwap================================='
+                );
                 console.log(
                     'spotPriceBeforeSwap: ',
                     spotPriceBeforeSwap(
@@ -261,13 +273,32 @@ describe('Test for fxPools', () => {
                     ).toNumber()
                 );
 
-                console.log(`Amount in: ${amountIn}`);
+                console.log(
+                    '=================================TARGET SWAP================================='
+                );
 
+                const amountIn = newPool._tokenInForExactTokenOut(
+                    poolPairData,
+                    amountOut
+                );
+
+                console.log(
+                    `TargetSwap Results in Raw Amount: ${formatFixed(
+                        amountIn.toNumber(),
+                        poolPairData.decimalsIn
+                    )}`
+                );
+                console.log(
+                    '=================================_spotPriceAfterSwapExactTokenInForTokenOut================================='
+                );
                 console.log(
                     `_spotPriceAfterSwapExactTokenInForTokenOut: ${newPool._spotPriceAfterSwapTokenInForExactTokenOut(
                         poolPairData,
                         amountOut
                     )}`
+                );
+                console.log(
+                    '=================================_derivativeSpotPriceAfterSwapExactTokenInForTokenOut================================='
                 );
                 console.log(
                     `_derivativeSpotPriceAfterSwapExactTokenInForTokenOut: ${newPool._derivativeSpotPriceAfterSwapTokenInForExactTokenOut(

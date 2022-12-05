@@ -61,32 +61,69 @@ const calculateGivenAmountInNumeraire = (
 
     if (isOriginSwap) {
         console.log('origin swap');
+
+        console.log(
+            'token in: ',
+            rateToNumber(poolPairData.tokenInRate.toNumber())
+        );
+
+        console.log(
+            'token out: ',
+            rateToNumber(poolPairData.tokenOutRate.toNumber())
+        );
         // tokenIn is given
-        calculatedNumeraireAmount = isUSDC(poolPairData.tokenIn)
-            ? viewNumeraireAmount(
-                  amount,
-                  rateToNumber(poolPairData.tokenOutRate.toNumber()),
-                  getBaseDecimals(poolPairData.decimalsOut)
-              )
-            : viewNumeraireAmount(
-                  amount,
-                  rateToNumber(poolPairData.tokenInRate.toNumber()),
-                  getBaseDecimals(poolPairData.decimalsIn)
-              );
+        // calculatedNumeraireAmount = isUSDC(poolPairData.tokenIn)
+        //     ? viewNumeraireAmount(
+        //           amount,
+        //           rateToNumber(poolPairData.tokenOutRate.toNumber()),
+        //           getBaseDecimals(poolPairData.decimalsOut)
+        //       )
+        //     : viewNumeraireAmount(
+        //           amount,
+        //           rateToNumber(poolPairData.tokenInRate.toNumber()),
+        //           getBaseDecimals(poolPairData.decimalsIn)
+        //       );
+
+        calculatedNumeraireAmount = viewNumeraireAmount(
+            amount,
+            rateToNumber(poolPairData.tokenInRate.toNumber()),
+            getBaseDecimals(poolPairData.decimalsIn)
+        );
     } else {
         console.log('target swap');
         // tokenOut is given
-        calculatedNumeraireAmount = isUSDC(poolPairData.tokenOut)
-            ? viewNumeraireAmount(
-                  amount,
-                  rateToNumber(poolPairData.tokenOutRate.toNumber()),
-                  getBaseDecimals(poolPairData.decimalsOut)
-              )
-            : viewNumeraireAmount(
-                  amount,
-                  rateToNumber(poolPairData.tokenInRate.toNumber()),
-                  getBaseDecimals(poolPairData.decimalsIn)
-              );
+
+        console.log(
+            `isUSDC(poolPairData.tokenOut) = ${isUSDC(poolPairData.tokenOut)}`
+        );
+
+        console.log(
+            'token in: ',
+            rateToNumber(poolPairData.tokenInRate.toNumber())
+        );
+
+        console.log(
+            'token out: ',
+            rateToNumber(poolPairData.tokenOutRate.toNumber())
+        );
+
+        // calculatedNumeraireAmount = isUSDC(poolPairData.tokenOut)
+        //     ? viewNumeraireAmount(
+        //           amount,
+        //           rateToNumber(poolPairData.tokenOutRate.toNumber()),
+        //           getBaseDecimals(poolPairData.decimalsOut)
+        //       )
+        //     : viewNumeraireAmount(
+        //           amount,
+        //           rateToNumber(poolPairData.tokenInRate.toNumber()),
+        //           getBaseDecimals(poolPairData.decimalsIn)
+        //       );
+
+        calculatedNumeraireAmount = viewNumeraireAmount(
+            amount,
+            rateToNumber(poolPairData.tokenOutRate.toNumber()),
+            getBaseDecimals(poolPairData.decimalsOut)
+        );
     }
 
     console.log('calculated amount', calculatedNumeraireAmount);
@@ -136,13 +173,16 @@ const getParsedFxPoolData = (
           );
 
     console.log(
-        `Token in is USDC?  ${isUSDC(
-            poolPairData.tokenIn
-        )}, Token out is in usdc? ${isUSDC(poolPairData.tokenOut)}`
-    );
-
-    console.log(
-        `Base reserves: ${baseReserves}, usdcReserves: ${usdcReserves} `
+        `${
+            isUSDC(poolPairData.tokenIn)
+                ? 'Token in is USDC, '
+                : 'Token in is Base Token, '
+        } ${
+            isUSDC(poolPairData.tokenIn)
+                ? 'Token out is Base Token. '
+                : 'Token out is USDC. '
+        } Base reserves: ${baseReserves}, USDC Reserves: ${usdcReserves}
+    `
     );
 
     // rate is converted from chainlink to the actual rate in decimals
@@ -157,7 +197,14 @@ const getParsedFxPoolData = (
     console.log(`Basetoken rate: ${baseTokenRate}`);
 
     // given amount in or out converted to numeraire
-    console.log('parsing amountsIn from: ', Number(amount.toString()));
+    console.log(
+        `${
+            isOriginSwap
+                ? 'Origin swap given in raw amount: '
+                : 'Target swap given in raw amount: '
+        }:  ${Number(amount.toString())}`
+    );
+
     const givenAmountInNumeraire = calculateGivenAmountInNumeraire(
         isOriginSwap,
         poolPairData,
@@ -225,7 +272,7 @@ const viewRawAmount = (
 ): OldBigNumber => {
     console.log('Amount in viewRawAmount: ', _amount);
     console.log('viewRawAmount rate ', rate);
-    console.log(baseDecimals);
+    console.log('basedecimals: ', baseDecimals);
 
     const amountToBN = Math.round(_amount * baseDecimals);
     // removed 1e8 since rate
@@ -234,7 +281,8 @@ const viewRawAmount = (
     console.log('amount_ in viewRawAmount: ', amountToBN);
     console.log('number amountToBN / rate: ', amountToBN / rate);
 
-    return bnum(amountToBN / rate);
+    // Note: rounded off twice to remove decimals for conversion to big number
+    return bnum(Math.round(amountToBN / rate));
 };
 
 const viewNumeraireAmount = (
@@ -603,7 +651,6 @@ export const spotPriceBeforeSwap = (
 };
 
 // spot price after origin swap
-// @todo change inputAmount to reflect numeraire value. inputAmount now is in raw amount.
 export const _spotPriceAfterSwapExactTokenInForTokenOut = (
     poolPairData: FxPoolPairData,
     amount: OldBigNumber
@@ -726,6 +773,9 @@ export const _spotPriceAfterSwapTokenInForExactTokenOut = (
     const _nGLiq = parsedFxPoolData._nGLiq;
     const _oBals = parsedFxPoolData._oBals;
 
+    console.log(
+        '=================================OUTPUT AFTER TRADE================================='
+    );
     const outputAfterTrade = calculateTrade(
         _oGLiq, // _oGLiq
         _nGLiq, // _nGLiq
