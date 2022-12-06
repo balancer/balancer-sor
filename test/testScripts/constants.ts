@@ -179,6 +179,11 @@ export const ADDRESSES = {
             decimals: 18,
             symbol: 'auraBal',
         },
+        FIAT: {
+            address: '0x586aa273f262909eef8fa02d90ab65f5015e0516',
+            decimals: 18,
+            symbol: 'FIAT',
+        },
     },
     [Network.KOVAN]: {
         // Visit https://balancer-faucet.on.fleek.co/#/faucet for test tokens

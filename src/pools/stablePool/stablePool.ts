@@ -27,6 +27,8 @@ import {
     _calcInGivenOut,
     _calcBptOutGivenExactTokensIn,
     _calcTokensOutGivenExactBptIn,
+    _spotPriceAfterSwapExactTokenInForTokenOut as _spotPriceAfterSwapExactTokenInForTokenOutBigInt,
+    _spotPriceAfterSwapTokenInForExactTokenOut as _spotPriceAfterSwapTokenInForExactTokenOutBigInt,
 } from './stableMathBigInt';
 
 type StablePoolToken = Pick<SubgraphToken, 'address' | 'balance' | 'decimals'>;
@@ -316,14 +318,46 @@ export class StablePool implements PoolBase {
         poolPairData: StablePoolPairData,
         amount: OldBigNumber
     ): OldBigNumber {
-        return _spotPriceAfterSwapExactTokenInForTokenOut(amount, poolPairData);
+        const amtScaled = parseFixed(
+            amount.dp(poolPairData.decimalsIn).toString(),
+            18
+        );
+
+        const amt = _spotPriceAfterSwapExactTokenInForTokenOutBigInt(
+            this.amp.toBigInt(),
+            poolPairData.allBalancesScaled.map((balance) => balance.toBigInt()),
+            poolPairData.tokenIndexIn,
+            poolPairData.tokenIndexOut,
+            amtScaled.toBigInt(),
+            poolPairData.swapFee.toBigInt() // pass the fee?
+        );
+        const answer = scale(bnum(amt.toString()), -18).dp(
+            poolPairData.decimalsOut,
+            1
+        );
+        return answer;
     }
 
     _spotPriceAfterSwapTokenInForExactTokenOut(
         poolPairData: StablePoolPairData,
         amount: OldBigNumber
     ): OldBigNumber {
-        return _spotPriceAfterSwapTokenInForExactTokenOut(amount, poolPairData);
+        const amtScaled = parseFixed(amount.dp(18).toString(), 18);
+
+        let amt = _spotPriceAfterSwapTokenInForExactTokenOutBigInt(
+            this.amp.toBigInt(),
+            poolPairData.allBalancesScaled.map((balance) => balance.toBigInt()),
+            poolPairData.tokenIndexIn,
+            poolPairData.tokenIndexOut,
+            amtScaled.toBigInt(),
+            poolPairData.swapFee.toBigInt()
+        );
+
+        // this is downscaleUp
+        const scaleFactor = BigInt(10 ** (18 - poolPairData.decimalsIn));
+        amt = (amt + scaleFactor - BigInt(1)) / scaleFactor;
+
+        return bnum(amt.toString()).div(10 ** poolPairData.decimalsIn);
     }
 
     _derivativeSpotPriceAfterSwapExactTokenInForTokenOut(

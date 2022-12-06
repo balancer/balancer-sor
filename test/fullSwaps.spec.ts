@@ -426,7 +426,7 @@ describe('Tests full swaps against known values', () => {
             swapInfo.tokenAddresses[swapInfo.swaps[0].assetOutIndex],
             USDC.address
         );
-        assert.equal(swapInfo.swaps[0].amount, '692256505473431402');
+        assert.equal(swapInfo.swaps[0].amount, '692256505473326522');
         assert.equal(
             swapInfo.swaps[1].poolId,
             '0x57755f7dec33320bca83159c26e93751bfd30fbe'
@@ -439,10 +439,10 @@ describe('Tests full swaps against known values', () => {
             swapInfo.tokenAddresses[swapInfo.swaps[1].assetOutIndex],
             USDC.address
         );
-        assert.equal(swapInfo.swaps[1].amount, '77743494526568598');
+        assert.equal(swapInfo.swaps[1].amount, '77743494526673478');
     }).timeout(10000);
 
-    it('should full swap stable & weighted swapExactOut', async () => {
+    it('debug should full swap stable & weighted swapExactOut', async () => {
         const name = 'full swap stable & weighted swapExactOut';
         // const testPools = require('./testData/filterTestPools.json');
         const weighted: any = testPools.weightedOnly;
@@ -478,7 +478,7 @@ describe('Tests full swaps against known values', () => {
             },
         });
 
-        assert.equal(swapInfo.returnAmount.toString(), '100601647114105022960');
+        assert.equal(swapInfo.returnAmount.toString(), '100600365514359700911');
         assert.equal(swapInfo.swaps.length, 3);
         assert.equal(
             swapInfo.swaps[0].poolId,
@@ -492,7 +492,7 @@ describe('Tests full swaps against known values', () => {
             swapInfo.tokenAddresses[swapInfo.swaps[0].assetOutIndex],
             USDC.address
         );
-        assert.equal(swapInfo.swaps[0].amount, '82364889');
+        assert.equal(swapInfo.swaps[0].amount, '84819583');
         assert.equal(
             swapInfo.swaps[1].poolId,
             '0x75286e183d923a5f52f52be205e358c5c9101b09'
@@ -505,7 +505,7 @@ describe('Tests full swaps against known values', () => {
             swapInfo.tokenAddresses[swapInfo.swaps[1].assetOutIndex],
             USDC.address
         );
-        assert.equal(swapInfo.swaps[1].amount, '16512830');
+        assert.equal(swapInfo.swaps[1].amount, '14306013');
         assert.equal(
             swapInfo.swaps[2].poolId,
             '0x57755f7dec33320bca83159c26e93751bfd30fbe'
@@ -518,7 +518,7 @@ describe('Tests full swaps against known values', () => {
             swapInfo.tokenAddresses[swapInfo.swaps[2].assetOutIndex],
             USDC.address
         );
-        assert.equal(swapInfo.swaps[2].amount, '1854381');
+        assert.equal(swapInfo.swaps[2].amount, '1606504');
     }).timeout(10000);
 
     it('WBTC>MKR2, swapExactIn', async () => {

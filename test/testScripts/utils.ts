@@ -170,6 +170,7 @@ export async function printOutput(
         BigNumber.from('35000')
     );
     const costToSwapScaled = formatFixed(cost, returnDecimals);
+    console.log(`Spot price: `, swapInfo.marketSp);
     console.log(`Swaps:`);
     console.log(swapInfo.swaps);
     console.log(swapInfo.tokenAddresses);
