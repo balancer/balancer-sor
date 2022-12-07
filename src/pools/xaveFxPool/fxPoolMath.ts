@@ -17,7 +17,7 @@ export const ONE_TO_THE_THIRTEEN = BigInt(`${ONE_TO_THE_THIRTEEN_NUM}`);
 export const ONE_ETHER = scale(bnum('1'), 18);
 const CURVEMATH_MAX = 0.25; //CURVEMATH MAX from contract
 
-enum CurveMathRevert {
+export enum CurveMathRevert {
     LowerHalt = 'CurveMath/lower-halt',
     UpperHalt = 'CurveMath/upper-halt',
     SwapInvariantViolation = 'CurveMath/swap-invariant-violation',
@@ -238,12 +238,14 @@ const getParsedFxPoolData = (
     };
 };
 
-const rateToNumber = (rate: number) => {
+// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
+export const rateToNumber = (rate: number) => {
     return rate / ONE_TO_THE_EIGHT_NUM;
 };
 
 // get base decimals for
-const getBaseDecimals = (decimals: number) => {
+// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
+export const getBaseDecimals = (decimals: number) => {
     switch (decimals) {
         case 6: {
             return ONE_TO_THE_SIX_NUM;
@@ -265,21 +267,21 @@ const getBaseDecimals = (decimals: number) => {
 
 // Base Assimilator Functions
 // calculations are from the BaseToUsdAssiilato
-const viewRawAmount = (
+export const viewRawAmount = (
     _amount: number,
     rate: number,
     baseDecimals: number
 ): OldBigNumber => {
-    console.log('Amount in viewRawAmount: ', _amount);
-    console.log('viewRawAmount rate ', rate);
-    console.log('basedecimals: ', baseDecimals);
+    // console.log('Amount in viewRawAmount: ', _amount);
+    // console.log('viewRawAmount rate ', rate);
+    // console.log('basedecimals: ', baseDecimals);
 
     const amountToBN = Math.round(_amount * baseDecimals);
     // removed 1e8 since rate
 
-    console.log('amountToBN: ', amountToBN);
-    console.log('amount_ in viewRawAmount: ', amountToBN);
-    console.log('number amountToBN / rate: ', amountToBN / rate);
+    // console.log('amountToBN: ', amountToBN);
+    // console.log('amount_ in viewRawAmount: ', amountToBN);
+    // console.log('number amountToBN / rate: ', amountToBN / rate);
 
     // Note: rounded off twice to remove decimals for conversion to big number
     return bnum(Math.round(amountToBN / rate));
@@ -290,10 +292,10 @@ const viewNumeraireAmount = (
     rate: number,
     baseDecimals: number
 ) => {
-    console.log('viewNumeraireAmount _amount(raw amount) : ', _amount);
+    // console.log('viewNumeraireAmount _amount(raw amount) : ', _amount);
     const amount_ = (_amount * rate) / baseDecimals;
     // const amount_ = _amount * rate;
-    console.log('viewNumeraireAmount _amount * rate : ', amount_);
+    // console.log('viewNumeraireAmount _amount * rate : ', amount_);
     return amount_;
 };
 
@@ -554,7 +556,7 @@ export function _exactTokenInForTokenOut(
         const epsilon = parsedFxPoolData.epsilon;
         const _amtWithFee = _amt[0] * (1 - epsilon); // fee retained by the pool
         console.log('_exactTokenInForTokenOut _amtWithFee: ', _amtWithFee);
-        console.log('tokenOutRate: ', poolPairData.tokenOutRate.toNumber());
+
         return viewRawAmount(
             Math.abs(_amtWithFee),
             rateToNumber(poolPairData.tokenOutRate.toNumber()),
@@ -609,6 +611,8 @@ export function _tokenInForExactTokenOut(
         const epsilon = Number(formatFixed(poolPairData.epsilon, 18));
         const _amtWithFee = _amt[0] * (1 + epsilon); // fee retained by the pool
 
+        console.log(' _amtWithFee: ', _amtWithFee);
+
         return viewRawAmount(
             Math.abs(_amtWithFee),
             rateToNumber(poolPairData.tokenInRate.toNumber()),
@@ -626,7 +630,7 @@ export const spotPriceBeforeSwap = (
     const parsedFxPoolData = getParsedFxPoolData(amount, poolPairData, true);
 
     console.log('spotPriceBeforeSwap');
-    console.log(parsedFxPoolData);
+
     const _oGLiq = parsedFxPoolData._oGLiq;
     const _nGLiq = parsedFxPoolData._nGLiq;
     const _oBals = parsedFxPoolData._oBals;
