@@ -167,7 +167,7 @@ export async function printOutput(
         outputToken.address,
         outputToken.decimals,
         gasPrice,
-        BigNumber.from('35000')
+        BigNumber.from('85000')
     );
     const costToSwapScaled = formatFixed(cost, returnDecimals);
     console.log(`Swaps:`);
