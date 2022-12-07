@@ -473,7 +473,7 @@ describe(`Tests for Stable Pools.`, () => {
                 amp
             );
 
-            expect(bptAmt.toString()).eq('999912236433875470');
+            expect(bptAmt.toString()).eq('999212124447530974');
         });
 
         it('should test BPTForTokensZeroPriceImpact for single token add + VERY uneven pool', () => {
@@ -490,12 +490,12 @@ describe(`Tests for Stable Pools.`, () => {
             const bptAmt = BPTForTokensZeroPriceImpact(
                 allBalances,
                 decimals,
-                amounts, // This has to have the same lenght as allBalances
+                amounts, // This has to have the same length as allBalances
                 bptTotalSupply,
                 amp
             );
 
-            expect(bptAmt.toString()).eq('997252048236528013');
+            expect(bptAmt.toString()).eq('977051100758936668');
         });
 
         it('Derivative Bug Case', () => {
@@ -516,12 +516,12 @@ describe(`Tests for Stable Pools.`, () => {
             const bptAmt = BPTForTokensZeroPriceImpact(
                 allBalances,
                 decimals,
-                amounts, // This has to have the same lenght as allBalances
+                amounts, // This has to have the same length as allBalances
                 bptTotalSupply,
                 amp
             );
 
-            expect(bptAmt.toString()).eq('28957866405645758931354');
+            expect(bptAmt.toString()).eq('28957866405645758917829');
         });
     });
 });

@@ -10,6 +10,7 @@ import {
 import { DAI, USDC, USDT } from './lib/constants';
 import * as SDK from '@georgeroman/balancer-v2-pools';
 import poolsFromFile from './testData/stablePools/stablePoolWithBPT.json';
+import { BigNumber } from '@ethersproject/bignumber';
 
 describe('stable-math tests', () => {
     // Make a stable pool
@@ -30,9 +31,8 @@ describe('stable-math tests', () => {
     );
     const amount = 5000000000000;
     const amtScaled = scale(bnum(amount), 18);
-    const amp1000 = bnum(stableBptSwapPool.amp.toString()).times(1000);
-
-    const error = 0.004;
+    const amp = bnum(stableBptSwapPool.amp.toString());
+    const error = 0.00001;
 
     context('swap outcomes', () => {
         it('_exactTokenInForTokenOut', () => {
@@ -42,7 +42,7 @@ describe('stable-math tests', () => {
                 DAI.address
             );
             let sdkValue = SDK.StableMath._calcOutGivenIn(
-                amp1000,
+                amp,
                 allBalancesScaled,
                 poolPairData.tokenIndexIn,
                 poolPairData.tokenIndexOut,
@@ -66,7 +66,7 @@ describe('stable-math tests', () => {
                 DAI.address
             );
             let sdkValue = SDK.StableMath._calcInGivenOut(
-                amp1000,
+                amp,
                 allBalancesScaled,
                 poolPairData.tokenIndexIn,
                 poolPairData.tokenIndexOut,
