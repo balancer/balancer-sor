@@ -179,6 +179,16 @@ export const ADDRESSES = {
             decimals: 18,
             symbol: 'auraBal',
         },
+        USDT: {
+            address: '0xdac17f958d2ee523a2206206994597c13d831ec7',
+            decimals: 6,
+            symbol: 'USDT',
+        },
+        bbausdt: {
+            address: '0x2f4eb100552ef93840d5adc30560e5513dfffacb',
+            decimals: 18,
+            symbol: 'bbaUSDT',
+        },
     },
     [Network.KOVAN]: {
         // Visit https://balancer-faucet.on.fleek.co/#/faucet for test tokens
