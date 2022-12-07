@@ -22,7 +22,7 @@ import { PhantomStablePoolPairData } from './phantomStablePool';
     // n = number of tokens                                                                      //
     **********************************************************************************************/
 export function _invariant(
-    amp: BigNumber, // amp
+    A: BigNumber,
     balances: OldBigNumber[] // balances
 ): OldBigNumber {
     let sum = ZERO;
@@ -35,9 +35,9 @@ export function _invariant(
     }
     let prevInv = ZERO;
     let inv = sum;
-    // amp is passed as an ethers bignumber while maths uses bignumber.js
-    const ampAdjusted = bnum(formatFixed(amp, 3));
-    const ampTimesNpowN = ampAdjusted.times(totalCoins ** totalCoins); // A*n^n
+    // A is passed as an ethers bignumber while maths uses bignumber.js
+    const AAdjusted = bnum(formatFixed(A, 3));
+    const ATimesNpowN = AAdjusted.times(totalCoins ** totalCoins); // A*n^n
 
     for (let i = 0; i < 255; i++) {
         let P_D = bnum(totalCoins).times(balances[0]);
@@ -50,11 +50,11 @@ export function _invariant(
         inv = bnum(totalCoins)
             .times(inv)
             .times(inv)
-            .plus(ampTimesNpowN.times(sum).times(P_D))
+            .plus(ATimesNpowN.times(sum).times(P_D))
             .div(
                 bnum(totalCoins + 1)
                     .times(inv)
-                    .plus(ampTimesNpowN.minus(1).times(P_D))
+                    .plus(ATimesNpowN.minus(1).times(P_D))
             );
         // Equality with the precision of 1
         if (inv.gt(prevInv)) {
@@ -68,34 +68,6 @@ export function _invariant(
     //Result is rounded up
     return inv;
 }
-
-// // This function has to be zero if the invariant D was calculated correctly
-// // It was only used for double checking that the invariant was correct
-// export function _invariantValueFunction(
-//     amp: BigNumber, // amp
-//     balances: BigNumber[], // balances
-//     D: BigNumber
-// ): BigNumber {
-//     let invariantValueFunction;
-//     let prod = ONE;
-//     let sum = ZERO;
-//     for (let i = 0; i < balances.length; i++) {
-//         prod = prod.times(balances[i]);
-//         sum = sum.plus(balances[i]);
-//     }
-//     let n = bnum(balances.length);
-
-//     // NOT! working based on Daniel's equation: https://www.notion.so/Analytical-for-2-tokens-1cd46debef6648dd81f2d75bae941fea
-//     // invariantValueFunction = amp.times(sum)
-//     //     .plus((ONE.div(n.pow(n)).minus(amp)).times(D))
-//     //     .minus((ONE.div(n.pow(n.times(2)).times(prod))).times(D.pow(n.plus(ONE))));
-//     invariantValueFunction = D.pow(n.plus(ONE))
-//         .div(n.pow(n).times(prod))
-//         .plus(D.times(amp.times(n.pow(n)).minus(ONE)))
-//         .minus(amp.times(n.pow(n)).times(sum));
-
-//     return invariantValueFunction;
-// }
 
 // Adapted from StableMath.sol, _outGivenIn()
 // * Added swap fee at very first line
@@ -120,13 +92,16 @@ export function _exactTokenInForTokenOut(
     const { amp, allBalances, tokenIndexIn, tokenIndexOut, swapFee } =
         poolPairData;
     const balances = [...allBalances];
+    const n = balances.length;
+    const A = amp.div(n ** (n - 1));
+
     let tokenAmountIn = amount;
     tokenAmountIn = tokenAmountIn
         .times(EONE.sub(swapFee).toString())
         .div(EONE.toString());
 
     //Invariant is rounded up
-    const inv = _invariant(amp, balances);
+    const inv = _invariant(A, balances);
     let p = inv;
     let sum = ZERO;
     const totalCoins = bnum(balances.length);
@@ -148,7 +123,7 @@ export function _exactTokenInForTokenOut(
     }
 
     //Calculate out balance
-    const y = _solveAnalyticalBalance(sum, inv, amp, n_pow_n, p);
+    const y = _solveAnalyticalBalance(sum, inv, A, n_pow_n, p);
 
     //Result is rounded down
     // return balances[tokenIndexOut] > y ? balances[tokenIndexOut].minus(y) : 0;
@@ -178,9 +153,11 @@ export function _tokenInForExactTokenOut(
     const { amp, allBalances, tokenIndexIn, tokenIndexOut, swapFee } =
         poolPairData;
     const balances = [...allBalances];
+    const n = balances.length;
+    const A = amp.div(n ** (n - 1));
     const tokenAmountOut = amount;
     //Invariant is rounded up
-    const inv = _invariant(amp, balances);
+    const inv = _invariant(A, balances);
     let p = inv;
     let sum = ZERO;
     const totalCoins = bnum(balances.length);
@@ -202,7 +179,7 @@ export function _tokenInForExactTokenOut(
     }
 
     //Calculate in balance
-    const y = _solveAnalyticalBalance(sum, inv, amp, n_pow_n, p);
+    const y = _solveAnalyticalBalance(sum, inv, A, n_pow_n, p);
 
     //Result is rounded up
     return y
@@ -232,10 +209,12 @@ export function _tokenInForExactBPTOut(
         swapFee,
     } = poolPairData;
     const balances = [...allBalances];
+    const n = balances.length;
+    const A = amp.div(n ** (n - 1));
     const bptAmountOut = amount;
 
     // Get current invariant
-    const currentInvariant = _invariant(amp, balances);
+    const currentInvariant = _invariant(A, balances);
     // Calculate new invariant
     const bnumBalanceOut = bnum(formatFixed(virtualBptSupply, decimalsOut));
     const newInvariant = bnumBalanceOut
@@ -253,7 +232,7 @@ export function _tokenInForExactBPTOut(
     // get amountInAfterFee
     const newBalanceTokenIndex =
         _getTokenBalanceGivenInvariantAndAllOtherBalances(
-            amp,
+            A,
             balances,
             newInvariant,
             tokenIndexIn
@@ -287,10 +266,12 @@ export function _BPTInForExactTokenOut(
         swapFee,
     } = poolPairData;
     const balances = [...allBalances];
+    const n = balances.length;
+    const A = amp.div(n ** (n - 1));
     const tokenAmountOut = amount;
 
     // Get current invariant
-    const currentInvariant = _invariant(amp, balances);
+    const currentInvariant = _invariant(A, balances);
 
     // First calculate the sum of all token balances which will be used to calculate
     // the current weights of each token relative to the sum of all balances
@@ -320,7 +301,7 @@ export function _BPTInForExactTokenOut(
     balances[tokenIndexOut] = balances[tokenIndexOut].minus(amountOutBeforeFee);
 
     // get new invariant taking into account swap fees
-    const newInvariant = _invariant(amp, balances);
+    const newInvariant = _invariant(A, balances);
 
     // return amountBPTIn
     const bnumBalanceIn = bnum(formatFixed(virtualBptSupply, decimalsIn));
@@ -332,7 +313,7 @@ export function _BPTInForExactTokenOut(
 //This function calculates the balance of a given token (tokenIndex)
 // given all the other balances and the invariant
 function _getTokenBalanceGivenInvariantAndAllOtherBalances(
-    amp: BigNumber,
+    A: BigNumber,
     balances: OldBigNumber[],
     inv: OldBigNumber,
     tokenIndex: number
@@ -355,23 +336,23 @@ function _getTokenBalanceGivenInvariantAndAllOtherBalances(
     }
 
     // Calculate token balance
-    return _solveAnalyticalBalance(sum, inv, amp, nPowN, p);
+    return _solveAnalyticalBalance(sum, inv, A, nPowN, p);
 }
 
 //This function calcuates the analytical solution to find the balance required
 export function _solveAnalyticalBalance(
     sum: OldBigNumber,
     inv: OldBigNumber,
-    amp: BigNumber,
+    A: BigNumber,
     n_pow_n: OldBigNumber,
     p: OldBigNumber
 ): OldBigNumber {
-    // amp is passed as an ethers bignumber while maths uses bignumber.js
-    const oldBN_amp = bnum(formatFixed(amp, 3));
+    // A is passed as an ethers bignumber while maths uses bignumber.js
+    const oldBN_A = bnum(formatFixed(A, 3));
     //Round up p
-    p = p.times(inv).div(oldBN_amp.times(n_pow_n).times(n_pow_n));
+    p = p.times(inv).div(oldBN_A.times(n_pow_n).times(n_pow_n));
     //Round down b
-    const b = sum.plus(inv.div(oldBN_amp.times(n_pow_n)));
+    const b = sum.plus(inv.div(oldBN_A.times(n_pow_n)));
     //Round up c
     // let c = inv >= b
     //     ? inv.minus(b).plus(Math.sqrtUp(inv.minus(b).times(inv.minus(b)).plus(p.times(4))))
@@ -413,10 +394,12 @@ export function _exactTokenInForBPTOut(
         decimalsOut,
     } = poolPairData;
     const balances = [...allBalances];
+    const n = balances.length;
+    const A = amp.div(n ** (n - 1));
 
     const tokenAmountIn = amount;
     // Get current invariant
-    const currentInvariant = _invariant(amp, balances);
+    const currentInvariant = _invariant(A, balances);
 
     // First calculate the sum of all token balances which will be used to calculate
     // the current weights of each token relative to the sum of all balances
@@ -447,7 +430,7 @@ export function _exactTokenInForBPTOut(
     balances[tokenIndexIn] = balances[tokenIndexIn].plus(amountInAfterFee);
 
     // get new invariant taking into account swap fees
-    const newInvariant = _invariant(amp, balances);
+    const newInvariant = _invariant(A, balances);
 
     const bnumBalanceOut = bnum(formatFixed(virtualBptSupply, decimalsOut));
 
@@ -471,6 +454,8 @@ export function _exactBPTInForTokenOut(
 
     const { amp, allBalances, tokenIndexOut, swapFee } = poolPairData;
     const balances = [...allBalances];
+    const n = balances.length;
+    const A = amp.div(n ** (n - 1));
     const bptAmountIn = amount;
 
     /**********************************************************************************************
@@ -478,7 +463,7 @@ export function _exactBPTInForTokenOut(
     **********************************************************************************************/
 
     // Get current invariant
-    const currentInvariant = _invariant(amp, balances);
+    const currentInvariant = _invariant(A, balances);
     // Calculate new invariant
     const bnumBalanceIn = bnum(formatFixed(poolPairData.virtualBptSupply, 18));
     const newInvariant = bnumBalanceIn
@@ -495,7 +480,7 @@ export function _exactBPTInForTokenOut(
 
     const newBalanceTokenIndex =
         _getTokenBalanceGivenInvariantAndAllOtherBalances(
-            amp,
+            A,
             balances,
             newInvariant,
             tokenIndexOut
@@ -517,7 +502,7 @@ export function _exactBPTInForTokenOut(
 }
 
 export function _poolDerivatives(
-    amp: BigNumber,
+    A: BigNumber,
     balances: OldBigNumber[],
     tokenIndexIn: number,
     tokenIndexOut: number,
@@ -525,7 +510,7 @@ export function _poolDerivatives(
     wrt_out: boolean
 ): OldBigNumber {
     const totalCoins = balances.length;
-    const D = _invariant(amp, balances);
+    const D = _invariant(A, balances);
     let S = ZERO;
     for (let i = 0; i < totalCoins; i++) {
         if (i != tokenIndexIn && i != tokenIndexOut) {
@@ -534,9 +519,9 @@ export function _poolDerivatives(
     }
     const x = balances[tokenIndexIn];
     const y = balances[tokenIndexOut];
-    // amp is passed as an ethers bignumber while maths uses bignumber.js
-    const ampAdjusted = bnum(formatFixed(amp, 3));
-    const a = ampAdjusted.times(totalCoins ** totalCoins); // = ampTimesNpowN
+    // A is passed as an ethers bignumber while maths uses bignumber.js
+    const AAdjusted = bnum(formatFixed(A, 3));
+    const a = AAdjusted.times(totalCoins ** totalCoins); // = ATimesNpowN
     const b = S.minus(D).times(a).plus(D);
     const twoaxy = bnum(2).times(a).times(x).times(y);
     const partial_x = twoaxy.plus(a.times(y).times(y)).plus(b.times(y));
@@ -568,7 +553,7 @@ export function _poolDerivatives(
 /////////
 
 export function _poolDerivativesBPT(
-    amp: BigNumber,
+    A: BigNumber,
     balances: OldBigNumber[],
     bptSupply: OldBigNumber,
     tokenIndexIn: number,
@@ -577,7 +562,7 @@ export function _poolDerivativesBPT(
     wrt_out: boolean
 ): OldBigNumber {
     const totalCoins = balances.length;
-    const D = _invariant(amp, balances);
+    const D = _invariant(A, balances);
     let S = ZERO;
     let D_P = D.div(totalCoins);
     for (let i = 0; i < totalCoins; i++) {
@@ -587,7 +572,7 @@ export function _poolDerivativesBPT(
         }
     }
     const x = balances[tokenIndexIn];
-    const alpha = bnum(amp.toString()).times(totalCoins ** totalCoins); // = ampTimesNpowN
+    const alpha = bnum(A.toString()).times(totalCoins ** totalCoins); // = ATimesNpowN
     const beta = alpha.times(S);
     const gamma = ONE.minus(alpha);
     const partial_x = bnum(2)
@@ -641,6 +626,8 @@ export function _spotPriceAfterSwapExactTokenInForTokenOut(
     const { amp, allBalances, tokenIndexIn, tokenIndexOut, swapFee } =
         poolPairData;
     const balances = [...allBalances];
+    const n = balances.length;
+    const A = amp.div(n ** (n - 1));
     balances[tokenIndexIn] = balances[tokenIndexIn].plus(
         amount.times(EONE.sub(swapFee).toString()).div(EONE.toString())
     );
@@ -648,7 +635,7 @@ export function _spotPriceAfterSwapExactTokenInForTokenOut(
         _exactTokenInForTokenOut(amount, poolPairData)
     );
     let ans = _poolDerivatives(
-        amp,
+        A,
         balances,
         tokenIndexIn,
         tokenIndexOut,
@@ -668,13 +655,15 @@ export function _spotPriceAfterSwapTokenInForExactTokenOut(
     const { amp, allBalances, tokenIndexIn, tokenIndexOut, swapFee } =
         poolPairData;
     const balances = [...allBalances];
+    const n = balances.length;
+    const A = amp.div(n ** (n - 1));
     const _in = _tokenInForExactTokenOut(amount, poolPairData)
         .times(EONE.sub(swapFee).toString())
         .div(EONE.toString());
     balances[tokenIndexIn] = balances[tokenIndexIn].plus(_in);
     balances[tokenIndexOut] = balances[tokenIndexOut].minus(amount);
     let ans = _poolDerivatives(
-        amp,
+        A,
         balances,
         tokenIndexIn,
         tokenIndexOut,
@@ -718,6 +707,8 @@ export function _spotPriceAfterSwapExactTokenInForBPTOut(
         swapFee,
     } = poolPairData;
     const balances = [...allBalances];
+    const n = balances.length;
+    const A = amp.div(n ** (n - 1));
     const feeFactor = _feeFactor(balances, tokenIndexIn, swapFee);
     let bnumBalanceOut = bnum(formatFixed(virtualBptSupply, decimalsOut));
     balances[tokenIndexIn] = balances[tokenIndexIn].plus(
@@ -727,7 +718,7 @@ export function _spotPriceAfterSwapExactTokenInForBPTOut(
         _exactTokenInForBPTOut(amount, poolPairData)
     );
     let ans = _poolDerivativesBPT(
-        amp,
+        A,
         balances,
         bnumBalanceOut,
         tokenIndexIn,
@@ -754,13 +745,15 @@ export function _spotPriceAfterSwapTokenInForExactBPTOut(
         swapFee,
     } = poolPairData;
     const balances = [...allBalances];
+    const n = balances.length;
+    const A = amp.div(n ** (n - 1));
     const _in = _tokenInForExactBPTOut(amount, poolPairData);
     const feeFactor = _feeFactor(balances, tokenIndexIn, swapFee);
     balances[tokenIndexIn] = balances[tokenIndexIn].plus(_in.times(feeFactor));
     let bnumBalanceOut = bnum(formatFixed(virtualBptSupply, decimalsOut));
     bnumBalanceOut = bnumBalanceOut.plus(amount);
     let ans = _poolDerivativesBPT(
-        amp,
+        A,
         balances,
         bnumBalanceOut,
         tokenIndexIn,
@@ -787,6 +780,8 @@ export function _spotPriceAfterSwapExactBPTInForTokenOut(
         decimalsIn,
     } = poolPairData;
     const balances = [...allBalances];
+    const n = balances.length;
+    const A = amp.div(n ** (n - 1));
 
     const _out = _exactBPTInForTokenOut(amount, poolPairData);
     const feeFactor = _feeFactor(balances, tokenIndexOut, swapFee);
@@ -797,7 +792,7 @@ export function _spotPriceAfterSwapExactBPTInForTokenOut(
     );
     bnumBalanceIn = bnumBalanceIn.minus(amount);
     const ans = _poolDerivativesBPT(
-        amp,
+        A,
         balances,
         bnumBalanceIn,
         tokenIndexOut,
@@ -823,6 +818,9 @@ export function _spotPriceAfterSwapBPTInForExactTokenOut(
         swapFee,
     } = poolPairData;
     const balances = [...allBalances];
+    const n = balances.length;
+    const A = amp.div(n ** (n - 1));
+
     const feeFactor = _feeFactor(balances, tokenIndexOut, swapFee);
     balances[tokenIndexOut] = balances[tokenIndexOut].minus(
         amount.div(feeFactor)
@@ -832,7 +830,7 @@ export function _spotPriceAfterSwapBPTInForExactTokenOut(
         _BPTInForExactTokenOut(amount, poolPairData)
     );
     const ans = _poolDerivativesBPT(
-        amp,
+        A,
         balances,
         bnumBalanceIn,
         tokenIndexOut,
@@ -856,6 +854,9 @@ export function _derivativeSpotPriceAfterSwapExactTokenInForTokenOut(
     const { amp, allBalances, tokenIndexIn, tokenIndexOut, swapFee } =
         poolPairData;
     const balances = [...allBalances];
+    const n = balances.length;
+    const A = amp.div(n ** (n - 1));
+
     balances[tokenIndexIn] = balances[tokenIndexIn].plus(
         amount.times(EONE.sub(swapFee).toString()).div(EONE.toString())
     );
@@ -863,7 +864,7 @@ export function _derivativeSpotPriceAfterSwapExactTokenInForTokenOut(
         _exactTokenInForTokenOut(amount, poolPairData)
     );
     return _poolDerivatives(
-        amp,
+        A,
         balances,
         tokenIndexIn,
         tokenIndexOut,
@@ -881,6 +882,9 @@ export function _derivativeSpotPriceAfterSwapTokenInForExactTokenOut(
     const { amp, allBalances, tokenIndexIn, tokenIndexOut, swapFee } =
         poolPairData;
     const balances = [...allBalances];
+    const n = balances.length;
+    const A = amp.div(n ** (n - 1));
+
     const bnumSwapFee = bnum(formatFixed(swapFee, 18));
     const _in = _tokenInForExactTokenOut(amount, poolPairData).times(
         bnum(1).minus(bnumSwapFee)
@@ -889,7 +893,7 @@ export function _derivativeSpotPriceAfterSwapTokenInForExactTokenOut(
     balances[tokenIndexOut] = balances[tokenIndexOut].minus(amount);
     const feeFactor = bnum(1).minus(bnumSwapFee);
     return _poolDerivatives(
-        amp,
+        A,
         balances,
         tokenIndexIn,
         tokenIndexOut,
@@ -907,6 +911,9 @@ export function _derivativeSpotPriceAfterSwapExactTokenInForBPTOut(
     const { amp, allBalances, balanceOut, decimalsOut, tokenIndexIn, swapFee } =
         poolPairData;
     const balances = [...allBalances];
+    const n = balances.length;
+    const A = amp.div(n ** (n - 1));
+
     const feeFactor = _feeFactor(balances, tokenIndexIn, swapFee);
     balances[tokenIndexIn] = balances[tokenIndexIn].plus(
         amount.times(feeFactor)
@@ -916,7 +923,7 @@ export function _derivativeSpotPriceAfterSwapExactTokenInForBPTOut(
         _exactTokenInForBPTOut(amount, poolPairData)
     );
     const ans = _poolDerivativesBPT(
-        amp,
+        A,
         balances,
         bnumBalanceOut,
         tokenIndexIn,
@@ -936,13 +943,16 @@ export function _derivativeSpotPriceAfterSwapTokenInForExactBPTOut(
     const { amp, allBalances, balanceOut, decimalsOut, tokenIndexIn, swapFee } =
         poolPairData;
     const balances = [...allBalances];
+    const n = balances.length;
+    const A = amp.div(n ** (n - 1));
+
     const _in = _tokenInForExactBPTOut(amount, poolPairData);
     const feeFactor = _feeFactor(balances, tokenIndexIn, swapFee);
     balances[tokenIndexIn] = balances[tokenIndexIn].plus(_in.times(feeFactor));
     let bnumBalanceOut = bnum(formatFixed(balanceOut, decimalsOut));
     bnumBalanceOut = bnumBalanceOut.plus(amount);
     return _poolDerivativesBPT(
-        amp,
+        A,
         balances,
         bnumBalanceOut,
         tokenIndexIn,
@@ -961,6 +971,9 @@ export function _derivativeSpotPriceAfterSwapBPTInForExactTokenOut(
     const { amp, allBalances, balanceIn, decimalsIn, tokenIndexOut, swapFee } =
         poolPairData;
     const balances = [...allBalances];
+    const n = balances.length;
+    const A = amp.div(n ** (n - 1));
+
     const _in = _BPTInForExactTokenOut(amount, poolPairData);
     const feeFactor = _feeFactor(balances, tokenIndexOut, swapFee);
     balances[tokenIndexOut] = balances[tokenIndexOut].minus(
@@ -969,7 +982,7 @@ export function _derivativeSpotPriceAfterSwapBPTInForExactTokenOut(
     let bnumBalanceIn = bnum(formatFixed(balanceIn, decimalsIn));
     bnumBalanceIn = bnumBalanceIn.minus(_in);
     const ans = _poolDerivativesBPT(
-        amp,
+        A,
         balances,
         bnumBalanceIn,
         tokenIndexOut,
@@ -989,6 +1002,9 @@ export function _derivativeSpotPriceAfterSwapExactBPTInForTokenOut(
     const { amp, allBalances, balanceIn, decimalsIn, tokenIndexOut, swapFee } =
         poolPairData;
     const balances = [...allBalances];
+    const n = balances.length;
+    const A = amp.div(n ** (n - 1));
+
     const _out = _exactBPTInForTokenOut(amount, poolPairData);
     const feeFactor = _feeFactor(balances, tokenIndexOut, swapFee);
     balances[tokenIndexOut] = balances[tokenIndexOut].minus(
@@ -997,7 +1013,7 @@ export function _derivativeSpotPriceAfterSwapExactBPTInForTokenOut(
     let bnumBalanceIn = bnum(formatFixed(balanceIn, decimalsIn));
     bnumBalanceIn = bnumBalanceIn.minus(amount);
     const ans = _poolDerivativesBPT(
-        amp,
+        A,
         balances,
         bnumBalanceIn,
         tokenIndexOut,
