@@ -44,11 +44,6 @@ describe('Test for fxPools', () => {
                 newPool.tokens[1].address // tokenOut, XSGD
             );
 
-            console.log(
-                `1 - ${newPool.tokens[0].address}, 2 - ${newPool.tokens[1].address}`
-            );
-            console.log(poolPairData);
-
             expect(poolPairData.id).to.eq(poolData.id);
             expect(poolPairData.poolType).to.eq(PoolTypes.Fx);
 
@@ -87,58 +82,38 @@ describe('Test for fxPools', () => {
                 SwapTypes.SwapExactIn
             );
 
-            // expect(amount.toString()).to.eq('KNOWN_LIMIT');
-            console.log('getLimitAmountSwap: SwapExactIn');
-
-            console.log(amount.toString());
-
             amount = newPool.getLimitAmountSwap(
                 poolPairData,
                 SwapTypes.SwapExactOut
             );
 
             console.log(amount);
+        });
+    });
 
-            console.log('getLimitAmountSwap: SwapExactOut');
-            // @todo add expected amount
+    // copied from the other implementations of the other project
+    context('class functions', () => {
+        it('getNormalizedLiquidity', async () => {
+            const poolData = testPools.pools[0];
+            const newPool = FxPool.fromPool(poolData);
+            const poolPairData = newPool.parsePoolPairData(
+                newPool.tokens[0].address, // tokenIn, USDC
+                newPool.tokens[1].address // tokenOut, XSGD
+            );
+
+            console.log(newPool.getNormalizedLiquidity(poolPairData));
         });
     });
 
     context('Test Swaps', () => {
-        // copied from the other implementations of the other project
-        context('class functions', () => {
-            // @todo check with khidir
-            it('getNormalizedLiquidity', async () => {
-                const poolData = testPools.pools[0];
-                const newPool = FxPool.fromPool(poolData);
-                const poolPairData = newPool.parsePoolPairData(
-                    newPool.tokens[0].address, // tokenIn, USDC
-                    newPool.tokens[1].address // tokenOut, XSGD
-                );
-
-                console.log(newPool.getNormalizedLiquidity(poolPairData));
-            });
-        });
-
         context('FxPool Test Cases', () => {
             const testCasesArray: TestCaseType[] = testCases as TestCaseType[];
 
             for (const testCase of testCasesArray) {
                 it(`Test Case No. ${testCase.testNo} - ${testCase.description}`, async () => {
-                    console.log(`Starting Test Case # ${testCase.testNo}`);
                     const givenAmount = bnum(
                         parseFixed(testCase.givenAmount, 6).toString()
                     ); // decimal is 6 for xsfd and usdc
-
-                    console.log('givenAmount: ', givenAmount.toNumber());
-
-                    console.log(
-                        `testCase.tokenIn === 'USDC' is ${
-                            testCase.tokenIn === 'USDC'
-                        },testCase.tokenOut === 'USDC' is ${
-                            testCase.tokenOut === 'USDC'
-                        } `
-                    );
 
                     const poolData = testPools.pools[0];
                     const newPool = FxPool.fromPool(poolData);
@@ -162,7 +137,6 @@ describe('Test for fxPools', () => {
                     );
 
                     if (testCase.swapType === 'OriginSwap') {
-                        console.log('origin swap');
                         let amountOut;
 
                         if (testCase.testNo === '9') {
@@ -197,11 +171,6 @@ describe('Test for fxPools', () => {
                                     givenAmount
                                 );
 
-                            console.log(
-                                '_spotPriceAfterSwapExactTokenInForTokenOut: ',
-                                _spotPriceAfterSwapExactTokenInForTokenOut
-                            );
-
                             expect(
                                 Number(
                                     _spotPriceAfterSwapExactTokenInForTokenOut
@@ -220,12 +189,6 @@ describe('Test for fxPools', () => {
                                 )
                                 .toNumber();
 
-                            console.log('Derivative: ', derivative);
-                            console.log(
-                                'testCase.expectedDerivativeSpotPriceAfterSwap: ',
-                                testCase.expectedDerivativeSpotPriceAfterSwap
-                            );
-
                             expect(derivative).to.be.closeTo(
                                 Number(
                                     testCase.expectedDerivativeSpotPriceAfterSwap
@@ -234,7 +197,6 @@ describe('Test for fxPools', () => {
                             );
                         }
                     } else {
-                        console.log('target swap');
                         let amountIn;
 
                         if (testCase.testNo === '12') {
@@ -270,11 +232,6 @@ describe('Test for fxPools', () => {
                                     givenAmount
                                 );
 
-                            console.log(
-                                '_spotPriceAfterSwapTokenInForExactTokenOut: ',
-                                _spotPriceAfterSwapTokenInForExactTokenOut
-                            );
-
                             expect(
                                 Number(
                                     _spotPriceAfterSwapTokenInForExactTokenOut
@@ -293,12 +250,6 @@ describe('Test for fxPools', () => {
                                 )
                                 .toNumber();
 
-                            console.log('Derivative: ', derivative);
-                            console.log(
-                                'testCase.expectedDerivativeSpotPriceAfterSwap: ',
-                                testCase.expectedDerivativeSpotPriceAfterSwap
-                            );
-
                             expect(derivative).to.be.closeTo(
                                 Number(
                                     testCase.expectedDerivativeSpotPriceAfterSwap
@@ -310,210 +261,5 @@ describe('Test for fxPools', () => {
                 });
             }
         });
-
-        // context.skip('_exactTokenInForTokenOut', () => {
-        //     it('OriginSwap/_exactTokenInForTokenOut USDC > ? XSGD', async () => {
-        //         const amountIn = bnum(parseFixed('200000', 6).toString());
-
-        //         console.log('AMOUNT IN :', amountIn);
-        //         const poolData = testPools.pools[0];
-        //         const newPool = FxPool.fromPool(poolData);
-
-        //         const poolPairData = newPool.parsePoolPairData(
-        //             newPool.tokens[0].address, // tokenIn, USDC
-        //             newPool.tokens[1].address // tokenOut, XSGD
-        //         );
-
-        //         console.log(
-        //             'spotPriceBeforeSwap: ',
-        //             spotPriceBeforeSwap(
-        //                 scale(bnum('1'), 6),
-        //                 poolPairData
-        //             ).toNumber()
-        //         );
-
-        //         const amountOut = newPool._exactTokenInForTokenOut(
-        //             poolPairData,
-        //             amountIn
-        //         );
-        //         console.log(
-        //             `_exactTokenInForTokenOut Amount out: ${amountOut}`
-        //         );
-
-        //         console.log(
-        //             `_spotPriceAfterSwapExactTokenInForTokenOut: ${newPool._spotPriceAfterSwapExactTokenInForTokenOut(
-        //                 poolPairData,
-        //                 amountIn
-        //             )}`
-        //         );
-        //         console.log(
-        //             `_derivativeSpotPriceAfterSwapExactTokenInForTokenOut: ${newPool._derivativeSpotPriceAfterSwapExactTokenInForTokenOut(
-        //                 poolPairData,
-        //                 amountIn
-        //             )}`
-        //         );
-
-        //         // @todo add expected for amountOut
-        //     });
-
-        //     it.skip('OriginSwap/_exactTokenInForTokenOut XSGD > ? USDC', async () => {
-        //         const amountIn = bnum(parseFixed('200000', 6).toString());
-
-        //         console.log('AMOUNT IN :', amountIn);
-        //         const poolData = testPools.pools[0];
-        //         const newPool = FxPool.fromPool(poolData);
-
-        //         const poolPairData = newPool.parsePoolPairData(
-        //             newPool.tokens[1].address, // tokenIn, XSGD
-        //             newPool.tokens[0].address // tokenOut, USDC
-        //         );
-
-        //         console.log(
-        //             'spotPriceBeforeSwap: ',
-        //             spotPriceBeforeSwap(
-        //                 scale(bnum('1'), 6),
-        //                 poolPairData
-        //             ).toNumber()
-        //         );
-
-        //         const amountOut = newPool._exactTokenInForTokenOut(
-        //             poolPairData,
-        //             amountIn
-        //         );
-        //         console.log(
-        //             `_exactTokenInForTokenOut Amount out: ${amountOut}`
-        //         );
-
-        //         console.log(
-        //             `_spotPriceAfterSwapExactTokenInForTokenOut: ${newPool._spotPriceAfterSwapExactTokenInForTokenOut(
-        //                 poolPairData,
-        //                 amountIn
-        //             )}`
-        //         );
-        //         console.log(
-        //             `_derivativeSpotPriceAfterSwapExactTokenInForTokenOut: ${newPool._derivativeSpotPriceAfterSwapExactTokenInForTokenOut(
-        //                 poolPairData,
-        //                 amountIn
-        //             )}`
-        //         );
-
-        //         // @todo add expected for amountOut
-        //     });
-        // });
-
-        // context('_tokenInForExactTokenOut', () => {
-        //     it('TargetSwap / tokenInForExactTokenOut ? USDC > XSGD', async () => {
-        //         const amountOut = bnum(parseFixed('200000', 6).toString());
-        //         const poolData = testPools.pools[0];
-        //         const newPool = FxPool.fromPool(poolData);
-        //         const poolPairData = newPool.parsePoolPairData(
-        //             newPool.tokens[0].address, // tokenIn, USDC
-        //             newPool.tokens[1].address // tokenOut, XSGD
-        //         );
-
-        //         //@todo add expected amountIn
-        //         // expect(amountIn).to.eq(KNOWN_AMOUNT);
-        //         console.log(
-        //             '=================================spotPriceBeforeSwap================================='
-        //         );
-        //         console.log(
-        //             'spotPriceBeforeSwap: ',
-        //             spotPriceBeforeSwap(
-        //                 scale(bnum('1'), 6),
-        //                 poolPairData
-        //             ).toNumber()
-        //         );
-        //         console.log(
-        //             '=================================TARGET SWAP================================='
-        //         );
-
-        //         const amountIn = newPool._tokenInForExactTokenOut(
-        //             poolPairData,
-        //             amountOut
-        //         );
-
-        //         console.log(
-        //             `TargetSwap Results in Raw Amount: ${formatFixed(
-        //                 amountIn.toNumber(),
-        //                 poolPairData.decimalsIn
-        //             )}`
-        //         );
-        //         console.log(
-        //             '=================================_spotPriceAfterSwapTokenInForExactTokenOut================================='
-        //         );
-        //         console.log(
-        //             `_spotPriceAfterSwapTokenInForExactTokenOut: ${newPool._spotPriceAfterSwapTokenInForExactTokenOut(
-        //                 poolPairData,
-        //                 amountOut
-        //             )}`
-        //         );
-        //         console.log(
-        //             '=================================_derivativeSpotPriceAfterSwapTokenInForExactTokenOut================================='
-        //         );
-        //         console.log(
-        //             `_derivativeSpotPriceAfterSwapTokenInForExactTokenOut: ${newPool._derivativeSpotPriceAfterSwapTokenInForExactTokenOut(
-        //                 poolPairData,
-        //                 amountOut
-        //             )}`
-        //         );
-        //     });
-
-        //     it('TargetSwap / tokenInForExactTokenOut ? XSGD > USDC', async () => {
-        //         const amountOut = bnum(parseFixed('200000', 6).toString());
-        //         const poolData = testPools.pools[0];
-        //         const newPool = FxPool.fromPool(poolData);
-        //         const poolPairData = newPool.parsePoolPairData(
-        //             newPool.tokens[1].address, // tokenIn, XSGD
-        //             newPool.tokens[0].address // tokenOut, USDC
-        //         );
-
-        //         //@todo add expected amountIn
-        //         // expect(amountIn).to.eq(KNOWN_AMOUNT);
-        //         console.log(
-        //             '=================================spotPriceBeforeSwap================================='
-        //         );
-        //         console.log(
-        //             'spotPriceBeforeSwap: ',
-        //             spotPriceBeforeSwap(
-        //                 scale(bnum('1'), 6),
-        //                 poolPairData
-        //             ).toNumber()
-        //         );
-
-        //         console.log(
-        //             '=================================TARGET SWAP================================='
-        //         );
-
-        //         const amountIn = newPool._tokenInForExactTokenOut(
-        //             poolPairData,
-        //             amountOut
-        //         );
-
-        //         console.log(
-        //             `TargetSwap Results in Raw Amount: ${formatFixed(
-        //                 amountIn.toNumber(),
-        //                 poolPairData.decimalsIn
-        //             )}`
-        //         );
-        //         console.log(
-        //             '=================================_spotPriceAfterSwapExactTokenInForTokenOut================================='
-        //         );
-        //         console.log(
-        //             `_spotPriceAfterSwapExactTokenInForTokenOut: ${newPool._spotPriceAfterSwapTokenInForExactTokenOut(
-        //                 poolPairData,
-        //                 amountOut
-        //             )}`
-        //         );
-        //         console.log(
-        //             '=================================_derivativeSpotPriceAfterSwapExactTokenInForTokenOut================================='
-        //         );
-        //         console.log(
-        //             `_derivativeSpotPriceAfterSwapExactTokenInForTokenOut: ${newPool._derivativeSpotPriceAfterSwapTokenInForExactTokenOut(
-        //                 poolPairData,
-        //                 amountOut
-        //             )}`
-        //         );
-        //     });
-        // });
     });
 });

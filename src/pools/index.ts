@@ -50,7 +50,7 @@ export function parseNewPool(
         | PhantomStablePool
         | Gyro2Pool
         | Gyro3Pool
-        | GyroEPool;
+        | GyroEPool
         | FxPool;
 
     try {

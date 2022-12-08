@@ -20,14 +20,13 @@ import {
     _spotPriceAfterSwapTokenInForExactTokenOut,
     _tokenInForExactTokenOut,
 } from './fxPoolMath';
-import { WeiPerEther as ONE } from '@ethersproject/constants';
+import { WeiPerEther as ONE, Zero } from '@ethersproject/constants';
 
 type FxPoolToken = Pick<
     SubgraphToken,
     'address' | 'balance' | 'decimals' | 'fxRate'
 >;
 
-// @todo check
 export type FxPoolPairData = PoolPairBase & {
     alpha: BigNumber;
     beta: BigNumber;
@@ -86,8 +85,6 @@ export class FxPool implements PoolBase {
         lambda: string,
         delta: string,
         epsilon: string
-        // tokenInRate: string,
-        // tokenOutRate: string
     ) {
         this.id = id;
         this.address = address;
@@ -95,12 +92,23 @@ export class FxPool implements PoolBase {
         this.totalShares = parseFixed(totalShares, 18);
         this.tokens = tokens;
         this.tokensList = tokensList;
-        // @todo check
         this.alpha = parseFixed(alpha, 18);
         this.beta = parseFixed(beta, 18);
         this.lambda = parseFixed(lambda, 18);
         this.delta = parseFixed(delta, 18);
         this.epsilon = parseFixed(epsilon, 18);
+    }
+    mainIndex?: number | undefined;
+    isLBP?: boolean | undefined;
+
+    _calcTokensOutGivenExactBptIn(bptAmountIn: BigNumber): BigNumber[] {
+        // Will copy over other implementations, not supporting BPT tokens atm
+        return new Array(this.tokens.length).fill(Zero);
+    }
+
+    _calcBptOutGivenExactTokensIn(amountsIn: BigNumber[]): BigNumber {
+        // Will copy over other implementations, not supporting BPT tokens atm
+        return Zero;
     }
 
     parsePoolPairData(tokenIn: string, tokenOut: string): FxPoolPairData {
