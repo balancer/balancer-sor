@@ -1,6 +1,6 @@
 // TS_NODE_PROJECT='tsconfig.testing.json' npx mocha -r ts-node/register test/phantomStableMath.spec.ts
 import { assert } from 'chai';
-import { formatFixed, parseFixed } from '@ethersproject/bignumber';
+import { BigNumber, formatFixed, parseFixed } from '@ethersproject/bignumber';
 import { BigNumber as OldBigNumber } from '../src/utils/bignumber';
 import { bnum } from '../src/utils/bignumber';
 import { WeiPerEther as ONE } from '@ethersproject/constants';
@@ -10,6 +10,7 @@ import {
     PhantomStablePoolPairData,
 } from '../src/pools/phantomStablePool/phantomStablePool';
 import * as phantomStableMath from '../src/pools/phantomStablePool/phantomStableMath';
+import * as stableMath from '../src/pools/stablePool/stableMath';
 import * as stableMathBigInt from '../src/pools/stablePool/stableMathBigInt';
 import { bbaUSD, LINEAR_AUSDT, LINEAR_AUSDC } from './lib/constants';
 
@@ -135,21 +136,45 @@ describe('phantomStable pools tests', () => {
                 'wrong result'
             );
             // spot prices
+            poolPairData.swapFee = BigNumber.from(0);
+            const spPhantom =
+                phantomStableMath._spotPriceAfterSwapExactBPTInForTokenOut(
+                    bnum(0),
+                    poolPairData
+                );
+
+            const balances = poolPairData.allBalancesScaled.map((balance) =>
+                balance.toBigInt()
+            );
+            const spBigInt =
+                stableMathBigInt._spotPriceAfterSwapExactBPTInForTokenOut(
+                    poolPairData.amp.toBigInt(),
+                    balances,
+                    poolPairData.tokenIndexOut,
+                    phantomStablePool.totalShares.toBigInt(),
+                    BigInt(0)
+                );
+            const bnumSpBigInt = bnum(spBigInt.toString()).div(oldBN_ONE);
+            assert.approximately(
+                spPhantom.div(bnumSpBigInt).toNumber(),
+                1,
+                sError,
+                'wrong result'
+            );
             checkPhantomStableSpotPrices(
                 phantomStablePool,
                 poolPairData,
                 amount,
-                mError
+                sError
             );
-            // We should check that the functions
-            // phantomStableMath._spotPrice...
-            // are the derivatives of the corresponding swap outcome functions.
         });
         it('phantomStable token -> BPT', () => {
             const poolPairData = phantomStablePool.parsePoolPairData(
                 LINEAR_AUSDC.address,
                 bbaUSD.address
             );
+            poolPairData.swapFee = BigNumber.from(0);
+
             // here we should compare phantomStableMath with stableMathBigInt
             // like in the previous case, BPT -> token.
             const { a1, a2 } = getSwapOutcomes(
@@ -167,7 +192,7 @@ describe('phantomStable pools tests', () => {
             assert.approximately(
                 a1.div(b1).toNumber(),
                 1,
-                mError,
+                sError,
                 'wrong result'
             );
             const b2 = phantomStableMath
@@ -176,7 +201,7 @@ describe('phantomStable pools tests', () => {
             assert.approximately(
                 a2.div(b2).toNumber(),
                 1,
-                mError,
+                sError,
                 'wrong result'
             );
             // spot price:
@@ -184,7 +209,7 @@ describe('phantomStable pools tests', () => {
                 phantomStablePool,
                 poolPairData,
                 4000,
-                mError
+                sError
             );
         });
     });

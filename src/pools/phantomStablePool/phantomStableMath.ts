@@ -574,15 +574,17 @@ export function _poolDerivativesBPT(
     const x = balances[tokenIndexIn];
     const alpha = bnum(A.toString()).times(totalCoins ** totalCoins); // = ATimesNpowN
     const beta = alpha.times(S);
-    const gamma = ONE.minus(alpha);
+    const gamma = bnum(1000).minus(alpha);
     const partial_x = bnum(2)
         .times(alpha)
         .times(x)
         .plus(beta)
         .plus(gamma.times(D));
-    const minus_partial_D = D_P.times(totalCoins + 1).minus(gamma.times(x));
+    const minus_partial_D = D_P.times(totalCoins + 1)
+        .times(1000)
+        .minus(gamma.times(x));
     const partial_D = ZERO.minus(minus_partial_D);
-    let ans;
+    let ans: OldBigNumber;
     if (is_first_derivative) {
         ans = partial_x.div(minus_partial_D).times(bptSupply).div(D);
     } else {
@@ -791,6 +793,7 @@ export function _spotPriceAfterSwapExactBPTInForTokenOut(
         _out.div(feeFactor)
     );
     bnumBalanceIn = bnumBalanceIn.minus(amount);
+
     const ans = _poolDerivativesBPT(
         A,
         balances,
