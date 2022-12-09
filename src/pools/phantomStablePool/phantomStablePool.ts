@@ -416,6 +416,7 @@ export class PhantomStablePool implements PoolBase {
             );
             return BigNumber.from(bptAmountOut.toString());
         } catch (err) {
+            console.log(`!!!!!!! ERROR - `, err);
             return Zero;
         }
     }

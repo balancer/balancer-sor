@@ -17,6 +17,9 @@ function _calculateInvariant(
     balances: bigint[],
     roundUp: boolean
 ): bigint {
+    console.log(`_calculateInvariant`);
+    console.log(amp.toString(), 'amp');
+    console.log(balances.toString(), 'balances');
     /**********************************************************************************************
       // invariant                                                                                 //
       // D = invariant                                                  D^(n+1)                    //
@@ -138,6 +141,11 @@ export function _calcBptOutGivenExactTokensIn(
     bptTotalSupply: bigint,
     swapFeePercentage: bigint
 ): bigint {
+    console.log(amp.toString(), 'amp');
+    console.log(balances.toString(), 'balances');
+    console.log(amountsIn.toString(), 'amountsIn');
+    console.log(bptTotalSupply.toString(), 'bptTotalSupply');
+    console.log(swapFeePercentage.toString(), 'swapFee');
     // BPT out, so we round down overall.
 
     // First loop calculates the sum of all token balances, which will be used to calculate
@@ -189,7 +197,10 @@ export function _calcBptOutGivenExactTokensIn(
 
     // Get current and new invariants, taking swap fees into account
     const currentInvariant = _calculateInvariant(amp, balances, true);
+    console.log(currentInvariant.toString(), 'currentInvariant');
     const newInvariant = _calculateInvariant(amp, newBalances, false);
+    console.log(newInvariant.toString(), 'newInvariant');
+
     const invariantRatio = MathSol.divDownFixed(newInvariant, currentInvariant);
 
     // If the invariant didn't increase for any reason, we simply don't mint BPT
