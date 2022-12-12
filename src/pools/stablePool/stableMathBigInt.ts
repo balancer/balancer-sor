@@ -540,7 +540,7 @@ export function _spotPriceAfterSwapTokenInForExactTokenOut(
     tokenIndexOut: number,
     amountOut: bigint,
     fee: bigint
-): BigInt {
+): bigint {
     const balancesCopy = [...balances];
     const _in = _calcInGivenOut(
         amp,

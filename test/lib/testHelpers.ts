@@ -400,7 +400,7 @@ export function checkPath(
     path: NewPath,
     tokenIn: string,
     tokenOut: string
-) {
+): void {
     // IDS should be all IDS concatenated
     expect(path.id).to.eq(expectedPoolIds.join(''));
     // Lengths of pools, pairData and swaps should all be equal

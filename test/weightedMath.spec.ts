@@ -5,7 +5,10 @@ import { BigNumber as OldBigNumber } from '../src/utils/bignumber';
 import { bnum } from '../src/utils/bignumber';
 import { BAL, WETH } from './lib/constants';
 import singleWeightedPool from './testData/weightedPools/singlePoolWithSwapEnabled.json';
-import { WeightedPool } from '../src/pools/weightedPool/weightedPool';
+import {
+    WeightedPool,
+    WeightedPoolPairData,
+} from '../src/pools/weightedPool/weightedPool';
 
 dotenv.config();
 
@@ -513,12 +516,15 @@ describe('weightedMath tests', () => {
 
 function checkDerivative(
     fn: (
-        poolPairData: any,
+        poolPairData: WeightedPoolPairData,
         amount: OldBigNumber,
         exact: boolean
     ) => OldBigNumber,
-    der: (poolPairData: any, amount: OldBigNumber) => OldBigNumber,
-    poolPairData: unknown,
+    der: (
+        poolPairData: WeightedPoolPairData,
+        amount: OldBigNumber
+    ) => OldBigNumber,
+    poolPairData: WeightedPoolPairData,
     amount: number,
     delta: number,
     error: number,

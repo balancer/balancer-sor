@@ -201,6 +201,7 @@ export class LinearPool implements PoolBase {
         return poolPairData;
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     getNormalizedLiquidity(poolPairData: LinearPoolPairData): OldBigNumber {
         return bnum(0);
     }
@@ -755,11 +756,13 @@ export class LinearPool implements PoolBase {
         }
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     _calcTokensOutGivenExactBptIn(bptAmountIn: BigNumber): BigNumber[] {
         // Linear Pool doesn't have Exit Pool implementation
         return new Array(this.tokens.length).fill(Zero);
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     _calcBptOutGivenExactTokensIn(amountsIn: BigNumber[]): BigNumber {
         // Linear Pool doesn't have Join Pool implementation
         return Zero;
