@@ -21,6 +21,9 @@ jobs:
                   paths:
                       - ~/balancer
             - run:
+                  name: Run Lint
+                  command: yarn lint
+            - run:
                   name: Run tests
                   command: yarn test
             - run:
