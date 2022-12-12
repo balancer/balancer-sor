@@ -6,7 +6,7 @@ import { formatFixed, parseFixed } from '@ethersproject/bignumber';
 import { JsonRpcProvider } from '@ethersproject/providers';
 import { bnum } from '../src/utils/bignumber';
 import { USDC, DAI, sorConfigEth } from './lib/constants';
-import { SwapTypes, SOR, SwapInfo } from '../src';
+import { SwapTypes, SOR, SwapInfo, SubgraphPoolBase } from '../src';
 // Add new PoolType
 import { Gyro2Pool } from '../src/pools/gyro2Pool/gyro2Pool';
 // Add new pool test data in Subgraph Schema format
@@ -151,7 +151,7 @@ describe('Gyro2Pool tests USDC > DAI', () => {
 
         context('FullSwap', () => {
             it(`Full Swap - swapExactIn, Token>Token`, async () => {
-                const pools: any = cloneDeep(testPools.pools);
+                const pools: SubgraphPoolBase[] = cloneDeep(testPools.pools);
                 const tokenIn = USDC.address;
                 const tokenOut = DAI.address;
                 const swapType = SwapTypes.SwapExactIn;

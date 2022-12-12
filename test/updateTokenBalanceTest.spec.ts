@@ -18,9 +18,7 @@ describe('debug fails if token balances are not updated after a swap', () => {
     assert.isNotTrue(path1 == path2);
     assert.isTrue(path1.pools[0] == path2.pools[0]);
     it('updateTokenBalance - WETH-BAL', () => {
-        const initialWethBalance = (
-            pool as any
-        ).tokens[0].balance.toString() as string;
+        const initialWethBalance = pool.tokens[0].balance.toString() as string;
         const [, returnDouble] = formatSwaps(
             [path1, path2],
             SwapTypes.SwapExactIn,
@@ -34,9 +32,7 @@ describe('debug fails if token balances are not updated after a swap', () => {
             [bnum(50)]
         );
         const difference = returnDouble.minus(returnSingle.times(2));
-        const finalWethBalance = (
-            pool as any
-        ).tokens[0].balance.toString() as string;
+        const finalWethBalance = pool.tokens[0].balance.toString() as string;
         assert.isNotTrue(
             difference.toNumber() == 0,
             'balances were not updated'
