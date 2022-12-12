@@ -67,9 +67,10 @@ describe('poolsMathStable: numeric functions using bigint', () => {
                 1600,
                 0.01
             );
-            assert.equal(
-                result.toString(),
-                SDKResult.toString(),
+            assert.approximately(
+                Number(result),
+                Number(SDKResult.toString()),
+                1,
                 'wrong result'
             );
         });
@@ -100,9 +101,10 @@ describe('poolsMathStable: numeric functions using bigint', () => {
                 1600,
                 0.01
             );
-            assert.equal(
-                result.toString(),
-                SDKResult.toString(),
+            assert.approximately(
+                Number(result),
+                Number(SDKResult),
+                1,
                 'wrong result'
             );
         });
@@ -325,7 +327,7 @@ function getBothValuesTokenGivenBPT(
     bptAmount: number,
     bptTotalSupply: number,
     fee: number
-): { result: any; SDKResult: any } {
+): { result: bigint; SDKResult: OldBigNumber } {
     const result = SORFunction(
         BigInt(amp),
         balances.map((amount) => s(amount)),
