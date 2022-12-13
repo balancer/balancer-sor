@@ -270,8 +270,22 @@ function getBothValuesWeighted(
 }
 
 function checkDerivative_weighted(
-    fn: any,
-    der: any,
+    fn: (
+        balanceIn: bigint,
+        weightIn: bigint,
+        balanceOut: bigint,
+        weightOut: bigint,
+        amountIn: bigint,
+        fee: bigint
+    ) => bigint,
+    der: (
+        balanceIn: bigint,
+        weightIn: bigint,
+        balanceOut: bigint,
+        weightOut: bigint,
+        amountIn: bigint,
+        fee: bigint
+    ) => bigint,
     num_balanceIn: number,
     num_weightIn: number,
     num_balanceOut: number,
@@ -327,8 +341,20 @@ function checkDerivative_weighted(
 }
 
 function checkDerivative_weighted_bpt(
-    fn: any,
-    der: any,
+    fn: (
+        balance: bigint,
+        normalizedWeight: bigint,
+        amountIn: bigint,
+        bptTotalSupply: bigint,
+        swapFeePercentage: bigint
+    ) => bigint,
+    der: (
+        balanceIn: bigint,
+        balanceOut: bigint,
+        weightIn: bigint,
+        amountIn: bigint,
+        swapFeeRatio: bigint
+    ) => bigint,
     num_balance: number,
     num_weight: number,
     num_amount: number,

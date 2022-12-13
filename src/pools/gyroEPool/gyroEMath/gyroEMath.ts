@@ -59,7 +59,9 @@ export function calculateInvariantWithError(
     if (x.add(y).gt(MAX_BALANCES)) throw new Error('MAX ASSETS EXCEEDED');
     const AtAChi = calcAtAChi(x, y, params, derived);
 
-    let [square_root, err] = calcInvariantSqrt(x, y, params, derived);
+    const invariantResult = calcInvariantSqrt(x, y, params, derived);
+    const square_root = invariantResult[0];
+    let err = invariantResult[1];
 
     if (square_root.gt(0)) {
         err = divUpMagU(err.add(1), square_root.mul(2));

@@ -869,6 +869,7 @@ function calculateMarketSp(
         if (!newPool) return bnum(0);
 
         // Parses relevant balances, etc
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const poolPairData: any = newPool.parsePoolPairData(
             assets[swap.assetInIndex],
             assets[swap.assetOutIndex]

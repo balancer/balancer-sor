@@ -14,6 +14,7 @@ import {
     PoolFilter,
     bnum,
     WeightedPool,
+    SubgraphPoolBase,
 } from '../src';
 import { WeightedPoolPairData } from '../src/pools/weightedPool/weightedPool';
 import { mockTokenPriceService } from './lib/mockTokenPriceService';
@@ -213,7 +214,7 @@ async function getSwapInfo(
     tokenIn: string,
     tokenOut: string,
     swapType: SwapTypes,
-    pools: any,
+    pools: SubgraphPoolBase[],
     swapAmount: BigNumber,
     useBpts?: boolean
 ) {

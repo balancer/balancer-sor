@@ -12,11 +12,7 @@ import { MathSol, BZERO } from '../../utils/basicOperations';
 
 const AMP_PRECISION = BigInt(1e3);
 
-function _calculateInvariant(
-    amp: bigint,
-    balances: bigint[],
-    roundUp: boolean
-): bigint {
+function _calculateInvariant(amp: bigint, balances: bigint[]): bigint {
     /**********************************************************************************************
       // invariant                                                                                 //
       // D = invariant                                                  D^(n+1)                    //
@@ -26,7 +22,7 @@ function _calculateInvariant(
       // n = number of tokens                                                                      //
       *********x************************************************************************************/
 
-    // We support rounding up or down.
+    // Always round down, to match Vyper's arithmetic (which always truncates).
 
     let sum = BZERO;
     const numTokens = balances.length;
@@ -42,30 +38,30 @@ function _calculateInvariant(
     const ampTimesTotal = amp * BigInt(numTokens);
 
     for (let i = 0; i < 255; i++) {
-        let P_D = balances[0] * BigInt(numTokens);
-        for (let j = 1; j < numTokens; j++) {
-            P_D = MathSol.div(
-                MathSol.mul(MathSol.mul(P_D, balances[j]), BigInt(numTokens)),
-                invariant,
-                roundUp
+        let D_P = invariant;
+        for (let j = 0; j < numTokens; j++) {
+            // (D_P * invariant) / (balances[j] * numTokens)
+            D_P = MathSol.divDown(
+                MathSol.mul(D_P, invariant),
+                MathSol.mul(balances[j], BigInt(numTokens))
             );
         }
+
         prevInvariant = invariant;
-        invariant = MathSol.div(
-            MathSol.mul(MathSol.mul(BigInt(numTokens), invariant), invariant) +
-                MathSol.div(
-                    MathSol.mul(MathSol.mul(ampTimesTotal, sum), P_D),
-                    AMP_PRECISION,
-                    roundUp
-                ),
-            MathSol.mul(BigInt(numTokens + 1), invariant) +
-                // No need to use checked arithmetic for the amp precision, the amp is guaranteed to be at least 1
-                MathSol.div(
-                    MathSol.mul(ampTimesTotal - AMP_PRECISION, P_D),
-                    AMP_PRECISION,
-                    !roundUp
-                ),
-            roundUp
+        invariant = MathSol.divDown(
+            MathSol.mul(
+                // (ampTimesTotal * sum) / AMP_PRECISION + D_P * numTokens
+                MathSol.divDown(
+                    MathSol.mul(ampTimesTotal, sum),
+                    AMP_PRECISION
+                ) + MathSol.mul(D_P, BigInt(numTokens)),
+                invariant
+            ),
+            // ((ampTimesTotal - _AMP_PRECISION) * invariant) / _AMP_PRECISION + (numTokens + 1) * D_P
+            MathSol.divDown(
+                MathSol.mul(ampTimesTotal - AMP_PRECISION, invariant),
+                AMP_PRECISION
+            ) + MathSol.mul(BigInt(numTokens + 1), D_P)
         );
 
         if (invariant > prevInvariant) {
@@ -76,7 +72,6 @@ function _calculateInvariant(
             return invariant;
         }
     }
-
     throw new Error('Errors.STABLE_INVARIANT_DIDNT_CONVERGE');
 }
 
@@ -91,8 +86,7 @@ export function _calcOutGivenIn(
     fee: bigint
 ): bigint {
     amountIn = subtractFee(amountIn, fee);
-    // Given that we need to have a greater final balance out, the invariant needs to be rounded up
-    const invariant = _calculateInvariant(amp, balances, true);
+    const invariant = _calculateInvariant(amp, balances);
 
     const initBalance = balances[tokenIndexIn];
     balances[tokenIndexIn] = initBalance + amountIn;
@@ -113,7 +107,7 @@ export function _calcInGivenOut(
     amountOut: bigint,
     fee: bigint
 ): bigint {
-    const invariant = _calculateInvariant(amp, balances, true);
+    const invariant = _calculateInvariant(amp, balances);
     balances[tokenIndexOut] = MathSol.sub(balances[tokenIndexOut], amountOut);
 
     const finalBalanceIn = _getTokenBalanceGivenInvariantAndAllOtherBalances(
@@ -188,8 +182,9 @@ export function _calcBptOutGivenExactTokensIn(
     }
 
     // Get current and new invariants, taking swap fees into account
-    const currentInvariant = _calculateInvariant(amp, balances, true);
-    const newInvariant = _calculateInvariant(amp, newBalances, false);
+    const currentInvariant = _calculateInvariant(amp, balances);
+    const newInvariant = _calculateInvariant(amp, newBalances);
+
     const invariantRatio = MathSol.divDownFixed(newInvariant, currentInvariant);
 
     // If the invariant didn't increase for any reason, we simply don't mint BPT
@@ -212,7 +207,7 @@ export function _calcTokenInGivenExactBptOut(
     fee: bigint
 ): bigint {
     // Token in, so we round up overall.
-    const currentInvariant = _calculateInvariant(amp, balances, true);
+    const currentInvariant = _calculateInvariant(amp, balances);
     const newInvariant = MathSol.mulUpFixed(
         MathSol.divUpFixed(
             MathSol.add(bptTotalSupply, bptAmountOut),
@@ -322,8 +317,8 @@ export function _calcBptInGivenExactTokensOut(
     }
 
     // Get current and new invariants, taking into account swap fees
-    const currentInvariant = _calculateInvariant(amp, balances, true);
-    const newInvariant = _calculateInvariant(amp, newBalances, false);
+    const currentInvariant = _calculateInvariant(amp, balances);
+    const newInvariant = _calculateInvariant(amp, newBalances);
     const invariantRatio = MathSol.divDownFixed(newInvariant, currentInvariant);
 
     // return amountBPTIn
@@ -343,8 +338,7 @@ export function _calcTokenOutGivenExactBptIn(
 ): bigint {
     // Token out, so we round down overall.
 
-    // Get the current and new invariants. Since we need a bigger new invariant, we round the current one up.
-    const currentInvariant = _calculateInvariant(amp, balances, true);
+    const currentInvariant = _calculateInvariant(amp, balances);
     const newInvariant = MathSol.mulUpFixed(
         MathSol.divUpFixed(bptTotalSupply - bptAmountIn, bptTotalSupply),
         currentInvariant
@@ -540,7 +534,7 @@ export function _spotPriceAfterSwapTokenInForExactTokenOut(
     tokenIndexOut: number,
     amountOut: bigint,
     fee: bigint
-): BigInt {
+): bigint {
     const balancesCopy = [...balances];
     const _in = _calcInGivenOut(
         amp,
@@ -714,7 +708,7 @@ export function _poolDerivatives(
     wrt_out: boolean
 ): bigint {
     const totalCoins = balances.length;
-    const D = _calculateInvariant(amp, balances, true);
+    const D = _calculateInvariant(amp, balances);
     let S = BigInt(0);
     for (let i = 0; i < totalCoins; i++) {
         if (i != tokenIndexIn && i != tokenIndexOut) {
@@ -765,7 +759,7 @@ export function _poolDerivativesBPT(
     wrt_out: boolean
 ): bigint {
     const totalCoins = balances.length;
-    const D = _calculateInvariant(amp, balances, true);
+    const D = _calculateInvariant(amp, balances);
     let S = BigInt(0);
     let D_P = D / BigInt(totalCoins);
     for (let i = 0; i < totalCoins; i++) {
