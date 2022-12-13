@@ -350,7 +350,7 @@ describe('Tests full swaps against known values', () => {
                 overRideCost: Zero,
             },
         });
-        assert.equal(swapInfo.returnAmount.toString(), '99922470289305282');
+        assert.equal(swapInfo.returnAmount.toString(), '99922470289305281');
         assert.equal(swapInfo.swaps.length, 1);
         assert.equal(
             swapInfo.swaps[0].poolId,
@@ -482,7 +482,7 @@ describe('Tests full swaps against known values', () => {
             },
         });
 
-        assert.equal(swapInfo.returnAmount.toString(), '100601647114105022960');
+        assert.equal(swapInfo.returnAmount.toString(), '100601647114105022959');
         assert.equal(swapInfo.swaps.length, 3);
         assert.equal(
             swapInfo.swaps[0].poolId,

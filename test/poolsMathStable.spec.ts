@@ -67,9 +67,10 @@ describe('poolsMathStable: numeric functions using bigint', () => {
                 1600,
                 0.01
             );
-            assert.equal(
-                result.toString(),
-                SDKResult.toString(),
+            assert.approximately(
+                Number(result),
+                Number(SDKResult.toString()),
+                1,
                 'wrong result'
             );
         });
@@ -100,9 +101,10 @@ describe('poolsMathStable: numeric functions using bigint', () => {
                 1600,
                 0.01
             );
-            assert.equal(
-                result.toString(),
-                SDKResult.toString(),
+            assert.approximately(
+                Number(result),
+                Number(SDKResult),
+                1,
                 'wrong result'
             );
         });
