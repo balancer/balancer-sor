@@ -17,10 +17,7 @@ import { bbaUSD, LINEAR_AUSDT, LINEAR_AUSDC } from './lib/constants';
 const oldBN_ONE = bnum(ONE.toString());
 
 describe('phantomStable pools tests', () => {
-    // For the moment we tolerate a moderate relative error until
-    // more accurate formulas are developed for phantomStable.
-    const sError = 0.00001;
-    const mError = 0.0035;
+    const error = 0.00001;
 
     context('phantomStable pools', () => {
         const phantomStablePool = PhantomStablePool.fromPool(
@@ -57,13 +54,13 @@ describe('phantomStable pools tests', () => {
             assert.approximately(
                 a1.div(b1).toNumber(),
                 1,
-                sError,
+                error,
                 'wrong result'
             );
             assert.approximately(
                 a2.div(b2).toNumber(),
                 1,
-                sError,
+                error,
                 'wrong result'
             );
             // spot price
@@ -71,13 +68,13 @@ describe('phantomStable pools tests', () => {
                 phantomStablePool,
                 poolPairData,
                 4000,
-                sError
+                error
             );
             checkPhantomStableDerivativeSpotPrices(
                 phantomStablePool,
                 poolPairData,
                 4000,
-                sError
+                error
             );
         });
 
@@ -105,7 +102,7 @@ describe('phantomStable pools tests', () => {
             assert.approximately(
                 outMath.div(bnumOutBigInt).toNumber(),
                 1,
-                sError,
+                error,
                 'wrong result'
             );
 
@@ -132,7 +129,7 @@ describe('phantomStable pools tests', () => {
             assert.approximately(
                 inMath.div(bnumInBigInt).toNumber(),
                 1,
-                sError,
+                error,
                 'wrong result'
             );
             // spot prices
@@ -158,14 +155,14 @@ describe('phantomStable pools tests', () => {
             assert.approximately(
                 spPhantom.div(bnumSpBigInt).toNumber(),
                 1,
-                sError,
+                error,
                 'wrong result'
             );
             checkPhantomStableSpotPrices(
                 phantomStablePool,
                 poolPairData,
                 amount,
-                sError
+                error
             );
         });
         it('phantomStable token -> BPT', () => {
@@ -192,7 +189,7 @@ describe('phantomStable pools tests', () => {
             assert.approximately(
                 a1.div(b1).toNumber(),
                 1,
-                sError,
+                error,
                 'wrong result'
             );
             const b2 = phantomStableMath
@@ -201,7 +198,7 @@ describe('phantomStable pools tests', () => {
             assert.approximately(
                 a2.div(b2).toNumber(),
                 1,
-                sError,
+                error,
                 'wrong result'
             );
             // spot price:
@@ -209,7 +206,7 @@ describe('phantomStable pools tests', () => {
                 phantomStablePool,
                 poolPairData,
                 4000,
-                sError
+                error
             );
         });
     });

@@ -425,10 +425,14 @@ export class PhantomStablePool implements PoolBase {
         poolPairData: PhantomStablePoolPairData,
         amount: OldBigNumber
     ): OldBigNumber {
-        const priceRateIn = formatFixed(poolPairData.tokenInPriceRate, 18);
-        const priceRateOut = formatFixed(poolPairData.tokenOutPriceRate, 18);
-        const amountConverted = amount.times(
+        const priceRateIn = bnum(
             formatFixed(poolPairData.tokenInPriceRate, 18)
+        );
+        const priceRateOut = bnum(
+            formatFixed(poolPairData.tokenOutPriceRate, 18)
+        );
+        const amountConverted = amount.times(
+            bnum(formatFixed(poolPairData.tokenInPriceRate, 18))
         );
         let result: OldBigNumber;
         if (poolPairData.pairType === PairTypes.TokenToBpt) {
@@ -456,8 +460,12 @@ export class PhantomStablePool implements PoolBase {
         poolPairData: PhantomStablePoolPairData,
         amount: OldBigNumber
     ): OldBigNumber {
-        const priceRateIn = formatFixed(poolPairData.tokenInPriceRate, 18);
-        const priceRateOut = formatFixed(poolPairData.tokenOutPriceRate, 18);
+        const priceRateIn = bnum(
+            formatFixed(poolPairData.tokenInPriceRate, 18)
+        );
+        const priceRateOut = bnum(
+            formatFixed(poolPairData.tokenOutPriceRate, 18)
+        );
         const amountConverted = amount.times(
             formatFixed(poolPairData.tokenOutPriceRate, 18)
         );
@@ -486,7 +494,9 @@ export class PhantomStablePool implements PoolBase {
         poolPairData: PhantomStablePoolPairData,
         amount: OldBigNumber
     ): OldBigNumber {
-        const priceRateOut = formatFixed(poolPairData.tokenOutPriceRate, 18);
+        const priceRateOut = bnum(
+            formatFixed(poolPairData.tokenOutPriceRate, 18)
+        );
         const amountConverted = amount.times(
             formatFixed(poolPairData.tokenInPriceRate, 18)
         );
@@ -517,8 +527,12 @@ export class PhantomStablePool implements PoolBase {
         poolPairData: PhantomStablePoolPairData,
         amount: OldBigNumber
     ): OldBigNumber {
-        const priceRateIn = formatFixed(poolPairData.tokenInPriceRate, 18);
-        const priceRateOut = formatFixed(poolPairData.tokenOutPriceRate, 18);
+        const priceRateIn = bnum(
+            formatFixed(poolPairData.tokenInPriceRate, 18)
+        );
+        const priceRateOut = bnum(
+            formatFixed(poolPairData.tokenOutPriceRate, 18)
+        );
         const amountConverted = amount.times(
             formatFixed(poolPairData.tokenOutPriceRate, 18)
         );
