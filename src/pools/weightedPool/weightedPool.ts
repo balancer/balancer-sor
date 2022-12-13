@@ -160,10 +160,6 @@ export class WeightedPool implements PoolBase {
         );
     }
 
-    // Normalized liquidity is an abstract term that can be thought of the
-    // inverse of the slippage. It is proportional to the token balances in the
-    // pool but also depends on the shape of the invariant curve.
-    // As a standard, we define normalized liquidity in tokenOut
     getNormalizedLiquidity(poolPairData: WeightedPoolPairData): OldBigNumber {
         const derivativeSpotPriceAtZero =
             this._derivativeSpotPriceAfterSwapExactTokenInForTokenOut(
@@ -171,16 +167,6 @@ export class WeightedPool implements PoolBase {
                 ZERO
             );
         const ans = bnum(1).div(derivativeSpotPriceAtZero);
-        const ansOld = bnum(
-            formatFixed(
-                poolPairData.balanceOut
-                    .mul(poolPairData.weightIn)
-                    .div(poolPairData.weightIn.add(poolPairData.weightOut)),
-                poolPairData.decimalsOut
-            )
-        );
-        console.log(ans.toString());
-        console.log(ansOld.toString());
         if (ans.isNaN()) return ZERO;
         else return ans;
     }

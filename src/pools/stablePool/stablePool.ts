@@ -134,26 +134,9 @@ export class StablePool implements PoolBase {
                 poolPairData,
                 ZERO
             );
-        // console.log('der: ', derivativeSpotPriceAtZero.toString());
         const ans = bnum(1).div(derivativeSpotPriceAtZero);
         if (ans.isNaN()) return ZERO;
-        const ansOld = bnum(
-            formatFixed(
-                poolPairData.balanceOut.mul(poolPairData.amp),
-                poolPairData.decimalsOut + StablePool.AMP_DECIMALS
-            )
-        );
-        console.log(ans.toString());
-        console.log(ansOld.toString());
         return ans;
-
-        // This is an approximation as the actual normalized liquidity is a lot more complicated to calculate
-        /*return bnum(
-            formatFixed(
-                poolPairData.balanceOut.mul(poolPairData.amp),
-                poolPairData.decimalsOut + StablePool.AMP_DECIMALS
-            )
-        );*/
     }
 
     getLimitAmountSwap(

@@ -1,7 +1,7 @@
 import { BigNumber, formatFixed, parseFixed } from '@ethersproject/bignumber';
 import { WeiPerEther as ONE, Zero } from '@ethersproject/constants';
 import { isSameAddress } from '../../utils';
-import { BigNumber as OldBigNumber, bnum } from '../../utils/bignumber';
+import { BigNumber as OldBigNumber, bnum, ZERO } from '../../utils/bignumber';
 import {
     PoolBase,
     PoolTypes,
@@ -147,17 +147,15 @@ export class ElementPool implements PoolBase {
         return poolPairData;
     }
 
-    // Normalized liquidity is an abstract term that can be thought of the
-    // inverse of the slippage. It is proportional to the token balances in the
-    // pool but also depends on the shape of the invariant curve.
-    // As a standard, we define normalized liquidity in tokenOut
     getNormalizedLiquidity(poolPairData: ElementPoolPairData): OldBigNumber {
-        // This could be refined by using the inverse of the slippage, but
-        // in practice this won't have a big impact in path selection for
-        // multi-hops so not a big priority
-        return bnum(
-            formatFixed(poolPairData.balanceOut, poolPairData.decimalsOut)
-        );
+        const derivativeSpotPriceAtZero =
+            this._derivativeSpotPriceAfterSwapExactTokenInForTokenOut(
+                poolPairData,
+                ZERO
+            );
+        const ans = bnum(1).div(derivativeSpotPriceAtZero);
+        if (ans.isNaN()) return ZERO;
+        return ans;
     }
 
     getLimitAmountSwap(

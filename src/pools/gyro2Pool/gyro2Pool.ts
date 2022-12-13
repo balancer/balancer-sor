@@ -1,7 +1,7 @@
 import { getAddress } from '@ethersproject/address';
 import { WeiPerEther as ONE, Zero } from '@ethersproject/constants';
 import { formatFixed, BigNumber } from '@ethersproject/bignumber';
-import { BigNumber as OldBigNumber, bnum } from '../../utils/bignumber';
+import { BigNumber as OldBigNumber, bnum, ZERO } from '../../utils/bignumber';
 
 import {
     PoolBase,
@@ -20,7 +20,6 @@ import {
     _calculateNewSpotPrice,
     _derivativeSpotPriceAfterSwapExactTokenInForTokenOut,
     _derivativeSpotPriceAfterSwapTokenInForExactTokenOut,
-    _getNormalizedLiquidity,
 } from './gyro2Math';
 import {
     _normalizeBalances,
@@ -131,27 +130,14 @@ export class Gyro2Pool implements PoolBase {
     }
 
     getNormalizedLiquidity(poolPairData: Gyro2PoolPairData): OldBigNumber {
-        const balances = [poolPairData.balanceIn, poolPairData.balanceOut];
-        const normalizedBalances = _normalizeBalances(balances, [
-            poolPairData.decimalsIn,
-            poolPairData.decimalsOut,
-        ]);
-        const invariant = _calculateInvariant(
-            normalizedBalances,
-            poolPairData.sqrtAlpha,
-            poolPairData.sqrtBeta
-        );
-        const [, virtualParamOut] = _findVirtualParams(
-            invariant,
-            poolPairData.sqrtAlpha,
-            poolPairData.sqrtBeta
-        );
-        const normalisedLiquidity = _getNormalizedLiquidity(
-            normalizedBalances,
-            virtualParamOut
-        );
-
-        return bnum(formatFixed(normalisedLiquidity, 18));
+        const derivativeSpotPriceAtZero =
+            this._derivativeSpotPriceAfterSwapExactTokenInForTokenOut(
+                poolPairData,
+                ZERO
+            );
+        const ans = bnum(1).div(derivativeSpotPriceAtZero);
+        if (ans.isNaN()) return ZERO;
+        return ans;
     }
 
     getLimitAmountSwap(
