@@ -25,7 +25,7 @@ export class SwapCostCalculator {
         tokenAddress: string,
         tokenDecimals: number,
         gasPriceWei: BigNumber,
-        swapGas: BigNumber = BigNumber.from('35000')
+        swapGas: BigNumber = BigNumber.from('85000')
     ): Promise<BigNumber> {
         if (gasPriceWei.isZero() || swapGas.isZero()) return Zero;
         const tokenPrice = await this.getNativeAssetPriceInToken(tokenAddress);

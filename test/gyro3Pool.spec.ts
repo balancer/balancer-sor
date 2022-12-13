@@ -4,14 +4,14 @@ import cloneDeep from 'lodash.clonedeep';
 import { formatFixed, parseFixed } from '@ethersproject/bignumber';
 import { bnum } from '../src/utils/bignumber';
 import { USDC, USDT } from './lib/constants';
-import { SwapTypes } from '../src';
+import { SubgraphPoolBase, SwapTypes } from '../src';
 // Add new PoolType
 import { Gyro3Pool } from '../src/pools/gyro3Pool/gyro3Pool';
 // Add new pool test data in Subgraph Schema format
 import testPools from './testData/gyro3Pools/gyro3TestPool.json';
 
 describe('Gyro3Pool tests USDC > DAI', () => {
-    const testPool: any = cloneDeep(testPools).pools[0];
+    const testPool: SubgraphPoolBase = cloneDeep(testPools).pools[0];
     const pool = Gyro3Pool.fromPool(testPool);
 
     const poolPairData = pool.parsePoolPairData(USDT.address, USDC.address);

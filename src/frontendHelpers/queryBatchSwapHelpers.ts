@@ -1,15 +1,8 @@
 import { BigNumberish } from '@ethersproject/bignumber';
 import { Contract } from '@ethersproject/contracts';
 import { AddressZero } from '@ethersproject/constants';
-import { SwapTypes, SwapInfo, SwapV2 } from '../types';
+import { SwapTypes, SwapInfo, SwapV2, FundManagement } from '../types';
 import { SOR } from '../index';
-
-type FundManagement = {
-    sender: string;
-    recipient: string;
-    fromInternalBalance: boolean;
-    toInternalBalance: boolean;
-};
 
 /*
  * queryBatchSwap simulates a call to `batchSwap`, returning an array of Vault asset deltas. Calls to `swap` cannot be
