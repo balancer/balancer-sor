@@ -22,5 +22,5 @@
         "src/pools/elementPool/ConvergentCurvePool.json",
         "src/pools/linearPool/linearPoolAbi.json"
     ],
-    "files": ["hardhat.config.js"]
+    "files": ["hardhat.config.ts"]
 }
