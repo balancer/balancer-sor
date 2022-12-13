@@ -21,6 +21,9 @@ import { PhantomStablePoolPairData } from './phantomStablePool';
     // P = product of balances    (n+1) * D + ( A * n^n − 1)* (n^n * P / D^(n−1))                //
     // n = number of tokens                                                                      //
     **********************************************************************************************/
+
+const AMP_PRECISION_BNUM = bnum(1000);
+
 export function _invariant(
     A: BigNumber,
     balances: OldBigNumber[] // balances
@@ -574,14 +577,14 @@ export function _poolDerivativesBPT(
     const x = balances[tokenIndexIn];
     const alpha = bnum(A.toString()).times(totalCoins ** totalCoins); // = ATimesNpowN
     const beta = alpha.times(S);
-    const gamma = bnum(1000).minus(alpha);
+    const gamma = AMP_PRECISION_BNUM.minus(alpha);
     const partial_x = bnum(2)
         .times(alpha)
         .times(x)
         .plus(beta)
         .plus(gamma.times(D));
     const minus_partial_D = D_P.times(totalCoins + 1)
-        .times(1000)
+        .times(AMP_PRECISION_BNUM)
         .minus(gamma.times(x));
     const partial_D = ZERO.minus(minus_partial_D);
     let ans: OldBigNumber;
