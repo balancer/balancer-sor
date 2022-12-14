@@ -10,7 +10,6 @@ import {
 import { DAI, USDC, USDT } from './lib/constants';
 import * as SDK from '@georgeroman/balancer-v2-pools';
 import poolsFromFile from './testData/stablePools/stablePoolWithBPT.json';
-import { BigNumber } from '@ethersproject/bignumber';
 
 describe('stable-math tests', () => {
     // Make a stable pool

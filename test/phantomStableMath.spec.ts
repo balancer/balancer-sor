@@ -10,7 +10,6 @@ import {
     PhantomStablePoolPairData,
 } from '../src/pools/phantomStablePool/phantomStablePool';
 import * as phantomStableMath from '../src/pools/phantomStablePool/phantomStableMath';
-import * as stableMath from '../src/pools/stablePool/stableMath';
 import * as stableMathBigInt from '../src/pools/stablePool/stableMathBigInt';
 import { bbaUSD, LINEAR_AUSDT, LINEAR_AUSDC } from './lib/constants';
 

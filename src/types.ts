@@ -252,3 +252,10 @@ export interface TokenPriceService {
 export interface PoolDataService {
     getPools(): Promise<SubgraphPoolBase[]>;
 }
+
+export type FundManagement = {
+    sender: string;
+    recipient: string;
+    fromInternalBalance: boolean;
+    toInternalBalance: boolean;
+};

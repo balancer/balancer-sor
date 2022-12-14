@@ -284,11 +284,13 @@ export class Gyro2Pool implements PoolBase {
         }
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     _calcTokensOutGivenExactBptIn(bptAmountIn: BigNumber): BigNumber[] {
         // Missing maths for this
         return new Array(this.tokens.length).fill(Zero);
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     _calcBptOutGivenExactTokensIn(amountsIn: BigNumber[]): BigNumber {
         // Missing maths for this
         return Zero;

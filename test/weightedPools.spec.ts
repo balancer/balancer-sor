@@ -14,6 +14,7 @@ import {
     PoolFilter,
     bnum,
     WeightedPool,
+    SubgraphPoolBase,
 } from '../src';
 import { WeightedPoolPairData } from '../src/pools/weightedPool/weightedPool';
 import { mockTokenPriceService } from './lib/mockTokenPriceService';
@@ -125,7 +126,7 @@ describe(`Tests for Weighted Pools.`, () => {
             );
             assert.equal(swapInfo1.swaps.length, 3, 'Should have 3 swaps');
             assert.equal(swapInfo2.swaps.length, 1, 'Should have 1 swap');
-            assert.equal(swapInfo1.returnAmount.toString(), '1264796479432');
+            assert.equal(swapInfo1.returnAmount.toString(), '1264796479436');
             // only using the stable pool returns a lower value:
             assert.equal(swapInfo2.returnAmount.toString(), '1264579692512');
         });
@@ -156,7 +157,7 @@ describe(`Tests for Weighted Pools.`, () => {
             assert.equal(swapInfo2.swaps.length, 1, 'Should have 1 swap');
             assert.equal(
                 swapInfo1.returnAmount.toString(),
-                '1279783692104473234902844'
+                '1279783692099680027157971'
             );
             assert.equal(
                 swapInfo2.returnAmount.toString(),
@@ -213,7 +214,7 @@ async function getSwapInfo(
     tokenIn: string,
     tokenOut: string,
     swapType: SwapTypes,
-    pools: any,
+    pools: SubgraphPoolBase[],
     swapAmount: BigNumber,
     useBpts?: boolean
 ) {

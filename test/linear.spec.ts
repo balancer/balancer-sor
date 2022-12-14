@@ -704,7 +704,7 @@ describe('linear pool tests', () => {
                     pools,
                     sorConfigKovan
                 );
-                expect(returnAmount).to.eq('124721185153919559');
+                expect(returnAmount).to.eq('124721185153919558');
             });
         });
 
