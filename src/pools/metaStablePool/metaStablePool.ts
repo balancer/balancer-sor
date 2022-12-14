@@ -111,7 +111,7 @@ export class MetaStablePool implements PoolBase {
 
         // Get all token balances
         const allBalances = this.tokens.map(({ balance, priceRate }) =>
-            bnum(balance).times(priceRate)
+            bnum(balance).times(bnum(priceRate))
         );
         const allBalancesScaled = this.tokens.map(({ balance, priceRate }) =>
             parseFixed(balance, 18).mul(parseFixed(priceRate, 18)).div(ONE)
@@ -354,8 +354,12 @@ export class MetaStablePool implements PoolBase {
         poolPairData: MetaStablePoolPairData,
         amount: OldBigNumber
     ): OldBigNumber {
-        const priceRateIn = formatFixed(poolPairData.tokenInPriceRate, 18);
-        const priceRateOut = formatFixed(poolPairData.tokenOutPriceRate, 18);
+        const priceRateIn = bnum(
+            formatFixed(poolPairData.tokenInPriceRate, 18)
+        );
+        const priceRateOut = bnum(
+            formatFixed(poolPairData.tokenOutPriceRate, 18)
+        );
         const amountConverted = amount.times(
             formatFixed(poolPairData.tokenInPriceRate, 18)
         );
@@ -370,8 +374,12 @@ export class MetaStablePool implements PoolBase {
         poolPairData: MetaStablePoolPairData,
         amount: OldBigNumber
     ): OldBigNumber {
-        const priceRateIn = formatFixed(poolPairData.tokenInPriceRate, 18);
-        const priceRateOut = formatFixed(poolPairData.tokenOutPriceRate, 18);
+        const priceRateIn = bnum(
+            formatFixed(poolPairData.tokenInPriceRate, 18)
+        );
+        const priceRateOut = bnum(
+            formatFixed(poolPairData.tokenOutPriceRate, 18)
+        );
         const amountConverted = amount.times(
             formatFixed(poolPairData.tokenOutPriceRate, 18)
         );
@@ -386,7 +394,9 @@ export class MetaStablePool implements PoolBase {
         poolPairData: MetaStablePoolPairData,
         amount: OldBigNumber
     ): OldBigNumber {
-        const priceRateOut = formatFixed(poolPairData.tokenOutPriceRate, 18);
+        const priceRateOut = bnum(
+            formatFixed(poolPairData.tokenOutPriceRate, 18)
+        );
         return _derivativeSpotPriceAfterSwapExactTokenInForTokenOut(
             amount,
             poolPairData
@@ -397,8 +407,12 @@ export class MetaStablePool implements PoolBase {
         poolPairData: MetaStablePoolPairData,
         amount: OldBigNumber
     ): OldBigNumber {
-        const priceRateIn = formatFixed(poolPairData.tokenInPriceRate, 18);
-        const priceRateOut = formatFixed(poolPairData.tokenOutPriceRate, 18);
+        const priceRateIn = bnum(
+            formatFixed(poolPairData.tokenInPriceRate, 18)
+        );
+        const priceRateOut = bnum(
+            formatFixed(poolPairData.tokenOutPriceRate, 18)
+        );
         return _derivativeSpotPriceAfterSwapTokenInForExactTokenOut(
             amount,
             poolPairData
