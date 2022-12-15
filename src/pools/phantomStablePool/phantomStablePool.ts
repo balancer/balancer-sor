@@ -224,7 +224,23 @@ export class PhantomStablePool implements PoolBase {
         // token is underlying in the pool
         const T = this.tokens.find((t) => isSameAddress(t.address, token));
         if (!T) throw Error('Pool does not contain this token');
-        T.balance = formatFixed(newBalance, T.decimals);
+        console.log(this.tokens.map((t) => t.balance));
+        console.log(formatFixed(this.totalShares, 18));
+
+        if (this.address == token) {
+            // remove new balance diff from BPT being hold by the pool
+            const diff = newBalance.sub(this.totalShares);
+            const parsedTokenBalance = parseFixed(T.balance, T.decimals);
+            T.balance = formatFixed(parsedTokenBalance.sub(diff), T.decimals);
+            // update total shares with new balance
+            this.totalShares = newBalance;
+            console.log(' - token balance updated - ');
+        } else {
+            T.balance = formatFixed(newBalance, T.decimals);
+        }
+
+        console.log(this.tokens.map((t) => t.balance));
+        console.log(formatFixed(this.totalShares, 18));
     }
 
     _exactTokenInForTokenOut(
