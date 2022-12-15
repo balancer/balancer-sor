@@ -11,7 +11,7 @@ import { bnum } from '../src/utils/bignumber';
 import { formatFixed } from '@ethersproject/bignumber';
 
 describe('debug fails if token balances are not updated after a swap', () => {
-    context('weighted pool', () => {
+    context('Weighted pool', () => {
         const poolsAll = parseToPoolsDict(cloneDeep(boostedPools.pools), 0);
         const pool = poolsAll['weightedBalWeth'];
         const path1 = createPath([WETH.address, BAL.address], [pool]);
@@ -51,7 +51,7 @@ describe('debug fails if token balances are not updated after a swap', () => {
             );
         });
     });
-    context('phantom stable pool', () => {
+    context('StablePhantom pool', () => {
         const poolsAll = parseToPoolsDict(cloneDeep(boostedPools.pools), 0);
         const pool = poolsAll['bbaUSD-Pool'];
         console.log(pool.tokensList);
@@ -73,15 +73,12 @@ describe('debug fails if token balances are not updated after a swap', () => {
         it('updateTokenBalance - bbaUSD-Pool', () => {
             const initialUsdcBalance =
                 pool.tokens[1].balance.toString() as string;
-            console.log(formatFixed(pool.totalShares, 18));
-
             const [, returnDouble] = formatSwaps(
                 [path1, path2],
                 SwapTypes.SwapExactIn,
                 bnum(100),
                 [bnum(50), bnum(50)]
             );
-            console.log(formatFixed(pool.totalShares, 18));
             const [, returnSingle] = formatSwaps(
                 [path3],
                 SwapTypes.SwapExactIn,
@@ -103,18 +100,19 @@ describe('debug fails if token balances are not updated after a swap', () => {
                 finalUsdcBalance.substring(0, 4) === '4967',
                 'it should be 4967'
             );
-            const initialBPTBalance = formatFixed(pool.totalShares, 18);
-            console.log(initialBPTBalance);
-            const [, returnBPT] = formatSwaps(
-                [path4],
-                SwapTypes.SwapExactIn,
-                bnum(50),
-                [bnum(50)]
+        });
+        it('update totalShares - bbaUSD-Pool', () => {
+            const initialTotalShares = formatFixed(pool.totalShares, 18);
+            formatSwaps([path4], SwapTypes.SwapExactIn, bnum(50), [bnum(50)]);
+            const finalTotalShares = formatFixed(pool.totalShares, 18);
+            assert.isTrue(
+                initialTotalShares.substring(0, 5) === '14473',
+                'it should be 14473'
             );
-            const finalBPTBalance = formatFixed(pool.totalShares, 18);
-            console.log(returnBPT.toString());
-
-            console.log(finalBPTBalance);
+            assert.isTrue(
+                finalTotalShares.substring(0, 5) === '14522',
+                'it should be 14522'
+            );
         });
     });
 });
