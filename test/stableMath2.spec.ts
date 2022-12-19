@@ -1,17 +1,15 @@
-// TS_NODE_PROJECT='tsconfig.testing.json' npx mocha -r ts-node/register test/phantomStableMath.spec.ts
+// TS_NODE_PROJECT='tsconfig.testing.json' npx mocha -r ts-node/register test/stableMath2.spec.ts
 import { assert } from 'chai';
 import { BigNumber, formatFixed, parseFixed } from '@ethersproject/bignumber';
 import { BigNumber as OldBigNumber } from '../src/utils/bignumber';
 import { bnum } from '../src/utils/bignumber';
 import { WeiPerEther as ONE } from '@ethersproject/constants';
 import phantomStableStabal3WithPriceRates from './testData/phantomStablePools/phantomStableStabal3WithPriceRates.json';
-import {
-    PhantomStablePool,
-    PhantomStablePoolPairData,
-} from '../src/pools/phantomStablePool/phantomStablePool';
-import * as phantomStableMath from '../src/pools/phantomStablePool/phantomStableMath';
+import { PhantomStablePool } from '../src/pools/phantomStablePool/phantomStablePool';
+import * as stableMath from '../src/pools/stablePool/stableMath';
 import * as stableMathBigInt from '../src/pools/stablePool/stableMathBigInt';
 import { bbaUSD, LINEAR_AUSDT, LINEAR_AUSDC } from './lib/constants';
+import { StablePoolPairData } from '../src/pools/stablePool/stablePool';
 
 const oldBN_ONE = bnum(ONE.toString());
 
@@ -28,23 +26,23 @@ describe('phantomStable pools tests', () => {
                 LINEAR_AUSDT.address
             );
             const priceRateIn = bnum(
-                formatFixed(poolPairData.tokenInPriceRate, 18)
+                formatFixed(poolPairData.tokenInPriceRate as BigNumber, 18)
             );
             const priceRateOut = bnum(
-                formatFixed(poolPairData.tokenOutPriceRate, 18)
+                formatFixed(poolPairData.tokenOutPriceRate as BigNumber, 18)
             );
             const { a1, a2 } = getSwapOutcomes(
                 phantomStablePool,
                 poolPairData,
                 4000
             );
-            const b1 = phantomStableMath
+            const b1 = stableMath
                 ._exactTokenInForTokenOut(
                     bnum(4000).times(priceRateIn),
                     poolPairData
                 )
                 .div(priceRateOut);
-            const b2 = phantomStableMath
+            const b2 = stableMath
                 ._tokenInForExactTokenOut(
                     bnum(4000).times(priceRateOut),
                     poolPairData
@@ -83,9 +81,9 @@ describe('phantomStable pools tests', () => {
                 LINEAR_AUSDC.address
             );
             // swap outcomes
-            // compares phantomStableMath with stableMathBigInt
+            // compares stableMath with stableMathBigInt
             const amount = 4000;
-            const outMath = phantomStableMath._exactBPTInForTokenOut(
+            const outMath = stableMath._exactBPTInForTokenOut(
                 bnum(amount),
                 poolPairData
             );
@@ -94,7 +92,7 @@ describe('phantomStable pools tests', () => {
                 poolPairData.allBalancesScaled.map((b) => b.toBigInt()),
                 poolPairData.tokenIndexOut,
                 ONE.mul(amount).toBigInt(),
-                poolPairData.virtualBptSupply.toBigInt(),
+                poolPairData.totalShares.toBigInt(),
                 poolPairData.swapFee.toBigInt()
             );
             const bnumOutBigInt = bnum(outBigInt.toString()).div(oldBN_ONE);
@@ -105,7 +103,7 @@ describe('phantomStable pools tests', () => {
                 'wrong result'
             );
 
-            const inMath = phantomStableMath._BPTInForExactTokenOut(
+            const inMath = stableMath._BPTInForExactTokenOut(
                 bnum(amount),
                 poolPairData
             );
@@ -121,7 +119,7 @@ describe('phantomStable pools tests', () => {
                 poolPairData.amp.toBigInt(),
                 poolPairData.allBalancesScaled.map((b) => b.toBigInt()),
                 amountsOutBigInt,
-                poolPairData.virtualBptSupply.toBigInt(),
+                poolPairData.totalShares.toBigInt(),
                 poolPairData.swapFee.toBigInt()
             );
             const bnumInBigInt = bnum(inBigInt.toString()).div(oldBN_ONE);
@@ -134,7 +132,7 @@ describe('phantomStable pools tests', () => {
             // spot prices
             poolPairData.swapFee = BigNumber.from(0);
             const spPhantom =
-                phantomStableMath._spotPriceAfterSwapExactBPTInForTokenOut(
+                stableMath._spotPriceAfterSwapExactBPTInForTokenOut(
                     bnum(0),
                     poolPairData
                 );
@@ -164,14 +162,14 @@ describe('phantomStable pools tests', () => {
                 error
             );
         });
-        it('phantomStable token -> BPT', () => {
+        it('debug phantomStable token -> BPT', () => {
             const poolPairData = phantomStablePool.parsePoolPairData(
                 LINEAR_AUSDC.address,
                 bbaUSD.address
             );
             poolPairData.swapFee = BigNumber.from(0);
 
-            // here we should compare phantomStableMath with stableMathBigInt
+            // here we should compare stableMath with stableMathBigInt
             // like in the previous case, BPT -> token.
             const { a1, a2 } = getSwapOutcomes(
                 phantomStablePool,
@@ -179,9 +177,9 @@ describe('phantomStable pools tests', () => {
                 4000
             );
             const priceRateIn = bnum(
-                formatFixed(poolPairData.tokenInPriceRate, 18)
+                formatFixed(poolPairData.tokenInPriceRate as BigNumber, 18)
             );
-            const b1 = phantomStableMath._exactTokenInForBPTOut(
+            const b1 = stableMath._exactTokenInForBPTOut(
                 bnum(4000).times(priceRateIn),
                 poolPairData
             );
@@ -191,7 +189,7 @@ describe('phantomStable pools tests', () => {
                 error,
                 'wrong result'
             );
-            const b2 = phantomStableMath
+            const b2 = stableMath
                 ._tokenInForExactBPTOut(bnum(4000), poolPairData)
                 .div(priceRateIn);
             assert.approximately(
@@ -213,7 +211,7 @@ describe('phantomStable pools tests', () => {
 
 function getSwapOutcomes(
     phantomStablePool: PhantomStablePool,
-    poolPairData: PhantomStablePoolPairData,
+    poolPairData: StablePoolPairData,
     amount: number
 ): { a1: OldBigNumber; a2: OldBigNumber } {
     const a1 = phantomStablePool._exactTokenInForTokenOut(
@@ -229,7 +227,7 @@ function getSwapOutcomes(
 
 function checkPhantomStableSpotPrices(
     phantomStablePool: PhantomStablePool,
-    poolPairData: PhantomStablePoolPairData,
+    poolPairData: StablePoolPairData,
     amount: number,
     error: number
 ) {
@@ -271,7 +269,7 @@ function checkPhantomStableSpotPrices(
 
 function incrementalQuotientExactTokenInForTokenOut(
     phantomStablePool: PhantomStablePool,
-    poolPairData: PhantomStablePoolPairData,
+    poolPairData: StablePoolPairData,
     amount: number,
     delta: number
 ): OldBigNumber {
@@ -289,7 +287,7 @@ function incrementalQuotientExactTokenInForTokenOut(
 
 function incrementalQuotientTokenInForExactTokenOut(
     phantomStablePool: PhantomStablePool,
-    poolPairData: PhantomStablePoolPairData,
+    poolPairData: StablePoolPairData,
     amount: number,
     delta: number
 ): OldBigNumber {
@@ -307,7 +305,7 @@ function incrementalQuotientTokenInForExactTokenOut(
 
 function checkPhantomStableDerivativeSpotPrices(
     phantomStablePool: PhantomStablePool,
-    poolPairData: PhantomStablePoolPairData,
+    poolPairData: StablePoolPairData,
     amount: number,
     error: number
 ) {
@@ -350,7 +348,7 @@ function checkPhantomStableDerivativeSpotPrices(
 
 function incrementalQuotientSpotPriceAfterSwapExactTokenInForTokenOut(
     phantomStablePool: PhantomStablePool,
-    poolPairData: PhantomStablePoolPairData,
+    poolPairData: StablePoolPairData,
     amount: number,
     delta: number
 ): OldBigNumber {
@@ -368,7 +366,7 @@ function incrementalQuotientSpotPriceAfterSwapExactTokenInForTokenOut(
 
 function incrementalQuotientSpotPriceAfterSwapTokenInForExactTokenOut(
     phantomStablePool: PhantomStablePool,
-    poolPairData: PhantomStablePoolPairData,
+    poolPairData: StablePoolPairData,
     amount: number,
     delta: number
 ): OldBigNumber {

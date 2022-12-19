@@ -77,6 +77,7 @@ describe(`Tests for Stable Pools.`, () => {
                 ],
                 tokenIndexIn: 0,
                 tokenIndexOut: 1,
+                totalShares: newPool.totalShares,
             };
 
             const limitAmt = newPool.getLimitAmountSwap(poolPairData, swapType);
@@ -117,6 +118,7 @@ describe(`Tests for Stable Pools.`, () => {
                 allBalancesScaled: [],
                 tokenIndexIn: 0,
                 tokenIndexOut: 1,
+                totalShares: newPool.totalShares,
             };
 
             const limitAmt = newPool.getLimitAmountSwap(poolPairData, swapType);

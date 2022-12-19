@@ -3,7 +3,7 @@ import { BPTForTokensZeroPriceImpact } from '../src/frontendHelpers/phantomStabl
 
 describe('frontend helpers', () => {
     context('BPTForTokensZeroPriceImpact', () => {
-        it('phantomStable', () => {
+        it('debug phantomStable', () => {
             const result = BPTForTokensZeroPriceImpact(
                 ['1000000000', '1000000000', '1000000000'],
                 [18, 18, 18],

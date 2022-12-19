@@ -16,7 +16,7 @@ export function BPTForTokensZeroPriceImpact(
     allBalances: BigNumberish[], // assuming that BPT balance was removed
     decimals: number[], // This should be [18, 18, 18]
     amounts: BigNumberish[], // This has to have the same length as allBalances
-    virtualBptSupply: BigNumberish,
+    bptSupply: BigNumberish,
     amp: BigNumberish,
     fee: BigNumberish,
     rates: BigNumberish[]
@@ -35,7 +35,7 @@ export function BPTForTokensZeroPriceImpact(
         transformedBalances,
         decimals,
         amountsAfterFee,
-        virtualBptSupply,
+        bptSupply,
         amp
     );
 }

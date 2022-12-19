@@ -21,7 +21,7 @@ export function BPTForTokensZeroPriceImpact(
     allBalances: BigNumberish[],
     decimals: number[],
     amounts: BigNumberish[], // This has to have the same lenght as allBalances
-    bptTotalSupply: BigNumberish,
+    bptSupply: BigNumberish,
     amp: BigNumberish
 ): BigNumber {
     if (allBalances.length != amounts.length)
@@ -40,7 +40,7 @@ export function BPTForTokensZeroPriceImpact(
             amp: BigNumber.from(amp),
             allBalances: allBalancesDownScaled,
             tokenIndexIn: i,
-            balanceOut: bptTotalSupply,
+            totalShares: bptSupply,
             decimalsOut: 18,
             swapFee: Zero,
         } as unknown as StablePoolPairData;

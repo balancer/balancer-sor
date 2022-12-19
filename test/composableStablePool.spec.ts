@@ -5,7 +5,7 @@ import { bnum } from '../src/utils/bignumber';
 import { WeiPerEther as ONE } from '@ethersproject/constants';
 import composableStable from './testData/phantomStablePools/composableStable.json';
 import { PhantomStablePool } from '../src/pools/phantomStablePool/phantomStablePool';
-import * as phantomStableMath from '../src/pools/phantomStablePool/phantomStableMath';
+import * as stableMath from '../src/pools/stablePool/stableMath';
 import * as stableMathBigInt from '../src/pools/stablePool/stableMathBigInt';
 import { ADDRESSES, Network } from './testScripts/constants';
 
@@ -26,7 +26,7 @@ describe('composable stable pool', () => {
             // spot prices
             poolPairData.swapFee = BigNumber.from(0);
             const spPhantom =
-                phantomStableMath._spotPriceAfterSwapExactTokenInForBPTOut(
+                stableMath._spotPriceAfterSwapExactTokenInForBPTOut(
                     bnum(0),
                     poolPairData
                 );

@@ -9,10 +9,7 @@ import { WeiPerEther as ONE } from '@ethersproject/constants';
 import { JsonRpcProvider } from '@ethersproject/providers';
 import { SOR, SwapInfo, SwapTypes, PoolTypes, SubgraphPoolBase } from '../src';
 import { bnum } from '../src/utils/bignumber';
-import {
-    MetaStablePool,
-    MetaStablePoolPairData,
-} from '../src/pools/metaStablePool/metaStablePool';
+import { MetaStablePool } from '../src/pools/metaStablePool/metaStablePool';
 import { BAL, sorConfigEth, USDC, WETH } from './lib/constants';
 import poolsFromFile from './testData/metaStablePools/singlePool.json';
 import poolsFromFileMultihop from './testData/metaStablePools/multihop.json';
@@ -22,6 +19,7 @@ const baseToken = '0x0000000000000000000000000000000000011111';
 const metaToken = '0x0000000000000000000000000000000000022222';
 
 import { MockPoolDataService } from './lib/mockPoolDataService';
+import { StablePoolPairData } from '../src/pools/stablePool/stablePool';
 
 const gasPrice = parseFixed('30', 9);
 const maxPools = 4;
@@ -78,7 +76,7 @@ describe(`Tests for MetaStable Pools.`, () => {
                 pool.tokensList
             );
 
-            const poolPairData: MetaStablePoolPairData = {
+            const poolPairData: StablePoolPairData = {
                 id: pool.id,
                 address: pool.address,
                 poolType: PoolTypes.Stable,
@@ -108,6 +106,7 @@ describe(`Tests for MetaStable Pools.`, () => {
                 tokenIndexOut: 1,
                 tokenInPriceRate: parseFixed(pool.tokens[0].priceRate, 18),
                 tokenOutPriceRate: parseFixed(pool.tokens[1].priceRate, 18),
+                totalShares: newPool.totalShares,
             };
 
             const limitAmt = newPool.getLimitAmountSwap(poolPairData, swapType);
@@ -133,7 +132,7 @@ describe(`Tests for MetaStable Pools.`, () => {
                 pool.tokensList
             );
 
-            const poolPairData: MetaStablePoolPairData = {
+            const poolPairData: StablePoolPairData = {
                 id: pool.id,
                 address: pool.address,
                 poolType: PoolTypes.Stable,
@@ -157,6 +156,7 @@ describe(`Tests for MetaStable Pools.`, () => {
                 tokenIndexOut: 1,
                 tokenInPriceRate: parseFixed(pool.tokens[0].priceRate, 18),
                 tokenOutPriceRate: parseFixed(pool.tokens[1].priceRate, 18),
+                totalShares: newPool.totalShares,
             };
 
             const limitAmt = newPool.getLimitAmountSwap(poolPairData, swapType);
