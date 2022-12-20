@@ -10,7 +10,7 @@ import { WETH, BAL, LINEAR_AUSDC, LINEAR_ADAI } from './lib/constants';
 import { bnum } from '../src/utils/bignumber';
 import { formatFixed } from '@ethersproject/bignumber';
 
-describe('debug fails if token balances are not updated after a swap', () => {
+describe('fails if token balances are not updated after a swap', () => {
     context('Weighted pool', () => {
         const poolsAll = parseToPoolsDict(cloneDeep(boostedPools.pools), 0);
         const pool = poolsAll['weightedBalWeth'];
@@ -94,7 +94,7 @@ describe('debug fails if token balances are not updated after a swap', () => {
             );
             assert.isTrue(
                 initialUsdcBalance.substring(0, 4) === '4817',
-                'it should be 100000'
+                'it should be 4817'
             );
             assert.isTrue(
                 finalUsdcBalance.substring(0, 4) === '4967',
