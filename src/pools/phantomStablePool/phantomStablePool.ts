@@ -228,11 +228,8 @@ export class PhantomStablePool implements PoolBase {
             // All values should use 1e18 fixed point
             // i.e. 1USDC => 1e18 not 1e6
             // In Phantom Pools every time there is a swap (token per token, bpt per token or token per bpt), we substract the fee from the amount in
-            const amtWithFeeEvm = this.subtractSwapFeeAmount(
-                parseFixed(amount.dp(18).toString(), 18),
-                poolPairData.swapFee
-            );
-            const amountConvertedEvm = amtWithFeeEvm
+
+            const amountConverted = parseFixed(amount.dp(18).toString(), 18)
                 .mul(tokenInPriceRate)
                 .div(ONE);
 
@@ -243,23 +240,23 @@ export class PhantomStablePool implements PoolBase {
                     poolPairData.allBalancesScaled.length
                 ).fill(BigInt(0));
                 amountsInBigInt[poolPairData.tokenIndexIn] =
-                    amountConvertedEvm.toBigInt();
+                    amountConverted.toBigInt();
 
                 returnEvm = _calcBptOutGivenExactTokensIn(
                     this.amp.toBigInt(),
                     poolPairData.allBalancesScaled.map((b) => b.toBigInt()),
                     amountsInBigInt,
                     this.totalShares.toBigInt(),
-                    BigInt(0)
+                    poolPairData.swapFee.toBigInt()
                 );
             } else if (poolPairData.pairType === PairTypes.BptToToken) {
                 returnEvm = _calcTokenOutGivenExactBptIn(
                     this.amp.toBigInt(),
                     poolPairData.allBalancesScaled.map((b) => b.toBigInt()),
                     poolPairData.tokenIndexOut,
-                    amountConvertedEvm.toBigInt(),
+                    amountConverted.toBigInt(),
                     this.totalShares.toBigInt(),
-                    BigInt(0)
+                    poolPairData.swapFee.toBigInt()
                 );
             } else {
                 returnEvm = _calcOutGivenIn(
@@ -267,8 +264,8 @@ export class PhantomStablePool implements PoolBase {
                     poolPairData.allBalancesScaled.map((b) => b.toBigInt()),
                     poolPairData.tokenIndexIn,
                     poolPairData.tokenIndexOut,
-                    amountConvertedEvm.toBigInt(),
-                    BigInt(0)
+                    amountConverted.toBigInt(),
+                    poolPairData.swapFee.toBigInt()
                 );
             }
 
@@ -309,7 +306,7 @@ export class PhantomStablePool implements PoolBase {
                     poolPairData.tokenIndexIn,
                     amountConvertedEvm.toBigInt(),
                     this.totalShares.toBigInt(),
-                    BigInt(0)
+                    poolPairData.swapFee.toBigInt()
                 );
             } else if (poolPairData.pairType === PairTypes.BptToToken) {
                 const amountsOutBigInt = Array(
@@ -323,7 +320,7 @@ export class PhantomStablePool implements PoolBase {
                     poolPairData.allBalancesScaled.map((b) => b.toBigInt()),
                     amountsOutBigInt,
                     this.totalShares.toBigInt(),
-                    BigInt(0) // Fee is handled below
+                    poolPairData.swapFee.toBigInt()
                 );
             } else {
                 returnEvm = _calcInGivenOut(
@@ -332,7 +329,7 @@ export class PhantomStablePool implements PoolBase {
                     poolPairData.tokenIndexIn,
                     poolPairData.tokenIndexOut,
                     amountConvertedEvm.toBigInt(),
-                    BigInt(0) // Fee is handled below
+                    poolPairData.swapFee.toBigInt()
                 );
             }
             // In Phantom Pools every time there is a swap (token per token, bpt per token or token per bpt), we substract the fee from the amount in
@@ -340,13 +337,8 @@ export class PhantomStablePool implements PoolBase {
                 .mul(ONE)
                 .div(tokenInPriceRate);
 
-            const returnEvmWithFee = this.addSwapFeeAmount(
-                returnEvmWithRate,
-                poolPairData.swapFee
-            );
-
             // return human number
-            return bnum(formatFixed(returnEvmWithFee, 18));
+            return bnum(formatFixed(returnEvmWithRate, 18));
         } catch (err) {
             console.error(`PhantomStable _evminGivenOut: ${err.message}`);
             return ZERO;

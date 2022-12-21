@@ -718,7 +718,7 @@ describe('linear pool tests', () => {
                     fullKovanPools.pools,
                     sorConfigFullKovan
                 );
-                expect(returnAmount).to.eq('6606146264948964392');
+                expect(returnAmount).to.eq('6638439512219283357');
             });
 
             it('BAL>USDT, SwapExactIn', async () => {
@@ -756,7 +756,7 @@ describe('linear pool tests', () => {
                     fullKovanPools.pools,
                     sorConfigFullKovan
                 );
-                expect(returnAmount).to.eq('702055');
+                expect(returnAmount).to.eq('698604');
             });
 
             it('BAL>USDT, SwapExactOut', async () => {
@@ -768,7 +768,7 @@ describe('linear pool tests', () => {
                     fullKovanPools.pools,
                     sorConfigFullKovan
                 );
-                expect(returnAmount).to.eq('81899098582251741376');
+                expect(returnAmount).to.eq('81419601531090714841');
             });
         });
 
@@ -784,7 +784,7 @@ describe('linear pool tests', () => {
                     pools,
                     sorConfigKovan
                 );
-                expect(returnAmount).to.eq('989985749906811070');
+                expect(returnAmount).to.eq('993338125331362114');
             });
 
             it('USDT>staBAL3, SwapExactOut', async () => {
@@ -796,7 +796,7 @@ describe('linear pool tests', () => {
                     kovanPools.pools,
                     sorConfigKovan
                 );
-                expect(returnAmount).to.eq('1009969');
+                expect(returnAmount).to.eq('1006617');
             });
 
             it('staBAL3>USDT, SwapExactIn', async () => {
@@ -808,7 +808,7 @@ describe('linear pool tests', () => {
                     kovanPools.pools,
                     sorConfigKovan
                 );
-                expect(returnAmount).to.eq('989869');
+                expect(returnAmount).to.eq('993188');
             });
 
             it('staBAL3>USDT, SwapExactOut', async () => {
@@ -820,7 +820,7 @@ describe('linear pool tests', () => {
                     kovanPools.pools,
                     sorConfigKovan
                 );
-                expect(returnAmount).to.eq('1010233805404347502');
+                expect(returnAmount).to.eq('1006881038845023935');
             });
 
             // it('aUSDT>staBAL3, SwapExactIn', async () => {

@@ -124,13 +124,18 @@ export const ADDRESSES = {
             decimals: 18,
             symbol: 'wSTETH',
         },
-        bbausd: {
+        bbausdOld: {
             address: '0x7b50775383d3d6f0215a8f290f2c9e2eebbeceb2',
             decimals: 18,
             symbol: 'bbausd',
         },
-        bbausdc: {
+        bbausdcOld: {
             address: '0x9210F1204b5a24742Eba12f710636D76240dF3d0',
+            decimals: 18,
+            symbol: 'bbausdc',
+        },
+        bbausdc: {
+            address: '0x82698aecc9e28e9bb27608bd52cf57f704bd1b83',
             decimals: 18,
             symbol: 'bbausdc',
         },
@@ -149,20 +154,20 @@ export const ADDRESSES = {
             decimals: 6,
             symbol: 'waUSDC',
         },
-        bbausd2: {
+        bbausd: {
             address: '0xA13a9247ea42D743238089903570127DdA72fE44',
             decimals: 18,
-            symbol: 'bbausd2',
+            symbol: 'bbausd',
         },
         bbadai2: {
             address: '0xae37d54ae477268b9997d4161b96b8200755935c',
             decimals: 18,
             symbol: 'bb-a-dai2',
         },
-        bbausdt2: {
+        bbausdt: {
             address: '0x2F4eb100552ef93840d5aDC30560E5513DFfFACb',
             decimals: 18,
-            symbol: 'bb-a-usdt2',
+            symbol: 'bb-a-usdt',
         },
         RPL: {
             address: '0xD33526068D116cE69F19A9ee46F0bd304F21A51f',
@@ -189,7 +194,7 @@ export const ADDRESSES = {
             decimals: 6,
             symbol: 'USDT',
         },
-        bbausdt: {
+        bbausdtOld: {
             address: '0x2f4eb100552ef93840d5adc30560e5513dfffacb',
             decimals: 18,
             symbol: 'bbaUSDT',
