@@ -14,6 +14,16 @@ export const SOR_CONFIG: Record<Network, SorConfig> = {
         chainId: Network.MAINNET, //1
         vault: '0xBA12222222228d8Ba445958a75a0704d566BF2C8',
         weth: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2',
+        connectingTokens: [
+            {
+                symbol: 'weth',
+                address: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2',
+            },
+            {
+                symbol: 'DOLA',
+                address: '0x865377367054516e17014CcdED1e7d814EDC9ce4',
+            },
+        ],
         wETHwstETH: {
             id: '0x32296969ef14eb0c6d29669c550d4a0449130230000200000000000000000080',
             address: '0x32296969ef14eb0c6d29669c550d4a0449130230',
@@ -23,6 +33,12 @@ export const SOR_CONFIG: Record<Network, SorConfig> = {
         chainId: Network.KOVAN, //42
         vault: '0xBA12222222228d8Ba445958a75a0704d566BF2C8',
         weth: '0xdFCeA9088c8A88A76FF74892C1457C17dfeef9C1',
+        connectingTokens: [
+            {
+                symbol: 'weth',
+                address: '0xdFCeA9088c8A88A76FF74892C1457C17dfeef9C1',
+            },
+        ],
         staBal3Pool: {
             id: '0x8fd162f338b770f7e879030830cde9173367f3010000000000000000000004d8',
             address: '0x8fd162f338b770f7e879030830cde9173367f301',
@@ -32,16 +48,34 @@ export const SOR_CONFIG: Record<Network, SorConfig> = {
         chainId: Network.GOERLI, //5
         vault: '0x65748E8287Ce4B9E6D83EE853431958851550311',
         weth: '0x9A1000D492d40bfccbc03f413A48F5B6516Ec0Fd',
+        connectingTokens: [
+            {
+                symbol: 'weth',
+                address: '0x9A1000D492d40bfccbc03f413A48F5B6516Ec0Fd',
+            },
+        ],
     },
     [Network.POLYGON]: {
         chainId: Network.POLYGON, //137
         vault: '0xBA12222222228d8Ba445958a75a0704d566BF2C8',
         weth: '0x0d500B1d8E8eF31E21C99d1Db9A6444d3ADf1270',
+        connectingTokens: [
+            {
+                symbol: 'weth',
+                address: '0x0d500B1d8E8eF31E21C99d1Db9A6444d3ADf1270',
+            },
+        ],
     },
     [Network.ARBITRUM]: {
         chainId: Network.ARBITRUM, //42161
         vault: '0xBA12222222228d8Ba445958a75a0704d566BF2C8',
         weth: '0x82aF49447D8a07e3bd95BD0d56f35241523fBab1',
+        connectingTokens: [
+            {
+                symbol: 'weth',
+                address: '0x82aF49447D8a07e3bd95BD0d56f35241523fBab1',
+            },
+        ],
     },
 };
 
@@ -193,6 +227,11 @@ export const ADDRESSES = {
             address: '0x2f4eb100552ef93840d5adc30560e5513dfffacb',
             decimals: 18,
             symbol: 'bbaUSDT',
+        },
+        DBR: {
+            address: '0xAD038Eb671c44b853887A7E32528FaB35dC5D710',
+            decimals: 18,
+            symbol: 'DBR',
         },
     },
     [Network.KOVAN]: {

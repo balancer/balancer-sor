@@ -173,7 +173,6 @@ export function getBoostedGraph(
     poolsAllDict: PoolDictionary,
     config: SorConfig
 ): edgeDict {
-    const wethAddress: string = config.weth.toLowerCase();
     const graphPoolsSet: Set<PoolBase> = new Set();
     const linearPools: PoolBase[] = [];
     const phantomPools: PoolBase[] = [];
@@ -194,73 +193,40 @@ export function getBoostedGraph(
             if (tokensList.includes(pool.address)) {
                 phantomPools.push(pool);
             }
-            if (config.lbpRaisingTokens) {
-                const raisingTokens = config.lbpRaisingTokens.map((address) =>
-                    address.toLowerCase()
+            if (config.lbpRaisingTokens && pool.isLBP) {
+                const connectingTokens = config.connectingTokens.map(
+                    (connectingToken) => connectingToken.address
                 );
-                if (pool.isLBP) {
-                    const raisingTokenIn: string | undefined = getRaisingToken(
-                        pool,
-                        raisingTokens,
-                        tokenIn
-                    );
-                    if (raisingTokenIn) {
-                        graphPoolsSet.add(pool);
-                        if (raisingTokenIn !== wethAddress) {
-                            const bestRaisingTokenInToWeth =
-                                getHighestLiquidityPool(
-                                    raisingTokenIn,
-                                    wethAddress,
-                                    poolsAllDict
-                                );
-                            if (bestRaisingTokenInToWeth) {
-                                graphPoolsSet.add(
-                                    poolsAllDict[bestRaisingTokenInToWeth]
-                                );
-                            }
-                        }
-                    }
-                    const raisingTokenOut: string | undefined = getRaisingToken(
-                        pool,
-                        raisingTokens,
-                        tokenOut
-                    );
-                    if (raisingTokenOut) {
-                        graphPoolsSet.add(pool);
-                        if (raisingTokenOut !== wethAddress) {
-                            const bestWethToRaisingTokenOut =
-                                getHighestLiquidityPool(
-                                    wethAddress,
-                                    raisingTokenOut,
-                                    poolsAllDict
-                                );
-                            if (bestWethToRaisingTokenOut) {
-                                graphPoolsSet.add(
-                                    poolsAllDict[bestWethToRaisingTokenOut]
-                                );
-                            }
-                        }
-                    }
-                }
+                handleLBPCase(
+                    graphPoolsSet,
+                    config.lbpRaisingTokens,
+                    pool,
+                    tokenIn,
+                    tokenOut,
+                    connectingTokens,
+                    poolsAllDict
+                );
             }
         }
     }
-    // add highest liquidity pools with tokenIn and weth or tokenOut and weth
-    const bestTokenInToWeth = getHighestLiquidityPool(
-        tokenIn,
-        wethAddress,
-        poolsAllDict
-    );
-    if (bestTokenInToWeth) {
-        graphPoolsSet.add(poolsAllDict[bestTokenInToWeth]);
-    }
-    const bestWethToTokenOut = getHighestLiquidityPool(
-        wethAddress,
-        tokenOut,
-        poolsAllDict
-    );
-    if (bestWethToTokenOut) {
-        graphPoolsSet.add(poolsAllDict[bestWethToTokenOut]);
+    // add best pools tokenIn -> connectingToken and connectingToken -> tokenOut
+    for (const connectingToken of config.connectingTokens) {
+        const bestTokenInToConnectingToken = getHighestLiquidityPool(
+            tokenIn,
+            connectingToken.address,
+            poolsAllDict
+        );
+        if (bestTokenInToConnectingToken) {
+            graphPoolsSet.add(poolsAllDict[bestTokenInToConnectingToken]);
+        }
+        const bestConnectingTokenToTokenOut = getHighestLiquidityPool(
+            connectingToken.address,
+            tokenOut,
+            poolsAllDict
+        );
+        if (bestConnectingTokenToTokenOut) {
+            graphPoolsSet.add(poolsAllDict[bestConnectingTokenToTokenOut]);
+        }
     }
     if (linearPools.length == 0) return {};
     const linearPoolsAddresses = linearPools.map((pool) => pool.address);
@@ -644,4 +610,58 @@ function getRaisingToken(
         }
     }
     return theOtherToken;
+}
+
+function handleLBPCase(
+    graphPoolsSet: Set<PoolBase>,
+    lbpRaisingTokens: string[],
+    pool: PoolBase,
+    tokenIn: string,
+    tokenOut: string,
+    connectingTokens: string[],
+    poolsAllDict: PoolDictionary
+) {
+    const raisingTokens = lbpRaisingTokens.map((address) =>
+        address.toLowerCase()
+    );
+    const raisingTokenIn: string | undefined = getRaisingToken(
+        pool,
+        raisingTokens,
+        tokenIn
+    );
+    if (raisingTokenIn) {
+        graphPoolsSet.add(pool);
+        for (const connectingToken of connectingTokens) {
+            if (raisingTokenIn !== connectingToken) {
+                const bestRaisingToConnecting = getHighestLiquidityPool(
+                    raisingTokenIn,
+                    connectingToken,
+                    poolsAllDict
+                );
+                if (bestRaisingToConnecting) {
+                    graphPoolsSet.add(poolsAllDict[bestRaisingToConnecting]);
+                }
+            }
+        }
+    }
+    const raisingTokenOut: string | undefined = getRaisingToken(
+        pool,
+        raisingTokens,
+        tokenOut
+    );
+    if (raisingTokenOut) {
+        graphPoolsSet.add(pool);
+        for (const connectingToken of connectingTokens) {
+            if (raisingTokenOut !== connectingToken) {
+                const bestConnectingToRaising = getHighestLiquidityPool(
+                    connectingToken,
+                    raisingTokenOut,
+                    poolsAllDict
+                );
+                if (bestConnectingToRaising) {
+                    graphPoolsSet.add(poolsAllDict[bestConnectingToRaising]);
+                }
+            }
+        }
+    }
 }
