@@ -442,12 +442,23 @@ describe('generic boosted pools, path creation test', () => {
         });
     });
     context('using an alternative connecting token', () => {
-        it('USDC to some token', () => {
-            const tokenIn = '0xe22da380ee6b445bb8273c81944adeb6e8450422'; // USDC
-            const tokenOut = '0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaabbbb';
+        const USDC = '0xe22da380ee6b445bb8273c81944adeb6e8450422'; // USDC
+        const GOLD = '0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaabbbb';
+        it('USDC to GOLD', () => {
             const [, , boostedPaths] = getPaths(
-                tokenIn,
-                tokenOut,
+                USDC,
+                GOLD,
+                SwapTypes.SwapExactIn,
+                genericBoostedPools.pools,
+                maxPools,
+                sorConfigTest
+            );
+            assert.equal(boostedPaths.length, 2);
+        });
+        it('GOLD to USDC', () => {
+            const [, , boostedPaths] = getPaths(
+                GOLD,
+                USDC,
                 SwapTypes.SwapExactIn,
                 genericBoostedPools.pools,
                 maxPools,
