@@ -16,6 +16,10 @@ export const sorConfigTest: SorConfig = {
             symbol: 'weth',
             address: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2',
         },
+        {
+            symbol: 'conn',
+            address: '0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
+        },
     ],
     wETHwstETH: {
         id: 'wETH-wstETH',
