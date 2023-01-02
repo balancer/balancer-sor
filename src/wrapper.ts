@@ -4,7 +4,6 @@ import cloneDeep from 'lodash.clonedeep';
 import { BigNumber as OldBigNumber } from './utils/bignumber';
 import { getBestPaths } from './router';
 import { getWrappedInfo, setWrappedInfo } from './wrapInfo';
-import { formatSwaps } from './formatSwaps';
 import { PoolCacher } from './poolCacher';
 import { RouteProposer } from './routeProposal';
 import { filterPoolsByType } from './routeProposal/filtering';
@@ -13,21 +12,23 @@ import { getLidoStaticSwaps, isLidoStableSwap } from './pools/lido';
 import { isSameAddress } from './utils';
 import { EMPTY_SWAPINFO } from './constants';
 import {
-    SwapInfo,
-    SwapTypes,
     NewPath,
-    PoolFilter,
-    Swap,
-    SubgraphPoolBase,
-    SwapOptions,
-    TokenPriceService,
     PoolDataService,
+    PoolFilter,
     SorConfig,
+    SubgraphPoolBase,
+    Swap,
+    SwapInfo,
+    SwapOptions,
+    SwapTypes,
+    TokenPriceService,
 } from './types';
 import { Zero } from '@ethersproject/constants';
+import { BatchswapQuery } from './batchswapQuery';
 
 export class SOR {
     private readonly poolCacher: PoolCacher;
+    private readonly batchswapQuery: BatchswapQuery;
     public readonly routeProposer: RouteProposer;
     readonly swapCostCalculator: SwapCostCalculator;
     private useBpt: boolean;
@@ -58,6 +59,11 @@ export class SOR {
         this.swapCostCalculator = new SwapCostCalculator(
             config,
             tokenPriceService
+        );
+        this.batchswapQuery = new BatchswapQuery(
+            config.vault,
+            config.multicall,
+            provider
         );
     }
 
@@ -209,30 +215,14 @@ export class SOR {
             swapOptions.swapGas
         );
 
-        // Returns list of swaps
-        const [swaps, total, marketSp, totalConsideringFees] =
-            this.getBestPaths(
-                paths,
-                swapAmount,
-                swapType,
-                tokenInDecimals,
-                tokenOutDecimals,
-                costOutputToken,
-                swapOptions.maxPools
-            );
-
-        const swapInfo = formatSwaps(
-            swaps,
+        return this.batchswapQuery.getBestPaths({
+            paths,
             swapType,
             swapAmount,
-            tokenIn,
-            tokenOut,
-            total,
-            totalConsideringFees,
-            marketSp
-        );
-
-        return swapInfo;
+            costOutputToken,
+            tokenIn: tokenIn.toLowerCase(),
+            tokenOut: tokenOut.toLowerCase(),
+        });
     }
 
     /**

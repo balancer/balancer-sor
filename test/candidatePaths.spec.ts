@@ -309,6 +309,7 @@ describe('Tests pools filtering and path processing', () => {
                 '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48',
                 '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2',
             ],
+            multicall: '0xeefba1e63905ef1d7acba5a8513c70307c1ce441',
         };
         const routeProposer = new RouteProposer(config);
         const paths = routeProposer.getCandidatePathsFromDict(

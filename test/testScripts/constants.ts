@@ -9,50 +9,6 @@ export enum Network {
     ARBITRUM = 42161,
 }
 
-export const SOR_CONFIG: Record<Network, SorConfig> = {
-    [Network.MAINNET]: {
-        chainId: Network.MAINNET, //1
-        vault: '0xBA12222222228d8Ba445958a75a0704d566BF2C8',
-        weth: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2',
-        wETHwstETH: {
-            id: '0x32296969ef14eb0c6d29669c550d4a0449130230000200000000000000000080',
-            address: '0x32296969ef14eb0c6d29669c550d4a0449130230',
-        },
-    },
-    [Network.KOVAN]: {
-        chainId: Network.KOVAN, //42
-        vault: '0xBA12222222228d8Ba445958a75a0704d566BF2C8',
-        weth: '0xdFCeA9088c8A88A76FF74892C1457C17dfeef9C1',
-        staBal3Pool: {
-            id: '0x8fd162f338b770f7e879030830cde9173367f3010000000000000000000004d8',
-            address: '0x8fd162f338b770f7e879030830cde9173367f301',
-        },
-    },
-    [Network.GOERLI]: {
-        chainId: Network.GOERLI, //5
-        vault: '0x65748E8287Ce4B9E6D83EE853431958851550311',
-        weth: '0x9A1000D492d40bfccbc03f413A48F5B6516Ec0Fd',
-    },
-    [Network.POLYGON]: {
-        chainId: Network.POLYGON, //137
-        vault: '0xBA12222222228d8Ba445958a75a0704d566BF2C8',
-        weth: '0x0d500B1d8E8eF31E21C99d1Db9A6444d3ADf1270',
-    },
-    [Network.ARBITRUM]: {
-        chainId: Network.ARBITRUM, //42161
-        vault: '0xBA12222222228d8Ba445958a75a0704d566BF2C8',
-        weth: '0x82aF49447D8a07e3bd95BD0d56f35241523fBab1',
-    },
-};
-
-export const PROVIDER_URLS = {
-    [Network.MAINNET]: `https://mainnet.infura.io/v3/${process.env.INFURA}`,
-    [Network.GOERLI]: `https://goerli.infura.io/v3/${process.env.INFURA}`,
-    [Network.KOVAN]: `https://kovan.infura.io/v3/${process.env.INFURA}`,
-    [Network.POLYGON]: `https://polygon-mainnet.infura.io/v3/${process.env.INFURA}`,
-    [Network.ARBITRUM]: `https://arbitrum-mainnet.infura.io/v3/${process.env.INFURA}`,
-};
-
 export const MULTIADDR: { [chainId: number]: string } = {
     1: '0xeefba1e63905ef1d7acba5a8513c70307c1ce441',
     3: '0x53c43764255c17bd724f74c4ef150724ac50a3ed',
@@ -62,6 +18,55 @@ export const MULTIADDR: { [chainId: number]: string } = {
     137: '0xa1B2b503959aedD81512C37e9dce48164ec6a94d',
     42161: '0x269ff446d9892c9e19082564df3f5e8741e190a1',
     99: '0xeefba1e63905ef1d7acba5a8513c70307c1ce441',
+};
+
+export const SOR_CONFIG: Record<Network, SorConfig> = {
+    [Network.MAINNET]: {
+        chainId: Network.MAINNET, //1
+        vault: '0xBA12222222228d8Ba445958a75a0704d566BF2C8',
+        weth: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2',
+        wETHwstETH: {
+            id: '0x32296969ef14eb0c6d29669c550d4a0449130230000200000000000000000080',
+            address: '0x32296969ef14eb0c6d29669c550d4a0449130230',
+        },
+        multicall: MULTIADDR[Network.MAINNET],
+    },
+    [Network.KOVAN]: {
+        chainId: Network.KOVAN, //42
+        vault: '0xBA12222222228d8Ba445958a75a0704d566BF2C8',
+        weth: '0xdFCeA9088c8A88A76FF74892C1457C17dfeef9C1',
+        staBal3Pool: {
+            id: '0x8fd162f338b770f7e879030830cde9173367f3010000000000000000000004d8',
+            address: '0x8fd162f338b770f7e879030830cde9173367f301',
+        },
+        multicall: MULTIADDR[Network.KOVAN],
+    },
+    [Network.GOERLI]: {
+        chainId: Network.GOERLI, //5
+        vault: '0x65748E8287Ce4B9E6D83EE853431958851550311',
+        weth: '0x9A1000D492d40bfccbc03f413A48F5B6516Ec0Fd',
+        multicall: MULTIADDR[Network.GOERLI],
+    },
+    [Network.POLYGON]: {
+        chainId: Network.POLYGON, //137
+        vault: '0xBA12222222228d8Ba445958a75a0704d566BF2C8',
+        weth: '0x0d500B1d8E8eF31E21C99d1Db9A6444d3ADf1270',
+        multicall: MULTIADDR[Network.POLYGON],
+    },
+    [Network.ARBITRUM]: {
+        chainId: Network.ARBITRUM, //42161
+        vault: '0xBA12222222228d8Ba445958a75a0704d566BF2C8',
+        weth: '0x82aF49447D8a07e3bd95BD0d56f35241523fBab1',
+        multicall: MULTIADDR[Network.ARBITRUM],
+    },
+};
+
+export const PROVIDER_URLS = {
+    [Network.MAINNET]: `https://mainnet.infura.io/v3/${process.env.INFURA}`,
+    [Network.GOERLI]: `https://goerli.infura.io/v3/${process.env.INFURA}`,
+    [Network.KOVAN]: `https://kovan.infura.io/v3/${process.env.INFURA}`,
+    [Network.POLYGON]: `https://polygon-mainnet.infura.io/v3/${process.env.INFURA}`,
+    [Network.ARBITRUM]: `https://arbitrum-mainnet.infura.io/v3/${process.env.INFURA}`,
 };
 
 export const SUBGRAPH_URLS = {
@@ -188,6 +193,11 @@ export const ADDRESSES = {
             address: '0x2f4eb100552ef93840d5adc30560e5513dfffacb',
             decimals: 18,
             symbol: 'bbaUSDT',
+        },
+        COMP: {
+            address: '0xc00e94cb662c3520282e6f5717214004a7f26888',
+            decimals: 18,
+            symbol: 'COMP',
         },
     },
     [Network.KOVAN]: {
