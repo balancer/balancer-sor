@@ -36,7 +36,6 @@ import {
 } from './weightedMath';
 import { BigNumber, formatFixed, parseFixed } from '@ethersproject/bignumber';
 import { WeiPerEther as ONE, Zero } from '@ethersproject/constants';
-import { takeToPrecision18 } from '../../router/helpersClass';
 import { MathSol } from '../../utils/basicOperations';
 import { universalNormalizedLiquidity } from '../liquidity';
 
@@ -215,13 +214,13 @@ export class WeightedPool implements PoolBase {
         const amountIn = parseFixed(amount.dp(18, 1).toString(), 18).toBigInt();
         const decimalsIn = poolPairData.decimalsIn;
         const decimalsOut = poolPairData.decimalsOut;
-        const balanceIn = takeToPrecision18(
-            poolPairData.balanceIn,
-            decimalsIn
+        const balanceIn = parseFixed(
+            poolPairData.balanceIn.toString(),
+            18 - decimalsIn
         ).toBigInt();
-        const balanceOut = takeToPrecision18(
-            poolPairData.balanceOut,
-            decimalsOut
+        const balanceOut = parseFixed(
+            poolPairData.balanceOut.toString(),
+            18 - decimalsOut
         ).toBigInt();
         const normalizedWeightIn = poolPairData.weightIn.toBigInt();
         const normalizedWeightOut = poolPairData.weightOut.toBigInt();
@@ -276,13 +275,13 @@ export class WeightedPool implements PoolBase {
         ).toBigInt();
         const decimalsIn = poolPairData.decimalsIn;
         const decimalsOut = poolPairData.decimalsOut;
-        const balanceIn = takeToPrecision18(
-            poolPairData.balanceIn,
-            decimalsIn
+        const balanceIn = parseFixed(
+            poolPairData.balanceIn.toString(),
+            18 - decimalsIn
         ).toBigInt();
-        const balanceOut = takeToPrecision18(
-            poolPairData.balanceOut,
-            decimalsOut
+        const balanceOut = parseFixed(
+            poolPairData.balanceOut.toString(),
+            18 - decimalsOut
         ).toBigInt();
         const normalizedWeightIn = poolPairData.weightIn.toBigInt();
         const normalizedWeightOut = poolPairData.weightOut.toBigInt();

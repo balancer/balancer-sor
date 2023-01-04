@@ -401,23 +401,3 @@ export function EVMgetOutputAmountSwap(
 
     return returnAmount;
 }
-
-export function takeToPrecision18(
-    amount: BigNumber,
-    decimals: number
-): BigNumber {
-    for (let i = 0; i < 18 - decimals; i++) {
-        amount = amount.mul(10);
-    }
-    return amount;
-}
-
-export function restorePrecision(
-    amount: BigNumber,
-    decimals: number
-): BigNumber {
-    for (let i = 0; i < 18 - decimals; i++) {
-        amount = amount.div(10);
-    }
-    return amount;
-}
