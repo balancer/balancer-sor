@@ -34,6 +34,7 @@ import {
     calcDerivativeSpotPriceAfterSwapInGivenOut,
 } from './gyroEMath/gyroEMath';
 import { SWAP_LIMIT_FACTOR } from '../gyroHelpers/constants';
+import { universalNormalizedLiquidity } from '../liquidity';
 
 export type GyroEPoolPairData = PoolPairBase & {
     tokenInIsToken0: boolean;
@@ -211,14 +212,12 @@ export class GyroEPool implements PoolBase {
     }
 
     getNormalizedLiquidity(poolPairData: GyroEPoolPairData): OldBigNumber {
-        const derivativeSpotPriceAtZero =
+        return universalNormalizedLiquidity(
             this._derivativeSpotPriceAfterSwapExactTokenInForTokenOut(
                 poolPairData,
                 ZERO
-            );
-        const ans = bnum(1).div(derivativeSpotPriceAtZero);
-        if (ans.isNaN()) return ZERO;
-        return ans;
+            )
+        );
     }
 
     getLimitAmountSwap(

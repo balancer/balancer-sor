@@ -20,6 +20,7 @@ import {
     _derivativeSpotPriceAfterSwapTokenInForExactTokenOut,
     getTimeTillExpiry,
 } from './elementMath';
+import { universalNormalizedLiquidity } from '../liquidity';
 
 type ElementPoolToken = Pick<SubgraphToken, 'address' | 'balance' | 'decimals'>;
 
@@ -148,14 +149,12 @@ export class ElementPool implements PoolBase {
     }
 
     getNormalizedLiquidity(poolPairData: ElementPoolPairData): OldBigNumber {
-        const derivativeSpotPriceAtZero =
+        return universalNormalizedLiquidity(
             this._derivativeSpotPriceAfterSwapExactTokenInForTokenOut(
                 poolPairData,
                 ZERO
-            );
-        const ans = bnum(1).div(derivativeSpotPriceAtZero);
-        if (ans.isNaN()) return ZERO;
-        return ans;
+            )
+        );
     }
 
     getLimitAmountSwap(

@@ -22,6 +22,7 @@ import {
 import * as phantomStableMath from '../phantomStablePool/phantomStableMath';
 import { MetaStablePoolPairData } from '../metaStablePool/metaStablePool';
 import cloneDeep from 'lodash.clonedeep';
+import { universalNormalizedLiquidity } from '../liquidity';
 
 enum PairTypes {
     BptToToken,
@@ -181,14 +182,12 @@ export class PhantomStablePool implements PoolBase {
     getNormalizedLiquidity(
         poolPairData: PhantomStablePoolPairData
     ): OldBigNumber {
-        const derivativeSpotPriceAtZero =
+        return universalNormalizedLiquidity(
             this._derivativeSpotPriceAfterSwapExactTokenInForTokenOut(
                 poolPairData,
                 ZERO
-            );
-        const ans = bnum(1).div(derivativeSpotPriceAtZero);
-        if (ans.isNaN()) return ZERO;
-        return ans;
+            )
+        );
     }
 
     getLimitAmountSwap(

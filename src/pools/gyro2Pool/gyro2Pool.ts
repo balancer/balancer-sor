@@ -28,6 +28,7 @@ import {
 } from '../gyroHelpers/helpers';
 import { mulDown, divDown } from '../gyroHelpers/gyroSignedFixedPoint';
 import { SWAP_LIMIT_FACTOR } from '../gyroHelpers/constants';
+import { universalNormalizedLiquidity } from '../liquidity';
 
 export type Gyro2PoolPairData = PoolPairBase & {
     sqrtAlpha: BigNumber;
@@ -130,14 +131,12 @@ export class Gyro2Pool implements PoolBase {
     }
 
     getNormalizedLiquidity(poolPairData: Gyro2PoolPairData): OldBigNumber {
-        const derivativeSpotPriceAtZero =
+        return universalNormalizedLiquidity(
             this._derivativeSpotPriceAfterSwapExactTokenInForTokenOut(
                 poolPairData,
                 ZERO
-            );
-        const ans = bnum(1).div(derivativeSpotPriceAtZero);
-        if (ans.isNaN()) return ZERO;
-        return ans;
+            )
+        );
     }
 
     getLimitAmountSwap(

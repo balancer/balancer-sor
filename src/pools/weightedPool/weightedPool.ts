@@ -38,6 +38,7 @@ import { BigNumber, formatFixed, parseFixed } from '@ethersproject/bignumber';
 import { WeiPerEther as ONE, Zero } from '@ethersproject/constants';
 import { takeToPrecision18 } from '../../router/helpersClass';
 import { MathSol } from '../../utils/basicOperations';
+import { universalNormalizedLiquidity } from '../liquidity';
 
 enum PairTypes {
     BptToToken,
@@ -161,14 +162,12 @@ export class WeightedPool implements PoolBase {
     }
 
     getNormalizedLiquidity(poolPairData: WeightedPoolPairData): OldBigNumber {
-        const derivativeSpotPriceAtZero =
+        return universalNormalizedLiquidity(
             this._derivativeSpotPriceAfterSwapExactTokenInForTokenOut(
                 poolPairData,
                 ZERO
-            );
-        const ans = bnum(1).div(derivativeSpotPriceAtZero);
-        if (ans.isNaN()) return ZERO;
-        else return ans;
+            )
+        );
     }
 
     getLimitAmountSwap(

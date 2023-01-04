@@ -28,6 +28,7 @@ import {
     _calcBptOutGivenExactTokensIn,
     _calcTokensOutGivenExactBptIn,
 } from './stableMathBigInt';
+import { universalNormalizedLiquidity } from '../liquidity';
 
 type StablePoolToken = Pick<SubgraphToken, 'address' | 'balance' | 'decimals'>;
 
@@ -129,14 +130,12 @@ export class StablePool implements PoolBase {
     }
 
     getNormalizedLiquidity(poolPairData: StablePoolPairData): OldBigNumber {
-        const derivativeSpotPriceAtZero =
+        return universalNormalizedLiquidity(
             this._derivativeSpotPriceAfterSwapExactTokenInForTokenOut(
                 poolPairData,
                 ZERO
-            );
-        const ans = bnum(1).div(derivativeSpotPriceAtZero);
-        if (ans.isNaN()) return ZERO;
-        return ans;
+            )
+        );
     }
 
     getLimitAmountSwap(
