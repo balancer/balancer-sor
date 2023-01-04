@@ -56,7 +56,7 @@ describe('Gyro3Pool tests USDC > DAI', () => {
                 pool.getNormalizedLiquidity(poolPairData);
 
             expect(normalizedLiquidity.toString()).to.equal(
-                '9478800.379791954566885539'
+                '9478800.379870785044596699'
             );
         });
     });

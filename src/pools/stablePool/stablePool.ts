@@ -129,13 +129,14 @@ export class StablePool implements PoolBase {
     }
 
     getNormalizedLiquidity(poolPairData: StablePoolPairData): OldBigNumber {
-        // This is an approximation as the actual normalized liquidity is a lot more complicated to calculate
-        return bnum(
-            formatFixed(
-                poolPairData.balanceOut.mul(poolPairData.amp),
-                poolPairData.decimalsOut + StablePool.AMP_DECIMALS
-            )
-        );
+        const derivativeSpotPriceAtZero =
+            this._derivativeSpotPriceAfterSwapExactTokenInForTokenOut(
+                poolPairData,
+                ZERO
+            );
+        const ans = bnum(1).div(derivativeSpotPriceAtZero);
+        if (ans.isNaN()) return ZERO;
+        return ans;
     }
 
     getLimitAmountSwap(
