@@ -40,7 +40,7 @@ export type Gyro3PoolToken = Pick<
     'address' | 'balance' | 'decimals'
 >;
 
-export class Gyro3Pool implements PoolBase {
+export class Gyro3Pool implements PoolBase<Gyro3PoolPairData> {
     poolType: PoolTypes = PoolTypes.Gyro3;
     id: string;
     address: string;

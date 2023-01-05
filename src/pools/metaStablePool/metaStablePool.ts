@@ -35,7 +35,7 @@ export type MetaStablePoolPairData = StablePoolPairData & {
     tokenOutPriceRate: BigNumber;
 };
 
-export class MetaStablePool implements PoolBase {
+export class MetaStablePool implements PoolBase<MetaStablePoolPairData> {
     poolType: PoolTypes = PoolTypes.MetaStable;
     id: string;
     address: string;

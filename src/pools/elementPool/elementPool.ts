@@ -33,7 +33,7 @@ export type ElementPoolPairData = PoolPairBase & {
     currentBlockTimestamp: number;
 };
 
-export class ElementPool implements PoolBase {
+export class ElementPool implements PoolBase<ElementPoolPairData> {
     poolType: PoolTypes = PoolTypes.Element;
     id: string;
     address: string;

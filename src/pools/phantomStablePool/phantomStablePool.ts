@@ -41,7 +41,7 @@ export type PhantomStablePoolPairData = MetaStablePoolPairData & {
     virtualBptSupply: BigNumber;
 };
 
-export class PhantomStablePool implements PoolBase {
+export class PhantomStablePool implements PoolBase<PhantomStablePoolPairData> {
     poolType: PoolTypes = PoolTypes.MetaStable;
     id: string;
     address: string;

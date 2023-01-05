@@ -65,7 +65,7 @@ export type LinearPoolPairData = PoolPairBase & {
     virtualBptSupply: BigNumber;
 };
 
-export class LinearPool implements PoolBase {
+export class LinearPool implements PoolBase<LinearPoolPairData> {
     poolType: PoolTypes = PoolTypes.Linear;
     id: string;
     address: string;
