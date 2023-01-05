@@ -9,7 +9,7 @@ import boostedPools from './testData/boostedPools/multipleBoosted.json';
 import { WETH, BAL } from './lib/constants';
 import { bnum } from '../src/utils/bignumber';
 
-describe('debug fails if token balances are not updated after a swap', () => {
+describe('fails if token balances are not updated after a swap', () => {
     const poolsAll = parseToPoolsDict(cloneDeep(boostedPools.pools), 0);
     const pool = poolsAll['weightedBalWeth'];
     const path1 = createPath([WETH.address, BAL.address], [pool]);

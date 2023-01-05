@@ -28,6 +28,7 @@ import {
     _calcBptOutGivenExactTokensIn,
     _calcTokensOutGivenExactBptIn,
 } from './stableMathBigInt';
+import { universalNormalizedLiquidity } from '../liquidity';
 
 type StablePoolToken = Pick<SubgraphToken, 'address' | 'balance' | 'decimals'>;
 
@@ -39,7 +40,7 @@ export type StablePoolPairData = PoolPairBase & {
     tokenIndexOut: number;
 };
 
-export class StablePool implements PoolBase {
+export class StablePool implements PoolBase<StablePoolPairData> {
     poolType: PoolTypes = PoolTypes.Stable;
     id: string;
     address: string;
@@ -129,11 +130,10 @@ export class StablePool implements PoolBase {
     }
 
     getNormalizedLiquidity(poolPairData: StablePoolPairData): OldBigNumber {
-        // This is an approximation as the actual normalized liquidity is a lot more complicated to calculate
-        return bnum(
-            formatFixed(
-                poolPairData.balanceOut.mul(poolPairData.amp),
-                poolPairData.decimalsOut + StablePool.AMP_DECIMALS
+        return universalNormalizedLiquidity(
+            this._derivativeSpotPriceAfterSwapExactTokenInForTokenOut(
+                poolPairData,
+                ZERO
             )
         );
     }

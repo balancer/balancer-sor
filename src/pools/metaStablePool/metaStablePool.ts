@@ -23,6 +23,7 @@ import {
     _calcTokensOutGivenExactBptIn,
 } from '../stablePool/stableMathBigInt';
 import { StablePoolPairData } from '../stablePool/stablePool';
+import { universalNormalizedLiquidity } from '../liquidity';
 
 type MetaStablePoolToken = Pick<
     SubgraphToken,
@@ -34,7 +35,7 @@ export type MetaStablePoolPairData = StablePoolPairData & {
     tokenOutPriceRate: BigNumber;
 };
 
-export class MetaStablePool implements PoolBase {
+export class MetaStablePool implements PoolBase<MetaStablePoolPairData> {
     poolType: PoolTypes = PoolTypes.MetaStable;
     id: string;
     address: string;
@@ -111,7 +112,7 @@ export class MetaStablePool implements PoolBase {
 
         // Get all token balances
         const allBalances = this.tokens.map(({ balance, priceRate }) =>
-            bnum(balance).times(priceRate)
+            bnum(balance).times(bnum(priceRate))
         );
         const allBalancesScaled = this.tokens.map(({ balance, priceRate }) =>
             parseFixed(balance, 18).mul(parseFixed(priceRate, 18)).div(ONE)
@@ -141,11 +142,10 @@ export class MetaStablePool implements PoolBase {
     }
 
     getNormalizedLiquidity(poolPairData: MetaStablePoolPairData): OldBigNumber {
-        // This is an approximation as the actual normalized liquidity is a lot more complicated to calculate
-        return bnum(
-            formatFixed(
-                poolPairData.balanceOut.mul(poolPairData.amp),
-                poolPairData.decimalsOut + MetaStablePool.AMP_DECIMALS
+        return universalNormalizedLiquidity(
+            this._derivativeSpotPriceAfterSwapExactTokenInForTokenOut(
+                poolPairData,
+                ZERO
             )
         );
     }
@@ -354,8 +354,12 @@ export class MetaStablePool implements PoolBase {
         poolPairData: MetaStablePoolPairData,
         amount: OldBigNumber
     ): OldBigNumber {
-        const priceRateIn = formatFixed(poolPairData.tokenInPriceRate, 18);
-        const priceRateOut = formatFixed(poolPairData.tokenOutPriceRate, 18);
+        const priceRateIn = bnum(
+            formatFixed(poolPairData.tokenInPriceRate, 18)
+        );
+        const priceRateOut = bnum(
+            formatFixed(poolPairData.tokenOutPriceRate, 18)
+        );
         const amountConverted = amount.times(
             formatFixed(poolPairData.tokenInPriceRate, 18)
         );
@@ -370,8 +374,12 @@ export class MetaStablePool implements PoolBase {
         poolPairData: MetaStablePoolPairData,
         amount: OldBigNumber
     ): OldBigNumber {
-        const priceRateIn = formatFixed(poolPairData.tokenInPriceRate, 18);
-        const priceRateOut = formatFixed(poolPairData.tokenOutPriceRate, 18);
+        const priceRateIn = bnum(
+            formatFixed(poolPairData.tokenInPriceRate, 18)
+        );
+        const priceRateOut = bnum(
+            formatFixed(poolPairData.tokenOutPriceRate, 18)
+        );
         const amountConverted = amount.times(
             formatFixed(poolPairData.tokenOutPriceRate, 18)
         );
@@ -386,7 +394,9 @@ export class MetaStablePool implements PoolBase {
         poolPairData: MetaStablePoolPairData,
         amount: OldBigNumber
     ): OldBigNumber {
-        const priceRateOut = formatFixed(poolPairData.tokenOutPriceRate, 18);
+        const priceRateOut = bnum(
+            formatFixed(poolPairData.tokenOutPriceRate, 18)
+        );
         return _derivativeSpotPriceAfterSwapExactTokenInForTokenOut(
             amount,
             poolPairData
@@ -397,8 +407,12 @@ export class MetaStablePool implements PoolBase {
         poolPairData: MetaStablePoolPairData,
         amount: OldBigNumber
     ): OldBigNumber {
-        const priceRateIn = formatFixed(poolPairData.tokenInPriceRate, 18);
-        const priceRateOut = formatFixed(poolPairData.tokenOutPriceRate, 18);
+        const priceRateIn = bnum(
+            formatFixed(poolPairData.tokenInPriceRate, 18)
+        );
+        const priceRateOut = bnum(
+            formatFixed(poolPairData.tokenOutPriceRate, 18)
+        );
         return _derivativeSpotPriceAfterSwapTokenInForExactTokenOut(
             amount,
             poolPairData

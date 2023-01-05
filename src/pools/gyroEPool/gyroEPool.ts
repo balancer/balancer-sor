@@ -1,7 +1,7 @@
 import { getAddress } from '@ethersproject/address';
 import { WeiPerEther as ONE, Zero } from '@ethersproject/constants';
 import { formatFixed, BigNumber } from '@ethersproject/bignumber';
-import { BigNumber as OldBigNumber, bnum } from '../../utils/bignumber';
+import { BigNumber as OldBigNumber, bnum, ZERO } from '../../utils/bignumber';
 
 import {
     PoolBase,
@@ -32,9 +32,9 @@ import {
     calcSpotPriceAfterSwapInGivenOut,
     calcDerivativePriceAfterSwapOutGivenIn,
     calcDerivativeSpotPriceAfterSwapInGivenOut,
-    calculateNormalizedLiquidity,
 } from './gyroEMath/gyroEMath';
 import { SWAP_LIMIT_FACTOR } from '../gyroHelpers/constants';
+import { universalNormalizedLiquidity } from '../liquidity';
 
 export type GyroEPoolPairData = PoolPairBase & {
     tokenInIsToken0: boolean;
@@ -64,7 +64,7 @@ type DerivedGyroEParamsFromSubgraph = {
     dSq: string;
 };
 
-export class GyroEPool implements PoolBase {
+export class GyroEPool implements PoolBase<GyroEPoolPairData> {
     poolType: PoolTypes = PoolTypes.GyroE;
     id: string;
     address: string;
@@ -212,38 +212,12 @@ export class GyroEPool implements PoolBase {
     }
 
     getNormalizedLiquidity(poolPairData: GyroEPoolPairData): OldBigNumber {
-        const normalizedBalances = normalizeBalances(
-            [poolPairData.balanceIn, poolPairData.balanceOut],
-            [poolPairData.decimalsIn, poolPairData.decimalsOut]
+        return universalNormalizedLiquidity(
+            this._derivativeSpotPriceAfterSwapExactTokenInForTokenOut(
+                poolPairData,
+                ZERO
+            )
         );
-
-        const orderedNormalizedBalances = balancesFromTokenInOut(
-            normalizedBalances[0],
-            normalizedBalances[1],
-            poolPairData.tokenInIsToken0
-        );
-
-        const [currentInvariant, invErr] = calculateInvariantWithError(
-            orderedNormalizedBalances,
-            this.gyroEParams,
-            this.derivedGyroEParams
-        );
-
-        const invariant: Vector2 = {
-            x: currentInvariant.add(invErr.mul(2)),
-            y: currentInvariant,
-        };
-
-        const normalizedLiquidity = calculateNormalizedLiquidity(
-            orderedNormalizedBalances,
-            this.gyroEParams,
-            this.derivedGyroEParams,
-            invariant,
-            this.swapFee,
-            poolPairData.tokenInIsToken0
-        );
-
-        return bnum(formatFixed(normalizedLiquidity, 18));
     }
 
     getLimitAmountSwap(

@@ -37,7 +37,7 @@ export function BPTForTokensZeroPriceImpact(
     const amountBPTOut = amounts.reduce((totalBptOut, amountIn, i) => {
         // Calculate amount of BPT gained per token in
         const poolPairData: StablePoolPairData = {
-            amp: amp,
+            amp: BigNumber.from(amp),
             allBalances: allBalancesDownScaled,
             tokenIndexIn: i,
             balanceOut: bptTotalSupply,

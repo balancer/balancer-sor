@@ -179,6 +179,11 @@ export const ADDRESSES = {
             decimals: 18,
             symbol: 'auraBal',
         },
+        FIAT: {
+            address: '0x586aa273f262909eef8fa02d90ab65f5015e0516',
+            decimals: 18,
+            symbol: 'FIAT',
+        },
         USDT: {
             address: '0xdac17f958d2ee523a2206206994597c13d831ec7',
             decimals: 6,
