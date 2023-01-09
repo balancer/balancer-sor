@@ -13,16 +13,16 @@ import { getLidoStaticSwaps, isLidoStableSwap } from './pools/lido';
 import { isSameAddress } from './utils';
 import { EMPTY_SWAPINFO } from './constants';
 import {
-    SwapInfo,
-    SwapTypes,
     NewPath,
-    PoolFilter,
-    Swap,
-    SubgraphPoolBase,
-    SwapOptions,
-    TokenPriceService,
     PoolDataService,
+    PoolFilter,
     SorConfig,
+    SubgraphPoolBase,
+    Swap,
+    SwapInfo,
+    SwapOptions,
+    SwapTypes,
+    TokenPriceService,
 } from './types';
 import { Zero } from '@ethersproject/constants';
 
@@ -70,7 +70,15 @@ export class SOR {
      * @returns {boolean} True if pools fetched successfully, False if not.
      */
     async fetchPools(): Promise<boolean> {
-        return this.poolCacher.fetchPools();
+        const success = await this.poolCacher.fetchPools();
+
+        if (success) {
+            this.routeProposer.initPathGraphWithPools(
+                this.poolCacher.getPools()
+            );
+        }
+
+        return success;
     }
     /**
 

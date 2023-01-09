@@ -1,24 +1,37 @@
 import {
+    filterPoolsOfInterest,
+    getBoostedPaths,
     getPathsUsingStaBalPool,
     parseToPoolsDict,
-    filterPoolsOfInterest,
     producePaths,
-    getBoostedPaths,
 } from './filtering';
 import { calculatePathLimits } from './pathLimits';
 import {
+    NewPath,
+    PoolDictionary,
+    SorConfig,
+    SubgraphPoolBase,
     SwapOptions,
     SwapTypes,
-    NewPath,
-    SubgraphPoolBase,
-    SorConfig,
-    PoolDictionary,
 } from '../types';
+import { PathGraph } from '../pathGraph/pathGraph';
 
 export class RouteProposer {
     cache: Record<string, { paths: NewPath[] }> = {};
+    private readonly pathGraph: PathGraph;
 
-    constructor(private readonly config: SorConfig) {}
+    constructor(private readonly config: SorConfig) {
+        this.pathGraph = new PathGraph();
+    }
+
+    public initPathGraphWithPools(pools: SubgraphPoolBase[]): void {
+        //TODO: setting the timestamp here is no longer ideal
+        const poolsAllDict = parseToPoolsDict(pools, 0);
+
+        this.pathGraph.buildGraph({
+            pools: Object.values(poolsAllDict),
+        });
+    }
 
     /**
      * Given a list of pools and a desired input/output, returns a set of possible paths to route through
@@ -47,6 +60,13 @@ export class RouteProposer {
         }
 
         const poolsAllDict = parseToPoolsDict(pools, swapOptions.timestamp);
+
+        //TODO: this flow is no longer ideal
+        if (!this.pathGraph.isGraphInitialized) {
+            this.pathGraph.buildGraph({
+                pools: Object.values(poolsAllDict),
+            });
+        }
 
         const [directPools, hopsIn, hopsOut] = filterPoolsOfInterest(
             poolsAllDict,
@@ -78,6 +98,25 @@ export class RouteProposer {
             poolsAllDict,
             this.config
         );
+
+        this.pathGraph.traverseGraphAndFindBestPaths({
+            tokenIn,
+            tokenOut,
+        });
+
+        /*console.log(
+            'uniquePaths',
+            JSON.stringify(
+                uniquePaths.map((item) => ({
+                    id: item.id,
+                    swaps: item.swaps,
+                    pools: item.pools.map((pool) => pool.id),
+                })),
+                null,
+                4
+            )
+        );*/
+        //console.log('boosted paths', JSON.stringify(boostedPaths, null, 4));
 
         const combinedPathData = pathData
             .concat(...boostedPaths)
