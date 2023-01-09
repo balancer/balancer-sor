@@ -301,10 +301,19 @@ export class LinearPool implements PoolBase<LinearPoolPairData> {
 
     // Updates the balance of a given token for the pool
     updateTokenBalanceForPool(token: string, newBalance: BigNumber): void {
-        const T = this.tokens.find((t) => isSameAddress(t.address, token));
-        if (!T) throw Error('Pool does not contain this token');
-        // Converts to human scaled number and saves.
-        T.balance = formatFixed(newBalance, T.decimals);
+        // token is BPT
+        if (isSameAddress(this.address, token)) {
+            this.updateTotalShares(newBalance);
+        } else {
+            const T = this.tokens.find((t) => isSameAddress(t.address, token));
+            if (!T) throw Error('Pool does not contain this token');
+            // Converts to human scaled number and saves.
+            T.balance = formatFixed(newBalance, T.decimals);
+        }
+    }
+
+    updateTotalShares(newTotalShares: BigNumber): void {
+        this.totalShares = newTotalShares;
     }
 
     _exactTokenInForTokenOut(

@@ -226,13 +226,18 @@ export class PhantomStablePool implements PoolBase<PhantomStablePoolPairData> {
         if (!T) throw Error('Pool does not contain this token');
 
         // update total shares with BPT balance diff
-        if (this.address == token) {
+        if (isSameAddress(this.address, token)) {
             const parsedTokenBalance = parseFixed(T.balance, T.decimals);
             const diff = parsedTokenBalance.sub(newBalance);
-            this.totalShares = this.totalShares.add(diff);
+            const newTotalShares = this.totalShares.add(diff);
+            this.updateTotalShares(newTotalShares);
         }
         // update token balance with new balance
         T.balance = formatFixed(newBalance, T.decimals);
+    }
+
+    updateTotalShares(newTotalShares: BigNumber): void {
+        this.totalShares = newTotalShares;
     }
 
     _exactTokenInForTokenOut(
