@@ -1,7 +1,7 @@
 import { getAddress } from '@ethersproject/address';
 import { WeiPerEther as ONE, Zero } from '@ethersproject/constants';
 import { formatFixed, BigNumber } from '@ethersproject/bignumber';
-import { BigNumber as OldBigNumber, bnum } from '../../utils/bignumber';
+import { BigNumber as OldBigNumber, bnum, ZERO } from '../../utils/bignumber';
 
 import {
     PoolBase,
@@ -20,7 +20,6 @@ import {
     _calculateNewSpotPrice,
     _derivativeSpotPriceAfterSwapExactTokenInForTokenOut,
     _derivativeSpotPriceAfterSwapTokenInForExactTokenOut,
-    _getNormalizedLiquidity,
 } from './gyro2Math';
 import {
     _normalizeBalances,
@@ -29,6 +28,7 @@ import {
 } from '../gyroHelpers/helpers';
 import { mulDown, divDown } from '../gyroHelpers/gyroSignedFixedPoint';
 import { SWAP_LIMIT_FACTOR } from '../gyroHelpers/constants';
+import { universalNormalizedLiquidity } from '../liquidity';
 
 export type Gyro2PoolPairData = PoolPairBase & {
     sqrtAlpha: BigNumber;
@@ -40,7 +40,7 @@ export type Gyro2PoolToken = Pick<
     'address' | 'balance' | 'decimals'
 >;
 
-export class Gyro2Pool implements PoolBase {
+export class Gyro2Pool implements PoolBase<Gyro2PoolPairData> {
     poolType: PoolTypes = PoolTypes.Gyro2;
     id: string;
     address: string;
@@ -131,27 +131,12 @@ export class Gyro2Pool implements PoolBase {
     }
 
     getNormalizedLiquidity(poolPairData: Gyro2PoolPairData): OldBigNumber {
-        const balances = [poolPairData.balanceIn, poolPairData.balanceOut];
-        const normalizedBalances = _normalizeBalances(balances, [
-            poolPairData.decimalsIn,
-            poolPairData.decimalsOut,
-        ]);
-        const invariant = _calculateInvariant(
-            normalizedBalances,
-            poolPairData.sqrtAlpha,
-            poolPairData.sqrtBeta
+        return universalNormalizedLiquidity(
+            this._derivativeSpotPriceAfterSwapExactTokenInForTokenOut(
+                poolPairData,
+                ZERO
+            )
         );
-        const [, virtualParamOut] = _findVirtualParams(
-            invariant,
-            poolPairData.sqrtAlpha,
-            poolPairData.sqrtBeta
-        );
-        const normalisedLiquidity = _getNormalizedLiquidity(
-            normalizedBalances,
-            virtualParamOut
-        );
-
-        return bnum(formatFixed(normalisedLiquidity, 18));
     }
 
     getLimitAmountSwap(

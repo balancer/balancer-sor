@@ -1,0 +1,54 @@
+{
+    "pools": [
+        {
+            "address": "0xa13a9247ea42d743238089903570127dda72fe44",
+            "amp": "1472",
+            "baseToken": "2",
+            "expiryTime": 0,
+            "id": "0xa13a9247ea42d743238089903570127dda72fe4400000000000000000000035d",
+            "poolType": "PhantomStable",
+            "principalToken": "0",
+            "swapEnabled": true,
+            "swapFee": "0.00001",
+            "tokens": [
+                {
+                    "address": "0x2f4eb100552ef93840d5adc30560e5513dfffacb",
+                    "balance": "34995795.166123461408475645",
+                    "decimals": 18,
+                    "priceRate": "1.003418516210349185",
+                    "weight": "0"
+                },
+                {
+                    "address": "0x82698aecc9e28e9bb27608bd52cf57f704bd1b83",
+                    "balance": "20640153.811021435406085515",
+                    "decimals": 18,
+                    "priceRate": "1.000994895137510751",
+                    "weight": "0"
+                },
+                {
+                    "address": "0xa13a9247ea42d743238089903570127dda72fe44",
+                    "balance": "2596148353468885.63048080413930515",
+                    "decimals": 18,
+                    "priceRate": "1",
+                    "weight": "0"
+                },
+                {
+                    "address": "0xae37d54ae477268b9997d4161b96b8200755935c",
+                    "balance": "20221176.302769888135275824",
+                    "decimals": 18,
+                    "priceRate": "1.001281524110011433",
+                    "weight": "0"
+                }
+            ],
+            "tokensList": [
+                "0x2f4eb100552ef93840d5adc30560e5513dfffacb",
+                "0x82698aecc9e28e9bb27608bd52cf57f704bd1b83",
+                "0xa13a9247ea42d743238089903570127dda72fe44",
+                "0xae37d54ae477268b9997d4161b96b8200755935c"
+            ],
+            "totalShares": "75895556.15221652668337493",
+            "totalWeight": "0",
+            "unitSeconds": 0
+        }
+    ]
+}

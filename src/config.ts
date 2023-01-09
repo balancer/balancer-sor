@@ -2,8 +2,15 @@ import { BigNumber as OldBigNumber } from './utils/bignumber';
 
 // priceErrorTolerance is how close we expect prices after swap to be in SOR
 // suggested paths
-const priceErrorTolerance: string =
-    process.env.PRICE_ERROR_TOLERANCE || '0.00001';
+let priceErrorTolerance = '0.00001';
+try {
+    priceErrorTolerance = process.env.PRICE_ERROR_TOLERANCE || '0.00001';
+} catch (err) {
+    if (console) {
+        console.log(err);
+    }
+}
+
 export const PRICE_ERROR_TOLERANCE: OldBigNumber = new OldBigNumber(
     priceErrorTolerance
 );
