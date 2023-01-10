@@ -205,6 +205,7 @@ export interface PoolBase<D extends PoolPairBase = PoolPairBase> {
      * @param {BigNumber} newBalance - New balance of token. EVM scaled.
      */
     updateTokenBalanceForPool: (token: string, newBalance: BigNumber) => void;
+    updateTotalShares: (newTotalShares: BigNumber) => void;
     _exactTokenInForTokenOut: (
         poolPairData: D,
         amount: OldBigNumber
