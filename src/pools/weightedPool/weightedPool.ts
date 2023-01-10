@@ -194,12 +194,16 @@ export class WeightedPool implements PoolBase<WeightedPoolPairData> {
     updateTokenBalanceForPool(token: string, newBalance: BigNumber): void {
         // token is BPT
         if (isSameAddress(this.address, token)) {
-            this.totalShares = newBalance;
+            this.updateTotalShares(newBalance);
         }
         // token is underlying in the pool
         const T = this.tokens.find((t) => isSameAddress(t.address, token));
         if (!T) throw Error('Pool does not contain this token');
         T.balance = formatFixed(newBalance, T.decimals);
+    }
+
+    updateTotalShares(newTotalShares: BigNumber): void {
+        this.totalShares = newTotalShares;
     }
 
     // Using BigNumber.js decimalPlaces (dp), allows us to consider token decimal accuracy correctly,
