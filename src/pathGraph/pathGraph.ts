@@ -9,7 +9,6 @@ import {
     PoolAddressDictionary,
     PoolPairMap,
 } from './pathGraphTypes';
-import * as console from 'console';
 
 export class PathGraph {
     private graph: Graph = new Graph({ multigraph: true });
@@ -21,6 +20,12 @@ export class PathGraph {
         return this.graphIsInitialized;
     }
 
+    // We build a directed graph for all pools.
+    // Nodes are tokens and edges are triads: [pool.id, tokenIn, tokenOut].
+    // The current criterion for including a pool path into this graph is the following:
+    // (a) We include every pool with phantom BPTs.
+    // (b) For any token pair x -> y, we include only the most liquid ${maxPathsPerTokenPair}
+    // pool pairs (default 2).
     public buildGraph({
         pools,
         maxPathsPerTokenPair = 2,
@@ -60,20 +65,41 @@ export class PathGraph {
         this.maxPathsPerTokenPair = maxPathsPerTokenPair;
     }
 
+    // Since the path combinations here can get quite large, we use configurable parameters
+    // to enforce upper limits across several dimensions, defined in the pathConfig.
+    // (a) maxDepth - the max depth of the traversal (length of token path), defaults to 7.
+    // (b) maxNonBoostedPathDepth - the max depth for any path that does not contain a phantom bpt.
+    // (c) maxNonBoostedHopTokensInBoostedPath - The max number of non boosted hop tokens
+    // allowed in a boosted path.
+    // (d) approxPathsToReturn - search for up to this many paths. Since all paths for a single traversal
+    // are added, its possible that the amount returned is larger than this number.
+    // (e) poolIdsToInclude - Only include paths with these poolIds (optional)
+
+    // Additionally, we impose the following requirements for a path to be considered valid
+    // (a) It does not visit the same token twice
+    // (b) It does not use the same pool twice
     public traverseGraphAndFindBestPaths({
         tokenIn,
         tokenOut,
-        config = {
-            maxDepth: 7,
-            maxNonBoostedPathDepth: 2,
-            maxNonBoostedSegmentsInBoostedPath: 1,
-            approxPathsToReturn: 20,
-        },
+        pathConfig,
     }: {
         tokenIn: string;
         tokenOut: string;
-        config?: PathGraphTraversalConfig;
+        pathConfig?: Partial<PathGraphTraversalConfig>;
     }): NewPath[] {
+        if (!this.graph.hasNode(tokenIn) || !this.graph.hasNode(tokenOut)) {
+            return [];
+        }
+
+        // apply defaults, allowing caller override whatever they'd like
+        const config: PathGraphTraversalConfig = {
+            maxDepth: 7,
+            maxNonBoostedPathDepth: 2,
+            maxNonBoostedHopTokensInBoostedPath: 1,
+            approxPathsToReturn: 10,
+            ...pathConfig,
+        };
+
         const paths: PathGraphEdge[][] = [];
         const selectedPathIds: string[] = [];
         let seenPoolAddresses: string[] = [];
@@ -90,8 +116,10 @@ export class PathGraph {
                 //most liquid pair
                 while (foundPath) {
                     foundPath = false;
+
                     const path = this.traverseGraphAndFindUniquePath({
                         token: tokenIn,
+                        tokenIn,
                         tokenOut,
                         tokenPairIndex: idx,
                         config,
@@ -136,11 +164,6 @@ export class PathGraph {
             }
         }
 
-        console.log(
-            'abc',
-            paths.map((segment) => segment.map((a) => a.poolId))
-        );
-
         return paths.map((path) => {
             return {
                 id: path.map((segment) => segment.poolId).join('_'),
@@ -148,8 +171,8 @@ export class PathGraph {
                     pool: segment.poolId,
                     tokenIn: segment.tokenIn,
                     tokenOut: segment.tokenOut,
-                    tokenInDecimals: 0,
-                    tokenOutDecimals: 0,
+                    tokenInDecimals: this.getTokenDecimals(segment.tokenIn),
+                    tokenOutDecimals: this.getTokenDecimals(segment.tokenOut),
                 })),
                 poolPairData: path.map((segment) => segment.poolPair),
                 pools: path.map(
@@ -248,6 +271,7 @@ export class PathGraph {
 
     private traverseGraphAndFindUniquePath({
         token,
+        tokenIn,
         tokenOut,
         tokenPath,
         tokenPairIndex,
@@ -256,6 +280,7 @@ export class PathGraph {
         selectedPathIds,
     }: {
         token: string;
+        tokenIn: string;
         tokenOut: string;
         tokenPath: string[];
         tokenPairIndex: number;
@@ -263,6 +288,10 @@ export class PathGraph {
         seenPoolAddresses: string[];
         selectedPathIds: string[];
     }): null | PathGraphEdge[] {
+        if (!this.isValidTokenPath({ tokenPath, config, tokenIn, tokenOut })) {
+            return null;
+        }
+
         const successors = (this.graph.successors(token) || []).filter(
             (successor) => !tokenPath.includes(successor)
         );
@@ -277,9 +306,9 @@ export class PathGraph {
                 path &&
                 this.isValidPath({
                     path,
-                    config,
                     seenPoolAddresses,
                     selectedPathIds,
+                    config,
                 })
             ) {
                 return path;
@@ -287,14 +316,15 @@ export class PathGraph {
         }
 
         // we peek ahead one level, and optimistically sort the successors
-        const sorted = sortBy(successors, (successor) => {
+        const sortedAndFiltered = sortBy(successors, (successor) => {
             const children = this.graph.successors(successor) || [];
             return children.includes(tokenOut) ? -1 : 1;
-        });
+        }).filter((successor) => !tokenPath.includes(successor));
 
-        for (const successor of sorted) {
+        for (const successor of sortedAndFiltered) {
             const result = this.traverseGraphAndFindUniquePath({
                 token: successor,
+                tokenIn,
                 tokenOut,
                 tokenPath: [...tokenPath, successor],
                 tokenPairIndex,
@@ -348,39 +378,39 @@ export class PathGraph {
 
     private isValidPath({
         path,
-        config,
         seenPoolAddresses,
         selectedPathIds,
+        config,
     }: {
         path: PathGraphEdge[];
-        config: PathGraphTraversalConfig;
         seenPoolAddresses: string[];
         selectedPathIds: string[];
+        config: PathGraphTraversalConfig;
     }) {
-        const { maxNonBoostedSegmentsInBoostedPath, maxNonBoostedPathDepth } =
-            config;
+        if (config.poolIdsToInclude) {
+            for (const edge of path) {
+                if (!config.poolIdsToInclude.includes(edge.poolId)) {
+                    //path includes a pool that is not allowed for this traversal
+                    return false;
+                }
+            }
+        }
+
+        const isBoostedPath =
+            path.filter(
+                (edge) =>
+                    this.poolAddressMap[edge.tokenIn] ||
+                    this.poolAddressMap[edge.tokenOut]
+            ).length > 0;
+
+        if (!isBoostedPath && path.length + 1 > config.maxNonBoostedPathDepth) {
+            return false;
+        }
+
         const uniquePools = uniq(path.map((edge) => edge.poolId));
-        const numBoostedSegments = path.filter(
-            (edge) => edge.isPhantomBptHop
-        ).length;
-        const numNonBoostedSegments = path.length - numBoostedSegments;
-        const isBoostedPath = numBoostedSegments > 0;
 
         //dont include any path that hops through the same pool twice
         if (uniquePools.length !== path.length) {
-            return false;
-        }
-
-        //non boosted path is too long
-        if (!isBoostedPath && path.length > maxNonBoostedPathDepth) {
-            return false;
-        }
-
-        //boosted path has more non boosted segments than is allowed
-        if (
-            isBoostedPath &&
-            numNonBoostedSegments > maxNonBoostedSegmentsInBoostedPath
-        ) {
             return false;
         }
 
@@ -417,8 +447,41 @@ export class PathGraph {
         );
     }
 
-    //TODO: just for testing
-    private getTokenSymbol(tokenAddress: string): string {
+    private isValidTokenPath({
+        tokenPath,
+        config,
+        tokenIn,
+        tokenOut,
+    }: {
+        tokenPath: string[];
+        config: PathGraphTraversalConfig;
+        tokenIn: string;
+        tokenOut: string;
+    }) {
+        const hopTokens = tokenPath.filter(
+            (token) => token !== tokenIn && token !== tokenOut
+        );
+        const numStandardHopTokens = hopTokens.filter(
+            (token) => !this.poolAddressMap[token]
+        ).length;
+        const isBoostedPath =
+            tokenPath.filter((token) => this.poolAddressMap[token]).length > 0;
+
+        if (tokenPath.length > config.maxDepth) {
+            return false;
+        }
+
+        if (
+            isBoostedPath &&
+            numStandardHopTokens > config.maxNonBoostedHopTokensInBoostedPath
+        ) {
+            return false;
+        }
+
+        return true;
+    }
+
+    private getTokenDecimals(tokenAddress: string): number {
         const allTokens = Object.values(this.poolAddressMap)
             .map((pool) => pool.tokens)
             .flat();
@@ -428,6 +491,6 @@ export class PathGraph {
                 token.address.toLowerCase() === tokenAddress.toLowerCase()
         );
 
-        return (token as unknown as { symbol: string })?.symbol || '';
+        return token?.decimals || 18;
     }
 }

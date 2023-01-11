@@ -315,8 +315,8 @@ describe('Tests pools filtering and path processing', () => {
             WETH.address,
             USDC.address,
             SwapTypes.SwapExactIn,
-            poolsDict,
-            4
+            poolsDict
+            //4
         );
         assert.equal(paths.length, 34, 'Should have 34 paths');
     });

@@ -1,14 +1,9 @@
-import {
-    filterPoolsOfInterest,
-    getBoostedPaths,
-    getPathsUsingStaBalPool,
-    parseToPoolsDict,
-    producePaths,
-} from './filtering';
+import { parseToPoolsDict } from './filtering';
 import { calculatePathLimits } from './pathLimits';
 import {
     NewPath,
     PoolDictionary,
+    PoolFilter,
     SorConfig,
     SubgraphPoolBase,
     SwapOptions,
@@ -59,69 +54,28 @@ export class RouteProposer {
             return cache.paths;
         }
 
-        const poolsAllDict = parseToPoolsDict(pools, swapOptions.timestamp);
-
-        //TODO: this flow is no longer ideal
+        //TODO: this flow is no longer ideal, but is here for the moment to ensure
+        //TODO: the graph is always initialized
         if (!this.pathGraph.isGraphInitialized) {
+            const poolsAllDict = parseToPoolsDict(pools, swapOptions.timestamp);
+
             this.pathGraph.buildGraph({
                 pools: Object.values(poolsAllDict),
             });
         }
 
-        const [directPools, hopsIn, hopsOut] = filterPoolsOfInterest(
-            poolsAllDict,
+        const bestPaths = this.pathGraph.traverseGraphAndFindBestPaths({
             tokenIn,
             tokenOut,
-            swapOptions.maxPools
-        );
-
-        const pathData = producePaths(
-            tokenIn,
-            tokenOut,
-            directPools,
-            hopsIn,
-            hopsOut,
-            poolsAllDict
-        );
-
-        const boostedPaths = getBoostedPaths(
-            tokenIn,
-            tokenOut,
-            poolsAllDict,
-            this.config
-        );
-
-        const pathsUsingStaBal = getPathsUsingStaBalPool(
-            tokenIn,
-            tokenOut,
-            poolsAllDict,
-            poolsAllDict,
-            this.config
-        );
-
-        this.pathGraph.traverseGraphAndFindBestPaths({
-            tokenIn,
-            tokenOut,
+            pathConfig: {
+                poolIdsToInclude:
+                    swapOptions.poolTypeFilter !== PoolFilter.All
+                        ? pools.map((pool) => pool.id)
+                        : undefined,
+            },
         });
 
-        /*console.log(
-            'uniquePaths',
-            JSON.stringify(
-                uniquePaths.map((item) => ({
-                    id: item.id,
-                    swaps: item.swaps,
-                    pools: item.pools.map((pool) => pool.id),
-                })),
-                null,
-                4
-            )
-        );*/
-        //console.log('boosted paths', JSON.stringify(boostedPaths, null, 4));
-
-        const combinedPathData = pathData
-            .concat(...boostedPaths)
-            .concat(...pathsUsingStaBal);
-        const [paths] = calculatePathLimits(combinedPathData, swapType);
+        const [paths] = calculatePathLimits(bestPaths, swapType);
 
         this.cache[`${tokenIn}${tokenOut}${swapType}${swapOptions.timestamp}`] =
             {
@@ -143,38 +97,20 @@ export class RouteProposer {
         tokenIn: string,
         tokenOut: string,
         swapType: SwapTypes,
-        poolsAllDict: PoolDictionary,
-        maxPools: number
+        poolsAllDict: PoolDictionary
+        //TODO: replace this with path config
+        //maxPools: number
     ): NewPath[] {
         tokenIn = tokenIn.toLowerCase();
         tokenOut = tokenOut.toLowerCase();
         if (Object.keys(poolsAllDict).length === 0) return [];
 
-        const [directPools, hopsIn, hopsOut] = filterPoolsOfInterest(
-            poolsAllDict,
+        const bestPaths = this.pathGraph.traverseGraphAndFindBestPaths({
             tokenIn,
             tokenOut,
-            maxPools
-        );
+        });
 
-        const pathData = producePaths(
-            tokenIn,
-            tokenOut,
-            directPools,
-            hopsIn,
-            hopsOut,
-            poolsAllDict
-        );
-
-        const boostedPaths = getBoostedPaths(
-            tokenIn,
-            tokenOut,
-            poolsAllDict,
-            this.config
-        );
-
-        const combinedPathData = pathData.concat(...boostedPaths);
-        const [paths] = calculatePathLimits(combinedPathData, swapType);
+        const [paths] = calculatePathLimits(bestPaths, swapType);
         return paths;
     }
 }

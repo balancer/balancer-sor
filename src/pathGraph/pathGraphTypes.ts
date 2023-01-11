@@ -28,6 +28,7 @@ export interface PathGraphEdge extends PathGraphEdgeLabel {
 export interface PathGraphTraversalConfig {
     maxDepth: number;
     maxNonBoostedPathDepth: number;
-    maxNonBoostedSegmentsInBoostedPath: number;
+    maxNonBoostedHopTokensInBoostedPath: number;
     approxPathsToReturn: number;
+    poolIdsToInclude?: string[];
 }

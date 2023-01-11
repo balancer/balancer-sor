@@ -73,9 +73,8 @@ export class SOR {
         const success = await this.poolCacher.fetchPools();
 
         if (success) {
-            this.routeProposer.initPathGraphWithPools(
-                this.poolCacher.getPools()
-            );
+            const pools = this.poolCacher.getPools();
+            this.routeProposer.initPathGraphWithPools(pools);
         }
 
         return success;
