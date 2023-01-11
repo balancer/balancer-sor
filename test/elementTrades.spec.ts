@@ -54,7 +54,7 @@ describe(`Tests against Element generated test trade file.`, () => {
             const poolsFromFile: SubgraphPoolBase[] = [
                 {
                     id: 'n/a',
-                    address: 'n/a',
+                    address: '0x000000000000000000000000000000000000000a',
                     poolType: 'Element',
                     swapFee: testTrades.init.percent_fee.toString(),
                     swapEnabled: true,

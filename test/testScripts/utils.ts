@@ -183,6 +183,7 @@ export async function printOutput(
         BigNumber.from('85000')
     );
     const costToSwapScaled = formatFixed(cost, returnDecimals);
+    console.log(`Spot price: `, swapInfo.marketSp);
     console.log(`Swaps:`);
     console.log(swapInfo.swaps);
     console.log(swapInfo.tokenAddresses);
@@ -194,4 +195,5 @@ export async function printOutput(
     );
     console.log(`Cost to swap: ${costToSwapScaled.toString()}`);
     console.log(`Return Considering Fees: ${returnWithFeesScaled.toString()}`);
+    console.log('spot price: ', swapInfo.marketSp);
 }

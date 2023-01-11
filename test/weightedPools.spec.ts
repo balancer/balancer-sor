@@ -126,7 +126,7 @@ describe(`Tests for Weighted Pools.`, () => {
             );
             assert.equal(swapInfo1.swaps.length, 3, 'Should have 3 swaps');
             assert.equal(swapInfo2.swaps.length, 1, 'Should have 1 swap');
-            assert.equal(swapInfo1.returnAmount.toString(), '1264585520968');
+            assert.equal(swapInfo1.returnAmount.toString(), '1264796479436');
             // only using the stable pool returns a lower value:
             assert.equal(swapInfo2.returnAmount.toString(), '1264579692512');
         });
@@ -157,7 +157,7 @@ describe(`Tests for Weighted Pools.`, () => {
             assert.equal(swapInfo2.swaps.length, 1, 'Should have 1 swap');
             assert.equal(
                 swapInfo1.returnAmount.toString(),
-                '1280000412490447883455427'
+                '1279783692099680027157971'
             );
             assert.equal(
                 swapInfo2.returnAmount.toString(),

@@ -1,7 +1,7 @@
 import { getAddress } from '@ethersproject/address';
 import { WeiPerEther as ONE, Zero } from '@ethersproject/constants';
 import { formatFixed, BigNumber } from '@ethersproject/bignumber';
-import { BigNumber as OldBigNumber, bnum } from '../../utils/bignumber';
+import { BigNumber as OldBigNumber, bnum, ZERO } from '../../utils/bignumber';
 
 import {
     PoolBase,
@@ -19,7 +19,6 @@ import {
     _calculateNewSpotPrice,
     _derivativeSpotPriceAfterSwapExactTokenInForTokenOut,
     _derivativeSpotPriceAfterSwapTokenInForExactTokenOut,
-    _getNormalizedLiquidity,
 } from './gyro3Math';
 
 import {
@@ -29,6 +28,7 @@ import {
 } from '../gyroHelpers/helpers';
 import { mulDown, divDown } from '../gyroHelpers/gyroSignedFixedPoint';
 import { SWAP_LIMIT_FACTOR } from '../gyroHelpers/constants';
+import { universalNormalizedLiquidity } from '../liquidity';
 
 export type Gyro3PoolPairData = PoolPairBase & {
     balanceTertiary: BigNumber; // Balance of the unchanged asset
@@ -40,7 +40,7 @@ export type Gyro3PoolToken = Pick<
     'address' | 'balance' | 'decimals'
 >;
 
-export class Gyro3Pool implements PoolBase {
+export class Gyro3Pool implements PoolBase<Gyro3PoolPairData> {
     poolType: PoolTypes = PoolTypes.Gyro3;
     id: string;
     address: string;
@@ -147,31 +147,12 @@ export class Gyro3Pool implements PoolBase {
     }
 
     getNormalizedLiquidity(poolPairData: Gyro3PoolPairData): OldBigNumber {
-        const balances = [
-            poolPairData.balanceIn,
-            poolPairData.balanceOut,
-            poolPairData.balanceTertiary,
-        ];
-        const decimals = [
-            poolPairData.decimalsIn,
-            poolPairData.decimalsOut,
-            poolPairData.decimalsTertiary,
-        ];
-        const normalizedBalances = _normalizeBalances(balances, decimals);
-
-        const invariant = _calculateInvariant(
-            normalizedBalances,
-            this.root3Alpha
+        return universalNormalizedLiquidity(
+            this._derivativeSpotPriceAfterSwapExactTokenInForTokenOut(
+                poolPairData,
+                ZERO
+            )
         );
-
-        const virtualOffsetInOut = mulDown(invariant, this.root3Alpha);
-
-        const normalisedLiquidity = _getNormalizedLiquidity(
-            normalizedBalances,
-            virtualOffsetInOut
-        );
-
-        return bnum(formatFixed(normalisedLiquidity, 18));
     }
 
     getLimitAmountSwap(
@@ -228,14 +209,18 @@ export class Gyro3Pool implements PoolBase {
     // Updates the balance of a given token for the pool
     updateTokenBalanceForPool(token: string, newBalance: BigNumber): void {
         // token is BPT
-        if (this.address == token) {
-            this.totalShares = newBalance;
+        if (isSameAddress(this.address, token)) {
+            this.updateTotalShares(newBalance);
         } else {
             // token is underlying in the pool
             const T = this.tokens.find((t) => isSameAddress(t.address, token));
             if (!T) throw Error('Pool does not contain this token');
             T.balance = formatFixed(newBalance, T.decimals);
         }
+    }
+
+    updateTotalShares(newTotalShares: BigNumber): void {
+        this.totalShares = newTotalShares;
     }
 
     _exactTokenInForTokenOut(

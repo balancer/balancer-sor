@@ -74,7 +74,7 @@ describe('gyroEPool tests', () => {
                 POOL.getNormalizedLiquidity(poolPairData);
 
             expect(Number(normalizedLiquidity)).to.be.approximately(
-                8521784.492644514672267378,
+                8521784.473067058,
                 0.00001
             );
         });

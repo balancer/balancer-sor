@@ -1,20 +1,22 @@
 // TS_NODE_PROJECT='tsconfig.testing.json' npx mocha -r ts-node/register test/phantomStableMath.spec.ts
 import { assert } from 'chai';
-import { formatFixed } from '@ethersproject/bignumber';
+import { BigNumber, formatFixed, parseFixed } from '@ethersproject/bignumber';
 import { BigNumber as OldBigNumber } from '../src/utils/bignumber';
 import { bnum } from '../src/utils/bignumber';
+import { WeiPerEther as ONE } from '@ethersproject/constants';
 import phantomStableStabal3WithPriceRates from './testData/phantomStablePools/phantomStableStabal3WithPriceRates.json';
 import {
     PhantomStablePool,
     PhantomStablePoolPairData,
 } from '../src/pools/phantomStablePool/phantomStablePool';
 import * as phantomStableMath from '../src/pools/phantomStablePool/phantomStableMath';
+import * as stableMathBigInt from '../src/pools/stablePool/stableMathBigInt';
 import { bbaUSD, LINEAR_AUSDT, LINEAR_AUSDC } from './lib/constants';
 
+const oldBN_ONE = bnum(ONE.toString());
+
 describe('phantomStable pools tests', () => {
-    // For the moment we tolerate a moderate relative error until
-    // more accurate formulas are developed for phantomStable.
-    const error = 0.005;
+    const error = 0.00001;
 
     context('phantomStable pools', () => {
         const phantomStablePool = PhantomStablePool.fromPool(
@@ -80,39 +82,85 @@ describe('phantomStable pools tests', () => {
                 bbaUSD.address,
                 LINEAR_AUSDC.address
             );
-            const priceRateOut = bnum(
-                formatFixed(poolPairData.tokenOutPriceRate, 18)
-            );
             // swap outcomes
-            const { a1, a2 } = getSwapOutcomes(
-                phantomStablePool,
-                poolPairData,
-                4000
-            );
-            const b1 = phantomStableMath
-                ._exactBPTInForTokenOut(bnum(4000), poolPairData)
-                .div(priceRateOut);
-            const b2 = phantomStableMath._BPTInForExactTokenOut(
-                bnum(4000).times(priceRateOut),
+            // compares phantomStableMath with stableMathBigInt
+            const amount = 4000;
+            const outMath = phantomStableMath._exactBPTInForTokenOut(
+                bnum(amount),
                 poolPairData
             );
+            const outBigInt = stableMathBigInt._calcTokenOutGivenExactBptIn(
+                poolPairData.amp.toBigInt(),
+                poolPairData.allBalancesScaled.map((b) => b.toBigInt()),
+                poolPairData.tokenIndexOut,
+                ONE.mul(amount).toBigInt(),
+                poolPairData.virtualBptSupply.toBigInt(),
+                poolPairData.swapFee.toBigInt()
+            );
+            const bnumOutBigInt = bnum(outBigInt.toString()).div(oldBN_ONE);
             assert.approximately(
-                a1.div(b1).toNumber(),
+                outMath.div(bnumOutBigInt).toNumber(),
                 1,
                 error,
                 'wrong result'
             );
+
+            const inMath = phantomStableMath._BPTInForExactTokenOut(
+                bnum(amount),
+                poolPairData
+            );
+            const amountsOutBigInt = Array(
+                poolPairData.allBalancesScaled.length
+            ).fill(BigInt(0));
+            amountsOutBigInt[poolPairData.tokenIndexIn] = parseFixed(
+                amount.toString(),
+                18
+            ).toBigInt();
+
+            const inBigInt = stableMathBigInt._calcBptInGivenExactTokensOut(
+                poolPairData.amp.toBigInt(),
+                poolPairData.allBalancesScaled.map((b) => b.toBigInt()),
+                amountsOutBigInt,
+                poolPairData.virtualBptSupply.toBigInt(),
+                poolPairData.swapFee.toBigInt()
+            );
+            const bnumInBigInt = bnum(inBigInt.toString()).div(oldBN_ONE);
             assert.approximately(
-                a2.div(b2).toNumber(),
+                inMath.div(bnumInBigInt).toNumber(),
                 1,
                 error,
                 'wrong result'
             );
             // spot prices
+            poolPairData.swapFee = BigNumber.from(0);
+            const spPhantom =
+                phantomStableMath._spotPriceAfterSwapExactBPTInForTokenOut(
+                    bnum(0),
+                    poolPairData
+                );
+
+            const balances = poolPairData.allBalancesScaled.map((balance) =>
+                balance.toBigInt()
+            );
+            const spBigInt =
+                stableMathBigInt._spotPriceAfterSwapExactBPTInForTokenOut(
+                    poolPairData.amp.toBigInt(),
+                    balances,
+                    poolPairData.tokenIndexOut,
+                    phantomStablePool.totalShares.toBigInt(),
+                    BigInt(0)
+                );
+            const bnumSpBigInt = bnum(spBigInt.toString()).div(oldBN_ONE);
+            assert.approximately(
+                spPhantom.div(bnumSpBigInt).toNumber(),
+                1,
+                error,
+                'wrong result'
+            );
             checkPhantomStableSpotPrices(
                 phantomStablePool,
                 poolPairData,
-                4000,
+                amount,
                 error
             );
         });
@@ -121,6 +169,10 @@ describe('phantomStable pools tests', () => {
                 LINEAR_AUSDC.address,
                 bbaUSD.address
             );
+            poolPairData.swapFee = BigNumber.from(0);
+
+            // here we should compare phantomStableMath with stableMathBigInt
+            // like in the previous case, BPT -> token.
             const { a1, a2 } = getSwapOutcomes(
                 phantomStablePool,
                 poolPairData,
