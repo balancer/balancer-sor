@@ -94,7 +94,7 @@ export class PathGraph {
         // apply defaults, allowing caller override whatever they'd like
         const config: PathGraphTraversalConfig = {
             maxDepth: 7,
-            maxNonBoostedPathDepth: 2,
+            maxNonBoostedPathDepth: 3,
             maxNonBoostedHopTokensInBoostedPath: 1,
             approxPathsToReturn: 10,
             ...pathConfig,
