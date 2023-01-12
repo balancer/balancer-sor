@@ -152,7 +152,10 @@ export class PathGraph {
                 const volatilePoolAddresses =
                     this.filterVolatilePools(seenPoolAddresses);
 
-                if (volatilePoolAddresses.length < seenPoolAddresses.length) {
+                if (
+                    volatilePoolAddresses.length > 0 &&
+                    volatilePoolAddresses.length < seenPoolAddresses.length
+                ) {
                     seenPoolAddresses = volatilePoolAddresses;
                 } else {
                     seenPoolAddresses = [];
@@ -473,6 +476,15 @@ export class PathGraph {
 
         if (
             isBoostedPath &&
+            numStandardHopTokens > config.maxNonBoostedHopTokensInBoostedPath
+        ) {
+            return false;
+        }
+
+        // if the path length is greater than maxNonBoostedPathDepth, then this path
+        // will only be valid if its a boosted path, so it must honor maxNonBoostedHopTokensInBoostedPath
+        if (
+            tokenPath.length > config.maxNonBoostedPathDepth &&
             numStandardHopTokens > config.maxNonBoostedHopTokensInBoostedPath
         ) {
             return false;
