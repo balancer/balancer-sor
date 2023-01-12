@@ -96,7 +96,7 @@ export class PathGraph {
             maxDepth: 7,
             maxNonBoostedPathDepth: 3,
             maxNonBoostedHopTokensInBoostedPath: 1,
-            approxPathsToReturn: 10,
+            approxPathsToReturn: 5,
             ...pathConfig,
         };
 
