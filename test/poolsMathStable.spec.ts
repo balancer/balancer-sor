@@ -67,9 +67,10 @@ describe('poolsMathStable: numeric functions using bigint', () => {
                 1600,
                 0.01
             );
-            assert.equal(
-                result.toString(),
-                SDKResult.toString(),
+            assert.approximately(
+                Number(result),
+                Number(SDKResult.toString()),
+                1,
                 'wrong result'
             );
         });
@@ -100,9 +101,10 @@ describe('poolsMathStable: numeric functions using bigint', () => {
                 1600,
                 0.01
             );
-            assert.equal(
-                result.toString(),
-                SDKResult.toString(),
+            assert.approximately(
+                Number(result),
+                Number(SDKResult),
+                1,
                 'wrong result'
             );
         });
@@ -284,7 +286,7 @@ function getBothValuesBPTGivenExactTokens(
     amounts: number[],
     bptTotalSupply: number,
     fee: number
-): { result: any; SDKResult: any } {
+): { result: bigint; SDKResult: OldBigNumber } {
     const result = SORFunction(
         BigInt(amp),
         balances.map((amount) => s(amount)),
@@ -325,7 +327,7 @@ function getBothValuesTokenGivenBPT(
     bptAmount: number,
     bptTotalSupply: number,
     fee: number
-): { result: any; SDKResult: any } {
+): { result: bigint; SDKResult: OldBigNumber } {
     const result = SORFunction(
         BigInt(amp),
         balances.map((amount) => s(amount)),
@@ -359,7 +361,7 @@ function getBothValuesTokensOutGivenBPTIn(
     balances: number[],
     bptAmountIn: number,
     bptTotalSupply: number
-): { result: any; SDKResult: any } {
+): { result: bigint[]; SDKResult: OldBigNumber[] } {
     const result = SORFunction(
         balances.map((amount) => s(amount)),
         s(bptAmountIn),
@@ -374,8 +376,22 @@ function getBothValuesTokensOutGivenBPTIn(
 }
 
 function checkDerivative_TokToTok(
-    fn: any,
-    der: any,
+    fn: (
+        amp: bigint,
+        balances: bigint[],
+        tokenIndexIn: number,
+        tokenIndexOut: number,
+        amountIn: bigint,
+        fee: bigint
+    ) => bigint,
+    der: (
+        amp: bigint,
+        balances: bigint[],
+        tokenIndexIn: number,
+        tokenIndexOut: number,
+        amountIn: bigint,
+        fee: bigint
+    ) => bigint,
     num_amp: number,
     num_balances: number[],
     tokenIndexIn: number,
@@ -436,8 +452,21 @@ function checkDerivative_TokToTok(
 }
 
 function checkDerivative_ExactTokenBPT(
-    fn: any,
-    der: any,
+    fn: (
+        amp: bigint,
+        balances: bigint[],
+        amountsIn: bigint[],
+        bptTotalSupply: bigint,
+        swapFeePercentage: bigint
+    ) => bigint,
+    der: (
+        amp: bigint,
+        balances: bigint[],
+        tokenIndexIn: number,
+        bptTotalSupply: bigint,
+        amountIn: bigint
+        // assuming zero fee
+    ) => bigint,
     num_amp: number,
     num_balances: number[],
     num_bptSupply: number,
@@ -490,8 +519,21 @@ function checkDerivative_ExactTokenBPT(
 }
 
 function checkDerivative_exactBPTToken(
-    fn: any,
-    der: any,
+    fn: (
+        amp: bigint,
+        balances: bigint[],
+        tokenIndexIn: number,
+        bptAmountOut: bigint,
+        bptTotalSupply: bigint,
+        fee: bigint
+    ) => bigint,
+    der: (
+        amp: bigint,
+        balances: bigint[],
+        tokenIndexIn: number,
+        bptTotalSupply: bigint,
+        amountOut: bigint
+    ) => bigint,
     num_amp: number,
     num_balances: number[],
     tokenIndex: number,

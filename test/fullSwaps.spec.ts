@@ -4,7 +4,7 @@ import { Zero } from '@ethersproject/constants';
 import { JsonRpcProvider } from '@ethersproject/providers';
 import cloneDeep from 'lodash.clonedeep';
 import { assert } from 'chai';
-import { SwapTypes } from '../src/types';
+import { SubgraphPoolBase, SwapTypes } from '../src/types';
 import { compareTest } from './lib/compareHelper';
 import { getFullSwap, ResultParsed, TradeInfo } from './lib/testHelpers';
 
@@ -350,7 +350,7 @@ describe('Tests full swaps against known values', () => {
                 overRideCost: Zero,
             },
         });
-        assert.equal(swapInfo.returnAmount.toString(), '99922470289305282');
+        assert.equal(swapInfo.returnAmount.toString(), '99922470289305281');
         assert.equal(swapInfo.swaps.length, 1);
         assert.equal(
             swapInfo.swaps[0].poolId,
@@ -370,8 +370,10 @@ describe('Tests full swaps against known values', () => {
     it('should full swap stable & weighted swapExactIn', async () => {
         const name = 'full swap stable & weighted swapExactIn';
         // const testPools = require('./testData/filterTestPools.json');
-        const weighted: any = testPools.weightedOnly;
-        const allPools = testPools.stableOnly.concat(weighted);
+        const weighted =
+            testPools.weightedOnly as unknown as SubgraphPoolBase[];
+        const stable = testPools.stableOnly as unknown as SubgraphPoolBase[];
+        const allPools: SubgraphPoolBase[] = stable.concat(weighted);
         const tokenIn = DAI.address;
         const tokenOut = USDC.address;
         const swapType = 'swapExactIn';
@@ -426,7 +428,7 @@ describe('Tests full swaps against known values', () => {
             swapInfo.tokenAddresses[swapInfo.swaps[0].assetOutIndex],
             USDC.address
         );
-        assert.equal(swapInfo.swaps[0].amount, '692256505473431402');
+        assert.equal(swapInfo.swaps[0].amount, '692256505473389013');
         assert.equal(
             swapInfo.swaps[1].poolId,
             '0x57755f7dec33320bca83159c26e93751bfd30fbe'
@@ -439,14 +441,16 @@ describe('Tests full swaps against known values', () => {
             swapInfo.tokenAddresses[swapInfo.swaps[1].assetOutIndex],
             USDC.address
         );
-        assert.equal(swapInfo.swaps[1].amount, '77743494526568598');
+        assert.equal(swapInfo.swaps[1].amount, '77743494526610987');
     }).timeout(10000);
 
     it('should full swap stable & weighted swapExactOut', async () => {
         const name = 'full swap stable & weighted swapExactOut';
         // const testPools = require('./testData/filterTestPools.json');
-        const weighted: any = testPools.weightedOnly;
-        const allPools = testPools.stableOnly.concat(weighted);
+        const weighted =
+            testPools.weightedOnly as unknown as SubgraphPoolBase[];
+        const stable = testPools.stableOnly as unknown as SubgraphPoolBase[];
+        const allPools: SubgraphPoolBase[] = stable.concat(weighted);
         const tokenIn = DAI.address;
         const tokenOut = USDC.address;
         const swapType = 'swapExactOut';
@@ -478,7 +482,7 @@ describe('Tests full swaps against known values', () => {
             },
         });
 
-        assert.equal(swapInfo.returnAmount.toString(), '100601647114105022960');
+        assert.equal(swapInfo.returnAmount.toString(), '100600365514359821527');
         assert.equal(swapInfo.swaps.length, 3);
         assert.equal(
             swapInfo.swaps[0].poolId,
@@ -492,7 +496,7 @@ describe('Tests full swaps against known values', () => {
             swapInfo.tokenAddresses[swapInfo.swaps[0].assetOutIndex],
             USDC.address
         );
-        assert.equal(swapInfo.swaps[0].amount, '82364889');
+        assert.equal(swapInfo.swaps[0].amount, '84819610');
         assert.equal(
             swapInfo.swaps[1].poolId,
             '0x75286e183d923a5f52f52be205e358c5c9101b09'
@@ -505,7 +509,7 @@ describe('Tests full swaps against known values', () => {
             swapInfo.tokenAddresses[swapInfo.swaps[1].assetOutIndex],
             USDC.address
         );
-        assert.equal(swapInfo.swaps[1].amount, '16512830');
+        assert.equal(swapInfo.swaps[1].amount, '14305989');
         assert.equal(
             swapInfo.swaps[2].poolId,
             '0x57755f7dec33320bca83159c26e93751bfd30fbe'
@@ -518,11 +522,12 @@ describe('Tests full swaps against known values', () => {
             swapInfo.tokenAddresses[swapInfo.swaps[2].assetOutIndex],
             USDC.address
         );
-        assert.equal(swapInfo.swaps[2].amount, '1854381');
+        assert.equal(swapInfo.swaps[2].amount, '1606501');
     }).timeout(10000);
 
     it('WBTC>MKR2, swapExactIn', async () => {
-        const allPools: any = subgraphPoolsDecimalsTest;
+        const allPools: SubgraphPoolBase[] =
+            subgraphPoolsDecimalsTest.pools as unknown as SubgraphPoolBase[];
         const amountIn = parseFixed('0.001', 8); // 0.00100000 WBTC
         const swapType = 'swapExactIn';
         const noPools = 4;
@@ -541,7 +546,7 @@ describe('Tests full swaps against known values', () => {
         };
 
         const testData = {
-            pools: cloneDeep(allPools.pools),
+            pools: cloneDeep(allPools),
             tradeInfo,
             v1Result: {} as ResultParsed,
         };
@@ -561,7 +566,8 @@ describe('Tests full swaps against known values', () => {
     }).timeout(10000);
 
     it('Full Multihop SOR, USDC>yUSD, swapExactIn', async () => {
-        const allPools = subgraphPoolsDecimalsTest;
+        const allPools =
+            subgraphPoolsDecimalsTest.pools as unknown as SubgraphPoolBase[];
         const amountIn = parseFixed('1', 6);
         const swapType = 'swapExactIn';
         const noPools = 4;
@@ -579,16 +585,14 @@ describe('Tests full swaps against known values', () => {
             ReturnAmountDecimals: 18,
         };
 
-        const testData: any = {
-            pools: cloneDeep(allPools.pools),
-            tradeInfo,
-            v1Result: {} as ResultParsed,
-        };
-
         const [, swapInfo] = await compareTest(
             `USDC>yUSD, swapExactIn`,
             provider,
-            testData
+            {
+                pools: cloneDeep(allPools),
+                tradeInfo,
+                v1Result: {} as ResultParsed,
+            }
         );
 
         assert.equal(swapInfo.swaps.length, 1, 'Should have 1 multiswap.');
@@ -600,7 +604,8 @@ describe('Tests full swaps against known values', () => {
     }).timeout(10000);
 
     it('Full Multihop SOR,  WBTC>MKR2, swapExactOut', async () => {
-        const allPools = subgraphPoolsDecimalsTest;
+        const allPools =
+            subgraphPoolsDecimalsTest.pools as unknown as SubgraphPoolBase[];
         const amountOut = parseFixed('0.001', 18);
         const swapType = 'swapExactOut';
         const noPools = 4;
@@ -618,17 +623,15 @@ describe('Tests full swaps against known values', () => {
             ReturnAmountDecimals: 8,
         };
 
-        const testData: any = {
-            pools: cloneDeep(allPools.pools),
-            tradeInfo,
-            v1Result: {} as ResultParsed,
-        };
-
         // This test has rounding differences between V1 and V2 maths that cause it to fail but has been checked by Fernando
         const [, swapInfo] = await compareTest(
             `WBTC>MKR2, swapExactOut`,
             provider,
-            testData,
+            {
+                pools: cloneDeep(allPools),
+                tradeInfo,
+                v1Result: {} as ResultParsed,
+            },
             {
                 compareResults: false,
                 costOutputTokenOveride: {
@@ -648,7 +651,8 @@ describe('Tests full swaps against known values', () => {
     }).timeout(10000);
 
     it('Full Multihop SOR, USDC>yUSD, swapExactOut', async () => {
-        const allPools = subgraphPoolsDecimalsTest;
+        const allPools =
+            subgraphPoolsDecimalsTest.pools as unknown as SubgraphPoolBase[];
         const amountOut = parseFixed('0.01', 18);
         const swapType = 'swapExactOut';
         const noPools = 4;
@@ -666,17 +670,15 @@ describe('Tests full swaps against known values', () => {
             ReturnAmountDecimals: 6,
         };
 
-        const testData: any = {
-            pools: cloneDeep(allPools.pools),
-            tradeInfo,
-            v1Result: {} as ResultParsed,
-        };
-
         // This test has rounding differences between V1 and V2 maths that cause it to fail but has been checked by Fernando
         const [, swapInfo] = await compareTest(
             `subgraphPoolsDecimalsTest`,
             provider,
-            testData,
+            {
+                pools: cloneDeep(allPools),
+                tradeInfo,
+                v1Result: {} as ResultParsed,
+            },
             {
                 compareResults: false,
                 costOutputTokenOveride: {
@@ -699,7 +701,8 @@ describe('Tests full swaps against known values', () => {
         This was a path that was previously causing issues because of GUSD having 2 decimals.
         Before fix the wrapper would return swaps even when return amount was 0.
         */
-        const allPools = gusdBugSinglePath;
+        const allPools =
+            gusdBugSinglePath.pools as unknown as SubgraphPoolBase[];
         const amountOut = parseFixed('0.01', 18);
         const swapType = 'swapExactIn';
         const noPools = 4;
@@ -717,17 +720,15 @@ describe('Tests full swaps against known values', () => {
             ReturnAmountDecimals: 18,
         };
 
-        const testData: any = {
-            pools: cloneDeep(allPools.pools),
-            tradeInfo,
-            v1Result: {} as ResultParsed,
-        };
-
         // This test has rounding differences between V1 and V2 maths that cause it to fail but has been checked by Fernando
         const [, swapInfo] = await compareTest(
             `subgraphPoolsDecimalsTest`,
             provider,
-            testData,
+            {
+                pools: cloneDeep(allPools),
+                tradeInfo,
+                v1Result: {} as ResultParsed,
+            },
             {
                 compareResults: false,
                 costOutputTokenOveride: {
@@ -747,7 +748,7 @@ describe('Tests full swaps against known values', () => {
         Before fix the wrapper would return a swap amount of 0 because it was routing a small amount via GUSD that was < two decimals.
         After fix the SOR should consider an alternative viable route with swap amount > 0.
         */
-        const allPools = gusdBug;
+        const allPools = gusdBug.pools as unknown as SubgraphPoolBase[];
         const amountOut = parseFixed('0.01', 18);
         const swapType = 'swapExactIn';
         const noPools = 4;
@@ -765,17 +766,15 @@ describe('Tests full swaps against known values', () => {
             ReturnAmountDecimals: 18,
         };
 
-        const testData: any = {
-            pools: cloneDeep(allPools.pools),
-            tradeInfo,
-            v1Result: {} as ResultParsed,
-        };
-
         // This test has rounding differences between V1 and V2 maths that cause it to fail but has been checked by Fernando
         const [, swapInfo] = await compareTest(
             `subgraphPoolsDecimalsTest`,
             provider,
-            testData,
+            {
+                pools: cloneDeep(allPools),
+                tradeInfo,
+                v1Result: {} as ResultParsed,
+            },
             {
                 compareResults: false,
                 costOutputTokenOveride: {

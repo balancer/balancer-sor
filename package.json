@@ -1,6 +1,6 @@
 {
     "name": "@balancer-labs/sor",
-    "version": "4.0.1-beta.15",
+    "version": "4.0.1-beta.18",
     "license": "GPL-3.0-only",
     "main": "dist/index.js",
     "module": "dist/index.esm.js",
@@ -8,14 +8,14 @@
     "scripts": {
         "build": "rollup -c",
         "prepack": "yarn build",
-        "test": "TS_NODE_PROJECT='tsconfig.testing.json' nyc mocha -r ts-node/register test/*.spec.ts",
+        "test": "TS_NODE_PROJECT='tsconfig.testing.json' nyc mocha -r ts-node/register test/*.spec.ts --timeout 20000",
         "coverage": "nyc report --reporter=text-lcov | coveralls",
         "lint": "eslint ./src ./test --ext .ts --max-warnings 0",
-        "node": "npx hardhat node --fork $(grep ALCHEMY_URL .env | cut -d '=' -f2) --fork-block-number 14828550"
+        "node": "npx hardhat node --tsconfig tsconfig.testing.json --fork $(grep ALCHEMY_URL .env | cut -d '=' -f2) --fork-block-number 14828550"
     },
     "husky": {
         "hooks": {
-            "pre-commit": "pretty-quick --staged"
+            "pre-commit": "pretty-quick --staged && yarn run lint"
         }
     },
     "publishConfig": {

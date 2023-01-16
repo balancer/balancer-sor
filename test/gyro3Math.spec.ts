@@ -17,9 +17,10 @@ import {
     _reduceFee,
     _normalizeBalances,
 } from '../src/pools/gyroHelpers/helpers';
+import { SubgraphPoolBase } from '../src';
 
 describe('gyro2Math tests', () => {
-    const testPool: any = cloneDeep(testPools).pools[0];
+    const testPool: SubgraphPoolBase = cloneDeep(testPools).pools[0];
     const pool = Gyro2Pool.fromPool(testPool);
 
     const poolPairData = pool.parsePoolPairData(USDC.address, DAI.address);

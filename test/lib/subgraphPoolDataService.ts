@@ -151,6 +151,6 @@ export class SubgraphPoolDataService implements PoolDataService {
             );
         }
 
-        return data.pools ?? [];
+        return pools ?? [];
     }
 }

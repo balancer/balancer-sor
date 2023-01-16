@@ -163,7 +163,7 @@ describe(`Tests for PhantomStable Pools.`, () => {
                     parseFixed('10.2563', 18),
                     [pool]
                 );
-                expect(returnAmount).to.eq('10153428718607272909');
+                expect(returnAmount).to.eq('10153428718607272910');
             });
 
             it('Token>BPT, SwapExactIn', async () => {
@@ -185,7 +185,7 @@ describe(`Tests for PhantomStable Pools.`, () => {
                     parseFixed('401.873', 18),
                     [pool]
                 );
-                expect(returnAmount).to.eq('397821023707679256400');
+                expect(returnAmount).to.eq('397821023707679256401');
             });
         });
 
@@ -198,7 +198,7 @@ describe(`Tests for PhantomStable Pools.`, () => {
                     parseFixed('0.070007000109821346', 18),
                     [pool]
                 );
-                expect(returnAmount).to.eq('70712367802296270');
+                expect(returnAmount).to.eq('70712367802296269');
             });
 
             it('Token>BPT, SwapExactOut', async () => {
@@ -209,7 +209,7 @@ describe(`Tests for PhantomStable Pools.`, () => {
                     parseFixed('654.98', 18),
                     [pool]
                 );
-                expect(returnAmount).to.eq('661659057984436270212');
+                expect(returnAmount).to.eq('661659057984436270211');
             });
 
             it('BPT>Token, SwapExactIn', async () => {

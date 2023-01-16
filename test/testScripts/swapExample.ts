@@ -87,7 +87,7 @@ export async function swap(): Promise<void> {
 
     // Simulate the swap transaction
     if (swapInfo.returnAmount.gt(0)) {
-        const key: any = process.env.TRADER_KEY;
+        const key = process.env.TRADER_KEY as string;
         const wallet = new Wallet(key, provider);
         // await handleAllowances(wallet, tokenIn: string, amount: BigNumber)
         const tx = buildTx(wallet, swapInfo, swapType);

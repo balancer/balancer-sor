@@ -4,7 +4,7 @@ import { BigNumber, formatFixed } from '@ethersproject/bignumber';
 import { Wallet } from '@ethersproject/wallet';
 import { Contract } from '@ethersproject/contracts';
 import { AddressZero, MaxUint256 } from '@ethersproject/constants';
-import { SOR, SwapInfo, SwapTypes } from '../../src';
+import { FundManagement, SOR, SwapInfo, SwapTypes } from '../../src';
 import { vaultAddr } from './constants';
 
 import erc20abi from '../abi/ERC20.json';
@@ -86,12 +86,19 @@ export function getLimits(
     return limits;
 }
 
+type SwapTx = {
+    funds: FundManagement;
+    limits: string[];
+    overRides: Record<string, unknown>;
+    deadline: BigNumber;
+};
+
 // Build batchSwap tx data
 export function buildTx(
     wallet: Wallet,
     swapInfo: SwapInfo,
     swapType: SwapTypes
-): any {
+): SwapTx {
     const funds = {
         sender: wallet.address,
         recipient: wallet.address,
@@ -126,12 +133,18 @@ export function buildTx(
     };
 }
 
+type Token = {
+    address: string;
+    decimals: number;
+    symbol: string;
+};
+
 // Helper to log output
 export async function printOutput(
     swapInfo: SwapInfo,
     sor: SOR,
-    tokenIn: any,
-    tokenOut: any,
+    tokenIn: Token,
+    tokenOut: Token,
     swapType: SwapTypes,
     swapAmount: BigNumber,
     gasPrice: BigNumber,
@@ -170,6 +183,7 @@ export async function printOutput(
         BigNumber.from('85000')
     );
     const costToSwapScaled = formatFixed(cost, returnDecimals);
+    console.log(`Spot price: `, swapInfo.marketSp);
     console.log(`Swaps:`);
     console.log(swapInfo.swaps);
     console.log(swapInfo.tokenAddresses);
@@ -181,4 +195,5 @@ export async function printOutput(
     );
     console.log(`Cost to swap: ${costToSwapScaled.toString()}`);
     console.log(`Return Considering Fees: ${returnWithFeesScaled.toString()}`);
+    console.log('spot price: ', swapInfo.marketSp);
 }

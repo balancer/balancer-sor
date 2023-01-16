@@ -23,5 +23,5 @@
         "src/pools/linearPool/linearPoolAbi.json",
         "src/pools/xaveFxPool/fxPoolAbi.json"
     ],
-    "files": ["hardhat.config.js"]
+    "files": ["hardhat.config.ts"]
 }

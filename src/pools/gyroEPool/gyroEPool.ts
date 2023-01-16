@@ -1,7 +1,7 @@
 import { getAddress } from '@ethersproject/address';
 import { WeiPerEther as ONE, Zero } from '@ethersproject/constants';
 import { formatFixed, BigNumber } from '@ethersproject/bignumber';
-import { BigNumber as OldBigNumber, bnum } from '../../utils/bignumber';
+import { BigNumber as OldBigNumber, bnum, ZERO } from '../../utils/bignumber';
 
 import {
     PoolBase,
@@ -32,9 +32,9 @@ import {
     calcSpotPriceAfterSwapInGivenOut,
     calcDerivativePriceAfterSwapOutGivenIn,
     calcDerivativeSpotPriceAfterSwapInGivenOut,
-    calculateNormalizedLiquidity,
 } from './gyroEMath/gyroEMath';
 import { SWAP_LIMIT_FACTOR } from '../gyroHelpers/constants';
+import { universalNormalizedLiquidity } from '../liquidity';
 
 export type GyroEPoolPairData = PoolPairBase & {
     tokenInIsToken0: boolean;
@@ -64,7 +64,7 @@ type DerivedGyroEParamsFromSubgraph = {
     dSq: string;
 };
 
-export class GyroEPool implements PoolBase {
+export class GyroEPool implements PoolBase<GyroEPoolPairData> {
     poolType: PoolTypes = PoolTypes.GyroE;
     id: string;
     address: string;
@@ -212,38 +212,12 @@ export class GyroEPool implements PoolBase {
     }
 
     getNormalizedLiquidity(poolPairData: GyroEPoolPairData): OldBigNumber {
-        const normalizedBalances = normalizeBalances(
-            [poolPairData.balanceIn, poolPairData.balanceOut],
-            [poolPairData.decimalsIn, poolPairData.decimalsOut]
+        return universalNormalizedLiquidity(
+            this._derivativeSpotPriceAfterSwapExactTokenInForTokenOut(
+                poolPairData,
+                ZERO
+            )
         );
-
-        const orderedNormalizedBalances = balancesFromTokenInOut(
-            normalizedBalances[0],
-            normalizedBalances[1],
-            poolPairData.tokenInIsToken0
-        );
-
-        const [currentInvariant, invErr] = calculateInvariantWithError(
-            orderedNormalizedBalances,
-            this.gyroEParams,
-            this.derivedGyroEParams
-        );
-
-        const invariant: Vector2 = {
-            x: currentInvariant.add(invErr.mul(2)),
-            y: currentInvariant,
-        };
-
-        const normalizedLiquidity = calculateNormalizedLiquidity(
-            orderedNormalizedBalances,
-            this.gyroEParams,
-            this.derivedGyroEParams,
-            invariant,
-            this.swapFee,
-            poolPairData.tokenInIsToken0
-        );
-
-        return bnum(formatFixed(normalizedLiquidity, 18));
     }
 
     getLimitAmountSwap(
@@ -310,14 +284,18 @@ export class GyroEPool implements PoolBase {
     // Updates the balance of a given token for the pool
     updateTokenBalanceForPool(token: string, newBalance: BigNumber): void {
         // token is BPT
-        if (this.address == token) {
-            this.totalShares = newBalance;
+        if (isSameAddress(this.address, token)) {
+            this.updateTotalShares(newBalance);
         } else {
             // token is underlying in the pool
             const T = this.tokens.find((t) => isSameAddress(t.address, token));
             if (!T) throw Error('Pool does not contain this token');
             T.balance = formatFixed(newBalance, T.decimals);
         }
+    }
+
+    updateTotalShares(newTotalShares: BigNumber): void {
+        this.totalShares = newTotalShares;
     }
 
     _exactTokenInForTokenOut(
@@ -392,11 +370,13 @@ export class GyroEPool implements PoolBase {
         return bnum(formatFixed(inAmount, 18));
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     _calcTokensOutGivenExactBptIn(bptAmountIn: BigNumber): BigNumber[] {
         // Missing maths for this
         return new Array(this.tokens.length).fill(Zero);
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     _calcBptOutGivenExactTokensIn(amountsIn: BigNumber[]): BigNumber {
         // Missing maths for this
         return Zero;
