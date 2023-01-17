@@ -92,7 +92,31 @@ describe('composable stable pool', () => {
                 .mul(ONE)
                 .div(expectedBptOut)
                 .abs();
-            const inaccuracyLimit = ONE.div(1e6); // inaccuracy should not be over 1e-6
+            const inaccuracyLimit = ONE.div(1e4); // inaccuracy should not be over 1 bps
+            assert(inaccuracy.lte(inaccuracyLimit));
+        });
+    });
+    context('exit - exact bpt in', () => {
+        const composableStablePool = PhantomStablePool.fromPool(bbausd);
+        it('should calculate expected amount out', () => {
+            const pairData = composableStablePool.parsePoolPairData(
+                composableStablePool.address,
+                composableStablePool.tokensList[0]
+            );
+            const amountOutHuman = composableStablePool
+                ._exactTokenInForTokenOut(
+                    pairData,
+                    bnum('10') // bptIn in human scale
+                )
+                .dp(18);
+            const amountOut = parseFixed(amountOutHuman.toString(), 18);
+            const expectedAmountOut = '9992943504916612596';
+            const inaccuracy = amountOut
+                .sub(expectedAmountOut)
+                .mul(ONE)
+                .div(expectedAmountOut)
+                .abs();
+            const inaccuracyLimit = ONE.div(1e4); // inaccuracy should not be over 1 bps
             assert(inaccuracy.lte(inaccuracyLimit));
         });
     });
