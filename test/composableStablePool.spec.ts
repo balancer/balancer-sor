@@ -1,6 +1,6 @@
 // TS_NODE_PROJECT='tsconfig.testing.json' npx mocha -r ts-node/register test/composableStablePool.spec.ts
 import { assert } from 'chai';
-import { BigNumber } from '@ethersproject/bignumber';
+import { BigNumber, parseFixed } from '@ethersproject/bignumber';
 import { bnum } from '../src/utils/bignumber';
 import { WeiPerEther as ONE } from '@ethersproject/constants';
 import composableStable from './testData/phantomStablePools/composableStable.json';
@@ -8,6 +8,14 @@ import { PhantomStablePool } from '../src/pools/phantomStablePool/phantomStableP
 import * as phantomStableMath from '../src/pools/phantomStablePool/phantomStableMath';
 import * as stableMathBigInt from '../src/pools/stablePool/stableMathBigInt';
 import { ADDRESSES, Network } from './testScripts/constants';
+import pools_15840286 from './testData/phantomStablePools/pools_15840286.json';
+import { SubgraphPoolBase } from '../src';
+
+const bbausd = pools_15840286.find(
+    (pool) =>
+        pool.id ==
+        '0xa13a9247ea42d743238089903570127dda72fe4400000000000000000000035d' // bbausd
+) as unknown as SubgraphPoolBase;
 
 describe('composable stable pool', () => {
     const oldBN_ONE = bnum(ONE.toString());
@@ -66,6 +74,26 @@ describe('composable stable pool', () => {
                 error,
                 'wrong result'
             );
+        });
+    });
+    context('join - exact tokens in', () => {
+        const composableStablePool = PhantomStablePool.fromPool(bbausd);
+        it('should calculate expected BPT out', () => {
+            const amountsIn = [
+                parseFixed('1.23', 18),
+                parseFixed('10.7', 18),
+                parseFixed('1099.5432', 18),
+            ];
+            const bptOut =
+                composableStablePool._calcBptOutGivenExactTokensIn(amountsIn);
+            const expectedBptOut = BigNumber.from('1111327432434158659003');
+            const inaccuracy = bptOut
+                .sub(expectedBptOut)
+                .mul(ONE)
+                .div(expectedBptOut)
+                .abs();
+            const inaccuracyLimit = ONE.div(1e6); // inaccuracy should not be over 1e-6
+            assert(inaccuracy.lte(inaccuracyLimit));
         });
     });
 });
