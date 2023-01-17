@@ -9,9 +9,16 @@ import * as phantomStableMath from '../src/pools/phantomStablePool/phantomStable
 import * as stableMathBigInt from '../src/pools/stablePool/stableMathBigInt';
 import { ADDRESSES, Network } from './testScripts/constants';
 import pools_15840286 from './testData/phantomStablePools/pools_15840286.json';
+import pools_16428572 from './testData/phantomStablePools/pools_16428572.json';
 import { SubgraphPoolBase } from '../src';
 
 const bbausd = pools_15840286.find(
+    (pool) =>
+        pool.id ==
+        '0xa13a9247ea42d743238089903570127dda72fe4400000000000000000000035d' // bbausd
+) as unknown as SubgraphPoolBase;
+
+const bbausdNoFee = pools_16428572.find(
     (pool) =>
         pool.id ==
         '0xa13a9247ea42d743238089903570127dda72fe4400000000000000000000035d' // bbausd
@@ -78,7 +85,7 @@ describe('composable stable pool', () => {
     });
     context('join - exact tokens in', () => {
         const composableStablePool = PhantomStablePool.fromPool(bbausd);
-        it('should calculate expected BPT out', () => {
+        it('bpt out should be within inaccuracy limit', () => {
             const amountsIn = [
                 parseFixed('1.23', 18),
                 parseFixed('10.7', 18),
@@ -96,9 +103,23 @@ describe('composable stable pool', () => {
             assert(inaccuracy.lte(inaccuracyLimit));
         });
     });
+    context('join - exact tokens in - protocol fees turned off', () => {
+        const composableStablePool = PhantomStablePool.fromPool(bbausdNoFee);
+        it('bpt out should match exactly with smart contract math', () => {
+            const amountsIn = [
+                parseFixed('1.23', 18),
+                parseFixed('10.7', 18),
+                parseFixed('1099.5432', 18),
+            ];
+            const bptOut =
+                composableStablePool._calcBptOutGivenExactTokensIn(amountsIn);
+            const expectedBptOut = BigNumber.from('1110698206088016093708');
+            assert.equal(bptOut.toString(), expectedBptOut.toString());
+        });
+    });
     context('exit - exact bpt in', () => {
         const composableStablePool = PhantomStablePool.fromPool(bbausd);
-        it('should calculate expected amount out', () => {
+        it('amount out should be within inaccuracy limit', () => {
             const pairData = composableStablePool.parsePoolPairData(
                 composableStablePool.address,
                 composableStablePool.tokensList[0]
