@@ -117,9 +117,9 @@ describe('composable stable pool', () => {
             assert.equal(bptOut.toString(), expectedBptOut.toString());
         });
     });
-    context('exit - exact bpt in', () => {
+    context('exit - exact bpt in - protocol fees turned off', () => {
         const composableStablePool = ComposableStablePool.fromPool(bbausdNoFee);
-        it('amount out should be within inaccuracy limit', () => {
+        it('amount out should match exactly with smart contract math', () => {
             const pairData = composableStablePool.parsePoolPairData(
                 composableStablePool.address,
                 composableStablePool.tokensList[0]
