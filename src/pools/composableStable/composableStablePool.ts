@@ -200,30 +200,37 @@ export class ComposableStablePool extends PhantomStablePool {
 
     /**
      * _calcBptOutGivenExactTokensIn
-     * @param amountsIn EVM Scale
+     * @param amountsIn EVM Scale (Should not have value for BPT token)
      * @returns EVM Scale
      */
     _calcBptOutGivenExactTokensIn(amountsIn: BigNumber[]): BigNumber {
         try {
+            const scaledAmountsIn = new Array(amountsIn.length).fill(BigInt(0));
+            const balancesEvm = new Array(amountsIn.length).fill(BigInt(0));
             // token balances are stored in human scale and must be EVM for maths
             // Must take priceRate into consideration
-            const balancesEvm = this.tokens
+            this.tokens
                 .filter((t) => !isSameAddress(t.address, this.address))
-                .map(({ balance, priceRate, decimals }) =>
-                    parseFixed(balance, decimals)
+                .forEach(({ balance, priceRate, decimals }, i) => {
+                    scaledAmountsIn[i] = amountsIn[i]
                         .mul(parseFixed(priceRate, 18))
                         .div(ONE)
-                        .toBigInt()
-                );
+                        .toBigInt();
+                    balancesEvm[i] = parseFixed(balance, decimals)
+                        .mul(parseFixed(priceRate, 18))
+                        .div(ONE)
+                        .toBigInt();
+                });
             const bptAmountOut = _calcBptOutGivenExactTokensIn(
                 this.amp.toBigInt(),
                 balancesEvm,
-                amountsIn.map((a) => a.toBigInt()),
+                scaledAmountsIn,
                 this.totalShares.toBigInt(),
-                BigInt(0)
+                this.swapFee.toBigInt()
             );
             return BigNumber.from(bptAmountOut.toString());
         } catch (err) {
+            console.error(err);
             return Zero;
         }
     }

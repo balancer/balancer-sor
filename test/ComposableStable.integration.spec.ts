@@ -1,7 +1,11 @@
 // TS_NODE_PROJECT='tsconfig.testing.json' npx mocha -r ts-node/register test/ComposableStable.integration.spec.ts
 import dotenv from 'dotenv';
 import { JsonRpcProvider } from '@ethersproject/providers';
-import { Vault__factory } from '@balancer-labs/typechain';
+import { defaultAbiCoder } from '@ethersproject/abi';
+import {
+    Vault__factory,
+    BalancerHelpers__factory,
+} from '@balancer-labs/typechain';
 import { vaultAddr } from './testScripts/constants';
 import { SubgraphPoolBase, SwapTypes, SOR } from '../src';
 import {
@@ -13,9 +17,10 @@ import {
 import { OnChainPoolDataService } from './lib/onchainData';
 import { TokenPriceService } from '../src';
 import { AddressZero } from '@ethersproject/constants';
-import { parseFixed } from '@ethersproject/bignumber';
+import { BigNumber, parseFixed } from '@ethersproject/bignumber';
 import { expect } from 'chai';
 import { closeTo } from './lib/testHelpers';
+import { ComposableStablePool } from '../src/pools/composableStable/composableStablePool';
 
 dotenv.config();
 
@@ -34,6 +39,7 @@ const funds = {
     fromInternalBalance: false,
     toInternalBalance: false,
 };
+let subgraphPoolDataService: OnChainPoolDataService;
 
 // bbausd
 const testPool: SubgraphPoolBase = {
@@ -85,7 +91,7 @@ const testPool: SubgraphPoolBase = {
 // Setup SOR with data services
 function setUp(networkId: Network, provider: JsonRpcProvider): SOR {
     // The SOR needs to fetch pool data from an external source. This provider fetches from Subgraph and onchain calls.
-    const subgraphPoolDataService = new OnChainPoolDataService({
+    subgraphPoolDataService = new OnChainPoolDataService({
         vaultAddress: vaultAddr,
         multiAddress: MULTIADDR[networkId],
         provider,
@@ -114,6 +120,43 @@ function setUp(networkId: Network, provider: JsonRpcProvider): SOR {
         coingeckoTokenPriceService
     );
 }
+
+export async function queryJoin(
+    network: number,
+    poolId: string,
+    assetsWithBpt: string[],
+    amountsInWithBpt: string[],
+    bptIndex: number
+): Promise<
+    [BigNumber, BigNumber[]] & { bptOut: BigNumber; amountsIn: BigNumber[] }
+> {
+    const helpers = BalancerHelpers__factory.connect(
+        ADDRESSES[network].balancerHelpers,
+        provider
+    );
+    const EXACT_TOKENS_IN_FOR_BPT_OUT = 1; // Alternative is: TOKEN_IN_FOR_EXACT_BPT_OUT
+    const minimumBPT = '0';
+    const abi = ['uint256', 'uint256[]', 'uint256'];
+    // ComposableStables must have no value for BPT in user data
+    const amountsWithOutBpt = [...amountsInWithBpt];
+    amountsWithOutBpt.splice(bptIndex, 1);
+    const data = [EXACT_TOKENS_IN_FOR_BPT_OUT, amountsWithOutBpt, minimumBPT];
+    const userDataEncoded = defaultAbiCoder.encode(abi, data);
+    const joinPoolRequest = {
+        assets: assetsWithBpt,
+        maxAmountsIn: amountsInWithBpt, // Must include BPT
+        userData: userDataEncoded,
+        fromInternalBalance: false,
+    };
+    const query = await helpers.queryJoin(
+        poolId,
+        AddressZero, // Not important for query
+        AddressZero,
+        joinPoolRequest
+    );
+    return query;
+}
+
 describe('ComposableStable', () => {
     context('test swaps vs queryBatchSwap', () => {
         // Setup chain
@@ -266,6 +309,86 @@ describe('ComposableStable', () => {
                 );
                 expect(queryResult[0].toString()).to.eq(
                     swapInfo.returnAmount.toString()
+                );
+            }).timeout(10000);
+        });
+    });
+    context('test joins vs queryJoin', () => {
+        // Setup chain
+        before(async function () {
+            this.timeout(20000);
+
+            await provider.send('hardhat_reset', [
+                {
+                    forking: {
+                        jsonRpcUrl,
+                        blockNumber: 16447247,
+                    },
+                },
+            ]);
+
+            sor = setUp(networkId, provider);
+            await sor.fetchPools();
+        });
+        context('Joins', () => {
+            it('Join with many tokens', async () => {
+                const bptIndex = 2;
+                const amountsInWithBpt = [
+                    parseFixed('2301.456', 18),
+                    parseFixed('201.45697', 18),
+                    parseFixed('0', 18), // BPT Token
+                    parseFixed('0.10', 18),
+                ];
+                const amountsWithOutBpt = [...amountsInWithBpt];
+                amountsWithOutBpt.splice(bptIndex, 1);
+
+                const pools = await subgraphPoolDataService.getPools();
+                const pool = ComposableStablePool.fromPool(pools[0]);
+                const bptCalculated =
+                    pool._calcBptOutGivenExactTokensIn(amountsWithOutBpt);
+
+                const deltas = await queryJoin(
+                    networkId,
+                    testPool.id,
+                    testPool.tokensList,
+                    amountsInWithBpt.map((a) => a.toString()),
+                    bptIndex
+                );
+                expect(bptCalculated.toString()).to.eq(
+                    deltas.bptOut.toString()
+                );
+                expect(deltas.amountsIn.toString()).to.eq(
+                    amountsInWithBpt.toString()
+                );
+            }).timeout(10000);
+            it('Join with single token', async () => {
+                const bptIndex = 2;
+                const amountsInWithBpt = [
+                    parseFixed('0', 18),
+                    parseFixed('777.777', 18),
+                    parseFixed('0', 18), // BPT Token
+                    parseFixed('0', 18),
+                ];
+                const amountsWithOutBpt = [...amountsInWithBpt];
+                amountsWithOutBpt.splice(bptIndex, 1);
+
+                const pools = await subgraphPoolDataService.getPools();
+                const pool = ComposableStablePool.fromPool(pools[0]);
+                const bptCalculated =
+                    pool._calcBptOutGivenExactTokensIn(amountsWithOutBpt);
+
+                const deltas = await queryJoin(
+                    networkId,
+                    testPool.id,
+                    testPool.tokensList,
+                    amountsInWithBpt.map((a) => a.toString()),
+                    bptIndex
+                );
+                expect(bptCalculated.toString()).to.eq(
+                    deltas.bptOut.toString()
+                );
+                expect(deltas.amountsIn.toString()).to.eq(
+                    amountsInWithBpt.toString()
                 );
             }).timeout(10000);
         });

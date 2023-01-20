@@ -194,6 +194,7 @@ export const ADDRESSES = {
             decimals: 18,
             symbol: 'bbaUSDT',
         },
+        balancerHelpers: '0x5aDDCCa35b7A0D07C74063c48700C8590E87864E',
     },
     [Network.KOVAN]: {
         // Visit https://balancer-faucet.on.fleek.co/#/faucet for test tokens
