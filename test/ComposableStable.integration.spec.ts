@@ -7,7 +7,7 @@ import {
     BalancerHelpers__factory,
 } from '@balancer-labs/typechain';
 import { vaultAddr } from './testScripts/constants';
-import { SubgraphPoolBase, SwapTypes, SOR } from '../src';
+import { SubgraphPoolBase, SwapTypes, SOR, bnum } from '../src';
 import {
     Network,
     MULTIADDR,
@@ -153,6 +153,40 @@ export async function queryJoin(
         AddressZero, // Not important for query
         AddressZero,
         joinPoolRequest
+    );
+    return query;
+}
+
+export async function querySingleTokenExit(
+    network: number,
+    poolId: string,
+    assetsWithBpt: string[],
+    bptAmountIn: string,
+    exitTokenIndex: number
+): Promise<
+    [BigNumber, BigNumber[]] & { bptIn: BigNumber; amountsOut: BigNumber[] }
+> {
+    const helpers = BalancerHelpers__factory.connect(
+        ADDRESSES[network].balancerHelpers,
+        provider
+    );
+    const EXACT_BPT_IN_FOR_ONE_TOKEN_OUT = 0; // Alternative is: BPT_IN_FOR_EXACT_TOKENS_OUT (No proportional)
+    const abi = ['uint256', 'uint256', 'uint256'];
+
+    const data = [EXACT_BPT_IN_FOR_ONE_TOKEN_OUT, bptAmountIn, exitTokenIndex];
+    const userDataEncoded = defaultAbiCoder.encode(abi, data);
+
+    const exitPoolRequest = {
+        assets: assetsWithBpt,
+        minAmountsOut: assetsWithBpt.map(() => '0'),
+        userData: userDataEncoded,
+        toInternalBalance: false,
+    };
+    const query = await helpers.queryExit(
+        poolId,
+        AddressZero, // Not important for query
+        AddressZero,
+        exitPoolRequest
     );
     return query;
 }
@@ -391,6 +425,67 @@ describe('ComposableStable', () => {
                     amountsInWithBpt.toString()
                 );
             }).timeout(10000);
+        });
+    });
+    context('test exits vs queryExit', () => {
+        // Setup chain
+        before(async function () {
+            this.timeout(20000);
+
+            await provider.send('hardhat_reset', [
+                {
+                    forking: {
+                        jsonRpcUrl,
+                        blockNumber: 16447247,
+                    },
+                },
+            ]);
+
+            sor = setUp(networkId, provider);
+            await sor.fetchPools();
+        });
+        context('Exits', () => {
+            it('BPT>token', async () => {
+                const tokenIndex = 0;
+                const bptInHuman = '977.234';
+                const bptInEvm = parseFixed(bptInHuman, 18);
+                const pools = await subgraphPoolDataService.getPools();
+                const pool = ComposableStablePool.fromPool(pools[0]);
+                const pairData = pool.parsePoolPairData(
+                    testPool.address,
+                    pool.tokensList[tokenIndex]
+                );
+                const amountOutHuman = pool._exactTokenInForTokenOut(
+                    pairData,
+                    bnum(bptInHuman)
+                );
+                const amountOutEvm = parseFixed(
+                    amountOutHuman.toString(),
+                    pairData.decimalsOut
+                );
+
+                const deltas = await querySingleTokenExit(
+                    networkId,
+                    testPool.id,
+                    testPool.tokensList,
+                    bptInEvm.toString(),
+                    tokenIndex
+                );
+                expect(deltas.bptIn.toString()).to.eq(bptInEvm.toString());
+                deltas.amountsOut.forEach((a, i) => {
+                    if (i === tokenIndex)
+                        expect(a.toString()).to.eq(amountOutEvm.toString());
+                    else expect(a.toString()).to.eq('0');
+                });
+            }).timeout(10000);
+            // ComposableStable V1 does not have this functionality but V2 does
+            // it('BPT>tokens', async () => {
+            //     const bptIn = parseFixed('77', 18);
+            //     const pools = await subgraphPoolDataService.getPools();
+            //     const pool = ComposableStablePool.fromPool(pools[0]);
+            //     const amountOut = pool._calcTokensOutGivenExactBptIn(bptIn);
+            //     console.log(amountOut.toString());
+            // }).timeout(10000);
         });
     });
 });
