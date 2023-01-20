@@ -279,7 +279,6 @@ export async function getOnChainBalances(
                     );
                     return;
                 }
-                console.log(`!!!!!!!!!`, actualSupply.toString());
                 subgraphPools[index].totalShares = formatFixed(
                     actualSupply,
                     18

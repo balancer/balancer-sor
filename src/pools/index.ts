@@ -4,8 +4,10 @@ import { MetaStablePool } from './metaStablePool/metaStablePool';
 import { LinearPool } from './linearPool/linearPool';
 import { ElementPool } from './elementPool/elementPool';
 import { PhantomStablePool } from './phantomStablePool/phantomStablePool';
+import { ComposableStablePool } from './composableStable/composableStablePool';
 import { Gyro2Pool } from './gyro2Pool/gyro2Pool';
 import { Gyro3Pool } from './gyro3Pool/gyro3Pool';
+import { GyroEPool } from './gyroEPool/gyroEPool';
 import {
     BigNumber as OldBigNumber,
     INFINITY,
@@ -19,7 +21,6 @@ import {
     PoolPairBase,
     PoolTypes,
 } from '../types';
-import { GyroEPool } from './gyroEPool/gyroEPool';
 
 export function parseNewPool(
     pool: SubgraphPoolBase,
@@ -31,6 +32,7 @@ export function parseNewPool(
     | LinearPool
     | MetaStablePool
     | PhantomStablePool
+    | ComposableStablePool
     | Gyro2Pool
     | Gyro3Pool
     | GyroEPool
@@ -45,6 +47,7 @@ export function parseNewPool(
         | LinearPool
         | MetaStablePool
         | PhantomStablePool
+        | ComposableStablePool
         | Gyro2Pool
         | Gyro3Pool
         | GyroEPool;
@@ -63,11 +66,10 @@ export function parseNewPool(
             newPool.setCurrentBlockTimestamp(currentBlockTimestamp);
         } else if (pool.poolType.toString().includes('Linear'))
             newPool = LinearPool.fromPool(pool);
-        else if (
-            pool.poolType === 'StablePhantom' ||
-            pool.poolType === 'ComposableStable'
-        )
+        else if (pool.poolType === 'StablePhantom')
             newPool = PhantomStablePool.fromPool(pool);
+        else if (pool.poolType === 'ComposableStable')
+            newPool = ComposableStablePool.fromPool(pool);
         else if (pool.poolType === 'Gyro2') newPool = Gyro2Pool.fromPool(pool);
         else if (pool.poolType === 'Gyro3') newPool = Gyro3Pool.fromPool(pool);
         else if (pool.poolType === 'GyroE') newPool = GyroEPool.fromPool(pool);

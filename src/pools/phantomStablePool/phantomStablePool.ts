@@ -24,13 +24,13 @@ import { MetaStablePoolPairData } from '../metaStablePool/metaStablePool';
 import cloneDeep from 'lodash.clonedeep';
 import { universalNormalizedLiquidity } from '../liquidity';
 
-enum PairTypes {
+export enum PairTypes {
     BptToToken,
     TokenToBpt,
     TokenToToken,
 }
 
-type PhantomStablePoolToken = Pick<
+export type PhantomStablePoolToken = Pick<
     SubgraphToken,
     'address' | 'balance' | 'decimals' | 'priceRate'
 >;
