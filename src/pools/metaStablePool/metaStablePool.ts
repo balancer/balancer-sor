@@ -306,19 +306,23 @@ export class MetaStablePool implements PoolBase<MetaStablePoolPairData> {
         const balancesEvm = this.tokens
             .filter((t) => !isSameAddress(t.address, this.address))
             .map(({ balance, priceRate, decimals }) =>
-                parseFixed(balance, 18)
-                    .mul(parseFixed(priceRate, decimals))
+                parseFixed(balance, decimals)
+                    .mul(parseFixed(priceRate, 18))
                     .div(ONE)
                     .toBigInt()
             );
-        let returnAmt: bigint[];
         try {
-            returnAmt = _calcTokensOutGivenExactBptIn(
+            const amountsOutWithRate = _calcTokensOutGivenExactBptIn(
                 balancesEvm,
                 bptAmountIn.toBigInt(),
                 this.totalShares.toBigInt()
             );
-            return returnAmt.map((a) => BigNumber.from(a.toString()));
+            const amountsOut = amountsOutWithRate.map((amount, i) =>
+                BigNumber.from(amount.toString())
+                    .mul(ONE)
+                    .div(this.tokens[i].priceRate)
+            );
+            return amountsOut;
         } catch (err) {
             return new Array(balancesEvm.length).fill(ZERO);
         }
@@ -331,22 +335,30 @@ export class MetaStablePool implements PoolBase<MetaStablePoolPairData> {
      */
     _calcBptOutGivenExactTokensIn(amountsIn: BigNumber[]): BigNumber {
         try {
+            const amountsInWithRate = new Array(amountsIn.length).fill(
+                BigInt(0)
+            );
+            const balancesEvm = new Array(amountsIn.length).fill(BigInt(0));
             // token balances are stored in human scale and must be EVM for maths
             // Must take priceRate into consideration
-            const balancesEvm = this.tokens
+            this.tokens
                 .filter((t) => !isSameAddress(t.address, this.address))
-                .map(({ balance, priceRate, decimals }) =>
-                    parseFixed(balance, 18)
-                        .mul(parseFixed(priceRate, decimals))
+                .forEach(({ balance, priceRate, decimals }, i) => {
+                    amountsInWithRate[i] = amountsIn[i]
+                        .mul(parseFixed(priceRate, 18))
                         .div(ONE)
-                        .toBigInt()
-                );
+                        .toBigInt();
+                    balancesEvm[i] = parseFixed(balance, decimals)
+                        .mul(parseFixed(priceRate, 18))
+                        .div(ONE)
+                        .toBigInt();
+                });
             const bptAmountOut = _calcBptOutGivenExactTokensIn(
                 this.amp.toBigInt(),
                 balancesEvm,
-                amountsIn.map((a) => a.toBigInt()),
+                amountsInWithRate,
                 this.totalShares.toBigInt(),
-                BigInt(0)
+                this.swapFee.toBigInt()
             );
             return BigNumber.from(bptAmountOut.toString());
         } catch (err) {

@@ -385,19 +385,23 @@ export class PhantomStablePool implements PoolBase<PhantomStablePoolPairData> {
         const balancesEvm = this.tokens
             .filter((t) => !isSameAddress(t.address, this.address))
             .map(({ balance, priceRate, decimals }) =>
-                parseFixed(balance, 18)
-                    .mul(parseFixed(priceRate, decimals))
+                parseFixed(balance, decimals)
+                    .mul(parseFixed(priceRate, 18))
                     .div(ONE)
                     .toBigInt()
             );
-        let returnAmt: bigint[];
         try {
-            returnAmt = _calcTokensOutGivenExactBptIn(
+            const amountsOutWithRate = _calcTokensOutGivenExactBptIn(
                 balancesEvm,
                 bptAmountIn.toBigInt(),
                 this.totalShares.toBigInt()
             );
-            return returnAmt.map((a) => BigNumber.from(a.toString()));
+            const amountsOut = amountsOutWithRate.map((amount, i) =>
+                BigNumber.from(amount.toString())
+                    .mul(ONE)
+                    .div(this.tokens[i].priceRate)
+            );
+            return amountsOut;
         } catch (err) {
             return new Array(balancesEvm.length).fill(ZERO);
         }
@@ -410,14 +414,16 @@ export class PhantomStablePool implements PoolBase<PhantomStablePoolPairData> {
      */
     _calcBptOutGivenExactTokensIn(amountsIn: BigNumber[]): BigNumber {
         try {
-            const scaledAmountsIn = new Array(amountsIn.length).fill(BigInt(0));
+            const amountsInWithRate = new Array(amountsIn.length).fill(
+                BigInt(0)
+            );
             const balancesEvm = new Array(amountsIn.length).fill(BigInt(0));
             // token balances are stored in human scale and must be EVM for maths
             // Must take priceRate into consideration
             this.tokens
                 .filter((t) => !isSameAddress(t.address, this.address))
                 .forEach(({ balance, priceRate, decimals }, i) => {
-                    scaledAmountsIn[i] = amountsIn[i]
+                    amountsInWithRate[i] = amountsIn[i]
                         .mul(parseFixed(priceRate, 18))
                         .div(ONE)
                         .toBigInt();
@@ -430,7 +436,7 @@ export class PhantomStablePool implements PoolBase<PhantomStablePoolPairData> {
             const bptAmountOut = _calcBptOutGivenExactTokensIn(
                 this.amp.toBigInt(),
                 balancesEvm,
-                scaledAmountsIn,
+                amountsInWithRate,
                 this.totalShares.toBigInt(),
                 this.swapFee.toBigInt()
             );
