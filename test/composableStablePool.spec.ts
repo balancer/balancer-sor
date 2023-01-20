@@ -4,12 +4,12 @@ import { BigNumber, parseFixed } from '@ethersproject/bignumber';
 import { bnum } from '../src/utils/bignumber';
 import { WeiPerEther as ONE } from '@ethersproject/constants';
 import composableStable from './testData/phantomStablePools/composableStable.json';
-import { PhantomStablePool } from '../src/pools/phantomStablePool/phantomStablePool';
+import pools_15840286 from './testData/phantomStablePools/pools_15840286.json';
+import pools_16428572 from './testData/phantomStablePools/pools_16428572.json';
+import { ComposableStablePool } from '../src/pools/composableStable/composableStablePool';
 import * as phantomStableMath from '../src/pools/phantomStablePool/phantomStableMath';
 import * as stableMathBigInt from '../src/pools/stablePool/stableMathBigInt';
 import { ADDRESSES, Network } from './testScripts/constants';
-import pools_15840286 from './testData/phantomStablePools/pools_15840286.json';
-import pools_16428572 from './testData/phantomStablePools/pools_16428572.json';
 import { SubgraphPoolBase } from '../src';
 
 const bbausd = pools_15840286.find(
@@ -21,14 +21,14 @@ const bbausd = pools_15840286.find(
 const bbausdNoFee = pools_16428572.find(
     (pool) =>
         pool.id ==
-        '0xa13a9247ea42d743238089903570127dda72fe4400000000000000000000035d' // bbausd
+        '0xa13a9247ea42d743238089903570127dda72fe4400000000000000000000035d' // bbausd without protocol fees
 ) as unknown as SubgraphPoolBase;
 
 describe('composable stable pool', () => {
     const oldBN_ONE = bnum(ONE.toString());
     const error = 0.00001;
     context('out given in, several consistencies', () => {
-        const composableStablePool = PhantomStablePool.fromPool(
+        const composableStablePool = ComposableStablePool.fromPool(
             composableStable.pools[0]
         );
         // parsePoolPairData contains pool's allBalances and allBalancesScaled
@@ -84,7 +84,7 @@ describe('composable stable pool', () => {
         });
     });
     context('join - exact tokens in', () => {
-        const composableStablePool = PhantomStablePool.fromPool(bbausd);
+        const composableStablePool = ComposableStablePool.fromPool(bbausd);
         it('bpt out should be within inaccuracy limit', () => {
             const amountsIn = [
                 parseFixed('1.23', 18),
@@ -104,7 +104,7 @@ describe('composable stable pool', () => {
         });
     });
     context('join - exact tokens in - protocol fees turned off', () => {
-        const composableStablePool = PhantomStablePool.fromPool(bbausdNoFee);
+        const composableStablePool = ComposableStablePool.fromPool(bbausdNoFee);
         it('bpt out should match exactly with smart contract math', () => {
             const amountsIn = [
                 parseFixed('1.23', 18),
@@ -118,7 +118,7 @@ describe('composable stable pool', () => {
         });
     });
     context('exit - exact bpt in', () => {
-        const composableStablePool = PhantomStablePool.fromPool(bbausd);
+        const composableStablePool = ComposableStablePool.fromPool(bbausdNoFee);
         it('amount out should be within inaccuracy limit', () => {
             const pairData = composableStablePool.parsePoolPairData(
                 composableStablePool.address,
@@ -130,15 +130,12 @@ describe('composable stable pool', () => {
                     bnum('10') // bptIn in human scale
                 )
                 .dp(18);
-            const amountOut = parseFixed(amountOutHuman.toString(), 18);
-            const expectedAmountOut = '9992943504916612596';
-            const inaccuracy = amountOut
-                .sub(expectedAmountOut)
-                .mul(ONE)
-                .div(expectedAmountOut)
-                .abs();
-            const inaccuracyLimit = ONE.div(1e4); // inaccuracy should not be over 1 bps
-            assert(inaccuracy.lte(inaccuracyLimit));
+            const amountOut = parseFixed(
+                amountOutHuman.toString(),
+                18
+            ).toString();
+            const expectedAmountOut = '9969765758058342507';
+            assert.equal(amountOut, expectedAmountOut);
         });
     });
 });
