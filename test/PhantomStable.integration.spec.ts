@@ -1,4 +1,4 @@
-// TS_NODE_PROJECT='tsconfig.testing.json' npx mocha -r ts-node/register test/PhantomStable.integration.spec.ts
+// yarn test:only test/PhantomStable.integration.spec.ts
 import dotenv from 'dotenv';
 import { JsonRpcProvider } from '@ethersproject/providers';
 import { Vault__factory } from '@balancer-labs/typechain';
@@ -118,8 +118,6 @@ describe('PhantomStable', () => {
     context('test swaps vs queryBatchSwap', () => {
         // Setup chain
         before(async function () {
-            this.timeout(20000);
-
             await provider.send('hardhat_reset', [
                 {
                     forking: {
@@ -154,7 +152,7 @@ describe('PhantomStable', () => {
                     swapInfo.swapAmount.toString()
                 );
                 closeTo(queryResult[1].abs(), swapInfo.returnAmount, 1);
-            }).timeout(10000);
+            });
             it('token>bpt', async () => {
                 const swapType = SwapTypes.SwapExactIn;
 
@@ -177,7 +175,7 @@ describe('PhantomStable', () => {
                 expect(queryResult[1].abs().toString()).to.eq(
                     swapInfo.returnAmount.toString()
                 );
-            }).timeout(10000);
+            });
             it('bpt>token', async () => {
                 const swapType = SwapTypes.SwapExactIn;
 
@@ -198,7 +196,7 @@ describe('PhantomStable', () => {
                     swapInfo.swapAmount.toString()
                 );
                 closeTo(queryResult[1].abs(), swapInfo.returnAmount, 1);
-            }).timeout(10000);
+            });
         });
 
         context('ExactOut', () => {
@@ -223,7 +221,7 @@ describe('PhantomStable', () => {
                     swapInfo.swapAmount.toString()
                 );
                 closeTo(queryResult[0].abs(), swapInfo.returnAmount, 2);
-            }).timeout(10000);
+            });
             it('token>bpt', async () => {
                 const swapInfo = await sor.getSwaps(
                     bbadai,
@@ -243,7 +241,7 @@ describe('PhantomStable', () => {
                     swapInfo.swapAmount.toString()
                 );
                 closeTo(queryResult[0].abs(), swapInfo.returnAmount, 2);
-            }).timeout(10000);
+            });
             it('bpt>token', async () => {
                 const swapInfo = await sor.getSwaps(
                     bpt,
@@ -265,7 +263,7 @@ describe('PhantomStable', () => {
                 expect(queryResult[0].toString()).to.eq(
                     swapInfo.returnAmount.toString()
                 );
-            }).timeout(10000);
+            });
         });
     });
 });
