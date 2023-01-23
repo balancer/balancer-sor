@@ -8,7 +8,7 @@ import vaultAbi from '../../src/abi/Vault.json';
 import aTokenRateProvider from '../../src/abi/StaticATokenRateProvider.json';
 import weightedPoolAbi from '../../src/pools/weightedPool/weightedPoolAbi.json';
 import stablePoolAbi from '../../src/pools/stablePool/stablePoolAbi.json';
-import composableDtablePoolAbi from '../../src/pools/composableStable/ComposableStable.json';
+import composableStablePoolAbi from '../../src/pools/composableStable/ComposableStable.json';
 import elementPoolAbi from '../../src/pools/elementPool/ConvergentCurvePool.json';
 import linearPoolAbi from '../../src/pools/linearPool/linearPoolAbi.json';
 import { PoolFilter, SubgraphPoolBase, PoolDataService } from '../../src';
@@ -34,7 +34,7 @@ export async function getOnChainBalances(
                     ...stablePoolAbi,
                     ...elementPoolAbi,
                     ...linearPoolAbi,
-                    ...composableDtablePoolAbi,
+                    ...composableStablePoolAbi,
                 ].map((row) => [row.name, row])
             )
         );
