@@ -1,5 +1,5 @@
 import { BigNumber, formatFixed, parseFixed } from '@ethersproject/bignumber';
-import { WeiPerEther as ONE, Zero } from '@ethersproject/constants';
+import { WeiPerEther as ONE } from '@ethersproject/constants';
 import { isSameAddress } from '../../utils';
 import { BigNumber as OldBigNumber, bnum, ZERO } from '../../utils/bignumber';
 import {
@@ -17,7 +17,6 @@ import {
     _calcTokenInGivenExactBptOut,
     _calcBptInGivenExactTokensOut,
     _calcInGivenOut,
-    _calcTokensOutGivenExactBptIn,
 } from '../stablePool/stableMathBigInt';
 import * as phantomStableMath from '../phantomStablePool/phantomStableMath';
 import { MetaStablePoolPairData } from '../metaStablePool/metaStablePool';
@@ -379,32 +378,12 @@ export class PhantomStablePool implements PoolBase<PhantomStablePoolPairData> {
      * @param bptAmountIn EVM scale.
      * @returns EVM scale.
      */
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     _calcTokensOutGivenExactBptIn(bptAmountIn: BigNumber): BigNumber[] {
-        // token balances are stored in human scale and must be EVM for maths
-        // Must take priceRate into consideration
-        const balancesEvm = this.tokens
-            .filter((t) => !isSameAddress(t.address, this.address))
-            .map(({ balance, priceRate, decimals }) =>
-                parseFixed(balance, decimals)
-                    .mul(parseFixed(priceRate, 18))
-                    .div(ONE)
-                    .toBigInt()
-            );
-        try {
-            const amountsOutWithRate = _calcTokensOutGivenExactBptIn(
-                balancesEvm,
-                bptAmountIn.toBigInt(),
-                this.totalShares.toBigInt()
-            );
-            const amountsOut = amountsOutWithRate.map((amount, i) =>
-                BigNumber.from(amount.toString())
-                    .mul(ONE)
-                    .div(this.tokens[i].priceRate)
-            );
-            return amountsOut;
-        } catch (err) {
-            return new Array(balancesEvm.length).fill(ZERO);
-        }
+        // PhantomStables can only be exited by using BPT > token swaps
+        throw new Error(
+            'PhantomPool does not have exit pool (_calcTokensOutGivenExactBptIn).'
+        );
     }
 
     /**
@@ -412,38 +391,12 @@ export class PhantomStablePool implements PoolBase<PhantomStablePoolPairData> {
      * @param amountsIn EVM Scale
      * @returns EVM Scale
      */
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     _calcBptOutGivenExactTokensIn(amountsIn: BigNumber[]): BigNumber {
-        try {
-            const amountsInWithRate = new Array(amountsIn.length).fill(
-                BigInt(0)
-            );
-            const balancesEvm = new Array(amountsIn.length).fill(BigInt(0));
-            // token balances are stored in human scale and must be EVM for maths
-            // Must take priceRate into consideration
-            this.tokens
-                .filter((t) => !isSameAddress(t.address, this.address))
-                .forEach(({ balance, priceRate, decimals }, i) => {
-                    amountsInWithRate[i] = amountsIn[i]
-                        .mul(parseFixed(priceRate, 18))
-                        .div(ONE)
-                        .toBigInt();
-                    balancesEvm[i] = parseFixed(balance, decimals)
-                        .mul(parseFixed(priceRate, 18))
-                        .div(ONE)
-                        .toBigInt();
-                });
-
-            const bptAmountOut = _calcBptOutGivenExactTokensIn(
-                this.amp.toBigInt(),
-                balancesEvm,
-                amountsInWithRate,
-                this.totalShares.toBigInt(),
-                this.swapFee.toBigInt()
-            );
-            return BigNumber.from(bptAmountOut.toString());
-        } catch (err) {
-            return Zero;
-        }
+        // PhantomStables can only be joined by using token > BPT swaps
+        throw new Error(
+            'PhantomPool does not have join pool (_calcBptOutGivenExactTokensIn).'
+        );
     }
 
     // this is the multiplicative inverse of the derivative of _exactTokenInForTokenOut
