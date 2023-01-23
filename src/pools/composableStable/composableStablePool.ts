@@ -50,7 +50,8 @@ export class ComposableStablePool extends PhantomStablePool {
         amount: OldBigNumber
     ): OldBigNumber {
         try {
-            // This code assumes that decimalsIn and decimalsOut is 18
+            // This code needs decimalsIn and decimalsOut as 18
+            // It will scale decimalsIn and decimalsOut to 18 and revert them back to original after calculation
 
             if (amount.isZero()) return ZERO;
             // All values should use 1e18 fixed point
@@ -100,7 +101,9 @@ export class ComposableStablePool extends PhantomStablePool {
                 .div(poolPairData.tokenOutPriceRate);
 
             // Return human scaled
-            return bnum(formatFixed(returnEvmWithRate, 18));
+            return bnum(formatFixed(returnEvmWithRate, 18)).dp(
+                poolPairData.decimalsOut
+            );
         } catch (err) {
             // console.error(`PhantomStable _evmoutGivenIn: ${err.message}`);
             return ZERO;
@@ -112,7 +115,8 @@ export class ComposableStablePool extends PhantomStablePool {
         amount: OldBigNumber
     ): OldBigNumber {
         try {
-            // This code assumes that decimalsIn and decimalsOut is 18
+            // This code needs decimalsIn and decimalsOut as 18
+            // It will scale decimalsIn and decimalsOut to 18 and revert them back to original after calculation
 
             if (amount.isZero()) return ZERO;
             // All values should use 1e18 fixed point
@@ -162,7 +166,9 @@ export class ComposableStablePool extends PhantomStablePool {
                 .div(poolPairData.tokenInPriceRate);
 
             // return human number
-            return bnum(formatFixed(returnEvmWithRate, 18));
+            return bnum(formatFixed(returnEvmWithRate, 18)).dp(
+                poolPairData.decimalsOut
+            );
         } catch (err) {
             console.error(`PhantomStable _evminGivenOut: ${err.message}`);
             return ZERO;
@@ -179,8 +185,8 @@ export class ComposableStablePool extends PhantomStablePool {
         // Must take priceRate into consideration
         const balancesEvm = this.tokens
             .filter((t) => !isSameAddress(t.address, this.address))
-            .map(({ balance, priceRate, decimals }) =>
-                parseFixed(balance, decimals)
+            .map(({ balance, priceRate }) =>
+                parseFixed(balance, 18)
                     .mul(parseFixed(priceRate, 18))
                     .div(ONE)
                     .toBigInt()
@@ -191,12 +197,19 @@ export class ComposableStablePool extends PhantomStablePool {
                 bptAmountIn.toBigInt(),
                 this.totalShares.toBigInt()
             );
-            const amountsOut = amountsOutWithRate.map((amount, i) =>
-                BigNumber.from(amount.toString())
+            const amountsOutEvm = amountsOutWithRate.map((amount, i) => {
+                // remove price rate from amounts out
+                const amountOut = BigNumber.from(amount.toString())
                     .mul(ONE)
-                    .div(this.tokens[i].priceRate)
-            );
-            return amountsOut;
+                    .div(this.tokens[i].priceRate);
+                // scale down from 18 decimals to token decimals
+                const amountOutHuman = bnum(formatFixed(amountOut, 18))
+                    .dp(this.tokens[i].decimals)
+                    .toString();
+                // parse to EVM scale
+                return parseFixed(amountOutHuman, this.tokens[i].decimals);
+            });
+            return amountsOutEvm;
         } catch (err) {
             return new Array(balancesEvm.length).fill(ZERO);
         }
@@ -209,6 +222,9 @@ export class ComposableStablePool extends PhantomStablePool {
      */
     _calcBptOutGivenExactTokensIn(amountsIn: BigNumber[]): BigNumber {
         try {
+            const amountsInHuman = amountsIn.map((amount, i) =>
+                formatFixed(amount, this.tokens[i].decimals)
+            );
             const amountsInWithRate = new Array(amountsIn.length).fill(
                 BigInt(0)
             );
@@ -217,12 +233,12 @@ export class ComposableStablePool extends PhantomStablePool {
             // Must take priceRate into consideration
             this.tokens
                 .filter((t) => !isSameAddress(t.address, this.address))
-                .forEach(({ balance, priceRate, decimals }, i) => {
-                    amountsInWithRate[i] = amountsIn[i]
+                .forEach(({ balance, priceRate }, i) => {
+                    amountsInWithRate[i] = parseFixed(amountsInHuman[i], 18) // 18 decimals required for maths
                         .mul(parseFixed(priceRate, 18))
                         .div(ONE)
                         .toBigInt();
-                    balancesEvm[i] = parseFixed(balance, decimals)
+                    balancesEvm[i] = parseFixed(balance, 18)
                         .mul(parseFixed(priceRate, 18))
                         .div(ONE)
                         .toBigInt();
