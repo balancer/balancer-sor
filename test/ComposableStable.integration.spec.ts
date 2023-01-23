@@ -1,4 +1,4 @@
-// TS_NODE_PROJECT='tsconfig.testing.json' npx mocha -r ts-node/register test/ComposableStable.integration.spec.ts
+// yarn test:only test/ComposableStable.integration.spec.ts
 import dotenv from 'dotenv';
 import { JsonRpcProvider } from '@ethersproject/providers';
 import { defaultAbiCoder } from '@ethersproject/abi';
@@ -88,6 +88,62 @@ const testPool: SubgraphPoolBase = {
     amp: '1472',
 };
 
+// 4pool chainlink - example containing tokens with less than 18 decimals
+const testPool1: SubgraphPoolBase = {
+    address: '0xbd482ffb3e6e50dc1c437557c3bea2b68f3683ee',
+    amp: '5000',
+    id: '0xbd482ffb3e6e50dc1c437557c3bea2b68f3683ee0000000000000000000003c6',
+    poolType: 'ComposableStable',
+    swapEnabled: true,
+    swapFee: '0.000001',
+    tokensList: [
+        '0x4fabb145d64652a948d72533023f6e7a623c7c53',
+        '0x6b175474e89094c44da98b954eedeac495271d0f',
+        '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48',
+        '0xbd482ffb3e6e50dc1c437557c3bea2b68f3683ee',
+        '0xdac17f958d2ee523a2206206994597c13d831ec7',
+    ],
+    tokens: [
+        {
+            address: '0x4fabb145d64652a948d72533023f6e7a623c7c53',
+            balance: '33.807963560659234546',
+            decimals: 18,
+            priceRate: '0.99999',
+            weight: null,
+        },
+        {
+            address: '0x6b175474e89094c44da98b954eedeac495271d0f',
+            balance: '26.9631582499169841',
+            decimals: 18,
+            priceRate: '1.00001',
+            weight: null,
+        },
+        {
+            address: '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48',
+            balance: '11.616432',
+            decimals: 6,
+            priceRate: '1.00001',
+            weight: null,
+        },
+        {
+            address: '0xbd482ffb3e6e50dc1c437557c3bea2b68f3683ee',
+            balance: '2596148429127534.870140576901863328',
+            decimals: 18,
+            priceRate: '1',
+            weight: null,
+        },
+        {
+            address: '0xdac17f958d2ee523a2206206994597c13d831ec7',
+            balance: '0.348188',
+            decimals: 6,
+            priceRate: '1.00001',
+            weight: null,
+        },
+    ],
+    totalShares: '169.938749131311798513',
+    totalWeight: '0',
+};
+
 // Setup SOR with data services
 function setUp(networkId: Network, provider: JsonRpcProvider): SOR {
     // The SOR needs to fetch pool data from an external source. This provider fetches from Subgraph and onchain calls.
@@ -95,7 +151,7 @@ function setUp(networkId: Network, provider: JsonRpcProvider): SOR {
         vaultAddress: vaultAddr,
         multiAddress: MULTIADDR[networkId],
         provider,
-        pools: [testPool],
+        pools: [testPool, testPool1],
     });
 
     class CoingeckoTokenPriceService implements TokenPriceService {
@@ -478,6 +534,39 @@ describe('ComposableStable', () => {
                     else expect(a.toString()).to.eq('0');
                 });
             }).timeout(10000);
+            it('BPT>token with less than 18 decimals', async () => {
+                const tokenIndex = 2; // usdc
+                const bptInHuman = '10.10';
+                const bptInEvm = parseFixed(bptInHuman, 18);
+                const pools = await subgraphPoolDataService.getPools();
+                const pool = ComposableStablePool.fromPool(pools[1]);
+                const pairData = pool.parsePoolPairData(
+                    pool.address,
+                    pool.tokensList[tokenIndex]
+                );
+                const amountOutHuman = pool._exactTokenInForTokenOut(
+                    pairData,
+                    bnum(bptInHuman)
+                );
+                const amountOutEvm = parseFixed(
+                    amountOutHuman.toString(),
+                    pairData.decimalsOut
+                );
+
+                const deltas = await querySingleTokenExit(
+                    networkId,
+                    pool.id,
+                    pool.tokensList,
+                    bptInEvm.toString(),
+                    tokenIndex
+                );
+                expect(deltas.bptIn.toString()).to.eq(bptInEvm.toString());
+                deltas.amountsOut.forEach((a, i) => {
+                    if (i === tokenIndex)
+                        expect(a.toString()).to.eq(amountOutEvm.toString());
+                    else expect(a.toString()).to.eq('0');
+                });
+            }).timeout(20000);
             // ComposableStable V1 does not have this functionality but V2 does
             // it('BPT>tokens', async () => {
             //     const bptIn = parseFixed('77', 18);
