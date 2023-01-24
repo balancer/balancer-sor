@@ -36,8 +36,8 @@ import {
 } from './weightedMath';
 import { BigNumber, formatFixed, parseFixed } from '@ethersproject/bignumber';
 import { WeiPerEther as ONE, Zero } from '@ethersproject/constants';
-import { takeToPrecision18 } from '../../router/helpersClass';
 import { MathSol } from '../../utils/basicOperations';
+import { universalNormalizedLiquidity } from '../liquidity';
 
 enum PairTypes {
     BptToToken,
@@ -56,7 +56,7 @@ export type WeightedPoolPairData = PoolPairBase & {
     weightOut: BigNumber;
 };
 
-export class WeightedPool implements PoolBase {
+export class WeightedPool implements PoolBase<WeightedPoolPairData> {
     poolType: PoolTypes = PoolTypes.Weighted;
     id: string;
     address: string;
@@ -160,18 +160,11 @@ export class WeightedPool implements PoolBase {
         );
     }
 
-    // Normalized liquidity is an abstract term that can be thought of the
-    // inverse of the slippage. It is proportional to the token balances in the
-    // pool but also depends on the shape of the invariant curve.
-    // As a standard, we define normalized liquidity in tokenOut
     getNormalizedLiquidity(poolPairData: WeightedPoolPairData): OldBigNumber {
-        // this should be different if tokenIn or tokenOut are the BPT
-        return bnum(
-            formatFixed(
-                poolPairData.balanceOut
-                    .mul(poolPairData.weightIn)
-                    .div(poolPairData.weightIn.add(poolPairData.weightOut)),
-                poolPairData.decimalsOut
+        return universalNormalizedLiquidity(
+            this._derivativeSpotPriceAfterSwapExactTokenInForTokenOut(
+                poolPairData,
+                ZERO
             )
         );
     }
@@ -201,12 +194,16 @@ export class WeightedPool implements PoolBase {
     updateTokenBalanceForPool(token: string, newBalance: BigNumber): void {
         // token is BPT
         if (isSameAddress(this.address, token)) {
-            this.totalShares = newBalance;
+            this.updateTotalShares(newBalance);
         }
         // token is underlying in the pool
         const T = this.tokens.find((t) => isSameAddress(t.address, token));
         if (!T) throw Error('Pool does not contain this token');
         T.balance = formatFixed(newBalance, T.decimals);
+    }
+
+    updateTotalShares(newTotalShares: BigNumber): void {
+        this.totalShares = newTotalShares;
     }
 
     // Using BigNumber.js decimalPlaces (dp), allows us to consider token decimal accuracy correctly,
@@ -221,13 +218,13 @@ export class WeightedPool implements PoolBase {
         const amountIn = parseFixed(amount.dp(18, 1).toString(), 18).toBigInt();
         const decimalsIn = poolPairData.decimalsIn;
         const decimalsOut = poolPairData.decimalsOut;
-        const balanceIn = takeToPrecision18(
-            poolPairData.balanceIn,
-            decimalsIn
+        const balanceIn = parseFixed(
+            poolPairData.balanceIn.toString(),
+            18 - decimalsIn
         ).toBigInt();
-        const balanceOut = takeToPrecision18(
-            poolPairData.balanceOut,
-            decimalsOut
+        const balanceOut = parseFixed(
+            poolPairData.balanceOut.toString(),
+            18 - decimalsOut
         ).toBigInt();
         const normalizedWeightIn = poolPairData.weightIn.toBigInt();
         const normalizedWeightOut = poolPairData.weightOut.toBigInt();
@@ -282,13 +279,13 @@ export class WeightedPool implements PoolBase {
         ).toBigInt();
         const decimalsIn = poolPairData.decimalsIn;
         const decimalsOut = poolPairData.decimalsOut;
-        const balanceIn = takeToPrecision18(
-            poolPairData.balanceIn,
-            decimalsIn
+        const balanceIn = parseFixed(
+            poolPairData.balanceIn.toString(),
+            18 - decimalsIn
         ).toBigInt();
-        const balanceOut = takeToPrecision18(
-            poolPairData.balanceOut,
-            decimalsOut
+        const balanceOut = parseFixed(
+            poolPairData.balanceOut.toString(),
+            18 - decimalsOut
         ).toBigInt();
         const normalizedWeightIn = poolPairData.weightIn.toBigInt();
         const normalizedWeightOut = poolPairData.weightOut.toBigInt();

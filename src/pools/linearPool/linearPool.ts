@@ -1,5 +1,5 @@
 import { BigNumber, parseFixed, formatFixed } from '@ethersproject/bignumber';
-import { bnum, scale, ZERO } from '../../utils/bignumber';
+import { bnum, INFINITY, scale, ZERO } from '../../utils/bignumber';
 import { BigNumber as OldBigNumber } from '../../utils/bignumber';
 import { WeiPerEther as ONE, Zero } from '@ethersproject/constants';
 import { isSameAddress } from '../../utils';
@@ -65,7 +65,7 @@ export type LinearPoolPairData = PoolPairBase & {
     virtualBptSupply: BigNumber;
 };
 
-export class LinearPool implements PoolBase {
+export class LinearPool implements PoolBase<LinearPoolPairData> {
     poolType: PoolTypes = PoolTypes.Linear;
     id: string;
     address: string;
@@ -203,7 +203,9 @@ export class LinearPool implements PoolBase {
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     getNormalizedLiquidity(poolPairData: LinearPoolPairData): OldBigNumber {
-        return bnum(0);
+        return INFINITY; // It is the inverse of zero
+        // This is correct since linear pools have no price impact,
+        // except for the swap fee that is expected to be small.
     }
 
     getLimitAmountSwap(
@@ -299,10 +301,19 @@ export class LinearPool implements PoolBase {
 
     // Updates the balance of a given token for the pool
     updateTokenBalanceForPool(token: string, newBalance: BigNumber): void {
-        const T = this.tokens.find((t) => isSameAddress(t.address, token));
-        if (!T) throw Error('Pool does not contain this token');
-        // Converts to human scaled number and saves.
-        T.balance = formatFixed(newBalance, T.decimals);
+        // token is BPT
+        if (isSameAddress(this.address, token)) {
+            this.updateTotalShares(newBalance);
+        } else {
+            const T = this.tokens.find((t) => isSameAddress(t.address, token));
+            if (!T) throw Error('Pool does not contain this token');
+            // Converts to human scaled number and saves.
+            T.balance = formatFixed(newBalance, T.decimals);
+        }
+    }
+
+    updateTotalShares(newTotalShares: BigNumber): void {
+        this.totalShares = newTotalShares;
     }
 
     _exactTokenInForTokenOut(
