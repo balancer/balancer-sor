@@ -64,6 +64,10 @@ export const SOR_CONFIG: Record<Network, SorConfig> = {
                 symbol: 'weth',
                 address: '0x0d500B1d8E8eF31E21C99d1Db9A6444d3ADf1270',
             },
+            {
+                symbol: 'bbrz2',
+                address: '0xe22483774bd8611be2ad2f4194078dac9159f4ba',
+            }, // Joins Stables<>BRZ via https://app.balancer.fi/#/polygon/pool/0x4a0b73f0d13ff6d43e304a174697e3d5cfd310a400020000000000000000091c
         ],
     },
     [Network.ARBITRUM]: {
@@ -410,6 +414,11 @@ export const ADDRESSES = {
             address: '0x48e6B98ef6329f8f0A30eBB8c7C960330d648085',
             decimals: 18,
             symbol: 'bb-am-usd',
+        },
+        brz: {
+            address: '0x491a4eb4f1fc3bff8e1d2fc856a6a46663ad556f',
+            decimals: 4,
+            symbol: 'BRZ',
         },
     },
     [Network.ARBITRUM]: {
