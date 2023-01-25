@@ -1,7 +1,4 @@
 <p align="center">
-  <a href="https://circleci.com/gh/balancer-labs/balancer-sor">
-    <img src="https://circleci.com/gh/balancer-labs/balancer-sor.svg?style=svg&circle-token=33636208d3161f79ff283b29c8dba9841bda8931" />
-  </a>
   <a href="https://coveralls.io/github/balancer-labs/balancer-sor">
     <img src="https://coveralls.io/repos/github/balancer-labs/balancer-sor/badge.svg?t=7avwwt" />
   </a>
