@@ -5,7 +5,7 @@ export interface SorConfig {
     chainId: number;
     vault: string;
     weth: string;
-    connectingTokens: { symbol: string; address: string }[];
+    connectingTokens?: { symbol: string; address: string }[];
     staBal3Pool?: { id: string; address: string };
     usdcConnectingPool?: { id: string; usdc: string };
     wETHwstETH?: { id: string; address: string };
