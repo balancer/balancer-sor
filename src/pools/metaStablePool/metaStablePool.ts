@@ -1,6 +1,11 @@
 import { BigNumber, formatFixed, parseFixed } from '@ethersproject/bignumber';
 import { WeiPerEther as ONE, Zero } from '@ethersproject/constants';
-import { isSameAddress } from '../../utils';
+import {
+    isSameAddress,
+    normaliseBalance,
+    normaliseAmount,
+    denormaliseAmount,
+} from '../../utils';
 import { BigNumber as OldBigNumber, bnum, ZERO } from '../../utils/bignumber';
 import {
     PoolBase,
@@ -301,30 +306,22 @@ export class MetaStablePool implements PoolBase<MetaStablePoolPairData> {
      * @returns EVM scale.
      */
     _calcTokensOutGivenExactBptIn(bptAmountIn: BigNumber): BigNumber[] {
-        // token balances are stored in human scale and must be EVM for maths
-        // Must take priceRate into consideration
-        const balancesEvm = this.tokens
+        // token balances are stored in human scale in SG and must be normalized as if it had 18 decimals for maths.
+        const balancesNormalised = this.tokens
             .filter((t) => !isSameAddress(t.address, this.address))
-            .map(({ balance, priceRate, decimals }) =>
-                parseFixed(balance, decimals)
-                    .mul(parseFixed(priceRate, 18))
-                    .div(ONE)
-                    .toBigInt()
-            );
+            .map((t) => normaliseBalance(t));
         try {
-            const amountsOutWithRate = _calcTokensOutGivenExactBptIn(
-                balancesEvm,
+            const amountsOutNormalised = _calcTokensOutGivenExactBptIn(
+                balancesNormalised,
                 bptAmountIn.toBigInt(),
                 this.totalShares.toBigInt()
             );
-            const amountsOut = amountsOutWithRate.map((amount, i) =>
-                BigNumber.from(amount.toString())
-                    .mul(ONE)
-                    .div(this.tokens[i].priceRate)
+            const amountsOut = amountsOutNormalised.map((a, i) =>
+                BigNumber.from(denormaliseAmount(a, this.tokens[i]).toString())
             );
             return amountsOut;
         } catch (err) {
-            return new Array(balancesEvm.length).fill(ZERO);
+            return new Array(balancesNormalised.length).fill(ZERO);
         }
     }
 
@@ -335,28 +332,27 @@ export class MetaStablePool implements PoolBase<MetaStablePoolPairData> {
      */
     _calcBptOutGivenExactTokensIn(amountsIn: BigNumber[]): BigNumber {
         try {
-            const amountsInWithRate = new Array(amountsIn.length).fill(
+            const amountsInNormalised = new Array(amountsIn.length).fill(
                 BigInt(0)
             );
-            const balancesEvm = new Array(amountsIn.length).fill(BigInt(0));
+            const balancesNormalised = new Array(amountsIn.length).fill(
+                BigInt(0)
+            );
             // token balances are stored in human scale and must be EVM for maths
             // Must take priceRate into consideration
             this.tokens
                 .filter((t) => !isSameAddress(t.address, this.address))
-                .forEach(({ balance, priceRate, decimals }, i) => {
-                    amountsInWithRate[i] = amountsIn[i]
-                        .mul(parseFixed(priceRate, 18))
-                        .div(ONE)
-                        .toBigInt();
-                    balancesEvm[i] = parseFixed(balance, decimals)
-                        .mul(parseFixed(priceRate, 18))
-                        .div(ONE)
-                        .toBigInt();
+                .forEach((token, i) => {
+                    amountsInNormalised[i] = normaliseAmount(
+                        BigInt(amountsIn[i].toString()),
+                        token
+                    );
+                    balancesNormalised[i] = normaliseBalance(token);
                 });
             const bptAmountOut = _calcBptOutGivenExactTokensIn(
                 this.amp.toBigInt(),
-                balancesEvm,
-                amountsInWithRate,
+                balancesNormalised,
+                amountsInNormalised,
                 this.totalShares.toBigInt(),
                 this.swapFee.toBigInt()
             );
