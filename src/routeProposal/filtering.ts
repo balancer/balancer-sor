@@ -17,6 +17,16 @@ import { Zero } from '@ethersproject/constants';
 
 const BOOSTED_PATHS_MAX_LENGTH = 7;
 
+interface edgeDict {
+    [node: string]: [string, string, string][];
+}
+
+interface treeEdge {
+    edge: [string, string, string];
+    parentIndices: [number, number];
+    visitedNodes: string[];
+}
+
 export const filterPoolsByType = (
     pools: SubgraphPoolBase[],
     poolTypeFilter: PoolFilter
@@ -166,7 +176,6 @@ export function producePaths(
 // We build this tree by adding at each step all the possible continuations for
 // each branch. When a branch reaches tokenOut, we write down the corresponding path.
 // We only allow paths up to length BOOSTED_PATHS_MAX_LENGTH = 7
-
 export function getBoostedGraph(
     tokenIn: string,
     tokenOut: string,
@@ -210,26 +219,20 @@ export function getBoostedGraph(
         }
     }
     // add best pools tokenIn -> connectingToken and connectingToken -> tokenOut
+    // these can be part of a longer path so do not rely on being directly connected
     for (const connectingToken of config.connectingTokens) {
-        const bestTokenInToConnectingTokenPoolId = getHighestLiquidityPool(
+        addMostLiquidPoolToSet(
             tokenIn,
             connectingToken.address,
-            poolsAllDict
+            poolsAllDict,
+            graphPoolsSet
         );
-        const bestConnectingTokenToTokenOutPoolId = getHighestLiquidityPool(
+        addMostLiquidPoolToSet(
             connectingToken.address,
             tokenOut,
-            poolsAllDict
+            poolsAllDict,
+            graphPoolsSet
         );
-        if (
-            bestTokenInToConnectingTokenPoolId &&
-            bestConnectingTokenToTokenOutPoolId
-        ) {
-            graphPoolsSet.add(poolsAllDict[bestTokenInToConnectingTokenPoolId]);
-            graphPoolsSet.add(
-                poolsAllDict[bestConnectingTokenToTokenOutPoolId]
-            );
-        }
     }
     if (linearPools.length == 0) return {};
     const linearPoolsAddresses = linearPools.map((pool) => pool.address);
@@ -263,10 +266,6 @@ export function getBoostedGraph(
     return edgeDict;
 }
 
-interface edgeDict {
-    [node: string]: [string, string, string][];
-}
-
 function getNodesAndEdges(pools: PoolBase[]): edgeDict {
     const edgesFromNode: edgeDict = {};
     for (const pool of pools) {
@@ -286,12 +285,6 @@ function getNodesAndEdges(pools: PoolBase[]): edgeDict {
         }
     }
     return edgesFromNode;
-}
-
-interface treeEdge {
-    edge: [string, string, string];
-    parentIndices: [number, number];
-    visitedNodes: string[];
 }
 
 export function getBoostedPaths(
@@ -618,53 +611,64 @@ function getRaisingToken(
 function handleLBPCase(
     graphPoolsSet: Set<PoolBase>,
     lbpRaisingTokens: string[],
-    pool: PoolBase,
+    poolLbp: PoolBase,
     tokenIn: string,
     tokenOut: string,
     connectingTokens: string[],
     poolsAllDict: PoolDictionary
 ) {
+    // Tokens that will be used as LBP Base Token, e.g. USDC/DAI/WETH
     const raisingTokens = lbpRaisingTokens.map((address) =>
         address.toLowerCase()
     );
+
+    if (raisingTokens.length === 0) return;
+
+    // Assuming tokenIn is the lbpToken find the corresponding base token if it exists
     const raisingTokenIn: string | undefined = getRaisingToken(
-        pool,
+        poolLbp,
         raisingTokens,
         tokenIn
     );
-    if (raisingTokenIn) {
-        graphPoolsSet.add(pool);
-        for (const connectingToken of connectingTokens) {
-            if (raisingTokenIn !== connectingToken) {
-                const bestRaisingToConnecting = getHighestLiquidityPool(
-                    raisingTokenIn,
-                    connectingToken,
-                    poolsAllDict
-                );
-                if (bestRaisingToConnecting) {
-                    graphPoolsSet.add(poolsAllDict[bestRaisingToConnecting]);
-                }
-            }
-        }
-    }
     const raisingTokenOut: string | undefined = getRaisingToken(
-        pool,
+        poolLbp,
         raisingTokens,
         tokenOut
     );
-    if (raisingTokenOut) {
-        graphPoolsSet.add(pool);
-        for (const connectingToken of connectingTokens) {
-            if (raisingTokenOut !== connectingToken) {
-                const bestConnectingToRaising = getHighestLiquidityPool(
-                    connectingToken,
-                    raisingTokenOut,
-                    poolsAllDict
-                );
-                if (bestConnectingToRaising) {
-                    graphPoolsSet.add(poolsAllDict[bestConnectingToRaising]);
-                }
-            }
+    if (!raisingTokenIn && !raisingTokenOut) return;
+
+    // Add the LBP pool to the graph
+    graphPoolsSet.add(poolLbp);
+
+    // For each connecting token add most liquid pools with raisingToken and raisingTokenOut
+    for (const connectingToken of connectingTokens) {
+        if (raisingTokenIn && raisingTokenIn !== connectingToken) {
+            // raisingToken>[Pool]>connectingToken
+            addMostLiquidPoolToSet(
+                raisingTokenIn,
+                connectingToken,
+                poolsAllDict,
+                graphPoolsSet
+            );
+        }
+        if (raisingTokenOut && raisingTokenOut !== connectingToken) {
+            // connectingToken>[Pool]>raisingToken
+            addMostLiquidPoolToSet(
+                connectingToken,
+                raisingTokenOut,
+                poolsAllDict,
+                graphPoolsSet
+            );
         }
     }
+}
+
+function addMostLiquidPoolToSet(
+    tokenIn: string,
+    tokenOut: string,
+    pools: PoolDictionary,
+    graphPools: Set<PoolBase>
+): void {
+    const pool = getHighestLiquidityPool(tokenIn, tokenOut, pools);
+    if (pool) graphPools.add(pools[pool]);
 }
