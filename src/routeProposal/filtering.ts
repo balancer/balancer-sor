@@ -176,6 +176,9 @@ export function getBoostedGraph(
     const graphPoolsSet: Set<PoolBase> = new Set();
     const linearPools: PoolBase[] = [];
     const phantomPools: PoolBase[] = [];
+    const connectingTokens = config.connectingTokens.map(
+        (connectingToken) => connectingToken.address
+    );
     // Here we add all linear pools, take note of phantom pools,
     // add LBP pools with tokenIn or tokenOut and their corresponding
     // highest liquidity WETH connections
@@ -194,9 +197,6 @@ export function getBoostedGraph(
                 phantomPools.push(pool);
             }
             if (config.lbpRaisingTokens && pool.isLBP) {
-                const connectingTokens = config.connectingTokens.map(
-                    (connectingToken) => connectingToken.address
-                );
                 handleLBPCase(
                     graphPoolsSet,
                     config.lbpRaisingTokens,
@@ -211,21 +211,24 @@ export function getBoostedGraph(
     }
     // add best pools tokenIn -> connectingToken and connectingToken -> tokenOut
     for (const connectingToken of config.connectingTokens) {
-        const bestTokenInToConnectingToken = getHighestLiquidityPool(
+        const bestTokenInToConnectingTokenPoolId = getHighestLiquidityPool(
             tokenIn,
             connectingToken.address,
             poolsAllDict
         );
-        if (bestTokenInToConnectingToken) {
-            graphPoolsSet.add(poolsAllDict[bestTokenInToConnectingToken]);
-        }
-        const bestConnectingTokenToTokenOut = getHighestLiquidityPool(
+        const bestConnectingTokenToTokenOutPoolId = getHighestLiquidityPool(
             connectingToken.address,
             tokenOut,
             poolsAllDict
         );
-        if (bestConnectingTokenToTokenOut) {
-            graphPoolsSet.add(poolsAllDict[bestConnectingTokenToTokenOut]);
+        if (
+            bestTokenInToConnectingTokenPoolId &&
+            bestConnectingTokenToTokenOutPoolId
+        ) {
+            graphPoolsSet.add(poolsAllDict[bestTokenInToConnectingTokenPoolId]);
+            graphPoolsSet.add(
+                poolsAllDict[bestConnectingTokenToTokenOutPoolId]
+            );
         }
     }
     if (linearPools.length == 0) return {};
