@@ -15,6 +15,7 @@ export const ONE_TO_THE_SIX = BigInt(`${ONE_TO_THE_SIX_NUM}`);
 export const ONE_TO_THE_THIRTEEN_NUM = 10000000000000;
 export const ONE_TO_THE_THIRTEEN = BigInt(`${ONE_TO_THE_THIRTEEN_NUM}`);
 export const ONE_ETHER = scale(bnum('1'), 18);
+export const ALMOST_ZERO = 0.0000000000000000001; // swapping within beta region has no slippage
 const CURVEMATH_MAX = 0.25; //CURVEMATH MAX from contract
 
 export enum CurveMathRevert {
@@ -483,6 +484,8 @@ export function _tokenInForExactTokenOut(
     }
 }
 
+// @todo check here
+
 export const spotPriceBeforeSwap = (
     amount: OldBigNumber,
     poolPairData: FxPoolPairData
@@ -581,6 +584,9 @@ export const _spotPriceAfterSwapExactTokenInForTokenOut = (
 };
 
 // spot price after target swap
+// @todo check the infinity
+// the less the normalized liquidity
+// we must have a absolute of the derivative price
 export const _spotPriceAfterSwapTokenInForExactTokenOut = (
     poolPairData: FxPoolPairData,
     amount: OldBigNumber
@@ -657,7 +663,8 @@ export const _derivativeSpotPriceAfterSwapExactTokenInForTokenOut = (
     const x = spotPriceBeforeSwap(bnum('1'), poolPairData);
     const y = _spotPriceAfterSwapExactTokenInForTokenOut(poolPairData, amount);
     const yMinusX = y.minus(x);
-    return yMinusX.div(x);
+    const ans = yMinusX.div(x);
+    return ans.isZero() ? bnum(ALMOST_ZERO) : ans.abs();
 };
 
 // target swap
@@ -667,7 +674,7 @@ export const _derivativeSpotPriceAfterSwapTokenInForExactTokenOut = (
 ): OldBigNumber => {
     const x = spotPriceBeforeSwap(bnum('1'), poolPairData);
     const y = _spotPriceAfterSwapTokenInForExactTokenOut(poolPairData, amount);
-
     const yMinusX = y.minus(x);
-    return yMinusX.div(x);
+    const ans = yMinusX.div(x);
+    return ans.abs();
 };

@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { getAddress } from '@ethersproject/address';
 import { BigNumber, formatFixed, parseFixed } from '@ethersproject/bignumber';
-import { BigNumber as OldBigNumber } from '../../utils/bignumber';
+import { BigNumber as OldBigNumber, ZERO } from '../../utils/bignumber';
 import {
     PoolBase,
     PoolPairBase,
@@ -21,6 +21,7 @@ import {
     _tokenInForExactTokenOut,
 } from './fxPoolMath';
 import { WeiPerEther as ONE, Zero } from '@ethersproject/constants';
+import { universalNormalizedLiquidity } from '../liquidity';
 
 type FxPoolToken = Pick<
     SubgraphToken,
@@ -98,6 +99,7 @@ export class FxPool implements PoolBase {
         this.delta = parseFixed(delta, 18);
         this.epsilon = parseFixed(epsilon, 18);
     }
+    updateTotalShares: (newTotalShares: BigNumber) => void;
     mainIndex?: number | undefined;
     isLBP?: boolean | undefined;
 
@@ -157,11 +159,11 @@ export class FxPool implements PoolBase {
     // pool but also depends on the shape of the invariant curve.
     // As a standard, we define normalized liquidity in tokenOut
     getNormalizedLiquidity(poolPairData: FxPoolPairData): OldBigNumber {
-        // This could be refined by using the inverse of the slippage, but
-        // in practice this won't have a big impact in path selection for
-        // multi-hops so not a big priority
-        return bnum(
-            formatFixed(poolPairData.balanceOut, poolPairData.decimalsOut)
+        return universalNormalizedLiquidity(
+            this._derivativeSpotPriceAfterSwapExactTokenInForTokenOut(
+                poolPairData,
+                ZERO
+            )
         );
     }
 

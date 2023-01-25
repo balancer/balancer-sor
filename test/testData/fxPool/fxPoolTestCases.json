@@ -57,7 +57,7 @@
         "expectedSpotPriceBeforeSwap": "0.743394117",
         "expectedSpotPriceAfterSwap": "0.7387621895",
         "expectedSwapOutput": "198654.47",
-        "expectedDerivativeSpotPriceAfterSwap": "-0.006230783064"
+        "expectedDerivativeSpotPriceAfterSwap": "0.006230783064"
     },
     {
         "testNo": "6",
@@ -93,7 +93,7 @@
         "expectedSpotPriceBeforeSwap": "0.743394117",
         "expectedSpotPriceAfterSwap": "0.7382737807",
         "expectedSwapOutput": "202310.75",
-        "expectedDerivativeSpotPriceAfterSwap": "-0.006887781537"
+        "expectedDerivativeSpotPriceAfterSwap": "0.006887781537"
     },
 
     {
@@ -118,7 +118,7 @@
         "expectedSpotPriceBeforeSwap": "0.743394117",
         "expectedSpotPriceAfterSwap": "0.7418224557",
         "expectedSwapOutput": "451178.98",
-        "expectedDerivativeSpotPriceAfterSwap": "-0.002114169664"
+        "expectedDerivativeSpotPriceAfterSwap": "0.002114169664"
     },
     {
         "testNo": "11",
@@ -130,7 +130,7 @@
         "expectedSpotPriceBeforeSwap": "0.743394117",
         "expectedSpotPriceAfterSwap": "0.743394117",
         "expectedSwapOutput": "452358.00907339100",
-        "expectedDerivativeSpotPriceAfterSwap": "-0.002453086836"
+        "expectedDerivativeSpotPriceAfterSwap": "0.002453086836"
     },
     {
         "testNo": "12",

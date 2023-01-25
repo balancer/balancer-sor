@@ -11,6 +11,7 @@ import testPools from './testData/fxPool/fxPool.json';
 import testCases from './testData/fxPool/fxPoolTestCases.json';
 import { parseFixed } from '@ethersproject/bignumber';
 import {
+    ALMOST_ZERO,
     CurveMathRevert,
     getBaseDecimals,
     rateToNumber,
@@ -87,7 +88,7 @@ describe('Test for fxPools', () => {
                 SwapTypes.SwapExactOut
             );
 
-            console.log(amount);
+            expect(amount.toString()).to.equals('191995.911732');
         });
     });
 
@@ -101,7 +102,9 @@ describe('Test for fxPools', () => {
                 newPool.tokens[1].address // tokenOut, XSGD
             );
 
-            console.log(newPool.getNormalizedLiquidity(poolPairData));
+            expect(
+                newPool.getNormalizedLiquidity(poolPairData).toNumber()
+            ).to.equals(1 / ALMOST_ZERO);
         });
     });
 
