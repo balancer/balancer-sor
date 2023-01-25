@@ -198,6 +198,12 @@ describe('linear pool tests', () => {
             const config = {
                 chainId: 99,
                 weth: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2',
+                connectingTokens: [
+                    {
+                        symbol: 'weth',
+                        address: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2',
+                    },
+                ],
                 vault: '0xeefba1e63905ef1d7acba5a8513c70307c1ce441',
             };
             it('getPathsUsingLinearPool return empty paths', () => {

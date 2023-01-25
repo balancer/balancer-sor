@@ -298,6 +298,12 @@ describe('Tests pools filtering and path processing', () => {
             chainId: 1,
             vault: '0xBA12222222228d8Ba445958a75a0704d566BF2C8',
             weth: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2',
+            connectingTokens: [
+                {
+                    symbol: 'weth',
+                    address: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2',
+                },
+            ],
             bbausd: {
                 id: '0x7b50775383d3d6f0215a8f290f2c9e2eebbeceb20000000000000000000000fe',
                 address: '0x7b50775383d3d6f0215a8f290f2c9e2eebbeceb2',

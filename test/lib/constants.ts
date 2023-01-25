@@ -11,6 +11,16 @@ export const sorConfigTest: SorConfig = {
     chainId: 99,
     weth: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2',
     vault: '0xeefba1e63905ef1d7acba5a8513c70307c1ce441',
+    connectingTokens: [
+        {
+            symbol: 'weth',
+            address: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2',
+        },
+        {
+            symbol: 'conn',
+            address: '0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
+        },
+    ],
     wETHwstETH: {
         id: 'wETH-wstETH',
         address: '0x0000000000000000000000000000000000222222',
@@ -25,6 +35,12 @@ export const sorConfigTestStaBal = {
     chainId: 99,
     weth: '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2',
     vault: '0xeefba1e63905ef1d7acba5a8513c70307c1ce441',
+    connectingTokens: [
+        {
+            symbol: 'weth',
+            address: '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2',
+        },
+    ],
     usdcConnectingPool: {
         id: 'usdcConnecting',
         usdc: '0x2791bca1f2de4661ed88a30c99a7a9449aa84174',
@@ -38,18 +54,40 @@ export const sorConfigTestStaBal = {
 export const sorConfigEth: SorConfig = {
     chainId: 1,
     weth: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2',
+    connectingTokens: [
+        {
+            symbol: 'wstEth',
+            address: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2',
+        },
+        {
+            symbol: 'wEth',
+            address: '0x7f39C581F595B53c5cb19bD0b3f8dA6c935E2Ca0',
+        },
+    ],
     vault: '0xeefba1e63905ef1d7acba5a8513c70307c1ce441',
 };
 
 export const sorConfigKovan: SorConfig = {
     chainId: 42,
     weth: '0xdFCeA9088c8A88A76FF74892C1457C17dfeef9C1',
+    connectingTokens: [
+        {
+            symbol: 'weth',
+            address: '0xdFCeA9088c8A88A76FF74892C1457C17dfeef9C1',
+        },
+    ],
     vault: '0xBA12222222228d8Ba445958a75a0704d566BF2C8',
 };
 
 export const sorConfigFullKovan: SorConfig = {
     chainId: 42,
     weth: '0xdFCeA9088c8A88A76FF74892C1457C17dfeef9C1',
+    connectingTokens: [
+        {
+            symbol: 'weth',
+            address: '0xdFCeA9088c8A88A76FF74892C1457C17dfeef9C1',
+        },
+    ],
     vault: '0xBA12222222228d8Ba445958a75a0704d566BF2C8',
     lbpRaisingTokens: [
         '0xdfcea9088c8a88a76ff74892c1457c17dfeef9c1',

@@ -19,8 +19,8 @@ describe('composable stable pool', () => {
         // parsePoolPairData contains pool's allBalances and allBalancesScaled
         // both already multiplied by the price rates.
         const poolPairData = composableStablePool.parsePoolPairData(
-            ADDRESSES[Network.MAINNET].bbausdt2.address,
-            ADDRESSES[Network.MAINNET].bbausd2.address
+            ADDRESSES[Network.MAINNET].bbausdt.address,
+            ADDRESSES[Network.MAINNET].bbausd.address
         );
         it('token -> BPT spot price with no rate', () => {
             // spot prices
