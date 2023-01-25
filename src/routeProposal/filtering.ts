@@ -211,21 +211,24 @@ export function getBoostedGraph(
     }
     // add best pools tokenIn -> connectingToken and connectingToken -> tokenOut
     for (const connectingToken of config.connectingTokens) {
-        const bestTokenInToConnectingToken = getHighestLiquidityPool(
+        const bestTokenInToConnectingTokenPoolId = getHighestLiquidityPool(
             tokenIn,
             connectingToken.address,
             poolsAllDict
         );
-        if (bestTokenInToConnectingToken) {
-            graphPoolsSet.add(poolsAllDict[bestTokenInToConnectingToken]);
-        }
-        const bestConnectingTokenToTokenOut = getHighestLiquidityPool(
+        const bestConnectingTokenToTokenOutPoolId = getHighestLiquidityPool(
             connectingToken.address,
             tokenOut,
             poolsAllDict
         );
-        if (bestConnectingTokenToTokenOut) {
-            graphPoolsSet.add(poolsAllDict[bestConnectingTokenToTokenOut]);
+        if (
+            bestTokenInToConnectingTokenPoolId &&
+            bestConnectingTokenToTokenOutPoolId
+        ) {
+            graphPoolsSet.add(poolsAllDict[bestTokenInToConnectingTokenPoolId]);
+            graphPoolsSet.add(
+                poolsAllDict[bestConnectingTokenToTokenOutPoolId]
+            );
         }
     }
     if (linearPools.length == 0) return {};
