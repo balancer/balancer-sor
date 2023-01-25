@@ -441,6 +441,32 @@ describe('generic boosted pools, path creation test', () => {
             assert.equal(paths.length, 4);
         });
     });
+    context('using an alternative connecting token', () => {
+        const USDC = '0xe22da380ee6b445bb8273c81944adeb6e8450422'; // USDC
+        const GOLD = '0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaabbbb';
+        it('USDC to GOLD', () => {
+            const [, , boostedPaths] = getPaths(
+                USDC,
+                GOLD,
+                SwapTypes.SwapExactIn,
+                genericBoostedPools.pools,
+                maxPools,
+                sorConfigTest
+            );
+            assert.equal(boostedPaths.length, 2);
+        });
+        it('GOLD to USDC', () => {
+            const [, , boostedPaths] = getPaths(
+                GOLD,
+                USDC,
+                SwapTypes.SwapExactIn,
+                genericBoostedPools.pools,
+                maxPools,
+                sorConfigTest
+            );
+            assert.equal(boostedPaths.length, 2);
+        });
+    });
 });
 
 describe('generic boosted pools with wstETH, path creation test', () => {
