@@ -176,6 +176,9 @@ export function getBoostedGraph(
     const graphPoolsSet: Set<PoolBase> = new Set();
     const linearPools: PoolBase[] = [];
     const phantomPools: PoolBase[] = [];
+    const connectingTokens = config.connectingTokens.map(
+        (connectingToken) => connectingToken.address
+    );
     // Here we add all linear pools, take note of phantom pools,
     // add LBP pools with tokenIn or tokenOut and their corresponding
     // highest liquidity WETH connections
@@ -194,9 +197,6 @@ export function getBoostedGraph(
                 phantomPools.push(pool);
             }
             if (config.lbpRaisingTokens && pool.isLBP) {
-                const connectingTokens = config.connectingTokens.map(
-                    (connectingToken) => connectingToken.address
-                );
                 handleLBPCase(
                     graphPoolsSet,
                     config.lbpRaisingTokens,
