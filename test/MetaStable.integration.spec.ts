@@ -3,20 +3,13 @@ import dotenv from 'dotenv';
 import { JsonRpcProvider } from '@ethersproject/providers';
 import { defaultAbiCoder } from '@ethersproject/abi';
 import { BalancerHelpers__factory } from '@balancer-labs/typechain';
-import { vaultAddr } from './testScripts/constants';
-import { SubgraphPoolBase, SOR } from '../src';
-import {
-    Network,
-    MULTIADDR,
-    SOR_CONFIG,
-    ADDRESSES,
-} from './testScripts/constants';
-import { OnChainPoolDataService } from './lib/onchainData';
-import { TokenPriceService } from '../src';
+import { SubgraphPoolBase } from '../src';
+import { Network, ADDRESSES } from './testScripts/constants';
 import { AddressZero } from '@ethersproject/constants';
 import { BigNumber, formatFixed, parseFixed } from '@ethersproject/bignumber';
 import { expect } from 'chai';
 import { MetaStablePool } from '../src/pools/metaStablePool/metaStablePool';
+import { setUp } from './testScripts/utils';
 
 dotenv.config();
 
@@ -51,45 +44,12 @@ const testPool: SubgraphPoolBase = {
     ],
 };
 
-let sor: SOR;
 const networkId = Network.MAINNET;
 const { ALCHEMY_URL: jsonRpcUrl } = process.env;
 const rpcUrl = 'http://127.0.0.1:8545';
+const blockNumber = 16447247;
 const provider = new JsonRpcProvider(rpcUrl, networkId);
-let subgraphPoolDataService: OnChainPoolDataService;
-
-// Setup SOR with data services
-function setUp(networkId: Network, provider: JsonRpcProvider): SOR {
-    // The SOR needs to fetch pool data from an external source. This provider fetches from Subgraph and onchain calls.
-    subgraphPoolDataService = new OnChainPoolDataService({
-        vaultAddress: vaultAddr,
-        multiAddress: MULTIADDR[networkId],
-        provider,
-        pools: [testPool],
-    });
-
-    class CoingeckoTokenPriceService implements TokenPriceService {
-        constructor(private readonly chainId: number) {}
-        async getNativeAssetPriceInToken(
-            // eslint-disable-next-line @typescript-eslint/no-unused-vars
-            tokenAddress: string
-        ): Promise<string> {
-            return '0';
-        }
-    }
-
-    // Use coingecko to fetch token price information. Used to calculate cost of additonal swaps/hops.
-    const coingeckoTokenPriceService = new CoingeckoTokenPriceService(
-        networkId
-    );
-
-    return new SOR(
-        provider,
-        SOR_CONFIG[networkId],
-        subgraphPoolDataService,
-        coingeckoTokenPriceService
-    );
-}
+let pool: MetaStablePool;
 
 export async function queryJoin(
     network: number,
@@ -204,32 +164,25 @@ export async function querySingleTokenExit(
 }
 
 describe('MetaStable', () => {
+    before(async function () {
+        const sor = await setUp(
+            networkId,
+            provider,
+            [testPool],
+            jsonRpcUrl as string,
+            blockNumber
+        );
+        await sor.fetchPools();
+        const pools = sor.getPools();
+        pool = MetaStablePool.fromPool(pools[0]);
+    });
     context('test joins vs queryJoin', () => {
-        // Setup chain
-        before(async function () {
-            this.timeout(20000);
-
-            await provider.send('hardhat_reset', [
-                {
-                    forking: {
-                        jsonRpcUrl,
-                        blockNumber: 16447247,
-                    },
-                },
-            ]);
-
-            sor = setUp(networkId, provider);
-            await sor.fetchPools();
-        });
         context('Joins', () => {
             it('Join with many tokens', async () => {
                 const amountsIn = [
                     parseFixed('0.0123', 6),
                     parseFixed('0.0456', 6),
                 ];
-
-                const pools = await subgraphPoolDataService.getPools();
-                const pool = MetaStablePool.fromPool(pools[0]);
                 const bptOut = pool._calcBptOutGivenExactTokensIn(amountsIn);
 
                 const deltas = await queryJoin(
@@ -246,8 +199,6 @@ describe('MetaStable', () => {
             });
             it('Join with single token', async () => {
                 const amountsIn = [parseFixed('0', 6), parseFixed('0.0789', 6)];
-                const pools = await subgraphPoolDataService.getPools();
-                const pool = MetaStablePool.fromPool(pools[0]);
                 const bptOut = pool._calcBptOutGivenExactTokensIn(amountsIn);
 
                 const deltas = await queryJoin(
@@ -265,30 +216,12 @@ describe('MetaStable', () => {
         });
     });
     context('test exits vs queryExit', () => {
-        // Setup chain
-        before(async function () {
-            this.timeout(20000);
-
-            await provider.send('hardhat_reset', [
-                {
-                    forking: {
-                        jsonRpcUrl,
-                        blockNumber: 16447247,
-                    },
-                },
-            ]);
-
-            sor = setUp(networkId, provider);
-            await sor.fetchPools();
-        });
         context('Exits', () => {
             // TODO: pending single token out implementation on metaStable pool
             // it('BPT>token', async () => {
             //     const tokenIndex = 0; // usdc
             //     const bptInHuman = '0.123';
             //     const bptInEvm = parseFixed(bptInHuman, 18);
-            //     const pools = await subgraphPoolDataService.getPools();
-            //     const pool = MetaStablePool.fromPool(pools[0]);
             //     const pairData = pool.parsePoolPairData(
             //         testPool.address,
             //         pool.tokensList[tokenIndex]
@@ -318,8 +251,7 @@ describe('MetaStable', () => {
             // });
             it('BPT>tokens', async () => {
                 const bptIn = parseFixed('0.0123', 18);
-                const pools = await subgraphPoolDataService.getPools();
-                const pool = MetaStablePool.fromPool(pools[0]);
+
                 const amountOut = pool._calcTokensOutGivenExactBptIn(bptIn);
                 const deltas = await queryExit(
                     networkId,
