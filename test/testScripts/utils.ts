@@ -1,11 +1,20 @@
 import dotenv from 'dotenv';
 dotenv.config();
 import { BigNumber, formatFixed } from '@ethersproject/bignumber';
+import { JsonRpcProvider } from '@ethersproject/providers';
 import { Wallet } from '@ethersproject/wallet';
 import { Contract } from '@ethersproject/contracts';
 import { AddressZero, MaxUint256 } from '@ethersproject/constants';
-import { FundManagement, SOR, SwapInfo, SwapTypes } from '../../src';
-import { vaultAddr } from './constants';
+import {
+    FundManagement,
+    SOR,
+    SubgraphPoolBase,
+    SwapInfo,
+    SwapTypes,
+} from '../../src';
+import { Network, MULTIADDR, SOR_CONFIG, vaultAddr } from './constants';
+import { OnChainPoolDataService } from '../lib/onchainData';
+import { TokenPriceService } from '../../src';
 
 import erc20abi from '../abi/ERC20.json';
 
@@ -197,3 +206,64 @@ export async function printOutput(
     console.log(`Return Considering Fees: ${returnWithFeesScaled.toString()}`);
     console.log('spot price: ', swapInfo.marketSp);
 }
+
+// export const onChainPoolDataService = (
+//     networkId: Network,
+//     provider: JsonRpcProvider,
+//     pools: SubgraphPoolBase[]
+// ): OnChainPoolDataService => {
+//     // The SOR needs to fetch pool data from an external source. This provider fetches from Subgraph and onchain calls.
+//     return new OnChainPoolDataService({
+//         vaultAddress: vaultAddr,
+//         multiAddress: MULTIADDR[networkId],
+//         provider,
+//         pools,
+//     });
+// };
+
+// Setup SOR with data services
+export const setUp = async (
+    networkId: Network,
+    provider: JsonRpcProvider,
+    pools: SubgraphPoolBase[],
+    jsonRpcUrl: string,
+    blockNumber: number
+): Promise<SOR> => {
+    await provider.send('hardhat_reset', [
+        {
+            forking: {
+                jsonRpcUrl,
+                blockNumber,
+            },
+        },
+    ]);
+
+    // The SOR needs to fetch pool data from an external source. This provider fetches from Subgraph and onchain calls.
+    const onChainPoolDataService = new OnChainPoolDataService({
+        vaultAddress: vaultAddr,
+        multiAddress: MULTIADDR[networkId],
+        provider,
+        pools,
+    });
+    class CoingeckoTokenPriceService implements TokenPriceService {
+        constructor(private readonly chainId: number) {}
+        async getNativeAssetPriceInToken(
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
+            tokenAddress: string
+        ): Promise<string> {
+            return '0';
+        }
+    }
+
+    // Use coingecko to fetch token price information. Used to calculate cost of additonal swaps/hops.
+    const coingeckoTokenPriceService = new CoingeckoTokenPriceService(
+        networkId
+    );
+
+    return new SOR(
+        provider,
+        SOR_CONFIG[networkId],
+        onChainPoolDataService,
+        coingeckoTokenPriceService
+    );
+};
