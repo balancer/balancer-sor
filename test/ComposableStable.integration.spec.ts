@@ -534,39 +534,41 @@ describe('ComposableStable', () => {
                     else expect(a.toString()).to.eq('0');
                 });
             }).timeout(10000);
-            it('BPT>token with less than 18 decimals', async () => {
-                const tokenIndex = 2; // usdc
-                const bptInHuman = '10.10';
-                const bptInEvm = parseFixed(bptInHuman, 18);
-                const pools = await subgraphPoolDataService.getPools();
-                const pool = ComposableStablePool.fromPool(pools[1]);
-                const pairData = pool.parsePoolPairData(
-                    pool.address,
-                    pool.tokensList[tokenIndex]
-                );
-                const amountOutHuman = pool._exactTokenInForTokenOut(
-                    pairData,
-                    bnum(bptInHuman)
-                );
-                const amountOutEvm = parseFixed(
-                    amountOutHuman.toString(),
-                    pairData.decimalsOut
-                );
+            // At the moment there is no ComposableStable pool containing a token with less than 18 decimals to test against
+            // it('BPT>token with less than 18 decimals', async () => {
+            //     const tokenIndex = 2; // usdc
+            //     const bptInHuman = '10.10';
+            //     const bptInEvm = parseFixed(bptInHuman, 18);
+            //     const pools = await subgraphPoolDataService.getPools();
+            //     const pool = ComposableStablePool.fromPool(pools[1]);
+            //     const pairData = pool.parsePoolPairData(
+            //         pool.address,
+            //         pool.tokensList[tokenIndex]
+            //     );
+            //     const amountOutHuman = pool._exactTokenInForTokenOut(
+            //         pairData,
+            //         bnum(bptInHuman)
+            //     );
+            //     const amountOutEvm = parseFixed(
+            //         amountOutHuman.toString(),
+            //         pairData.decimalsOut
+            //     );
 
-                const deltas = await querySingleTokenExit(
-                    networkId,
-                    pool.id,
-                    pool.tokensList,
-                    bptInEvm.toString(),
-                    tokenIndex
-                );
-                expect(deltas.bptIn.toString()).to.eq(bptInEvm.toString());
-                deltas.amountsOut.forEach((a, i) => {
-                    if (i === tokenIndex)
-                        expect(a.toString()).to.eq(amountOutEvm.toString());
-                    else expect(a.toString()).to.eq('0');
-                });
-            }).timeout(20000);
+            //     const deltas = await querySingleTokenExit(
+            //         networkId,
+            //         pool.id,
+            //         pool.tokensList,
+            //         bptInEvm.toString(),
+            //         tokenIndex
+            //     );
+            //     expect(deltas.bptIn.toString()).to.eq(bptInEvm.toString());
+            //     deltas.amountsOut.forEach((a, i) => {
+            //         if (i === tokenIndex)
+            //             expect(a.toString()).to.eq(amountOutEvm.toString());
+            //         else expect(a.toString()).to.eq('0');
+            //     });
+            // }).timeout(20000);
+
             // ComposableStable V1 does not have this functionality but V2 does
             // it('BPT>tokens', async () => {
             //     const bptIn = parseFixed('77', 18);
