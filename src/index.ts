@@ -15,6 +15,7 @@ export { WeightedPool } from './pools/weightedPool/weightedPool';
 export { StablePool } from './pools/stablePool/stablePool';
 export { MetaStablePool } from './pools/metaStablePool/metaStablePool';
 export { PhantomStablePool } from './pools/phantomStablePool/phantomStablePool';
+export { ComposableStablePool } from './pools/composableStable/composableStablePool';
 export { LinearPool } from './pools/linearPool/linearPool';
 export { getSpotPriceAfterSwapForPath } from './router/helpersClass';
 export * as WeightedMaths from './pools/weightedPool/weightedMath';

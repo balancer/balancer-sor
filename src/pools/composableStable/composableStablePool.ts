@@ -1,6 +1,11 @@
 import { BigNumber, formatFixed, parseFixed } from '@ethersproject/bignumber';
 import { WeiPerEther as ONE, Zero } from '@ethersproject/constants';
-import { isSameAddress } from '../../utils';
+import {
+    isSameAddress,
+    normaliseBalance,
+    normaliseAmount,
+    denormaliseAmount,
+} from '../../utils';
 import { BigNumber as OldBigNumber, bnum, ZERO } from '../../utils/bignumber';
 import { SubgraphPoolBase } from '../../types';
 import {
@@ -50,11 +55,10 @@ export class ComposableStablePool extends PhantomStablePool {
         amount: OldBigNumber
     ): OldBigNumber {
         try {
-            // This code assumes that decimalsIn and decimalsOut is 18
+            // balances and amounts must be normalized to 1e18 fixed point - e.g. 1USDC => 1e18 not 1e6
+            // takes price rate into account
 
             if (amount.isZero()) return ZERO;
-            // All values should use 1e18 fixed point
-            // i.e. 1USDC => 1e18 not 1e6
             const amountConvertedEvm = parseFixed(amount.dp(18).toString(), 18)
                 .mul(poolPairData.tokenInPriceRate)
                 .div(ONE);
@@ -100,7 +104,9 @@ export class ComposableStablePool extends PhantomStablePool {
                 .div(poolPairData.tokenOutPriceRate);
 
             // Return human scaled
-            return bnum(formatFixed(returnEvmWithRate, 18));
+            return bnum(formatFixed(returnEvmWithRate, 18)).dp(
+                poolPairData.decimalsOut
+            );
         } catch (err) {
             // console.error(`PhantomStable _evmoutGivenIn: ${err.message}`);
             return ZERO;
@@ -112,11 +118,9 @@ export class ComposableStablePool extends PhantomStablePool {
         amount: OldBigNumber
     ): OldBigNumber {
         try {
-            // This code assumes that decimalsIn and decimalsOut is 18
-
             if (amount.isZero()) return ZERO;
-            // All values should use 1e18 fixed point
-            // i.e. 1USDC => 1e18 not 1e6
+            // balances and amounts must be normalized to 1e18 fixed point - e.g. 1USDC => 1e18 not 1e6
+            // takes price rate into account
             const amountConvertedEvm = parseFixed(amount.dp(18).toString(), 18)
                 .mul(poolPairData.tokenOutPriceRate)
                 .div(ONE);
@@ -162,7 +166,9 @@ export class ComposableStablePool extends PhantomStablePool {
                 .div(poolPairData.tokenInPriceRate);
 
             // return human number
-            return bnum(formatFixed(returnEvmWithRate, 18));
+            return bnum(formatFixed(returnEvmWithRate, 18)).dp(
+                poolPairData.decimalsOut
+            );
         } catch (err) {
             console.error(`PhantomStable _evminGivenOut: ${err.message}`);
             return ZERO;
@@ -175,26 +181,24 @@ export class ComposableStablePool extends PhantomStablePool {
      * @returns EVM scale.
      */
     _calcTokensOutGivenExactBptIn(bptAmountIn: BigNumber): BigNumber[] {
-        // token balances are stored in human scale and must be EVM for maths
-        // Must take priceRate into consideration
-        const balancesEvm = this.tokens
+        // balances and amounts must be normalized to 1e18 fixed point - e.g. 1USDC => 1e18 not 1e6
+        // takes price rate into account
+        const balancesNormalised = this.tokens
             .filter((t) => !isSameAddress(t.address, this.address))
-            .map(({ balance, priceRate, decimals }) =>
-                parseFixed(balance, 18)
-                    .mul(parseFixed(priceRate, decimals))
-                    .div(ONE)
-                    .toBigInt()
-            );
-        let returnAmt: bigint[];
+            .map((t) => normaliseBalance(t));
         try {
-            returnAmt = _calcTokensOutGivenExactBptIn(
-                balancesEvm,
+            const amountsOutNormalised = _calcTokensOutGivenExactBptIn(
+                balancesNormalised,
                 bptAmountIn.toBigInt(),
                 this.totalShares.toBigInt()
             );
-            return returnAmt.map((a) => BigNumber.from(a.toString()));
+            // We want to return denormalised amounts. e.g. 1USDC => 1e6 not 1e18
+            const amountsOut = amountsOutNormalised.map((a, i) =>
+                denormaliseAmount(a, this.tokens[i])
+            );
+            return amountsOut.map((a) => BigNumber.from(a));
         } catch (err) {
-            return new Array(balancesEvm.length).fill(ZERO);
+            return new Array(balancesNormalised.length).fill(ZERO);
         }
     }
 
@@ -205,26 +209,27 @@ export class ComposableStablePool extends PhantomStablePool {
      */
     _calcBptOutGivenExactTokensIn(amountsIn: BigNumber[]): BigNumber {
         try {
-            const scaledAmountsIn = new Array(amountsIn.length).fill(BigInt(0));
-            const balancesEvm = new Array(amountsIn.length).fill(BigInt(0));
-            // token balances are stored in human scale and must be EVM for maths
-            // Must take priceRate into consideration
+            // balances and amounts must be normalized to 1e18 fixed point - e.g. 1USDC => 1e18 not 1e6
+            // takes price rate into account
+            const amountsInNormalised = new Array(amountsIn.length).fill(
+                BigInt(0)
+            );
+            const balancesNormalised = new Array(amountsIn.length).fill(
+                BigInt(0)
+            );
             this.tokens
                 .filter((t) => !isSameAddress(t.address, this.address))
-                .forEach(({ balance, priceRate, decimals }, i) => {
-                    scaledAmountsIn[i] = amountsIn[i]
-                        .mul(parseFixed(priceRate, 18))
-                        .div(ONE)
-                        .toBigInt();
-                    balancesEvm[i] = parseFixed(balance, decimals)
-                        .mul(parseFixed(priceRate, 18))
-                        .div(ONE)
-                        .toBigInt();
+                .forEach((token, i) => {
+                    amountsInNormalised[i] = normaliseAmount(
+                        BigInt(amountsIn[i].toString()),
+                        token
+                    );
+                    balancesNormalised[i] = normaliseBalance(token);
                 });
             const bptAmountOut = _calcBptOutGivenExactTokensIn(
                 this.amp.toBigInt(),
-                balancesEvm,
-                scaledAmountsIn,
+                balancesNormalised,
+                amountsInNormalised,
                 this.totalShares.toBigInt(),
                 this.swapFee.toBigInt()
             );

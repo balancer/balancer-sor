@@ -1,10 +1,10 @@
-// TS_NODE_PROJECT='tsconfig.testing.json' npx mocha -r ts-node/register test/composableStablePool.spec.ts
+// yarn test:only test/composableStablePool.spec.ts
 import { assert } from 'chai';
 import { BigNumber } from '@ethersproject/bignumber';
 import { bnum } from '../src/utils/bignumber';
 import { WeiPerEther as ONE } from '@ethersproject/constants';
 import composableStable from './testData/phantomStablePools/composableStable.json';
-import { PhantomStablePool } from '../src/pools/phantomStablePool/phantomStablePool';
+import { ComposableStablePool } from '../src/pools/composableStable/composableStablePool';
 import * as phantomStableMath from '../src/pools/phantomStablePool/phantomStableMath';
 import * as stableMathBigInt from '../src/pools/stablePool/stableMathBigInt';
 import { ADDRESSES, Network } from './testScripts/constants';
@@ -13,7 +13,7 @@ describe('composable stable pool', () => {
     const oldBN_ONE = bnum(ONE.toString());
     const error = 0.00001;
     context('out given in, several consistencies', () => {
-        const composableStablePool = PhantomStablePool.fromPool(
+        const composableStablePool = ComposableStablePool.fromPool(
             composableStable.pools[0]
         );
         // parsePoolPairData contains pool's allBalances and allBalancesScaled

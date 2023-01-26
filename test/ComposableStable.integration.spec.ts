@@ -1,4 +1,4 @@
-// TS_NODE_PROJECT='tsconfig.testing.json' npx mocha -r ts-node/register test/ComposableStable.integration.spec.ts
+// yarn test:only test/ComposableStable.integration.spec.ts
 import dotenv from 'dotenv';
 import { JsonRpcProvider } from '@ethersproject/providers';
 import { defaultAbiCoder } from '@ethersproject/abi';
@@ -8,19 +8,13 @@ import {
 } from '@balancer-labs/typechain';
 import { vaultAddr } from './testScripts/constants';
 import { SubgraphPoolBase, SwapTypes, SOR, bnum } from '../src';
-import {
-    Network,
-    MULTIADDR,
-    SOR_CONFIG,
-    ADDRESSES,
-} from './testScripts/constants';
-import { OnChainPoolDataService } from './lib/onchainData';
-import { TokenPriceService } from '../src';
+import { Network, ADDRESSES } from './testScripts/constants';
 import { AddressZero } from '@ethersproject/constants';
 import { BigNumber, parseFixed } from '@ethersproject/bignumber';
 import { expect } from 'chai';
 import { closeTo } from './lib/testHelpers';
 import { ComposableStablePool } from '../src/pools/composableStable/composableStablePool';
+import { setUp } from './testScripts/utils';
 
 dotenv.config();
 
@@ -28,6 +22,7 @@ let sor: SOR;
 const networkId = Network.MAINNET;
 const { ALCHEMY_URL: jsonRpcUrl } = process.env;
 const rpcUrl = 'http://127.0.0.1:8545';
+const blockNumber = 16447247;
 const provider = new JsonRpcProvider(rpcUrl, networkId);
 const vault = Vault__factory.connect(vaultAddr, provider);
 const bbausdt = ADDRESSES[networkId].bbausdt2.address;
@@ -39,7 +34,6 @@ const funds = {
     fromInternalBalance: false,
     toInternalBalance: false,
 };
-let subgraphPoolDataService: OnChainPoolDataService;
 
 // bbausd
 const testPool: SubgraphPoolBase = {
@@ -87,39 +81,6 @@ const testPool: SubgraphPoolBase = {
     ],
     amp: '1472',
 };
-
-// Setup SOR with data services
-function setUp(networkId: Network, provider: JsonRpcProvider): SOR {
-    // The SOR needs to fetch pool data from an external source. This provider fetches from Subgraph and onchain calls.
-    subgraphPoolDataService = new OnChainPoolDataService({
-        vaultAddress: vaultAddr,
-        multiAddress: MULTIADDR[networkId],
-        provider,
-        pools: [testPool],
-    });
-
-    class CoingeckoTokenPriceService implements TokenPriceService {
-        constructor(private readonly chainId: number) {}
-        async getNativeAssetPriceInToken(
-            // eslint-disable-next-line @typescript-eslint/no-unused-vars
-            tokenAddress: string
-        ): Promise<string> {
-            return '0';
-        }
-    }
-
-    // Use coingecko to fetch token price information. Used to calculate cost of additonal swaps/hops.
-    const coingeckoTokenPriceService = new CoingeckoTokenPriceService(
-        networkId
-    );
-
-    return new SOR(
-        provider,
-        SOR_CONFIG[networkId],
-        subgraphPoolDataService,
-        coingeckoTokenPriceService
-    );
-}
 
 export async function queryJoin(
     network: number,
@@ -192,24 +153,20 @@ export async function querySingleTokenExit(
 }
 
 describe('ComposableStable', () => {
+    // Setup chain
+    before(async function () {
+        this.timeout(20000);
+
+        sor = await setUp(
+            networkId,
+            provider,
+            [testPool],
+            jsonRpcUrl as string,
+            blockNumber
+        );
+        await sor.fetchPools();
+    });
     context('test swaps vs queryBatchSwap', () => {
-        // Setup chain
-        before(async function () {
-            this.timeout(20000);
-
-            await provider.send('hardhat_reset', [
-                {
-                    forking: {
-                        jsonRpcUrl,
-                        blockNumber: 16447247,
-                    },
-                },
-            ]);
-
-            sor = setUp(networkId, provider);
-            await sor.fetchPools();
-        });
-
         context('ExactIn', () => {
             it('token>token', async () => {
                 const swapType = SwapTypes.SwapExactIn;
@@ -348,22 +305,6 @@ describe('ComposableStable', () => {
         });
     });
     context('test joins vs queryJoin', () => {
-        // Setup chain
-        before(async function () {
-            this.timeout(20000);
-
-            await provider.send('hardhat_reset', [
-                {
-                    forking: {
-                        jsonRpcUrl,
-                        blockNumber: 16447247,
-                    },
-                },
-            ]);
-
-            sor = setUp(networkId, provider);
-            await sor.fetchPools();
-        });
         context('Joins', () => {
             it('Join with many tokens', async () => {
                 const bptIndex = 2;
@@ -376,7 +317,7 @@ describe('ComposableStable', () => {
                 const amountsWithOutBpt = [...amountsInWithBpt];
                 amountsWithOutBpt.splice(bptIndex, 1);
 
-                const pools = await subgraphPoolDataService.getPools();
+                const pools = sor.getPools();
                 const pool = ComposableStablePool.fromPool(pools[0]);
                 const bptCalculated =
                     pool._calcBptOutGivenExactTokensIn(amountsWithOutBpt);
@@ -406,7 +347,7 @@ describe('ComposableStable', () => {
                 const amountsWithOutBpt = [...amountsInWithBpt];
                 amountsWithOutBpt.splice(bptIndex, 1);
 
-                const pools = await subgraphPoolDataService.getPools();
+                const pools = sor.getPools();
                 const pool = ComposableStablePool.fromPool(pools[0]);
                 const bptCalculated =
                     pool._calcBptOutGivenExactTokensIn(amountsWithOutBpt);
@@ -428,28 +369,12 @@ describe('ComposableStable', () => {
         });
     });
     context('test exits vs queryExit', () => {
-        // Setup chain
-        before(async function () {
-            this.timeout(20000);
-
-            await provider.send('hardhat_reset', [
-                {
-                    forking: {
-                        jsonRpcUrl,
-                        blockNumber: 16447247,
-                    },
-                },
-            ]);
-
-            sor = setUp(networkId, provider);
-            await sor.fetchPools();
-        });
         context('Exits', () => {
             it('BPT>token', async () => {
                 const tokenIndex = 0;
                 const bptInHuman = '977.234';
                 const bptInEvm = parseFixed(bptInHuman, 18);
-                const pools = await subgraphPoolDataService.getPools();
+                const pools = sor.getPools();
                 const pool = ComposableStablePool.fromPool(pools[0]);
                 const pairData = pool.parsePoolPairData(
                     testPool.address,
@@ -478,10 +403,45 @@ describe('ComposableStable', () => {
                     else expect(a.toString()).to.eq('0');
                 });
             }).timeout(10000);
+            // At the moment there is no ComposableStable pool containing a token with less than 18 decimals to test against
+            // it('BPT>token with less than 18 decimals', async () => {
+            //     const tokenIndex = 2; // usdc
+            //     const bptInHuman = '10.10';
+            //     const bptInEvm = parseFixed(bptInHuman, 18);
+            //     const pools = sor.getPools();
+            //     const pool = ComposableStablePool.fromPool(pools[1]);
+            //     const pairData = pool.parsePoolPairData(
+            //         pool.address,
+            //         pool.tokensList[tokenIndex]
+            //     );
+            //     const amountOutHuman = pool._exactTokenInForTokenOut(
+            //         pairData,
+            //         bnum(bptInHuman)
+            //     );
+            //     const amountOutEvm = parseFixed(
+            //         amountOutHuman.toString(),
+            //         pairData.decimalsOut
+            //     );
+
+            //     const deltas = await querySingleTokenExit(
+            //         networkId,
+            //         pool.id,
+            //         pool.tokensList,
+            //         bptInEvm.toString(),
+            //         tokenIndex
+            //     );
+            //     expect(deltas.bptIn.toString()).to.eq(bptInEvm.toString());
+            //     deltas.amountsOut.forEach((a, i) => {
+            //         if (i === tokenIndex)
+            //             expect(a.toString()).to.eq(amountOutEvm.toString());
+            //         else expect(a.toString()).to.eq('0');
+            //     });
+            // }).timeout(20000);
+
             // ComposableStable V1 does not have this functionality but V2 does
             // it('BPT>tokens', async () => {
             //     const bptIn = parseFixed('77', 18);
-            //     const pools = await subgraphPoolDataService.getPools();
+            //     const pools = sor.getPools();
             //     const pool = ComposableStablePool.fromPool(pools[0]);
             //     const amountOut = pool._calcTokensOutGivenExactBptIn(bptIn);
             //     console.log(amountOut.toString());

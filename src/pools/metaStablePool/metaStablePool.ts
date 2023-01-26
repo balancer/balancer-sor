@@ -1,6 +1,11 @@
 import { BigNumber, formatFixed, parseFixed } from '@ethersproject/bignumber';
 import { WeiPerEther as ONE, Zero } from '@ethersproject/constants';
-import { isSameAddress } from '../../utils';
+import {
+    isSameAddress,
+    normaliseBalance,
+    normaliseAmount,
+    denormaliseAmount,
+} from '../../utils';
 import { BigNumber as OldBigNumber, bnum, ZERO } from '../../utils/bignumber';
 import {
     PoolBase,
@@ -301,26 +306,23 @@ export class MetaStablePool implements PoolBase<MetaStablePoolPairData> {
      * @returns EVM scale.
      */
     _calcTokensOutGivenExactBptIn(bptAmountIn: BigNumber): BigNumber[] {
-        // token balances are stored in human scale and must be EVM for maths
-        // Must take priceRate into consideration
-        const balancesEvm = this.tokens
+        // balances and amounts must be normalized as if it had 18 decimals for maths
+        // takes price rate into account
+        const balancesNormalised = this.tokens
             .filter((t) => !isSameAddress(t.address, this.address))
-            .map(({ balance, priceRate, decimals }) =>
-                parseFixed(balance, 18)
-                    .mul(parseFixed(priceRate, decimals))
-                    .div(ONE)
-                    .toBigInt()
-            );
-        let returnAmt: bigint[];
+            .map((t) => normaliseBalance(t));
         try {
-            returnAmt = _calcTokensOutGivenExactBptIn(
-                balancesEvm,
+            const amountsOutNormalised = _calcTokensOutGivenExactBptIn(
+                balancesNormalised,
                 bptAmountIn.toBigInt(),
                 this.totalShares.toBigInt()
             );
-            return returnAmt.map((a) => BigNumber.from(a.toString()));
+            const amountsOut = amountsOutNormalised.map((a, i) =>
+                BigNumber.from(denormaliseAmount(a, this.tokens[i]).toString())
+            );
+            return amountsOut;
         } catch (err) {
-            return new Array(balancesEvm.length).fill(ZERO);
+            return new Array(balancesNormalised.length).fill(ZERO);
         }
     }
 
@@ -331,22 +333,29 @@ export class MetaStablePool implements PoolBase<MetaStablePoolPairData> {
      */
     _calcBptOutGivenExactTokensIn(amountsIn: BigNumber[]): BigNumber {
         try {
-            // token balances are stored in human scale and must be EVM for maths
-            // Must take priceRate into consideration
-            const balancesEvm = this.tokens
+            // balances and amounts must be normalized as if it had 18 decimals for maths
+            // takes price rate into account
+            const amountsInNormalised = new Array(amountsIn.length).fill(
+                BigInt(0)
+            );
+            const balancesNormalised = new Array(amountsIn.length).fill(
+                BigInt(0)
+            );
+            this.tokens
                 .filter((t) => !isSameAddress(t.address, this.address))
-                .map(({ balance, priceRate, decimals }) =>
-                    parseFixed(balance, 18)
-                        .mul(parseFixed(priceRate, decimals))
-                        .div(ONE)
-                        .toBigInt()
-                );
+                .forEach((token, i) => {
+                    amountsInNormalised[i] = normaliseAmount(
+                        BigInt(amountsIn[i].toString()),
+                        token
+                    );
+                    balancesNormalised[i] = normaliseBalance(token);
+                });
             const bptAmountOut = _calcBptOutGivenExactTokensIn(
                 this.amp.toBigInt(),
-                balancesEvm,
-                amountsIn.map((a) => a.toBigInt()),
+                balancesNormalised,
+                amountsInNormalised,
                 this.totalShares.toBigInt(),
-                BigInt(0)
+                this.swapFee.toBigInt()
             );
             return BigNumber.from(bptAmountOut.toString());
         } catch (err) {
