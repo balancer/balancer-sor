@@ -82,62 +82,6 @@ const testPool: SubgraphPoolBase = {
     amp: '1472',
 };
 
-// 4pool chainlink - example containing tokens with less than 18 decimals
-const testPool1: SubgraphPoolBase = {
-    address: '0xbd482ffb3e6e50dc1c437557c3bea2b68f3683ee',
-    amp: '5000',
-    id: '0xbd482ffb3e6e50dc1c437557c3bea2b68f3683ee0000000000000000000003c6',
-    poolType: 'ComposableStable',
-    swapEnabled: true,
-    swapFee: '0.000001',
-    tokensList: [
-        '0x4fabb145d64652a948d72533023f6e7a623c7c53',
-        '0x6b175474e89094c44da98b954eedeac495271d0f',
-        '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48',
-        '0xbd482ffb3e6e50dc1c437557c3bea2b68f3683ee',
-        '0xdac17f958d2ee523a2206206994597c13d831ec7',
-    ],
-    tokens: [
-        {
-            address: '0x4fabb145d64652a948d72533023f6e7a623c7c53',
-            balance: '33.807963560659234546',
-            decimals: 18,
-            priceRate: '0.99999',
-            weight: null,
-        },
-        {
-            address: '0x6b175474e89094c44da98b954eedeac495271d0f',
-            balance: '26.9631582499169841',
-            decimals: 18,
-            priceRate: '1.00001',
-            weight: null,
-        },
-        {
-            address: '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48',
-            balance: '11.616432',
-            decimals: 6,
-            priceRate: '1.00001',
-            weight: null,
-        },
-        {
-            address: '0xbd482ffb3e6e50dc1c437557c3bea2b68f3683ee',
-            balance: '2596148429127534.870140576901863328',
-            decimals: 18,
-            priceRate: '1',
-            weight: null,
-        },
-        {
-            address: '0xdac17f958d2ee523a2206206994597c13d831ec7',
-            balance: '0.348188',
-            decimals: 6,
-            priceRate: '1.00001',
-            weight: null,
-        },
-    ],
-    totalShares: '169.938749131311798513',
-    totalWeight: '0',
-};
-
 export async function queryJoin(
     network: number,
     poolId: string,
@@ -216,7 +160,7 @@ describe('ComposableStable', () => {
         sor = await setUp(
             networkId,
             provider,
-            [testPool, testPool1],
+            [testPool],
             jsonRpcUrl as string,
             blockNumber
         );
