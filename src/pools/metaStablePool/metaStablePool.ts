@@ -306,7 +306,8 @@ export class MetaStablePool implements PoolBase<MetaStablePoolPairData> {
      * @returns EVM scale.
      */
     _calcTokensOutGivenExactBptIn(bptAmountIn: BigNumber): BigNumber[] {
-        // token balances are stored in human scale in SG and must be normalized as if it had 18 decimals for maths.
+        // balances and amounts must be normalized as if it had 18 decimals for maths
+        // takes price rate into account
         const balancesNormalised = this.tokens
             .filter((t) => !isSameAddress(t.address, this.address))
             .map((t) => normaliseBalance(t));
@@ -332,14 +333,14 @@ export class MetaStablePool implements PoolBase<MetaStablePoolPairData> {
      */
     _calcBptOutGivenExactTokensIn(amountsIn: BigNumber[]): BigNumber {
         try {
+            // balances and amounts must be normalized as if it had 18 decimals for maths
+            // takes price rate into account
             const amountsInNormalised = new Array(amountsIn.length).fill(
                 BigInt(0)
             );
             const balancesNormalised = new Array(amountsIn.length).fill(
                 BigInt(0)
             );
-            // token balances are stored in human scale and must be EVM for maths
-            // Must take priceRate into consideration
             this.tokens
                 .filter((t) => !isSameAddress(t.address, this.address))
                 .forEach((token, i) => {
