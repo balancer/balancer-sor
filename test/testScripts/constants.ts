@@ -14,6 +14,16 @@ export const SOR_CONFIG: Record<Network, SorConfig> = {
         chainId: Network.MAINNET, //1
         vault: '0xBA12222222228d8Ba445958a75a0704d566BF2C8',
         weth: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2',
+        connectingTokens: [
+            {
+                symbol: 'weth',
+                address: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2',
+            },
+            {
+                symbol: 'DOLA',
+                address: '0x865377367054516e17014CcdED1e7d814EDC9ce4',
+            },
+        ],
         wETHwstETH: {
             id: '0x32296969ef14eb0c6d29669c550d4a0449130230000200000000000000000080',
             address: '0x32296969ef14eb0c6d29669c550d4a0449130230',
@@ -23,6 +33,12 @@ export const SOR_CONFIG: Record<Network, SorConfig> = {
         chainId: Network.KOVAN, //42
         vault: '0xBA12222222228d8Ba445958a75a0704d566BF2C8',
         weth: '0xdFCeA9088c8A88A76FF74892C1457C17dfeef9C1',
+        connectingTokens: [
+            {
+                symbol: 'weth',
+                address: '0xdFCeA9088c8A88A76FF74892C1457C17dfeef9C1',
+            },
+        ],
         staBal3Pool: {
             id: '0x8fd162f338b770f7e879030830cde9173367f3010000000000000000000004d8',
             address: '0x8fd162f338b770f7e879030830cde9173367f301',
@@ -32,16 +48,38 @@ export const SOR_CONFIG: Record<Network, SorConfig> = {
         chainId: Network.GOERLI, //5
         vault: '0x65748E8287Ce4B9E6D83EE853431958851550311',
         weth: '0x9A1000D492d40bfccbc03f413A48F5B6516Ec0Fd',
+        connectingTokens: [
+            {
+                symbol: 'weth',
+                address: '0x9A1000D492d40bfccbc03f413A48F5B6516Ec0Fd',
+            },
+        ],
     },
     [Network.POLYGON]: {
         chainId: Network.POLYGON, //137
         vault: '0xBA12222222228d8Ba445958a75a0704d566BF2C8',
         weth: '0x0d500B1d8E8eF31E21C99d1Db9A6444d3ADf1270',
+        connectingTokens: [
+            {
+                symbol: 'weth',
+                address: '0x0d500B1d8E8eF31E21C99d1Db9A6444d3ADf1270',
+            },
+            {
+                symbol: 'bbrz2',
+                address: '0xe22483774bd8611be2ad2f4194078dac9159f4ba',
+            }, // Joins Stables<>BRZ via https://app.balancer.fi/#/polygon/pool/0x4a0b73f0d13ff6d43e304a174697e3d5cfd310a400020000000000000000091c
+        ],
     },
     [Network.ARBITRUM]: {
         chainId: Network.ARBITRUM, //42161
         vault: '0xBA12222222228d8Ba445958a75a0704d566BF2C8',
         weth: '0x82aF49447D8a07e3bd95BD0d56f35241523fBab1',
+        connectingTokens: [
+            {
+                symbol: 'weth',
+                address: '0x82aF49447D8a07e3bd95BD0d56f35241523fBab1',
+            },
+        ],
     },
 };
 
@@ -124,13 +162,18 @@ export const ADDRESSES = {
             decimals: 18,
             symbol: 'wSTETH',
         },
-        bbausd: {
+        bbausdOld: {
             address: '0x7b50775383d3d6f0215a8f290f2c9e2eebbeceb2',
             decimals: 18,
             symbol: 'bbausd',
         },
-        bbausdc: {
+        bbausdcOld: {
             address: '0x9210F1204b5a24742Eba12f710636D76240dF3d0',
+            decimals: 18,
+            symbol: 'bbausdc',
+        },
+        bbausdc: {
+            address: '0x82698aecc9e28e9bb27608bd52cf57f704bd1b83',
             decimals: 18,
             symbol: 'bbausdc',
         },
@@ -149,20 +192,20 @@ export const ADDRESSES = {
             decimals: 6,
             symbol: 'waUSDC',
         },
-        bbausd2: {
+        bbausd: {
             address: '0xA13a9247ea42D743238089903570127DdA72fE44',
             decimals: 18,
-            symbol: 'bbausd2',
+            symbol: 'bbausd',
         },
         bbadai2: {
             address: '0xae37d54ae477268b9997d4161b96b8200755935c',
             decimals: 18,
             symbol: 'bb-a-dai2',
         },
-        bbausdt2: {
+        bbausdt: {
             address: '0x2F4eb100552ef93840d5aDC30560E5513DFfFACb',
             decimals: 18,
-            symbol: 'bb-a-usdt2',
+            symbol: 'bb-a-usdt',
         },
         RPL: {
             address: '0xD33526068D116cE69F19A9ee46F0bd304F21A51f',
@@ -189,12 +232,17 @@ export const ADDRESSES = {
             decimals: 6,
             symbol: 'USDT',
         },
-        bbausdt: {
+        bbausdtOld: {
             address: '0x2f4eb100552ef93840d5adc30560e5513dfffacb',
             decimals: 18,
             symbol: 'bbaUSDT',
         },
         balancerHelpers: '0x5aDDCCa35b7A0D07C74063c48700C8590E87864E',
+        DBR: {
+            address: '0xAD038Eb671c44b853887A7E32528FaB35dC5D710',
+            decimals: 18,
+            symbol: 'DBR',
+        },
     },
     [Network.KOVAN]: {
         // Visit https://balancer-faucet.on.fleek.co/#/faucet for test tokens
@@ -372,6 +420,11 @@ export const ADDRESSES = {
             address: '0x48e6B98ef6329f8f0A30eBB8c7C960330d648085',
             decimals: 18,
             symbol: 'bb-am-usd',
+        },
+        brz: {
+            address: '0x491a4eb4f1fc3bff8e1d2fc856a6a46663ad556f',
+            decimals: 4,
+            symbol: 'BRZ',
         },
     },
     [Network.ARBITRUM]: {
