@@ -55,12 +55,10 @@ export class ComposableStablePool extends PhantomStablePool {
         amount: OldBigNumber
     ): OldBigNumber {
         try {
-            // This code needs decimalsIn and decimalsOut as 18
-            // It will scale decimalsIn and decimalsOut to 18 and revert them back to original after calculation
+            // balances and amounts must be normalized to 1e18 fixed point - e.g. 1USDC => 1e18 not 1e6
+            // takes price rate into account
 
             if (amount.isZero()) return ZERO;
-            // All values should use 1e18 fixed point
-            // i.e. 1USDC => 1e18 not 1e6
             const amountConvertedEvm = parseFixed(amount.dp(18).toString(), 18)
                 .mul(poolPairData.tokenInPriceRate)
                 .div(ONE);
@@ -120,12 +118,9 @@ export class ComposableStablePool extends PhantomStablePool {
         amount: OldBigNumber
     ): OldBigNumber {
         try {
-            // This code needs decimalsIn and decimalsOut as 18
-            // It will scale decimalsIn and decimalsOut to 18 and revert them back to original after calculation
-
             if (amount.isZero()) return ZERO;
-            // All values should use 1e18 fixed point
-            // i.e. 1USDC => 1e18 not 1e6
+            // balances and amounts must be normalized to 1e18 fixed point - e.g. 1USDC => 1e18 not 1e6
+            // takes price rate into account
             const amountConvertedEvm = parseFixed(amount.dp(18).toString(), 18)
                 .mul(poolPairData.tokenOutPriceRate)
                 .div(ONE);
@@ -186,7 +181,7 @@ export class ComposableStablePool extends PhantomStablePool {
      * @returns EVM scale.
      */
     _calcTokensOutGivenExactBptIn(bptAmountIn: BigNumber): BigNumber[] {
-        // balances and amounts must be normalized as if it had 18 decimals for maths
+        // balances and amounts must be normalized to 1e18 fixed point - e.g. 1USDC => 1e18 not 1e6
         // takes price rate into account
         const balancesNormalised = this.tokens
             .filter((t) => !isSameAddress(t.address, this.address))
@@ -197,7 +192,7 @@ export class ComposableStablePool extends PhantomStablePool {
                 bptAmountIn.toBigInt(),
                 this.totalShares.toBigInt()
             );
-            // We want to return denormalised amounts. e.g. 1USDC should be 1e6 not 1e18
+            // We want to return denormalised amounts. e.g. 1USDC => 1e6 not 1e18
             const amountsOut = amountsOutNormalised.map((a, i) =>
                 denormaliseAmount(a, this.tokens[i])
             );
@@ -214,7 +209,7 @@ export class ComposableStablePool extends PhantomStablePool {
      */
     _calcBptOutGivenExactTokensIn(amountsIn: BigNumber[]): BigNumber {
         try {
-            // balances and amounts must be normalized as if it had 18 decimals for maths
+            // balances and amounts must be normalized to 1e18 fixed point - e.g. 1USDC => 1e18 not 1e6
             // takes price rate into account
             const amountsInNormalised = new Array(amountsIn.length).fill(
                 BigInt(0)
