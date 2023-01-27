@@ -6,7 +6,7 @@ import { BalancerHelpers__factory } from '@balancer-labs/typechain';
 import { SubgraphPoolBase } from '../src';
 import { Network, ADDRESSES } from './testScripts/constants';
 import { AddressZero } from '@ethersproject/constants';
-import { BigNumber, formatFixed, parseFixed } from '@ethersproject/bignumber';
+import { BigNumber, parseFixed } from '@ethersproject/bignumber';
 import { expect } from 'chai';
 import { MetaStablePool } from '../src/pools/metaStablePool/metaStablePool';
 import { setUp } from './testScripts/utils';
@@ -191,9 +191,6 @@ describe('MetaStable', () => {
                     testPool.tokensList,
                     amountsIn.map((a) => a.toString())
                 );
-                console.log('bptOut       ', formatFixed(bptOut, 18));
-                console.log('delta bptOut ', formatFixed(deltas.bptOut, 18));
-                // TODO: check if it's ok to have a small difference - diff comes from divDown not matching between TS and SC math
                 expect(bptOut.sub(deltas.bptOut).toNumber()).to.closeTo(0, 1);
                 expect(deltas.amountsIn.toString()).to.eq(amountsIn.toString());
             });
@@ -207,9 +204,6 @@ describe('MetaStable', () => {
                     testPool.tokensList,
                     amountsIn.map((a) => a.toString())
                 );
-                console.log('bptOut       ', formatFixed(bptOut, 18));
-                console.log('delta bptOut ', formatFixed(deltas.bptOut, 18));
-                // TODO: check if it's ok to have a small difference - diff comes from divDown not matching between TS and SC math
                 expect(bptOut.sub(deltas.bptOut).toNumber()).to.closeTo(0, 1);
                 expect(deltas.amountsIn.toString()).to.eq(amountsIn.toString());
             });
