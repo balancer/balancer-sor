@@ -167,6 +167,11 @@ export const ADDRESSES = {
             decimals: 18,
             symbol: 'bbausd',
         },
+        bbausd: {
+            address: '0xA13a9247ea42D743238089903570127DdA72fE44',
+            decimals: 18,
+            symbol: 'bbausd',
+        },
         bbausdcOld: {
             address: '0x9210F1204b5a24742Eba12f710636D76240dF3d0',
             decimals: 18,
@@ -177,10 +182,25 @@ export const ADDRESSES = {
             decimals: 18,
             symbol: 'bbausdc',
         },
-        bbadai: {
+        bbadaiOld: {
             address: '0x804cdb9116a10bb78768d3252355a1b18067bf8f',
             decimals: 18,
             symbol: 'bb-a-dai',
+        },
+        bbadai: {
+            address: '0xae37d54ae477268b9997d4161b96b8200755935c',
+            decimals: 18,
+            symbol: 'bb-a-dai2',
+        },
+        bbausdtOld: {
+            address: '0x2f4eb100552ef93840d5adc30560e5513dfffacb',
+            decimals: 18,
+            symbol: 'bbaUSDT',
+        },
+        bbausdt: {
+            address: '0x2F4eb100552ef93840d5aDC30560E5513DFfFACb',
+            decimals: 18,
+            symbol: 'bb-a-usdt',
         },
         waDAI: {
             address: '0x02d60b84491589974263d922d9cc7a3152618ef6',
@@ -191,21 +211,6 @@ export const ADDRESSES = {
             address: '0xd093fa4fb80d09bb30817fdcd442d4d02ed3e5de',
             decimals: 6,
             symbol: 'waUSDC',
-        },
-        bbausd: {
-            address: '0xA13a9247ea42D743238089903570127DdA72fE44',
-            decimals: 18,
-            symbol: 'bbausd',
-        },
-        bbadai2: {
-            address: '0xae37d54ae477268b9997d4161b96b8200755935c',
-            decimals: 18,
-            symbol: 'bb-a-dai2',
-        },
-        bbausdt: {
-            address: '0x2F4eb100552ef93840d5aDC30560E5513DFfFACb',
-            decimals: 18,
-            symbol: 'bb-a-usdt',
         },
         RPL: {
             address: '0xD33526068D116cE69F19A9ee46F0bd304F21A51f',
@@ -231,11 +236,6 @@ export const ADDRESSES = {
             address: '0xdac17f958d2ee523a2206206994597c13d831ec7',
             decimals: 6,
             symbol: 'USDT',
-        },
-        bbausdtOld: {
-            address: '0x2f4eb100552ef93840d5adc30560e5513dfffacb',
-            decimals: 18,
-            symbol: 'bbaUSDT',
         },
         balancerHelpers: '0x5aDDCCa35b7A0D07C74063c48700C8590E87864E',
         DBR: {

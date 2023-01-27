@@ -25,9 +25,9 @@ const { ALCHEMY_URL: jsonRpcUrl } = process.env;
 const rpcUrl = 'http://127.0.0.1:8545';
 const provider = new JsonRpcProvider(rpcUrl, networkId);
 const vault = Vault__factory.connect(vaultAddr, provider);
-const bbausdt = ADDRESSES[networkId].bbausdc.address;
-const bbadai = ADDRESSES[networkId].bbadai.address;
-const bpt = ADDRESSES[networkId].bbausd.address;
+const bbausdt = ADDRESSES[networkId].bbausdcOld.address;
+const bbadai = ADDRESSES[networkId].bbadaiOld.address;
+const bpt = ADDRESSES[networkId].bbausdOld.address;
 const funds = {
     sender: AddressZero,
     recipient: AddressZero,

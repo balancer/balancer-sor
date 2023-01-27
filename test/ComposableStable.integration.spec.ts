@@ -25,9 +25,9 @@ const rpcUrl = 'http://127.0.0.1:8545';
 const blockNumber = 16447247;
 const provider = new JsonRpcProvider(rpcUrl, networkId);
 const vault = Vault__factory.connect(vaultAddr, provider);
-const bbausdt = ADDRESSES[networkId].bbausdt2.address;
-const bbadai = ADDRESSES[networkId].bbadai2.address;
-const bpt = ADDRESSES[networkId].bbausd2.address;
+const bbausdt = ADDRESSES[networkId].bbausdt.address;
+const bbadai = ADDRESSES[networkId].bbadai.address;
+const bpt = ADDRESSES[networkId].bbausd.address;
 const funds = {
     sender: AddressZero,
     recipient: AddressZero,
