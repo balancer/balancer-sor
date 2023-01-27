@@ -1,10 +1,10 @@
 import dotenv from 'dotenv';
 dotenv.config();
-import { BigNumber, formatFixed } from '@ethersproject/bignumber';
+import { BigNumber, BigNumberish, formatFixed } from '@ethersproject/bignumber';
 import { JsonRpcProvider } from '@ethersproject/providers';
 import { Wallet } from '@ethersproject/wallet';
 import { Contract } from '@ethersproject/contracts';
-import { AddressZero, MaxUint256 } from '@ethersproject/constants';
+import { AddressZero, MaxUint256, WeiPerEther } from '@ethersproject/constants';
 import {
     FundManagement,
     SOR,
@@ -266,4 +266,23 @@ export const setUp = async (
         onChainPoolDataService,
         coingeckoTokenPriceService
     );
+};
+
+export const checkInaccuracy = (
+    amount: BigNumber,
+    expectedAmount: BigNumberish,
+    inaccuracyLimit: number
+): boolean => {
+    if (amount.eq(expectedAmount)) {
+        return true;
+    }
+    if (amount.eq(0)) throw new Error("Can't check inaccuracy for 0 amount");
+
+    const inaccuracyEVM = amount
+        .sub(expectedAmount)
+        .mul(WeiPerEther)
+        .div(amount)
+        .abs();
+    const inaccuracyLimitEVM = WeiPerEther.div(1 / inaccuracyLimit);
+    return inaccuracyEVM.lte(inaccuracyLimitEVM);
 };
