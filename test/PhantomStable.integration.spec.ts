@@ -4,18 +4,12 @@ import { JsonRpcProvider } from '@ethersproject/providers';
 import { Vault__factory } from '@balancer-labs/typechain';
 import { vaultAddr } from './testScripts/constants';
 import { SubgraphPoolBase, SwapTypes, SOR } from '../src';
-import {
-    Network,
-    MULTIADDR,
-    SOR_CONFIG,
-    ADDRESSES,
-} from './testScripts/constants';
-import { OnChainPoolDataService } from './lib/onchainData';
-import { TokenPriceService } from '../src';
+import { Network, ADDRESSES } from './testScripts/constants';
 import { AddressZero } from '@ethersproject/constants';
 import { parseFixed } from '@ethersproject/bignumber';
 import { expect } from 'chai';
 import { closeTo } from './lib/testHelpers';
+import { setUp } from './testScripts/utils';
 
 dotenv.config();
 
@@ -23,6 +17,7 @@ let sor: SOR;
 const networkId = Network.MAINNET;
 const { ALCHEMY_URL: jsonRpcUrl } = process.env;
 const rpcUrl = 'http://127.0.0.1:8545';
+const blockNumber = 16447247;
 const provider = new JsonRpcProvider(rpcUrl, networkId);
 const vault = Vault__factory.connect(vaultAddr, provider);
 const bbausdt = ADDRESSES[networkId].bbausdcOld.address;
@@ -82,52 +77,17 @@ const testPool: SubgraphPoolBase = {
     amp: '1472',
 };
 
-// Setup SOR with data services
-function setUp(networkId: Network, provider: JsonRpcProvider): SOR {
-    // The SOR needs to fetch pool data from an external source. This provider fetches from Subgraph and onchain calls.
-    const subgraphPoolDataService = new OnChainPoolDataService({
-        vaultAddress: vaultAddr,
-        multiAddress: MULTIADDR[networkId],
-        provider,
-        pools: [testPool],
-    });
-
-    class CoingeckoTokenPriceService implements TokenPriceService {
-        constructor(private readonly chainId: number) {}
-        async getNativeAssetPriceInToken(
-            // eslint-disable-next-line @typescript-eslint/no-unused-vars
-            tokenAddress: string
-        ): Promise<string> {
-            return '0';
-        }
-    }
-
-    // Use coingecko to fetch token price information. Used to calculate cost of additonal swaps/hops.
-    const coingeckoTokenPriceService = new CoingeckoTokenPriceService(
-        networkId
-    );
-
-    return new SOR(
-        provider,
-        SOR_CONFIG[networkId],
-        subgraphPoolDataService,
-        coingeckoTokenPriceService
-    );
-}
 describe('PhantomStable', () => {
     context('test swaps vs queryBatchSwap', () => {
         // Setup chain
         before(async function () {
-            await provider.send('hardhat_reset', [
-                {
-                    forking: {
-                        jsonRpcUrl,
-                        blockNumber: 16447247,
-                    },
-                },
-            ]);
-
-            sor = setUp(networkId, provider);
+            sor = await setUp(
+                networkId,
+                provider,
+                [testPool],
+                jsonRpcUrl as string,
+                blockNumber
+            );
             await sor.fetchPools();
         });
 
