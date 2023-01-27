@@ -20,7 +20,8 @@ dotenv.config();
 
 let sor: SOR;
 const networkId = Network.MAINNET;
-const { ALCHEMY_URL: jsonRpcUrl } = process.env;
+const { INFURA } = process.env;
+const jsonRpcUrl = 'https://mainnet.infura.io/v3/' + INFURA;
 const rpcUrl = 'http://127.0.0.1:8545';
 const blockNumber = 16447247;
 const provider = new JsonRpcProvider(rpcUrl, networkId);
