@@ -7,6 +7,7 @@ export enum Network {
     KOVAN = 42,
     POLYGON = 137,
     ARBITRUM = 42161,
+    GNOSIS = 100,
 }
 
 export const SOR_CONFIG: Record<Network, SorConfig> = {
@@ -81,6 +82,17 @@ export const SOR_CONFIG: Record<Network, SorConfig> = {
             },
         ],
     },
+    [Network.GNOSIS]: {
+        chainId: Network.GNOSIS, //100
+        vault: '0xBA12222222228d8Ba445958a75a0704d566BF2C8',
+        weth: '0x6A023CCd1ff6F2045C3309768eAd9E68F978f6e1',
+        connectingTokens: [
+            {
+                symbol: 'weth',
+                address: '0x82aF49447D8a07e3bd95BD0d56f35241523fBab1',
+            },
+        ],
+    },
 };
 
 export const PROVIDER_URLS = {
@@ -89,6 +101,7 @@ export const PROVIDER_URLS = {
     [Network.KOVAN]: `https://kovan.infura.io/v3/${process.env.INFURA}`,
     [Network.POLYGON]: `https://polygon-mainnet.infura.io/v3/${process.env.INFURA}`,
     [Network.ARBITRUM]: `https://arbitrum-mainnet.infura.io/v3/${process.env.INFURA}`,
+    [Network.GNOSIS]: `https://poa-xdai.gateway.pokt.network/v1/lb/91bc0e12a76e7a84dd76189d`,
 };
 
 export const MULTIADDR: { [chainId: number]: string } = {
@@ -100,6 +113,7 @@ export const MULTIADDR: { [chainId: number]: string } = {
     137: '0xa1B2b503959aedD81512C37e9dce48164ec6a94d',
     42161: '0x269ff446d9892c9e19082564df3f5e8741e190a1',
     99: '0xeefba1e63905ef1d7acba5a8513c70307c1ce441',
+    100: '0xbb6fab6b627947dae0a75808250d8b2652952cb5',
 };
 
 export const SUBGRAPH_URLS = {
@@ -112,6 +126,7 @@ export const SUBGRAPH_URLS = {
     [Network.POLYGON]:
         'https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-polygon-v2',
     [Network.ARBITRUM]: `https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-arbitrum-v2`,
+    [Network.GNOSIS]: `https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-gnosis-chain-v2`,
 };
 
 // This is the same across networks
@@ -447,6 +462,33 @@ export const ADDRESSES = {
             address: 'N/A',
             decimals: 18,
             symbol: 'STETH',
+        },
+    },
+    [Network.GNOSIS]: {
+        WETH: {
+            address: '0x6A023CCd1ff6F2045C3309768eAd9E68F978f6e1',
+            decimals: 18,
+            symbol: 'WETH',
+        },
+        BAL: {
+            address: '0x7eF541E2a22058048904fE5744f9c7E4C57AF717',
+            decimals: 18,
+            symbol: 'BAL',
+        },
+        USDC: {
+            address: '0xDDAfbb505ad214D7b80b1f830fcCc89B60fb7A83',
+            decimals: 6,
+            symbol: 'USDC',
+        },
+        WXDAI: {
+            address: '0xe91d153e0b41518a2ce8dd3d7944fa863463a97d',
+            decimals: 18,
+            symbol: 'DAI',
+        },
+        USDT: {
+            address: '0x4ECaBa5870353805a9F068101A40E0f32ed605C6',
+            decimals: 6,
+            symbol: 'USDT',
         },
     },
 };
