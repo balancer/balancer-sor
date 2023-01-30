@@ -25,10 +25,11 @@ export function safeParseFixed(value: string, decimals = 0): BigNumber {
 
 // normalizes its balance as if it had 18 decimals taking price rate into consideration.
 export const normaliseBalance = (
-    token: Pick<SubgraphToken, 'balance' | 'priceRate'>
+    token: Partial<Pick<SubgraphToken, 'priceRate'>> &
+        Pick<SubgraphToken, 'balance'>
 ): bigint => {
     return parseFixed(token.balance, 18)
-        .mul(parseFixed(token.priceRate, 18))
+        .mul(parseFixed(token.priceRate ?? '1', 18))
         .div(ONE)
         .toBigInt();
 };
@@ -36,11 +37,12 @@ export const normaliseBalance = (
 // normalizes amount as if it had 18 decimals taking price rate into consideration.
 export const normaliseAmount = (
     amount: bigint,
-    token: Pick<SubgraphToken, 'priceRate' | 'decimals'>
+    token: Partial<Pick<SubgraphToken, 'priceRate'>> &
+        Pick<SubgraphToken, 'decimals'>
 ): bigint => {
     const scalingFactor = _computeScalingFactor(BigInt(token.decimals));
     return BigNumber.from(_upscale(amount, scalingFactor).toString())
-        .mul(parseFixed(token.priceRate, 18))
+        .mul(parseFixed(token.priceRate ?? '1', 18))
         .div(ONE)
         .toBigInt();
 };
@@ -48,11 +50,12 @@ export const normaliseAmount = (
 // denormalises amount from 18 decimals to token decimals taking price rate into consideration.
 export const denormaliseAmount = (
     amount: bigint,
-    token: Pick<SubgraphToken, 'priceRate' | 'decimals'>
+    token: Partial<Pick<SubgraphToken, 'priceRate'>> &
+        Pick<SubgraphToken, 'decimals'>
 ): bigint => {
     const amountAfterRate =
         (amount * ONE_BigInt) /
-        BigInt(parseFixed(token.priceRate, 18).toString());
+        BigInt(parseFixed(token.priceRate ?? '1', 18).toString());
     const scalingFactor = _computeScalingFactor(BigInt(token.decimals));
     return _downscaleDown(amountAfterRate, scalingFactor);
 };

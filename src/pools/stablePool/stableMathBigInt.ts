@@ -125,6 +125,15 @@ export function _calcInGivenOut(
     return amountIn;
 }
 
+/**
+ * _calcBptOutGivenExactTokensIn
+ * @param amp Amplification parameter in EVM Scale
+ * @param balances Token balances in EVM Scale normalised to 18 decimals (Should not have value for BPT token)
+ * @param amountsIn Token amounts in EVM Scale normalised to 18 decimals (Should not have value for BPT token)
+ * @param bptTotalSupply BPT total supply in EVM Scale
+ * @param swapFeePercentage Swap fee percentage in EVM Scale
+ * @returns BPT out in EVM Scale
+ */
 export function _calcBptOutGivenExactTokensIn(
     amp: bigint,
     balances: bigint[],
@@ -198,6 +207,16 @@ export function _calcBptOutGivenExactTokensIn(
     }
 }
 
+/**
+ * _calcTokenInGivenExactBptOut
+ * @param amp Amplification parameter in EVM Scale
+ * @param balances Token balances in EVM Scale normalised to 18 decimals (Should not have value for BPT token)
+ * @param tokenIndexIn Index of token in (from tokens array without BPT)
+ * @param bptAmountOut BPT amount out in EVM scale
+ * @param bptTotalSupply BPT total supply in EVM Scale
+ * @param fee Swap fee percentage in EVM Scale
+ * @returns token in EVM Scale normalised to 18 decimals
+ */
 export function _calcTokenInGivenExactBptOut(
     amp: bigint,
     balances: bigint[],
