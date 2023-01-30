@@ -1,53 +1,48 @@
-// yarn test:only test/stable.integration.spec.ts
+// yarn test:only test/weighted.integration.spec.ts
 import dotenv from 'dotenv';
 import { JsonRpcProvider } from '@ethersproject/providers';
 import { defaultAbiCoder } from '@ethersproject/abi';
 import { BalancerHelpers__factory } from '@balancer-labs/typechain';
-import { SubgraphPoolBase } from '../src';
+import { SubgraphPoolBase, bnum } from '../src';
 import { Network, ADDRESSES } from './testScripts/constants';
 import { AddressZero } from '@ethersproject/constants';
 import { BigNumber, formatFixed, parseFixed } from '@ethersproject/bignumber';
 import { expect } from 'chai';
-import { StablePool } from '../src/pools/stablePool/stablePool';
+import {
+    WeightedPool,
+    WeightedPoolToken,
+} from '../src/pools/weightedPool/weightedPool';
 import { setUp, checkInaccuracy } from './testScripts/utils';
 
 dotenv.config();
 
-// stabal3 - 'Balancer USD Stable Pool'
+// Balancer 50 WBTC 50 WETH
 const testPool: SubgraphPoolBase = {
-    id: '0x06df3b2bbb68adc8b0e302443692037ed9f91b42000000000000000000000063',
-    address: '0x06df3b2bbb68adc8b0e302443692037ed9f91b42',
-    poolType: 'Stable',
-    swapFee: '0.00005',
+    id: '0xa6f548df93de924d73be7d25dc02554c6bd66db500020000000000000000000e',
+    address: '0xa6f548df93de924d73be7d25dc02554c6bd66db5',
+    poolType: 'Weighted',
+    swapFee: '0.0025',
     swapEnabled: true,
-    totalWeight: '0',
-    totalShares: '2379452.16938807774682641',
+    totalWeight: '1',
+    totalShares: '569.975179583636271111',
     tokensList: [
-        '0x6b175474e89094c44da98b954eedeac495271d0f',
-        '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48',
-        '0xdac17f958d2ee523a2206206994597c13d831ec7',
+        '0x2260fac5e5542a773aa44fbcfedf7c193bc2c599',
+        '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2',
     ],
     tokens: [
         {
-            address: '0x6b175474e89094c44da98b954eedeac495271d0f', // dai
-            balance: '816187.617388549266500637',
+            address: '0x2260fac5e5542a773aa44fbcfedf7c193bc2c599', // WBTC
+            balance: '79.07066658',
+            decimals: 8,
+            priceRate: '1',
+            weight: '0.5',
+        },
+        {
+            address: '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2', // WETH
+            balance: '1070.934861851870065442',
             decimals: 18,
             priceRate: '1',
-            weight: null,
-        },
-        {
-            address: '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48', // usdc
-            balance: '843334.571152',
-            decimals: 6,
-            priceRate: '1',
-            weight: null,
-        },
-        {
-            address: '0xdac17f958d2ee523a2206206994597c13d831ec7', // usdt
-            balance: '757349.509194',
-            decimals: 6,
-            priceRate: '1',
-            weight: null,
+            weight: '0.5',
         },
     ],
 };
@@ -57,7 +52,7 @@ const jsonRpcUrl = 'https://mainnet.infura.io/v3/' + process.env.INFURA;
 const rpcUrl = 'http://127.0.0.1:8545';
 const blockNumber = 16447247;
 const provider = new JsonRpcProvider(rpcUrl, networkId);
-let pool: StablePool;
+let pool: WeightedPool;
 
 export async function queryJoin(
     network: number,
@@ -137,9 +132,43 @@ export async function queryExit(
     return query;
 }
 
-const inaccuracyLimit = 1e-2;
+export async function querySingleTokenExit(
+    network: number,
+    poolId: string,
+    assets: string[],
+    bptAmountIn: string,
+    exitTokenIndex: number
+): Promise<
+    [BigNumber, BigNumber[]] & { bptIn: BigNumber; amountsOut: BigNumber[] }
+> {
+    const helpers = BalancerHelpers__factory.connect(
+        ADDRESSES[network].balancerHelpers,
+        provider
+    );
+    const EXACT_BPT_IN_FOR_ONE_TOKEN_OUT = 0; // Alternative is: BPT_IN_FOR_EXACT_TOKENS_OUT (No proportional)
+    const abi = ['uint256', 'uint256', 'uint256'];
 
-describe('Stable', () => {
+    const data = [EXACT_BPT_IN_FOR_ONE_TOKEN_OUT, bptAmountIn, exitTokenIndex];
+    const userDataEncoded = defaultAbiCoder.encode(abi, data);
+
+    const exitPoolRequest = {
+        assets,
+        minAmountsOut: assets.map(() => '0'),
+        userData: userDataEncoded,
+        toInternalBalance: false,
+    };
+    const query = await helpers.queryExit(
+        poolId,
+        AddressZero, // Not important for query
+        AddressZero,
+        exitPoolRequest
+    );
+    return query;
+}
+
+const inaccuracyLimit = 1e-4;
+
+describe('Weighted', () => {
     before(async function () {
         const sor = await setUp(
             networkId,
@@ -150,30 +179,16 @@ describe('Stable', () => {
         );
         await sor.fetchPools();
         const pools = sor.getPools();
-        pool = StablePool.fromPool(pools[0]);
+        pool = WeightedPool.fromPool(pools[0]);
     });
     context('test joins vs queryJoin', () => {
-        context('Joins', () => {
-            it('Join with many tokens', async () => {
+        context('Join with all tokens', () => {
+            it('should calc join with all tokens with max 1 bps inaccuracy', async () => {
                 const amountsIn = [
-                    parseFixed('0.123', 18),
-                    parseFixed('0.456', 6),
-                    parseFixed('0.789', 6),
+                    parseFixed('0.123', 8),
+                    parseFixed('0.456', 18),
                 ];
                 const bptOut = pool._calcBptOutGivenExactTokensIn(amountsIn);
-
-                /*
-                {
-                  "assets": [
-                    "0x6b175474e89094c44da98b954eedeac495271d0f",
-                    "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
-                    "0xdac17f958d2ee523a2206206994597c13d831ec7"
-                  ],
-                  "maxAmountsIn": [ "123000000000000000", "456000", "789000" ],
-                  "userData": "0x000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000600000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000300000000000000000000000000000000000000000000000001b4fbd92b5f8000000000000000000000000000000000000000000000000000000000000006f54000000000000000000000000000000000000000000000000000000000000c0a08",
-                  "fromInternalBalance": false
-                }
-                */
 
                 const deltas = await queryJoin(
                     networkId,
@@ -181,10 +196,6 @@ describe('Stable', () => {
                     testPool.tokensList,
                     amountsIn.map((a) => a.toString())
                 );
-                console.log('bptOut       ', formatFixed(bptOut, 18));
-                console.log('delta bptOut ', formatFixed(deltas.bptOut, 18));
-                // expect(bptOut.sub(deltas.bptOut).toNumber()).to.closeTo(0, 1);
-                // expect(deltas.amountsIn.toString()).to.eq(amountsIn.toString());
                 expect(checkInaccuracy(bptOut, deltas.bptOut, inaccuracyLimit))
                     .to.be.true;
                 deltas.amountsIn.forEach((a, i) => {
@@ -192,12 +203,10 @@ describe('Stable', () => {
                         .be.true;
                 });
             });
-            it('Join with single token', async () => {
-                const amountsIn = [
-                    parseFixed('0', 18),
-                    parseFixed('0', 6),
-                    parseFixed('0.789', 6),
-                ];
+        });
+        context('Join with single token', () => {
+            it('should calc join with single token with max 1 bps inaccuracy', async () => {
+                const amountsIn = [parseFixed('0.789', 8), parseFixed('0', 18)];
                 const bptOut = pool._calcBptOutGivenExactTokensIn(amountsIn);
 
                 const deltas = await queryJoin(
@@ -206,10 +215,6 @@ describe('Stable', () => {
                     testPool.tokensList,
                     amountsIn.map((a) => a.toString())
                 );
-                console.log('bptOut       ', formatFixed(bptOut, 18));
-                console.log('delta bptOut ', formatFixed(deltas.bptOut, 18));
-                // expect(bptOut.sub(deltas.bptOut).toNumber()).to.closeTo(0, 1);
-                // expect(deltas.amountsIn.toString()).to.eq(amountsIn.toString());
                 expect(checkInaccuracy(bptOut, deltas.bptOut, inaccuracyLimit))
                     .to.be.true;
                 deltas.amountsIn.forEach((a, i) => {
@@ -220,40 +225,62 @@ describe('Stable', () => {
         });
     });
     context('test exits vs queryExit', () => {
-        context('Exits', () => {
-            // TODO: pending single token out implementation on stable pool
-            // it('BPT>token', async () => {
-            //     const tokenIndex = 0; // usdc
-            //     const bptInHuman = '0.123';
-            //     const bptInEvm = parseFixed(bptInHuman, 18);
-            //     const pairData = pool.parsePoolPairData(
-            //         testPool.address,
-            //         pool.tokensList[tokenIndex]
-            //     );
-            //     const amountOutHuman = pool._exactTokenInForTokenOut(
-            //         pairData,
-            //         bnum(bptInHuman)
-            //     );
-            //     const amountOutEvm = parseFixed(
-            //         amountOutHuman.toString(),
-            //         pairData.decimalsOut
-            //     );
+        context('Exit to single token', () => {
+            before(async function () {
+                // Artificially add BPT to the weighted pool
+                // Required for single token exit calc on the SOR (_exactTokenInForTokenOut)
+                const bptAsToken: WeightedPoolToken = {
+                    address: pool.address,
+                    balance: formatFixed(pool.totalShares, 18),
+                    decimals: 18,
+                    weight: '0',
+                };
+                pool.tokens.push(bptAsToken);
+                pool.tokensList.push(pool.address);
+            });
+            it('should calc exit to single token with max 1 bps inaccuracy', async () => {
+                const tokenIndex = 0; // WBTC
+                const bptInHuman = '0.123';
+                const bptInEvm = parseFixed(bptInHuman, 18);
+                const pairData = pool.parsePoolPairData(
+                    pool.address,
+                    pool.tokensList[tokenIndex]
+                );
 
-            //     const deltas = await querySingleTokenExit(
-            //         networkId,
-            //         testPool.id,
-            //         testPool.tokensList,
-            //         bptInEvm.toString(),
-            //         tokenIndex
-            //     );
-            //     expect(deltas.bptIn.toString()).to.eq(bptInEvm.toString());
-            //     deltas.amountsOut.forEach((a, i) => {
-            //         if (i === tokenIndex)
-            //             expect(a.toString()).to.eq(amountOutEvm.toString());
-            //         else expect(a.toString()).to.eq('0');
-            //     });
-            // });
-            it('BPT>tokens', async () => {
+                const amountOutHuman = pool._exactTokenInForTokenOut(
+                    pairData,
+                    bnum(bptInHuman)
+                );
+                const amountOutEvm = parseFixed(
+                    amountOutHuman.dp(pairData.decimalsOut).toString(),
+                    pairData.decimalsOut
+                );
+
+                const deltas = await querySingleTokenExit(
+                    networkId,
+                    testPool.id,
+                    testPool.tokensList,
+                    bptInEvm.toString(),
+                    tokenIndex
+                );
+                expect(checkInaccuracy(bptInEvm, deltas.bptIn, inaccuracyLimit))
+                    .to.be.true;
+                deltas.amountsOut.forEach((a, i) => {
+                    if (i === tokenIndex) {
+                        expect(
+                            checkInaccuracy(amountOutEvm, a, inaccuracyLimit)
+                        ).to.be.true;
+                    } else expect(a.toString()).to.eq('0');
+                });
+            });
+            after(async function () {
+                // Remove BPT that was artifically added to the pool
+                pool.tokens.pop();
+                pool.tokensList.pop();
+            });
+        });
+        context('Exit to all tokens', async () => {
+            it('should calc exit to all tokens with max 1 bps inaccuracy', async () => {
                 const bptIn = parseFixed('0.123', 18);
 
                 const amountsOut = pool._calcTokensOutGivenExactBptIn(bptIn);
@@ -263,12 +290,6 @@ describe('Stable', () => {
                     testPool.tokensList,
                     bptIn.toString()
                 );
-                console.log('amountOut       ', amountsOut.toString());
-                console.log('delta amountOut ', deltas.amountsOut.toString());
-                // expect(deltas.bptIn.toString()).to.eq(bptIn.toString());
-                // deltas.amountsOut.forEach((a, i) => {
-                //     expect(a.toString()).to.eq(amountsOut[i].toString());
-                // });
                 expect(checkInaccuracy(bptIn, deltas.bptIn, inaccuracyLimit)).to
                     .be.true;
                 deltas.amountsOut.forEach((a, i) => {

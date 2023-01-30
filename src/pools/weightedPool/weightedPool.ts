@@ -5,7 +5,12 @@ import {
     scale,
     ZERO,
 } from '../../utils/bignumber';
-import { isSameAddress } from '../../utils';
+import {
+    isSameAddress,
+    normaliseBalance,
+    normaliseAmount,
+    denormaliseAmount,
+} from '../../utils';
 import {
     PoolBase,
     PoolTypes,
@@ -331,20 +336,24 @@ export class WeightedPool implements PoolBase<WeightedPoolPairData> {
      * @returns EVM scale.
      */
     _calcTokensOutGivenExactBptIn(bptAmountIn: BigNumber): BigNumber[] {
-        // token balances are stored in human scale and must be EVM for maths
-        const balancesEvm = this.tokens
+        // balances and amounts must be normalized to 1e18 fixed point - e.g. 1USDC => 1e18 not 1e6
+        // takes price rate into account
+        const balancesNormalised = this.tokens
             .filter((t) => !isSameAddress(t.address, this.address))
-            .map((t) => parseFixed(t.balance, t.decimals).toBigInt());
-        let returnAmt: bigint[];
+            .map((t) => normaliseBalance(t));
         try {
-            returnAmt = _calcTokensOutGivenExactBptIn(
-                balancesEvm,
+            const amountsOutNormalised = _calcTokensOutGivenExactBptIn(
+                balancesNormalised,
                 bptAmountIn.toBigInt(),
                 this.totalShares.toBigInt()
             );
-            return returnAmt.map((a) => BigNumber.from(a.toString()));
+            // We want to return denormalised amounts. e.g. 1USDC => 1e6 not 1e18
+            const amountsOut = amountsOutNormalised.map((a, i) =>
+                denormaliseAmount(a, this.tokens[i])
+            );
+            return amountsOut.map((a) => BigNumber.from(a));
         } catch (err) {
-            return new Array(balancesEvm.length).fill(ZERO);
+            return new Array(balancesNormalised.length).fill(ZERO);
         }
     }
 
@@ -355,14 +364,27 @@ export class WeightedPool implements PoolBase<WeightedPoolPairData> {
      */
     _calcBptOutGivenExactTokensIn(amountsIn: BigNumber[]): BigNumber {
         try {
-            // token balances are stored in human scale and must be EVM for maths
-            const balancesEvm = this.tokens
+            // balances and amounts must be normalized to 1e18 fixed point - e.g. 1USDC => 1e18 not 1e6
+            // takes price rate into account
+            const amountsInNormalised = new Array(amountsIn.length).fill(
+                BigInt(0)
+            );
+            const balancesNormalised = new Array(amountsIn.length).fill(
+                BigInt(0)
+            );
+            this.tokens
                 .filter((t) => !isSameAddress(t.address, this.address))
-                .map((t) => parseFixed(t.balance, t.decimals).toBigInt());
+                .forEach((token, i) => {
+                    amountsInNormalised[i] = normaliseAmount(
+                        BigInt(amountsIn[i].toString()),
+                        token
+                    );
+                    balancesNormalised[i] = normaliseBalance(token);
+                });
             const bptAmountOut = _calcBptOutGivenExactTokensIn(
-                balancesEvm,
+                balancesNormalised,
                 this.getNormalizedWeights(),
-                amountsIn.map((a) => a.toBigInt()),
+                amountsInNormalised,
                 this.totalShares.toBigInt(),
                 this.swapFee.toBigInt()
             );
