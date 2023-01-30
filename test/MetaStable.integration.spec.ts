@@ -1,4 +1,4 @@
-// yarn test:only test/MetaStable.integration.spec.ts
+// yarn test:only test/metaStable.integration.spec.ts
 import dotenv from 'dotenv';
 import { JsonRpcProvider } from '@ethersproject/providers';
 import { defaultAbiCoder } from '@ethersproject/abi';

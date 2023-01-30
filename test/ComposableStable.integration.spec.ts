@@ -1,4 +1,4 @@
-// yarn test:only test/ComposableStable.integration.spec.ts
+// yarn test:only test/composableStable.integration.spec.ts
 import dotenv from 'dotenv';
 import { JsonRpcProvider } from '@ethersproject/providers';
 import { defaultAbiCoder } from '@ethersproject/abi';

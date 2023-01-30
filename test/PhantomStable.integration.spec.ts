@@ -1,4 +1,4 @@
-// yarn test:only test/PhantomStable.integration.spec.ts
+// yarn test:only test/phantomStable.integration.spec.ts
 import dotenv from 'dotenv';
 import { JsonRpcProvider } from '@ethersproject/providers';
 import { Vault__factory } from '@balancer-labs/typechain';
