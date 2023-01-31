@@ -484,8 +484,6 @@ export function _tokenInForExactTokenOut(
     }
 }
 
-// @todo check here
-
 export const spotPriceBeforeSwap = (
     amount: OldBigNumber,
     poolPairData: FxPoolPairData
@@ -584,7 +582,6 @@ export const _spotPriceAfterSwapExactTokenInForTokenOut = (
 };
 
 // spot price after target swap
-// @todo check the infinity
 // the less the normalized liquidity
 // we must have a absolute of the derivative price
 export const _spotPriceAfterSwapTokenInForExactTokenOut = (

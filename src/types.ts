@@ -191,7 +191,7 @@ export enum PoolFilter {
     ComposableStable = 'ComposableStable',
     Gyro2 = 'Gyro2',
     Gyro3 = 'Gyro3',
-    FxPool = 'FxPool',
+    FxPool = 'FX',
 }
 
 export interface PoolBase<D extends PoolPairBase = PoolPairBase> {

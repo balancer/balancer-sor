@@ -10,6 +10,7 @@ import weightedPoolAbi from '../../src/pools/weightedPool/weightedPoolAbi.json';
 import stablePoolAbi from '../../src/pools/stablePool/stablePoolAbi.json';
 import elementPoolAbi from '../../src/pools/elementPool/ConvergentCurvePool.json';
 import linearPoolAbi from '../../src/pools/linearPool/linearPoolAbi.json';
+import fxPoolAbi from '../../src/pools/xaveFxPool/fxPoolAbi.json';
 import { PoolFilter, SubgraphPoolBase, PoolDataService } from '../../src';
 import { Multicaller } from './multicaller';
 import { Fragment, JsonFragment } from '@ethersproject/abi/lib/fragments';
@@ -33,6 +34,7 @@ export async function getOnChainBalances(
                     ...stablePoolAbi,
                     ...elementPoolAbi,
                     ...linearPoolAbi,
+                    ...fxPoolAbi,
                 ].map((row) => [row.name, row])
             )
         );
@@ -89,6 +91,12 @@ export async function getOnChainBalances(
             );
         } else if (pool.poolType === 'Element') {
             multiPool.call(`${pool.id}.swapFee`, pool.address, 'percentFee');
+        } else if (pool.poolType === 'FX') {
+            multiPool.call(
+                `${pool.id}.swapFee`,
+                pool.address,
+                'protocolPercentFee'
+            );
         } else if (pool.poolType.toString().includes('Linear')) {
             multiPool.call(
                 `${pool.id}.swapFee`,
@@ -141,6 +149,7 @@ export async function getOnChainBalances(
             }
         >;
     } catch (err) {
+        console.error(err);
         throw `Issue with multicall execution.`;
     }
 
@@ -149,7 +158,7 @@ export async function getOnChainBalances(
     Object.entries(pools).forEach(([poolId, onchainData], index) => {
         try {
             const { poolTokens, swapFee, weights } = onchainData;
-
+            console.log('onchainData: ', onchainData);
             if (
                 subgraphPools[index].poolType === 'Stable' ||
                 subgraphPools[index].poolType === 'MetaStable' ||
@@ -200,24 +209,29 @@ export async function getOnChainBalances(
             }
 
             subgraphPools[index].swapFee = formatFixed(swapFee, 18);
-
+            console.log(poolTokens.tokens);
             poolTokens.tokens.forEach((token, i) => {
+                console.log(i);
                 const T = subgraphPools[index].tokens.find((t) =>
                     isSameAddress(t.address, token)
                 );
+
                 if (!T) throw `Pool Missing Expected Token: ${poolId} ${token}`;
+
                 T.balance = formatFixed(poolTokens.balances[i], T.decimals);
+                console.log(T.balance);
                 if (weights) {
                     // Only expected for WeightedPools
                     T.weight = formatFixed(weights[i], 18);
                 }
             });
             onChainPools.push(subgraphPools[index]);
+            console.log('onChainPools: ', onChainPools);
         } catch (err) {
             throw `Issue with pool onchain data: ${err}`;
         }
     });
-
+    console.log('returning onChainPools');
     return onChainPools;
 }
 
