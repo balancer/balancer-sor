@@ -6,7 +6,7 @@ import { BalancerHelpers__factory } from '@balancer-labs/typechain';
 import { SubgraphPoolBase } from '../src';
 import { Network, ADDRESSES } from './testScripts/constants';
 import { AddressZero } from '@ethersproject/constants';
-import { BigNumber, formatFixed, parseFixed } from '@ethersproject/bignumber';
+import { BigNumber, parseFixed } from '@ethersproject/bignumber';
 import { expect } from 'chai';
 import { StablePool } from '../src/pools/stablePool/stablePool';
 import { setUp, checkInaccuracy } from './testScripts/utils';
@@ -58,6 +58,7 @@ const rpcUrl = 'http://127.0.0.1:8545';
 const blockNumber = 16447247;
 const provider = new JsonRpcProvider(rpcUrl, networkId);
 let pool: StablePool;
+const inaccuracyLimit = 1e-2;
 
 export async function queryJoin(
     network: number,
@@ -82,18 +83,6 @@ export async function queryJoin(
         userData: userDataEncoded,
         fromInternalBalance: false,
     };
-
-    /*
-    {
-      "assets": [
-        "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
-        "0xdac17f958d2ee523a2206206994597c13d831ec7"
-      ],
-      "maxAmountsIn": [ "12300", "45600" ],
-      "userData": "0x0000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000006000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000300c000000000000000000000000000000000000000000000000000000000000b220",
-      "fromInternalBalance": false
-    }
-    */
 
     const query = await helpers.queryJoin(
         poolId,
@@ -137,8 +126,6 @@ export async function queryExit(
     return query;
 }
 
-const inaccuracyLimit = 1e-2;
-
 describe('Stable', () => {
     before(async function () {
         const sor = await setUp(
@@ -162,29 +149,12 @@ describe('Stable', () => {
                 ];
                 const bptOut = pool._calcBptOutGivenExactTokensIn(amountsIn);
 
-                /*
-                {
-                  "assets": [
-                    "0x6b175474e89094c44da98b954eedeac495271d0f",
-                    "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
-                    "0xdac17f958d2ee523a2206206994597c13d831ec7"
-                  ],
-                  "maxAmountsIn": [ "123000000000000000", "456000", "789000" ],
-                  "userData": "0x000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000600000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000300000000000000000000000000000000000000000000000001b4fbd92b5f8000000000000000000000000000000000000000000000000000000000000006f54000000000000000000000000000000000000000000000000000000000000c0a08",
-                  "fromInternalBalance": false
-                }
-                */
-
                 const deltas = await queryJoin(
                     networkId,
                     testPool.id,
                     testPool.tokensList,
                     amountsIn.map((a) => a.toString())
                 );
-                console.log('bptOut       ', formatFixed(bptOut, 18));
-                console.log('delta bptOut ', formatFixed(deltas.bptOut, 18));
-                // expect(bptOut.sub(deltas.bptOut).toNumber()).to.closeTo(0, 1);
-                // expect(deltas.amountsIn.toString()).to.eq(amountsIn.toString());
                 expect(checkInaccuracy(bptOut, deltas.bptOut, inaccuracyLimit))
                     .to.be.true;
                 deltas.amountsIn.forEach((a, i) => {
@@ -206,10 +176,6 @@ describe('Stable', () => {
                     testPool.tokensList,
                     amountsIn.map((a) => a.toString())
                 );
-                console.log('bptOut       ', formatFixed(bptOut, 18));
-                console.log('delta bptOut ', formatFixed(deltas.bptOut, 18));
-                // expect(bptOut.sub(deltas.bptOut).toNumber()).to.closeTo(0, 1);
-                // expect(deltas.amountsIn.toString()).to.eq(amountsIn.toString());
                 expect(checkInaccuracy(bptOut, deltas.bptOut, inaccuracyLimit))
                     .to.be.true;
                 deltas.amountsIn.forEach((a, i) => {
@@ -263,12 +229,6 @@ describe('Stable', () => {
                     testPool.tokensList,
                     bptIn.toString()
                 );
-                console.log('amountOut       ', amountsOut.toString());
-                console.log('delta amountOut ', deltas.amountsOut.toString());
-                // expect(deltas.bptIn.toString()).to.eq(bptIn.toString());
-                // deltas.amountsOut.forEach((a, i) => {
-                //     expect(a.toString()).to.eq(amountsOut[i].toString());
-                // });
                 expect(checkInaccuracy(bptIn, deltas.bptIn, inaccuracyLimit)).to
                     .be.true;
                 deltas.amountsOut.forEach((a, i) => {

@@ -75,18 +75,6 @@ export async function queryJoin(
         fromInternalBalance: false,
     };
 
-    /*
-    {
-      "assets": [
-        "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
-        "0xdac17f958d2ee523a2206206994597c13d831ec7"
-      ],
-      "maxAmountsIn": [ "12300", "45600" ],
-      "userData": "0x0000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000006000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000300c000000000000000000000000000000000000000000000000000000000000b220",
-      "fromInternalBalance": false
-    }
-    */
-
     const query = await helpers.queryJoin(
         poolId,
         AddressZero, // Not important for query
@@ -253,8 +241,6 @@ describe('MetaStable', () => {
                     testPool.tokensList,
                     bptIn.toString()
                 );
-                console.log('amountOut       ', amountOut.toString());
-                console.log('delta amountOut ', deltas.amountsOut.toString());
                 expect(deltas.bptIn.toString()).to.eq(bptIn.toString());
                 deltas.amountsOut.forEach((a, i) => {
                     expect(a.toString()).to.eq(amountOut[i].toString());
