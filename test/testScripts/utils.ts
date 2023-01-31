@@ -1,10 +1,12 @@
 import dotenv from 'dotenv';
 dotenv.config();
+import { defaultAbiCoder } from '@ethersproject/abi';
 import { BigNumber, BigNumberish, formatFixed } from '@ethersproject/bignumber';
 import { JsonRpcProvider } from '@ethersproject/providers';
 import { Wallet } from '@ethersproject/wallet';
 import { Contract } from '@ethersproject/contracts';
 import { AddressZero, MaxUint256, WeiPerEther } from '@ethersproject/constants';
+import { BalancerHelpers__factory } from '@balancer-labs/typechain';
 import {
     FundManagement,
     SOR,
@@ -12,7 +14,13 @@ import {
     SwapInfo,
     SwapTypes,
 } from '../../src';
-import { Network, MULTIADDR, SOR_CONFIG, vaultAddr } from './constants';
+import {
+    ADDRESSES,
+    MULTIADDR,
+    Network,
+    SOR_CONFIG,
+    vaultAddr,
+} from './constants';
 import { OnChainPoolDataService } from '../lib/onchainData';
 import { TokenPriceService } from '../../src';
 
@@ -286,3 +294,117 @@ export const checkInaccuracy = (
     const inaccuracyLimitEVM = WeiPerEther.div(1 / inaccuracyLimit);
     return inaccuracyEVM.lte(inaccuracyLimitEVM);
 };
+
+export async function queryJoin(
+    provider: JsonRpcProvider,
+    poolId: string,
+    assets: string[],
+    amounts: string[]
+): Promise<
+    [BigNumber, BigNumber[]] & { bptOut: BigNumber; amountsIn: BigNumber[] }
+> {
+    const helpers = BalancerHelpers__factory.connect(
+        ADDRESSES[provider.network.chainId].balancerHelpers,
+        provider
+    );
+    const EXACT_TOKENS_IN_FOR_BPT_OUT = 1; // Alternative is: TOKEN_IN_FOR_EXACT_BPT_OUT
+    const minimumBPT = '0';
+    const abi = ['uint256', 'uint256[]', 'uint256'];
+    // Remove BPT from amounts to be passed into data
+    const bptAddress = poolId.slice(0, 42); // Get BPT address from poolId
+    const bptIndex = assets.findIndex(
+        (a) => a.toLowerCase() === bptAddress.toLowerCase()
+    );
+    const amountsWithoutBpt = [...amounts];
+    if (bptIndex !== -1) {
+        amountsWithoutBpt.splice(bptIndex, 1);
+    }
+    const data = [EXACT_TOKENS_IN_FOR_BPT_OUT, amountsWithoutBpt, minimumBPT]; // Must not include amount for BPT
+    const userDataEncoded = defaultAbiCoder.encode(abi, data);
+    const joinPoolRequest = {
+        assets,
+        maxAmountsIn: amounts, // Must include BPT
+        userData: userDataEncoded,
+        fromInternalBalance: false,
+    };
+    const query = await helpers.queryJoin(
+        poolId,
+        AddressZero, // Not important for query
+        AddressZero,
+        joinPoolRequest
+    );
+    return query;
+}
+
+export async function querySingleTokenExit(
+    provider: JsonRpcProvider,
+    poolId: string,
+    assets: string[],
+    bptIn: string,
+    exitTokenIndex: number
+): Promise<
+    [BigNumber, BigNumber[]] & { bptIn: BigNumber; amountsOut: BigNumber[] }
+> {
+    const helpers = BalancerHelpers__factory.connect(
+        ADDRESSES[provider.network.chainId].balancerHelpers,
+        provider
+    );
+    const EXACT_BPT_IN_FOR_ONE_TOKEN_OUT = 0; // Alternative is: BPT_IN_FOR_EXACT_TOKENS_OUT (No proportional)
+    const abi = ['uint256', 'uint256', 'uint256'];
+
+    // Remove BPT from amounts to be passed into data
+    const bptAddress = poolId.slice(0, 42); // Get BPT address from poolId
+    const bptIndex = assets.findIndex((a) => a === bptAddress);
+    // Exit token index must be adjusted if BPT is included in assets
+    if (bptIndex > -1 && bptIndex < exitTokenIndex) exitTokenIndex -= 1;
+
+    const data = [EXACT_BPT_IN_FOR_ONE_TOKEN_OUT, bptIn, exitTokenIndex];
+    const userData = defaultAbiCoder.encode(abi, data);
+
+    const exitPoolRequest = {
+        assets,
+        minAmountsOut: assets.map(() => '0'),
+        userData,
+        toInternalBalance: false,
+    };
+    const query = await helpers.queryExit(
+        poolId,
+        AddressZero, // Not important for query
+        AddressZero,
+        exitPoolRequest
+    );
+    return query;
+}
+
+export async function queryExit(
+    provider: JsonRpcProvider,
+    poolId: string,
+    assets: string[],
+    bptIn: string
+): Promise<
+    [BigNumber, BigNumber[]] & { bptIn: BigNumber; amountsOut: BigNumber[] }
+> {
+    const helpers = BalancerHelpers__factory.connect(
+        ADDRESSES[provider.network.chainId].balancerHelpers,
+        provider
+    );
+    const EXACT_BPT_IN_FOR_TOKENS_OUT = 1; // Alternative is: BPT_IN_FOR_EXACT_TOKENS_OUT (No proportional)
+    const abi = ['uint256', 'uint256'];
+
+    const data = [EXACT_BPT_IN_FOR_TOKENS_OUT, bptIn];
+    const userData = defaultAbiCoder.encode(abi, data);
+
+    const exitPoolRequest = {
+        assets,
+        minAmountsOut: assets.map(() => '0'),
+        userData,
+        toInternalBalance: false,
+    };
+    const query = await helpers.queryExit(
+        poolId,
+        AddressZero, // Not important for query
+        AddressZero,
+        exitPoolRequest
+    );
+    return query;
+}

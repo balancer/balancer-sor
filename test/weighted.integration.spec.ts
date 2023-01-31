@@ -1,18 +1,21 @@
 // yarn test:only test/weighted.integration.spec.ts
 import dotenv from 'dotenv';
 import { JsonRpcProvider } from '@ethersproject/providers';
-import { defaultAbiCoder } from '@ethersproject/abi';
-import { BalancerHelpers__factory } from '@balancer-labs/typechain';
 import { SubgraphPoolBase, bnum } from '../src';
-import { Network, ADDRESSES } from './testScripts/constants';
-import { AddressZero } from '@ethersproject/constants';
-import { BigNumber, formatFixed, parseFixed } from '@ethersproject/bignumber';
+import { Network } from './testScripts/constants';
+import { formatFixed, parseFixed } from '@ethersproject/bignumber';
 import { expect } from 'chai';
 import {
     WeightedPool,
     WeightedPoolToken,
 } from '../src/pools/weightedPool/weightedPool';
-import { setUp, checkInaccuracy } from './testScripts/utils';
+import {
+    setUp,
+    queryJoin,
+    queryExit,
+    querySingleTokenExit,
+    checkInaccuracy,
+} from './testScripts/utils';
 
 dotenv.config();
 
@@ -55,106 +58,6 @@ const provider = new JsonRpcProvider(rpcUrl, networkId);
 let pool: WeightedPool;
 const inaccuracyLimit = 1e-4;
 
-export async function queryJoin(
-    network: number,
-    poolId: string,
-    assets: string[],
-    amountsIn: string[]
-): Promise<
-    [BigNumber, BigNumber[]] & { bptOut: BigNumber; amountsIn: BigNumber[] }
-> {
-    const helpers = BalancerHelpers__factory.connect(
-        ADDRESSES[network].balancerHelpers,
-        provider
-    );
-    const EXACT_TOKENS_IN_FOR_BPT_OUT = 1; // Alternative is: TOKEN_IN_FOR_EXACT_BPT_OUT
-    const minimumBPT = '0';
-    const abi = ['uint256', 'uint256[]', 'uint256'];
-    const data = [EXACT_TOKENS_IN_FOR_BPT_OUT, amountsIn, minimumBPT];
-    const userDataEncoded = defaultAbiCoder.encode(abi, data);
-    const joinPoolRequest = {
-        assets,
-        maxAmountsIn: amountsIn,
-        userData: userDataEncoded,
-        fromInternalBalance: false,
-    };
-
-    const query = await helpers.queryJoin(
-        poolId,
-        AddressZero, // Not important for query
-        AddressZero,
-        joinPoolRequest
-    );
-    return query;
-}
-
-export async function queryExit(
-    network: number,
-    poolId: string,
-    assets: string[],
-    bptAmountIn: string
-): Promise<
-    [BigNumber, BigNumber[]] & { bptIn: BigNumber; amountsOut: BigNumber[] }
-> {
-    const helpers = BalancerHelpers__factory.connect(
-        ADDRESSES[network].balancerHelpers,
-        provider
-    );
-    const EXACT_BPT_IN_FOR_TOKENS_OUT = 1; // Alternative is: BPT_IN_FOR_EXACT_TOKENS_OUT (No proportional)
-    const abi = ['uint256', 'uint256'];
-
-    const data = [EXACT_BPT_IN_FOR_TOKENS_OUT, bptAmountIn];
-    const userDataEncoded = defaultAbiCoder.encode(abi, data);
-
-    const exitPoolRequest = {
-        assets,
-        minAmountsOut: assets.map(() => '0'),
-        userData: userDataEncoded,
-        toInternalBalance: false,
-    };
-    const query = await helpers.queryExit(
-        poolId,
-        AddressZero, // Not important for query
-        AddressZero,
-        exitPoolRequest
-    );
-    return query;
-}
-
-export async function querySingleTokenExit(
-    network: number,
-    poolId: string,
-    assets: string[],
-    bptAmountIn: string,
-    exitTokenIndex: number
-): Promise<
-    [BigNumber, BigNumber[]] & { bptIn: BigNumber; amountsOut: BigNumber[] }
-> {
-    const helpers = BalancerHelpers__factory.connect(
-        ADDRESSES[network].balancerHelpers,
-        provider
-    );
-    const EXACT_BPT_IN_FOR_ONE_TOKEN_OUT = 0; // Alternative is: BPT_IN_FOR_EXACT_TOKENS_OUT (No proportional)
-    const abi = ['uint256', 'uint256', 'uint256'];
-
-    const data = [EXACT_BPT_IN_FOR_ONE_TOKEN_OUT, bptAmountIn, exitTokenIndex];
-    const userDataEncoded = defaultAbiCoder.encode(abi, data);
-
-    const exitPoolRequest = {
-        assets,
-        minAmountsOut: assets.map(() => '0'),
-        userData: userDataEncoded,
-        toInternalBalance: false,
-    };
-    const query = await helpers.queryExit(
-        poolId,
-        AddressZero, // Not important for query
-        AddressZero,
-        exitPoolRequest
-    );
-    return query;
-}
-
 describe('Weighted', () => {
     before(async function () {
         const sor = await setUp(
@@ -178,7 +81,7 @@ describe('Weighted', () => {
                 const bptOut = pool._calcBptOutGivenExactTokensIn(amountsIn);
 
                 const deltas = await queryJoin(
-                    networkId,
+                    provider,
                     testPool.id,
                     testPool.tokensList,
                     amountsIn.map((a) => a.toString())
@@ -197,7 +100,7 @@ describe('Weighted', () => {
                 const bptOut = pool._calcBptOutGivenExactTokensIn(amountsIn);
 
                 const deltas = await queryJoin(
-                    networkId,
+                    provider,
                     testPool.id,
                     testPool.tokensList,
                     amountsIn.map((a) => a.toString())
@@ -244,7 +147,7 @@ describe('Weighted', () => {
                 );
 
                 const deltas = await querySingleTokenExit(
-                    networkId,
+                    provider,
                     testPool.id,
                     testPool.tokensList,
                     bptInEvm.toString(),
@@ -272,7 +175,7 @@ describe('Weighted', () => {
 
                 const amountsOut = pool._calcTokensOutGivenExactBptIn(bptIn);
                 const deltas = await queryExit(
-                    networkId,
+                    provider,
                     testPool.id,
                     testPool.tokensList,
                     bptIn.toString()
