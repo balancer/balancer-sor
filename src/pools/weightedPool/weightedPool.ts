@@ -337,7 +337,6 @@ export class WeightedPool implements PoolBase<WeightedPoolPairData> {
      */
     _calcTokensOutGivenExactBptIn(bptAmountIn: BigNumber): BigNumber[] {
         // balances and amounts must be normalized to 1e18 fixed point - e.g. 1USDC => 1e18 not 1e6
-        // takes price rate into account
         const balancesNormalised = this.tokens
             .filter((t) => !isSameAddress(t.address, this.address))
             .map((t) => normaliseBalance(t));
@@ -365,7 +364,6 @@ export class WeightedPool implements PoolBase<WeightedPoolPairData> {
     _calcBptOutGivenExactTokensIn(amountsIn: BigNumber[]): BigNumber {
         try {
             // balances and amounts must be normalized to 1e18 fixed point - e.g. 1USDC => 1e18 not 1e6
-            // takes price rate into account
             const amountsInNormalised = new Array(amountsIn.length).fill(
                 BigInt(0)
             );
