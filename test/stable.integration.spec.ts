@@ -6,12 +6,7 @@ import { Network } from './testScripts/constants';
 import { parseFixed } from '@ethersproject/bignumber';
 import { expect } from 'chai';
 import { StablePool } from '../src/pools/stablePool/stablePool';
-import {
-    setUp,
-    queryJoin,
-    queryExit,
-    checkInaccuracy,
-} from './testScripts/utils';
+import { setUp, queryJoin, queryExit, accuracy } from './testScripts/utils';
 
 dotenv.config();
 
@@ -91,11 +86,15 @@ describe('Stable', () => {
                     testPool.tokensList,
                     amountsIn.map((a) => a.toString())
                 );
-                expect(checkInaccuracy(bptOut, deltas.bptOut, inaccuracyLimit))
-                    .to.be.true;
+                expect(accuracy(bptOut, deltas.bptOut)).to.be.closeTo(
+                    1,
+                    inaccuracyLimit
+                );
                 deltas.amountsIn.forEach((a, i) => {
-                    expect(checkInaccuracy(amountsIn[i], a, inaccuracyLimit)).to
-                        .be.true;
+                    expect(accuracy(amountsIn[i], a)).to.be.closeTo(
+                        1,
+                        inaccuracyLimit
+                    );
                 });
             });
             it('Join with single token', async () => {
@@ -112,11 +111,15 @@ describe('Stable', () => {
                     testPool.tokensList,
                     amountsIn.map((a) => a.toString())
                 );
-                expect(checkInaccuracy(bptOut, deltas.bptOut, inaccuracyLimit))
-                    .to.be.true;
+                expect(accuracy(bptOut, deltas.bptOut)).to.be.closeTo(
+                    1,
+                    inaccuracyLimit
+                );
                 deltas.amountsIn.forEach((a, i) => {
-                    expect(checkInaccuracy(amountsIn[i], a, inaccuracyLimit)).to
-                        .be.true;
+                    expect(accuracy(amountsIn[i], a)).to.be.closeTo(
+                        1,
+                        inaccuracyLimit
+                    );
                 });
             });
         });
@@ -165,11 +168,15 @@ describe('Stable', () => {
                     testPool.tokensList,
                     bptIn.toString()
                 );
-                expect(checkInaccuracy(bptIn, deltas.bptIn, inaccuracyLimit)).to
-                    .be.true;
+                expect(accuracy(bptIn, deltas.bptIn)).to.be.closeTo(
+                    1,
+                    inaccuracyLimit
+                );
                 deltas.amountsOut.forEach((a, i) => {
-                    expect(checkInaccuracy(amountsOut[i], a, inaccuracyLimit))
-                        .to.be.true;
+                    expect(accuracy(amountsOut[i], a)).to.be.closeTo(
+                        1,
+                        inaccuracyLimit
+                    );
                 });
             });
         });

@@ -14,7 +14,7 @@ import {
     queryJoin,
     queryExit,
     querySingleTokenExit,
-    checkInaccuracy,
+    accuracy,
 } from './testScripts/utils';
 
 dotenv.config();
@@ -86,11 +86,15 @@ describe('Weighted', () => {
                     testPool.tokensList,
                     amountsIn.map((a) => a.toString())
                 );
-                expect(checkInaccuracy(bptOut, deltas.bptOut, inaccuracyLimit))
-                    .to.be.true;
+                expect(accuracy(bptOut, deltas.bptOut)).to.be.closeTo(
+                    1,
+                    inaccuracyLimit
+                );
                 deltas.amountsIn.forEach((a, i) => {
-                    expect(checkInaccuracy(amountsIn[i], a, inaccuracyLimit)).to
-                        .be.true;
+                    expect(accuracy(amountsIn[i], a)).to.be.closeTo(
+                        1,
+                        inaccuracyLimit
+                    );
                 });
             });
         });
@@ -105,11 +109,15 @@ describe('Weighted', () => {
                     testPool.tokensList,
                     amountsIn.map((a) => a.toString())
                 );
-                expect(checkInaccuracy(bptOut, deltas.bptOut, inaccuracyLimit))
-                    .to.be.true;
+                expect(accuracy(bptOut, deltas.bptOut)).to.be.closeTo(
+                    1,
+                    inaccuracyLimit
+                );
                 deltas.amountsIn.forEach((a, i) => {
-                    expect(checkInaccuracy(amountsIn[i], a, inaccuracyLimit)).to
-                        .be.true;
+                    expect(accuracy(amountsIn[i], a)).to.be.closeTo(
+                        1,
+                        inaccuracyLimit
+                    );
                 });
             });
         });
@@ -153,13 +161,16 @@ describe('Weighted', () => {
                     bptInEvm.toString(),
                     tokenIndex
                 );
-                expect(checkInaccuracy(bptInEvm, deltas.bptIn, inaccuracyLimit))
-                    .to.be.true;
+                expect(accuracy(bptInEvm, deltas.bptIn)).to.be.closeTo(
+                    1,
+                    inaccuracyLimit
+                );
                 deltas.amountsOut.forEach((a, i) => {
                     if (i === tokenIndex) {
-                        expect(
-                            checkInaccuracy(amountOutEvm, a, inaccuracyLimit)
-                        ).to.be.true;
+                        expect(accuracy(amountOutEvm, a)).to.be.closeTo(
+                            1,
+                            inaccuracyLimit
+                        );
                     } else expect(a.toString()).to.eq('0');
                 });
             });
@@ -180,11 +191,15 @@ describe('Weighted', () => {
                     testPool.tokensList,
                     bptIn.toString()
                 );
-                expect(checkInaccuracy(bptIn, deltas.bptIn, inaccuracyLimit)).to
-                    .be.true;
+                expect(accuracy(bptIn, deltas.bptIn)).to.be.closeTo(
+                    1,
+                    inaccuracyLimit
+                );
                 deltas.amountsOut.forEach((a, i) => {
-                    expect(checkInaccuracy(amountsOut[i], a, inaccuracyLimit))
-                        .to.be.true;
+                    expect(accuracy(amountsOut[i], a)).to.be.closeTo(
+                        1,
+                        inaccuracyLimit
+                    );
                 });
             });
         });

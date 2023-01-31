@@ -1,7 +1,7 @@
 import dotenv from 'dotenv';
 dotenv.config();
 import { defaultAbiCoder } from '@ethersproject/abi';
-import { BigNumber, BigNumberish, formatFixed } from '@ethersproject/bignumber';
+import { BigNumber, formatFixed } from '@ethersproject/bignumber';
 import { JsonRpcProvider } from '@ethersproject/providers';
 import { Wallet } from '@ethersproject/wallet';
 import { Contract } from '@ethersproject/contracts';
@@ -276,23 +276,16 @@ export const setUp = async (
     );
 };
 
-export const checkInaccuracy = (
+export const accuracy = (
     amount: BigNumber,
-    expectedAmount: BigNumberish,
-    inaccuracyLimit: number
-): boolean => {
-    if (amount.eq(expectedAmount)) {
-        return true;
-    }
-    if (amount.eq(0)) throw new Error("Can't check inaccuracy for 0 amount");
-
-    const inaccuracyEVM = amount
-        .sub(expectedAmount)
-        .mul(WeiPerEther)
-        .div(amount)
-        .abs();
-    const inaccuracyLimitEVM = WeiPerEther.div(1 / inaccuracyLimit);
-    return inaccuracyEVM.lte(inaccuracyLimitEVM);
+    expectedAmount: BigNumber
+): number => {
+    if (amount.eq(expectedAmount)) return 1;
+    if (expectedAmount.eq(0))
+        throw new Error("Can't check accuracy for expectedAmount 0");
+    const accuracyEvm = amount.mul(WeiPerEther).div(expectedAmount);
+    const accuracy = formatFixed(accuracyEvm, 18);
+    return parseFloat(accuracy);
 };
 
 export async function queryJoin(
