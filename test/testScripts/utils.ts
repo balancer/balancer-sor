@@ -215,20 +215,6 @@ export async function printOutput(
     console.log('spot price: ', swapInfo.marketSp);
 }
 
-// export const onChainPoolDataService = (
-//     networkId: Network,
-//     provider: JsonRpcProvider,
-//     pools: SubgraphPoolBase[]
-// ): OnChainPoolDataService => {
-//     // The SOR needs to fetch pool data from an external source. This provider fetches from Subgraph and onchain calls.
-//     return new OnChainPoolDataService({
-//         vaultAddress: vaultAddr,
-//         multiAddress: MULTIADDR[networkId],
-//         provider,
-//         pools,
-//     });
-// };
-
 // Setup SOR with data services
 export const setUp = async (
     networkId: Network,
