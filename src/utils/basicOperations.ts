@@ -1,9 +1,20 @@
 export const BZERO = BigInt(0);
 export const BONE = BigInt(1);
+export const ONE = BigInt('1000000000000000000'); // 18 decimal places
 
 const _require = (b: boolean, message: string) => {
     if (!b) throw new Error(message);
 };
+
+/**
+ * @dev Returns a scaling factor that, when multiplied to a token amount for `token`, normalizes its balance as if
+ * it had 18 decimals.
+ */
+export function _computeScalingFactor(tokenDecimals: bigint): bigint {
+    // Tokens with more than 18 decimals are not supported.
+    const decimalsDifference = BigInt(18) - tokenDecimals;
+    return ONE * BigInt(10) ** decimalsDifference;
+}
 
 /**
  * @dev Applies `scalingFactor` to `amount`, resulting in a larger or equal value depending on whether it needed

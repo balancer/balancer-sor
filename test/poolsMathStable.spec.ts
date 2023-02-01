@@ -1,3 +1,4 @@
+// TS_NODE_PROJECT='tsconfig.testing.json' npx mocha -r ts-node/register test/poolsMathStable.spec.ts
 import * as stable from '../src/pools/stablePool/stableMathBigInt';
 import * as SDK from '@georgeroman/balancer-v2-pools';
 import { BigNumber as OldBigNumber, bnum } from '../src/utils/bignumber';
