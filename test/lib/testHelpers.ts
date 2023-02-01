@@ -460,3 +460,8 @@ export function poolsCheckPath(path: NewPath, poolsIds: string[]): boolean {
     }
     return true;
 }
+
+export function closeTo(x: BigNumber, y: BigNumber, delta: number): void {
+    const diff = x.sub(y).abs().toNumber();
+    expect(diff).lte(delta);
+}

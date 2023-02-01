@@ -63,6 +63,8 @@ jobs:
               if: steps.cache.outputs.cache-hit != 'true'
             - name: Compile
               run: yarn build
+            - name: Run node in background for integration tests
+              run: npx hardhat --tsconfig tsconfig.testing.json node --hostname 127.0.0.1 --fork https://mainnet.infura.io/v3/${{ secrets.INFURA }} &
             - name: Test
               run: yarn test
 env:
