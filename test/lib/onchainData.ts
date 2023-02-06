@@ -8,6 +8,7 @@ import vaultAbi from '../../src/abi/Vault.json';
 import aTokenRateProvider from '../../src/abi/StaticATokenRateProvider.json';
 import weightedPoolAbi from '../../src/pools/weightedPool/weightedPoolAbi.json';
 import stablePoolAbi from '../../src/pools/stablePool/stablePoolAbi.json';
+import composableStablePoolAbi from '../../src/pools/composableStable/ComposableStable.json';
 import elementPoolAbi from '../../src/pools/elementPool/ConvergentCurvePool.json';
 import linearPoolAbi from '../../src/pools/linearPool/linearPoolAbi.json';
 import fxPoolAbi from '../../src/pools/xaveFxPool/fxPoolAbi.json';
@@ -34,6 +35,7 @@ export async function getOnChainBalances(
                     ...stablePoolAbi,
                     ...elementPoolAbi,
                     ...linearPoolAbi,
+                    ...composableStablePoolAbi,
                     ...fxPoolAbi,
                 ].map((row) => [row.name, row])
             )
@@ -55,6 +57,35 @@ export async function getOnChainBalances(
             pool.id,
         ]);
         multiPool.call(`${pool.id}.totalSupply`, pool.address, 'totalSupply');
+
+        // Pools with pre minted BPT
+        if (
+            pool.poolType.includes('Linear') ||
+            pool.poolType === 'StablePhantom'
+        ) {
+            multiPool.call(
+                `${pool.id}.virtualSupply`,
+                pool.address,
+                'getVirtualSupply'
+            );
+        }
+
+        /**
+         * Returns the effective BPT supply.
+         * In other pools, this would be the same as `totalSupply`, but there are two key differences here:
+         *  - this pool pre-mints BPT and holds it in the Vault as a token, and as such we need to subtract the Vault's
+         *    balance to get the total "circulating supply". This is called the 'virtualSupply'.
+         *  - the Pool owes debt to the Protocol in the form of unminted BPT, which will be minted immediately before the
+         *    next join or exit. We need to take these into account since, even if they don't yet exist, they will
+         *    effectively be included in any Pool operation that involves BPT.
+         * In the vast majority of cases, this function should be used instead of `totalSupply()`.
+         */
+        if (pool.poolType === 'ComposableStable')
+            multiPool.call(
+                `${pool.id}.actualSupply`,
+                pool.address,
+                'getActualSupply'
+            );
 
         // TO DO - Make this part of class to make more flexible?
         if (
@@ -131,6 +162,9 @@ export async function getOnChainBalances(
                 balances: string[];
             };
             rate?: string;
+            totalSupply: string;
+            virtualSupply?: string;
+            actualSupply?: string;
         }
     >;
 
@@ -146,10 +180,13 @@ export async function getOnChainBalances(
                     balances: string[];
                 };
                 rate?: string;
+                totalSupply: string;
+                virtualSupply?: string;
+                actualSupply?: string;
             }
         >;
     } catch (err) {
-        console.error(err);
+        console.log(err);
         throw `Issue with multicall execution.`;
     }
 
@@ -157,8 +194,15 @@ export async function getOnChainBalances(
 
     Object.entries(pools).forEach(([poolId, onchainData], index) => {
         try {
-            const { poolTokens, swapFee, weights } = onchainData;
-            console.log('onchainData: ', onchainData);
+            const {
+                poolTokens,
+                swapFee,
+                weights,
+                virtualSupply,
+                actualSupply,
+                totalSupply,
+            } = onchainData;
+
             if (
                 subgraphPools[index].poolType === 'Stable' ||
                 subgraphPools[index].poolType === 'MetaStable' ||
@@ -225,6 +269,35 @@ export async function getOnChainBalances(
                     T.weight = formatFixed(weights[i], 18);
                 }
             });
+            // Pools with pre minted BPT
+            if (
+                subgraphPools[index].poolType.includes('Linear') ||
+                subgraphPools[index].poolType === 'StablePhantom'
+            ) {
+                if (virtualSupply === undefined) {
+                    console.error(
+                        `Pool with pre-minted BPT missing Virtual Supply: ${poolId}`
+                    );
+                    return;
+                }
+                subgraphPools[index].totalShares = formatFixed(
+                    virtualSupply,
+                    18
+                );
+            } else if (subgraphPools[index].poolType === 'ComposableStable') {
+                if (actualSupply === undefined) {
+                    console.error(
+                        `ComposableStable missing Actual Supply: ${poolId}`
+                    );
+                    return;
+                }
+                subgraphPools[index].totalShares = formatFixed(
+                    actualSupply,
+                    18
+                );
+            } else {
+                subgraphPools[index].totalShares = formatFixed(totalSupply, 18);
+            }
             onChainPools.push(subgraphPools[index]);
             console.log('onChainPools: ', onChainPools);
         } catch (err) {

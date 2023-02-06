@@ -7,6 +7,7 @@ export enum Network {
     KOVAN = 42,
     POLYGON = 137,
     ARBITRUM = 42161,
+    GNOSIS = 100,
 }
 
 export const SOR_CONFIG: Record<Network, SorConfig> = {
@@ -14,6 +15,16 @@ export const SOR_CONFIG: Record<Network, SorConfig> = {
         chainId: Network.MAINNET, //1
         vault: '0xBA12222222228d8Ba445958a75a0704d566BF2C8',
         weth: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2',
+        connectingTokens: [
+            {
+                symbol: 'weth',
+                address: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2',
+            },
+            {
+                symbol: 'DOLA',
+                address: '0x865377367054516e17014CcdED1e7d814EDC9ce4',
+            },
+        ],
         wETHwstETH: {
             id: '0x32296969ef14eb0c6d29669c550d4a0449130230000200000000000000000080',
             address: '0x32296969ef14eb0c6d29669c550d4a0449130230',
@@ -23,6 +34,12 @@ export const SOR_CONFIG: Record<Network, SorConfig> = {
         chainId: Network.KOVAN, //42
         vault: '0xBA12222222228d8Ba445958a75a0704d566BF2C8',
         weth: '0xdFCeA9088c8A88A76FF74892C1457C17dfeef9C1',
+        connectingTokens: [
+            {
+                symbol: 'weth',
+                address: '0xdFCeA9088c8A88A76FF74892C1457C17dfeef9C1',
+            },
+        ],
         staBal3Pool: {
             id: '0x8fd162f338b770f7e879030830cde9173367f3010000000000000000000004d8',
             address: '0x8fd162f338b770f7e879030830cde9173367f301',
@@ -32,16 +49,49 @@ export const SOR_CONFIG: Record<Network, SorConfig> = {
         chainId: Network.GOERLI, //5
         vault: '0x65748E8287Ce4B9E6D83EE853431958851550311',
         weth: '0x9A1000D492d40bfccbc03f413A48F5B6516Ec0Fd',
+        connectingTokens: [
+            {
+                symbol: 'weth',
+                address: '0x9A1000D492d40bfccbc03f413A48F5B6516Ec0Fd',
+            },
+        ],
     },
     [Network.POLYGON]: {
         chainId: Network.POLYGON, //137
         vault: '0xBA12222222228d8Ba445958a75a0704d566BF2C8',
         weth: '0x0d500B1d8E8eF31E21C99d1Db9A6444d3ADf1270',
+        connectingTokens: [
+            {
+                symbol: 'weth',
+                address: '0x0d500B1d8E8eF31E21C99d1Db9A6444d3ADf1270',
+            },
+            {
+                symbol: 'bbrz2',
+                address: '0xe22483774bd8611be2ad2f4194078dac9159f4ba',
+            }, // Joins Stables<>BRZ via https://app.balancer.fi/#/polygon/pool/0x4a0b73f0d13ff6d43e304a174697e3d5cfd310a400020000000000000000091c
+        ],
     },
     [Network.ARBITRUM]: {
         chainId: Network.ARBITRUM, //42161
         vault: '0xBA12222222228d8Ba445958a75a0704d566BF2C8',
         weth: '0x82aF49447D8a07e3bd95BD0d56f35241523fBab1',
+        connectingTokens: [
+            {
+                symbol: 'weth',
+                address: '0x82aF49447D8a07e3bd95BD0d56f35241523fBab1',
+            },
+        ],
+    },
+    [Network.GNOSIS]: {
+        chainId: Network.GNOSIS, //100
+        vault: '0xBA12222222228d8Ba445958a75a0704d566BF2C8',
+        weth: '0x6A023CCd1ff6F2045C3309768eAd9E68F978f6e1',
+        connectingTokens: [
+            {
+                symbol: 'weth',
+                address: '0x82aF49447D8a07e3bd95BD0d56f35241523fBab1',
+            },
+        ],
     },
 };
 
@@ -51,6 +101,7 @@ export const PROVIDER_URLS = {
     [Network.KOVAN]: `https://kovan.infura.io/v3/${process.env.INFURA}`,
     [Network.POLYGON]: `https://polygon-mainnet.infura.io/v3/${process.env.INFURA}`,
     [Network.ARBITRUM]: `https://arbitrum-mainnet.infura.io/v3/${process.env.INFURA}`,
+    [Network.GNOSIS]: `https://poa-xdai.gateway.pokt.network/v1/lb/91bc0e12a76e7a84dd76189d`,
 };
 
 export const MULTIADDR: { [chainId: number]: string } = {
@@ -62,6 +113,7 @@ export const MULTIADDR: { [chainId: number]: string } = {
     137: '0xa1B2b503959aedD81512C37e9dce48164ec6a94d',
     42161: '0x269ff446d9892c9e19082564df3f5e8741e190a1',
     99: '0xeefba1e63905ef1d7acba5a8513c70307c1ce441',
+    100: '0xbb6fab6b627947dae0a75808250d8b2652952cb5',
 };
 
 export const SUBGRAPH_URLS = {
@@ -74,6 +126,7 @@ export const SUBGRAPH_URLS = {
     [Network.POLYGON]:
         'https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-polygon-v2',
     [Network.ARBITRUM]: `https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-arbitrum-v2`,
+    [Network.GNOSIS]: `https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-gnosis-chain-v2`,
 };
 
 // This is the same across networks
@@ -124,20 +177,45 @@ export const ADDRESSES = {
             decimals: 18,
             symbol: 'wSTETH',
         },
-        bbausd: {
+        bbausdOld: {
             address: '0x7b50775383d3d6f0215a8f290f2c9e2eebbeceb2',
             decimals: 18,
             symbol: 'bbausd',
         },
-        bbausdc: {
+        bbausd: {
+            address: '0xA13a9247ea42D743238089903570127DdA72fE44',
+            decimals: 18,
+            symbol: 'bbausd',
+        },
+        bbausdcOld: {
             address: '0x9210F1204b5a24742Eba12f710636D76240dF3d0',
             decimals: 18,
             symbol: 'bbausdc',
         },
-        bbadai: {
+        bbausdc: {
+            address: '0x82698aecc9e28e9bb27608bd52cf57f704bd1b83',
+            decimals: 18,
+            symbol: 'bbausdc',
+        },
+        bbadaiOld: {
             address: '0x804cdb9116a10bb78768d3252355a1b18067bf8f',
             decimals: 18,
             symbol: 'bb-a-dai',
+        },
+        bbadai: {
+            address: '0xae37d54ae477268b9997d4161b96b8200755935c',
+            decimals: 18,
+            symbol: 'bb-a-dai2',
+        },
+        bbausdtOld: {
+            address: '0x2f4eb100552ef93840d5adc30560e5513dfffacb',
+            decimals: 18,
+            symbol: 'bbaUSDT',
+        },
+        bbausdt: {
+            address: '0x2F4eb100552ef93840d5aDC30560E5513DFfFACb',
+            decimals: 18,
+            symbol: 'bb-a-usdt',
         },
         waDAI: {
             address: '0x02d60b84491589974263d922d9cc7a3152618ef6',
@@ -148,21 +226,6 @@ export const ADDRESSES = {
             address: '0xd093fa4fb80d09bb30817fdcd442d4d02ed3e5de',
             decimals: 6,
             symbol: 'waUSDC',
-        },
-        bbausd2: {
-            address: '0xA13a9247ea42D743238089903570127DdA72fE44',
-            decimals: 18,
-            symbol: 'bbausd2',
-        },
-        bbadai2: {
-            address: '0xae37d54ae477268b9997d4161b96b8200755935c',
-            decimals: 18,
-            symbol: 'bb-a-dai2',
-        },
-        bbausdt2: {
-            address: '0x2F4eb100552ef93840d5aDC30560E5513DFfFACb',
-            decimals: 18,
-            symbol: 'bb-a-usdt2',
         },
         RPL: {
             address: '0xD33526068D116cE69F19A9ee46F0bd304F21A51f',
@@ -189,10 +252,11 @@ export const ADDRESSES = {
             decimals: 6,
             symbol: 'USDT',
         },
-        bbausdt: {
-            address: '0x2f4eb100552ef93840d5adc30560e5513dfffacb',
+        balancerHelpers: '0x5aDDCCa35b7A0D07C74063c48700C8590E87864E',
+        DBR: {
+            address: '0xAD038Eb671c44b853887A7E32528FaB35dC5D710',
             decimals: 18,
-            symbol: 'bbaUSDT',
+            symbol: 'DBR',
         },
     },
     [Network.KOVAN]: {
@@ -372,6 +436,11 @@ export const ADDRESSES = {
             decimals: 18,
             symbol: 'bb-am-usd',
         },
+        brz: {
+            address: '0x491a4eb4f1fc3bff8e1d2fc856a6a46663ad556f',
+            decimals: 4,
+            symbol: 'BRZ',
+        },
         XSGD: {
             address: '0xdc3326e71d45186f113a2f448984ca0e8d201995',
             decimals: 18,
@@ -398,6 +467,33 @@ export const ADDRESSES = {
             address: 'N/A',
             decimals: 18,
             symbol: 'STETH',
+        },
+    },
+    [Network.GNOSIS]: {
+        WETH: {
+            address: '0x6A023CCd1ff6F2045C3309768eAd9E68F978f6e1',
+            decimals: 18,
+            symbol: 'WETH',
+        },
+        BAL: {
+            address: '0x7eF541E2a22058048904fE5744f9c7E4C57AF717',
+            decimals: 18,
+            symbol: 'BAL',
+        },
+        USDC: {
+            address: '0xDDAfbb505ad214D7b80b1f830fcCc89B60fb7A83',
+            decimals: 6,
+            symbol: 'USDC',
+        },
+        WXDAI: {
+            address: '0xe91d153e0b41518a2ce8dd3d7944fa863463a97d',
+            decimals: 18,
+            symbol: 'DAI',
+        },
+        USDT: {
+            address: '0x4ECaBa5870353805a9F068101A40E0f32ed605C6',
+            decimals: 6,
+            symbol: 'USDT',
         },
     },
 };
