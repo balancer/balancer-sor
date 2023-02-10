@@ -187,6 +187,7 @@ export enum PoolFilter {
     Gyro2 = 'Gyro2',
     Gyro3 = 'Gyro3',
     GyroE = 'GyroE',
+    EulerLinear = 'EulerLinear',
 }
 
 export interface PoolBase<D extends PoolPairBase = PoolPairBase> {
