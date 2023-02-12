@@ -785,154 +785,162 @@ export class LinearPool implements PoolBase<LinearPoolPairData> {
         poolPairData: LinearPoolPairData,
         amount: OldBigNumber
     ): OldBigNumber {
-        const bigintAmount = parseFixed(
-            amount.dp(18).toString(),
-            18
-        ).toBigInt();
-        const mainBalance = poolPairData.mainBalanceScaled.toBigInt();
-        const wrappedBalance = poolPairData.wrappedBalanceScaled.toBigInt();
-        const bptSupply = poolPairData.virtualBptSupply.toBigInt();
-        const params = {
-            fee: poolPairData.swapFee.toBigInt(),
-            lowerTarget: poolPairData.lowerTarget.toBigInt(),
-            upperTarget: poolPairData.upperTarget.toBigInt(),
-            rate: poolPairData.rate.toBigInt(),
-        };
-        let result: bigint;
-        if (poolPairData.pairType === PairTypes.MainTokenToBpt) {
-            result = _spotPriceAfterSwapBptOutPerMainIn(
-                bigintAmount,
-                mainBalance,
-                wrappedBalance,
-                bptSupply,
-                params
+        try {
+            const bigintAmount = parseFixed(
+                amount.dp(18).toString(),
+                18
+            ).toBigInt();
+            const mainBalance = poolPairData.mainBalanceScaled.toBigInt();
+            const wrappedBalance = poolPairData.wrappedBalanceScaled.toBigInt();
+            const bptSupply = poolPairData.virtualBptSupply.toBigInt();
+            const params = {
+                fee: poolPairData.swapFee.toBigInt(),
+                lowerTarget: poolPairData.lowerTarget.toBigInt(),
+                upperTarget: poolPairData.upperTarget.toBigInt(),
+                rate: poolPairData.rate.toBigInt(),
+            };
+            let result: bigint;
+            if (poolPairData.pairType === PairTypes.MainTokenToBpt) {
+                result = _spotPriceAfterSwapBptOutPerMainIn(
+                    bigintAmount,
+                    mainBalance,
+                    wrappedBalance,
+                    bptSupply,
+                    params
+                );
+            } else if (poolPairData.pairType === PairTypes.BptToMainToken) {
+                result = _spotPriceAfterSwapMainOutPerBptIn(
+                    bigintAmount,
+                    mainBalance,
+                    wrappedBalance,
+                    bptSupply,
+                    params
+                );
+            } else if (poolPairData.pairType === PairTypes.WrappedTokenToBpt) {
+                result = _spotPriceAfterSwapBptOutPerWrappedIn(
+                    bigintAmount,
+                    mainBalance,
+                    wrappedBalance,
+                    bptSupply,
+                    params
+                );
+            } else if (poolPairData.pairType === PairTypes.BptToWrappedToken) {
+                result = _spotPriceAfterSwapWrappedOutPerBptIn(
+                    bigintAmount,
+                    mainBalance,
+                    wrappedBalance,
+                    bptSupply,
+                    params
+                );
+            } else if (
+                poolPairData.pairType === PairTypes.MainTokenToWrappedToken
+            ) {
+                result = _spotPriceAfterSwapWrappedOutPerMainIn(
+                    bigintAmount,
+                    mainBalance,
+                    wrappedBalance,
+                    bptSupply,
+                    params
+                );
+            } else if (
+                poolPairData.pairType === PairTypes.WrappedTokenToMainToken
+            ) {
+                result = _spotPriceAfterSwapMainOutPerWrappedIn(
+                    bigintAmount,
+                    mainBalance,
+                    wrappedBalance,
+                    bptSupply,
+                    params
+                );
+            } else return bnum(0);
+            return scale(bnum(result.toString()), -18).dp(
+                poolPairData.decimalsOut,
+                0
             );
-        } else if (poolPairData.pairType === PairTypes.BptToMainToken) {
-            result = _spotPriceAfterSwapMainOutPerBptIn(
-                bigintAmount,
-                mainBalance,
-                wrappedBalance,
-                bptSupply,
-                params
-            );
-        } else if (poolPairData.pairType === PairTypes.WrappedTokenToBpt) {
-            result = _spotPriceAfterSwapBptOutPerWrappedIn(
-                bigintAmount,
-                mainBalance,
-                wrappedBalance,
-                bptSupply,
-                params
-            );
-        } else if (poolPairData.pairType === PairTypes.BptToWrappedToken) {
-            result = _spotPriceAfterSwapWrappedOutPerBptIn(
-                bigintAmount,
-                mainBalance,
-                wrappedBalance,
-                bptSupply,
-                params
-            );
-        } else if (
-            poolPairData.pairType === PairTypes.MainTokenToWrappedToken
-        ) {
-            result = _spotPriceAfterSwapWrappedOutPerMainIn(
-                bigintAmount,
-                mainBalance,
-                wrappedBalance,
-                bptSupply,
-                params
-            );
-        } else if (
-            poolPairData.pairType === PairTypes.WrappedTokenToMainToken
-        ) {
-            result = _spotPriceAfterSwapMainOutPerWrappedIn(
-                bigintAmount,
-                mainBalance,
-                wrappedBalance,
-                bptSupply,
-                params
-            );
-        } else return bnum(0);
-        return scale(bnum(result.toString()), -18).dp(
-            poolPairData.decimalsOut,
-            0
-        );
+        } catch (err) {
+            return bnum(0);
+        }
     }
 
     _spotPriceAfterSwapTokenInForExactTokenOut(
         poolPairData: LinearPoolPairData,
         amount: OldBigNumber
     ): OldBigNumber {
-        const bigintAmount = parseFixed(
-            amount.dp(18).toString(),
-            18
-        ).toBigInt();
-        const mainBalance = poolPairData.mainBalanceScaled.toBigInt();
-        const wrappedBalance = poolPairData.wrappedBalanceScaled.toBigInt();
-        const bptSupply = poolPairData.virtualBptSupply.toBigInt();
-        const params = {
-            fee: poolPairData.swapFee.toBigInt(),
-            lowerTarget: poolPairData.lowerTarget.toBigInt(),
-            upperTarget: poolPairData.upperTarget.toBigInt(),
-            rate: poolPairData.rate.toBigInt(),
-        };
-        let result: bigint;
-        if (poolPairData.pairType === PairTypes.MainTokenToBpt) {
-            result = _spotPriceAfterSwapMainInPerBptOut(
-                bigintAmount,
-                mainBalance,
-                wrappedBalance,
-                bptSupply,
-                params
+        try {
+            const bigintAmount = parseFixed(
+                amount.dp(18).toString(),
+                18
+            ).toBigInt();
+            const mainBalance = poolPairData.mainBalanceScaled.toBigInt();
+            const wrappedBalance = poolPairData.wrappedBalanceScaled.toBigInt();
+            const bptSupply = poolPairData.virtualBptSupply.toBigInt();
+            const params = {
+                fee: poolPairData.swapFee.toBigInt(),
+                lowerTarget: poolPairData.lowerTarget.toBigInt(),
+                upperTarget: poolPairData.upperTarget.toBigInt(),
+                rate: poolPairData.rate.toBigInt(),
+            };
+            let result: bigint;
+            if (poolPairData.pairType === PairTypes.MainTokenToBpt) {
+                result = _spotPriceAfterSwapMainInPerBptOut(
+                    bigintAmount,
+                    mainBalance,
+                    wrappedBalance,
+                    bptSupply,
+                    params
+                );
+            } else if (poolPairData.pairType === PairTypes.BptToMainToken) {
+                result = _spotPriceAfterSwapBptInPerMainOut(
+                    bigintAmount,
+                    mainBalance,
+                    wrappedBalance,
+                    bptSupply,
+                    params
+                );
+            } else if (poolPairData.pairType === PairTypes.WrappedTokenToBpt) {
+                result = _spotPriceAfterSwapWrappedInPerBptOut(
+                    bigintAmount,
+                    mainBalance,
+                    wrappedBalance,
+                    bptSupply,
+                    params
+                );
+            } else if (poolPairData.pairType === PairTypes.BptToWrappedToken) {
+                result = _spotPriceAfterSwapBptInPerWrappedOut(
+                    bigintAmount,
+                    mainBalance,
+                    wrappedBalance,
+                    bptSupply,
+                    params
+                );
+            } else if (
+                poolPairData.pairType === PairTypes.MainTokenToWrappedToken
+            ) {
+                result = _spotPriceAfterSwapMainInPerWrappedOut(
+                    bigintAmount,
+                    mainBalance,
+                    wrappedBalance,
+                    bptSupply,
+                    params
+                );
+            } else if (
+                poolPairData.pairType === PairTypes.WrappedTokenToMainToken
+            ) {
+                result = _spotPriceAfterSwapWrappedInPerMainOut(
+                    bigintAmount,
+                    mainBalance,
+                    wrappedBalance,
+                    bptSupply,
+                    params
+                );
+            } else return bnum(0);
+            return scale(bnum(result.toString()), -18).dp(
+                poolPairData.decimalsOut,
+                0
             );
-        } else if (poolPairData.pairType === PairTypes.BptToMainToken) {
-            result = _spotPriceAfterSwapBptInPerMainOut(
-                bigintAmount,
-                mainBalance,
-                wrappedBalance,
-                bptSupply,
-                params
-            );
-        } else if (poolPairData.pairType === PairTypes.WrappedTokenToBpt) {
-            result = _spotPriceAfterSwapWrappedInPerBptOut(
-                bigintAmount,
-                mainBalance,
-                wrappedBalance,
-                bptSupply,
-                params
-            );
-        } else if (poolPairData.pairType === PairTypes.BptToWrappedToken) {
-            result = _spotPriceAfterSwapBptInPerWrappedOut(
-                bigintAmount,
-                mainBalance,
-                wrappedBalance,
-                bptSupply,
-                params
-            );
-        } else if (
-            poolPairData.pairType === PairTypes.MainTokenToWrappedToken
-        ) {
-            result = _spotPriceAfterSwapMainInPerWrappedOut(
-                bigintAmount,
-                mainBalance,
-                wrappedBalance,
-                bptSupply,
-                params
-            );
-        } else if (
-            poolPairData.pairType === PairTypes.WrappedTokenToMainToken
-        ) {
-            result = _spotPriceAfterSwapWrappedInPerMainOut(
-                bigintAmount,
-                mainBalance,
-                wrappedBalance,
-                bptSupply,
-                params
-            );
-        } else return bnum(0);
-        return scale(bnum(result.toString()), -18).dp(
-            poolPairData.decimalsOut,
-            0
-        );
+        } catch (err) {
+            return bnum(0);
+        }
     }
 
     _derivativeSpotPriceAfterSwapExactTokenInForTokenOut(

@@ -192,6 +192,8 @@ export enum PoolFilter {
     ComposableStable = 'ComposableStable',
     Gyro2 = 'Gyro2',
     Gyro3 = 'Gyro3',
+    GyroE = 'GyroE',
+    EulerLinear = 'EulerLinear',
     FxPool = 'FX',
 }
 
