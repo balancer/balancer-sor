@@ -180,14 +180,23 @@ export enum PoolFilter {
     LBP = 'LiquidityBootstrapping',
     Investment = 'Investment',
     Element = 'Element',
-    AaveLinear = 'AaveLinear',
     StablePhantom = 'StablePhantom',
-    ERC4626Linear = 'ERC4626Linear',
     ComposableStable = 'ComposableStable',
     Gyro2 = 'Gyro2',
     Gyro3 = 'Gyro3',
     GyroE = 'GyroE',
+    // Linear Pools defined below all operate the same mathematically but have different factories and names in Subgraph
+    AaveLinear = 'AaveLinear',
+    Linear = 'Linear',
     EulerLinear = 'EulerLinear',
+    ERC4626Linear = 'ERC4626Linear',
+    BeefyLinear = 'BeefyLinear',
+    GearboxLinear = 'GearboxLinear',
+    MidasLinear = 'MidasLinear',
+    ReaperLinear = 'ReaperLinear',
+    SiloLinear = 'SiloLinear',
+    TetuLinear = 'TetuLinear',
+    YearnLinear = 'YearnLinear',
 }
 
 export interface PoolBase<D extends PoolPairBase = PoolPairBase> {
