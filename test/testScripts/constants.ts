@@ -24,6 +24,10 @@ export const SOR_CONFIG: Record<Network, SorConfig> = {
                 symbol: 'DOLA',
                 address: '0x865377367054516e17014CcdED1e7d814EDC9ce4',
             },
+            {
+                symbol: 'wstEth',
+                address: '0x7f39c581f595b53c5cb19bd0b3f8da6c935e2ca0',
+            },
         ],
         wETHwstETH: {
             id: '0x32296969ef14eb0c6d29669c550d4a0449130230000200000000000000000080',
@@ -257,6 +261,21 @@ export const ADDRESSES = {
             address: '0xAD038Eb671c44b853887A7E32528FaB35dC5D710',
             decimals: 18,
             symbol: 'DBR',
+        },
+        APE: {
+            address: '0x4d224452801aced8b2f0aebe155379bb5d594381',
+            decimals: 18,
+            symbol: 'APE',
+        },
+        sAPE: {
+            address: '0x7966c5bae631294d7cffcea5430b78c2f76db6fa',
+            decimals: 18,
+            symbol: 'sAPE',
+        },
+        bbtAPE: {
+            address: '0x126e7643235ec0ab9c103c507642dC3F4cA23C66'.toLowerCase(),
+            decimals: 18,
+            symbol: 'bbtAPE',
         },
     },
     [Network.KOVAN]: {
