@@ -58,7 +58,6 @@ export function getEffectivePriceSwapForPath(
     );
     if (swapType === SwapTypes.SwapExactIn) {
         outputAmountSwap = outputAmountSwap.minus(gasCost);
-        if (outputAmountSwap.lte(ZERO)) return INFINITY;
         return amount.div(outputAmountSwap); // amountIn/AmountOut
     } else {
         amount = amount.plus(gasCost);
