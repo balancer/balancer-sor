@@ -18,7 +18,7 @@ import {
     _calcBptInGivenExactTokensOut,
     _calcInGivenOut,
 } from '../stablePool/stableMathBigInt';
-import * as phantomStableMath from '../phantomStablePool/phantomStableMath';
+import * as phantomStableMath from '../stablePool/stableMath';
 import { MetaStablePoolPairData } from '../metaStablePool/metaStablePool';
 import cloneDeep from 'lodash.clonedeep';
 import { universalNormalizedLiquidity } from '../liquidity';
