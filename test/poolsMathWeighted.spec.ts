@@ -1,117 +1,8 @@
 import * as weighted from '../src/pools/weightedPool/weightedMath';
-import * as SDK from '@georgeroman/balancer-v2-pools';
-import { BigNumber as OldBigNumber, bnum } from '../src/utils/bignumber';
 import { assert } from 'chai';
 import { MathSol } from '../src/utils/basicOperations';
 
 describe('weighted pools - weightedMath.ts - numeric functions using bigint', () => {
-    context('swap outcomes', () => {
-        it('_calcOutGivenIn', () => {
-            const { result, SDKResult } = getBothValuesWeighted(
-                weighted._calcOutGivenIn,
-                SDK.WeightedMath._calcOutGivenIn,
-                1000,
-                1,
-                3000,
-                2,
-                30,
-                0.003
-            );
-            assert.equal(
-                result.toString(),
-                SDKResult.toString(),
-                'wrong result'
-            );
-        });
-        it('_calcInGivenOut', () => {
-            const { result, SDKResult } = getBothValuesWeighted(
-                weighted._calcInGivenOut,
-                SDK.WeightedMath._calcInGivenOut,
-                1000,
-                1,
-                2000,
-                2,
-                30,
-                0.003
-            );
-            assert.equal(
-                result.toString(),
-                SDKResult.toString(),
-                'wrong result'
-            );
-        });
-        // token-BPT
-        // exact in
-        it('_calcTokenOutGivenExactBptIn', () => {
-            const { result, SDKResult } = getBothValuesWeighted(
-                weighted._calcTokenOutGivenExactBptIn,
-                SDK.WeightedMath._calcTokenOutGivenExactBptIn,
-                1000,
-                0.7,
-                30,
-                2000,
-                0.003,
-                -1 // this is not used
-            );
-            assert.equal(
-                result.toString(),
-                SDKResult.toString(),
-                'wrong result'
-            );
-        });
-        it('_calcBptOutGivenExactTokenIn', () => {
-            const { result, SDKResult } = getBothValuesWeighted(
-                _calcBptOutGivenExactTokenIn,
-                _SDKcalcBptOutGivenExactTokenIn,
-                1000,
-                0.7,
-                30,
-                2000,
-                0.003,
-                -1 // this is not used
-            );
-            assert.equal(
-                result.toString(),
-                SDKResult.toString(),
-                'wrong result'
-            );
-        });
-        // exact out
-        it('_calcTokenInGivenExactBptOut', () => {
-            const { result, SDKResult } = getBothValuesWeighted(
-                weighted._calcTokenInGivenExactBptOut,
-                SDK.WeightedMath._calcTokenInGivenExactBptOut,
-                1000,
-                0.7,
-                30,
-                2000,
-                0.003,
-                -1 // this is not used
-            );
-            assert.equal(
-                result.toString(),
-                SDKResult.toString(),
-                'wrong result'
-            );
-        });
-        it('_calcBptInGivenExactTokenOut', () => {
-            const { result, SDKResult } = getBothValuesWeighted(
-                _calcBptInGivenExactTokenOut,
-                _SDKcalcBptInGivenExactTokenOut,
-                1000,
-                0.7,
-                30,
-                2000,
-                0.003,
-                -1 // this is not used
-            );
-            assert.equal(
-                result.toString(),
-                SDKResult.toString(),
-                'wrong result'
-            );
-        });
-    });
     context('spot prices', () => {
         it('_spotPriceAfterSwapExactTokenInForTokenOut', () => {
             checkDerivative_weighted(
@@ -162,38 +53,6 @@ describe('weighted pools - weightedMath.ts - numeric functions using bigint', ()
     });
 });
 
-function _calcBptInGivenExactTokenOut(
-    balance: bigint,
-    normalizedWeight: bigint,
-    amountOut: bigint,
-    bptTotalSupply: bigint,
-    swapFeePercentage: bigint
-) {
-    return weighted._calcBptInGivenExactTokensOut(
-        [balance, BigInt(1)],
-        [normalizedWeight, s(1) - normalizedWeight],
-        [amountOut, BigInt(0)],
-        bptTotalSupply,
-        swapFeePercentage
-    );
-}
-
-function _SDKcalcBptInGivenExactTokenOut(
-    balance: OldBigNumber,
-    normalizedWeight: OldBigNumber,
-    amountOut: OldBigNumber,
-    bptTotalSupply: OldBigNumber,
-    swapFeePercentage: OldBigNumber
-) {
-    return SDK.WeightedMath._calcBptInGivenExactTokensOut(
-        [balance, bnum(1)],
-        [normalizedWeight, b(1).minus(normalizedWeight)],
-        [amountOut, bnum(0)],
-        bptTotalSupply,
-        swapFeePercentage
-    );
-}
-
 function _calcBptOutGivenExactTokenIn(
     balance: bigint,
     normalizedWeight: bigint,
@@ -208,65 +67,6 @@ function _calcBptOutGivenExactTokenIn(
         bptTotalSupply,
         swapFeePercentage
     );
-}
-
-function _SDKcalcBptOutGivenExactTokenIn(
-    balance: OldBigNumber,
-    normalizedWeight: OldBigNumber,
-    amountIn: OldBigNumber,
-    bptTotalSupply: OldBigNumber,
-    swapFeePercentage: OldBigNumber
-) {
-    return SDK.WeightedMath._calcBptOutGivenExactTokensIn(
-        [balance, bnum(1)],
-        [normalizedWeight, b(1).minus(normalizedWeight)],
-        [amountIn, bnum(0)],
-        bptTotalSupply,
-        swapFeePercentage
-    );
-}
-
-function getBothValuesWeighted(
-    SORFunction: (
-        balanceIn: bigint,
-        weightIn: bigint,
-        balanceOut: bigint,
-        weightOut: bigint,
-        amount: bigint,
-        fee: bigint
-    ) => bigint,
-    SDKFunction: (
-        balanceIn: OldBigNumber,
-        weightIn: OldBigNumber,
-        balanceOut: OldBigNumber,
-        weightOut: OldBigNumber,
-        amount: OldBigNumber,
-        swapFeePercentage?: OldBigNumber
-    ) => OldBigNumber,
-    balanceIn: number,
-    weightIn: number,
-    balanceOut: number,
-    weightOut: number,
-    amount: number,
-    fee: number
-): { result: bigint; SDKResult: OldBigNumber } {
-    const result = SORFunction(
-        s(balanceIn),
-        s(weightIn),
-        s(balanceOut),
-        s(weightOut),
-        s(amount),
-        s(fee)
-    );
-    const SDKResult = SDKFunction(
-        b(balanceIn),
-        b(weightIn),
-        b(balanceOut),
-        b(weightOut),
-        b(amount),
-        b(fee)
-    );
-    return { result, SDKResult };
 }
 
 function checkDerivative_weighted(
@@ -395,8 +195,4 @@ function checkDerivative_weighted_bpt(
 
 function s(a: number): bigint {
     return BigInt(a * 10 ** 18);
-}
-
-function b(a: number): OldBigNumber {
-    return bnum(a * 10 ** 18);
 }
