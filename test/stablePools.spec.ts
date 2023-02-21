@@ -18,6 +18,7 @@ import { BPTForTokensZeroPriceImpact } from '../src/frontendHelpers/stableHelper
 import { parseFixed } from '@ethersproject/bignumber';
 import { BAL, DAI, sorConfigEth, USDC, USDT } from './lib/constants';
 import { Zero } from '@ethersproject/constants';
+import { _computeScalingFactor } from '../src/utils/basicOperations';
 import { MockPoolDataService } from './lib/mockPoolDataService';
 
 const poolsFromFile: {
@@ -45,7 +46,7 @@ describe(`Tests for Stable Pools.`, () => {
             const swapType = SwapTypes.SwapExactIn;
 
             // Max out uses standard V2 limits
-            const MAX_OUT_RATIO = bnum(0.3);
+            const MAX_OUT_RATIO = bnum(0.99);
 
             const newPool = StablePool.fromPool(pool);
 
@@ -77,6 +78,12 @@ describe(`Tests for Stable Pools.`, () => {
                 ],
                 tokenIndexIn: 0,
                 tokenIndexOut: 1,
+                tokenInScalingFactor: _computeScalingFactor(
+                    BigInt(pool.tokens[0].decimals)
+                ),
+                tokenOutScalingFactor: _computeScalingFactor(
+                    BigInt(pool.tokens[1].decimals)
+                ),
             };
 
             const limitAmt = newPool.getLimitAmountSwap(poolPairData, swapType);
@@ -91,7 +98,7 @@ describe(`Tests for Stable Pools.`, () => {
             const swapType = SwapTypes.SwapExactOut;
 
             // Max out uses standard V2 limits
-            const MAX_OUT_RATIO = bnum(0.3);
+            const MAX_OUT_RATIO = bnum(0.99);
 
             const newPool = StablePool.fromPool(pool);
 
@@ -117,6 +124,12 @@ describe(`Tests for Stable Pools.`, () => {
                 allBalancesScaled: [],
                 tokenIndexIn: 0,
                 tokenIndexOut: 1,
+                tokenInScalingFactor: _computeScalingFactor(
+                    BigInt(pool.tokens[0].decimals)
+                ),
+                tokenOutScalingFactor: _computeScalingFactor(
+                    BigInt(pool.tokens[1].decimals)
+                ),
             };
 
             const limitAmt = newPool.getLimitAmountSwap(poolPairData, swapType);

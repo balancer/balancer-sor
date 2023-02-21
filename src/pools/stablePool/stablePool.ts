@@ -4,7 +4,7 @@ import { WeiPerEther as ONE, Zero } from '@ethersproject/constants';
 import {
     BigNumber as OldBigNumber,
     bnum,
-    scale,
+    integerToFloating,
     ZERO,
 } from '../../utils/bignumber';
 import {
@@ -12,7 +12,14 @@ import {
     normaliseBalance,
     normaliseAmount,
     denormaliseAmount,
+    safeParseFixed,
 } from '../../utils';
+import { universalNormalizedLiquidity } from '../liquidity';
+import {
+    _computeScalingFactor,
+    _downscaleDown,
+    _downscaleUp,
+} from '../../utils/basicOperations';
 import {
     PoolBase,
     PoolTypes,
@@ -33,9 +40,11 @@ import {
     _calcBptOutGivenExactTokensIn,
     _calcTokensOutGivenExactBptIn,
 } from './stableMathBigInt';
-import { universalNormalizedLiquidity } from '../liquidity';
 
-type StablePoolToken = Pick<SubgraphToken, 'address' | 'balance' | 'decimals'>;
+export type StablePoolToken = Pick<
+    SubgraphToken,
+    'address' | 'balance' | 'decimals'
+>;
 
 export type StablePoolPairData = PoolPairBase & {
     allBalances: OldBigNumber[];
@@ -43,6 +52,8 @@ export type StablePoolPairData = PoolPairBase & {
     amp: BigNumber;
     tokenIndexIn: number;
     tokenIndexOut: number;
+    tokenInScalingFactor: bigint;
+    tokenOutScalingFactor: bigint;
 };
 
 export class StablePool implements PoolBase<StablePoolPairData> {
@@ -54,8 +65,7 @@ export class StablePool implements PoolBase<StablePoolPairData> {
     totalShares: BigNumber;
     tokens: StablePoolToken[];
     tokensList: string[];
-    MAX_IN_RATIO = parseFixed('0.3', 18);
-    MAX_OUT_RATIO = parseFixed('0.3', 18);
+    ALMOST_ONE = parseFixed('0.99', 18);
 
     static AMP_DECIMALS = 3;
 
@@ -90,22 +100,23 @@ export class StablePool implements PoolBase<StablePoolPairData> {
         this.tokensList = tokensList;
     }
 
-    parsePoolPairData(tokenIn: string, tokenOut: string): StablePoolPairData {
-        const tokenIndexIn = this.tokens.findIndex(
-            (t) => getAddress(t.address) === getAddress(tokenIn)
+    private findTokenIndex<Token extends { address: string }>(
+        list: Token[],
+        tokenAddress: string
+    ): number {
+        const index = list.findIndex(
+            (t) => getAddress(t.address) === getAddress(tokenAddress)
         );
-        if (tokenIndexIn < 0) throw 'Pool does not contain tokenIn';
-        const tI = this.tokens[tokenIndexIn];
-        const balanceIn = tI.balance;
-        const decimalsIn = tI.decimals;
+        if (index < 0) throw 'Pool does not contain tokenIn';
+        return index;
+    }
 
-        const tokenIndexOut = this.tokens.findIndex(
-            (t) => getAddress(t.address) === getAddress(tokenOut)
-        );
-        if (tokenIndexOut < 0) throw 'Pool does not contain tokenOut';
+    parsePoolPairData(tokenIn: string, tokenOut: string): StablePoolPairData {
+        const tokenIndexIn = this.findTokenIndex(this.tokens, tokenIn);
+        const tI = this.tokens[tokenIndexIn];
+
+        const tokenIndexOut = this.findTokenIndex(this.tokens, tokenOut);
         const tO = this.tokens[tokenIndexOut];
-        const balanceOut = tO.balance;
-        const decimalsOut = tO.decimals;
 
         // Get all token balances
         const allBalances = this.tokens.map(({ balance }) => bnum(balance));
@@ -119,16 +130,18 @@ export class StablePool implements PoolBase<StablePoolPairData> {
             poolType: this.poolType,
             tokenIn: tokenIn,
             tokenOut: tokenOut,
-            balanceIn: parseFixed(balanceIn, decimalsIn),
-            balanceOut: parseFixed(balanceOut, decimalsOut),
+            balanceIn: parseFixed(tI.balance, tI.decimals),
+            balanceOut: parseFixed(tO.balance, tO.decimals),
             swapFee: this.swapFee,
             allBalances,
             allBalancesScaled, // TO DO - Change to BigInt??
             amp: this.amp,
             tokenIndexIn: tokenIndexIn,
             tokenIndexOut: tokenIndexOut,
-            decimalsIn: Number(decimalsIn),
-            decimalsOut: Number(decimalsOut),
+            decimalsIn: tI.decimals,
+            decimalsOut: tO.decimals,
+            tokenInScalingFactor: _computeScalingFactor(BigInt(tI.decimals)),
+            tokenOutScalingFactor: _computeScalingFactor(BigInt(tO.decimals)),
         };
 
         return poolPairData;
@@ -143,26 +156,24 @@ export class StablePool implements PoolBase<StablePoolPairData> {
         );
     }
 
+    /**
+     * Calculate Limit for Swap
+     * @param poolPairData
+     * @param swapType
+     * @returns Limit (Floating point)
+     */
     getLimitAmountSwap(
         poolPairData: PoolPairBase,
         swapType: SwapTypes
     ): OldBigNumber {
-        // We multiply ratios by 10**-18 because we are in normalized space
-        // so 0.5 should be 0.5 and not 500000000000000000
-        // TODO: update bmath to use everything normalized
         if (swapType === SwapTypes.SwapExactIn) {
-            return bnum(
-                formatFixed(
-                    poolPairData.balanceIn.mul(this.MAX_IN_RATIO).div(ONE),
-                    poolPairData.decimalsIn
-                )
-            );
+            const limit = poolPairData.balanceIn.mul(this.ALMOST_ONE).div(ONE);
+            return integerToFloating(limit.toString(), poolPairData.decimalsIn);
         } else {
-            return bnum(
-                formatFixed(
-                    poolPairData.balanceOut.mul(this.MAX_OUT_RATIO).div(ONE),
-                    poolPairData.decimalsOut
-                )
+            const limit = poolPairData.balanceOut.mul(this.ALMOST_ONE).div(ONE);
+            return integerToFloating(
+                limit.toString(),
+                poolPairData.decimalsOut
             );
         }
     }
@@ -184,6 +195,12 @@ export class StablePool implements PoolBase<StablePoolPairData> {
         this.totalShares = newTotalShares;
     }
 
+    /**
+     *
+     * @param poolPairData
+     * @param amount Amount of token in. Floating point number.
+     * @returns Amount out. Floating point number.
+     */
     _exactTokenInForTokenOut(
         poolPairData: StablePoolPairData,
         amount: OldBigNumber
@@ -191,38 +208,31 @@ export class StablePool implements PoolBase<StablePoolPairData> {
         try {
             if (amount.isZero()) return ZERO;
 
-            const amtWithFeeEvm = this.subtractSwapFeeAmount(
-                parseFixed(
-                    amount.dp(poolPairData.decimalsIn).toString(),
-                    poolPairData.decimalsIn
-                ),
+            // Maths uses normalised to 1e18 fixed point i.e. 1USDC => 1e18 not 1e6
+            const amountNormalised = safeParseFixed(amount.toString(), 18);
+            const amountMinusFee = this.subtractSwapFeeAmount(
+                amountNormalised,
                 poolPairData.swapFee
             );
 
-            // All values should use 1e18 fixed point
-            // i.e. 1USDC => 1e18 not 1e6
-            const amtScaled = amtWithFeeEvm.mul(
-                10 ** (18 - poolPairData.decimalsIn)
-            );
-
-            const amt = _calcOutGivenIn(
+            const amountOutNormalised = _calcOutGivenIn(
                 this.amp.toBigInt(),
                 poolPairData.allBalancesScaled.map((balance) =>
                     balance.toBigInt()
                 ),
                 poolPairData.tokenIndexIn,
                 poolPairData.tokenIndexOut,
-                amtScaled.toBigInt(),
+                amountMinusFee.toBigInt(),
                 BigInt(0)
             );
-
-            // return normalised amount
-            // Using BigNumber.js decimalPlaces (dp), allows us to consider token decimal accuracy correctly,
-            // i.e. when using token with 2decimals 0.002 should be returned as 0
-            // Uses ROUND_DOWN mode (1)
-            return scale(bnum(amt.toString()), -18).dp(
+            const amountDownscaled = _downscaleDown(
+                amountOutNormalised,
+                poolPairData.tokenOutScalingFactor
+            );
+            return integerToFloating(
+                amountDownscaled.toString(),
                 poolPairData.decimalsOut,
-                1
+                false
             );
         } catch (err) {
             // console.error(`_evmoutGivenIn: ${err.message}`);
@@ -230,37 +240,43 @@ export class StablePool implements PoolBase<StablePoolPairData> {
         }
     }
 
+    /**
+     *
+     * @param poolPairData
+     * @param amount Amount of token out. Floating point number.
+     * @returns Amount in. Floating point number.
+     */
     _tokenInForExactTokenOut(
         poolPairData: StablePoolPairData,
         amount: OldBigNumber
     ): OldBigNumber {
         try {
             if (amount.isZero()) return ZERO;
-            // All values should use 1e18 fixed point
-            // i.e. 1USDC => 1e18 not 1e6
-            const amtScaled = parseFixed(amount.dp(18).toString(), 18);
+            // Maths uses normalised to 1e18 fixed point i.e. 1USDC => 1e18 not 1e6
+            const amountOutNormalised = safeParseFixed(amount.toString(), 18);
 
-            let amt = _calcInGivenOut(
+            const amountInNormalised = _calcInGivenOut(
                 this.amp.toBigInt(),
                 poolPairData.allBalancesScaled.map((balance) =>
                     balance.toBigInt()
                 ),
                 poolPairData.tokenIndexIn,
                 poolPairData.tokenIndexOut,
-                amtScaled.toBigInt(),
+                amountOutNormalised.toBigInt(),
                 BigInt(0)
             );
-
-            // this is downscaleUp
-            const scaleFactor = BigInt(10 ** (18 - poolPairData.decimalsIn));
-            amt = (amt + scaleFactor - BigInt(1)) / scaleFactor;
+            const amountDownscaled = _downscaleUp(
+                amountInNormalised,
+                poolPairData.tokenInScalingFactor
+            );
 
             const amtWithFee = this.addSwapFeeAmount(
-                BigNumber.from(amt),
+                BigNumber.from(amountDownscaled),
                 poolPairData.swapFee
             );
-            return bnum(amtWithFee.toString()).div(
-                10 ** poolPairData.decimalsIn
+            return integerToFloating(
+                amtWithFee.toString(),
+                poolPairData.decimalsIn
             );
         } catch (err) {
             console.error(`_evminGivenOut: ${err.message}`);

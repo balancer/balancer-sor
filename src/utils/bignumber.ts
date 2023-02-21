@@ -19,4 +19,13 @@ export function bnum(val: string | number | BigNumber): BigNumber {
     return new BigNumber(val.toString());
 }
 
+export function integerToFloating(
+    amount: string,
+    decimals: number,
+    roundingUp = true
+): BigNumber {
+    if (roundingUp) return scale(bnum(amount), -decimals).dp(decimals, 0);
+    else return scale(bnum(amount), -decimals).dp(decimals, 1);
+}
+
 export { BigNumber };
