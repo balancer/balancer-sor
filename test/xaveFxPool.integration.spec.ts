@@ -10,9 +10,9 @@ import { AddressZero } from '@ethersproject/constants';
 import { setUp } from './testScripts/utils';
 
 /*
- * Testing on Polygon
- * - Update hardhat.config.js with chainId = 137
- * - Update ALCHEMY_URL on .env with a polygon api key
+ * Testing Notes:
+ * - Add polygon ALCHEMY_URL in .env
+ * - Change --fork-block-number to 38546978
  * - Run polygon node on terminal: yarn run node
  */
 
@@ -25,7 +25,6 @@ const rpcUrl = 'http://127.0.0.1:8545';
 const provider = new JsonRpcProvider(rpcUrl, networkId);
 const blocknumber = 38546978;
 
-// const vault = new Contract(vaultAddr, vaultArtifact, provider);
 const vault = Vault__factory.connect(vaultAddr, provider);
 
 const xaveFxPool: SubgraphPoolBase = {
@@ -89,64 +88,55 @@ describe('xaveFxPool integration tests', () => {
             toInternalBalance: false,
         };
 
-        context('ExactIn', () => {
-            it('token>token', async () => {
-                const swapType = SwapTypes.SwapExactIn;
-                const swapAmount = parseFixed('1000', 6);
+        it('ExactIn', async () => {
+            const swapType = SwapTypes.SwapExactIn;
+            const swapAmount = parseFixed('1000', 6);
 
-                const swapInfo = await sor.getSwaps(
-                    tokenIn,
-                    tokenOut,
-                    swapType,
-                    swapAmount
-                );
+            const swapInfo = await sor.getSwaps(
+                tokenIn,
+                tokenOut,
+                swapType,
+                swapAmount
+            );
 
-                console.log('==========swapinfo==========');
-                console.log(swapInfo);
+            const queryResult = await vault.callStatic.queryBatchSwap(
+                swapType,
+                swapInfo.swaps,
+                swapInfo.tokenAddresses,
+                funds
+            );
 
-                const queryResult = await vault.callStatic.queryBatchSwap(
-                    swapType,
-                    swapInfo.swaps,
-                    swapInfo.tokenAddresses,
-                    funds
-                );
+            expect(queryResult[0].toString()).to.eq(
+                swapInfo.swapAmount.toString()
+            );
 
-                console.log('==========queryResult==========');
-                console.log(queryResult);
-
-                expect(queryResult[0].toString()).to.eq(
-                    swapInfo.swapAmount.toString()
-                );
-
-                // expect(queryResult[1].abs().toString()).to.eq(
-                //     swapInfo.returnAmount.toString()
-                // );
-                expect(queryResult[1].abs().toString()).to.eq('1301255953');
-            });
+            // expect(queryResult[1].abs().toString()).to.eq(
+            //     swapInfo.returnAmount.toString()
+            // );
+            // TODO: Check small descrepancy in amounts
+            const expectedReturnAmount = '1301255953';
+            expect(queryResult[1].abs().toString()).to.eq(expectedReturnAmount);
         });
-        // .timeout(10000);
-        context('ExactOut', () => {
-            it('token>token', async () => {
-                const swapType = SwapTypes.SwapExactOut;
-                const swapAmount = parseFixed('1000', 6);
-                const swapInfo = await sor.getSwaps(
-                    tokenIn,
-                    tokenOut,
-                    swapType,
-                    swapAmount
-                );
-                const queryResult = await vault.callStatic.queryBatchSwap(
-                    swapType,
-                    swapInfo.swaps,
-                    swapInfo.tokenAddresses,
-                    funds
-                );
-                // Amount out should be exact
-                expect(queryResult[1].abs().toString()).to.eq(
-                    swapInfo.swapAmount.toString()
-                );
-            });
+
+        it('ExactOut', async () => {
+            const swapType = SwapTypes.SwapExactOut;
+            const swapAmount = parseFixed('1000', 6);
+            const swapInfo = await sor.getSwaps(
+                tokenIn,
+                tokenOut,
+                swapType,
+                swapAmount
+            );
+            const queryResult = await vault.callStatic.queryBatchSwap(
+                swapType,
+                swapInfo.swaps,
+                swapInfo.tokenAddresses,
+                funds
+            );
+            // Amount out should be exact
+            expect(queryResult[1].abs().toString()).to.eq(
+                swapInfo.swapAmount.toString()
+            );
         });
-        // .timeout(10000);
     });
 });
