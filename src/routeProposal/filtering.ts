@@ -32,6 +32,7 @@ export const filterPoolsByType = (
     poolTypeFilter: PoolFilter
 ): SubgraphPoolBase[] => {
     if (poolTypeFilter === PoolFilter.All) return pools;
+
     return pools.filter((p) => p.poolType === poolTypeFilter);
 };
 
@@ -51,7 +52,9 @@ export function filterPoolsOfInterest(
 
     Object.keys(allPools).forEach((id) => {
         const pool = allPools[id];
+
         const tokenListSet = new Set(pool.tokensList);
+
         const containsTokenIn = tokenListSet.has(tokenIn.toLowerCase());
         const containsTokenOut = tokenListSet.has(tokenOut.toLowerCase());
 

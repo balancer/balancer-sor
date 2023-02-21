@@ -253,9 +253,8 @@ export async function getOnChainBalances(
             }
 
             subgraphPools[index].swapFee = formatFixed(swapFee, 18);
-            console.log(poolTokens.tokens);
+
             poolTokens.tokens.forEach((token, i) => {
-                console.log(i);
                 const T = subgraphPools[index].tokens.find((t) =>
                     isSameAddress(t.address, token)
                 );
@@ -263,7 +262,7 @@ export async function getOnChainBalances(
                 if (!T) throw `Pool Missing Expected Token: ${poolId} ${token}`;
 
                 T.balance = formatFixed(poolTokens.balances[i], T.decimals);
-                console.log(T.balance);
+
                 if (weights) {
                     // Only expected for WeightedPools
                     T.weight = formatFixed(weights[i], 18);
@@ -299,12 +298,11 @@ export async function getOnChainBalances(
                 subgraphPools[index].totalShares = formatFixed(totalSupply, 18);
             }
             onChainPools.push(subgraphPools[index]);
-            console.log('onChainPools: ', onChainPools);
         } catch (err) {
             throw `Issue with pool onchain data: ${err}`;
         }
     });
-    console.log('returning onChainPools');
+
     return onChainPools;
 }
 

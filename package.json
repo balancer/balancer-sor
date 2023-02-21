@@ -12,7 +12,7 @@
         "test:only": "TS_NODE_PROJECT='tsconfig.testing.json' npx mocha -r ts-node/register --timeout 20000",
         "coverage": "nyc report --reporter=text-lcov | coveralls",
         "lint": "eslint ./src ./test --ext .ts --max-warnings 0",
-        "node": "npx hardhat node --tsconfig tsconfig.testing.json --fork $(grep ALCHEMY_URL .env | cut -d '=' -f2) --fork-block-number 14828550"
+        "node": "npx hardhat node --tsconfig tsconfig.testing.json --fork $(grep ALCHEMY_URL .env | cut -d '=' -f2) --fork-block-number 38546978"
     },
     "husky": {
         "hooks": {
