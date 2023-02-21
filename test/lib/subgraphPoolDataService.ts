@@ -16,7 +16,7 @@ const queryWithLinear = `
           poolType
           swapFee
           totalShares
-          tokens {
+          tokens (orderBy: index) {
             address
             balance
             decimals
@@ -68,7 +68,7 @@ const queryWithLinear = `
           poolType
           swapFee
           totalShares
-          tokens {
+          tokens (orderBy: index) {
             address
             balance
             decimals

@@ -4,9 +4,9 @@ import { SorConfig } from '../../src';
 export enum Network {
     MAINNET = 1,
     GOERLI = 5,
-    KOVAN = 42,
     POLYGON = 137,
     ARBITRUM = 42161,
+    OPTIMISM = 10,
     GNOSIS = 100,
 }
 
@@ -33,21 +33,11 @@ export const SOR_CONFIG: Record<Network, SorConfig> = {
             id: '0x32296969ef14eb0c6d29669c550d4a0449130230000200000000000000000080',
             address: '0x32296969ef14eb0c6d29669c550d4a0449130230',
         },
-    },
-    [Network.KOVAN]: {
-        chainId: Network.KOVAN, //42
-        vault: '0xBA12222222228d8Ba445958a75a0704d566BF2C8',
-        weth: '0xdFCeA9088c8A88A76FF74892C1457C17dfeef9C1',
-        connectingTokens: [
-            {
-                symbol: 'weth',
-                address: '0xdFCeA9088c8A88A76FF74892C1457C17dfeef9C1',
-            },
+        lbpRaisingTokens: [
+            '0x6b175474e89094c44da98b954eedeac495271d0f', // DAI
+            '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48', // USDC
+            '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2', // WETH
         ],
-        staBal3Pool: {
-            id: '0x8fd162f338b770f7e879030830cde9173367f3010000000000000000000004d8',
-            address: '0x8fd162f338b770f7e879030830cde9173367f301',
-        },
     },
     [Network.GOERLI]: {
         chainId: Network.GOERLI, //5
@@ -74,16 +64,42 @@ export const SOR_CONFIG: Record<Network, SorConfig> = {
                 address: '0xe22483774bd8611be2ad2f4194078dac9159f4ba',
             }, // Joins Stables<>BRZ via https://app.balancer.fi/#/polygon/pool/0x4a0b73f0d13ff6d43e304a174697e3d5cfd310a400020000000000000000091c
         ],
+        lbpRaisingTokens: [
+            '0x8f3cf7ad23cd3cadbd9735aff958023239c6a063', // DAI
+            '0x2791bca1f2de4661ed88a30c99a7a9449aa84174', // USDC
+            '0x0d500B1d8E8eF31E21C99d1Db9A6444d3ADf1270', // WMATIC
+        ],
     },
     [Network.ARBITRUM]: {
         chainId: Network.ARBITRUM, //42161
         vault: '0xBA12222222228d8Ba445958a75a0704d566BF2C8',
-        weth: '0x82aF49447D8a07e3bd95BD0d56f35241523fBab1',
+        weth: '0x82af49447d8a07e3bd95bd0d56f35241523fbab1',
         connectingTokens: [
             {
                 symbol: 'weth',
-                address: '0x82aF49447D8a07e3bd95BD0d56f35241523fBab1',
+                address: '0x82af49447d8a07e3bd95bd0d56f35241523fbab1',
             },
+        ],
+        lbpRaisingTokens: [
+            '0xda10009cbd5d07dd0cecc66161fc93d7c9000da1', // DAI
+            '0xff970a61a04b1ca14834a43f5de4533ebddb5cc8', // USDC
+            '0x82af49447d8a07e3bd95bd0d56f35241523fbab1', // WETH
+        ],
+    },
+    [Network.OPTIMISM]: {
+        chainId: Network.OPTIMISM,
+        vault: '0xBA12222222228d8Ba445958a75a0704d566BF2C8',
+        weth: '0x4200000000000000000000000000000000000006',
+        connectingTokens: [
+            {
+                symbol: 'weth',
+                address: '0x4200000000000000000000000000000000000006',
+            },
+        ],
+        lbpRaisingTokens: [
+            '0xda10009cbd5d07dd0cecc66161fc93d7c9000da1', // DAI
+            '0x7f5c764cbc14f9669b88837ca1490cca17c31607', // USDC
+            '0x4200000000000000000000000000000000000006', // WETH
         ],
     },
     [Network.GNOSIS]: {
@@ -93,7 +109,7 @@ export const SOR_CONFIG: Record<Network, SorConfig> = {
         connectingTokens: [
             {
                 symbol: 'weth',
-                address: '0x82aF49447D8a07e3bd95BD0d56f35241523fBab1',
+                address: '0x82af49447d8a07e3bd95bd0d56f35241523fbab1',
             },
         ],
     },
@@ -102,7 +118,6 @@ export const SOR_CONFIG: Record<Network, SorConfig> = {
 export const PROVIDER_URLS = {
     [Network.MAINNET]: `https://mainnet.infura.io/v3/${process.env.INFURA}`,
     [Network.GOERLI]: `https://goerli.infura.io/v3/${process.env.INFURA}`,
-    [Network.KOVAN]: `https://kovan.infura.io/v3/${process.env.INFURA}`,
     [Network.POLYGON]: `https://polygon-mainnet.infura.io/v3/${process.env.INFURA}`,
     [Network.ARBITRUM]: `https://arbitrum-mainnet.infura.io/v3/${process.env.INFURA}`,
     [Network.GNOSIS]: `https://poa-xdai.gateway.pokt.network/v1/lb/91bc0e12a76e7a84dd76189d`,
@@ -125,8 +140,6 @@ export const SUBGRAPH_URLS = {
         'https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-v2-beta',
     [Network.GOERLI]:
         'https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-goerli-v2',
-    [Network.KOVAN]:
-        'https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-kovan-v2',
     [Network.POLYGON]:
         'https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-polygon-v2',
     [Network.ARBITRUM]: `https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-arbitrum-v2`,
@@ -276,92 +289,6 @@ export const ADDRESSES = {
             address: '0x126e7643235ec0ab9c103c507642dC3F4cA23C66'.toLowerCase(),
             decimals: 18,
             symbol: 'bbtAPE',
-        },
-    },
-    [Network.KOVAN]: {
-        // Visit https://balancer-faucet.on.fleek.co/#/faucet for test tokens
-        BatchRelayer: {
-            address: '0x41B953164995c11C81DA73D212ED8Af25741b7Ac',
-        },
-        ETH: {
-            address: AddressZero,
-            decimals: 18,
-            symbol: 'ETH',
-        },
-        BAL: {
-            address: '0x41286Bb1D3E870f3F750eB7E1C25d7E48c8A1Ac7',
-            decimals: 18,
-            symbol: 'BAL',
-        },
-        USDC: {
-            address: '0xc2569dd7d0fd715B054fBf16E75B001E5c0C1115',
-            decimals: 6,
-            symbol: 'USDC',
-        },
-        WBTC: {
-            address: '0x1C8E3Bcb3378a443CC591f154c5CE0EBb4dA9648',
-            decimals: 8,
-            symbol: 'WBTC',
-        },
-        WETH: {
-            address: '0xdFCeA9088c8A88A76FF74892C1457C17dfeef9C1',
-            decimals: 18,
-            symbol: 'WETH',
-        },
-        DAI: {
-            address: '0x04DF6e4121c27713ED22341E7c7Df330F56f289B',
-            decimals: 18,
-            symbol: 'DAI',
-        },
-        STETH: {
-            address: '0x4803bb90d18a1cb7a2187344fe4feb0e07878d05',
-            decimals: 18,
-            symbol: 'STETH',
-        },
-        wSTETH: {
-            address: '0xa387b91e393cfb9356a460370842bc8dbb2f29af',
-            decimals: 18,
-            symbol: 'wSTETH',
-        },
-        USDT_from_AAVE: {
-            address: '0x13512979ade267ab5100878e2e0f485b568328a4',
-            decimals: 6,
-            symbol: 'USDT_from_AAVE',
-        },
-        aUSDT: {
-            address: '0xe8191aacfcdb32260cda25830dc6c9342142f310',
-            decimals: 6,
-            symbol: 'aUSDT',
-        },
-        bUSDT: {
-            address: '0xe667d48618e71c2a02e4a1b66ed9def1426938b6',
-            decimals: 18,
-            symbol: 'bUSDT',
-        },
-        USDC_from_AAVE: {
-            address: '0xe22da380ee6b445bb8273c81944adeb6e8450422',
-            decimals: 6,
-            symbol: 'USDC_from_AAVE',
-        },
-        aUSDC: {
-            address: '0x0fbddc06a4720408a2f5eb78e62bc31ac6e2a3c4',
-            decimals: 6,
-            symbol: 'aUSDC',
-        },
-        DAI_from_AAVE: {
-            address: '0xff795577d9ac8bd7d90ee22b6c1703490b6512fd',
-            decimals: 18,
-            symbol: 'DAI_from_AAVE',
-        },
-        bDAI: {
-            address: '0xfcccb77a946b6a3bd59d149f083b5bfbb8004d6d',
-            decimals: 18,
-            symbol: 'bDAI',
-        },
-        STABAL3: {
-            address: '0x8fd162f338b770f7e879030830cde9173367f301',
-            decimals: 18,
-            symbol: 'STABAL3',
         },
     },
     [Network.POLYGON]: {
