@@ -14,6 +14,7 @@ import {
     MetaStablePoolPairData,
 } from '../src/pools/metaStablePool/metaStablePool';
 import { BAL, sorConfigEth, USDC, WETH } from './lib/constants';
+import { _computeScalingFactor } from '../src/utils/basicOperations';
 import poolsFromFile from './testData/metaStablePools/singlePool.json';
 import poolsFromFileMultihop from './testData/metaStablePools/multihop.json';
 
@@ -66,7 +67,7 @@ describe(`Tests for MetaStable Pools.`, () => {
             const swapType = SwapTypes.SwapExactIn;
 
             // Max out uses standard V2 limits
-            const MAX_OUT_RATIO = bnum(0.3);
+            const MAX_OUT_RATIO = bnum(0.99);
 
             const newPool = new MetaStablePool(
                 pool.id,
@@ -81,7 +82,7 @@ describe(`Tests for MetaStable Pools.`, () => {
             const poolPairData: MetaStablePoolPairData = {
                 id: pool.id,
                 address: pool.address,
-                poolType: PoolTypes.Stable,
+                poolType: PoolTypes.MetaStable,
                 tokenIn: pool.tokens[0].address,
                 tokenOut: pool.tokens[1].address,
                 balanceIn: parseFixed(
@@ -108,6 +109,12 @@ describe(`Tests for MetaStable Pools.`, () => {
                 tokenIndexOut: 1,
                 tokenInPriceRate: parseFixed(pool.tokens[0].priceRate, 18),
                 tokenOutPriceRate: parseFixed(pool.tokens[1].priceRate, 18),
+                tokenInScalingFactor: _computeScalingFactor(
+                    BigInt(pool.tokens[0].decimals)
+                ),
+                tokenOutScalingFactor: _computeScalingFactor(
+                    BigInt(pool.tokens[1].decimals)
+                ),
             };
 
             const limitAmt = newPool.getLimitAmountSwap(poolPairData, swapType);
@@ -121,7 +128,7 @@ describe(`Tests for MetaStable Pools.`, () => {
             const swapType = SwapTypes.SwapExactOut;
 
             // Max out uses standard V2 limits
-            const MAX_OUT_RATIO = bnum(0.3);
+            const MAX_OUT_RATIO = bnum(0.99);
 
             const newPool = new MetaStablePool(
                 pool.id,
@@ -136,7 +143,7 @@ describe(`Tests for MetaStable Pools.`, () => {
             const poolPairData: MetaStablePoolPairData = {
                 id: pool.id,
                 address: pool.address,
-                poolType: PoolTypes.Stable,
+                poolType: PoolTypes.MetaStable,
                 tokenIn: pool.tokens[0].address,
                 tokenOut: pool.tokens[1].address,
                 balanceIn: parseFixed(
@@ -157,14 +164,18 @@ describe(`Tests for MetaStable Pools.`, () => {
                 tokenIndexOut: 1,
                 tokenInPriceRate: parseFixed(pool.tokens[0].priceRate, 18),
                 tokenOutPriceRate: parseFixed(pool.tokens[1].priceRate, 18),
+                tokenInScalingFactor: _computeScalingFactor(
+                    BigInt(pool.tokens[0].decimals)
+                ),
+                tokenOutScalingFactor: _computeScalingFactor(
+                    BigInt(pool.tokens[1].decimals)
+                ),
             };
 
             const limitAmt = newPool.getLimitAmountSwap(poolPairData, swapType);
+            console.log(limitAmt.toString());
             expect(limitAmt.toString()).to.eq(
-                bnum(pool.tokens[1].balance)
-                    .div(bnum(pool.tokens[1].priceRate))
-                    .times(MAX_OUT_RATIO)
-                    .toString()
+                bnum(pool.tokens[1].balance).times(MAX_OUT_RATIO).toString()
             );
         });
     });

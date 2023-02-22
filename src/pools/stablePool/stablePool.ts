@@ -100,7 +100,7 @@ export class StablePool implements PoolBase<StablePoolPairData> {
         this.tokensList = tokensList;
     }
 
-    private findTokenIndex<Token extends { address: string }>(
+    findTokenIndex<Token extends { address: string }>(
         list: Token[],
         tokenAddress: string
     ): number {
