@@ -66,6 +66,7 @@ export class StablePool implements PoolBase<StablePoolPairData> {
     tokens: StablePoolToken[];
     tokensList: string[];
     ALMOST_ONE = parseFixed('0.99', 18);
+    SWAP_FEE_MATHS = BigInt(0);
 
     static AMP_DECIMALS = 3;
 
@@ -223,7 +224,7 @@ export class StablePool implements PoolBase<StablePoolPairData> {
                 poolPairData.tokenIndexIn,
                 poolPairData.tokenIndexOut,
                 amountMinusFee.toBigInt(),
-                BigInt(0)
+                this.SWAP_FEE_MATHS
             );
             const amountDownscaled = _downscaleDown(
                 amountOutNormalised,
@@ -263,7 +264,7 @@ export class StablePool implements PoolBase<StablePoolPairData> {
                 poolPairData.tokenIndexIn,
                 poolPairData.tokenIndexOut,
                 amountOutNormalised.toBigInt(),
-                BigInt(0)
+                this.SWAP_FEE_MATHS
             );
             const amountDownscaled = _downscaleUp(
                 amountInNormalised,

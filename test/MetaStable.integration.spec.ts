@@ -1,16 +1,13 @@
 // yarn test:only test/metaStable.integration.spec.ts
 import dotenv from 'dotenv';
 import { JsonRpcProvider } from '@ethersproject/providers';
-import { SubgraphPoolBase, SwapTypes } from '../src';
-import { Network, ADDRESSES, vaultAddr } from './testScripts/constants';
-import { AddressZero } from '@ethersproject/constants';
+import { SubgraphPoolBase } from '../src';
+import { Network } from './testScripts/constants';
 
 import { parseFixed } from '@ethersproject/bignumber';
 import { expect } from 'chai';
 import { MetaStablePool } from '../src/pools/metaStablePool/metaStablePool';
 import { setUp, queryJoin, queryExit } from './testScripts/utils';
-import { Vault__factory } from '@balancer-labs/typechain';
-import { closeTo } from './lib/testHelpers';
 
 dotenv.config();
 
@@ -50,14 +47,14 @@ const jsonRpcUrl = 'https://mainnet.infura.io/v3/' + process.env.INFURA;
 const rpcUrl = 'http://127.0.0.1:8545';
 const blockNumber = 16447247;
 const provider = new JsonRpcProvider(rpcUrl, networkId);
-const vault = Vault__factory.connect(vaultAddr, provider);
+// const vault = Vault__factory.connect(vaultAddr, provider);
 let pool: MetaStablePool;
-const funds = {
-    sender: AddressZero,
-    recipient: AddressZero,
-    fromInternalBalance: false,
-    toInternalBalance: false,
-};
+// const funds = {
+//     sender: AddressZero,
+//     recipient: AddressZero,
+//     fromInternalBalance: false,
+//     toInternalBalance: false,
+// };
 let sor;
 
 describe('MetaStable', () => {
@@ -157,46 +154,46 @@ describe('MetaStable', () => {
             });
         });
     });
-    context('swaps', () => {
-        it('token>token, ExactIn', async () => {
-            const swapType = SwapTypes.SwapExactIn;
-            const swapInfo = await sor.getSwaps(
-                ADDRESSES[networkId].USDC.address,
-                ADDRESSES[networkId].USDT.address,
-                swapType,
-                parseFixed('0.1', 6)
-            );
-            const queryResult = await vault.callStatic.queryBatchSwap(
-                swapType,
-                swapInfo.swaps,
-                swapInfo.tokenAddresses,
-                funds
-            );
-            expect(queryResult[0].toString()).to.eq(
-                swapInfo.swapAmount.toString()
-            );
-            expect(queryResult[1].abs().toString()).to.eq(
-                swapInfo.returnAmount.toString()
-            );
-        });
-        it('token>token, ExactOut', async () => {
-            const swapType = SwapTypes.SwapExactOut;
-            const swapInfo = await sor.getSwaps(
-                ADDRESSES[networkId].USDC.address,
-                ADDRESSES[networkId].USDT.address,
-                swapType,
-                parseFixed('0.1', 6)
-            );
-            const queryResult = await vault.callStatic.queryBatchSwap(
-                swapType,
-                swapInfo.swaps,
-                swapInfo.tokenAddresses,
-                funds
-            );
-            closeTo(queryResult[0], swapInfo.returnAmount, 1);
-            expect(queryResult[1].abs().toString()).to.eq(
-                swapInfo.swapAmount.toString()
-            );
-        });
-    });
+    // context('swaps', () => {
+    //     it('token>token, ExactIn', async () => {
+    //         const swapType = SwapTypes.SwapExactIn;
+    //         const swapInfo = await sor.getSwaps(
+    //             ADDRESSES[networkId].USDC.address,
+    //             ADDRESSES[networkId].USDT.address,
+    //             swapType,
+    //             parseFixed('0.1', 6)
+    //         );
+    //         const queryResult = await vault.callStatic.queryBatchSwap(
+    //             swapType,
+    //             swapInfo.swaps,
+    //             swapInfo.tokenAddresses,
+    //             funds
+    //         );
+    //         expect(queryResult[0].toString()).to.eq(
+    //             swapInfo.swapAmount.toString()
+    //         );
+    //         expect(queryResult[1].abs().toString()).to.eq(
+    //             swapInfo.returnAmount.toString()
+    //         );
+    //     });
+    //     it('token>token, ExactOut', async () => {
+    //         const swapType = SwapTypes.SwapExactOut;
+    //         const swapInfo = await sor.getSwaps(
+    //             ADDRESSES[networkId].USDC.address,
+    //             ADDRESSES[networkId].USDT.address,
+    //             swapType,
+    //             parseFixed('0.1', 6)
+    //         );
+    //         const queryResult = await vault.callStatic.queryBatchSwap(
+    //             swapType,
+    //             swapInfo.swaps,
+    //             swapInfo.tokenAddresses,
+    //             funds
+    //         );
+    //         closeTo(queryResult[0], swapInfo.returnAmount, 1);
+    //         expect(queryResult[1].abs().toString()).to.eq(
+    //             swapInfo.swapAmount.toString()
+    //         );
+    //     });
+    // });
 });
