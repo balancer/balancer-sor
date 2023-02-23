@@ -104,6 +104,7 @@ export class PhantomStablePool
         tokensList: string[]
     ) {
         super(id, address, amp, swapFee, totalShares, tokens, tokensList);
+        this.tokens = tokens;
     }
 
     parsePoolPairData(
