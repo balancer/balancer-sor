@@ -1,4 +1,5 @@
-// TS_NODE_PROJECT='tsconfig.testing.json' npx mocha -r ts-node/register test/math.spec.ts
+// TS_NODE_PROJECT='tsconfig.testing.json' npx mocha -r ts-node/register test/frontendHelpers.spec.ts
+import { expect } from 'chai';
 import { BPTForTokensZeroPriceImpact } from '../src/frontendHelpers/phantomStableHelpers';
 
 describe('frontend helpers', () => {
@@ -17,7 +18,7 @@ describe('frontend helpers', () => {
                     '1000000000000000000',
                 ]
             );
-            console.log(result.toString());
+            expect(result.toString()).to.eq('969582');
         });
     });
 });

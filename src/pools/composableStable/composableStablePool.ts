@@ -1,29 +1,24 @@
-import { BigNumber, formatFixed, parseFixed } from '@ethersproject/bignumber';
+import { BigNumber, formatFixed } from '@ethersproject/bignumber';
 import { WeiPerEther as ONE, Zero } from '@ethersproject/constants';
 import {
     isSameAddress,
     normaliseBalance,
     normaliseAmount,
     denormaliseAmount,
+    safeParseFixed,
 } from '../../utils';
 import { BigNumber as OldBigNumber, bnum, ZERO } from '../../utils/bignumber';
 import { SubgraphPoolBase } from '../../types';
 import {
     _calcBptOutGivenExactTokensIn,
-    _calcTokenOutGivenExactBptIn,
-    _calcOutGivenIn,
-    _calcTokenInGivenExactBptOut,
-    _calcBptInGivenExactTokensOut,
-    _calcInGivenOut,
     _calcTokensOutGivenExactBptIn,
 } from '../stablePool/stableMathBigInt';
 import {
     PhantomStablePool,
-    PhantomStablePoolPairData,
     PhantomStablePoolToken,
-    PairTypes,
 } from '../phantomStablePool/phantomStablePool';
 export class ComposableStablePool extends PhantomStablePool {
+    SWAP_FEE_MATHS: bigint;
     constructor(
         id: string,
         address: string,
@@ -34,6 +29,7 @@ export class ComposableStablePool extends PhantomStablePool {
         tokensList: string[]
     ) {
         super(id, address, amp, swapFee, totalShares, tokens, tokensList);
+        this.SWAP_FEE_MATHS = this.swapFee.toBigInt();
     }
 
     static fromPool(pool: SubgraphPoolBase): ComposableStablePool {
@@ -50,129 +46,28 @@ export class ComposableStablePool extends PhantomStablePool {
         );
     }
 
-    _exactTokenInForTokenOut(
-        poolPairData: PhantomStablePoolPairData,
-        amount: OldBigNumber
-    ): OldBigNumber {
-        try {
-            // balances and amounts must be normalized to 1e18 fixed point - e.g. 1USDC => 1e18 not 1e6
-            // takes price rate into account
-
-            if (amount.isZero()) return ZERO;
-            const amountConvertedEvm = parseFixed(amount.dp(18).toString(), 18)
-                .mul(poolPairData.tokenInPriceRate)
-                .div(ONE);
-
-            let returnEvm: BigInt;
-
-            if (poolPairData.pairType === PairTypes.TokenToBpt) {
-                const amountsInBigInt = Array(
-                    poolPairData.allBalancesScaled.length
-                ).fill(BigInt(0));
-                amountsInBigInt[poolPairData.tokenIndexIn] =
-                    amountConvertedEvm.toBigInt();
-
-                returnEvm = _calcBptOutGivenExactTokensIn(
-                    this.amp.toBigInt(),
-                    poolPairData.allBalancesScaled.map((b) => b.toBigInt()),
-                    amountsInBigInt,
-                    poolPairData.virtualBptSupply.toBigInt(),
-                    poolPairData.swapFee.toBigInt()
-                );
-            } else if (poolPairData.pairType === PairTypes.BptToToken) {
-                returnEvm = _calcTokenOutGivenExactBptIn(
-                    this.amp.toBigInt(),
-                    poolPairData.allBalancesScaled.map((b) => b.toBigInt()),
-                    poolPairData.tokenIndexOut,
-                    amountConvertedEvm.toBigInt(),
-                    poolPairData.virtualBptSupply.toBigInt(),
-                    poolPairData.swapFee.toBigInt()
-                );
-            } else {
-                returnEvm = _calcOutGivenIn(
-                    this.amp.toBigInt(),
-                    poolPairData.allBalancesScaled.map((b) => b.toBigInt()),
-                    poolPairData.tokenIndexIn,
-                    poolPairData.tokenIndexOut,
-                    amountConvertedEvm.toBigInt(),
-                    poolPairData.swapFee.toBigInt()
-                );
-            }
-
-            const returnEvmWithRate = BigNumber.from(returnEvm)
-                .mul(ONE)
-                .div(poolPairData.tokenOutPriceRate);
-
-            // Return human scaled
-            return bnum(formatFixed(returnEvmWithRate, 18)).dp(
-                poolPairData.decimalsOut
-            );
-        } catch (err) {
-            // console.error(`PhantomStable _evmoutGivenIn: ${err.message}`);
-            return ZERO;
-        }
+    handleScalingAndFeeTokenIn(
+        swapFee: BigNumber,
+        amount: string,
+        priceRate: BigNumber
+    ): bigint {
+        // Amount is floating point here and must be normalised for maths i.e. 1USDC => 1e18 not 1e6
+        const amountNormalised = safeParseFixed(amount, 18);
+        const amountWithRate = amountNormalised.mul(priceRate).div(ONE);
+        // Fee is handled in maths not here
+        return amountWithRate.toBigInt();
     }
 
-    _tokenInForExactTokenOut(
-        poolPairData: PhantomStablePoolPairData,
-        amount: OldBigNumber
+    handleScalingAndFeeTokenOut(
+        swapFee: BigNumber,
+        amount: string,
+        priceRate: BigNumber,
+        decimalsOut: number
     ): OldBigNumber {
-        try {
-            if (amount.isZero()) return ZERO;
-            // balances and amounts must be normalized to 1e18 fixed point - e.g. 1USDC => 1e18 not 1e6
-            // takes price rate into account
-            const amountConvertedEvm = parseFixed(amount.dp(18).toString(), 18)
-                .mul(poolPairData.tokenOutPriceRate)
-                .div(ONE);
-
-            let returnEvm: BigInt;
-
-            if (poolPairData.pairType === PairTypes.TokenToBpt) {
-                returnEvm = _calcTokenInGivenExactBptOut(
-                    this.amp.toBigInt(),
-                    poolPairData.allBalancesScaled.map((b) => b.toBigInt()),
-                    poolPairData.tokenIndexIn,
-                    amountConvertedEvm.toBigInt(),
-                    poolPairData.virtualBptSupply.toBigInt(),
-                    poolPairData.swapFee.toBigInt()
-                );
-            } else if (poolPairData.pairType === PairTypes.BptToToken) {
-                const amountsOutBigInt = Array(
-                    poolPairData.allBalancesScaled.length
-                ).fill(BigInt(0));
-                amountsOutBigInt[poolPairData.tokenIndexOut] =
-                    amountConvertedEvm.toBigInt();
-
-                returnEvm = _calcBptInGivenExactTokensOut(
-                    this.amp.toBigInt(),
-                    poolPairData.allBalancesScaled.map((b) => b.toBigInt()),
-                    amountsOutBigInt,
-                    poolPairData.virtualBptSupply.toBigInt(),
-                    poolPairData.swapFee.toBigInt()
-                );
-            } else {
-                returnEvm = _calcInGivenOut(
-                    this.amp.toBigInt(),
-                    poolPairData.allBalancesScaled.map((b) => b.toBigInt()),
-                    poolPairData.tokenIndexIn,
-                    poolPairData.tokenIndexOut,
-                    amountConvertedEvm.toBigInt(),
-                    poolPairData.swapFee.toBigInt()
-                );
-            }
-            // In Phantom Pools every time there is a swap (token per token, bpt per token or token per bpt), we substract the fee from the amount in
-            const returnEvmWithRate = BigNumber.from(returnEvm)
-                .mul(ONE)
-                .div(poolPairData.tokenInPriceRate);
-
-            // return human number
-            return bnum(formatFixed(returnEvmWithRate, 18)).dp(
-                poolPairData.decimalsOut
-            );
-        } catch (err) {
-            console.error(`PhantomStable _evminGivenOut: ${err.message}`);
-            return ZERO;
-        }
+        // Amount is normalised here (straight from maths)
+        const returnWithRate = BigNumber.from(amount).mul(ONE).div(priceRate);
+        // Fee has already been handled in maths
+        return bnum(formatFixed(returnWithRate, 18)).dp(decimalsOut);
     }
 
     /**

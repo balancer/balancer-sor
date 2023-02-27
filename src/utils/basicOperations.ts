@@ -256,9 +256,8 @@ export class MathSol {
 
     // This is the same as mulDown in Smart Contracts FixedPoint.sol
     static mulDownFixed(a: bigint, b: bigint): bigint {
+        // No check for overflows as js bigints aren't uint256 and won't ever overflow
         const product = a * b;
-        _require(a == BZERO || product / a == b, 'Errors.MUL_OVERFLOW');
-
         return product / this.ONE;
     }
 }

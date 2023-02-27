@@ -7,7 +7,7 @@ import {
 import { Zero } from '@ethersproject/constants';
 import { BigNumber as OldBigNumber, bnum, ZERO } from '../utils/bignumber';
 import * as stableMath from '../pools/stablePool/stableMath';
-import { StablePoolPairData } from '../pools/stablePool/stablePool';
+import { PhantomStablePoolPairData } from '../pools/phantomStablePool/phantomStablePool';
 
 /////////
 /// UI Helpers
@@ -36,14 +36,14 @@ export function BPTForTokensZeroPriceImpact(
 
     const amountBPTOut = amounts.reduce((totalBptOut, amountIn, i) => {
         // Calculate amount of BPT gained per token in
-        const poolPairData: StablePoolPairData = {
+        const poolPairData: PhantomStablePoolPairData = {
             amp: BigNumber.from(amp),
             allBalances: allBalancesDownScaled,
             tokenIndexIn: i,
-            balanceOut: bptTotalSupply,
+            virtualBptSupply: bptTotalSupply,
             decimalsOut: 18,
             swapFee: Zero,
-        } as unknown as StablePoolPairData;
+        } as unknown as PhantomStablePoolPairData;
         const BPTPrice = stableMath._spotPriceAfterSwapTokenInForExactBPTOut(
             ZERO,
             poolPairData
