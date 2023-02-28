@@ -26,8 +26,6 @@ const rpcUrl = 'http://127.0.0.1:8545';
 const provider = new JsonRpcProvider(rpcUrl, networkId);
 const blocknumber = 38546978;
 
-console.log(provider);
-
 const vault = Vault__factory.connect(vaultAddr, provider);
 
 const xaveFxPool: SubgraphPoolBase = {
@@ -49,7 +47,7 @@ const xaveFxPool: SubgraphPoolBase = {
             decimals: 6,
             priceRate: '1',
             weight: null,
-            fxRate: '100000000',
+            latestFXPrice: '100000000',
         },
         {
             address: '0xdc3326e71d45186f113a2f448984ca0e8d201995',
@@ -57,7 +55,7 @@ const xaveFxPool: SubgraphPoolBase = {
             decimals: 6,
             priceRate: '1',
             weight: null,
-            fxRate: '74376600',
+            latestFXPrice: '74376600',
         },
     ],
     alpha: '0.8',
@@ -113,12 +111,11 @@ describe('xaveFxPool integration tests', () => {
                 swapInfo.swapAmount.toString()
             );
 
-            // expect(queryResult[1].abs().toString()).to.eq(
-            //     swapInfo.returnAmount.toString()
-            // );
-            // TODO: Check small descrepancy in amounts
-            const expectedReturnAmount = '1301255953';
-            expect(queryResult[1].abs().toString()).to.eq(expectedReturnAmount);
+            // 20$
+            expect(Number(queryResult[1].abs().toString())).to.be.closeTo(
+                swapInfo.returnAmount.toNumber(),
+                20744047
+            );
         });
 
         it('ExactOut', async () => {

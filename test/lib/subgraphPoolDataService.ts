@@ -45,7 +45,7 @@ const queryWithLinear = `
           lambda
           delta
           epsilon
-          fxRate
+          latestFXPrice
           tauAlphaX
           tauAlphaY
           tauBetaX

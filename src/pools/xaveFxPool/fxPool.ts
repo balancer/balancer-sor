@@ -26,7 +26,7 @@ import { universalNormalizedLiquidity } from '../liquidity';
 
 type FxPoolToken = Pick<
     SubgraphToken,
-    'address' | 'balance' | 'decimals' | 'fxRate'
+    'address' | 'balance' | 'decimals' | 'latestFXPrice'
 >;
 
 export type FxPoolPairData = PoolPairBase & {
@@ -148,8 +148,8 @@ export class FxPool implements PoolBase {
             lambda: this.lambda,
             delta: this.delta,
             epsilon: this.epsilon,
-            tokenInRate: parseFixed(this.tokens[tokenIndexIn].fxRate!),
-            tokenOutRate: parseFixed(this.tokens[tokenIndexOut].fxRate!),
+            tokenInRate: parseFixed(this.tokens[tokenIndexIn].latestFXPrice!),
+            tokenOutRate: parseFixed(this.tokens[tokenIndexOut].latestFXPrice!),
         };
 
         return poolPairData;
