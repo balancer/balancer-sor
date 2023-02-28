@@ -56,8 +56,8 @@ export class FxPool implements PoolBase {
     tokenOutRate: BigNumber;
 
     // Max In/Out Ratios
-    MAX_IN_RATIO = parseFixed('0.3', 18);
-    MAX_OUT_RATIO = parseFixed('0.3', 18);
+    MAX_IN_RATIO = parseFixed('1', 18);
+    MAX_OUT_RATIO = parseFixed('1', 18);
 
     static fromPool(pool: SubgraphPoolBase): FxPool {
         return new FxPool(
