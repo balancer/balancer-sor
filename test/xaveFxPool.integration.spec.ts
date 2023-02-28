@@ -13,6 +13,7 @@ import { setUp } from './testScripts/utils';
  * Testing Notes:
  * - Add polygon ALCHEMY_URL in .env
  * - Change --fork-block-number to 38546978
+ * - Change hardhat.config.ts chainId to 137
  * - Run polygon node on terminal: yarn run node
  */
 
@@ -24,6 +25,8 @@ const jsonRpcUrl = process.env.ALCHEMY_URL;
 const rpcUrl = 'http://127.0.0.1:8545';
 const provider = new JsonRpcProvider(rpcUrl, networkId);
 const blocknumber = 38546978;
+
+console.log(provider);
 
 const vault = Vault__factory.connect(vaultAddr, provider);
 
@@ -42,7 +45,7 @@ const xaveFxPool: SubgraphPoolBase = {
     tokens: [
         {
             address: '0x2791bca1f2de4661ed88a30c99a7a9449aa84174',
-            balance: '731837',
+            balance: '731837.486297',
             decimals: 6,
             priceRate: '1',
             weight: null,
@@ -50,7 +53,7 @@ const xaveFxPool: SubgraphPoolBase = {
         },
         {
             address: '0xdc3326e71d45186f113a2f448984ca0e8d201995',
-            balance: '639986',
+            balance: '639986.37244',
             decimals: 6,
             priceRate: '1',
             weight: null,

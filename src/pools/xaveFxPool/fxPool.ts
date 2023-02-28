@@ -168,6 +168,7 @@ export class FxPool implements PoolBase {
         );
     }
 
+    // There will be no limit amount to swap.
     getLimitAmountSwap(
         poolPairData: FxPoolPairData,
         swapType: SwapTypes

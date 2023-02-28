@@ -1,6 +1,7 @@
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 require('dotenv').config();
-// TS_NODE_PROJECT='tsconfig.testing.json' npx mocha -r ts-node/register test/xaveFxPool.spec.ts
+
+// yarn test:only test/xaveFxPool.spec.ts
 import { assert, expect } from 'chai';
 import { bnum, scale } from '../src/utils/bignumber';
 import { PoolTypes, SwapTypes } from '../src';
@@ -88,7 +89,7 @@ describe('Test for fxPools', () => {
                 SwapTypes.SwapExactOut
             );
 
-            expect(amount.toString()).to.equals('191995.911732');
+            expect(amount.toString()).to.equals(poolData.tokens[1].balance);
         });
     });
 
