@@ -405,12 +405,12 @@ describe(`Tests for Lido USD routes.`, () => {
             expect(swapInfo.swaps[0].amount.toString()).to.eq(
                 swapAmt.toString()
             );
-            expect(swapInfo.swaps[0].assetInIndex).to.eq('0');
-            expect(swapInfo.swaps[0].assetOutIndex).to.eq('1');
+            expect(swapInfo.swaps[0].assetInIndex).to.eq(0);
+            expect(swapInfo.swaps[0].assetOutIndex).to.eq(1);
             expect(swapInfo.swaps[1].amount.toString()).to.eq('0');
             expect(swapInfo.swaps[1].poolId).to.eq(poolLido);
-            expect(swapInfo.swaps[1].assetInIndex).to.eq('1');
-            expect(swapInfo.swaps[1].assetOutIndex).to.eq('2');
+            expect(swapInfo.swaps[1].assetInIndex).to.eq(1);
+            expect(swapInfo.swaps[1].assetOutIndex).to.eq(2);
             // This is pulled from mainnet so needs valid routes
             expect(swapInfo.returnAmount.gt(0)).to.be.true;
             expect(swapInfo.returnAmountConsideringFees.gt(0)).to.be.true;
@@ -450,12 +450,12 @@ describe(`Tests for Lido USD routes.`, () => {
             expect(swapInfo.swaps[0].amount.toString()).to.eq(
                 swapAmt.toString()
             );
-            expect(swapInfo.swaps[0].assetInIndex).to.eq('1');
-            expect(swapInfo.swaps[0].assetOutIndex).to.eq('2');
+            expect(swapInfo.swaps[0].assetInIndex).to.eq(1);
+            expect(swapInfo.swaps[0].assetOutIndex).to.eq(2);
             expect(swapInfo.swaps[1].amount.toString()).to.eq('0');
             expect(swapInfo.swaps[1].poolId).to.eq(poolWethDai);
-            expect(swapInfo.swaps[1].assetInIndex).to.eq('0');
-            expect(swapInfo.swaps[1].assetOutIndex).to.eq('1');
+            expect(swapInfo.swaps[1].assetInIndex).to.eq(0);
+            expect(swapInfo.swaps[1].assetOutIndex).to.eq(1);
             // This is pulled from mainnet so needs valid routes
             expect(swapInfo.returnAmount.gt(0)).to.be.true;
             expect(swapInfo.returnAmountConsideringFees.gt(0)).to.be.true;
@@ -492,12 +492,12 @@ describe(`Tests for Lido USD routes.`, () => {
             expect(swapInfo.swaps[0].amount.toString()).to.eq(
                 swapAmt.toString()
             );
-            expect(swapInfo.swaps[0].assetInIndex).to.eq('0');
-            expect(swapInfo.swaps[0].assetOutIndex).to.eq('1');
+            expect(swapInfo.swaps[0].assetInIndex).to.eq(0);
+            expect(swapInfo.swaps[0].assetOutIndex).to.eq(1);
             expect(swapInfo.swaps[1].amount.toString()).to.eq('0');
             expect(swapInfo.swaps[1].poolId).to.eq(poolWethDai);
-            expect(swapInfo.swaps[1].assetInIndex).to.eq('1');
-            expect(swapInfo.swaps[1].assetOutIndex).to.eq('2');
+            expect(swapInfo.swaps[1].assetInIndex).to.eq(1);
+            expect(swapInfo.swaps[1].assetOutIndex).to.eq(2);
             // This is pulled from mainnet so needs valid routes
             expect(swapInfo.returnAmount.gt(0)).to.be.true;
             expect(swapInfo.returnAmountConsideringFees.gt(0)).to.be.true;
@@ -534,12 +534,12 @@ describe(`Tests for Lido USD routes.`, () => {
             expect(swapInfo.swaps[0].amount.toString()).to.eq(
                 swapAmt.toString()
             );
-            expect(swapInfo.swaps[0].assetInIndex).to.eq('1');
-            expect(swapInfo.swaps[0].assetOutIndex).to.eq('2');
+            expect(swapInfo.swaps[0].assetInIndex).to.eq(1);
+            expect(swapInfo.swaps[0].assetOutIndex).to.eq(2);
             expect(swapInfo.swaps[1].amount.toString()).to.eq('0');
             expect(swapInfo.swaps[1].poolId).to.eq(poolLido);
-            expect(swapInfo.swaps[1].assetInIndex).to.eq('0');
-            expect(swapInfo.swaps[1].assetOutIndex).to.eq('1');
+            expect(swapInfo.swaps[1].assetInIndex).to.eq(0);
+            expect(swapInfo.swaps[1].assetOutIndex).to.eq(1);
             // This is pulled from mainnet so needs valid routes
             expect(swapInfo.returnAmount.gt(0)).to.be.true;
             expect(swapInfo.returnAmountConsideringFees.gt(0)).to.be.true;
@@ -583,16 +583,16 @@ describe(`Tests for Lido USD routes.`, () => {
             expect(swapInfo.swaps[0].amount.toString()).to.eq(
                 swapAmt.toString()
             );
-            expect(swapInfo.swaps[0].assetInIndex).to.eq('0');
-            expect(swapInfo.swaps[0].assetOutIndex).to.eq('1');
+            expect(swapInfo.swaps[0].assetInIndex).to.eq(0);
+            expect(swapInfo.swaps[0].assetOutIndex).to.eq(1);
             expect(swapInfo.swaps[1].poolId).to.eq(poolWethDai);
             expect(swapInfo.swaps[1].amount.toString()).to.eq('0');
-            expect(swapInfo.swaps[1].assetInIndex).to.eq('1');
-            expect(swapInfo.swaps[1].assetOutIndex).to.eq('2');
+            expect(swapInfo.swaps[1].assetInIndex).to.eq(1);
+            expect(swapInfo.swaps[1].assetOutIndex).to.eq(2);
             expect(swapInfo.swaps[2].amount.toString()).to.eq('0');
             expect(swapInfo.swaps[2].poolId).to.eq(poolLido);
-            expect(swapInfo.swaps[2].assetInIndex).to.eq('2');
-            expect(swapInfo.swaps[2].assetOutIndex).to.eq('3');
+            expect(swapInfo.swaps[2].assetInIndex).to.eq(2);
+            expect(swapInfo.swaps[2].assetOutIndex).to.eq(3);
             // This is pulled from mainnet so needs valid routes
             expect(swapInfo.returnAmount.gt(0)).to.be.true;
             expect(swapInfo.returnAmountConsideringFees.gt(0)).to.be.true;
@@ -634,16 +634,16 @@ describe(`Tests for Lido USD routes.`, () => {
             expect(swapInfo.swaps[0].amount.toString()).to.eq(
                 swapAmt.toString()
             );
-            expect(swapInfo.swaps[0].assetInIndex).to.eq('2');
-            expect(swapInfo.swaps[0].assetOutIndex).to.eq('3');
+            expect(swapInfo.swaps[0].assetInIndex).to.eq(2);
+            expect(swapInfo.swaps[0].assetOutIndex).to.eq(3);
             expect(swapInfo.swaps[1].poolId).to.eq(poolWethDai);
             expect(swapInfo.swaps[1].amount.toString()).to.eq('0');
-            expect(swapInfo.swaps[1].assetInIndex).to.eq('1');
-            expect(swapInfo.swaps[1].assetOutIndex).to.eq('2');
+            expect(swapInfo.swaps[1].assetInIndex).to.eq(1);
+            expect(swapInfo.swaps[1].assetOutIndex).to.eq(2);
             expect(swapInfo.swaps[2].amount.toString()).to.eq('0');
             expect(swapInfo.swaps[2].poolId).to.eq(poolStaBal);
-            expect(swapInfo.swaps[2].assetInIndex).to.eq('0');
-            expect(swapInfo.swaps[2].assetOutIndex).to.eq('1');
+            expect(swapInfo.swaps[2].assetInIndex).to.eq(0);
+            expect(swapInfo.swaps[2].assetOutIndex).to.eq(1);
             // This is pulled from mainnet so needs valid routes
             expect(swapInfo.returnAmount.gt(0)).to.be.true;
             expect(swapInfo.returnAmountConsideringFees.gt(0)).to.be.true;
@@ -685,16 +685,16 @@ describe(`Tests for Lido USD routes.`, () => {
             expect(swapInfo.swaps[0].amount.toString()).to.eq(
                 swapAmt.toString()
             );
-            expect(swapInfo.swaps[0].assetInIndex).to.eq('0');
-            expect(swapInfo.swaps[0].assetOutIndex).to.eq('1');
+            expect(swapInfo.swaps[0].assetInIndex).to.eq(0);
+            expect(swapInfo.swaps[0].assetOutIndex).to.eq(1);
             expect(swapInfo.swaps[1].poolId).to.eq(poolWethDai);
             expect(swapInfo.swaps[1].amount.toString()).to.eq('0');
-            expect(swapInfo.swaps[1].assetInIndex).to.eq('1');
-            expect(swapInfo.swaps[1].assetOutIndex).to.eq('2');
+            expect(swapInfo.swaps[1].assetInIndex).to.eq(1);
+            expect(swapInfo.swaps[1].assetOutIndex).to.eq(2);
             expect(swapInfo.swaps[2].amount.toString()).to.eq('0');
             expect(swapInfo.swaps[2].poolId).to.eq(poolStaBal);
-            expect(swapInfo.swaps[2].assetInIndex).to.eq('2');
-            expect(swapInfo.swaps[2].assetOutIndex).to.eq('3');
+            expect(swapInfo.swaps[2].assetInIndex).to.eq(2);
+            expect(swapInfo.swaps[2].assetOutIndex).to.eq(3);
             // This is pulled from mainnet so needs valid routes
             expect(swapInfo.returnAmount.gt(0)).to.be.true;
             expect(swapInfo.returnAmountConsideringFees.gt(0)).to.be.true;
@@ -736,16 +736,16 @@ describe(`Tests for Lido USD routes.`, () => {
             expect(swapInfo.swaps[0].amount.toString()).to.eq(
                 swapAmt.toString()
             );
-            expect(swapInfo.swaps[0].assetInIndex).to.eq('2');
-            expect(swapInfo.swaps[0].assetOutIndex).to.eq('3');
+            expect(swapInfo.swaps[0].assetInIndex).to.eq(2);
+            expect(swapInfo.swaps[0].assetOutIndex).to.eq(3);
             expect(swapInfo.swaps[1].poolId).to.eq(poolWethDai);
             expect(swapInfo.swaps[1].amount.toString()).to.eq('0');
-            expect(swapInfo.swaps[1].assetInIndex).to.eq('1');
-            expect(swapInfo.swaps[1].assetOutIndex).to.eq('2');
+            expect(swapInfo.swaps[1].assetInIndex).to.eq(1);
+            expect(swapInfo.swaps[1].assetOutIndex).to.eq(2);
             expect(swapInfo.swaps[2].amount.toString()).to.eq('0');
             expect(swapInfo.swaps[2].poolId).to.eq(poolLido);
-            expect(swapInfo.swaps[2].assetInIndex).to.eq('0');
-            expect(swapInfo.swaps[2].assetOutIndex).to.eq('1');
+            expect(swapInfo.swaps[2].assetInIndex).to.eq(0);
+            expect(swapInfo.swaps[2].assetOutIndex).to.eq(1);
             // This is pulled from mainnet so needs valid routes
             expect(swapInfo.returnAmount.gt(0)).to.be.true;
             expect(swapInfo.returnAmountConsideringFees.gt(0)).to.be.true;
@@ -789,16 +789,16 @@ describe(`Tests for Lido USD routes.`, () => {
             expect(swapInfo.swaps[0].amount.toString()).to.eq(
                 swapAmt.toString()
             );
-            expect(swapInfo.swaps[0].assetInIndex).to.eq('0');
-            expect(swapInfo.swaps[0].assetOutIndex).to.eq('1');
+            expect(swapInfo.swaps[0].assetInIndex).to.eq(0);
+            expect(swapInfo.swaps[0].assetOutIndex).to.eq(1);
             expect(swapInfo.swaps[1].poolId).to.eq(poolWethDai);
             expect(swapInfo.swaps[1].amount.toString()).to.eq('0');
-            expect(swapInfo.swaps[1].assetInIndex).to.eq('1');
-            expect(swapInfo.swaps[1].assetOutIndex).to.eq('2');
+            expect(swapInfo.swaps[1].assetInIndex).to.eq(1);
+            expect(swapInfo.swaps[1].assetOutIndex).to.eq(2);
             expect(swapInfo.swaps[2].amount.toString()).to.eq('0');
             expect(swapInfo.swaps[2].poolId).to.eq(poolLido);
-            expect(swapInfo.swaps[2].assetInIndex).to.eq('2');
-            expect(swapInfo.swaps[2].assetOutIndex).to.eq('3');
+            expect(swapInfo.swaps[2].assetInIndex).to.eq(2);
+            expect(swapInfo.swaps[2].assetOutIndex).to.eq(3);
             // This is pulled from mainnet so needs valid routes
             expect(swapInfo.returnAmount.gt(0)).to.be.true;
             expect(swapInfo.returnAmountConsideringFees.gt(0)).to.be.true;
@@ -840,16 +840,16 @@ describe(`Tests for Lido USD routes.`, () => {
             expect(swapInfo.swaps[0].amount.toString()).to.eq(
                 swapAmt.toString()
             );
-            expect(swapInfo.swaps[0].assetInIndex).to.eq('2');
-            expect(swapInfo.swaps[0].assetOutIndex).to.eq('3');
+            expect(swapInfo.swaps[0].assetInIndex).to.eq(2);
+            expect(swapInfo.swaps[0].assetOutIndex).to.eq(3);
             expect(swapInfo.swaps[1].poolId).to.eq(poolWethDai);
             expect(swapInfo.swaps[1].amount.toString()).to.eq('0');
-            expect(swapInfo.swaps[1].assetInIndex).to.eq('1');
-            expect(swapInfo.swaps[1].assetOutIndex).to.eq('2');
+            expect(swapInfo.swaps[1].assetInIndex).to.eq(1);
+            expect(swapInfo.swaps[1].assetOutIndex).to.eq(2);
             expect(swapInfo.swaps[2].amount.toString()).to.eq('0');
             expect(swapInfo.swaps[2].poolId).to.eq(poolStaBal);
-            expect(swapInfo.swaps[2].assetInIndex).to.eq('0');
-            expect(swapInfo.swaps[2].assetOutIndex).to.eq('1');
+            expect(swapInfo.swaps[2].assetInIndex).to.eq(0);
+            expect(swapInfo.swaps[2].assetOutIndex).to.eq(1);
             // This is pulled from mainnet so needs valid routes
             expect(swapInfo.returnAmount.gt(0)).to.be.true;
             expect(swapInfo.returnAmountConsideringFees.gt(0)).to.be.true;
@@ -892,16 +892,16 @@ describe(`Tests for Lido USD routes.`, () => {
             expect(swapInfo.swaps[0].amount.toString()).to.eq(
                 swapAmt.toString()
             );
-            expect(swapInfo.swaps[0].assetInIndex).to.eq('0');
-            expect(swapInfo.swaps[0].assetOutIndex).to.eq('1');
+            expect(swapInfo.swaps[0].assetInIndex).to.eq(0);
+            expect(swapInfo.swaps[0].assetOutIndex).to.eq(1);
             expect(swapInfo.swaps[1].poolId).to.eq(poolWethDai);
             expect(swapInfo.swaps[1].amount.toString()).to.eq('0');
-            expect(swapInfo.swaps[1].assetInIndex).to.eq('1');
-            expect(swapInfo.swaps[1].assetOutIndex).to.eq('2');
+            expect(swapInfo.swaps[1].assetInIndex).to.eq(1);
+            expect(swapInfo.swaps[1].assetOutIndex).to.eq(2);
             expect(swapInfo.swaps[2].amount.toString()).to.eq('0');
             expect(swapInfo.swaps[2].poolId).to.eq(poolStaBal);
-            expect(swapInfo.swaps[2].assetInIndex).to.eq('2');
-            expect(swapInfo.swaps[2].assetOutIndex).to.eq('3');
+            expect(swapInfo.swaps[2].assetInIndex).to.eq(2);
+            expect(swapInfo.swaps[2].assetOutIndex).to.eq(3);
             // This is pulled from mainnet so needs valid routes
             expect(swapInfo.returnAmount.gt(0)).to.be.true;
             expect(swapInfo.returnAmountConsideringFees.gt(0)).to.be.true;
@@ -946,16 +946,16 @@ describe(`Tests for Lido USD routes.`, () => {
             expect(swapInfo.swaps[0].amount.toString()).to.eq(
                 swapAmt.toString()
             );
-            expect(swapInfo.swaps[0].assetInIndex).to.eq('2');
-            expect(swapInfo.swaps[0].assetOutIndex).to.eq('3');
+            expect(swapInfo.swaps[0].assetInIndex).to.eq(2);
+            expect(swapInfo.swaps[0].assetOutIndex).to.eq(3);
             expect(swapInfo.swaps[1].poolId).to.eq(poolWethDai);
             expect(swapInfo.swaps[1].amount.toString()).to.eq('0');
-            expect(swapInfo.swaps[1].assetInIndex).to.eq('1');
-            expect(swapInfo.swaps[1].assetOutIndex).to.eq('2');
+            expect(swapInfo.swaps[1].assetInIndex).to.eq(1);
+            expect(swapInfo.swaps[1].assetOutIndex).to.eq(2);
             expect(swapInfo.swaps[2].amount.toString()).to.eq('0');
             expect(swapInfo.swaps[2].poolId).to.eq(poolLido);
-            expect(swapInfo.swaps[2].assetInIndex).to.eq('0');
-            expect(swapInfo.swaps[2].assetOutIndex).to.eq('1');
+            expect(swapInfo.swaps[2].assetInIndex).to.eq(0);
+            expect(swapInfo.swaps[2].assetOutIndex).to.eq(1);
             // This is pulled from mainnet so needs valid routes
             expect(swapInfo.returnAmount.gt(0)).to.be.true;
             expect(swapInfo.returnAmountConsideringFees.gt(0)).to.be.true;
