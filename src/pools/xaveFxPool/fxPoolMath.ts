@@ -40,6 +40,12 @@ interface ParsedFxPoolData {
     givenAmountInNumeraire: number;
 }
 
+interface ReservesInNumeraire {
+    tokenInReservesInNumeraire: number;
+    tokenOutReservesInNumeraire: number;
+    _oGLiq: number;
+}
+
 const isUSDC = (address: string) => {
     if (
         address == '0x2791bca1f2de4661ed88a30c99a7a9449aa84174' ||
@@ -77,6 +83,42 @@ const calculateGivenAmountInNumeraire = (
     return calculatedNumeraireAmount;
 };
 
+export const poolBalancesToNumeraire = (
+    poolPairData: FxPoolPairData
+): ReservesInNumeraire => {
+    let tokenInNumeraire, tokenOutNumeraire;
+
+    if (isUSDC(poolPairData.tokenIn)) {
+        tokenInNumeraire = viewNumeraireAmount(
+            Number(poolPairData.balanceIn),
+            rateToNumber(poolPairData.tokenInRate.toNumber()),
+            getBaseDecimals(poolPairData.decimalsIn)
+        );
+        tokenOutNumeraire = viewNumeraireAmount(
+            Number(poolPairData.balanceOut),
+            rateToNumber(poolPairData.tokenOutRate.toNumber()),
+            getBaseDecimals(poolPairData.decimalsOut)
+        );
+    } else {
+        tokenInNumeraire = viewNumeraireAmount(
+            Number(poolPairData.balanceOut),
+            rateToNumber(poolPairData.tokenOutRate.toNumber()),
+            getBaseDecimals(poolPairData.decimalsOut)
+        );
+
+        tokenOutNumeraire = viewNumeraireAmount(
+            Number(poolPairData.balanceIn),
+            rateToNumber(poolPairData.tokenInRate.toNumber()),
+            getBaseDecimals(poolPairData.decimalsIn)
+        );
+    }
+
+    return {
+        tokenInReservesInNumeraire: tokenInNumeraire,
+        tokenOutReservesInNumeraire: tokenOutNumeraire,
+        _oGLiq: tokenInNumeraire + tokenOutNumeraire,
+    };
+};
 // everything is in order of USDC, base token
 const getParsedFxPoolData = (
     amount: OldBigNumber,
@@ -84,6 +126,7 @@ const getParsedFxPoolData = (
     isOriginSwap: boolean
 ): ParsedFxPoolData => {
     // reserves are not in wei
+
     const baseReserves = isUSDC(poolPairData.tokenIn)
         ? viewNumeraireAmount(
               Number(poolPairData.balanceOut),
@@ -173,7 +216,7 @@ export const getBaseDecimals = (decimals: number) => {
 };
 
 // Base Assimilator Functions
-// calculations are from the BaseToUsdAssiilato
+// calculations are from the BaseToUsdAssimilator
 export const viewRawAmount = (
     _amount: number,
     rate: number,

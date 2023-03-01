@@ -14,6 +14,10 @@ import {
 import { isSameAddress } from '../../utils';
 import { bnum } from '../../utils/bignumber';
 import {
+    getBaseDecimals,
+    poolBalancesToNumeraire,
+    rateToNumber,
+    viewRawAmount,
     _derivativeSpotPriceAfterSwapExactTokenInForTokenOut,
     _derivativeSpotPriceAfterSwapTokenInForExactTokenOut,
     _exactTokenInForTokenOut,
@@ -173,17 +177,36 @@ export class FxPool implements PoolBase {
         poolPairData: FxPoolPairData,
         swapType: SwapTypes
     ): OldBigNumber {
+        const parsedReserves = poolBalancesToNumeraire(poolPairData);
+        const alphaValue = Number(formatFixed(poolPairData.alpha, 18));
+
+        const maxLimit = (1 + alphaValue) * parsedReserves._oGLiq * 0.5;
+
         if (swapType === SwapTypes.SwapExactIn) {
+            const maxLimitAmount =
+                maxLimit - parsedReserves.tokenInReservesInNumeraire;
+
             return bnum(
                 formatFixed(
-                    poolPairData.balanceIn.mul(this.MAX_IN_RATIO).div(ONE),
+                    viewRawAmount(
+                        maxLimitAmount,
+                        rateToNumber(poolPairData.tokenInRate.toNumber()),
+                        getBaseDecimals(poolPairData.decimalsIn)
+                    ).toString(),
                     poolPairData.decimalsIn
                 )
             );
         } else {
+            const maxLimitAmount =
+                maxLimit - parsedReserves.tokenOutReservesInNumeraire;
+
             return bnum(
                 formatFixed(
-                    poolPairData.balanceOut.mul(this.MAX_OUT_RATIO).div(ONE),
+                    viewRawAmount(
+                        maxLimitAmount,
+                        rateToNumber(poolPairData.tokenOutRate.toNumber()),
+                        getBaseDecimals(poolPairData.decimalsOut)
+                    ).toString(),
                     poolPairData.decimalsOut
                 )
             );

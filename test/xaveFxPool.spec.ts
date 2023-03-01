@@ -10,11 +10,12 @@ import { FxPool } from '../src/pools/xaveFxPool/fxPool';
 // Add new pool test data in Subgraph Schema format
 import testPools from './testData/fxPool/fxPool.json';
 import testCases from './testData/fxPool/fxPoolTestCases.json';
-import { parseFixed } from '@ethersproject/bignumber';
+import { formatFixed, parseFixed } from '@ethersproject/bignumber';
 import {
     ALMOST_ZERO,
     CurveMathRevert,
     getBaseDecimals,
+    poolBalancesToNumeraire,
     rateToNumber,
     spotPriceBeforeSwap,
     viewRawAmount,
@@ -67,11 +68,12 @@ describe('Test for fxPools', () => {
         });
     });
 
-    // copied from the other implementations of the other project
+    // All pools are weighted 50:50.
+    // Max value to swap before halting is defined as
+    // maxLimit  = [(1 + alpha) * oGLiq * 0.5] - token value in numeraire
     context('limit amounts', () => {
         it(`getLimitAmountSwap, token to token`, async () => {
             // Test limit amounts against expected values
-
             const poolData = testPools.pools[0];
             const newPool = FxPool.fromPool(poolData);
             const poolPairData = newPool.parsePoolPairData(
@@ -79,9 +81,46 @@ describe('Test for fxPools', () => {
                 newPool.tokens[1].address // tokenOut
             );
 
+            const reservesInNumeraire = poolBalancesToNumeraire(poolPairData);
+            const alphaValue = Number(formatFixed(poolPairData.alpha, 18));
+            const maxLimit =
+                (1 + alphaValue) * reservesInNumeraire._oGLiq * 0.5;
+
+            const maxLimitAmountForTokenIn =
+                maxLimit - reservesInNumeraire.tokenInReservesInNumeraire;
+
+            const maxLimitAmountForTokenOut =
+                maxLimit - reservesInNumeraire.tokenOutReservesInNumeraire;
+
+            const expectedLimitForTokenIn = bnum(
+                formatFixed(
+                    viewRawAmount(
+                        maxLimitAmountForTokenIn,
+                        rateToNumber(poolPairData.tokenInRate.toNumber()),
+                        getBaseDecimals(poolPairData.decimalsIn)
+                    ).toString(),
+                    poolPairData.decimalsIn
+                )
+            );
+
+            const expectedLimitForTokenOut = bnum(
+                formatFixed(
+                    viewRawAmount(
+                        maxLimitAmountForTokenOut,
+                        rateToNumber(poolPairData.tokenOutRate.toNumber()),
+                        getBaseDecimals(poolPairData.decimalsOut)
+                    ).toString(),
+                    poolPairData.decimalsOut
+                )
+            );
+
             let amount = newPool.getLimitAmountSwap(
                 poolPairData,
                 SwapTypes.SwapExactIn
+            );
+
+            expect(amount.toString()).to.equals(
+                expectedLimitForTokenIn.toString()
             );
 
             amount = newPool.getLimitAmountSwap(
@@ -89,7 +128,9 @@ describe('Test for fxPools', () => {
                 SwapTypes.SwapExactOut
             );
 
-            expect(amount.toString()).to.equals(poolData.tokens[1].balance);
+            expect(amount.toString()).to.equals(
+                expectedLimitForTokenOut.toString()
+            );
         });
     });
 
