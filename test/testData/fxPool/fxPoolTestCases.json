@@ -87,7 +87,7 @@
         "testNo": "8",
         "description": "Swap Beyond Beta Region: TargetSwap / tokenInForExactTokenOut ? USDC > XSGD",
         "swapType": "TargetSwap",
-        "givenAmount": "270000",
+        "givenAmount": "269999",
         "tokenIn": "USDC",
         "tokenOut": "XSGD",
         "expectedSpotPriceBeforeSwap": "0.743394117",

@@ -290,6 +290,11 @@ export const ADDRESSES = {
             decimals: 18,
             symbol: 'bbtAPE',
         },
+        XSGD: {
+            address: '0x70e8dE73cE538DA2bEEd35d14187F6959a8ecA96'.toLowerCase(),
+            decimals: 18,
+            symbol: 'XSGD',
+        },
     },
     [Network.POLYGON]: {
         MATIC: {

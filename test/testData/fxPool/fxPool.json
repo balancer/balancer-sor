@@ -15,7 +15,9 @@
                     "decimals": 6,
                     "priceRate": "1",
                     "weight": null,
-                    "latestFXPrice": "100000000"
+                    "token": {
+                        "latestFXPrice": "1.00000000"
+                    }
                 },
                 {
                     "address": "0xdc3326e71d45186f113a2f448984ca0e8d201995",
@@ -24,7 +26,9 @@
                     "decimals": 6,
                     "priceRate": "1",
                     "weight": null,
-                    "latestFXPrice": "74376600"
+                    "token": {
+                        "latestFXPrice": "0.74376600"
+                    }
                 }
             ],
             "tokensList": [

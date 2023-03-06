@@ -16,7 +16,6 @@ import { bnum } from '../../utils/bignumber';
 import {
     getBaseDecimals,
     poolBalancesToNumeraire,
-    rateToNumber,
     viewRawAmount,
     _derivativeSpotPriceAfterSwapExactTokenInForTokenOut,
     _derivativeSpotPriceAfterSwapTokenInForExactTokenOut,
@@ -30,7 +29,7 @@ import { universalNormalizedLiquidity } from '../liquidity';
 
 type FxPoolToken = Pick<
     SubgraphToken,
-    'address' | 'balance' | 'decimals' | 'latestFXPrice'
+    'address' | 'balance' | 'decimals' | 'token'
 >;
 
 export type FxPoolPairData = PoolPairBase & {
@@ -39,8 +38,8 @@ export type FxPoolPairData = PoolPairBase & {
     lambda: BigNumber;
     delta: BigNumber;
     epsilon: BigNumber;
-    tokenInRate: BigNumber;
-    tokenOutRate: BigNumber;
+    tokenInRate: OldBigNumber;
+    tokenOutRate: OldBigNumber;
 };
 
 export class FxPool implements PoolBase {
@@ -58,10 +57,6 @@ export class FxPool implements PoolBase {
     epsilon: BigNumber;
     tokenInRate: BigNumber;
     tokenOutRate: BigNumber;
-
-    // Max In/Out Ratios
-    MAX_IN_RATIO = parseFixed('1', 18);
-    MAX_OUT_RATIO = parseFixed('1', 18);
 
     static fromPool(pool: SubgraphPoolBase): FxPool {
         return new FxPool(
@@ -152,8 +147,10 @@ export class FxPool implements PoolBase {
             lambda: this.lambda,
             delta: this.delta,
             epsilon: this.epsilon,
-            tokenInRate: parseFixed(this.tokens[tokenIndexIn].latestFXPrice!),
-            tokenOutRate: parseFixed(this.tokens[tokenIndexOut].latestFXPrice!),
+            tokenInRate: bnum(this.tokens[tokenIndexIn].token!.latestFXPrice!), // decimals is formatted from subgraph in rate we get from the chainlink oracle
+            tokenOutRate: bnum(
+                this.tokens[tokenIndexOut].token!.latestFXPrice!
+            ), // decimals is formatted from subgraph in rate we get from the chainlink oracle
         };
 
         return poolPairData;
@@ -190,23 +187,25 @@ export class FxPool implements PoolBase {
                 formatFixed(
                     viewRawAmount(
                         maxLimitAmount,
-                        rateToNumber(poolPairData.tokenInRate.toNumber()),
-                        getBaseDecimals(poolPairData.decimalsIn)
-                    ).toString(),
+                        poolPairData.tokenInRate.toNumber()
+                    )
+                        .abs()
+                        .toString(),
                     poolPairData.decimalsIn
                 )
             );
         } else {
             const maxLimitAmount =
                 maxLimit - parsedReserves.tokenOutReservesInNumeraire;
-
+            // maxLimit must be absolute value
             return bnum(
                 formatFixed(
                     viewRawAmount(
                         maxLimitAmount,
-                        rateToNumber(poolPairData.tokenOutRate.toNumber()),
-                        getBaseDecimals(poolPairData.decimalsOut)
-                    ).toString(),
+                        poolPairData.tokenOutRate.toNumber()
+                    )
+                        .abs()
+                        .toString(),
                     poolPairData.decimalsOut
                 )
             );

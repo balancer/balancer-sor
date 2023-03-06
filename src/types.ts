@@ -130,6 +130,10 @@ export type SubgraphToken = {
     priceRate: string;
     // WeightedPool field
     weight: string | null;
+    token?: SubgraphTokenData;
+};
+
+export type SubgraphTokenData = {
     latestFXPrice?: string;
 };
 

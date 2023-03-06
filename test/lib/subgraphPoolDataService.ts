@@ -22,6 +22,9 @@ const queryWithLinear = `
             decimals
             weight
             priceRate
+            token {
+              latestFXPrice
+            }
           }
           tokensList
           totalWeight
@@ -45,7 +48,6 @@ const queryWithLinear = `
           lambda
           delta
           epsilon
-          latestFXPrice
           tauAlphaX
           tauAlphaY
           tauBetaX
@@ -74,6 +76,9 @@ const queryWithLinear = `
             decimals
             weight
             priceRate
+            token {
+              latestFXPrice
+            }
           }
           tokensList
           totalWeight

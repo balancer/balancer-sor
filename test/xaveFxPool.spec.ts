@@ -16,7 +16,6 @@ import {
     CurveMathRevert,
     getBaseDecimals,
     poolBalancesToNumeraire,
-    rateToNumber,
     spotPriceBeforeSwap,
     viewRawAmount,
 } from '../src/pools/xaveFxPool/fxPoolMath';
@@ -96,8 +95,7 @@ describe('Test for fxPools', () => {
                 formatFixed(
                     viewRawAmount(
                         maxLimitAmountForTokenIn,
-                        rateToNumber(poolPairData.tokenInRate.toNumber()),
-                        getBaseDecimals(poolPairData.decimalsIn)
+                        poolPairData.tokenInRate.toNumber()
                     ).toString(),
                     poolPairData.decimalsIn
                 )
@@ -107,8 +105,7 @@ describe('Test for fxPools', () => {
                 formatFixed(
                     viewRawAmount(
                         maxLimitAmountForTokenOut,
-                        rateToNumber(poolPairData.tokenOutRate.toNumber()),
-                        getBaseDecimals(poolPairData.decimalsOut)
+                        poolPairData.tokenOutRate.toNumber()
                     ).toString(),
                     poolPairData.decimalsOut
                 )
@@ -199,13 +196,19 @@ describe('Test for fxPools', () => {
                                 poolPairData,
                                 givenAmount
                             );
-                            expect(amountOut.toNumber()).to.be.closeTo(
+                            expect(
+                                amountOut
+                                    .div(
+                                        getBaseDecimals(
+                                            poolPairData.decimalsOut
+                                        )
+                                    )
+                                    .toNumber()
+                            ).to.be.closeTo(
                                 viewRawAmount(
                                     Number(testCase.expectedSwapOutput),
-                                    rateToNumber(
-                                        poolPairData.tokenOutRate.toNumber()
-                                    ),
-                                    getBaseDecimals(poolPairData.decimalsOut)
+
+                                    poolPairData.tokenOutRate.toNumber()
                                 ).toNumber(),
                                 10000
                             ); // rounded off
@@ -260,13 +263,16 @@ describe('Test for fxPools', () => {
                                 givenAmount
                             );
 
-                            expect(amountIn.toNumber()).to.be.closeTo(
+                            expect(
+                                amountIn
+                                    .div(
+                                        getBaseDecimals(poolPairData.decimalsIn)
+                                    )
+                                    .toNumber()
+                            ).to.be.closeTo(
                                 viewRawAmount(
                                     Number(testCase.expectedSwapOutput),
-                                    rateToNumber(
-                                        poolPairData.tokenInRate.toNumber()
-                                    ),
-                                    getBaseDecimals(poolPairData.decimalsIn)
+                                    poolPairData.tokenInRate.toNumber()
                                 ).toNumber(),
                                 2000000
                             ); // rounded off, decimal adjustment
