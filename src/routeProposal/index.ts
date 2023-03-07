@@ -35,11 +35,11 @@ export class RouteProposer {
         if (pools.length === 0) return [];
 
         // If token pair has been processed before that info can be reused to speed up execution
+        // If timestamp has not been manually set in `getSwaps` then default (set on instantiation) is used which means cache will be used
         const cache =
             this.cache[
                 `${tokenIn}${tokenOut}${swapType}${swapOptions.timestamp}`
             ];
-
         // forceRefresh can be set to force fresh processing of paths/prices
         if (!swapOptions.forceRefresh && !!cache) {
             // Using pre-processed data from cache

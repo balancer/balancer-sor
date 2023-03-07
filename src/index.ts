@@ -21,3 +21,12 @@ export { getSpotPriceAfterSwapForPath } from './router/helpersClass';
 export * as WeightedMaths from './pools/weightedPool/weightedMath';
 export * as StableMaths from './pools/stablePool/stableMath';
 export * as StableMathBigInt from './pools/stablePool/stableMathBigInt';
+export * as Gyro2Maths from './pools/gyro2Pool/gyro2Math';
+export * as Gyro3Maths from './pools/gyro3Pool/gyro3Math';
+export * as GyroEMaths from './pools/gyroEPool/gyroEMath/gyroEMath';
+export {
+    balancesFromTokenInOut,
+    GyroEParams,
+    DerivedGyroEParams,
+    Vector2,
+} from './pools/gyroEPool/gyroEMath/gyroEMathHelpers';
