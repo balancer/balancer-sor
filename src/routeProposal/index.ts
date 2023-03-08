@@ -32,7 +32,6 @@ export class RouteProposer {
     ): NewPath[] {
         tokenIn = tokenIn.toLowerCase();
         tokenOut = tokenOut.toLowerCase();
-
         if (pools.length === 0) return [];
 
         // If token pair has been processed before that info can be reused to speed up execution
