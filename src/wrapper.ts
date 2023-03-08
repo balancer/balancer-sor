@@ -72,7 +72,6 @@ export class SOR {
     async fetchPools(): Promise<boolean> {
         return this.poolCacher.fetchPools();
     }
-    /**
 
     /**
      * getSwaps Retrieve information for best swap tokenIn>tokenOut.
@@ -80,7 +79,7 @@ export class SOR {
      * @param {string} tokenOut - Address of tokenOut.
      * @param {SwapTypes} swapType - SwapExactIn where the amount of tokens in (sent to the Pool) is known or SwapExactOut where the amount of tokens out (received from the Pool) is known.
      * @param {BigNumberish} swapAmount - Either amountIn or amountOut depending on the `swapType` value.
-     * @param swapOptions 
+     * @param swapOptions
      * @param useBpts Set to true to consider join/exit weighted pool paths (these will need formatted and submitted via Relayer)
      * @returns Swap information including return amount and swaps structure to be submitted to Vault.
      */
