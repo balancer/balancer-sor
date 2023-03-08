@@ -103,7 +103,6 @@ export class SOR {
             this.useBpt = useBpts;
         }
         const pools: SubgraphPoolBase[] = this.poolCacher.getPools(useBpts);
-
         const filteredPools = filterPoolsByType(pools, options.poolTypeFilter);
 
         const wrappedInfo = await getWrappedInfo(
