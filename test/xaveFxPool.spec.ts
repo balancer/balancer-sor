@@ -1,16 +1,10 @@
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-require('dotenv').config();
-
 // yarn test:only test/xaveFxPool.spec.ts
 import { assert, expect } from 'chai';
+import { formatFixed, parseFixed } from '@ethersproject/bignumber';
 import { bnum } from '../src/utils/bignumber';
 import { PoolTypes, SwapTypes } from '../src';
 // Add new PoolType
 import { FxPool } from '../src/pools/xaveFxPool/fxPool';
-// Add new pool test data in Subgraph Schema format
-import testPools from './testData/fxPool/fxPool.json';
-import testCases from './testData/fxPool/fxPoolTestCases.json';
-import { formatFixed, parseFixed } from '@ethersproject/bignumber';
 import {
     ALMOST_ZERO,
     CurveMathRevert,
@@ -18,6 +12,10 @@ import {
     spotPriceBeforeSwap,
     viewRawAmount,
 } from '../src/pools/xaveFxPool/fxPoolMath';
+
+// Add new pool test data in Subgraph Schema format
+import testPools from './testData/fxPool/fxPool.json';
+import testCases from './testData/fxPool/fxPoolTestCases.json';
 
 type TestCaseType = {
     testNo: string;
@@ -95,14 +93,14 @@ describe('Test for fxPools', () => {
             const expectedLimitForTokenIn = bnum(
                 viewRawAmount(
                     maxLimitAmountForTokenIn,
-                    poolPairData.tokenInRate.toNumber()
+                    poolPairData.tokenInLatestFXPrice.toNumber()
                 ).toString()
             );
 
             const expectedLimitForTokenOut = bnum(
                 viewRawAmount(
                     maxLimitAmountForTokenOut,
-                    poolPairData.tokenOutRate.toNumber()
+                    poolPairData.tokenOutLatestFXPrice.toNumber()
                 ).toString()
             );
 
@@ -192,7 +190,7 @@ describe('Test for fxPools', () => {
                             expect(amountOut.toNumber()).to.be.closeTo(
                                 viewRawAmount(
                                     Number(testCase.expectedSwapOutput),
-                                    poolPairData.tokenOutRate.toNumber()
+                                    poolPairData.tokenOutLatestFXPrice.toNumber()
                                 ).toNumber(),
                                 10000
                             ); // rounded off
@@ -250,7 +248,7 @@ describe('Test for fxPools', () => {
                             expect(amountIn.toNumber()).to.be.closeTo(
                                 viewRawAmount(
                                     Number(testCase.expectedSwapOutput),
-                                    poolPairData.tokenInRate.toNumber()
+                                    poolPairData.tokenInLatestFXPrice.toNumber()
                                 ).toNumber(),
                                 2000000
                             ); // rounded off, decimal adjustment

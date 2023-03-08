@@ -1,8 +1,9 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
-/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { getAddress } from '@ethersproject/address';
 import { BigNumber, formatFixed, parseFixed } from '@ethersproject/bignumber';
-import { BigNumber as OldBigNumber, ZERO } from '../../utils/bignumber';
+import { Zero } from '@ethersproject/constants';
+import { BigNumber as OldBigNumber, ZERO, bnum } from '../../utils/bignumber';
+import { isSameAddress } from '../../utils';
+import { universalNormalizedLiquidity } from '../liquidity';
 import {
     PoolBase,
     PoolPairBase,
@@ -11,10 +12,7 @@ import {
     SubgraphToken,
     SwapTypes,
 } from '../../types';
-import { isSameAddress } from '../../utils';
-import { bnum } from '../../utils/bignumber';
 import {
-    getBaseDecimals,
     poolBalancesToNumeraire,
     viewRawAmount,
     _derivativeSpotPriceAfterSwapExactTokenInForTokenOut,
@@ -24,8 +22,6 @@ import {
     _spotPriceAfterSwapTokenInForExactTokenOut,
     _tokenInForExactTokenOut,
 } from './fxPoolMath';
-import { Zero } from '@ethersproject/constants';
-import { universalNormalizedLiquidity } from '../liquidity';
 
 type FxPoolToken = Pick<
     SubgraphToken,
@@ -38,11 +34,11 @@ export type FxPoolPairData = PoolPairBase & {
     lambda: BigNumber;
     delta: BigNumber;
     epsilon: BigNumber;
-    tokenInRate: OldBigNumber;
-    tokenOutRate: OldBigNumber;
+    tokenInLatestFXPrice: OldBigNumber;
+    tokenOutLatestFXPrice: OldBigNumber;
 };
 
-export class FxPool implements PoolBase {
+export class FxPool implements PoolBase<FxPoolPairData> {
     poolType: PoolTypes = PoolTypes.Fx;
     id: string;
     address: string;
@@ -55,10 +51,16 @@ export class FxPool implements PoolBase {
     lambda: BigNumber;
     delta: BigNumber;
     epsilon: BigNumber;
-    tokenInRate: BigNumber;
-    tokenOutRate: BigNumber;
 
     static fromPool(pool: SubgraphPoolBase): FxPool {
+        if (
+            !pool.alpha ||
+            !pool.beta ||
+            !pool.lambda ||
+            !pool.delta ||
+            !pool.epsilon
+        )
+            throw new Error('FX Pool Missing Subgraph Field');
         return new FxPool(
             pool.id,
             pool.address,
@@ -66,11 +68,11 @@ export class FxPool implements PoolBase {
             pool.totalShares,
             pool.tokens,
             pool.tokensList,
-            pool.alpha!,
-            pool.beta!,
-            pool.lambda!,
-            pool.delta!,
-            pool.epsilon!
+            pool.alpha,
+            pool.beta,
+            pool.lambda,
+            pool.delta,
+            pool.epsilon
         );
     }
 
@@ -103,11 +105,13 @@ export class FxPool implements PoolBase {
     mainIndex?: number | undefined;
     isLBP?: boolean | undefined;
 
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     _calcTokensOutGivenExactBptIn(bptAmountIn: BigNumber): BigNumber[] {
         // Will copy over other implementations, not supporting BPT tokens atm
         return new Array(this.tokens.length).fill(Zero);
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     _calcBptOutGivenExactTokensIn(amountsIn: BigNumber[]): BigNumber {
         // Will copy over other implementations, not supporting BPT tokens atm
         return Zero;
@@ -131,6 +135,9 @@ export class FxPool implements PoolBase {
         const balanceOut = tO.balance;
         const decimalsOut = tO.decimals;
 
+        if (!tO.token?.latestFXPrice || !tI.token?.latestFXPrice)
+            throw 'FX Pool Missing LatestFxPrice';
+
         const poolPairData: FxPoolPairData = {
             id: this.id,
             address: this.address,
@@ -147,10 +154,8 @@ export class FxPool implements PoolBase {
             lambda: this.lambda,
             delta: this.delta,
             epsilon: this.epsilon,
-            tokenInRate: bnum(this.tokens[tokenIndexIn].token!.latestFXPrice!), // decimals is formatted from subgraph in rate we get from the chainlink oracle
-            tokenOutRate: bnum(
-                this.tokens[tokenIndexOut].token!.latestFXPrice!
-            ), // decimals is formatted from subgraph in rate we get from the chainlink oracle
+            tokenInLatestFXPrice: bnum(tI.token.latestFXPrice), // decimals is formatted from subgraph in rate we get from the chainlink oracle
+            tokenOutLatestFXPrice: bnum(tO.token.latestFXPrice), // decimals is formatted from subgraph in rate we get from the chainlink oracle
         };
 
         return poolPairData;
@@ -169,7 +174,10 @@ export class FxPool implements PoolBase {
         );
     }
 
-    // There will be no limit amount to swap.
+    /*
+    Fx pool logic has an alpha region where it halts swaps.
+    maxLimit  = [(1 + alpha) * oGLiq * 0.5] - token value in numeraire
+    */
     getLimitAmountSwap(
         poolPairData: FxPoolPairData,
         swapType: SwapTypes
@@ -188,7 +196,7 @@ export class FxPool implements PoolBase {
                 formatFixed(
                     viewRawAmount(
                         maxLimitAmount,
-                        poolPairData.tokenInRate.toNumber()
+                        poolPairData.tokenInLatestFXPrice.toNumber()
                     ).toString()
                 )
             );
@@ -200,7 +208,7 @@ export class FxPool implements PoolBase {
                 formatFixed(
                     viewRawAmount(
                         maxLimitAmount,
-                        poolPairData.tokenOutRate.toNumber()
+                        poolPairData.tokenOutLatestFXPrice.toNumber()
                     ).toString()
                 )
             );

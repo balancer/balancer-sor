@@ -68,13 +68,13 @@ const calculateGivenAmountInNumeraire = (
         // tokenIn is given
         calculatedNumeraireAmount = viewNumeraireAmount(
             amount,
-            poolPairData.tokenInRate.toNumber()
+            poolPairData.tokenInLatestFXPrice.toNumber()
         );
     } else {
         // tokenOut is given
         calculatedNumeraireAmount = viewNumeraireAmount(
             amount,
-            poolPairData.tokenOutRate.toNumber()
+            poolPairData.tokenOutLatestFXPrice.toNumber()
         );
     }
 
@@ -102,14 +102,14 @@ export const poolBalancesToNumeraire = (
         tokenInNumeraire = convertToNumber(
             viewNumeraireAmount(
                 Number(poolPairData.balanceIn),
-                poolPairData.tokenInRate.toNumber()
+                poolPairData.tokenInLatestFXPrice.toNumber()
             ),
             getBaseDecimals(poolPairData.decimalsIn)
         );
         tokenOutNumeraire = convertToNumber(
             viewNumeraireAmount(
                 Number(poolPairData.balanceOut),
-                poolPairData.tokenOutRate.toNumber()
+                poolPairData.tokenOutLatestFXPrice.toNumber()
             ),
             getBaseDecimals(poolPairData.decimalsOut)
         );
@@ -117,7 +117,7 @@ export const poolBalancesToNumeraire = (
         tokenInNumeraire = convertToNumber(
             viewNumeraireAmount(
                 Number(poolPairData.balanceOut),
-                poolPairData.tokenOutRate.toNumber()
+                poolPairData.tokenOutLatestFXPrice.toNumber()
             ),
             getBaseDecimals(poolPairData.decimalsOut)
         );
@@ -125,7 +125,7 @@ export const poolBalancesToNumeraire = (
         tokenOutNumeraire = convertToNumber(
             viewNumeraireAmount(
                 Number(poolPairData.balanceIn),
-                poolPairData.tokenInRate.toNumber()
+                poolPairData.tokenInLatestFXPrice.toNumber()
             ),
             getBaseDecimals(poolPairData.decimalsIn)
         );
@@ -148,14 +148,14 @@ const getParsedFxPoolData = (
         ? convertToNumber(
               viewNumeraireAmount(
                   Number(poolPairData.balanceOut),
-                  poolPairData.tokenOutRate.toNumber()
+                  poolPairData.tokenOutLatestFXPrice.toNumber()
               ),
               getBaseDecimals(poolPairData.decimalsOut)
           )
         : convertToNumber(
               viewNumeraireAmount(
                   Number(poolPairData.balanceIn),
-                  poolPairData.tokenInRate.toNumber()
+                  poolPairData.tokenInLatestFXPrice.toNumber()
               ),
               getBaseDecimals(poolPairData.decimalsIn)
           );
@@ -165,22 +165,22 @@ const getParsedFxPoolData = (
         ? convertToNumber(
               viewNumeraireAmount(
                   Number(poolPairData.balanceIn),
-                  poolPairData.tokenInRate.toNumber()
+                  poolPairData.tokenInLatestFXPrice.toNumber()
               ),
               getBaseDecimals(poolPairData.decimalsIn)
           )
         : convertToNumber(
               viewNumeraireAmount(
                   Number(poolPairData.balanceOut),
-                  poolPairData.tokenOutRate.toNumber()
+                  poolPairData.tokenOutLatestFXPrice.toNumber()
               ),
               getBaseDecimals(poolPairData.decimalsOut)
           );
 
     // rate is converted from chainlink to the actual rate in decimals
     const baseTokenRate = isUSDC(poolPairData.tokenIn)
-        ? poolPairData.tokenOutRate.toNumber()
-        : poolPairData.tokenInRate.toNumber();
+        ? poolPairData.tokenOutLatestFXPrice.toNumber()
+        : poolPairData.tokenInLatestFXPrice.toNumber();
 
     // given amount in or out converted to numeraire
     const givenAmountInNumeraire = calculateGivenAmountInNumeraire(
@@ -454,7 +454,7 @@ export function _exactTokenInForTokenOut(
     if (poolPairData.tokenIn === poolPairData.tokenOut) {
         return viewRawAmount(
             targetAmountInNumeraire,
-            poolPairData.tokenInRate.toNumber()
+            poolPairData.tokenInLatestFXPrice.toNumber()
         ); // must be the token out
     }
 
@@ -481,7 +481,7 @@ export function _exactTokenInForTokenOut(
 
         return viewRawAmount(
             Math.abs(_amtWithFee),
-            poolPairData.tokenOutRate.toNumber()
+            poolPairData.tokenOutLatestFXPrice.toNumber()
         );
     }
 }
@@ -499,7 +499,7 @@ export function _tokenInForExactTokenOut(
         viewRawAmount(
             // poolPairData.tokenOut as TokenSymbol,
             targetAmountInNumeraire,
-            poolPairData.tokenOutRate.toNumber()
+            poolPairData.tokenOutLatestFXPrice.toNumber()
         ); // must be the token out
     }
 
@@ -526,7 +526,7 @@ export function _tokenInForExactTokenOut(
 
         return viewRawAmount(
             Math.abs(_amtWithFee),
-            poolPairData.tokenInRate.toNumber()
+            poolPairData.tokenInLatestFXPrice.toNumber()
         ); // must be the token out
     }
 }
