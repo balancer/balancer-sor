@@ -24,7 +24,7 @@ import {
     _spotPriceAfterSwapTokenInForExactTokenOut,
     _tokenInForExactTokenOut,
 } from './fxPoolMath';
-import { WeiPerEther as ONE, Zero } from '@ethersproject/constants';
+import { Zero } from '@ethersproject/constants';
 import { universalNormalizedLiquidity } from '../liquidity';
 
 type FxPoolToken = Pick<
@@ -175,6 +175,7 @@ export class FxPool implements PoolBase {
         swapType: SwapTypes
     ): OldBigNumber {
         const parsedReserves = poolBalancesToNumeraire(poolPairData);
+
         const alphaValue = Number(formatFixed(poolPairData.alpha, 18));
 
         const maxLimit = (1 + alphaValue) * parsedReserves._oGLiq * 0.5;
@@ -188,25 +189,19 @@ export class FxPool implements PoolBase {
                     viewRawAmount(
                         maxLimitAmount,
                         poolPairData.tokenInRate.toNumber()
-                    )
-                        .abs()
-                        .toString(),
-                    poolPairData.decimalsIn
+                    ).toString()
                 )
             );
         } else {
             const maxLimitAmount =
                 maxLimit - parsedReserves.tokenOutReservesInNumeraire;
-            // maxLimit must be absolute value
+
             return bnum(
                 formatFixed(
                     viewRawAmount(
                         maxLimitAmount,
                         poolPairData.tokenOutRate.toNumber()
-                    )
-                        .abs()
-                        .toString(),
-                    poolPairData.decimalsOut
+                    ).toString()
                 )
             );
         }

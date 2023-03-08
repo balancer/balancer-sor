@@ -75,7 +75,7 @@
         "testNo": "7",
         "description": "Swap within Beta Region: OriginSwap/_exactTokenInForTokenOut XSGD > ? USDC",
         "swapType": "OriginSwap",
-        "givenAmount": "270000",
+        "givenAmount": "269999",
         "tokenIn": "XSGD",
         "tokenOut": "USDC",
         "expectedSpotPriceBeforeSwap": "0.743394117",

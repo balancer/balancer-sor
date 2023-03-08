@@ -24,7 +24,7 @@ const jsonRpcUrl = 'https://mainnet.infura.io/v3/' + process.env.INFURA;
 const rpcUrl = 'http://127.0.0.1:8545';
 const provider = new JsonRpcProvider(rpcUrl, networkId);
 const blocknumber = 16734425;
-const inaccuracyLimit = 1.4;
+const inaccuracyLimit = 0.02; // 0.02 USD
 
 const vault = Vault__factory.connect(vaultAddr, provider);
 
@@ -48,7 +48,7 @@ const xaveFxPool: SubgraphPoolBase = {
             priceRate: '1',
             weight: null,
             token: {
-                latestFXPrice: '0.99999999', // 99999999
+                latestFXPrice: '0.99999999',
             },
         },
         {

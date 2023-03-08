@@ -81,29 +81,53 @@ const calculateGivenAmountInNumeraire = (
     return calculatedNumeraireAmount;
 };
 
+// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
+export const convertToNumber = (
+    amount: number,
+    baseDecimal: number | string
+) => {
+    if (typeof baseDecimal === 'string') {
+        return Number(bnum(amount).div(bnum(ONE_ETHER)));
+    } else {
+        return amount / baseDecimal;
+    }
+};
+
 export const poolBalancesToNumeraire = (
     poolPairData: FxPoolPairData
 ): ReservesInNumeraire => {
     let tokenInNumeraire, tokenOutNumeraire;
 
     if (isUSDC(poolPairData.tokenIn)) {
-        tokenInNumeraire = viewNumeraireAmount(
-            Number(poolPairData.balanceIn),
-            poolPairData.tokenInRate.toNumber()
+        tokenInNumeraire = convertToNumber(
+            viewNumeraireAmount(
+                Number(poolPairData.balanceIn),
+                poolPairData.tokenInRate.toNumber()
+            ),
+            getBaseDecimals(poolPairData.decimalsIn)
         );
-        tokenOutNumeraire = viewNumeraireAmount(
-            Number(poolPairData.balanceOut),
-            poolPairData.tokenOutRate.toNumber()
+        tokenOutNumeraire = convertToNumber(
+            viewNumeraireAmount(
+                Number(poolPairData.balanceOut),
+                poolPairData.tokenOutRate.toNumber()
+            ),
+            getBaseDecimals(poolPairData.decimalsOut)
         );
     } else {
-        tokenInNumeraire = viewNumeraireAmount(
-            Number(poolPairData.balanceOut),
-            poolPairData.tokenOutRate.toNumber()
+        tokenInNumeraire = convertToNumber(
+            viewNumeraireAmount(
+                Number(poolPairData.balanceOut),
+                poolPairData.tokenOutRate.toNumber()
+            ),
+            getBaseDecimals(poolPairData.decimalsOut)
         );
 
-        tokenOutNumeraire = viewNumeraireAmount(
-            Number(poolPairData.balanceIn),
-            poolPairData.tokenInRate.toNumber()
+        tokenOutNumeraire = convertToNumber(
+            viewNumeraireAmount(
+                Number(poolPairData.balanceIn),
+                poolPairData.tokenInRate.toNumber()
+            ),
+            getBaseDecimals(poolPairData.decimalsIn)
         );
     }
 
@@ -119,27 +143,38 @@ const getParsedFxPoolData = (
     poolPairData: FxPoolPairData,
     isOriginSwap: boolean
 ): ParsedFxPoolData => {
-    // reserves are not in wei
-
+    // reserves are in raw amount, they converted to numeraire
     const baseReserves = isUSDC(poolPairData.tokenIn)
-        ? viewNumeraireAmount(
-              Number(poolPairData.balanceOut),
-              poolPairData.tokenOutRate.toNumber()
+        ? convertToNumber(
+              viewNumeraireAmount(
+                  Number(poolPairData.balanceOut),
+                  poolPairData.tokenOutRate.toNumber()
+              ),
+              getBaseDecimals(poolPairData.decimalsOut)
           )
-        : viewNumeraireAmount(
-              Number(poolPairData.balanceIn),
-              poolPairData.tokenInRate.toNumber()
+        : convertToNumber(
+              viewNumeraireAmount(
+                  Number(poolPairData.balanceIn),
+                  poolPairData.tokenInRate.toNumber()
+              ),
+              getBaseDecimals(poolPairData.decimalsIn)
           );
 
     // reserves are not in wei
     const usdcReserves = isUSDC(poolPairData.tokenIn)
-        ? viewNumeraireAmount(
-              Number(poolPairData.balanceIn),
-              poolPairData.tokenInRate.toNumber()
+        ? convertToNumber(
+              viewNumeraireAmount(
+                  Number(poolPairData.balanceIn),
+                  poolPairData.tokenInRate.toNumber()
+              ),
+              getBaseDecimals(poolPairData.decimalsIn)
           )
-        : viewNumeraireAmount(
-              Number(poolPairData.balanceOut),
-              poolPairData.tokenOutRate.toNumber()
+        : convertToNumber(
+              viewNumeraireAmount(
+                  Number(poolPairData.balanceOut),
+                  poolPairData.tokenOutRate.toNumber()
+              ),
+              getBaseDecimals(poolPairData.decimalsOut)
           );
 
     // rate is converted from chainlink to the actual rate in decimals
@@ -191,11 +226,11 @@ export const getBaseDecimals = (decimals: number) => {
         }
 
         case 18: {
-            return ONE_ETHER.toNumber();
+            return ONE_ETHER.toString();
         }
 
         default: {
-            return ONE_ETHER.toNumber();
+            return ONE_ETHER.toString();
         }
     }
 };
@@ -203,17 +238,11 @@ export const getBaseDecimals = (decimals: number) => {
 // Base Assimilator Functions
 // calculations are from the BaseToUsdAssimilator
 export const viewRawAmount = (_amount: number, rate: number): OldBigNumber => {
-    // @todo maybe remove?
-    const amountToBN = Math.round(_amount);
-    // removed 1e8 since rate
-    // Note: rounded off twice to remove decimals for conversion to big number
-    return bnum(Math.round(amountToBN / rate));
+    return bnum(Math.round(_amount / rate));
 };
 
-const viewNumeraireAmount = (_amount: number, rate: number) => {
-    const amount_ = _amount * rate;
-
-    return amount_;
+const viewNumeraireAmount = (_amount: number, rate: number): number => {
+    return _amount * rate;
 };
 
 // Curve Math
@@ -419,6 +448,7 @@ export function _exactTokenInForTokenOut(
     poolPairData: FxPoolPairData
 ): OldBigNumber {
     const parsedFxPoolData = getParsedFxPoolData(amount, poolPairData, true);
+
     const targetAmountInNumeraire = parsedFxPoolData.givenAmountInNumeraire;
 
     if (poolPairData.tokenIn === poolPairData.tokenOut) {

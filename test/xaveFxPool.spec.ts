@@ -3,7 +3,7 @@ require('dotenv').config();
 
 // yarn test:only test/xaveFxPool.spec.ts
 import { assert, expect } from 'chai';
-import { bnum, scale } from '../src/utils/bignumber';
+import { bnum } from '../src/utils/bignumber';
 import { PoolTypes, SwapTypes } from '../src';
 // Add new PoolType
 import { FxPool } from '../src/pools/xaveFxPool/fxPool';
@@ -14,7 +14,6 @@ import { formatFixed, parseFixed } from '@ethersproject/bignumber';
 import {
     ALMOST_ZERO,
     CurveMathRevert,
-    getBaseDecimals,
     poolBalancesToNumeraire,
     spotPriceBeforeSwap,
     viewRawAmount,
@@ -32,6 +31,8 @@ type TestCaseType = {
     expectedSwapOutput: string;
     expectedDerivativeSpotPriceAfterSwap: string;
 };
+
+const ONE_NUMERAIRE = bnum(1);
 
 describe('Test for fxPools', () => {
     context('parsePoolPairData', () => {
@@ -92,23 +93,17 @@ describe('Test for fxPools', () => {
                 maxLimit - reservesInNumeraire.tokenOutReservesInNumeraire;
 
             const expectedLimitForTokenIn = bnum(
-                formatFixed(
-                    viewRawAmount(
-                        maxLimitAmountForTokenIn,
-                        poolPairData.tokenInRate.toNumber()
-                    ).toString(),
-                    poolPairData.decimalsIn
-                )
+                viewRawAmount(
+                    maxLimitAmountForTokenIn,
+                    poolPairData.tokenInRate.toNumber()
+                ).toString()
             );
 
             const expectedLimitForTokenOut = bnum(
-                formatFixed(
-                    viewRawAmount(
-                        maxLimitAmountForTokenOut,
-                        poolPairData.tokenOutRate.toNumber()
-                    ).toString(),
-                    poolPairData.decimalsOut
-                )
+                viewRawAmount(
+                    maxLimitAmountForTokenOut,
+                    poolPairData.tokenOutRate.toNumber()
+                ).toString()
             );
 
             let amount = newPool.getLimitAmountSwap(
@@ -153,9 +148,7 @@ describe('Test for fxPools', () => {
 
             for (const testCase of testCasesArray) {
                 it(`Test Case No. ${testCase.testNo} - ${testCase.description}`, async () => {
-                    const givenAmount = bnum(
-                        parseFixed(testCase.givenAmount, 6).toString()
-                    ); // decimal is 6 for xsfd and usdc
+                    const givenAmount = bnum(testCase.givenAmount); // decimal is 6 for xsgd and usdc
 
                     const poolData = testPools.pools[0];
                     const newPool = FxPool.fromPool(poolData);
@@ -170,7 +163,7 @@ describe('Test for fxPools', () => {
                     );
 
                     const spotPriceBeforeSwapValue = spotPriceBeforeSwap(
-                        scale(bnum('1'), 6),
+                        ONE_NUMERAIRE,
                         poolPairData
                     ).toNumber();
 
@@ -196,18 +189,9 @@ describe('Test for fxPools', () => {
                                 poolPairData,
                                 givenAmount
                             );
-                            expect(
-                                amountOut
-                                    .div(
-                                        getBaseDecimals(
-                                            poolPairData.decimalsOut
-                                        )
-                                    )
-                                    .toNumber()
-                            ).to.be.closeTo(
+                            expect(amountOut.toNumber()).to.be.closeTo(
                                 viewRawAmount(
                                     Number(testCase.expectedSwapOutput),
-
                                     poolPairData.tokenOutRate.toNumber()
                                 ).toNumber(),
                                 10000
@@ -263,13 +247,7 @@ describe('Test for fxPools', () => {
                                 givenAmount
                             );
 
-                            expect(
-                                amountIn
-                                    .div(
-                                        getBaseDecimals(poolPairData.decimalsIn)
-                                    )
-                                    .toNumber()
-                            ).to.be.closeTo(
+                            expect(amountIn.toNumber()).to.be.closeTo(
                                 viewRawAmount(
                                     Number(testCase.expectedSwapOutput),
                                     poolPairData.tokenInRate.toNumber()
