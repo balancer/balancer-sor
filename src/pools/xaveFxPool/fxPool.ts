@@ -185,24 +185,20 @@ export class FxPool implements PoolBase {
                 maxLimit - parsedReserves.tokenInReservesInNumeraire;
 
             return bnum(
-                formatFixed(
-                    viewRawAmount(
-                        maxLimitAmount,
-                        poolPairData.tokenInRate.toNumber()
-                    ).toString()
-                )
+                viewRawAmount(
+                    maxLimitAmount,
+                    poolPairData.tokenInRate.toNumber()
+                ).toString()
             );
         } else {
             const maxLimitAmount =
                 maxLimit - parsedReserves.tokenOutReservesInNumeraire;
 
             return bnum(
-                formatFixed(
-                    viewRawAmount(
-                        maxLimitAmount,
-                        poolPairData.tokenOutRate.toNumber()
-                    ).toString()
-                )
+                viewRawAmount(
+                    maxLimitAmount,
+                    poolPairData.tokenOutRate.toNumber()
+                ).toString()
             );
         }
     }
