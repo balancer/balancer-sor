@@ -2,7 +2,7 @@ import { BigNumberish } from '@ethersproject/bignumber';
 import { Contract } from '@ethersproject/contracts';
 import { AddressZero } from '@ethersproject/constants';
 import { SwapTypes, SwapInfo, SwapV2, FundManagement } from '../types';
-import { SOR } from '../index';
+import { SOR } from '../wrapper';
 
 /*
  * queryBatchSwap simulates a call to `batchSwap`, returning an array of Vault asset deltas. Calls to `swap` cannot be

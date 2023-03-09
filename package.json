@@ -1,12 +1,16 @@
 {
     "name": "@balancer-labs/sor",
     "version": "4.1.1-beta.4",
+    "engines": {
+        "node": ">=16",
+        "npm": ">=8"
+    },
     "license": "GPL-3.0-only",
-    "main": "dist/index.js",
-    "module": "dist/index.esm.js",
-    "types": "dist/index.d.ts",
+    "module": "./dist/esm/index.js",
+    "sideEffects": false,
+    "types": "dist/esm/index.d.ts",
     "scripts": {
-        "build": "rollup -c",
+        "build": "rimraf dist && rollup --config rollup.config.ts --configPlugin typescript",
         "prepack": "yarn build",
         "test": "TS_NODE_PROJECT='tsconfig.testing.json' nyc mocha -r ts-node/register test/*.spec.ts --timeout 20000",
         "test:only": "TS_NODE_PROJECT='tsconfig.testing.json' npx mocha -r ts-node/register --timeout 20000",
@@ -37,17 +41,17 @@
         "@ethersproject/wallet": "^5.4.0",
         "@georgeroman/balancer-v2-pools": "0.0.7",
         "@nomiclabs/hardhat-ethers": "^2.0.6",
-        "@rollup/plugin-commonjs": "^20.0.0",
-        "@rollup/plugin-json": "^4.1.0",
-        "@rollup/plugin-node-resolve": "^13.0.4",
-        "@rollup/plugin-typescript": "^8.2.5",
+        "@rollup/plugin-commonjs": "^24.0.1",
+        "@rollup/plugin-json": "^6.0.0",
+        "@rollup/plugin-node-resolve": "^15.0.1",
+        "@rollup/plugin-terser": "^0.4.0",
+        "@rollup/plugin-typescript": "^11.0.0",
         "@types/chai": "^4.2.10",
         "@types/lodash.clonedeep": "^4.5.6",
         "@types/mocha": "^7.0.2",
         "@types/node": "^14.0.20",
         "@typescript-eslint/eslint-plugin": "^4.29.2",
         "@typescript-eslint/parser": "^4.29.2",
-        "bignumber.js": "^9.0.1",
         "chai": "^4.2.0",
         "dotenv": "^8.2.0",
         "eslint": "^7.32.0",
@@ -62,10 +66,13 @@
         "perf_hooks": "^0.0.1",
         "prettier": "^2.3.2",
         "pretty-quick": "^2.0.1",
-        "rollup": "^2.56.3",
-        "rollup-plugin-dts": "^4.0.0",
+        "rollup": "^3.18.0",
+        "rollup-plugin-analyzer": "^4.0.0",
+        "rollup-plugin-dts": "^5.2.0",
         "ts-node": "^10.0.0",
-        "typescript": "^4.3.5"
+        "typescript": "^4.9.5",
+        "vite": "^4.1.4",
+        "vitest": "^0.29.2"
     },
     "dependencies": {
         "isomorphic-fetch": "^2.2.1"
@@ -76,6 +83,7 @@
         "@ethersproject/bignumber": "^5.4.2",
         "@ethersproject/constants": "^5.4.0",
         "@ethersproject/contracts": "^5.4.1",
-        "@ethersproject/providers": "^5.4.4"
+        "@ethersproject/providers": "^5.4.4",
+        "bignumber.js": "^9.0.1"
     }
 }
