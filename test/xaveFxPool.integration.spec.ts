@@ -9,12 +9,15 @@ import { Vault__factory } from '@balancer-labs/typechain';
 import { AddressZero } from '@ethersproject/constants';
 import { setUp } from './testScripts/utils';
 import { scale } from '../src/utils/bignumber';
+import { ONE_ETHER, ONE_TO_THE_SIX } from '../src/pools/xaveFxPool/fxPoolMath';
 
 /*
  * Testing Notes:
  * - Add infura api key on .env
  * - Run  node on terminal: yarn run node
  */
+
+// accuracy test: https://app.warp.dev/block/bcbBMkR8Da96QHQ2phmHZN
 
 dotenv.config();
 
@@ -23,12 +26,14 @@ const networkId = Network.MAINNET;
 const jsonRpcUrl = 'https://mainnet.infura.io/v3/' + process.env.INFURA;
 const rpcUrl = 'http://127.0.0.1:8545';
 const provider = new JsonRpcProvider(rpcUrl, networkId);
-const blocknumber = 16734425;
-const inaccuracyLimit = 0.02; // 0.02 USD
+const blocknumber = 16797531;
+
+const inaccuracyLimit = 1e-14;
 
 const vault = Vault__factory.connect(vaultAddr, provider);
+const SWAP_AMOUNT_IN_NUMERAIRE = '10';
 
-const xaveFxPool: SubgraphPoolBase = {
+const xaveFxPoolDAI_USDC_MAINNET: SubgraphPoolBase = {
     id: '0x66bb9d104c55861feb3ec3559433f01f6373c9660002000000000000000003cf',
     address: '0x66bb9d104c55861feb3ec3559433f01f6373c966',
     poolType: 'FX',
@@ -48,7 +53,7 @@ const xaveFxPool: SubgraphPoolBase = {
             priceRate: '1',
             weight: null,
             token: {
-                latestFXPrice: '0.99999999',
+                latestFXPrice: '0.99980000', // roundId 92233720368547774306
             },
         },
         {
@@ -58,7 +63,7 @@ const xaveFxPool: SubgraphPoolBase = {
             priceRate: '1',
             weight: null,
             token: {
-                latestFXPrice: '1.00000000',
+                latestFXPrice: '1.00019000', // roundId 36893488147419104088
             },
         },
     ],
@@ -69,14 +74,14 @@ const xaveFxPool: SubgraphPoolBase = {
     epsilon: '0.0015',
 };
 
-describe('xaveFxPool integration tests', () => {
+describe('xaveFxPool: DAI-USDC integration tests', () => {
     context('test swaps vs queryBatchSwap', () => {
         // Setup chain
         before(async function () {
             sor = await setUp(
                 networkId,
                 provider,
-                [xaveFxPool],
+                [xaveFxPoolDAI_USDC_MAINNET],
                 jsonRpcUrl as string,
                 blocknumber
             );
@@ -97,7 +102,7 @@ describe('xaveFxPool integration tests', () => {
         it('ExactIn', async () => {
             const swapType = SwapTypes.SwapExactIn;
             // swapAmount is tokenIn, expect tokenOut
-            const swapAmount = parseFixed('10', 6);
+            const swapAmount = parseFixed(SWAP_AMOUNT_IN_NUMERAIRE, 6);
 
             const swapInfo = await sor.getSwaps(
                 tokenIn,
@@ -128,7 +133,7 @@ describe('xaveFxPool integration tests', () => {
         it('ExactOut', async () => {
             const swapType = SwapTypes.SwapExactOut;
             // swapAmount is tokenOut, expect tokenIn
-            const swapAmount = parseFixed('10', 18);
+            const swapAmount = parseFixed(SWAP_AMOUNT_IN_NUMERAIRE, 18);
             const swapInfo = await sor.getSwaps(
                 tokenIn,
                 tokenOut,
