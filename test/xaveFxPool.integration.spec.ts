@@ -9,7 +9,6 @@ import { Vault__factory } from '@balancer-labs/typechain';
 import { AddressZero } from '@ethersproject/constants';
 import { setUp } from './testScripts/utils';
 import { scale } from '../src/utils/bignumber';
-import { ONE_ETHER, ONE_TO_THE_SIX } from '../src/pools/xaveFxPool/fxPoolMath';
 
 /*
  * Testing Notes:
