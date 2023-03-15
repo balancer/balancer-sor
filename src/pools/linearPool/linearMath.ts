@@ -1,4 +1,4 @@
-import { MathSol } from '../../utils/basicOperations';
+import { MathSol, BZERO } from '../../utils/basicOperations';
 
 type Params = {
     fee: bigint;
@@ -395,7 +395,7 @@ export function _calcTokensOutGivenExactBptIn(
     // multiplication and division.
 
     const bptRatio = MathSol.divDownFixed(bptAmountIn, bptTotalSupply);
-    const amountsOut: bigint[] = new Array(balances.length);
+    const amountsOut: bigint[] = new Array(balances.length).fill(BZERO);
     for (let i = 0; i < balances.length; i++) {
         // BPT is skipped as those tokens are not the LPs, but rather the preminted and undistributed amount.
         if (i != bptIndex) {
