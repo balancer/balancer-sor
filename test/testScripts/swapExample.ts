@@ -58,7 +58,7 @@ function setUp(networkId: Network, provider: JsonRpcProvider): SOR {
 }
 
 export async function swap(): Promise<void> {
-    const networkId = Network.ARBITRUM;
+    const networkId = Network.MAINNET;
     const provider = new JsonRpcProvider(PROVIDER_URLS[networkId]);
     // gasPrice is used by SOR as a factor to determine how many pools to swap against.
     // i.e. higher cost means more costly to trade against lots of different pools.

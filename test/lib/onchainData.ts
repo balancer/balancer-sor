@@ -78,12 +78,18 @@ export async function getOnChainBalances(
          *    effectively be included in any Pool operation that involves BPT.
          * In the vast majority of cases, this function should be used instead of `totalSupply()`.
          */
-        if (pool.poolType === 'ComposableStable')
+        if (pool.poolType === 'ComposableStable') {
             multiPool.call(
                 `${pool.id}.actualSupply`,
                 pool.address,
                 'getActualSupply'
             );
+            multiPool.call(
+                `${pool.id}.scalingFactors`,
+                pool.address,
+                'getScalingFactors'
+            );
+        }
 
         // TO DO - Make this part of class to make more flexible?
         if (
@@ -157,6 +163,7 @@ export async function getOnChainBalances(
             totalSupply: string;
             virtualSupply?: string;
             actualSupply?: string;
+            scalingFactors?: string[];
         }
     >;
 
@@ -175,6 +182,7 @@ export async function getOnChainBalances(
                 totalSupply: string;
                 virtualSupply?: string;
                 actualSupply?: string;
+                scalingFactors?: string[];
             }
         >;
     } catch (err) {
@@ -193,6 +201,7 @@ export async function getOnChainBalances(
                 virtualSupply,
                 actualSupply,
                 totalSupply,
+                scalingFactors,
             } = onchainData;
 
             if (
@@ -255,6 +264,13 @@ export async function getOnChainBalances(
                 if (weights) {
                     // Only expected for WeightedPools
                     T.weight = formatFixed(weights[i], 18);
+                }
+                if (scalingFactors) {
+                    const decimalsDifference = 18 - T.decimals;
+                    T.priceRate = formatFixed(
+                        scalingFactors[i],
+                        18 + decimalsDifference
+                    );
                 }
             });
             // Pools with pre minted BPT
