@@ -182,32 +182,36 @@ export class FxPool implements PoolBase<FxPoolPairData> {
         poolPairData: FxPoolPairData,
         swapType: SwapTypes
     ): OldBigNumber {
-        const parsedReserves = poolBalancesToNumeraire(poolPairData);
+        try {
+            const parsedReserves = poolBalancesToNumeraire(poolPairData);
 
-        const alphaValue = Number(formatFixed(poolPairData.alpha, 18));
+            const alphaValue = Number(formatFixed(poolPairData.alpha, 18));
 
-        const maxLimit = (1 + alphaValue) * parsedReserves._oGLiq * 0.5;
+            const maxLimit = (1 + alphaValue) * parsedReserves._oGLiq * 0.5;
 
-        if (swapType === SwapTypes.SwapExactIn) {
-            const maxLimitAmount =
-                maxLimit - parsedReserves.tokenInReservesInNumeraire;
+            if (swapType === SwapTypes.SwapExactIn) {
+                const maxLimitAmount =
+                    maxLimit - parsedReserves.tokenInReservesInNumeraire;
 
-            return bnum(
-                viewRawAmount(
-                    maxLimitAmount,
-                    poolPairData.tokenInLatestFXPrice.toNumber()
-                ).toString()
-            );
-        } else {
-            const maxLimitAmount =
-                maxLimit - parsedReserves.tokenOutReservesInNumeraire;
+                return bnum(
+                    viewRawAmount(
+                        maxLimitAmount,
+                        poolPairData.tokenInLatestFXPrice.toNumber()
+                    ).toString()
+                );
+            } else {
+                const maxLimitAmount =
+                    maxLimit - parsedReserves.tokenOutReservesInNumeraire;
 
-            return bnum(
-                viewRawAmount(
-                    maxLimitAmount,
-                    poolPairData.tokenOutLatestFXPrice.toNumber()
-                ).toString()
-            );
+                return bnum(
+                    viewRawAmount(
+                        maxLimitAmount,
+                        poolPairData.tokenOutLatestFXPrice.toNumber()
+                    ).toString()
+                );
+            }
+        } catch {
+            return ZERO;
         }
     }
 
@@ -228,47 +232,77 @@ export class FxPool implements PoolBase<FxPoolPairData> {
         poolPairData: FxPoolPairData,
         amount: OldBigNumber
     ): OldBigNumber {
-        return _exactTokenInForTokenOut(amount, poolPairData);
+        try {
+            return _exactTokenInForTokenOut(amount, poolPairData);
+        } catch {
+            return ZERO;
+        }
     }
 
     _tokenInForExactTokenOut(
         poolPairData: FxPoolPairData,
         amount: OldBigNumber
     ): OldBigNumber {
-        return _tokenInForExactTokenOut(amount, poolPairData);
+        try {
+            return _tokenInForExactTokenOut(amount, poolPairData);
+        } catch {
+            return ZERO;
+        }
     }
 
     _spotPriceAfterSwapExactTokenInForTokenOut(
         poolPairData: FxPoolPairData,
         amount: OldBigNumber
     ): OldBigNumber {
-        return _spotPriceAfterSwapExactTokenInForTokenOut(poolPairData, amount);
+        try {
+            return _spotPriceAfterSwapExactTokenInForTokenOut(
+                poolPairData,
+                amount
+            );
+        } catch {
+            return ZERO;
+        }
     }
 
     _spotPriceAfterSwapTokenInForExactTokenOut(
         poolPairData: FxPoolPairData,
         amount: OldBigNumber
     ): OldBigNumber {
-        return _spotPriceAfterSwapTokenInForExactTokenOut(poolPairData, amount);
+        try {
+            return _spotPriceAfterSwapTokenInForExactTokenOut(
+                poolPairData,
+                amount
+            );
+        } catch {
+            return ZERO;
+        }
     }
 
     _derivativeSpotPriceAfterSwapExactTokenInForTokenOut(
         poolPairData: FxPoolPairData,
         amount: OldBigNumber
     ): OldBigNumber {
-        return _derivativeSpotPriceAfterSwapExactTokenInForTokenOut(
-            amount,
-            poolPairData
-        );
+        try {
+            return _derivativeSpotPriceAfterSwapExactTokenInForTokenOut(
+                amount,
+                poolPairData
+            );
+        } catch {
+            return ZERO;
+        }
     }
 
     _derivativeSpotPriceAfterSwapTokenInForExactTokenOut(
         poolPairData: FxPoolPairData,
         amount: OldBigNumber
     ): OldBigNumber {
-        return _derivativeSpotPriceAfterSwapTokenInForExactTokenOut(
-            amount,
-            poolPairData
-        );
+        try {
+            return _derivativeSpotPriceAfterSwapTokenInForExactTokenOut(
+                amount,
+                poolPairData
+            );
+        } catch {
+            return ZERO;
+        }
     }
 }
