@@ -148,15 +148,19 @@ export class SubgraphPoolDataService implements PoolDataService {
 
         const { data } = await response.json();
 
+        // These pools are related to Euler hack and have issues the cause multicall to fail
+        const poolsToFilter = [
+            '0x0afbd58beca09545e4fb67772faf3858e610bcd0',
+            '0x2ff1a9dbdacd55297452cfd8a4d94724bc22a5f7',
+            '0xbc0f2372008005471874e426e86ccfae7b4de79d',
+            '0xdba274b4d04097b90a72b62467d828cefd708037',
+            '0xf22ff21e17157340575158ad7394e068048dd98b',
+            '0xf71d0774b214c4cf51e33eb3d30ef98132e4dbaa',
+        ];
+
         let pools = [...data.pool0, ...data.pool1000];
 
-        pools = pools.filter(
-            (p) =>
-                p.id ===
-                '0x66bb9d104c55861feb3ec3559433f01f6373c9660002000000000000000003cf'
-        );
-
-        console.log(pools.length);
+        pools = pools.filter((p) => !poolsToFilter.includes(p.address));
 
         if (this.config.onchain) {
             return getOnChainBalances(

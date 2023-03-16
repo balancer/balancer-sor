@@ -295,6 +295,11 @@ export const ADDRESSES = {
             decimals: 18,
             symbol: 'XSGD',
         },
+        EURS: {
+            address: '0xdb25f211ab05b1c97d595516f45794528a807ad8',
+            decimals: 2,
+            symbol: 'EURS',
+        },
     },
     [Network.POLYGON]: {
         MATIC: {
@@ -394,8 +399,8 @@ export const ADDRESSES = {
         },
         XSGD: {
             address: '0xdc3326e71d45186f113a2f448984ca0e8d201995',
-            decimals: 18,
-            symbols: 'XSGD',
+            decimals: 6,
+            symbol: 'XSGD',
         },
     },
     [Network.ARBITRUM]: {
