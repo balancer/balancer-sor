@@ -1,15 +1,16 @@
 // yarn test:only test/xaveFxPool.spec.ts
 import { expect } from 'chai';
-import { formatFixed, parseFixed } from '@ethersproject/bignumber';
+import { formatFixed, parseFixed, BigNumber } from '@ethersproject/bignumber';
 import { bnum, ZERO } from '../src/utils/bignumber';
 import { PoolTypes, SwapTypes } from '../src';
 // Add new PoolType
-import { FxPool } from '../src/pools/xaveFxPool/fxPool';
+import { FxPool, FxPoolPairData } from '../src/pools/xaveFxPool/fxPool';
 import {
     ALMOST_ZERO,
     poolBalancesToNumeraire,
     spotPriceBeforeSwap,
     viewRawAmount,
+    _spotPriceAfterSwapExactTokenInForTokenOut,
 } from '../src/pools/xaveFxPool/fxPoolMath';
 
 // Add new pool test data in Subgraph Schema format
@@ -280,6 +281,36 @@ describe('Test for fxPools', () => {
                     }
                 });
             }
+        });
+    });
+
+    context('_spotPriceAfterSwapExactTokenInForTokenOut', () => {
+        it('should return sp for 0 amount', () => {
+            const amount = bnum(0);
+            const poolPairData: FxPoolPairData = {
+                id: '0x726e324c29a1e49309672b244bdc4ff62a270407000200000000000000000702',
+                address: '0x726e324c29a1e49309672b244bdc4ff62a270407',
+                poolType: 8,
+                tokenIn: '0x2791bca1f2de4661ed88a30c99a7a9449aa84174',
+                tokenOut: '0xdc3326e71d45186f113a2f448984ca0e8d201995',
+                decimalsIn: 6,
+                decimalsOut: 6,
+                balanceIn: BigNumber.from('0xbf24ffac00'),
+                balanceOut: BigNumber.from('0x59bbba58b6'),
+                swapFee: BigNumber.from('0x25'),
+                alpha: BigNumber.from('0x0b1a2bc2ec500000'),
+                beta: BigNumber.from('0x06a94d74f4300000'),
+                lambda: BigNumber.from('0x0429d069189e0000'),
+                delta: BigNumber.from('0x03cb71f51fc55800'),
+                epsilon: BigNumber.from('0x01c6bf52634000'),
+                tokenInLatestFXPrice: bnum('99963085000000'),
+                tokenOutLatestFXPrice: bnum('74200489000000'),
+            };
+            const sp = _spotPriceAfterSwapExactTokenInForTokenOut(
+                poolPairData,
+                amount
+            );
+            expect(sp.isNaN).to.be.false;
         });
     });
 });
