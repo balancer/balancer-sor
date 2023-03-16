@@ -1,13 +1,12 @@
 // yarn test:only test/xaveFxPool.spec.ts
-import { assert, expect } from 'chai';
+import { expect } from 'chai';
 import { formatFixed, parseFixed } from '@ethersproject/bignumber';
-import { bnum } from '../src/utils/bignumber';
+import { bnum, ZERO } from '../src/utils/bignumber';
 import { PoolTypes, SwapTypes } from '../src';
 // Add new PoolType
 import { FxPool } from '../src/pools/xaveFxPool/fxPool';
 import {
     ALMOST_ZERO,
-    CurveMathRevert,
     poolBalancesToNumeraire,
     spotPriceBeforeSwap,
     viewRawAmount,
@@ -173,15 +172,12 @@ describe('Test for fxPools', () => {
                         let amountOut;
 
                         if (testCase.testNo === '9') {
-                            assert.throws(
-                                () =>
-                                    newPool._exactTokenInForTokenOut(
-                                        poolPairData,
-                                        givenAmount
-                                    ),
-                                Error,
-                                CurveMathRevert.SwapConvergenceFailed
+                            // CurveMathRevert.SwapConvergenceFailed
+                            const amountOut = newPool._exactTokenInForTokenOut(
+                                poolPairData,
+                                givenAmount
                             );
+                            expect(amountOut).to.eq(ZERO);
                         } else {
                             amountOut = newPool._exactTokenInForTokenOut(
                                 poolPairData,
@@ -230,15 +226,12 @@ describe('Test for fxPools', () => {
                         let amountIn;
 
                         if (testCase.testNo === '12') {
-                            assert.throws(
-                                () =>
-                                    newPool._tokenInForExactTokenOut(
-                                        poolPairData,
-                                        givenAmount
-                                    ),
-                                Error,
-                                CurveMathRevert.LowerHalt
+                            // CurveMathRevert.LowerHalt
+                            const amountIn = newPool._tokenInForExactTokenOut(
+                                poolPairData,
+                                givenAmount
                             );
+                            expect(amountIn).to.eq(ZERO);
                         } else {
                             amountIn = newPool._tokenInForExactTokenOut(
                                 poolPairData,
