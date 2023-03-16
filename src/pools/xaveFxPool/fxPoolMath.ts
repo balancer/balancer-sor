@@ -238,7 +238,7 @@ export const getBaseDecimals = (decimals: number) => {
 // Base Assimilator Functions
 // calculations are from the BaseToUsdAssimilator
 export const viewRawAmount = (_amount: number, rate: number): OldBigNumber => {
-    return bnum(Math.round(_amount / rate));
+    return bnum(_amount / rate);
 };
 
 const viewNumeraireAmount = (_amount: number, rate: number): number => {
@@ -522,6 +522,7 @@ export function _tokenInForExactTokenOut(
         throw new Error(CurveMathRevert.CannotSwap);
     } else {
         const epsilon = Number(formatFixed(poolPairData.epsilon, 18));
+
         const _amtWithFee = _amt[0] * (1 + epsilon); // fee retained by the pool
 
         return viewRawAmount(
