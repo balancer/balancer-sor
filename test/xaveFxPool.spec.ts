@@ -310,7 +310,8 @@ describe('Test for fxPools', () => {
                 poolPairData,
                 amount
             );
-            expect(sp.isNaN).to.be.false;
+
+            expect(sp.isNaN()).to.be.false;
         });
     });
 });

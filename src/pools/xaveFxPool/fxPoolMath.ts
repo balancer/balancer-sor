@@ -603,21 +603,31 @@ export const _spotPriceAfterSwapExactTokenInForTokenOut = (
         const oBals1after = _nBals[1];
 
         if (oBals1after < minBetaLimit && oBals0after > maxBetaLimit) {
-            return bnum(
-                (Math.abs(outputAmount * (1 - epsilon)) /
-                    Math.abs(targetAmountInNumeraire)) *
-                    currentRate
-            );
+            // returns 0 because  Math.abs(targetAmountInNumeraire)) * currentRate
+            // used that function with a 0 amount to get a market spot price for the pool
+            // which is used in front end display.
+
+            return amount.isZero()
+                ? spotPriceBeforeSwap(amount, poolPairData)
+                : bnum(
+                      (Math.abs(outputAmount * (1 - epsilon)) /
+                          Math.abs(targetAmountInNumeraire)) *
+                          currentRate
+                  );
         } else {
             return bnum(currentRate * (1 - epsilon));
         }
     } else {
+        // if usdc is tokenOut
         //  token[1] to token [0] in originswap
         const oBals0after = _nBals[1];
 
         const oBals1after = _nBals[0];
 
         if (oBals1after < minBetaLimit && oBals0after > maxBetaLimit) {
+            if (amount.isZero())
+                return spotPriceBeforeSwap(amount, poolPairData);
+
             const ratioOfOutputAndInput =
                 Math.abs(outputAmount * (1 - epsilon)) /
                 Math.abs(targetAmountInNumeraire);
