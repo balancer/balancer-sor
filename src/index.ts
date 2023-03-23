@@ -30,5 +30,5 @@ export {
     DerivedGyroEParams,
     Vector2,
 } from './pools/gyroEPool/gyroEMath/gyroEMathHelpers';
-
+export * as LinearMaths from './pools/linearPool/linearMath';
 export const ISOLATED_CONST = 'isolated';
