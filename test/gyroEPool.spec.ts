@@ -65,6 +65,8 @@ const POOL = GyroEPool.fromPool({
     dSq: '1.00000000000000002140811391783216360000',
 });
 
+const maxDelta = '0.00001';
+
 describe('gyroEPool tests', () => {
     const poolPairData = TEST_POOL_PAIR_DATA;
 
@@ -86,11 +88,10 @@ describe('gyroEPool tests', () => {
                 poolPairData,
                 SwapTypes.SwapExactIn
             );
-
-            expect(Number(limitAmount)).to.be.approximately(
-                354.48480273457726733583,
-                0.00001
-            );
+            const delta = limitAmount
+                .minus(bnum('354.48480273457726733583'))
+                .abs();
+            expect(delta.lt(maxDelta)).to.be.true;
         });
 
         it(`should correctly calculate limit amount for swap exact out`, async () => {
@@ -109,11 +110,8 @@ describe('gyroEPool tests', () => {
                 poolPairData,
                 bnum('10')
             );
-
-            expect(Number(swapAmount)).to.be.approximately(
-                2.821007799187925949,
-                0.00001
-            );
+            const delta = swapAmount.minus(bnum('2.821007799187925949')).abs();
+            expect(delta.lt(maxDelta)).to.be.true;
         });
 
         it(`should correctly calculate swap amount for swap exact out`, async () => {
@@ -130,10 +128,10 @@ describe('gyroEPool tests', () => {
                 18
             );
 
-            expect(Number(reduced)).to.be.approximately(
-                32.257987339909373037,
-                0.00001
-            );
+            const delta = bnum(reduced)
+                .minus(bnum('32.257987339909373037'))
+                .abs();
+            expect(delta.lt(maxDelta)).to.be.true;
         });
     });
 
@@ -144,11 +142,10 @@ describe('gyroEPool tests', () => {
                     poolPairData,
                     bnum('10')
                 );
-
-            expect(Number(priceAfterSwap)).to.be.approximately(
-                3.544833007099248968,
-                0.00001
-            );
+            const delta = priceAfterSwap
+                .minus(bnum('3.544833007099248968'))
+                .abs();
+            expect(delta.lt(maxDelta)).to.be.true;
         });
 
         it(`should correctly calculate price after swap exact out`, async () => {
@@ -157,11 +154,10 @@ describe('gyroEPool tests', () => {
                     poolPairData,
                     bnum('10')
                 );
-
-            expect(Number(priceAfterSwap)).to.be.approximately(
-                3.544835504848199306,
-                0.00001
-            );
+            const delta = priceAfterSwap
+                .minus(bnum('3.544835504848199306'))
+                .abs();
+            expect(delta.lt(maxDelta)).to.be.true;
         });
     });
 
