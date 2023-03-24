@@ -11,6 +11,7 @@ import stablePoolAbi from '../../src/pools/stablePool/stablePoolAbi.json';
 import composableStablePoolAbi from '../../src/pools/composableStable/ComposableStable.json';
 import elementPoolAbi from '../../src/pools/elementPool/ConvergentCurvePool.json';
 import linearPoolAbi from '../../src/pools/linearPool/linearPoolAbi.json';
+import fxPoolAbi from '../../src/pools/xaveFxPool/fxPoolAbi.json';
 import { PoolFilter, SubgraphPoolBase, PoolDataService } from '../../src';
 import { Multicaller } from './multicaller';
 import { Fragment, JsonFragment } from '@ethersproject/abi/lib/fragments';
@@ -35,6 +36,7 @@ export async function getOnChainBalances(
                     ...elementPoolAbi,
                     ...linearPoolAbi,
                     ...composableStablePoolAbi,
+                    ...fxPoolAbi,
                 ].map((row) => [row.name, row])
             )
         );
@@ -120,6 +122,12 @@ export async function getOnChainBalances(
             );
         } else if (pool.poolType === 'Element') {
             multiPool.call(`${pool.id}.swapFee`, pool.address, 'percentFee');
+        } else if (pool.poolType === 'FX') {
+            multiPool.call(
+                `${pool.id}.swapFee`,
+                pool.address,
+                'protocolPercentFee'
+            );
         } else if (pool.poolType.toString().includes('Linear')) {
             multiPool.call(
                 `${pool.id}.swapFee`,
@@ -250,8 +258,11 @@ export async function getOnChainBalances(
                 const T = subgraphPools[index].tokens.find((t) =>
                     isSameAddress(t.address, token)
                 );
+
                 if (!T) throw `Pool Missing Expected Token: ${poolId} ${token}`;
+
                 T.balance = formatFixed(poolTokens.balances[i], T.decimals);
+
                 if (weights) {
                     // Only expected for WeightedPools
                     T.weight = formatFixed(weights[i], 18);

@@ -30,6 +30,7 @@ export enum PoolTypes {
     Gyro2,
     Gyro3,
     GyroE,
+    Fx,
 }
 
 export interface SwapOptions {
@@ -116,6 +117,10 @@ export interface SubgraphPoolBase {
     w?: string;
     z?: string;
     dSq?: string;
+
+    // FxPool
+    delta?: string;
+    epsilon?: string;
 }
 
 export type SubgraphToken = {
@@ -125,6 +130,11 @@ export type SubgraphToken = {
     priceRate: string;
     // WeightedPool field
     weight: string | null;
+    token?: SubgraphTokenData;
+};
+
+export type SubgraphTokenData = {
+    latestFXPrice?: string;
 };
 
 export interface SwapV2 {
@@ -197,6 +207,7 @@ export enum PoolFilter {
     SiloLinear = 'SiloLinear',
     TetuLinear = 'TetuLinear',
     YearnLinear = 'YearnLinear',
+    FxPool = 'FX',
 }
 
 export interface PoolBase<D extends PoolPairBase = PoolPairBase> {
