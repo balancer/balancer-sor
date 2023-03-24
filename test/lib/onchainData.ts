@@ -1,5 +1,5 @@
 import { JsonRpcProvider } from '@ethersproject/providers';
-import { formatFixed, BigNumber } from '@ethersproject/bignumber';
+import { formatFixed } from '@ethersproject/bignumber';
 import { Provider } from '@ethersproject/providers';
 import { isSameAddress } from '../../src/utils';
 
@@ -12,6 +12,7 @@ import composableStablePoolAbi from '../../src/pools/composableStable/Composable
 import elementPoolAbi from '../../src/pools/elementPool/ConvergentCurvePool.json';
 import linearPoolAbi from '../../src/pools/linearPool/linearPoolAbi.json';
 import fxPoolAbi from '../../src/pools/xaveFxPool/fxPoolAbi.json';
+import gyroEV2Abi from '../../src/pools/gyroEV2Pool/gyroEV2Abi.json';
 import { PoolFilter, SubgraphPoolBase, PoolDataService } from '../../src';
 import { Multicaller } from './multicaller';
 import { Fragment, JsonFragment } from '@ethersproject/abi/lib/fragments';
@@ -37,6 +38,7 @@ export async function getOnChainBalances(
                     ...linearPoolAbi,
                     ...composableStablePoolAbi,
                     ...fxPoolAbi,
+                    ...gyroEV2Abi,
                 ].map((row) => [row.name, row])
             )
         );
@@ -147,7 +149,7 @@ export async function getOnChainBalances(
                 pool.address,
                 'getSwapFeePercentage'
             );
-            if (pool.poolType.toString() === 'GyroE') {
+            if (pool.poolType.toString() === 'GyroEV2') {
                 multiPool.call(
                     `${pool.id}.tokenRates`,
                     pool.address,
@@ -172,7 +174,7 @@ export async function getOnChainBalances(
             totalSupply: string;
             virtualSupply?: string;
             actualSupply?: string;
-            tokenRates?: [BigNumber, BigNumber];
+            tokenRates?: string[];
         }
     >;
 
@@ -191,7 +193,7 @@ export async function getOnChainBalances(
                 totalSupply: string;
                 virtualSupply?: string;
                 actualSupply?: string;
-                tokenRates?: [BigNumber, BigNumber];
+                tokenRates?: string[];
             }
         >;
     } catch (err) {
@@ -308,10 +310,16 @@ export async function getOnChainBalances(
                 subgraphPools[index].totalShares = formatFixed(totalSupply, 18);
             }
 
-            if (subgraphPools[index].poolType === 'GyroE') {
-                if (tokenRates && tokenRates.length) {
-                    subgraphPools[index].tokenRates = tokenRates;
+            if (subgraphPools[index].poolType === 'GyroEV2') {
+                if (!Array.isArray(tokenRates) || tokenRates.length !== 2) {
+                    console.error(
+                        `GyroEV2 pool with missing or invalid tokenRates: ${poolId}`
+                    );
+                    return;
                 }
+                subgraphPools[index].tokenRates = tokenRates.map((rate) =>
+                    formatFixed(rate, 18)
+                );
             }
 
             onChainPools.push(subgraphPools[index]);

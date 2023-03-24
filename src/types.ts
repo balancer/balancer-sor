@@ -102,7 +102,7 @@ export interface SubgraphPoolBase {
     // Gyro3 specific field
     root3Alpha?: string;
 
-    // GyroE specific fields
+    // GyroE and GyroEV2 specific fields
     alpha?: string;
     beta?: string;
     c?: string;
@@ -117,7 +117,9 @@ export interface SubgraphPoolBase {
     w?: string;
     z?: string;
     dSq?: string;
-    tokenRates?: [BigNumber, BigNumber];
+
+    // GyroEV2 specific fields
+    tokenRates?: string[];
 
     // FxPool
     delta?: string;
@@ -196,6 +198,7 @@ export enum PoolFilter {
     Gyro2 = 'Gyro2',
     Gyro3 = 'Gyro3',
     GyroE = 'GyroE',
+    GyroEV2 = 'GyroEV2',
     // Linear Pools defined below all operate the same mathematically but have different factories and names in Subgraph
     AaveLinear = 'AaveLinear',
     Linear = 'Linear',
