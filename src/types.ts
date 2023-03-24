@@ -117,6 +117,7 @@ export interface SubgraphPoolBase {
     w?: string;
     z?: string;
     dSq?: string;
+    tokenRates?: [BigNumber, BigNumber];
 
     // FxPool
     delta?: string;

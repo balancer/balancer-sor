@@ -1,5 +1,5 @@
 import { JsonRpcProvider } from '@ethersproject/providers';
-import { formatFixed } from '@ethersproject/bignumber';
+import { formatFixed, BigNumber } from '@ethersproject/bignumber';
 import { Provider } from '@ethersproject/providers';
 import { isSameAddress } from '../../src/utils';
 
@@ -147,6 +147,13 @@ export async function getOnChainBalances(
                 pool.address,
                 'getSwapFeePercentage'
             );
+            if (pool.poolType.toString() === 'GyroE') {
+                multiPool.call(
+                    `${pool.id}.tokenRates`,
+                    pool.address,
+                    'getTokenRates'
+                );
+            }
         }
     });
 
@@ -165,6 +172,7 @@ export async function getOnChainBalances(
             totalSupply: string;
             virtualSupply?: string;
             actualSupply?: string;
+            tokenRates?: [BigNumber, BigNumber];
         }
     >;
 
@@ -183,6 +191,7 @@ export async function getOnChainBalances(
                 totalSupply: string;
                 virtualSupply?: string;
                 actualSupply?: string;
+                tokenRates?: [BigNumber, BigNumber];
             }
         >;
     } catch (err) {
@@ -201,6 +210,7 @@ export async function getOnChainBalances(
                 virtualSupply,
                 actualSupply,
                 totalSupply,
+                tokenRates,
             } = onchainData;
 
             if (
@@ -297,6 +307,13 @@ export async function getOnChainBalances(
             } else {
                 subgraphPools[index].totalShares = formatFixed(totalSupply, 18);
             }
+
+            if (subgraphPools[index].poolType === 'GyroE') {
+                if (tokenRates && tokenRates.length) {
+                    subgraphPools[index].tokenRates = tokenRates;
+                }
+            }
+
             onChainPools.push(subgraphPools[index]);
         } catch (err) {
             throw `Issue with pool onchain data: ${err}`;

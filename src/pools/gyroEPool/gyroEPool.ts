@@ -74,6 +74,7 @@ export class GyroEPool implements PoolBase<GyroEPoolPairData> {
     totalShares: BigNumber;
     gyroEParams: GyroEParams;
     derivedGyroEParams: DerivedGyroEParams;
+    tokenRates: [BigNumber, BigNumber];
 
     static fromPool(pool: SubgraphPoolBase): GyroEPool {
         const {
@@ -91,6 +92,7 @@ export class GyroEPool implements PoolBase<GyroEPoolPairData> {
             w,
             z,
             dSq,
+            tokenRates,
         } = pool;
 
         const gyroEParams = {
@@ -129,7 +131,8 @@ export class GyroEPool implements PoolBase<GyroEPoolPairData> {
             pool.tokens as GyroEPoolToken[],
             pool.tokensList,
             gyroEParams as GyroEParamsFromSubgraph,
-            derivedGyroEParams as DerivedGyroEParamsFromSubgraph
+            derivedGyroEParams as DerivedGyroEParamsFromSubgraph,
+            tokenRates ?? [ONE, ONE]
         );
     }
 
@@ -141,7 +144,8 @@ export class GyroEPool implements PoolBase<GyroEPoolPairData> {
         tokens: GyroEPoolToken[],
         tokensList: string[],
         gyroEParams: GyroEParamsFromSubgraph,
-        derivedGyroEParams: DerivedGyroEParamsFromSubgraph
+        derivedGyroEParams: DerivedGyroEParamsFromSubgraph,
+        tokenRates: [BigNumber, BigNumber]
     ) {
         this.id = id;
         this.address = address;
@@ -173,6 +177,8 @@ export class GyroEPool implements PoolBase<GyroEPoolPairData> {
             z: safeParseFixed(derivedGyroEParams.z, 38),
             dSq: safeParseFixed(derivedGyroEParams.dSq, 38),
         };
+
+        this.tokenRates = tokenRates;
     }
 
     parsePoolPairData(tokenIn: string, tokenOut: string): GyroEPoolPairData {
