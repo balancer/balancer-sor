@@ -68,12 +68,13 @@ export function addFee(amountIn: BigNumber, swapFee: BigNumber): BigNumber {
 ////////
 export function normalizeBalances(
     balances: BigNumber[],
-    decimals: number[]
+    decimals: number[],
+    tokenRates: BigNumber[]
 ): BigNumber[] {
     const scalingFactors = decimals.map((d) => parseFixed('1', d));
 
     return balances.map((bal, index) =>
-        bal.mul(ONE).div(scalingFactors[index])
+        bal.mul(ONE).div(scalingFactors[index]).mul(tokenRates[index])
     );
 }
 
@@ -86,6 +87,10 @@ export function balancesFromTokenInOut(
         ? [balanceTokenIn, balanceTokenOut]
         : [balanceTokenOut, balanceTokenIn];
 }
+
+// Alias for code readability.
+export const valuesInOutFrom01 = balancesFromTokenInOut;
+
 
 /////////
 /// INVARIANT CALC
