@@ -74,7 +74,7 @@ export function normalizeBalances(
     const scalingFactors = decimals.map((d) => parseFixed('1', d));
 
     return balances.map((bal, index) =>
-        bal.mul(ONE).div(scalingFactors[index]).mul(tokenRates[index])
+        mulDown(bal.mul(ONE).div(scalingFactors[index]), tokenRates[index])
     );
 }
 

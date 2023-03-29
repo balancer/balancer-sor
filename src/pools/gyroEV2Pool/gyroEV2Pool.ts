@@ -275,9 +275,8 @@ export class GyroEV2Pool implements PoolBase<GyroEPoolPairData> {
                     true
                 )
             );
-            const limitAmountIn = maxAmountInAssetInPool.sub(
-                normalizedBalances[0]
-            ).div(
+            const limitAmountIn = divDown(
+                maxAmountInAssetInPool.sub(normalizedBalances[0]),
                 tokenRateInOut[0]
             );
             const limitAmountInPlusSwapFee = divDown(
@@ -348,7 +347,7 @@ export class GyroEV2Pool implements PoolBase<GyroEPoolPairData> {
         };
         const inAmount = safeParseFixed(amount.toString(), 18);
         const inAmountLessFee = reduceFee(inAmount, poolPairData.swapFee);
-        const inAmountLessFeeScaled = inAmountLessFee.mul(tokenRateInOut[0]);
+        const inAmountLessFeeScaled = mulDown(inAmountLessFee, tokenRateInOut[0]);
         const outAmountScaled = calcOutGivenIn(
             orderedNormalizedBalances,
             inAmountLessFeeScaled,
@@ -357,7 +356,7 @@ export class GyroEV2Pool implements PoolBase<GyroEPoolPairData> {
             this.derivedGyroEParams,
             invariant
         );
-        const outAmount = outAmountScaled.div(tokenRateInOut[1]);
+        const outAmount = divDown(outAmountScaled, tokenRateInOut[1]);
         return bnum(formatFixed(outAmount, 18));
     }
 
@@ -390,7 +389,7 @@ export class GyroEV2Pool implements PoolBase<GyroEPoolPairData> {
             y: currentInvariant,
         };
         const outAmount = safeParseFixed(amount.toString(), 18);
-        const outAmountScaled = outAmount.mul(tokenRateInOut[1]);
+        const outAmountScaled = mulDown(outAmount, tokenRateInOut[1]);
 
         const inAmountScaledLessFee = calcInGivenOut(
             orderedNormalizedBalances,
@@ -400,7 +399,7 @@ export class GyroEV2Pool implements PoolBase<GyroEPoolPairData> {
             this.derivedGyroEParams,
             invariant
         );
-        const inAmountLessFee = inAmountScaledLessFee.div(tokenRateInOut[0]);
+        const inAmountLessFee = divDown(inAmountScaledLessFee, tokenRateInOut[0]);
         const inAmount = addFee(inAmountLessFee, poolPairData.swapFee);
         return bnum(formatFixed(inAmount, 18));
     }
@@ -447,7 +446,7 @@ export class GyroEV2Pool implements PoolBase<GyroEPoolPairData> {
         };
         const inAmount = safeParseFixed(amount.toString(), 18);
         const inAmountLessFee = reduceFee(inAmount, poolPairData.swapFee);
-        const inAmountLessFeeScaled = inAmountLessFee.mul(tokenRateInOut[0]);
+        const inAmountLessFeeScaled = mulDown(inAmountLessFee, tokenRateInOut[0]);
         const newSpotPriceScaled = calcSpotPriceAfterSwapOutGivenIn(
             orderedNormalizedBalances,
             inAmountLessFeeScaled,
@@ -457,7 +456,7 @@ export class GyroEV2Pool implements PoolBase<GyroEPoolPairData> {
             invariant,
             poolPairData.swapFee
         );
-        const newSpotPrice = newSpotPriceScaled.mul(tokenRateInOut[1]).div(tokenRateInOut[0]);
+        const newSpotPrice = divDown(mulDown(newSpotPriceScaled, tokenRateInOut[1]), tokenRateInOut[0]);
         return bnum(formatFixed(newSpotPrice, 18));
     }
 
@@ -490,7 +489,7 @@ export class GyroEV2Pool implements PoolBase<GyroEPoolPairData> {
             y: currentInvariant,
         };
         const outAmount = safeParseFixed(amount.toString(), 18);
-        const outAmountScaled = outAmount.mul(tokenRateInOut[1]);
+        const outAmountScaled = mulDown(outAmount, tokenRateInOut[1]);
         const newSpotPriceScaled = calcSpotPriceAfterSwapInGivenOut(
             orderedNormalizedBalances,
             outAmountScaled,
@@ -500,7 +499,7 @@ export class GyroEV2Pool implements PoolBase<GyroEPoolPairData> {
             invariant,
             poolPairData.swapFee
         );
-        const newSpotPrice = newSpotPriceScaled.mul(tokenRateInOut[1]).div(tokenRateInOut[0]);
+        const newSpotPrice = divDown(mulDown(newSpotPriceScaled, tokenRateInOut[1]), tokenRateInOut[0]);
         return bnum(formatFixed(newSpotPrice, 18));
     }
 
@@ -537,7 +536,7 @@ export class GyroEV2Pool implements PoolBase<GyroEPoolPairData> {
         const derivativeScaled = calcDerivativePriceAfterSwapOutGivenIn(
             [
                 orderedNormalizedBalances[0].add(
-                    reduceFee(inAmount.mul(tokenRateInOut[0]), poolPairData.swapFee)
+                    reduceFee(mulDown(inAmount, tokenRateInOut[0]), poolPairData.swapFee)
                 ),
                 orderedNormalizedBalances[1],
             ],
@@ -547,7 +546,7 @@ export class GyroEV2Pool implements PoolBase<GyroEPoolPairData> {
             invariant,
             poolPairData.swapFee
         );
-        const derivative = derivativeScaled.mul(tokenRateInOut[1]);
+        const derivative = mulDown(derivativeScaled, tokenRateInOut[1]);
         return bnum(formatFixed(derivative, 18));
     }
 
@@ -583,7 +582,7 @@ export class GyroEV2Pool implements PoolBase<GyroEPoolPairData> {
         const derivativeScaled = calcDerivativeSpotPriceAfterSwapInGivenOut(
             [
                 orderedNormalizedBalances[0],
-                orderedNormalizedBalances[1].sub(outAmount.mul(tokenRateInOut[1])),
+                orderedNormalizedBalances[1].sub(mulDown(outAmount, tokenRateInOut[1])),
             ],
             poolPairData.tokenInIsToken0,
             this.gyroEParams,
@@ -591,7 +590,7 @@ export class GyroEV2Pool implements PoolBase<GyroEPoolPairData> {
             invariant,
             poolPairData.swapFee
         );
-        const derivative = derivativeScaled.mul(tokenRateInOut[1].pow(2)).div(tokenRateInOut[0]);
+        const derivative = divDown(mulDown(derivativeScaled, tokenRateInOut[1].pow(2)), tokenRateInOut[0]);
         return bnum(formatFixed(derivative, 18));
     }
 }
