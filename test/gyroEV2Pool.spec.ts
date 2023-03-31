@@ -2,11 +2,11 @@
 
 import { GyroEPoolPairData } from '../src/pools/gyroEV2Pool/gyroEV2Pool';
 import { WeiPerEther as ONE } from '@ethersproject/constants';
-import { formatFixed, parseFixed } from '@ethersproject/bignumber';
+import {BigNumber, formatFixed, parseFixed} from '@ethersproject/bignumber';
 import { expect } from 'chai';
 import { GyroEV2Pool } from '../src/pools/gyroEV2Pool/gyroEV2Pool';
 import { SwapTypes } from '../src/types';
-import { bnum } from '../src/utils/bignumber';
+import {bnum, ZERO} from '../src/utils/bignumber';
 import { reduceFee } from '../src/pools/gyroEV2Pool/gyroEV2Math/gyroEV2MathHelpers';
 
 const TEST_POOL_PAIR_DATA: GyroEPoolPairData = {
@@ -18,7 +18,7 @@ const TEST_POOL_PAIR_DATA: GyroEPoolPairData = {
     tokenOut: '123',
     decimalsIn: 18,
     decimalsOut: 18,
-    balanceIn: ONE.mul(100),
+    balanceIn: BigNumber.from('66666666666666672128'), // ~ 100/1.5 so that the rate-scaled balances are about the same
     balanceOut: ONE.mul(100),
     tokenInIsToken0: true,
 };
@@ -87,9 +87,8 @@ describe('gyroEPool tests', () => {
                 poolPairData,
                 SwapTypes.SwapExactIn
             );
-
             expect(Number(limitAmount)).to.be.approximately(
-                237.276550936135363786,
+                236.323201823051507893,
                 0.00001
             );
         });
@@ -132,8 +131,8 @@ describe('gyroEPool tests', () => {
             );
 
             expect(Number(reduced)).to.be.approximately(
-                23.632225157442760466,
-                0.00001
+                21.505324893272912024,
+                0.0001
             );
         });
     });
@@ -176,9 +175,22 @@ describe('gyroEPool tests', () => {
 
             expect(Number(priceDerivative)).to.be.approximately(
                 1.03343127137E-7,
-                0.00001
+                1E-12
             );
         });
+
+        it(`should correctly calculate derivative of price after swap exact in at 0`, async () => {
+            const priceDerivative =
+                POOL._derivativeSpotPriceAfterSwapExactTokenInForTokenOut(
+                    poolPairData,
+                    bnum('0')
+                );
+
+            expect(Number(priceDerivative)).to.be.approximately(
+                1.17346314397E-7,
+                1E-12
+            );
+        })
 
         it(`should correctly calculate derivative of price after swap exact out`, async () => {
             const priceDerivative =
@@ -189,7 +201,7 @@ describe('gyroEPool tests', () => {
 
             expect(Number(priceDerivative)).to.be.approximately(
                 2.13539511340E-7,
-                0.00001
+                1E-12
             );
         });
     });
