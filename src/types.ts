@@ -270,7 +270,7 @@ export interface TokenPriceService {
 }
 
 export interface PoolDataService {
-    getPools(): Promise<SubgraphPoolBase[]>;
+    getPools(query?: GraphQLArgs): Promise<SubgraphPoolBase[]>;
 }
 
 export type FundManagement = {
@@ -279,3 +279,23 @@ export type FundManagement = {
     fromInternalBalance: boolean;
     toInternalBalance: boolean;
 };
+
+type GraphQLFilterOperator = 'gt' | 'lt' | 'eq' | 'in' | 'not_in' | 'contains';
+
+type GraphQLFilter = {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    [operator in GraphQLFilterOperator]?: any;
+};
+
+export interface GraphQLArgs {
+    chainId?: number;
+    first?: number;
+    skip?: number;
+    nextToken?: string;
+    orderBy?: string;
+    orderDirection?: string;
+    block?: {
+        number?: number;
+    };
+    where?: Record<string, GraphQLFilter>;
+}
