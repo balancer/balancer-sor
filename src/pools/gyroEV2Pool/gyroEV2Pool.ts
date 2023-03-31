@@ -15,14 +15,12 @@ import {
     GyroEParams,
     DerivedGyroEParams,
     Vector2,
-    normalizeBalances,
     balancesFromTokenInOut,
-    valuesInOutFrom01,
     reduceFee,
     addFee,
     virtualOffset0,
     virtualOffset1,
-} from './gyroEV2Math/gyroEV2MathHelpers';
+} from '../gyroEPool/gyroEMath/gyroEMathHelpers';
 import { isSameAddress, safeParseFixed } from '../../utils';
 import { mulDown, divDown } from '../gyroHelpers/gyroSignedFixedPoint';
 import {
@@ -33,9 +31,15 @@ import {
     calcSpotPriceAfterSwapInGivenOut,
     calcDerivativePriceAfterSwapOutGivenIn,
     calcDerivativeSpotPriceAfterSwapInGivenOut,
-} from './gyroEV2Math/gyroEV2Math';
+} from '../gyroEPool/gyroEMath/gyroEMath';
 import { SWAP_LIMIT_FACTOR } from '../gyroHelpers/constants';
 import { universalNormalizedLiquidity } from '../liquidity';
+
+import { normalizeBalances } from './gyroEV2Math/gyroEV2MathHelpers';
+
+// Alias for code readability. Observe that `balancesFromTokenInOut()` is its own inverse.
+const valuesInOutFrom01 = balancesFromTokenInOut;
+
 
 export type GyroEPoolPairData = PoolPairBase & {
     tokenInIsToken0: boolean;

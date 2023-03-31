@@ -7,7 +7,7 @@ import { expect } from 'chai';
 import { GyroEV2Pool } from '../src/pools/gyroEV2Pool/gyroEV2Pool';
 import { SwapTypes } from '../src/types';
 import {bnum, ZERO} from '../src/utils/bignumber';
-import { reduceFee } from '../src/pools/gyroEV2Pool/gyroEV2Math/gyroEV2MathHelpers';
+import { reduceFee } from '../src/pools/gyroEPool/gyroEMath/gyroEMathHelpers';
 
 const TEST_POOL_PAIR_DATA: GyroEPoolPairData = {
     id: '123',
