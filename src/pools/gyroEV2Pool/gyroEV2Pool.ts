@@ -590,7 +590,8 @@ export class GyroEV2Pool implements PoolBase<GyroEPoolPairData> {
             invariant,
             poolPairData.swapFee
         );
-        const derivative = divDown(mulDown(derivativeScaled, tokenRateInOut[1].pow(2)), tokenRateInOut[0]);
+        const rateAdjFactor = divDown(mulDown(tokenRateInOut[1], tokenRateInOut[1]), tokenRateInOut[0]);
+        const derivative = mulDown(derivativeScaled, rateAdjFactor);
         return bnum(formatFixed(derivative, 18));
     }
 }
