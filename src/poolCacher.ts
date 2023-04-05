@@ -1,5 +1,10 @@
 import cloneDeep from 'lodash.clonedeep';
-import { PoolDataService, SubgraphPoolBase, SubgraphToken } from './types';
+import {
+    PoolDataService,
+    SubgraphPoolBase,
+    SubgraphToken,
+    GraphQLArgs,
+} from './types';
 
 export class PoolCacher {
     private pools: SubgraphPoolBase[] = [];
@@ -37,10 +42,13 @@ export class PoolCacher {
 
     /*
      * Saves updated pools data to internal cache.
+     *
+     * @param {GraphQLArgs} queryArgs - Optional query arguments to pass to pool data service.
+     * @returns {boolean} True if pools fetched successfully, False if not.
      */
-    public async fetchPools(): Promise<boolean> {
+    public async fetchPools(queryArgs?: GraphQLArgs): Promise<boolean> {
         try {
-            this.pools = await this.poolDataService.getPools();
+            this.pools = await this.poolDataService.getPools(queryArgs);
             this._finishedFetching = true;
             return true;
         } catch (err) {
