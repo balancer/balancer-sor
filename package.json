@@ -67,6 +67,7 @@
         "perf_hooks": "^0.0.1",
         "prettier": "^2.3.2",
         "pretty-quick": "^2.0.1",
+        "rimraf": "^5.0.0",
         "rollup": "^3.18.0",
         "rollup-plugin-analyzer": "^4.0.0",
         "rollup-plugin-dts": "^5.2.0",

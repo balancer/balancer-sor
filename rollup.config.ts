@@ -55,7 +55,7 @@ export default [
     {
         treeshake: { moduleSideEffects: false },
         input: 'src/index.ts',
-        output: [{ file: 'dist/esm/index.d.ts', format: 'es' }],
+        output: [{ file: 'dist/index.d.ts', format: 'es' }],
         plugins: [dts()],
     },
 ];
