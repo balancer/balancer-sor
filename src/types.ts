@@ -71,6 +71,7 @@ export interface SubgraphPoolBase {
     id: string;
     address: string;
     poolType: string;
+    poolTypeVersion?: number;
     swapFee: string;
     swapEnabled: boolean;
     totalShares: string;
@@ -198,7 +199,6 @@ export enum PoolFilter {
     Gyro2 = 'Gyro2',
     Gyro3 = 'Gyro3',
     GyroE = 'GyroE',
-    GyroEV2 = 'GyroEV2',
     // Linear Pools defined below all operate the same mathematically but have different factories and names in Subgraph
     AaveLinear = 'AaveLinear',
     Linear = 'Linear',

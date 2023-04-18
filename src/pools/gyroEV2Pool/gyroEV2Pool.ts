@@ -40,7 +40,6 @@ import { normalizeBalances } from './gyroEV2Math/gyroEV2MathHelpers';
 // Alias for code readability. Observe that `balancesFromTokenInOut()` is its own inverse.
 const valuesInOutFrom01 = balancesFromTokenInOut;
 
-
 export type GyroEPoolPairData = PoolPairBase & {
     tokenInIsToken0: boolean;
 };
@@ -351,7 +350,10 @@ export class GyroEV2Pool implements PoolBase<GyroEPoolPairData> {
         };
         const inAmount = safeParseFixed(amount.toString(), 18);
         const inAmountLessFee = reduceFee(inAmount, poolPairData.swapFee);
-        const inAmountLessFeeScaled = mulDown(inAmountLessFee, tokenRateInOut[0]);
+        const inAmountLessFeeScaled = mulDown(
+            inAmountLessFee,
+            tokenRateInOut[0]
+        );
         const outAmountScaled = calcOutGivenIn(
             orderedNormalizedBalances,
             inAmountLessFeeScaled,
@@ -403,7 +405,10 @@ export class GyroEV2Pool implements PoolBase<GyroEPoolPairData> {
             this.derivedGyroEParams,
             invariant
         );
-        const inAmountLessFee = divDown(inAmountScaledLessFee, tokenRateInOut[0]);
+        const inAmountLessFee = divDown(
+            inAmountScaledLessFee,
+            tokenRateInOut[0]
+        );
         const inAmount = addFee(inAmountLessFee, poolPairData.swapFee);
         return bnum(formatFixed(inAmount, 18));
     }
@@ -450,7 +455,10 @@ export class GyroEV2Pool implements PoolBase<GyroEPoolPairData> {
         };
         const inAmount = safeParseFixed(amount.toString(), 18);
         const inAmountLessFee = reduceFee(inAmount, poolPairData.swapFee);
-        const inAmountLessFeeScaled = mulDown(inAmountLessFee, tokenRateInOut[0]);
+        const inAmountLessFeeScaled = mulDown(
+            inAmountLessFee,
+            tokenRateInOut[0]
+        );
         const newSpotPriceScaled = calcSpotPriceAfterSwapOutGivenIn(
             orderedNormalizedBalances,
             inAmountLessFeeScaled,
@@ -460,7 +468,10 @@ export class GyroEV2Pool implements PoolBase<GyroEPoolPairData> {
             invariant,
             poolPairData.swapFee
         );
-        const newSpotPrice = divDown(mulDown(newSpotPriceScaled, tokenRateInOut[1]), tokenRateInOut[0]);
+        const newSpotPrice = divDown(
+            mulDown(newSpotPriceScaled, tokenRateInOut[1]),
+            tokenRateInOut[0]
+        );
         return bnum(formatFixed(newSpotPrice, 18));
     }
 
@@ -503,7 +514,10 @@ export class GyroEV2Pool implements PoolBase<GyroEPoolPairData> {
             invariant,
             poolPairData.swapFee
         );
-        const newSpotPrice = divDown(mulDown(newSpotPriceScaled, tokenRateInOut[1]), tokenRateInOut[0]);
+        const newSpotPrice = divDown(
+            mulDown(newSpotPriceScaled, tokenRateInOut[1]),
+            tokenRateInOut[0]
+        );
         return bnum(formatFixed(newSpotPrice, 18));
     }
 
@@ -540,7 +554,10 @@ export class GyroEV2Pool implements PoolBase<GyroEPoolPairData> {
         const derivativeScaled = calcDerivativePriceAfterSwapOutGivenIn(
             [
                 orderedNormalizedBalances[0].add(
-                    reduceFee(mulDown(inAmount, tokenRateInOut[0]), poolPairData.swapFee)
+                    reduceFee(
+                        mulDown(inAmount, tokenRateInOut[0]),
+                        poolPairData.swapFee
+                    )
                 ),
                 orderedNormalizedBalances[1],
             ],
@@ -586,7 +603,9 @@ export class GyroEV2Pool implements PoolBase<GyroEPoolPairData> {
         const derivativeScaled = calcDerivativeSpotPriceAfterSwapInGivenOut(
             [
                 orderedNormalizedBalances[0],
-                orderedNormalizedBalances[1].sub(mulDown(outAmount, tokenRateInOut[1])),
+                orderedNormalizedBalances[1].sub(
+                    mulDown(outAmount, tokenRateInOut[1])
+                ),
             ],
             poolPairData.tokenInIsToken0,
             this.gyroEParams,
@@ -594,7 +613,10 @@ export class GyroEV2Pool implements PoolBase<GyroEPoolPairData> {
             invariant,
             poolPairData.swapFee
         );
-        const rateAdjFactor = divDown(mulDown(tokenRateInOut[1], tokenRateInOut[1]), tokenRateInOut[0]);
+        const rateAdjFactor = divDown(
+            mulDown(tokenRateInOut[1], tokenRateInOut[1]),
+            tokenRateInOut[0]
+        );
         const derivative = mulDown(derivativeScaled, rateAdjFactor);
         return bnum(formatFixed(derivative, 18));
     }

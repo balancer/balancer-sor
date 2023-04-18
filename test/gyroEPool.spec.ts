@@ -188,7 +188,7 @@ describe('gyroEPool tests', () => {
 
             expect(Number(priceDerivative)).to.be.approximately(
                 3.2030926701e-7,
-                1E-12
+                1e-12
             );
         });
     });

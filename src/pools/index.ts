@@ -78,10 +78,13 @@ export function parseNewPool(
             newPool = ComposableStablePool.fromPool(pool);
         else if (pool.poolType === 'Gyro2') newPool = Gyro2Pool.fromPool(pool);
         else if (pool.poolType === 'Gyro3') newPool = Gyro3Pool.fromPool(pool);
-        else if (pool.poolType === 'GyroE') newPool = GyroEPool.fromPool(pool);
-        else if (pool.poolType === 'GyroEV2')
-            newPool = GyroEV2Pool.fromPool(pool);
-        else if (pool.poolType === 'FX') newPool = FxPool.fromPool(pool);
+        else if (pool.poolType === 'GyroE') {
+            if (pool.poolTypeVersion === 2) {
+                newPool = GyroEV2Pool.fromPool(pool);
+            } else {
+                newPool = GyroEPool.fromPool(pool);
+            }
+        } else if (pool.poolType === 'FX') newPool = FxPool.fromPool(pool);
         else {
             console.error(
                 `Unknown pool type or type field missing: ${pool.poolType} ${pool.id}`

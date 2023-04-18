@@ -1,8 +1,6 @@
 import { BigNumber, parseFixed } from '@ethersproject/bignumber';
 import { WeiPerEther as ONE } from '@ethersproject/constants';
-import {
-    mulDown,
-} from '../../gyroHelpers/gyroSignedFixedPoint';
+import { mulDown } from '../../gyroHelpers/gyroSignedFixedPoint';
 
 export function normalizeBalances(
     balances: BigNumber[],

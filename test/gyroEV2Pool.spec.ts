@@ -2,11 +2,11 @@
 
 import { GyroEPoolPairData } from '../src/pools/gyroEV2Pool/gyroEV2Pool';
 import { WeiPerEther as ONE } from '@ethersproject/constants';
-import {BigNumber, formatFixed, parseFixed} from '@ethersproject/bignumber';
+import { BigNumber, formatFixed, parseFixed } from '@ethersproject/bignumber';
 import { expect } from 'chai';
 import { GyroEV2Pool } from '../src/pools/gyroEV2Pool/gyroEV2Pool';
 import { SwapTypes } from '../src/types';
-import {bnum, ZERO} from '../src/utils/bignumber';
+import { bnum } from '../src/utils/bignumber';
 import { reduceFee } from '../src/pools/gyroEPool/gyroEMath/gyroEMathHelpers';
 
 const TEST_POOL_PAIR_DATA: GyroEPoolPairData = {
@@ -174,8 +174,8 @@ describe('gyroEPool tests', () => {
                 );
 
             expect(Number(priceDerivative)).to.be.approximately(
-                1.03343127137E-7,
-                1E-12
+                1.03343127137e-7,
+                1e-12
             );
         });
 
@@ -187,10 +187,10 @@ describe('gyroEPool tests', () => {
                 );
 
             expect(Number(priceDerivative)).to.be.approximately(
-                1.17346314397E-7,
-                1E-12
+                1.17346314397e-7,
+                1e-12
             );
-        })
+        });
 
         it(`should correctly calculate derivative of price after swap exact out`, async () => {
             const priceDerivative =
@@ -200,8 +200,8 @@ describe('gyroEPool tests', () => {
                 );
 
             expect(Number(priceDerivative)).to.be.approximately(
-                2.13539511340E-7,
-                1E-12
+                2.1353951134e-7,
+                1e-12
             );
         });
     });
