@@ -234,7 +234,9 @@ export class FxPool implements PoolBase<FxPoolPairData> {
     ): OldBigNumber {
         try {
             return _exactTokenInForTokenOut(amount, poolPairData);
-        } catch {
+        } catch (err) {
+            console.log(`!!!!!!! HELP`);
+            console.log(err);
             return ZERO;
         }
     }

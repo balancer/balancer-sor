@@ -221,7 +221,8 @@ export const setUp = async (
     provider: JsonRpcProvider,
     pools: SubgraphPoolBase[],
     jsonRpcUrl: string,
-    blockNumber: number
+    blockNumber: number,
+    nativeAssetPriceInToken = '0'
 ): Promise<SOR> => {
     await provider.send('hardhat_reset', [
         {
@@ -245,7 +246,7 @@ export const setUp = async (
             // eslint-disable-next-line @typescript-eslint/no-unused-vars
             tokenAddress: string
         ): Promise<string> {
-            return '0';
+            return nativeAssetPriceInToken;
         }
     }
 
