@@ -187,7 +187,7 @@ export enum PoolFilter {
     Weighted = 'Weighted',
     Stable = 'Stable',
     MetaStable = 'MetaStable',
-    LBP = 'LiquidityBootstrapping',
+    LiquidityBootstrapping = 'LiquidityBootstrapping',
     Investment = 'Investment',
     Element = 'Element',
     StablePhantom = 'StablePhantom',
@@ -207,7 +207,7 @@ export enum PoolFilter {
     SiloLinear = 'SiloLinear',
     TetuLinear = 'TetuLinear',
     YearnLinear = 'YearnLinear',
-    FxPool = 'FX',
+    // FX = 'FX',
 }
 
 export interface PoolBase<D extends PoolPairBase = PoolPairBase> {
