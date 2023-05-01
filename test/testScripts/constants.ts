@@ -402,6 +402,16 @@ export const ADDRESSES = {
             decimals: 6,
             symbol: 'XSGD',
         },
+        WMATIC: {
+            address: '0x0d500b1d8e8ef31e21c99d1db9a6444d3adf1270',
+            decimals: 18,
+            symbol: 'WMATIC',
+        },
+        stMATIC: {
+            address: '0x3A58a54C066FdC0f2D55FC9C89F0415C92eBf3C4',
+            decimals: 18,
+            symbol: 'stMATIC',
+        },
     },
     [Network.ARBITRUM]: {
         WETH: {
