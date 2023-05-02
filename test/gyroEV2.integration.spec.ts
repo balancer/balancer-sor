@@ -1,40 +1,29 @@
 // yarn test:only test/gyroEV2.integration.spec.ts
 import dotenv from 'dotenv';
+import { expect } from 'chai';
 import { JsonRpcProvider } from '@ethersproject/providers';
+import { parseFixed } from '@ethersproject/bignumber';
+import { AddressZero } from '@ethersproject/constants';
+import { Vault__factory } from '@balancer-labs/typechain';
 import { bnum, SOR, SubgraphPoolBase, SwapTypes } from '../src';
 import { ADDRESSES, Network, vaultAddr } from './testScripts/constants';
-import { parseFixed } from '@ethersproject/bignumber';
-import { expect } from 'chai';
-import { Vault__factory } from '@balancer-labs/typechain';
-import { AddressZero } from '@ethersproject/constants';
 import { setUp } from './testScripts/utils';
-import { scale } from '../src/utils/bignumber';
-
-/*
- * Testing Notes:
- * - Run  node on terminal: npx hardhat node --tsconfig tsconfig.testing.json --fork https://polygon-rpc.com --fork-block-number 42173266
- */
-
-// accuracy test: https://app.warp.dev/block/bcbBMkR8Da96QHQ2phmHZN
 
 dotenv.config();
 
-let sor: SOR;
 const networkId = Network.POLYGON;
-const jsonRpcUrl = 'https://polygon-rpc.com';
-const rpcUrl = 'http://127.0.0.1:8545';
+const { ALCHEMY_URL_POLYGON: jsonRpcUrl } = process.env;
+const rpcUrl = 'http://127.0.0.1:8137';
 const provider = new JsonRpcProvider(rpcUrl, networkId);
 const blocknumber = 42173266;
 
-const inaccuracyLimit = 1e-14;
-
 const vault = Vault__factory.connect(vaultAddr, provider);
-const SWAP_AMOUNT_IN_NUMERAIRE = '0.1';
 
 const gyroEV2PoolWMATIC_stMATIC_POLYGON: SubgraphPoolBase = {
     id: '0xf0ad209e2e969eaaa8c882aac71f02d8a047d5c2000200000000000000000b49',
     address: '0xf0ad209e2e969eaaa8c882aac71f02d8a047d5c2',
     poolType: 'GyroE',
+    poolTypeVersion: 2,
     swapFee: '0.0002',
     swapEnabled: true,
     totalWeight: '0',
@@ -76,35 +65,47 @@ const gyroEV2PoolWMATIC_stMATIC_POLYGON: SubgraphPoolBase = {
 };
 
 describe('gyroEV2: WMATIC-stMATIC integration tests', () => {
-    context('test swaps vs queryBatchSwap', () => {
-        // Setup chain
-        before(async function () {
-            sor = await setUp(
-                networkId,
-                provider,
-                [gyroEV2PoolWMATIC_stMATIC_POLYGON],
-                jsonRpcUrl as string,
-                blocknumber
+    let sor: SOR;
+    const funds = {
+        sender: AddressZero,
+        recipient: AddressZero,
+        fromInternalBalance: false,
+        toInternalBalance: false,
+    };
+
+    // Setup chain
+    before(async function () {
+        sor = await setUp(
+            networkId,
+            provider,
+            [gyroEV2PoolWMATIC_stMATIC_POLYGON],
+            jsonRpcUrl as string,
+            blocknumber
+        );
+
+        await sor.fetchPools();
+    });
+    context('ExactIn', async () => {
+        const swapType = SwapTypes.SwapExactIn;
+
+        it('should return no swaps when above limit', async () => {
+            const tokenIn = ADDRESSES[Network.POLYGON].WMATIC.address;
+            const tokenOut = ADDRESSES[Network.POLYGON].stMATIC.address;
+            const swapAmount = parseFixed('33.33333333333333', 18);
+            const swapInfo = await sor.getSwaps(
+                tokenIn,
+                tokenOut,
+                swapType,
+                swapAmount
             );
 
-            await sor.fetchPools();
+            expect(swapInfo.swaps.length).to.eq(0);
+            expect(swapInfo.returnAmount.toString()).to.eq('0');
         });
-
-        const tokenIn = ADDRESSES[Network.POLYGON].WMATIC.address;
-        const tokenOut = ADDRESSES[Network.POLYGON].stMATIC.address;
-
-        const funds = {
-            sender: AddressZero,
-            recipient: AddressZero,
-            fromInternalBalance: false,
-            toInternalBalance: false,
-        };
-
-        it('ExactIn', async () => {
-            const swapType = SwapTypes.SwapExactIn;
-            // swapAmount is tokenIn, expect tokenOut
-            const swapAmount = parseFixed(SWAP_AMOUNT_IN_NUMERAIRE, 6);
-
+        it('token > LSD, getSwaps result should match queryBatchSwap', async () => {
+            const tokenIn = ADDRESSES[Network.POLYGON].WMATIC.address;
+            const tokenOut = ADDRESSES[Network.POLYGON].stMATIC.address;
+            const swapAmount = parseFixed('1.12345678', 18);
             const swapInfo = await sor.getSwaps(
                 tokenIn,
                 tokenOut,
@@ -122,19 +123,14 @@ describe('gyroEV2: WMATIC-stMATIC integration tests', () => {
             expect(queryResult[0].toString()).to.eq(
                 swapInfo.swapAmount.toString()
             );
-
-            expect(
-                bnum(queryResult[1].abs().toString()).toNumber()
-            ).to.be.closeTo(
-                bnum(swapInfo.returnAmount.toString()).toNumber(),
-                scale(bnum(inaccuracyLimit), 18).toNumber()
+            expect(bnum(queryResult[1].abs().toString()).toNumber()).to.eq(
+                bnum(swapInfo.returnAmount.toString()).toNumber()
             );
         });
-
-        it('ExactOut', async () => {
-            const swapType = SwapTypes.SwapExactOut;
-            // swapAmount is tokenOut, expect tokenIn
-            const swapAmount = parseFixed(SWAP_AMOUNT_IN_NUMERAIRE, 18);
+        it('LSD > token, getSwaps result should match queryBatchSwap', async () => {
+            const tokenIn = ADDRESSES[Network.POLYGON].stMATIC.address;
+            const tokenOut = ADDRESSES[Network.POLYGON].WMATIC.address;
+            const swapAmount = parseFixed('0.999', 18);
             const swapInfo = await sor.getSwaps(
                 tokenIn,
                 tokenOut,
@@ -149,11 +145,75 @@ describe('gyroEV2: WMATIC-stMATIC integration tests', () => {
                 funds
             );
 
-            expect(
-                bnum(queryResult[0].abs().toString()).toNumber()
-            ).to.be.closeTo(
-                bnum(swapInfo.returnAmount.toString()).toNumber(),
-                scale(bnum(inaccuracyLimit), 6).toNumber()
+            expect(queryResult[0].toString()).to.eq(
+                swapInfo.swapAmount.toString()
+            );
+            expect(bnum(queryResult[1].abs().toString()).toNumber()).to.eq(
+                bnum(swapInfo.returnAmount.toString()).toNumber()
+            );
+        });
+    });
+
+    context('ExactOut', async () => {
+        const swapType = SwapTypes.SwapExactOut;
+
+        it('should return no swaps when above limit', async () => {
+            const tokenIn = ADDRESSES[Network.POLYGON].WMATIC.address;
+            const tokenOut = ADDRESSES[Network.POLYGON].stMATIC.address;
+            const swapAmount = parseFixed('100', 18);
+            const swapInfo = await sor.getSwaps(
+                tokenIn,
+                tokenOut,
+                swapType,
+                swapAmount
+            );
+
+            expect(swapInfo.swaps.length).to.eq(0);
+            expect(swapInfo.returnAmount.toString()).to.eq('0');
+        });
+        it('token > LSD, getSwaps result should match queryBatchSwap', async () => {
+            const tokenIn = ADDRESSES[Network.POLYGON].WMATIC.address;
+            const tokenOut = ADDRESSES[Network.POLYGON].stMATIC.address;
+            const swapAmount = parseFixed('1.987654321', 18);
+            const swapInfo = await sor.getSwaps(
+                tokenIn,
+                tokenOut,
+                swapType,
+                swapAmount
+            );
+
+            const queryResult = await vault.callStatic.queryBatchSwap(
+                swapType,
+                swapInfo.swaps,
+                swapInfo.tokenAddresses,
+                funds
+            );
+            expect(bnum(queryResult[0].abs().toString()).toNumber()).to.eq(
+                bnum(swapInfo.returnAmount.toString()).toNumber()
+            );
+            expect(queryResult[1].abs().toString()).to.eq(
+                swapInfo.swapAmount.toString()
+            );
+        });
+        it('LSD > token, getSwaps result should match queryBatchSwap', async () => {
+            const tokenIn = ADDRESSES[Network.POLYGON].stMATIC.address;
+            const tokenOut = ADDRESSES[Network.POLYGON].WMATIC.address;
+            const swapAmount = parseFixed('0.999', 18);
+            const swapInfo = await sor.getSwaps(
+                tokenIn,
+                tokenOut,
+                swapType,
+                swapAmount
+            );
+
+            const queryResult = await vault.callStatic.queryBatchSwap(
+                swapType,
+                swapInfo.swaps,
+                swapInfo.tokenAddresses,
+                funds
+            );
+            expect(bnum(queryResult[0].abs().toString()).toNumber()).to.eq(
+                bnum(swapInfo.returnAmount.toString()).toNumber()
             );
             expect(queryResult[1].abs().toString()).to.eq(
                 swapInfo.swapAmount.toString()

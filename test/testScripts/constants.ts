@@ -141,7 +141,7 @@ export const SUBGRAPH_URLS = {
     [Network.GOERLI]:
         'https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-goerli-v2',
     [Network.POLYGON]:
-        'https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-polygon-v2',
+        'https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-polygon-v2-beta',
     [Network.ARBITRUM]: `https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-arbitrum-v2`,
     [Network.GNOSIS]: `https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-gnosis-chain-v2`,
 };
