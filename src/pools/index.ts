@@ -22,6 +22,7 @@ import {
     SwapTypes,
     PoolPairBase,
     PoolTypes,
+    PoolFilter,
 } from '../types';
 
 export function parseNewPool(
@@ -59,6 +60,11 @@ export function parseNewPool(
         | FxPool;
 
     try {
+        const isLinear = pool.poolType.toString().includes('Linear');
+        if (!isLinear && !(pool.poolType in PoolFilter)) {
+            console.error(`Unsupported pool type: ${pool.poolType} ${pool.id}`);
+            return undefined;
+        }
         if (pool.poolType === 'Weighted' || pool.poolType === 'Investment') {
             newPool = WeightedPool.fromPool(pool, false);
         } else if (pool.poolType === 'LiquidityBootstrapping') {
@@ -70,8 +76,7 @@ export function parseNewPool(
         } else if (pool.poolType === 'Element') {
             newPool = ElementPool.fromPool(pool);
             newPool.setCurrentBlockTimestamp(currentBlockTimestamp);
-        } else if (pool.poolType.toString().includes('Linear'))
-            newPool = LinearPool.fromPool(pool);
+        } else if (isLinear) newPool = LinearPool.fromPool(pool);
         else if (pool.poolType === 'StablePhantom')
             newPool = PhantomStablePool.fromPool(pool);
         else if (pool.poolType === 'ComposableStable')

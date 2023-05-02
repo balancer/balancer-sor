@@ -49,7 +49,7 @@ export async function getOnChainBalances(
     const subgraphPools: SubgraphPoolBase[] = [];
     subgraphPoolsOriginal.forEach((pool) => {
         if (!supportedPoolTypes.includes(pool.poolType)) {
-            console.error(`Unknown pool type: ${pool.poolType} ${pool.id}`);
+            console.error(`Unknown pool type OC: ${pool.poolType} ${pool.id}`);
             return;
         }
 
