@@ -323,94 +323,102 @@ export class GyroEV2Pool implements PoolBase<GyroEPoolPairData> {
         poolPairData: GyroEPoolPairData,
         amount: OldBigNumber
     ): OldBigNumber {
-        const tokenRateInOut = valuesInOutFrom01(
-            this.tokenRates[0],
-            this.tokenRates[1],
-            poolPairData.tokenInIsToken0
-        );
-        const normalizedBalances = normalizeBalances(
-            [poolPairData.balanceIn, poolPairData.balanceOut],
-            [poolPairData.decimalsIn, poolPairData.decimalsOut],
-            tokenRateInOut
-        );
-        const orderedNormalizedBalances = balancesFromTokenInOut(
-            normalizedBalances[0],
-            normalizedBalances[1],
-            poolPairData.tokenInIsToken0
-        );
-        const [currentInvariant, invErr] = calculateInvariantWithError(
-            orderedNormalizedBalances,
-            this.gyroEParams,
-            this.derivedGyroEParams
-        );
+        try {
+            const tokenRateInOut = valuesInOutFrom01(
+                this.tokenRates[0],
+                this.tokenRates[1],
+                poolPairData.tokenInIsToken0
+            );
+            const normalizedBalances = normalizeBalances(
+                [poolPairData.balanceIn, poolPairData.balanceOut],
+                [poolPairData.decimalsIn, poolPairData.decimalsOut],
+                tokenRateInOut
+            );
+            const orderedNormalizedBalances = balancesFromTokenInOut(
+                normalizedBalances[0],
+                normalizedBalances[1],
+                poolPairData.tokenInIsToken0
+            );
+            const [currentInvariant, invErr] = calculateInvariantWithError(
+                orderedNormalizedBalances,
+                this.gyroEParams,
+                this.derivedGyroEParams
+            );
 
-        const invariant: Vector2 = {
-            x: currentInvariant.add(invErr.mul(2)),
-            y: currentInvariant,
-        };
-        const inAmount = safeParseFixed(amount.toString(), 18);
-        const inAmountLessFee = reduceFee(inAmount, poolPairData.swapFee);
-        const inAmountLessFeeScaled = mulDown(
-            inAmountLessFee,
-            tokenRateInOut[0]
-        );
-        const outAmountScaled = calcOutGivenIn(
-            orderedNormalizedBalances,
-            inAmountLessFeeScaled,
-            poolPairData.tokenInIsToken0,
-            this.gyroEParams,
-            this.derivedGyroEParams,
-            invariant
-        );
-        const outAmount = divDown(outAmountScaled, tokenRateInOut[1]);
-        return bnum(formatFixed(outAmount, 18));
+            const invariant: Vector2 = {
+                x: currentInvariant.add(invErr.mul(2)),
+                y: currentInvariant,
+            };
+            const inAmount = safeParseFixed(amount.toString(), 18);
+            const inAmountLessFee = reduceFee(inAmount, poolPairData.swapFee);
+            const inAmountLessFeeScaled = mulDown(
+                inAmountLessFee,
+                tokenRateInOut[0]
+            );
+            const outAmountScaled = calcOutGivenIn(
+                orderedNormalizedBalances,
+                inAmountLessFeeScaled,
+                poolPairData.tokenInIsToken0,
+                this.gyroEParams,
+                this.derivedGyroEParams,
+                invariant
+            );
+            const outAmount = divDown(outAmountScaled, tokenRateInOut[1]);
+            return bnum(formatFixed(outAmount, 18));
+        } catch (err) {
+            return ZERO;
+        }
     }
 
     _tokenInForExactTokenOut(
         poolPairData: GyroEPoolPairData,
         amount: OldBigNumber
     ): OldBigNumber {
-        const tokenRateInOut = valuesInOutFrom01(
-            this.tokenRates[0],
-            this.tokenRates[1],
-            poolPairData.tokenInIsToken0
-        );
-        const normalizedBalances = normalizeBalances(
-            [poolPairData.balanceIn, poolPairData.balanceOut],
-            [poolPairData.decimalsIn, poolPairData.decimalsOut],
-            tokenRateInOut
-        );
-        const orderedNormalizedBalances = balancesFromTokenInOut(
-            normalizedBalances[0],
-            normalizedBalances[1],
-            poolPairData.tokenInIsToken0
-        );
-        const [currentInvariant, invErr] = calculateInvariantWithError(
-            orderedNormalizedBalances,
-            this.gyroEParams,
-            this.derivedGyroEParams
-        );
-        const invariant: Vector2 = {
-            x: currentInvariant.add(invErr.mul(2)),
-            y: currentInvariant,
-        };
-        const outAmount = safeParseFixed(amount.toString(), 18);
-        const outAmountScaled = mulDown(outAmount, tokenRateInOut[1]);
+        try {
+            const tokenRateInOut = valuesInOutFrom01(
+                this.tokenRates[0],
+                this.tokenRates[1],
+                poolPairData.tokenInIsToken0
+            );
+            const normalizedBalances = normalizeBalances(
+                [poolPairData.balanceIn, poolPairData.balanceOut],
+                [poolPairData.decimalsIn, poolPairData.decimalsOut],
+                tokenRateInOut
+            );
+            const orderedNormalizedBalances = balancesFromTokenInOut(
+                normalizedBalances[0],
+                normalizedBalances[1],
+                poolPairData.tokenInIsToken0
+            );
+            const [currentInvariant, invErr] = calculateInvariantWithError(
+                orderedNormalizedBalances,
+                this.gyroEParams,
+                this.derivedGyroEParams
+            );
+            const invariant: Vector2 = {
+                x: currentInvariant.add(invErr.mul(2)),
+                y: currentInvariant,
+            };
+            const outAmount = safeParseFixed(amount.toString(), 18);
+            const outAmountScaled = mulDown(outAmount, tokenRateInOut[1]);
 
-        const inAmountScaledLessFee = calcInGivenOut(
-            orderedNormalizedBalances,
-            outAmountScaled,
-            poolPairData.tokenInIsToken0,
-            this.gyroEParams,
-            this.derivedGyroEParams,
-            invariant
-        );
-        const inAmountLessFee = divDown(
-            inAmountScaledLessFee,
-            tokenRateInOut[0]
-        );
-        const inAmount = addFee(inAmountLessFee, poolPairData.swapFee);
-        return bnum(formatFixed(inAmount, 18));
+            const inAmountScaledLessFee = calcInGivenOut(
+                orderedNormalizedBalances,
+                outAmountScaled,
+                poolPairData.tokenInIsToken0,
+                this.gyroEParams,
+                this.derivedGyroEParams,
+                invariant
+            );
+            const inAmountLessFee = divDown(
+                inAmountScaledLessFee,
+                tokenRateInOut[0]
+            );
+            const inAmount = addFee(inAmountLessFee, poolPairData.swapFee);
+            return bnum(formatFixed(inAmount, 18));
+        } catch (err) {
+            return ZERO;
+        }
     }
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -429,195 +437,211 @@ export class GyroEV2Pool implements PoolBase<GyroEPoolPairData> {
         poolPairData: GyroEPoolPairData,
         amount: OldBigNumber
     ): OldBigNumber {
-        const tokenRateInOut = valuesInOutFrom01(
-            this.tokenRates[0],
-            this.tokenRates[1],
-            poolPairData.tokenInIsToken0
-        );
-        const normalizedBalances = normalizeBalances(
-            [poolPairData.balanceIn, poolPairData.balanceOut],
-            [poolPairData.decimalsIn, poolPairData.decimalsOut],
-            tokenRateInOut
-        );
-        const orderedNormalizedBalances = balancesFromTokenInOut(
-            normalizedBalances[0],
-            normalizedBalances[1],
-            poolPairData.tokenInIsToken0
-        );
-        const [currentInvariant, invErr] = calculateInvariantWithError(
-            orderedNormalizedBalances,
-            this.gyroEParams,
-            this.derivedGyroEParams
-        );
-        const invariant: Vector2 = {
-            x: currentInvariant.add(invErr.mul(2)),
-            y: currentInvariant,
-        };
-        const inAmount = safeParseFixed(amount.toString(), 18);
-        const inAmountLessFee = reduceFee(inAmount, poolPairData.swapFee);
-        const inAmountLessFeeScaled = mulDown(
-            inAmountLessFee,
-            tokenRateInOut[0]
-        );
-        const newSpotPriceScaled = calcSpotPriceAfterSwapOutGivenIn(
-            orderedNormalizedBalances,
-            inAmountLessFeeScaled,
-            poolPairData.tokenInIsToken0,
-            this.gyroEParams,
-            this.derivedGyroEParams,
-            invariant,
-            poolPairData.swapFee
-        );
-        const newSpotPrice = divDown(
-            mulDown(newSpotPriceScaled, tokenRateInOut[1]),
-            tokenRateInOut[0]
-        );
-        return bnum(formatFixed(newSpotPrice, 18));
+        try {
+            const tokenRateInOut = valuesInOutFrom01(
+                this.tokenRates[0],
+                this.tokenRates[1],
+                poolPairData.tokenInIsToken0
+            );
+            const normalizedBalances = normalizeBalances(
+                [poolPairData.balanceIn, poolPairData.balanceOut],
+                [poolPairData.decimalsIn, poolPairData.decimalsOut],
+                tokenRateInOut
+            );
+            const orderedNormalizedBalances = balancesFromTokenInOut(
+                normalizedBalances[0],
+                normalizedBalances[1],
+                poolPairData.tokenInIsToken0
+            );
+            const [currentInvariant, invErr] = calculateInvariantWithError(
+                orderedNormalizedBalances,
+                this.gyroEParams,
+                this.derivedGyroEParams
+            );
+            const invariant: Vector2 = {
+                x: currentInvariant.add(invErr.mul(2)),
+                y: currentInvariant,
+            };
+            const inAmount = safeParseFixed(amount.toString(), 18);
+            const inAmountLessFee = reduceFee(inAmount, poolPairData.swapFee);
+            const inAmountLessFeeScaled = mulDown(
+                inAmountLessFee,
+                tokenRateInOut[0]
+            );
+            const newSpotPriceScaled = calcSpotPriceAfterSwapOutGivenIn(
+                orderedNormalizedBalances,
+                inAmountLessFeeScaled,
+                poolPairData.tokenInIsToken0,
+                this.gyroEParams,
+                this.derivedGyroEParams,
+                invariant,
+                poolPairData.swapFee
+            );
+            const newSpotPrice = divDown(
+                mulDown(newSpotPriceScaled, tokenRateInOut[1]),
+                tokenRateInOut[0]
+            );
+            return bnum(formatFixed(newSpotPrice, 18));
+        } catch (err) {
+            return ZERO;
+        }
     }
 
     _spotPriceAfterSwapTokenInForExactTokenOut(
         poolPairData: GyroEPoolPairData,
         amount: OldBigNumber
     ): OldBigNumber {
-        const tokenRateInOut = valuesInOutFrom01(
-            this.tokenRates[0],
-            this.tokenRates[1],
-            poolPairData.tokenInIsToken0
-        );
-        const normalizedBalances = normalizeBalances(
-            [poolPairData.balanceIn, poolPairData.balanceOut],
-            [poolPairData.decimalsIn, poolPairData.decimalsOut],
-            tokenRateInOut
-        );
-        const orderedNormalizedBalances = balancesFromTokenInOut(
-            normalizedBalances[0],
-            normalizedBalances[1],
-            poolPairData.tokenInIsToken0
-        );
-        const [currentInvariant, invErr] = calculateInvariantWithError(
-            orderedNormalizedBalances,
-            this.gyroEParams,
-            this.derivedGyroEParams
-        );
-        const invariant: Vector2 = {
-            x: currentInvariant.add(invErr.mul(2)),
-            y: currentInvariant,
-        };
-        const outAmount = safeParseFixed(amount.toString(), 18);
-        const outAmountScaled = mulDown(outAmount, tokenRateInOut[1]);
-        const newSpotPriceScaled = calcSpotPriceAfterSwapInGivenOut(
-            orderedNormalizedBalances,
-            outAmountScaled,
-            poolPairData.tokenInIsToken0,
-            this.gyroEParams,
-            this.derivedGyroEParams,
-            invariant,
-            poolPairData.swapFee
-        );
-        const newSpotPrice = divDown(
-            mulDown(newSpotPriceScaled, tokenRateInOut[1]),
-            tokenRateInOut[0]
-        );
-        return bnum(formatFixed(newSpotPrice, 18));
+        try {
+            const tokenRateInOut = valuesInOutFrom01(
+                this.tokenRates[0],
+                this.tokenRates[1],
+                poolPairData.tokenInIsToken0
+            );
+            const normalizedBalances = normalizeBalances(
+                [poolPairData.balanceIn, poolPairData.balanceOut],
+                [poolPairData.decimalsIn, poolPairData.decimalsOut],
+                tokenRateInOut
+            );
+            const orderedNormalizedBalances = balancesFromTokenInOut(
+                normalizedBalances[0],
+                normalizedBalances[1],
+                poolPairData.tokenInIsToken0
+            );
+            const [currentInvariant, invErr] = calculateInvariantWithError(
+                orderedNormalizedBalances,
+                this.gyroEParams,
+                this.derivedGyroEParams
+            );
+            const invariant: Vector2 = {
+                x: currentInvariant.add(invErr.mul(2)),
+                y: currentInvariant,
+            };
+            const outAmount = safeParseFixed(amount.toString(), 18);
+            const outAmountScaled = mulDown(outAmount, tokenRateInOut[1]);
+            const newSpotPriceScaled = calcSpotPriceAfterSwapInGivenOut(
+                orderedNormalizedBalances,
+                outAmountScaled,
+                poolPairData.tokenInIsToken0,
+                this.gyroEParams,
+                this.derivedGyroEParams,
+                invariant,
+                poolPairData.swapFee
+            );
+            const newSpotPrice = divDown(
+                mulDown(newSpotPriceScaled, tokenRateInOut[1]),
+                tokenRateInOut[0]
+            );
+            return bnum(formatFixed(newSpotPrice, 18));
+        } catch (err) {
+            return ZERO;
+        }
     }
 
     _derivativeSpotPriceAfterSwapExactTokenInForTokenOut(
         poolPairData: GyroEPoolPairData,
         amount: OldBigNumber
     ): OldBigNumber {
-        const inAmount = safeParseFixed(amount.toString(), 18);
-        const tokenRateInOut = valuesInOutFrom01(
-            this.tokenRates[0],
-            this.tokenRates[1],
-            poolPairData.tokenInIsToken0
-        );
-        const normalizedBalances = normalizeBalances(
-            [poolPairData.balanceIn, poolPairData.balanceOut],
-            [poolPairData.decimalsIn, poolPairData.decimalsOut],
-            tokenRateInOut
-        );
-        const orderedNormalizedBalances = balancesFromTokenInOut(
-            normalizedBalances[0],
-            normalizedBalances[1],
-            poolPairData.tokenInIsToken0
-        );
-        const [currentInvariant, invErr] = calculateInvariantWithError(
-            orderedNormalizedBalances,
-            this.gyroEParams,
-            this.derivedGyroEParams
-        );
-        const invariant: Vector2 = {
-            x: currentInvariant.add(invErr.mul(2)),
-            y: currentInvariant,
-        };
+        try {
+            const inAmount = safeParseFixed(amount.toString(), 18);
+            const tokenRateInOut = valuesInOutFrom01(
+                this.tokenRates[0],
+                this.tokenRates[1],
+                poolPairData.tokenInIsToken0
+            );
+            const normalizedBalances = normalizeBalances(
+                [poolPairData.balanceIn, poolPairData.balanceOut],
+                [poolPairData.decimalsIn, poolPairData.decimalsOut],
+                tokenRateInOut
+            );
+            const orderedNormalizedBalances = balancesFromTokenInOut(
+                normalizedBalances[0],
+                normalizedBalances[1],
+                poolPairData.tokenInIsToken0
+            );
+            const [currentInvariant, invErr] = calculateInvariantWithError(
+                orderedNormalizedBalances,
+                this.gyroEParams,
+                this.derivedGyroEParams
+            );
+            const invariant: Vector2 = {
+                x: currentInvariant.add(invErr.mul(2)),
+                y: currentInvariant,
+            };
 
-        const derivativeScaled = calcDerivativePriceAfterSwapOutGivenIn(
-            [
-                orderedNormalizedBalances[0].add(
-                    reduceFee(
-                        mulDown(inAmount, tokenRateInOut[0]),
-                        poolPairData.swapFee
-                    )
-                ),
-                orderedNormalizedBalances[1],
-            ],
-            poolPairData.tokenInIsToken0,
-            this.gyroEParams,
-            this.derivedGyroEParams,
-            invariant,
-            poolPairData.swapFee
-        );
-        const derivative = mulDown(derivativeScaled, tokenRateInOut[1]);
-        return bnum(formatFixed(derivative, 18));
+            const derivativeScaled = calcDerivativePriceAfterSwapOutGivenIn(
+                [
+                    orderedNormalizedBalances[0].add(
+                        reduceFee(
+                            mulDown(inAmount, tokenRateInOut[0]),
+                            poolPairData.swapFee
+                        )
+                    ),
+                    orderedNormalizedBalances[1],
+                ],
+                poolPairData.tokenInIsToken0,
+                this.gyroEParams,
+                this.derivedGyroEParams,
+                invariant,
+                poolPairData.swapFee
+            );
+            const derivative = mulDown(derivativeScaled, tokenRateInOut[1]);
+            return bnum(formatFixed(derivative, 18));
+        } catch (err) {
+            return ZERO;
+        }
     }
 
     _derivativeSpotPriceAfterSwapTokenInForExactTokenOut(
         poolPairData: GyroEPoolPairData,
         amount: OldBigNumber
     ): OldBigNumber {
-        const tokenRateInOut = valuesInOutFrom01(
-            this.tokenRates[0],
-            this.tokenRates[1],
-            poolPairData.tokenInIsToken0
-        );
-        const normalizedBalances = normalizeBalances(
-            [poolPairData.balanceIn, poolPairData.balanceOut],
-            [poolPairData.decimalsIn, poolPairData.decimalsOut],
-            tokenRateInOut
-        );
-        const orderedNormalizedBalances = balancesFromTokenInOut(
-            normalizedBalances[0],
-            normalizedBalances[1],
-            poolPairData.tokenInIsToken0
-        );
-        const [currentInvariant, invErr] = calculateInvariantWithError(
-            orderedNormalizedBalances,
-            this.gyroEParams,
-            this.derivedGyroEParams
-        );
-        const invariant: Vector2 = {
-            x: currentInvariant.add(invErr.mul(2)),
-            y: currentInvariant,
-        };
-        const outAmount = safeParseFixed(amount.toString(), 18);
-        const derivativeScaled = calcDerivativeSpotPriceAfterSwapInGivenOut(
-            [
-                orderedNormalizedBalances[0],
-                orderedNormalizedBalances[1].sub(
-                    mulDown(outAmount, tokenRateInOut[1])
-                ),
-            ],
-            poolPairData.tokenInIsToken0,
-            this.gyroEParams,
-            this.derivedGyroEParams,
-            invariant,
-            poolPairData.swapFee
-        );
-        const rateAdjFactor = divDown(
-            mulDown(tokenRateInOut[1], tokenRateInOut[1]),
-            tokenRateInOut[0]
-        );
-        const derivative = mulDown(derivativeScaled, rateAdjFactor);
-        return bnum(formatFixed(derivative, 18));
+        try {
+            const tokenRateInOut = valuesInOutFrom01(
+                this.tokenRates[0],
+                this.tokenRates[1],
+                poolPairData.tokenInIsToken0
+            );
+            const normalizedBalances = normalizeBalances(
+                [poolPairData.balanceIn, poolPairData.balanceOut],
+                [poolPairData.decimalsIn, poolPairData.decimalsOut],
+                tokenRateInOut
+            );
+            const orderedNormalizedBalances = balancesFromTokenInOut(
+                normalizedBalances[0],
+                normalizedBalances[1],
+                poolPairData.tokenInIsToken0
+            );
+            const [currentInvariant, invErr] = calculateInvariantWithError(
+                orderedNormalizedBalances,
+                this.gyroEParams,
+                this.derivedGyroEParams
+            );
+            const invariant: Vector2 = {
+                x: currentInvariant.add(invErr.mul(2)),
+                y: currentInvariant,
+            };
+            const outAmount = safeParseFixed(amount.toString(), 18);
+            const derivativeScaled = calcDerivativeSpotPriceAfterSwapInGivenOut(
+                [
+                    orderedNormalizedBalances[0],
+                    orderedNormalizedBalances[1].sub(
+                        mulDown(outAmount, tokenRateInOut[1])
+                    ),
+                ],
+                poolPairData.tokenInIsToken0,
+                this.gyroEParams,
+                this.derivedGyroEParams,
+                invariant,
+                poolPairData.swapFee
+            );
+            const rateAdjFactor = divDown(
+                mulDown(tokenRateInOut[1], tokenRateInOut[1]),
+                tokenRateInOut[0]
+            );
+            const derivative = mulDown(derivativeScaled, rateAdjFactor);
+            return bnum(formatFixed(derivative, 18));
+        } catch (err) {
+            return ZERO;
+        }
     }
 }

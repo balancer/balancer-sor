@@ -151,7 +151,7 @@ export async function getOnChainBalances(
             );
             if (
                 pool.poolType.toString() === 'GyroE' &&
-                pool.poolTypeVersion == 2
+                pool.poolTypeVersion === 2
             ) {
                 multiPool.call(
                     `${pool.id}.tokenRates`,

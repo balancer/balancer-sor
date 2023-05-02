@@ -1,4 +1,4 @@
-// TS_NODE_PROJECT='tsconfig.testing.json' npx mocha -r ts-node/register test/gyroEPool.spec.ts
+// TS_NODE_PROJECT='tsconfig.testing.json' npx mocha -r ts-node/register test/gyroEV2Pool.spec.ts
 
 import { GyroEPoolPairData } from '../src/pools/gyroEV2Pool/gyroEV2Pool';
 import { WeiPerEther as ONE } from '@ethersproject/constants';
