@@ -1,7 +1,7 @@
 // yarn test:only test/xaveFxPool.integration.spec.ts
 import dotenv from 'dotenv';
 import { JsonRpcProvider } from '@ethersproject/providers';
-import { bnum, SOR, SubgraphPoolBase, SwapTypes } from '../src';
+import { bnum, PoolFilter, SOR, SubgraphPoolBase, SwapTypes } from '../src';
 import { ADDRESSES, Network, vaultAddr } from './testScripts/constants';
 import { parseFixed } from '@ethersproject/bignumber';
 import { expect } from 'chai';
@@ -73,6 +73,8 @@ const xaveFxPoolDAI_USDC_MAINNET: SubgraphPoolBase = {
     epsilon: '0.0015',
 };
 
+const test = 'FX' in PoolFilter;
+
 describe('xaveFxPool: DAI-USDC integration tests', () => {
     context('test swaps vs queryBatchSwap', () => {
         // Setup chain
@@ -98,7 +100,9 @@ describe('xaveFxPool: DAI-USDC integration tests', () => {
             toInternalBalance: false,
         };
 
-        it('ExactIn', async () => {
+        it('ExactIn', async function () {
+            if (!test) this.skip();
+
             const swapType = SwapTypes.SwapExactIn;
             // swapAmount is tokenIn, expect tokenOut
             const swapAmount = parseFixed(SWAP_AMOUNT_IN_NUMERAIRE, 6);
@@ -129,7 +133,9 @@ describe('xaveFxPool: DAI-USDC integration tests', () => {
             );
         });
 
-        it('ExactOut', async () => {
+        it('ExactOut', async function () {
+            if (!test) this.skip();
+
             const swapType = SwapTypes.SwapExactOut;
             // swapAmount is tokenOut, expect tokenIn
             const swapAmount = parseFixed(SWAP_AMOUNT_IN_NUMERAIRE, 18);
