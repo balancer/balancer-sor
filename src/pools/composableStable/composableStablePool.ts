@@ -183,9 +183,12 @@ export class ComposableStablePool extends PhantomStablePool {
     _calcTokensOutGivenExactBptIn(bptAmountIn: BigNumber): BigNumber[] {
         // balances and amounts must be normalized to 1e18 fixed point - e.g. 1USDC => 1e18 not 1e6
         // takes price rate into account
-        const balancesNormalised = this.tokens
-            .filter((t) => !isSameAddress(t.address, this.address))
-            .map((t) => normaliseBalance(t));
+        const tokensWithoutBpt = this.tokens.filter(
+            (t) => !isSameAddress(t.address, this.address)
+        );
+        const balancesNormalised = tokensWithoutBpt.map((t) =>
+            normaliseBalance(t)
+        );
         try {
             const amountsOutNormalised = _calcTokensOutGivenExactBptIn(
                 balancesNormalised,
@@ -194,7 +197,7 @@ export class ComposableStablePool extends PhantomStablePool {
             );
             // We want to return denormalised amounts. e.g. 1USDC => 1e6 not 1e18
             const amountsOut = amountsOutNormalised.map((a, i) =>
-                denormaliseAmount(a, this.tokens[i])
+                denormaliseAmount(a, tokensWithoutBpt[i])
             );
             return amountsOut.map((a) => BigNumber.from(a));
         } catch (err) {

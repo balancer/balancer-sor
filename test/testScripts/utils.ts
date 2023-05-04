@@ -359,7 +359,8 @@ export async function queryExit(
     provider: JsonRpcProvider,
     poolId: string,
     assets: string[],
-    bptIn: string
+    bptIn: string,
+    isComposablePool = false
 ): Promise<
     [BigNumber, BigNumber[]] & { bptIn: BigNumber; amountsOut: BigNumber[] }
 > {
@@ -367,7 +368,7 @@ export async function queryExit(
         ADDRESSES[provider.network.chainId].balancerHelpers,
         provider
     );
-    const EXACT_BPT_IN_FOR_TOKENS_OUT = 1; // Alternative is: BPT_IN_FOR_EXACT_TOKENS_OUT (No proportional)
+    const EXACT_BPT_IN_FOR_TOKENS_OUT = isComposablePool ? 2 : 1; // Alternative is: BPT_IN_FOR_EXACT_TOKENS_OUT (No proportional)
     const abi = ['uint256', 'uint256'];
 
     const data = [EXACT_BPT_IN_FOR_TOKENS_OUT, bptIn];

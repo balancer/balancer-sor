@@ -141,7 +141,7 @@ export const SUBGRAPH_URLS = {
     [Network.GOERLI]:
         'https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-goerli-v2',
     [Network.POLYGON]:
-        'https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-polygon-v2',
+        'https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-polygon-v2-beta',
     [Network.ARBITRUM]: `https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-arbitrum-v2`,
     [Network.GNOSIS]: `https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-gnosis-chain-v2`,
 };
@@ -290,6 +290,16 @@ export const ADDRESSES = {
             decimals: 18,
             symbol: 'bbtAPE',
         },
+        XSGD: {
+            address: '0x70e8dE73cE538DA2bEEd35d14187F6959a8ecA96'.toLowerCase(),
+            decimals: 18,
+            symbol: 'XSGD',
+        },
+        EURS: {
+            address: '0xdb25f211ab05b1c97d595516f45794528a807ad8',
+            decimals: 2,
+            symbol: 'EURS',
+        },
     },
     [Network.POLYGON]: {
         MATIC: {
@@ -386,6 +396,21 @@ export const ADDRESSES = {
             address: '0x491a4eb4f1fc3bff8e1d2fc856a6a46663ad556f',
             decimals: 4,
             symbol: 'BRZ',
+        },
+        XSGD: {
+            address: '0xdc3326e71d45186f113a2f448984ca0e8d201995',
+            decimals: 6,
+            symbol: 'XSGD',
+        },
+        WMATIC: {
+            address: '0x0d500b1d8e8ef31e21c99d1db9a6444d3adf1270',
+            decimals: 18,
+            symbol: 'WMATIC',
+        },
+        stMATIC: {
+            address: '0x3A58a54C066FdC0f2D55FC9C89F0415C92eBf3C4',
+            decimals: 18,
+            symbol: 'stMATIC',
         },
     },
     [Network.ARBITRUM]: {

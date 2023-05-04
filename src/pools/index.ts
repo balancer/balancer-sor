@@ -8,6 +8,8 @@ import { ComposableStablePool } from './composableStable/composableStablePool';
 import { Gyro2Pool } from './gyro2Pool/gyro2Pool';
 import { Gyro3Pool } from './gyro3Pool/gyro3Pool';
 import { GyroEPool } from './gyroEPool/gyroEPool';
+import { GyroEV2Pool } from './gyroEV2Pool/gyroEV2Pool';
+import { FxPool } from './xaveFxPool/fxPool';
 import {
     BigNumber as OldBigNumber,
     INFINITY,
@@ -20,6 +22,7 @@ import {
     SwapTypes,
     PoolPairBase,
     PoolTypes,
+    PoolFilter,
 } from '../types';
 
 export function parseNewPool(
@@ -36,6 +39,8 @@ export function parseNewPool(
     | Gyro2Pool
     | Gyro3Pool
     | GyroEPool
+    | GyroEV2Pool
+    | FxPool
     | undefined {
     // We're not interested in any pools which don't allow swapping
     if (!pool.swapEnabled) return undefined;
@@ -50,9 +55,16 @@ export function parseNewPool(
         | ComposableStablePool
         | Gyro2Pool
         | Gyro3Pool
-        | GyroEPool;
+        | GyroEPool
+        | GyroEV2Pool
+        | FxPool;
 
     try {
+        const isLinear = pool.poolType.toString().includes('Linear');
+        if (!isLinear && !(pool.poolType in PoolFilter)) {
+            console.error(`Unsupported pool type: ${pool.poolType} ${pool.id}`);
+            return undefined;
+        }
         if (pool.poolType === 'Weighted' || pool.poolType === 'Investment') {
             newPool = WeightedPool.fromPool(pool, false);
         } else if (pool.poolType === 'LiquidityBootstrapping') {
@@ -64,15 +76,20 @@ export function parseNewPool(
         } else if (pool.poolType === 'Element') {
             newPool = ElementPool.fromPool(pool);
             newPool.setCurrentBlockTimestamp(currentBlockTimestamp);
-        } else if (pool.poolType.toString().includes('Linear'))
-            newPool = LinearPool.fromPool(pool);
+        } else if (isLinear) newPool = LinearPool.fromPool(pool);
         else if (pool.poolType === 'StablePhantom')
             newPool = PhantomStablePool.fromPool(pool);
         else if (pool.poolType === 'ComposableStable')
             newPool = ComposableStablePool.fromPool(pool);
         else if (pool.poolType === 'Gyro2') newPool = Gyro2Pool.fromPool(pool);
         else if (pool.poolType === 'Gyro3') newPool = Gyro3Pool.fromPool(pool);
-        else if (pool.poolType === 'GyroE') newPool = GyroEPool.fromPool(pool);
+        else if (pool.poolType === 'GyroE') {
+            if (pool.poolTypeVersion === 2) {
+                newPool = GyroEV2Pool.fromPool(pool);
+            } else {
+                newPool = GyroEPool.fromPool(pool);
+            }
+        } else if (pool.poolType === 'FX') newPool = FxPool.fromPool(pool);
         else {
             console.error(
                 `Unknown pool type or type field missing: ${pool.poolType} ${pool.id}`

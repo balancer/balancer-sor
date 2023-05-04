@@ -30,6 +30,7 @@ export enum PoolTypes {
     Gyro2,
     Gyro3,
     GyroE,
+    Fx,
 }
 
 export interface SwapOptions {
@@ -70,6 +71,7 @@ export interface SubgraphPoolBase {
     id: string;
     address: string;
     poolType: string;
+    poolTypeVersion?: number;
     swapFee: string;
     swapEnabled: boolean;
     totalShares: string;
@@ -101,7 +103,7 @@ export interface SubgraphPoolBase {
     // Gyro3 specific field
     root3Alpha?: string;
 
-    // GyroE specific fields
+    // GyroE and GyroEV2 specific fields
     alpha?: string;
     beta?: string;
     c?: string;
@@ -116,6 +118,13 @@ export interface SubgraphPoolBase {
     w?: string;
     z?: string;
     dSq?: string;
+
+    // GyroEV2 specific fields
+    tokenRates?: string[];
+
+    // FxPool
+    delta?: string;
+    epsilon?: string;
 }
 
 export type SubgraphToken = {
@@ -125,6 +134,11 @@ export type SubgraphToken = {
     priceRate: string;
     // WeightedPool field
     weight: string | null;
+    token?: SubgraphTokenData;
+};
+
+export type SubgraphTokenData = {
+    latestFXPrice?: string;
 };
 
 export interface SwapV2 {
@@ -177,7 +191,7 @@ export enum PoolFilter {
     Weighted = 'Weighted',
     Stable = 'Stable',
     MetaStable = 'MetaStable',
-    LBP = 'LiquidityBootstrapping',
+    LiquidityBootstrapping = 'LiquidityBootstrapping',
     Investment = 'Investment',
     Element = 'Element',
     StablePhantom = 'StablePhantom',
@@ -197,6 +211,7 @@ export enum PoolFilter {
     SiloLinear = 'SiloLinear',
     TetuLinear = 'TetuLinear',
     YearnLinear = 'YearnLinear',
+    // FX = 'FX',
 }
 
 export interface PoolBase<D extends PoolPairBase = PoolPairBase> {
@@ -259,7 +274,7 @@ export interface TokenPriceService {
 }
 
 export interface PoolDataService {
-    getPools(): Promise<SubgraphPoolBase[]>;
+    getPools(query?: GraphQLArgs): Promise<SubgraphPoolBase[]>;
 }
 
 export type FundManagement = {
@@ -268,3 +283,23 @@ export type FundManagement = {
     fromInternalBalance: boolean;
     toInternalBalance: boolean;
 };
+
+type GraphQLFilterOperator = 'gt' | 'lt' | 'eq' | 'in' | 'not_in' | 'contains';
+
+type GraphQLFilter = {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    [operator in GraphQLFilterOperator]?: any;
+};
+
+export interface GraphQLArgs {
+    chainId?: number;
+    first?: number;
+    skip?: number;
+    nextToken?: string;
+    orderBy?: string;
+    orderDirection?: string;
+    block?: {
+        number?: number;
+    };
+    where?: Record<string, GraphQLFilter>;
+}

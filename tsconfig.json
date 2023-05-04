@@ -21,7 +21,9 @@
         "src/pools/weightedPool/weightedPoolAbi.json",
         "src/pools/elementPool/ConvergentCurvePool.json",
         "src/pools/linearPool/linearPoolAbi.json",
-        "src/pools/composableStable/ComposableStable.json"
+        "src/pools/composableStable/ComposableStable.json",
+        "src/pools/xaveFxPool/fxPoolAbi.json",
+        "src/pools/gyroEV2Pool/gyroEV2Abi.json"
     ],
     "files": ["hardhat.config.ts"]
 }
