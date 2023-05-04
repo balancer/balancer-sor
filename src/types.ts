@@ -71,6 +71,7 @@ export interface SubgraphPoolBase {
     id: string;
     address: string;
     poolType: string;
+    poolTypeVersion?: number;
     swapFee: string;
     swapEnabled: boolean;
     totalShares: string;
@@ -102,7 +103,7 @@ export interface SubgraphPoolBase {
     // Gyro3 specific field
     root3Alpha?: string;
 
-    // GyroE specific fields
+    // GyroE and GyroEV2 specific fields
     alpha?: string;
     beta?: string;
     c?: string;
@@ -117,6 +118,9 @@ export interface SubgraphPoolBase {
     w?: string;
     z?: string;
     dSq?: string;
+
+    // GyroEV2 specific fields
+    tokenRates?: string[];
 
     // FxPool
     delta?: string;

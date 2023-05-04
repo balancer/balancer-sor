@@ -8,6 +8,7 @@ import { ComposableStablePool } from './composableStable/composableStablePool';
 import { Gyro2Pool } from './gyro2Pool/gyro2Pool';
 import { Gyro3Pool } from './gyro3Pool/gyro3Pool';
 import { GyroEPool } from './gyroEPool/gyroEPool';
+import { GyroEV2Pool } from './gyroEV2Pool/gyroEV2Pool';
 import { FxPool } from './xaveFxPool/fxPool';
 import {
     BigNumber as OldBigNumber,
@@ -38,6 +39,7 @@ export function parseNewPool(
     | Gyro2Pool
     | Gyro3Pool
     | GyroEPool
+    | GyroEV2Pool
     | FxPool
     | undefined {
     // We're not interested in any pools which don't allow swapping
@@ -54,6 +56,7 @@ export function parseNewPool(
         | Gyro2Pool
         | Gyro3Pool
         | GyroEPool
+        | GyroEV2Pool
         | FxPool;
 
     try {
@@ -80,8 +83,13 @@ export function parseNewPool(
             newPool = ComposableStablePool.fromPool(pool);
         else if (pool.poolType === 'Gyro2') newPool = Gyro2Pool.fromPool(pool);
         else if (pool.poolType === 'Gyro3') newPool = Gyro3Pool.fromPool(pool);
-        else if (pool.poolType === 'GyroE') newPool = GyroEPool.fromPool(pool);
-        else if (pool.poolType === 'FX') newPool = FxPool.fromPool(pool);
+        else if (pool.poolType === 'GyroE') {
+            if (pool.poolTypeVersion === 2) {
+                newPool = GyroEV2Pool.fromPool(pool);
+            } else {
+                newPool = GyroEPool.fromPool(pool);
+            }
+        } else if (pool.poolType === 'FX') newPool = FxPool.fromPool(pool);
         else {
             console.error(
                 `Unknown pool type or type field missing: ${pool.poolType} ${pool.id}`
