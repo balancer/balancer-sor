@@ -39,6 +39,8 @@ const TEST_POOL_PAIR_DATA: GyroEPoolPairData = {
     tokenInIsToken0: true,
 };
 
+const maxDelta = '10000000000000';
+
 describe('gyroEMath tests', () => {
     const poolPairData = TEST_POOL_PAIR_DATA;
 
@@ -98,10 +100,8 @@ describe('gyroEMath tests', () => {
                 DERIVED_GYRO_E_PARAMS,
                 invariant
             );
-            expect(Number(formatFixed(a, 18))).to.be.approximately(
-                211.290746521816255142,
-                0.00001
-            );
+            const delta = a.sub('211290746521816255142').abs();
+            expect(delta.lt(maxDelta)).to.be.true;
         });
     });
 
@@ -128,10 +128,8 @@ describe('gyroEMath tests', () => {
                 DERIVED_GYRO_E_PARAMS,
                 invariant
             );
-            expect(Number(formatFixed(b, 18))).to.be.approximately(
-                65.500131431538418723,
-                0.00001
-            );
+            const delta = b.sub('65500131431538418723').abs();
+            expect(delta.lt(maxDelta)).to.be.true;
         });
     });
 });
