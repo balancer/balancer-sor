@@ -23,6 +23,7 @@ import {
     TokenPriceService,
     PoolDataService,
     SorConfig,
+    GraphQLArgs,
 } from './types';
 import { Zero } from '@ethersproject/constants';
 
@@ -69,8 +70,8 @@ export class SOR {
      * fetchPools Retrieves pools information and saves to internal pools cache.
      * @returns {boolean} True if pools fetched successfully, False if not.
      */
-    async fetchPools(): Promise<boolean> {
-        return this.poolCacher.fetchPools();
+    async fetchPools(queryArgs?: GraphQLArgs): Promise<boolean> {
+        return this.poolCacher.fetchPools(queryArgs);
     }
 
     /**
