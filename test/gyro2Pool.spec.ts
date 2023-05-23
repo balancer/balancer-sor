@@ -14,8 +14,6 @@ import testPools from './testData/gyro2Pools/gyro2TestPool.json';
 import { MockPoolDataService } from './lib/mockPoolDataService';
 import { mockTokenPriceService } from './lib/mockTokenPriceService';
 
-const maxDelta = bnum('0.00001');
-
 describe('Gyro2Pool tests USDC > DAI', () => {
     const testPool = cloneDeep(testPools).pools[0];
     const pool = Gyro2Pool.fromPool(testPool);
@@ -77,20 +75,20 @@ describe('Gyro2Pool tests USDC > DAI', () => {
             const normalizedLiquidity =
                 pool.getNormalizedLiquidity(poolPairData);
 
-            const delta = normalizedLiquidity
-                .minus(bnum('1116333.916257166990921337'))
-                .abs();
-            expect(delta.lt(maxDelta)).to.be.true;
+            expect(Number(normalizedLiquidity.toString())).to.be.approximately(
+                1116333.916257166990921337,
+                0.00001
+            );
         });
 
         it(`should correctly calculate normalized liquidity, DAI > USDC`, async () => {
             const normalizedLiquidity =
                 pool.getNormalizedLiquidity(poolPairData2);
 
-            const delta = normalizedLiquidity
-                .minus(bnum('1116217.358286598731855228'))
-                .abs();
-            expect(delta.lt(maxDelta)).to.be.true;
+            expect(Number(normalizedLiquidity.toString())).to.be.approximately(
+                1116217.358286598731855228,
+                0.00001
+            );
         });
     });
 
