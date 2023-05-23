@@ -87,8 +87,10 @@ describe('gyroEPool tests', () => {
                 poolPairData,
                 SwapTypes.SwapExactIn
             );
-            const delta = limitAmount.minus('236.323201823051507893').abs();
-            expect(delta.toNumber()).to.be.lessThan(0.00001);
+            expect(Number(limitAmount)).to.be.approximately(
+                236.323201823051507893,
+                0.00001
+            );
         });
 
         it(`should correctly calculate limit amount for swap exact out`, async () => {
@@ -107,8 +109,11 @@ describe('gyroEPool tests', () => {
                 poolPairData,
                 bnum('10')
             );
-            const delta = swapAmount.minus('4.231511373250766852').abs();
-            expect(delta.toNumber()).to.be.lessThan(0.00001);
+
+            expect(Number(swapAmount)).to.be.approximately(
+                4.231511373250766852,
+                0.00001
+            );
         });
 
         it(`should correctly calculate swap amount for swap exact out`, async () => {
@@ -124,8 +129,11 @@ describe('gyroEPool tests', () => {
                 ),
                 18
             );
-            const delta = bnum(reduced).minus('21.505324893272912024').abs();
-            expect(delta.toNumber()).to.be.lessThan(0.00001);
+
+            expect(Number(reduced)).to.be.approximately(
+                21.505324893272912024,
+                0.0001
+            );
         });
     });
 
@@ -136,8 +144,11 @@ describe('gyroEPool tests', () => {
                     poolPairData,
                     bnum('10')
                 );
-            const delta = priceAfterSwap.minus('2.363222355995745212').abs();
-            expect(delta.toNumber()).to.be.lessThan(0.00001);
+
+            expect(Number(priceAfterSwap)).to.be.approximately(
+                2.363222355995745212,
+                0.00001
+            );
         });
 
         it(`should correctly calculate price after swap exact out`, async () => {
@@ -146,8 +157,11 @@ describe('gyroEPool tests', () => {
                     poolPairData,
                     bnum('10')
                 );
-            const delta = priceAfterSwap.minus('2.363223669898799537').abs();
-            expect(delta.toNumber()).to.be.lessThan(0.00001);
+
+            expect(Number(priceAfterSwap)).to.be.approximately(
+                2.363223669898799537,
+                0.00001
+            );
         });
     });
 
