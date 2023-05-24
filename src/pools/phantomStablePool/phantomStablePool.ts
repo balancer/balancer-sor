@@ -258,7 +258,7 @@ export class PhantomStablePool implements PoolBase<PhantomStablePoolPairData> {
                 .mul(poolPairData.tokenInPriceRate)
                 .div(ONE);
 
-            let returnEvm: BigInt;
+            let returnEvm: bigint;
 
             if (poolPairData.pairType === PairTypes.TokenToBpt) {
                 const amountsInBigInt = Array(
@@ -320,7 +320,7 @@ export class PhantomStablePool implements PoolBase<PhantomStablePoolPairData> {
                 .mul(poolPairData.tokenOutPriceRate)
                 .div(ONE);
 
-            let returnEvm: BigInt;
+            let returnEvm: bigint;
 
             if (poolPairData.pairType === PairTypes.TokenToBpt) {
                 returnEvm = _calcTokenInGivenExactBptOut(
