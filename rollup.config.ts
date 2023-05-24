@@ -30,9 +30,19 @@ export default [
                 sourcemap: true,
                 dir: 'dist/esm',
                 preserveModules: true,
-                // preserveModulesRoot is needed to be compatible with nodeResolve plugin:
-                // https://github.com/rollup/rollup/issues/3684
+                // preserveModulesRoot and entryFileNames are needed to be compatible with nodeResolve plugin:
+                // https://github.com/rollup/rollup/issues/3684#issuecomment-1535836196
                 preserveModulesRoot: 'src',
+                entryFileNames: (chunkInfo) => {
+                    if (chunkInfo.name.includes('node_modules')) {
+                        return (
+                            chunkInfo.name.replace('node_modules', 'external') +
+                            '.js'
+                        );
+                    }
+
+                    return '[name].js';
+                },
             },
         ],
         plugins: [
