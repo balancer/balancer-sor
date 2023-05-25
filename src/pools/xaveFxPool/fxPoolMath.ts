@@ -1,6 +1,6 @@
 import { BigNumber as OldBigNumber, bnum, scale } from '../../utils/bignumber';
 import { FxPoolPairData } from './fxPool';
-import { formatFixed } from '@ethersproject/bignumber';
+import { BigNumber, formatFixed } from '@ethersproject/bignumber';
 
 // Constants
 export const CURVEMATH_MAX_DIFF = -0.000001000000000000024;
@@ -27,23 +27,23 @@ export enum CurveMathRevert {
 }
 
 interface ParsedFxPoolData {
-    alpha: number;
-    beta: number;
-    delta: number;
-    epsilon: number;
-    lambda: number;
-    baseTokenRate: number;
-    _oGLiq: number;
-    _nGLiq: number;
-    _oBals: number[];
-    _nBals: number[];
-    givenAmountInNumeraire: number;
+    alpha: OldBigNumber;
+    beta: OldBigNumber;
+    delta: OldBigNumber;
+    epsilon: OldBigNumber;
+    lambda: OldBigNumber;
+    baseTokenRate: OldBigNumber;
+    _oGLiq: OldBigNumber;
+    _nGLiq: OldBigNumber;
+    _oBals: OldBigNumber[];
+    _nBals: OldBigNumber[];
+    givenAmountInNumeraire: OldBigNumber;
 }
 
 interface ReservesInNumeraire {
-    tokenInReservesInNumeraire: number;
-    tokenOutReservesInNumeraire: number;
-    _oGLiq: number;
+    tokenInReservesInNumeraire: OldBigNumber;
+    tokenOutReservesInNumeraire: OldBigNumber;
+    _oGLiq: OldBigNumber;
 }
 
 const isUSDC = (address: string) => {
@@ -60,7 +60,7 @@ const isUSDC = (address: string) => {
 const calculateGivenAmountInNumeraire = (
     isOriginSwap: boolean,
     poolPairData: FxPoolPairData,
-    amount: number
+    amount: OldBigNumber
 ) => {
     let calculatedNumeraireAmount;
 
@@ -68,13 +68,13 @@ const calculateGivenAmountInNumeraire = (
         // tokenIn is given
         calculatedNumeraireAmount = viewNumeraireAmount(
             amount,
-            poolPairData.tokenInLatestFXPrice.toNumber()
+            poolPairData.tokenInLatestFXPrice
         );
     } else {
         // tokenOut is given
         calculatedNumeraireAmount = viewNumeraireAmount(
             amount,
-            poolPairData.tokenOutLatestFXPrice.toNumber()
+            poolPairData.tokenOutLatestFXPrice
         );
     }
 
@@ -83,14 +83,23 @@ const calculateGivenAmountInNumeraire = (
 
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 export const convertToNumber = (
-    amount: number,
+    amount: OldBigNumber,
     baseDecimal: number | string
-) => {
+): OldBigNumber => {
     if (typeof baseDecimal === 'string') {
-        return Number(bnum(amount).div(bnum(ONE_ETHER)));
+        return amount.div(bnum(ONE_ETHER));
     } else {
-        return amount / baseDecimal;
+        return amount.div(baseDecimal);
     }
+};
+
+/**
+ * Convert from an Ethersjs BigNumber to a bignumber.js BigNumber
+ * @param amount BigNumber
+ * @returns OldBigNumber
+ */
+const EthersBNToOldBn = (amount: BigNumber): OldBigNumber => {
+    return bnum(amount.toString());
 };
 
 export const poolBalancesToNumeraire = (
@@ -101,31 +110,31 @@ export const poolBalancesToNumeraire = (
     if (isUSDC(poolPairData.tokenIn)) {
         tokenInNumeraire = convertToNumber(
             viewNumeraireAmount(
-                Number(poolPairData.balanceIn),
-                poolPairData.tokenInLatestFXPrice.toNumber()
+                EthersBNToOldBn(poolPairData.balanceIn),
+                poolPairData.tokenInLatestFXPrice
             ),
             getBaseDecimals(poolPairData.decimalsIn)
         );
         tokenOutNumeraire = convertToNumber(
             viewNumeraireAmount(
-                Number(poolPairData.balanceOut),
-                poolPairData.tokenOutLatestFXPrice.toNumber()
+                EthersBNToOldBn(poolPairData.balanceOut),
+                poolPairData.tokenOutLatestFXPrice
             ),
             getBaseDecimals(poolPairData.decimalsOut)
         );
     } else {
         tokenInNumeraire = convertToNumber(
             viewNumeraireAmount(
-                Number(poolPairData.balanceOut),
-                poolPairData.tokenOutLatestFXPrice.toNumber()
+                EthersBNToOldBn(poolPairData.balanceOut),
+                poolPairData.tokenOutLatestFXPrice
             ),
             getBaseDecimals(poolPairData.decimalsOut)
         );
 
         tokenOutNumeraire = convertToNumber(
             viewNumeraireAmount(
-                Number(poolPairData.balanceIn),
-                poolPairData.tokenInLatestFXPrice.toNumber()
+                EthersBNToOldBn(poolPairData.balanceIn),
+                poolPairData.tokenInLatestFXPrice
             ),
             getBaseDecimals(poolPairData.decimalsIn)
         );
@@ -134,7 +143,7 @@ export const poolBalancesToNumeraire = (
     return {
         tokenInReservesInNumeraire: tokenInNumeraire,
         tokenOutReservesInNumeraire: tokenOutNumeraire,
-        _oGLiq: tokenInNumeraire + tokenOutNumeraire,
+        _oGLiq: tokenInNumeraire.plus(tokenOutNumeraire),
     };
 };
 // everything is in order of USDC, base token
@@ -147,15 +156,15 @@ const getParsedFxPoolData = (
     const baseReserves = isUSDC(poolPairData.tokenIn)
         ? convertToNumber(
               viewNumeraireAmount(
-                  Number(poolPairData.balanceOut),
-                  poolPairData.tokenOutLatestFXPrice.toNumber()
+                  EthersBNToOldBn(poolPairData.balanceOut),
+                  poolPairData.tokenOutLatestFXPrice
               ),
               getBaseDecimals(poolPairData.decimalsOut)
           )
         : convertToNumber(
               viewNumeraireAmount(
-                  Number(poolPairData.balanceIn),
-                  poolPairData.tokenInLatestFXPrice.toNumber()
+                  EthersBNToOldBn(poolPairData.balanceIn),
+                  poolPairData.tokenInLatestFXPrice
               ),
               getBaseDecimals(poolPairData.decimalsIn)
           );
@@ -164,49 +173,49 @@ const getParsedFxPoolData = (
     const usdcReserves = isUSDC(poolPairData.tokenIn)
         ? convertToNumber(
               viewNumeraireAmount(
-                  Number(poolPairData.balanceIn),
-                  poolPairData.tokenInLatestFXPrice.toNumber()
+                  EthersBNToOldBn(poolPairData.balanceIn),
+                  poolPairData.tokenInLatestFXPrice
               ),
               getBaseDecimals(poolPairData.decimalsIn)
           )
         : convertToNumber(
               viewNumeraireAmount(
-                  Number(poolPairData.balanceOut),
-                  poolPairData.tokenOutLatestFXPrice.toNumber()
+                  EthersBNToOldBn(poolPairData.balanceOut),
+                  poolPairData.tokenOutLatestFXPrice
               ),
               getBaseDecimals(poolPairData.decimalsOut)
           );
 
     // rate is converted from chainlink to the actual rate in decimals
     const baseTokenRate = isUSDC(poolPairData.tokenIn)
-        ? poolPairData.tokenOutLatestFXPrice.toNumber()
-        : poolPairData.tokenInLatestFXPrice.toNumber();
+        ? poolPairData.tokenOutLatestFXPrice
+        : poolPairData.tokenInLatestFXPrice;
 
     // given amount in or out converted to numeraire
     const givenAmountInNumeraire = calculateGivenAmountInNumeraire(
         isOriginSwap,
         poolPairData,
-        Number(amount.toString())
+        amount
     );
 
     return {
-        alpha: Number(formatFixed(poolPairData.alpha, 18)),
-        beta: Number(formatFixed(poolPairData.beta, 18)),
-        delta: Number(formatFixed(poolPairData.delta, 18)),
-        epsilon: Number(formatFixed(poolPairData.epsilon, 18)),
-        lambda: Number(formatFixed(poolPairData.lambda, 18)),
+        alpha: bnum(formatFixed(poolPairData.alpha, 18)),
+        beta: bnum(formatFixed(poolPairData.beta, 18)),
+        delta: bnum(formatFixed(poolPairData.delta, 18)),
+        epsilon: bnum(formatFixed(poolPairData.epsilon, 18)),
+        lambda: bnum(formatFixed(poolPairData.lambda, 18)),
         baseTokenRate: baseTokenRate,
-        _oGLiq: baseReserves + usdcReserves,
-        _nGLiq: baseReserves + usdcReserves,
+        _oGLiq: baseReserves.plus(usdcReserves),
+        _nGLiq: baseReserves.plus(usdcReserves),
         _oBals: [usdcReserves, baseReserves],
         _nBals: isUSDC(poolPairData.tokenIn)
             ? [
-                  usdcReserves + givenAmountInNumeraire,
-                  baseReserves - givenAmountInNumeraire,
+                  usdcReserves.plus(givenAmountInNumeraire),
+                  baseReserves.minus(givenAmountInNumeraire),
               ]
             : [
-                  usdcReserves - givenAmountInNumeraire,
-                  baseReserves + givenAmountInNumeraire,
+                  usdcReserves.minus(givenAmountInNumeraire),
+                  baseReserves.plus(givenAmountInNumeraire),
               ],
 
         givenAmountInNumeraire: givenAmountInNumeraire,
@@ -237,55 +246,61 @@ export const getBaseDecimals = (decimals: number) => {
 
 // Base Assimilator Functions
 // calculations are from the BaseToUsdAssimilator
-export const viewRawAmount = (_amount: number, rate: number): OldBigNumber => {
-    return bnum(_amount / rate);
+export const viewRawAmount = (
+    _amount: OldBigNumber,
+    rate: OldBigNumber
+): OldBigNumber => {
+    return _amount.div(rate);
 };
 
-const viewNumeraireAmount = (_amount: number, rate: number): number => {
-    return _amount * rate;
+const viewNumeraireAmount = (
+    _amount: OldBigNumber,
+    rate: OldBigNumber
+): OldBigNumber => {
+    return _amount.times(rate);
 };
 
 // Curve Math
 // calculations are from CurveMath.sol
 const calculateMicroFee = (
-    _bal: number,
-    _ideal: number,
-    _beta: number,
-    _delta: number
-): number => {
+    _bal: OldBigNumber,
+    _ideal: OldBigNumber,
+    _beta: OldBigNumber,
+    _delta: OldBigNumber
+): OldBigNumber => {
     let _threshold, _feeMargin;
-    let fee_ = 0;
+    let fee_ = bnum(0);
 
-    if (_bal < _ideal) {
-        _threshold = _ideal * (1 - _beta); // CURVEMATH ONE
+    if (_bal.lt(_ideal)) {
+        _threshold = _ideal.times(bnum(1).minus(_beta)); // CURVEMATH ONE
 
-        if (_bal < _threshold) {
-            _feeMargin = _threshold - _bal;
-            fee_ = _feeMargin / _ideal;
-            fee_ = fee_ * _delta;
+        if (_bal.lt(_threshold)) {
+            _feeMargin = _threshold.minus(_bal);
+            fee_ = bnum(_feeMargin).div(_ideal);
+            fee_ = fee_.times(_delta);
 
-            if (fee_ > CURVEMATH_MAX) {
-                fee_ = CURVEMATH_MAX;
+            if (fee_.gt(CURVEMATH_MAX)) {
+                fee_ = bnum(CURVEMATH_MAX);
             }
 
-            fee_ = fee_ * _feeMargin;
+            fee_ = fee_.times(_feeMargin);
         } else {
-            fee_ = 0;
+            fee_ = bnum(0);
         }
     } else {
-        _threshold = _ideal * (1 + _beta); // CURVEMATH_ONE
+        _threshold = _ideal.times(bnum(1).plus(_beta)); // CURVEMATH_ONE
 
-        if (_bal > _threshold) {
-            _feeMargin = _bal - _threshold;
+        if (_bal.gt(_threshold)) {
+            _feeMargin = _bal.minus(_threshold);
 
-            fee_ = _feeMargin / _ideal;
-            fee_ = fee_ * _delta;
+            fee_ = bnum(_feeMargin).div(_ideal);
+            fee_ = bnum(fee_).times(_delta);
 
-            if (fee_ > CURVEMATH_MAX) fee_ = CURVEMATH_MAX;
+            if (fee_.gt(CURVEMATH_MAX)) fee_ = bnum(CURVEMATH_MAX);
 
-            fee_ = fee_ * _feeMargin;
+            fee_ = fee_.times(_feeMargin);
         } else {
-            fee_ = 0;
+            fee_ = bnum(0);
         }
     }
 
@@ -293,20 +308,20 @@ const calculateMicroFee = (
 };
 
 const calculateFee = (
-    _gLiq: number,
-    _bals: number[],
-    _beta: number,
-    _delta: number,
-    _weights: number[]
-): number => {
+    _gLiq: OldBigNumber,
+    _bals: OldBigNumber[],
+    _beta: OldBigNumber,
+    _delta: OldBigNumber,
+    _weights: OldBigNumber[]
+): OldBigNumber => {
     const _length = _bals.length;
-    let psi_ = 0;
+    let psi_ = bnum(0);
 
     for (let i = 0; i < _length; i++) {
-        const _ideal = _gLiq * _weights[i];
+        const _ideal = _gLiq.times(_weights[i]);
 
         // keep away from wei values like how the contract do it
-        psi_ = psi_ + calculateMicroFee(_bals[i], _ideal, _beta, _delta);
+        psi_ = psi_.plus(calculateMicroFee(_bals[i], _ideal, _beta, _delta));
     }
 
     return psi_;
@@ -314,45 +329,45 @@ const calculateFee = (
 
 // return outputAmount and ngliq
 const calculateTrade = (
-    _oGLiq: number,
-    _nGLiq: number,
-    _oBals: number[],
-    _nBals: number[],
-    _inputAmt: number,
+    _oGLiq: OldBigNumber,
+    _nGLiq: OldBigNumber,
+    _oBals: OldBigNumber[],
+    _nBals: OldBigNumber[],
+    _inputAmt: OldBigNumber,
     _outputIndex: number,
     poolPairData: ParsedFxPoolData
-): [number, number] => {
+): [OldBigNumber, OldBigNumber] => {
     let outputAmt_;
-    const _weights: number[] = [0.5, 0.5]; // const for now since all weights are 0.5
+    const _weights: OldBigNumber[] = [bnum('0.5'), bnum('0.5')]; // const for now since all weights are 0.5
 
     const alpha = poolPairData.alpha;
     const beta = poolPairData.beta;
     const delta = poolPairData.delta;
     const lambda = poolPairData.lambda;
 
-    outputAmt_ = -_inputAmt;
+    outputAmt_ = _inputAmt.times(-1);
 
     const _omega = calculateFee(_oGLiq, _oBals, beta, delta, _weights);
 
-    let _psi: number;
+    let _psi: OldBigNumber;
 
     for (let i = 0; i < 32; i++) {
         _psi = calculateFee(_nGLiq, _nBals, beta, delta, _weights);
 
         const prevAmount = outputAmt_;
 
-        outputAmt_ =
-            _omega < _psi
-                ? -(_inputAmt + (_omega - _psi))
-                : -(_inputAmt + lambda * (_omega - _psi));
+        outputAmt_ = _omega.lt(_psi)
+            ? _inputAmt.plus(_omega.minus(_psi)).times(-1)
+            : _inputAmt.plus(lambda.times(_omega.minus(_psi))).times(-1);
 
         if (
-            outputAmt_ / ONE_TO_THE_THIRTEEN_NUM ==
-            prevAmount / ONE_TO_THE_THIRTEEN_NUM
+            outputAmt_
+                .div(ONE_TO_THE_THIRTEEN_NUM)
+                .eq(prevAmount.div(ONE_TO_THE_THIRTEEN_NUM))
         ) {
-            _nGLiq = _oGLiq + _inputAmt + outputAmt_;
+            _nGLiq = _oGLiq.plus(_inputAmt).plus(outputAmt_);
 
-            _nBals[_outputIndex] = _oBals[_outputIndex] + outputAmt_;
+            _nBals[_outputIndex] = _oBals[_outputIndex].plus(outputAmt_);
 
             // throws error already, removed if statement
             enforceSwapInvariant(_oGLiq, _omega, _nGLiq, _psi);
@@ -360,9 +375,9 @@ const calculateTrade = (
 
             return [outputAmt_, _nGLiq];
         } else {
-            _nGLiq = _oGLiq + _inputAmt + outputAmt_;
+            _nGLiq = _oGLiq.plus(_inputAmt).plus(outputAmt_);
 
-            _nBals[_outputIndex] = _oBals[_outputIndex] + outputAmt_;
+            _nBals[_outputIndex] = _oBals[_outputIndex].plus(outputAmt_);
         }
     }
 
@@ -371,47 +386,47 @@ const calculateTrade = (
 
 // invariant enforcement
 const enforceHalts = (
-    _oGLiq: number,
-    _nGLiq: number,
-    _oBals: number[],
-    _nBals: number[],
-    _weights: number[],
-    alpha: number
+    _oGLiq: OldBigNumber,
+    _nGLiq: OldBigNumber,
+    _oBals: OldBigNumber[],
+    _nBals: OldBigNumber[],
+    _weights: OldBigNumber[],
+    alpha: OldBigNumber
 ): boolean => {
     const _length = _nBals.length;
     const _alpha = alpha;
 
     for (let i = 0; i < _length; i++) {
-        const _nIdeal = _nGLiq * _weights[i];
+        const _nIdeal = _nGLiq.times(_weights[i]);
 
-        if (_nBals[i] > _nIdeal) {
-            const _upperAlpha = 1 + _alpha;
+        if (_nBals[i].gt(_nIdeal)) {
+            const _upperAlpha = _alpha.plus(1);
 
-            const _nHalt = _nIdeal * _upperAlpha;
+            const _nHalt = _nIdeal.times(_upperAlpha);
 
-            if (_nBals[i] > _nHalt) {
-                const _oHalt = _oGLiq * _weights[i] * _upperAlpha;
+            if (_nBals[i].gt(_nHalt)) {
+                const _oHalt = _oGLiq.times(_weights[i]).times(_upperAlpha);
 
-                if (_oBals[i] < _oHalt) {
+                if (_oBals[i].lt(_oHalt)) {
                     throw new Error(CurveMathRevert.UpperHalt);
                 }
-                if (_nBals[i] - _nHalt > _oBals[i] - _oHalt) {
+                if (_nBals[i].minus(_nHalt).gt(_oBals[i].minus(_oHalt))) {
                     throw new Error(CurveMathRevert.UpperHalt);
                 }
             }
         } else {
-            const _lowerAlpha = 1 - _alpha;
+            const _lowerAlpha = bnum(1).minus(_alpha);
 
-            const _nHalt = _nIdeal * _lowerAlpha;
+            const _nHalt = _nIdeal.times(_lowerAlpha);
 
-            if (_nBals[i] < _nHalt) {
-                let _oHalt = _oGLiq * _weights[i];
-                _oHalt = _oHalt * _lowerAlpha;
+            if (_nBals[i].lt(_nHalt)) {
+                let _oHalt = _oGLiq.times(_weights[i]);
+                _oHalt = _oHalt.times(_lowerAlpha);
 
-                if (_oBals[i] > _oHalt) {
+                if (_oBals[i].gt(_oHalt)) {
                     throw new Error(CurveMathRevert.LowerHalt);
                 }
-                if (_nHalt - _nBals[i] > _oHalt - _oBals[i]) {
+                if (_nHalt.minus(_nBals[i]).gt(_oHalt.minus(_oBals[i]))) {
                     throw new Error(CurveMathRevert.LowerHalt);
                 }
             }
@@ -421,19 +436,19 @@ const enforceHalts = (
 };
 
 const enforceSwapInvariant = (
-    _oGLiq: number,
-    _omega: number,
-    _nGLiq: number,
-    _psi: number
+    _oGLiq: OldBigNumber,
+    _omega: OldBigNumber,
+    _nGLiq: OldBigNumber,
+    _psi: OldBigNumber
 ): boolean => {
-    const _nextUtil = _nGLiq - _psi;
+    const _nextUtil = _nGLiq.minus(_psi);
 
-    const _prevUtil = _oGLiq - _omega;
+    const _prevUtil = _oGLiq.minus(_omega);
 
-    const _diff = _nextUtil - _prevUtil;
+    const _diff = _nextUtil.minus(_prevUtil);
 
     // from int128 private constant MAX_DIFF = -0x10C6F7A0B5EE converted to plain decimals
-    if (0 < _diff || _diff >= CURVEMATH_MAX_DIFF) {
+    if (_diff.gt(0) || _diff.gte(CURVEMATH_MAX_DIFF)) {
         return true;
     } else {
         throw new Error(CurveMathRevert.SwapInvariantViolation);
@@ -454,7 +469,7 @@ export function _exactTokenInForTokenOut(
     if (poolPairData.tokenIn === poolPairData.tokenOut) {
         return viewRawAmount(
             targetAmountInNumeraire,
-            poolPairData.tokenInLatestFXPrice.toNumber()
+            poolPairData.tokenInLatestFXPrice
         ); // must be the token out
     }
 
@@ -477,11 +492,11 @@ export function _exactTokenInForTokenOut(
         throw new Error(CurveMathRevert.CannotSwap);
     } else {
         const epsilon = parsedFxPoolData.epsilon;
-        const _amtWithFee = _amt[0] * (1 - epsilon); // fee retained by the pool
+        const _amtWithFee = _amt[0].times(bnum(1).minus(epsilon)); // fee retained by the pool
 
         return viewRawAmount(
-            Math.abs(_amtWithFee),
-            poolPairData.tokenOutLatestFXPrice.toNumber()
+            _amtWithFee.abs(),
+            poolPairData.tokenOutLatestFXPrice
         );
     }
 }
@@ -493,13 +508,14 @@ export function _tokenInForExactTokenOut(
 ): OldBigNumber {
     // const amountIn = scale(amount, poolPairData.decimalsOut);
     const parsedFxPoolData = getParsedFxPoolData(amount, poolPairData, false);
-    const targetAmountInNumeraire = -parsedFxPoolData.givenAmountInNumeraire;
+    const targetAmountInNumeraire =
+        parsedFxPoolData.givenAmountInNumeraire.times(-1);
 
     if (poolPairData.tokenIn === poolPairData.tokenOut) {
         viewRawAmount(
             // poolPairData.tokenOut as TokenSymbol,
             targetAmountInNumeraire,
-            poolPairData.tokenOutLatestFXPrice.toNumber()
+            poolPairData.tokenOutLatestFXPrice
         ); // must be the token out
     }
 
@@ -521,13 +537,13 @@ export function _tokenInForExactTokenOut(
     if (_amt === undefined) {
         throw new Error(CurveMathRevert.CannotSwap);
     } else {
-        const epsilon = Number(formatFixed(poolPairData.epsilon, 18));
+        const epsilon = bnum(formatFixed(poolPairData.epsilon, 18));
 
-        const _amtWithFee = _amt[0] * (1 + epsilon); // fee retained by the pool
+        const _amtWithFee = _amt[0].times(epsilon.plus(1)); // fee retained by the pool
 
         return viewRawAmount(
-            Math.abs(_amtWithFee),
-            poolPairData.tokenInLatestFXPrice.toNumber()
+            _amtWithFee.abs(),
+            poolPairData.tokenInLatestFXPrice
         ); // must be the token out
     }
 }
@@ -537,7 +553,7 @@ export const spotPriceBeforeSwap = (
     poolPairData: FxPoolPairData
 ): OldBigNumber => {
     // input amount 1 XSGD to get the output in USDC
-    const inputAmountInNumeraire = 1;
+    const inputAmountInNumeraire = bnum(1);
     const parsedFxPoolData = getParsedFxPoolData(amount, poolPairData, true);
 
     const _oGLiq = parsedFxPoolData._oGLiq;
@@ -550,17 +566,16 @@ export const spotPriceBeforeSwap = (
         _nGLiq, // _nGLiq
         _oBals, // _oBals
         _nBals, // _nBals
-        1, // input amount
+        bnum(1), // input amount
         0, // always output in USDC
         parsedFxPoolData
     );
 
-    return bnum(
-        ((Math.abs(outputAmountInNumeraire[0]) *
-            (1 - parsedFxPoolData.epsilon)) /
-            Math.abs(inputAmountInNumeraire)) *
-            parsedFxPoolData.baseTokenRate
-    );
+    return outputAmountInNumeraire[0]
+        .abs()
+        .times(bnum(1).minus(parsedFxPoolData.epsilon))
+        .div(inputAmountInNumeraire.abs())
+        .times(parsedFxPoolData.baseTokenRate);
 };
 
 // spot price after origin swap
@@ -592,9 +607,9 @@ export const _spotPriceAfterSwapExactTokenInForTokenOut = (
 
     const outputAmount = outputAfterTrade[0];
 
-    const maxBetaLimit: number = (1 + beta) * 0.5 * _oGLiq;
+    const maxBetaLimit = beta.plus(1).times(0.5).times(_oGLiq);
 
-    const minBetaLimit: number = (1 - beta) * 0.5 * _oGLiq;
+    const minBetaLimit = bnum(1).minus(beta).times(0.5).times(_oGLiq);
 
     if (isUSDC(poolPairData.tokenIn)) {
         // token[0] to token [1] in originswap
@@ -602,20 +617,27 @@ export const _spotPriceAfterSwapExactTokenInForTokenOut = (
 
         const oBals1after = _nBals[1];
 
-        if (oBals1after < minBetaLimit && oBals0after > maxBetaLimit) {
+        if (oBals1after.lt(minBetaLimit) && oBals0after.gt(maxBetaLimit)) {
             // returns 0 because  Math.abs(targetAmountInNumeraire)) * currentRate
             // used that function with a 0 amount to get a market spot price for the pool
             // which is used in front end display.
 
+            // return amount.isZero()
+            //     ? spotPriceBeforeSwap(amount, poolPairData)
+            //     : bnum(
+            //           (Math.abs(outputAmount * (bnum(1).minus(epsilon))) /
+            //               Math.abs(targetAmountInNumeraire)) *
+            //               currentRate
+            //       );
             return amount.isZero()
                 ? spotPriceBeforeSwap(amount, poolPairData)
-                : bnum(
-                      (Math.abs(outputAmount * (1 - epsilon)) /
-                          Math.abs(targetAmountInNumeraire)) *
-                          currentRate
-                  );
+                : outputAmount
+                      .times(bnum(1).minus(epsilon))
+                      .abs()
+                      .div(targetAmountInNumeraire.abs())
+                      .times(currentRate);
         } else {
-            return bnum(currentRate * (1 - epsilon));
+            return currentRate.times(bnum(1).minus(epsilon));
         }
     } else {
         // if usdc is tokenOut
@@ -624,17 +646,17 @@ export const _spotPriceAfterSwapExactTokenInForTokenOut = (
 
         const oBals1after = _nBals[0];
 
-        if (oBals1after < minBetaLimit && oBals0after > maxBetaLimit) {
+        if (oBals1after.lt(minBetaLimit) && oBals0after.gt(maxBetaLimit)) {
             if (amount.isZero())
                 return spotPriceBeforeSwap(amount, poolPairData);
 
-            const ratioOfOutputAndInput =
-                Math.abs(outputAmount * (1 - epsilon)) /
-                Math.abs(targetAmountInNumeraire);
-
-            return bnum(ratioOfOutputAndInput * currentRate);
+            const ratioOfOutputAndInput = outputAmount
+                .times(bnum(1).minus(epsilon))
+                .abs()
+                .div(targetAmountInNumeraire.abs());
+            return ratioOfOutputAndInput.times(currentRate);
         } else {
-            return bnum(currentRate * (1 - epsilon));
+            return currentRate.times(bnum(1).minus(epsilon));
         }
     }
 };
@@ -648,7 +670,8 @@ export const _spotPriceAfterSwapTokenInForExactTokenOut = (
 ): OldBigNumber => {
     const parsedFxPoolData = getParsedFxPoolData(amount, poolPairData, false);
 
-    const targetAmountInNumeraire = -parsedFxPoolData.givenAmountInNumeraire;
+    const targetAmountInNumeraire =
+        parsedFxPoolData.givenAmountInNumeraire.times(-1);
 
     const _oGLiq = parsedFxPoolData._oGLiq;
     const _nBals = parsedFxPoolData._nBals;
@@ -672,40 +695,38 @@ export const _spotPriceAfterSwapTokenInForExactTokenOut = (
 
     const outputAmount = outputAfterTrade[0];
 
-    const maxBetaLimit: number = (1 + beta) * 0.5 * _oGLiq;
+    const maxBetaLimit = beta.plus(1).times(0.5).times(_oGLiq);
 
-    const minBetaLimit: number = (1 - beta) * 0.5 * _oGLiq;
+    const minBetaLimit = bnum(1).minus(beta).times(0.5).times(_oGLiq);
 
     if (isUSDC(poolPairData.tokenIn)) {
         // token[0] to token [1] in originswap
         const oBals0after = _nBals[0];
         const oBals1after = _nBals[1];
 
-        if (oBals1after < minBetaLimit && oBals0after > maxBetaLimit) {
-            return bnum(
-                (Math.abs(targetAmountInNumeraire) /
-                    Math.abs(outputAmount * (1 + epsilon))) *
-                    currentRate
-            );
+        if (oBals1after.lt(minBetaLimit) && oBals0after.gt(maxBetaLimit)) {
+            return targetAmountInNumeraire
+                .abs()
+                .div(outputAmount.times(epsilon.plus(1)).abs())
+                .times(currentRate);
         } else {
-            return bnum(currentRate * (1 - epsilon));
+            return currentRate.times(bnum(1).minus(epsilon));
         }
     } else {
         //  token[1] to token [0] in originswap
         const oBals0after = _nBals[0];
         const oBals1after = _nBals[1];
 
-        const isBeyondMinBeta = oBals0after < minBetaLimit;
-        const isBeyondMaxBeta = oBals1after > maxBetaLimit;
+        const isBeyondMinBeta = oBals0after.lt(minBetaLimit);
+        const isBeyondMaxBeta = oBals1after.gt(maxBetaLimit);
 
         if (isBeyondMinBeta && isBeyondMaxBeta) {
-            return bnum(
-                (Math.abs(targetAmountInNumeraire) /
-                    Math.abs(outputAmount * (1 + epsilon))) *
-                    currentRate
-            );
+            return targetAmountInNumeraire
+                .abs()
+                .div(outputAmount.times(epsilon.plus(1)).abs())
+                .times(currentRate);
         } else {
-            return bnum(currentRate * (1 - epsilon));
+            return currentRate.times(bnum(1).minus(epsilon));
         }
     }
 };

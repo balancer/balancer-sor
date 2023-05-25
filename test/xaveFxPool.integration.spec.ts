@@ -1,15 +1,19 @@
 // yarn test:only test/xaveFxPool.integration.spec.ts
 import dotenv from 'dotenv';
 import { JsonRpcProvider } from '@ethersproject/providers';
-import { bnum, SOR, SubgraphPoolBase, SwapTypes } from '../src';
+import { bnum, OldBigNumber, SOR, SubgraphPoolBase, SwapTypes } from '../src';
 import { ADDRESSES, Network, vaultAddr } from './testScripts/constants';
 import { parseFixed } from '@ethersproject/bignumber';
 import { expect } from 'chai';
 import { Vault__factory } from '@balancer-labs/typechain';
 import { AddressZero } from '@ethersproject/constants';
 import { setUp } from './testScripts/utils';
-import { scale } from '../src/utils/bignumber';
+const debug = require('debug')('xave');
 
+const x = bnum('0.000000000000000001');
+
+debug('x', x.toString());
+debug('x', (-x).toString());
 /*
  * Testing Notes:
  * - Add infura api key on .env
@@ -121,11 +125,9 @@ describe('xaveFxPool: DAI-USDC integration tests', () => {
                 swapInfo.swapAmount.toString()
             );
 
-            expect(
-                bnum(queryResult[1].abs().toString()).toNumber()
-            ).to.be.closeTo(
-                bnum(swapInfo.returnAmount.toString()).toNumber(),
-                scale(bnum(inaccuracyLimit), 18).toNumber()
+            // this is a correct test
+            expect(queryResult[1].abs().toString()).to.be.eq(
+                swapInfo.returnAmount.toString()
             );
         });
 
@@ -147,11 +149,8 @@ describe('xaveFxPool: DAI-USDC integration tests', () => {
                 funds
             );
 
-            expect(
-                bnum(queryResult[0].abs().toString()).toNumber()
-            ).to.be.closeTo(
-                bnum(swapInfo.returnAmount.toString()).toNumber(),
-                scale(bnum(inaccuracyLimit), 6).toNumber()
+            expect(queryResult[0].abs().toString()).to.be.eq(
+                swapInfo.returnAmount.toString()
             );
             expect(queryResult[1].abs().toString()).to.eq(
                 swapInfo.swapAmount.toString()

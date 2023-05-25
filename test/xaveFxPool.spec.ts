@@ -2,7 +2,7 @@
 import { expect } from 'chai';
 import { formatFixed, parseFixed, BigNumber } from '@ethersproject/bignumber';
 import { bnum, ZERO } from '../src/utils/bignumber';
-import { PoolTypes, SwapTypes } from '../src';
+import { OldBigNumber, PoolTypes, SwapTypes } from '../src';
 // Add new PoolType
 import { FxPool, FxPoolPairData } from '../src/pools/xaveFxPool/fxPool';
 import {
@@ -80,27 +80,31 @@ describe('Test for fxPools', () => {
             );
 
             const reservesInNumeraire = poolBalancesToNumeraire(poolPairData);
-            const alphaValue = Number(formatFixed(poolPairData.alpha, 18));
-            const maxLimit =
-                (1 + alphaValue) * reservesInNumeraire._oGLiq * 0.5;
+            const alphaValue = bnum(formatFixed(poolPairData.alpha, 18));
+            const maxLimit = alphaValue
+                .plus(1)
+                .times(reservesInNumeraire._oGLiq)
+                .times(0.5);
 
-            const maxLimitAmountForTokenIn =
-                maxLimit - reservesInNumeraire.tokenInReservesInNumeraire;
+            const maxLimitAmountForTokenIn = maxLimit.minus(
+                reservesInNumeraire.tokenInReservesInNumeraire
+            );
 
-            const maxLimitAmountForTokenOut =
-                maxLimit - reservesInNumeraire.tokenOutReservesInNumeraire;
+            const maxLimitAmountForTokenOut = maxLimit.times(
+                reservesInNumeraire.tokenOutReservesInNumeraire
+            );
 
             const expectedLimitForTokenIn = bnum(
                 viewRawAmount(
                     maxLimitAmountForTokenIn,
-                    poolPairData.tokenInLatestFXPrice.toNumber()
+                    poolPairData.tokenInLatestFXPrice
                 ).toString()
             );
 
             const expectedLimitForTokenOut = bnum(
                 viewRawAmount(
                     maxLimitAmountForTokenOut,
-                    poolPairData.tokenOutLatestFXPrice.toNumber()
+                    poolPairData.tokenOutLatestFXPrice
                 ).toString()
             );
 
@@ -135,8 +139,8 @@ describe('Test for fxPools', () => {
             );
 
             expect(
-                newPool.getNormalizedLiquidity(poolPairData).toNumber()
-            ).to.equals(1 / ALMOST_ZERO);
+                newPool.getNormalizedLiquidity(poolPairData).toString()
+            ).to.equals(bnum(1).div(ALMOST_ZERO).toString());
         });
     });
 
@@ -186,8 +190,8 @@ describe('Test for fxPools', () => {
                             );
                             expect(amountOut.toNumber()).to.be.closeTo(
                                 viewRawAmount(
-                                    Number(testCase.expectedSwapOutput),
-                                    poolPairData.tokenOutLatestFXPrice.toNumber()
+                                    bnum(testCase.expectedSwapOutput),
+                                    poolPairData.tokenOutLatestFXPrice
                                 ).toNumber(),
                                 10000
                             ); // rounded off
@@ -241,8 +245,8 @@ describe('Test for fxPools', () => {
 
                             expect(amountIn.toNumber()).to.be.closeTo(
                                 viewRawAmount(
-                                    Number(testCase.expectedSwapOutput),
-                                    poolPairData.tokenInLatestFXPrice.toNumber()
+                                    bnum(testCase.expectedSwapOutput),
+                                    poolPairData.tokenInLatestFXPrice
                                 ).toNumber(),
                                 2000000
                             ); // rounded off, decimal adjustment
