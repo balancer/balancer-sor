@@ -2,7 +2,7 @@
 import { expect } from 'chai';
 import { formatFixed, parseFixed, BigNumber } from '@ethersproject/bignumber';
 import { bnum, ZERO } from '../src/utils/bignumber';
-import { OldBigNumber, PoolTypes, SwapTypes } from '../src';
+import { PoolTypes, SwapTypes } from '../src';
 // Add new PoolType
 import { FxPool, FxPoolPairData } from '../src/pools/xaveFxPool/fxPool';
 import {
@@ -12,6 +12,7 @@ import {
     viewRawAmount,
     _spotPriceAfterSwapExactTokenInForTokenOut,
 } from '../src/pools/xaveFxPool/fxPoolMath';
+const debug = require('debug')('xave');
 
 // Add new pool test data in Subgraph Schema format
 import testPools from './testData/fxPool/fxPool.json';
@@ -90,22 +91,18 @@ describe('Test for fxPools', () => {
                 reservesInNumeraire.tokenInReservesInNumeraire
             );
 
-            const maxLimitAmountForTokenOut = maxLimit.times(
+            const maxLimitAmountForTokenOut = maxLimit.minus(
                 reservesInNumeraire.tokenOutReservesInNumeraire
             );
 
-            const expectedLimitForTokenIn = bnum(
-                viewRawAmount(
-                    maxLimitAmountForTokenIn,
-                    poolPairData.tokenInLatestFXPrice
-                ).toString()
+            const expectedLimitForTokenIn = viewRawAmount(
+                maxLimitAmountForTokenIn,
+                poolPairData.tokenInLatestFXPrice
             );
 
-            const expectedLimitForTokenOut = bnum(
-                viewRawAmount(
-                    maxLimitAmountForTokenOut,
-                    poolPairData.tokenOutLatestFXPrice
-                ).toString()
+            const expectedLimitForTokenOut = viewRawAmount(
+                maxLimitAmountForTokenOut,
+                poolPairData.tokenOutLatestFXPrice
             );
 
             let amount = newPool.getLimitAmountSwap(
