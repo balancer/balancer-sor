@@ -31,8 +31,6 @@ const rpcUrl = 'http://127.0.0.1:8545';
 const provider = new JsonRpcProvider(rpcUrl, networkId);
 const blocknumber = 16797531;
 
-const inaccuracyLimit = 1e-14;
-
 const vault = Vault__factory.connect(vaultAddr, provider);
 const SWAP_AMOUNT_IN_NUMERAIRE = '10';
 

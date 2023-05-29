@@ -87,7 +87,7 @@ export const convertToNumber = (
     baseDecimal: number | string
 ): OldBigNumber => {
     if (typeof baseDecimal === 'string') {
-        return amount.div(bnum(ONE_ETHER));
+        return amount.div(ONE_ETHER);
     } else {
         return amount.div(baseDecimal);
     }
@@ -276,7 +276,7 @@ const calculateMicroFee = (
 
         if (_bal.lt(_threshold)) {
             _feeMargin = _threshold.minus(_bal);
-            fee_ = bnum(_feeMargin).div(_ideal);
+            fee_ = _feeMargin.div(_ideal);
             fee_ = fee_.times(_delta);
 
             if (fee_.gt(CURVEMATH_MAX)) {
@@ -288,13 +288,13 @@ const calculateMicroFee = (
             fee_ = bnum(0);
         }
     } else {
-        _threshold = _ideal.times(bnum(1).plus(_beta)); // CURVEMATH_ONE
+        _threshold = _ideal.times(_beta.plus(1)); // CURVEMATH_ONE
 
         if (_bal.gt(_threshold)) {
             _feeMargin = _bal.minus(_threshold);
 
-            fee_ = bnum(_feeMargin).div(_ideal);
-            fee_ = bnum(fee_).times(_delta);
+            fee_ = _feeMargin.div(_ideal);
+            fee_ = fee_.times(_delta);
 
             if (fee_.gt(CURVEMATH_MAX)) fee_ = bnum(CURVEMATH_MAX);
 
@@ -370,8 +370,8 @@ const calculateTrade = (
             _nBals[_outputIndex] = _oBals[_outputIndex].plus(outputAmt_);
 
             // throws error already, removed if statement
-            enforceSwapInvariant(_oGLiq, _omega, _nGLiq, _psi);
             enforceHalts(_oGLiq, _nGLiq, _oBals, _nBals, _weights, alpha);
+            enforceSwapInvariant(_oGLiq, _omega, _nGLiq, _psi);
 
             return [outputAmt_, _nGLiq];
         } else {
