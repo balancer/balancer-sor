@@ -197,11 +197,9 @@ export class FxPool implements PoolBase<FxPoolPairData> {
                     parsedReserves.tokenInReservesInNumeraire
                 );
 
-                return bnum(
-                    viewRawAmount(
-                        maxLimitAmount,
-                        poolPairData.tokenInLatestFXPrice
-                    ).toString()
+                return viewRawAmount(
+                    maxLimitAmount,
+                    poolPairData.tokenInLatestFXPrice
                 );
             } else {
                 const maxLimitAmount = maxLimit.minus(
