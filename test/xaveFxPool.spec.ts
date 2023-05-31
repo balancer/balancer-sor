@@ -12,7 +12,6 @@ import {
     viewRawAmount,
     _spotPriceAfterSwapExactTokenInForTokenOut,
 } from '../src/pools/xaveFxPool/fxPoolMath';
-const debug = require('debug')('xave');
 
 // Add new pool test data in Subgraph Schema format
 import testPools from './testData/fxPool/fxPool.json';

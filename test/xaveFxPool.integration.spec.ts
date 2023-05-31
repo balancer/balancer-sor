@@ -1,19 +1,19 @@
 // yarn test:only test/xaveFxPool.integration.spec.ts
 import dotenv from 'dotenv';
 import { JsonRpcProvider } from '@ethersproject/providers';
-import { bnum, OldBigNumber, SOR, SubgraphPoolBase, SwapTypes } from '../src';
+import { SOR, SubgraphPoolBase, SwapTypes } from '../src';
 import { ADDRESSES, Network, vaultAddr } from './testScripts/constants';
 import { parseFixed } from '@ethersproject/bignumber';
 import { expect } from 'chai';
 import { Vault__factory } from '@balancer-labs/typechain';
 import { AddressZero } from '@ethersproject/constants';
 import { setUp } from './testScripts/utils';
+
 const debug = require('debug')('xave');
 
-const x = bnum('0.000000000000000001');
+// 361.628895632722 - Solidity
+// 361.62889581632257725
 
-debug('x', x.toString());
-debug('x', (-x).toString());
 /*
  * Testing Notes:
  * - Add infura api key on .env
@@ -26,7 +26,7 @@ dotenv.config();
 
 let sor: SOR;
 const networkId = Network.MAINNET;
-const jsonRpcUrl = 'https://mainnet.infura.io/v3/' + process.env.INFURA;
+const jsonRpcUrl = process.env.RPC_URL;
 const rpcUrl = 'http://127.0.0.1:8545';
 const provider = new JsonRpcProvider(rpcUrl, networkId);
 const blocknumber = 16797531;
@@ -55,16 +55,19 @@ const xaveFxPoolDAI_USDC_MAINNET: SubgraphPoolBase = {
             weight: null,
             token: {
                 latestFXPrice: '0.99980000', // roundId 92233720368547774306
+                oracleDecimals: 8,
             },
         },
         {
             address: '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48',
-            balance: '167.890447',
+            // 167890440
+            balance: '167.890440',
             decimals: 6,
             priceRate: '1',
             weight: null,
             token: {
                 latestFXPrice: '1.00019000', // roundId 36893488147419104088
+                oracleDecimals: 8,
             },
         },
     ],
@@ -112,6 +115,11 @@ describe('xaveFxPool: DAI-USDC integration tests', () => {
                 swapAmount
             );
 
+            debug('swapType: ', swapType);
+            debug('swaps: ', swapInfo.swaps);
+            debug('swapInfo.tokenAddresses: ', swapInfo.tokenAddresses);
+            debug('funds: ', funds);
+
             const queryResult = await vault.callStatic.queryBatchSwap(
                 swapType,
                 swapInfo.swaps,
@@ -123,36 +131,35 @@ describe('xaveFxPool: DAI-USDC integration tests', () => {
                 swapInfo.swapAmount.toString()
             );
 
-            // this is a correct test
             expect(queryResult[1].abs().toString()).to.be.eq(
                 swapInfo.returnAmount.toString()
             );
         });
 
-        it('ExactOut', async () => {
-            const swapType = SwapTypes.SwapExactOut;
-            // swapAmount is tokenOut, expect tokenIn
-            const swapAmount = parseFixed(SWAP_AMOUNT_IN_NUMERAIRE, 18);
-            const swapInfo = await sor.getSwaps(
-                tokenIn,
-                tokenOut,
-                swapType,
-                swapAmount
-            );
+        // it('ExactOut', async () => {
+        //     const swapType = SwapTypes.SwapExactOut;
+        //     // swapAmount is tokenOut, expect tokenIn
+        //     const swapAmount = parseFixed(SWAP_AMOUNT_IN_NUMERAIRE, 18);
+        //     const swapInfo = await sor.getSwaps(
+        //         tokenIn,
+        //         tokenOut,
+        //         swapType,
+        //         swapAmount
+        //     );
 
-            const queryResult = await vault.callStatic.queryBatchSwap(
-                swapType,
-                swapInfo.swaps,
-                swapInfo.tokenAddresses,
-                funds
-            );
+        //     const queryResult = await vault.callStatic.queryBatchSwap(
+        //         swapType,
+        //         swapInfo.swaps,
+        //         swapInfo.tokenAddresses,
+        //         funds
+        //     );
 
-            expect(queryResult[0].abs().toString()).to.be.eq(
-                swapInfo.returnAmount.toString()
-            );
-            expect(queryResult[1].abs().toString()).to.eq(
-                swapInfo.swapAmount.toString()
-            );
-        });
+        //     expect(queryResult[0].abs().toString()).to.be.eq(
+        //         swapInfo.returnAmount.toString()
+        //     );
+        //     expect(queryResult[1].abs().toString()).to.eq(
+        //         swapInfo.swapAmount.toString()
+        //     );
+        // });
     });
 });

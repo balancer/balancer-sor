@@ -35,7 +35,9 @@ export type FxPoolPairData = PoolPairBase & {
     delta: BigNumber;
     epsilon: BigNumber;
     tokenInLatestFXPrice: OldBigNumber;
+    tokenInOracleDecimals: OldBigNumber;
     tokenOutLatestFXPrice: OldBigNumber;
+    tokenOutOracleDecimals: OldBigNumber;
 };
 
 export class FxPool implements PoolBase<FxPoolPairData> {
@@ -137,6 +139,8 @@ export class FxPool implements PoolBase<FxPoolPairData> {
 
         if (!tO.token?.latestFXPrice || !tI.token?.latestFXPrice)
             throw 'FX Pool Missing LatestFxPrice';
+        if (!tO.token?.oracleDecimals || !tI.token?.oracleDecimals)
+            throw 'FX Pool Missing tokenIn or tokenOut oracleDecimals';
 
         const poolPairData: FxPoolPairData = {
             id: this.id,
@@ -154,8 +158,14 @@ export class FxPool implements PoolBase<FxPoolPairData> {
             lambda: this.lambda,
             delta: this.delta,
             epsilon: this.epsilon,
-            tokenInLatestFXPrice: bnum(tI.token.latestFXPrice), // decimals is formatted from subgraph in rate we get from the chainlink oracle
-            tokenOutLatestFXPrice: bnum(tO.token.latestFXPrice), // decimals is formatted from subgraph in rate we get from the chainlink oracle
+            tokenInLatestFXPrice: bnum(tI.token.latestFXPrice)
+                .times(bnum(10).pow(tI.token.oracleDecimals))
+                .integerValue(OldBigNumber.ROUND_DOWN), // decimals is formatted from subgraph in rate we get from the chainlink oracle
+            tokenOutLatestFXPrice: bnum(tO.token.latestFXPrice)
+                .times(bnum(10).pow(tO.token.oracleDecimals))
+                .integerValue(OldBigNumber.ROUND_DOWN), // decimals is formatted from subgraph in rate we get from the chainlink oracle
+            tokenInOracleDecimals: bnum(tI.token.oracleDecimals),
+            tokenOutOracleDecimals: bnum(tO.token.oracleDecimals),
         };
 
         return poolPairData;

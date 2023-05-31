@@ -17,6 +17,7 @@ export const ONE_TO_THE_THIRTEEN = BigInt(`${ONE_TO_THE_THIRTEEN_NUM}`);
 export const ONE_ETHER = scale(bnum('1'), 18);
 export const ALMOST_ZERO = 0.0000000000000000001; // swapping within beta region has no slippage
 const CURVEMATH_MAX = 0.25; //CURVEMATH MAX from contract
+const debug = require('debug')('xave');
 
 export enum CurveMathRevert {
     LowerHalt = 'CurveMath/lower-halt',
@@ -68,29 +69,32 @@ const calculateGivenAmountInNumeraire = (
         // tokenIn is given
         calculatedNumeraireAmount = viewNumeraireAmount(
             amount,
-            poolPairData.tokenInLatestFXPrice
+            bnum(poolPairData.decimalsIn),
+            poolPairData.tokenInLatestFXPrice,
+            poolPairData.tokenInOracleDecimals
         );
     } else {
         // tokenOut is given
         calculatedNumeraireAmount = viewNumeraireAmount(
             amount,
-            poolPairData.tokenOutLatestFXPrice
+            bnum(poolPairData.decimalsOut),
+            poolPairData.tokenOutLatestFXPrice,
+            poolPairData.tokenOutOracleDecimals
         );
     }
 
     return calculatedNumeraireAmount;
 };
 
-// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
-export const convertToNumber = (
-    amount: OldBigNumber,
-    baseDecimal: number | string
-): OldBigNumber => {
-    if (typeof baseDecimal === 'string') {
-        return amount.div(ONE_ETHER);
-    } else {
-        return amount.div(baseDecimal);
-    }
+const BNToBigInt = (val: OldBigNumber): bigint => {
+    try {
+        // 1 is ROUND_DOWN
+        return BigInt(val.integerValue(1).toString());
+    } catch (e) {}
+
+    throw new Error(
+        `this platform does not support BigInt. Value: ${val.toString()}`
+    );
 };
 
 /**
@@ -108,35 +112,33 @@ export const poolBalancesToNumeraire = (
     let tokenInNumeraire, tokenOutNumeraire;
 
     if (isUSDC(poolPairData.tokenIn)) {
-        tokenInNumeraire = convertToNumber(
-            viewNumeraireAmount(
-                EthersBNToOldBn(poolPairData.balanceIn),
-                poolPairData.tokenInLatestFXPrice
-            ),
-            getBaseDecimals(poolPairData.decimalsIn)
+        // amount * rate / 10^poolPairData.decimalsIn -> rate: (_rate / 10^oracleDecimals)
+        // _amount.mul(_rate).div(baseOracleDecimals).divu(baseDecimals);
+        tokenInNumeraire = viewNumeraireAmount(
+            EthersBNToOldBn(poolPairData.balanceIn),
+            bnum(poolPairData.decimalsIn),
+            poolPairData.tokenInLatestFXPrice,
+            poolPairData.tokenInOracleDecimals
         );
-        tokenOutNumeraire = convertToNumber(
-            viewNumeraireAmount(
-                EthersBNToOldBn(poolPairData.balanceOut),
-                poolPairData.tokenOutLatestFXPrice
-            ),
-            getBaseDecimals(poolPairData.decimalsOut)
+        tokenOutNumeraire = viewNumeraireAmount(
+            EthersBNToOldBn(poolPairData.balanceOut),
+            bnum(poolPairData.decimalsOut),
+            poolPairData.tokenOutLatestFXPrice,
+            poolPairData.tokenOutOracleDecimals
         );
     } else {
-        tokenInNumeraire = convertToNumber(
-            viewNumeraireAmount(
-                EthersBNToOldBn(poolPairData.balanceOut),
-                poolPairData.tokenOutLatestFXPrice
-            ),
-            getBaseDecimals(poolPairData.decimalsOut)
+        tokenInNumeraire = viewNumeraireAmount(
+            EthersBNToOldBn(poolPairData.balanceOut),
+            bnum(poolPairData.decimalsOut),
+            poolPairData.tokenOutLatestFXPrice,
+            poolPairData.tokenOutOracleDecimals
         );
 
-        tokenOutNumeraire = convertToNumber(
-            viewNumeraireAmount(
-                EthersBNToOldBn(poolPairData.balanceIn),
-                poolPairData.tokenInLatestFXPrice
-            ),
-            getBaseDecimals(poolPairData.decimalsIn)
+        tokenOutNumeraire = viewNumeraireAmount(
+            EthersBNToOldBn(poolPairData.balanceIn),
+            bnum(poolPairData.decimalsIn),
+            poolPairData.tokenInLatestFXPrice,
+            poolPairData.tokenInOracleDecimals
         );
     }
 
@@ -154,36 +156,32 @@ const getParsedFxPoolData = (
 ): ParsedFxPoolData => {
     // reserves are in raw amount, they converted to numeraire
     const baseReserves = isUSDC(poolPairData.tokenIn)
-        ? convertToNumber(
-              viewNumeraireAmount(
-                  EthersBNToOldBn(poolPairData.balanceOut),
-                  poolPairData.tokenOutLatestFXPrice
-              ),
-              getBaseDecimals(poolPairData.decimalsOut)
+        ? viewNumeraireAmount(
+              EthersBNToOldBn(poolPairData.balanceOut),
+              bnum(poolPairData.decimalsOut),
+              poolPairData.tokenOutLatestFXPrice,
+              poolPairData.tokenOutOracleDecimals
           )
-        : convertToNumber(
-              viewNumeraireAmount(
-                  EthersBNToOldBn(poolPairData.balanceIn),
-                  poolPairData.tokenInLatestFXPrice
-              ),
-              getBaseDecimals(poolPairData.decimalsIn)
+        : viewNumeraireAmount(
+              EthersBNToOldBn(poolPairData.balanceIn),
+              bnum(poolPairData.decimalsIn),
+              poolPairData.tokenInLatestFXPrice,
+              poolPairData.tokenInOracleDecimals
           );
 
     // reserves are not in wei
     const usdcReserves = isUSDC(poolPairData.tokenIn)
-        ? convertToNumber(
-              viewNumeraireAmount(
-                  EthersBNToOldBn(poolPairData.balanceIn),
-                  poolPairData.tokenInLatestFXPrice
-              ),
-              getBaseDecimals(poolPairData.decimalsIn)
+        ? viewNumeraireAmount(
+              EthersBNToOldBn(poolPairData.balanceIn),
+              bnum(poolPairData.decimalsIn),
+              poolPairData.tokenInLatestFXPrice,
+              poolPairData.tokenInOracleDecimals
           )
-        : convertToNumber(
-              viewNumeraireAmount(
-                  EthersBNToOldBn(poolPairData.balanceOut),
-                  poolPairData.tokenOutLatestFXPrice
-              ),
-              getBaseDecimals(poolPairData.decimalsOut)
+        : viewNumeraireAmount(
+              EthersBNToOldBn(poolPairData.balanceOut),
+              bnum(poolPairData.decimalsOut),
+              poolPairData.tokenOutLatestFXPrice,
+              poolPairData.tokenOutOracleDecimals
           );
 
     // rate is converted from chainlink to the actual rate in decimals
@@ -250,14 +248,25 @@ export const viewRawAmount = (
     _amount: OldBigNumber,
     rate: OldBigNumber
 ): OldBigNumber => {
-    return _amount.div(rate);
+    // solidity code `_amount.mulu(DECIMALS).mul(1e8).div(_rate)`
+    // `mulu` rounds down
+    debug(`amount.div(rate): ${_amount.div(rate).toString()}`);
+    return _amount.div(rate).integerValue(OldBigNumber.ROUND_DOWN);
 };
 
 const viewNumeraireAmount = (
     _amount: OldBigNumber,
-    rate: OldBigNumber
+    tokenDecimals: OldBigNumber,
+    rate: OldBigNumber,
+    oracleDecimals: OldBigNumber
 ): OldBigNumber => {
-    return _amount.times(rate);
+    // Solidity: _amount.mul(_rate).div(baseOracleDecimals).divu(baseDecimals);
+    return _amount
+        .times(rate)
+        .div(bnum(10).pow(oracleDecimals))
+        .integerValue(OldBigNumber.ROUND_DOWN)
+        .div(bnum(10).pow(tokenDecimals));
+    // 167_922_339.1836
 };
 
 // Curve Math
@@ -317,6 +326,8 @@ const calculateFee = (
     const _length = _bals.length;
     let psi_ = bnum(0);
 
+    debug('calculateFee _bals.length', _bals.length);
+
     for (let i = 0; i < _length; i++) {
         const _ideal = _gLiq.times(_weights[i]);
 
@@ -346,13 +357,18 @@ const calculateTrade = (
     const lambda = poolPairData.lambda;
 
     outputAmt_ = _inputAmt.times(-1);
+    debug(`[calculateTrade] _inputAmt: ${_inputAmt.toString()}`);
+    debug(`[calculateTrade] outputAmt_: ${outputAmt_.toString()}`);
 
     const _omega = calculateFee(_oGLiq, _oBals, beta, delta, _weights);
+    debug(`[calculateTrade] omega: ${_omega.toString()}`);
 
     let _psi: OldBigNumber;
 
     for (let i = 0; i < 32; i++) {
         _psi = calculateFee(_nGLiq, _nBals, beta, delta, _weights);
+
+        debug(`[calculateTrade] psi: ${_psi.toString()}`);
 
         const prevAmount = outputAmt_;
 
@@ -360,12 +376,16 @@ const calculateTrade = (
             ? _inputAmt.plus(_omega.minus(_psi)).times(-1)
             : _inputAmt.plus(lambda.times(_omega.minus(_psi))).times(-1);
 
+        debug(`[calculateTrade] outputAmt_: ${outputAmt_.toString()}`);
+
         if (
             outputAmt_
                 .div(ONE_TO_THE_THIRTEEN_NUM)
                 .eq(prevAmount.div(ONE_TO_THE_THIRTEEN_NUM))
         ) {
             _nGLiq = _oGLiq.plus(_inputAmt).plus(outputAmt_);
+
+            debug(`[calculateTrade] 1st if nGLiq: ${_nGLiq.toString()}`);
 
             _nBals[_outputIndex] = _oBals[_outputIndex].plus(outputAmt_);
 
@@ -376,6 +396,7 @@ const calculateTrade = (
             return [outputAmt_, _nGLiq];
         } else {
             _nGLiq = _oGLiq.plus(_inputAmt).plus(outputAmt_);
+            debug(`[calculateTrade] 2nd if nGLiq: ${_nGLiq.toString()}`);
 
             _nBals[_outputIndex] = _oBals[_outputIndex].plus(outputAmt_);
         }
@@ -462,11 +483,13 @@ export function _exactTokenInForTokenOut(
     amount: OldBigNumber,
     poolPairData: FxPoolPairData
 ): OldBigNumber {
+    debug('_exactTokenInForTokenOut', amount.toString());
     const parsedFxPoolData = getParsedFxPoolData(amount, poolPairData, true);
 
     const targetAmountInNumeraire = parsedFxPoolData.givenAmountInNumeraire;
 
     if (poolPairData.tokenIn === poolPairData.tokenOut) {
+        // solidity code `_amount.mulu(DECIMALS).mul(1e8).div(_rate)`
         return viewRawAmount(
             targetAmountInNumeraire,
             poolPairData.tokenInLatestFXPrice
@@ -493,6 +516,9 @@ export function _exactTokenInForTokenOut(
     } else {
         const epsilon = parsedFxPoolData.epsilon;
         const _amtWithFee = _amt[0].times(bnum(1).minus(epsilon)); // fee retained by the pool
+        const testR = bnum('9.98689715').div(
+            poolPairData.tokenOutLatestFXPrice
+        );
 
         return viewRawAmount(
             _amtWithFee.abs(),
