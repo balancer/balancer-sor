@@ -135,7 +135,7 @@ export type SubgraphToken = {
 
 export type SubgraphTokenData = {
     latestFXPrice?: string;
-    oracleDecimals?: number;
+    fxOracleDecimals?: number;
 };
 
 export interface SwapV2 {

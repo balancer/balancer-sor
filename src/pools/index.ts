@@ -85,6 +85,7 @@ export function parseNewPool(
         }
     } catch (err) {
         console.error(`parseNewPool: ${err.message}`);
+        throw err;
         return undefined;
     }
     return newPool;

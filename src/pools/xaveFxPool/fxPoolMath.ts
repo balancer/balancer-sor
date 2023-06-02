@@ -17,7 +17,6 @@ export const ONE_TO_THE_THIRTEEN = BigInt(`${ONE_TO_THE_THIRTEEN_NUM}`);
 export const ONE_ETHER = scale(bnum('1'), 18);
 export const ALMOST_ZERO = 0.0000000000000000001; // swapping within beta region has no slippage
 const CURVEMATH_MAX = 0.25; //CURVEMATH MAX from contract
-const debug = require('debug')('xave');
 
 export enum CurveMathRevert {
     LowerHalt = 'CurveMath/lower-halt',
@@ -68,18 +67,18 @@ const calculateGivenAmountInNumeraire = (
     if (isOriginSwap) {
         // tokenIn is given
         calculatedNumeraireAmount = viewNumeraireAmount(
-            amount,
+            amount.times(bnum(10).pow(poolPairData.decimalsIn)),
             bnum(poolPairData.decimalsIn),
             poolPairData.tokenInLatestFXPrice,
-            poolPairData.tokenInOracleDecimals
+            poolPairData.tokenInfxOracleDecimals
         );
     } else {
         // tokenOut is given
         calculatedNumeraireAmount = viewNumeraireAmount(
-            amount,
+            amount.times(bnum(10).pow(poolPairData.decimalsOut)),
             bnum(poolPairData.decimalsOut),
             poolPairData.tokenOutLatestFXPrice,
-            poolPairData.tokenOutOracleDecimals
+            poolPairData.tokenOutfxOracleDecimals
         );
     }
 
@@ -112,33 +111,33 @@ export const poolBalancesToNumeraire = (
     let tokenInNumeraire, tokenOutNumeraire;
 
     if (isUSDC(poolPairData.tokenIn)) {
-        // amount * rate / 10^poolPairData.decimalsIn -> rate: (_rate / 10^oracleDecimals)
-        // _amount.mul(_rate).div(baseOracleDecimals).divu(baseDecimals);
+        // amount * rate / 10^poolPairData.decimalsIn -> rate: (_rate / 10^fxOracleDecimals)
+        // _amount.mul(_rate).div(basefxOracleDecimals).divu(baseDecimals);
         tokenInNumeraire = viewNumeraireAmount(
             EthersBNToOldBn(poolPairData.balanceIn),
             bnum(poolPairData.decimalsIn),
             poolPairData.tokenInLatestFXPrice,
-            poolPairData.tokenInOracleDecimals
+            poolPairData.tokenInfxOracleDecimals
         );
         tokenOutNumeraire = viewNumeraireAmount(
             EthersBNToOldBn(poolPairData.balanceOut),
             bnum(poolPairData.decimalsOut),
             poolPairData.tokenOutLatestFXPrice,
-            poolPairData.tokenOutOracleDecimals
-        );
+            poolPairData.tokenOutfxOracleDecimals
+        ).decimalPlaces(15, OldBigNumber.ROUND_DOWN);
     } else {
         tokenInNumeraire = viewNumeraireAmount(
             EthersBNToOldBn(poolPairData.balanceOut),
             bnum(poolPairData.decimalsOut),
             poolPairData.tokenOutLatestFXPrice,
-            poolPairData.tokenOutOracleDecimals
+            poolPairData.tokenOutfxOracleDecimals
         );
 
         tokenOutNumeraire = viewNumeraireAmount(
             EthersBNToOldBn(poolPairData.balanceIn),
             bnum(poolPairData.decimalsIn),
             poolPairData.tokenInLatestFXPrice,
-            poolPairData.tokenInOracleDecimals
+            poolPairData.tokenInfxOracleDecimals
         );
     }
 
@@ -160,13 +159,13 @@ const getParsedFxPoolData = (
               EthersBNToOldBn(poolPairData.balanceOut),
               bnum(poolPairData.decimalsOut),
               poolPairData.tokenOutLatestFXPrice,
-              poolPairData.tokenOutOracleDecimals
+              poolPairData.tokenOutfxOracleDecimals
           )
         : viewNumeraireAmount(
               EthersBNToOldBn(poolPairData.balanceIn),
               bnum(poolPairData.decimalsIn),
               poolPairData.tokenInLatestFXPrice,
-              poolPairData.tokenInOracleDecimals
+              poolPairData.tokenInfxOracleDecimals
           );
 
     // reserves are not in wei
@@ -175,13 +174,13 @@ const getParsedFxPoolData = (
               EthersBNToOldBn(poolPairData.balanceIn),
               bnum(poolPairData.decimalsIn),
               poolPairData.tokenInLatestFXPrice,
-              poolPairData.tokenInOracleDecimals
+              poolPairData.tokenInfxOracleDecimals
           )
         : viewNumeraireAmount(
               EthersBNToOldBn(poolPairData.balanceOut),
               bnum(poolPairData.decimalsOut),
               poolPairData.tokenOutLatestFXPrice,
-              poolPairData.tokenOutOracleDecimals
+              poolPairData.tokenOutfxOracleDecimals
           );
 
     // rate is converted from chainlink to the actual rate in decimals
@@ -197,11 +196,11 @@ const getParsedFxPoolData = (
     );
 
     return {
-        alpha: bnum(formatFixed(poolPairData.alpha, 18)),
-        beta: bnum(formatFixed(poolPairData.beta, 18)),
-        delta: bnum(formatFixed(poolPairData.delta, 18)),
-        epsilon: bnum(formatFixed(poolPairData.epsilon, 18)),
-        lambda: bnum(formatFixed(poolPairData.lambda, 18)),
+        alpha: poolPairData.alpha.div(bnum(10).pow(18)),
+        beta: poolPairData.beta.div(bnum(10).pow(18)),
+        delta: poolPairData.delta.div(bnum(10).pow(18)),
+        epsilon: poolPairData.epsilon.div(bnum(10).pow(18)),
+        lambda: poolPairData.lambda.div(bnum(10).pow(18)),
         baseTokenRate: baseTokenRate,
         _oGLiq: baseReserves.plus(usdcReserves),
         _nGLiq: baseReserves.plus(usdcReserves),
@@ -246,24 +245,29 @@ export const getBaseDecimals = (decimals: number) => {
 // calculations are from the BaseToUsdAssimilator
 export const viewRawAmount = (
     _amount: OldBigNumber,
-    rate: OldBigNumber
+    tokenDecimals: OldBigNumber,
+    rate: OldBigNumber,
+    fxOracleDecimals: OldBigNumber
 ): OldBigNumber => {
-    // solidity code `_amount.mulu(DECIMALS).mul(1e8).div(_rate)`
-    // `mulu` rounds down
-    debug(`amount.div(rate): ${_amount.div(rate).toString()}`);
-    return _amount.div(rate).integerValue(OldBigNumber.ROUND_DOWN);
+    // solidity code `_amount.mulu(baseDecimals).mul(baseOracleDecimals).div(_rate);
+
+    return _amount
+      .times(bnum(10).pow(tokenDecimals))
+      .integerValue(OldBigNumber.ROUND_DOWN) // `mulu` rounds down
+      .times(bnum(10).pow(fxOracleDecimals))
+      .div(rate).integerValue(OldBigNumber.ROUND_DOWN);
 };
 
 const viewNumeraireAmount = (
     _amount: OldBigNumber,
     tokenDecimals: OldBigNumber,
     rate: OldBigNumber,
-    oracleDecimals: OldBigNumber
+    fxOracleDecimals: OldBigNumber
 ): OldBigNumber => {
-    // Solidity: _amount.mul(_rate).div(baseOracleDecimals).divu(baseDecimals);
+    // Solidity: _amount.mul(_rate).div(basefxOracleDecimals).divu(baseDecimals);
     return _amount
         .times(rate)
-        .div(bnum(10).pow(oracleDecimals))
+        .div(bnum(10).pow(fxOracleDecimals))
         .integerValue(OldBigNumber.ROUND_DOWN)
         .div(bnum(10).pow(tokenDecimals));
     // 167_922_339.1836
@@ -326,8 +330,6 @@ const calculateFee = (
     const _length = _bals.length;
     let psi_ = bnum(0);
 
-    debug('calculateFee _bals.length', _bals.length);
-
     for (let i = 0; i < _length; i++) {
         const _ideal = _gLiq.times(_weights[i]);
 
@@ -357,26 +359,19 @@ const calculateTrade = (
     const lambda = poolPairData.lambda;
 
     outputAmt_ = _inputAmt.times(-1);
-    debug(`[calculateTrade] _inputAmt: ${_inputAmt.toString()}`);
-    debug(`[calculateTrade] outputAmt_: ${outputAmt_.toString()}`);
 
     const _omega = calculateFee(_oGLiq, _oBals, beta, delta, _weights);
-    debug(`[calculateTrade] omega: ${_omega.toString()}`);
 
     let _psi: OldBigNumber;
 
     for (let i = 0; i < 32; i++) {
         _psi = calculateFee(_nGLiq, _nBals, beta, delta, _weights);
 
-        debug(`[calculateTrade] psi: ${_psi.toString()}`);
-
         const prevAmount = outputAmt_;
 
         outputAmt_ = _omega.lt(_psi)
             ? _inputAmt.plus(_omega.minus(_psi)).times(-1)
             : _inputAmt.plus(lambda.times(_omega.minus(_psi))).times(-1);
-
-        debug(`[calculateTrade] outputAmt_: ${outputAmt_.toString()}`);
 
         if (
             outputAmt_
@@ -385,19 +380,13 @@ const calculateTrade = (
         ) {
             _nGLiq = _oGLiq.plus(_inputAmt).plus(outputAmt_);
 
-            debug(`[calculateTrade] 1st if nGLiq: ${_nGLiq.toString()}`);
-
             _nBals[_outputIndex] = _oBals[_outputIndex].plus(outputAmt_);
-
             // throws error already, removed if statement
             enforceHalts(_oGLiq, _nGLiq, _oBals, _nBals, _weights, alpha);
             enforceSwapInvariant(_oGLiq, _omega, _nGLiq, _psi);
-
             return [outputAmt_, _nGLiq];
         } else {
             _nGLiq = _oGLiq.plus(_inputAmt).plus(outputAmt_);
-            debug(`[calculateTrade] 2nd if nGLiq: ${_nGLiq.toString()}`);
-
             _nBals[_outputIndex] = _oBals[_outputIndex].plus(outputAmt_);
         }
     }
@@ -483,17 +472,17 @@ export function _exactTokenInForTokenOut(
     amount: OldBigNumber,
     poolPairData: FxPoolPairData
 ): OldBigNumber {
-    debug('_exactTokenInForTokenOut', amount.toString());
     const parsedFxPoolData = getParsedFxPoolData(amount, poolPairData, true);
 
     const targetAmountInNumeraire = parsedFxPoolData.givenAmountInNumeraire;
 
     if (poolPairData.tokenIn === poolPairData.tokenOut) {
-        // solidity code `_amount.mulu(DECIMALS).mul(1e8).div(_rate)`
         return viewRawAmount(
             targetAmountInNumeraire,
-            poolPairData.tokenInLatestFXPrice
-        ); // must be the token out
+            bnum(poolPairData.decimalsIn),
+            poolPairData.tokenInLatestFXPrice,
+            poolPairData.tokenInfxOracleDecimals
+        ).div(bnum(10).pow(poolPairData.decimalsIn)); // must be the token out
     }
 
     const _oGLiq = parsedFxPoolData._oGLiq;
@@ -515,15 +504,14 @@ export function _exactTokenInForTokenOut(
         throw new Error(CurveMathRevert.CannotSwap);
     } else {
         const epsilon = parsedFxPoolData.epsilon;
-        const _amtWithFee = _amt[0].times(bnum(1).minus(epsilon)); // fee retained by the pool
-        const testR = bnum('9.98689715').div(
-            poolPairData.tokenOutLatestFXPrice
-        );
-
+        const _amtWithFee = _amt[0].times(bnum(1).minus(epsilon)); // fee retained by the pool // @TODO this results in a 1 wei less in solidity
+      // -10.0019 * (1-0.0015)
         return viewRawAmount(
             _amtWithFee.abs(),
-            poolPairData.tokenOutLatestFXPrice
-        );
+            bnum(poolPairData.decimalsOut),
+            poolPairData.tokenOutLatestFXPrice,
+            poolPairData.tokenOutfxOracleDecimals
+        ).div(bnum(10).pow(poolPairData.decimalsOut));
     }
 }
 
@@ -541,8 +529,10 @@ export function _tokenInForExactTokenOut(
         viewRawAmount(
             // poolPairData.tokenOut as TokenSymbol,
             targetAmountInNumeraire,
-            poolPairData.tokenOutLatestFXPrice
-        ); // must be the token out
+            bnum(poolPairData.decimalsOut),
+            poolPairData.tokenOutLatestFXPrice,
+            poolPairData.tokenOutfxOracleDecimals
+        ).div(bnum(10).pow(poolPairData.decimalsOut)); // must be the token out
     }
 
     const _oGLiq = parsedFxPoolData._oGLiq;
@@ -563,14 +553,16 @@ export function _tokenInForExactTokenOut(
     if (_amt === undefined) {
         throw new Error(CurveMathRevert.CannotSwap);
     } else {
-        const epsilon = bnum(formatFixed(poolPairData.epsilon, 18));
+        const epsilon = poolPairData.epsilon.div(bnum(10).pow(18));
 
         const _amtWithFee = _amt[0].times(epsilon.plus(1)); // fee retained by the pool
 
         return viewRawAmount(
             _amtWithFee.abs(),
-            poolPairData.tokenInLatestFXPrice
-        ); // must be the token out
+            bnum(poolPairData.decimalsIn),
+            poolPairData.tokenInLatestFXPrice,
+            poolPairData.tokenInfxOracleDecimals
+        ).div(bnum(10).pow(poolPairData.decimalsIn)); // must be the token out
     }
 }
 

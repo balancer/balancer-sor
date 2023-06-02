@@ -9,11 +9,6 @@ import { Vault__factory } from '@balancer-labs/typechain';
 import { AddressZero } from '@ethersproject/constants';
 import { setUp } from './testScripts/utils';
 
-const debug = require('debug')('xave');
-
-// 361.628895632722 - Solidity
-// 361.62889581632257725
-
 /*
  * Testing Notes:
  * - Add infura api key on .env
@@ -55,7 +50,7 @@ const xaveFxPoolDAI_USDC_MAINNET: SubgraphPoolBase = {
             weight: null,
             token: {
                 latestFXPrice: '0.99980000', // roundId 92233720368547774306
-                oracleDecimals: 8,
+                fxOracleDecimals: 8,
             },
         },
         {
@@ -67,7 +62,7 @@ const xaveFxPoolDAI_USDC_MAINNET: SubgraphPoolBase = {
             weight: null,
             token: {
                 latestFXPrice: '1.00019000', // roundId 36893488147419104088
-                oracleDecimals: 8,
+                fxOracleDecimals: 8,
             },
         },
     ],
@@ -75,6 +70,11 @@ const xaveFxPoolDAI_USDC_MAINNET: SubgraphPoolBase = {
     beta: '0.42',
     lambda: '0.3',
     delta: '0.3',
+    // precise value is `0.001500000000000000953`
+    // but right now we have parseFixed(epsilon, 18) across our code
+    // so had to trim the value to 18 decimals
+    // but the correct code should be parseFixed(epsilon, 21)
+    // epsilon: '0.001500000000000001',
     epsilon: '0.0015',
 };
 
@@ -115,11 +115,6 @@ describe('xaveFxPool: DAI-USDC integration tests', () => {
                 swapAmount
             );
 
-            debug('swapType: ', swapType);
-            debug('swaps: ', swapInfo.swaps);
-            debug('swapInfo.tokenAddresses: ', swapInfo.tokenAddresses);
-            debug('funds: ', funds);
-
             const queryResult = await vault.callStatic.queryBatchSwap(
                 swapType,
                 swapInfo.swaps,
@@ -136,30 +131,30 @@ describe('xaveFxPool: DAI-USDC integration tests', () => {
             );
         });
 
-        // it('ExactOut', async () => {
-        //     const swapType = SwapTypes.SwapExactOut;
-        //     // swapAmount is tokenOut, expect tokenIn
-        //     const swapAmount = parseFixed(SWAP_AMOUNT_IN_NUMERAIRE, 18);
-        //     const swapInfo = await sor.getSwaps(
-        //         tokenIn,
-        //         tokenOut,
-        //         swapType,
-        //         swapAmount
-        //     );
+        it('ExactOut', async () => {
+            const swapType = SwapTypes.SwapExactOut;
+            // swapAmount is tokenOut, expect tokenIn
+            const swapAmount = parseFixed(SWAP_AMOUNT_IN_NUMERAIRE, 18);
+            const swapInfo = await sor.getSwaps(
+                tokenIn,
+                tokenOut,
+                swapType,
+                swapAmount
+            );
 
-        //     const queryResult = await vault.callStatic.queryBatchSwap(
-        //         swapType,
-        //         swapInfo.swaps,
-        //         swapInfo.tokenAddresses,
-        //         funds
-        //     );
+            const queryResult = await vault.callStatic.queryBatchSwap(
+                swapType,
+                swapInfo.swaps,
+                swapInfo.tokenAddresses,
+                funds
+            );
 
-        //     expect(queryResult[0].abs().toString()).to.be.eq(
-        //         swapInfo.returnAmount.toString()
-        //     );
-        //     expect(queryResult[1].abs().toString()).to.eq(
-        //         swapInfo.swapAmount.toString()
-        //     );
-        // });
+            expect(queryResult[0].abs().toString()).to.be.eq(
+                swapInfo.returnAmount.toString()
+            );
+            expect(queryResult[1].abs().toString()).to.eq(
+                swapInfo.swapAmount.toString()
+            );
+        });
     });
 });

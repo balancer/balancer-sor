@@ -1,7 +1,7 @@
 import { getAddress } from '@ethersproject/address';
 import { BigNumber, formatFixed, parseFixed } from '@ethersproject/bignumber';
 import { Zero } from '@ethersproject/constants';
-import { BigNumber as OldBigNumber, ZERO, bnum } from '../../utils/bignumber';
+import { BigNumber as OldBigNumber, ZERO, bnum, scale } from './big-number';
 import { isSameAddress } from '../../utils';
 import { universalNormalizedLiquidity } from '../liquidity';
 import {
@@ -21,6 +21,7 @@ import {
     _spotPriceAfterSwapExactTokenInForTokenOut,
     _spotPriceAfterSwapTokenInForExactTokenOut,
     _tokenInForExactTokenOut,
+    ONE_ETHER,
 } from './fxPoolMath';
 
 type FxPoolToken = Pick<
@@ -28,16 +29,24 @@ type FxPoolToken = Pick<
     'address' | 'balance' | 'decimals' | 'token'
 >;
 
+// replicates ` (_lambda + 1).divu(1e18)` operation from the smart contract
+//  ( 10000n << 64n ) / (10n**18n) * 10n**18n >> 64n == 9999n
+const parseFixedCurveParam = (param: string): OldBigNumber => {
+  // `alpha * 1e18 + 1)
+  const param64 = (((BigInt(parseFixed(param, 18).toString()) + 1n) << 64n) / 10n ** 18n) * 10n ** 36n >> 64n;
+  return bnum(param64.toString()).div(bnum(10).pow(18));
+}
+
 export type FxPoolPairData = PoolPairBase & {
-    alpha: BigNumber;
-    beta: BigNumber;
-    lambda: BigNumber;
-    delta: BigNumber;
-    epsilon: BigNumber;
+    alpha: OldBigNumber;
+    beta: OldBigNumber;
+    lambda: OldBigNumber;
+    delta: OldBigNumber;
+    epsilon: OldBigNumber;
     tokenInLatestFXPrice: OldBigNumber;
-    tokenInOracleDecimals: OldBigNumber;
+    tokenInfxOracleDecimals: OldBigNumber;
     tokenOutLatestFXPrice: OldBigNumber;
-    tokenOutOracleDecimals: OldBigNumber;
+    tokenOutfxOracleDecimals: OldBigNumber;
 };
 
 export class FxPool implements PoolBase<FxPoolPairData> {
@@ -48,11 +57,11 @@ export class FxPool implements PoolBase<FxPoolPairData> {
     totalShares: BigNumber;
     tokens: FxPoolToken[];
     tokensList: string[];
-    alpha: BigNumber;
-    beta: BigNumber;
-    lambda: BigNumber;
-    delta: BigNumber;
-    epsilon: BigNumber;
+    alpha: OldBigNumber;
+    beta: OldBigNumber;
+    lambda: OldBigNumber;
+    delta: OldBigNumber;
+    epsilon: OldBigNumber;
 
     static fromPool(pool: SubgraphPoolBase): FxPool {
         if (
@@ -91,17 +100,27 @@ export class FxPool implements PoolBase<FxPoolPairData> {
         delta: string,
         epsilon: string
     ) {
+        /**
+                 64.64 fixed point value -> decimal (including precision error)
+          alpha     14757395258967641311 -> 0.800000000000000000987
+          beta       7747632510958011697 -> 0.420000000000000000991
+          delta      5534023222112865502 -> 0.30000000000000000093
+          epsilon      27670116110564345 -> 0.001500000000000000953
+          lambda     5534023222112865503 -> 0.300000000000000000987
+        */
+
         this.id = id;
         this.address = address;
         this.swapFee = parseFixed(swapFee, 18);
         this.totalShares = parseFixed(totalShares, 18);
         this.tokens = tokens;
         this.tokensList = tokensList;
-        this.alpha = parseFixed(alpha, 18);
-        this.beta = parseFixed(beta, 18);
-        this.lambda = parseFixed(lambda, 18);
-        this.delta = parseFixed(delta, 18);
-        this.epsilon = parseFixed(epsilon, 18);
+        this.alpha = parseFixedCurveParam(alpha).decimalPlaces(3, OldBigNumber.ROUND_UP);
+        this.beta = parseFixedCurveParam(beta).decimalPlaces(3, OldBigNumber.ROUND_UP);
+        this.lambda = parseFixedCurveParam(lambda).decimalPlaces(3, OldBigNumber.ROUND_UP);
+        this.delta = parseFixedCurveParam(delta).decimalPlaces(3, OldBigNumber.ROUND_UP);
+
+        this.epsilon = parseFixedCurveParam(epsilon).decimalPlaces(3, OldBigNumber.ROUND_UP);
     }
     updateTotalShares: (newTotalShares: BigNumber) => void;
     mainIndex?: number | undefined;
@@ -139,8 +158,8 @@ export class FxPool implements PoolBase<FxPoolPairData> {
 
         if (!tO.token?.latestFXPrice || !tI.token?.latestFXPrice)
             throw 'FX Pool Missing LatestFxPrice';
-        if (!tO.token?.oracleDecimals || !tI.token?.oracleDecimals)
-            throw 'FX Pool Missing tokenIn or tokenOut oracleDecimals';
+        if (!tO.token?.fxOracleDecimals || !tI.token?.fxOracleDecimals)
+            throw 'FX Pool Missing tokenIn or tokenOut fxOracleDecimals';
 
         const poolPairData: FxPoolPairData = {
             id: this.id,
@@ -159,13 +178,13 @@ export class FxPool implements PoolBase<FxPoolPairData> {
             delta: this.delta,
             epsilon: this.epsilon,
             tokenInLatestFXPrice: bnum(tI.token.latestFXPrice)
-                .times(bnum(10).pow(tI.token.oracleDecimals))
+                .times(bnum(10).pow(tI.token.fxOracleDecimals))
                 .integerValue(OldBigNumber.ROUND_DOWN), // decimals is formatted from subgraph in rate we get from the chainlink oracle
             tokenOutLatestFXPrice: bnum(tO.token.latestFXPrice)
-                .times(bnum(10).pow(tO.token.oracleDecimals))
+                .times(bnum(10).pow(tO.token.fxOracleDecimals))
                 .integerValue(OldBigNumber.ROUND_DOWN), // decimals is formatted from subgraph in rate we get from the chainlink oracle
-            tokenInOracleDecimals: bnum(tI.token.oracleDecimals),
-            tokenOutOracleDecimals: bnum(tO.token.oracleDecimals),
+            tokenInfxOracleDecimals: bnum(tI.token.fxOracleDecimals),
+            tokenOutfxOracleDecimals: bnum(tO.token.fxOracleDecimals),
         };
 
         return poolPairData;
@@ -195,7 +214,7 @@ export class FxPool implements PoolBase<FxPoolPairData> {
         try {
             const parsedReserves = poolBalancesToNumeraire(poolPairData);
 
-            const alphaValue = bnum(formatFixed(poolPairData.alpha, 18));
+            const alphaValue = poolPairData.alpha.div(bnum(10).pow(18));
 
             const maxLimit = alphaValue
                 .plus(1)
@@ -209,8 +228,10 @@ export class FxPool implements PoolBase<FxPoolPairData> {
 
                 return viewRawAmount(
                     maxLimitAmount,
-                    poolPairData.tokenInLatestFXPrice
-                );
+                    bnum(poolPairData.decimalsIn),
+                    poolPairData.tokenInLatestFXPrice,
+                    poolPairData.tokenInfxOracleDecimals
+                ).div(bnum(10).pow(poolPairData.decimalsIn));
             } else {
                 const maxLimitAmount = maxLimit.minus(
                     parsedReserves.tokenOutReservesInNumeraire
@@ -218,8 +239,10 @@ export class FxPool implements PoolBase<FxPoolPairData> {
 
                 return viewRawAmount(
                     maxLimitAmount,
-                    poolPairData.tokenOutLatestFXPrice
-                );
+                    bnum(poolPairData.decimalsOut),
+                    poolPairData.tokenOutLatestFXPrice,
+                    poolPairData.tokenOutfxOracleDecimals
+                ).div(bnum(10).pow(poolPairData.decimalsOut));
             }
         } catch {
             return ZERO;

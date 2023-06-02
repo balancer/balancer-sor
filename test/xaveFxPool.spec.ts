@@ -1,7 +1,8 @@
 // yarn test:only test/xaveFxPool.spec.ts
 import { expect } from 'chai';
 import { formatFixed, parseFixed, BigNumber } from '@ethersproject/bignumber';
-import { bnum, ZERO } from '../src/utils/bignumber';
+import { BigNumber as OldBigNumber, ZERO, bnum } from '../src/utils/bignumber';
+
 import { PoolTypes, SwapTypes } from '../src';
 // Add new PoolType
 import { FxPool, FxPoolPairData } from '../src/pools/xaveFxPool/fxPool';
@@ -48,20 +49,20 @@ describe('Test for fxPools', () => {
             expect(poolPairData.id).to.eq(poolData.id);
             expect(poolPairData.poolType).to.eq(PoolTypes.Fx);
 
-            expect(poolPairData.alpha._hex).to.eq(
-                parseFixed(poolData.alpha, 18)._hex
+            expect(poolPairData.alpha.toString()).to.eq(
+               poolData.alpha
             );
-            expect(poolPairData.beta._hex).to.eq(
-                parseFixed(poolData.beta, 18)._hex
+            expect(poolPairData.beta.toString()).to.eq(
+               poolData.beta
             );
-            expect(poolPairData.lambda._hex).to.eq(
-                parseFixed(poolData.lambda, 18)._hex
+            expect(poolPairData.lambda.toString()).to.eq(
+               poolData.lambda
             );
-            expect(poolPairData.delta._hex).to.eq(
-                parseFixed(poolData.delta, 18)._hex
+            expect(poolPairData.delta.toString()).to.eq(
+               poolData.delta
             );
-            expect(poolPairData.epsilon._hex).to.eq(
-                parseFixed(poolData.epsilon, 18)._hex
+            expect(poolPairData.epsilon.toString()).to.eq(
+               poolData.epsilon
             );
         });
     });
@@ -80,7 +81,7 @@ describe('Test for fxPools', () => {
             );
 
             const reservesInNumeraire = poolBalancesToNumeraire(poolPairData);
-            const alphaValue = bnum(formatFixed(poolPairData.alpha, 18));
+            const alphaValue = poolPairData.alpha.div(bnum(10).pow(18));
             const maxLimit = alphaValue
                 .plus(1)
                 .times(reservesInNumeraire._oGLiq)
@@ -96,12 +97,16 @@ describe('Test for fxPools', () => {
 
             const expectedLimitForTokenIn = viewRawAmount(
                 maxLimitAmountForTokenIn,
-                poolPairData.tokenInLatestFXPrice
+                bnum(poolPairData.decimalsIn),
+                poolPairData.tokenInLatestFXPrice,
+                poolPairData.tokenInfxOracleDecimals
             );
 
             const expectedLimitForTokenOut = viewRawAmount(
                 maxLimitAmountForTokenOut,
-                poolPairData.tokenOutLatestFXPrice
+                bnum(poolPairData.decimalsOut),
+                poolPairData.tokenOutLatestFXPrice,
+                poolPairData.tokenOutfxOracleDecimals
             );
 
             let amount = newPool.getLimitAmountSwap(
@@ -187,7 +192,9 @@ describe('Test for fxPools', () => {
                             expect(amountOut.toNumber()).to.be.closeTo(
                                 viewRawAmount(
                                     bnum(testCase.expectedSwapOutput),
-                                    poolPairData.tokenOutLatestFXPrice
+                                    bnum(poolPairData.decimalsOut),
+                                    poolPairData.tokenOutLatestFXPrice,
+                                    poolPairData.tokenOutfxOracleDecimals
                                 ).toNumber(),
                                 10000
                             ); // rounded off
@@ -242,7 +249,9 @@ describe('Test for fxPools', () => {
                             expect(amountIn.toNumber()).to.be.closeTo(
                                 viewRawAmount(
                                     bnum(testCase.expectedSwapOutput),
-                                    poolPairData.tokenInLatestFXPrice
+                                    bnum(poolPairData.decimalsIn),
+                                    poolPairData.tokenInLatestFXPrice,
+                                    poolPairData.tokenInfxOracleDecimals
                                 ).toNumber(),
                                 2000000
                             ); // rounded off, decimal adjustment
@@ -298,13 +307,15 @@ describe('Test for fxPools', () => {
                 balanceIn: BigNumber.from('0xbf24ffac00'),
                 balanceOut: BigNumber.from('0x59bbba58b6'),
                 swapFee: BigNumber.from('0x25'),
-                alpha: BigNumber.from('0x0b1a2bc2ec500000'),
-                beta: BigNumber.from('0x06a94d74f4300000'),
-                lambda: BigNumber.from('0x0429d069189e0000'),
-                delta: BigNumber.from('0x03cb71f51fc55800'),
-                epsilon: BigNumber.from('0x01c6bf52634000'),
+                alpha: bnum('0x0b1a2bc2ec500000'),
+                beta: bnum('0x06a94d74f4300000'),
+                lambda: bnum('0x0429d069189e0000'),
+                delta: bnum('0x03cb71f51fc55800'),
+                epsilon: bnum('0x01c6bf52634000'),
                 tokenInLatestFXPrice: bnum('99963085000000'),
                 tokenOutLatestFXPrice: bnum('74200489000000'),
+                tokenInfxOracleDecimals: bnum(8),
+                tokenOutfxOracleDecimals: bnum(8),
             };
             const sp = _spotPriceAfterSwapExactTokenInForTokenOut(
                 poolPairData,
