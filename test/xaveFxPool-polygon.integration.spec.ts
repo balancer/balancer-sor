@@ -23,10 +23,11 @@ const networkId = Network.POLYGON;
 const jsonRpcUrl = process.env.RPC_URL;
 const rpcUrl = 'http://127.0.0.1:8545';
 const provider = new JsonRpcProvider(rpcUrl, networkId);
-const blocknumber = 38546978;
+const blocknumber = 43667355;
 
 const vault = Vault__factory.connect(vaultAddr, provider);
-const SWAP_AMOUNT_IN_NUMERAIRE = '10000';
+// const SWAP_AMOUNT_IN_NUMERAIRE = '400000';
+const SWAP_AMOUNT_IN_NUMERAIRE = '600000';
 
 const xaveFxPoolXSGD_USDC_POLYGON: SubgraphPoolBase = {
     id: '0x726e324c29a1e49309672b244bdc4ff62a270407000200000000000000000702',
@@ -35,7 +36,7 @@ const xaveFxPoolXSGD_USDC_POLYGON: SubgraphPoolBase = {
     swapFee: '0',
     swapEnabled: true,
     totalWeight: '0',
-    totalShares: '1187294',
+    totalShares: '1860106.756724251739208277', // subgraph blocknumber 43667355
     tokensList: [
         '0x2791bca1f2de4661ed88a30c99a7a9449aa84174',
         '0xdc3326e71d45186f113a2f448984ca0e8d201995',
@@ -43,23 +44,23 @@ const xaveFxPoolXSGD_USDC_POLYGON: SubgraphPoolBase = {
     tokens: [
         {
             address: '0x2791bca1f2de4661ed88a30c99a7a9449aa84174',
-            balance: '831428.276274',
+            balance: '640405.311822',
             decimals: 6,
             priceRate: '1',
             weight: null,
             token: {
-                latestFXPrice: '1.00010000',
+                latestFXPrice: '0.99997703',
                 fxOracleDecimals: 8,
             },
         },
         {
             address: '0xdc3326e71d45186f113a2f448984ca0e8d201995',
-            balance: '377081.466659',
+            balance: '1533442.592483',
             decimals: 6,
             priceRate: '1',
             weight: null,
             token: {
-                latestFXPrice: '0.76220000',
+                latestFXPrice: '0.74226380',
                 fxOracleDecimals: 8,
             },
         },
@@ -71,7 +72,7 @@ const xaveFxPoolXSGD_USDC_POLYGON: SubgraphPoolBase = {
     epsilon: '0.0005',
 };
 
-describe('xaveFxPool: XSGD-USDC integration tests', () => {
+describe('xaveFxPool: DAI-USDC integration tests', () => {
     context('test swaps vs queryBatchSwap', () => {
         // Setup chain
         before(async function () {
