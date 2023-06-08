@@ -43,23 +43,23 @@ const xaveFxPoolXSGD_USDC_POLYGON: SubgraphPoolBase = {
     tokens: [
         {
             address: '0x2791bca1f2de4661ed88a30c99a7a9449aa84174',
-            balance: '731837.486297',
+            balance: '831428.276274',
             decimals: 6,
             priceRate: '1',
             weight: null,
             token: {
-                latestFXPrice: '1.00000000',
+                latestFXPrice: '1.00010000',
                 fxOracleDecimals: 8,
             },
         },
         {
             address: '0xdc3326e71d45186f113a2f448984ca0e8d201995',
-            balance: '639986.37244',
+            balance: '377081.466659',
             decimals: 6,
             priceRate: '1',
             weight: null,
             token: {
-                latestFXPrice: '0.74376600',
+                latestFXPrice: '0.76220000',
                 fxOracleDecimals: 8,
             },
         },
@@ -71,7 +71,7 @@ const xaveFxPoolXSGD_USDC_POLYGON: SubgraphPoolBase = {
     epsilon: '0.0005',
 };
 
-describe('xaveFxPool: DAI-USDC integration tests', () => {
+describe('xaveFxPool: XSGD-USDC integration tests', () => {
     context('test swaps vs queryBatchSwap', () => {
         // Setup chain
         before(async function () {
