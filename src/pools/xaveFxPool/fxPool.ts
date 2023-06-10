@@ -35,7 +35,9 @@ const parseFixedCurveParam = (param: string): OldBigNumber => {
             10n ** 18n) *
             10n ** 36n) >>
         64n;
-    return bnum(param64.toString()).div(bnum(10).pow(18));
+    return bnum(param64.toString())
+        .div(bnum(10).pow(18))
+        .decimalPlaces(3, OldBigNumber.ROUND_UP);
 };
 
 export type FxPoolPairData = PoolPairBase & {
@@ -116,27 +118,12 @@ export class FxPool implements PoolBase<FxPoolPairData> {
         this.totalShares = parseFixed(totalShares, 18);
         this.tokens = tokens;
         this.tokensList = tokensList;
-        this.alpha = parseFixedCurveParam(alpha).decimalPlaces(
-            3,
-            OldBigNumber.ROUND_UP
-        );
-        this.beta = parseFixedCurveParam(beta).decimalPlaces(
-            3,
-            OldBigNumber.ROUND_UP
-        );
-        this.lambda = parseFixedCurveParam(lambda).decimalPlaces(
-            3,
-            OldBigNumber.ROUND_UP
-        );
-        this.delta = parseFixedCurveParam(delta).decimalPlaces(
-            3,
-            OldBigNumber.ROUND_UP
-        );
+        this.alpha = parseFixedCurveParam(alpha);
+        this.beta = parseFixedCurveParam(beta);
+        this.lambda = parseFixedCurveParam(lambda);
+        this.delta = parseFixedCurveParam(delta);
 
-        this.epsilon = parseFixedCurveParam(epsilon).decimalPlaces(
-            3,
-            OldBigNumber.ROUND_UP
-        );
+        this.epsilon = parseFixedCurveParam(epsilon);
     }
     updateTotalShares: (newTotalShares: BigNumber) => void;
     mainIndex?: number | undefined;
