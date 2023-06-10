@@ -1,7 +1,7 @@
 // yarn test:only test/xaveFxPool.spec.ts
 import { expect } from 'chai';
-import { formatFixed, parseFixed, BigNumber } from '@ethersproject/bignumber';
-import { BigNumber as OldBigNumber, ZERO, bnum } from '../src/utils/bignumber';
+import { BigNumber } from '@ethersproject/bignumber';
+import { ZERO, bnum } from '../src/utils/bignumber';
 
 import { PoolTypes, SwapTypes } from '../src';
 // Add new PoolType
@@ -49,21 +49,11 @@ describe('Test for fxPools', () => {
             expect(poolPairData.id).to.eq(poolData.id);
             expect(poolPairData.poolType).to.eq(PoolTypes.Fx);
 
-            expect(poolPairData.alpha.toString()).to.eq(
-               poolData.alpha
-            );
-            expect(poolPairData.beta.toString()).to.eq(
-               poolData.beta
-            );
-            expect(poolPairData.lambda.toString()).to.eq(
-               poolData.lambda
-            );
-            expect(poolPairData.delta.toString()).to.eq(
-               poolData.delta
-            );
-            expect(poolPairData.epsilon.toString()).to.eq(
-               poolData.epsilon
-            );
+            expect(poolPairData.alpha.toString()).to.eq(poolData.alpha);
+            expect(poolPairData.beta.toString()).to.eq(poolData.beta);
+            expect(poolPairData.lambda.toString()).to.eq(poolData.lambda);
+            expect(poolPairData.delta.toString()).to.eq(poolData.delta);
+            expect(poolPairData.epsilon.toString()).to.eq(poolData.epsilon);
         });
     });
 

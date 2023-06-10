@@ -1,7 +1,7 @@
 import { getAddress } from '@ethersproject/address';
 import { BigNumber, formatFixed, parseFixed } from '@ethersproject/bignumber';
 import { Zero } from '@ethersproject/constants';
-import { BigNumber as OldBigNumber, ZERO, bnum, scale } from './big-number';
+import { BigNumber as OldBigNumber, ZERO, bnum } from './big-number';
 import { isSameAddress } from '../../utils';
 import { universalNormalizedLiquidity } from '../liquidity';
 import {
@@ -21,7 +21,6 @@ import {
     _spotPriceAfterSwapExactTokenInForTokenOut,
     _spotPriceAfterSwapTokenInForExactTokenOut,
     _tokenInForExactTokenOut,
-    ONE_ETHER,
 } from './fxPoolMath';
 
 type FxPoolToken = Pick<
@@ -30,12 +29,14 @@ type FxPoolToken = Pick<
 >;
 
 // replicates ` (_lambda + 1).divu(1e18)` operation from the smart contract
-//  ( 10000n << 64n ) / (10n**18n) * 10n**18n >> 64n == 9999n
 const parseFixedCurveParam = (param: string): OldBigNumber => {
-  // `alpha * 1e18 + 1)
-  const param64 = (((BigInt(parseFixed(param, 18).toString()) + 1n) << 64n) / 10n ** 18n) * 10n ** 36n >> 64n;
-  return bnum(param64.toString()).div(bnum(10).pow(18));
-}
+    const param64 =
+        ((((BigInt(parseFixed(param, 18).toString()) + 1n) << 64n) /
+            10n ** 18n) *
+            10n ** 36n) >>
+        64n;
+    return bnum(param64.toString()).div(bnum(10).pow(18));
+};
 
 export type FxPoolPairData = PoolPairBase & {
     alpha: OldBigNumber;
@@ -115,12 +116,27 @@ export class FxPool implements PoolBase<FxPoolPairData> {
         this.totalShares = parseFixed(totalShares, 18);
         this.tokens = tokens;
         this.tokensList = tokensList;
-        this.alpha = parseFixedCurveParam(alpha).decimalPlaces(3, OldBigNumber.ROUND_UP);
-        this.beta = parseFixedCurveParam(beta).decimalPlaces(3, OldBigNumber.ROUND_UP);
-        this.lambda = parseFixedCurveParam(lambda).decimalPlaces(3, OldBigNumber.ROUND_UP);
-        this.delta = parseFixedCurveParam(delta).decimalPlaces(3, OldBigNumber.ROUND_UP);
+        this.alpha = parseFixedCurveParam(alpha).decimalPlaces(
+            3,
+            OldBigNumber.ROUND_UP
+        );
+        this.beta = parseFixedCurveParam(beta).decimalPlaces(
+            3,
+            OldBigNumber.ROUND_UP
+        );
+        this.lambda = parseFixedCurveParam(lambda).decimalPlaces(
+            3,
+            OldBigNumber.ROUND_UP
+        );
+        this.delta = parseFixedCurveParam(delta).decimalPlaces(
+            3,
+            OldBigNumber.ROUND_UP
+        );
 
-        this.epsilon = parseFixedCurveParam(epsilon).decimalPlaces(3, OldBigNumber.ROUND_UP);
+        this.epsilon = parseFixedCurveParam(epsilon).decimalPlaces(
+            3,
+            OldBigNumber.ROUND_UP
+        );
     }
     updateTotalShares: (newTotalShares: BigNumber) => void;
     mainIndex?: number | undefined;

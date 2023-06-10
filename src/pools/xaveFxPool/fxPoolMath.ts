@@ -1,6 +1,6 @@
 import { BigNumber as OldBigNumber, bnum, scale } from '../../utils/bignumber';
 import { FxPoolPairData } from './fxPool';
-import { BigNumber, formatFixed } from '@ethersproject/bignumber';
+import { BigNumber } from '@ethersproject/bignumber';
 
 // Constants
 export const CURVEMATH_MAX_DIFF = -0.000001000000000000024;
@@ -83,17 +83,6 @@ const calculateGivenAmountInNumeraire = (
     }
 
     return calculatedNumeraireAmount;
-};
-
-const BNToBigInt = (val: OldBigNumber): bigint => {
-    try {
-        // 1 is ROUND_DOWN
-        return BigInt(val.integerValue(1).toString());
-    } catch (e) {}
-
-    throw new Error(
-        `this platform does not support BigInt. Value: ${val.toString()}`
-    );
 };
 
 /**
@@ -252,10 +241,11 @@ export const viewRawAmount = (
     // solidity code `_amount.mulu(baseDecimals).mul(baseOracleDecimals).div(_rate);
 
     return _amount
-      .times(bnum(10).pow(tokenDecimals))
-      .integerValue(OldBigNumber.ROUND_DOWN) // `mulu` rounds down
-      .times(bnum(10).pow(fxOracleDecimals))
-      .div(rate).integerValue(OldBigNumber.ROUND_DOWN);
+        .times(bnum(10).pow(tokenDecimals))
+        .integerValue(OldBigNumber.ROUND_DOWN) // `mulu` rounds down
+        .times(bnum(10).pow(fxOracleDecimals))
+        .div(rate)
+        .integerValue(OldBigNumber.ROUND_DOWN);
 };
 
 const viewNumeraireAmount = (
@@ -505,7 +495,7 @@ export function _exactTokenInForTokenOut(
     } else {
         const epsilon = parsedFxPoolData.epsilon;
         const _amtWithFee = _amt[0].times(bnum(1).minus(epsilon)); // fee retained by the pool // @TODO this results in a 1 wei less in solidity
-      // -10.0019 * (1-0.0015)
+        // -10.0019 * (1-0.0015)
         return viewRawAmount(
             _amtWithFee.abs(),
             bnum(poolPairData.decimalsOut),
