@@ -70,11 +70,6 @@ const xaveFxPoolDAI_USDC_MAINNET: SubgraphPoolBase = {
     beta: '0.42',
     lambda: '0.3',
     delta: '0.3',
-    // precise value is `0.001500000000000000953`
-    // but right now we have parseFixed(epsilon, 18) across our code
-    // so had to trim the value to 18 decimals
-    // but the correct code should be parseFixed(epsilon, 21)
-    // epsilon: '0.001500000000000001',
     epsilon: '0.0015',
 };
 
