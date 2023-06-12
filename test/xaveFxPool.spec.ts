@@ -1,6 +1,6 @@
 // yarn test:only test/xaveFxPool.spec.ts
 import { expect } from 'chai';
-import { BigNumber } from '@ethersproject/bignumber';
+import { BigNumber, parseFixed } from '@ethersproject/bignumber';
 import { ZERO, bnum } from '../src/utils/bignumber';
 
 import { PoolTypes, SwapTypes } from '../src';
@@ -49,11 +49,36 @@ describe('Test for fxPools', () => {
             expect(poolPairData.id).to.eq(poolData.id);
             expect(poolPairData.poolType).to.eq(PoolTypes.Fx);
 
-            expect(poolPairData.alpha.toString()).to.eq(poolData.alpha);
-            expect(poolPairData.beta.toString()).to.eq(poolData.beta);
-            expect(poolPairData.lambda.toString()).to.eq(poolData.lambda);
-            expect(poolPairData.delta.toString()).to.eq(poolData.delta);
-            expect(poolPairData.epsilon.toString()).to.eq(poolData.epsilon);
+            expect(
+                poolPairData.alpha
+                    .div(bnum(10).pow(18))
+                    .decimalPlaces(8)
+                    .toString()
+            ).to.eq(poolData.alpha);
+            expect(
+                poolPairData.beta
+                    .div(bnum(10).pow(18))
+                    .decimalPlaces(8)
+                    .toString()
+            ).to.eq(poolData.beta);
+            expect(
+                poolPairData.lambda
+                    .div(bnum(10).pow(18))
+                    .decimalPlaces(8)
+                    .toString()
+            ).to.eq(poolData.lambda);
+            expect(
+                poolPairData.delta
+                    .div(bnum(10).pow(18))
+                    .decimalPlaces(8)
+                    .toString()
+            ).to.eq(poolData.delta);
+            expect(
+                poolPairData.epsilon
+                    .div(bnum(10).pow(18))
+                    .decimalPlaces(8)
+                    .toString()
+            ).to.eq(poolData.epsilon);
         });
     });
 

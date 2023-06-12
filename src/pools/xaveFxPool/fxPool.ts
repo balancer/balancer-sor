@@ -123,15 +123,6 @@ export class FxPool implements PoolBase<FxPoolPairData> {
         delta: string,
         epsilon: string
     ) {
-        /**
-                 64.64 fixed point value -> decimal (including precision error)
-          alpha     14757395258967641311 -> 0.800000000000000000987
-          beta       7747632510958011697 -> 0.420000000000000000991
-          delta      5534023222112865502 -> 0.30000000000000000093
-          epsilon      27670116110564345 -> 0.001500000000000000953
-          lambda     5534023222112865503 -> 0.300000000000000000987
-        */
-
         this.id = id;
         this.address = address;
         this.swapFee = parseFixed(swapFee, 18);
@@ -142,7 +133,6 @@ export class FxPool implements PoolBase<FxPoolPairData> {
         this.beta = parseFixedCurveParam(beta);
         this.lambda = parseFixedCurveParam(lambda);
         this.delta = parseFixedCurveParam(delta);
-
         this.epsilon = parseFixedCurveParam(epsilon);
     }
     updateTotalShares: (newTotalShares: BigNumber) => void;
@@ -200,12 +190,18 @@ export class FxPool implements PoolBase<FxPoolPairData> {
             lambda: this.lambda,
             delta: this.delta,
             epsilon: this.epsilon,
-            tokenInLatestFXPrice: bnum(tI.token.latestFXPrice)
-                .times(bnum(10).pow(tI.token.fxOracleDecimals))
-                .integerValue(OldBigNumber.ROUND_DOWN), // decimals is formatted from subgraph in rate we get from the chainlink oracle
-            tokenOutLatestFXPrice: bnum(tO.token.latestFXPrice)
-                .times(bnum(10).pow(tO.token.fxOracleDecimals))
-                .integerValue(OldBigNumber.ROUND_DOWN), // decimals is formatted from subgraph in rate we get from the chainlink oracle
+            tokenInLatestFXPrice: bnum(
+                parseFixed(
+                    tI.token.latestFXPrice,
+                    tI.token.fxOracleDecimals
+                ).toString()
+            ), // decimals is formatted from subgraph in rate we get from the chainlink oracle
+            tokenOutLatestFXPrice: bnum(
+                parseFixed(
+                    tO.token.latestFXPrice,
+                    tO.token.fxOracleDecimals
+                ).toString()
+            ), // decimals is formatted from subgraph in rate we get from the chainlink oracle
             tokenInfxOracleDecimals: bnum(tI.token.fxOracleDecimals),
             tokenOutfxOracleDecimals: bnum(tO.token.fxOracleDecimals),
         };

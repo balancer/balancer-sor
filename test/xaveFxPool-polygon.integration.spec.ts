@@ -20,7 +20,7 @@ dotenv.config();
 
 let sor: SOR;
 const networkId = Network.POLYGON;
-const jsonRpcUrl = process.env.RPC_URL;
+const jsonRpcUrl = process.env.ALCHEMY_URL;
 const rpcUrl = 'http://127.0.0.1:8545';
 const provider = new JsonRpcProvider(rpcUrl, networkId);
 const blocknumber = 43667355;

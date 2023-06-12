@@ -16,7 +16,8 @@
                     "priceRate": "1",
                     "weight": null,
                     "token": {
-                        "latestFXPrice": "1.00000000"
+                        "latestFXPrice": "1.00000000",
+                        "fxOracleDecimals": 8
                     }
                 },
                 {
@@ -27,7 +28,8 @@
                     "priceRate": "1",
                     "weight": null,
                     "token": {
-                        "latestFXPrice": "0.74376600"
+                        "latestFXPrice": "0.74376600",
+                        "fxOracleDecimals": 8
                     }
                 }
             ],
