@@ -141,7 +141,7 @@ export const SUBGRAPH_URLS = {
     [Network.GOERLI]:
         'https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-goerli-v2',
     [Network.POLYGON]:
-        'https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-polygon-v2',
+        'https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-polygon-v2-beta',
     [Network.ARBITRUM]: `https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-arbitrum-v2`,
     [Network.GNOSIS]: `https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-gnosis-chain-v2`,
 };
@@ -401,6 +401,16 @@ export const ADDRESSES = {
             address: '0xdc3326e71d45186f113a2f448984ca0e8d201995',
             decimals: 6,
             symbol: 'XSGD',
+        },
+        WMATIC: {
+            address: '0x0d500b1d8e8ef31e21c99d1db9a6444d3adf1270',
+            decimals: 18,
+            symbol: 'WMATIC',
+        },
+        stMATIC: {
+            address: '0x3A58a54C066FdC0f2D55FC9C89F0415C92eBf3C4',
+            decimals: 18,
+            symbol: 'stMATIC',
         },
     },
     [Network.ARBITRUM]: {

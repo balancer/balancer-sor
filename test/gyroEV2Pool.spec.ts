@@ -1,10 +1,10 @@
-// TS_NODE_PROJECT='tsconfig.testing.json' npx mocha -r ts-node/register test/gyroEPool.spec.ts
+// TS_NODE_PROJECT='tsconfig.testing.json' npx mocha -r ts-node/register test/gyroEV2Pool.spec.ts
 
-import { GyroEPoolPairData } from '../src/pools/gyroEPool/gyroEPool';
+import { GyroEPoolPairData } from '../src/pools/gyroEV2Pool/gyroEV2Pool';
 import { WeiPerEther as ONE } from '@ethersproject/constants';
-import { formatFixed, parseFixed } from '@ethersproject/bignumber';
+import { BigNumber, formatFixed, parseFixed } from '@ethersproject/bignumber';
 import { expect } from 'chai';
-import { GyroEPool } from '../src/pools/gyroEPool/gyroEPool';
+import { GyroEV2Pool } from '../src/pools/gyroEV2Pool/gyroEV2Pool';
 import { SwapTypes } from '../src/types';
 import { bnum } from '../src/utils/bignumber';
 import { reduceFee } from '../src/pools/gyroEPool/gyroEMath/gyroEMathHelpers';
@@ -18,12 +18,12 @@ const TEST_POOL_PAIR_DATA: GyroEPoolPairData = {
     tokenOut: '123',
     decimalsIn: 18,
     decimalsOut: 18,
-    balanceIn: ONE.mul(100),
+    balanceIn: BigNumber.from('66666666666666672128'), // ~ 100/1.5 so that the rate-scaled balances are about the same
     balanceOut: ONE.mul(100),
     tokenInIsToken0: true,
 };
 
-const POOL = GyroEPool.fromPool({
+const POOL = GyroEV2Pool.fromPool({
     id: '1',
     address: '1',
     poolType: 'GyroE',
@@ -33,7 +33,7 @@ const POOL = GyroEPool.fromPool({
     tokens: [
         {
             address: '1',
-            balance: '100',
+            balance: '66.66666666666667', // ~ 100/1.5 so that the rate-scaled balances are about the same
             decimals: 18,
             priceRate: '1',
             weight: null,
@@ -47,6 +47,7 @@ const POOL = GyroEPool.fromPool({
         },
     ],
     tokensList: ['1', '2'],
+    tokenRates: ['1.5', '1'],
     // GYRO E-CLP PARAMS
     alpha: '0.050000000000020290',
     beta: '0.397316269897841178',
@@ -86,9 +87,8 @@ describe('gyroEPool tests', () => {
                 poolPairData,
                 SwapTypes.SwapExactIn
             );
-
             expect(Number(limitAmount)).to.be.approximately(
-                354.48480273457726733583,
+                236.323201823051507893,
                 0.00001
             );
         });
@@ -111,7 +111,7 @@ describe('gyroEPool tests', () => {
             );
 
             expect(Number(swapAmount)).to.be.approximately(
-                2.821007799187925949,
+                4.231511373250766852,
                 0.00001
             );
         });
@@ -131,8 +131,8 @@ describe('gyroEPool tests', () => {
             );
 
             expect(Number(reduced)).to.be.approximately(
-                32.257987339909373037,
-                0.00001
+                21.505324893272912024,
+                0.0001
             );
         });
     });
@@ -146,7 +146,7 @@ describe('gyroEPool tests', () => {
                 );
 
             expect(Number(priceAfterSwap)).to.be.approximately(
-                3.544833007099248968,
+                2.363222355995745212,
                 0.00001
             );
         });
@@ -159,7 +159,7 @@ describe('gyroEPool tests', () => {
                 );
 
             expect(Number(priceAfterSwap)).to.be.approximately(
-                3.544835504848199306,
+                2.363223669898799537,
                 0.00001
             );
         });
@@ -174,8 +174,21 @@ describe('gyroEPool tests', () => {
                 );
 
             expect(Number(priceDerivative)).to.be.approximately(
-                1.07491448987e-7,
-                0.00001
+                1.03343127137e-7,
+                1e-12
+            );
+        });
+
+        it(`should correctly calculate derivative of price after swap exact in at 0`, async () => {
+            const priceDerivative =
+                POOL._derivativeSpotPriceAfterSwapExactTokenInForTokenOut(
+                    poolPairData,
+                    bnum('0')
+                );
+
+            expect(Number(priceDerivative)).to.be.approximately(
+                1.17346314397e-7,
+                1e-12
             );
         });
 
@@ -187,7 +200,7 @@ describe('gyroEPool tests', () => {
                 );
 
             expect(Number(priceDerivative)).to.be.approximately(
-                3.2030926701e-7,
+                2.1353951134e-7,
                 1e-12
             );
         });

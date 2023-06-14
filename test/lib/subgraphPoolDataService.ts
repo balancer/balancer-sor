@@ -14,6 +14,7 @@ const queryWithLinear = `
           id
           address
           poolType
+          poolTypeVersion
           swapFee
           totalShares
           tokens (orderBy: index) {
@@ -68,6 +69,7 @@ const queryWithLinear = `
           id
           address
           poolType
+          poolTypeVersion
           swapFee
           totalShares
           tokens (orderBy: index) {
