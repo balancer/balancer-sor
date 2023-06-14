@@ -649,13 +649,6 @@ export const _spotPriceAfterSwapExactTokenInForTokenOut = (
             // used that function with a 0 amount to get a market spot price for the pool
             // which is used in front end display.
 
-            // return amount.isZero()
-            //     ? spotPriceBeforeSwap(amount, poolPairData)
-            //     : bnum(
-            //           (Math.abs(outputAmount * (bnum(1).minus(epsilon))) /
-            //               Math.abs(targetAmountInNumeraire)) *
-            //               currentRate
-            //       );
             return amount.isZero()
                 ? spotPriceBeforeSwap(amount, poolPairData)
                 : outputAmount
