@@ -39,7 +39,7 @@ const stablePool: SubgraphPoolBase[] = [
                 token: {
                     latestFXPrice: '0.9999',
                     fxOracleDecimals: 8,
-              },
+                },
             },
             {
                 address: '0x79c58f70905f734641735bc61e45c19dd9ad60bc',
@@ -50,7 +50,7 @@ const stablePool: SubgraphPoolBase[] = [
                 token: {
                     latestFXPrice: undefined,
                     fxOracleDecimals: 18,
-                  },
+                },
             },
             {
                 address: '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48',
@@ -61,7 +61,7 @@ const stablePool: SubgraphPoolBase[] = [
                 token: {
                     latestFXPrice: '1.00012638',
                     fxOracleDecimals: 8,
-              },
+                },
             },
             {
                 address: '0xdac17f958d2ee523a2206206994597c13d831ec7',
@@ -131,7 +131,7 @@ const xavePool: SubgraphPoolBase[] = [
                 token: {
                     latestFXPrice: '0.99999000',
                     fxOracleDecimals: 8,
-              },
+                },
             },
             {
                 address: '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48',
@@ -213,7 +213,7 @@ describe('Replicating FX Pool Issue, DAI>USDC', () => {
                 provider,
                 [...stablePool, ...xavePool],
                 jsonRpcUrl as string,
-                blocknumber,
+                blocknumber
             );
 
             await sor.fetchPools();
@@ -251,5 +251,7 @@ async function testSwap(): Promise<void> {
 
     expect(swapInfo.returnAmount.gt(0)).to.be.true;
     expect(queryResult[0].toString()).to.eq(swapInfo.swapAmount.toString());
-    expect(queryResult[1].abs().toString()).to.eq(swapInfo.returnAmount.toString());
+    expect(queryResult[1].abs().toString()).to.eq(
+        swapInfo.returnAmount.toString()
+    );
 }

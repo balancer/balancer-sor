@@ -10,12 +10,8 @@ import { AddressZero } from '@ethersproject/constants';
 import { setUp } from './testScripts/utils';
 
 import {
-    ALMOST_ZERO,
-    poolBalancesToNumeraire,
-    spotPriceBeforeSwap,
     viewRawAmount,
     viewNumeraireAmount,
-    _spotPriceAfterSwapExactTokenInForTokenOut,
 } from '../src/pools/xaveFxPool/fxPoolMath';
 /*
  * Testing Notes:

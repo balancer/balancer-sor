@@ -362,7 +362,8 @@ export class FxPool implements PoolBase<FxPoolPairData> {
      * @param args
      * @returns
      */
-    _inHigherPrecision(funcName: Function, ...args) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/ban-types
+    _inHigherPrecision(funcName: Function, ...args: any[]): OldBigNumber {
         const prevDecimalPlaces = OldBigNumber.config({}).DECIMAL_PLACES;
         OldBigNumber.config({
             DECIMAL_PLACES: 36,

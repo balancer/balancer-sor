@@ -1,4 +1,4 @@
-import { BigNumber as OldBigNumber, bnum, scale } from '../../utils/bignumber';
+import { BigNumber as OldBigNumber, bnum } from '../../utils/bignumber';
 import { parseFixed } from '@ethersproject/bignumber';
 
 /**

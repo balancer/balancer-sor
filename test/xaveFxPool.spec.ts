@@ -1,16 +1,14 @@
 // yarn test:only test/xaveFxPool.spec.ts
 import { expect } from 'chai';
-import { BigNumber, parseFixed } from '@ethersproject/bignumber';
-import { ZERO, bnum } from '../src/utils/bignumber';
+import { BigNumber } from '@ethersproject/bignumber';
+import { bnum } from '../src/utils/bignumber';
 
 import { OldBigNumber, PoolTypes, SwapTypes } from '../src';
 // Add new PoolType
 import { FxPool, FxPoolPairData } from '../src/pools/xaveFxPool/fxPool';
 import {
     ALMOST_ZERO,
-    poolBalancesToNumeraire,
     spotPriceBeforeSwap,
-    viewRawAmount,
     _spotPriceAfterSwapExactTokenInForTokenOut,
 } from '../src/pools/xaveFxPool/fxPoolMath';
 
@@ -95,7 +93,7 @@ describe('Test for fxPools', () => {
                 newPool.tokens[1].address // tokenOut
             );
 
-            let amount = newPool.getLimitAmountSwap(
+            const amount = newPool.getLimitAmountSwap(
                 poolPairData,
                 SwapTypes.SwapExactIn
             );
@@ -173,7 +171,10 @@ describe('Test for fxPools', () => {
                                 givenAmount
                             );
 
-                            expect(amountOut.toString()).to.be.equal(testCase.expectedSwapOutput, 'amountOut vs. expectedSwapOutput');
+                            expect(amountOut.toString()).to.be.equal(
+                                testCase.expectedSwapOutput,
+                                'amountOut vs. expectedSwapOutput'
+                            );
 
                             // this doesn't make much sense now
                             // expect(amountOut.toString()).to.be.equal(
@@ -227,7 +228,10 @@ describe('Test for fxPools', () => {
                                 poolPairData,
                                 givenAmount
                             );
-                            expect(amountIn.toString()).to.be.equal(testCase.expectedSwapOutput, 'amountIn vs. expectedSwapOutput');
+                            expect(amountIn.toString()).to.be.equal(
+                                testCase.expectedSwapOutput,
+                                'amountIn vs. expectedSwapOutput'
+                            );
 
                             // expect(amountIn.toString()).to.be.eq(
                             //     viewRawAmount(
