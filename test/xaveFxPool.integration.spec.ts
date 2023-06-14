@@ -9,6 +9,15 @@ import { Vault__factory } from '@balancer-labs/typechain';
 import { AddressZero } from '@ethersproject/constants';
 import { setUp } from './testScripts/utils';
 
+import { ZERO, bnum } from '../src/utils/bignumber';
+import {
+    ALMOST_ZERO,
+    poolBalancesToNumeraire,
+    spotPriceBeforeSwap,
+    viewRawAmount,
+    viewNumeraireAmount,
+    _spotPriceAfterSwapExactTokenInForTokenOut,
+} from '../src/pools/xaveFxPool/fxPoolMath';
 /*
  * Testing Notes:
  * - Add infura api key on .env
@@ -74,6 +83,33 @@ const xaveFxPoolDAI_USDC_MAINNET: SubgraphPoolBase = {
 };
 
 describe('xaveFxPool: DAI-USDC integration tests', () => {
+    context('test fxMath functions', () => {
+        const tokenDecimals = bnum(6);
+        const tokenFxRateDecimals = bnum(8);
+        const rate = bnum('74376600'); // 0.743766
+        it(`should correctly return 'viewRawAmount'`, async () => {
+            const rawAmount = viewRawAmount(
+                bnum('10000'),
+                tokenDecimals,
+                rate,
+                tokenFxRateDecimals
+            );
+            const expected = '13445088912';
+            expect(rawAmount.toString()).to.eq(expected);
+        });
+
+        it(`should correctly return 'viewNumeraireAmount' values`, async () => {
+            const numerarieAmount = viewNumeraireAmount(
+                bnum('13445088912'),
+                tokenDecimals,
+                rate,
+                tokenFxRateDecimals
+            );
+            const expected = '9999.999999';
+            expect(numerarieAmount.toString()).to.eq(expected);
+        });
+    });
+
     context('test swaps vs queryBatchSwap', () => {
         // Setup chain
         before(async function () {

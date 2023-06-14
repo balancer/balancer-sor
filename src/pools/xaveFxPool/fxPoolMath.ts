@@ -174,8 +174,12 @@ const getParsedFxPoolData = (
 
     // rate is converted from chainlink to the actual rate in decimals
     const baseTokenRate = isUSDC(poolPairData.tokenIn)
-        ? poolPairData.tokenOutLatestFXPrice
-        : poolPairData.tokenInLatestFXPrice;
+        ? poolPairData.tokenOutLatestFXPrice.div(
+              bnum(10).pow(poolPairData.tokenOutfxOracleDecimals)
+          )
+        : poolPairData.tokenInLatestFXPrice.div(
+              bnum(10).pow(poolPairData.tokenInfxOracleDecimals)
+          );
 
     // given amount in or out converted to numeraire
     const givenAmountInNumeraire = calculateGivenAmountInNumeraire(
@@ -232,10 +236,19 @@ export const getBaseDecimals = (decimals: number) => {
 
 // Base Assimilator Functions
 // calculations are from the BaseToUsdAssimilator
+
+/**
+ *
+ * @param _amount in numeraire
+ * @param tokenDecimals
+ * @param rate in wei
+ * @param fxOracleDecimals
+ * @returns amount in wei
+ */
 export const viewRawAmount = (
-    _amount: OldBigNumber,
+    _amount: OldBigNumber, // numeraire
     tokenDecimals: OldBigNumber,
-    rate: OldBigNumber,
+    rate: OldBigNumber, // wei
     fxOracleDecimals: OldBigNumber
 ): OldBigNumber => {
     // solidity code `_amount.mulu(baseDecimals).mul(baseOracleDecimals).div(_rate);
@@ -248,10 +261,17 @@ export const viewRawAmount = (
         .integerValue(OldBigNumber.ROUND_DOWN);
 };
 
-const viewNumeraireAmount = (
-    _amount: OldBigNumber,
+/**
+ * @param _amount in wei
+ * @param tokenDecimals
+ * @param rate in wei
+ * @param fxOracleDecimals
+ * @returns amount in numeraire (ie. user friendly decimals)
+ */
+export const viewNumeraireAmount = (
+    _amount: OldBigNumber, // wei
     tokenDecimals: OldBigNumber,
-    rate: OldBigNumber,
+    rate: OldBigNumber, // wei
     fxOracleDecimals: OldBigNumber
 ): OldBigNumber => {
     // Solidity: _amount.mul(_rate).div(basefxOracleDecimals).divu(baseDecimals);

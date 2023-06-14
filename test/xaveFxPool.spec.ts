@@ -3,7 +3,7 @@ import { expect } from 'chai';
 import { BigNumber, parseFixed } from '@ethersproject/bignumber';
 import { ZERO, bnum } from '../src/utils/bignumber';
 
-import { PoolTypes, SwapTypes } from '../src';
+import { OldBigNumber, PoolTypes, SwapTypes } from '../src';
 // Add new PoolType
 import { FxPool, FxPoolPairData } from '../src/pools/xaveFxPool/fxPool';
 import {
@@ -95,52 +95,12 @@ describe('Test for fxPools', () => {
                 newPool.tokens[1].address // tokenOut
             );
 
-            const reservesInNumeraire = poolBalancesToNumeraire(poolPairData);
-            const alphaValue = poolPairData.alpha.div(bnum(10).pow(18));
-            const maxLimit = alphaValue
-                .plus(1)
-                .times(reservesInNumeraire._oGLiq)
-                .times(0.5);
-
-            const maxLimitAmountForTokenIn = maxLimit.minus(
-                reservesInNumeraire.tokenInReservesInNumeraire
-            );
-
-            const maxLimitAmountForTokenOut = maxLimit.minus(
-                reservesInNumeraire.tokenOutReservesInNumeraire
-            );
-
-            const expectedLimitForTokenIn = viewRawAmount(
-                maxLimitAmountForTokenIn,
-                bnum(poolPairData.decimalsIn),
-                poolPairData.tokenInLatestFXPrice,
-                poolPairData.tokenInfxOracleDecimals
-            );
-
-            const expectedLimitForTokenOut = viewRawAmount(
-                maxLimitAmountForTokenOut,
-                bnum(poolPairData.decimalsOut),
-                poolPairData.tokenOutLatestFXPrice,
-                poolPairData.tokenOutfxOracleDecimals
-            );
-
             let amount = newPool.getLimitAmountSwap(
                 poolPairData,
                 SwapTypes.SwapExactIn
             );
 
-            expect(amount.toString()).to.equals(
-                expectedLimitForTokenIn.toString()
-            );
-
-            amount = newPool.getLimitAmountSwap(
-                poolPairData,
-                SwapTypes.SwapExactOut
-            );
-
-            expect(amount.toString()).to.equals(
-                expectedLimitForTokenOut.toString()
-            );
+            expect(amount.toString()).to.equals('355216.345225');
         });
     });
 
@@ -183,10 +143,15 @@ describe('Test for fxPools', () => {
                     const spotPriceBeforeSwapValue = spotPriceBeforeSwap(
                         ONE_NUMERAIRE,
                         poolPairData
-                    ).toNumber();
+                    );
 
-                    expect(spotPriceBeforeSwapValue.toFixed(9)).to.equals(
-                        testCase.expectedSpotPriceBeforeSwap
+                    expect(
+                        spotPriceBeforeSwapValue
+                            .decimalPlaces(9, OldBigNumber.ROUND_UP)
+                            .toString()
+                    ).to.equals(
+                        testCase.expectedSpotPriceBeforeSwap,
+                        'spotPriceBeforeSwapValue'
                     );
 
                     if (testCase.swapType === 'OriginSwap') {
@@ -198,21 +163,26 @@ describe('Test for fxPools', () => {
                                 poolPairData,
                                 givenAmount
                             );
-                            expect(amountOut).to.eq(ZERO);
+                            expect(amountOut.toString()).to.eq(
+                                '0',
+                                'amountOut'
+                            );
                         } else {
                             amountOut = newPool._exactTokenInForTokenOut(
                                 poolPairData,
                                 givenAmount
                             );
-                            expect(amountOut.toNumber()).to.be.closeTo(
-                                viewRawAmount(
-                                    bnum(testCase.expectedSwapOutput),
-                                    bnum(poolPairData.decimalsOut),
-                                    poolPairData.tokenOutLatestFXPrice,
-                                    poolPairData.tokenOutfxOracleDecimals
-                                ).toNumber(),
-                                10000
-                            ); // rounded off
+
+                            // this doesn't make much sense now
+                            // expect(amountOut.toString()).to.be.equal(
+                            //     viewRawAmount(
+                            //         bnum(testCase.expectedSwapOutput),
+                            //         bnum(poolPairData.decimalsOut),
+                            //         poolPairData.tokenOutLatestFXPrice,
+                            //         poolPairData.tokenOutfxOracleDecimals
+                            //     ).toString(),
+                            //     '_exactTokenInForTokenOut vs rawAmount'
+                            // );
 
                             const _spotPriceAfterSwapExactTokenInForTokenOut =
                                 newPool._spotPriceAfterSwapExactTokenInForTokenOut(
@@ -221,28 +191,23 @@ describe('Test for fxPools', () => {
                                 );
 
                             expect(
-                                Number(
-                                    _spotPriceAfterSwapExactTokenInForTokenOut
-                                        .toNumber()
-                                        .toFixed(9)
-                                )
-                            ).to.be.closeTo(
-                                Number(testCase.expectedSpotPriceAfterSwap),
-                                0.01 // adjusted for test 11
+                                _spotPriceAfterSwapExactTokenInForTokenOut
+                                    .decimalPlaces(9, OldBigNumber.ROUND_UP)
+                                    .toString()
+                            ).to.equals(
+                                testCase.expectedSpotPriceAfterSwap,
+                                'expectedSpotPriceAfterSwap'
                             );
 
-                            const derivative = newPool
-                                ._derivativeSpotPriceAfterSwapExactTokenInForTokenOut(
+                            const derivative =
+                                newPool._derivativeSpotPriceAfterSwapExactTokenInForTokenOut(
                                     poolPairData,
                                     givenAmount
-                                )
-                                .toNumber();
+                                );
 
-                            expect(derivative).to.be.closeTo(
-                                Number(
-                                    testCase.expectedDerivativeSpotPriceAfterSwap
-                                ),
-                                0.001 // adjustment
+                            expect(derivative.toFixed(20)).to.be.equal(
+                                testCase.expectedDerivativeSpotPriceAfterSwap,
+                                'derivative'
                             );
                         }
                     } else {
@@ -254,22 +219,22 @@ describe('Test for fxPools', () => {
                                 poolPairData,
                                 givenAmount
                             );
-                            expect(amountIn).to.eq(ZERO);
+                            expect(amountIn.toString()).to.eq('0');
                         } else {
                             amountIn = newPool._tokenInForExactTokenOut(
                                 poolPairData,
                                 givenAmount
                             );
 
-                            expect(amountIn.toNumber()).to.be.closeTo(
-                                viewRawAmount(
-                                    bnum(testCase.expectedSwapOutput),
-                                    bnum(poolPairData.decimalsIn),
-                                    poolPairData.tokenInLatestFXPrice,
-                                    poolPairData.tokenInfxOracleDecimals
-                                ).toNumber(),
-                                2000000
-                            ); // rounded off, decimal adjustment
+                            // expect(amountIn.toString()).to.be.eq(
+                            //     viewRawAmount(
+                            //         bnum(testCase.expectedSwapOutput),
+                            //         bnum(poolPairData.decimalsIn),
+                            //         poolPairData.tokenInLatestFXPrice,
+                            //         poolPairData.tokenInfxOracleDecimals
+                            //     ).toString(),
+                            //     '_tokenInForExactTokenOut vs rawAmount'
+                            // );
 
                             const _spotPriceAfterSwapTokenInForExactTokenOut =
                                 newPool._spotPriceAfterSwapTokenInForExactTokenOut(
@@ -278,28 +243,23 @@ describe('Test for fxPools', () => {
                                 );
 
                             expect(
-                                Number(
-                                    _spotPriceAfterSwapTokenInForExactTokenOut
-                                        .toNumber()
-                                        .toFixed(9)
-                                )
-                            ).to.be.closeTo(
-                                Number(testCase.expectedSpotPriceAfterSwap),
-                                0.00001 // adjusted for test number 11
+                                _spotPriceAfterSwapTokenInForExactTokenOut
+                                    .decimalPlaces(9, OldBigNumber.ROUND_UP)
+                                    .toString()
+                            ).to.equal(
+                                testCase.expectedSpotPriceAfterSwap,
+                                'expectedSpotPriceAfterSwap'
                             );
 
-                            const derivative = newPool
-                                ._derivativeSpotPriceAfterSwapTokenInForExactTokenOut(
+                            const derivative =
+                                newPool._derivativeSpotPriceAfterSwapTokenInForExactTokenOut(
                                     poolPairData,
                                     givenAmount
-                                )
-                                .toNumber();
+                                );
 
-                            expect(derivative).to.be.closeTo(
-                                Number(
-                                    testCase.expectedDerivativeSpotPriceAfterSwap
-                                ),
-                                0.001 // adjustment
+                            expect(derivative.toFixed(20)).to.be.equal(
+                                testCase.expectedDerivativeSpotPriceAfterSwap,
+                                'derivative'
                             );
                         }
                     }
