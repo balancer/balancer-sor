@@ -1,7 +1,9 @@
 import { getAddress } from '@ethersproject/address';
 import { BigNumber, formatFixed, parseFixed } from '@ethersproject/bignumber';
 import { Zero } from '@ethersproject/constants';
-import { BigNumber as OldBigNumber, ZERO, bnum } from './big-number';
+import { BigNumber as OldBigNumber, ZERO, bnum } from '../../utils/bignumber';
+
+import { parseFixedCurveParam } from './parseFixedCurveParam';
 import { isSameAddress } from '../../utils';
 import { universalNormalizedLiquidity } from '../liquidity';
 import {
@@ -27,38 +29,6 @@ type FxPoolToken = Pick<
     SubgraphToken,
     'address' | 'balance' | 'decimals' | 'token'
 >;
-
-/**
- * Replicates the conversion operation to 64.64 fixed point numbers (ABDK library)
- * that occurs in the smart contract. This is done to replicate the loss of precision
- * from the smart contract.
- *
- * For example: in 1e18 decimals, when converting _epsilon_ `0.0015` from `uint256`
- * to a 64.64 fixed point number (`(_epsilon + 1).divu(1e18)`) there is a loss
- * of precision. In 64.64 fixed point, epsilon is stored as 0.001500000000000000953.
- * This is the value that is used in calculations in the smart contract.
- *
- * When converted from 64.64 fixed point back to `uint256` the value is
- * 0.001500000000000000 which is the same as the original value of 0.0015.
- * This is what the graph is seeing.
- *
- * This function is used to replicate the same loss of precision that occurs
- * in the smart contract so that we work with an epsilon value of
- * 0.001500000000000000953 instead of 0.0015.
- *
- * @param param any of the pool's curve parameters like alpha, beta, lambda, delta, epsilon
- * @returns OldBigNumber with the same loss of precision as the smart contract
- */
-const parseFixedCurveParam = (param: string): OldBigNumber => {
-    const param64 =
-        ((((BigInt(parseFixed(param, 18).toString()) + 1n) << 64n) /
-            10n ** 18n) *
-            10n ** 36n) >>
-        64n;
-    return bnum(param64.toString())
-        .div(bnum(10).pow(18))
-        .decimalPlaces(3, OldBigNumber.ROUND_UP);
-};
 
 export type FxPoolPairData = PoolPairBase & {
     alpha: OldBigNumber;
@@ -230,6 +200,17 @@ export class FxPool implements PoolBase<FxPoolPairData> {
         poolPairData: FxPoolPairData,
         swapType: SwapTypes
     ): OldBigNumber {
+        return this._inHigherPrecision(
+            this._getLimitAmountSwap,
+            poolPairData,
+            swapType
+        );
+    }
+
+    _getLimitAmountSwap(
+        poolPairData: FxPoolPairData,
+        swapType: SwapTypes
+    ): OldBigNumber {
         try {
             const parsedReserves = poolBalancesToNumeraire(poolPairData);
 
@@ -286,8 +267,12 @@ export class FxPool implements PoolBase<FxPoolPairData> {
         amount: OldBigNumber
     ): OldBigNumber {
         try {
-            return _exactTokenInForTokenOut(amount, poolPairData);
-        } catch {
+            return this._inHigherPrecision(
+                _exactTokenInForTokenOut,
+                amount,
+                poolPairData
+            );
+        } catch (e) {
             return ZERO;
         }
     }
@@ -297,7 +282,11 @@ export class FxPool implements PoolBase<FxPoolPairData> {
         amount: OldBigNumber
     ): OldBigNumber {
         try {
-            return _tokenInForExactTokenOut(amount, poolPairData);
+            return this._inHigherPrecision(
+                _tokenInForExactTokenOut,
+                amount,
+                poolPairData
+            );
         } catch {
             return ZERO;
         }
@@ -308,7 +297,8 @@ export class FxPool implements PoolBase<FxPoolPairData> {
         amount: OldBigNumber
     ): OldBigNumber {
         try {
-            return _spotPriceAfterSwapExactTokenInForTokenOut(
+            return this._inHigherPrecision(
+                _spotPriceAfterSwapExactTokenInForTokenOut,
                 poolPairData,
                 amount
             );
@@ -322,7 +312,8 @@ export class FxPool implements PoolBase<FxPoolPairData> {
         amount: OldBigNumber
     ): OldBigNumber {
         try {
-            return _spotPriceAfterSwapTokenInForExactTokenOut(
+            return this._inHigherPrecision(
+                _spotPriceAfterSwapTokenInForExactTokenOut,
                 poolPairData,
                 amount
             );
@@ -336,7 +327,8 @@ export class FxPool implements PoolBase<FxPoolPairData> {
         amount: OldBigNumber
     ): OldBigNumber {
         try {
-            return _derivativeSpotPriceAfterSwapExactTokenInForTokenOut(
+            return this._inHigherPrecision(
+                _derivativeSpotPriceAfterSwapExactTokenInForTokenOut,
                 amount,
                 poolPairData
             );
@@ -350,12 +342,38 @@ export class FxPool implements PoolBase<FxPoolPairData> {
         amount: OldBigNumber
     ): OldBigNumber {
         try {
-            return _derivativeSpotPriceAfterSwapTokenInForExactTokenOut(
+            return this._inHigherPrecision(
+                _derivativeSpotPriceAfterSwapTokenInForExactTokenOut,
                 amount,
                 poolPairData
             );
         } catch {
             return ZERO;
         }
+    }
+
+    /**
+     * Runs the given function with the BigNumber config set to 36 decimals.
+     * This is needed since in the Solidity code we use 64.64 fixed point numbers
+     * for the curve math operations. This makes the SOR default of 18 decimals
+     * not enough.
+     *
+     * @param funcName
+     * @param args
+     * @returns
+     */
+    _inHigherPrecision(funcName: Function, ...args) {
+        const prevDecimalPlaces = OldBigNumber.config({}).DECIMAL_PLACES;
+        OldBigNumber.config({
+            DECIMAL_PLACES: 36,
+        });
+
+        const val = funcName.apply(this, args);
+
+        OldBigNumber.config({
+            DECIMAL_PLACES: prevDecimalPlaces,
+        });
+
+        return val;
     }
 }
