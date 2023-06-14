@@ -280,7 +280,6 @@ export const viewNumeraireAmount = (
         .div(bnum(10).pow(fxOracleDecimals))
         .integerValue(OldBigNumber.ROUND_DOWN)
         .div(bnum(10).pow(tokenDecimals));
-    // 167_922_339.1836
 };
 
 // Curve Math

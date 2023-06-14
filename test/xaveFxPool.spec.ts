@@ -14,6 +14,8 @@ import {
     _spotPriceAfterSwapExactTokenInForTokenOut,
 } from '../src/pools/xaveFxPool/fxPoolMath';
 
+const debug = require('debug')('xave');
+
 // Add new pool test data in Subgraph Schema format
 import testPools from './testData/fxPool/fxPool.json';
 import testCases from './testData/fxPool/fxPoolTestCases.json';
@@ -173,6 +175,8 @@ describe('Test for fxPools', () => {
                                 givenAmount
                             );
 
+                            expect(testCase.expectedSwapOutput).to.be.equal(amountOut.toString(), 'amountOut vs. expectedSwapOutput');
+
                             // this doesn't make much sense now
                             // expect(amountOut.toString()).to.be.equal(
                             //     viewRawAmount(
@@ -225,6 +229,7 @@ describe('Test for fxPools', () => {
                                 poolPairData,
                                 givenAmount
                             );
+                            expect(testCase.expectedSwapOutput).to.be.equal(amountIn.toString(), 'amountIn vs. expectedSwapOutput');
 
                             // expect(amountIn.toString()).to.be.eq(
                             //     viewRawAmount(
