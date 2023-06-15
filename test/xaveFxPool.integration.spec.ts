@@ -75,7 +75,7 @@ const xaveFxPoolDAI_USDC_MAINNET: SubgraphPoolBase = {
 
 const test = 'FX' in PoolFilter;
 
-describe('xaveFxPool: DAI-USDC integration tests', () => {
+describe('xaveFxPool: DAI-USDC integration (Mainnet) tests', () => {
     context('test swaps vs queryBatchSwap', () => {
         // Setup chain
         before(async function () {

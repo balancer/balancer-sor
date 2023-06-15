@@ -20,8 +20,8 @@ dotenv.config();
 
 let sor: SOR;
 const networkId = Network.POLYGON;
-const jsonRpcUrl = process.env.ALCHEMY_URL;
-const rpcUrl = 'http://127.0.0.1:8545';
+const jsonRpcUrl = process.env.ALCHEMY_URL_POLYGON;
+const rpcUrl = 'http://127.0.0.1:8137';
 const provider = new JsonRpcProvider(rpcUrl, networkId);
 const blocknumber = 43667355;
 
@@ -72,7 +72,7 @@ const xaveFxPoolXSGD_USDC_POLYGON: SubgraphPoolBase = {
     epsilon: '0.0005',
 };
 
-describe('[POLYGON] xaveFxPool: DAI-USDC integration tests', () => {
+describe('xaveFxPool: DAI-USDC integration (Polygon) tests', () => {
     context('test swaps vs queryBatchSwap', () => {
         // Setup chain
         before(async function () {

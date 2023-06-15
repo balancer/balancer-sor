@@ -187,7 +187,7 @@ const tokenOut = ADDRESSES[Network.MAINNET].USDC.address;
 const swapType = SwapTypes.SwapExactIn;
 const swapAmount = parseFixed('10', 18);
 
-describe('Replicating FX Pool Issue, DAI>USDC', () => {
+describe('xaveFxPool: Stable Pool + FX Pool integration (Mainnet), DAI-USDC', () => {
     context('Stable pool only', () => {
         before(async function () {
             sor = await setUp(

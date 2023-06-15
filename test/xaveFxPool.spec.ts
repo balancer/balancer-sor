@@ -31,7 +31,7 @@ type TestCaseType = {
 
 const ONE_NUMERAIRE = bnum(1);
 
-describe('Test for fxPools', () => {
+describe('xaveFxPool: fxPools stub test', () => {
     context('parsePoolPairData', () => {
         it(`should correctly parse token > token`, async () => {
             // It's useful to use tokens with <18 decimals for some tests to make sure scaling is ok

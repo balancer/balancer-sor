@@ -9,7 +9,7 @@ import {
     viewNumeraireAmount,
 } from '../src/pools/xaveFxPool/fxPoolMath';
 
-context('test fxMath functions', () => {
+context('xaveFxPool: fxMath functions', () => {
     const tokenDecimals = bnum(6);
     const tokenFxRateDecimals = bnum(8);
     const rate = bnum('74376600'); // 0.743766
