@@ -9,14 +9,6 @@ import { Vault__factory } from '@balancer-labs/typechain';
 import { AddressZero } from '@ethersproject/constants';
 import { setUp } from './testScripts/utils';
 
-/*
- * Testing Notes:
- * - Add infura api key on .env
- * - Run  node on terminal: yarn run node
- */
-
-// accuracy test: https://app.warp.dev/block/bcbBMkR8Da96QHQ2phmHZN
-
 dotenv.config();
 
 let sor: SOR;
