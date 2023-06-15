@@ -151,6 +151,10 @@ describe('xaveFxPool: fxPools stub test', () => {
                         testCase.expectedSpotPriceBeforeSwap,
                         'spotPriceBeforeSwapValue'
                     );
+                    expect(OldBigNumber.config({}).DECIMAL_PLACES).to.eq(
+                        18,
+                        'OldBigNumber.config().DECIMAL_PLACES should be 18 after a call to FXPool functions'
+                    );
 
                     if (testCase.swapType === 'OriginSwap') {
                         let amountOut;
@@ -175,17 +179,6 @@ describe('xaveFxPool: fxPools stub test', () => {
                                 testCase.expectedSwapOutput,
                                 'amountOut vs. expectedSwapOutput'
                             );
-
-                            // this doesn't make much sense now
-                            // expect(amountOut.toString()).to.be.equal(
-                            //     viewRawAmount(
-                            //         bnum(testCase.expectedSwapOutput),
-                            //         bnum(poolPairData.decimalsOut),
-                            //         poolPairData.tokenOutLatestFXPrice,
-                            //         poolPairData.tokenOutfxOracleDecimals
-                            //     ).toString(),
-                            //     '_exactTokenInForTokenOut vs rawAmount'
-                            // );
 
                             const _spotPriceAfterSwapExactTokenInForTokenOut =
                                 newPool._spotPriceAfterSwapExactTokenInForTokenOut(
@@ -217,12 +210,29 @@ describe('xaveFxPool: fxPools stub test', () => {
                         let amountIn;
 
                         if (testCase.testNo === '12') {
+                            expect(
+                                OldBigNumber.config({}).DECIMAL_PLACES
+                            ).to.eq(
+                                18,
+                                'OldBigNumber.config().DECIMAL_PLACES should be 18 by default'
+                            );
+
                             // CurveMathRevert.LowerHalt
                             const amountIn = newPool._tokenInForExactTokenOut(
                                 poolPairData,
                                 givenAmount
                             );
-                            expect(amountIn.toString()).to.eq('0');
+                            expect(amountIn.toString()).to.eq(
+                                '0',
+                                `_tokenInForExactTokenOut should throw CurveMathRevert.LowerHalt`
+                            );
+                            // ensure that even in the case of an exception, DECIMAL_PLACES is still 18
+                            expect(
+                                OldBigNumber.config({}).DECIMAL_PLACES
+                            ).to.eq(
+                                18,
+                                'OldBigNumber.config().DECIMAL_PLACES should be 18 even if FxPool._tokenInForExactTokenOut throws CurveMathRevert.LowerHalt'
+                            );
                         } else {
                             amountIn = newPool._tokenInForExactTokenOut(
                                 poolPairData,
@@ -232,16 +242,6 @@ describe('xaveFxPool: fxPools stub test', () => {
                                 testCase.expectedSwapOutput,
                                 'amountIn vs. expectedSwapOutput'
                             );
-
-                            // expect(amountIn.toString()).to.be.eq(
-                            //     viewRawAmount(
-                            //         bnum(testCase.expectedSwapOutput),
-                            //         bnum(poolPairData.decimalsIn),
-                            //         poolPairData.tokenInLatestFXPrice,
-                            //         poolPairData.tokenInfxOracleDecimals
-                            //     ).toString(),
-                            //     '_tokenInForExactTokenOut vs rawAmount'
-                            // );
 
                             const _spotPriceAfterSwapTokenInForExactTokenOut =
                                 newPool._spotPriceAfterSwapTokenInForExactTokenOut(

@@ -369,12 +369,19 @@ export class FxPool implements PoolBase<FxPoolPairData> {
             DECIMAL_PLACES: 36,
         });
 
-        const val = funcName.apply(this, args);
-
-        OldBigNumber.config({
-            DECIMAL_PLACES: prevDecimalPlaces,
-        });
-
-        return val;
+        try {
+            const val = funcName.apply(this, args);
+            OldBigNumber.config({
+                DECIMAL_PLACES: prevDecimalPlaces,
+            });
+            return val;
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        } catch (err: any) {
+            // restore the original BigNumber config even in case of an exception
+            OldBigNumber.config({
+                DECIMAL_PLACES: prevDecimalPlaces,
+            });
+            throw err;
+        }
     }
 }
