@@ -212,7 +212,7 @@ export enum PoolFilter {
     SiloLinear = 'SiloLinear',
     TetuLinear = 'TetuLinear',
     YearnLinear = 'YearnLinear',
-    // FX = 'FX',
+    FX = 'FX',
 }
 
 export interface PoolBase<D extends PoolPairBase = PoolPairBase> {
