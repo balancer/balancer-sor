@@ -13,8 +13,8 @@ import {
 } from '../src/pools/xaveFxPool/fxPoolMath';
 
 // Add new pool test data in Subgraph Schema format
-import testPools from './testData/fxPool/fxPool.json';
-import testCases from './testData/fxPool/fxPoolTestCases.json';
+import testPools from './testData/fxPool/fxPool_43667355.json';
+import testCases from './testData/fxPool/fxPoolTestCases_43667355.json';
 
 type TestCaseType = {
     testNo: string;
@@ -98,7 +98,7 @@ describe('xaveFxPool: fxPools stub test', () => {
                 SwapTypes.SwapExactIn
             );
 
-            expect(amount.toString()).to.equals('355216.345225');
+            expect(amount.toString()).to.equals('960380.032958'); // @todo check
         });
     });
 

@@ -514,6 +514,7 @@ export function _exactTokenInForTokenOut(
     } else {
         const epsilon = parsedFxPoolData.epsilon;
         const _amtWithFee = _amt[0].times(bnum(1).minus(epsilon)); // fee retained by the pool // @TODO this results in a 1 wei less in solidity
+
         // -10.0019 * (1-0.0015)
         return viewRawAmount(
             _amtWithFee.abs(),
