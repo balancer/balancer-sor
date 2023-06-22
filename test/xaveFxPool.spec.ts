@@ -47,36 +47,21 @@ describe('xaveFxPool: fxPools stub test', () => {
             expect(poolPairData.id).to.eq(poolData.id);
             expect(poolPairData.poolType).to.eq(PoolTypes.Fx);
 
-            expect(
-                poolPairData.alpha
-                    .div(bnum(10).pow(18))
-                    .decimalPlaces(8)
-                    .toString()
-            ).to.eq(poolData.alpha);
-            expect(
-                poolPairData.beta
-                    .div(bnum(10).pow(18))
-                    .decimalPlaces(8)
-                    .toString()
-            ).to.eq(poolData.beta);
-            expect(
-                poolPairData.lambda
-                    .div(bnum(10).pow(18))
-                    .decimalPlaces(8)
-                    .toString()
-            ).to.eq(poolData.lambda);
-            expect(
-                poolPairData.delta
-                    .div(bnum(10).pow(18))
-                    .decimalPlaces(8)
-                    .toString()
-            ).to.eq(poolData.delta);
-            expect(
-                poolPairData.epsilon
-                    .div(bnum(10).pow(18))
-                    .decimalPlaces(8)
-                    .toString()
-            ).to.eq(poolData.epsilon);
+            expect(poolPairData.alpha.div(bnum(10).pow(18)).toString()).to.eq(
+                poolData.alpha
+            );
+            expect(poolPairData.beta.div(bnum(10).pow(18)).toString()).to.eq(
+                poolData.beta
+            );
+            expect(poolPairData.lambda.div(bnum(10).pow(18)).toString()).to.eq(
+                poolData.lambda
+            );
+            expect(poolPairData.delta.div(bnum(10).pow(18)).toString()).to.eq(
+                poolData.delta
+            );
+            expect(poolPairData.epsilon.div(bnum(10).pow(18)).toString()).to.eq(
+                poolData.epsilon
+            );
         });
     });
 
@@ -143,11 +128,7 @@ describe('xaveFxPool: fxPools stub test', () => {
                         poolPairData
                     );
 
-                    expect(
-                        spotPriceBeforeSwapValue
-                            .decimalPlaces(9, OldBigNumber.ROUND_UP)
-                            .toString()
-                    ).to.equals(
+                    expect(spotPriceBeforeSwapValue.toString()).to.equals(
                         testCase.expectedSpotPriceBeforeSwap,
                         'spotPriceBeforeSwapValue'
                     );
@@ -187,9 +168,7 @@ describe('xaveFxPool: fxPools stub test', () => {
                                 );
 
                             expect(
-                                _spotPriceAfterSwapExactTokenInForTokenOut
-                                    .decimalPlaces(9, OldBigNumber.ROUND_UP)
-                                    .toString()
+                                _spotPriceAfterSwapExactTokenInForTokenOut.toString()
                             ).to.equals(
                                 testCase.expectedSpotPriceAfterSwap,
                                 'expectedSpotPriceAfterSwap'
@@ -250,9 +229,7 @@ describe('xaveFxPool: fxPools stub test', () => {
                                 );
 
                             expect(
-                                _spotPriceAfterSwapTokenInForExactTokenOut
-                                    .decimalPlaces(9, OldBigNumber.ROUND_UP)
-                                    .toString()
+                                _spotPriceAfterSwapTokenInForExactTokenOut.toString()
                             ).to.equal(
                                 testCase.expectedSpotPriceAfterSwap,
                                 'expectedSpotPriceAfterSwap'
