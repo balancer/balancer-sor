@@ -7,7 +7,6 @@ import { OldBigNumber, PoolTypes, SwapTypes } from '../src';
 // Add new PoolType
 import { FxPool, FxPoolPairData } from '../src/pools/xaveFxPool/fxPool';
 import {
-    ALMOST_ZERO,
     spotPriceBeforeSwap,
     _spotPriceAfterSwapExactTokenInForTokenOut,
 } from '../src/pools/xaveFxPool/fxPoolMath';
