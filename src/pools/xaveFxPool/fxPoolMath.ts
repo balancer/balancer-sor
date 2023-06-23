@@ -212,28 +212,6 @@ const getParsedFxPoolData = (
     };
 };
 
-// get base decimals for
-// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
-export const getBaseDecimals = (decimals: number) => {
-    switch (decimals) {
-        case 6: {
-            return ONE_TO_THE_SIX_NUM;
-        }
-
-        case 2: {
-            return ONE_TO_THE_SECOND_NUM;
-        }
-
-        case 18: {
-            return ONE_ETHER.toString();
-        }
-
-        default: {
-            return ONE_ETHER.toString();
-        }
-    }
-};
-
 // Base Assimilator Functions
 // calculations are from the BaseToUsdAssimilator
 
@@ -513,7 +491,7 @@ export function _exactTokenInForTokenOut(
         throw new Error(CurveMathRevert.CannotSwap);
     } else {
         const epsilon = parsedFxPoolData.epsilon;
-        const _amtWithFee = _amt[0].times(bnum(1).minus(epsilon)); // fee retained by the pool // @TODO this results in a 1 wei less in solidity
+        const _amtWithFee = _amt[0].times(bnum(1).minus(epsilon));
 
         return viewRawAmount(
             _amtWithFee.abs(),
@@ -529,7 +507,6 @@ export function _tokenInForExactTokenOut(
     amount: OldBigNumber,
     poolPairData: FxPoolPairData
 ): OldBigNumber {
-    // const amountIn = scale(amount, poolPairData.decimalsOut);
     const parsedFxPoolData = getParsedFxPoolData(amount, poolPairData, false);
     const targetAmountInNumeraire =
         parsedFxPoolData.givenAmountInNumeraire.times(-1);
