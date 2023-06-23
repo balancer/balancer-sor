@@ -219,7 +219,7 @@ export class FxPool implements PoolBase<FxPoolPairData> {
             const maxLimit = alphaValue
                 .plus(1)
                 .times(parsedReserves._oGLiq)
-                .times(0.5);
+                .times('0.5');
 
             if (swapType === SwapTypes.SwapExactIn) {
                 const maxLimitAmount = maxLimit.minus(
@@ -355,8 +355,8 @@ export class FxPool implements PoolBase<FxPoolPairData> {
     /**
      * Runs the given function with the BigNumber config set to 36 decimals.
      * This is needed since in the Solidity code we use 64.64 fixed point numbers
-     * for the curve math operations. This makes the SOR default of 18 decimals
-     * not enough.
+     * for the curve math operations (ABDKMath64x64.sol). This makes the SOR
+     * default of 18 decimals not enough.
      *
      * @param funcName
      * @param args

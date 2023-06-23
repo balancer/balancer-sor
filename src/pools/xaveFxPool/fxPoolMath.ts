@@ -1,22 +1,11 @@
-import { BigNumber as OldBigNumber, bnum, scale } from '../../utils/bignumber';
+import { BigNumber as OldBigNumber, bnum } from '../../utils/bignumber';
 import { FxPoolPairData } from './fxPool';
 import { BigNumber } from '@ethersproject/bignumber';
 
 // Constants
-export const CURVEMATH_MAX_DIFF = -0.000001000000000000024;
-export const NEGATIVE_ONE = bnum('-1');
-export const ONE = bnum('1');
-export const ONE_TO_THE_SECOND_NUM = 100;
-export const ONE_TO_THE_SECOND = BigInt(`${ONE_TO_THE_SECOND_NUM}`);
-export const ONE_TO_THE_EIGHT_NUM = 100000000;
-export const ONE_TO_THE_EIGHT = BigInt(`${ONE_TO_THE_EIGHT_NUM}`);
-export const ONE_TO_THE_SIX_NUM = 1000000;
-export const ONE_TO_THE_SIX = BigInt(`${ONE_TO_THE_SIX_NUM}`);
-export const ONE_TO_THE_THIRTEEN_NUM = 10000000000000;
-export const ONE_TO_THE_THIRTEEN = BigInt(`${ONE_TO_THE_THIRTEEN_NUM}`);
-export const ONE_ETHER = scale(bnum('1'), 18);
-export const ALMOST_ZERO = 0.0000000000000000001; // swapping within beta region has no slippage
-const CURVEMATH_MAX = 0.25; //CURVEMATH MAX from contract
+export const CURVEMATH_MAX_DIFF = bnum('-0.000001000000000000024');
+export const ONE_TO_THE_THIRTEEN_NUM = bnum('10000000000000');
+const CURVEMATH_MAX = bnum('0.25'); //CURVEMATH MAX from contract
 
 export enum CurveMathRevert {
     LowerHalt = 'CurveMath/lower-halt',
@@ -113,7 +102,7 @@ export const poolBalancesToNumeraire = (
             bnum(poolPairData.decimalsOut),
             poolPairData.tokenOutLatestFXPrice,
             poolPairData.tokenOutfxOracleDecimals
-        ).decimalPlaces(15, OldBigNumber.ROUND_DOWN);
+        );
     } else {
         tokenInNumeraire = viewNumeraireAmount(
             EthersBNToOldBn(poolPairData.balanceOut),
@@ -280,7 +269,7 @@ const calculateMicroFee = (
             fee_ = fee_.times(_delta);
 
             if (fee_.gt(CURVEMATH_MAX)) {
-                fee_ = bnum(CURVEMATH_MAX);
+                fee_ = CURVEMATH_MAX;
             }
 
             fee_ = fee_.times(_feeMargin);
@@ -296,7 +285,7 @@ const calculateMicroFee = (
             fee_ = _feeMargin.div(_ideal);
             fee_ = fee_.times(_delta);
 
-            if (fee_.gt(CURVEMATH_MAX)) fee_ = bnum(CURVEMATH_MAX);
+            if (fee_.gt(CURVEMATH_MAX)) fee_ = CURVEMATH_MAX;
 
             fee_ = fee_.times(_feeMargin);
         } else {
@@ -616,9 +605,9 @@ export const _spotPriceAfterSwapExactTokenInForTokenOut = (
 
     const outputAmount = outputAfterTrade[0];
 
-    const maxBetaLimit = beta.plus(1).times(0.5).times(_oGLiq);
+    const maxBetaLimit = beta.plus(1).times('0.5').times(_oGLiq);
 
-    const minBetaLimit = bnum(1).minus(beta).times(0.5).times(_oGLiq);
+    const minBetaLimit = bnum(1).minus(beta).times('0.5').times(_oGLiq);
 
     if (isUSDC(poolPairData.tokenIn)) {
         // token[0] to token [1] in originswap
@@ -716,9 +705,9 @@ export const _spotPriceAfterSwapTokenInForExactTokenOut = (
 
     const outputAmount = outputAfterTrade[0];
 
-    const maxBetaLimit = beta.plus(1).times(0.5).times(_oGLiq);
+    const maxBetaLimit = beta.plus(1).times('0.5').times(_oGLiq);
 
-    const minBetaLimit = bnum(1).minus(beta).times(0.5).times(_oGLiq);
+    const minBetaLimit = bnum(1).minus(beta).times('0.5').times(_oGLiq);
 
     if (isUSDC(poolPairData.tokenIn)) {
         // token[0] to token [1] in originswap
