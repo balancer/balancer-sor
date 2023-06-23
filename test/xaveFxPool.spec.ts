@@ -99,7 +99,7 @@ describe('xaveFxPool: fxPools stub test', () => {
 
             expect(
                 newPool.getNormalizedLiquidity(poolPairData).toString()
-            ).to.equals(bnum(1).div(ALMOST_ZERO).toString());
+            ).to.equals('0', 'getNormalizedLiquidity');
         });
     });
 

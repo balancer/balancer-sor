@@ -6,10 +6,10 @@
         "givenAmount": "100000",
         "tokenIn": "USDC",
         "tokenOut": "XSGD",
-        "expectedSpotPriceBeforeSwap": "0.7418926681",
-        "expectedSpotPriceAfterSwap": "0.7418926681",
+        "expectedSpotPriceBeforeSwap": "0.74189266",
+        "expectedSpotPriceAfterSwap": "0.74189266",
         "expectedSwapOutput": "134652.537477",
-        "expectedDerivativeSpotPriceAfterSwap": "0.00000000000000000010"
+        "expectedDerivativeSpotPriceAfterSwap": "0.00000000000000000000"
     },
     {
         "testNo": "2",
@@ -18,8 +18,8 @@
         "givenAmount": "100000",
         "tokenIn": "XSGD",
         "tokenOut": "USDC",
-        "expectedSpotPriceBeforeSwap": "0.7418926681",
-        "expectedSpotPriceAfterSwap": "0.7418926681",
+        "expectedSpotPriceBeforeSwap": "0.74189266",
+        "expectedSpotPriceAfterSwap": "0.74189266",
         "expectedSwapOutput": "134787.257375",
         "expectedDerivativeSpotPriceAfterSwap": "0.00000000000000000000"
     },
@@ -30,10 +30,10 @@
         "givenAmount": "100000",
         "tokenIn": "XSGD",
         "tokenOut": "USDC",
-        "expectedSpotPriceBeforeSwap": "0.7418926681",
-        "expectedSpotPriceAfterSwap": "0.7418926681",
+        "expectedSpotPriceBeforeSwap": "0.74189266",
+        "expectedSpotPriceAfterSwap": "0.74189266",
         "expectedSwapOutput": "74190.970975",
-        "expectedDerivativeSpotPriceAfterSwap": "0.00000000000000000010"
+        "expectedDerivativeSpotPriceAfterSwap": "0.00000000000000000000"
     },
     {
         "testNo": "4",
@@ -42,8 +42,8 @@
         "givenAmount": "100000",
         "tokenIn": "USDC",
         "tokenOut": "XSGD",
-        "expectedSpotPriceBeforeSwap": "0.7418926681",
-        "expectedSpotPriceAfterSwap": "0.7418926681",
+        "expectedSpotPriceBeforeSwap": "0.74189266",
+        "expectedSpotPriceAfterSwap": "0.74189266",
         "expectedSwapOutput": "74265.199061",
         "expectedDerivativeSpotPriceAfterSwap": "0.00000000000000000000"
     },
@@ -55,10 +55,10 @@
         "givenAmount": "200000",
         "tokenIn": "USDC",
         "tokenOut": "XSGD",
-        "expectedSpotPriceBeforeSwap": "0.7418926681",
-        "expectedSpotPriceAfterSwap": "0.7418926681",
+        "expectedSpotPriceBeforeSwap": "0.74189266",
+        "expectedSpotPriceAfterSwap": "0.74189266",
         "expectedSwapOutput": "269305.074955",
-        "expectedDerivativeSpotPriceAfterSwap": "0.00000000000000000010"
+        "expectedDerivativeSpotPriceAfterSwap": "0.00000000000000000000"
     },
 
     {
@@ -68,10 +68,10 @@
         "givenAmount": "200000",
         "tokenIn": "XSGD",
         "tokenOut": "USDC",
-        "expectedSpotPriceBeforeSwap": "0.7418926681",
-        "expectedSpotPriceAfterSwap": "0.740778401",
+        "expectedSpotPriceBeforeSwap": "0.74189266",
+        "expectedSpotPriceAfterSwap": "0.7407784",
         "expectedSwapOutput": "269980.072169",
-        "expectedDerivativeSpotPriceAfterSwap": "0.00150192575850307544"
+        "expectedDerivativeSpotPriceAfterSwap": "0.00150191538490217708"
     },
 
     {
@@ -81,10 +81,10 @@
         "givenAmount": "270000",
         "tokenIn": "XSGD",
         "tokenOut": "USDC",
-        "expectedSpotPriceBeforeSwap": "0.7418926681",
-        "expectedSpotPriceAfterSwap": "0.740767482",
+        "expectedSpotPriceBeforeSwap": "0.74189266",
+        "expectedSpotPriceAfterSwap": "0.74076748",
         "expectedSwapOutput": "200011.814393",
-        "expectedDerivativeSpotPriceAfterSwap": "0.00151664278646597275"
+        "expectedDerivativeSpotPriceAfterSwap": "0.00151663449534599789"
     },
     {
         "testNo": "8",
@@ -93,8 +93,8 @@
         "givenAmount": "270000",
         "tokenIn": "USDC",
         "tokenOut": "XSGD",
-        "expectedSpotPriceBeforeSwap": "0.7418926681",
-        "expectedSpotPriceAfterSwap": "0.7418926681",
+        "expectedSpotPriceBeforeSwap": "0.74189266",
+        "expectedSpotPriceAfterSwap": "0.74189266",
         "expectedSwapOutput": "200516.037466",
         "expectedDerivativeSpotPriceAfterSwap": "0.00000000000000000000"
     },
@@ -106,10 +106,10 @@
         "givenAmount": "450000",
         "tokenIn": "XSGD",
         "tokenOut": "USDC",
-        "expectedSpotPriceBeforeSwap": "0.7418926681",
-        "expectedSpotPriceAfterSwap": "0.669706953",
+        "expectedSpotPriceBeforeSwap": "0.74189266",
+        "expectedSpotPriceAfterSwap": "0.66970695",
         "expectedSwapOutput": "671920.250617",
-        "expectedDerivativeSpotPriceAfterSwap": "0.09729940529313825916"
+        "expectedDerivativeSpotPriceAfterSwap": "0.09729939908018499603"
     },
 
     {
@@ -119,7 +119,7 @@
         "givenAmount": "610000",
         "tokenIn": "XSGD",
         "tokenOut": "USDC",
-        "expectedSpotPriceBeforeSwap": "0.7418926681",
+        "expectedSpotPriceBeforeSwap": "0.74189266",
         "expectedSpotPriceAfterSwap": "CurveMath/lower-halt",
         "expectedSwapOutput": "CurveMath/lower-halt",
         "expectedDerivativeSpotPriceAfterSwap": "CurveMath/lower-halt"

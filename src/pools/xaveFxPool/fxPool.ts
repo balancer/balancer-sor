@@ -102,7 +102,7 @@ export class FxPool implements PoolBase<FxPoolPairData> {
         this.alpha = parseFixedCurveParam(alpha);
         this.beta = parseFixedCurveParam(beta);
         this.lambda = parseFixedCurveParam(lambda);
-        this.delta = parseFixedCurveParam(delta);
+        this.delta = bnum(parseFixed(delta, 18).toString());
         this.epsilon = parseFixedCurveParam(epsilon);
     }
     updateTotalShares: (newTotalShares: BigNumber) => void;

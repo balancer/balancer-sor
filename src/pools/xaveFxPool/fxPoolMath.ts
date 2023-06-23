@@ -599,11 +599,16 @@ export const spotPriceBeforeSwap = (
         parsedFxPoolData
     );
 
-    return outputAmountInNumeraire[0]
+    const val = outputAmountInNumeraire[0]
         .abs()
         .times(bnum(1).minus(parsedFxPoolData.epsilon))
         .div(inputAmountInNumeraire.abs())
-        .times(parsedFxPoolData.baseTokenRate);
+        .times(parsedFxPoolData.baseTokenRate)
+        .decimalPlaces(
+            poolPairData.tokenOutfxOracleDecimals.toNumber(),
+            OldBigNumber.ROUND_DOWN
+        );
+    return val;
 };
 
 // spot price after origin swap
@@ -656,9 +661,18 @@ export const _spotPriceAfterSwapExactTokenInForTokenOut = (
                       .times(bnum(1).minus(epsilon))
                       .abs()
                       .div(targetAmountInNumeraire.abs())
-                      .times(currentRate);
+                      .times(currentRate)
+                      .decimalPlaces(
+                          poolPairData.tokenInfxOracleDecimals.toNumber(),
+                          OldBigNumber.ROUND_DOWN
+                      );
         } else {
-            return currentRate.times(bnum(1).minus(epsilon));
+            return currentRate
+                .times(bnum(1).minus(epsilon))
+                .decimalPlaces(
+                    poolPairData.tokenInfxOracleDecimals.toNumber(),
+                    OldBigNumber.ROUND_DOWN
+                );
         }
     } else {
         // if usdc is tokenOut
@@ -675,9 +689,19 @@ export const _spotPriceAfterSwapExactTokenInForTokenOut = (
                 .times(bnum(1).minus(epsilon))
                 .abs()
                 .div(targetAmountInNumeraire.abs());
-            return ratioOfOutputAndInput.times(currentRate);
+            return ratioOfOutputAndInput
+                .times(currentRate)
+                .decimalPlaces(
+                    poolPairData.tokenInfxOracleDecimals.toNumber(),
+                    OldBigNumber.ROUND_DOWN
+                );
         } else {
-            return currentRate.times(bnum(1).minus(epsilon));
+            return currentRate
+                .times(bnum(1).minus(epsilon))
+                .decimalPlaces(
+                    poolPairData.tokenInfxOracleDecimals.toNumber(),
+                    OldBigNumber.ROUND_DOWN
+                );
         }
     }
 };
@@ -729,9 +753,19 @@ export const _spotPriceAfterSwapTokenInForExactTokenOut = (
             return targetAmountInNumeraire
                 .abs()
                 .div(outputAmount.times(epsilon.plus(1)).abs())
-                .times(currentRate);
+                .times(currentRate)
+                .decimalPlaces(
+                    poolPairData.tokenOutfxOracleDecimals.toNumber(),
+                    OldBigNumber.ROUND_DOWN
+                );
         } else {
-            return currentRate.times(bnum(1).minus(epsilon));
+            // rate * (1-epsilon)
+            return currentRate
+                .times(bnum(1).minus(epsilon))
+                .decimalPlaces(
+                    poolPairData.tokenOutfxOracleDecimals.toNumber(),
+                    OldBigNumber.ROUND_DOWN
+                );
         }
     } else {
         //  token[1] to token [0] in originswap
@@ -745,9 +779,18 @@ export const _spotPriceAfterSwapTokenInForExactTokenOut = (
             return targetAmountInNumeraire
                 .abs()
                 .div(outputAmount.times(epsilon.plus(1)).abs())
-                .times(currentRate);
+                .times(currentRate)
+                .decimalPlaces(
+                    poolPairData.tokenOutfxOracleDecimals.toNumber(),
+                    OldBigNumber.ROUND_DOWN
+                );
         } else {
-            return currentRate.times(bnum(1).minus(epsilon));
+            return currentRate
+                .times(bnum(1).minus(epsilon))
+                .decimalPlaces(
+                    poolPairData.tokenOutfxOracleDecimals.toNumber(),
+                    OldBigNumber.ROUND_DOWN
+                );
         }
     }
 };
@@ -761,7 +804,11 @@ export const _derivativeSpotPriceAfterSwapExactTokenInForTokenOut = (
     const y = _spotPriceAfterSwapExactTokenInForTokenOut(poolPairData, amount);
     const yMinusX = y.minus(x);
     const ans = yMinusX.div(x);
-    return ans.isZero() ? bnum(ALMOST_ZERO) : ans.abs();
+    // if we're outside the Beta region the derivative will be negative
+    // but `UniversalNormalizedLiquidity` returns ZERO for negative values
+    // therefore we want to make sure this reflects the fact that we're
+    // moving outside of Beta region
+    return ans.abs();
 };
 
 // target swap
@@ -773,5 +820,9 @@ export const _derivativeSpotPriceAfterSwapTokenInForExactTokenOut = (
     const y = _spotPriceAfterSwapTokenInForExactTokenOut(poolPairData, amount);
     const yMinusX = y.minus(x);
     const ans = yMinusX.div(x);
+    // if we're outside the Beta region the derivative will be negative
+    // but `UniversalNormalizedLiquidity` returns ZERO for negative values
+    // therefore we want to make sure this reflects the fact that we're
+    // moving outside of Beta region
     return ans.abs();
 };
