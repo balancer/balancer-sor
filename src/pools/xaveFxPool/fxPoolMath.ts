@@ -1,7 +1,6 @@
 import { BigNumber as OldBigNumber, bnum } from '../../utils/bignumber';
 import { FxPoolPairData } from './fxPool';
 import { BigNumber, parseFixed } from '@ethersproject/bignumber';
-import { ONE as ONE_ETH } from '../../utils/basicOperations';
 import { safeParseFixed } from '../../utils';
 
 // Constants
@@ -19,11 +18,11 @@ export enum CurveMathRevert {
 }
 
 interface ParsedFxPoolData {
-    alpha: OldBigNumber;
-    beta: OldBigNumber;
-    delta: OldBigNumber;
-    epsilon: OldBigNumber;
-    lambda: OldBigNumber;
+    alpha: BigNumber;
+    beta: BigNumber;
+    delta: BigNumber;
+    epsilon: BigNumber;
+    lambda: BigNumber;
     baseTokenRate: OldBigNumber;
     _oGLiq: OldBigNumber;
     _nGLiq: OldBigNumber;
@@ -181,11 +180,11 @@ const getParsedFxPoolData = (
     );
 
     return {
-        alpha: poolPairData.alpha.div(bnum(10).pow(18)),
-        beta: poolPairData.beta.div(bnum(10).pow(18)),
-        delta: poolPairData.delta.div(bnum(10).pow(18)),
-        epsilon: poolPairData.epsilon.div(bnum(10).pow(18)),
-        lambda: poolPairData.lambda.div(bnum(10).pow(18)),
+        alpha: parseFixed(poolPairData.alpha.toString(), 18),
+        beta: parseFixed(poolPairData.beta.toString(), 18),
+        delta: parseFixed(poolPairData.delta.toString(), 18),
+        epsilon: parseFixed(poolPairData.epsilon.toString(), 18),
+        lambda: parseFixed(poolPairData.lambda.toString(), 18),
         baseTokenRate: baseTokenRate,
         _oGLiq: baseReserves.plus(usdcReserves),
         _nGLiq: baseReserves.plus(usdcReserves),
@@ -223,14 +222,11 @@ export const viewRawAmount = (
 ): OldBigNumber => {
     // solidity code `_amount.mulu(baseDecimals).mul(baseOracleDecimals).div(_rate);
 
-    const inAmount = BigInt(
-        safeParseFixed(_amount.toString(), tokenDecimals).toString()
-    );
-
-    const val =
-        (inAmount * BigInt(10 ** fxOracleDecimals) * ONE_ETH) /
-        BigInt(rate.toString()) /
-        ONE_ETH;
+    const val = safeParseFixed(_amount.toString(), tokenDecimals)
+      .mul(safeParseFixed('1', fxOracleDecimals))
+      .mul(ONE_36)
+      .div(safeParseFixed(rate.toString(), 36))
+      ;
 
     return bnum(val.toString());
 };
@@ -250,9 +246,9 @@ export const viewNumeraireAmount = (
 ): OldBigNumber => {
     // Solidity: _amount.mul(_rate).div(basefxOracleDecimals).divu(baseDecimals);
 
-    const val =
-        (BigInt(_amount.toString()) * BigInt(rate.toString())) /
-        BigInt(10 ** fxOracleDecimals);
+    const val = safeParseFixed(_amount.toString(), 36).mul(
+      safeParseFixed(rate.toString(), 36)
+    ).div(ONE_36).div(ONE_36).div(safeParseFixed('1', fxOracleDecimals));
 
     return bnum(val.toString()).div(bnum(10).pow(tokenDecimals));
 };
@@ -345,10 +341,10 @@ const calculateTrade = (
     const oBals_ = _oBals.map((d) => safeParseFixed(d.toString(), 36));
     const nBals_ = _nBals.map((d) => safeParseFixed(d.toString(), 36));
 
-    const alpha = safeParseFixed(poolPairData.alpha.toString(), 36);
-    const beta = safeParseFixed(poolPairData.beta.toString(), 36);
-    const delta = safeParseFixed(poolPairData.delta.toString(), 36);
-    const lambda = safeParseFixed(poolPairData.lambda.toString(), 36);
+    const alpha = poolPairData.alpha;
+    const beta = poolPairData.beta;
+    const delta = poolPairData.delta;
+    const lambda = poolPairData.lambda;
 
     let outputAmt_ = inputAmt_.mul(-1);
 
@@ -504,7 +500,9 @@ export function _exactTokenInForTokenOut(
         throw new Error(CurveMathRevert.CannotSwap);
     } else {
         const epsilon = parsedFxPoolData.epsilon;
-        const _amtWithFee = _amt[0].times(bnum(1).minus(epsilon));
+        const _amtWithFee = _amt[0].times(
+            bnum(1).minus(bnum(epsilon.toString()).div(bnum(10).pow(36)))
+        );
 
         return viewRawAmount(
             _amtWithFee.abs(),
@@ -590,7 +588,11 @@ export const spotPriceBeforeSwap = (
 
     const val = outputAmountInNumeraire[0]
         .abs()
-        .times(bnum(1).minus(parsedFxPoolData.epsilon))
+        .times(
+            bnum(1).minus(
+                bnum(parsedFxPoolData.epsilon.toString()).div(bnum(10).pow(36))
+            )
+        )
         .div(inputAmountInNumeraire.abs())
         .times(parsedFxPoolData.baseTokenRate)
         .decimalPlaces(
@@ -629,9 +631,16 @@ export const _spotPriceAfterSwapExactTokenInForTokenOut = (
 
     const outputAmount = outputAfterTrade[0];
 
-    const maxBetaLimit = beta.plus(1).times('0.5').times(_oGLiq);
+    const maxBetaLimit = bnum(beta.toString())
+        .div(bnum(10).pow(36))
+        .plus(1)
+        .times('0.5')
+        .times(_oGLiq);
 
-    const minBetaLimit = bnum(1).minus(beta).times('0.5').times(_oGLiq);
+    const minBetaLimit = bnum(1)
+        .minus(bnum(beta.toString()).div(bnum(10).pow(36)))
+        .times('0.5')
+        .times(_oGLiq);
 
     if (isUSDC(poolPairData.tokenIn)) {
         // token[0] to token [1] in originswap
@@ -647,7 +656,11 @@ export const _spotPriceAfterSwapExactTokenInForTokenOut = (
             return amount.isZero()
                 ? spotPriceBeforeSwap(amount, poolPairData)
                 : outputAmount
-                      .times(bnum(1).minus(epsilon))
+                      .times(
+                          bnum(1).minus(
+                              bnum(epsilon.toString()).div(bnum(10).pow(36))
+                          )
+                      )
                       .abs()
                       .div(targetAmountInNumeraire.abs())
                       .times(currentRate)
@@ -657,7 +670,11 @@ export const _spotPriceAfterSwapExactTokenInForTokenOut = (
                       );
         } else {
             return currentRate
-                .times(bnum(1).minus(epsilon))
+                .times(
+                    bnum(1).minus(
+                        bnum(epsilon.toString()).div(bnum(10).pow(36))
+                    )
+                )
                 .decimalPlaces(
                     poolPairData.tokenInfxOracleDecimals,
                     OldBigNumber.ROUND_DOWN
@@ -675,7 +692,11 @@ export const _spotPriceAfterSwapExactTokenInForTokenOut = (
                 return spotPriceBeforeSwap(amount, poolPairData);
 
             const ratioOfOutputAndInput = outputAmount
-                .times(bnum(1).minus(epsilon))
+                .times(
+                    bnum(1).minus(
+                        bnum(epsilon.toString()).div(bnum(10).pow(36))
+                    )
+                )
                 .abs()
                 .div(targetAmountInNumeraire.abs());
             return ratioOfOutputAndInput
@@ -686,7 +707,11 @@ export const _spotPriceAfterSwapExactTokenInForTokenOut = (
                 );
         } else {
             return currentRate
-                .times(bnum(1).minus(epsilon))
+                .times(
+                    bnum(1).minus(
+                        bnum(epsilon.toString()).div(bnum(10).pow(36))
+                    )
+                )
                 .decimalPlaces(
                     poolPairData.tokenInfxOracleDecimals,
                     OldBigNumber.ROUND_DOWN
@@ -727,9 +752,16 @@ export const _spotPriceAfterSwapTokenInForExactTokenOut = (
 
     const outputAmount = outputAfterTrade[0];
 
-    const maxBetaLimit = beta.plus(1).times('0.5').times(_oGLiq);
+    const maxBetaLimit = bnum(beta.toString())
+        .div(bnum(10).pow(36))
+        .plus(1)
+        .times('0.5')
+        .times(_oGLiq);
 
-    const minBetaLimit = bnum(1).minus(beta).times('0.5').times(_oGLiq);
+    const minBetaLimit = bnum(1)
+        .minus(bnum(beta.toString()).div(bnum(10).pow(36)))
+        .times('0.5')
+        .times(_oGLiq);
 
     if (isUSDC(poolPairData.tokenIn)) {
         // token[0] to token [1] in originswap
@@ -739,7 +771,15 @@ export const _spotPriceAfterSwapTokenInForExactTokenOut = (
         if (oBals1after.lt(minBetaLimit) && oBals0after.gt(maxBetaLimit)) {
             return targetAmountInNumeraire
                 .abs()
-                .div(outputAmount.times(epsilon.plus(1)).abs())
+                .div(
+                    outputAmount
+                        .times(
+                            bnum(epsilon.toString())
+                                .div(bnum(10).pow(36))
+                                .plus(1)
+                        )
+                        .abs()
+                )
                 .times(currentRate)
                 .decimalPlaces(
                     poolPairData.tokenOutfxOracleDecimals,
@@ -748,7 +788,11 @@ export const _spotPriceAfterSwapTokenInForExactTokenOut = (
         } else {
             // rate * (1-epsilon)
             return currentRate
-                .times(bnum(1).minus(epsilon))
+                .times(
+                    bnum(1).minus(
+                        bnum(epsilon.toString()).div(bnum(10).pow(36))
+                    )
+                )
                 .decimalPlaces(
                     poolPairData.tokenOutfxOracleDecimals,
                     OldBigNumber.ROUND_DOWN
@@ -765,7 +809,15 @@ export const _spotPriceAfterSwapTokenInForExactTokenOut = (
         if (isBeyondMinBeta && isBeyondMaxBeta) {
             return targetAmountInNumeraire
                 .abs()
-                .div(outputAmount.times(epsilon.plus(1)).abs())
+                .div(
+                    outputAmount
+                        .times(
+                            bnum(epsilon.toString())
+                                .div(bnum(10).pow(36))
+                                .plus(1)
+                        )
+                        .abs()
+                )
                 .times(currentRate)
                 .decimalPlaces(
                     poolPairData.tokenOutfxOracleDecimals,
@@ -773,7 +825,11 @@ export const _spotPriceAfterSwapTokenInForExactTokenOut = (
                 );
         } else {
             return currentRate
-                .times(bnum(1).minus(epsilon))
+                .times(
+                    bnum(1).minus(
+                        bnum(epsilon.toString()).div(bnum(10).pow(36))
+                    )
+                )
                 .decimalPlaces(
                     poolPairData.tokenOutfxOracleDecimals,
                     OldBigNumber.ROUND_DOWN

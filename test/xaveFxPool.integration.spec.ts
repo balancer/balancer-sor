@@ -113,12 +113,12 @@ describe('xaveFxPool: DAI-USDC integration (Mainnet) tests', () => {
                 funds
             );
 
-            expect(queryResult[0].toString()).to.eq(
-                swapInfo.swapAmount.toString()
+            expect(swapInfo.swapAmount.toString()).to.eq(
+                queryResult[0].toString()
             );
 
-            expect(queryResult[1].abs().toString()).to.be.eq(
-                swapInfo.returnAmount.toString()
+            expect(swapInfo.returnAmount.toString()).to.be.eq(
+                queryResult[1].abs().toString()
             );
         });
 
@@ -142,11 +142,11 @@ describe('xaveFxPool: DAI-USDC integration (Mainnet) tests', () => {
                 funds
             );
 
-            expect(queryResult[0].abs().toString()).to.be.eq(
-                swapInfo.returnAmount.toString()
+            expect(swapInfo.returnAmount.toString()).to.be.eq(
+                queryResult[0].abs().toString()
             );
-            expect(queryResult[1].abs().toString()).to.eq(
-                swapInfo.swapAmount.toString()
+            expect(swapInfo.swapAmount.toString()).to.eq(
+                queryResult[1].abs().toString()
             );
         });
     });
