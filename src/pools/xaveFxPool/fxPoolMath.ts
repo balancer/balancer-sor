@@ -1,13 +1,14 @@
 import { BigNumber as OldBigNumber, bnum } from '../../utils/bignumber';
 import { FxPoolPairData } from './fxPool';
-import { BigNumber } from '@ethersproject/bignumber';
+import { BigNumber, parseFixed } from '@ethersproject/bignumber';
 import { ONE as ONE_ETH } from '../../utils/basicOperations';
 import { safeParseFixed } from '../../utils';
 
 // Constants
+export const ONE_36 = parseFixed('1', 36);
 export const CURVEMATH_MAX_DIFF = bnum('-0.000001000000000000024');
 export const ONE_TO_THE_THIRTEEN_NUM = bnum('10000000000000');
-const CURVEMATH_MAX = bnum('0.25'); //CURVEMATH MAX from contract
+const CURVEMATH_MAX_36 = parseFixed('0.25', 36); //CURVEMATH MAX from contract
 
 export enum CurveMathRevert {
     LowerHalt = 'CurveMath/lower-halt',
@@ -259,44 +260,44 @@ export const viewNumeraireAmount = (
 // Curve Math
 // calculations are from CurveMath.sol
 const calculateMicroFee = (
-    _bal: OldBigNumber,
-    _ideal: OldBigNumber,
-    _beta: OldBigNumber,
-    _delta: OldBigNumber
-): OldBigNumber => {
+    _bal: BigNumber,
+    _ideal: BigNumber,
+    _beta: BigNumber,
+    _delta: BigNumber
+): BigNumber => {
     let _threshold, _feeMargin;
-    let fee_ = bnum(0);
+    let fee_ = BigNumber.from(0);
 
     if (_bal.lt(_ideal)) {
-        _threshold = _ideal.times(bnum(1).minus(_beta)); // CURVEMATH ONE
+        _threshold = _ideal.mul(ONE_36.sub(_beta)).div(ONE_36);
 
         if (_bal.lt(_threshold)) {
-            _feeMargin = _threshold.minus(_bal);
-            fee_ = _feeMargin.div(_ideal);
-            fee_ = fee_.times(_delta);
+            _feeMargin = _threshold.sub(_bal);
+            fee_ = _feeMargin.mul(ONE_36).div(_ideal);
+            fee_ = fee_.mul(_delta).div(ONE_36);
 
-            if (fee_.gt(CURVEMATH_MAX)) {
-                fee_ = CURVEMATH_MAX;
+            if (fee_.gt(CURVEMATH_MAX_36)) {
+                fee_ = CURVEMATH_MAX_36;
             }
 
-            fee_ = fee_.times(_feeMargin);
+            fee_ = fee_.mul(_feeMargin).div(ONE_36);
         } else {
-            fee_ = bnum(0);
+            fee_ = BigNumber.from(0);
         }
     } else {
-        _threshold = _ideal.times(_beta.plus(1)); // CURVEMATH_ONE
+        _threshold = _ideal.mul(_beta.add(ONE_36)).div(ONE_36);
 
         if (_bal.gt(_threshold)) {
-            _feeMargin = _bal.minus(_threshold);
+            _feeMargin = _bal.sub(_threshold);
 
-            fee_ = _feeMargin.div(_ideal);
-            fee_ = fee_.times(_delta);
+            fee_ = _feeMargin.mul(ONE_36).div(_ideal);
+            fee_ = fee_.mul(_delta).div(ONE_36);
 
-            if (fee_.gt(CURVEMATH_MAX)) fee_ = CURVEMATH_MAX;
+            if (fee_.gt(CURVEMATH_MAX_36)) fee_ = CURVEMATH_MAX_36;
 
-            fee_ = fee_.times(_feeMargin);
+            fee_ = fee_.mul(_feeMargin).div(ONE_36);
         } else {
-            fee_ = bnum(0);
+            fee_ = BigNumber.from(0);
         }
     }
 
@@ -304,20 +305,20 @@ const calculateMicroFee = (
 };
 
 const calculateFee = (
-    _gLiq: OldBigNumber,
-    _bals: OldBigNumber[],
-    _beta: OldBigNumber,
-    _delta: OldBigNumber,
-    _weights: OldBigNumber[]
-): OldBigNumber => {
+    _gLiq: BigNumber,
+    _bals: BigNumber[],
+    _beta: BigNumber,
+    _delta: BigNumber,
+    _weights: BigNumber[]
+): BigNumber => {
     const _length = _bals.length;
-    let psi_ = bnum(0);
+    let psi_ = BigNumber.from(0);
 
     for (let i = 0; i < _length; i++) {
-        const _ideal = _gLiq.times(_weights[i]);
+        const _ideal = _gLiq.mul(_weights[i]).div(ONE_36);
 
         // keep away from wei values like how the contract do it
-        psi_ = psi_.plus(calculateMicroFee(_bals[i], _ideal, _beta, _delta));
+        psi_ = psi_.add(calculateMicroFee(_bals[i], _ideal, _beta, _delta));
     }
 
     return psi_;
@@ -343,12 +344,28 @@ const calculateTrade = (
 
     outputAmt_ = _inputAmt.times(-1);
 
-    const _omega = calculateFee(_oGLiq, _oBals, beta, delta, _weights);
+    const _omega = bnum(
+        calculateFee(
+            safeParseFixed(_oGLiq.toString(), 36),
+            _oBals.map((d) => safeParseFixed(d.toString(), 36)),
+            safeParseFixed(beta.toString(), 36),
+            safeParseFixed(delta.toString(), 36),
+            _weights.map((d) => safeParseFixed(d.toString(), 36))
+        ).toString()
+    ).div(bnum(10).pow(36));
 
     let _psi: OldBigNumber;
 
     for (let i = 0; i < 32; i++) {
-        _psi = calculateFee(_nGLiq, _nBals, beta, delta, _weights);
+        _psi = bnum(
+            calculateFee(
+                safeParseFixed(_nGLiq.toString(), 36),
+                _nBals.map((d) => safeParseFixed(d.toString(), 36)),
+                safeParseFixed(beta.toString(), 36),
+                safeParseFixed(delta.toString(), 36),
+                _weights.map((d) => safeParseFixed(d.toString(), 36))
+            ).toString()
+        ).div(bnum(10).pow(36));
 
         const prevAmount = outputAmt_;
 

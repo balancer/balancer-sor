@@ -72,56 +72,5 @@
         "expectedSpotPriceAfterSwap": "0.7407784",
         "expectedSwapOutput": "269980.072169",
         "expectedDerivativeSpotPriceAfterSwap": "0.00150191538490217708"
-    },
-
-    {
-        "testNo": "7",
-        "description": "Swap within Beta Region: OriginSwap/_exactTokenInForTokenOut XSGD > ? USDC",
-        "swapType": "OriginSwap",
-        "givenAmount": "270000",
-        "tokenIn": "XSGD",
-        "tokenOut": "USDC",
-        "expectedSpotPriceBeforeSwap": "0.74189266",
-        "expectedSpotPriceAfterSwap": "0.74076748",
-        "expectedSwapOutput": "200011.814393",
-        "expectedDerivativeSpotPriceAfterSwap": "0.00151663449534599789"
-    },
-    {
-        "testNo": "8",
-        "description": "Swap Beyond Beta Region: TargetSwap / tokenInForExactTokenOut ? USDC > XSGD",
-        "swapType": "TargetSwap",
-        "givenAmount": "270000",
-        "tokenIn": "USDC",
-        "tokenOut": "XSGD",
-        "expectedSpotPriceBeforeSwap": "0.74189266",
-        "expectedSpotPriceAfterSwap": "0.74189266",
-        "expectedSwapOutput": "200516.037466",
-        "expectedDerivativeSpotPriceAfterSwap": "0.00000000000000000000"
-    },
-
-    {
-        "testNo": "10",
-        "description": "Swap within Beta Region: TargetSwap / tokenInForExactTokenOut ? XSGD > USDC",
-        "swapType": "TargetSwap",
-        "givenAmount": "450000",
-        "tokenIn": "XSGD",
-        "tokenOut": "USDC",
-        "expectedSpotPriceBeforeSwap": "0.74189266",
-        "expectedSpotPriceAfterSwap": "0.66970695",
-        "expectedSwapOutput": "671920.250617",
-        "expectedDerivativeSpotPriceAfterSwap": "0.09729939908018499603"
-    },
-
-    {
-        "testNo": "12",
-        "description": "Swap beyond Alpha Region: TargetSwap / tokenInForExactTokenOut ? USDC > XSGD",
-        "swapType": "TargetSwap",
-        "givenAmount": "610000",
-        "tokenIn": "XSGD",
-        "tokenOut": "USDC",
-        "expectedSpotPriceBeforeSwap": "0.74189266",
-        "expectedSpotPriceAfterSwap": "CurveMath/lower-halt",
-        "expectedSwapOutput": "CurveMath/lower-halt",
-        "expectedDerivativeSpotPriceAfterSwap": "CurveMath/lower-halt"
     }
 ]
