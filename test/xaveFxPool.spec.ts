@@ -272,8 +272,8 @@ describe('xaveFxPool: fxPools stub test', () => {
                 epsilon: bnum('0x01c6bf52634000'),
                 tokenInLatestFXPrice: bnum('99963085000000'),
                 tokenOutLatestFXPrice: bnum('74200489000000'),
-                tokenInfxOracleDecimals: bnum(8),
-                tokenOutfxOracleDecimals: bnum(8),
+                tokenInfxOracleDecimals: 8,
+                tokenOutfxOracleDecimals: 8,
             };
             const sp = _spotPriceAfterSwapExactTokenInForTokenOut(
                 poolPairData,

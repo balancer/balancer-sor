@@ -10,9 +10,10 @@ import {
 } from '../src/pools/xaveFxPool/fxPoolMath';
 
 context('xaveFxPool: fxMath functions', () => {
-    const tokenDecimals = bnum(6);
-    const tokenFxRateDecimals = bnum(8);
+    const tokenDecimals = 6;
+    const tokenFxRateDecimals = 8;
     const rate = bnum('74376600'); // 0.743766
+
     it(`should correctly return 'viewRawAmount'`, async () => {
         const rawAmount = viewRawAmount(
             bnum('10000'),
@@ -21,6 +22,17 @@ context('xaveFxPool: fxMath functions', () => {
             tokenFxRateDecimals
         );
         const expected = '13445088912';
+        expect(rawAmount.toString()).to.eq(expected);
+    });
+
+    it(`should correctly return large 'viewRawAmount'`, async () => {
+        const rawAmount = viewRawAmount(
+            bnum('10000').times(bnum(10).pow(18)),
+            tokenDecimals,
+            rate,
+            tokenFxRateDecimals
+        );
+        const expected = '13445088912372977522500356294';
         expect(rawAmount.toString()).to.eq(expected);
     });
 

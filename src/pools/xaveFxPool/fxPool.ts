@@ -37,9 +37,9 @@ export type FxPoolPairData = PoolPairBase & {
     delta: OldBigNumber;
     epsilon: OldBigNumber;
     tokenInLatestFXPrice: OldBigNumber;
-    tokenInfxOracleDecimals: OldBigNumber;
+    tokenInfxOracleDecimals: number;
     tokenOutLatestFXPrice: OldBigNumber;
-    tokenOutfxOracleDecimals: OldBigNumber;
+    tokenOutfxOracleDecimals: number;
 };
 
 export class FxPool implements PoolBase<FxPoolPairData> {
@@ -172,8 +172,8 @@ export class FxPool implements PoolBase<FxPoolPairData> {
                     tO.token.fxOracleDecimals
                 ).toString()
             ), // decimals is formatted from subgraph in rate we get from the chainlink oracle
-            tokenInfxOracleDecimals: bnum(tI.token.fxOracleDecimals),
-            tokenOutfxOracleDecimals: bnum(tO.token.fxOracleDecimals),
+            tokenInfxOracleDecimals: tI.token.fxOracleDecimals,
+            tokenOutfxOracleDecimals: tO.token.fxOracleDecimals,
         };
 
         return poolPairData;
@@ -228,7 +228,7 @@ export class FxPool implements PoolBase<FxPoolPairData> {
 
                 return viewRawAmount(
                     maxLimitAmount,
-                    bnum(poolPairData.decimalsIn),
+                    poolPairData.decimalsIn,
                     poolPairData.tokenInLatestFXPrice,
                     poolPairData.tokenInfxOracleDecimals
                 ).div(bnum(10).pow(poolPairData.decimalsIn));
@@ -239,7 +239,7 @@ export class FxPool implements PoolBase<FxPoolPairData> {
 
                 return viewRawAmount(
                     maxLimitAmount,
-                    bnum(poolPairData.decimalsOut),
+                    poolPairData.decimalsOut,
                     poolPairData.tokenOutLatestFXPrice,
                     poolPairData.tokenOutfxOracleDecimals
                 ).div(bnum(10).pow(poolPairData.decimalsOut));
