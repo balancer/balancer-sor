@@ -6,8 +6,8 @@ import { safeParseFixed } from '../../utils';
 
 // Constants
 export const ONE_36 = parseFixed('1', 36);
-export const CURVEMATH_MAX_DIFF = bnum('-0.000001000000000000024');
-export const ONE_TO_THE_THIRTEEN_NUM = bnum('10000000000000');
+export const CURVEMATH_MAX_DIFF_36 = parseFixed('-0.000001000000000000024', 36);
+export const ONE_TO_THE_THIRTEEN_NUM_36 = parseFixed('10000000000000', 36);
 const CURVEMATH_MAX_36 = parseFixed('0.25', 36); //CURVEMATH MAX from contract
 
 export enum CurveMathRevert {
@@ -334,60 +334,56 @@ const calculateTrade = (
     _outputIndex: number,
     poolPairData: ParsedFxPoolData
 ): [OldBigNumber, OldBigNumber] => {
-    let outputAmt_;
-    const _weights: OldBigNumber[] = [bnum('0.5'), bnum('0.5')]; // const for now since all weights are 0.5
+    const weights_: BigNumber[] = [
+        safeParseFixed('0.5', 36),
+        safeParseFixed('0.5', 36),
+    ]; // const for now since all weights are 0.5
 
-    const alpha = poolPairData.alpha;
-    const beta = poolPairData.beta;
-    const delta = poolPairData.delta;
-    const lambda = poolPairData.lambda;
+    const inputAmt_ = safeParseFixed(_inputAmt.toString(), 36);
+    const oGLiq_ = safeParseFixed(_oGLiq.toString(), 36);
+    let nGLiq_ = safeParseFixed(_nGLiq.toString(), 36);
+    const oBals_ = _oBals.map((d) => safeParseFixed(d.toString(), 36));
+    const nBals_ = _nBals.map((d) => safeParseFixed(d.toString(), 36));
 
-    outputAmt_ = _inputAmt.times(-1);
+    const alpha = safeParseFixed(poolPairData.alpha.toString(), 36);
+    const beta = safeParseFixed(poolPairData.beta.toString(), 36);
+    const delta = safeParseFixed(poolPairData.delta.toString(), 36);
+    const lambda = safeParseFixed(poolPairData.lambda.toString(), 36);
 
-    const _omega = bnum(
-        calculateFee(
-            safeParseFixed(_oGLiq.toString(), 36),
-            _oBals.map((d) => safeParseFixed(d.toString(), 36)),
-            safeParseFixed(beta.toString(), 36),
-            safeParseFixed(delta.toString(), 36),
-            _weights.map((d) => safeParseFixed(d.toString(), 36))
-        ).toString()
-    ).div(bnum(10).pow(36));
+    let outputAmt_ = inputAmt_.mul(-1);
 
-    let _psi: OldBigNumber;
+    const omega_ = calculateFee(oGLiq_, oBals_, beta, delta, weights_);
+
+    let psi_: BigNumber;
 
     for (let i = 0; i < 32; i++) {
-        _psi = bnum(
-            calculateFee(
-                safeParseFixed(_nGLiq.toString(), 36),
-                _nBals.map((d) => safeParseFixed(d.toString(), 36)),
-                safeParseFixed(beta.toString(), 36),
-                safeParseFixed(delta.toString(), 36),
-                _weights.map((d) => safeParseFixed(d.toString(), 36))
-            ).toString()
-        ).div(bnum(10).pow(36));
+        psi_ = calculateFee(nGLiq_, nBals_, beta, delta, weights_);
 
         const prevAmount = outputAmt_;
 
-        outputAmt_ = _omega.lt(_psi)
-            ? _inputAmt.plus(_omega.minus(_psi)).times(-1)
-            : _inputAmt.plus(lambda.times(_omega.minus(_psi))).times(-1);
+        outputAmt_ = omega_.lt(psi_)
+            ? inputAmt_.add(omega_.sub(psi_)).mul(-1)
+            : inputAmt_.add(lambda.mul(omega_.sub(psi_)).div(ONE_36)).mul(-1);
 
         if (
             outputAmt_
-                .div(ONE_TO_THE_THIRTEEN_NUM)
-                .eq(prevAmount.div(ONE_TO_THE_THIRTEEN_NUM))
+                .mul(ONE_36)
+                .div(ONE_TO_THE_THIRTEEN_NUM_36)
+                .eq(prevAmount.mul(ONE_36).div(ONE_TO_THE_THIRTEEN_NUM_36))
         ) {
-            _nGLiq = _oGLiq.plus(_inputAmt).plus(outputAmt_);
+            nGLiq_ = oGLiq_.add(inputAmt_).add(outputAmt_);
 
-            _nBals[_outputIndex] = _oBals[_outputIndex].plus(outputAmt_);
+            nBals_[_outputIndex] = oBals_[_outputIndex].add(outputAmt_);
             // throws error already, removed if statement
-            enforceHalts(_oGLiq, _nGLiq, _oBals, _nBals, _weights, alpha);
-            enforceSwapInvariant(_oGLiq, _omega, _nGLiq, _psi);
-            return [outputAmt_, _nGLiq];
+            enforceHalts(oGLiq_, nGLiq_, oBals_, nBals_, weights_, alpha);
+            enforceSwapInvariant(oGLiq_, omega_, nGLiq_, psi_);
+            return [
+                bnum(outputAmt_.toString()).div(bnum(10).pow(36)),
+                bnum(nGLiq_.toString()).div(bnum(10).pow(36)),
+            ];
         } else {
-            _nGLiq = _oGLiq.plus(_inputAmt).plus(outputAmt_);
-            _nBals[_outputIndex] = _oBals[_outputIndex].plus(outputAmt_);
+            nGLiq_ = oGLiq_.add(inputAmt_).add(outputAmt_);
+            nBals_[_outputIndex] = oBals_[_outputIndex].add(outputAmt_);
         }
     }
 
@@ -396,47 +392,51 @@ const calculateTrade = (
 
 // invariant enforcement
 const enforceHalts = (
-    _oGLiq: OldBigNumber,
-    _nGLiq: OldBigNumber,
-    _oBals: OldBigNumber[],
-    _nBals: OldBigNumber[],
-    _weights: OldBigNumber[],
-    alpha: OldBigNumber
+    _oGLiq: BigNumber,
+    _nGLiq: BigNumber,
+    _oBals: BigNumber[],
+    _nBals: BigNumber[],
+    _weights: BigNumber[],
+    alpha: BigNumber
 ): boolean => {
     const _length = _nBals.length;
     const _alpha = alpha;
 
     for (let i = 0; i < _length; i++) {
-        const _nIdeal = _nGLiq.times(_weights[i]);
+        const _nIdeal = _nGLiq.mul(_weights[i]).div(ONE_36);
 
         if (_nBals[i].gt(_nIdeal)) {
-            const _upperAlpha = _alpha.plus(1);
+            const _upperAlpha = _alpha.add(ONE_36);
 
-            const _nHalt = _nIdeal.times(_upperAlpha);
+            const _nHalt = _nIdeal.mul(_upperAlpha).div(ONE_36);
 
             if (_nBals[i].gt(_nHalt)) {
-                const _oHalt = _oGLiq.times(_weights[i]).times(_upperAlpha);
+                const _oHalt = _oGLiq
+                    .mul(_weights[i])
+                    .div(ONE_36)
+                    .mul(_upperAlpha)
+                    .div(ONE_36);
 
                 if (_oBals[i].lt(_oHalt)) {
                     throw new Error(CurveMathRevert.UpperHalt);
                 }
-                if (_nBals[i].minus(_nHalt).gt(_oBals[i].minus(_oHalt))) {
+                if (_nBals[i].sub(_nHalt).gt(_oBals[i].sub(_oHalt))) {
                     throw new Error(CurveMathRevert.UpperHalt);
                 }
             }
         } else {
-            const _lowerAlpha = bnum(1).minus(_alpha);
+            const _lowerAlpha = ONE_36.sub(_alpha);
 
-            const _nHalt = _nIdeal.times(_lowerAlpha);
+            const _nHalt = _nIdeal.mul(_lowerAlpha).div(ONE_36);
 
             if (_nBals[i].lt(_nHalt)) {
-                let _oHalt = _oGLiq.times(_weights[i]);
-                _oHalt = _oHalt.times(_lowerAlpha);
+                let _oHalt = _oGLiq.mul(_weights[i]).div(ONE_36);
+                _oHalt = _oHalt.mul(_lowerAlpha).div(ONE_36);
 
                 if (_oBals[i].gt(_oHalt)) {
                     throw new Error(CurveMathRevert.LowerHalt);
                 }
-                if (_nHalt.minus(_nBals[i]).gt(_oHalt.minus(_oBals[i]))) {
+                if (_nHalt.sub(_nBals[i]).gt(_oHalt.sub(_oBals[i]))) {
                     throw new Error(CurveMathRevert.LowerHalt);
                 }
             }
@@ -446,19 +446,19 @@ const enforceHalts = (
 };
 
 const enforceSwapInvariant = (
-    _oGLiq: OldBigNumber,
-    _omega: OldBigNumber,
-    _nGLiq: OldBigNumber,
-    _psi: OldBigNumber
+    _oGLiq: BigNumber,
+    _omega: BigNumber,
+    _nGLiq: BigNumber,
+    _psi: BigNumber
 ): boolean => {
-    const _nextUtil = _nGLiq.minus(_psi);
+    const _nextUtil = _nGLiq.sub(_psi);
 
-    const _prevUtil = _oGLiq.minus(_omega);
+    const _prevUtil = _oGLiq.sub(_omega);
 
-    const _diff = _nextUtil.minus(_prevUtil);
+    const _diff = _nextUtil.sub(_prevUtil);
 
     // from int128 private constant MAX_DIFF = -0x10C6F7A0B5EE converted to plain decimals
-    if (_diff.gt(0) || _diff.gte(CURVEMATH_MAX_DIFF)) {
+    if (_diff.gt(0) || _diff.gte(CURVEMATH_MAX_DIFF_36)) {
         return true;
     } else {
         throw new Error(CurveMathRevert.SwapInvariantViolation);
@@ -710,10 +710,8 @@ export const _spotPriceAfterSwapTokenInForExactTokenOut = (
     const _oGLiq = parsedFxPoolData._oGLiq;
     const _nBals = parsedFxPoolData._nBals;
     const currentRate = parsedFxPoolData.baseTokenRate;
-
     const beta = parsedFxPoolData.beta;
     const epsilon = parsedFxPoolData.epsilon;
-
     const _nGLiq = parsedFxPoolData._nGLiq;
     const _oBals = parsedFxPoolData._oBals;
 
