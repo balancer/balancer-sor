@@ -16,7 +16,7 @@
                     "weight": null,
                     "token": {
                         "latestFXPrice": "0.99997703",
-                        "fxOracleDecimals": 8
+                        "__fxOracleDecimals__": "purposefully missing to test the default"
                     }
                 },
                 {
@@ -27,7 +27,7 @@
                     "weight": null,
                     "token": {
                         "latestFXPrice": "0.74226380",
-                        "fxOracleDecimals": 8
+                        "__fxOracleDecimals__": "purposefully missing to test the default"
                     }
                 }
             ],

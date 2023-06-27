@@ -142,8 +142,13 @@ export class FxPool implements PoolBase<FxPoolPairData> {
 
         if (!tO.token?.latestFXPrice || !tI.token?.latestFXPrice)
             throw 'FX Pool Missing LatestFxPrice';
-        if (!tO.token?.fxOracleDecimals || !tI.token?.fxOracleDecimals)
-            throw 'FX Pool Missing tokenIn or tokenOut fxOracleDecimals';
+
+        if (tO.token?.fxOracleDecimals == null) {
+            tO.token.fxOracleDecimals = 8;
+        }
+        if (tI.token?.fxOracleDecimals == null) {
+            tI.token.fxOracleDecimals = 8;
+        }
 
         const poolPairData: FxPoolPairData = {
             id: this.id,
