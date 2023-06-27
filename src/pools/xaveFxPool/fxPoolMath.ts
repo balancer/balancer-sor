@@ -18,11 +18,11 @@ export enum CurveMathRevert {
 }
 
 interface ParsedFxPoolData {
-    alpha: BigNumber;
-    beta: BigNumber;
-    delta: BigNumber;
-    epsilon: BigNumber;
-    lambda: BigNumber;
+    alpha_36: BigNumber;
+    beta_36: BigNumber;
+    delta_36: BigNumber;
+    epsilon_36: BigNumber;
+    lambda_36: BigNumber;
     baseTokenRate_36: BigNumber;
     _oGLiq_36: BigNumber;
     _nGLiq_36: BigNumber;
@@ -171,11 +171,13 @@ const getParsedFxPoolData = (
     );
 
     return {
-        alpha: parseFixed(poolPairData.alpha.toString(), 18),
-        beta: parseFixed(poolPairData.beta.toString(), 18),
-        delta: parseFixed(poolPairData.delta.toString(), 18),
-        epsilon: parseFixed(poolPairData.epsilon.toString(), 18),
-        lambda: parseFixed(poolPairData.lambda.toString(), 18),
+        // poolPairData already has the parameters with 18 decimals
+        // therefore we only need to add 18 decimals more
+        alpha_36: safeParseFixed(poolPairData.alpha.toString(), 18),
+        beta_36: parseFixed(poolPairData.beta.toString(), 18),
+        delta_36: parseFixed(poolPairData.delta.toString(), 18),
+        epsilon_36: parseFixed(poolPairData.epsilon.toString(), 18),
+        lambda_36: parseFixed(poolPairData.lambda.toString(), 18),
         baseTokenRate_36: baseTokenRate_36,
         _oGLiq_36: baseReserves_36.add(usdcReserves_36),
         _nGLiq_36: baseReserves_36.add(usdcReserves_36),
@@ -302,16 +304,16 @@ const calculateFee = (
     _weights: BigNumber[]
 ): BigNumber => {
     const _length = _bals.length;
-    let psi_ = BigNumber.from(0);
+    let psi_36 = BigNumber.from(0);
 
     for (let i = 0; i < _length; i++) {
         const _ideal = _gLiq.mul(_weights[i]).div(ONE_36);
 
         // keep away from wei values like how the contract do it
-        psi_ = psi_.add(calculateMicroFee(_bals[i], _ideal, _beta, _delta));
+        psi_36 = psi_36.add(calculateMicroFee(_bals[i], _ideal, _beta, _delta));
     }
 
-    return psi_;
+    return psi_36;
 };
 
 // return outputAmount and ngliq
@@ -329,26 +331,32 @@ const calculateTrade = (
         safeParseFixed('0.5', 36),
     ]; // const for now since all weights are 0.5
 
-    const alpha = poolPairData.alpha;
-    const beta = poolPairData.beta;
-    const delta = poolPairData.delta;
-    const lambda = poolPairData.lambda;
+    const alpha_36 = poolPairData.alpha_36;
+    const beta_36 = poolPairData.beta_36;
+    const delta_36 = poolPairData.delta_36;
+    const lambda_36 = poolPairData.lambda_36;
 
     let outputAmt_ = _inputAmt_36.mul(-1);
 
-    const omega_ = calculateFee(_oGLiq_36, _oBals_36, beta, delta, weights_);
+    const omega_36 = calculateFee(
+        _oGLiq_36,
+        _oBals_36,
+        beta_36,
+        delta_36,
+        weights_
+    );
 
-    let psi_: BigNumber;
+    let psi_36: BigNumber;
 
     for (let i = 0; i < 32; i++) {
-        psi_ = calculateFee(_nGLiq_36, _nBals_36, beta, delta, weights_);
+        psi_36 = calculateFee(_nGLiq_36, _nBals_36, beta_36, delta_36, weights_);
 
         const prevAmount = outputAmt_;
 
-        outputAmt_ = omega_.lt(psi_)
-            ? _inputAmt_36.add(omega_.sub(psi_)).mul(-1)
+        outputAmt_ = omega_36.lt(psi_36)
+            ? _inputAmt_36.add(omega_36.sub(psi_36)).mul(-1)
             : _inputAmt_36
-                  .add(lambda.mul(omega_.sub(psi_)).div(ONE_36))
+                  .add(lambda_36.mul(omega_36.sub(psi_36)).div(ONE_36))
                   .mul(-1);
 
         if (
@@ -367,9 +375,9 @@ const calculateTrade = (
                 _oBals_36,
                 _nBals_36,
                 weights_,
-                alpha
+                alpha_36
             );
-            enforceSwapInvariant(_oGLiq_36, omega_, _nGLiq_36, psi_);
+            enforceSwapInvariant(_oGLiq_36, omega_36, _nGLiq_36, psi_36);
             return [
                 bnum(outputAmt_.toString()).div(bnum(10).pow(36)),
                 bnum(_nGLiq_36.toString()).div(bnum(10).pow(36)),
@@ -390,16 +398,15 @@ const enforceHalts = (
     _oBals: BigNumber[],
     _nBals: BigNumber[],
     _weights: BigNumber[],
-    alpha: BigNumber
+    alpha_36: BigNumber
 ): boolean => {
     const _length = _nBals.length;
-    const _alpha = alpha;
 
     for (let i = 0; i < _length; i++) {
         const _nIdeal = _nGLiq.mul(_weights[i]).div(ONE_36);
 
         if (_nBals[i].gt(_nIdeal)) {
-            const _upperAlpha = _alpha.add(ONE_36);
+            const _upperAlpha = alpha_36.add(ONE_36);
 
             const _nHalt = _nIdeal.mul(_upperAlpha).div(ONE_36);
 
@@ -418,7 +425,7 @@ const enforceHalts = (
                 }
             }
         } else {
-            const _lowerAlpha = ONE_36.sub(_alpha);
+            const _lowerAlpha = ONE_36.sub(alpha_36);
 
             const _nHalt = _nIdeal.mul(_lowerAlpha).div(ONE_36);
 
@@ -501,7 +508,7 @@ export function _exactTokenInForTokenOut(
     if (_amt === undefined) {
         throw new Error(CurveMathRevert.CannotSwap);
     } else {
-        const epsilon = parsedFxPoolData.epsilon;
+        const epsilon = parsedFxPoolData.epsilon_36;
         const _amtWithFee = _amt[0].times(
             bnum(1).minus(bnum(epsilon.toString()).div(bnum(10).pow(36)))
         );
@@ -586,7 +593,9 @@ export const spotPriceBeforeSwap = (
         .abs()
         .times(
             bnum(1).minus(
-                bnum(parsedFxPoolData.epsilon.toString()).div(bnum(10).pow(36))
+                bnum(parsedFxPoolData.epsilon_36.toString()).div(
+                    bnum(10).pow(36)
+                )
             )
         )
         .div(inputAmountInNumeraire.abs())
@@ -613,8 +622,8 @@ export const _spotPriceAfterSwapExactTokenInForTokenOut = (
     const _oGLiq_36 = parsedFxPoolData._oGLiq_36;
     const _nBals_36 = parsedFxPoolData._nBals_36;
     const currentRate_36 = parsedFxPoolData.baseTokenRate_36;
-    const beta = parsedFxPoolData.beta;
-    const epsilon = parsedFxPoolData.epsilon;
+    const beta_36 = parsedFxPoolData.beta_36;
+    const epsilon_36 = parsedFxPoolData.epsilon_36;
     const _nGLiq_36 = parsedFxPoolData._nGLiq_36;
     const _oBals_36 = parsedFxPoolData._oBals_36;
 
@@ -630,7 +639,7 @@ export const _spotPriceAfterSwapExactTokenInForTokenOut = (
 
     const outputAmount = outputAfterTrade[0];
 
-    const maxBetaLimit = bnum(beta.toString())
+    const maxBetaLimit = bnum(beta_36.toString())
         .div(bnum(10).pow(36))
         .plus(1)
         .times('0.5')
@@ -638,7 +647,7 @@ export const _spotPriceAfterSwapExactTokenInForTokenOut = (
         .div(bnum(10).pow(36));
 
     const minBetaLimit = bnum(1)
-        .minus(bnum(beta.toString()).div(bnum(10).pow(36)))
+        .minus(bnum(beta_36.toString()).div(bnum(10).pow(36)))
         .times('0.5')
         .times(_oGLiq_36.toString())
         .div(bnum(10).pow(36));
@@ -659,7 +668,7 @@ export const _spotPriceAfterSwapExactTokenInForTokenOut = (
                 : outputAmount
                       .times(
                           bnum(1).minus(
-                              bnum(epsilon.toString()).div(bnum(10).pow(36))
+                              bnum(epsilon_36.toString()).div(bnum(10).pow(36))
                           )
                       )
                       .abs()
@@ -676,7 +685,7 @@ export const _spotPriceAfterSwapExactTokenInForTokenOut = (
                 .div(ONE_36.toString())
                 .times(
                     bnum(1).minus(
-                        bnum(epsilon.toString()).div(bnum(10).pow(36))
+                        bnum(epsilon_36.toString()).div(bnum(10).pow(36))
                     )
                 )
                 .decimalPlaces(
@@ -697,7 +706,7 @@ export const _spotPriceAfterSwapExactTokenInForTokenOut = (
             const ratioOfOutputAndInput = outputAmount
                 .times(
                     bnum(1).minus(
-                        bnum(epsilon.toString()).div(bnum(10).pow(36))
+                        bnum(epsilon_36.toString()).div(bnum(10).pow(36))
                     )
                 )
                 .abs()
@@ -715,7 +724,7 @@ export const _spotPriceAfterSwapExactTokenInForTokenOut = (
                 .div(ONE_36.toString())
                 .times(
                     bnum(1).minus(
-                        bnum(epsilon.toString()).div(bnum(10).pow(36))
+                        bnum(epsilon_36.toString()).div(bnum(10).pow(36))
                     )
                 )
                 .decimalPlaces(
@@ -746,8 +755,8 @@ export const _spotPriceAfterSwapTokenInForExactTokenOut = (
     const _oGLiq_36 = parsedFxPoolData._oGLiq_36;
     const _nBals_36 = parsedFxPoolData._nBals_36;
     const currentRate = parsedFxPoolData.baseTokenRate_36;
-    const beta = parsedFxPoolData.beta;
-    const epsilon = parsedFxPoolData.epsilon;
+    const beta_36 = parsedFxPoolData.beta_36;
+    const epsilon_36 = parsedFxPoolData.epsilon_36;
     const _nGLiq_36 = parsedFxPoolData._nGLiq_36;
     const _oBals_36 = parsedFxPoolData._oBals_36;
 
@@ -763,14 +772,14 @@ export const _spotPriceAfterSwapTokenInForExactTokenOut = (
 
     const outputAmount = outputAfterTrade[0];
 
-    const maxBetaLimit = bnum(beta.toString())
+    const maxBetaLimit = bnum(beta_36.toString())
         .div(bnum(10).pow(36))
         .plus(1)
         .times('0.5')
         .times(_oGLiq_36.toString())
         .div(bnum(10).pow(36));
     const minBetaLimit = bnum(1)
-        .minus(bnum(beta.toString()).div(bnum(10).pow(36)))
+        .minus(bnum(beta_36.toString()).div(bnum(10).pow(36)))
         .times('0.5')
         .times(_oGLiq_36.toString())
         .div(bnum(10).pow(36));
@@ -786,7 +795,7 @@ export const _spotPriceAfterSwapTokenInForExactTokenOut = (
                 .div(
                     outputAmount
                         .times(
-                            bnum(epsilon.toString())
+                            bnum(epsilon_36.toString())
                                 .div(bnum(10).pow(36))
                                 .plus(1)
                         )
@@ -804,7 +813,7 @@ export const _spotPriceAfterSwapTokenInForExactTokenOut = (
                 .div(ONE_36.toString())
                 .times(
                     bnum(1).minus(
-                        bnum(epsilon.toString()).div(bnum(10).pow(36))
+                        bnum(epsilon_36.toString()).div(bnum(10).pow(36))
                     )
                 )
                 .decimalPlaces(
@@ -827,7 +836,7 @@ export const _spotPriceAfterSwapTokenInForExactTokenOut = (
                 .div(
                     outputAmount
                         .times(
-                            bnum(epsilon.toString())
+                            bnum(epsilon_36.toString())
                                 .div(bnum(10).pow(36))
                                 .plus(1)
                         )
@@ -844,7 +853,7 @@ export const _spotPriceAfterSwapTokenInForExactTokenOut = (
                 .div(ONE_36.toString())
                 .times(
                     bnum(1).minus(
-                        bnum(epsilon.toString()).div(bnum(10).pow(36))
+                        bnum(epsilon_36.toString()).div(bnum(10).pow(36))
                     )
                 )
                 .decimalPlaces(
