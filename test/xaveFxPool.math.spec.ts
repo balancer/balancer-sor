@@ -44,7 +44,7 @@ context('xaveFxPool: fxMath functions', () => {
             rate,
             tokenFxRateDecimals
         );
-        const expected = '9999.999999';
-        expect(numerarieAmount.toString()).to.eq(expected);
+        const expected = safeParseFixed('9999.999999', 36);
+        expect(numerarieAmount.toString()).to.eq(expected.toString());
     });
 });

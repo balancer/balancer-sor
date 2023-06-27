@@ -23,18 +23,18 @@ interface ParsedFxPoolData {
     delta: BigNumber;
     epsilon: BigNumber;
     lambda: BigNumber;
-    baseTokenRate: BigNumber;
-    _oGLiq: OldBigNumber;
-    _nGLiq: OldBigNumber;
-    _oBals: OldBigNumber[];
-    _nBals: OldBigNumber[];
-    givenAmountInNumeraire: OldBigNumber;
+    baseTokenRate_36: BigNumber;
+    _oGLiq_36: BigNumber;
+    _nGLiq_36: BigNumber;
+    _oBals_36: BigNumber[];
+    _nBals_36: BigNumber[];
+    givenAmountInNumeraire_36: BigNumber;
 }
 
 interface ReservesInNumeraire {
-    tokenInReservesInNumeraire: OldBigNumber;
-    tokenOutReservesInNumeraire: OldBigNumber;
-    _oGLiq: OldBigNumber;
+    tokenInReservesInNumeraire_36: BigNumber;
+    tokenOutReservesInNumeraire_36: BigNumber;
+    _oGLiq_36: BigNumber;
 }
 
 const isUSDC = (address: string) => {
@@ -52,12 +52,12 @@ const calculateGivenAmountInNumeraire = (
     isOriginSwap: boolean,
     poolPairData: FxPoolPairData,
     amount_36: BigNumber
-) => {
-    let calculatedNumeraireAmount;
+): BigNumber => {
+    let calculatedNumeraireAmount_36: BigNumber;
 
     if (isOriginSwap) {
         // tokenIn is given
-        calculatedNumeraireAmount = viewNumeraireAmount(
+        calculatedNumeraireAmount_36 = viewNumeraireAmount(
             safeParseFixed(amount_36.toString(), poolPairData.decimalsIn),
             poolPairData.decimalsIn,
             poolPairData.tokenInLatestFXPrice,
@@ -65,7 +65,7 @@ const calculateGivenAmountInNumeraire = (
         );
     } else {
         // tokenOut is given
-        calculatedNumeraireAmount = viewNumeraireAmount(
+        calculatedNumeraireAmount_36 = viewNumeraireAmount(
             safeParseFixed(amount_36.toString(), poolPairData.decimalsOut),
             poolPairData.decimalsOut,
             poolPairData.tokenOutLatestFXPrice,
@@ -73,13 +73,13 @@ const calculateGivenAmountInNumeraire = (
         );
     }
 
-    return calculatedNumeraireAmount;
+    return calculatedNumeraireAmount_36;
 };
 
 export const poolBalancesToNumeraire = (
     poolPairData: FxPoolPairData
 ): ReservesInNumeraire => {
-    let tokenInNumeraire, tokenOutNumeraire;
+    let tokenInNumeraire: BigNumber, tokenOutNumeraire: BigNumber;
 
     if (isUSDC(poolPairData.tokenIn)) {
         // amount * rate / 10^poolPairData.decimalsIn -> rate: (_rate / 10^fxOracleDecimals)
@@ -113,9 +113,9 @@ export const poolBalancesToNumeraire = (
     }
 
     return {
-        tokenInReservesInNumeraire: tokenInNumeraire,
-        tokenOutReservesInNumeraire: tokenOutNumeraire,
-        _oGLiq: tokenInNumeraire.plus(tokenOutNumeraire),
+        tokenInReservesInNumeraire_36: tokenInNumeraire,
+        tokenOutReservesInNumeraire_36: tokenOutNumeraire,
+        _oGLiq_36: tokenInNumeraire.add(tokenOutNumeraire),
     };
 };
 // everything is in order of USDC, base token
@@ -125,7 +125,7 @@ const getParsedFxPoolData = (
     isOriginSwap: boolean
 ): ParsedFxPoolData => {
     // reserves are in raw amount, they converted to numeraire
-    const baseReserves = isUSDC(poolPairData.tokenIn)
+    const baseReserves_36 = isUSDC(poolPairData.tokenIn)
         ? viewNumeraireAmount(
               safeParseFixed(poolPairData.balanceOut.toString(), 36),
               poolPairData.decimalsOut,
@@ -140,7 +140,7 @@ const getParsedFxPoolData = (
           );
 
     // reserves are not in wei
-    const usdcReserves = isUSDC(poolPairData.tokenIn)
+    const usdcReserves_36 = isUSDC(poolPairData.tokenIn)
         ? viewNumeraireAmount(
               safeParseFixed(poolPairData.balanceIn.toString(), 36),
               poolPairData.decimalsIn,
@@ -155,20 +155,16 @@ const getParsedFxPoolData = (
           );
 
     // rate is converted from chainlink to the actual rate in decimals
-    const baseTokenRate = isUSDC(poolPairData.tokenIn)
+    const baseTokenRate_36 = isUSDC(poolPairData.tokenIn)
         ? poolPairData.tokenOutLatestFXPrice
               .mul(ONE_36)
-              .div(
-                  BigNumber.from(10).pow(poolPairData.tokenOutfxOracleDecimals)
-              )
+              .div(safeParseFixed('1', poolPairData.tokenOutfxOracleDecimals))
         : poolPairData.tokenInLatestFXPrice
               .mul(ONE_36)
-              .div(
-                  BigNumber.from(10).pow(poolPairData.tokenInfxOracleDecimals)
-              );
+              .div(safeParseFixed('1', poolPairData.tokenInfxOracleDecimals));
 
     // given amount in or out converted to numeraire
-    const givenAmountInNumeraire = calculateGivenAmountInNumeraire(
+    const givenAmountInNumeraire_36 = calculateGivenAmountInNumeraire(
         isOriginSwap,
         poolPairData,
         amount_36
@@ -180,21 +176,21 @@ const getParsedFxPoolData = (
         delta: parseFixed(poolPairData.delta.toString(), 18),
         epsilon: parseFixed(poolPairData.epsilon.toString(), 18),
         lambda: parseFixed(poolPairData.lambda.toString(), 18),
-        baseTokenRate: baseTokenRate,
-        _oGLiq: baseReserves.plus(usdcReserves),
-        _nGLiq: baseReserves.plus(usdcReserves),
-        _oBals: [usdcReserves, baseReserves],
-        _nBals: isUSDC(poolPairData.tokenIn)
+        baseTokenRate_36: baseTokenRate_36,
+        _oGLiq_36: baseReserves_36.add(usdcReserves_36),
+        _nGLiq_36: baseReserves_36.add(usdcReserves_36),
+        _oBals_36: [usdcReserves_36, baseReserves_36],
+        _nBals_36: isUSDC(poolPairData.tokenIn)
             ? [
-                  usdcReserves.plus(givenAmountInNumeraire),
-                  baseReserves.minus(givenAmountInNumeraire),
+                  usdcReserves_36.add(givenAmountInNumeraire_36),
+                  baseReserves_36.sub(givenAmountInNumeraire_36),
               ]
             : [
-                  usdcReserves.minus(givenAmountInNumeraire),
-                  baseReserves.plus(givenAmountInNumeraire),
+                  usdcReserves_36.sub(givenAmountInNumeraire_36),
+                  baseReserves_36.add(givenAmountInNumeraire_36),
               ],
 
-        givenAmountInNumeraire: givenAmountInNumeraire,
+        givenAmountInNumeraire_36: givenAmountInNumeraire_36,
     };
 };
 
@@ -230,23 +226,25 @@ export const viewRawAmount = (
  * @param tokenDecimals
  * @param rate in wei
  * @param fxOracleDecimals
- * @returns amount in numeraire (ie. user friendly decimals)
+ * @returns amount in numeraire in 36 decimals
  */
 export const viewNumeraireAmount = (
     amount_36: BigNumber, // wei
     tokenDecimals: number,
     rate: BigNumber, // wei
     fxOracleDecimals: number
-): OldBigNumber => {
+): BigNumber => {
     // Solidity: _amount.mul(_rate).div(basefxOracleDecimals).divu(baseDecimals);
 
     const val = amount_36
         .mul(safeParseFixed(rate.toString(), 36))
         .div(ONE_36)
         .div(ONE_36)
-        .div(safeParseFixed('1', fxOracleDecimals));
+        .div(safeParseFixed('1', fxOracleDecimals))
+        .mul(ONE_36)
+        .div(safeParseFixed('1', tokenDecimals));
 
-    return bnum(val.toString()).div(bnum(10).pow(tokenDecimals));
+    return val;
 };
 
 // Curve Math
@@ -318,11 +316,11 @@ const calculateFee = (
 
 // return outputAmount and ngliq
 const calculateTrade = (
-    _oGLiq: OldBigNumber,
-    _nGLiq: OldBigNumber,
-    _oBals: OldBigNumber[],
-    _nBals: OldBigNumber[],
-    _inputAmt: OldBigNumber,
+    _oGLiq_36: BigNumber,
+    _nGLiq_36: BigNumber,
+    _oBals_36: BigNumber[],
+    _nBals_36: BigNumber[],
+    _inputAmt_36: BigNumber,
     _outputIndex: number,
     poolPairData: ParsedFxPoolData
 ): [OldBigNumber, OldBigNumber] => {
@@ -331,31 +329,27 @@ const calculateTrade = (
         safeParseFixed('0.5', 36),
     ]; // const for now since all weights are 0.5
 
-    const inputAmt_ = safeParseFixed(_inputAmt.toString(), 36);
-    const oGLiq_ = safeParseFixed(_oGLiq.toString(), 36);
-    let nGLiq_ = safeParseFixed(_nGLiq.toString(), 36);
-    const oBals_ = _oBals.map((d) => safeParseFixed(d.toString(), 36));
-    const nBals_ = _nBals.map((d) => safeParseFixed(d.toString(), 36));
-
     const alpha = poolPairData.alpha;
     const beta = poolPairData.beta;
     const delta = poolPairData.delta;
     const lambda = poolPairData.lambda;
 
-    let outputAmt_ = inputAmt_.mul(-1);
+    let outputAmt_ = _inputAmt_36.mul(-1);
 
-    const omega_ = calculateFee(oGLiq_, oBals_, beta, delta, weights_);
+    const omega_ = calculateFee(_oGLiq_36, _oBals_36, beta, delta, weights_);
 
     let psi_: BigNumber;
 
     for (let i = 0; i < 32; i++) {
-        psi_ = calculateFee(nGLiq_, nBals_, beta, delta, weights_);
+        psi_ = calculateFee(_nGLiq_36, _nBals_36, beta, delta, weights_);
 
         const prevAmount = outputAmt_;
 
         outputAmt_ = omega_.lt(psi_)
-            ? inputAmt_.add(omega_.sub(psi_)).mul(-1)
-            : inputAmt_.add(lambda.mul(omega_.sub(psi_)).div(ONE_36)).mul(-1);
+            ? _inputAmt_36.add(omega_.sub(psi_)).mul(-1)
+            : _inputAmt_36
+                  .add(lambda.mul(omega_.sub(psi_)).div(ONE_36))
+                  .mul(-1);
 
         if (
             outputAmt_
@@ -363,19 +357,26 @@ const calculateTrade = (
                 .div(ONE_TO_THE_THIRTEEN_NUM_36)
                 .eq(prevAmount.mul(ONE_36).div(ONE_TO_THE_THIRTEEN_NUM_36))
         ) {
-            nGLiq_ = oGLiq_.add(inputAmt_).add(outputAmt_);
+            _nGLiq_36 = _oGLiq_36.add(_inputAmt_36).add(outputAmt_);
 
-            nBals_[_outputIndex] = oBals_[_outputIndex].add(outputAmt_);
+            _nBals_36[_outputIndex] = _oBals_36[_outputIndex].add(outputAmt_);
             // throws error already, removed if statement
-            enforceHalts(oGLiq_, nGLiq_, oBals_, nBals_, weights_, alpha);
-            enforceSwapInvariant(oGLiq_, omega_, nGLiq_, psi_);
+            enforceHalts(
+                _oGLiq_36,
+                _nGLiq_36,
+                _oBals_36,
+                _nBals_36,
+                weights_,
+                alpha
+            );
+            enforceSwapInvariant(_oGLiq_36, omega_, _nGLiq_36, psi_);
             return [
                 bnum(outputAmt_.toString()).div(bnum(10).pow(36)),
-                bnum(nGLiq_.toString()).div(bnum(10).pow(36)),
+                bnum(_nGLiq_36.toString()).div(bnum(10).pow(36)),
             ];
         } else {
-            nGLiq_ = oGLiq_.add(inputAmt_).add(outputAmt_);
-            nBals_[_outputIndex] = oBals_[_outputIndex].add(outputAmt_);
+            _nGLiq_36 = _oGLiq_36.add(_inputAmt_36).add(outputAmt_);
+            _nBals_36[_outputIndex] = _oBals_36[_outputIndex].add(outputAmt_);
         }
     }
 
@@ -470,28 +471,29 @@ export function _exactTokenInForTokenOut(
         true
     );
 
-    const targetAmountInNumeraire = parsedFxPoolData.givenAmountInNumeraire;
+    const targetAmountInNumeraire_36 =
+        parsedFxPoolData.givenAmountInNumeraire_36;
 
     if (poolPairData.tokenIn === poolPairData.tokenOut) {
         return viewRawAmount(
-            safeParseFixed(targetAmountInNumeraire.toString(), 36),
+            targetAmountInNumeraire_36,
             poolPairData.decimalsIn,
             poolPairData.tokenInLatestFXPrice,
             poolPairData.tokenInfxOracleDecimals
         ).div(bnum(10).pow(poolPairData.decimalsIn)); // must be the token out
     }
 
-    const _oGLiq = parsedFxPoolData._oGLiq;
-    const _nGLiq = parsedFxPoolData._nGLiq;
-    const _oBals = parsedFxPoolData._oBals;
-    const _nBals = parsedFxPoolData._nBals;
+    const _oGLiq_36 = parsedFxPoolData._oGLiq_36;
+    const _nGLiq_36 = parsedFxPoolData._nGLiq_36;
+    const _oBals_36 = parsedFxPoolData._oBals_36;
+    const _nBals_36 = parsedFxPoolData._nBals_36;
 
     const _amt = calculateTrade(
-        _oGLiq, // _oGLiq
-        _nGLiq, // _nGLiq
-        _oBals, // _oBals
-        _nBals, // _nBals
-        targetAmountInNumeraire, // input amount
+        _oGLiq_36, // _oGLiq
+        _nGLiq_36, // _nGLiq
+        _oBals_36, // _oBals
+        _nBals_36, // _nBals
+        targetAmountInNumeraire_36, // input amount
         isUSDC(poolPairData.tokenIn) ? 1 : 0, // if USDC return base token (index 1), else return 0 for USDC out
         parsedFxPoolData
     );
@@ -523,30 +525,25 @@ export function _tokenInForExactTokenOut(
         poolPairData,
         false
     );
-    const targetAmountInNumeraire =
-        parsedFxPoolData.givenAmountInNumeraire.times(-1);
+    const targetAmountInNumeraire_36 =
+        parsedFxPoolData.givenAmountInNumeraire_36.mul(-1);
 
     if (poolPairData.tokenIn === poolPairData.tokenOut) {
         viewRawAmount(
             // poolPairData.tokenOut as TokenSymbol,
-            safeParseFixed(targetAmountInNumeraire.toString(), 36),
+            targetAmountInNumeraire_36,
             poolPairData.decimalsOut,
             poolPairData.tokenOutLatestFXPrice,
             poolPairData.tokenOutfxOracleDecimals
         ).div(bnum(10).pow(poolPairData.decimalsOut)); // must be the token out
     }
 
-    const _oGLiq = parsedFxPoolData._oGLiq;
-    const _nGLiq = parsedFxPoolData._nGLiq;
-    const _oBals = parsedFxPoolData._oBals;
-    const _nBals = parsedFxPoolData._nBals;
-
     const _amt = calculateTrade(
-        _oGLiq, // _oGLiq
-        _nGLiq, // _nGLiq
-        _oBals, // _oBals
-        _nBals, // _nBals
-        targetAmountInNumeraire,
+        parsedFxPoolData._oGLiq_36,
+        parsedFxPoolData._nGLiq_36,
+        parsedFxPoolData._oBals_36,
+        parsedFxPoolData._nBals_36,
+        targetAmountInNumeraire_36,
         isUSDC(poolPairData.tokenIn) ? 0 : 1, // if USDC return 0 else return 1 for base token
         parsedFxPoolData
     );
@@ -579,17 +576,12 @@ export const spotPriceBeforeSwap = (
         true
     );
 
-    const _oGLiq = parsedFxPoolData._oGLiq;
-    const _nGLiq = parsedFxPoolData._nGLiq;
-    const _oBals = parsedFxPoolData._oBals;
-    const _nBals = parsedFxPoolData._nBals;
-
     const outputAmountInNumeraire = calculateTrade(
-        _oGLiq, // _oGLiq
-        _nGLiq, // _nGLiq
-        _oBals, // _oBals
-        _nBals, // _nBals
-        bnum(1), // input amount
+        parsedFxPoolData._oGLiq_36, // _oGLiq
+        parsedFxPoolData._nGLiq_36, // _nGLiq
+        parsedFxPoolData._oBals_36, // _oBals
+        parsedFxPoolData._nBals_36, // _nBals
+        parseFixed('1', 36), // input amount
         0, // always output in USDC
         parsedFxPoolData
     );
@@ -602,7 +594,7 @@ export const spotPriceBeforeSwap = (
             )
         )
         .div(inputAmountInNumeraire.abs())
-        .times(parsedFxPoolData.baseTokenRate.toString())
+        .times(parsedFxPoolData.baseTokenRate_36.toString())
         .div(ONE_36.toString())
         .decimalPlaces(
             poolPairData.tokenOutfxOracleDecimals,
@@ -622,22 +614,23 @@ export const _spotPriceAfterSwapExactTokenInForTokenOut = (
         true
     );
 
-    const targetAmountInNumeraire = parsedFxPoolData.givenAmountInNumeraire;
+    const targetAmountInNumeraire_36 =
+        parsedFxPoolData.givenAmountInNumeraire_36;
 
-    const _oGLiq = parsedFxPoolData._oGLiq;
-    const _nBals = parsedFxPoolData._nBals;
-    const currentRate = parsedFxPoolData.baseTokenRate;
+    const _oGLiq_36 = parsedFxPoolData._oGLiq_36;
+    const _nBals_36 = parsedFxPoolData._nBals_36;
+    const currentRate = parsedFxPoolData.baseTokenRate_36;
     const beta = parsedFxPoolData.beta;
     const epsilon = parsedFxPoolData.epsilon;
-    const _nGLiq = parsedFxPoolData._nGLiq;
-    const _oBals = parsedFxPoolData._oBals;
+    const _nGLiq_36 = parsedFxPoolData._nGLiq_36;
+    const _oBals_36 = parsedFxPoolData._oBals_36;
 
     const outputAfterTrade = calculateTrade(
-        _oGLiq, // _oGLiq
-        _nGLiq, // _nGLiq
-        _oBals, // _oBals
-        _nBals, // _nBals
-        targetAmountInNumeraire, // input amount
+        _oGLiq_36,
+        _nGLiq_36,
+        _oBals_36,
+        _nBals_36,
+        targetAmountInNumeraire_36, // input amount
         isUSDC(poolPairData.tokenIn) ? 1 : 0, // if USDC return base token (index 1), else return 0 for USDC out
         parsedFxPoolData
     );
@@ -648,18 +641,20 @@ export const _spotPriceAfterSwapExactTokenInForTokenOut = (
         .div(bnum(10).pow(36))
         .plus(1)
         .times('0.5')
-        .times(_oGLiq);
+        .times(_oGLiq_36.toString())
+        .div(bnum(10).pow(36));
 
     const minBetaLimit = bnum(1)
         .minus(bnum(beta.toString()).div(bnum(10).pow(36)))
         .times('0.5')
-        .times(_oGLiq);
+        .times(_oGLiq_36.toString())
+        .div(bnum(10).pow(36));
 
     if (isUSDC(poolPairData.tokenIn)) {
         // token[0] to token [1] in originswap
-        const oBals0after = _nBals[0];
+        const oBals0after = bnum(_nBals_36[0].toString()).div(bnum(10).pow(36));
 
-        const oBals1after = _nBals[1];
+        const oBals1after = bnum(_nBals_36[1].toString()).div(bnum(10).pow(36));
 
         if (oBals1after.lt(minBetaLimit) && oBals0after.gt(maxBetaLimit)) {
             // returns 0 because  Math.abs(targetAmountInNumeraire)) * currentRate
@@ -675,7 +670,8 @@ export const _spotPriceAfterSwapExactTokenInForTokenOut = (
                           )
                       )
                       .abs()
-                      .div(targetAmountInNumeraire.abs())
+                      .times(bnum(10).pow(36))
+                      .div(bnum(targetAmountInNumeraire_36.toString()).abs())
                       .times(currentRate.toString())
                       .div(ONE_36.toString())
                       .decimalPlaces(
@@ -698,9 +694,8 @@ export const _spotPriceAfterSwapExactTokenInForTokenOut = (
     } else {
         // if usdc is tokenOut
         //  token[1] to token [0] in originswap
-        const oBals0after = _nBals[1];
-
-        const oBals1after = _nBals[0];
+        const oBals0after = bnum(_nBals_36[1].toString()).div(bnum(10).pow(36));
+        const oBals1after = bnum(_nBals_36[0].toString()).div(bnum(10).pow(36));
 
         if (oBals1after.lt(minBetaLimit) && oBals0after.gt(maxBetaLimit)) {
             if (amount.isZero())
@@ -713,7 +708,8 @@ export const _spotPriceAfterSwapExactTokenInForTokenOut = (
                     )
                 )
                 .abs()
-                .div(targetAmountInNumeraire.abs());
+                .times(bnum(10).pow(36))
+                .div(bnum(targetAmountInNumeraire_36.toString()).abs());
             return ratioOfOutputAndInput
                 .times(currentRate.toString())
                 .div(ONE_36.toString())
@@ -750,23 +746,23 @@ export const _spotPriceAfterSwapTokenInForExactTokenOut = (
         false
     );
 
-    const targetAmountInNumeraire =
-        parsedFxPoolData.givenAmountInNumeraire.times(-1);
+    const targetAmountInNumeraire_36 =
+        parsedFxPoolData.givenAmountInNumeraire_36.mul(-1);
 
-    const _oGLiq = parsedFxPoolData._oGLiq;
-    const _nBals = parsedFxPoolData._nBals;
-    const currentRate = parsedFxPoolData.baseTokenRate;
+    const _oGLiq_36 = parsedFxPoolData._oGLiq_36;
+    const _nBals_36 = parsedFxPoolData._nBals_36;
+    const currentRate = parsedFxPoolData.baseTokenRate_36;
     const beta = parsedFxPoolData.beta;
     const epsilon = parsedFxPoolData.epsilon;
-    const _nGLiq = parsedFxPoolData._nGLiq;
-    const _oBals = parsedFxPoolData._oBals;
+    const _nGLiq_36 = parsedFxPoolData._nGLiq_36;
+    const _oBals_36 = parsedFxPoolData._oBals_36;
 
     const outputAfterTrade = calculateTrade(
-        _oGLiq, // _oGLiq
-        _nGLiq, // _nGLiq
-        _oBals, // _oBals
-        _nBals, // _nBals
-        targetAmountInNumeraire, // input amount
+        _oGLiq_36,
+        _nGLiq_36,
+        _oBals_36,
+        _nBals_36,
+        targetAmountInNumeraire_36, // input amount
         isUSDC(poolPairData.tokenIn) ? 0 : 1, // if USDC return 0 else return 1 for base token
         parsedFxPoolData
     );
@@ -777,20 +773,21 @@ export const _spotPriceAfterSwapTokenInForExactTokenOut = (
         .div(bnum(10).pow(36))
         .plus(1)
         .times('0.5')
-        .times(_oGLiq);
-
+        .times(_oGLiq_36.toString())
+        .div(bnum(10).pow(36));
     const minBetaLimit = bnum(1)
         .minus(bnum(beta.toString()).div(bnum(10).pow(36)))
         .times('0.5')
-        .times(_oGLiq);
-
+        .times(_oGLiq_36.toString())
+        .div(bnum(10).pow(36));
     if (isUSDC(poolPairData.tokenIn)) {
         // token[0] to token [1] in originswap
-        const oBals0after = _nBals[0];
-        const oBals1after = _nBals[1];
+        const oBals0after = bnum(_nBals_36[0].toString()).div(bnum(10).pow(36));
+        const oBals1after = bnum(_nBals_36[1].toString()).div(bnum(19).pow(36));
 
         if (oBals1after.lt(minBetaLimit) && oBals0after.gt(maxBetaLimit)) {
-            return targetAmountInNumeraire
+            return bnum(targetAmountInNumeraire_36.toString())
+                .div(bnum(10).pow(36))
                 .abs()
                 .div(
                     outputAmount
@@ -823,14 +820,15 @@ export const _spotPriceAfterSwapTokenInForExactTokenOut = (
         }
     } else {
         //  token[1] to token [0] in originswap
-        const oBals0after = _nBals[0];
-        const oBals1after = _nBals[1];
+        const oBals0after = bnum(_nBals_36[0].toString()).div(bnum(10).pow(36));
+        const oBals1after = bnum(_nBals_36[1].toString()).div(bnum(10).pow(36));
 
         const isBeyondMinBeta = oBals0after.lt(minBetaLimit);
         const isBeyondMaxBeta = oBals1after.gt(maxBetaLimit);
 
         if (isBeyondMinBeta && isBeyondMaxBeta) {
-            return targetAmountInNumeraire
+            return bnum(targetAmountInNumeraire_36.toString())
+                .div(bnum(10).pow(36))
                 .abs()
                 .div(
                     outputAmount

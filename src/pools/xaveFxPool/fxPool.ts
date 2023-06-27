@@ -23,6 +23,7 @@ import {
     _spotPriceAfterSwapExactTokenInForTokenOut,
     _spotPriceAfterSwapTokenInForExactTokenOut,
     _tokenInForExactTokenOut,
+    ONE_36,
 } from './fxPoolMath';
 
 type FxPoolToken = Pick<
@@ -210,31 +211,35 @@ export class FxPool implements PoolBase<FxPoolPairData> {
         try {
             const parsedReserves = poolBalancesToNumeraire(poolPairData);
 
-            const alphaValue = poolPairData.alpha.div(bnum(10).pow(18));
+            const alphaValue = safeParseFixed(
+                poolPairData.alpha.toString(),
+                18
+            );
 
             const maxLimit = alphaValue
-                .plus(1)
-                .times(parsedReserves._oGLiq)
-                .times('0.5');
+                .add(ONE_36)
+                .mul(parsedReserves._oGLiq_36)
+                .div(ONE_36)
+                .div(2);
 
             if (swapType === SwapTypes.SwapExactIn) {
-                const maxLimitAmount = maxLimit.minus(
-                    parsedReserves.tokenInReservesInNumeraire
+                const maxLimitAmount_36 = maxLimit.sub(
+                    parsedReserves.tokenInReservesInNumeraire_36.toString()
                 );
 
                 return viewRawAmount(
-                    safeParseFixed(maxLimitAmount.toString(), 36),
+                    maxLimitAmount_36,
                     poolPairData.decimalsIn,
                     poolPairData.tokenInLatestFXPrice,
                     poolPairData.tokenInfxOracleDecimals
                 ).div(bnum(10).pow(poolPairData.decimalsIn));
             } else {
-                const maxLimitAmount = maxLimit.minus(
-                    parsedReserves.tokenOutReservesInNumeraire
+                const maxLimitAmount_36 = maxLimit.sub(
+                    parsedReserves.tokenOutReservesInNumeraire_36
                 );
 
                 return viewRawAmount(
-                    safeParseFixed(maxLimitAmount.toString(), 36),
+                    maxLimitAmount_36,
                     poolPairData.decimalsOut,
                     poolPairData.tokenOutLatestFXPrice,
                     poolPairData.tokenOutfxOracleDecimals
