@@ -210,14 +210,15 @@ const getParsedFxPoolData = (
  * @returns amount in wei
  */
 export const viewRawAmount = (
-    _amount: OldBigNumber, // numeraire
+    amount_36: BigNumber,
     tokenDecimals: number,
     rate: BigNumber, // wei
     fxOracleDecimals: number
 ): OldBigNumber => {
-    // solidity code `_amount.mulu(baseDecimals).mul(baseOracleDecimals).div(_rate);
+    // solidity code `amount.mulu(baseDecimals).mul(baseOracleDecimals).div(_rate);
 
-    const val = safeParseFixed(_amount.toString(), tokenDecimals)
+    const val = safeParseFixed(amount_36.toString(), tokenDecimals)
+        .div(ONE_36)
         .mul(safeParseFixed('1', fxOracleDecimals))
         .mul(ONE_36)
         .div(safeParseFixed(rate.toString(), 36));
@@ -473,7 +474,7 @@ export function _exactTokenInForTokenOut(
 
     if (poolPairData.tokenIn === poolPairData.tokenOut) {
         return viewRawAmount(
-            targetAmountInNumeraire,
+            safeParseFixed(targetAmountInNumeraire.toString(), 36),
             poolPairData.decimalsIn,
             poolPairData.tokenInLatestFXPrice,
             poolPairData.tokenInfxOracleDecimals
@@ -504,7 +505,7 @@ export function _exactTokenInForTokenOut(
         );
 
         return viewRawAmount(
-            _amtWithFee.abs(),
+            safeParseFixed(_amtWithFee.abs().toString(), 36),
             poolPairData.decimalsOut,
             poolPairData.tokenOutLatestFXPrice,
             poolPairData.tokenOutfxOracleDecimals
@@ -528,7 +529,7 @@ export function _tokenInForExactTokenOut(
     if (poolPairData.tokenIn === poolPairData.tokenOut) {
         viewRawAmount(
             // poolPairData.tokenOut as TokenSymbol,
-            targetAmountInNumeraire,
+            safeParseFixed(targetAmountInNumeraire.toString(), 36),
             poolPairData.decimalsOut,
             poolPairData.tokenOutLatestFXPrice,
             poolPairData.tokenOutfxOracleDecimals
@@ -558,7 +559,7 @@ export function _tokenInForExactTokenOut(
         const _amtWithFee = _amt[0].times(epsilon.plus(1)); // fee retained by the pool
 
         return viewRawAmount(
-            _amtWithFee.abs(),
+            safeParseFixed(_amtWithFee.abs().toString(), 36),
             poolPairData.decimalsIn,
             poolPairData.tokenInLatestFXPrice,
             poolPairData.tokenInfxOracleDecimals

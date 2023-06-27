@@ -4,7 +4,7 @@ import { Zero } from '@ethersproject/constants';
 import { BigNumber as OldBigNumber, ZERO, bnum } from '../../utils/bignumber';
 
 import { parseFixedCurveParam } from './parseFixedCurveParam';
-import { isSameAddress } from '../../utils';
+import { isSameAddress, safeParseFixed } from '../../utils';
 import { universalNormalizedLiquidity } from '../liquidity';
 import {
     PoolBase,
@@ -223,7 +223,7 @@ export class FxPool implements PoolBase<FxPoolPairData> {
                 );
 
                 return viewRawAmount(
-                    maxLimitAmount,
+                    safeParseFixed(maxLimitAmount.toString(), 36),
                     poolPairData.decimalsIn,
                     poolPairData.tokenInLatestFXPrice,
                     poolPairData.tokenInfxOracleDecimals
@@ -234,7 +234,7 @@ export class FxPool implements PoolBase<FxPoolPairData> {
                 );
 
                 return viewRawAmount(
-                    maxLimitAmount,
+                    safeParseFixed(maxLimitAmount.toString(), 36),
                     poolPairData.decimalsOut,
                     poolPairData.tokenOutLatestFXPrice,
                     poolPairData.tokenOutfxOracleDecimals

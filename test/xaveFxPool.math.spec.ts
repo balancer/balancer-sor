@@ -2,7 +2,6 @@
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 require('dotenv').config();
 import { expect } from 'chai';
-import { bnum } from '../src/utils/bignumber';
 
 import {
     viewRawAmount,
@@ -18,7 +17,7 @@ context('xaveFxPool: fxMath functions', () => {
 
     it(`should correctly return 'viewRawAmount'`, async () => {
         const rawAmount = viewRawAmount(
-            bnum('10000'),
+            safeParseFixed('10000', 36),
             tokenDecimals,
             rate,
             tokenFxRateDecimals
@@ -29,12 +28,12 @@ context('xaveFxPool: fxMath functions', () => {
 
     it(`should correctly return large 'viewRawAmount'`, async () => {
         const rawAmount = viewRawAmount(
-            bnum('10000').times(bnum(10).pow(18)),
+            safeParseFixed('10000', 45),
             tokenDecimals,
             rate,
             tokenFxRateDecimals
         );
-        const expected = '13445088912372977522500356294';
+        const expected = '13445088912372977522';
         expect(rawAmount.toString()).to.eq(expected);
     });
 
