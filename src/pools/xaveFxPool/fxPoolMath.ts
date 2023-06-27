@@ -213,7 +213,7 @@ export const viewRawAmount = (
     tokenDecimals: number,
     rate: BigNumber, // wei
     fxOracleDecimals: number
-): OldBigNumber => {
+): BigNumber => {
     // solidity code `amount.mulu(baseDecimals).mul(baseOracleDecimals).div(_rate);
 
     const val = safeParseFixed(amount_36.toString(), tokenDecimals)
@@ -221,7 +221,7 @@ export const viewRawAmount = (
         .mul(safeParseFixed('1', fxOracleDecimals))
         .mul(ONE_36)
         .div(safeParseFixed(rate.toString(), 36));
-    return bnum(val.toString());
+    return val;
 };
 
 /**
@@ -486,11 +486,13 @@ export function _exactTokenInForTokenOut(
         parsedFxPoolData.givenAmountInNumeraire_36;
 
     if (poolPairData.tokenIn === poolPairData.tokenOut) {
-        return viewRawAmount(
-            targetAmountInNumeraire_36,
-            poolPairData.decimalsIn,
-            poolPairData.tokenInLatestFXPrice,
-            poolPairData.tokenInfxOracleDecimals
+        return bnum(
+            viewRawAmount(
+                targetAmountInNumeraire_36,
+                poolPairData.decimalsIn,
+                poolPairData.tokenInLatestFXPrice,
+                poolPairData.tokenInfxOracleDecimals
+            ).toString()
         ).div(bnum(10).pow(poolPairData.decimalsIn)); // must be the token out
     }
 
@@ -517,11 +519,13 @@ export function _exactTokenInForTokenOut(
             .mul(ONE_36.sub(epsilon_36))
             .div(ONE_36);
 
-        return viewRawAmount(
-            _amtWithFee_36.abs(),
-            poolPairData.decimalsOut,
-            poolPairData.tokenOutLatestFXPrice,
-            poolPairData.tokenOutfxOracleDecimals
+        return bnum(
+            viewRawAmount(
+                _amtWithFee_36.abs(),
+                poolPairData.decimalsOut,
+                poolPairData.tokenOutLatestFXPrice,
+                poolPairData.tokenOutfxOracleDecimals
+            ).toString()
         ).div(bnum(10).pow(poolPairData.decimalsOut));
     }
 }
@@ -540,12 +544,14 @@ export function _tokenInForExactTokenOut(
         parsedFxPoolData.givenAmountInNumeraire_36.mul(-1);
 
     if (poolPairData.tokenIn === poolPairData.tokenOut) {
-        viewRawAmount(
-            // poolPairData.tokenOut as TokenSymbol,
-            targetAmountInNumeraire_36,
-            poolPairData.decimalsOut,
-            poolPairData.tokenOutLatestFXPrice,
-            poolPairData.tokenOutfxOracleDecimals
+        bnum(
+            viewRawAmount(
+                // poolPairData.tokenOut as TokenSymbol,
+                targetAmountInNumeraire_36,
+                poolPairData.decimalsOut,
+                poolPairData.tokenOutLatestFXPrice,
+                poolPairData.tokenOutfxOracleDecimals
+            ).toString()
         ).div(bnum(10).pow(poolPairData.decimalsOut)); // must be the token out
     }
 
@@ -566,11 +572,13 @@ export function _tokenInForExactTokenOut(
 
         const _amtWithFee = _amt_36[0].mul(ONE_36.add(epsilon_36)).div(ONE_36); // fee retained by the pool
 
-        return viewRawAmount(
-            _amtWithFee.abs(),
-            poolPairData.decimalsIn,
-            poolPairData.tokenInLatestFXPrice,
-            poolPairData.tokenInfxOracleDecimals
+        return bnum(
+            viewRawAmount(
+                _amtWithFee.abs(),
+                poolPairData.decimalsIn,
+                poolPairData.tokenInLatestFXPrice,
+                poolPairData.tokenInfxOracleDecimals
+            ).toString()
         ).div(bnum(10).pow(poolPairData.decimalsIn)); // must be the token out
     }
 }
@@ -578,7 +586,7 @@ export function _tokenInForExactTokenOut(
 export const spotPriceBeforeSwap = (
     amount_36: BigNumber,
     poolPairData: FxPoolPairData
-): OldBigNumber => {
+): BigNumber => {
     const parsedFxPoolData = getParsedFxPoolData(amount_36, poolPairData, true);
 
     const outputAmountInNumeraire_36 = calculateTrade(
@@ -597,12 +605,7 @@ export const spotPriceBeforeSwap = (
         .div(ONE_36)
         .mul(parsedFxPoolData.baseTokenRate_36)
         .div(ONE_36);
-    return bnum(val.toString())
-        .div(bnum(10).pow(36))
-        .decimalPlaces(
-            poolPairData.tokenOutfxOracleDecimals,
-            OldBigNumber.ROUND_DOWN
-        );
+    return val;
 };
 
 // spot price after origin swap
@@ -662,7 +665,12 @@ export const _spotPriceAfterSwapExactTokenInForTokenOut = (
             // which is used in front end display.
 
             return amount.isZero()
-                ? spotPriceBeforeSwap(amount_36, poolPairData)
+                ? bnum(spotPriceBeforeSwap(amount_36, poolPairData).toString())
+                      .div(bnum(10).pow(36))
+                      .decimalPlaces(
+                          poolPairData.tokenOutfxOracleDecimals,
+                          OldBigNumber.ROUND_DOWN
+                      )
                 : bnum(
                       outputAmount_36
                           .mul(ONE_36.sub(epsilon_36))
@@ -703,7 +711,14 @@ export const _spotPriceAfterSwapExactTokenInForTokenOut = (
             oBals0after_36.gt(maxBetaLimit_36)
         ) {
             if (amount.isZero())
-                return spotPriceBeforeSwap(amount_36, poolPairData);
+                return bnum(
+                    spotPriceBeforeSwap(amount_36, poolPairData).toString()
+                )
+                    .div(bnum(10).pow(36))
+                    .decimalPlaces(
+                        poolPairData.tokenOutfxOracleDecimals,
+                        OldBigNumber.ROUND_DOWN
+                    );
 
             const ratioOfOutputAndInput = outputAmount_36
                 .mul(ONE_36.sub(epsilon_36))
@@ -875,7 +890,14 @@ export const _derivativeSpotPriceAfterSwapExactTokenInForTokenOut = (
     amount: OldBigNumber,
     poolPairData: FxPoolPairData
 ): OldBigNumber => {
-    const x = spotPriceBeforeSwap(parseFixed('1', 36), poolPairData);
+    const x = bnum(
+        spotPriceBeforeSwap(parseFixed('1', 36), poolPairData).toString()
+    )
+        .div(bnum(10).pow(36))
+        .decimalPlaces(
+            poolPairData.tokenOutfxOracleDecimals,
+            OldBigNumber.ROUND_DOWN
+        );
     const y = _spotPriceAfterSwapExactTokenInForTokenOut(poolPairData, amount);
     const yMinusX = y.minus(x);
     const ans = yMinusX.div(x);
@@ -891,7 +913,14 @@ export const _derivativeSpotPriceAfterSwapTokenInForExactTokenOut = (
     amount: OldBigNumber,
     poolPairData: FxPoolPairData
 ): OldBigNumber => {
-    const x = spotPriceBeforeSwap(parseFixed('1', 36), poolPairData);
+    const x = bnum(
+        spotPriceBeforeSwap(parseFixed('1', 36), poolPairData).toString()
+    )
+        .div(bnum(10).pow(36))
+        .decimalPlaces(
+            poolPairData.tokenOutfxOracleDecimals,
+            OldBigNumber.ROUND_DOWN
+        );
     const y = _spotPriceAfterSwapTokenInForExactTokenOut(poolPairData, amount);
     const yMinusX = y.minus(x);
     const ans = yMinusX.div(x);
