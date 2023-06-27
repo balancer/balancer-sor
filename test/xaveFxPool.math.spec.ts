@@ -9,6 +9,7 @@ import {
     viewNumeraireAmount,
 } from '../src/pools/xaveFxPool/fxPoolMath';
 import { BigNumber } from '@ethersproject/bignumber';
+import { safeParseFixed } from '../src/utils';
 
 context('xaveFxPool: fxMath functions', () => {
     const tokenDecimals = 6;
@@ -39,7 +40,7 @@ context('xaveFxPool: fxMath functions', () => {
 
     it(`should correctly return 'viewNumeraireAmount' values`, async () => {
         const numerarieAmount = viewNumeraireAmount(
-            BigNumber.from('13445088912'),
+            safeParseFixed('13445088912', 36),
             tokenDecimals,
             rate,
             tokenFxRateDecimals

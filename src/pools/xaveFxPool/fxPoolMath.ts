@@ -51,16 +51,14 @@ const isUSDC = (address: string) => {
 const calculateGivenAmountInNumeraire = (
     isOriginSwap: boolean,
     poolPairData: FxPoolPairData,
-    amount: OldBigNumber
+    amount_36: BigNumber
 ) => {
     let calculatedNumeraireAmount;
 
     if (isOriginSwap) {
         // tokenIn is given
         calculatedNumeraireAmount = viewNumeraireAmount(
-            BigNumber.from(
-                amount.times(bnum(10).pow(poolPairData.decimalsIn)).toString()
-            ),
+            safeParseFixed(amount_36.toString(), poolPairData.decimalsIn),
             poolPairData.decimalsIn,
             poolPairData.tokenInLatestFXPrice,
             poolPairData.tokenInfxOracleDecimals
@@ -68,9 +66,7 @@ const calculateGivenAmountInNumeraire = (
     } else {
         // tokenOut is given
         calculatedNumeraireAmount = viewNumeraireAmount(
-            BigNumber.from(
-                amount.times(bnum(10).pow(poolPairData.decimalsOut)).toString()
-            ),
+            safeParseFixed(amount_36.toString(), poolPairData.decimalsOut),
             poolPairData.decimalsOut,
             poolPairData.tokenOutLatestFXPrice,
             poolPairData.tokenOutfxOracleDecimals
@@ -89,27 +85,27 @@ export const poolBalancesToNumeraire = (
         // amount * rate / 10^poolPairData.decimalsIn -> rate: (_rate / 10^fxOracleDecimals)
         // _amount.mul(_rate).div(basefxOracleDecimals).divu(baseDecimals);
         tokenInNumeraire = viewNumeraireAmount(
-            poolPairData.balanceIn,
+            safeParseFixed(poolPairData.balanceIn.toString(), 36),
             poolPairData.decimalsIn,
             poolPairData.tokenInLatestFXPrice,
             poolPairData.tokenInfxOracleDecimals
         );
         tokenOutNumeraire = viewNumeraireAmount(
-            poolPairData.balanceOut,
+            safeParseFixed(poolPairData.balanceOut.toString(), 36),
             poolPairData.decimalsOut,
             poolPairData.tokenOutLatestFXPrice,
             poolPairData.tokenOutfxOracleDecimals
         );
     } else {
         tokenInNumeraire = viewNumeraireAmount(
-            poolPairData.balanceOut,
+            safeParseFixed(poolPairData.balanceOut.toString(), 36),
             poolPairData.decimalsOut,
             poolPairData.tokenOutLatestFXPrice,
             poolPairData.tokenOutfxOracleDecimals
         );
 
         tokenOutNumeraire = viewNumeraireAmount(
-            poolPairData.balanceIn,
+            safeParseFixed(poolPairData.balanceIn.toString(), 36),
             poolPairData.decimalsIn,
             poolPairData.tokenInLatestFXPrice,
             poolPairData.tokenInfxOracleDecimals
@@ -124,20 +120,20 @@ export const poolBalancesToNumeraire = (
 };
 // everything is in order of USDC, base token
 const getParsedFxPoolData = (
-    amount: OldBigNumber,
+    amount_36: BigNumber,
     poolPairData: FxPoolPairData,
     isOriginSwap: boolean
 ): ParsedFxPoolData => {
     // reserves are in raw amount, they converted to numeraire
     const baseReserves = isUSDC(poolPairData.tokenIn)
         ? viewNumeraireAmount(
-              poolPairData.balanceOut,
+              safeParseFixed(poolPairData.balanceOut.toString(), 36),
               poolPairData.decimalsOut,
               poolPairData.tokenOutLatestFXPrice,
               poolPairData.tokenOutfxOracleDecimals
           )
         : viewNumeraireAmount(
-              poolPairData.balanceIn,
+              safeParseFixed(poolPairData.balanceIn.toString(), 36),
               poolPairData.decimalsIn,
               poolPairData.tokenInLatestFXPrice,
               poolPairData.tokenInfxOracleDecimals
@@ -146,13 +142,13 @@ const getParsedFxPoolData = (
     // reserves are not in wei
     const usdcReserves = isUSDC(poolPairData.tokenIn)
         ? viewNumeraireAmount(
-              poolPairData.balanceIn,
+              safeParseFixed(poolPairData.balanceIn.toString(), 36),
               poolPairData.decimalsIn,
               poolPairData.tokenInLatestFXPrice,
               poolPairData.tokenInfxOracleDecimals
           )
         : viewNumeraireAmount(
-              poolPairData.balanceOut,
+              safeParseFixed(poolPairData.balanceOut.toString(), 36),
               poolPairData.decimalsOut,
               poolPairData.tokenOutLatestFXPrice,
               poolPairData.tokenOutfxOracleDecimals
@@ -175,7 +171,7 @@ const getParsedFxPoolData = (
     const givenAmountInNumeraire = calculateGivenAmountInNumeraire(
         isOriginSwap,
         poolPairData,
-        amount
+        amount_36
     );
 
     return {
@@ -236,14 +232,14 @@ export const viewRawAmount = (
  * @returns amount in numeraire (ie. user friendly decimals)
  */
 export const viewNumeraireAmount = (
-    _amount: BigNumber, // wei
+    amount_36: BigNumber, // wei
     tokenDecimals: number,
     rate: BigNumber, // wei
     fxOracleDecimals: number
 ): OldBigNumber => {
     // Solidity: _amount.mul(_rate).div(basefxOracleDecimals).divu(baseDecimals);
 
-    const val = safeParseFixed(_amount.toString(), 36)
+    const val = amount_36
         .mul(safeParseFixed(rate.toString(), 36))
         .div(ONE_36)
         .div(ONE_36)
@@ -467,7 +463,11 @@ export function _exactTokenInForTokenOut(
     amount: OldBigNumber,
     poolPairData: FxPoolPairData
 ): OldBigNumber {
-    const parsedFxPoolData = getParsedFxPoolData(amount, poolPairData, true);
+    const parsedFxPoolData = getParsedFxPoolData(
+        safeParseFixed(amount.toString(), 36),
+        poolPairData,
+        true
+    );
 
     const targetAmountInNumeraire = parsedFxPoolData.givenAmountInNumeraire;
 
@@ -517,7 +517,11 @@ export function _tokenInForExactTokenOut(
     amount: OldBigNumber,
     poolPairData: FxPoolPairData
 ): OldBigNumber {
-    const parsedFxPoolData = getParsedFxPoolData(amount, poolPairData, false);
+    const parsedFxPoolData = getParsedFxPoolData(
+        safeParseFixed(amount.toString(), 36),
+        poolPairData,
+        false
+    );
     const targetAmountInNumeraire =
         parsedFxPoolData.givenAmountInNumeraire.times(-1);
 
@@ -568,7 +572,11 @@ export const spotPriceBeforeSwap = (
 ): OldBigNumber => {
     // input amount 1 XSGD to get the output in USDC
     const inputAmountInNumeraire = bnum(1);
-    const parsedFxPoolData = getParsedFxPoolData(amount, poolPairData, true);
+    const parsedFxPoolData = getParsedFxPoolData(
+        safeParseFixed(amount.toString(), 36),
+        poolPairData,
+        true
+    );
 
     const _oGLiq = parsedFxPoolData._oGLiq;
     const _nGLiq = parsedFxPoolData._nGLiq;
@@ -607,7 +615,11 @@ export const _spotPriceAfterSwapExactTokenInForTokenOut = (
     poolPairData: FxPoolPairData,
     amount: OldBigNumber
 ): OldBigNumber => {
-    const parsedFxPoolData = getParsedFxPoolData(amount, poolPairData, true);
+    const parsedFxPoolData = getParsedFxPoolData(
+        safeParseFixed(amount.toString(), 36),
+        poolPairData,
+        true
+    );
 
     const targetAmountInNumeraire = parsedFxPoolData.givenAmountInNumeraire;
 
@@ -731,7 +743,11 @@ export const _spotPriceAfterSwapTokenInForExactTokenOut = (
     poolPairData: FxPoolPairData,
     amount: OldBigNumber
 ): OldBigNumber => {
-    const parsedFxPoolData = getParsedFxPoolData(amount, poolPairData, false);
+    const parsedFxPoolData = getParsedFxPoolData(
+        safeParseFixed(amount.toString(), 36),
+        poolPairData,
+        false
+    );
 
     const targetAmountInNumeraire =
         parsedFxPoolData.givenAmountInNumeraire.times(-1);
