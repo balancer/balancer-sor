@@ -5,6 +5,7 @@ import { safeParseFixed } from '../../utils';
 
 // Constants
 export const ONE_36 = parseFixed('1', 36);
+export const ONE_18 = parseFixed('1', 18);
 export const CURVEMATH_MAX_DIFF_36 = parseFixed('-0.000001000000000000024', 36);
 export const ONE_TO_THE_THIRTEEN_NUM_36 = parseFixed('10000000000000', 36);
 const CURVEMATH_MAX_36 = parseFixed('0.25', 36); //CURVEMATH MAX from contract
@@ -325,7 +326,7 @@ const calculateTrade = (
     _inputAmt_36: BigNumber,
     _outputIndex: number,
     poolPairData: ParsedFxPoolData
-): [OldBigNumber, OldBigNumber] => {
+): [BigNumber, BigNumber] => {
     const weights_: BigNumber[] = [
         safeParseFixed('0.5', 36),
         safeParseFixed('0.5', 36),
@@ -349,7 +350,13 @@ const calculateTrade = (
     let psi_36: BigNumber;
 
     for (let i = 0; i < 32; i++) {
-        psi_36 = calculateFee(_nGLiq_36, _nBals_36, beta_36, delta_36, weights_);
+        psi_36 = calculateFee(
+            _nGLiq_36,
+            _nBals_36,
+            beta_36,
+            delta_36,
+            weights_
+        );
 
         const prevAmount = outputAmt_;
 
@@ -378,10 +385,7 @@ const calculateTrade = (
                 alpha_36
             );
             enforceSwapInvariant(_oGLiq_36, omega_36, _nGLiq_36, psi_36);
-            return [
-                bnum(outputAmt_.toString()).div(bnum(10).pow(36)),
-                bnum(_nGLiq_36.toString()).div(bnum(10).pow(36)),
-            ];
+            return [outputAmt_, _nGLiq_36];
         } else {
             _nGLiq_36 = _oGLiq_36.add(_inputAmt_36).add(outputAmt_);
             _nBals_36[_outputIndex] = _oBals_36[_outputIndex].add(outputAmt_);
@@ -446,14 +450,14 @@ const enforceHalts = (
 };
 
 const enforceSwapInvariant = (
-    _oGLiq: BigNumber,
-    _omega: BigNumber,
-    _nGLiq: BigNumber,
-    _psi: BigNumber
+    _oGLiq_36: BigNumber,
+    _omega_36: BigNumber,
+    _nGLiq_36: BigNumber,
+    _psi_36: BigNumber
 ): boolean => {
-    const _nextUtil = _nGLiq.sub(_psi);
+    const _nextUtil = _nGLiq_36.sub(_psi_36);
 
-    const _prevUtil = _oGLiq.sub(_omega);
+    const _prevUtil = _oGLiq_36.sub(_omega_36);
 
     const _diff = _nextUtil.sub(_prevUtil);
 
@@ -495,7 +499,7 @@ export function _exactTokenInForTokenOut(
     const _oBals_36 = parsedFxPoolData._oBals_36;
     const _nBals_36 = parsedFxPoolData._nBals_36;
 
-    const _amt = calculateTrade(
+    const _amt_36 = calculateTrade(
         _oGLiq_36, // _oGLiq
         _nGLiq_36, // _nGLiq
         _oBals_36, // _oBals
@@ -505,16 +509,16 @@ export function _exactTokenInForTokenOut(
         parsedFxPoolData
     );
 
-    if (_amt === undefined) {
+    if (_amt_36 === undefined) {
         throw new Error(CurveMathRevert.CannotSwap);
     } else {
-        const epsilon = parsedFxPoolData.epsilon_36;
-        const _amtWithFee = _amt[0].times(
-            bnum(1).minus(bnum(epsilon.toString()).div(bnum(10).pow(36)))
-        );
+        const epsilon_36 = parsedFxPoolData.epsilon_36;
+        const _amtWithFee_36 = _amt_36[0]
+            .mul(ONE_36.sub(epsilon_36))
+            .div(ONE_36);
 
         return viewRawAmount(
-            safeParseFixed(_amtWithFee.abs().toString(), 36),
+            _amtWithFee_36.abs(),
             poolPairData.decimalsOut,
             poolPairData.tokenOutLatestFXPrice,
             poolPairData.tokenOutfxOracleDecimals
@@ -545,7 +549,7 @@ export function _tokenInForExactTokenOut(
         ).div(bnum(10).pow(poolPairData.decimalsOut)); // must be the token out
     }
 
-    const _amt = calculateTrade(
+    const _amt_36 = calculateTrade(
         parsedFxPoolData._oGLiq_36,
         parsedFxPoolData._nGLiq_36,
         parsedFxPoolData._oBals_36,
@@ -555,15 +559,15 @@ export function _tokenInForExactTokenOut(
         parsedFxPoolData
     );
 
-    if (_amt === undefined) {
+    if (_amt_36 === undefined) {
         throw new Error(CurveMathRevert.CannotSwap);
     } else {
-        const epsilon = poolPairData.epsilon.div(bnum(10).pow(18));
+        const epsilon_36 = safeParseFixed(poolPairData.epsilon.toString(), 18);
 
-        const _amtWithFee = _amt[0].times(epsilon.plus(1)); // fee retained by the pool
+        const _amtWithFee = _amt_36[0].mul(ONE_36.add(epsilon_36)).div(ONE_36); // fee retained by the pool
 
         return viewRawAmount(
-            safeParseFixed(_amtWithFee.abs().toString(), 36),
+            _amtWithFee.abs(),
             poolPairData.decimalsIn,
             poolPairData.tokenInLatestFXPrice,
             poolPairData.tokenInfxOracleDecimals
@@ -575,11 +579,9 @@ export const spotPriceBeforeSwap = (
     amount_36: BigNumber,
     poolPairData: FxPoolPairData
 ): OldBigNumber => {
-    // input amount 1 XSGD to get the output in USDC
-    const inputAmountInNumeraire = bnum(1);
     const parsedFxPoolData = getParsedFxPoolData(amount_36, poolPairData, true);
 
-    const outputAmountInNumeraire = calculateTrade(
+    const outputAmountInNumeraire_36 = calculateTrade(
         parsedFxPoolData._oGLiq_36, // _oGLiq
         parsedFxPoolData._nGLiq_36, // _nGLiq
         parsedFxPoolData._oBals_36, // _oBals
@@ -589,23 +591,18 @@ export const spotPriceBeforeSwap = (
         parsedFxPoolData
     );
 
-    const val = outputAmountInNumeraire[0]
+    const val = outputAmountInNumeraire_36[0]
         .abs()
-        .times(
-            bnum(1).minus(
-                bnum(parsedFxPoolData.epsilon_36.toString()).div(
-                    bnum(10).pow(36)
-                )
-            )
-        )
-        .div(inputAmountInNumeraire.abs())
-        .times(parsedFxPoolData.baseTokenRate_36.toString())
-        .div(ONE_36.toString())
+        .mul(ONE_36.sub(parsedFxPoolData.epsilon_36))
+        .div(ONE_36)
+        .mul(parsedFxPoolData.baseTokenRate_36)
+        .div(ONE_36);
+    return bnum(val.toString())
+        .div(bnum(10).pow(36))
         .decimalPlaces(
             poolPairData.tokenOutfxOracleDecimals,
             OldBigNumber.ROUND_DOWN
         );
-    return val;
 };
 
 // spot price after origin swap
@@ -627,7 +624,7 @@ export const _spotPriceAfterSwapExactTokenInForTokenOut = (
     const _nGLiq_36 = parsedFxPoolData._nGLiq_36;
     const _oBals_36 = parsedFxPoolData._oBals_36;
 
-    const outputAfterTrade = calculateTrade(
+    const outputAfterTrade_36 = calculateTrade(
         _oGLiq_36,
         _nGLiq_36,
         _oBals_36,
@@ -637,57 +634,59 @@ export const _spotPriceAfterSwapExactTokenInForTokenOut = (
         parsedFxPoolData
     );
 
-    const outputAmount = outputAfterTrade[0];
+    const outputAmount_36 = outputAfterTrade_36[0];
 
-    const maxBetaLimit = bnum(beta_36.toString())
-        .div(bnum(10).pow(36))
-        .plus(1)
-        .times('0.5')
-        .times(_oGLiq_36.toString())
-        .div(bnum(10).pow(36));
+    const maxBetaLimit_36 = beta_36
+        .add(ONE_36)
+        .div(2)
+        .mul(_oGLiq_36)
+        .div(ONE_36);
 
-    const minBetaLimit = bnum(1)
-        .minus(bnum(beta_36.toString()).div(bnum(10).pow(36)))
-        .times('0.5')
-        .times(_oGLiq_36.toString())
-        .div(bnum(10).pow(36));
+    const minBetaLimit_36 = ONE_36.sub(beta_36)
+        .div(2)
+        .mul(_oGLiq_36)
+        .div(ONE_36);
 
     if (isUSDC(poolPairData.tokenIn)) {
         // token[0] to token [1] in originswap
-        const oBals0after = bnum(_nBals_36[0].toString()).div(bnum(10).pow(36));
+        const oBals0after_36 = _nBals_36[0];
 
-        const oBals1after = bnum(_nBals_36[1].toString()).div(bnum(10).pow(36));
+        const oBals1after_36 = _nBals_36[1];
 
-        if (oBals1after.lt(minBetaLimit) && oBals0after.gt(maxBetaLimit)) {
+        if (
+            oBals1after_36.lt(minBetaLimit_36) &&
+            oBals0after_36.gt(maxBetaLimit_36)
+        ) {
             // returns 0 because  Math.abs(targetAmountInNumeraire)) * currentRate
             // used that function with a 0 amount to get a market spot price for the pool
             // which is used in front end display.
 
             return amount.isZero()
                 ? spotPriceBeforeSwap(amount_36, poolPairData)
-                : outputAmount
-                      .times(
-                          bnum(1).minus(
-                              bnum(epsilon_36.toString()).div(bnum(10).pow(36))
-                          )
-                      )
-                      .abs()
-                      .times(bnum(10).pow(36))
-                      .div(bnum(targetAmountInNumeraire_36.toString()).abs())
-                      .times(currentRate_36.toString())
-                      .div(ONE_36.toString())
+                : bnum(
+                      outputAmount_36
+                          .mul(ONE_36.sub(epsilon_36))
+                          .div(ONE_36)
+                          .abs()
+                          .mul(ONE_36)
+                          .div(targetAmountInNumeraire_36.abs())
+                          .mul(currentRate_36)
+                          .div(ONE_36)
+                          .toString()
+                  )
+                      .div(bnum(10).pow(36))
                       .decimalPlaces(
                           poolPairData.tokenInfxOracleDecimals,
                           OldBigNumber.ROUND_DOWN
                       );
         } else {
-            return bnum(currentRate_36.toString())
-                .div(ONE_36.toString())
-                .times(
-                    bnum(1).minus(
-                        bnum(epsilon_36.toString()).div(bnum(10).pow(36))
-                    )
-                )
+            return bnum(
+                currentRate_36
+                    .mul(ONE_36.sub(epsilon_36))
+                    .div(ONE_36)
+                    .toString()
+            )
+                .div(bnum(10).pow(36))
                 .decimalPlaces(
                     poolPairData.tokenInfxOracleDecimals,
                     OldBigNumber.ROUND_DOWN
@@ -696,25 +695,26 @@ export const _spotPriceAfterSwapExactTokenInForTokenOut = (
     } else {
         // if usdc is tokenOut
         //  token[1] to token [0] in originswap
-        const oBals0after = bnum(_nBals_36[1].toString()).div(bnum(10).pow(36));
-        const oBals1after = bnum(_nBals_36[0].toString()).div(bnum(10).pow(36));
+        const oBals0after_36 = _nBals_36[1];
+        const oBals1after_36 = _nBals_36[0];
 
-        if (oBals1after.lt(minBetaLimit) && oBals0after.gt(maxBetaLimit)) {
+        if (
+            oBals1after_36.lt(minBetaLimit_36) &&
+            oBals0after_36.gt(maxBetaLimit_36)
+        ) {
             if (amount.isZero())
                 return spotPriceBeforeSwap(amount_36, poolPairData);
 
-            const ratioOfOutputAndInput = outputAmount
-                .times(
-                    bnum(1).minus(
-                        bnum(epsilon_36.toString()).div(bnum(10).pow(36))
-                    )
-                )
+            const ratioOfOutputAndInput = outputAmount_36
+                .mul(ONE_36.sub(epsilon_36))
+                .div(ONE_36)
                 .abs()
-                .times(bnum(10).pow(36))
-                .div(bnum(targetAmountInNumeraire_36.toString()).abs());
-            return ratioOfOutputAndInput
-                .times(currentRate_36.toString())
-                .div(ONE_36.toString())
+                .mul(ONE_36)
+                .div(targetAmountInNumeraire_36.abs());
+            return bnum(
+                ratioOfOutputAndInput.mul(currentRate_36).div(ONE_36).toString()
+            )
+                .div(bnum(10).pow(36))
                 .decimalPlaces(
                     poolPairData.tokenInfxOracleDecimals,
                     OldBigNumber.ROUND_DOWN
@@ -754,13 +754,13 @@ export const _spotPriceAfterSwapTokenInForExactTokenOut = (
 
     const _oGLiq_36 = parsedFxPoolData._oGLiq_36;
     const _nBals_36 = parsedFxPoolData._nBals_36;
-    const currentRate = parsedFxPoolData.baseTokenRate_36;
+    const currentRate_36 = parsedFxPoolData.baseTokenRate_36;
     const beta_36 = parsedFxPoolData.beta_36;
     const epsilon_36 = parsedFxPoolData.epsilon_36;
     const _nGLiq_36 = parsedFxPoolData._nGLiq_36;
     const _oBals_36 = parsedFxPoolData._oBals_36;
 
-    const outputAfterTrade = calculateTrade(
+    const outputAfterTrade_36 = calculateTrade(
         _oGLiq_36,
         _nGLiq_36,
         _oBals_36,
@@ -770,96 +770,102 @@ export const _spotPriceAfterSwapTokenInForExactTokenOut = (
         parsedFxPoolData
     );
 
-    const outputAmount = outputAfterTrade[0];
+    const outputAmount_36 = outputAfterTrade_36[0];
 
-    const maxBetaLimit = bnum(beta_36.toString())
-        .div(bnum(10).pow(36))
-        .plus(1)
-        .times('0.5')
-        .times(_oGLiq_36.toString())
-        .div(bnum(10).pow(36));
-    const minBetaLimit = bnum(1)
-        .minus(bnum(beta_36.toString()).div(bnum(10).pow(36)))
-        .times('0.5')
-        .times(_oGLiq_36.toString())
-        .div(bnum(10).pow(36));
+    const maxBetaLimit_36 = beta_36
+        .add(ONE_36)
+        .div(2)
+        .mul(_oGLiq_36)
+        .div(ONE_36);
+    const minBetaLimit_36 = ONE_36.sub(beta_36)
+        .div(2)
+        .mul(_oGLiq_36)
+        .div(ONE_36);
     if (isUSDC(poolPairData.tokenIn)) {
         // token[0] to token [1] in originswap
-        const oBals0after = bnum(_nBals_36[0].toString()).div(bnum(10).pow(36));
-        const oBals1after = bnum(_nBals_36[1].toString()).div(bnum(19).pow(36));
+        const oBals0after_36 = _nBals_36[0];
+        const oBals1after_36 = _nBals_36[1];
 
-        if (oBals1after.lt(minBetaLimit) && oBals0after.gt(maxBetaLimit)) {
-            return bnum(targetAmountInNumeraire_36.toString())
+        if (
+            oBals1after_36.lt(minBetaLimit_36) &&
+            oBals0after_36.gt(maxBetaLimit_36)
+        ) {
+            const val = bnum(
+                targetAmountInNumeraire_36
+                    .abs()
+                    .mul(ONE_36)
+                    .div(
+                        outputAmount_36
+                            .mul(epsilon_36.add(ONE_36))
+                            .div(ONE_36)
+                            .abs()
+                    )
+                    .mul(currentRate_36)
+                    .div(ONE_36)
+                    .toString()
+            )
                 .div(bnum(10).pow(36))
-                .abs()
-                .div(
-                    outputAmount
-                        .times(
-                            bnum(epsilon_36.toString())
-                                .div(bnum(10).pow(36))
-                                .plus(1)
-                        )
-                        .abs()
-                )
-                .times(currentRate.toString())
-                .div(ONE_36.toString())
                 .decimalPlaces(
                     poolPairData.tokenOutfxOracleDecimals,
                     OldBigNumber.ROUND_DOWN
                 );
+            return val;
         } else {
             // rate * (1-epsilon)
-            return bnum(currentRate.toString())
-                .div(ONE_36.toString())
-                .times(
-                    bnum(1).minus(
-                        bnum(epsilon_36.toString()).div(bnum(10).pow(36))
-                    )
-                )
+            const val = bnum(
+                currentRate_36
+                    .mul(ONE_36.sub(epsilon_36))
+                    .div(ONE_36)
+                    .toString()
+            )
+                .div(bnum(10).pow(36))
                 .decimalPlaces(
                     poolPairData.tokenOutfxOracleDecimals,
                     OldBigNumber.ROUND_DOWN
                 );
+            return val;
         }
     } else {
         //  token[1] to token [0] in originswap
-        const oBals0after = bnum(_nBals_36[0].toString()).div(bnum(10).pow(36));
-        const oBals1after = bnum(_nBals_36[1].toString()).div(bnum(10).pow(36));
+        const oBals0after_36 = _nBals_36[0];
+        const oBals1after_36 = _nBals_36[1];
 
-        const isBeyondMinBeta = oBals0after.lt(minBetaLimit);
-        const isBeyondMaxBeta = oBals1after.gt(maxBetaLimit);
+        const isBeyondMinBeta = oBals0after_36.lt(minBetaLimit_36);
+        const isBeyondMaxBeta = oBals1after_36.gt(maxBetaLimit_36);
 
         if (isBeyondMinBeta && isBeyondMaxBeta) {
-            return bnum(targetAmountInNumeraire_36.toString())
+            return bnum(
+                targetAmountInNumeraire_36
+                    .abs()
+                    .mul(ONE_36)
+                    .div(
+                        outputAmount_36
+                            .mul(epsilon_36.add(ONE_36))
+                            .div(ONE_36)
+                            .abs()
+                    )
+                    .mul(currentRate_36)
+                    .div(ONE_36)
+                    .toString()
+            )
                 .div(bnum(10).pow(36))
-                .abs()
-                .div(
-                    outputAmount
-                        .times(
-                            bnum(epsilon_36.toString())
-                                .div(bnum(10).pow(36))
-                                .plus(1)
-                        )
-                        .abs()
-                )
-                .times(currentRate.toString())
-                .div(ONE_36.toString())
                 .decimalPlaces(
                     poolPairData.tokenOutfxOracleDecimals,
                     OldBigNumber.ROUND_DOWN
                 );
         } else {
-            return bnum(currentRate.toString())
-                .div(ONE_36.toString())
-                .times(
-                    bnum(1).minus(
-                        bnum(epsilon_36.toString()).div(bnum(10).pow(36))
-                    )
-                )
+            const val = bnum(
+                currentRate_36
+                    .mul(ONE_36.sub(epsilon_36))
+                    .div(ONE_36)
+                    .toString()
+            )
+                .div(bnum(10).pow(36))
                 .decimalPlaces(
                     poolPairData.tokenOutfxOracleDecimals,
                     OldBigNumber.ROUND_DOWN
                 );
+            return val;
         }
     }
 };

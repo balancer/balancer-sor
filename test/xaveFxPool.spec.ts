@@ -146,7 +146,7 @@ describe('xaveFxPool: fxPools stub test', () => {
                             );
                             expect(amountOut.toString()).to.eq(
                                 '0',
-                                'amountOut'
+                                '_exactTokenInForTokenOut'
                             );
                         } else {
                             amountOut = newPool._exactTokenInForTokenOut(
@@ -156,7 +156,7 @@ describe('xaveFxPool: fxPools stub test', () => {
 
                             expect(amountOut.toString()).to.be.equal(
                                 testCase.expectedSwapOutput,
-                                'amountOut vs. expectedSwapOutput'
+                                '_exactTokenInForTokenOut'
                             );
 
                             const _spotPriceAfterSwapExactTokenInForTokenOut =
@@ -169,7 +169,7 @@ describe('xaveFxPool: fxPools stub test', () => {
                                 _spotPriceAfterSwapExactTokenInForTokenOut.toString()
                             ).to.equals(
                                 testCase.expectedSpotPriceAfterSwap,
-                                'expectedSpotPriceAfterSwap'
+                                '_spotPriceAfterSwapExactTokenInForTokenOut'
                             );
 
                             const derivative =
@@ -180,7 +180,7 @@ describe('xaveFxPool: fxPools stub test', () => {
 
                             expect(derivative.toFixed(20)).to.be.equal(
                                 testCase.expectedDerivativeSpotPriceAfterSwap,
-                                'derivative'
+                                '_derivativeSpotPriceAfterSwapExactTokenInForTokenOut'
                             );
                         }
                     } else {
@@ -217,7 +217,7 @@ describe('xaveFxPool: fxPools stub test', () => {
                             );
                             expect(amountIn.toString()).to.be.equal(
                                 testCase.expectedSwapOutput,
-                                'amountIn vs. expectedSwapOutput'
+                                '_tokenInForExactTokenOut'
                             );
 
                             const _spotPriceAfterSwapTokenInForExactTokenOut =
@@ -230,7 +230,7 @@ describe('xaveFxPool: fxPools stub test', () => {
                                 _spotPriceAfterSwapTokenInForExactTokenOut.toString()
                             ).to.equal(
                                 testCase.expectedSpotPriceAfterSwap,
-                                'expectedSpotPriceAfterSwap'
+                                '_spotPriceAfterSwapTokenInForExactTokenOut'
                             );
 
                             const derivative =
@@ -241,7 +241,7 @@ describe('xaveFxPool: fxPools stub test', () => {
 
                             expect(derivative.toFixed(20)).to.be.equal(
                                 testCase.expectedDerivativeSpotPriceAfterSwap,
-                                'derivative'
+                                '_derivativeSpotPriceAfterSwapTokenInForExactTokenOut'
                             );
                         }
                     }
