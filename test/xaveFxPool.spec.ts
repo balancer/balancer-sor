@@ -270,8 +270,8 @@ describe('xaveFxPool: fxPools stub test', () => {
                 lambda: bnum('0x0429d069189e0000'),
                 delta: bnum('0x03cb71f51fc55800'),
                 epsilon: bnum('0x01c6bf52634000'),
-                tokenInLatestFXPrice: bnum('99963085000000'),
-                tokenOutLatestFXPrice: bnum('74200489000000'),
+                tokenInLatestFXPrice: BigNumber.from('99963085000000'),
+                tokenOutLatestFXPrice: BigNumber.from('74200489000000'),
                 tokenInfxOracleDecimals: 8,
                 tokenOutfxOracleDecimals: 8,
             };

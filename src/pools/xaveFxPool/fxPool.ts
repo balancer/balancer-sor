@@ -36,9 +36,9 @@ export type FxPoolPairData = PoolPairBase & {
     lambda: OldBigNumber;
     delta: OldBigNumber;
     epsilon: OldBigNumber;
-    tokenInLatestFXPrice: OldBigNumber;
+    tokenInLatestFXPrice: BigNumber;
     tokenInfxOracleDecimals: number;
-    tokenOutLatestFXPrice: OldBigNumber;
+    tokenOutLatestFXPrice: BigNumber;
     tokenOutfxOracleDecimals: number;
 };
 
@@ -160,17 +160,13 @@ export class FxPool implements PoolBase<FxPoolPairData> {
             lambda: this.lambda,
             delta: this.delta,
             epsilon: this.epsilon,
-            tokenInLatestFXPrice: bnum(
-                parseFixed(
-                    tI.token.latestFXPrice,
-                    tI.token.fxOracleDecimals
-                ).toString()
+            tokenInLatestFXPrice: parseFixed(
+                tI.token.latestFXPrice,
+                tI.token.fxOracleDecimals
             ), // decimals is formatted from subgraph in rate we get from the chainlink oracle
-            tokenOutLatestFXPrice: bnum(
-                parseFixed(
-                    tO.token.latestFXPrice,
-                    tO.token.fxOracleDecimals
-                ).toString()
+            tokenOutLatestFXPrice: parseFixed(
+                tO.token.latestFXPrice,
+                tO.token.fxOracleDecimals
             ), // decimals is formatted from subgraph in rate we get from the chainlink oracle
             tokenInfxOracleDecimals: tI.token.fxOracleDecimals,
             tokenOutfxOracleDecimals: tO.token.fxOracleDecimals,

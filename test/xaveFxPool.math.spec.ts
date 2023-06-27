@@ -8,11 +8,12 @@ import {
     viewRawAmount,
     viewNumeraireAmount,
 } from '../src/pools/xaveFxPool/fxPoolMath';
+import { BigNumber } from '@ethersproject/bignumber';
 
 context('xaveFxPool: fxMath functions', () => {
     const tokenDecimals = 6;
     const tokenFxRateDecimals = 8;
-    const rate = bnum('74376600'); // 0.743766
+    const rate = BigNumber.from('74376600'); // 0.743766
 
     it(`should correctly return 'viewRawAmount'`, async () => {
         const rawAmount = viewRawAmount(
@@ -38,7 +39,7 @@ context('xaveFxPool: fxMath functions', () => {
 
     it(`should correctly return 'viewNumeraireAmount' values`, async () => {
         const numerarieAmount = viewNumeraireAmount(
-            bnum('13445088912'),
+            BigNumber.from('13445088912'),
             tokenDecimals,
             rate,
             tokenFxRateDecimals
