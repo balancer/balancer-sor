@@ -6,6 +6,7 @@ import { safeParseFixed } from '../../utils';
 // Constants
 export const ONE_36 = parseFixed('1', 36);
 export const ONE_18 = parseFixed('1', 18);
+export const OLD_ONE_36 = bnum(10).pow(36);
 export const CURVEMATH_MAX_DIFF_36 = parseFixed('-0.000001000000000000024', 36);
 export const ONE_TO_THE_THIRTEEN_NUM_36 = parseFixed('10000000000000', 36);
 const CURVEMATH_MAX_36 = parseFixed('0.25', 36); //CURVEMATH MAX from contract
@@ -666,7 +667,7 @@ export const _spotPriceAfterSwapExactTokenInForTokenOut = (
 
             return amount.isZero()
                 ? bnum(spotPriceBeforeSwap(amount_36, poolPairData).toString())
-                      .div(bnum(10).pow(36))
+                      .div(OLD_ONE_36)
                       .decimalPlaces(
                           poolPairData.tokenOutfxOracleDecimals,
                           OldBigNumber.ROUND_DOWN
@@ -682,7 +683,7 @@ export const _spotPriceAfterSwapExactTokenInForTokenOut = (
                           .div(ONE_36)
                           .toString()
                   )
-                      .div(bnum(10).pow(36))
+                      .div(OLD_ONE_36)
                       .decimalPlaces(
                           poolPairData.tokenInfxOracleDecimals,
                           OldBigNumber.ROUND_DOWN
@@ -694,7 +695,7 @@ export const _spotPriceAfterSwapExactTokenInForTokenOut = (
                     .div(ONE_36)
                     .toString()
             )
-                .div(bnum(10).pow(36))
+                .div(OLD_ONE_36)
                 .decimalPlaces(
                     poolPairData.tokenInfxOracleDecimals,
                     OldBigNumber.ROUND_DOWN
@@ -714,7 +715,7 @@ export const _spotPriceAfterSwapExactTokenInForTokenOut = (
                 return bnum(
                     spotPriceBeforeSwap(amount_36, poolPairData).toString()
                 )
-                    .div(bnum(10).pow(36))
+                    .div(OLD_ONE_36)
                     .decimalPlaces(
                         poolPairData.tokenOutfxOracleDecimals,
                         OldBigNumber.ROUND_DOWN
@@ -729,7 +730,7 @@ export const _spotPriceAfterSwapExactTokenInForTokenOut = (
             return bnum(
                 ratioOfOutputAndInput.mul(currentRate_36).div(ONE_36).toString()
             )
-                .div(bnum(10).pow(36))
+                .div(OLD_ONE_36)
                 .decimalPlaces(
                     poolPairData.tokenInfxOracleDecimals,
                     OldBigNumber.ROUND_DOWN
@@ -738,9 +739,7 @@ export const _spotPriceAfterSwapExactTokenInForTokenOut = (
             return bnum(currentRate_36.toString())
                 .div(ONE_36.toString())
                 .times(
-                    bnum(1).minus(
-                        bnum(epsilon_36.toString()).div(bnum(10).pow(36))
-                    )
+                    bnum(1).minus(bnum(epsilon_36.toString()).div(OLD_ONE_36))
                 )
                 .decimalPlaces(
                     poolPairData.tokenInfxOracleDecimals,
@@ -819,7 +818,7 @@ export const _spotPriceAfterSwapTokenInForExactTokenOut = (
                     .div(ONE_36)
                     .toString()
             )
-                .div(bnum(10).pow(36))
+                .div(OLD_ONE_36)
                 .decimalPlaces(
                     poolPairData.tokenOutfxOracleDecimals,
                     OldBigNumber.ROUND_DOWN
@@ -833,7 +832,7 @@ export const _spotPriceAfterSwapTokenInForExactTokenOut = (
                     .div(ONE_36)
                     .toString()
             )
-                .div(bnum(10).pow(36))
+                .div(OLD_ONE_36)
                 .decimalPlaces(
                     poolPairData.tokenOutfxOracleDecimals,
                     OldBigNumber.ROUND_DOWN
@@ -863,7 +862,7 @@ export const _spotPriceAfterSwapTokenInForExactTokenOut = (
                     .div(ONE_36)
                     .toString()
             )
-                .div(bnum(10).pow(36))
+                .div(OLD_ONE_36)
                 .decimalPlaces(
                     poolPairData.tokenOutfxOracleDecimals,
                     OldBigNumber.ROUND_DOWN
@@ -875,7 +874,7 @@ export const _spotPriceAfterSwapTokenInForExactTokenOut = (
                     .div(ONE_36)
                     .toString()
             )
-                .div(bnum(10).pow(36))
+                .div(OLD_ONE_36)
                 .decimalPlaces(
                     poolPairData.tokenOutfxOracleDecimals,
                     OldBigNumber.ROUND_DOWN
@@ -893,7 +892,7 @@ export const _derivativeSpotPriceAfterSwapExactTokenInForTokenOut = (
     const x = bnum(
         spotPriceBeforeSwap(parseFixed('1', 36), poolPairData).toString()
     )
-        .div(bnum(10).pow(36))
+        .div(OLD_ONE_36)
         .decimalPlaces(
             poolPairData.tokenOutfxOracleDecimals,
             OldBigNumber.ROUND_DOWN
@@ -916,7 +915,7 @@ export const _derivativeSpotPriceAfterSwapTokenInForExactTokenOut = (
     const x = bnum(
         spotPriceBeforeSwap(parseFixed('1', 36), poolPairData).toString()
     )
-        .div(bnum(10).pow(36))
+        .div(OLD_ONE_36)
         .decimalPlaces(
             poolPairData.tokenOutfxOracleDecimals,
             OldBigNumber.ROUND_DOWN
