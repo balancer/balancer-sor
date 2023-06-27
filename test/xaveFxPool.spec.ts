@@ -9,6 +9,7 @@ import { FxPool, FxPoolPairData } from '../src/pools/xaveFxPool/fxPool';
 import {
     spotPriceBeforeSwap,
     _spotPriceAfterSwapExactTokenInForTokenOut,
+    ONE_36,
 } from '../src/pools/xaveFxPool/fxPoolMath';
 
 // Add new pool test data in Subgraph Schema format
@@ -27,8 +28,6 @@ type TestCaseType = {
     expectedSwapOutput: string;
     expectedDerivativeSpotPriceAfterSwap: string;
 };
-
-const ONE_NUMERAIRE = bnum(1);
 
 describe('xaveFxPool: fxPools stub test', () => {
     context('parsePoolPairData', () => {
@@ -123,7 +122,7 @@ describe('xaveFxPool: fxPools stub test', () => {
                     );
 
                     const spotPriceBeforeSwapValue = spotPriceBeforeSwap(
-                        ONE_NUMERAIRE,
+                        ONE_36,
                         poolPairData
                     );
 
