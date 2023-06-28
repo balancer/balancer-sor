@@ -675,9 +675,7 @@ export const _spotPriceAfterSwapExactTokenInForTokenOut = (
                 : bnum(
                       outputAmount_36
                           .mul(ONE_36.sub(epsilon_36))
-                          .div(ONE_36)
                           .abs()
-                          .mul(ONE_36)
                           .div(targetAmountInNumeraire_36.abs())
                           .mul(currentRate_36)
                           .div(ONE_36)
@@ -723,9 +721,7 @@ export const _spotPriceAfterSwapExactTokenInForTokenOut = (
 
             const ratioOfOutputAndInput = outputAmount_36
                 .mul(ONE_36.sub(epsilon_36))
-                .div(ONE_36)
                 .abs()
-                .mul(ONE_36)
                 .div(targetAmountInNumeraire_36.abs());
             return bnum(
                 ratioOfOutputAndInput.mul(currentRate_36).div(ONE_36).toString()
