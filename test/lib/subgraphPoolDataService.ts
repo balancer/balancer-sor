@@ -7,21 +7,25 @@ const queryWithLinear = `
       {
         pool0: pools(
           first: 1000,
-          where: { swapEnabled: true, totalShares_gt: "0" },
+          where: { swapEnabled: true, totalShares_gt: "0.000000000001" },
           orderBy: totalLiquidity,
           orderDirection: desc
         ) {
           id
           address
           poolType
+          poolTypeVersion
           swapFee
           totalShares
-          tokens {
+          tokens (orderBy: index) {
             address
             balance
             decimals
             weight
             priceRate
+            token {
+              latestFXPrice
+            }
           }
           tokensList
           totalWeight
@@ -38,25 +42,45 @@ const queryWithLinear = `
           sqrtAlpha
           sqrtBeta
           root3Alpha
+          alpha
+          beta
+          c
+          s
+          lambda
+          delta
+          epsilon
+          tauAlphaX
+          tauAlphaY
+          tauBetaX
+          tauBetaY
+          u
+          v
+          w
+          z
+          dSq
         }
         pool1000: pools(
           first: 1000,
           skip: 1000,
-          where: { swapEnabled: true, totalShares_gt: "0" },
+          where: { swapEnabled: true, totalShares_gt: "0.000000000001" },
           orderBy: totalLiquidity,
           orderDirection: desc
         ) {
           id
           address
           poolType
+          poolTypeVersion
           swapFee
           totalShares
-          tokens {
+          tokens (orderBy: index) {
             address
             balance
             decimals
             weight
             priceRate
+            token {
+              latestFXPrice
+            }
           }
           tokensList
           totalWeight
@@ -73,66 +97,20 @@ const queryWithLinear = `
           sqrtAlpha
           sqrtBeta
           root3Alpha
-        }
-      }
-    `;
-
-const queryWithOutLinear = `
-      {
-        pool0: pools(
-          first: 1000,
-          where: { swapEnabled: true, totalShares_gt: "0" },
-          orderBy: totalLiquidity,
-          orderDirection: desc
-        ) {
-          id
-          address
-          poolType
-          swapFee
-          totalShares
-          tokens {
-            address
-            balance
-            decimals
-            weight
-            priceRate
-          }
-          tokensList
-          totalWeight
-          amp
-          expiryTime
-          unitSeconds
-          principalToken
-          baseToken
-          swapEnabled
-        }
-        pool1000: pools(
-          first: 1000,
-          skip: 1000,
-          where: { swapEnabled: true, totalShares_gt: "0" },
-          orderBy: totalLiquidity,
-          orderDirection: desc
-        ) {
-          id
-          address
-          poolType
-          swapFee
-          totalShares
-          tokens {
-            address
-            balance
-            decimals
-            weight
-            priceRate
-          }
-          tokensList
-          totalWeight
-          amp
-          expiryTime
-          unitSeconds
-          principalToken
-          baseToken
-          swapEnabled
+          alpha
+          beta
+          c
+          s
+          lambda
+          tauAlphaX
+          tauAlphaY
+          tauBetaX
+          tauBetaY
+          u
+          v
+          w
+          z
+          dSq
         }
       }
     `;
@@ -145,6 +123,7 @@ export const Query: { [chainId: number]: string } = {
     42: queryWithLinear,
     137: queryWithLinear,
     42161: queryWithLinear,
+    100: queryWithLinear,
 };
 
 export class SubgraphPoolDataService implements PoolDataService {
@@ -171,7 +150,19 @@ export class SubgraphPoolDataService implements PoolDataService {
 
         const { data } = await response.json();
 
-        const pools = [...data.pool0, ...data.pool1000];
+        // These pools are related to Euler hack and have issues the cause multicall to fail
+        const poolsToFilter = [
+            '0x0afbd58beca09545e4fb67772faf3858e610bcd0',
+            '0x2ff1a9dbdacd55297452cfd8a4d94724bc22a5f7',
+            '0xbc0f2372008005471874e426e86ccfae7b4de79d',
+            '0xdba274b4d04097b90a72b62467d828cefd708037',
+            '0xf22ff21e17157340575158ad7394e068048dd98b',
+            '0xf71d0774b214c4cf51e33eb3d30ef98132e4dbaa',
+        ];
+
+        let pools = [...data.pool0, ...data.pool1000];
+
+        pools = pools.filter((p) => !poolsToFilter.includes(p.address));
 
         if (this.config.onchain) {
             return getOnChainBalances(
@@ -182,6 +173,6 @@ export class SubgraphPoolDataService implements PoolDataService {
             );
         }
 
-        return data.pools ?? [];
+        return pools ?? [];
     }
 }

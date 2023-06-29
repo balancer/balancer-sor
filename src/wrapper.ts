@@ -23,6 +23,7 @@ import {
     TokenPriceService,
     PoolDataService,
     SorConfig,
+    GraphQLArgs,
 } from './types';
 import { Zero } from '@ethersproject/constants';
 
@@ -30,10 +31,11 @@ export class SOR {
     private readonly poolCacher: PoolCacher;
     public readonly routeProposer: RouteProposer;
     readonly swapCostCalculator: SwapCostCalculator;
+    private useBpt: boolean;
 
     private readonly defaultSwapOptions: SwapOptions = {
         gasPrice: parseFixed('50', 9),
-        swapGas: BigNumber.from('35000'),
+        swapGas: BigNumber.from('85000'),
         poolTypeFilter: PoolFilter.All,
         maxPools: 4,
         timestamp: Math.floor(Date.now() / 1000),
@@ -60,16 +62,16 @@ export class SOR {
         );
     }
 
-    getPools(): SubgraphPoolBase[] {
-        return this.poolCacher.getPools();
+    getPools(useBpts?: boolean): SubgraphPoolBase[] {
+        return this.poolCacher.getPools(useBpts);
     }
 
     /**
      * fetchPools Retrieves pools information and saves to internal pools cache.
      * @returns {boolean} True if pools fetched successfully, False if not.
      */
-    async fetchPools(): Promise<boolean> {
-        return this.poolCacher.fetchPools();
+    async fetchPools(queryArgs?: GraphQLArgs): Promise<boolean> {
+        return this.poolCacher.fetchPools(queryArgs);
     }
 
     /**
@@ -78,14 +80,17 @@ export class SOR {
      * @param {string} tokenOut - Address of tokenOut.
      * @param {SwapTypes} swapType - SwapExactIn where the amount of tokens in (sent to the Pool) is known or SwapExactOut where the amount of tokens out (received from the Pool) is known.
      * @param {BigNumberish} swapAmount - Either amountIn or amountOut depending on the `swapType` value.
-     * @returns {SwapInfo} Swap information including return amount and swaps structure to be submitted to Vault.
+     * @param swapOptions
+     * @param useBpts Set to true to consider join/exit weighted pool paths (these will need formatted and submitted via Relayer)
+     * @returns Swap information including return amount and swaps structure to be submitted to Vault.
      */
     async getSwaps(
         tokenIn: string,
         tokenOut: string,
         swapType: SwapTypes,
         swapAmount: BigNumberish,
-        swapOptions?: Partial<SwapOptions>
+        swapOptions?: Partial<SwapOptions>,
+        useBpts = false
     ): Promise<SwapInfo> {
         if (!this.poolCacher.finishedFetching) return cloneDeep(EMPTY_SWAPINFO);
 
@@ -94,9 +99,11 @@ export class SOR {
             ...this.defaultSwapOptions,
             ...swapOptions,
         };
-
-        const pools: SubgraphPoolBase[] = this.poolCacher.getPools();
-
+        if (this.useBpt !== useBpts) {
+            options.forceRefresh = true;
+            this.useBpt = useBpts;
+        }
+        const pools: SubgraphPoolBase[] = this.poolCacher.getPools(useBpts);
         const filteredPools = filterPoolsByType(pools, options.poolTypeFilter);
 
         const wrappedInfo = await getWrappedInfo(
@@ -141,7 +148,7 @@ export class SOR {
      * @param {string} outputToken - Address of outputToken.
      * @param {number} outputTokenDecimals - Decimals of outputToken.
      * @param {BigNumber} gasPrice - Gas price used to calculate cost.
-     * @param {BigNumber} swapGas - Gas cost of a swap. Default=35000.
+     * @param {BigNumber} swapGas - Gas cost of a swap. Default=85000.
      * @returns {BigNumber} Price of a swap in outputToken denomination.
      */
     async getCostOfSwapInToken(

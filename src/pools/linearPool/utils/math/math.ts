@@ -7,7 +7,7 @@ export const ZERO = bn(0);
 export const ONE = bn(1);
 export const TWO = bn(2);
 
-export const abs = (a: BigNumber, b: BigNumber): BigNumber => {
+export const abs = (a: BigNumber): BigNumber => {
     return a.gt(0) ? a : a.negated();
 };
 

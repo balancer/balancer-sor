@@ -18,7 +18,7 @@ const provider = new JsonRpcProvider(
     `https://mainnet.infura.io/v3/${process.env.INFURA}`
 );
 
-// npx mocha -r ts-node/register test/helpers.spec.ts
+// TS_NODE_PROJECT='tsconfig.testing.json' npx mocha -r ts-node/register test/helpers.spec.ts
 describe(`Tests for Helpers.`, () => {
     it(`Should format directhop swapExactIn`, () => {
         const swapAmount = parseFixed('1', 18);
@@ -1325,7 +1325,6 @@ describe(`Tests for Helpers.`, () => {
         // });
 
         it(`setWrappedInfo, ETH In, SwapExactIn`, async () => {
-            const chainId = 1;
             const swapType = SwapTypes.SwapExactIn;
             const tokenIn = AddressZero;
             const tokenOut = BAL.address;
@@ -1391,7 +1390,6 @@ describe(`Tests for Helpers.`, () => {
         });
 
         it(`setWrappedInfo, ETH In, SwapExactOut`, async () => {
-            const chainId = 1;
             const swapType = SwapTypes.SwapExactOut;
             const tokenIn = AddressZero;
             const tokenOut = BAL.address;
@@ -1457,7 +1455,6 @@ describe(`Tests for Helpers.`, () => {
         });
 
         it(`setWrappedInfo, ETH Out, SwapExactIn`, async () => {
-            const chainId = 1;
             const swapType = SwapTypes.SwapExactIn;
             const tokenIn = BAL.address;
             const tokenOut = AddressZero;
@@ -1523,7 +1520,6 @@ describe(`Tests for Helpers.`, () => {
         });
 
         it(`setWrappedInfo, ETH Out, SwapExactOut`, async () => {
-            const chainId = 1;
             const swapType = SwapTypes.SwapExactOut;
             const tokenIn = BAL.address;
             const tokenOut = AddressZero;

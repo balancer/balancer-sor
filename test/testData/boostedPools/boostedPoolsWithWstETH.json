@@ -532,7 +532,7 @@
             "totalShares": "10000"
         },
         {
-            "address": "0x0000000000000000000000000000000000000004",
+            "address": "0x0000000000000000000000000000000000000005",
             "id": "weightedWstETH-BBfusd",
             "poolType": "Weighted",
             "publicSwap": true,
@@ -566,7 +566,7 @@
             "totalShares": "10000"
         },
         {
-            "address": "0x0000000000000000000000000000000000000005",
+            "address": "0x0000000000000000000000000000000000000007",
             "id": "weightedBalWeth",
             "poolType": "Weighted",
             "publicSwap": true,

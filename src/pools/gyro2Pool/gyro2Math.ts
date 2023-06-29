@@ -1,6 +1,12 @@
 import { BigNumber } from '@ethersproject/bignumber';
 import { WeiPerEther as ONE } from '@ethersproject/constants';
-import { _sqrt, mulUp, divUp, mulDown, divDown } from './helpers';
+import {
+    sqrt,
+    mulUp,
+    divUp,
+    mulDown,
+    divDown,
+} from '../gyroHelpers/gyroSignedFixedPoint';
 
 /////////
 /// Virtual Parameter calculations
@@ -91,7 +97,7 @@ export function _calculateQuadratic(
     const addTerm = mulDown(mulDown(mc, ONE.mul(4)), a);
     // The minus sign in the radicand cancels out in this special case, so we add
     const radicand = bSquare.add(addTerm);
-    const sqrResult = _sqrt(radicand, BigNumber.from(5));
+    const sqrResult = sqrt(radicand, BigNumber.from(5));
     // The minus sign in the numerator cancels out in this special case
     const numerator = mb.add(sqrResult);
     const invariant = divDown(numerator, denominator);

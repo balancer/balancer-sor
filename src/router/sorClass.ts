@@ -75,7 +75,9 @@ export const optimizeSwapAmounts = (
                 swapType,
                 totalSwapAmount,
                 swapAmounts,
-                inputDecimals
+                inputDecimals,
+                outputDecimals,
+                costReturnToken
             );
         swapAmounts = bestAmounts;
 
@@ -144,13 +146,17 @@ const optimizePathDistribution = (
     swapType: SwapTypes,
     totalSwapAmount: BigNumber,
     initialSwapAmounts: OldBigNumber[],
-    inputDecimals: number
+    inputDecimals: number,
+    outputDecimals,
+    costReturnToken: BigNumber
 ): { paths: NewPath[]; swapAmounts: OldBigNumber[] } => {
     let [selectedPaths, exceedingAmounts] = getBestPathIds(
         allPaths,
         swapType,
         initialSwapAmounts,
-        inputDecimals
+        inputDecimals,
+        outputDecimals,
+        costReturnToken
     );
 
     let swapAmounts = initialSwapAmounts;
@@ -193,7 +199,9 @@ const optimizePathDistribution = (
             allPaths,
             swapType,
             swapAmounts,
-            inputDecimals
+            inputDecimals,
+            outputDecimals,
+            costReturnToken
         );
 
         if (newSelectedPaths.length === 0) break;
@@ -229,7 +237,6 @@ export const formatSwaps = (
             highestSwapAmt = swapAmount;
             largestSwapPath = path;
         }
-
         // // TODO: remove. To debug only!
         /*
         console.log(
@@ -262,6 +269,7 @@ export const formatSwaps = (
                     swapAmount: amounts[i].toString(),
                     tokenInDecimals: path.poolPairData[i].decimalsIn,
                     tokenOutDecimals: path.poolPairData[i].decimalsOut,
+                    returnAmount: amounts[amounts.length - 1].toString(),
                 };
                 pathSwaps.push(swap);
             }
@@ -283,6 +291,7 @@ export const formatSwaps = (
                     swapAmount: amounts[1].toString(),
                     tokenInDecimals: path.poolPairData[n - 1 - i].decimalsIn,
                     tokenOutDecimals: path.poolPairData[n - 1 - i].decimalsOut,
+                    returnAmount: amounts[0].toString(),
                 };
                 pathSwaps.unshift(swap);
             }
@@ -335,7 +344,9 @@ function getBestPathIds(
     originalPaths: NewPath[],
     swapType: SwapTypes,
     swapAmounts: OldBigNumber[],
-    inputDecimals: number
+    inputDecimals: number,
+    outputDecimals: number,
+    costReturnToken: BigNumber
 ): [NewPath[], OldBigNumber[]] {
     const selectedPaths: NewPath[] = [];
     const selectedPathExceedingAmounts: OldBigNumber[] = [];
@@ -361,7 +372,7 @@ function getBestPathIds(
                 // If path.limitAmount = swapAmount we set effectivePrice as
                 // Infinity because we know this path is maxed out and we want
                 // to select other paths that can still be improved on
-                let effectivePrice;
+                let effectivePrice: OldBigNumber;
                 if (
                     bnum(formatFixed(path.limitAmount, inputDecimals)).eq(
                         swapAmount
@@ -375,7 +386,9 @@ function getBestPathIds(
                         path,
                         swapType,
                         swapAmount,
-                        inputDecimals
+                        inputDecimals,
+                        outputDecimals,
+                        costReturnToken
                     );
                 }
                 if (effectivePrice.lte(bestEffectivePrice)) {
@@ -386,18 +399,29 @@ function getBestPathIds(
         });
 
         if (bestPathIndex === -1) {
-            return [[], []];
-        }
-
-        selectedPaths.push(paths[bestPathIndex]);
-        selectedPathExceedingAmounts.push(
-            swapAmount.minus(
-                bnum(
-                    formatFixed(paths[bestPathIndex].limitAmount, inputDecimals)
+            selectedPaths.push({
+                id: '',
+                swaps: [],
+                poolPairData: [],
+                limitAmount: BigNumber.from('0'),
+                pools: [],
+            });
+            selectedPathExceedingAmounts.push(ZERO);
+            return;
+        } else {
+            selectedPaths.push(paths[bestPathIndex]);
+            selectedPathExceedingAmounts.push(
+                swapAmount.minus(
+                    bnum(
+                        formatFixed(
+                            paths[bestPathIndex].limitAmount,
+                            inputDecimals
+                        )
+                    )
                 )
-            )
-        );
-        paths.splice(bestPathIndex, 1); // Remove path from list
+            );
+            paths.splice(bestPathIndex, 1); // Remove path from list
+        }
     });
 
     return [selectedPaths, selectedPathExceedingAmounts];

@@ -709,6 +709,70 @@
             "totalShares": "14473.092928301396719020",
             "totalWeight": "0",
             "wrappedIndex": 0
+        },
+        {
+            "address": "0x000000000000000000000000000000000000aaaa",
+            "id": "weightedConn-BBausd",
+            "poolType": "Weighted",
+            "publicSwap": true,
+            "swapFee": "0.01",
+            "swapEnabled": true,
+            "tokens": [
+                {
+                    "address": "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                    "balance": "100000.000000",
+                    "decimals": 18,
+                    "weight": "50",
+                    "symbol": "CONN",
+                    "priceRate": "1"
+                },
+                {
+                    "address": "0x8fd162f338b770f7e879030830cde9173367f301",
+                    "balance": "20000000.78213445",
+                    "decimals": 18,
+                    "weight": "50",
+                    "symbol": "bbaUSD",
+                    "priceRate": "1"
+                }
+            ],
+            "tokensList": [
+                "0x8fd162f338b770f7e879030830cde9173367f301",
+                "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+            ],
+            "totalWeight": "100",
+            "totalShares": "10000"
+        },
+        {
+            "address": "0x000000000000000000000000000000000000aaaa",
+            "id": "weightedConn-GOLD",
+            "poolType": "Weighted",
+            "publicSwap": true,
+            "swapFee": "0.01",
+            "swapEnabled": true,
+            "tokens": [
+                {
+                    "address": "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                    "balance": "100000.000000",
+                    "decimals": 18,
+                    "weight": "50",
+                    "symbol": "CONN",
+                    "priceRate": "1"
+                },
+                {
+                    "address": "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaabbbb",
+                    "balance": "20000000.78213445",
+                    "decimals": 18,
+                    "weight": "50",
+                    "symbol": "GOLD",
+                    "priceRate": "1"
+                }
+            ],
+            "tokensList": [
+                "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaabbbb",
+                "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+            ],
+            "totalWeight": "100",
+            "totalShares": "10000"
         }
     ]
 }

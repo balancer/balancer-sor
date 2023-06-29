@@ -1,16 +1,17 @@
+// TS_NODE_PROJECT='tsconfig.testing.json' npx mocha -r ts-node/register test/gyro3Pool.spec.ts
 import { expect } from 'chai';
 import cloneDeep from 'lodash.clonedeep';
-import { formatFixed, parseFixed, BigNumber } from '@ethersproject/bignumber';
+import { formatFixed, parseFixed } from '@ethersproject/bignumber';
 import { bnum } from '../src/utils/bignumber';
 import { USDC, USDT } from './lib/constants';
-import { SwapTypes } from '../src';
+import { SubgraphPoolBase, SwapTypes } from '../src';
 // Add new PoolType
 import { Gyro3Pool } from '../src/pools/gyro3Pool/gyro3Pool';
 // Add new pool test data in Subgraph Schema format
 import testPools from './testData/gyro3Pools/gyro3TestPool.json';
 
 describe('Gyro3Pool tests USDC > DAI', () => {
-    const testPool: any = cloneDeep(testPools).pools[0];
+    const testPool: SubgraphPoolBase = cloneDeep(testPools).pools[0];
     const pool = Gyro3Pool.fromPool(testPool);
 
     const poolPairData = pool.parsePoolPairData(USDT.address, USDC.address);
@@ -38,14 +39,14 @@ describe('Gyro3Pool tests USDC > DAI', () => {
                 SwapTypes.SwapExactIn
             );
 
-            expect(amount.toString()).to.eq('24935.7');
+            expect(amount.toString()).to.eq('82089.998821185751004412');
 
             amount = pool.getLimitAmountSwap(
                 poolPairData,
                 SwapTypes.SwapExactOut
             );
 
-            expect(amount.toString()).to.eq('24445.5');
+            expect(amount.toString()).to.eq('81484.918515');
         });
     });
 
@@ -55,7 +56,7 @@ describe('Gyro3Pool tests USDC > DAI', () => {
                 pool.getNormalizedLiquidity(poolPairData);
 
             expect(normalizedLiquidity.toString()).to.equal(
-                '9478800.379791954566885539'
+                '9478800.379870785044596699'
             );
         });
     });

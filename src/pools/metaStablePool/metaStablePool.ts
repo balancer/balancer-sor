@@ -1,6 +1,11 @@
 import { BigNumber, formatFixed, parseFixed } from '@ethersproject/bignumber';
-import { WeiPerEther as ONE } from '@ethersproject/constants';
-import { isSameAddress } from '../../utils';
+import { WeiPerEther as ONE, Zero } from '@ethersproject/constants';
+import {
+    isSameAddress,
+    normaliseBalance,
+    normaliseAmount,
+    denormaliseAmount,
+} from '../../utils';
 import { BigNumber as OldBigNumber, bnum, ZERO } from '../../utils/bignumber';
 import {
     PoolBase,
@@ -19,8 +24,11 @@ import {
 import {
     _calcOutGivenIn,
     _calcInGivenOut,
+    _calcBptOutGivenExactTokensIn,
+    _calcTokensOutGivenExactBptIn,
 } from '../stablePool/stableMathBigInt';
 import { StablePoolPairData } from '../stablePool/stablePool';
+import { universalNormalizedLiquidity } from '../liquidity';
 
 type MetaStablePoolToken = Pick<
     SubgraphToken,
@@ -32,7 +40,7 @@ export type MetaStablePoolPairData = StablePoolPairData & {
     tokenOutPriceRate: BigNumber;
 };
 
-export class MetaStablePool implements PoolBase {
+export class MetaStablePool implements PoolBase<MetaStablePoolPairData> {
     poolType: PoolTypes = PoolTypes.MetaStable;
     id: string;
     address: string;
@@ -109,7 +117,7 @@ export class MetaStablePool implements PoolBase {
 
         // Get all token balances
         const allBalances = this.tokens.map(({ balance, priceRate }) =>
-            bnum(balance).times(priceRate)
+            bnum(balance).times(bnum(priceRate))
         );
         const allBalancesScaled = this.tokens.map(({ balance, priceRate }) =>
             parseFixed(balance, 18).mul(parseFixed(priceRate, 18)).div(ONE)
@@ -139,11 +147,10 @@ export class MetaStablePool implements PoolBase {
     }
 
     getNormalizedLiquidity(poolPairData: MetaStablePoolPairData): OldBigNumber {
-        // This is an approximation as the actual normalized liquidity is a lot more complicated to calculate
-        return bnum(
-            formatFixed(
-                poolPairData.balanceOut.mul(poolPairData.amp),
-                poolPairData.decimalsOut + MetaStablePool.AMP_DECIMALS
+        return universalNormalizedLiquidity(
+            this._derivativeSpotPriceAfterSwapExactTokenInForTokenOut(
+                poolPairData,
+                ZERO
             )
         );
     }
@@ -180,14 +187,18 @@ export class MetaStablePool implements PoolBase {
     // Updates the balance of a given token for the pool
     updateTokenBalanceForPool(token: string, newBalance: BigNumber): void {
         // token is BPT
-        if (this.address == token) {
-            this.totalShares = newBalance;
+        if (isSameAddress(this.address, token)) {
+            this.updateTotalShares(newBalance);
         } else {
             // token is underlying in the pool
             const T = this.tokens.find((t) => isSameAddress(t.address, token));
             if (!T) throw Error('Pool does not contain this token');
             T.balance = formatFixed(newBalance, T.decimals);
         }
+    }
+
+    updateTotalShares(newTotalShares: BigNumber): void {
+        this.totalShares = newTotalShares;
     }
 
     _exactTokenInForTokenOut(
@@ -289,12 +300,79 @@ export class MetaStablePool implements PoolBase {
         }
     }
 
+    /**
+     * _calcTokensOutGivenExactBptIn
+     * @param bptAmountIn EVM scale.
+     * @returns EVM scale.
+     */
+    _calcTokensOutGivenExactBptIn(bptAmountIn: BigNumber): BigNumber[] {
+        // balances and amounts must be normalized as if it had 18 decimals for maths
+        // takes price rate into account
+        const balancesNormalised = this.tokens
+            .filter((t) => !isSameAddress(t.address, this.address))
+            .map((t) => normaliseBalance(t));
+        try {
+            const amountsOutNormalised = _calcTokensOutGivenExactBptIn(
+                balancesNormalised,
+                bptAmountIn.toBigInt(),
+                this.totalShares.toBigInt()
+            );
+            const amountsOut = amountsOutNormalised.map((a, i) =>
+                BigNumber.from(denormaliseAmount(a, this.tokens[i]).toString())
+            );
+            return amountsOut;
+        } catch (err) {
+            return new Array(balancesNormalised.length).fill(ZERO);
+        }
+    }
+
+    /**
+     * _calcBptOutGivenExactTokensIn
+     * @param amountsIn EVM Scale
+     * @returns EVM Scale
+     */
+    _calcBptOutGivenExactTokensIn(amountsIn: BigNumber[]): BigNumber {
+        try {
+            // balances and amounts must be normalized as if it had 18 decimals for maths
+            // takes price rate into account
+            const amountsInNormalised = new Array(amountsIn.length).fill(
+                BigInt(0)
+            );
+            const balancesNormalised = new Array(amountsIn.length).fill(
+                BigInt(0)
+            );
+            this.tokens
+                .filter((t) => !isSameAddress(t.address, this.address))
+                .forEach((token, i) => {
+                    amountsInNormalised[i] = normaliseAmount(
+                        BigInt(amountsIn[i].toString()),
+                        token
+                    );
+                    balancesNormalised[i] = normaliseBalance(token);
+                });
+            const bptAmountOut = _calcBptOutGivenExactTokensIn(
+                this.amp.toBigInt(),
+                balancesNormalised,
+                amountsInNormalised,
+                this.totalShares.toBigInt(),
+                this.swapFee.toBigInt()
+            );
+            return BigNumber.from(bptAmountOut.toString());
+        } catch (err) {
+            return Zero;
+        }
+    }
+
     _spotPriceAfterSwapExactTokenInForTokenOut(
         poolPairData: MetaStablePoolPairData,
         amount: OldBigNumber
     ): OldBigNumber {
-        const priceRateIn = formatFixed(poolPairData.tokenInPriceRate, 18);
-        const priceRateOut = formatFixed(poolPairData.tokenOutPriceRate, 18);
+        const priceRateIn = bnum(
+            formatFixed(poolPairData.tokenInPriceRate, 18)
+        );
+        const priceRateOut = bnum(
+            formatFixed(poolPairData.tokenOutPriceRate, 18)
+        );
         const amountConverted = amount.times(
             formatFixed(poolPairData.tokenInPriceRate, 18)
         );
@@ -309,8 +387,12 @@ export class MetaStablePool implements PoolBase {
         poolPairData: MetaStablePoolPairData,
         amount: OldBigNumber
     ): OldBigNumber {
-        const priceRateIn = formatFixed(poolPairData.tokenInPriceRate, 18);
-        const priceRateOut = formatFixed(poolPairData.tokenOutPriceRate, 18);
+        const priceRateIn = bnum(
+            formatFixed(poolPairData.tokenInPriceRate, 18)
+        );
+        const priceRateOut = bnum(
+            formatFixed(poolPairData.tokenOutPriceRate, 18)
+        );
         const amountConverted = amount.times(
             formatFixed(poolPairData.tokenOutPriceRate, 18)
         );
@@ -325,7 +407,9 @@ export class MetaStablePool implements PoolBase {
         poolPairData: MetaStablePoolPairData,
         amount: OldBigNumber
     ): OldBigNumber {
-        const priceRateOut = formatFixed(poolPairData.tokenOutPriceRate, 18);
+        const priceRateOut = bnum(
+            formatFixed(poolPairData.tokenOutPriceRate, 18)
+        );
         return _derivativeSpotPriceAfterSwapExactTokenInForTokenOut(
             amount,
             poolPairData
@@ -336,8 +420,12 @@ export class MetaStablePool implements PoolBase {
         poolPairData: MetaStablePoolPairData,
         amount: OldBigNumber
     ): OldBigNumber {
-        const priceRateIn = formatFixed(poolPairData.tokenInPriceRate, 18);
-        const priceRateOut = formatFixed(poolPairData.tokenOutPriceRate, 18);
+        const priceRateIn = bnum(
+            formatFixed(poolPairData.tokenInPriceRate, 18)
+        );
+        const priceRateOut = bnum(
+            formatFixed(poolPairData.tokenOutPriceRate, 18)
+        );
         return _derivativeSpotPriceAfterSwapTokenInForExactTokenOut(
             amount,
             poolPairData

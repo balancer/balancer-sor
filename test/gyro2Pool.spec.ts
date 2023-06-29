@@ -2,11 +2,11 @@ import 'dotenv/config';
 // TS_NODE_PROJECT='tsconfig.testing.json' npx mocha -r ts-node/register test/gyro2Pool.spec.ts
 import { expect } from 'chai';
 import cloneDeep from 'lodash.clonedeep';
-import { formatFixed, parseFixed, BigNumber } from '@ethersproject/bignumber';
+import { formatFixed, parseFixed } from '@ethersproject/bignumber';
 import { JsonRpcProvider } from '@ethersproject/providers';
 import { bnum } from '../src/utils/bignumber';
 import { USDC, DAI, sorConfigEth } from './lib/constants';
-import { SwapTypes, SOR, SwapInfo } from '../src';
+import { SwapTypes, SOR, SwapInfo, SubgraphPoolBase } from '../src';
 // Add new PoolType
 import { Gyro2Pool } from '../src/pools/gyro2Pool/gyro2Pool';
 // Add new pool test data in Subgraph Schema format
@@ -59,14 +59,14 @@ describe('Gyro2Pool tests USDC > DAI', () => {
                 SwapTypes.SwapExactIn
             );
 
-            expect(amount.toString()).to.eq('300');
+            expect(amount.toString()).to.eq('1243.74395782517101711');
 
             amount = pool.getLimitAmountSwap(
                 poolPairData,
                 SwapTypes.SwapExactOut
             );
 
-            expect(amount.toString()).to.eq('369.6');
+            expect(amount.toString()).to.eq('1231.998768');
         });
     });
 
@@ -151,7 +151,7 @@ describe('Gyro2Pool tests USDC > DAI', () => {
 
         context('FullSwap', () => {
             it(`Full Swap - swapExactIn, Token>Token`, async () => {
-                const pools: any = cloneDeep(testPools.pools);
+                const pools: SubgraphPoolBase[] = cloneDeep(testPools.pools);
                 const tokenIn = USDC.address;
                 const tokenOut = DAI.address;
                 const swapType = SwapTypes.SwapExactIn;
