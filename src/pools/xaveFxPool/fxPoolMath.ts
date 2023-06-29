@@ -78,41 +78,27 @@ const calculateGivenAmountInNumeraire = (
     return calculatedNumeraireAmount_36;
 };
 
+// Now only used in the fxpool.ts to calculate numeraire values of the raw amount balances
+// from the subgraph to calculate the limit to swap
 export const poolBalancesToNumeraire = (
     poolPairData: FxPoolPairData
 ): ReservesInNumeraire => {
-    let tokenInNumeraire: BigNumber, tokenOutNumeraire: BigNumber;
+    // amount * rate / 10^poolPairData.decimalsIn -> rate: (_rate / 10^fxOracleDecimals)
+    // _amount.mul(_rate).div(basefxOracleDecimals).divu(baseDecimals);
 
-    if (isUSDC(poolPairData.tokenIn)) {
-        // amount * rate / 10^poolPairData.decimalsIn -> rate: (_rate / 10^fxOracleDecimals)
-        // _amount.mul(_rate).div(basefxOracleDecimals).divu(baseDecimals);
-        tokenInNumeraire = viewNumeraireAmount(
-            safeParseFixed(poolPairData.balanceIn.toString(), 36),
-            poolPairData.decimalsIn,
-            poolPairData.tokenInLatestFXPrice,
-            poolPairData.tokenInfxOracleDecimals
-        );
-        tokenOutNumeraire = viewNumeraireAmount(
-            safeParseFixed(poolPairData.balanceOut.toString(), 36),
-            poolPairData.decimalsOut,
-            poolPairData.tokenOutLatestFXPrice,
-            poolPairData.tokenOutfxOracleDecimals
-        );
-    } else {
-        tokenInNumeraire = viewNumeraireAmount(
-            safeParseFixed(poolPairData.balanceOut.toString(), 36),
-            poolPairData.decimalsOut,
-            poolPairData.tokenOutLatestFXPrice,
-            poolPairData.tokenOutfxOracleDecimals
-        );
+    const tokenInNumeraire = viewNumeraireAmount(
+        safeParseFixed(poolPairData.balanceIn.toString(), 36),
+        poolPairData.decimalsIn,
+        poolPairData.tokenInLatestFXPrice,
+        poolPairData.tokenInfxOracleDecimals
+    );
 
-        tokenOutNumeraire = viewNumeraireAmount(
-            safeParseFixed(poolPairData.balanceIn.toString(), 36),
-            poolPairData.decimalsIn,
-            poolPairData.tokenInLatestFXPrice,
-            poolPairData.tokenInfxOracleDecimals
-        );
-    }
+    const tokenOutNumeraire = viewNumeraireAmount(
+        safeParseFixed(poolPairData.balanceOut.toString(), 36),
+        poolPairData.decimalsOut,
+        poolPairData.tokenOutLatestFXPrice,
+        poolPairData.tokenOutfxOracleDecimals
+    );
 
     return {
         tokenInReservesInNumeraire_36: tokenInNumeraire,
