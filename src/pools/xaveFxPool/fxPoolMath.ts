@@ -827,11 +827,16 @@ export const _derivativeSpotPriceAfterSwapExactTokenInForTokenOut = (
     const y = _spotPriceAfterSwapExactTokenInForTokenOut(poolPairData, amount);
     const yMinusX = y.minus(x);
     const ans = yMinusX.div(x);
-    // if we're outside the Beta region the derivative will be negative
-    // but `UniversalNormalizedLiquidity` returns ZERO for negative values
-    // therefore we want to make sure this reflects the fact that we're
-    // moving outside of Beta region
-    return ans.abs();
+    if (ans.isZero()) {
+        // swapping within beta region has no slippage
+        return bnum(1).div(ONE_18.toString());
+    } else {
+        // if we're outside the Beta region the derivative will be negative
+        // but `UniversalNormalizedLiquidity` returns ZERO for negative values
+        // therefore we want to make sure this reflects the fact that we're
+        // moving outside of Beta region
+        return ans.abs();
+    }
 };
 
 // target swap
@@ -843,9 +848,5 @@ export const _derivativeSpotPriceAfterSwapTokenInForExactTokenOut = (
     const y = _spotPriceAfterSwapTokenInForExactTokenOut(poolPairData, amount);
     const yMinusX = y.minus(x);
     const ans = yMinusX.div(x);
-    // if we're outside the Beta region the derivative will be negative
-    // but `UniversalNormalizedLiquidity` returns ZERO for negative values
-    // therefore we want to make sure this reflects the fact that we're
-    // moving outside of Beta region
     return ans.abs();
 };
