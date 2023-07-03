@@ -336,6 +336,7 @@ export class FxPool implements PoolBase<FxPoolPairData> {
         poolPairData: FxPoolPairData,
         amount: OldBigNumber
     ): OldBigNumber {
+        // `calculateTrade` will throw if the trade is beyond alpha region
         try {
             return this._inHigherPrecision(
                 _derivativeSpotPriceAfterSwapExactTokenInForTokenOut,

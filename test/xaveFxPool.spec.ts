@@ -121,14 +121,10 @@ describe('xaveFxPool: fxPools stub test', () => {
                             : newPool.tokens[1].address // tokenOut
                     );
 
-                    const spotPriceBeforeSwapValue = bnum(
-                        spotPriceBeforeSwap(ONE_36, poolPairData).toString()
-                    )
-                        .div(bnum(10).pow(36))
-                        .decimalPlaces(
-                            poolPairData.tokenOutfxOracleDecimals,
-                            OldBigNumber.ROUND_DOWN
-                        );
+                    const spotPriceBeforeSwapValue = spotPriceBeforeSwap(
+                        ONE_36,
+                        poolPairData
+                    );
 
                     expect(spotPriceBeforeSwapValue.toString()).to.equals(
                         testCase.expectedSpotPriceBeforeSwap,
