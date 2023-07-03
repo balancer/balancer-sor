@@ -664,16 +664,14 @@ export const _spotPriceAfterSwapExactTokenInForTokenOut = (
                           .mul(currentRate_36)
                           .div(ONE_36)
                           .toString()
-                  )
-                      .div(OLD_ONE_36);
+                  ).div(OLD_ONE_36);
         } else {
             return bnum(
                 currentRate_36
                     .mul(ONE_36.sub(epsilon_36))
                     .div(ONE_36)
                     .toString()
-            )
-                .div(OLD_ONE_36);
+            ).div(OLD_ONE_36);
         }
     } else {
         // if usdc is tokenOut
@@ -694,8 +692,7 @@ export const _spotPriceAfterSwapExactTokenInForTokenOut = (
                 .div(targetAmountInNumeraire_36.abs());
             return bnum(
                 ratioOfOutputAndInput.mul(currentRate_36).div(ONE_36).toString()
-            )
-                .div(OLD_ONE_36);
+            ).div(OLD_ONE_36);
         } else {
             return bnum(currentRate_36.toString())
                 .div(ONE_36.toString())
@@ -774,8 +771,7 @@ export const _spotPriceAfterSwapTokenInForExactTokenOut = (
                     .mul(currentRate_36)
                     .div(ONE_36)
                     .toString()
-            )
-                .div(OLD_ONE_36)
+            ).div(OLD_ONE_36);
             return val;
         } else {
             // rate * (1-epsilon)
@@ -784,8 +780,7 @@ export const _spotPriceAfterSwapTokenInForExactTokenOut = (
                     .mul(ONE_36.sub(epsilon_36))
                     .div(ONE_36)
                     .toString()
-            )
-                .div(OLD_ONE_36);
+            ).div(OLD_ONE_36);
             return val;
         }
     } else {
@@ -810,16 +805,14 @@ export const _spotPriceAfterSwapTokenInForExactTokenOut = (
                     .mul(currentRate_36)
                     .div(ONE_36)
                     .toString()
-            )
-                .div(OLD_ONE_36);
+            ).div(OLD_ONE_36);
         } else {
             const val = bnum(
                 currentRate_36
                     .mul(ONE_36.sub(epsilon_36))
                     .div(ONE_36)
                     .toString()
-            )
-                .div(OLD_ONE_36);
+            ).div(OLD_ONE_36);
             return val;
         }
     }
