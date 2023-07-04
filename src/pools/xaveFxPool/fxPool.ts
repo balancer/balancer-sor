@@ -2,7 +2,9 @@ import { getAddress } from '@ethersproject/address';
 import { BigNumber, formatFixed, parseFixed } from '@ethersproject/bignumber';
 import { Zero } from '@ethersproject/constants';
 import { BigNumber as OldBigNumber, ZERO, bnum } from '../../utils/bignumber';
-import { isSameAddress } from '../../utils';
+
+import { parseFixedCurveParam } from './parseFixedCurveParam';
+import { isSameAddress, safeParseFixed } from '../../utils';
 import { universalNormalizedLiquidity } from '../liquidity';
 import {
     PoolBase,
@@ -21,6 +23,7 @@ import {
     _spotPriceAfterSwapExactTokenInForTokenOut,
     _spotPriceAfterSwapTokenInForExactTokenOut,
     _tokenInForExactTokenOut,
+    ONE_36,
 } from './fxPoolMath';
 
 type FxPoolToken = Pick<
@@ -29,13 +32,15 @@ type FxPoolToken = Pick<
 >;
 
 export type FxPoolPairData = PoolPairBase & {
-    alpha: BigNumber;
-    beta: BigNumber;
-    lambda: BigNumber;
-    delta: BigNumber;
-    epsilon: BigNumber;
-    tokenInLatestFXPrice: OldBigNumber;
-    tokenOutLatestFXPrice: OldBigNumber;
+    alpha: OldBigNumber;
+    beta: OldBigNumber;
+    lambda: OldBigNumber;
+    delta: OldBigNumber;
+    epsilon: OldBigNumber;
+    tokenInLatestFXPrice: BigNumber;
+    tokenInfxOracleDecimals: number;
+    tokenOutLatestFXPrice: BigNumber;
+    tokenOutfxOracleDecimals: number;
 };
 
 export class FxPool implements PoolBase<FxPoolPairData> {
@@ -46,11 +51,11 @@ export class FxPool implements PoolBase<FxPoolPairData> {
     totalShares: BigNumber;
     tokens: FxPoolToken[];
     tokensList: string[];
-    alpha: BigNumber;
-    beta: BigNumber;
-    lambda: BigNumber;
-    delta: BigNumber;
-    epsilon: BigNumber;
+    alpha: OldBigNumber;
+    beta: OldBigNumber;
+    lambda: OldBigNumber;
+    delta: OldBigNumber;
+    epsilon: OldBigNumber;
 
     static fromPool(pool: SubgraphPoolBase): FxPool {
         if (
@@ -95,11 +100,11 @@ export class FxPool implements PoolBase<FxPoolPairData> {
         this.totalShares = parseFixed(totalShares, 18);
         this.tokens = tokens;
         this.tokensList = tokensList;
-        this.alpha = parseFixed(alpha, 18);
-        this.beta = parseFixed(beta, 18);
-        this.lambda = parseFixed(lambda, 18);
-        this.delta = parseFixed(delta, 18);
-        this.epsilon = parseFixed(epsilon, 18);
+        this.alpha = parseFixedCurveParam(alpha);
+        this.beta = parseFixedCurveParam(beta);
+        this.lambda = parseFixedCurveParam(lambda);
+        this.delta = bnum(parseFixed(delta, 18).toString());
+        this.epsilon = parseFixedCurveParam(epsilon);
     }
     updateTotalShares: (newTotalShares: BigNumber) => void;
     mainIndex?: number | undefined;
@@ -138,6 +143,13 @@ export class FxPool implements PoolBase<FxPoolPairData> {
         if (!tO.token?.latestFXPrice || !tI.token?.latestFXPrice)
             throw 'FX Pool Missing LatestFxPrice';
 
+        if (tO.token?.fxOracleDecimals == null) {
+            tO.token.fxOracleDecimals = 8;
+        }
+        if (tI.token?.fxOracleDecimals == null) {
+            tI.token.fxOracleDecimals = 8;
+        }
+
         const poolPairData: FxPoolPairData = {
             id: this.id,
             address: this.address,
@@ -154,8 +166,16 @@ export class FxPool implements PoolBase<FxPoolPairData> {
             lambda: this.lambda,
             delta: this.delta,
             epsilon: this.epsilon,
-            tokenInLatestFXPrice: bnum(tI.token.latestFXPrice), // decimals is formatted from subgraph in rate we get from the chainlink oracle
-            tokenOutLatestFXPrice: bnum(tO.token.latestFXPrice), // decimals is formatted from subgraph in rate we get from the chainlink oracle
+            tokenInLatestFXPrice: parseFixed(
+                tI.token.latestFXPrice,
+                tI.token.fxOracleDecimals
+            ), // decimals is formatted from subgraph in rate we get from the chainlink oracle
+            tokenOutLatestFXPrice: parseFixed(
+                tO.token.latestFXPrice,
+                tO.token.fxOracleDecimals
+            ), // decimals is formatted from subgraph in rate we get from the chainlink oracle
+            tokenInfxOracleDecimals: tI.token.fxOracleDecimals,
+            tokenOutfxOracleDecimals: tO.token.fxOracleDecimals,
         };
 
         return poolPairData;
@@ -182,33 +202,57 @@ export class FxPool implements PoolBase<FxPoolPairData> {
         poolPairData: FxPoolPairData,
         swapType: SwapTypes
     ): OldBigNumber {
+        return this._inHigherPrecision(
+            this._getLimitAmountSwap,
+            poolPairData,
+            swapType
+        );
+    }
+
+    _getLimitAmountSwap(
+        poolPairData: FxPoolPairData,
+        swapType: SwapTypes
+    ): OldBigNumber {
         try {
             const parsedReserves = poolBalancesToNumeraire(poolPairData);
 
-            const alphaValue = Number(formatFixed(poolPairData.alpha, 18));
+            const alphaValue = safeParseFixed(
+                poolPairData.alpha.toString(),
+                18
+            );
 
-            const maxLimit = (1 + alphaValue) * parsedReserves._oGLiq * 0.5;
+            const maxLimit = alphaValue
+                .add(ONE_36)
+                .mul(parsedReserves._oGLiq_36)
+                .div(ONE_36)
+                .div(2);
 
             if (swapType === SwapTypes.SwapExactIn) {
-                const maxLimitAmount =
-                    maxLimit - parsedReserves.tokenInReservesInNumeraire;
+                const maxLimitAmount_36 = maxLimit.sub(
+                    parsedReserves.tokenInReservesInNumeraire_36.toString()
+                );
 
                 return bnum(
                     viewRawAmount(
-                        maxLimitAmount,
-                        poolPairData.tokenInLatestFXPrice.toNumber()
+                        maxLimitAmount_36,
+                        poolPairData.decimalsIn,
+                        poolPairData.tokenInLatestFXPrice,
+                        poolPairData.tokenInfxOracleDecimals
                     ).toString()
-                );
+                ).div(bnum(10).pow(poolPairData.decimalsIn));
             } else {
-                const maxLimitAmount =
-                    maxLimit - parsedReserves.tokenOutReservesInNumeraire;
+                const maxLimitAmount_36 = maxLimit.sub(
+                    parsedReserves.tokenOutReservesInNumeraire_36
+                );
 
                 return bnum(
                     viewRawAmount(
-                        maxLimitAmount,
-                        poolPairData.tokenOutLatestFXPrice.toNumber()
+                        maxLimitAmount_36,
+                        poolPairData.decimalsOut,
+                        poolPairData.tokenOutLatestFXPrice,
+                        poolPairData.tokenOutfxOracleDecimals
                     ).toString()
-                );
+                ).div(bnum(10).pow(poolPairData.decimalsOut));
             }
         } catch {
             return ZERO;
@@ -233,8 +277,12 @@ export class FxPool implements PoolBase<FxPoolPairData> {
         amount: OldBigNumber
     ): OldBigNumber {
         try {
-            return _exactTokenInForTokenOut(amount, poolPairData);
-        } catch {
+            return this._inHigherPrecision(
+                _exactTokenInForTokenOut,
+                amount,
+                poolPairData
+            );
+        } catch (e) {
             return ZERO;
         }
     }
@@ -244,7 +292,11 @@ export class FxPool implements PoolBase<FxPoolPairData> {
         amount: OldBigNumber
     ): OldBigNumber {
         try {
-            return _tokenInForExactTokenOut(amount, poolPairData);
+            return this._inHigherPrecision(
+                _tokenInForExactTokenOut,
+                amount,
+                poolPairData
+            );
         } catch {
             return ZERO;
         }
@@ -255,7 +307,8 @@ export class FxPool implements PoolBase<FxPoolPairData> {
         amount: OldBigNumber
     ): OldBigNumber {
         try {
-            return _spotPriceAfterSwapExactTokenInForTokenOut(
+            return this._inHigherPrecision(
+                _spotPriceAfterSwapExactTokenInForTokenOut,
                 poolPairData,
                 amount
             );
@@ -269,7 +322,8 @@ export class FxPool implements PoolBase<FxPoolPairData> {
         amount: OldBigNumber
     ): OldBigNumber {
         try {
-            return _spotPriceAfterSwapTokenInForExactTokenOut(
+            return this._inHigherPrecision(
+                _spotPriceAfterSwapTokenInForExactTokenOut,
                 poolPairData,
                 amount
             );
@@ -282,8 +336,10 @@ export class FxPool implements PoolBase<FxPoolPairData> {
         poolPairData: FxPoolPairData,
         amount: OldBigNumber
     ): OldBigNumber {
+        // `calculateTrade` will throw if the trade is beyond alpha region
         try {
-            return _derivativeSpotPriceAfterSwapExactTokenInForTokenOut(
+            return this._inHigherPrecision(
+                _derivativeSpotPriceAfterSwapExactTokenInForTokenOut,
                 amount,
                 poolPairData
             );
@@ -297,12 +353,46 @@ export class FxPool implements PoolBase<FxPoolPairData> {
         amount: OldBigNumber
     ): OldBigNumber {
         try {
-            return _derivativeSpotPriceAfterSwapTokenInForExactTokenOut(
+            return this._inHigherPrecision(
+                _derivativeSpotPriceAfterSwapTokenInForExactTokenOut,
                 amount,
                 poolPairData
             );
         } catch {
             return ZERO;
+        }
+    }
+
+    /**
+     * Runs the given function with the BigNumber config set to 36 decimals.
+     * This is needed since in the Solidity code we use 64.64 fixed point numbers
+     * for the curve math operations (ABDKMath64x64.sol). This makes the SOR
+     * default of 18 decimals not enough.
+     *
+     * @param funcName
+     * @param args
+     * @returns
+     */
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/ban-types
+    _inHigherPrecision(funcName: Function, ...args: any[]): OldBigNumber {
+        const prevDecimalPlaces = OldBigNumber.config({}).DECIMAL_PLACES;
+        OldBigNumber.config({
+            DECIMAL_PLACES: 36,
+        });
+
+        try {
+            const val = funcName.apply(this, args);
+            OldBigNumber.config({
+                DECIMAL_PLACES: prevDecimalPlaces,
+            });
+            return val;
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        } catch (err: any) {
+            // restore the original BigNumber config even in case of an exception
+            OldBigNumber.config({
+                DECIMAL_PLACES: prevDecimalPlaces,
+            });
+            throw err;
         }
     }
 }
