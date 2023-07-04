@@ -10,26 +10,24 @@
             "tokens": [
                 {
                     "address": "0x2791bca1f2de4661ed88a30c99a7a9449aa84174",
-                    "symbol": "USDC",
-                    "balance": "731837.486297",
+                    "balance": "640405.311822",
                     "decimals": 6,
                     "priceRate": "1",
                     "weight": null,
                     "token": {
-                        "latestFXPrice": "1.00000000",
-                        "fxOracleDecimals": 8
+                        "latestFXPrice": "0.99997703",
+                        "__fxOracleDecimals__": "purposefully missing to test the default"
                     }
                 },
                 {
                     "address": "0xdc3326e71d45186f113a2f448984ca0e8d201995",
-                    "symbol": "XSGD",
-                    "balance": "639986.37244",
+                    "balance": "1533442.592483",
                     "decimals": 6,
                     "priceRate": "1",
                     "weight": null,
                     "token": {
-                        "latestFXPrice": "0.74376600",
-                        "fxOracleDecimals": 8
+                        "latestFXPrice": "0.74226380",
+                        "__fxOracleDecimals__": "purposefully missing to test the default"
                     }
                 }
             ],

@@ -1,9 +1,9 @@
 {
     "compilerOptions": {
         "module": "esnext",
-        "target": "es2016",
+        "target": "es2020",
         "declaration": true,
-        "lib": ["es2019", "es2018.promise"],
+        "lib": ["es2020", "es2018.promise"],
         "outDir": "./dist/",
         "baseUrl": "src",
         "esModuleInterop": true,
