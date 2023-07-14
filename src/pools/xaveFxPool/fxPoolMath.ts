@@ -41,8 +41,9 @@ interface ReservesInNumeraire {
 
 const isUSDC = (address: string) => {
     if (
-        address == '0x2791bca1f2de4661ed88a30c99a7a9449aa84174' ||
-        address == '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48'
+        address == '0x2791bca1f2de4661ed88a30c99a7a9449aa84174' || // Polygon
+        address == '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48' || // Mainnet
+        address == '0xB97EF9Ef8734C71904D8002F8b6Bc66Dd9c48a6E' // AVAX
     ) {
         return true;
     } else {
