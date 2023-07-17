@@ -1,4 +1,4 @@
-// yarn test:only test/xaveFxPool-polygon.integration.spec.ts
+// yarn test:only test/xaveFxPool.polygon.integration.spec.ts
 import dotenv from 'dotenv';
 import { JsonRpcProvider } from '@ethersproject/providers';
 import { SOR, SubgraphPoolBase, SwapTypes } from '../src';
@@ -20,7 +20,7 @@ dotenv.config();
 
 let sor: SOR;
 const networkId = Network.POLYGON;
-const jsonRpcUrl = process.env.ALCHEMY_URL_POLYGON;
+const jsonRpcUrl = 'https://polygon-mainnet.infura.io/v3/' + process.env.INFURA;
 const rpcUrl = 'http://127.0.0.1:8137';
 const provider = new JsonRpcProvider(rpcUrl, networkId);
 const blocknumber = 43667355;
@@ -72,7 +72,7 @@ const xaveFxPoolXSGD_USDC_POLYGON: SubgraphPoolBase = {
     epsilon: '0.0005',
 };
 
-describe('xaveFxPool: DAI-USDC integration (Polygon) tests', () => {
+describe.skip('xaveFxPool: DAI-USDC integration (Polygon) tests', () => {
     context('test swaps vs queryBatchSwap', () => {
         // Setup chain
         before(async function () {

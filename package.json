@@ -1,6 +1,6 @@
 {
     "name": "@balancer-labs/sor",
-    "version": "4.1.1-beta.12",
+    "version": "4.1.1-beta.13",
     "license": "GPL-3.0-only",
     "main": "dist/index.js",
     "module": "dist/index.esm.js",
@@ -10,6 +10,7 @@
         "prepack": "yarn build",
         "test": "TS_NODE_PROJECT='tsconfig.testing.json' nyc mocha -r ts-node/register test/*.spec.ts --timeout 20000",
         "test:only": "TS_NODE_PROJECT='tsconfig.testing.json' npx mocha -r ts-node/register --timeout 20000",
+        "example": "TS_NODE_PROJECT='tsconfig.testing.json' ts-node",
         "coverage": "nyc report --reporter=text-lcov | coveralls",
         "lint": "eslint ./src ./test --ext .ts --max-warnings 0",
         "node": "npx hardhat node --tsconfig tsconfig.testing.json --fork $(. ./.env && echo $ALCHEMY_URL)",
