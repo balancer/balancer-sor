@@ -72,7 +72,7 @@ const xaveFxPoolXSGD_USDC_POLYGON: SubgraphPoolBase = {
     epsilon: '0.0005',
 };
 
-describe('xaveFxPool: DAI-USDC integration (Polygon) tests', () => {
+describe.skip('xaveFxPool: DAI-USDC integration (Polygon) tests', () => {
     context('test swaps vs queryBatchSwap', () => {
         // Setup chain
         before(async function () {

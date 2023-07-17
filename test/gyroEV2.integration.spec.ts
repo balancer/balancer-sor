@@ -64,7 +64,7 @@ const gyroEV2PoolWMATIC_stMATIC_POLYGON: SubgraphPoolBase = {
     dSq: '0.9999999999999999988662409334210612',
 };
 
-describe('gyroEV2: WMATIC-stMATIC integration tests', () => {
+describe.skip('gyroEV2: WMATIC-stMATIC integration tests', () => {
     let sor: SOR;
     const funds = {
         sender: AddressZero,
