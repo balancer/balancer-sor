@@ -8,6 +8,7 @@ export enum Network {
     ARBITRUM = 42161,
     OPTIMISM = 10,
     GNOSIS = 100,
+    ZKEVM = 1101,
 }
 
 export const SOR_CONFIG: Record<Network, SorConfig> = {
@@ -109,7 +110,18 @@ export const SOR_CONFIG: Record<Network, SorConfig> = {
         connectingTokens: [
             {
                 symbol: 'weth',
-                address: '0x82af49447d8a07e3bd95bd0d56f35241523fbab1',
+                address: '0x6A023CCd1ff6F2045C3309768eAd9E68F978f6e1',
+            },
+        ],
+    },
+    [Network.ZKEVM]: {
+        chainId: Network.ZKEVM, //1101
+        vault: '0xBA12222222228d8Ba445958a75a0704d566BF2C8',
+        weth: '0x4f9a0e7fd2bf6067db6994cf12e4495df938e6e9',
+        connectingTokens: [
+            {
+                symbol: 'weth',
+                address: '0x4f9a0e7fd2bf6067db6994cf12e4495df938e6e9',
             },
         ],
     },
@@ -121,6 +133,7 @@ export const PROVIDER_URLS = {
     [Network.POLYGON]: `https://polygon-mainnet.infura.io/v3/${process.env.INFURA}`,
     [Network.ARBITRUM]: `https://arbitrum-mainnet.infura.io/v3/${process.env.INFURA}`,
     [Network.GNOSIS]: `https://poa-xdai.gateway.pokt.network/v1/lb/91bc0e12a76e7a84dd76189d`,
+    [Network.ZKEVM]: `${process.env.RPC_URL_ZKEVM}`,
 };
 
 export const MULTIADDR: { [chainId: number]: string } = {
@@ -133,6 +146,7 @@ export const MULTIADDR: { [chainId: number]: string } = {
     42161: '0x269ff446d9892c9e19082564df3f5e8741e190a1',
     99: '0xeefba1e63905ef1d7acba5a8513c70307c1ce441',
     100: '0xbb6fab6b627947dae0a75808250d8b2652952cb5',
+    1101: '0xca11bde05977b3631167028862be2a173976ca11',
 };
 
 export const SUBGRAPH_URLS = {
@@ -144,6 +158,7 @@ export const SUBGRAPH_URLS = {
         'https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-polygon-v2-beta',
     [Network.ARBITRUM]: `https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-arbitrum-v2`,
     [Network.GNOSIS]: `https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-gnosis-chain-v2`,
+    [Network.ZKEVM]: `https://api.studio.thegraph.com/query/24660/balancer-polygon-zk-v2/version/latest`,
 };
 
 // This is the same across networks
@@ -460,6 +475,30 @@ export const ADDRESSES = {
             address: '0x4ECaBa5870353805a9F068101A40E0f32ed605C6',
             decimals: 6,
             symbol: 'USDT',
+        },
+    },
+    [Network.GOERLI]: {
+        DAI: {
+            address: '0xb8096bc53c3ce4c11ebb0069da0341d75264b104',
+            decimals: 18,
+            symbol: 'DAI',
+        },
+        USDC: {
+            address: '0xdabd33683bafdd448968ab6d6f47c3535c64bf0c',
+            decimals: 6,
+            symbol: 'USDC',
+        },
+    },
+    [Network.ZKEVM]: {
+        USDT: {
+            address: '0x1e4a5963abfd975d8c9021ce480b42188849d41d',
+            decimals: 6,
+            symbol: 'USDT',
+        },
+        USDC: {
+            address: '0xA8CE8aee21bC2A48a5EF670afCc9274C7bbbC035',
+            decimals: 6,
+            symbol: 'USDC',
         },
     },
 };
