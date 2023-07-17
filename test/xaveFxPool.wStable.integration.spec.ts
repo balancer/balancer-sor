@@ -1,4 +1,4 @@
-// yarn test:only test/xaveFxPoolBug.integration.spec.ts
+// yarn test:only test/xaveFxPool.wStable.integration.spec.ts
 import dotenv from 'dotenv';
 import { expect } from 'chai';
 import { JsonRpcProvider } from '@ethersproject/providers';
