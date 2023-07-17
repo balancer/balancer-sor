@@ -12,7 +12,7 @@ import { setUp } from './testScripts/utils';
 dotenv.config();
 
 const networkId = Network.POLYGON;
-const { ALCHEMY_URL_POLYGON: jsonRpcUrl } = process.env;
+const jsonRpcUrl = 'https://polygon-mainnet.infura.io/v3/' + process.env.INFURA;
 const rpcUrl = 'http://127.0.0.1:8137';
 const provider = new JsonRpcProvider(rpcUrl, networkId);
 const blocknumber = 42173266;
