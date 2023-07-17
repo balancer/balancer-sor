@@ -32,6 +32,7 @@ export class CoingeckoTokenPriceService implements TokenPriceService {
         const data = await response.json();
 
         if (
+            data[tokenAddress.toLowerCase()] === undefined ||
             data[tokenAddress.toLowerCase()][this.nativeAssetId] === undefined
         ) {
             throw Error('No price returned from Coingecko');
