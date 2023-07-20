@@ -46,9 +46,15 @@ export class PoolCacher {
      * @param {GraphQLArgs} queryArgs - Optional query arguments to pass to pool data service.
      * @returns {boolean} True if pools fetched successfully, False if not.
      */
-    public async fetchPools(queryArgs?: GraphQLArgs): Promise<boolean> {
+    public async fetchPools(
+        queryArgs?: GraphQLArgs,
+        chunkSize?: number
+    ): Promise<boolean> {
         try {
-            this.pools = await this.poolDataService.getPools(queryArgs);
+            this.pools = await this.poolDataService.getPools(
+                queryArgs,
+                chunkSize
+            );
             this._finishedFetching = true;
             return true;
         } catch (err) {
