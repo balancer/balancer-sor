@@ -275,7 +275,10 @@ export interface TokenPriceService {
 }
 
 export interface PoolDataService {
-    getPools(query?: GraphQLArgs): Promise<SubgraphPoolBase[]>;
+    getPools(
+        query?: GraphQLArgs,
+        chunkSize?: number
+    ): Promise<SubgraphPoolBase[]>;
 }
 
 export type FundManagement = {
