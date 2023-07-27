@@ -31,11 +31,50 @@ The example file `swapExample.ts` in: [./testScripts](test/testScripts/), demons
 
 To Run:
 
-Create a .env file in root dir with an RPC URL: `RPC_URL_MAINNET=alchemy/infura`
+Create a .env file in root dir. Depending on network being used add an RPC URL (e.g. Alchemy, Infura), e.g.: `RPC_URL_MAINNET=alchemy/infura`
+
+Supported networks out of box for example are:
+
+```
+RPC_URL_MAINNET
+RPC_URL_POLYGON
+RPC_URL_ARBITRUM
+RPC_URL_GNOSIS
+RPC_URL_ZKEVM
+RPC_URL_GOERLI
+```
 
 Install dependencies: `$ yarn install`
 
 Run example: `$ ts-node ./test/testScripts/swapExample.ts`
+
+## Contributing/Adding New Pools
+
+Running tests locally:
+
+1. Add .env and add following RPC URLs (e.g. Alchemy, Infura)
+
+```
+RPC_URL_MAINNET=
+RPC_URL_POLYGON=
+```
+
+2. Start local forked nodes to test against:
+
+`$ yarn run node`
+
+`$ yarn run node:polygon`
+
+3. Run tests:
+   `$ yarn test`
+
+To run a single test file use `test:only`, e.g.:
+
+`$ yarn test:only test/composableStable.integration.spec.ts`
+
+Adding New Pools:
+
+See info [here](https://www.notion.so/SOR-Adding-New-Pools-fa073ec6fecb4c22b1ba13504b04f5bf?pvs=4)
 
 ## Environment Variables
 
