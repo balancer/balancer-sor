@@ -31,7 +31,7 @@ The example file `swapExample.ts` in: [./testScripts](test/testScripts/), demons
 
 To Run:
 
-Create a .env file in root dir with your infura provider key: `INFURA=your_key`
+Create a .env file in root dir with an RPC URL: `RPC_URL_MAINNET=alchemy/infura`
 
 Install dependencies: `$ yarn install`
 
