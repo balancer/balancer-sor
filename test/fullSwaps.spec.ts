@@ -19,9 +19,7 @@ const ANT = '0x960b236a07cf122663c4303350609a66a7b288c0'; // ANT lower case
 const MKR2 = '0xef13C0c8abcaf5767160018d268f9697aE4f5375'.toLowerCase();
 const yUSD = '0xb2fdd60ad80ca7ba89b9bab3b5336c2601c020b4';
 
-const provider = new JsonRpcProvider(
-    `https://mainnet.infura.io/v3/${process.env.INFURA}`
-);
+const provider = new JsonRpcProvider(``);
 
 describe('Tests full swaps against known values', () => {
     const gasPrice = parseFixed('30', 9);

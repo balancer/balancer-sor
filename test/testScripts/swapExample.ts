@@ -153,5 +153,5 @@ export async function swap(): Promise<void> {
     }
 }
 
-// $ TS_NODE_PROJECT='tsconfig.testing.json' ts-node ./test/testScripts/swapExample.ts
+// $ TS_NODE_PROJECT='tsconfig.testing.json' npx ts-node ./test/testScripts/swapExample.ts
 swap();
