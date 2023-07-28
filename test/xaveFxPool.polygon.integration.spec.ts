@@ -20,7 +20,7 @@ dotenv.config();
 
 let sor: SOR;
 const networkId = Network.POLYGON;
-const jsonRpcUrl = 'https://polygon-mainnet.infura.io/v3/' + process.env.INFURA;
+const jsonRpcUrl = process.env.RPC_URL_POLYGON;
 const rpcUrl = 'http://127.0.0.1:8137';
 const provider = new JsonRpcProvider(rpcUrl, networkId);
 const blocknumber = 43667355;
