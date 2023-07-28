@@ -159,9 +159,7 @@ describe('Gyro2Pool tests USDC > DAI', () => {
 
                 const gasPrice = parseFixed('30', 9);
                 const maxPools = 4;
-                const provider = new JsonRpcProvider(
-                    `https://mainnet.infura.io/v3/${process.env.INFURA}`
-                );
+                const provider = new JsonRpcProvider(``);
 
                 const sor = new SOR(
                     provider,
