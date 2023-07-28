@@ -128,12 +128,12 @@ export const SOR_CONFIG: Record<Network, SorConfig> = {
 };
 
 export const PROVIDER_URLS = {
-    [Network.MAINNET]: `https://mainnet.infura.io/v3/${process.env.INFURA}`,
-    [Network.GOERLI]: `https://goerli.infura.io/v3/${process.env.INFURA}`,
-    [Network.POLYGON]: `https://polygon-mainnet.infura.io/v3/${process.env.INFURA}`,
-    [Network.ARBITRUM]: `https://arbitrum-mainnet.infura.io/v3/${process.env.INFURA}`,
-    [Network.GNOSIS]: `https://poa-xdai.gateway.pokt.network/v1/lb/91bc0e12a76e7a84dd76189d`,
-    [Network.ZKEVM]: `${process.env.RPC_URL_ZKEVM}`,
+    [Network.MAINNET]: process.env.RPC_URL_MAINNET,
+    [Network.GOERLI]: process.env.RPC_URL_GOERLI,
+    [Network.POLYGON]: process.env.RPC_URL_POLYGON,
+    [Network.ARBITRUM]: process.env.RPC_URL_ARBITRUM,
+    [Network.GNOSIS]: process.env.RPC_URL_GNOSIS,
+    [Network.ZKEVM]: process.env.RPC_URL_ZKEVM,
 };
 
 export const MULTIADDR: { [chainId: number]: string } = {
