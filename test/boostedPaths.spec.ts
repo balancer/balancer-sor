@@ -606,9 +606,7 @@ export async function checkBestPath(
     const swapAmount = parseFixed(amount.toString(), tokenIn.decimals);
     const costOutputToken = BigNumber.from('0');
     const gasPrice = BigNumber.from(`10000000000`);
-    const provider = new JsonRpcProvider(
-        `https://mainnet.infura.io/v3/${process.env.INFURA}`
-    );
+    const provider = new JsonRpcProvider(``);
     const swapGas = BigNumber.from(`32500`);
     const swapInfo = await getFullSwap(
         cloneDeep(pools),

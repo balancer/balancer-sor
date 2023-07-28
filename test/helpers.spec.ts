@@ -14,9 +14,7 @@ import { BAL, DAI, GUSD, sorConfigEth, USDC, WETH } from './lib/constants';
 
 const marketSp = '7';
 
-const provider = new JsonRpcProvider(
-    `https://mainnet.infura.io/v3/${process.env.INFURA}`
-);
+const provider = new JsonRpcProvider(process.env.RPC_URL_MAINNET);
 
 // TS_NODE_PROJECT='tsconfig.testing.json' npx mocha -r ts-node/register test/helpers.spec.ts
 describe(`Tests for Helpers.`, () => {
