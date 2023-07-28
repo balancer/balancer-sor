@@ -218,7 +218,9 @@ async function getSwapInfo(
     swapAmount: BigNumber,
     useBpts?: boolean
 ) {
-    const provider = new JsonRpcProvider(``);
+    const provider = new JsonRpcProvider(
+        `https://mainnet.infura.io/v3/${process.env.INFURA}`
+    );
     const maxPools = 4;
     const gasPrice = BigNumber.from('0');
     const sor = new SOR(

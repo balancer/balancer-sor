@@ -2,7 +2,9 @@ import { JsonRpcProvider } from '@ethersproject/providers';
 import { loadTestFile } from './lib/testHelpers';
 import { compareTest } from './lib/compareHelper';
 
-const provider = new JsonRpcProvider(``);
+const provider = new JsonRpcProvider(
+    `https://mainnet.infura.io/v3/${process.env.INFURA}`
+);
 
 // This must be updated with pools of interest (see ./test/testData/testPools)
 const testFiles = [

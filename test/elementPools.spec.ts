@@ -23,7 +23,9 @@ import { MockPoolDataService } from './lib/mockPoolDataService';
 
 const gasPrice = parseFixed('30', 9);
 const maxPools = 4;
-const provider = new JsonRpcProvider(``);
+const provider = new JsonRpcProvider(
+    `https://mainnet.infura.io/v3/${process.env.INFURA}`
+);
 
 // npx mocha -r ts-node/register test/elementPools.spec.ts
 describe(`Tests for Element Pools.`, () => {

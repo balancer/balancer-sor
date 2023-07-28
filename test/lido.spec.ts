@@ -16,7 +16,9 @@ import { parseFixed } from '@ethersproject/bignumber';
 const gasPrice = parseFixed('30', 9);
 const maxPools = 4;
 const chainId = 1;
-const provider = new JsonRpcProvider(process.env.RPC_URL_MAINNET);
+const provider = new JsonRpcProvider(
+    `https://mainnet.infura.io/v3/${process.env.INFURA}`
+);
 const USDC = Lido.USDC[chainId];
 const DAI = Lido.DAI[chainId];
 const USDT = Lido.USDT[chainId];

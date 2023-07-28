@@ -13,8 +13,8 @@
         "example": "TS_NODE_PROJECT='tsconfig.testing.json' ts-node",
         "coverage": "nyc report --reporter=text-lcov | coveralls",
         "lint": "eslint ./src ./test --ext .ts --max-warnings 0",
-        "node": "npx hardhat node --tsconfig tsconfig.testing.json --fork $(. ./.env && echo $RPC_URL_MAINNET)",
-        "node:polygon": "npx hardhat --tsconfig tsconfig.testing.json --config hardhat.config.polygon.ts node --fork $(. ./.env && echo $RPC_URL_POLYGON) --port 8137"
+        "node": "npx hardhat node --tsconfig tsconfig.testing.json --fork $(. ./.env && echo $ALCHEMY_URL)",
+        "node:polygon": "npx hardhat --tsconfig tsconfig.testing.json --config hardhat.config.polygon.ts node --fork $(. ./.env && echo $ALCHEMY_URL_POLYGON) --port 8137"
     },
     "husky": {
         "hooks": {

@@ -42,7 +42,7 @@ const testPool: SubgraphPoolBase = {
 };
 
 const networkId = Network.MAINNET;
-const jsonRpcUrl = process.env.RPC_URL_MAINNET;
+const jsonRpcUrl = 'https://mainnet.infura.io/v3/' + process.env.INFURA;
 const rpcUrl = 'http://127.0.0.1:8545';
 const blockNumber = 16447247;
 const provider = new JsonRpcProvider(rpcUrl, networkId);

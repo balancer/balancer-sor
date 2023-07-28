@@ -238,7 +238,9 @@ async function testFullSwap(
     // const costOutputToken = BigNumber.from('1000000000000000000');
     const costOutputToken = BigNumber.from('0');
     const gasPrice = BigNumber.from(`10000000000`);
-    const provider = new JsonRpcProvider(``);
+    const provider = new JsonRpcProvider(
+        `https://kovan.infura.io/v3/${process.env.INFURA}`
+    );
     const swapGas = BigNumber.from(`32500`);
 
     const swapInfo = await getFullSwap(

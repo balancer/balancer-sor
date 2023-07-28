@@ -63,13 +63,10 @@ jobs:
               if: steps.cache.outputs.cache-hit != 'true'
             - name: Compile
               run: yarn build
-            - name: Run mainnet node in background for integration tests
-              run: npx hardhat --tsconfig tsconfig.testing.json node --hostname 127.0.0.1 --fork ${{ secrets.RPC_URL_MAINNET }} &
-            - name: Run Polygon node in background for integration tests
-              run: npx hardhat --tsconfig tsconfig.testing.json --config hardhat.config.polygon.ts node --hostname 127.0.0.1 --fork ${{ secrets.RPC_URL_POLYGON }} --port 8137 &
+            - name: Run node in background for integration tests
+              run: npx hardhat --tsconfig tsconfig.testing.json node --hostname 127.0.0.1 --fork https://mainnet.infura.io/v3/${{ secrets.INFURA }} &
             - name: Test
               run: yarn test
 env:
     CI: true
-    RPC_URL_MAINNET: ${{ secrets.RPC_URL_MAINNET }}
-    RPC_URL_POLYGON: ${{ secrets.RPC_URL_POLYGON }}
+    INFURA: ${{ secrets.INFURA }}

@@ -21,7 +21,9 @@ const subgraphPoolsSmallWithTrade: {
     // eslint-disable-next-line @typescript-eslint/no-var-requires
 } = require('./testData/testPools/subgraphPoolsSmallWithTrade.json');
 
-const provider = new JsonRpcProvider(``);
+const provider = new JsonRpcProvider(
+    `https://mainnet.infura.io/v3/${process.env.INFURA}`
+);
 const gasPrice = parseFixed('30', 9);
 const maxPools = 4;
 
