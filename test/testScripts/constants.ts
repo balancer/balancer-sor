@@ -9,6 +9,7 @@ export enum Network {
     OPTIMISM = 10,
     GNOSIS = 100,
     ZKEVM = 1101,
+    AVALANCHE = 43114,
 }
 
 export const SOR_CONFIG: Record<Network, SorConfig> = {
@@ -125,6 +126,11 @@ export const SOR_CONFIG: Record<Network, SorConfig> = {
             },
         ],
     },
+    [Network.AVALANCHE]: {
+        chainId: Network.AVALANCHE,
+        vault: '0xBA12222222228d8Ba445958a75a0704d566BF2C8',
+        weth: '0xb31f66aa3c1e785363f0875a1b74e27b85fd66c7',
+    },
 };
 
 export const PROVIDER_URLS = {
@@ -134,6 +140,7 @@ export const PROVIDER_URLS = {
     [Network.ARBITRUM]: process.env.RPC_URL_ARBITRUM,
     [Network.GNOSIS]: process.env.RPC_URL_GNOSIS,
     [Network.ZKEVM]: process.env.RPC_URL_ZKEVM,
+    [Network.AVALANCHE]: process.env.RPC_URL_AVALANCHE,
 };
 
 export const MULTIADDR: { [chainId: number]: string } = {
@@ -147,6 +154,7 @@ export const MULTIADDR: { [chainId: number]: string } = {
     99: '0xeefba1e63905ef1d7acba5a8513c70307c1ce441',
     100: '0xbb6fab6b627947dae0a75808250d8b2652952cb5',
     1101: '0xca11bde05977b3631167028862be2a173976ca11',
+    43114: '0xcA11bde05977b3631167028862bE2a173976CA11',
 };
 
 export const SUBGRAPH_URLS = {
@@ -159,6 +167,7 @@ export const SUBGRAPH_URLS = {
     [Network.ARBITRUM]: `https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-arbitrum-v2`,
     [Network.GNOSIS]: `https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-gnosis-chain-v2`,
     [Network.ZKEVM]: `https://api.studio.thegraph.com/query/24660/balancer-polygon-zk-v2/version/latest`,
+    [Network.AVALANCHE]: `https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-avalanche-v2`,
 };
 
 // This is the same across networks
@@ -314,6 +323,11 @@ export const ADDRESSES = {
             address: '0xdb25f211ab05b1c97d595516f45794528a807ad8',
             decimals: 2,
             symbol: 'EURS',
+        },
+        swETH: {
+            address: '0xf951e335afb289353dc249e82926178eac7ded78',
+            decimals: 18,
+            symbol: 'swETH',
         },
     },
     [Network.POLYGON]: {
@@ -499,6 +513,23 @@ export const ADDRESSES = {
             address: '0xA8CE8aee21bC2A48a5EF670afCc9274C7bbbC035',
             decimals: 6,
             symbol: 'USDC',
+        },
+    },
+    [Network.AVALANCHE]: {
+        EUROC: {
+            address: '0xC891EB4cbdEFf6e073e859e987815Ed1505c2ACD',
+            decimals: 6,
+            symbol: 'EUROC',
+        },
+        USDC: {
+            address: '0xB97EF9Ef8734C71904D8002F8b6Bc66Dd9c48a6E',
+            decimals: 6,
+            symbol: 'USDC',
+        },
+        STETH: {
+            address: 'TOD',
+            decimals: 6,
+            symbol: 'stETH',
         },
     },
 };
