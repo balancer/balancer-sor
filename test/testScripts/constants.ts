@@ -130,6 +130,16 @@ export const SOR_CONFIG: Record<Network, SorConfig> = {
         chainId: Network.AVALANCHE,
         vault: '0xBA12222222228d8Ba445958a75a0704d566BF2C8',
         weth: '0xb31f66aa3c1e785363f0875a1b74e27b85fd66c7',
+        connectingTokens: [
+            {
+                symbol: 'WAVAX',
+                address: '0xb31f66aa3c1e785363f0875a1b74e27b85fd66c7',
+            },
+            {
+                symbol: 'sAVAX',
+                address: '0x2b2c81e08f1af8835a78bb2a90ae924ace0ea4be',
+            },
+        ],
     },
 };
 
@@ -525,6 +535,21 @@ export const ADDRESSES = {
             address: '0xB97EF9Ef8734C71904D8002F8b6Bc66Dd9c48a6E',
             decimals: 6,
             symbol: 'USDC',
+        },
+        BETS: {
+            address: '0x94025780a1ab58868d9b2dbbb775f44b32e8e6e5',
+            decimals: 18,
+            symbol: 'BETS',
+        },
+        WAVAX: {
+            address: '0xb31f66aa3c1e785363f0875a1b74e27b85fd66c7',
+            decimals: 6,
+            symbol: 'WAVAX',
+        },
+        sAVAX: {
+            address: '0x2b2c81e08f1af8835a78bb2a90ae924ace0ea4be',
+            decimals: 18,
+            symbol: 'sAVAX',
         },
         STETH: {
             address: 'TOD',
