@@ -587,10 +587,20 @@ export const ADDRESSES = {
             decimals: 18,
             symbol: 'stETH',
         },
+        WETH: {
+            address: '0x4200000000000000000000000000000000000006',
+            decimals: 18,
+            symbol: 'WETH',
+        },
         USDC: {
             address: '0xd9aAEc86B65D86f6A7B5B1b0c42FFA531710b6CA',
             decimals: 6,
             symbol: 'USDC',
+        },
+        DAI: {
+            address: '0x50c5725949A6F0c72E6C4a641F24049A917DB0Cb',
+            decimals: 18,
+            symbol: 'DAI',
         },
         BALD: {
             address: '0x27D2DECb4bFC9C76F0309b8E88dec3a601Fe25a8',
