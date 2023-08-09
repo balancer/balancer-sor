@@ -10,6 +10,7 @@ export enum Network {
     GNOSIS = 100,
     ZKEVM = 1101,
     AVALANCHE = 43114,
+    BASE = 8453,
 }
 
 export const SOR_CONFIG: Record<Network, SorConfig> = {
@@ -141,6 +142,24 @@ export const SOR_CONFIG: Record<Network, SorConfig> = {
             },
         ],
     },
+    [Network.BASE]: {
+        chainId: Network.BASE,
+        vault: '0xBA12222222228d8Ba445958a75a0704d566BF2C8',
+        weth: '0x4200000000000000000000000000000000000006',
+        connectingTokens: [
+            {
+                symbol: 'WETH',
+                address: '0x4200000000000000000000000000000000000006',
+            },
+        ],
+        staBal3Pool: {
+            id: '0x6fbfcf88db1aada31f34215b2a1df7fafb4883e900000000000000000000000c',
+            address: '0x6FbFcf88DB1aADA31F34215b2a1Df7fafb4883e9',
+        },
+        triPathMidPoolIds: [
+            '0x2db50a0e0310723ef0c2a165cb9a9f80d772ba2f00020000000000000000000d',
+        ],
+    },
 };
 
 export const PROVIDER_URLS = {
@@ -151,6 +170,7 @@ export const PROVIDER_URLS = {
     [Network.GNOSIS]: process.env.RPC_URL_GNOSIS,
     [Network.ZKEVM]: process.env.RPC_URL_ZKEVM,
     [Network.AVALANCHE]: process.env.RPC_URL_AVALANCHE,
+    [Network.BASE]: process.env.RPC_URL_BASE,
 };
 
 export const MULTIADDR: { [chainId: number]: string } = {
@@ -165,6 +185,7 @@ export const MULTIADDR: { [chainId: number]: string } = {
     100: '0xbb6fab6b627947dae0a75808250d8b2652952cb5',
     1101: '0xca11bde05977b3631167028862be2a173976ca11',
     43114: '0xcA11bde05977b3631167028862bE2a173976CA11',
+    8453: '0xcA11bde05977b3631167028862bE2a173976CA11',
 };
 
 export const SUBGRAPH_URLS = {
@@ -178,6 +199,7 @@ export const SUBGRAPH_URLS = {
     [Network.GNOSIS]: `https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-gnosis-chain-v2`,
     [Network.ZKEVM]: `https://api.studio.thegraph.com/query/24660/balancer-polygon-zk-v2/version/latest`,
     [Network.AVALANCHE]: `https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-avalanche-v2`,
+    [Network.BASE]: `https://api.studio.thegraph.com/query/24660/balancer-base-v2/version/latest`,
 };
 
 // This is the same across networks
@@ -551,10 +573,42 @@ export const ADDRESSES = {
             decimals: 18,
             symbol: 'sAVAX',
         },
+        BPT: {
+            address: '0xA154009870E9B6431305F19b09F9cfD7284d4E7A',
+            decimals: 18,
+            symbol: 'BPT',
+        },
         STETH: {
             address: 'TOD',
             decimals: 6,
             symbol: 'stETH',
+        },
+    },
+    [Network.BASE]: {
+        STETH: {
+            address: 'TOD0',
+            decimals: 18,
+            symbol: 'stETH',
+        },
+        WETH: {
+            address: '0x4200000000000000000000000000000000000006',
+            decimals: 18,
+            symbol: 'WETH',
+        },
+        USDC: {
+            address: '0xd9aAEc86B65D86f6A7B5B1b0c42FFA531710b6CA',
+            decimals: 6,
+            symbol: 'USDC',
+        },
+        DAI: {
+            address: '0x50c5725949A6F0c72E6C4a641F24049A917DB0Cb',
+            decimals: 18,
+            symbol: 'DAI',
+        },
+        BALD: {
+            address: '0x27D2DECb4bFC9C76F0309b8E88dec3a601Fe25a8',
+            decimals: 18,
+            symbol: 'BALD',
         },
     },
 };

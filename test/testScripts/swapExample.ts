@@ -58,21 +58,17 @@ function setUp(networkId: Network, provider: JsonRpcProvider): SOR {
 }
 
 export async function swap(): Promise<void> {
-    const networkId = Network.AVALANCHE;
+    const networkId = Network.BASE;
     const provider = new JsonRpcProvider(PROVIDER_URLS[networkId]);
     // gasPrice is used by SOR as a factor to determine how many pools to swap against.
     // i.e. higher cost means more costly to trade against lots of different pools.
     const gasPrice = BigNumber.from('14000000000');
     // This determines the max no of pools the SOR will use to swap.
     const maxPools = 4;
-    const tokenIn = ADDRESSES[networkId].BETS;
-    const tokenOut = ADDRESSES[networkId].WAVAX;
+    const tokenIn = ADDRESSES[networkId].DAI;
+    const tokenOut = ADDRESSES[networkId].BALD;
     const swapType: SwapTypes = SwapTypes.SwapExactIn;
-    const swapAmount = parseFixed('1', 18);
-    // BETS -> https://snowtrace.io//address/0x94025780a1ab58868d9b2dbbb775f44b32e8e6e5  (18)
-    // BETS -> WAVAX https://snowtrace.io//address/0xb31f66aa3c1e785363f0875a1b74e27b85fd66c7 (18)
-    // BETS -> USDC ()
-    // via sAVAX: https://snowtrace.io//address/0x2b2c81e08f1af8835a78bb2a90ae924ace0ea4be (18)
+    const swapAmount = parseFixed('900', 18);
 
     const sor = setUp(networkId, provider);
 
