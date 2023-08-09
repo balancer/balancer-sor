@@ -8,7 +8,7 @@ type TokenWithPools = {
 };
 
 /**
- * For each midpool construct construct 3 hop paths like: tokenIn[poolA]tokenA[MidPool]tokenB[poolB]tokenOut.
+ * For each midpool construct 3 hop paths like: tokenIn[poolA]tokenA[MidPool]tokenB[poolB]tokenOut.
  * tokenA/B are midpool pool tokens.
  * poolA/B are most liquid pools connecting tokenIn/Out to tokenA/B.
  * @param tokenIn
