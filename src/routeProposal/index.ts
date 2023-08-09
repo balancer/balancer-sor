@@ -14,6 +14,7 @@ import {
     SorConfig,
     PoolDictionary,
 } from '../types';
+import { getTriPaths } from './triPaths';
 
 export class RouteProposer {
     cache: Record<string, { paths: NewPath[] }> = {};
@@ -79,9 +80,17 @@ export class RouteProposer {
             this.config
         );
 
+        const triPaths = getTriPaths(
+            tokenIn,
+            tokenOut,
+            poolsAllDict,
+            this.config.triPathMidPoolIds ?? []
+        );
+
         const combinedPathData = pathData
             .concat(...boostedPaths)
-            .concat(...pathsUsingStaBal);
+            .concat(...pathsUsingStaBal)
+            .concat(...triPaths);
         const [paths] = calculatePathLimits(combinedPathData, swapType);
 
         this.cache[`${tokenIn}${tokenOut}${swapType}${swapOptions.timestamp}`] =

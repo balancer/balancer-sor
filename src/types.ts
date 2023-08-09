@@ -10,6 +10,7 @@ export interface SorConfig {
     usdcConnectingPool?: { id: string; usdc: string };
     wETHwstETH?: { id: string; address: string };
     lbpRaisingTokens?: string[];
+    triPathMidPoolIds?: string[];
 }
 
 export type NoNullableField<T> = {
