@@ -68,7 +68,7 @@ export async function swap(): Promise<void> {
     const tokenIn = ADDRESSES[networkId].DAI;
     const tokenOut = ADDRESSES[networkId].BALD;
     const swapType: SwapTypes = SwapTypes.SwapExactIn;
-    const swapAmount = parseFixed('100', 18);
+    const swapAmount = parseFixed('900', 18);
 
     const sor = setUp(networkId, provider);
 

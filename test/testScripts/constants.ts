@@ -156,6 +156,9 @@ export const SOR_CONFIG: Record<Network, SorConfig> = {
             id: '0x6fbfcf88db1aada31f34215b2a1df7fafb4883e900000000000000000000000c',
             address: '0x6FbFcf88DB1aADA31F34215b2a1Df7fafb4883e9',
         },
+        triPathMidPoolIds: [
+            '0x2db50a0e0310723ef0c2a165cb9a9f80d772ba2f00020000000000000000000d',
+        ],
     },
 };
 
