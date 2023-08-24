@@ -82,7 +82,7 @@ export async function swap(): Promise<void> {
 
     const sorNow = setUp(networkId, provider);
 
-    await sorNow.fetchPools(undefined, undefined, undefined);
+    await sorNow.fetchPools();
 
     // Find swapInfo for best trade for given pair and amount
     const swapInfoNow = await sorNow.getSwaps(
