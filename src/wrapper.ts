@@ -70,7 +70,7 @@ export class SOR {
      * fetchPools Retrieves pools information and saves to internal pools cache.
      * @param {GraphQLArgs} queryArgs - Optional query arguments to pass to pool data service.
      * @param {number} chunkSize - Optional chunksize arguments to pass to pool data service.
-     * @param {GraphQLArgs} blockNumber - Optional blocknumber to pass to the pool data service.
+     * @param {number} blockNumber - Optional blocknumber to pass to the pool data service.
      * @returns {boolean} True if pools fetched successfully, False if not.
      */
     async fetchPools(
