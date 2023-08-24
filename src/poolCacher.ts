@@ -40,20 +40,24 @@ export class PoolCacher {
         return pools;
     }
 
-    /*
+    /**
      * Saves updated pools data to internal cache.
      *
      * @param {GraphQLArgs} queryArgs - Optional query arguments to pass to pool data service.
+     * @param {number} chunkSize - Optional chunksize arguments to pass to pool data service.
+     * @param {GraphQLArgs} blockNumber - Optional blocknumber to pass to the pool data service.
      * @returns {boolean} True if pools fetched successfully, False if not.
      */
     public async fetchPools(
         queryArgs?: GraphQLArgs,
-        chunkSize?: number
+        chunkSize?: number,
+        blockNumber?: number
     ): Promise<boolean> {
         try {
             this.pools = await this.poolDataService.getPools(
                 queryArgs,
-                chunkSize
+                chunkSize,
+                blockNumber
             );
             this._finishedFetching = true;
             return true;

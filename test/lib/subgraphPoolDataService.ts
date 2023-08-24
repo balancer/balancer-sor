@@ -1,5 +1,5 @@
 import fetch from 'isomorphic-fetch';
-import { PoolDataService, SubgraphPoolBase } from '../../src';
+import { GraphQLArgs, PoolDataService, SubgraphPoolBase } from '../../src';
 import { getOnChainBalances } from './onchainData';
 import { Provider } from '@ethersproject/providers';
 
@@ -7,6 +7,7 @@ const queryWithLinear = `
       {
         pool0: pools(
           first: 1000,
+          {{BLOCKNUMBER}}
           where: { swapEnabled: true, totalShares_gt: "0.000000000001" },
           orderBy: totalLiquidity,
           orderDirection: desc
@@ -61,6 +62,7 @@ const queryWithLinear = `
         }
         pool1000: pools(
           first: 1000,
+          {{BLOCKNUMBER}}
           skip: 1000,
           where: { swapEnabled: true, totalShares_gt: "0.000000000001" },
           orderBy: totalLiquidity,
@@ -138,17 +140,32 @@ export class SubgraphPoolDataService implements PoolDataService {
             subgraphUrl: string;
             provider: Provider;
             onchain: boolean;
+            targetBlock?: number;
         }
     ) {}
 
-    public async getPools(): Promise<SubgraphPoolBase[]> {
+    public async getPools(
+        query?: GraphQLArgs | undefined,
+        chunkSize?: number | undefined,
+        blockNumber?: number | undefined
+    ): Promise<SubgraphPoolBase[]> {
+        let graphQuery = Query[this.config.chainId];
+        if (blockNumber) {
+            // if a block number is specified, add "block: { number: BLOCKNUMBER }," to the graphQL query
+            const toAdd = `block: { number: ${blockNumber} },`;
+            graphQuery = graphQuery.split('{{BLOCKNUMBER}}').join(toAdd);
+        } else {
+            // else replace {{BLOCKNUMBER}} token with an empty string
+            graphQuery = graphQuery.split('{{BLOCKNUMBER}}').join('');
+        }
+
         const response = await fetch(this.config.subgraphUrl, {
             method: 'POST',
             headers: {
                 Accept: 'application/json',
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ query: Query[this.config.chainId] }),
+            body: JSON.stringify({ query: graphQuery }),
         });
 
         const { data } = await response.json();
@@ -172,7 +189,8 @@ export class SubgraphPoolDataService implements PoolDataService {
                 pools ?? [],
                 this.config.multiAddress,
                 this.config.vaultAddress,
-                this.config.provider
+                this.config.provider,
+                blockNumber
             );
         }
 

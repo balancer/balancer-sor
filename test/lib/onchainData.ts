@@ -21,7 +21,8 @@ export async function getOnChainBalances(
     subgraphPoolsOriginal: SubgraphPoolBase[],
     multiAddress: string,
     vaultAddress: string,
-    provider: Provider
+    provider: Provider,
+    blockNumber?: number
 ): Promise<SubgraphPoolBase[]> {
     if (subgraphPoolsOriginal.length === 0) return subgraphPoolsOriginal;
 
@@ -43,7 +44,13 @@ export async function getOnChainBalances(
             )
         );
 
-    const multiPool = new Multicaller(multiAddress, provider, abis);
+    // if blockNumber given in parameters, construct the multicaller with the blockTag option
+    // this require an archive node
+    const multiPool = blockNumber
+        ? new Multicaller(multiAddress, provider, abis, {
+              blockTag: blockNumber,
+          })
+        : new Multicaller(multiAddress, provider, abis);
 
     const supportedPoolTypes: string[] = Object.values(PoolFilter);
     const subgraphPools: SubgraphPoolBase[] = [];

@@ -278,7 +278,8 @@ export interface TokenPriceService {
 export interface PoolDataService {
     getPools(
         query?: GraphQLArgs,
-        chunkSize?: number
+        chunkSize?: number,
+        blockNumber?: number
     ): Promise<SubgraphPoolBase[]>;
 }
 
