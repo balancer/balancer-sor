@@ -1,5 +1,4 @@
-// Example using SOR to find the best swap for a given pair and simulate using batchSwap.
-// Requires TRADER_KEY in .env.
+// Example using SOR to find the best swap at a given block and at the most recent block
 // Run using: $ TS_NODE_PROJECT='tsconfig.testing.json' ts-node ./test/testScripts/swapExample.ts
 // NOTE: This is for test/debug purposes, the Balancer SDK Swaps module has a more user friendly interface for interacting with SOR:
 // https://github.com/balancer-labs/balancer-sdk/tree/develop/balancer-js#swaps-module
@@ -7,8 +6,6 @@ import dotenv from 'dotenv';
 dotenv.config();
 import { BigNumber, parseFixed, formatFixed } from '@ethersproject/bignumber';
 import { JsonRpcProvider } from '@ethersproject/providers';
-import { Wallet } from '@ethersproject/wallet';
-import { Contract } from '@ethersproject/contracts';
 import { SOR, SwapInfo, SwapTypes } from '../../src';
 import { CoingeckoTokenPriceService } from '../lib/coingeckoTokenPriceService';
 import { SubgraphPoolDataService } from '../lib/subgraphPoolDataService';
@@ -21,9 +18,6 @@ import {
     vaultAddr,
     MULTIADDR,
 } from './constants';
-import { buildTx, printOutput } from './utils';
-
-import vaultArtifact from '../../src/abi/Vault.json';
 
 // Setup SOR with data services
 function setUp(networkId: Network, provider: JsonRpcProvider): SOR {
@@ -57,10 +51,6 @@ function setUp(networkId: Network, provider: JsonRpcProvider): SOR {
     );
 }
 
-/**
- * This example tries to get the WETH/USDC price at block 17 000 000
- * and compare it to the current price.
- */
 export async function swap(): Promise<void> {
     const networkId = Network.MAINNET;
     const provider = new JsonRpcProvider(PROVIDER_URLS[networkId]);
