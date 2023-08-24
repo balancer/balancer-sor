@@ -140,7 +140,6 @@ export class SubgraphPoolDataService implements PoolDataService {
             subgraphUrl: string;
             provider: Provider;
             onchain: boolean;
-            targetBlock?: number;
         }
     ) {}
 
