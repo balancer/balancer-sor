@@ -114,6 +114,13 @@ export const SOR_CONFIG: Record<Network, SorConfig> = {
                 symbol: 'weth',
                 address: '0x6A023CCd1ff6F2045C3309768eAd9E68F978f6e1',
             },
+            {
+                symbol: 'wsteth',
+                address: '0x6C76971f98945AE98dD7d4DFcA8711ebea946eA6',
+            },
+        ],
+        triPathMidPoolIds: [
+            '0xeb30c85cc528537f5350cf5684ce6a4538e13394000200000000000000000059', // 3POOL_BPT/wstETH
         ],
     },
     [Network.ZKEVM]: {
@@ -521,6 +528,16 @@ export const ADDRESSES = {
             address: '0x4ECaBa5870353805a9F068101A40E0f32ed605C6',
             decimals: 6,
             symbol: 'USDT',
+        },
+        wstETH: {
+            address: '0x6C76971f98945AE98dD7d4DFcA8711ebea946eA6',
+            decimals: 18,
+            symbol: 'wstETH',
+        },
+        STETH: {
+            address: 'todo',
+            decimals: 18,
+            symbol: 'STETH',
         },
     },
     [Network.GOERLI]: {
