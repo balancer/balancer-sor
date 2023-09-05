@@ -5,10 +5,12 @@ export interface SorConfig {
     chainId: number;
     vault: string;
     weth: string;
+    connectingTokens?: { symbol: string; address: string }[];
     staBal3Pool?: { id: string; address: string };
     usdcConnectingPool?: { id: string; usdc: string };
     wETHwstETH?: { id: string; address: string };
     lbpRaisingTokens?: string[];
+    triPathMidPoolIds?: string[];
 }
 
 export type NoNullableField<T> = {
@@ -28,6 +30,8 @@ export enum PoolTypes {
     Linear,
     Gyro2,
     Gyro3,
+    GyroE,
+    Fx,
 }
 
 export interface SwapOptions {
@@ -61,12 +65,14 @@ export interface Swap {
     maxPrice?: string;
     tokenInDecimals: number;
     tokenOutDecimals: number;
+    returnAmount?: string;
 }
 
 export interface SubgraphPoolBase {
     id: string;
     address: string;
     poolType: string;
+    poolTypeVersion?: number;
     swapFee: string;
     swapEnabled: boolean;
     totalShares: string;
@@ -91,12 +97,35 @@ export interface SubgraphPoolBase {
     lowerTarget?: string;
     upperTarget?: string;
 
-    // Gyro2 specific field
+    // Gyro2 specific fields
     sqrtAlpha?: string;
     sqrtBeta?: string;
 
     // Gyro3 specific field
     root3Alpha?: string;
+
+    // GyroE and GyroEV2 specific fields
+    alpha?: string;
+    beta?: string;
+    c?: string;
+    s?: string;
+    lambda?: string;
+    tauAlphaX?: string;
+    tauAlphaY?: string;
+    tauBetaX?: string;
+    tauBetaY?: string;
+    u?: string;
+    v?: string;
+    w?: string;
+    z?: string;
+    dSq?: string;
+
+    // GyroEV2 specific fields
+    tokenRates?: string[];
+
+    // FxPool
+    delta?: string;
+    epsilon?: string;
 }
 
 export type SubgraphToken = {
@@ -106,6 +135,12 @@ export type SubgraphToken = {
     priceRate: string;
     // WeightedPool field
     weight: string | null;
+    token?: SubgraphTokenData;
+};
+
+export type SubgraphTokenData = {
+    latestFXPrice?: string;
+    fxOracleDecimals?: number;
 };
 
 export interface SwapV2 {
@@ -114,6 +149,7 @@ export interface SwapV2 {
     assetOutIndex: number;
     amount: string;
     userData: string;
+    returnAmount?: string;
 }
 
 export interface SwapInfo {
@@ -157,62 +193,76 @@ export enum PoolFilter {
     Weighted = 'Weighted',
     Stable = 'Stable',
     MetaStable = 'MetaStable',
-    LBP = 'LiquidityBootstrapping',
+    LiquidityBootstrapping = 'LiquidityBootstrapping',
     Investment = 'Investment',
     Element = 'Element',
-    AaveLinear = 'AaveLinear',
     StablePhantom = 'StablePhantom',
-    ERC4626Linear = 'ERC4626Linear',
+    ComposableStable = 'ComposableStable',
     Gyro2 = 'Gyro2',
     Gyro3 = 'Gyro3',
-    ComposableStable = 'ComposableStable',
+    GyroE = 'GyroE',
+    // Linear Pools defined below all operate the same mathematically but have different factories and names in Subgraph
+    AaveLinear = 'AaveLinear',
+    Linear = 'Linear',
+    EulerLinear = 'EulerLinear',
+    ERC4626Linear = 'ERC4626Linear',
+    BeefyLinear = 'BeefyLinear',
+    GearboxLinear = 'GearboxLinear',
+    MidasLinear = 'MidasLinear',
+    ReaperLinear = 'ReaperLinear',
+    SiloLinear = 'SiloLinear',
+    TetuLinear = 'TetuLinear',
+    YearnLinear = 'YearnLinear',
+    FX = 'FX',
 }
 
-export interface PoolBase {
+export interface PoolBase<D extends PoolPairBase = PoolPairBase> {
     poolType: PoolTypes;
     id: string;
     address: string;
     tokensList: string[];
+    tokens: { address: string; balance: string; decimals: number }[];
+    totalShares: BigNumber;
     mainIndex?: number;
     isLBP?: boolean;
-    parsePoolPairData: (tokenIn: string, tokenOut: string) => PoolPairBase;
-    getNormalizedLiquidity: (poolPairData: PoolPairBase) => OldBigNumber;
-    getLimitAmountSwap: (
-        poolPairData: PoolPairBase,
-        swapType: SwapTypes
-    ) => OldBigNumber;
+    parsePoolPairData: (tokenIn: string, tokenOut: string) => D;
+    getNormalizedLiquidity: (poolPairData: D) => OldBigNumber;
+    getLimitAmountSwap: (poolPairData: D, swapType: SwapTypes) => OldBigNumber;
     /**
      * @param {string} token - Address of token.
      * @param {BigNumber} newBalance - New balance of token. EVM scaled.
      */
     updateTokenBalanceForPool: (token: string, newBalance: BigNumber) => void;
+    updateTotalShares: (newTotalShares: BigNumber) => void;
     _exactTokenInForTokenOut: (
-        poolPairData: PoolPairBase,
+        poolPairData: D,
         amount: OldBigNumber
     ) => OldBigNumber;
     _tokenInForExactTokenOut: (
-        poolPairData: PoolPairBase,
+        poolPairData: D,
         amount: OldBigNumber
     ) => OldBigNumber;
+    _calcTokensOutGivenExactBptIn(bptAmountIn: BigNumber): BigNumber[];
+    _calcBptOutGivenExactTokensIn(amountsIn: BigNumber[]): BigNumber;
     _spotPriceAfterSwapExactTokenInForTokenOut: (
-        poolPairData: PoolPairBase,
+        poolPairData: D,
         amount: OldBigNumber
     ) => OldBigNumber;
     _spotPriceAfterSwapTokenInForExactTokenOut: (
-        poolPairData: PoolPairBase,
+        poolPairData: D,
         amount: OldBigNumber
     ) => OldBigNumber;
     _derivativeSpotPriceAfterSwapExactTokenInForTokenOut: (
-        poolPairData: PoolPairBase,
+        poolPairData: D,
         amount: OldBigNumber
     ) => OldBigNumber;
     _derivativeSpotPriceAfterSwapTokenInForExactTokenOut: (
-        poolPairData: PoolPairBase,
+        poolPairData: D,
         amount: OldBigNumber
     ) => OldBigNumber;
 }
 
-export interface WeightedPool extends PoolBase {
+export interface WeightedPool<D extends PoolPairBase> extends PoolBase<D> {
     totalWeight: string;
 }
 
@@ -226,5 +276,35 @@ export interface TokenPriceService {
 }
 
 export interface PoolDataService {
-    getPools(): Promise<SubgraphPoolBase[]>;
+    getPools(
+        query?: GraphQLArgs,
+        chunkSize?: number
+    ): Promise<SubgraphPoolBase[]>;
+}
+
+export type FundManagement = {
+    sender: string;
+    recipient: string;
+    fromInternalBalance: boolean;
+    toInternalBalance: boolean;
+};
+
+type GraphQLFilterOperator = 'gt' | 'lt' | 'eq' | 'in' | 'not_in' | 'contains';
+
+type GraphQLFilter = {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    [operator in GraphQLFilterOperator]?: any;
+};
+
+export interface GraphQLArgs {
+    chainId?: number;
+    first?: number;
+    skip?: number;
+    nextToken?: string;
+    orderBy?: string;
+    orderDirection?: string;
+    block?: {
+        number?: number;
+    };
+    where?: Record<string, GraphQLFilter>;
 }

@@ -400,7 +400,7 @@ export function checkPath(
     path: NewPath,
     tokenIn: string,
     tokenOut: string
-) {
+): void {
     // IDS should be all IDS concatenated
     expect(path.id).to.eq(expectedPoolIds.join(''));
     // Lengths of pools, pairData and swaps should all be equal
@@ -459,4 +459,9 @@ export function poolsCheckPath(path: NewPath, poolsIds: string[]): boolean {
         if (poolsIds[i] !== path.pools[i].id) return false;
     }
     return true;
+}
+
+export function closeTo(x: BigNumber, y: BigNumber, delta: number): void {
+    const diff = x.sub(y).abs().toNumber();
+    expect(diff).lte(delta);
 }

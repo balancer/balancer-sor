@@ -1,10 +1,4 @@
 <p align="center">
-  <a href="https://circleci.com/gh/balancer-labs/balancer-sor">
-    <img src="https://circleci.com/gh/balancer-labs/balancer-sor.svg?style=svg&circle-token=33636208d3161f79ff283b29c8dba9841bda8931" />
-  </a>
-  <a href="https://coveralls.io/github/balancer-labs/balancer-sor">
-    <img src="https://coveralls.io/repos/github/balancer-labs/balancer-sor/badge.svg?t=7avwwt" />
-  </a>
   <a href="https://www.gnu.org/licenses/gpl-3.0">
     <img src="https://img.shields.io/badge/License-GPLv3-green.svg" />
   </a>
@@ -37,11 +31,50 @@ The example file `swapExample.ts` in: [./testScripts](test/testScripts/), demons
 
 To Run:
 
-Create a .env file in root dir with your infura provider key: `INFURA=your_key`
+Create a .env file in root dir. Depending on network being used add an RPC URL (e.g. Alchemy, Infura), e.g.: `RPC_URL_MAINNET=alchemy/infura`
+
+Supported networks out of box for example are:
+
+```
+RPC_URL_MAINNET
+RPC_URL_POLYGON
+RPC_URL_ARBITRUM
+RPC_URL_GNOSIS
+RPC_URL_ZKEVM
+RPC_URL_GOERLI
+```
 
 Install dependencies: `$ yarn install`
 
 Run example: `$ ts-node ./test/testScripts/swapExample.ts`
+
+## Contributing/Adding New Pools
+
+Running tests locally:
+
+1. Add .env and add following RPC URLs (e.g. Alchemy, Infura)
+
+```
+RPC_URL_MAINNET=
+RPC_URL_POLYGON=
+```
+
+2. Start local forked nodes to test against:
+
+`$ yarn run node`
+
+`$ yarn run node:polygon`
+
+3. Run tests:
+   `$ yarn test`
+
+To run a single test file use `test:only`, e.g.:
+
+`$ yarn test:only test/composableStable.integration.spec.ts`
+
+Adding New Pools:
+
+See info [here](https://www.notion.so/SOR-Adding-New-Pools-fa073ec6fecb4c22b1ba13504b04f5bf?pvs=4)
 
 ## Environment Variables
 
@@ -57,3 +90,9 @@ Example:
 PRICE_ERROR_TOLERANCE=0.00001
 INFINITESIMAL=0.000001
 ```
+
+## Note on Licensing
+
+Except where indicated otherwise, the code in this repository is licensed GPLv3.
+
+Superluminal Labs Ltd. is the owner of the directories `balancer-sor/src/pools/gyro2Pool/`, `balancer-sor/src/pools/gyro3Pool/` and `balancer-sor/src/pools/gyroEPool/` and any accompanying files contained herein (collectively, these “Software”). Use of these Software is exclusively subject to the [Gyroscope Pool License](./src/pools/gyroEPool/LICENSE), which is available at the provided link (the “Gyroscope Pool License”). These Software are not covered by the General Public License and do not confer any rights to the user other than the limited rights specified in the Gyroscope Pool License. A special hybrid license between Superluminal Labs Ltd and Balancer Labs OÜ governs Superluminal Labs Ltd's use of the Balancer Labs OÜ code [Special License](./src/pools/gyroEPool/GyroscopeBalancerLicense.pdf), which is available at the provided link. By using these Software, you agree to be bound by the terms and conditions of the Gyroscope Pool License. If you do not agree to all terms and conditions of the Gyroscope Pool License, do not use any of these Software.

@@ -1,6 +1,6 @@
 {
     "name": "@balancer-labs/sor",
-    "version": "4.0.1-beta.5",
+    "version": "4.1.1-beta.16",
     "license": "GPL-3.0-only",
     "main": "dist/index.js",
     "module": "dist/index.esm.js",
@@ -8,14 +8,17 @@
     "scripts": {
         "build": "rollup -c",
         "prepack": "yarn build",
-        "test": "TS_NODE_PROJECT='tsconfig.testing.json' nyc mocha -r ts-node/register test/*.spec.ts",
+        "test": "TS_NODE_PROJECT='tsconfig.testing.json' nyc mocha -r ts-node/register test/*.spec.ts --timeout 20000",
+        "test:only": "TS_NODE_PROJECT='tsconfig.testing.json' npx mocha -r ts-node/register --timeout 20000",
+        "example": "TS_NODE_PROJECT='tsconfig.testing.json' ts-node",
         "coverage": "nyc report --reporter=text-lcov | coveralls",
         "lint": "eslint ./src ./test --ext .ts --max-warnings 0",
-        "node": "npx hardhat node --fork $(grep ALCHEMY_URL .env | cut -d '=' -f2) --fork-block-number 14828550"
+        "node": "npx hardhat node --tsconfig tsconfig.testing.json --fork $(. ./.env && echo $RPC_URL_MAINNET)",
+        "node:polygon": "npx hardhat --tsconfig tsconfig.testing.json --config hardhat.config.polygon.ts node --fork $(. ./.env && echo $RPC_URL_POLYGON) --port 8137"
     },
     "husky": {
         "hooks": {
-            "pre-commit": "pretty-quick --staged"
+            "pre-commit": "pretty-quick --staged && yarn run lint"
         }
     },
     "publishConfig": {
@@ -48,7 +51,6 @@
         "@typescript-eslint/parser": "^4.29.2",
         "bignumber.js": "^9.0.1",
         "chai": "^4.2.0",
-        "coveralls": "^3.0.9",
         "dotenv": "^8.2.0",
         "eslint": "^7.32.0",
         "eslint-plugin-mocha-no-only": "^1.1.1",

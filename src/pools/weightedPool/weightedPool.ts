@@ -5,7 +5,12 @@ import {
     scale,
     ZERO,
 } from '../../utils/bignumber';
-import { isSameAddress } from '../../utils';
+import {
+    isSameAddress,
+    normaliseBalance,
+    normaliseAmount,
+    denormaliseAmount,
+} from '../../utils';
 import {
     PoolBase,
     PoolTypes,
@@ -22,10 +27,28 @@ import {
     _spotPriceAfterSwapTokenInForExactTokenOut,
     _derivativeSpotPriceAfterSwapExactTokenInForTokenOut,
     _derivativeSpotPriceAfterSwapTokenInForExactTokenOut,
+    _calcBptOutGivenExactTokensIn,
+    _calcTokenOutGivenExactBptIn,
+    _calcTokenInGivenExactBptOut,
+    _calcBptInGivenExactTokensOut,
+    _spotPriceAfterSwapExactTokenInForBPTOut,
+    _spotPriceAfterSwapExactBPTInForTokenOut,
+    _spotPriceAfterSwapTokenInForExactBPTOut,
+    _spotPriceAfterSwapBPTInForExactTokenOut,
+    _derivativeSpotPriceAfterSwapExactBPTInForTokenOut,
+    _derivativeSpotPriceAfterSwapExactTokenInForBPTOut,
+    _calcTokensOutGivenExactBptIn,
 } from './weightedMath';
 import { BigNumber, formatFixed, parseFixed } from '@ethersproject/bignumber';
-import { WeiPerEther as ONE } from '@ethersproject/constants';
-import { takeToPrecision18 } from '../../router/helpersClass';
+import { WeiPerEther as ONE, Zero } from '@ethersproject/constants';
+import { MathSol } from '../../utils/basicOperations';
+import { universalNormalizedLiquidity } from '../liquidity';
+
+enum PairTypes {
+    BptToToken,
+    TokenToBpt,
+    TokenToToken,
+}
 
 export type WeightedPoolToken = Pick<
     NoNullableField<SubgraphToken>,
@@ -33,11 +56,12 @@ export type WeightedPoolToken = Pick<
 >;
 
 export type WeightedPoolPairData = PoolPairBase & {
+    pairType: PairTypes;
     weightIn: BigNumber;
     weightOut: BigNumber;
 };
 
-export class WeightedPool implements PoolBase {
+export class WeightedPool implements PoolBase<WeightedPoolPairData> {
     poolType: PoolTypes = PoolTypes.Weighted;
     id: string;
     address: string;
@@ -107,6 +131,15 @@ export class WeightedPool implements PoolBase {
             .mul(ONE)
             .div(this.totalWeight);
 
+        let pairType: PairTypes;
+        if (tokenIn == this.address) {
+            pairType = PairTypes.BptToToken;
+        } else if (tokenOut == this.address) {
+            pairType = PairTypes.TokenToBpt;
+        } else {
+            pairType = PairTypes.TokenToToken;
+        }
+
         const poolPairData: WeightedPoolPairData = {
             id: this.id,
             address: this.address,
@@ -117,6 +150,7 @@ export class WeightedPool implements PoolBase {
             decimalsOut: Number(decimalsOut),
             balanceIn: parseFixed(balanceIn, decimalsIn),
             balanceOut: parseFixed(balanceOut, decimalsOut),
+            pairType: pairType,
             weightIn: weightIn,
             weightOut: weightOut,
             swapFee: this.swapFee,
@@ -125,17 +159,17 @@ export class WeightedPool implements PoolBase {
         return poolPairData;
     }
 
-    // Normalized liquidity is an abstract term that can be thought of the
-    // inverse of the slippage. It is proportional to the token balances in the
-    // pool but also depends on the shape of the invariant curve.
-    // As a standard, we define normalized liquidity in tokenOut
+    getNormalizedWeights(): bigint[] {
+        return this.tokens.map((t) =>
+            parseFixed(t.weight, 18).mul(ONE).div(this.totalWeight).toBigInt()
+        );
+    }
+
     getNormalizedLiquidity(poolPairData: WeightedPoolPairData): OldBigNumber {
-        return bnum(
-            formatFixed(
-                poolPairData.balanceOut
-                    .mul(poolPairData.weightIn)
-                    .div(poolPairData.weightIn.add(poolPairData.weightOut)),
-                poolPairData.decimalsOut
+        return universalNormalizedLiquidity(
+            this._derivativeSpotPriceAfterSwapExactTokenInForTokenOut(
+                poolPairData,
+                ZERO
             )
         );
     }
@@ -164,14 +198,17 @@ export class WeightedPool implements PoolBase {
     // Updates the balance of a given token for the pool
     updateTokenBalanceForPool(token: string, newBalance: BigNumber): void {
         // token is BPT
-        if (this.address == token) {
-            this.totalShares = newBalance;
-        } else {
-            // token is underlying in the pool
-            const T = this.tokens.find((t) => isSameAddress(t.address, token));
-            if (!T) throw Error('Pool does not contain this token');
-            T.balance = formatFixed(newBalance, T.decimals);
+        if (isSameAddress(this.address, token)) {
+            this.updateTotalShares(newBalance);
         }
+        // token is underlying in the pool
+        const T = this.tokens.find((t) => isSameAddress(t.address, token));
+        if (!T) throw Error('Pool does not contain this token');
+        T.balance = formatFixed(newBalance, T.decimals);
+    }
+
+    updateTotalShares(newTotalShares: BigNumber): void {
+        this.totalShares = newTotalShares;
     }
 
     // Using BigNumber.js decimalPlaces (dp), allows us to consider token decimal accuracy correctly,
@@ -183,23 +220,50 @@ export class WeightedPool implements PoolBase {
         amount: OldBigNumber
     ): OldBigNumber {
         if (amount.isNaN()) return amount;
-        const balanceIn = poolPairData.balanceIn;
-        const balanceOut = poolPairData.balanceOut;
+        const amountIn = parseFixed(amount.dp(18, 1).toString(), 18).toBigInt();
         const decimalsIn = poolPairData.decimalsIn;
         const decimalsOut = poolPairData.decimalsOut;
-
+        const balanceIn = parseFixed(
+            poolPairData.balanceIn.toString(),
+            18 - decimalsIn
+        ).toBigInt();
+        const balanceOut = parseFixed(
+            poolPairData.balanceOut.toString(),
+            18 - decimalsOut
+        ).toBigInt();
+        const normalizedWeightIn = poolPairData.weightIn.toBigInt();
+        const normalizedWeightOut = poolPairData.weightOut.toBigInt();
+        const swapFee = poolPairData.swapFee.toBigInt();
+        let returnAmt: bigint;
         try {
-            const amt = _calcOutGivenIn(
-                takeToPrecision18(balanceIn, decimalsIn).toBigInt(),
-                poolPairData.weightIn.toBigInt(),
-                takeToPrecision18(balanceOut, decimalsOut).toBigInt(),
-                poolPairData.weightOut.toBigInt(),
-                parseFixed(amount.dp(18, 1).toString(), 18).toBigInt(),
-                poolPairData.swapFee.toBigInt()
-            );
+            if (poolPairData.pairType === PairTypes.TokenToBpt) {
+                returnAmt = _calcBptOutGivenExactTokensIn(
+                    [balanceIn, BigInt(1)],
+                    [normalizedWeightIn, MathSol.ONE - normalizedWeightIn],
+                    [amountIn, BigInt(0)],
+                    balanceOut,
+                    swapFee
+                );
+            } else if (poolPairData.pairType === PairTypes.BptToToken) {
+                returnAmt = _calcTokenOutGivenExactBptIn(
+                    balanceOut,
+                    normalizedWeightOut,
+                    amountIn,
+                    balanceIn,
+                    swapFee
+                );
+            } else {
+                returnAmt = _calcOutGivenIn(
+                    balanceIn,
+                    normalizedWeightIn,
+                    balanceOut,
+                    normalizedWeightOut,
+                    amountIn,
+                    swapFee
+                );
+            }
             // return human scaled
-            const amtOldBn = bnum(amt.toString());
-            return scale(amtOldBn, -18);
+            return scale(bnum(returnAmt.toString()), -18);
         } catch (err) {
             return ZERO;
         }
@@ -214,24 +278,117 @@ export class WeightedPool implements PoolBase {
         amount: OldBigNumber
     ): OldBigNumber {
         if (amount.isNaN()) return amount;
-        const balanceIn = poolPairData.balanceIn;
-        const balanceOut = poolPairData.balanceOut;
+        const amountOut = parseFixed(
+            amount.dp(18, 1).toString(),
+            18
+        ).toBigInt();
         const decimalsIn = poolPairData.decimalsIn;
         const decimalsOut = poolPairData.decimalsOut;
+        const balanceIn = parseFixed(
+            poolPairData.balanceIn.toString(),
+            18 - decimalsIn
+        ).toBigInt();
+        const balanceOut = parseFixed(
+            poolPairData.balanceOut.toString(),
+            18 - decimalsOut
+        ).toBigInt();
+        const normalizedWeightIn = poolPairData.weightIn.toBigInt();
+        const normalizedWeightOut = poolPairData.weightOut.toBigInt();
+        const swapFee = poolPairData.swapFee.toBigInt();
+        let returnAmt: bigint;
         try {
-            const amt = _calcInGivenOut(
-                takeToPrecision18(balanceIn, decimalsIn).toBigInt(),
-                poolPairData.weightIn.toBigInt(),
-                takeToPrecision18(balanceOut, decimalsOut).toBigInt(),
-                poolPairData.weightOut.toBigInt(),
-                parseFixed(amount.dp(18, 1).toString(), 18).toBigInt(),
-                poolPairData.swapFee.toBigInt()
-            );
+            if (poolPairData.pairType === PairTypes.TokenToBpt) {
+                returnAmt = _calcTokenInGivenExactBptOut(
+                    balanceIn,
+                    normalizedWeightIn,
+                    amountOut,
+                    balanceOut,
+                    swapFee
+                );
+            } else if (poolPairData.pairType === PairTypes.BptToToken) {
+                returnAmt = _calcBptInGivenExactTokensOut(
+                    [balanceOut, BigInt(1)],
+                    [normalizedWeightOut, MathSol.ONE - normalizedWeightOut],
+                    [amountOut, BigInt(0)],
+                    balanceIn,
+                    swapFee
+                );
+            } else {
+                returnAmt = _calcInGivenOut(
+                    balanceIn,
+                    normalizedWeightIn,
+                    balanceOut,
+                    normalizedWeightOut,
+                    amountOut,
+                    swapFee
+                );
+            }
             // return human scaled
-            const amtOldBn = bnum(amt.toString());
-            return scale(amtOldBn, -18);
+            return scale(bnum(returnAmt.toString()), -18);
         } catch (err) {
             return ZERO;
+        }
+    }
+
+    /**
+     * _calcTokensOutGivenExactBptIn
+     * @param bptAmountIn EVM scale.
+     * @returns EVM scale.
+     */
+    _calcTokensOutGivenExactBptIn(bptAmountIn: BigNumber): BigNumber[] {
+        // balances and amounts must be normalized to 1e18 fixed point - e.g. 1USDC => 1e18 not 1e6
+        const balancesNormalised = this.tokens
+            .filter((t) => !isSameAddress(t.address, this.address))
+            .map((t) => normaliseBalance(t));
+        try {
+            const amountsOutNormalised = _calcTokensOutGivenExactBptIn(
+                balancesNormalised,
+                bptAmountIn.toBigInt(),
+                this.totalShares.toBigInt()
+            );
+            // We want to return denormalised amounts. e.g. 1USDC => 1e6 not 1e18
+            const amountsOut = amountsOutNormalised.map((a, i) =>
+                denormaliseAmount(a, this.tokens[i])
+            );
+            return amountsOut.map((a) => BigNumber.from(a));
+        } catch (err) {
+            return new Array(balancesNormalised.length).fill(ZERO);
+        }
+    }
+
+    /**
+     * _calcBptOutGivenExactTokensIn
+     * @param amountsIn EVM Scale
+     * @returns EVM Scale
+     */
+    _calcBptOutGivenExactTokensIn(amountsIn: BigNumber[]): BigNumber {
+        try {
+            // balances and amounts must be normalized to 1e18 fixed point - e.g. 1USDC => 1e18 not 1e6
+            const amountsInNormalised = new Array(amountsIn.length).fill(
+                BigInt(0)
+            );
+            const balancesNormalised = new Array(amountsIn.length).fill(
+                BigInt(0)
+            );
+            this.tokens
+                .filter((t) => !isSameAddress(t.address, this.address))
+                .forEach((token, i) => {
+                    amountsInNormalised[i] = normaliseAmount(
+                        BigInt(amountsIn[i].toString()),
+                        token
+                    );
+                    balancesNormalised[i] = normaliseBalance(token);
+                });
+            const bptAmountOut = _calcBptOutGivenExactTokensIn(
+                balancesNormalised,
+                this.getNormalizedWeights(),
+                amountsInNormalised,
+                this.totalShares.toBigInt(),
+                this.swapFee.toBigInt()
+            );
+            return BigNumber.from(bptAmountOut.toString());
+        } catch (err) {
+            return Zero;
         }
     }
 
@@ -239,24 +396,66 @@ export class WeightedPool implements PoolBase {
         poolPairData: WeightedPoolPairData,
         amount: OldBigNumber
     ): OldBigNumber {
-        return _spotPriceAfterSwapExactTokenInForTokenOut(amount, poolPairData);
+        if (poolPairData.pairType === PairTypes.TokenToBpt) {
+            return _spotPriceAfterSwapExactTokenInForBPTOut(
+                amount,
+                poolPairData
+            );
+        } else if (poolPairData.pairType === PairTypes.BptToToken) {
+            return _spotPriceAfterSwapExactBPTInForTokenOut(
+                amount,
+                poolPairData
+            );
+        } else {
+            return _spotPriceAfterSwapExactTokenInForTokenOut(
+                amount,
+                poolPairData
+            );
+        }
     }
 
     _spotPriceAfterSwapTokenInForExactTokenOut(
         poolPairData: WeightedPoolPairData,
         amount: OldBigNumber
     ): OldBigNumber {
-        return _spotPriceAfterSwapTokenInForExactTokenOut(amount, poolPairData);
+        if (poolPairData.pairType === PairTypes.TokenToBpt) {
+            return _spotPriceAfterSwapTokenInForExactBPTOut(
+                amount,
+                poolPairData
+            );
+        } else if (poolPairData.pairType === PairTypes.BptToToken) {
+            return _spotPriceAfterSwapBPTInForExactTokenOut(
+                amount,
+                poolPairData
+            );
+        } else {
+            return _spotPriceAfterSwapTokenInForExactTokenOut(
+                amount,
+                poolPairData
+            );
+        }
     }
 
     _derivativeSpotPriceAfterSwapExactTokenInForTokenOut(
         poolPairData: WeightedPoolPairData,
         amount: OldBigNumber
     ): OldBigNumber {
-        return _derivativeSpotPriceAfterSwapExactTokenInForTokenOut(
-            amount,
-            poolPairData
-        );
+        if (poolPairData.pairType === PairTypes.TokenToBpt) {
+            return _derivativeSpotPriceAfterSwapExactTokenInForBPTOut(
+                amount,
+                poolPairData
+            );
+        } else if (poolPairData.pairType === PairTypes.BptToToken) {
+            return _derivativeSpotPriceAfterSwapExactBPTInForTokenOut(
+                amount,
+                poolPairData
+            );
+        } else {
+            return _derivativeSpotPriceAfterSwapExactTokenInForTokenOut(
+                amount,
+                poolPairData
+            );
+        }
     }
 
     _derivativeSpotPriceAfterSwapTokenInForExactTokenOut(

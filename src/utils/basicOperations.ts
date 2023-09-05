@@ -1,9 +1,20 @@
 export const BZERO = BigInt(0);
 export const BONE = BigInt(1);
+export const ONE = BigInt('1000000000000000000'); // 18 decimal places
 
 const _require = (b: boolean, message: string) => {
     if (!b) throw new Error(message);
 };
+
+/**
+ * @dev Returns a scaling factor that, when multiplied to a token amount for `token`, normalizes its balance as if
+ * it had 18 decimals.
+ */
+export function _computeScalingFactor(tokenDecimals: bigint): bigint {
+    // Tokens with more than 18 decimals are not supported.
+    const decimalsDifference = BigInt(18) - tokenDecimals;
+    return ONE * BigInt(10) ** decimalsDifference;
+}
 
 /**
  * @dev Applies `scalingFactor` to `amount`, resulting in a larger or equal value depending on whether it needed
@@ -257,12 +268,12 @@ class LogExpMath {
     // two numbers, and multiply by ONE when dividing them.
 
     // All arguments and return values are 18 decimal fixed point numbers.
-    static ONE_18: bigint = BigInt('1000000000000000000');
+    static ONE_18 = BigInt('1000000000000000000');
 
     // Internally, intermediate values are computed with higher precision as 20 decimal fixed point numbers, and in the
     // case of ln36, 36 decimals.
-    static ONE_20: bigint = BigInt('100000000000000000000');
-    static ONE_36: bigint = BigInt('1000000000000000000000000000000000000');
+    static ONE_20 = BigInt('100000000000000000000');
+    static ONE_36 = BigInt('1000000000000000000000000000000000000');
 
     // The domain of natural exponentiation is bound by the word size and number of decimals used.
     //
@@ -271,8 +282,8 @@ class LogExpMath {
     // The smallest possible result is 10^(-18), which makes largest negative argument
     // ln(10^(-18)) = -41.446531673892822312.
     // We use 130.0 and -41.0 to have some safety margin.
-    static MAX_NATURAL_EXPONENT: bigint = BigInt('130000000000000000000');
-    static MIN_NATURAL_EXPONENT: bigint = BigInt('-41000000000000000000');
+    static MAX_NATURAL_EXPONENT = BigInt('130000000000000000000');
+    static MIN_NATURAL_EXPONENT = BigInt('-41000000000000000000');
 
     // Bounds for ln_36's argument. Both ln(0.9) and ln(1.1) can be represented with 36 decimal places in a fixed point
     // 256 bit integer.
@@ -285,34 +296,34 @@ class LogExpMath {
         BigInt(2) ** BigInt(254) / LogExpMath.ONE_20;
 
     // 18 decimal constants
-    static x0: bigint = BigInt('128000000000000000000'); // 2ˆ7
-    static a0: bigint = BigInt(
+    static x0 = BigInt('128000000000000000000'); // 2ˆ7
+    static a0 = BigInt(
         '38877084059945950922200000000000000000000000000000000000'
     ); // eˆ(x0) (no decimals)
-    static x1: bigint = BigInt('64000000000000000000'); // 2ˆ6
-    static a1: bigint = BigInt('6235149080811616882910000000'); // eˆ(x1) (no decimals)
+    static x1 = BigInt('64000000000000000000'); // 2ˆ6
+    static a1 = BigInt('6235149080811616882910000000'); // eˆ(x1) (no decimals)
 
     // 20 decimal constants
-    static x2: bigint = BigInt('3200000000000000000000'); // 2ˆ5
-    static a2: bigint = BigInt('7896296018268069516100000000000000'); // eˆ(x2)
-    static x3: bigint = BigInt('1600000000000000000000'); // 2ˆ4
-    static a3: bigint = BigInt('888611052050787263676000000'); // eˆ(x3)
-    static x4: bigint = BigInt('800000000000000000000'); // 2ˆ3
-    static a4: bigint = BigInt('298095798704172827474000'); // eˆ(x4)
-    static x5: bigint = BigInt('400000000000000000000'); // 2ˆ2
-    static a5: bigint = BigInt('5459815003314423907810'); // eˆ(x5)
-    static x6: bigint = BigInt('200000000000000000000'); // 2ˆ1
-    static a6: bigint = BigInt('738905609893065022723'); // eˆ(x6)
-    static x7: bigint = BigInt('100000000000000000000'); // 2ˆ0
-    static a7: bigint = BigInt('271828182845904523536'); // eˆ(x7)
-    static x8: bigint = BigInt('50000000000000000000'); // 2ˆ-1
-    static a8: bigint = BigInt('164872127070012814685'); // eˆ(x8)
-    static x9: bigint = BigInt('25000000000000000000'); // 2ˆ-2
-    static a9: bigint = BigInt('128402541668774148407'); // eˆ(x9)
-    static x10: bigint = BigInt('12500000000000000000'); // 2ˆ-3
-    static a10: bigint = BigInt('113314845306682631683'); // eˆ(x10)
-    static x11: bigint = BigInt('6250000000000000000'); // 2ˆ-4
-    static a11: bigint = BigInt('106449445891785942956'); // eˆ(x11)
+    static x2 = BigInt('3200000000000000000000'); // 2ˆ5
+    static a2 = BigInt('7896296018268069516100000000000000'); // eˆ(x2)
+    static x3 = BigInt('1600000000000000000000'); // 2ˆ4
+    static a3 = BigInt('888611052050787263676000000'); // eˆ(x3)
+    static x4 = BigInt('800000000000000000000'); // 2ˆ3
+    static a4 = BigInt('298095798704172827474000'); // eˆ(x4)
+    static x5 = BigInt('400000000000000000000'); // 2ˆ2
+    static a5 = BigInt('5459815003314423907810'); // eˆ(x5)
+    static x6 = BigInt('200000000000000000000'); // 2ˆ1
+    static a6 = BigInt('738905609893065022723'); // eˆ(x6)
+    static x7 = BigInt('100000000000000000000'); // 2ˆ0
+    static a7 = BigInt('271828182845904523536'); // eˆ(x7)
+    static x8 = BigInt('50000000000000000000'); // 2ˆ-1
+    static a8 = BigInt('164872127070012814685'); // eˆ(x8)
+    static x9 = BigInt('25000000000000000000'); // 2ˆ-2
+    static a9 = BigInt('128402541668774148407'); // eˆ(x9)
+    static x10 = BigInt('12500000000000000000'); // 2ˆ-3
+    static a10 = BigInt('113314845306682631683'); // eˆ(x10)
+    static x11 = BigInt('6250000000000000000'); // 2ˆ-4
+    static a11 = BigInt('106449445891785942956'); // eˆ(x11)
 
     // All arguments and return values are 18 decimal fixed point numbers.
     static pow(x: bigint, y: bigint): bigint {

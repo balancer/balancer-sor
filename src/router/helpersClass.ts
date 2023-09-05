@@ -16,6 +16,8 @@ import {
 } from '../types';
 import { BigNumber, formatFixed, parseFixed } from '@ethersproject/bignumber';
 
+const MINIMUM_VALUE = bnum('0.000000000000000001');
+
 export function getHighestLimitAmountsForPaths(
     paths: NewPath[],
     maxPools: number
@@ -35,22 +37,30 @@ export function getEffectivePriceSwapForPath(
     path: NewPath,
     swapType: SwapTypes,
     amount: OldBigNumber,
-    inputDecimals: number
+    inputDecimals: number,
+    outputDecimals: number,
+    costReturnToken: BigNumber
 ): OldBigNumber {
     if (amount.lt(INFINITESIMAL)) {
         // Return spot price as code below would be 0/0 = undefined
         // or small_amount/0 or 0/small_amount which would cause bugs
         return getSpotPriceAfterSwapForPath(path, swapType, amount);
     }
-    const outputAmountSwap = getOutputAmountSwapForPath(
+
+    let outputAmountSwap = getOutputAmountSwapForPath(
         path,
         swapType,
         amount,
         inputDecimals
     );
+    const gasCost = bnum(formatFixed(costReturnToken, outputDecimals)).times(
+        path.pools.length
+    );
     if (swapType === SwapTypes.SwapExactIn) {
+        outputAmountSwap = outputAmountSwap.minus(gasCost);
         return amount.div(outputAmountSwap); // amountIn/AmountOut
     } else {
+        amount = amount.plus(gasCost);
         return outputAmountSwap.div(amount); // amountIn/AmountOut
     }
 }
@@ -255,6 +265,7 @@ export function getDerivativeSpotPriceAfterSwapForPath(
             ans = ans.plus(newTerm);
         }
     }
+    if (ans.eq(bnum(0))) ans = MINIMUM_VALUE;
     return ans;
 }
 
@@ -303,6 +314,12 @@ export function EVMgetOutputAmountSwap(
     swapType: SwapTypes,
     amount: OldBigNumber
 ): OldBigNumber {
+    //we recalculate the pool pair data since balance updates are not reflected immediately in cached poolPairData
+    poolPairData = pool.parsePoolPairData(
+        poolPairData.tokenIn,
+        poolPairData.tokenOut
+    );
+
     const { balanceIn, balanceOut, tokenIn, tokenOut } = poolPairData;
 
     let returnAmount: OldBigNumber;
@@ -356,12 +373,17 @@ export function EVMgetOutputAmountSwap(
             throw Error('Unsupported swap');
         }
     }
+
+    const amountIn = swapType === SwapTypes.SwapExactIn ? amount : returnAmount;
+    const amountOut =
+        swapType === SwapTypes.SwapExactIn ? returnAmount : amount;
+
     // Update balances of tokenIn and tokenOut
     pool.updateTokenBalanceForPool(
         tokenIn,
         balanceIn.add(
             parseFixed(
-                returnAmount.dp(poolPairData.decimalsIn).toString(),
+                amountIn.dp(poolPairData.decimalsIn).toString(),
                 poolPairData.decimalsIn
             )
         )
@@ -370,31 +392,11 @@ export function EVMgetOutputAmountSwap(
         tokenOut,
         balanceOut.sub(
             parseFixed(
-                amount.dp(poolPairData.decimalsOut).toString(),
+                amountOut.dp(poolPairData.decimalsOut).toString(),
                 poolPairData.decimalsOut
             )
         )
     );
 
     return returnAmount;
-}
-
-export function takeToPrecision18(
-    amount: BigNumber,
-    decimals: number
-): BigNumber {
-    for (let i = 0; i < 18 - decimals; i++) {
-        amount = amount.mul(10);
-    }
-    return amount;
-}
-
-export function restorePrecision(
-    amount: BigNumber,
-    decimals: number
-): BigNumber {
-    for (let i = 0; i < 18 - decimals; i++) {
-        amount = amount.div(10);
-    }
-    return amount;
 }

@@ -1,7 +1,7 @@
 import { BigNumber, formatFixed, parseFixed } from '@ethersproject/bignumber';
-import { WeiPerEther as ONE } from '@ethersproject/constants';
+import { WeiPerEther as ONE, Zero } from '@ethersproject/constants';
 import { isSameAddress } from '../../utils';
-import { BigNumber as OldBigNumber, bnum } from '../../utils/bignumber';
+import { BigNumber as OldBigNumber, bnum, ZERO } from '../../utils/bignumber';
 import {
     PoolBase,
     PoolTypes,
@@ -20,6 +20,7 @@ import {
     _derivativeSpotPriceAfterSwapTokenInForExactTokenOut,
     getTimeTillExpiry,
 } from './elementMath';
+import { universalNormalizedLiquidity } from '../liquidity';
 
 type ElementPoolToken = Pick<SubgraphToken, 'address' | 'balance' | 'decimals'>;
 
@@ -32,7 +33,7 @@ export type ElementPoolPairData = PoolPairBase & {
     currentBlockTimestamp: number;
 };
 
-export class ElementPool implements PoolBase {
+export class ElementPool implements PoolBase<ElementPoolPairData> {
     poolType: PoolTypes = PoolTypes.Element;
     id: string;
     address: string;
@@ -147,16 +148,12 @@ export class ElementPool implements PoolBase {
         return poolPairData;
     }
 
-    // Normalized liquidity is an abstract term that can be thought of the
-    // inverse of the slippage. It is proportional to the token balances in the
-    // pool but also depends on the shape of the invariant curve.
-    // As a standard, we define normalized liquidity in tokenOut
     getNormalizedLiquidity(poolPairData: ElementPoolPairData): OldBigNumber {
-        // This could be refined by using the inverse of the slippage, but
-        // in practice this won't have a big impact in path selection for
-        // multi-hops so not a big priority
-        return bnum(
-            formatFixed(poolPairData.balanceOut, poolPairData.decimalsOut)
+        return universalNormalizedLiquidity(
+            this._derivativeSpotPriceAfterSwapExactTokenInForTokenOut(
+                poolPairData,
+                ZERO
+            )
         );
     }
 
@@ -193,14 +190,18 @@ export class ElementPool implements PoolBase {
     // Updates the balance of a given token for the pool
     updateTokenBalanceForPool(token: string, newBalance: BigNumber): void {
         // token is BPT
-        if (this.address == token) {
-            this.totalShares = newBalance;
+        if (isSameAddress(this.address, token)) {
+            this.updateTotalShares(newBalance);
         } else {
             // token is underlying in the pool
             const T = this.tokens.find((t) => isSameAddress(t.address, token));
             if (!T) throw Error('Pool does not contain this token');
             T.balance = formatFixed(newBalance, T.decimals);
         }
+    }
+
+    updateTotalShares(newTotalShares: BigNumber): void {
+        this.totalShares = newTotalShares;
     }
 
     _exactTokenInForTokenOut(
@@ -217,6 +218,18 @@ export class ElementPool implements PoolBase {
     ): OldBigNumber {
         poolPairData.currentBlockTimestamp = this.currentBlockTimestamp;
         return _tokenInForExactTokenOut(amount, poolPairData);
+    }
+
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    _calcTokensOutGivenExactBptIn(bptAmountIn: BigNumber): BigNumber[] {
+        // Missing maths for this
+        return new Array(this.tokens.length).fill(Zero);
+    }
+
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    _calcBptOutGivenExactTokensIn(amountsIn: BigNumber[]): BigNumber {
+        // Missing maths for this
+        return Zero;
     }
 
     _spotPriceAfterSwapExactTokenInForTokenOut(

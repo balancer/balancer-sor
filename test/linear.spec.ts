@@ -198,6 +198,12 @@ describe('linear pool tests', () => {
             const config = {
                 chainId: 99,
                 weth: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2',
+                connectingTokens: [
+                    {
+                        symbol: 'weth',
+                        address: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2',
+                    },
+                ],
                 vault: '0xeefba1e63905ef1d7acba5a8513c70307c1ce441',
             };
             it('getPathsUsingLinearPool return empty paths', () => {
@@ -327,17 +333,17 @@ describe('linear pool tests', () => {
                     ['linearDAI', 'bbaUSD-Pool', 'linearUSDC'],
                     // eslint-disable-next-line prettier/prettier
                     [
-                        'weightedDaiWeth',
-                        'weightedWeth-BBausd',
-                        'bbaUSD-Pool',
-                        'linearUSDC',
-                    ],
-                    // eslint-disable-next-line prettier/prettier
-                    [
                         'linearDAI',
                         'bbaUSD-Pool',
                         'weightedWeth-BBausd',
                         'weightedUsdcWeth',
+                    ],
+                    // eslint-disable-next-line prettier/prettier
+                    [
+                        'weightedDaiWeth',
+                        'weightedWeth-BBausd',
+                        'bbaUSD-Pool',
+                        'linearUSDC',
                     ],
                 ];
                 for (let i = 0; i < 3; i++) {
@@ -704,7 +710,7 @@ describe('linear pool tests', () => {
                     pools,
                     sorConfigKovan
                 );
-                expect(returnAmount).to.eq('124721185153919559');
+                expect(returnAmount).to.eq('124721185153919558');
             });
         });
 
@@ -718,8 +724,7 @@ describe('linear pool tests', () => {
                     fullKovanPools.pools,
                     sorConfigFullKovan
                 );
-                // 6605808981785744500
-                expect(returnAmount).to.eq('20111716378263652638');
+                expect(returnAmount).to.eq('6606146264948964392');
             });
 
             it('BAL>USDT, SwapExactIn', async () => {
@@ -757,7 +762,7 @@ describe('linear pool tests', () => {
                     fullKovanPools.pools,
                     sorConfigFullKovan
                 );
-                expect(returnAmount).to.eq('221067');
+                expect(returnAmount).to.eq('702055');
             });
 
             it('BAL>USDT, SwapExactOut', async () => {
@@ -769,8 +774,7 @@ describe('linear pool tests', () => {
                     fullKovanPools.pools,
                     sorConfigFullKovan
                 );
-                // from worse path: 81899098582251741376
-                expect(returnAmount).to.eq('653098636918112');
+                expect(returnAmount).to.eq('81899098582251741376');
             });
         });
 
@@ -896,9 +900,7 @@ export async function testFullSwap(
     // const costOutputToken = BigNumber.from('1000000000000000000');
     const costOutputToken = BigNumber.from('0');
     const gasPrice = BigNumber.from(`10000000000`);
-    const provider = new JsonRpcProvider(
-        `https://mainnet.infura.io/v3/${process.env.INFURA}`
-    );
+    const provider = new JsonRpcProvider(``);
     const swapGas = BigNumber.from(`32500`);
 
     const swapInfo = await getFullSwap(

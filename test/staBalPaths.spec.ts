@@ -1,7 +1,7 @@
 // TS_NODE_PROJECT='tsconfig.testing.json' npx mocha -r ts-node/register test/staBalPaths.spec.ts
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 require('dotenv').config();
-import { config, expect } from 'chai';
+import { expect } from 'chai';
 import cloneDeep from 'lodash.clonedeep';
 import {
     PoolDictionary,
@@ -20,7 +20,7 @@ import {
     getBoostedPaths,
 } from '../src/routeProposal/filtering';
 import staBalPools from './testData/staBal/staBalPools.json';
-import { checkPath, poolsCheckPath, simpleCheckPath } from './lib/testHelpers';
+import { checkPath, poolsCheckPath } from './lib/testHelpers';
 import {
     BAL,
     TUSD,
@@ -30,8 +30,6 @@ import {
 } from './lib/constants';
 import { BigNumber } from '@ethersproject/bignumber';
 import { RouteProposer } from '../src/routeProposal';
-
-const maxPools = 4;
 
 describe(`staBalPaths.`, () => {
     it(`should be no USDC connecting pool for mainnet`, () => {

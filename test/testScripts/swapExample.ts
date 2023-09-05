@@ -58,17 +58,17 @@ function setUp(networkId: Network, provider: JsonRpcProvider): SOR {
 }
 
 export async function swap(): Promise<void> {
-    const networkId = Network.MAINNET;
+    const networkId = Network.BASE;
     const provider = new JsonRpcProvider(PROVIDER_URLS[networkId]);
     // gasPrice is used by SOR as a factor to determine how many pools to swap against.
     // i.e. higher cost means more costly to trade against lots of different pools.
-    const gasPrice = BigNumber.from('40000000000');
+    const gasPrice = BigNumber.from('14000000000');
     // This determines the max no of pools the SOR will use to swap.
     const maxPools = 4;
     const tokenIn = ADDRESSES[networkId].DAI;
-    const tokenOut = ADDRESSES[networkId].USDC;
+    const tokenOut = ADDRESSES[networkId].BALD;
     const swapType: SwapTypes = SwapTypes.SwapExactIn;
-    const swapAmount = parseFixed('0.001', 18);
+    const swapAmount = parseFixed('900', 18);
 
     const sor = setUp(networkId, provider);
 
@@ -81,12 +81,13 @@ export async function swap(): Promise<void> {
         tokenOut.address,
         swapType,
         swapAmount,
-        { gasPrice, maxPools }
+        { gasPrice, maxPools },
+        false
     );
 
     // Simulate the swap transaction
     if (swapInfo.returnAmount.gt(0)) {
-        const key: any = process.env.TRADER_KEY;
+        const key = process.env.TRADER_KEY as string;
         const wallet = new Wallet(key, provider);
         // await handleAllowances(wallet, tokenIn: string, amount: BigNumber)
         const tx = buildTx(wallet, swapInfo, swapType);
@@ -152,5 +153,5 @@ export async function swap(): Promise<void> {
     }
 }
 
-// $ TS_NODE_PROJECT='tsconfig.testing.json' ts-node ./test/testScripts/swapExample.ts
+// $ TS_NODE_PROJECT='tsconfig.testing.json' npx ts-node ./test/testScripts/swapExample.ts
 swap();

@@ -17,6 +17,16 @@ import { Zero } from '@ethersproject/constants';
 
 const BOOSTED_PATHS_MAX_LENGTH = 7;
 
+interface edgeDict {
+    [node: string]: [string, string, string][];
+}
+
+interface treeEdge {
+    edge: [string, string, string];
+    parentIndices: [number, number];
+    visitedNodes: string[];
+}
+
 export const filterPoolsByType = (
     pools: SubgraphPoolBase[],
     poolTypeFilter: PoolFilter
@@ -148,12 +158,11 @@ export function producePaths(
 // Nodes are tokens and edges are triads: [pool.id, tokenIn, tokenOut].
 // The current criterion for including a pool into this graph is the following:
 // (a) We include every linear pool.
-// (b) Among phantom pools, we include those that contain the pool token of a linear pool.
-// (c) Among every pool, we include those that contain the pool token of
-// a pool from the previous step.
-// (d) We include connections of tokenIn and tokenOut to WETH.
+// (b) Among preminted BPT pools and weighted pools, we include those that contain the pool token of a linear pool.
+// (c) Among every pool, we include those that contain the pool token of a pool from the previous step.
+// (d) We include connections of tokenIn and tokenOut to list of tokens from `connectingTokens` (only highest liquidity for each).
 // (e) When tokenIn or tokenOut are tokens offered at an LBP, we also include
-// the LBPs and the connections of the corresponding raising tokens with WETH.
+// the LBPs and the corresponding highest liquidity connections of the raising tokens with WETH.
 // (f) We include the pool weth/wsteth
 //
 // To build the paths using boosted pools we use the following algorithm.
@@ -166,122 +175,98 @@ export function producePaths(
 // We build this tree by adding at each step all the possible continuations for
 // each branch. When a branch reaches tokenOut, we write down the corresponding path.
 // We only allow paths up to length BOOSTED_PATHS_MAX_LENGTH = 7
-
 export function getBoostedGraph(
     tokenIn: string,
     tokenOut: string,
     poolsAllDict: PoolDictionary,
     config: SorConfig
 ): edgeDict {
-    const wethAddress: string = config.weth.toLowerCase();
+    // This should contain all pools in the Graph
     const graphPoolsSet: Set<PoolBase> = new Set();
-    const linearPools: PoolBase[] = [];
-    const phantomPools: PoolBase[] = [];
-    const relevantRaisingTokens: string[] = [];
-    // Here we add all linear pools, take note of phantom pools,
-    // add pools with tokenIn or tokenOut with weth,
-    // add LBP pools with tokenIn or tokenOut and take note of the
-    // corresponding raising tokens.
+    const allLinearPoolAddresses: string[] = [];
+    const poolsToCheckForLinearBpt: PoolBase[] = [];
+    const connectingTokens = config.connectingTokens
+        ? config.connectingTokens.map(
+              (connectingToken) => connectingToken.address
+          )
+        : [];
+    // Add all LinearPools (see step a)
+    // Create a list of pools that should be checked for Linear BPT (for step b)
+    // Add LBP pools with tokenIn or tokenOut and their corresponding highest liquidity connections
     for (const id in poolsAllDict) {
         const pool = poolsAllDict[id];
         if (pool.poolType == PoolTypes.Linear) {
-            linearPools.push(pool);
+            allLinearPoolAddresses.push(pool.address);
             graphPoolsSet.add(pool);
         } else {
-            // Here we asssume that phantom pools are exactly those that
-            // are not linear and have their pool token in their tokensList.
             const tokensList = pool.tokensList.map((address) =>
                 address.toLowerCase()
             );
             if (tokensList.includes(pool.address)) {
-                phantomPools.push(pool);
+                // Here we asssume that preminted pools are exactly those that
+                // are not linear and have their pool token in their tokensList.
+                poolsToCheckForLinearBpt.push(pool);
+            } else if (pool.poolType === PoolTypes.Weighted) {
+                // We want to consider Weighted Pools with Linear Bpt tokens
+                poolsToCheckForLinearBpt.push(pool);
             }
-            // adds pools having tokenIn or tokenOut with weth
-            if (
-                tokenIn != wethAddress &&
-                tokenOut != wethAddress &&
-                tokensList.includes(wethAddress)
-            ) {
-                if (
-                    tokensList.length <= 3 &&
-                    (tokensList.includes(tokenIn) ||
-                        tokensList.includes(tokenOut))
-                ) {
-                    graphPoolsSet.add(pool);
-                }
-            }
-            if (config.lbpRaisingTokens) {
-                const raisingTokens = config.lbpRaisingTokens.map((address) =>
-                    address.toLowerCase()
+            if (config.lbpRaisingTokens && pool.isLBP) {
+                handleLBPCase(
+                    graphPoolsSet,
+                    config.lbpRaisingTokens,
+                    pool,
+                    tokenIn,
+                    tokenOut,
+                    connectingTokens,
+                    poolsAllDict
                 );
-                if (pool.isLBP) {
-                    const raisingTokenIn: string | undefined = getRaisingToken(
-                        pool,
-                        raisingTokens,
-                        tokenIn
-                    );
-                    if (raisingTokenIn) {
-                        graphPoolsSet.add(pool);
-                        relevantRaisingTokens.push(raisingTokenIn);
-                    }
-                    const raisingTokenOut: string | undefined = getRaisingToken(
-                        pool,
-                        raisingTokens,
-                        tokenOut
-                    );
-                    if (raisingTokenOut) {
-                        graphPoolsSet.add(pool);
-                        relevantRaisingTokens.push(raisingTokenOut);
-                    }
-                }
             }
         }
     }
-    if (linearPools.length == 0) return {};
-    const linearPoolsAddresses = linearPools.map((pool) => pool.address);
-    const secondStepPoolsSet: Set<PoolBase> = new Set();
-    for (const pool of phantomPools) {
-        for (const linearPoolAddress of linearPoolsAddresses) {
-            if (pool.tokensList.includes(linearPoolAddress)) {
-                graphPoolsSet.add(pool);
-                secondStepPoolsSet.add(pool);
-            }
+    if (allLinearPoolAddresses.length == 0) return {};
+
+    // add best pools tokenIn -> connectingToken and connectingToken -> tokenOut
+    // these can be part of a longer path so do not rely on being directly connected
+    for (const connectingToken of connectingTokens) {
+        addMostLiquidPoolToSet(
+            tokenIn,
+            connectingToken,
+            poolsAllDict,
+            graphPoolsSet
+        );
+        addMostLiquidPoolToSet(
+            connectingToken,
+            tokenOut,
+            poolsAllDict,
+            graphPoolsSet
+        );
+    }
+    // As per step b - Among preminted BPT pools and weighted pools, we include those that contain the pool token of a linear pool.
+    const poolsWithLinearTokens: Set<string> = new Set();
+    for (const pool of poolsToCheckForLinearBpt) {
+        if (
+            pool.tokensList.some((token) =>
+                allLinearPoolAddresses.includes(token)
+            )
+        ) {
+            graphPoolsSet.add(pool);
+            poolsWithLinearTokens.add(pool.address);
         }
     }
-    const secondStepPoolsAddresses = [...secondStepPoolsSet].map(
-        (pool) => pool.address
-    );
-    // Here we include every pool that has a pool token from the previous step
-    // and pools having relevant raising tokens and WETH.
+    // As per step c -  We include every pool that has a pool token from the previous step
     for (const id in poolsAllDict) {
         const pool = poolsAllDict[id];
-        for (const secondStepPoolAddress of secondStepPoolsAddresses) {
-            if (pool.tokensList.includes(secondStepPoolAddress)) {
-                graphPoolsSet.add(pool);
-            }
-        }
-        const tokensList = pool.tokensList;
-        for (const raisingToken of relevantRaisingTokens) {
-            if (
-                tokensList.includes(raisingToken) &&
-                tokensList.includes(wethAddress) &&
-                raisingToken !== wethAddress
-            ) {
-                graphPoolsSet.add(pool);
-            }
+        if (pool.tokensList.some((token) => poolsWithLinearTokens.has(token))) {
+            graphPoolsSet.add(pool);
         }
     }
-    // add pool weth/wsteth when it exists
+    // Step f - add pool weth/wsteth when it exists
     if (config.wETHwstETH && poolsAllDict[config.wETHwstETH.id]) {
         graphPoolsSet.add(poolsAllDict[config.wETHwstETH.id]);
     }
     const graphPools: PoolBase[] = [...graphPoolsSet];
     const edgeDict = getNodesAndEdges(graphPools);
     return edgeDict;
-}
-
-interface edgeDict {
-    [node: string]: [string, string, string][];
 }
 
 function getNodesAndEdges(pools: PoolBase[]): edgeDict {
@@ -303,12 +288,6 @@ function getNodesAndEdges(pools: PoolBase[]): edgeDict {
         }
     }
     return edgesFromNode;
-}
-
-interface treeEdge {
-    edge: [string, string, string];
-    parentIndices: [number, number];
-    visitedNodes: string[];
 }
 
 export function getBoostedPaths(
@@ -630,4 +609,69 @@ function getRaisingToken(
         }
     }
     return theOtherToken;
+}
+
+function handleLBPCase(
+    graphPoolsSet: Set<PoolBase>,
+    lbpRaisingTokens: string[],
+    poolLbp: PoolBase,
+    tokenIn: string,
+    tokenOut: string,
+    connectingTokens: string[],
+    poolsAllDict: PoolDictionary
+) {
+    // Tokens that will be used as LBP Base Token, e.g. USDC/DAI/WETH
+    const raisingTokens = lbpRaisingTokens.map((address) =>
+        address.toLowerCase()
+    );
+
+    if (raisingTokens.length === 0) return;
+
+    // Assuming tokenIn is the lbpToken find the corresponding base token if it exists
+    const raisingTokenIn: string | undefined = getRaisingToken(
+        poolLbp,
+        raisingTokens,
+        tokenIn
+    );
+    const raisingTokenOut: string | undefined = getRaisingToken(
+        poolLbp,
+        raisingTokens,
+        tokenOut
+    );
+    if (!raisingTokenIn && !raisingTokenOut) return;
+
+    // Add the LBP pool to the graph
+    graphPoolsSet.add(poolLbp);
+
+    // For each connecting token add most liquid pools with raisingToken and raisingTokenOut
+    for (const connectingToken of connectingTokens) {
+        if (raisingTokenIn && raisingTokenIn !== connectingToken) {
+            // raisingToken>[Pool]>connectingToken
+            addMostLiquidPoolToSet(
+                raisingTokenIn,
+                connectingToken,
+                poolsAllDict,
+                graphPoolsSet
+            );
+        }
+        if (raisingTokenOut && raisingTokenOut !== connectingToken) {
+            // connectingToken>[Pool]>raisingToken
+            addMostLiquidPoolToSet(
+                connectingToken,
+                raisingTokenOut,
+                poolsAllDict,
+                graphPoolsSet
+            );
+        }
+    }
+}
+
+function addMostLiquidPoolToSet(
+    tokenIn: string,
+    tokenOut: string,
+    pools: PoolDictionary,
+    graphPools: Set<PoolBase>
+): void {
+    const pool = getHighestLiquidityPool(tokenIn, tokenOut, pools);
+    if (pool) graphPools.add(pools[pool]);
 }

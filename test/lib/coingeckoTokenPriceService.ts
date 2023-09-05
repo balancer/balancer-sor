@@ -32,6 +32,7 @@ export class CoingeckoTokenPriceService implements TokenPriceService {
         const data = await response.json();
 
         if (
+            data[tokenAddress.toLowerCase()] === undefined ||
             data[tokenAddress.toLowerCase()][this.nativeAssetId] === undefined
         ) {
             throw Error('No price returned from Coingecko');
@@ -50,6 +51,8 @@ export class CoingeckoTokenPriceService implements TokenPriceService {
                 return 'polygon-pos';
             case 42161:
                 return 'arbitrum-one';
+            case 100:
+                return 'xdai';
         }
 
         return '2';
@@ -65,6 +68,8 @@ export class CoingeckoTokenPriceService implements TokenPriceService {
                 return '';
             case 42161:
                 return 'eth';
+            case 100:
+                return 'xdai';
         }
 
         return '';

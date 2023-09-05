@@ -21,14 +21,15 @@ import {
 import * as phantomStableMath from '../phantomStablePool/phantomStableMath';
 import { MetaStablePoolPairData } from '../metaStablePool/metaStablePool';
 import cloneDeep from 'lodash.clonedeep';
+import { universalNormalizedLiquidity } from '../liquidity';
 
-enum PairTypes {
+export enum PairTypes {
     BptToToken,
     TokenToBpt,
     TokenToToken,
 }
 
-type PhantomStablePoolToken = Pick<
+export type PhantomStablePoolToken = Pick<
     SubgraphToken,
     'address' | 'balance' | 'decimals' | 'priceRate'
 >;
@@ -39,7 +40,7 @@ export type PhantomStablePoolPairData = MetaStablePoolPairData & {
     virtualBptSupply: BigNumber;
 };
 
-export class PhantomStablePool implements PoolBase {
+export class PhantomStablePool implements PoolBase<PhantomStablePoolPairData> {
     poolType: PoolTypes = PoolTypes.MetaStable;
     id: string;
     address: string;
@@ -130,7 +131,7 @@ export class PhantomStablePool implements PoolBase {
 
         // Get all token balances
         const allBalances = this.tokens.map(({ balance, priceRate }) =>
-            bnum(balance).times(priceRate)
+            bnum(balance).times(bnum(priceRate))
         );
         const allBalancesScaled = this.tokens.map(({ balance, priceRate }) =>
             parseFixed(balance, 18).mul(parseFixed(priceRate, 18)).div(ONE)
@@ -180,11 +181,10 @@ export class PhantomStablePool implements PoolBase {
     getNormalizedLiquidity(
         poolPairData: PhantomStablePoolPairData
     ): OldBigNumber {
-        // This is an approximation as the actual normalized liquidity is a lot more complicated to calculate
-        return bnum(
-            formatFixed(
-                poolPairData.balanceOut.mul(poolPairData.amp),
-                poolPairData.decimalsOut + PhantomStablePool.AMP_DECIMALS
+        return universalNormalizedLiquidity(
+            this._derivativeSpotPriceAfterSwapExactTokenInForTokenOut(
+                poolPairData,
+                ZERO
             )
         );
     }
@@ -223,7 +223,20 @@ export class PhantomStablePool implements PoolBase {
         // token is underlying in the pool
         const T = this.tokens.find((t) => isSameAddress(t.address, token));
         if (!T) throw Error('Pool does not contain this token');
+
+        // update total shares with BPT balance diff
+        if (isSameAddress(this.address, token)) {
+            const parsedTokenBalance = parseFixed(T.balance, T.decimals);
+            const diff = parsedTokenBalance.sub(newBalance);
+            const newTotalShares = this.totalShares.add(diff);
+            this.updateTotalShares(newTotalShares);
+        }
+        // update token balance with new balance
         T.balance = formatFixed(newBalance, T.decimals);
+    }
+
+    updateTotalShares(newTotalShares: BigNumber): void {
+        this.totalShares = newTotalShares;
     }
 
     _exactTokenInForTokenOut(
@@ -360,15 +373,45 @@ export class PhantomStablePool implements PoolBase {
         }
     }
 
+    /**
+     * _calcTokensOutGivenExactBptIn
+     * @param bptAmountIn EVM scale.
+     * @returns EVM scale.
+     */
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    _calcTokensOutGivenExactBptIn(bptAmountIn: BigNumber): BigNumber[] {
+        // PhantomStables can only be exited by using BPT > token swaps
+        throw new Error(
+            'PhantomPool does not have exit pool (_calcTokensOutGivenExactBptIn).'
+        );
+    }
+
+    /**
+     * _calcBptOutGivenExactTokensIn
+     * @param amountsIn EVM Scale
+     * @returns EVM Scale
+     */
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    _calcBptOutGivenExactTokensIn(amountsIn: BigNumber[]): BigNumber {
+        // PhantomStables can only be joined by using token > BPT swaps
+        throw new Error(
+            'PhantomPool does not have join pool (_calcBptOutGivenExactTokensIn).'
+        );
+    }
+
     // this is the multiplicative inverse of the derivative of _exactTokenInForTokenOut
     _spotPriceAfterSwapExactTokenInForTokenOut(
         poolPairData: PhantomStablePoolPairData,
         amount: OldBigNumber
     ): OldBigNumber {
-        const priceRateIn = formatFixed(poolPairData.tokenInPriceRate, 18);
-        const priceRateOut = formatFixed(poolPairData.tokenOutPriceRate, 18);
-        const amountConverted = amount.times(
+        const priceRateIn = bnum(
             formatFixed(poolPairData.tokenInPriceRate, 18)
+        );
+        const priceRateOut = bnum(
+            formatFixed(poolPairData.tokenOutPriceRate, 18)
+        );
+        const amountConverted = amount.times(
+            bnum(formatFixed(poolPairData.tokenInPriceRate, 18))
         );
         let result: OldBigNumber;
         if (poolPairData.pairType === PairTypes.TokenToBpt) {
@@ -396,8 +439,12 @@ export class PhantomStablePool implements PoolBase {
         poolPairData: PhantomStablePoolPairData,
         amount: OldBigNumber
     ): OldBigNumber {
-        const priceRateIn = formatFixed(poolPairData.tokenInPriceRate, 18);
-        const priceRateOut = formatFixed(poolPairData.tokenOutPriceRate, 18);
+        const priceRateIn = bnum(
+            formatFixed(poolPairData.tokenInPriceRate, 18)
+        );
+        const priceRateOut = bnum(
+            formatFixed(poolPairData.tokenOutPriceRate, 18)
+        );
         const amountConverted = amount.times(
             formatFixed(poolPairData.tokenOutPriceRate, 18)
         );
@@ -426,7 +473,9 @@ export class PhantomStablePool implements PoolBase {
         poolPairData: PhantomStablePoolPairData,
         amount: OldBigNumber
     ): OldBigNumber {
-        const priceRateOut = formatFixed(poolPairData.tokenOutPriceRate, 18);
+        const priceRateOut = bnum(
+            formatFixed(poolPairData.tokenOutPriceRate, 18)
+        );
         const amountConverted = amount.times(
             formatFixed(poolPairData.tokenInPriceRate, 18)
         );
@@ -457,8 +506,12 @@ export class PhantomStablePool implements PoolBase {
         poolPairData: PhantomStablePoolPairData,
         amount: OldBigNumber
     ): OldBigNumber {
-        const priceRateIn = formatFixed(poolPairData.tokenInPriceRate, 18);
-        const priceRateOut = formatFixed(poolPairData.tokenOutPriceRate, 18);
+        const priceRateIn = bnum(
+            formatFixed(poolPairData.tokenInPriceRate, 18)
+        );
+        const priceRateOut = bnum(
+            formatFixed(poolPairData.tokenOutPriceRate, 18)
+        );
         const amountConverted = amount.times(
             formatFixed(poolPairData.tokenOutPriceRate, 18)
         );

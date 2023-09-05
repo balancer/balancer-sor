@@ -14,6 +14,7 @@ import {
     SorConfig,
     PoolDictionary,
 } from '../types';
+import { getTriPaths } from './triPaths';
 
 export class RouteProposer {
     cache: Record<string, { paths: NewPath[] }> = {};
@@ -35,11 +36,11 @@ export class RouteProposer {
         if (pools.length === 0) return [];
 
         // If token pair has been processed before that info can be reused to speed up execution
+        // If timestamp has not been manually set in `getSwaps` then default (set on instantiation) is used which means cache will be used
         const cache =
             this.cache[
                 `${tokenIn}${tokenOut}${swapType}${swapOptions.timestamp}`
             ];
-
         // forceRefresh can be set to force fresh processing of paths/prices
         if (!swapOptions.forceRefresh && !!cache) {
             // Using pre-processed data from cache
@@ -79,9 +80,17 @@ export class RouteProposer {
             this.config
         );
 
+        const triPaths = getTriPaths(
+            tokenIn,
+            tokenOut,
+            poolsAllDict,
+            this.config.triPathMidPoolIds ?? []
+        );
+
         const combinedPathData = pathData
             .concat(...boostedPaths)
-            .concat(...pathsUsingStaBal);
+            .concat(...pathsUsingStaBal)
+            .concat(...triPaths);
         const [paths] = calculatePathLimits(combinedPathData, swapType);
 
         this.cache[`${tokenIn}${tokenOut}${swapType}${swapOptions.timestamp}`] =

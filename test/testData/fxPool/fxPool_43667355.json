@@ -1,0 +1,45 @@
+{
+    "pools": [
+        {
+            "id": "0x726e324c29a1e49309672b244bdc4ff62a270407000200000000000000000702",
+            "address": "0x726e324c29a1e49309672b244bdc4ff62a270407",
+            "swapFee": "0",
+            "poolType": "FX",
+            "totalShares": "1187294.678092153421192704",
+            "swapEnabled": true,
+            "tokens": [
+                {
+                    "address": "0x2791bca1f2de4661ed88a30c99a7a9449aa84174",
+                    "balance": "640405.311822",
+                    "decimals": 6,
+                    "priceRate": "1",
+                    "weight": null,
+                    "token": {
+                        "latestFXPrice": "0.99997703",
+                        "__fxOracleDecimals__": "purposefully missing to test the default"
+                    }
+                },
+                {
+                    "address": "0xdc3326e71d45186f113a2f448984ca0e8d201995",
+                    "balance": "1533442.592483",
+                    "decimals": 6,
+                    "priceRate": "1",
+                    "weight": null,
+                    "token": {
+                        "latestFXPrice": "0.74226380",
+                        "__fxOracleDecimals__": "purposefully missing to test the default"
+                    }
+                }
+            ],
+            "tokensList": [
+                "0x2791bca1f2de4661ed88a30c99a7a9449aa84174",
+                "0xdc3326e71d45186f113a2f448984ca0e8d201995"
+            ],
+            "alpha": "0.8",
+            "beta": "0.48",
+            "lambda": "0.3",
+            "delta": "0.2734375",
+            "epsilon": "0.0005"
+        }
+    ]
+}

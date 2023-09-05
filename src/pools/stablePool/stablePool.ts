@@ -1,13 +1,18 @@
 import { getAddress } from '@ethersproject/address';
 import { BigNumber, formatFixed, parseFixed } from '@ethersproject/bignumber';
-import { WeiPerEther as ONE } from '@ethersproject/constants';
+import { WeiPerEther as ONE, Zero } from '@ethersproject/constants';
 import {
     BigNumber as OldBigNumber,
     bnum,
     scale,
     ZERO,
 } from '../../utils/bignumber';
-import { isSameAddress } from '../../utils';
+import {
+    isSameAddress,
+    normaliseBalance,
+    normaliseAmount,
+    denormaliseAmount,
+} from '../../utils';
 import {
     PoolBase,
     PoolTypes,
@@ -22,7 +27,13 @@ import {
     _derivativeSpotPriceAfterSwapExactTokenInForTokenOut,
     _derivativeSpotPriceAfterSwapTokenInForExactTokenOut,
 } from './stableMath';
-import { _calcOutGivenIn, _calcInGivenOut } from './stableMathBigInt';
+import {
+    _calcOutGivenIn,
+    _calcInGivenOut,
+    _calcBptOutGivenExactTokensIn,
+    _calcTokensOutGivenExactBptIn,
+} from './stableMathBigInt';
+import { universalNormalizedLiquidity } from '../liquidity';
 
 type StablePoolToken = Pick<SubgraphToken, 'address' | 'balance' | 'decimals'>;
 
@@ -34,7 +45,7 @@ export type StablePoolPairData = PoolPairBase & {
     tokenIndexOut: number;
 };
 
-export class StablePool implements PoolBase {
+export class StablePool implements PoolBase<StablePoolPairData> {
     poolType: PoolTypes = PoolTypes.Stable;
     id: string;
     address: string;
@@ -124,11 +135,10 @@ export class StablePool implements PoolBase {
     }
 
     getNormalizedLiquidity(poolPairData: StablePoolPairData): OldBigNumber {
-        // This is an approximation as the actual normalized liquidity is a lot more complicated to calculate
-        return bnum(
-            formatFixed(
-                poolPairData.balanceOut.mul(poolPairData.amp),
-                poolPairData.decimalsOut + StablePool.AMP_DECIMALS
+        return universalNormalizedLiquidity(
+            this._derivativeSpotPriceAfterSwapExactTokenInForTokenOut(
+                poolPairData,
+                ZERO
             )
         );
     }
@@ -160,14 +170,18 @@ export class StablePool implements PoolBase {
     // Updates the balance of a given token for the pool
     updateTokenBalanceForPool(token: string, newBalance: BigNumber): void {
         // token is BPT
-        if (this.address == token) {
-            this.totalShares = newBalance;
+        if (isSameAddress(this.address, token)) {
+            this.updateTotalShares(newBalance);
         } else {
             // token is underlying in the pool
             const T = this.tokens.find((t) => isSameAddress(t.address, token));
             if (!T) throw Error('Pool does not contain this token');
             T.balance = formatFixed(newBalance, T.decimals);
         }
+    }
+
+    updateTotalShares(newTotalShares: BigNumber): void {
+        this.totalShares = newTotalShares;
     }
 
     _exactTokenInForTokenOut(
@@ -251,6 +265,70 @@ export class StablePool implements PoolBase {
         } catch (err) {
             console.error(`_evminGivenOut: ${err.message}`);
             return ZERO;
+        }
+    }
+
+    /**
+     * _calcTokensOutGivenExactBptIn
+     * @param bptAmountIn EVM scale.
+     * @returns EVM scale.
+     */
+    _calcTokensOutGivenExactBptIn(bptAmountIn: BigNumber): BigNumber[] {
+        // balances and amounts must be normalized to 1e18 fixed point - e.g. 1USDC => 1e18 not 1e6
+        // takes price rate into account
+        const balancesNormalised = this.tokens
+            .filter((t) => !isSameAddress(t.address, this.address))
+            .map((t) => normaliseBalance(t));
+        try {
+            const amountsOutNormalised = _calcTokensOutGivenExactBptIn(
+                balancesNormalised,
+                bptAmountIn.toBigInt(),
+                this.totalShares.toBigInt()
+            );
+            // We want to return denormalised amounts. e.g. 1USDC => 1e6 not 1e18
+            const amountsOut = amountsOutNormalised.map((a, i) =>
+                denormaliseAmount(a, this.tokens[i])
+            );
+            return amountsOut.map((a) => BigNumber.from(a));
+        } catch (err) {
+            return new Array(balancesNormalised.length).fill(ZERO);
+        }
+    }
+
+    /**
+     * _calcBptOutGivenExactTokensIn
+     * @param amountsIn EVM Scale
+     * @returns EVM Scale
+     */
+    _calcBptOutGivenExactTokensIn(amountsIn: BigNumber[]): BigNumber {
+        try {
+            // balances and amounts must be normalized to 1e18 fixed point - e.g. 1USDC => 1e18 not 1e6
+            // takes price rate into account
+            const amountsInNormalised = new Array(amountsIn.length).fill(
+                BigInt(0)
+            );
+            const balancesNormalised = new Array(amountsIn.length).fill(
+                BigInt(0)
+            );
+            this.tokens
+                .filter((t) => !isSameAddress(t.address, this.address))
+                .forEach((token, i) => {
+                    amountsInNormalised[i] = normaliseAmount(
+                        BigInt(amountsIn[i].toString()),
+                        token
+                    );
+                    balancesNormalised[i] = normaliseBalance(token);
+                });
+            const bptAmountOut = _calcBptOutGivenExactTokensIn(
+                this.amp.toBigInt(),
+                balancesNormalised,
+                amountsInNormalised,
+                this.totalShares.toBigInt(),
+                this.swapFee.toBigInt()
+            );
+            return BigNumber.from(bptAmountOut.toString());
+        } catch (err) {
+            return Zero;
         }
     }
 

@@ -12,6 +12,7 @@
     "pools": [
         {
             "id": "0xelementPool1",
+            "address": "0x000000000000000000000000000000000000000a",
             "poolType": "Element",
             "swapFee": "0.05",
             "swapEnabled": true,

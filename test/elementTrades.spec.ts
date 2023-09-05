@@ -23,9 +23,7 @@ import { parseFixed } from '@ethersproject/bignumber';
 
 const gasPrice = parseFixed('30', 9);
 const maxPools = 4;
-const provider = new JsonRpcProvider(
-    `https://mainnet.infura.io/v3/${process.env.INFURA}`
-);
+const provider = new JsonRpcProvider(``);
 
 interface TradeData {
     input: {
@@ -54,7 +52,7 @@ describe(`Tests against Element generated test trade file.`, () => {
             const poolsFromFile: SubgraphPoolBase[] = [
                 {
                     id: 'n/a',
-                    address: 'n/a',
+                    address: '0x000000000000000000000000000000000000000a',
                     poolType: 'Element',
                     swapFee: testTrades.init.percent_fee.toString(),
                     swapEnabled: true,
