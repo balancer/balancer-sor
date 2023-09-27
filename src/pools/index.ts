@@ -62,7 +62,7 @@ export function parseNewPool(
     try {
         const isLinear = pool.poolType.toString().includes('Linear');
         if (!isLinear && !(pool.poolType in PoolFilter)) {
-            console.error(`Unsupported pool type: ${pool.poolType} ${pool.id}`);
+            console.warn(`Unsupported pool type: ${pool.poolType} ${pool.id}`);
             return undefined;
         }
         if (pool.poolType === 'Weighted' || pool.poolType === 'Investment') {
