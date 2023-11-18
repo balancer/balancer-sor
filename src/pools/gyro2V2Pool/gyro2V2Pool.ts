@@ -22,10 +22,7 @@ import {
     _derivativeSpotPriceAfterSwapExactTokenInForTokenOut,
     _derivativeSpotPriceAfterSwapTokenInForExactTokenOut,
 } from '../gyro2Pool/gyro2Math';
-import {
-    _reduceFee,
-    _addFee,
-} from '../gyroHelpers/helpers';
+import { _reduceFee, _addFee } from '../gyroHelpers/helpers';
 import { SWAP_LIMIT_FACTOR } from '../gyroHelpers/constants';
 import { universalNormalizedLiquidity } from '../liquidity';
 
@@ -61,7 +58,8 @@ export class Gyro2V2Pool implements PoolBase<Gyro2V2PoolPairData> {
                 'Pool missing Gyro2 sqrtAlpha and/or sqrtBeta params'
             );
 
-        if (!pool.tokenRates) throw new Error('GyroEV2 Pool missing tokenRates');
+        if (!pool.tokenRates)
+            throw new Error('GyroEV2 Pool missing tokenRates');
 
         return new Gyro2V2Pool(
             pool.id,
@@ -139,7 +137,7 @@ export class Gyro2V2Pool implements PoolBase<Gyro2V2PoolPairData> {
                 : divDown(ONE, this.sqrtAlpha),
             tokenRates: tokenInIsToken0
                 ? this.tokenRates
-                : [this.tokenRates[1], this.tokenRates[0]]
+                : [this.tokenRates[1], this.tokenRates[0]],
         };
 
         return poolPairData;
@@ -160,7 +158,8 @@ export class Gyro2V2Pool implements PoolBase<Gyro2V2PoolPairData> {
     ): OldBigNumber {
         if (swapType === SwapTypes.SwapExactIn) {
             const balances = [poolPairData.balanceIn, poolPairData.balanceOut];
-            const normalizedBalances = normalizeBalances(balances,
+            const normalizedBalances = normalizeBalances(
+                balances,
                 [poolPairData.decimalsIn, poolPairData.decimalsOut],
                 poolPairData.tokenRates
             );
@@ -222,7 +221,8 @@ export class Gyro2V2Pool implements PoolBase<Gyro2V2PoolPairData> {
     ): OldBigNumber {
         try {
             const balances = [poolPairData.balanceIn, poolPairData.balanceOut];
-            const normalizedBalances = normalizeBalances(balances,
+            const normalizedBalances = normalizeBalances(
+                balances,
                 [poolPairData.decimalsIn, poolPairData.decimalsOut],
                 poolPairData.tokenRates
             );
@@ -250,7 +250,10 @@ export class Gyro2V2Pool implements PoolBase<Gyro2V2PoolPairData> {
                 virtualParamIn,
                 virtualParamOut
             );
-            const outAmount = divDown(outAmountScaled, poolPairData.tokenRates[1]);
+            const outAmount = divDown(
+                outAmountScaled,
+                poolPairData.tokenRates[1]
+            );
             return bnum(formatFixed(outAmount, 18));
         } catch (error) {
             return bnum(0);
@@ -264,8 +267,12 @@ export class Gyro2V2Pool implements PoolBase<Gyro2V2PoolPairData> {
         try {
             const outAmount = safeParseFixed(amount.toString(), 18);
             const balances = [poolPairData.balanceIn, poolPairData.balanceOut];
-            const outAmountScaled = mulDown(outAmount, poolPairData.tokenRates[1]);
-            const normalizedBalances = normalizeBalances(balances,
+            const outAmountScaled = mulDown(
+                outAmount,
+                poolPairData.tokenRates[1]
+            );
+            const normalizedBalances = normalizeBalances(
+                balances,
                 [poolPairData.decimalsIn, poolPairData.decimalsOut],
                 poolPairData.tokenRates
             );
@@ -316,7 +323,8 @@ export class Gyro2V2Pool implements PoolBase<Gyro2V2PoolPairData> {
     ): OldBigNumber {
         try {
             const balances = [poolPairData.balanceIn, poolPairData.balanceOut];
-            const normalizedBalances = normalizeBalances(balances,
+            const normalizedBalances = normalizeBalances(
+                balances,
                 [poolPairData.decimalsIn, poolPairData.decimalsOut],
                 poolPairData.tokenRates
             );
@@ -372,7 +380,8 @@ export class Gyro2V2Pool implements PoolBase<Gyro2V2PoolPairData> {
         try {
             const outAmount = safeParseFixed(amount.toString(), 18);
             const balances = [poolPairData.balanceIn, poolPairData.balanceOut];
-            const normalizedBalances = normalizeBalances(balances,
+            const normalizedBalances = normalizeBalances(
+                balances,
                 [poolPairData.decimalsIn, poolPairData.decimalsOut],
                 poolPairData.tokenRates
             );
@@ -386,7 +395,10 @@ export class Gyro2V2Pool implements PoolBase<Gyro2V2PoolPairData> {
                 poolPairData.sqrtAlpha,
                 poolPairData.sqrtBeta
             );
-            const outAmountScaled = mulDown(outAmount, poolPairData.tokenRates[1]);
+            const outAmountScaled = mulDown(
+                outAmount,
+                poolPairData.tokenRates[1]
+            );
             const inAmountLessFeeScaled = _calcInGivenOut(
                 normalizedBalances[0],
                 normalizedBalances[1],
@@ -394,7 +406,10 @@ export class Gyro2V2Pool implements PoolBase<Gyro2V2PoolPairData> {
                 virtualParamIn,
                 virtualParamOut
             );
-            const inAmountScaled = _addFee(inAmountLessFeeScaled, poolPairData.swapFee);
+            const inAmountScaled = _addFee(
+                inAmountLessFeeScaled,
+                poolPairData.swapFee
+            );
             const newSpotPriceScaled = _calculateNewSpotPrice(
                 normalizedBalances,
                 inAmountScaled,
@@ -420,7 +435,8 @@ export class Gyro2V2Pool implements PoolBase<Gyro2V2PoolPairData> {
     ): OldBigNumber {
         try {
             const balances = [poolPairData.balanceIn, poolPairData.balanceOut];
-            const normalizedBalances = normalizeBalances(balances,
+            const normalizedBalances = normalizeBalances(
+                balances,
                 [poolPairData.decimalsIn, poolPairData.decimalsOut],
                 poolPairData.tokenRates
             );
@@ -453,7 +469,10 @@ export class Gyro2V2Pool implements PoolBase<Gyro2V2PoolPairData> {
                     outAmountScaled,
                     virtualParamOut
                 );
-            const derivative = mulDown(derivativeScaled, poolPairData.tokenRates[1]);
+            const derivative = mulDown(
+                derivativeScaled,
+                poolPairData.tokenRates[1]
+            );
             return bnum(formatFixed(derivative, 18));
         } catch (error) {
             return bnum(0);
@@ -467,7 +486,8 @@ export class Gyro2V2Pool implements PoolBase<Gyro2V2PoolPairData> {
         try {
             const outAmount = safeParseFixed(amount.toString(), 18);
             const balances = [poolPairData.balanceIn, poolPairData.balanceOut];
-            const normalizedBalances = normalizeBalances(balances,
+            const normalizedBalances = normalizeBalances(
+                balances,
                 [poolPairData.decimalsIn, poolPairData.decimalsOut],
                 poolPairData.tokenRates
             );
@@ -481,7 +501,10 @@ export class Gyro2V2Pool implements PoolBase<Gyro2V2PoolPairData> {
                 poolPairData.sqrtAlpha,
                 poolPairData.sqrtBeta
             );
-            const outAmountScaled = mulDown(outAmount, poolPairData.tokenRates[1]);
+            const outAmountScaled = mulDown(
+                outAmount,
+                poolPairData.tokenRates[1]
+            );
             const inAmountLessFeeScaled = _calcInGivenOut(
                 normalizedBalances[0],
                 normalizedBalances[1],
@@ -489,7 +512,10 @@ export class Gyro2V2Pool implements PoolBase<Gyro2V2PoolPairData> {
                 virtualParamIn,
                 virtualParamOut
             );
-            const inAmountScaled = _addFee(inAmountLessFeeScaled, poolPairData.swapFee);
+            const inAmountScaled = _addFee(
+                inAmountLessFeeScaled,
+                poolPairData.swapFee
+            );
 
             const derivativeScaled =
                 _derivativeSpotPriceAfterSwapTokenInForExactTokenOut(
