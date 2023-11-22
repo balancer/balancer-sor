@@ -13,7 +13,6 @@ export { MetaStablePool } from './pools/metaStablePool/metaStablePool';
 export { PhantomStablePool } from './pools/phantomStablePool/phantomStablePool';
 export { ComposableStablePool } from './pools/composableStable/composableStablePool';
 export { LinearPool } from './pools/linearPool/linearPool';
-// TODO should we still export the (deprecated) Gyro2Pool or scrap that & only export Gyro2V2Pool?
 export { Gyro2Pool } from './pools/gyro2Pool/gyro2Pool';
 export { Gyro2V2Pool } from './pools/gyro2V2Pool/gyro2V2Pool';
 export { Gyro3Pool } from './pools/gyro3Pool/gyro3Pool';

@@ -59,7 +59,7 @@ export class Gyro2V2Pool implements PoolBase<Gyro2V2PoolPairData> {
             );
 
         if (!pool.tokenRates)
-            throw new Error('GyroEV2 Pool missing tokenRates');
+            throw new Error('Gyro2V2 Pool missing tokenRates');
 
         return new Gyro2V2Pool(
             pool.id,

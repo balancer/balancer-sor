@@ -1,5 +1,3 @@
-// Same file as for gyroEV2Pool. (could just refer to that but I think this way it's cleaner)
-
 import { BigNumber, parseFixed } from '@ethersproject/bignumber';
 import { WeiPerEther as ONE } from '@ethersproject/constants';
 import { mulDown } from '../../gyroHelpers/gyroSignedFixedPoint';
