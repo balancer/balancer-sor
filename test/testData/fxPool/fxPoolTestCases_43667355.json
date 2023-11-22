@@ -1,0 +1,127 @@
+[
+    {
+        "testNo": "1",
+        "description": "Swap within Beta Region: OriginSwap/_exactTokenInForTokenOut USDC > ? XSGD",
+        "swapType": "OriginSwap",
+        "givenAmount": "100000",
+        "tokenIn": "USDC",
+        "tokenOut": "XSGD",
+        "expectedSpotPriceBeforeSwap": "0.741892668099999999",
+        "expectedSpotPriceAfterSwap": "0.7418926680999999992673856294",
+        "expectedSwapOutput": "134652.537477",
+        "expectedDerivativeSpotPriceAfterSwap": "0.00000000000000000100"
+    },
+    {
+        "testNo": "2",
+        "description": "Swap within Beta Region: TargetSwap / tokenInForExactTokenOut ? XSGD > USDC",
+        "swapType": "TargetSwap",
+        "givenAmount": "100000",
+        "tokenIn": "XSGD",
+        "tokenOut": "USDC",
+        "expectedSpotPriceBeforeSwap": "0.741892668099999999",
+        "expectedSpotPriceAfterSwap": "0.7418926680999999992673856294",
+        "expectedSwapOutput": "134787.257375",
+        "expectedDerivativeSpotPriceAfterSwap": "0.00000000000000000000"
+    },
+    {
+        "testNo": "3",
+        "description": "Swap within Beta Region: OriginSwap/_exactTokenInForTokenOut XSGD > ? USDC",
+        "swapType": "OriginSwap",
+        "givenAmount": "100000",
+        "tokenIn": "XSGD",
+        "tokenOut": "USDC",
+        "expectedSpotPriceBeforeSwap": "0.741892668099999999",
+        "expectedSpotPriceAfterSwap": "0.7418926680999999992673856294",
+        "expectedSwapOutput": "74190.970975",
+        "expectedDerivativeSpotPriceAfterSwap": "0.00000000000000000100"
+    },
+    {
+        "testNo": "4",
+        "description": "Swap within Beta Region: TargetSwap / tokenInForExactTokenOut ? USDC > XSGD",
+        "swapType": "TargetSwap",
+        "givenAmount": "100000",
+        "tokenIn": "USDC",
+        "tokenOut": "XSGD",
+        "expectedSpotPriceBeforeSwap": "0.741892668099999999",
+        "expectedSpotPriceAfterSwap": "0.7418926680999999992673856294",
+        "expectedSwapOutput": "74265.199061",
+        "expectedDerivativeSpotPriceAfterSwap": "0.00000000000000000000"
+    },
+
+    {
+        "testNo": "5",
+        "description": "Swap Beyond Beta Region: OriginSwap/_exactTokenInForTokenOut USDC > ? XSGD",
+        "swapType": "OriginSwap",
+        "givenAmount": "200000",
+        "tokenIn": "USDC",
+        "tokenOut": "XSGD",
+        "expectedSpotPriceBeforeSwap": "0.741892668099999999",
+        "expectedSpotPriceAfterSwap": "0.7418926680999999992673856294",
+        "expectedSwapOutput": "269305.074955",
+        "expectedDerivativeSpotPriceAfterSwap": "0.00000000000000000100"
+    },
+
+    {
+        "testNo": "6",
+        "description": "Swap within Beta Region: TargetSwap / tokenInForExactTokenOut ? XSGD > USDC",
+        "swapType": "TargetSwap",
+        "givenAmount": "200000",
+        "tokenIn": "XSGD",
+        "tokenOut": "USDC",
+        "expectedSpotPriceBeforeSwap": "0.741892668099999999",
+        "expectedSpotPriceAfterSwap": "0.740778400391736036366991206905941151",
+        "expectedSwapOutput": "269980.072169",
+        "expectedDerivativeSpotPriceAfterSwap": "0.00150192575850307544"
+    },
+
+    {
+        "testNo": "7",
+        "description": "Swap within Beta Region: OriginSwap/_exactTokenInForTokenOut XSGD > ? USDC",
+        "swapType": "OriginSwap",
+        "givenAmount": "270000",
+        "tokenIn": "XSGD",
+        "tokenOut": "USDC",
+        "expectedSpotPriceBeforeSwap": "0.741892668099999999",
+        "expectedSpotPriceAfterSwap": "0.740767481936594140174584949186879657",
+        "expectedSwapOutput": "200011.814393",
+        "expectedDerivativeSpotPriceAfterSwap": "0.00151664278646597275"
+    },
+    {
+        "testNo": "8",
+        "description": "Swap Beyond Beta Region: TargetSwap / tokenInForExactTokenOut ? USDC > XSGD",
+        "swapType": "TargetSwap",
+        "givenAmount": "270000",
+        "tokenIn": "USDC",
+        "tokenOut": "XSGD",
+        "expectedSpotPriceBeforeSwap": "0.741892668099999999",
+        "expectedSpotPriceAfterSwap": "0.7418926680999999992673856294",
+        "expectedSwapOutput": "200516.037466",
+        "expectedDerivativeSpotPriceAfterSwap": "0.00000000000000000000"
+    },
+
+    {
+        "testNo": "10",
+        "description": "Swap within Beta Region: TargetSwap / tokenInForExactTokenOut ? XSGD > USDC",
+        "swapType": "TargetSwap",
+        "givenAmount": "450000",
+        "tokenIn": "XSGD",
+        "tokenOut": "USDC",
+        "expectedSpotPriceBeforeSwap": "0.741892668099999999",
+        "expectedSpotPriceAfterSwap": "0.669706952702530393874295458687083876",
+        "expectedSwapOutput": "671920.250617",
+        "expectedDerivativeSpotPriceAfterSwap": "0.09729940529313825882"
+    },
+
+    {
+        "testNo": "12",
+        "description": "Swap beyond Alpha Region: TargetSwap / tokenInForExactTokenOut ? USDC > XSGD",
+        "swapType": "TargetSwap",
+        "givenAmount": "610000",
+        "tokenIn": "XSGD",
+        "tokenOut": "USDC",
+        "expectedSpotPriceBeforeSwap": "0.741892668099999999",
+        "expectedSpotPriceAfterSwap": "CurveMath/lower-halt",
+        "expectedSwapOutput": "CurveMath/lower-halt",
+        "expectedDerivativeSpotPriceAfterSwap": "CurveMath/lower-halt"
+    }
+]

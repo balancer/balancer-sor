@@ -8,6 +8,9 @@ export enum Network {
     ARBITRUM = 42161,
     OPTIMISM = 10,
     GNOSIS = 100,
+    ZKEVM = 1101,
+    AVALANCHE = 43114,
+    BASE = 8453,
 }
 
 export const SOR_CONFIG: Record<Network, SorConfig> = {
@@ -109,18 +112,65 @@ export const SOR_CONFIG: Record<Network, SorConfig> = {
         connectingTokens: [
             {
                 symbol: 'weth',
-                address: '0x82af49447d8a07e3bd95bd0d56f35241523fbab1',
+                address: '0x6A023CCd1ff6F2045C3309768eAd9E68F978f6e1',
             },
+        ],
+    },
+    [Network.ZKEVM]: {
+        chainId: Network.ZKEVM, //1101
+        vault: '0xBA12222222228d8Ba445958a75a0704d566BF2C8',
+        weth: '0x4f9a0e7fd2bf6067db6994cf12e4495df938e6e9',
+        connectingTokens: [
+            {
+                symbol: 'weth',
+                address: '0x4f9a0e7fd2bf6067db6994cf12e4495df938e6e9',
+            },
+        ],
+    },
+    [Network.AVALANCHE]: {
+        chainId: Network.AVALANCHE,
+        vault: '0xBA12222222228d8Ba445958a75a0704d566BF2C8',
+        weth: '0xb31f66aa3c1e785363f0875a1b74e27b85fd66c7',
+        connectingTokens: [
+            {
+                symbol: 'WAVAX',
+                address: '0xb31f66aa3c1e785363f0875a1b74e27b85fd66c7',
+            },
+            {
+                symbol: 'sAVAX',
+                address: '0x2b2c81e08f1af8835a78bb2a90ae924ace0ea4be',
+            },
+        ],
+    },
+    [Network.BASE]: {
+        chainId: Network.BASE,
+        vault: '0xBA12222222228d8Ba445958a75a0704d566BF2C8',
+        weth: '0x4200000000000000000000000000000000000006',
+        connectingTokens: [
+            {
+                symbol: 'WETH',
+                address: '0x4200000000000000000000000000000000000006',
+            },
+        ],
+        staBal3Pool: {
+            id: '0x6fbfcf88db1aada31f34215b2a1df7fafb4883e900000000000000000000000c',
+            address: '0x6FbFcf88DB1aADA31F34215b2a1Df7fafb4883e9',
+        },
+        triPathMidPoolIds: [
+            '0x2db50a0e0310723ef0c2a165cb9a9f80d772ba2f00020000000000000000000d',
         ],
     },
 };
 
 export const PROVIDER_URLS = {
-    [Network.MAINNET]: `https://mainnet.infura.io/v3/${process.env.INFURA}`,
-    [Network.GOERLI]: `https://goerli.infura.io/v3/${process.env.INFURA}`,
-    [Network.POLYGON]: `https://polygon-mainnet.infura.io/v3/${process.env.INFURA}`,
-    [Network.ARBITRUM]: `https://arbitrum-mainnet.infura.io/v3/${process.env.INFURA}`,
-    [Network.GNOSIS]: `https://poa-xdai.gateway.pokt.network/v1/lb/91bc0e12a76e7a84dd76189d`,
+    [Network.MAINNET]: process.env.RPC_URL_MAINNET,
+    [Network.GOERLI]: process.env.RPC_URL_GOERLI,
+    [Network.POLYGON]: process.env.RPC_URL_POLYGON,
+    [Network.ARBITRUM]: process.env.RPC_URL_ARBITRUM,
+    [Network.GNOSIS]: process.env.RPC_URL_GNOSIS,
+    [Network.ZKEVM]: process.env.RPC_URL_ZKEVM,
+    [Network.AVALANCHE]: process.env.RPC_URL_AVALANCHE,
+    [Network.BASE]: process.env.RPC_URL_BASE,
 };
 
 export const MULTIADDR: { [chainId: number]: string } = {
@@ -133,6 +183,9 @@ export const MULTIADDR: { [chainId: number]: string } = {
     42161: '0x269ff446d9892c9e19082564df3f5e8741e190a1',
     99: '0xeefba1e63905ef1d7acba5a8513c70307c1ce441',
     100: '0xbb6fab6b627947dae0a75808250d8b2652952cb5',
+    1101: '0xca11bde05977b3631167028862be2a173976ca11',
+    43114: '0xcA11bde05977b3631167028862bE2a173976CA11',
+    8453: '0xcA11bde05977b3631167028862bE2a173976CA11',
 };
 
 export const SUBGRAPH_URLS = {
@@ -144,6 +197,9 @@ export const SUBGRAPH_URLS = {
         'https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-polygon-v2-beta',
     [Network.ARBITRUM]: `https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-arbitrum-v2`,
     [Network.GNOSIS]: `https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-gnosis-chain-v2`,
+    [Network.ZKEVM]: `https://api.studio.thegraph.com/query/24660/balancer-polygon-zk-v2/version/latest`,
+    [Network.AVALANCHE]: `https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-avalanche-v2`,
+    [Network.BASE]: `https://api.studio.thegraph.com/query/24660/balancer-base-v2/version/latest`,
 };
 
 // This is the same across networks
@@ -299,6 +355,11 @@ export const ADDRESSES = {
             address: '0xdb25f211ab05b1c97d595516f45794528a807ad8',
             decimals: 2,
             symbol: 'EURS',
+        },
+        swETH: {
+            address: '0xf951e335afb289353dc249e82926178eac7ded78',
+            decimals: 18,
+            symbol: 'swETH',
         },
     },
     [Network.POLYGON]: {
@@ -460,6 +521,94 @@ export const ADDRESSES = {
             address: '0x4ECaBa5870353805a9F068101A40E0f32ed605C6',
             decimals: 6,
             symbol: 'USDT',
+        },
+    },
+    [Network.GOERLI]: {
+        DAI: {
+            address: '0xb8096bc53c3ce4c11ebb0069da0341d75264b104',
+            decimals: 18,
+            symbol: 'DAI',
+        },
+        USDC: {
+            address: '0xdabd33683bafdd448968ab6d6f47c3535c64bf0c',
+            decimals: 6,
+            symbol: 'USDC',
+        },
+    },
+    [Network.ZKEVM]: {
+        USDT: {
+            address: '0x1e4a5963abfd975d8c9021ce480b42188849d41d',
+            decimals: 6,
+            symbol: 'USDT',
+        },
+        USDC: {
+            address: '0xA8CE8aee21bC2A48a5EF670afCc9274C7bbbC035',
+            decimals: 6,
+            symbol: 'USDC',
+        },
+    },
+    [Network.AVALANCHE]: {
+        EUROC: {
+            address: '0xC891EB4cbdEFf6e073e859e987815Ed1505c2ACD',
+            decimals: 6,
+            symbol: 'EUROC',
+        },
+        USDC: {
+            address: '0xB97EF9Ef8734C71904D8002F8b6Bc66Dd9c48a6E',
+            decimals: 6,
+            symbol: 'USDC',
+        },
+        BETS: {
+            address: '0x94025780a1ab58868d9b2dbbb775f44b32e8e6e5',
+            decimals: 18,
+            symbol: 'BETS',
+        },
+        WAVAX: {
+            address: '0xb31f66aa3c1e785363f0875a1b74e27b85fd66c7',
+            decimals: 6,
+            symbol: 'WAVAX',
+        },
+        sAVAX: {
+            address: '0x2b2c81e08f1af8835a78bb2a90ae924ace0ea4be',
+            decimals: 18,
+            symbol: 'sAVAX',
+        },
+        BPT: {
+            address: '0xA154009870E9B6431305F19b09F9cfD7284d4E7A',
+            decimals: 18,
+            symbol: 'BPT',
+        },
+        STETH: {
+            address: 'TOD',
+            decimals: 6,
+            symbol: 'stETH',
+        },
+    },
+    [Network.BASE]: {
+        STETH: {
+            address: 'TOD0',
+            decimals: 18,
+            symbol: 'stETH',
+        },
+        WETH: {
+            address: '0x4200000000000000000000000000000000000006',
+            decimals: 18,
+            symbol: 'WETH',
+        },
+        USDC: {
+            address: '0xd9aAEc86B65D86f6A7B5B1b0c42FFA531710b6CA',
+            decimals: 6,
+            symbol: 'USDC',
+        },
+        DAI: {
+            address: '0x50c5725949A6F0c72E6C4a641F24049A917DB0Cb',
+            decimals: 18,
+            symbol: 'DAI',
+        },
+        BALD: {
+            address: '0x27D2DECb4bFC9C76F0309b8E88dec3a601Fe25a8',
+            decimals: 18,
+            symbol: 'BALD',
         },
     },
 };

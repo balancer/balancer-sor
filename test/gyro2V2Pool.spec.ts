@@ -1,5 +1,6 @@
+// TS_NODE_PROJECT='tsconfig.testing.json' npx mocha -r ts-node/register test/gyro2V2Pool.spec.ts
+
 import 'dotenv/config';
-// TS_NODE_PROJECT='tsconfig.testing.json' npx mocha -r ts-node/register test/gyro2Pool.spec.ts
 import { expect } from 'chai';
 import cloneDeep from 'lodash.clonedeep';
 import { formatFixed, parseFixed } from '@ethersproject/bignumber';
@@ -8,15 +9,15 @@ import { bnum } from '../src/utils/bignumber';
 import { USDC, DAI, sorConfigEth } from './lib/constants';
 import { SwapTypes, SOR, SwapInfo, SubgraphPoolBase } from '../src';
 // Add new PoolType
-import { Gyro2Pool } from '../src/pools/gyro2Pool/gyro2Pool';
+import { Gyro2V2Pool } from '../src/pools/gyro2V2Pool/gyro2V2Pool';
 // Add new pool test data in Subgraph Schema format
-import testPools from './testData/gyro2Pools/gyro2TestPool.json';
+import testPools from './testData/gyro2Pools/gyro2V2TestPool.json';
 import { MockPoolDataService } from './lib/mockPoolDataService';
 import { mockTokenPriceService } from './lib/mockTokenPriceService';
 
-describe('Gyro2Pool tests USDC > DAI', () => {
+describe('Gyro2V2Pool tests USDC > DAI', () => {
     const testPool = cloneDeep(testPools).pools[0];
-    const pool = Gyro2Pool.fromPool(testPool);
+    const pool = Gyro2V2Pool.fromPool(testPool);
 
     const poolPairData = pool.parsePoolPairData(USDC.address, DAI.address);
 
@@ -29,8 +30,15 @@ describe('Gyro2Pool tests USDC > DAI', () => {
                 parseFixed(testPool.swapFee, 18).toString()
             );
             expect(poolPairData.id).to.eq(testPool.id);
+            expect(poolPairData.tokenRates[0].toString()).to.eq(
+                parseFixed(testPool.tokenRates[1], 18).toString()
+            );
+            expect(poolPairData.tokenRates[1].toString()).to.eq(
+                parseFixed(testPool.tokenRates[0], 18).toString()
+            );
         });
 
+        // NB these price bounds are not affected by rate scaling, so they're the same as for gyro2Pool.
         it(`should correctly calculate price bounds USDC > DAI`, async () => {
             expect(
                 Number(formatFixed(poolPairData.sqrtAlpha, 18))
@@ -59,7 +67,7 @@ describe('Gyro2Pool tests USDC > DAI', () => {
                 SwapTypes.SwapExactIn
             );
 
-            expect(amount.toString()).to.eq('1243.74395782517101711');
+            expect(amount.toString()).to.eq('1865.435197059850834134');
 
             amount = pool.getLimitAmountSwap(
                 poolPairData,
@@ -76,7 +84,7 @@ describe('Gyro2Pool tests USDC > DAI', () => {
                 pool.getNormalizedLiquidity(poolPairData);
 
             expect(Number(normalizedLiquidity.toString())).to.be.approximately(
-                1116333.916257166990921337,
+                949690.862560122978692435,
                 0.00001
             );
         });
@@ -86,7 +94,7 @@ describe('Gyro2Pool tests USDC > DAI', () => {
                 pool.getNormalizedLiquidity(poolPairData2);
 
             expect(Number(normalizedLiquidity.toString())).to.be.approximately(
-                1116217.358286598731855228,
+                1424111.581891956376601924,
                 0.00001
             );
         });
@@ -101,7 +109,11 @@ describe('Gyro2Pool tests USDC > DAI', () => {
                     poolPairData,
                     amountIn
                 );
-                expect(amountOut.toString()).to.eq('13.379816831223414577');
+                expect(Number(amountOut.toString())).to.be.approximately(
+                    8.921618001976369271,
+                    0.000000000000000001
+                );
+                // expect(amountOut.toString()).to.eq('8.921618001976369271');
             });
             it('should correctly calculate newSpotPrice', async () => {
                 const newSpotPrice =
@@ -109,7 +121,7 @@ describe('Gyro2Pool tests USDC > DAI', () => {
                         poolPairData,
                         amountIn
                     );
-                expect(newSpotPrice.toString()).to.eq('1.008988469190824523');
+                expect(newSpotPrice.toString()).to.eq('1.513185546431756763');
             });
             it('should correctly calculate derivative of spot price function at newSpotPrice', async () => {
                 const derivative =
@@ -117,7 +129,7 @@ describe('Gyro2Pool tests USDC > DAI', () => {
                         poolPairData,
                         amountIn
                     );
-                expect(derivative.toString()).to.eq('0.000000895794688507');
+                expect(derivative.toString()).to.eq('0.000001052979170973');
             });
         });
 
@@ -129,7 +141,7 @@ describe('Gyro2Pool tests USDC > DAI', () => {
                     poolPairData,
                     amountOut
                 );
-                expect(amountIn.toString()).to.eq('45.977973896504501314');
+                expect(amountIn.toString()).to.eq('68.953845491508993928');
             });
             it('should correctly calculate newSpotPrice', async () => {
                 const newSpotPrice =
@@ -137,7 +149,10 @@ describe('Gyro2Pool tests USDC > DAI', () => {
                         poolPairData,
                         amountOut
                     );
-                expect(newSpotPrice.toString()).to.eq('1.00901756299705875');
+                expect(Number(newSpotPrice.toString())).to.be.approximately(
+                    1.513243938739323921,
+                    0.000000000000000001
+                );
             });
             it('should correctly calculate derivative of spot price function at newSpotPrice', async () => {
                 const derivative =
@@ -145,7 +160,10 @@ describe('Gyro2Pool tests USDC > DAI', () => {
                         poolPairData,
                         amountOut
                     );
-                expect(derivative.toString()).to.eq('0.000000903885604863');
+                expect(Number(derivative.toString())).to.be.approximately(
+                    0.000001593445091924,
+                    0.000000000000000005
+                );
             });
         });
 

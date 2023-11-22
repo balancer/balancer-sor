@@ -1,9 +1,9 @@
 {
     "compilerOptions": {
         "module": "esnext",
-        "target": "es2016",
+        "target": "es2020",
         "declaration": true,
-        "lib": ["es2019", "es2018.promise"],
+        "lib": ["es2020", "es2018.promise"],
         "outDir": "./dist/",
         "baseUrl": "src",
         "esModuleInterop": true,
@@ -23,7 +23,8 @@
         "src/pools/linearPool/linearPoolAbi.json",
         "src/pools/composableStable/ComposableStable.json",
         "src/pools/xaveFxPool/fxPoolAbi.json",
-        "src/pools/gyroEV2Pool/gyroEV2Abi.json"
+        "src/pools/gyroEV2Pool/gyroEV2Abi.json",
+        "src/pools/gyro2V2Pool/gyro2V2Abi.json"
     ],
     "files": ["hardhat.config.ts"]
 }

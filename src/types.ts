@@ -10,6 +10,7 @@ export interface SorConfig {
     usdcConnectingPool?: { id: string; usdc: string };
     wETHwstETH?: { id: string; address: string };
     lbpRaisingTokens?: string[];
+    triPathMidPoolIds?: string[];
 }
 
 export type NoNullableField<T> = {
@@ -119,7 +120,7 @@ export interface SubgraphPoolBase {
     z?: string;
     dSq?: string;
 
-    // GyroEV2 specific fields
+    // GyroEV2 and Gyro2V2 specific fields
     tokenRates?: string[];
 
     // FxPool
@@ -139,6 +140,7 @@ export type SubgraphToken = {
 
 export type SubgraphTokenData = {
     latestFXPrice?: string;
+    fxOracleDecimals?: number;
 };
 
 export interface SwapV2 {
@@ -211,7 +213,7 @@ export enum PoolFilter {
     SiloLinear = 'SiloLinear',
     TetuLinear = 'TetuLinear',
     YearnLinear = 'YearnLinear',
-    // FX = 'FX',
+    FX = 'FX',
 }
 
 export interface PoolBase<D extends PoolPairBase = PoolPairBase> {
@@ -274,7 +276,10 @@ export interface TokenPriceService {
 }
 
 export interface PoolDataService {
-    getPools(query?: GraphQLArgs): Promise<SubgraphPoolBase[]>;
+    getPools(
+        query?: GraphQLArgs,
+        chunkSize?: number
+    ): Promise<SubgraphPoolBase[]>;
 }
 
 export type FundManagement = {
