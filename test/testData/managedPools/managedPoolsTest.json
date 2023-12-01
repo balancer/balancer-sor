@@ -1,0 +1,35 @@
+{
+    "pools": [
+        {
+            "id": "managed-pool",
+            "address": "0x0000000000000000000000000000000000000000",
+            "swapFee": "0.002",
+            "swapEnabled": true,
+            "tokens": [
+                {
+                    "address": "0xba100000625a3754423978a60c9317c58a424e3d",
+                    "balance": "1000.0",
+                    "decimals": 18,
+                    "weight": "0.5",
+                    "priceRate": "1",
+                    "symbol": "BAL"
+                },
+                {
+                    "address": "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+                    "balance": "3759.0",
+                    "decimals": 6,
+                    "weight": "0.5",
+                    "priceRate": "1",
+                    "symbol": "USDC"
+                }
+            ],
+            "tokensList": [
+                "0x6b175474e89094c44da98b954eedeac495271d0f",
+                "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48"
+            ],
+            "totalWeight": "1",
+            "totalShares": "10000000000000",
+            "poolType": "ManagedPool"
+        }
+    ]
+}

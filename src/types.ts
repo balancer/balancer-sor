@@ -32,6 +32,7 @@ export enum PoolTypes {
     Gyro3,
     GyroE,
     Fx,
+    Managed,
 }
 
 export interface SwapOptions {
