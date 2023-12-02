@@ -121,6 +121,7 @@ export const SOR_CONFIG: Record<Network, SorConfig> = {
         ],
         triPathMidPoolIds: [
             '0xeb30c85cc528537f5350cf5684ce6a4538e13394000200000000000000000059', // 3POOL_BPT/wstETH
+            '0x7644fa5d0ea14fcf3e813fdf93ca9544f8567655000000000000000000000066', // sBAL3
         ],
     },
     [Network.ZKEVM]: {
@@ -522,7 +523,7 @@ export const ADDRESSES = {
         WXDAI: {
             address: '0xe91d153e0b41518a2ce8dd3d7944fa863463a97d',
             decimals: 18,
-            symbol: 'DAI',
+            symbol: 'WXDAI',
         },
         USDT: {
             address: '0x4ECaBa5870353805a9F068101A40E0f32ed605C6',
@@ -538,6 +539,16 @@ export const ADDRESSES = {
             address: 'todo',
             decimals: 18,
             symbol: 'STETH',
+        },
+        crvUSD: {
+            address: '0xaBEf652195F98A91E490f047A5006B71c85f058d',
+            decimals: 18,
+            symbol: 'crvUSD',
+        },
+        sDAI: {
+            address: '0xaf204776c7245bf4147c2612bf6e5972ee483701',
+            decimals: 18,
+            symbol: 'sDAI',
         },
     },
     [Network.GOERLI]: {
