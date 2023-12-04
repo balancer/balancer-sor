@@ -15,7 +15,7 @@ import {
     SubgraphPoolBase,
     SwapTypes,
 } from '../../types';
-import { WeightedPoolToken } from './weightedPool';
+import { WeightedPoolToken } from '../weightedPool/weightedPool';
 import {
     _calcInGivenOut,
     _calcOutGivenIn,
@@ -23,7 +23,7 @@ import {
     _derivativeSpotPriceAfterSwapTokenInForExactTokenOut,
     _spotPriceAfterSwapExactTokenInForTokenOut,
     _spotPriceAfterSwapTokenInForExactTokenOut,
-} from './weightedMath';
+} from '../weightedPool/weightedMath';
 import { universalNormalizedLiquidity } from '../liquidity';
 
 export type ManagedPoolPairData = PoolPairBase & {
@@ -31,8 +31,8 @@ export type ManagedPoolPairData = PoolPairBase & {
     weightOut: BigNumber;
 };
 
-export class ManagedPool implements PoolBase<PoolPairBase> {
-    poolType: PoolTypes = PoolTypes.Managed;
+export class KassandraManagedPool implements PoolBase<PoolPairBase> {
+    poolType: PoolTypes = PoolTypes.KassandraManaged;
     id: string;
     address: string;
     tokensList: string[];
@@ -50,6 +50,7 @@ export class ManagedPool implements PoolBase<PoolPairBase> {
         address: string,
         tokenList: string[],
         tokens: WeightedPoolToken[],
+        totalShares: string,
         totalWeight: string,
         swapFee: string
     ) {
@@ -57,19 +58,21 @@ export class ManagedPool implements PoolBase<PoolPairBase> {
         this.address = address;
         this.tokensList = tokenList;
         this.tokens = tokens;
+        this.totalShares = parseFixed(totalShares, 18);
         this.totalWeight = parseFixed(totalWeight, 18);
         this.swapFee = parseFixed(swapFee, 18);
     }
 
-    static fromPool(pool: SubgraphPoolBase): ManagedPool {
+    static fromPool(pool: SubgraphPoolBase): KassandraManagedPool {
         if (!pool.totalWeight) {
             throw new Error('WeightedPool missing totalWeight');
         }
-        return new ManagedPool(
+        return new KassandraManagedPool(
             pool.id,
             pool.address,
             pool.tokensList,
             pool.tokens as WeightedPoolToken[],
+            pool.totalShares,
             pool.totalWeight,
             pool.swapFee
         );
@@ -79,8 +82,9 @@ export class ManagedPool implements PoolBase<PoolPairBase> {
         if (
             isSameAddress(tokenIn, this.address) ||
             isSameAddress(tokenOut, this.address)
-        )
-            throw 'Token cannot be BPT';
+        ) {
+            throw new Error('Token cannot be BPT');
+        }
         const tokenIndexIn = this.tokens.findIndex(
             (t) => getAddress(t.address) === getAddress(tokenIn)
         );

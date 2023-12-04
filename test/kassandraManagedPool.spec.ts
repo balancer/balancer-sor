@@ -3,18 +3,18 @@ import cloneDeep from 'lodash.clonedeep';
 import { parseFixed } from '@ethersproject/bignumber';
 import { bnum } from '../src/utils/bignumber';
 import { SwapTypes } from '../src';
-import { ManagedPool } from '../src/pools/weightedPool/managedPool';
-import managedPools from './testData/managedPools/managedPoolsTest.json';
+import { KassandraManagedPool } from '../src/pools/kassandraManaged/kassandraManagedPool';
+import managedPools from './testData/managedPools/kassandraManagedPoolsTest.json';
 
 const MAX_RATIO = bnum(0.3);
 
-describe('ManagedPool', () => {
+describe('KassandraManagedPool', () => {
     context('parsePoolPairData', () => {
         it(`should correctly parse USDC > BAL`, async () => {
             const pool = cloneDeep(managedPools).pools[0];
             const tokenIn = pool.tokens[0];
             const tokenOut = pool.tokens[1];
-            const managedPool = ManagedPool.fromPool(pool);
+            const managedPool = KassandraManagedPool.fromPool(pool);
             const poolPairData = managedPool.parsePoolPairData(
                 tokenIn.address,
                 tokenOut.address
@@ -46,7 +46,7 @@ describe('ManagedPool', () => {
             const pool = cloneDeep(managedPools).pools[0];
             const tokenIn = pool.tokens[0];
             const tokenOut = pool.tokens[1];
-            const managedPool = ManagedPool.fromPool(pool);
+            const managedPool = KassandraManagedPool.fromPool(pool);
             const poolPairData = managedPool.parsePoolPairData(
                 tokenIn.address,
                 tokenOut.address
@@ -75,7 +75,7 @@ describe('ManagedPool', () => {
             const pool = cloneDeep(managedPools).pools[0];
             const tokenIn = pool.tokens[1];
             const tokenOut = pool.tokens[0];
-            const managedPool = ManagedPool.fromPool(pool);
+            const managedPool = KassandraManagedPool.fromPool(pool);
             const poolPairData = managedPool.parsePoolPairData(
                 tokenIn.address,
                 tokenOut.address
@@ -108,7 +108,7 @@ describe('ManagedPool', () => {
                 const tokenIn = pool.tokens[0];
                 const tokenOut = pool.tokens[1];
                 const amountIn = bnum('1.5');
-                const managedPool = ManagedPool.fromPool(pool);
+                const managedPool = KassandraManagedPool.fromPool(pool);
                 const poolPairData = managedPool.parsePoolPairData(
                     tokenIn.address,
                     tokenOut.address
@@ -124,7 +124,7 @@ describe('ManagedPool', () => {
                 const tokenIn = pool.tokens[1];
                 const tokenOut = pool.tokens[0];
                 const amountIn = bnum('5.61881163893890533');
-                const managedPool = ManagedPool.fromPool(pool);
+                const managedPool = KassandraManagedPool.fromPool(pool);
                 const poolPairData = managedPool.parsePoolPairData(
                     tokenIn.address,
                     tokenOut.address
@@ -142,7 +142,7 @@ describe('ManagedPool', () => {
                 const tokenIn = pool.tokens[0];
                 const tokenOut = pool.tokens[1];
                 const amountOut = bnum('5.5');
-                const managedPool = ManagedPool.fromPool(pool);
+                const managedPool = KassandraManagedPool.fromPool(pool);
                 const poolPairData = managedPool.parsePoolPairData(
                     tokenIn.address,
                     tokenOut.address
@@ -158,7 +158,7 @@ describe('ManagedPool', () => {
                 const tokenIn = pool.tokens[1];
                 const tokenOut = pool.tokens[0];
                 const amountOut = bnum('1.5');
-                const managedPool = ManagedPool.fromPool(pool);
+                const managedPool = KassandraManagedPool.fromPool(pool);
                 const poolPairData = managedPool.parsePoolPairData(
                     tokenIn.address,
                     tokenOut.address

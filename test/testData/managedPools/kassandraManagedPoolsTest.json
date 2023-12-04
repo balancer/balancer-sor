@@ -1,7 +1,7 @@
 {
     "pools": [
         {
-            "id": "managed-pool",
+            "id": "kassandra-managed-pool",
             "address": "0x0000000000000000000000000000000000000000",
             "swapFee": "0.002",
             "swapEnabled": true,
