@@ -32,7 +32,7 @@ export enum PoolTypes {
     Gyro3,
     GyroE,
     Fx,
-    KassandraManaged,
+    Managed,
 }
 
 export interface SwapOptions {
@@ -215,7 +215,7 @@ export enum PoolFilter {
     TetuLinear = 'TetuLinear',
     YearnLinear = 'YearnLinear',
     FX = 'FX',
-    KassandraManaged = 'KassandraManaged',
+    Managed = 'Managed',
 }
 
 export interface PoolBase<D extends PoolPairBase = PoolPairBase> {

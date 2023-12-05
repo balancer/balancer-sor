@@ -4,7 +4,7 @@ import { SOR, SubgraphPoolBase, SwapTypes } from '../src';
 import { Network, vaultAddr } from './testScripts/constants';
 import { formatFixed, parseFixed } from '@ethersproject/bignumber';
 import { expect } from 'chai';
-import { KassandraManagedPool } from '../src/pools/kassandraManaged/kassandraManagedPool';
+import { KassandraManagedPool } from '../src/pools/managedPools/kassandraManagedPool';
 import { setUp } from './testScripts/utils';
 import { WeightedPoolToken } from '../src/pools/weightedPool/weightedPool';
 import { Vault, Vault__factory } from '@balancer-labs/typechain';
@@ -15,7 +15,7 @@ dotenv.config();
 const testPool: SubgraphPoolBase = {
     id: '0x107cb7c6d67ad745c50d7d4627335c1c6a684003000100000000000000000c37',
     address: '0x107cb7c6d67ad745c50d7d4627335c1c6a684003',
-    poolType: 'KassandraManaged',
+    poolType: 'Managed',
     swapFee: '0.003',
     swapEnabled: true,
     totalWeight: '1',
@@ -38,63 +38,63 @@ const testPool: SubgraphPoolBase = {
             balance: '396.136772427774719658',
             decimals: 18,
             priceRate: '1',
-            weight: '0.0457',
+            weight: null,
         },
         {
             address: '0x1a3acf6d19267e2d3e7f898f42803e90c9219062',
             balance: '32.15685999953081616',
             decimals: 18,
             priceRate: '1',
-            weight: '0.0482',
+            weight: null,
         },
         {
             address: '0x50b728d8d964fd00c2d0aad81718b71311fef68a',
             balance: '128.635643494144033617',
             decimals: 18,
             priceRate: '1',
-            weight: '0.0885',
+            weight: null,
         },
         {
             address: '0x6f7c932e7684666c9fd1d44527765433e01ff61d',
             balance: '0.376577387336367528',
             decimals: 18,
             priceRate: '1',
-            weight: '0.1187',
+            weight: null,
         },
         {
             address: '0x8505b9d2254a7ae468c0e9dd10ccea3a837aef5c',
             balance: '3.075712849360558397',
             decimals: 18,
             priceRate: '1',
-            weight: '0.0322',
+            weight: null,
         },
         {
             address: '0x9a71012b13ca4d3d0cdc72a177df3ef03b0e76a3',
             balance: '22.14930620288425309',
             decimals: 18,
             priceRate: '1',
-            weight: '0.0169',
+            weight: null,
         },
         {
             address: '0xb33eaad8d922b1083446dc23f610c2567fb5180f',
             balance: '300.69117873097954205',
             decimals: 18,
             priceRate: '1',
-            weight: '0.3911',
+            weight: null,
         },
         {
             address: '0xc3c7d422809852031b44ab29eec9f1eff2a58756',
             balance: '331.466141781162778932',
             decimals: 18,
             priceRate: '1',
-            weight: '0.1648',
+            weight: null,
         },
         {
             address: '0xd6df932a45c0f255f85145f286ea0b292b21c90b',
             balance: '4.675112151574476223',
             decimals: 18,
             priceRate: '1',
-            weight: '0.0939',
+            weight: null,
         },
     ],
 };
@@ -115,7 +115,7 @@ const funds = {
     toInternalBalance: false,
 };
 
-describe('KassandraManaged', () => {
+describe('Managed', () => {
     before(async function () {
         sor = await setUp(
             networkId,

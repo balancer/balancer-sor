@@ -92,7 +92,7 @@ export async function getOnChainBalances(
         // TO DO - Make this part of class to make more flexible?
         if (
             pool.poolType === 'Weighted' ||
-            pool.poolType === 'KassandraManaged' ||
+            pool.poolType === 'Managed' ||
             pool.poolType === 'LiquidityBootstrapping' ||
             pool.poolType === 'Investment'
         ) {
@@ -281,17 +281,12 @@ export async function getOnChainBalances(
             const tokens = [...poolTokens.tokens];
             const balances = [...poolTokens.balances];
 
-            if (subgraphPools[index].poolType === 'KassandraManaged') {
+            if (subgraphPools[index].poolType === 'Managed') {
                 tokens.shift();
                 balances.shift();
             }
 
             tokens.forEach((token, i) => {
-                if (
-                    i === 0 &&
-                    subgraphPools[index].poolType === 'KassandraManaged'
-                )
-                    return;
                 const T = subgraphPools[index].tokens.find((t) =>
                     isSameAddress(t.address, token)
                 );

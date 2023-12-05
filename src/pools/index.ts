@@ -10,7 +10,7 @@ import { Gyro3Pool } from './gyro3Pool/gyro3Pool';
 import { GyroEPool } from './gyroEPool/gyroEPool';
 import { GyroEV2Pool } from './gyroEV2Pool/gyroEV2Pool';
 import { FxPool } from './xaveFxPool/fxPool';
-import { KassandraManagedPool } from './kassandraManaged/kassandraManagedPool';
+import { KassandraManagedPool } from './managedPools/kassandraManagedPool';
 import {
     BigNumber as OldBigNumber,
     INFINITY,
@@ -93,7 +93,7 @@ export function parseNewPool(
                 newPool = GyroEPool.fromPool(pool);
             }
         } else if (pool.poolType === 'FX') newPool = FxPool.fromPool(pool);
-        else if (pool.poolType === 'KassandraManaged')
+        else if (pool.poolType === 'Managed')
             newPool = KassandraManagedPool.fromPool(pool);
         else {
             console.error(

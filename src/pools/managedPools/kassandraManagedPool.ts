@@ -32,7 +32,7 @@ export type ManagedPoolPairData = PoolPairBase & {
 };
 
 export class KassandraManagedPool implements PoolBase<PoolPairBase> {
-    poolType: PoolTypes = PoolTypes.KassandraManaged;
+    poolType: PoolTypes = PoolTypes.Managed;
     id: string;
     address: string;
     tokensList: string[];
