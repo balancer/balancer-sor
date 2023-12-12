@@ -31,7 +31,7 @@ export type ManagedPoolPairData = PoolPairBase & {
     weightOut: BigNumber;
 };
 
-export class KassandraManagedPool implements PoolBase<PoolPairBase> {
+export class MaganedPoolKassandra implements PoolBase<PoolPairBase> {
     poolType: PoolTypes = PoolTypes.Managed;
     id: string;
     address: string;
@@ -51,7 +51,6 @@ export class KassandraManagedPool implements PoolBase<PoolPairBase> {
         tokenList: string[],
         tokens: WeightedPoolToken[],
         totalShares: string,
-        totalWeight: string,
         swapFee: string
     ) {
         this.id = id;
@@ -59,21 +58,20 @@ export class KassandraManagedPool implements PoolBase<PoolPairBase> {
         this.tokensList = tokenList;
         this.tokens = tokens;
         this.totalShares = parseFixed(totalShares, 18);
-        this.totalWeight = parseFixed(totalWeight, 18);
+        this.totalWeight = parseFixed('1', 18);
         this.swapFee = parseFixed(swapFee, 18);
     }
 
-    static fromPool(pool: SubgraphPoolBase): KassandraManagedPool {
+    static fromPool(pool: SubgraphPoolBase): MaganedPoolKassandra {
         if (!pool.totalWeight) {
             throw new Error('WeightedPool missing totalWeight');
         }
-        return new KassandraManagedPool(
+        return new MaganedPoolKassandra(
             pool.id,
             pool.address,
             pool.tokensList,
             pool.tokens as WeightedPoolToken[],
             pool.totalShares,
-            pool.totalWeight,
             pool.swapFee
         );
     }

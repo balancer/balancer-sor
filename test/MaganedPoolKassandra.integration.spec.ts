@@ -4,7 +4,7 @@ import { SOR, SubgraphPoolBase, SwapTypes } from '../src';
 import { Network, vaultAddr } from './testScripts/constants';
 import { formatFixed, parseFixed } from '@ethersproject/bignumber';
 import { expect } from 'chai';
-import { KassandraManagedPool } from '../src/pools/managedPools/kassandraManagedPool';
+import { MaganedPoolKassandra } from '../src/pools/managedPools/MaganedPoolKassandra';
 import { setUp } from './testScripts/utils';
 import { WeightedPoolToken } from '../src/pools/weightedPool/weightedPool';
 import { Vault, Vault__factory } from '@balancer-labs/typechain';
@@ -18,7 +18,7 @@ const testPool: SubgraphPoolBase = {
     poolType: 'Managed',
     swapFee: '0.003',
     swapEnabled: true,
-    totalWeight: '1',
+    totalWeight: '0',
     totalShares: '587.155942710616273381',
     tokensList: [
         '0x107cb7c6d67ad745c50d7d4627335c1c6a684003',
@@ -104,7 +104,7 @@ const jsonRpcUrl = process.env.RPC_URL_POLYGON;
 const rpcUrl = 'http://127.0.0.1:8137';
 const blockNumber = 50629622;
 const provider = new JsonRpcProvider(rpcUrl, networkId);
-let pool: KassandraManagedPool;
+let pool: MaganedPoolKassandra;
 let sor: SOR;
 let vault: Vault;
 
@@ -126,7 +126,7 @@ describe('Managed', () => {
         );
         await sor.fetchPools();
         const pools = sor.getPools();
-        pool = KassandraManagedPool.fromPool(pools[0]);
+        pool = MaganedPoolKassandra.fromPool(pools[0]);
         vault = Vault__factory.connect(vaultAddr, provider);
     });
     context('test swaps vs querySwap', () => {
