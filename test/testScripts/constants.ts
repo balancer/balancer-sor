@@ -371,6 +371,7 @@ export const ADDRESSES = {
         },
     },
     [Network.POLYGON]: {
+        balancerHelpers: '0xE39B5e3B6D74016b2F6A9673D7d7493B6DF549d5',
         MATIC: {
             address: AddressZero,
             decimals: 18,
