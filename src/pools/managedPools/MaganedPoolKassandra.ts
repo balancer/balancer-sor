@@ -63,9 +63,6 @@ export class MaganedPoolKassandra implements PoolBase<PoolPairBase> {
     }
 
     static fromPool(pool: SubgraphPoolBase): MaganedPoolKassandra {
-        if (!pool.totalWeight) {
-            throw new Error('WeightedPool missing totalWeight');
-        }
         return new MaganedPoolKassandra(
             pool.id,
             pool.address,
