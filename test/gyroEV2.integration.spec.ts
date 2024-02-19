@@ -12,10 +12,10 @@ import { setUp } from './testScripts/utils';
 dotenv.config();
 
 const networkId = Network.POLYGON;
-const jsonRpcUrl = '';
+const jsonRpcUrl = process.env.RPC_URL_POLYGON ?? '';
 const rpcUrl = 'http://127.0.0.1:8137';
 const provider = new JsonRpcProvider(rpcUrl, networkId);
-const blocknumber = 42173266;
+const blocknumber = 47427007;
 
 const vault = Vault__factory.connect(vaultAddr, provider);
 
@@ -64,7 +64,7 @@ const gyroEV2PoolWMATIC_stMATIC_POLYGON: SubgraphPoolBase = {
     dSq: '0.9999999999999999988662409334210612',
 };
 
-describe.skip('gyroEV2: WMATIC-stMATIC integration tests', () => {
+describe('gyroEV2: WMATIC-stMATIC integration tests', () => {
     let sor: SOR;
     const funds = {
         sender: AddressZero,
@@ -91,21 +91,20 @@ describe.skip('gyroEV2: WMATIC-stMATIC integration tests', () => {
         it('should return no swaps when above limit', async () => {
             const tokenIn = ADDRESSES[Network.POLYGON].WMATIC.address;
             const tokenOut = ADDRESSES[Network.POLYGON].stMATIC.address;
-            const swapAmount = parseFixed('33.33333333333333', 18);
+            const swapAmount = parseFixed('100000000', 18);
             const swapInfo = await sor.getSwaps(
                 tokenIn,
                 tokenOut,
                 swapType,
                 swapAmount
             );
-
             expect(swapInfo.swaps.length).to.eq(0);
             expect(swapInfo.returnAmount.toString()).to.eq('0');
         });
         it('token > LSD, getSwaps result should match queryBatchSwap', async () => {
             const tokenIn = ADDRESSES[Network.POLYGON].WMATIC.address;
             const tokenOut = ADDRESSES[Network.POLYGON].stMATIC.address;
-            const swapAmount = parseFixed('1.12345678', 18);
+            const swapAmount = parseFixed('1603426', 18);
             const swapInfo = await sor.getSwaps(
                 tokenIn,
                 tokenOut,
@@ -130,7 +129,7 @@ describe.skip('gyroEV2: WMATIC-stMATIC integration tests', () => {
         it('LSD > token, getSwaps result should match queryBatchSwap', async () => {
             const tokenIn = ADDRESSES[Network.POLYGON].stMATIC.address;
             const tokenOut = ADDRESSES[Network.POLYGON].WMATIC.address;
-            const swapAmount = parseFixed('0.999', 18);
+            const swapAmount = parseFixed('160342', 18);
             const swapInfo = await sor.getSwaps(
                 tokenIn,
                 tokenOut,
@@ -160,7 +159,7 @@ describe.skip('gyroEV2: WMATIC-stMATIC integration tests', () => {
         it('should return no swaps when above limit', async () => {
             const tokenIn = ADDRESSES[Network.POLYGON].WMATIC.address;
             const tokenOut = ADDRESSES[Network.POLYGON].stMATIC.address;
-            const swapAmount = parseFixed('100', 18);
+            const swapAmount = parseFixed('100000000', 18);
             const swapInfo = await sor.getSwaps(
                 tokenIn,
                 tokenOut,
@@ -174,7 +173,7 @@ describe.skip('gyroEV2: WMATIC-stMATIC integration tests', () => {
         it('token > LSD, getSwaps result should match queryBatchSwap', async () => {
             const tokenIn = ADDRESSES[Network.POLYGON].WMATIC.address;
             const tokenOut = ADDRESSES[Network.POLYGON].stMATIC.address;
-            const swapAmount = parseFixed('1.987654321', 18);
+            const swapAmount = parseFixed('1603426', 18);
             const swapInfo = await sor.getSwaps(
                 tokenIn,
                 tokenOut,
@@ -198,7 +197,7 @@ describe.skip('gyroEV2: WMATIC-stMATIC integration tests', () => {
         it('LSD > token, getSwaps result should match queryBatchSwap', async () => {
             const tokenIn = ADDRESSES[Network.POLYGON].stMATIC.address;
             const tokenOut = ADDRESSES[Network.POLYGON].WMATIC.address;
-            const swapAmount = parseFixed('0.999', 18);
+            const swapAmount = parseFixed('1603420', 18);
             const swapInfo = await sor.getSwaps(
                 tokenIn,
                 tokenOut,

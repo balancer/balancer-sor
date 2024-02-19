@@ -140,11 +140,14 @@ export async function getOnChainBalances(
             );
 
             multiPool.call(`${pool.id}.targets`, pool.address, 'getTargets');
-            multiPool.call(
-                `${pool.id}.rate`,
-                pool.address,
-                'getWrappedTokenRate'
-            );
+            // AaveLinear pools with version === 1 rates will still work
+            if (pool.poolType === 'AaveLinear' && pool.poolTypeVersion === 1) {
+                multiPool.call(
+                    `${pool.id}.rate`,
+                    pool.address,
+                    'getWrappedTokenRate'
+                );
+            }
         } else if (pool.poolType.toString().includes('Gyro')) {
             multiPool.call(
                 `${pool.id}.swapFee`,
@@ -263,19 +266,24 @@ export async function getOnChainBalances(
                     );
                 }
 
-                const wrappedIndex = subgraphPools[index].wrappedIndex;
                 if (
-                    wrappedIndex === undefined ||
-                    onchainData.rate === undefined
+                    subgraphPools[index].poolType === 'AaveLinear' &&
+                    subgraphPools[index].poolTypeVersion === 1
                 ) {
-                    console.error(
-                        `Linear Pool Missing WrappedIndex or PriceRate: ${poolId}`
-                    );
-                    return;
+                    const wrappedIndex = subgraphPools[index].wrappedIndex;
+                    if (
+                        wrappedIndex === undefined ||
+                        onchainData.rate === undefined
+                    ) {
+                        console.error(
+                            `Linear Pool Missing WrappedIndex or PriceRate: ${poolId}`
+                        );
+                        return;
+                    }
+                    // Update priceRate of wrappedToken
+                    subgraphPools[index].tokens[wrappedIndex].priceRate =
+                        formatFixed(onchainData.rate, 18);
                 }
-                // Update priceRate of wrappedToken
-                subgraphPools[index].tokens[wrappedIndex].priceRate =
-                    formatFixed(onchainData.rate, 18);
             }
 
             subgraphPools[index].swapFee = formatFixed(swapFee, 18);
