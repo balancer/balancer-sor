@@ -1,6 +1,6 @@
 // Example using SOR to find the best swap for a given pair and simulate using batchSwap.
 // Requires TRADER_KEY in .env.
-// Run using: $ TS_NODE_PROJECT='tsconfig.testing.json' ts-node ./test/testScripts/swapExample.ts
+// Run using: yarn example ./test/testScripts/swapExample.ts
 // NOTE: This is for test/debug purposes, the Balancer SDK Swaps module has a more user friendly interface for interacting with SOR:
 // https://github.com/balancer-labs/balancer-sdk/tree/develop/balancer-js#swaps-module
 import dotenv from 'dotenv';
@@ -10,7 +10,6 @@ import { JsonRpcProvider } from '@ethersproject/providers';
 import { Wallet } from '@ethersproject/wallet';
 import { Contract } from '@ethersproject/contracts';
 import { SOR, SwapInfo, SwapTypes } from '../../src';
-import { CoingeckoTokenPriceService } from '../lib/coingeckoTokenPriceService';
 import { SubgraphPoolDataService } from '../lib/subgraphPoolDataService';
 import {
     Network,
@@ -24,6 +23,7 @@ import {
 import { buildTx, printOutput } from './utils';
 
 import vaultArtifact from '../../src/abi/Vault.json';
+import { ApiTokenPriceService } from '../lib/apiTokenPriceService';
 
 // Setup SOR with data services
 function setUp(networkId: Network, provider: JsonRpcProvider): SOR {
@@ -42,9 +42,10 @@ function setUp(networkId: Network, provider: JsonRpcProvider): SOR {
     // mockPoolDataService.setPools(poolsSource);
 
     // Use coingecko to fetch token price information. Used to calculate cost of additonal swaps/hops.
-    const coingeckoTokenPriceService = new CoingeckoTokenPriceService(
-        networkId
-    );
+    // const coingeckoTokenPriceService = new CoingeckoTokenPriceService(
+    //     networkId
+    // );
+    const apiTokenPriceService = new ApiTokenPriceService(networkId);
     // Use the mock token price service if you want to manually set the token price in native asset
     // import { mockPoolDataService } from '../lib/mockPoolDataService';
     //  mockTokenPriceService.setTokenPrice('0.001');
@@ -53,22 +54,22 @@ function setUp(networkId: Network, provider: JsonRpcProvider): SOR {
         provider,
         SOR_CONFIG[networkId],
         subgraphPoolDataService,
-        coingeckoTokenPriceService
+        apiTokenPriceService
     );
 }
 
 export async function swap(): Promise<void> {
-    const networkId = Network.GNOSIS;
+    const networkId = Network.ARBITRUM;
     const provider = new JsonRpcProvider(PROVIDER_URLS[networkId]);
     // gasPrice is used by SOR as a factor to determine how many pools to swap against.
     // i.e. higher cost means more costly to trade against lots of different pools.
     const gasPrice = BigNumber.from('14000000000');
     // This determines the max no of pools the SOR will use to swap.
     const maxPools = 4;
-    const tokenIn = ADDRESSES[networkId].WXDAI;
-    const tokenOut = ADDRESSES[networkId].crvUSD;
+    const tokenIn = ADDRESSES[networkId].USDT;
+    const tokenOut = ADDRESSES[networkId].sfrxETH;
     const swapType: SwapTypes = SwapTypes.SwapExactIn;
-    const swapAmount = parseFixed('200', 18);
+    const swapAmount = parseFixed('100', tokenIn.decimals);
 
     const sor = setUp(networkId, provider);
 
