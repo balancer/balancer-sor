@@ -239,7 +239,7 @@ export const setUp = async (
         provider,
         pools,
     });
-    class CoingeckoTokenPriceService implements TokenPriceService {
+    class MockTokenPriceService implements TokenPriceService {
         constructor(private readonly chainId: number) {}
         async getNativeAssetPriceInToken(
             // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -249,16 +249,14 @@ export const setUp = async (
         }
     }
 
-    // Use coingecko to fetch token price information. Used to calculate cost of additonal swaps/hops.
-    const coingeckoTokenPriceService = new CoingeckoTokenPriceService(
-        networkId
-    );
+    // Mock token price information. Used to calculate cost of additonal swaps/hops.
+    const mockTokenPriceService = new MockTokenPriceService(networkId);
 
     return new SOR(
         provider,
         SOR_CONFIG[networkId],
         onChainPoolDataService,
-        coingeckoTokenPriceService
+        mockTokenPriceService
     );
 };
 
