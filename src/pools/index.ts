@@ -6,6 +6,7 @@ import { ElementPool } from './elementPool/elementPool';
 import { PhantomStablePool } from './phantomStablePool/phantomStablePool';
 import { ComposableStablePool } from './composableStable/composableStablePool';
 import { Gyro2Pool } from './gyro2Pool/gyro2Pool';
+import { Gyro2V2Pool } from './gyro2V2Pool/gyro2V2Pool';
 import { Gyro3Pool } from './gyro3Pool/gyro3Pool';
 import { GyroEPool } from './gyroEPool/gyroEPool';
 import { GyroEV2Pool } from './gyroEV2Pool/gyroEV2Pool';
@@ -37,6 +38,7 @@ export function parseNewPool(
     | PhantomStablePool
     | ComposableStablePool
     | Gyro2Pool
+    | Gyro2V2Pool
     | Gyro3Pool
     | GyroEPool
     | GyroEV2Pool
@@ -54,6 +56,7 @@ export function parseNewPool(
         | PhantomStablePool
         | ComposableStablePool
         | Gyro2Pool
+        | Gyro2V2Pool
         | Gyro3Pool
         | GyroEPool
         | GyroEV2Pool
@@ -81,8 +84,14 @@ export function parseNewPool(
             newPool = PhantomStablePool.fromPool(pool);
         else if (pool.poolType === 'ComposableStable')
             newPool = ComposableStablePool.fromPool(pool);
-        else if (pool.poolType === 'Gyro2') newPool = Gyro2Pool.fromPool(pool);
-        else if (pool.poolType === 'Gyro3') newPool = Gyro3Pool.fromPool(pool);
+        else if (pool.poolType === 'Gyro2') {
+            if (pool.poolTypeVersion === 2) {
+                newPool = Gyro2V2Pool.fromPool(pool);
+            } else {
+                newPool = Gyro2Pool.fromPool(pool);
+            }
+        } else if (pool.poolType === 'Gyro3')
+            newPool = Gyro3Pool.fromPool(pool);
         else if (pool.poolType === 'GyroE') {
             if (pool.poolTypeVersion === 2) {
                 newPool = GyroEV2Pool.fromPool(pool);

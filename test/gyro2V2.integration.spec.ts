@@ -1,70 +1,64 @@
-// yarn test:only test/gyroEV2.integration.spec.ts
+// yarn test:only test/gyro2V2.integration.spec.ts
 import dotenv from 'dotenv';
+dotenv.config();
+
 import { expect } from 'chai';
 import { JsonRpcProvider } from '@ethersproject/providers';
 import { parseFixed } from '@ethersproject/bignumber';
 import { AddressZero } from '@ethersproject/constants';
 import { Vault__factory } from '@balancer-labs/typechain';
-import { bnum, SOR, SubgraphPoolBase, SwapTypes } from '../src';
+
+import { SOR, SubgraphPoolBase, SwapTypes } from '../src';
 import { ADDRESSES, Network, vaultAddr } from './testScripts/constants';
 import { setUp } from './testScripts/utils';
 
-dotenv.config();
-
-const networkId = Network.POLYGON;
-const jsonRpcUrl = process.env.RPC_URL_POLYGON ?? '';
-const rpcUrl = 'http://127.0.0.1:8137';
+const networkId = Network.MAINNET;
+const jsonRpcUrl = process.env.RPC_URL_MAINNET ?? '';
+const rpcUrl = 'http://127.0.0.1:8545';
 const provider = new JsonRpcProvider(rpcUrl, networkId);
-const blocknumber = 47427007;
+const blocknumber = 19269440;
 
 const vault = Vault__factory.connect(vaultAddr, provider);
 
-const gyroEV2PoolWMATIC_stMATIC_POLYGON: SubgraphPoolBase = {
-    id: '0xf0ad209e2e969eaaa8c882aac71f02d8a047d5c2000200000000000000000b49',
-    address: '0xf0ad209e2e969eaaa8c882aac71f02d8a047d5c2',
-    poolType: 'GyroE',
+const WETH = ADDRESSES[networkId].WETH;
+const wSTETH = ADDRESSES[networkId].wSTETH;
+
+const gyro2V2_WSTETH_WETH: SubgraphPoolBase = {
+    id: '0xc6853f0539f7d4926c719326d60bd84a752bbb8f00020000000000000000065e',
+    address: '0xc6853f0539f7d4926c719326d60bd84a752bbb8f',
+    poolType: 'Gyro2',
     poolTypeVersion: 2,
-    swapFee: '0.0002',
+    swapFee: '0.0001',
     swapEnabled: true,
     totalWeight: '0',
-    totalShares: '5.366644050391084161',
+    totalShares: '0.000026367631539116',
     tokensList: [
-        '0x0d500b1d8e8ef31e21c99d1db9a6444d3adf1270',
-        '0x3a58a54c066fdc0f2d55fc9c89f0415c92ebf3c4',
+        '0x7f39c581f595b53c5cb19bd0b3f8da6c935e2ca0',
+        '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2',
     ],
     tokens: [
         {
-            address: '0x0d500b1d8e8ef31e21c99d1db9a6444d3adf1270',
-            balance: '1.123393517620917161',
+            address: '0x7f39c581f595b53c5cb19bd0b3f8da6c935e2ca0',
+            balance: '0.000005508044603265',
             decimals: 18,
             priceRate: '1',
             weight: null,
         },
         {
-            address: '0x3a58a54c066fdc0f2d55fc9c89f0415c92ebf3c4',
-            balance: '3.973745355066743187',
+            address: '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2',
+            balance: '0.000019999999999999',
             decimals: 18,
             priceRate: '1',
             weight: null,
         },
     ],
-    alpha: '0.997',
-    beta: '1.00300902708124',
-    c: '0.707106781186547524',
-    s: '0.707106781186547524',
-    lambda: '2000',
-    tauAlphaX: '-0.9488255257963911869756698523798861',
-    tauAlphaY: '0.3158007625025655333984021158671054',
-    tauBetaX: '0.9488255257962740264038592402880117',
-    tauBetaY: '0.3158007625029175431284287745394428',
-    u: '0.948825525796332605614025003860828',
-    v: '0.3158007625027415379053734674832487',
-    w: '0.00000000000017600486501332933596912057',
-    z: '-0.00000000000005858028590530604587080878',
-    dSq: '0.9999999999999999988662409334210612',
+    sqrtAlpha: '0.998348636499294268',
+    sqrtBeta: '1.001249219725039286',
 };
 
-describe('gyroEV2: WMATIC-stMATIC integration tests', () => {
+const ROUNDING_ERROR_TOLERANCE = 2; // in wei
+
+describe('gyro2V2: WETH-wSTETH integration tests', () => {
     let sor: SOR;
     const funds = {
         sender: AddressZero,
@@ -78,7 +72,7 @@ describe('gyroEV2: WMATIC-stMATIC integration tests', () => {
         sor = await setUp(
             networkId,
             provider,
-            [gyroEV2PoolWMATIC_stMATIC_POLYGON],
+            [gyro2V2_WSTETH_WETH],
             jsonRpcUrl as string,
             blocknumber
         );
@@ -89,9 +83,9 @@ describe('gyroEV2: WMATIC-stMATIC integration tests', () => {
         const swapType = SwapTypes.SwapExactIn;
 
         it('should return no swaps when above limit', async () => {
-            const tokenIn = ADDRESSES[Network.POLYGON].WMATIC.address;
-            const tokenOut = ADDRESSES[Network.POLYGON].stMATIC.address;
-            const swapAmount = parseFixed('100000000', 18);
+            const tokenIn = WETH.address;
+            const tokenOut = wSTETH.address;
+            const swapAmount = parseFixed('1', WETH.decimals);
             const swapInfo = await sor.getSwaps(
                 tokenIn,
                 tokenOut,
@@ -102,9 +96,9 @@ describe('gyroEV2: WMATIC-stMATIC integration tests', () => {
             expect(swapInfo.returnAmount.toString()).to.eq('0');
         });
         it('token > LSD, getSwaps result should match queryBatchSwap', async () => {
-            const tokenIn = ADDRESSES[Network.POLYGON].WMATIC.address;
-            const tokenOut = ADDRESSES[Network.POLYGON].stMATIC.address;
-            const swapAmount = parseFixed('1603426', 18);
+            const tokenIn = WETH.address;
+            const tokenOut = wSTETH.address;
+            const swapAmount = parseFixed('0.000000001', WETH.decimals);
             const swapInfo = await sor.getSwaps(
                 tokenIn,
                 tokenOut,
@@ -119,17 +113,19 @@ describe('gyroEV2: WMATIC-stMATIC integration tests', () => {
                 funds
             );
 
-            expect(queryResult[0].toString()).to.eq(
-                swapInfo.swapAmount.toString()
+            expect(queryResult[0].toNumber()).to.be.closeTo(
+                swapInfo.swapAmount.toNumber(),
+                ROUNDING_ERROR_TOLERANCE
             );
-            expect(bnum(queryResult[1].abs().toString()).toNumber()).to.eq(
-                bnum(swapInfo.returnAmount.toString()).toNumber()
+            expect(queryResult[1].toNumber() * -1).to.be.closeTo(
+                swapInfo.returnAmount.toNumber(),
+                ROUNDING_ERROR_TOLERANCE
             );
         });
         it('LSD > token, getSwaps result should match queryBatchSwap', async () => {
-            const tokenIn = ADDRESSES[Network.POLYGON].stMATIC.address;
-            const tokenOut = ADDRESSES[Network.POLYGON].WMATIC.address;
-            const swapAmount = parseFixed('160342', 18);
+            const tokenIn = wSTETH.address;
+            const tokenOut = WETH.address;
+            const swapAmount = parseFixed('0.000000001', wSTETH.decimals);
             const swapInfo = await sor.getSwaps(
                 tokenIn,
                 tokenOut,
@@ -144,11 +140,13 @@ describe('gyroEV2: WMATIC-stMATIC integration tests', () => {
                 funds
             );
 
-            expect(queryResult[0].toString()).to.eq(
-                swapInfo.swapAmount.toString()
+            expect(queryResult[0].toNumber()).to.be.closeTo(
+                swapInfo.swapAmount.toNumber(),
+                ROUNDING_ERROR_TOLERANCE
             );
-            expect(bnum(queryResult[1].abs().toString()).toNumber()).to.eq(
-                bnum(swapInfo.returnAmount.toString()).toNumber()
+            expect(queryResult[1].toNumber() * -1).to.be.closeTo(
+                swapInfo.returnAmount.toNumber(),
+                ROUNDING_ERROR_TOLERANCE
             );
         });
     });
@@ -157,9 +155,9 @@ describe('gyroEV2: WMATIC-stMATIC integration tests', () => {
         const swapType = SwapTypes.SwapExactOut;
 
         it('should return no swaps when above limit', async () => {
-            const tokenIn = ADDRESSES[Network.POLYGON].WMATIC.address;
-            const tokenOut = ADDRESSES[Network.POLYGON].stMATIC.address;
-            const swapAmount = parseFixed('100000000', 18);
+            const tokenIn = WETH.address;
+            const tokenOut = wSTETH.address;
+            const swapAmount = parseFixed('1', wSTETH.decimals);
             const swapInfo = await sor.getSwaps(
                 tokenIn,
                 tokenOut,
@@ -171,9 +169,9 @@ describe('gyroEV2: WMATIC-stMATIC integration tests', () => {
             expect(swapInfo.returnAmount.toString()).to.eq('0');
         });
         it('token > LSD, getSwaps result should match queryBatchSwap', async () => {
-            const tokenIn = ADDRESSES[Network.POLYGON].WMATIC.address;
-            const tokenOut = ADDRESSES[Network.POLYGON].stMATIC.address;
-            const swapAmount = parseFixed('1603426', 18);
+            const tokenIn = WETH.address;
+            const tokenOut = wSTETH.address;
+            const swapAmount = parseFixed('0.000000001', wSTETH.decimals);
             const swapInfo = await sor.getSwaps(
                 tokenIn,
                 tokenOut,
@@ -187,17 +185,19 @@ describe('gyroEV2: WMATIC-stMATIC integration tests', () => {
                 swapInfo.tokenAddresses,
                 funds
             );
-            expect(bnum(queryResult[0].abs().toString()).toNumber()).to.eq(
-                bnum(swapInfo.returnAmount.toString()).toNumber()
+            expect(queryResult[0].toNumber()).to.be.closeTo(
+                swapInfo.returnAmount.toNumber(),
+                ROUNDING_ERROR_TOLERANCE
             );
-            expect(queryResult[1].abs().toString()).to.eq(
-                swapInfo.swapAmount.toString()
+            expect(queryResult[1].toNumber() * -1).to.be.closeTo(
+                swapInfo.swapAmount.toNumber(),
+                ROUNDING_ERROR_TOLERANCE
             );
         });
         it('LSD > token, getSwaps result should match queryBatchSwap', async () => {
-            const tokenIn = ADDRESSES[Network.POLYGON].stMATIC.address;
-            const tokenOut = ADDRESSES[Network.POLYGON].WMATIC.address;
-            const swapAmount = parseFixed('1603420', 18);
+            const tokenIn = wSTETH.address;
+            const tokenOut = WETH.address;
+            const swapAmount = parseFixed('0.000000001', WETH.decimals);
             const swapInfo = await sor.getSwaps(
                 tokenIn,
                 tokenOut,
@@ -211,11 +211,13 @@ describe('gyroEV2: WMATIC-stMATIC integration tests', () => {
                 swapInfo.tokenAddresses,
                 funds
             );
-            expect(bnum(queryResult[0].abs().toString()).toNumber()).to.eq(
-                bnum(swapInfo.returnAmount.toString()).toNumber()
+            expect(queryResult[0].toNumber()).to.be.closeTo(
+                swapInfo.returnAmount.toNumber(),
+                ROUNDING_ERROR_TOLERANCE
             );
-            expect(queryResult[1].abs().toString()).to.eq(
-                swapInfo.swapAmount.toString()
+            expect(queryResult[1].toNumber() * -1).to.be.closeTo(
+                swapInfo.swapAmount.toNumber(),
+                ROUNDING_ERROR_TOLERANCE
             );
         });
     });

@@ -13,6 +13,7 @@ import elementPoolAbi from '../../src/pools/elementPool/ConvergentCurvePool.json
 import linearPoolAbi from '../../src/pools/linearPool/linearPoolAbi.json';
 import fxPoolAbi from '../../src/pools/xaveFxPool/fxPoolAbi.json';
 import gyroEV2Abi from '../../src/pools/gyroEV2Pool/gyroEV2Abi.json';
+import gyro2V2Abi from '../../src/pools/gyro2V2Pool/gyro2V2Abi.json';
 import { PoolFilter, SubgraphPoolBase, PoolDataService } from '../../src';
 import { Multicaller } from './multicaller';
 import { Fragment, JsonFragment } from '@ethersproject/abi/lib/fragments';
@@ -39,6 +40,7 @@ export async function getOnChainBalances(
                     ...composableStablePoolAbi,
                     ...fxPoolAbi,
                     ...gyroEV2Abi,
+                    ...gyro2V2Abi,
                 ].map((row) => [row.name, row])
             )
         );
@@ -138,11 +140,14 @@ export async function getOnChainBalances(
             );
 
             multiPool.call(`${pool.id}.targets`, pool.address, 'getTargets');
-            multiPool.call(
-                `${pool.id}.rate`,
-                pool.address,
-                'getWrappedTokenRate'
-            );
+            // AaveLinear pools with version === 1 rates will still work
+            if (pool.poolType === 'AaveLinear' && pool.poolTypeVersion === 1) {
+                multiPool.call(
+                    `${pool.id}.rate`,
+                    pool.address,
+                    'getWrappedTokenRate'
+                );
+            }
         } else if (pool.poolType.toString().includes('Gyro')) {
             multiPool.call(
                 `${pool.id}.swapFee`,
@@ -151,6 +156,15 @@ export async function getOnChainBalances(
             );
             if (
                 pool.poolType.toString() === 'GyroE' &&
+                pool.poolTypeVersion === 2
+            ) {
+                multiPool.call(
+                    `${pool.id}.tokenRates`,
+                    pool.address,
+                    'getTokenRates'
+                );
+            } else if (
+                pool.poolType.toString() === 'Gyro2' &&
                 pool.poolTypeVersion === 2
             ) {
                 multiPool.call(
@@ -252,19 +266,24 @@ export async function getOnChainBalances(
                     );
                 }
 
-                const wrappedIndex = subgraphPools[index].wrappedIndex;
                 if (
-                    wrappedIndex === undefined ||
-                    onchainData.rate === undefined
+                    subgraphPools[index].poolType === 'AaveLinear' &&
+                    subgraphPools[index].poolTypeVersion === 1
                 ) {
-                    console.error(
-                        `Linear Pool Missing WrappedIndex or PriceRate: ${poolId}`
-                    );
-                    return;
+                    const wrappedIndex = subgraphPools[index].wrappedIndex;
+                    if (
+                        wrappedIndex === undefined ||
+                        onchainData.rate === undefined
+                    ) {
+                        console.error(
+                            `Linear Pool Missing WrappedIndex or PriceRate: ${poolId}`
+                        );
+                        return;
+                    }
+                    // Update priceRate of wrappedToken
+                    subgraphPools[index].tokens[wrappedIndex].priceRate =
+                        formatFixed(onchainData.rate, 18);
                 }
-                // Update priceRate of wrappedToken
-                subgraphPools[index].tokens[wrappedIndex].priceRate =
-                    formatFixed(onchainData.rate, 18);
             }
 
             subgraphPools[index].swapFee = formatFixed(swapFee, 18);
@@ -328,6 +347,20 @@ export async function getOnChainBalances(
                 );
             }
 
+            if (
+                subgraphPools[index].poolType === 'Gyro2' &&
+                subgraphPools[index].poolTypeVersion == 2
+            ) {
+                if (!Array.isArray(tokenRates) || tokenRates.length !== 2) {
+                    console.error(
+                        `Gyro2V2 pool with missing or invalid tokenRates: ${poolId}`
+                    );
+                    return;
+                }
+                subgraphPools[index].tokenRates = tokenRates.map((rate) =>
+                    formatFixed(rate, 18)
+                );
+            }
             onChainPools.push(subgraphPools[index]);
         } catch (err) {
             throw `Issue with pool onchain data: ${err}`;
