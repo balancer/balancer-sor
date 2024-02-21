@@ -1,0 +1,49 @@
+{
+    "tradeInfo": {
+        "SwapType": "n/a",
+        "TokenIn": "n/a",
+        "TokenOut": "n/a",
+        "NoPools": 1,
+        "SwapAmount": "n/a",
+        "GasPrice": "n/a",
+        "SwapAmountDecimals": "n/a",
+        "ReturnAmountDecimals": "n/a"
+    },
+    "pools": [
+        {
+            "id": "0xebfed10e11dc08fcda1af1fda146945e8710f22e0000000000000000000000ff",
+            "address": "0xebfed10e11dc08fcda1af1fda146945e8710f22e",
+            "swapFee": "0.009",
+            "tokens": [
+                {
+                    "address": "0x6b175474e89094c44da98b954eedeac495271d0f",
+                    "balance": "1232",
+                    "decimals": 18,
+                    "symbol": "DAI",
+                    "weight": null,
+                    "priceRate": "1"
+                },
+                {
+                    "address": "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+                    "balance": "1000",
+                    "decimals": 6,
+                    "weight": null,
+                    "priceRate": "1",
+                    "symbol": "USDC"
+                }
+            ],
+            "tokensList": [
+                "0x6b175474e89094c44da98b954eedeac495271d0f",
+                "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48"
+            ],
+            "totalWeight": "15",
+            "totalShares": "100",
+            "poolType": "Gyro2",
+            "poolTypeVersion": 2,
+            "swapEnabled": true,
+            "sqrtAlpha": "0.9994998749",
+            "sqrtBeta": "1.000499875",
+            "tokenRates": ["1.5", "1"]
+        }
+    ]
+}
