@@ -11,6 +11,7 @@ import { Gyro3Pool } from './gyro3Pool/gyro3Pool';
 import { GyroEPool } from './gyroEPool/gyroEPool';
 import { GyroEV2Pool } from './gyroEV2Pool/gyroEV2Pool';
 import { FxPool } from './xaveFxPool/fxPool';
+import { MaganedPoolKassandra } from './managedPools/MaganedPoolKassandra';
 import {
     BigNumber as OldBigNumber,
     INFINITY,
@@ -43,6 +44,7 @@ export function parseNewPool(
     | GyroEPool
     | GyroEV2Pool
     | FxPool
+    | MaganedPoolKassandra
     | undefined {
     // We're not interested in any pools which don't allow swapping
     if (!pool.swapEnabled) return undefined;
@@ -60,7 +62,8 @@ export function parseNewPool(
         | Gyro3Pool
         | GyroEPool
         | GyroEV2Pool
-        | FxPool;
+        | FxPool
+        | MaganedPoolKassandra;
 
     try {
         const isLinear = pool.poolType.toString().includes('Linear');
@@ -99,6 +102,8 @@ export function parseNewPool(
                 newPool = GyroEPool.fromPool(pool);
             }
         } else if (pool.poolType === 'FX') newPool = FxPool.fromPool(pool);
+        else if (pool.poolType === 'Managed')
+            newPool = MaganedPoolKassandra.fromPool(pool);
         else {
             console.error(
                 `Unknown pool type or type field missing: ${pool.poolType} ${pool.id}`

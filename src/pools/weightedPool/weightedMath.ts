@@ -5,6 +5,8 @@ import { MathSol, BZERO } from '../../utils/basicOperations';
 
 const MAX_INVARIANT_RATIO = BigInt('3000000000000000000'); // 3e18
 
+type WeightedPoolMathPairData = Omit<WeightedPoolPairData, 'pairType'>;
+
 // The following function are BigInt versions implemented by Sergio.
 // BigInt was requested from integrators as it is more efficient.
 // Swap outcomes formulas should match exactly those from smart contracts.
@@ -482,7 +484,7 @@ export function _calcDueProtocolSwapFeeBptAmount(
 // SwapType = 'swapExactIn'
 export function _spotPriceAfterSwapExactTokenInForTokenOut(
     amount: OldBigNumber,
-    poolPairData: WeightedPoolPairData
+    poolPairData: WeightedPoolMathPairData
 ): OldBigNumber {
     const Bi = parseFloat(
         formatFixed(poolPairData.balanceIn, poolPairData.decimalsIn)
@@ -506,7 +508,7 @@ export function _spotPriceAfterSwapExactTokenInForTokenOut(
 // SwapType = 'swapExactOut'
 export function _spotPriceAfterSwapTokenInForExactTokenOut(
     amount: OldBigNumber,
-    poolPairData: WeightedPoolPairData
+    poolPairData: WeightedPoolMathPairData
 ): OldBigNumber {
     const Bi = parseFloat(
         formatFixed(poolPairData.balanceIn, poolPairData.decimalsIn)
@@ -530,7 +532,7 @@ export function _spotPriceAfterSwapTokenInForExactTokenOut(
 // SwapType = 'swapExactIn'
 export function _spotPriceAfterSwapExactTokenInForBPTOut(
     amount: OldBigNumber,
-    poolPairData: WeightedPoolPairData
+    poolPairData: WeightedPoolMathPairData
 ): OldBigNumber {
     const Bi = parseFloat(
         formatFixed(poolPairData.balanceIn, poolPairData.decimalsIn)
@@ -573,7 +575,7 @@ export function _spotPriceAfterSwapBptOutGivenExactTokenInBigInt(
 // SwapType = 'swapExactIn'
 export function _spotPriceAfterSwapExactBPTInForTokenOut(
     amount: OldBigNumber,
-    poolPairData: WeightedPoolPairData
+    poolPairData: WeightedPoolMathPairData
 ): OldBigNumber {
     const Bbpt = parseFloat(
         formatFixed(poolPairData.balanceIn, poolPairData.decimalsIn)
@@ -597,7 +599,7 @@ export function _spotPriceAfterSwapExactBPTInForTokenOut(
 // SwapType = 'swapExactOut'
 export function _spotPriceAfterSwapBPTInForExactTokenOut(
     amount: OldBigNumber,
-    poolPairData: WeightedPoolPairData
+    poolPairData: WeightedPoolMathPairData
 ): OldBigNumber {
     const Bbpt = parseFloat(formatFixed(poolPairData.balanceIn, 18));
     const Bo = parseFloat(
@@ -619,7 +621,7 @@ export function _spotPriceAfterSwapBPTInForExactTokenOut(
 // SwapType = 'swapExactOut'
 export function _spotPriceAfterSwapTokenInForExactBPTOut(
     amount: OldBigNumber,
-    poolPairData: WeightedPoolPairData
+    poolPairData: WeightedPoolMathPairData
 ): OldBigNumber {
     const Bi = parseFloat(
         formatFixed(poolPairData.balanceIn, poolPairData.decimalsIn)
@@ -642,7 +644,7 @@ export function _spotPriceAfterSwapTokenInForExactBPTOut(
 // SwapType = 'swapExactIn'
 export function _derivativeSpotPriceAfterSwapExactTokenInForTokenOut(
     amount: OldBigNumber,
-    poolPairData: WeightedPoolPairData
+    poolPairData: WeightedPoolMathPairData
 ): OldBigNumber {
     const Bi = parseFloat(
         formatFixed(poolPairData.balanceIn, poolPairData.decimalsIn)
@@ -661,7 +663,7 @@ export function _derivativeSpotPriceAfterSwapExactTokenInForTokenOut(
 // SwapType = 'swapExactOut'
 export function _derivativeSpotPriceAfterSwapTokenInForExactTokenOut(
     amount: OldBigNumber,
-    poolPairData: WeightedPoolPairData
+    poolPairData: WeightedPoolMathPairData
 ): OldBigNumber {
     const Bi = parseFloat(
         formatFixed(poolPairData.balanceIn, poolPairData.decimalsIn)
@@ -685,7 +687,7 @@ export function _derivativeSpotPriceAfterSwapTokenInForExactTokenOut(
 // SwapType = 'swapExactIn'
 export function _derivativeSpotPriceAfterSwapExactTokenInForBPTOut(
     amount: OldBigNumber,
-    poolPairData: WeightedPoolPairData
+    poolPairData: WeightedPoolMathPairData
 ): OldBigNumber {
     const Bi = parseFloat(
         formatFixed(poolPairData.balanceIn, poolPairData.decimalsIn)
@@ -703,7 +705,7 @@ export function _derivativeSpotPriceAfterSwapExactTokenInForBPTOut(
 // SwapType = 'swapExactOut'
 export function _derivativeSpotPriceAfterSwapTokenInForExactBPTOut(
     amount: OldBigNumber,
-    poolPairData: WeightedPoolPairData
+    poolPairData: WeightedPoolMathPairData
 ): OldBigNumber {
     const Bi = parseFloat(
         formatFixed(poolPairData.balanceIn, poolPairData.decimalsIn)
@@ -726,7 +728,7 @@ export function _derivativeSpotPriceAfterSwapTokenInForExactBPTOut(
 // SwapType = 'swapExactIn'
 export function _derivativeSpotPriceAfterSwapExactBPTInForTokenOut(
     amount: OldBigNumber,
-    poolPairData: WeightedPoolPairData
+    poolPairData: WeightedPoolMathPairData
 ): OldBigNumber {
     const Bbpt = parseFloat(formatFixed(poolPairData.balanceIn, 18));
     const Bo = parseFloat(
@@ -747,7 +749,7 @@ export function _derivativeSpotPriceAfterSwapExactBPTInForTokenOut(
 // SwapType = 'swapExactOut'
 export function _derivativeSpotPriceAfterSwapBPTInForExactTokenOut(
     amount: OldBigNumber,
-    poolPairData: WeightedPoolPairData
+    poolPairData: WeightedPoolMathPairData
 ): OldBigNumber {
     const Bbpt = parseFloat(formatFixed(poolPairData.balanceIn, 18));
     const Bo = parseFloat(
