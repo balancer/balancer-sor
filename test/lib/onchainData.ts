@@ -13,6 +13,7 @@ import elementPoolAbi from '../../src/pools/elementPool/ConvergentCurvePool.json
 import linearPoolAbi from '../../src/pools/linearPool/linearPoolAbi.json';
 import fxPoolAbi from '../../src/pools/xaveFxPool/fxPoolAbi.json';
 import gyroEV2Abi from '../../src/pools/gyroEV2Pool/gyroEV2Abi.json';
+import gyro2V2Abi from '../../src/pools/gyro2V2Pool/gyro2V2Abi.json';
 import { PoolFilter, SubgraphPoolBase, PoolDataService } from '../../src';
 import { Multicaller } from './multicaller';
 import { Fragment, JsonFragment } from '@ethersproject/abi/lib/fragments';
@@ -39,6 +40,7 @@ export async function getOnChainBalances(
                     ...composableStablePoolAbi,
                     ...fxPoolAbi,
                     ...gyroEV2Abi,
+                    ...gyro2V2Abi,
                 ].map((row) => [row.name, row])
             )
         );
@@ -154,6 +156,15 @@ export async function getOnChainBalances(
             );
             if (
                 pool.poolType.toString() === 'GyroE' &&
+                pool.poolTypeVersion === 2
+            ) {
+                multiPool.call(
+                    `${pool.id}.tokenRates`,
+                    pool.address,
+                    'getTokenRates'
+                );
+            } else if (
+                pool.poolType.toString() === 'Gyro2' &&
                 pool.poolTypeVersion === 2
             ) {
                 multiPool.call(
@@ -336,6 +347,20 @@ export async function getOnChainBalances(
                 );
             }
 
+            if (
+                subgraphPools[index].poolType === 'Gyro2' &&
+                subgraphPools[index].poolTypeVersion == 2
+            ) {
+                if (!Array.isArray(tokenRates) || tokenRates.length !== 2) {
+                    console.error(
+                        `Gyro2V2 pool with missing or invalid tokenRates: ${poolId}`
+                    );
+                    return;
+                }
+                subgraphPools[index].tokenRates = tokenRates.map((rate) =>
+                    formatFixed(rate, 18)
+                );
+            }
             onChainPools.push(subgraphPools[index]);
         } catch (err) {
             throw `Issue with pool onchain data: ${err}`;
