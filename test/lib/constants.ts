@@ -56,11 +56,11 @@ export const sorConfigEth: SorConfig = {
     weth: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2',
     connectingTokens: [
         {
-            symbol: 'wstEth',
+            symbol: 'wETH',
             address: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2',
         },
         {
-            symbol: 'wEth',
+            symbol: 'wstETH',
             address: '0x7f39C581F595B53c5cb19bD0b3f8dA6c935E2Ca0',
         },
     ],
