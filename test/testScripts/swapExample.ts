@@ -59,17 +59,17 @@ function setUp(networkId: Network, provider: JsonRpcProvider): SOR {
 }
 
 export async function swap(): Promise<void> {
-    const networkId = Network.ARBITRUM;
+    const networkId = Network.MAINNET;
     const provider = new JsonRpcProvider(PROVIDER_URLS[networkId]);
     // gasPrice is used by SOR as a factor to determine how many pools to swap against.
     // i.e. higher cost means more costly to trade against lots of different pools.
     const gasPrice = BigNumber.from('14000000000');
     // This determines the max no of pools the SOR will use to swap.
     const maxPools = 4;
-    const tokenIn = ADDRESSES[networkId].USDT;
-    const tokenOut = ADDRESSES[networkId].sfrxETH;
+    const tokenIn = ADDRESSES[networkId].BAL80WETH20;
+    const tokenOut = ADDRESSES[networkId].USDC;
     const swapType: SwapTypes = SwapTypes.SwapExactIn;
-    const swapAmount = parseFixed('100', tokenIn.decimals);
+    const swapAmount = parseFixed('17', tokenIn.decimals);
 
     const sor = setUp(networkId, provider);
 
@@ -82,8 +82,8 @@ export async function swap(): Promise<void> {
         tokenOut.address,
         swapType,
         swapAmount,
-        { gasPrice, maxPools },
-        false
+        undefined,
+        true
     );
 
     // Simulate the swap transaction
@@ -104,41 +104,41 @@ export async function swap(): Promise<void> {
             tx.limits
         );
 
-        if (![tokenIn, tokenOut].includes(ADDRESSES[networkId].STETH)) {
-            console.log('VAULT SWAP');
-            const vaultContract = new Contract(
-                vaultAddr,
-                vaultArtifact,
-                provider
-            );
-            // Simulates a call to `batchSwap`, returning an array of Vault asset deltas.
-            // Each element in the array corresponds to the asset at the same index, and indicates the number of tokens(or ETH)
-            // the Vault would take from the sender(if positive) or send to the recipient(if negative).
-            const deltas = await vaultContract.queryBatchSwap(
-                swapType,
-                swapInfo.swaps,
-                swapInfo.tokenAddresses,
-                tx.funds
-            );
-            console.log(deltas.toString());
-            // To actually make the trade:
-            // vaultContract.connect(wallet);
-            // const tx = await vaultContract
-            //     .connect(wallet)
-            //     .batchSwap(
-            //         swapType,
-            //         swapInfo.swaps,
-            //         swapInfo.tokenAddresses,
-            //         tx.funds,
-            //         tx.limits,
-            //         tx.deadline,
-            //         tx.overRides
-            //     );
+        // if (![tokenIn, tokenOut].includes(ADDRESSES[networkId].STETH)) {
+        //     console.log('VAULT SWAP');
+        //     const vaultContract = new Contract(
+        //         vaultAddr,
+        //         vaultArtifact,
+        //         provider
+        //     );
+        //     // Simulates a call to `batchSwap`, returning an array of Vault asset deltas.
+        //     // Each element in the array corresponds to the asset at the same index, and indicates the number of tokens(or ETH)
+        //     // the Vault would take from the sender(if positive) or send to the recipient(if negative).
+        //     const deltas = await vaultContract.queryBatchSwap(
+        //         swapType,
+        //         swapInfo.swaps,
+        //         swapInfo.tokenAddresses,
+        //         tx.funds
+        //     );
+        //     console.log(deltas.toString());
+        //     // To actually make the trade:
+        //     // vaultContract.connect(wallet);
+        //     // const tx = await vaultContract
+        //     //     .connect(wallet)
+        //     //     .batchSwap(
+        //     //         swapType,
+        //     //         swapInfo.swaps,
+        //     //         swapInfo.tokenAddresses,
+        //     //         tx.funds,
+        //     //         tx.limits,
+        //     //         tx.deadline,
+        //     //         tx.overRides
+        //     //     );
 
-            // console.log(`tx: ${tx}`);
-        } else {
-            console.log('RELAYER SWAP - Execute via batchRelayer.');
-        }
+        //     // console.log(`tx: ${tx}`);
+        // } else {
+        //     console.log('RELAYER SWAP - Execute via batchRelayer.');
+        // }
     } else {
         console.log('No Valid Swap');
         await printOutput(
