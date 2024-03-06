@@ -108,7 +108,6 @@ export class SOR {
         }
         const pools: SubgraphPoolBase[] = this.poolCacher.getPools(useBpts);
         const filteredPools = filterPoolsByType(pools, options.poolTypeFilter);
-
         const wrappedInfo = await getWrappedInfo(
             this.provider,
             swapType,
@@ -117,7 +116,6 @@ export class SOR {
             this.config,
             BigNumber.from(swapAmount)
         );
-
         let swapInfo: SwapInfo;
         if (isLidoStableSwap(this.config.chainId, tokenIn, tokenOut)) {
             swapInfo = await getLidoStaticSwaps(
@@ -146,6 +144,62 @@ export class SOR {
 
         return swapInfo;
     }
+
+    async getSwapsWithFilteredPoolsInput(
+        tokenIn: string,
+        tokenOut: string,
+        swapType: SwapTypes,
+        swapAmount: BigNumberish,
+        filteredPools: SubgraphPoolBase[],
+        swapOptions?: Partial<SwapOptions>,
+        useBpts = false
+    ): Promise<SwapInfo> {
+        const options: SwapOptions = {
+            ...this.defaultSwapOptions,
+            ...swapOptions,
+        };
+        if (this.useBpt !== useBpts) {
+            options.forceRefresh = true;
+            this.useBpt = useBpts;
+        }
+        const wrappedInfo = await getWrappedInfo(
+            this.provider,
+            swapType,
+            tokenIn,
+            tokenOut,
+            this.config,
+            BigNumber.from(swapAmount)
+        );
+        console.log('wrappedInfo: ', wrappedInfo);
+        let swapInfo: SwapInfo;
+        if (isLidoStableSwap(this.config.chainId, tokenIn, tokenOut)) {
+            swapInfo = await getLidoStaticSwaps(
+                filteredPools,
+                this.config.chainId,
+                wrappedInfo.tokenIn.addressForSwaps,
+                wrappedInfo.tokenOut.addressForSwaps,
+                swapType,
+                wrappedInfo.swapAmountForSwaps,
+                this.provider
+            );
+        } else {
+            swapInfo = await this.processSwaps(
+                wrappedInfo.tokenIn.addressForSwaps,
+                wrappedInfo.tokenOut.addressForSwaps,
+                swapType,
+                wrappedInfo.swapAmountForSwaps,
+                filteredPools,
+                options
+            );
+        }
+
+        if (swapInfo.returnAmount.isZero()) return swapInfo;
+
+        swapInfo = setWrappedInfo(swapInfo, swapType, wrappedInfo, this.config);
+
+        return swapInfo;
+    }
+
     /**
      * getCostOfSwapInToken Calculates and saves price of a swap in outputToken denomination. Used to determine if extra swaps are cost effective.
      * @param {string} outputToken - Address of outputToken.
@@ -187,7 +241,19 @@ export class SOR {
             pools,
             swapOptions
         );
-
+        // console.log('paths: ');
+        // console.log(
+        //     paths.map((path) =>
+        //         path.poolPairData.map((poolPairData) => {
+        //             return {
+        //                 tokenIn: poolPairData.tokenIn,
+        //                 tokenOut: poolPairData.tokenOut,
+        //                 balanceIn: poolPairData.balanceIn.toString(),
+        //                 balanceOut: poolPairData.balanceOut.toString(),
+        //             };
+        //         })
+        //     )
+        // );
         if (paths.length == 0) return cloneDeep(EMPTY_SWAPINFO);
 
         // Path is guaranteed to contain both tokenIn and tokenOut
@@ -211,7 +277,7 @@ export class SOR {
             swapOptions.gasPrice,
             swapOptions.swapGas
         );
-
+        console.log('costOutputToken: ' + costOutputToken.toString());
         // Returns list of swaps
         const [swaps, total, marketSp, totalConsideringFees] =
             this.getBestPaths(
