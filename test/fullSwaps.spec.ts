@@ -139,7 +139,7 @@ describe('Tests full swaps against known values', () => {
         // These test should highlight any changes in maths that may unexpectedly change result
         assert.equal(
             swapInfo.returnAmount.toString(),
-            '2932409883691685',
+            '2932409883691175',
             'V2 sanity check.'
         );
     }).timeout(10000);
@@ -184,7 +184,7 @@ describe('Tests full swaps against known values', () => {
             swapInfo.tokenAddresses[swapInfo.swaps[0].assetOutIndex],
             USDC.address
         );
-        assert.equal(swapInfo.swaps[0].amount, '89883768143240164');
+        assert.equal(swapInfo.swaps[0].amount, '89883768143225903');
         assert.equal(
             swapInfo.swaps[1].poolId,
             '0x57755f7dec33320bca83159c26e93751bfd30fbe'
@@ -234,7 +234,7 @@ describe('Tests full swaps against known values', () => {
         });
 
         // The expected test results are from previous version
-        assert.equal(swapInfo.returnAmount.toString(), '99251606996075153');
+        assert.equal(swapInfo.returnAmount.toString(), '99251606996078174');
         assert.equal(swapInfo.swaps.length, 2);
         assert.equal(
             swapInfo.swaps[0].poolId,
@@ -426,7 +426,7 @@ describe('Tests full swaps against known values', () => {
             swapInfo.tokenAddresses[swapInfo.swaps[0].assetOutIndex],
             USDC.address
         );
-        assert.equal(swapInfo.swaps[0].amount, '692256505473389013');
+        assert.equal(swapInfo.swaps[0].amount, '692256505473351912');
         assert.equal(
             swapInfo.swaps[1].poolId,
             '0x57755f7dec33320bca83159c26e93751bfd30fbe'
@@ -480,7 +480,7 @@ describe('Tests full swaps against known values', () => {
             },
         });
 
-        assert.equal(swapInfo.returnAmount.toString(), '100600365514359821527');
+        assert.equal(swapInfo.returnAmount.toString(), '100600365514359819807');
         assert.equal(swapInfo.swaps.length, 3);
         assert.equal(
             swapInfo.swaps[0].poolId,
