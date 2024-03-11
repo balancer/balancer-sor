@@ -6,10 +6,7 @@ import cloneDeep from 'lodash.clonedeep';
 import { assert } from 'chai';
 import { SubgraphPoolBase, SwapTypes } from '../src/types';
 import { getFullSwap } from './lib/testHelpers';
-
-import subgraphPoolsLarge from './testData/testPools/subgraphPoolsLarge.json';
 import precisionTestPools from './testData/precisionTestPools.json';
-import { WETH } from '@balancer-labs/typechain';
 import _ from 'lodash';
 
 const B80BAL20WETH = '0x5c6ee304399dbdb9c8ef030ab642b10820db8f56';
