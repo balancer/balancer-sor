@@ -537,12 +537,8 @@ function iterateSwapAmountsApproximation(
     // 1.042818e-12 while using normal js math operations it was
     // 1.0428184989387553e-12. This loss of precision caused an important bug
 
-    // let weighted_average_SPaS = sumSPaSDividedByDerivativeSPaSs.div(
-    //     sumInverseDerivativeSPaSs
-    // );
-    const weighted_average_SPaS = bnum(
-        sumSPaSDividedByDerivativeSPaSs.toNumber() /
-            sumInverseDerivativeSPaSs.toNumber()
+    const weighted_average_SPaS = sumSPaSDividedByDerivativeSPaSs.div(
+        sumInverseDerivativeSPaSs
     );
 
     swapAmounts.forEach((swapAmount, i) => {

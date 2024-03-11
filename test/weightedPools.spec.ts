@@ -157,7 +157,7 @@ describe(`Tests for Weighted Pools.`, () => {
             assert.equal(swapInfo2.swaps.length, 1, 'Should have 1 swap');
             assert.equal(
                 swapInfo1.returnAmount.toString(),
-                '1279783692099680027157971'
+                '1279783692099680203796046'
             );
             assert.equal(
                 swapInfo2.returnAmount.toString(),
