@@ -31,6 +31,17 @@ export const SOR_CONFIG: Record<Network, SorConfig> = {
                 symbol: 'wstEth',
                 address: '0x7f39c581f595b53c5cb19bd0b3f8da6c935e2ca0',
             },
+            {
+                symbol: 'rEth',
+                address: '0xae78736cd615f374d3085123a210448e74fc6393',
+            },
+            {
+                symbol: 'ethX',
+                address: '0xa35b1b31ce002fbf2058d22f30f95d405200a15b',
+            },
+        ],
+        triPathMidPoolIds: [
+            '0x1e19cf2d73a72ef1332c882f20534b6519be0276000200000000000000000112', // rETH/WETH
         ],
         wETHwstETH: {
             id: '0x32296969ef14eb0c6d29669c550d4a0449130230000200000000000000000080',
@@ -369,6 +380,31 @@ export const ADDRESSES = {
             decimals: 18,
             symbol: 'swETH',
         },
+        BAL80WETH20: {
+            address: '0x5c6ee304399dbdb9c8ef030ab642b10820db8f56',
+            decimals: 18,
+            symbol: 'BAL80WETH20',
+        },
+        vETH: {
+            address: '0x4bc3263eb5bb2ef7ad9ab6fb68be80e43b43801f',
+            decimals: 18,
+            symbol: 'vETH',
+        },
+        vETH_vector: {
+            address: '0x38d64ce1bdf1a9f24e0ec469c9cade61236fb4a0',
+            decimals: 18,
+            symbol: 'vETH_vector',
+        },
+        ezETH: {
+            address: '0xbf5495efe5db9ce00f80364c8b423567e58d2110',
+            decimals: 18,
+            symbol: 'ezETH',
+        },
+        weETH: {
+            address: '0xcd5fe23c85820f7b72d0926fc9b05b43e359b7ee',
+            decimals: 18,
+            symbol: 'weETH',
+        },
     },
     [Network.POLYGON]: {
         MATIC: {
@@ -498,10 +534,20 @@ export const ADDRESSES = {
             decimals: 6,
             symbol: 'USDC',
         },
+        USDT: {
+            address: '0xfd086bc7cd5c481dcc9c85ebe478a1c0b69fcbb9',
+            decimals: 6,
+            symbol: 'USDT',
+        },
         STETH: {
             address: 'N/A',
             decimals: 18,
             symbol: 'STETH',
+        },
+        sfrxETH: {
+            address: '0x95ab45875cffdba1e5f451b950bc2e42c0053f39',
+            decimals: 18,
+            symbol: 'sfrxETH',
         },
     },
     [Network.GNOSIS]: {
