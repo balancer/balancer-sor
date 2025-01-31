@@ -260,7 +260,7 @@ function maxBalances0(p: GyroEParams, d: DerivedGyroEParams, r: Vector2) {
     );
     xp = xp.add(
         termXp2.gt(BigNumber.from(0))
-            ? mulDownMagU(r.y, p.s)
+            ? mulDownXpToNpU(mulDownMagU(r.y, p.s), termXp2)
             : mulDownXpToNpU(mulUpMagU(r.x, p.s), termXp2)
     );
     return xp;
@@ -275,7 +275,7 @@ function maxBalances1(p: GyroEParams, d: DerivedGyroEParams, r: Vector2) {
     );
     yp = yp.add(
         termXp2.gt(BigNumber.from(0))
-            ? mulDownMagU(r.y, p.c)
+            ? mulDownXpToNpU(mulDownMagU(r.y, p.c), termXp2)
             : mulDownXpToNpU(mulUpMagU(r.x, p.c), termXp2)
     );
     return yp;
