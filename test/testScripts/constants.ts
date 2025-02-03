@@ -204,7 +204,7 @@ export const SUBGRAPH_URLS = {
     [Network.POLYGON]:
         'https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-polygon-v2-beta',
     [Network.ARBITRUM]: `https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-arbitrum-v2`,
-    [Network.GNOSIS]: `https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-gnosis-chain-v2`,
+    [Network.GNOSIS]: `https://api.studio.thegraph.com/query/75376/balancer-gnosis-chain-v2/version/latest`,
     [Network.ZKEVM]: `https://api.studio.thegraph.com/query/24660/balancer-polygon-zk-v2/version/latest`,
     [Network.AVALANCHE]: `https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-avalanche-v2`,
     [Network.BASE]: `https://api.studio.thegraph.com/query/24660/balancer-base-v2/version/latest`,
@@ -368,6 +368,16 @@ export const ADDRESSES = {
             address: '0xf951e335afb289353dc249e82926178eac7ded78',
             decimals: 18,
             symbol: 'swETH',
+        },
+        sDAI: {
+            address: '0x83f20f44975d03b1b09e64809b757c47f942beea',
+            decimals: 18,
+            symbol: 'sDAI',
+        },
+        GYD: {
+            address: '0xe07f9d810a48ab5c3c914ba3ca53af14e4491e8a',
+            decimals: 18,
+            symbol: 'GYD',
         },
     },
     [Network.POLYGON]: {
