@@ -11,56 +11,56 @@ import { setUp } from './testScripts/utils';
 
 dotenv.config();
 
-const networkId = Network.POLYGON;
-const jsonRpcUrl = process.env.RPC_URL_POLYGON ?? '';
-const rpcUrl = 'http://127.0.0.1:8137';
+const networkId = Network.MAINNET;
+const jsonRpcUrl = process.env.RPC_URL_MAINNET ?? '';
+const rpcUrl = 'http://127.0.0.1:8545';
 const provider = new JsonRpcProvider(rpcUrl, networkId);
-const blocknumber = 47427007;
+const blocknumber = 21766481;
 
 const vault = Vault__factory.connect(vaultAddr, provider);
 
 const gyroEV2PoolWMATIC_stMATIC_POLYGON: SubgraphPoolBase = {
-    id: '0xf0ad209e2e969eaaa8c882aac71f02d8a047d5c2000200000000000000000b49',
-    address: '0xf0ad209e2e969eaaa8c882aac71f02d8a047d5c2',
+    id: '0x2191df821c198600499aa1f0031b1a7514d7a7d9000200000000000000000639',
+    address: '0x2191df821c198600499aa1f0031b1a7514d7a7d9',
     poolType: 'GyroE',
     poolTypeVersion: 2,
-    swapFee: '0.0002',
+    swapFee: '0.0001',
     swapEnabled: true,
     totalWeight: '0',
-    totalShares: '5.366644050391084161',
+    totalShares: '20000012.527099771278999999',
     tokensList: [
-        '0x0d500b1d8e8ef31e21c99d1db9a6444d3adf1270',
-        '0x3a58a54c066fdc0f2d55fc9c89f0415c92ebf3c4',
+        '0x83f20f44975d03b1b09e64809b757c47f942beea',
+        '0xe07f9d810a48ab5c3c914ba3ca53af14e4491e8a',
     ],
     tokens: [
         {
-            address: '0x0d500b1d8e8ef31e21c99d1db9a6444d3adf1270',
-            balance: '1.123393517620917161',
+            address: '0x83f20f44975d03b1b09e64809b757c47f942beea',
+            balance: '4432755.239644201',
             decimals: 18,
-            priceRate: '1',
+            priceRate: '1.142769567047935073',
             weight: null,
         },
         {
-            address: '0x3a58a54c066fdc0f2d55fc9c89f0415c92ebf3c4',
-            balance: '3.973745355066743187',
+            address: '0xe07f9d810a48ab5c3c914ba3ca53af14e4491e8a',
+            balance: '15174144.625652788',
             decimals: 18,
             priceRate: '1',
             weight: null,
         },
     ],
-    alpha: '0.997',
-    beta: '1.00300902708124',
+    alpha: '0.998502246630054917',
+    beta: '1.0002000400080016',
     c: '0.707106781186547524',
     s: '0.707106781186547524',
-    lambda: '2000',
-    tauAlphaX: '-0.9488255257963911869756698523798861',
-    tauAlphaY: '0.3158007625025655333984021158671054',
-    tauBetaX: '0.9488255257962740264038592402880117',
-    tauBetaY: '0.3158007625029175431284287745394428',
-    u: '0.948825525796332605614025003860828',
-    v: '0.3158007625027415379053734674832487',
-    w: '0.00000000000017600486501332933596912057',
-    z: '-0.00000000000005858028590530604587080878',
+    lambda: '4000',
+    tauAlphaX: '-0.9486121281309605728951250557427516',
+    tauAlphaY: '0.3164411957423527992645129267756733',
+    tauBetaX: '0.3714226953311354953759113134564398',
+    tauBetaY: '0.9284638826540074399595774740921852',
+    u: '0.6600174117310480333872174599495555',
+    v: '0.6224525391981801189063339906029102',
+    w: '0.3060113434558273200005891385392101',
+    z: '-0.28859471639991253843240999485797747',
     dSq: '0.9999999999999999988662409334210612',
 };
 
@@ -89,8 +89,8 @@ describe('gyroEV2: WMATIC-stMATIC integration tests', () => {
         const swapType = SwapTypes.SwapExactIn;
 
         it('should return no swaps when above limit', async () => {
-            const tokenIn = ADDRESSES[Network.POLYGON].WMATIC.address;
-            const tokenOut = ADDRESSES[Network.POLYGON].stMATIC.address;
+            const tokenIn = ADDRESSES[Network.MAINNET].sDAI.address;
+            const tokenOut = ADDRESSES[Network.MAINNET].GYD.address;
             const swapAmount = parseFixed('100000000', 18);
             const swapInfo = await sor.getSwaps(
                 tokenIn,
@@ -102,8 +102,8 @@ describe('gyroEV2: WMATIC-stMATIC integration tests', () => {
             expect(swapInfo.returnAmount.toString()).to.eq('0');
         });
         it('token > LSD, getSwaps result should match queryBatchSwap', async () => {
-            const tokenIn = ADDRESSES[Network.POLYGON].WMATIC.address;
-            const tokenOut = ADDRESSES[Network.POLYGON].stMATIC.address;
+            const tokenIn = ADDRESSES[Network.MAINNET].sDAI.address;
+            const tokenOut = ADDRESSES[Network.MAINNET].GYD.address;
             const swapAmount = parseFixed('1603426', 18);
             const swapInfo = await sor.getSwaps(
                 tokenIn,
@@ -127,8 +127,8 @@ describe('gyroEV2: WMATIC-stMATIC integration tests', () => {
             );
         });
         it('LSD > token, getSwaps result should match queryBatchSwap', async () => {
-            const tokenIn = ADDRESSES[Network.POLYGON].stMATIC.address;
-            const tokenOut = ADDRESSES[Network.POLYGON].WMATIC.address;
+            const tokenIn = ADDRESSES[Network.MAINNET].GYD.address;
+            const tokenOut = ADDRESSES[Network.MAINNET].sDAI.address;
             const swapAmount = parseFixed('160342', 18);
             const swapInfo = await sor.getSwaps(
                 tokenIn,
@@ -143,7 +143,6 @@ describe('gyroEV2: WMATIC-stMATIC integration tests', () => {
                 swapInfo.tokenAddresses,
                 funds
             );
-
             expect(queryResult[0].toString()).to.eq(
                 swapInfo.swapAmount.toString()
             );
@@ -157,8 +156,8 @@ describe('gyroEV2: WMATIC-stMATIC integration tests', () => {
         const swapType = SwapTypes.SwapExactOut;
 
         it('should return no swaps when above limit', async () => {
-            const tokenIn = ADDRESSES[Network.POLYGON].WMATIC.address;
-            const tokenOut = ADDRESSES[Network.POLYGON].stMATIC.address;
+            const tokenIn = ADDRESSES[Network.MAINNET].sDAI.address;
+            const tokenOut = ADDRESSES[Network.MAINNET].GYD.address;
             const swapAmount = parseFixed('100000000', 18);
             const swapInfo = await sor.getSwaps(
                 tokenIn,
@@ -171,8 +170,8 @@ describe('gyroEV2: WMATIC-stMATIC integration tests', () => {
             expect(swapInfo.returnAmount.toString()).to.eq('0');
         });
         it('token > LSD, getSwaps result should match queryBatchSwap', async () => {
-            const tokenIn = ADDRESSES[Network.POLYGON].WMATIC.address;
-            const tokenOut = ADDRESSES[Network.POLYGON].stMATIC.address;
+            const tokenIn = ADDRESSES[Network.MAINNET].sDAI.address;
+            const tokenOut = ADDRESSES[Network.MAINNET].GYD.address;
             const swapAmount = parseFixed('1603426', 18);
             const swapInfo = await sor.getSwaps(
                 tokenIn,
@@ -195,8 +194,8 @@ describe('gyroEV2: WMATIC-stMATIC integration tests', () => {
             );
         });
         it('LSD > token, getSwaps result should match queryBatchSwap', async () => {
-            const tokenIn = ADDRESSES[Network.POLYGON].stMATIC.address;
-            const tokenOut = ADDRESSES[Network.POLYGON].WMATIC.address;
+            const tokenIn = ADDRESSES[Network.MAINNET].GYD.address;
+            const tokenOut = ADDRESSES[Network.MAINNET].sDAI.address;
             const swapAmount = parseFixed('1603420', 18);
             const swapInfo = await sor.getSwaps(
                 tokenIn,

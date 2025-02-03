@@ -11,7 +11,7 @@ jobs:
             - name: Install node
               uses: actions/setup-node@v3
               with:
-                  node-version: 14.16.1
+                  node-version: 18
             - name: Cache
               uses: actions/cache@v2
               id: cache
@@ -31,7 +31,7 @@ jobs:
             - name: Install node
               uses: actions/setup-node@v3
               with:
-                  node-version: 14.16.1
+                  node-version: 18
             - name: Cache
               uses: actions/cache@v2
               id: cache
@@ -51,7 +51,7 @@ jobs:
             - name: Install node
               uses: actions/setup-node@v3
               with:
-                  node-version: 14.16.1
+                  node-version: 18
             - name: Cache
               uses: actions/cache@v2
               id: cache
