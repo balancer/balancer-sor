@@ -94,6 +94,7 @@ export async function getOnChainBalances(
         // TO DO - Make this part of class to make more flexible?
         if (
             pool.poolType === 'Weighted' ||
+            pool.poolType === 'Managed' ||
             pool.poolType === 'LiquidityBootstrapping' ||
             pool.poolType === 'Investment'
         ) {
@@ -288,14 +289,22 @@ export async function getOnChainBalances(
 
             subgraphPools[index].swapFee = formatFixed(swapFee, 18);
 
-            poolTokens.tokens.forEach((token, i) => {
+            const tokens = [...poolTokens.tokens];
+            const balances = [...poolTokens.balances];
+
+            if (subgraphPools[index].poolType === 'Managed') {
+                tokens.shift();
+                balances.shift();
+            }
+
+            tokens.forEach((token, i) => {
                 const T = subgraphPools[index].tokens.find((t) =>
                     isSameAddress(t.address, token)
                 );
 
                 if (!T) throw `Pool Missing Expected Token: ${poolId} ${token}`;
 
-                T.balance = formatFixed(poolTokens.balances[i], T.decimals);
+                T.balance = formatFixed(balances[i], T.decimals);
 
                 if (weights) {
                     // Only expected for WeightedPools
