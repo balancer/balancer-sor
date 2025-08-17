@@ -154,19 +154,7 @@ export async function getOnChainBalances(
                 pool.address,
                 'getSwapFeePercentage'
             );
-            if (
-                pool.poolType.toString() === 'GyroE' &&
-                pool.poolTypeVersion === 2
-            ) {
-                multiPool.call(
-                    `${pool.id}.tokenRates`,
-                    pool.address,
-                    'getTokenRates'
-                );
-            } else if (
-                pool.poolType.toString() === 'Gyro2' &&
-                pool.poolTypeVersion === 2
-            ) {
+            if (pool.poolTypeVersion === 2) {
                 multiPool.call(
                     `${pool.id}.tokenRates`,
                     pool.address,
@@ -361,6 +349,22 @@ export async function getOnChainBalances(
                     formatFixed(rate, 18)
                 );
             }
+
+            if (
+                subgraphPools[index].poolType === 'Gyro3' &&
+                subgraphPools[index].poolTypeVersion == 2
+            ) {
+                if (!Array.isArray(tokenRates) || tokenRates.length !== 3) {
+                    console.error(
+                        `Gyro2V2 pool with missing or invalid tokenRates: ${poolId}`
+                    );
+                    return;
+                }
+                subgraphPools[index].tokenRates = tokenRates.map((rate) =>
+                    formatFixed(rate, 18)
+                );
+            }
+
             onChainPools.push(subgraphPools[index]);
         } catch (err) {
             throw `Issue with pool onchain data: ${err}`;

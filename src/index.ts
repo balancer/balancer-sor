@@ -16,6 +16,7 @@ export { LinearPool } from './pools/linearPool/linearPool';
 export { Gyro2Pool } from './pools/gyro2Pool/gyro2Pool';
 export { Gyro2V2Pool } from './pools/gyro2V2Pool/gyro2V2Pool';
 export { Gyro3Pool } from './pools/gyro3Pool/gyro3Pool';
+export { Gyro3V2Pool } from './pools/gyro3V2Pool/gyro3V2Pool';
 export { GyroEV2Pool } from './pools/gyroEV2Pool/gyroEV2Pool';
 export { FxPool } from './pools/xaveFxPool/fxPool';
 export { getSpotPriceAfterSwapForPath } from './router/helpersClass';

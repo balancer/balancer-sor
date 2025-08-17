@@ -120,7 +120,7 @@ export interface SubgraphPoolBase {
     z?: string;
     dSq?: string;
 
-    // GyroEV2 and Gyro2V2 specific fields
+    // GyroEV2, Gyro2V2, and Gyro3V2 specific fields
     tokenRates?: string[];
 
     // FxPool
